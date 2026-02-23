@@ -1,0 +1,67 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:l="sap.ui.layout"
+  controllerName="theme7.controller.Master">
+
+  <Page showHeader="false">
+    <VBox class="contentWrap">
+      <VBox class="glassHero">
+        <Text text="PREMIUM UI WRAPPER" class="heroKicker"/>
+        <Title text="Design system quality for your UI5 app" level="H1" titleStyle="H2" class="sapUiSmallMarginTop"/>
+        <Text text="Fast navigation, clean visual hierarchy and polished interaction in every column." class="heroSubtitle sapUiSmallMarginTop"/>
+
+        <SearchField width="100%"
+                     placeholder="Search object by id / name"
+                     class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+
+        <HBox wrap="Wrap" class="gridGap">
+          <VBox class="glassPanel metricCard">
+            <Text text="Objects" class="mutedText"/>
+            <Title text="2" level="H4"/>
+          </VBox>
+          <VBox class="glassPanel metricCard">
+            <Text text="Route" class="mutedText"/>
+            <Title text="Master → Object → Detail" level="H5"/>
+          </VBox>
+          <VBox class="glassPanel metricCard">
+            <Text text="Theme" class="mutedText"/>
+            <Title text="Adaptive Light/Dark" level="H5"/>
+          </VBox>
+        </HBox>
+      </VBox>
+
+      <VBox class="glassSurface">
+        <OverflowToolbar>
+          <Title text="Search results" level="H3"/>
+          <ToolbarSpacer/>
+          <Text text="Tap a row to open the object" class="mutedText"/>
+        </OverflowToolbar>
+
+        <Table growing="true"
+               items="{dataModel>/searchResults}"
+               itemPress=".onSelect">
+          <columns>
+            <Column width="8rem"><Text text="ID"/></Column>
+            <Column><Text text="Name"/></Column>
+            <Column width="10rem"><Text text="Status"/></Column>
+            <Column hAlign="End" width="5rem"><Text text=""/></Column>
+          </columns>
+
+          <items>
+            <ColumnListItem type="Active">
+              <cells>
+                <ObjectIdentifier title="#{dataModel>id}" text="Asset"/>
+                <Text text="{dataModel>name}"/>
+                <ObjectStatus text="{dataModel>status}" state="{= ${dataModel>status} === 'Ready' ? 'Success' : 'Information' }"/>
+                <HBox justifyContent="End" alignItems="Center">
+                  <core:Icon xmlns:core="sap.ui.core" src="sap-icon://navigation-right-arrow" color="var(--accent)"/>
+                </HBox>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </VBox>
+    </VBox>
+  </Page>
+</mvc:View>

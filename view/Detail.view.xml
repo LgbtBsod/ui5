@@ -1,0 +1,28 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  controllerName="theme7.controller.Detail">
+
+  <Page title="Checklist details">
+    <content>
+      <VBox class="contentWrap">
+        <VBox class="glassSurface">
+          <Title text="Execution checklist" level="H2"/>
+          <Text text="Final validation steps before release." class="mutedText sapUiTinyMarginBottom"/>
+
+          <List items="{dataModel>/object/checks}" showSeparators="Inner">
+            <CustomListItem>
+              <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                <VBox>
+                  <Title text="{dataModel>title}" level="H4"/>
+                  <Text text="Operational control" class="mutedText"/>
+                </VBox>
+                <ObjectStatus text="{dataModel>status}" state="{= ${dataModel>status} === 'OK' ? 'Success' : 'Warning' }"/>
+              </HBox>
+            </CustomListItem>
+          </List>
+        </VBox>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>
