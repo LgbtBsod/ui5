@@ -17,7 +17,9 @@
                   <Title text="{dataModel>title}" level="H4"/>
                   <Text text="Operational control" class="mutedText"/>
                 </VBox>
-                <ObjectStatus text="{dataModel>status}" state="{= ${dataModel>status} === 'OK' ? 'Success' : 'Warning' }"/>
+                <ObjectStatus 
+                  text="{dataModel>status}" 
+                  state="{= ${dataModel>status} === 'OK' ? 'Success' : 'Warning' }"/>
               </HBox>
             </CustomListItem>
           </List>
