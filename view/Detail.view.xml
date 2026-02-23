@@ -1,0 +1,19 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  controllerName="theme7.controller.Detail">
+
+  <Page title="Detail checks">
+    <content>
+      <VBox class="contentWrap">
+        <VBox class="glassSurface">
+          <Title text="Checklist" level="H3"/>
+
+          <List items="{dataModel>/object/checks}">
+            <ObjectListItem title="{dataModel>title}" intro="Status" number="{dataModel>status}"/>
+          </List>
+        </VBox>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

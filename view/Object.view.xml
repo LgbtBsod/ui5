@@ -1,0 +1,28 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  controllerName="theme7.controller.Object">
+
+  <Page title="{dataModel>/object/name}">
+    <content>
+      <VBox class="contentWrap">
+        <VBox class="glassSurface">
+          <HBox justifyContent="SpaceBetween" alignItems="Center">
+            <Title text="Object overview" level="H3"/>
+            <Switch customTextOn="EDIT"
+                    customTextOff="READ"
+                    change=".onToggleEdit"/>
+          </HBox>
+
+          <ObjectIdentifier title="ID" text="{dataModel>/object/id}"/>
+          <Text text="{dataModel>/object/description}" wrapping="true"/>
+
+          <Button text="Open details"
+                  type="Emphasized"
+                  press=".onOpenDetail"
+                  class="sapUiSmallMarginTop"/>
+        </VBox>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>
