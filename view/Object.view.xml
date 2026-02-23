@@ -7,6 +7,7 @@
     <content>
       <VBox class="contentWrap">
         <VBox class="glassSurface">
+          
           <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap">
             <VBox>
               <Title text="Object overview" level="H2"/>
@@ -42,6 +43,7 @@
                     icon="sap-icon://open-command-field"
                     press=".onOpenDetail"/>
           </Toolbar>
+
         </VBox>
       </VBox>
     </content>
