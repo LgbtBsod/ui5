@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Theme 7 Demo – UI5 1.71</title>
+
+<script
+  id="sap-ui-bootstrap"
+  src="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js"
+  data-sap-ui-theme="sap_fiori_3"
+  data-sap-ui-libs="sap.m,sap.f,sap.ui.layout,sap.ui.comp"
+  data-sap-ui-compatVersion="edge"
+  data-sap-ui-resourceroots='{
+    "theme7": "./"
+  }'>
+</script>
+
+<link rel="stylesheet" href="css/style.css">
+
+<script>
+sap.ui.getCore().attachInit(function () {
+  new sap.ui.core.ComponentContainer({
+    name: "theme7",
+    height: "100%"
+  }).placeAt("content");
+});
+</script>
+</head>
+
+<body class="sapUiBody appLight">
+<div id="content"></div>
+</body>
+</html>

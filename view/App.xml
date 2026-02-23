@@ -1,0 +1,14 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.f"
+  xmlns:m="sap.m"
+  controllerName="theme7.controller.App">
+
+  <m:Button text="Mode"
+            press=".onToggleTheme"
+            class="themeBtn"/>
+
+  <FlexibleColumnLayout id="fcl"
+                        layout="OneColumn"/>
+
+</mvc:View>
