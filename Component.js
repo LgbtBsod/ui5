@@ -1,23 +1,46 @@
 sap.ui.define([
-  "sap/ui/core/UIComponent",
-  "sap_ui5/model/models",
-  "sap_ui5/model/mockData",
-  "sap_ui5/model/referenceData"
-], function (UIComponent, models, mockData, referenceData) {
+    "sap/ui/core/UIComponent",
+    "sap/ui/Device",
+    "sap_ui5/model/ModelFactory",
+    "sap_ui5/service/ChecklistService"
+], function (UIComponent, Device, ModelFactory, ChecklistService) {
+    "use strict";
 
-  return UIComponent.extend("sap_ui5.Component", {
+    return UIComponent.extend("sap_ui5.Component", {
 
-    metadata: { manifest: "json" },
+        metadata: {
+            manifest: "json"
+        },
 
-    init: function () {
-      UIComponent.prototype.init.apply(this, arguments);
+        init: function () {
+            UIComponent.prototype.init.apply(this, arguments);
 
-      this.setModel(models.createDataModel(mockData), "dataModel");
-      this.setModel(models.createStateModel(), "stateModel");
-      this.setModel(models.createReferenceModel(referenceData), "referenceModel");
+            const oDataModel = ModelFactory.createDataModel();
+            const oStateModel = ModelFactory.createStateModel();
+            const oReferenceModel = ModelFactory.createReferenceModel();
 
-      this.getRouter().initialize();
-    }
+            this.setModel(oDataModel, "data");
+            this.setModel(oStateModel, "state");
+            this.setModel(oReferenceModel, "ref");
 
-  });
+            Promise.all([
+                ChecklistService.loadCheckLists(),
+                ChecklistService.loadPersons(),
+                ChecklistService.loadLpc(),
+                ChecklistService.loadProfessions(),
+                ChecklistService.loadLocations()
+            ]).then(([checkLists, persons, lpc, professions, locations]) => {
+
+                oDataModel.setProperty("/checkLists", checkLists);
+                oReferenceModel.setProperty("/persons", persons);
+                oReferenceModel.setProperty("/lpc", lpc);
+                oReferenceModel.setProperty("/professions", professions);
+                oReferenceModel.setProperty("/locations", locations);
+
+            });
+
+            this.getRouter().initialize();
+        }
+
+    });
 });

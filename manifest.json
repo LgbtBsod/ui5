@@ -1,49 +1,113 @@
 {
+  "_version": "1.12.0",
   "sap.app": {
     "id": "sap_ui5",
-    "type": "application"
+    "type": "application",
+    "title": "Checklist Application",
+    "description": "Enterprise Checklist Management",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
   },
+
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {},
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+
   "sap.ui5": {
+
     "rootView": {
       "viewName": "sap_ui5.view.App",
       "type": "XML",
+      "async": true,
       "id": "app"
     },
+
     "dependencies": {
-      "minUI5Version": "1.71.0",
+      "minUI5Version": "1.71.70",
       "libs": {
         "sap.m": {},
+        "sap.ui.core": {},
         "sap.f": {},
-        "sap.ui.layout": {},
-        "sap.ui.comp": {}
+        "sap.ui.layout": {}
       }
     },
-    "models": {
-      "dataModel": { "type": "sap.ui.model.json.JSONModel" },
-      "stateModel": { "type": "sap.ui.model.json.JSONModel" },
-      "referenceModel": { "type": "sap.ui.model.json.JSONModel" }
+
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
     },
+
+    "models": {
+
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "sap_ui5.i18n.i18n"
+        }
+      },
+
+      "data": {
+        "type": "sap.ui.model.json.JSONModel"
+      },
+
+      "state": {
+        "type": "sap.ui.model.json.JSONModel"
+      },
+
+      "ref": {
+        "type": "sap.ui.model.json.JSONModel"
+      }
+
+    },
+
     "routing": {
+
       "config": {
         "routerClass": "sap.f.routing.Router",
         "viewType": "XML",
+        "viewPath": "sap_ui5.view",
         "controlId": "fcl",
+        "controlAggregation": "beginColumnPages",
         "async": true
       },
+
       "routes": [
-        { "pattern": "", "name": "master", "target": ["master"] },
-        { "pattern": "object/{id}", "name": "object", "target": ["master","object"] }
+        {
+          "pattern": "",
+          "name": "search",
+          "target": ["search"]
+        },
+        {
+          "pattern": "detail/{id}",
+          "name": "detail",
+          "target": ["search", "detail"]
+        }
       ],
+
       "targets": {
-        "master": {
-          "viewName": "Master",
+
+        "search": {
+          "viewName": "Search",
+          "viewLevel": 1,
           "controlAggregation": "beginColumnPages"
         },
-        "object": {
-          "viewName": "Object",
+
+        "detail": {
+          "viewName": "Detail",
+          "viewLevel": 2,
           "controlAggregation": "midColumnPages"
         }
+
       }
+
     }
+
   }
 }

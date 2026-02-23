@@ -1,0 +1,100 @@
+<mvc:View
+    controllerName="sap_ui5.controller.Search"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core">
+
+    <Page title="Checklist Search">
+
+        <content>
+
+            <!-- FILTER BAR -->
+            <VBox class="sapUiSmallMargin">
+
+                <Toolbar>
+                    <Title text="Filters"/>
+                    <ToolbarSpacer/>
+                    <Button text="Create" press=".onCreate"/>
+                    <Button text="Copy" press=".onCopy"/>
+                </Toolbar>
+
+                <HBox class="sapUiSmallMarginTop" alignItems="Center" wrap="Wrap">
+
+                    <Input
+                        placeholder="Checklist ID"
+                        value="{state>/filterId}"
+                        width="200px"/>
+
+                    <Select
+                        width="200px"
+                        selectedKey="{state>/filterLpc}">
+                        <items>
+                            <core:Item key="" text="All LPC"/>
+                            <core:Item key="L1" text="Low"/>
+                            <core:Item key="L2" text="Medium"/>
+                            <core:Item key="L3" text="High"/>
+                        </items>
+                    </Select>
+
+                    <!-- Custom filter checks -->
+                    <SegmentedButton selectedKey="{state>/filterFailedChecks}">
+                        <items>
+                            <SegmentedButtonItem key="ALL" text="All Checks"/>
+                            <SegmentedButtonItem key="TRUE" text="Has Failed"/>
+                            <SegmentedButtonItem key="FALSE" text="All Passed"/>
+                        </items>
+                    </SegmentedButton>
+
+                    <!-- Custom filter barriers -->
+                    <SegmentedButton selectedKey="{state>/filterFailedBarriers}">
+                        <items>
+                            <SegmentedButtonItem key="ALL" text="All Barriers"/>
+                            <SegmentedButtonItem key="TRUE" text="Has Failed"/>
+                            <SegmentedButtonItem key="FALSE" text="All Passed"/>
+                        </items>
+                    </SegmentedButton>
+
+                    <Button text="Search" press=".onSearch"/>
+                </HBox>
+
+            </VBox>
+
+            <!-- TABLE -->
+            <Table
+                id="checkTable"
+                items="{
+                    path: 'data>/checkLists'
+                }"
+                mode="SingleSelectMaster"
+                itemPress=".onSelect">
+
+                <columns>
+                    <Column><Text text="ID"/></Column>
+                    <Column><Text text="Status"/></Column>
+                    <Column><Text text="Checks %"/></Column>
+                    <Column><Text text="Barriers %"/></Column>
+                    <Column><Text text="Observer"/></Column>
+                </columns>
+
+                <items>
+                    <ColumnListItem type="Navigation">
+                        <cells>
+                            <Text text="{data>root/id}"/>
+                            <ObjectStatus
+                                text="{data>root/status}"
+                                state="{
+                                    path: 'data>root/status',
+                                    formatter: '.formatStatus'
+                                }"/>
+                            <Text text="{data>root/successRateChecks}"/>
+                            <Text text="{data>root/successRateBarriers}"/>
+                            <Text text="{data>basic/OBSERVER_FULLNAME}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+
+            </Table>
+
+        </content>
+    </Page>
+</mvc:View>
