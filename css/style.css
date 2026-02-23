@@ -1,73 +1,160 @@
 :root {
-  --bg-main: #f4f6fb;
-  --glass-bg: rgba(255,255,255,.7);
-  --accent: #0a6ed1;
+  --bg-main: #f2f5fb;
+  --bg-gradient-a: #eef4ff;
+  --bg-gradient-b: #f8f0ff;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --text-main: #1a2333;
+  --text-muted: #5e6a7f;
+  --accent: #5d5fef;
+  --accent-2: #22c3a6;
+  --shadow-soft: 0 20px 60px rgba(26, 35, 51, 0.12);
+}
+
+body,
+html,
+#content {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(circle at 15% 20%, var(--bg-gradient-a), transparent 35%),
+              radial-gradient(circle at 85% 10%, var(--bg-gradient-b), transparent 35%),
+              var(--bg-main);
+  color: var(--text-main);
 }
 
 body.appDark {
-  --bg-main: #0f131a;
-  --glass-bg: rgba(28,32,40,.75);
-  --accent: #ffb300;
+  --bg-main: #0b1020;
+  --bg-gradient-a: rgba(76, 110, 245, 0.25);
+  --bg-gradient-b: rgba(162, 84, 255, 0.18);
+  --glass-bg: rgba(17, 24, 39, 0.72);
+  --glass-border: rgba(148, 163, 184, 0.22);
+  --text-main: #e5edf8;
+  --text-muted: #a9b7cd;
+  --accent: #8b93ff;
+  --accent-2: #2dd4bf;
+  --shadow-soft: 0 24px 70px rgba(2, 8, 23, 0.58);
 }
 
 .sapMPage {
-  background: var(--bg-main);
-  transition:.4s ease;
+  background: transparent;
 }
 
 .contentWrap {
-  max-width:1100px;
-  margin:80px auto;
-  padding:0 48px;
+  max-width: 1120px;
+  margin: 80px auto;
+  padding: 0 40px;
 }
 
 .glassHero,
+.glassSurface,
+.glassPanel {
+  background: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0.32));
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-soft);
+}
+
+.glassHero {
+  padding: 30px;
+  margin-bottom: 22px;
+}
+
 .glassSurface {
-  background: var(--glass-bg);
-  border-radius:24px;
-  padding:24px;
-  margin-bottom:32px;
-  backdrop-filter:blur(14px);
-  transition:.3s ease;
+  padding: 22px;
+  margin-bottom: 22px;
 }
 
-.sapMBtn,
-.sapMInputBaseInner,
-.sapMTextAreaInner {
-  border-radius:14px !important;
+.glassPanel {
+  padding: 18px;
 }
 
-.sapMListTbl {
-  border-collapse:separate !important;
-  border-spacing:0 14px !important;
+.heroKicker {
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
-.sapMListTblRow {
-  border-radius:16px;
-  transition:.2s ease;
+.heroSubtitle,
+.mutedText,
+.mutedText .sapMText {
+  color: var(--text-muted) !important;
 }
 
-.sapMListTblRow:hover {
-  transform:translateY(-2px);
+.statusPill {
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
 }
 
-.dot {
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--accent);
-  animation:pulse 1.2s infinite;
+.statusPill.status-loading {
+  background: rgba(93, 95, 239, .16);
+  color: var(--accent);
 }
 
-@keyframes pulse {
-  0%{transform:scale(1);}
-  50%{transform:scale(1.6);opacity:.4;}
-  100%{transform:scale(1);}
+.statusPill.status-ok {
+  background: rgba(34, 195, 166, .18);
+  color: var(--accent-2);
 }
 
 .themeBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  z-index:1000;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  border-radius: 14px;
+}
+
+.sapMBtn,
+.sapMSwt,
+.sapMInputBaseInner,
+.sapMTextAreaInner {
+  border-radius: 14px !important;
+}
+
+.sapMListTbl {
+  border-collapse: separate !important;
+  border-spacing: 0 12px !important;
+}
+
+.sapMListTblRow {
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.sapMListTblRow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(25, 36, 58, 0.12);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.3s infinite;
+}
+
+.dot.ok {
+  background: var(--accent-2);
+}
+
+.metricCard {
+  min-width: 170px;
+}
+
+.gridGap {
+  gap: 14px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  60% { transform: scale(1.7); opacity: .35; }
+  100% { transform: scale(1); opacity: 1; }
 }

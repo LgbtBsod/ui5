@@ -32,17 +32,48 @@
         "routerClass": "sap.f.routing.Router",
         "viewType": "XML",
         "controlId": "fcl",
-        "async": true
+        "async": true,
+        "viewPath": "theme7.view"
       },
       "routes": [
-        { "pattern": "", "name": "master", "target": ["master"] },
-        { "pattern": "object/{id}", "name": "object", "target": ["master","object"] },
-        { "pattern": "detail/{id}", "name": "detail", "target": ["master","object","detail"] }
+        {
+          "pattern": "",
+          "name": "master",
+          "target": [
+            "master"
+          ]
+        },
+        {
+          "pattern": "object/{id}",
+          "name": "object",
+          "target": [
+            "master",
+            "object"
+          ]
+        },
+        {
+          "pattern": "detail/{id}",
+          "name": "detail",
+          "target": [
+            "master",
+            "object",
+            "detail"
+          ]
+        }
       ],
       "targets": {
-        "master": { "viewName": "Master", "controlAggregation": "beginColumnPages" },
-        "object": { "viewName": "Object", "controlAggregation": "midColumnPages" },
-        "detail": { "viewName": "Detail", "controlAggregation": "endColumnPages" }
+        "master": {
+          "viewName": "Master",
+          "controlAggregation": "beginColumnPages"
+        },
+        "object": {
+          "viewName": "Object",
+          "controlAggregation": "midColumnPages"
+        },
+        "detail": {
+          "viewName": "Detail",
+          "controlAggregation": "endColumnPages"
+        }
       }
     }
   }

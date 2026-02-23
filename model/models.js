@@ -8,13 +8,13 @@ sap.ui.define([
     createDataModel: function () {
       return new JSONModel({
         searchResults: [
-          { id: "1001", name: "Safety Inspection A", status:"Loading" },
-          { id: "1002", name: "Quality Audit B", status:"Loading" }
+          { id: "1001", name: "Safety Inspection A", status: "Ready" },
+          { id: "1002", name: "Quality Audit B", status: "In Progress" }
         ],
         object: {
           id: "1001",
           name: "Safety Inspection A",
-          description: "Enterprise checklist object",
+          description: "Enterprise checklist object with design-grade wrapper experience.",
           checks: [
             { title: "Visual Check", status: "OK" },
             { title: "Barrier Check", status: "Warning" }
@@ -26,7 +26,8 @@ sap.ui.define([
     createStateModel: function () {
       return new JSONModel({
         mode: "READ",
-        isBusy: false
+        isBusy: false,
+        selectedId: "1001"
       });
     },
 
