@@ -7,19 +7,8 @@ sap.ui.define([
 
     createDataModel: function () {
       return new JSONModel({
-        searchResults: [
-          { id: "1001", name: "Safety Inspection A", status: "Ready" },
-          { id: "1002", name: "Quality Audit B", status: "In Progress" }
-        ],
-        object: {
-          id: "1001",
-          name: "Safety Inspection A",
-          description: "Enterprise checklist object with design-grade wrapper experience.",
-          checks: [
-            { title: "Visual Check", status: "OK" },
-            { title: "Barrier Check", status: "Warning" }
-          ]
-        }
+        searchResults: [],
+        object: {}
       });
     },
 
@@ -27,7 +16,7 @@ sap.ui.define([
       return new JSONModel({
         mode: "READ",
         isBusy: false,
-        selectedId: "1001"
+        filterMode: "ALL"
       });
     },
 

@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (Controller) {
   "use strict";
 
-  return Controller.extend("theme7.controller.Detail", {
+  return Controller.extend("sap_ui5.controller.Detail", {
 
     onInit: function () {
       this.getOwnerComponent().getRouter()

@@ -1,14 +1,19 @@
 {
   "sap.app": {
-    "id": "theme7",
-    "type": "application"
+    "id": "sap_ui5",
+    "type": "application",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
   },
   "sap.ui5": {
     "rootView": {
-      "viewName": "theme7.view.App",
-      "type": "XML"
+      "viewName": "sap_ui5.view.App",
+      "type": "XML",
+      "id": "app"
     },
     "dependencies": {
+      "minUI5Version": "1.71.0",
       "libs": {
         "sap.m": {},
         "sap.f": {},
@@ -32,33 +37,18 @@
         "routerClass": "sap.f.routing.Router",
         "viewType": "XML",
         "controlId": "fcl",
-        "async": true,
-        "viewPath": "theme7.view"
+        "async": true
       },
       "routes": [
         {
           "pattern": "",
           "name": "master",
-          "target": [
-            "master"
-          ]
+          "target": ["master"]
         },
         {
           "pattern": "object/{id}",
           "name": "object",
-          "target": [
-            "master",
-            "object"
-          ]
-        },
-        {
-          "pattern": "detail/{id}",
-          "name": "detail",
-          "target": [
-            "master",
-            "object",
-            "detail"
-          ]
+          "target": ["master", "object"]
         }
       ],
       "targets": {
@@ -69,10 +59,6 @@
         "object": {
           "viewName": "Object",
           "controlAggregation": "midColumnPages"
-        },
-        "detail": {
-          "viewName": "Detail",
-          "controlAggregation": "endColumnPages"
         }
       }
     }

@@ -2,7 +2,7 @@
   xmlns:mvc="sap.ui.core.mvc"
   xmlns="sap.f"
   xmlns:m="sap.m"
-  controllerName="theme7.controller.App">
+  controllerName="sap_ui5.controller.App">
 
   <m:Button text="Theme"
             icon="sap-icon://palette"

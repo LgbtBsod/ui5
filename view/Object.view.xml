@@ -1,7 +1,7 @@
 <mvc:View
   xmlns:mvc="sap.ui.core.mvc"
   xmlns="sap.m"
-  controllerName="theme7.controller.Object">
+  controllerName="sap_ui5.controller.Object">
 
   <Page title="{dataModel>/object/name}">
     <content>

@@ -1,7 +1,7 @@
 <mvc:View
   xmlns:mvc="sap.ui.core.mvc"
   xmlns="sap.m"
-  controllerName="theme7.controller.Detail">
+  controllerName="sap_ui5.controller.Detail">
 
   <Page title="Checklist details">
     <content>
