@@ -1,51 +1,53 @@
-<mvc:View
-  xmlns:mvc="sap.ui.core.mvc"
-  xmlns="sap.m"
-  controllerName="sap_ui5.controller.Object">
+<Page showHeader="false">
 
-  <Page title="{dataModel>/object/name}">
-    <content>
-      <VBox class="contentWrap">
-        <VBox class="glassSurface">
-          
-          <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap">
-            <VBox>
-              <Title text="Object overview" level="H2"/>
-              <Text text="{dataModel>/object/description}" class="mutedText"/>
-            </VBox>
-            <HBox alignItems="Center" class="sapUiTinyMarginTopBottom">
-              <Text text="Edit mode" class="mutedText sapUiTinyMarginEnd"/>
-              <Switch customTextOn="ON"
-                      customTextOff="OFF"
-                      change=".onToggleEdit"/>
-            </HBox>
-          </HBox>
+<VBox class="pagePadding">
 
-          <HBox wrap="Wrap" class="gridGap sapUiSmallMarginTop">
-            <VBox class="glassPanel metricCard">
-              <Text text="Object ID" class="mutedText"/>
-              <Title text="{dataModel>/object/id}" level="H4"/>
-            </VBox>
-            <VBox class="glassPanel metricCard">
-              <Text text="Checks" class="mutedText"/>
-              <Title text="2" level="H4"/>
-            </VBox>
-            <VBox class="glassPanel metricCard">
-              <Text text="Mode" class="mutedText"/>
-              <ObjectStatus text="{stateModel>/mode}" state="Success"/>
-            </VBox>
-          </HBox>
+<!-- Header -->
+<HBox class="glassHero">
+  <Title text="{dataModel>/object/root/id}"/>
+  <ToolbarSpacer/>
+  <Switch state="{= ${stateModel>/mode} === 'EDIT' }"
+          change=".onToggleEdit"/>
+</HBox>
 
-          <Toolbar class="sapUiSmallMarginTop">
-            <ToolbarSpacer/>
-            <Button text="Open details"
-                    type="Emphasized"
-                    icon="sap-icon://open-command-field"
-                    press=".onOpenDetail"/>
-          </Toolbar>
+<!-- Basic Block -->
+<VBox class="glassSurface blockCard">
 
-        </VBox>
-      </VBox>
-    </content>
-  </Page>
-</mvc:View>
+  <Label text="Date"/>
+  <DatePicker value="{dataModel>/object/basic/date}"
+              editable="{= ${stateModel>/mode}==='EDIT'}"/>
+
+  <Label text="Timezone"/>
+  <Select items="{referenceModel>/timezones}"
+          selectedKey="{dataModel>/object/basic/timezone}"
+          enabled="{= ${stateModel>/mode}==='EDIT'}">
+      <core:Item key="{referenceModel>key}" text="{referenceModel>text}"
+      xmlns:core="sap.ui.core"/>
+  </Select>
+
+</VBox>
+
+<!-- Checks Table -->
+<VBox class="glassSurface blockCard">
+  <Title text="Checks"/>
+
+  <Table items="{dataModel>/object/checks}">
+    <columns>
+      <Column><Text text="No"/></Column>
+      <Column><Text text="Text"/></Column>
+      <Column><Text text="Result"/></Column>
+    </columns>
+
+    <ColumnListItem>
+      <cells>
+        <Text text="{dataModel>no}"/>
+        <Text text="{dataModel>text}"/>
+        <Switch state="{dataModel>result}"
+                enabled="{= ${stateModel>/mode}==='EDIT'}"/>
+      </cells>
+    </ColumnListItem>
+  </Table>
+</VBox>
+
+</VBox>
+</Page>

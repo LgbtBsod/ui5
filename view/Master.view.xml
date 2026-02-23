@@ -4,77 +4,70 @@
   xmlns:smart="sap.ui.comp.smartfilterbar"
   controllerName="sap_ui5.controller.Master">
 
-  <Page showHeader="false">
-    <VBox class="contentWrap">
+<Page showHeader="false">
 
-      <!-- Smart Filters -->
-      <smart:SmartFilterBar
-        id="filterBar"
-        entitySet="BarrierSet"
-        persistencyKey="demoFilters"
-        class="glassHero"
-      />
+<VBox class="pagePadding">
 
-      <!-- Custom Segmented Filters -->
-      <HBox class="glassSurface segFilters">
-        <SegmentedButton
-          id="hasFailedChecks"
-          selectedKey="{stateModel>/filterMode}"
-          buttons='[
-            {"text":"ALL","key":"ALL"},
-            {"text":"TRUE","key":"TRUE"},
-            {"text":"FALSE","key":"FALSE"}
-          ]'
-        />
-        <SegmentedButton
-          id="hasFailedBarriers"
-          selectedKey="{stateModel>/filterMode}"
-          buttons='[
-            {"text":"ALL","key":"ALL"},
-            {"text":"TRUE","key":"TRUE"},
-            {"text":"FALSE","key":"FALSE"}
-          ]'
-        />
-      </HBox>
+<!-- Smart Filter -->
+<smart:SmartFilterBar id="filterBar" entitySet="BarrierSet"/>
 
-      <!-- Action Buttons -->
-      <HBox class="btnBar">
-        <Button text="Create" press=".onCreate"/>
-        <Button text="Copy" press=".onCopy"/>
-        <ToolbarSpacer/>
-        <Button text="Sort"/>
-        <Button text="Group"/>
-        <Button text="Settings"/>
-        <Button text="Export"/>
-      </HBox>
+<!-- Custom Filters -->
+<HBox class="glassSurface">
+  <SegmentedButton selectedKey="{stateModel>/failedChecks}">
+    <items>
+      <SegmentedButtonItem key="ALL" text="Checks: All"/>
+      <SegmentedButtonItem key="TRUE" text="Failed"/>
+      <SegmentedButtonItem key="FALSE" text="Passed"/>
+    </items>
+  </SegmentedButton>
 
-      <!-- Search Table -->
-      <VBox class="glassSurface">
-        <Table
-          growing="true"
-          items="{dataModel>/searchResults}"
-          itemPress=".onSelect">
+  <SegmentedButton selectedKey="{stateModel>/failedBarriers}">
+    <items>
+      <SegmentedButtonItem key="ALL" text="Barriers: All"/>
+      <SegmentedButtonItem key="TRUE" text="Failed"/>
+      <SegmentedButtonItem key="FALSE" text="Passed"/>
+    </items>
+  </SegmentedButton>
 
-          <columns>
-            <Column><Text text="ID"/></Column>
-            <Column><Text text="Date Check"/></Column>
-            <Column><Text text="LPC"/></Column>
-            <Column><Text text="PROF"/></Column>
-          </columns>
+  <Switch state="{stateModel>/advancedMode}"/>
+</HBox>
 
-          <ColumnListItem>
-            <cells>
-              <Text text="{dataModel>id}"/>
-              <Text text="{dataModel>date_check}"/>
-              <Text text="{dataModel>lpc_t}"/>
-              <Text text="{dataModel>prof_t}"/>
-            </cells>
-          </ColumnListItem>
+<!-- Actions -->
+<Toolbar>
+  <Button text="Create" press=".onCreate"/>
+  <Button text="Copy" press=".onCopy"/>
+  <ToolbarSpacer/>
+  <Button icon="sap-icon://sort"/>
+  <Button icon="sap-icon://group-2"/>
+  <Button icon="sap-icon://action-settings"/>
+  <Button icon="sap-icon://download"/>
+</Toolbar>
 
-        </Table>
-      </VBox>
+<!-- Table -->
+<Table
+  items="{dataModel>/searchResults}"
+  itemPress=".onSelect"
+  growing="true"
+  class="glassSurface">
 
-    </VBox>
-  </Page>
+  <columns>
+    <Column><Text text="ID"/></Column>
+    <Column><Text text="Date"/></Column>
+    <Column><Text text="LPC"/></Column>
+    <Column><Text text="PROF"/></Column>
+  </columns>
 
+  <ColumnListItem type="Active">
+    <cells>
+      <Text text="{dataModel>id}"/>
+      <Text text="{dataModel>date_check}"/>
+      <Text text="{dataModel>lpc_t}"/>
+      <Text text="{dataModel>prof_t}"/>
+    </cells>
+  </ColumnListItem>
+
+</Table>
+
+</VBox>
+</Page>
 </mvc:View>

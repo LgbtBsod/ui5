@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (Controller) {
   "use strict";
 
-  return Controller.extend("sap_ui5.controller.Object", {
+  return Controller.extend("theme7.controller.Object", {
 
     onInit: function () {
       this.getOwnerComponent().getRouter()
@@ -12,29 +12,32 @@ sap.ui.define([
     },
 
     _onMatched: function (oEvent) {
-      var sId = oEvent.getParameter("arguments").id;
+      var id = oEvent.getParameter("arguments").id;
+      var oModel = this.getOwnerComponent().getModel("dataModel");
 
-      this.getOwnerComponent().getModel("stateModel").setProperty("/selectedId", sId);
-      this.getView().getParent().setLayout("TwoColumnsMidExpanded");
-    },
+      if (id === "__create") {
+        oModel.setProperty("/object", {});
+      } else {
+        var mockObj = {
+          id: id,
+          date: "2025-05-15",
+          time: "12:00",
+          checks: [
+            { no:1, text:"Check A", comment:"", result:"YES" },
+            { no:2, text:"Check B", comment:"", result:"NO" }
+          ]
+        };
+        oModel.setProperty("/object", mockObj);
+      }
 
-    onOpenDetail: function () {
-      var sId = this.getOwnerComponent().getModel("stateModel").getProperty("/selectedId") || "1001";
-
-      this.getOwnerComponent().getRouter().navTo("detail", { id: sId });
+      // Switch to mid column
+      var oFCL = this.getOwnerComponent().getRootControl().byId("fcl");
+      oFCL.setLayout("TwoColumnsMidExpanded");
     },
 
     onToggleEdit: function (oEvent) {
-      var bOn = oEvent.getParameter("state");
-      var oStateModel = this.getOwnerComponent().getModel("stateModel");
-
-      oStateModel.setProperty("/mode", bOn ? "EDIT" : "READ");
-
-      if (bOn) {
-        document.body.classList.add("editMode");
-      } else {
-        document.body.classList.remove("editMode");
-      }
+      var isEdit = oEvent.getParameter("state");
+      this.getOwnerComponent().getModel("stateModel").setProperty("/mode", isEdit ? "EDIT" : "READ");
     }
 
   });

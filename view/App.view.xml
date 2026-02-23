@@ -1,15 +1,8 @@
 <mvc:View
   xmlns:mvc="sap.ui.core.mvc"
   xmlns="sap.f"
-  xmlns:m="sap.m"
-  controllerName="sap_ui5.controller.App">
+  displayBlock="true">
 
-  <m:Button text="Theme"
-            icon="sap-icon://palette"
-            type="Ghost"
-            press=".onToggleTheme"
-            class="themeBtn"/>
-
-  <FlexibleColumnLayout id="fcl" layout="OneColumn"/>
+  <FlexibleColumnLayout id="fcl"/>
 
 </mvc:View>

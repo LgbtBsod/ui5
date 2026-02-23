@@ -158,3 +158,30 @@ body.appDark {
   60% { transform: scale(1.7); opacity: .35; }
   100% { transform: scale(1); opacity: 1; }
 }
+.pagePadding {
+  padding: 2rem;
+}
+
+.glassSurface {
+  margin: 1rem 0;
+  padding: 1.5rem;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.glassHero {
+  padding: 2rem;
+  border-radius: 24px;
+  background: linear-gradient(135deg,#f6f8fb,#eef2f7);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+}
+
+.blockCard {
+  transition: all 0.2s ease;
+}
+
+.editMode .blockCard {
+  border: 2px solid #2ecc71;
+}
