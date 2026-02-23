@@ -4,11 +4,12 @@
   xmlns:m="sap.m"
   controllerName="theme7.controller.App">
 
-  <m:Button text="Mode"
+  <m:Button text="Theme"
+            icon="sap-icon://palette"
+            type="Ghost"
             press=".onToggleTheme"
             class="themeBtn"/>
 
-  <FlexibleColumnLayout id="fcl"
-                        layout="OneColumn"/>
+  <FlexibleColumnLayout id="fcl" layout="OneColumn"/>
 
 </mvc:View>

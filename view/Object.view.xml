@@ -7,20 +7,43 @@
     <content>
       <VBox class="contentWrap">
         <VBox class="glassSurface">
-          <HBox justifyContent="SpaceBetween" alignItems="Center">
-            <Title text="Object overview" level="H3"/>
-            <Switch customTextOn="EDIT"
-                    customTextOff="READ"
-                    change=".onToggleEdit"/>
+          
+          <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap">
+            <VBox>
+              <Title text="Object overview" level="H2"/>
+              <Text text="{dataModel>/object/description}" class="mutedText"/>
+            </VBox>
+            <HBox alignItems="Center" class="sapUiTinyMarginTopBottom">
+              <Text text="Edit mode" class="mutedText sapUiTinyMarginEnd"/>
+              <Switch customTextOn="ON"
+                      customTextOff="OFF"
+                      change=".onToggleEdit"/>
+            </HBox>
           </HBox>
 
-          <ObjectIdentifier title="ID" text="{dataModel>/object/id}"/>
-          <Text text="{dataModel>/object/description}" wrapping="true"/>
+          <HBox wrap="Wrap" class="gridGap sapUiSmallMarginTop">
+            <VBox class="glassPanel metricCard">
+              <Text text="Object ID" class="mutedText"/>
+              <Title text="{dataModel>/object/id}" level="H4"/>
+            </VBox>
+            <VBox class="glassPanel metricCard">
+              <Text text="Checks" class="mutedText"/>
+              <Title text="2" level="H4"/>
+            </VBox>
+            <VBox class="glassPanel metricCard">
+              <Text text="Mode" class="mutedText"/>
+              <ObjectStatus text="{stateModel>/mode}" state="Success"/>
+            </VBox>
+          </HBox>
 
-          <Button text="Open details"
-                  type="Emphasized"
-                  press=".onOpenDetail"
-                  class="sapUiSmallMarginTop"/>
+          <Toolbar class="sapUiSmallMarginTop">
+            <ToolbarSpacer/>
+            <Button text="Open details"
+                    type="Emphasized"
+                    icon="sap-icon://open-command-field"
+                    press=".onOpenDetail"/>
+          </Toolbar>
+
         </VBox>
       </VBox>
     </content>

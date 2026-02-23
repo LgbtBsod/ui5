@@ -1,45 +1,30 @@
 <mvc:View
   xmlns:mvc="sap.ui.core.mvc"
   xmlns="sap.m"
-  controllerName="theme7.controller.Master">
+  controllerName="theme7.controller.Detail">
 
-  <Page showHeader="false">
-    <VBox class="contentWrap">
-      <VBox class="glassHero">
-        <Title text="UI wrapper for UI5 project" level="H2"/>
-        <Text text="Search and open objects in a flexible 3-column layout."/>
-        <SearchField width="100%" placeholder="Search (demo UI)" class="sapUiSmallMarginTop"/>
+  <Page title="Checklist details">
+    <content>
+      <VBox class="contentWrap">
+        <VBox class="glassSurface">
+          <Title text="Execution checklist" level="H2"/>
+          <Text text="Final validation steps before release." class="mutedText sapUiTinyMarginBottom"/>
+
+          <List items="{dataModel>/object/checks}" showSeparators="Inner">
+            <CustomListItem>
+              <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                <VBox>
+                  <Title text="{dataModel>title}" level="H4"/>
+                  <Text text="Operational control" class="mutedText"/>
+                </VBox>
+                <ObjectStatus 
+                  text="{dataModel>status}" 
+                  state="{= ${dataModel>status} === 'OK' ? 'Success' : 'Warning' }"/>
+              </HBox>
+            </CustomListItem>
+          </List>
+        </VBox>
       </VBox>
-
-      <VBox class="glassSurface">
-        <Table growing="true"
-               items="{dataModel>/searchResults}"
-               itemPress=".onSelect">
-
-          <columns>
-            <Column><Text text="ID"/></Column>
-            <Column><Text text="Name"/></Column>
-            <Column><Text text="Status"/></Column>
-          </columns>
-
-          <items>
-            <ColumnListItem type="Active">
-              <cells>
-                <Text text="{dataModel>id}"/>
-                <Text text="{dataModel>name}"/>
-                <HBox>
-                  <core:HTML
-                    xmlns:core="sap.ui.core"
-                    content='&lt;div class="dot"&gt;&lt;/div&gt;'/>
-                  <Text text="{dataModel>status}" class="sapUiTinyMarginBegin"/>
-                </HBox>
-              </cells>
-            </ColumnListItem>
-          </items>
-
-        </Table>
-      </VBox>
-
-    </VBox>
+    </content>
   </Page>
 </mvc:View>

@@ -3,14 +3,25 @@
   xmlns="sap.m"
   controllerName="theme7.controller.Detail">
 
-  <Page title="Detail checks">
+  <Page title="Checklist details">
     <content>
       <VBox class="contentWrap">
         <VBox class="glassSurface">
-          <Title text="Checklist" level="H3"/>
+          <Title text="Execution checklist" level="H2"/>
+          <Text text="Final validation steps before release." class="mutedText sapUiTinyMarginBottom"/>
 
-          <List items="{dataModel>/object/checks}">
-            <ObjectListItem title="{dataModel>title}" intro="Status" number="{dataModel>status}"/>
+          <List items="{dataModel>/object/checks}" showSeparators="Inner">
+            <CustomListItem>
+              <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                <VBox>
+                  <Title text="{dataModel>title}" level="H4"/>
+                  <Text text="Operational control" class="mutedText"/>
+                </VBox>
+                <ObjectStatus 
+                  text="{dataModel>status}" 
+                  state="{= ${dataModel>status} === 'OK' ? 'Success' : 'Warning' }"/>
+              </HBox>
+            </CustomListItem>
           </List>
         </VBox>
       </VBox>
