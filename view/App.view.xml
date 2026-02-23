@@ -1,10 +1,13 @@
 <mvc:View
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.f"
-    controllerName="sap_ui5.controller.App">
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.f"
+  xmlns:core="sap.ui.core"
+  controllerName="sap_ui5.controller.App"
+  displayBlock="true">
 
-    <FlexibleColumnLayout
-        id="fcl"
-        layout="OneColumn"/>
+  <FlexibleColumnLayout
+    id="fcl"
+    layout="OneColumn"
+    backgroundDesign="Solid"/>
 
 </mvc:View>
