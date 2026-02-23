@@ -71,7 +71,11 @@ sap.ui.define([
                 .getModel("data")
                 .setProperty("/selectedChecklist", selected);
 
-            console.log("Selected:", selected);
+            this.getOwnerComponent()
+                .getRouter()
+                .navTo("detail", {
+                    id: selected.root.id
+                });
         },
 
         onCreate: function () {

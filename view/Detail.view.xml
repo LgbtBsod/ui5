@@ -10,16 +10,16 @@
           <Title text="Execution checklist" level="H2"/>
           <Text text="Final validation steps before release." class="mutedText sapUiTinyMarginBottom"/>
 
-          <List items="{dataModel>/object/checks}" showSeparators="Inner">
+          <List items="{data>/selectedChecklist/checks}" showSeparators="Inner">
             <CustomListItem>
               <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
                 <VBox>
-                  <Title text="{dataModel>title}" level="H4"/>
+                  <Title text="{data>text}" level="H4"/>
                   <Text text="Operational control" class="mutedText"/>
                 </VBox>
                 <ObjectStatus 
-                  text="{dataModel>status}" 
-                  state="{= ${dataModel>status} === 'OK' ? 'Success' : 'Warning' }"/>
+                  text="{= ${data>result} ? 'OK' : 'Failed' }" 
+                  state="{= ${data>result} ? 'Success' : 'Error' }"/>
               </HBox>
             </CustomListItem>
           </List>
