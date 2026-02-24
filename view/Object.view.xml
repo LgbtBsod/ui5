@@ -5,7 +5,7 @@
   controllerName="sap_ui5.controller.Object">
 
   <Page showHeader="false" busy="{state>/isBusy}" class="pageTransparent">
-    <VBox class="appContent">
+    <VBox class="appContent objectContent">
 
       <MessageStrip text="{i18n>lockKilledMessage}"
                     type="Warning"
@@ -13,13 +13,13 @@
                     visible="{state>/isKilled}"
                     class="sapUiTinyMarginBottom"/>
 
-      <HBox class="glassCard" alignItems="Center" justifyContent="SpaceBetween">
-        <Title text="{= ${data>/object/root/id} || ${i18n>newChecklist} }"/>
+      <HBox class="glassCard objectHeroCard" alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap" renderType="Bare">
+        <VBox renderType="Bare"><Title text="{= ${data>/object/root/id} || ${i18n>newChecklist} }" class="detailHeroTitle"/><Text text="{i18n>detailHeroSubtitle}" class="modeHintText"/></VBox>
         <Switch state="{= ${state>/mode} === 'EDIT' }"
                 change=".onToggleEdit"/>
       </HBox>
 
-      <HBox class="sapUiTinyMarginBottom" justifyContent="End">
+      <HBox class="sapUiTinyMarginBottom objectActionBar" justifyContent="End" alignItems="Center" renderType="Bare">
         <Button text="{i18n>objectSave}"
                 type="Emphasized"
                 press=".onSave"

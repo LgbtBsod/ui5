@@ -19,8 +19,8 @@
 
 
                     <HBox class="uxStatRow" wrap="Wrap" renderType="Bare">
-                        <ObjectStatus text="Custom SmartFilter" state="Success" visible="{layout>/smartFilter/useCustomSmartFilters}" class="sapUiTinyMarginEnd"/>
-                        <ObjectStatus text="Custom SmartTable" state="Success" visible="{layout>/smartTable/useCustomSmartTable}"/>
+                        <ObjectStatus text="SmartFilterBar" state="Success" visible="{layout>/smartFilter/useCustomSmartFilters}" class="sapUiTinyMarginEnd"/>
+                        <ObjectStatus text="SmartTable" state="Success" visible="{layout>/smartTable/useCustomSmartTable}"/>
                     </HBox>
                     <HBox class="sapUiTinyMarginTop" visible="{state>/loadError}" wrap="Wrap" alignItems="Center" renderType="Bare">
                         <MessageStrip
@@ -132,7 +132,16 @@
                     <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar sapUiTinyMarginBottom">
                         <Button text="{i18n>createButton}" press=".onCreate" class="sapUiTinyMarginEnd"/>
                         <Button text="{i18n>copyButton}" press=".onCopy" class="sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>deleteButton}" type="Reject" press=".onDelete" enabled="{view>/hasSelection}"/>
+                        <Button text="{i18n>deleteButton}" type="Reject" press=".onDelete" enabled="{view>/hasSelection}" class="sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>exportChecklistButton}" press=".onExportReport" type="Transparent" class="sapUiTinyMarginEnd">
+                            <customData><core:CustomData key="entity" value="checklist"/></customData>
+                        </Button>
+                        <Button text="{i18n>exportBarriersButton}" press=".onExportReport" type="Transparent" class="sapUiTinyMarginEnd">
+                            <customData><core:CustomData key="entity" value="barrier"/></customData>
+                        </Button>
+                        <Button text="{i18n>exportChecksButton}" press=".onExportReport" type="Transparent" class="sapUiTinyMarginEnd">
+                            <customData><core:CustomData key="entity" value="check"/></customData>
+                        </Button>
                         <ToolbarSpacer/>
                         <Label text="{i18n>searchModeLabel}" class="sapUiTinyMarginEnd"/>
                         <Text text="{i18n>searchModeExact}" class="sapUiTinyMarginEnd modeHintText" visible="{= ${state>/searchMode} !== 'LOOSE' }"/>

@@ -10,7 +10,7 @@
 
     <Button
         icon="{= ${appView>/isDark} ? 'sap-icon://sun' : 'sap-icon://moon' }"
-        tooltip="Toggle theme"
+        tooltip="Switch Fiori theme"
         press=".onToggleTheme"
         type="Transparent"
         class="themeDockButton"/>

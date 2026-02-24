@@ -110,6 +110,13 @@ sap.ui.define([
             return Promise.resolve([]);
         },
 
+        exportReport: function (sEntity, mPayload) {
+            if (_backendService.exportReport) {
+                return _backendService.exportReport(sEntity, mPayload || {});
+            }
+            return Promise.resolve({ rows: [] });
+        },
+
         createObject: function (data) {
             return _backendService.create(data);
         },

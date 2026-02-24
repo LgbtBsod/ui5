@@ -7,14 +7,15 @@ sap.ui.define([
     return BaseController.extend("sap_ui5.controller.App", {
 
         onInit: function () {
+            var oApplied = this.applyStoredTheme();
             this.setModel(new JSONModel({
-                isDark: this.isDarkThemeEnabled()
+                isDark: !!oApplied.isDark
             }), "appView");
         },
 
         onToggleTheme: function () {
-            var bIsDark = this.toggleTheme();
-            this.getView().getModel("appView").setProperty("/isDark", bIsDark);
+            var oResult = this.toggleTheme();
+            this.getView().getModel("appView").setProperty("/isDark", !!oResult.isDark);
         }
     });
 });

@@ -334,6 +334,18 @@ sap.ui.define([], function () {
             });
         },
 
+        exportReport: function (sEntity, mPayload) {
+            return _request("/actions/export", {
+                method: "POST",
+                body: {
+                    entity: sEntity || "checklist",
+                    filters: (mPayload && mPayload.filters) || {},
+                    search_mode: (mPayload && mPayload.searchMode) || "EXACT"
+                }
+            });
+        },
+
+
         create: function (payload) {
             return Promise.resolve(payload);
         },

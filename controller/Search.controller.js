@@ -3,8 +3,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap_ui5/service/backend/BackendAdapter",
-    "sap_ui5/service/SmartSearchAdapter"
-], function (BaseController, JSONModel, MessageToast, BackendAdapter, SmartSearchAdapter) {
+    "sap_ui5/service/SmartSearchAdapter",
+    "sap_ui5/util/ExcelExport"
+], function (BaseController, JSONModel, MessageToast, BackendAdapter, SmartSearchAdapter, ExcelExport) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -210,6 +211,33 @@ sap.ui.define([
             this.onSearch();
         },
 
+
+
+        onExportReport: function (oEvent) {
+            var sEntity = oEvent.getSource().data("entity") || "checklist";
+            var mPayload = this._buildFilterPayload();
+            var sSearchMode = this.getModel("state").getProperty("/searchMode") || "EXACT";
+            var oBundle = this.getResourceBundle();
+
+            this.getModel("state").setProperty("/isLoading", true);
+
+            BackendAdapter.exportReport(sEntity, {
+                filters: mPayload,
+                searchMode: sSearchMode
+            }).then(function (oResult) {
+                var aRows = (oResult && oResult.rows) || [];
+                if (!aRows.length) {
+                    MessageToast.show(oBundle.getText("exportEmpty"));
+                    return;
+                }
+                ExcelExport.download("checklist_" + sEntity + "_" + Date.now(), aRows);
+                MessageToast.show(oBundle.getText("exportDone", [aRows.length]));
+            }).catch(function (oError) {
+                MessageToast.show(oBundle.getText("exportFailed", [((oError && oError.message) || "Unknown error")]));
+            }).finally(function () {
+                this.getModel("state").setProperty("/isLoading", false);
+            }.bind(this));
+        },
 
         onRetryLoad: function () {
             var oStateModel = this.getModel("state");

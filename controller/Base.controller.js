@@ -4,8 +4,12 @@ sap.ui.define([
     "use strict";
 
     var THEME_STORAGE_KEY = "sap_ui5_theme";
-    var DARK_THEME = "dark";
-    var LIGHT_THEME = "light";
+    var LIGHT_THEME = "sap_fiori_3";
+    var DARK_THEME = "sap_fiori_3_dark";
+
+    function _isDarkTheme(sTheme) {
+        return sTheme === DARK_THEME;
+    }
 
     return Controller.extend("sap_ui5.controller.Base", {
 
@@ -33,31 +37,39 @@ sap.ui.define([
             this.getRouter().getRoute(sRouteName).attachPatternMatched(fnHandler, this);
         },
 
-        isDarkAccentEnabled: function () {
-            return this.isDarkThemeEnabled();
+        getCurrentTheme: function () {
+            return window.localStorage.getItem(THEME_STORAGE_KEY) || DARK_THEME;
         },
 
         isDarkThemeEnabled: function () {
-            return document.body.classList.contains("appDark");
+            return _isDarkTheme(this.getCurrentTheme());
         },
 
         applyStoredTheme: function () {
-            var sTheme = window.localStorage.getItem(THEME_STORAGE_KEY) || DARK_THEME;
+            var sTheme = this.getCurrentTheme();
             this._applyTheme(sTheme);
-            return sTheme;
+            return {
+                isDark: _isDarkTheme(sTheme),
+                theme: sTheme
+            };
         },
 
         toggleTheme: function () {
             var sNextTheme = this.isDarkThemeEnabled() ? LIGHT_THEME : DARK_THEME;
             this._applyTheme(sNextTheme);
             window.localStorage.setItem(THEME_STORAGE_KEY, sNextTheme);
-            return sNextTheme === DARK_THEME;
+            return {
+                isDark: _isDarkTheme(sNextTheme),
+                theme: sNextTheme
+            };
         },
 
         _applyTheme: function (sTheme) {
-            var bDark = sTheme !== LIGHT_THEME;
+            var bDark = _isDarkTheme(sTheme);
+            sap.ui.getCore().applyTheme(sTheme);
             document.body.classList.toggle("appDark", bDark);
             document.body.classList.toggle("appLight", !bDark);
+            document.body.classList.toggle("lightMode", !bDark);
             document.documentElement.classList.toggle("light-mode", !bDark);
         }
     });
