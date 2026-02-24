@@ -2,7 +2,7 @@
   --bg: #0b0b0f;
   --bg2: #14131c;
   --surface: rgba(255, 83, 17, 0.05);
-  --surface2: rgba(255, 83, 17, 0.06);
+  --surface2: rgba(24, 24, 32, 0.82);
   --border: rgba(255, 122, 73, 0.2);
   --border-bright: rgba(255, 122, 73, 0.35);
   --text: #f6f2e8;
@@ -18,8 +18,8 @@
   --bg-main: radial-gradient(circle at 20% 15%, #2d1711 0%, #16131b 46%, #0a0a0e 100%);
   --bg-grad-a: rgba(255, 83, 17, 0.31);
   --bg-grad-b: rgba(88, 223, 255, 0.16);
-  --glass-bg: rgba(19, 17, 17, 0.58);
-  --glass-border: rgba(255, 132, 90, 0.26);
+  --glass-bg: rgba(17, 18, 26, 0.78);
+  --glass-border: rgba(255, 132, 90, 0.18);
   --glass-shadow: 0 28px 95px rgba(0, 0, 0, 0.58);
   --text-main: var(--text);
   --text-muted: var(--text-sub);
@@ -199,9 +199,9 @@ body {
 }
 
 .themeDockButton .sapMBtnInner {
-  width: 2.9rem;
-  height: 2.9rem;
-  border-radius: 12px !important;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 14px !important;
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
   color: var(--text-main) !important;
@@ -233,20 +233,20 @@ body {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   background-clip: padding-box;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: none;
+  border-bottom: none;
 }
 
 .glassTable .sapMListTblCell:first-child {
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
-  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: none;
 }
 
 .glassTable .sapMListTblCell:last-child {
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
-  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  border-right: none;
 }
 
 .roundedTable .sapMListTbl {
@@ -271,74 +271,44 @@ body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
-.sapMSegB {
-  background: var(--surface2) !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.2) !important;
-  border-radius: 14px !important;
-  padding: 2px !important;
-}
-
-.sapMSegBBtn {
+.cleanSegment.sapMSegB {
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.05)) !important;
   border: none !important;
-  border-radius: 0 !important;
+  border-radius: 14px !important;
+  padding: 3px !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+
+.cleanSegment .sapMSegBBtn {
+  border: none !important;
+  border-radius: 10px !important;
   box-shadow: none !important;
-  background: transparent !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  opacity: 0.76;
 }
 
-.sapMSegBBtn:first-child {
-  border-top-left-radius: 11px !important;
-  border-bottom-left-radius: 11px !important;
+.cleanSegment .sapMSegBBtn .sapMBtnContent {
+  font-weight: 500;
 }
 
-.sapMSegBBtn:last-child {
-  border-top-right-radius: 11px !important;
-  border-bottom-right-radius: 11px !important;
+.cleanSegment .sapMSegBBtn + .sapMSegBBtn {
+  border-left: none !important;
 }
 
-.sapMSegBBtn + .sapMSegBBtn {
-  border-left: 1px solid var(--border-bright) !important;
-}
-
-.sapMSegBBtnSel {
-  background: var(--accent-grad) !important;
-  color: #fff !important;
-  border-radius: 11px !important;
-}
-
-.statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel {
-  background: var(--accent-grad) !important;
+.cleanSegment .sapMSegBBtnSel {
+  background: color-mix(in srgb, rgba(var(--accent-rgb), 0.28) 35%, var(--surface2)) !important;
+  color: var(--text-main) !important;
+  border-radius: 10px !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.32), 0 6px 16px rgba(var(--accent-rgb), 0.22) !important;
+  opacity: 1;
 }
 
 .statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"].sapMSegBBtnSel {
-  background: linear-gradient(145deg, #f43f5e, #dc2626) !important;
-  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.35) !important;
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.48), 0 6px 14px rgba(239, 68, 68, 0.26) !important;
 }
 
 .statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="FALSE"].sapMSegBBtnSel {
-  background: linear-gradient(145deg, #34d399, #16a34a) !important;
-  box-shadow: 0 10px 22px rgba(22, 163, 74, 0.35) !important;
-}
-
-.sapMBtn:not(.sapMBtnEmphasized) .sapMBtnInner {
-  border: 1px solid rgba(var(--accent-rgb), 0.24) !important;
-  background: color-mix(in srgb, var(--surface2) 96%, rgba(var(--accent-rgb), 0.1)) !important;
-  color: var(--text-main) !important;
-}
-
-.sapMBtn:not(.sapMBtnEmphasized):hover .sapMBtnInner {
-  border-color: rgba(var(--accent-rgb), 0.45) !important;
-  box-shadow: 0 10px 20px rgba(var(--accent-rgb), 0.2) !important;
-}
-
-:root.light-mode .sapMListTblRow .sapMListTblCell,
-:root.light-mode .sapMListTblRow .sapMText,
-:root.light-mode .sapMListTblRow .sapMObjStatus,
-:root.light-mode .sapMListTblRow .sapMObjStatus>.sapMObjStatusText {
-  color: #15324a !important;
-}
-
-:root:not(.light-mode) .sapMListTblRow .sapMListTblCell {
-  background: rgba(255, 255, 255, 0.035) !important;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.48), 0 6px 14px rgba(34, 197, 94, 0.26) !important;
 }
 
 .sapMSegBBtnSel + .sapMSegBBtn {
@@ -357,4 +327,35 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--border-bright);
   border-radius: 10px;
+}
+
+
+.themeDockButton .sapMBtnContent {
+  font-size: 1.7rem !important;
+  line-height: 1.7rem !important;
+  font-weight: 600;
+}
+
+
+.searchResultTable .sapMListTblRow .sapMListTblCell {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.searchResultTable .sapMListTblRow .sapMListTblCell:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.searchResultTable .sapMListTblRow .sapMListTblCell:last-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.modeHintText {
+  min-width: 3.8rem;
+  text-align: right;
+  opacity: 0.9;
+}
+
+.resultToolbar {
+  padding-inline: 0.25rem;
 }

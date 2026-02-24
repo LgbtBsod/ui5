@@ -10,17 +10,17 @@
 
             <HBox justifyContent="End" class="sapUiTinyMarginBottom" alignItems="Center" renderType="Bare">
                 <Button
-                    text="Save"
+                    text="{i18n>objectSave}"
                     type="Emphasized"
                     visible="{= ${state>/mode} === 'EDIT' }"
                     press=".onSaveDetail"
                     class="sapUiTinyMarginEnd"/>
                 <Button
-                    text="Cancel"
+                    text="{i18n>objectCancel}"
                     visible="{= ${state>/mode} === 'EDIT' }"
                     press=".onCancelEditFromDetail"
                     class="sapUiTinyMarginEnd"/>
-                <Label text="Edit mode" class="sapUiTinyMarginEnd"/>
+                <Label text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
                 <Switch
                     state="{= ${state>/mode} === 'EDIT' }"
                     change=".onToggleEditFromDetail"
@@ -28,25 +28,25 @@
                 <Button
                     icon="sap-icon://decline"
                     type="Transparent"
-                    tooltip="Close details"
+                    tooltip="{i18n>closeDetails}"
                     press=".onCloseDetail"/>
             </HBox>
 
             <VBox class="glassCard">
-                <Title text="Basic Information"/>
+                <Title text="{i18n>basicInformation}"/>
                 <form:SimpleForm
                     editable="true"
                     layout="ResponsiveGridLayout"
                     columnsL="2"
                     columnsM="2">
 
-                    <Label text="Date"/>
+                    <Label text="{i18n>dateLabel}"/>
                     <Input value="{selected>/basic/date}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
-                    <Label text="Equipment"/>
+                    <Label text="{i18n>equipmentLabel}"/>
                     <Input value="{selected>/basic/equipment}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
-                    <Label text="LPC"/>
+                    <Label text="{i18n>lpcLabel}"/>
                     <Input value="{selected>/basic/LPC_TEXT}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
                 </form:SimpleForm>
@@ -54,21 +54,24 @@
 
             <VBox class="glassCard">
                 <Toolbar class="toolbarTransparent">
-                    <Title text="Checks"/>
+                    <Title text="{i18n>checksTitle}"/>
                     <ToolbarSpacer/>
+                    <Button text="{i18n>deleteSelected}" press=".onDeleteSelectedChecks" type="Reject" enabled="{view>/hasSelectedChecks}" visible="{= ${state>/mode} === 'EDIT' }" class="sapUiTinyMarginEnd"/>
                     <Button
-                        text="Add row"
+                        text="{i18n>addRow}"
                         press=".onAddCheckRow"
                         visible="{= ${state>/mode} === 'EDIT' }"/>
                 </Toolbar>
                 <Table items="{selected>/checks}" class="glassTable roundedTable">
                     <columns>
-                        <Column><Text text="Check"/></Column>
-                        <Column><Text text="Status"/></Column>
+                        <Column width="3rem"><Text text=""/></Column>
+                        <Column><Text text="{i18n>checkLabel}"/></Column>
+                        <Column><Text text="{i18n>statusLabel}"/></Column>
                     </columns>
                     <items>
                         <ColumnListItem>
                             <cells>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' }"/>
                                 <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
                                 <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
                             </cells>
@@ -79,21 +82,24 @@
 
             <VBox class="glassCard">
                 <Toolbar class="toolbarTransparent">
-                    <Title text="Barriers"/>
+                    <Title text="{i18n>barriersTitle}"/>
                     <ToolbarSpacer/>
+                    <Button text="{i18n>deleteSelected}" press=".onDeleteSelectedBarriers" type="Reject" enabled="{view>/hasSelectedBarriers}" visible="{= ${state>/mode} === 'EDIT' }" class="sapUiTinyMarginEnd"/>
                     <Button
-                        text="Add row"
+                        text="{i18n>addRow}"
                         press=".onAddBarrierRow"
                         visible="{= ${state>/mode} === 'EDIT' }"/>
                 </Toolbar>
                 <Table items="{selected>/barriers}" class="glassTable roundedTable">
                     <columns>
-                        <Column><Text text="Barrier"/></Column>
-                        <Column><Text text="Status"/></Column>
+                        <Column width="3rem"><Text text=""/></Column>
+                        <Column><Text text="{i18n>barrierLabel}"/></Column>
+                        <Column><Text text="{i18n>statusLabel}"/></Column>
                     </columns>
                     <items>
                         <ColumnListItem>
                             <cells>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' }"/>
                                 <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
                                 <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
                             </cells>
