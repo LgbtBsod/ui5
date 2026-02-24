@@ -2,7 +2,9 @@
     controllerName="sap_ui5.controller.Detail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:form="sap.ui.layout.form">
+    xmlns:form="sap.ui.layout.form"
+    xmlns:f="sap.f"
+    xmlns:dnd="sap.ui.core.dnd">
 
     <Page showHeader="false" class="pageTransparent">
 
@@ -33,6 +35,39 @@
             </HBox>
 
             <VBox class="glassCard">
+                <Toolbar class="toolbarTransparent">
+                    <Title text="{i18n>participantsTitle}"/>
+                    <ToolbarSpacer/>
+                    <Text text="{i18n>dragHint}" visible="{= ${state>/mode} === 'EDIT' }" class="modeHintText"/>
+                </Toolbar>
+                <f:GridList id="infoCardGrid" items="{view>/infoCards}" class="infoCardGrid">
+                    <dragDropConfig>
+                        <dnd:DragInfo sourceAggregation="items" enabled="{= ${state>/mode} === 'EDIT' }"/>
+                        <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} === 'EDIT' }" drop=".onInfoCardsDrop"/>
+                    </dragDropConfig>
+                    <customLayout>
+                        <f:GridListDefaultLayout minColumnWidth="14rem"/>
+                    </customLayout>
+                    <items>
+                        <CustomListItem>
+                            <VBox class="infoCardTile" renderType="Bare">
+                                <Text text="{view>title}" class="infoCardTitle"/>
+                                <Text
+                                    text="{parts: [
+                                        {path: 'view>key'},
+                                        {path: 'selected>/basic/OBSERVER_FULLNAME'},
+                                        {path: 'selected>/basic/OBSERVED_FULLNAME'},
+                                        {path: 'selected>/basic/LOCATION_NAME'},
+                                        {path: 'selected>/basic/LOCATION_TEXT'}
+                                    ], formatter: '.formatInfoCardValue'}"
+                                    class="infoCardValue"/>
+                            </VBox>
+                        </CustomListItem>
+                    </items>
+                </f:GridList>
+            </VBox>
+
+            <VBox class="glassCard">
                 <Title text="{i18n>basicInformation}"/>
                 <form:SimpleForm
                     editable="true"
@@ -56,7 +91,6 @@
                 <Toolbar class="toolbarTransparent">
                     <Title text="{i18n>checksTitle}"/>
                     <ToolbarSpacer/>
-                    <Button text="{i18n>deleteSelected}" press=".onDeleteSelectedChecks" type="Reject" enabled="{view>/hasSelectedChecks}" visible="{= ${state>/mode} === 'EDIT' }" class="sapUiTinyMarginEnd"/>
                     <Button
                         text="{i18n>addRow}"
                         press=".onAddCheckRow"
@@ -86,7 +120,6 @@
                 <Toolbar class="toolbarTransparent">
                     <Title text="{i18n>barriersTitle}"/>
                     <ToolbarSpacer/>
-                    <Button text="{i18n>deleteSelected}" press=".onDeleteSelectedBarriers" type="Reject" enabled="{view>/hasSelectedBarriers}" visible="{= ${state>/mode} === 'EDIT' }" class="sapUiTinyMarginEnd"/>
                     <Button
                         text="{i18n>addRow}"
                         press=".onAddBarrierRow"

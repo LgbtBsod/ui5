@@ -5,10 +5,13 @@ sap.ui.define([], function () {
         return String(v || "").toLowerCase();
     }
 
-    function evaluateRateMatch(sFilterKey, nRate) {
-        var bFailed = Number.isFinite(nRate) && nRate < 100;
-        return sFilterKey === "ALL"
-            || (sFilterKey === "TRUE" && bFailed)
+    function evaluateRateMatch(sFilterKey, nRate, vHasFailed) {
+        var bFailed = typeof vHasFailed === "boolean" ? vHasFailed : (Number.isFinite(nRate) && nRate < 100);
+        if (sFilterKey === "ALL") {
+            return true;
+        }
+
+        return (sFilterKey === "TRUE" && bFailed)
             || (sFilterKey === "FALSE" && !bFailed);
     }
 
@@ -40,13 +43,16 @@ sap.ui.define([], function () {
             return (aData || []).filter(function (oItem) {
                 var sId = toLow((((oItem || {}).root || {}).id));
                 var sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
-                var nChecks = Number((((oItem || {}).root || {}).successRateChecks));
-                var nBarriers = Number((((oItem || {}).root || {}).successRateBarriers));
+                var oRoot = ((oItem || {}).root || {});
+                var nChecks = Number(oRoot.successRateChecks);
+                var nBarriers = Number(oRoot.successRateBarriers);
+                var vChecksFailed = oRoot.hasFailedChecks;
+                var vBarriersFailed = oRoot.hasFailedBarriers;
 
                 var bIdMatch = !sFilterId || sId.includes(sFilterId);
                 var bLpcMatch = !sFilterLpc || sLpc === sFilterLpc;
-                var bChecksMatch = evaluateRateMatch(sChecks, nChecks);
-                var bBarriersMatch = evaluateRateMatch(sBarriers, nBarriers);
+                var bChecksMatch = evaluateRateMatch(sChecks, nChecks, vChecksFailed);
+                var bBarriersMatch = evaluateRateMatch(sBarriers, nBarriers, vBarriersFailed);
 
                 if (sSearchMode === "LOOSE") {
                     var aRules = [

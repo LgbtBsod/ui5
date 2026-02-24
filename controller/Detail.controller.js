@@ -11,7 +11,12 @@ sap.ui.define([
     onInit: function () {
       this.setModel(new JSONModel({
         hasSelectedChecks: false,
-        hasSelectedBarriers: false
+        hasSelectedBarriers: false,
+        infoCards: [
+          { key: "observer", title: this.getResourceBundle().getText("observerLabel") },
+          { key: "observed", title: this.getResourceBundle().getText("observedLabel") },
+          { key: "location", title: this.getResourceBundle().getText("locationLabel") }
+        ]
       }), "view");
       this.attachRouteMatched("detail", this._onMatched);
     },
@@ -82,6 +87,54 @@ sap.ui.define([
 
     onSelectionToggle: function () {
       this._updateSelectionState();
+    },
+
+    formatInfoCardValue: function (sKey, sObserver, sObserved, sLocationName, sLocationText) {
+      if (sKey === "observer") {
+        return sObserver || "-";
+      }
+
+      if (sKey === "observed") {
+        return sObserved || "-";
+      }
+
+      return sLocationName || sLocationText || "-";
+    },
+
+    onInfoCardsDrop: function (oEvent) {
+      var oDragged = oEvent.getParameter("draggedControl");
+      var oDropped = oEvent.getParameter("droppedControl");
+      var sDropPosition = oEvent.getParameter("dropPosition");
+
+      if (!oDragged || !oDropped) {
+        return;
+      }
+
+      var oDraggedCtx = oDragged.getBindingContext("view");
+      var oDroppedCtx = oDropped.getBindingContext("view");
+
+      if (!oDraggedCtx || !oDroppedCtx) {
+        return;
+      }
+
+      var iDragged = Number(oDraggedCtx.getPath().split("/").pop());
+      var iDropped = Number(oDroppedCtx.getPath().split("/").pop());
+
+      if (!Number.isInteger(iDragged) || !Number.isInteger(iDropped) || iDragged === iDropped) {
+        return;
+      }
+
+      var oViewModel = this.getModel("view");
+      var aItems = (oViewModel.getProperty("/infoCards") || []).slice();
+      var oMoved = aItems.splice(iDragged, 1)[0];
+      var iTarget = sDropPosition === "After" ? iDropped + 1 : iDropped;
+
+      if (iDragged < iDropped) {
+        iTarget -= 1;
+      }
+
+      aItems.splice(iTarget, 0, oMoved);
+      oViewModel.setProperty("/infoCards", aItems);
     },
 
     onSaveDetail: function () {

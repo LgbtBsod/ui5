@@ -332,54 +332,66 @@ body {
 }
 
 
-.cleanSegment.sapMSegB {
-  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.05)) !important;
+.statusSegmented.sapMSegB {
+  background-color: transparent !important;
   border: none !important;
-  border-radius: 14px !important;
-  padding: 3px !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+  border-radius: 12px !important;
+  padding: 2px !important;
 }
 
-.cleanSegment .sapMSegBBtn {
-  border: none !important;
+.statusSegmented .sapMSegBBtn {
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 10px !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  opacity: 0.76;
-  transition: background-color .18s var(--transition), opacity .18s var(--transition);
+  opacity: 0.88;
+  transition: all 0.25s ease;
 }
 
-.cleanSegment .sapMSegBBtn:hover {
+.statusSegmented .sapMSegBBtn:hover {
   background: var(--interactive-hover) !important;
   opacity: 1;
 }
 
-.cleanSegment .sapMSegBBtn .sapMBtnContent {
-  font-weight: 500;
+.statusSegmented .sapMSegBBtn .sapMBtnContent {
+  font-weight: 600;
 }
 
-.cleanSegment .sapMSegBBtn + .sapMSegBBtn {
+.statusSegmented .sapMSegBBtn + .sapMSegBBtn {
   border-left: none !important;
 }
 
-.cleanSegment .sapMSegBBtnSel {
-  background: color-mix(in srgb, rgba(var(--accent-rgb), 0.28) 35%, var(--surface2)) !important;
-  color: var(--text-main) !important;
-  border-radius: 10px !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.32), 0 6px 16px rgba(var(--accent-rgb), 0.22) !important;
-  opacity: 1;
+.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"] {
+  color: rgba(255, 83, 17, 0.68) !important;
 }
 
-.cleanSegment .sapMSegBBtn:active {
-  background: var(--interactive-pressed) !important;
+.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"] {
+  color: rgba(255, 77, 77, 0.72) !important;
 }
 
-.statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"].sapMSegBBtnSel {
-  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.48), 0 6px 14px rgba(239, 68, 68, 0.26) !important;
+.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="FALSE"] {
+  color: rgba(0, 200, 83, 0.72) !important;
 }
 
-.statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="FALSE"].sapMSegBBtnSel {
-  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.48), 0 6px 14px rgba(34, 197, 94, 0.26) !important;
+.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel {
+  background-color: #ff5311 !important;
+  color: #fff !important;
+}
+
+.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"].sapMSegBBtnSel {
+  background-color: #ff4d4d !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.3) !important;
+}
+
+.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="FALSE"].sapMSegBBtnSel {
+  background-color: #00c853 !important;
+  color: #fff !important;
+  box-shadow: 0 6px 14px rgba(34, 197, 94, 0.3) !important;
+}
+
+.sapUiLight .statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel,
+:root.light-mode .statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel {
+  background-color: #00acee !important;
 }
 
 .sapMSegBBtnSel + .sapMSegBBtn {
@@ -411,6 +423,19 @@ body {
 .searchResultTable .sapMListTblRow .sapMListTblCell {
   border-top: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
   border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
+  vertical-align: middle !important;
+}
+
+.searchResultTable .sapMListTblHeaderCell {
+  background: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 90%, transparent) !important;
+}
+
+.searchResultTable .sapMListTblHeaderCell .sapMText {
+  font-size: .74rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted) !important;
 }
 
 .searchResultTable .sapMListTblRow .sapMListTblCell:first-child {
@@ -419,6 +444,15 @@ body {
 
 .searchResultTable .sapMListTblRow .sapMListTblCell:last-child {
   border-right: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
+}
+
+.searchResultTable .sapMListTblSubCnt,
+.searchResultTable .sapMText,
+.searchResultTable .sapMObjStatus,
+.searchResultTable .sapMPIText {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .modeHintText {
@@ -503,6 +537,11 @@ body {
 
 .searchResultTable .sapMListTblCell {
   transition: background-color .18s var(--transition), transform .18s var(--transition);
+  padding: .75rem .8rem !important;
+}
+
+.searchResultTable .sapMPI {
+  min-width: 7rem;
 }
 
 .sapMInputBaseContentWrapper:focus-within,
@@ -537,4 +576,35 @@ body {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+
+.infoCardGrid {
+  margin-top: .35rem;
+}
+
+.infoCardTile {
+  min-height: 8.6rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 88%, transparent);
+  background: color-mix(in srgb, var(--surface2) 86%, transparent);
+  padding: .95rem;
+  justify-content: space-between;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.infoCardTitle {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted) !important;
+}
+
+.infoCardValue {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sapMListUl > .sapMLIB.infoCardTileDrag {
+  opacity: .7;
 }
