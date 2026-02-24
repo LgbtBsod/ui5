@@ -189,6 +189,19 @@ sap.ui.define([
             this._executeSearch();
         },
 
+        onStatusFilterPress: function (oEvent) {
+            var oSource = oEvent.getSource();
+            var sFilterPath = oSource.data("filterPath");
+            var sFilterValue = oSource.data("filterValue");
+
+            if (!sFilterPath) {
+                return;
+            }
+
+            this.getModel("state").setProperty(sFilterPath, sFilterValue);
+            this.onSearch();
+        },
+
 
         onRetryLoad: function () {
             var oStateModel = this.getModel("state");
