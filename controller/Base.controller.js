@@ -1,8 +1,10 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap_ui5/service/backend/BackendAdapter",
-    "sap_ui5/util/ThemePhilosophy"
-], function (Controller, BackendAdapter, ThemePhilosophy) {
+    "sap_ui5/util/ThemePhilosophy",
+    "sap/m/MessageToast",
+    "sap/m/MessageBox"
+], function (Controller, BackendAdapter, ThemePhilosophy, MessageToast, MessageBox) {
     "use strict";
 
     var THEME_STORAGE_KEY = "sap_ui5_theme";
@@ -145,6 +147,22 @@ sap.ui.define([
          * Generic async wrapper for busy/loading flags.
          * Prevents duplicated try/finally blocks in feature controllers.
          */
+
+
+        /**
+         * Unified i18n toast helper to reduce repeated MessageToast boilerplate in controllers.
+         */
+        showI18nToast: function (sI18nKey, aArgs) {
+            MessageToast.show(this.getResourceBundle().getText(sI18nKey, aArgs || []));
+        },
+
+        /**
+         * Unified i18n message-box error helper for consistent UX and auditing readability.
+         */
+        showI18nError: function (sI18nKey, aArgs) {
+            MessageBox.error(this.getResourceBundle().getText(sI18nKey, aArgs || []));
+        },
+
         runWithStateFlag: function (oStateModel, sPath, fnTask) {
             if (!oStateModel || !sPath || typeof fnTask !== "function") {
                 return Promise.resolve(null);

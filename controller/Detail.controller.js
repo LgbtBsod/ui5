@@ -110,12 +110,11 @@ sap.ui.define([
         return;
       }
 
-      this.getModel("state").setProperty("/isLoading", true);
-      BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
-        oDataModel.setProperty("/selectedChecklist", oRootOnly);
-        this._applyChecklistLazily(oRootOnly);
-      }.bind(this)).finally(function () {
-        this.getModel("state").setProperty("/isLoading", false);
+      this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
+        return BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
+          oDataModel.setProperty("/selectedChecklist", oRootOnly);
+          this._applyChecklistLazily(oRootOnly);
+        }.bind(this));
       }.bind(this));
     },
 
@@ -229,33 +228,29 @@ sap.ui.define([
       var sObjectId = oStateModel.getProperty("/activeObjectId");
       var sSessionId = oStateModel.getProperty("/sessionId");
 
-      this.setLockPending(oStateModel, true);
       this.setLockUiState(oStateModel, "PENDING", this.getResourceBundle().getText("lockPending"));
+      this.runWithStateFlag(oStateModel, "/lockOperationPending", function () {
+        if (!bEditMode) {
+          return this.releaseLock(sObjectId, sSessionId).finally(function () {
+            oStateModel.setProperty("/mode", "READ");
+            oStateModel.setProperty("/isLocked", false);
+            this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockReleased"));
+          }.bind(this));
+        }
 
-      if (!bEditMode) {
-        this.releaseLock(sObjectId, sSessionId).finally(function () {
+        return BackendAdapter.lockAcquire(
+          sObjectId,
+          sSessionId
+        ).then(function () {
+          oStateModel.setProperty("/isLocked", true);
+          oStateModel.setProperty("/mode", "EDIT");
+          this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
+        }.bind(this)).catch(function (oError) {
           oStateModel.setProperty("/mode", "READ");
           oStateModel.setProperty("/isLocked", false);
-          this.setLockPending(oStateModel, false);
-          this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockReleased"));
+          this.setLockUiState(oStateModel, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
+          return FlowCoordinator.handleBackendError(this, oError);
         }.bind(this));
-        return;
-      }
-
-      BackendAdapter.lockAcquire(
-        sObjectId,
-        sSessionId
-      ).then(function () {
-        oStateModel.setProperty("/isLocked", true);
-        oStateModel.setProperty("/mode", "EDIT");
-        this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
-      }.bind(this)).catch(function (oError) {
-        oStateModel.setProperty("/mode", "READ");
-        oStateModel.setProperty("/isLocked", false);
-        this.setLockUiState(oStateModel, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
-        return FlowCoordinator.handleBackendError(this, oError);
-      }.bind(this)).finally(function () {
-        this.setLockPending(oStateModel, false);
       }.bind(this));
     },
 
@@ -364,13 +359,13 @@ sap.ui.define([
       var sId = ((((oEdited || {}).root || {}).id) || "").trim();
 
       if (!sId) {
-        MessageToast.show(oBundle.getText("checklistIdMissing"));
+        this.showI18nToast("checklistIdMissing");
         return;
       }
 
-      oStateModel.setProperty("/isBusy", true);
+      return this.runWithStateFlag(oStateModel, "/isBusy", function () {
 
-      BackendAdapter.updateCheckList(sId, oEdited)
+      return BackendAdapter.updateCheckList(sId, oEdited)
         .then(function (oSavedChecklist) {
           return BackendAdapter.getCheckLists().then(function (aUpdatedCheckLists) {
             return {
@@ -387,12 +382,12 @@ sap.ui.define([
           oStateModel.setProperty("/mode", "READ");
           oStateModel.setProperty("/isDirty", false);
           window.dispatchEvent(new CustomEvent("pcct:fullSave"));
-          MessageToast.show(oBundle.getText("objectSaved"));
+          this.showI18nToast("objectSaved");
         }.bind(this))
         .catch(function (oError) {
           return FlowCoordinator.handleBackendError(this, oError, {
             onConflictChoice: function (sChoice) {
-              if (sChoice === oBundle.getText("reloadButton")) {
+              if (sChoice === this.getResourceBundle().getText("reloadButton")) {
                 return BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
                   if (oRootOnly) {
                     this.getModel("selected").setData(ChecklistDraftHelper.clone(oRootOnly));
@@ -400,16 +395,14 @@ sap.ui.define([
                   }
                 }.bind(this));
               }
-              if (sChoice === oBundle.getText("overwriteButton")) {
+              if (sChoice === this.getResourceBundle().getText("overwriteButton")) {
                 return BackendAdapter.updateCheckList(sId, oEdited, { force: true });
               }
               return null;
             }.bind(this)
           });
-        }.bind(this))
-        .finally(function () {
-          oStateModel.setProperty("/isBusy", false);
-        });
+        }.bind(this));
+      }.bind(this));
     },
 
     onAddCheckRow: function () {

@@ -80,8 +80,8 @@ sap.ui.define([
       this.getOwnerComponent().getRootControl().byId("fcl").setLayout(oRouteArgs.layout || "TwoColumnsMidExpanded");
 
       if (!bCreate && !bCopy && !bEdit && !oFoundChecklist && sId) {
-        oState.setProperty("/isLoading", true);
-        BackendAdapter.getCheckLists().then(function (aLoadedChecklists) {
+        this.runWithStateFlag(oState, "/isLoading", function () {
+          return BackendAdapter.getCheckLists().then(function (aLoadedChecklists) {
           var aSafe = aLoadedChecklists || [];
           var oRemote = aSafe.find(function (oChecklist) {
             return oChecklist && oChecklist.root && oChecklist.root.id === sId;
@@ -95,9 +95,8 @@ sap.ui.define([
             this.getModel("state").setProperty("/isDirty", false);
             this._updateSelectionState();
           }
-        }.bind(this)).finally(function () {
-          oState.setProperty("/isLoading", false);
-        });
+          }.bind(this));
+        }.bind(this));
       }
     },
 
@@ -107,30 +106,26 @@ sap.ui.define([
       var sObjectId = oState.getProperty("/activeObjectId");
       var sSessionId = oState.getProperty("/sessionId");
 
-      this.setLockPending(oState, true);
       this.setLockUiState(oState, "PENDING", this.getResourceBundle().getText("lockPending"));
+      this.runWithStateFlag(oState, "/lockOperationPending", function () {
+        if (isEdit) {
+          return BackendAdapter.lockAcquire(sObjectId, sSessionId).then(function () {
+            oState.setProperty("/isLocked", true);
+            oState.setProperty("/mode", "EDIT");
+            this.setLockUiState(oState, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
+          }.bind(this)).catch(function (oError) {
+            oState.setProperty("/mode", "READ");
+            oState.setProperty("/isLocked", false);
+            this.setLockUiState(oState, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
+            return FlowCoordinator.handleBackendError(this, oError);
+          }.bind(this));
+        }
 
-      if (isEdit) {
-        BackendAdapter.lockAcquire(sObjectId, sSessionId).then(function () {
-          oState.setProperty("/isLocked", true);
-          oState.setProperty("/mode", "EDIT");
-          this.setLockUiState(oState, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
-        }.bind(this)).catch(function (oError) {
-          oState.setProperty("/mode", "READ");
+        return this.releaseLock(sObjectId, sSessionId, { trySave: true }).finally(function () {
           oState.setProperty("/isLocked", false);
-          this.setLockUiState(oState, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
-          return FlowCoordinator.handleBackendError(this, oError);
-        }.bind(this)).finally(function () {
-          this.setLockPending(oState, false);
-        });
-        return;
-      }
-
-      this.releaseLock(sObjectId, sSessionId, { trySave: true }).finally(function () {
-        oState.setProperty("/isLocked", false);
-        oState.setProperty("/mode", "READ");
-        this.setLockPending(oState, false);
-        this.setLockUiState(oState, "IDLE", this.getResourceBundle().getText("lockReleased"));
+          oState.setProperty("/mode", "READ");
+          this.setLockUiState(oState, "IDLE", this.getResourceBundle().getText("lockReleased"));
+        }.bind(this));
       }.bind(this));
     },
 
@@ -200,7 +195,6 @@ sap.ui.define([
     onSave: function () {
       var oDataModel = this.getModel("data");
       var oStateModel = this.getModel("state");
-      var oBundle = this.getResourceBundle();
       var oObject = ChecklistDraftHelper.clone(oDataModel.getProperty("/object") || {});
       var sId = (((oObject || {}).root || {}).id || "").trim();
       var aChecklists = oDataModel.getProperty("/checkLists") || [];
@@ -209,12 +203,12 @@ sap.ui.define([
       });
       var bCreateMode = !sId || iExistingIndex < 0;
 
-      oStateModel.setProperty("/isBusy", true);
+      return this.runWithStateFlag(oStateModel, "/isBusy", function () {
 
-      (bCreateMode ? BackendAdapter.createCheckList(oObject) : BackendAdapter.updateCheckList(sId, oObject))
+      return (bCreateMode ? BackendAdapter.createCheckList(oObject) : BackendAdapter.updateCheckList(sId, oObject))
         .then(function (oSavedChecklist) {
           if (!oSavedChecklist || !oSavedChecklist.root || !oSavedChecklist.root.id) {
-            throw new Error(oBundle.getText("objectSaveInvalidResponse"));
+            throw new Error(this.getResourceBundle().getText("objectSaveInvalidResponse"));
           }
           return BackendAdapter.getCheckLists().then(function (aUpdatedCheckLists) {
             return { savedChecklist: oSavedChecklist, checkLists: aUpdatedCheckLists };
@@ -231,12 +225,12 @@ sap.ui.define([
           oStateModel.setProperty("/isDirty", false);
 
           window.dispatchEvent(new CustomEvent("pcct:fullSave"));
-          MessageToast.show(oBundle.getText("objectSaved"));
+          this.showI18nToast("objectSaved");
           this.navTo("detail", { id: oSavedChecklist.root.id });
         }.bind(this)).catch(function (oError) {
           return FlowCoordinator.handleBackendError(this, oError, {
             onConflictChoice: function (sChoice) {
-              if (sChoice === oBundle.getText("reloadButton")) {
+              if (sChoice === this.getResourceBundle().getText("reloadButton")) {
                 return BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
                   if (oRootOnly) {
                     oDataModel.setProperty("/object", ChecklistDraftHelper.clone(oRootOnly));
@@ -245,15 +239,14 @@ sap.ui.define([
                   }
                 });
               }
-              if (sChoice === oBundle.getText("overwriteButton")) {
+              if (sChoice === this.getResourceBundle().getText("overwriteButton")) {
                 return BackendAdapter.updateCheckList(sId, oObject, { force: true });
               }
               return null;
             }
           });
-        }.bind(this)).finally(function () {
-          oStateModel.setProperty("/isBusy", false);
-        });
+        }.bind(this));
+      }.bind(this));
     },
 
     onCancel: function () {
