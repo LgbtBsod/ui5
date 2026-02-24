@@ -120,25 +120,42 @@ body.appDark .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
 }
 
 .glassTable .sapMListTblRow {
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 16px;
   transition: transform .2s ease, background .2s ease;
-}
-
-body.appDark .glassTable .sapMListTblRow {
-  background: rgba(255, 255, 255, 0.06);
 }
 
 .glassTable .sapMListTblRow:hover {
   transform: translateX(4px);
 }
 
+.glassTable .sapMListTblCell {
+  background: rgba(255, 255, 255, 0.4);
+  background-clip: padding-box;
+  border-top: 1px solid rgba(255, 255, 255, 0.44);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.44);
+}
+
+body.appDark .glassTable .sapMListTblCell {
+  background: rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .glassTable .sapMListTblCell:first-child {
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.44);
 }
 
 .glassTable .sapMListTblCell:last-child {
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.44);
+}
+
+body.appDark .glassTable .sapMListTblCell:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.appDark .glassTable .sapMListTblCell:last-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
