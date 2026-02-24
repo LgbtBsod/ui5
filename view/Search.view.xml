@@ -74,7 +74,7 @@
                 busy="{state>/isLoading}"
                 noDataText="{= ${state>/loadError} ? ${i18n>noDataLoadError} : ${i18n>noDataDefault} }"
                 items="{
-                    path: 'data>/checkLists'
+                    path: 'data>/visibleCheckLists'
                 }"
                 mode="SingleSelectMaster"
                 itemPress=".onSelect">

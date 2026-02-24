@@ -2,8 +2,9 @@ sap.ui.define([
     "sap/ui/core/UIComponent",
     "sap/ui/Device",
     "sap_ui5/model/ModelFactory",
-    "sap_ui5/service/ChecklistService"
-], function (UIComponent, Device, ModelFactory, ChecklistService) {
+    "sap_ui5/service/ChecklistService",
+    "sap/ui/model/json/JSONModel"
+], function (UIComponent, Device, ModelFactory, ChecklistService, JSONModel) {
     "use strict";
 
     return UIComponent.extend("sap_ui5.Component", {
@@ -19,7 +20,7 @@ sap.ui.define([
             const oStateModel = ModelFactory.createStateModel();
             const oReferenceModel = ModelFactory.createReferenceModel();
 
-this.setModel(new sap.ui.model.json.JSONModel({}), "selected");
+            this.setModel(new JSONModel({}), "selected");
 
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
@@ -37,7 +38,9 @@ this.setModel(new sap.ui.model.json.JSONModel({}), "selected");
                 ChecklistService.loadLocations()
             ]).then(([checkLists, persons, lpc, professions, locations]) => {
 
-                oDataModel.setProperty("/checkLists", Array.isArray(checkLists) ? checkLists : []);
+                const aCheckLists = Array.isArray(checkLists) ? checkLists : [];
+                oDataModel.setProperty("/checkLists", aCheckLists);
+                oDataModel.setProperty("/visibleCheckLists", aCheckLists);
                 oReferenceModel.setProperty("/persons", Array.isArray(persons) ? persons : []);
                 oReferenceModel.setProperty("/lpc", Array.isArray(lpc) ? lpc : []);
                 oReferenceModel.setProperty("/professions", Array.isArray(professions) ? professions : []);
@@ -45,6 +48,7 @@ this.setModel(new sap.ui.model.json.JSONModel({}), "selected");
 
             }).catch(function (oError) {
                 oDataModel.setProperty("/checkLists", []);
+                oDataModel.setProperty("/visibleCheckLists", []);
                 oReferenceModel.setProperty("/persons", []);
                 oReferenceModel.setProperty("/lpc", []);
                 oReferenceModel.setProperty("/professions", []);
