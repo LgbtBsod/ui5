@@ -1,109 +1,78 @@
 <mvc:View
-  controllerName="sap_ui5.controller.Detail"
-  xmlns:mvc="sap.ui.core.mvc"
-  xmlns="sap.m"
-  xmlns:core="sap.ui.core">
+    controllerName="sap_ui5.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
 
-  <VBox class="luxRoot">
+    <Page showHeader="false" class="pageTransparent">
 
-    <!-- HERO -->
-    <VBox class="luxHero luxGlass">
-      <Title text="{root/id}" class="luxHeroTitle"/>
-      <Text text="Checklist Status: {root/status}" class="luxHeroSub"/>
-    </VBox>
+        <VBox class="detailContainer">
 
-    <!-- GRID BLOCKS -->
-    <FlexBox
-      wrap="Wrap"
-      class="luxGrid"
-      id="kpiGrid">
+            <Button
+                icon="sap-icon://lightbulb"
+                press=".onToggleTheme"
+                class="themeButton"/>
 
-      <VBox class="luxMiniCard">
-        <Text text="Success Checks"/>
-        <Title text="{root/successRateChecks} %"/>
-      </VBox>
+            <VBox class="glassCard">
+                <Title text="Basic Information"/>
+                <SimpleForm
+                    editable="false"
+                    layout="ResponsiveGridLayout"
+                    columnsL="2"
+                    columnsM="2">
 
-      <VBox class="luxMiniCard">
-        <Text text="Success Barriers"/>
-        <Title text="{root/successRateBarriers} %"/>
-      </VBox>
+                    <Label text="Date"/>
+                    <Text text="{selected>/date}"/>
 
-      <VBox class="luxMiniCard">
-        <Text text="LPC"/>
-        <Title text="{basic/LPC}"/>
-      </VBox>
+                    <Label text="Equipment"/>
+                    <Text text="{selected>/equipment}"/>
 
-      <VBox class="luxMiniCard">
-        <Text text="Profession"/>
-        <Title text="{basic/profession}"/>
-      </VBox>
+                    <Label text="LPC"/>
+                    <Text text="{selected>/lpc}"/>
 
-    </FlexBox>
+                </SimpleForm>
+            </VBox>
 
-    <!-- BASIC INFO -->
-    <VBox class="luxGlass">
-      <Title text="Basic Information"/>
-      <Text text="Location: {basic/LOCATION_NAME}"/>
-      <Text text="Observer: {basic/observer_fullName}"/>
-      <Text text="Observed: {basic/observed_fullName}"/>
-    </VBox>
+            <VBox class="glassCard">
+                <Title text="Checks"/>
+                <Table items="{selected>/checksList}">
+                    <columns>
+                        <Column><Text text="Check"/></Column>
+                        <Column><Text text="Status"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{selected>text}"/>
+                                <ObjectStatus
+                                    text="{selected>status}"
+                                    state="{path:'selected>status', formatter:'.statusState'}"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
 
-    <!-- CHECKS TABLE -->
-    <VBox class="luxGlass luxTableWrapper">
-      <Title text="Checks"/>
-      <Table
-        items="{checks}"
-        class="luxTable">
+            <VBox class="glassCard">
+                <Title text="Barriers"/>
+                <Table items="{selected>/barriersList}">
+                    <columns>
+                        <Column><Text text="Barrier"/></Column>
+                        <Column><Text text="Status"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{selected>text}"/>
+                                <ObjectStatus
+                                    text="{selected>status}"
+                                    state="{path:'selected>status', formatter:'.statusState'}"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
 
-        <columns>
-          <Column>
-            <Text text="Check"/>
-          </Column>
-          <Column>
-            <Text text="Status"/>
-          </Column>
-        </columns>
+        </VBox>
 
-        <items>
-          <ColumnListItem>
-            <cells>
-              <Text text="{title}"/>
-              <ObjectStatus text="{status}" state="Success"/>
-            </cells>
-          </ColumnListItem>
-        </items>
-
-      </Table>
-    </VBox>
-
-    <!-- BARRIERS TABLE -->
-    <VBox class="luxGlass luxTableWrapper">
-      <Title text="Barriers"/>
-      <Table
-        items="{barriers}"
-        class="luxTable">
-
-        <columns>
-          <Column>
-            <Text text="Barrier"/>
-          </Column>
-          <Column>
-            <Text text="Status"/>
-          </Column>
-        </columns>
-
-        <items>
-          <ColumnListItem>
-            <cells>
-              <Text text="{title}"/>
-              <ObjectStatus text="{status}" state="Warning"/>
-            </cells>
-          </ColumnListItem>
-        </items>
-
-      </Table>
-    </VBox>
-
-  </VBox>
-
+    </Page>
 </mvc:View>

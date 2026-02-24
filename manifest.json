@@ -32,7 +32,7 @@
       "viewName": "sap_ui5.view.App",
       "type": "XML",
       "async": true,
-      "id": "app"
+      "id": "splitApp"
     },
 
     "dependencies": {

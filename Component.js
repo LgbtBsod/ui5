@@ -19,6 +19,8 @@ sap.ui.define([
             const oStateModel = ModelFactory.createStateModel();
             const oReferenceModel = ModelFactory.createReferenceModel();
 
+this.setModel(new sap.ui.model.json.JSONModel({}), "selected");
+
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
             this.setModel(oReferenceModel, "ref");

@@ -1,25 +1,19 @@
 <mvc:View
-  controllerName="sap_ui5.controller.App"
-  xmlns:mvc="sap.ui.core.mvc"
-  xmlns:f="sap.f"
-  xmlns:m="sap.m"
-  xmlns="sap.m"
-  displayBlock="true">
+    controllerName="sap_ui5.controller.App"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
 
-  <m:App id="app">
-    <m:pages>
-      <m:Page backgroundDesign="Transparent" showHeader="false">
-        <m:content>
-          
-          <f:FlexibleColumnLayout id="fcl" backgroundDesign="Transparent"/>
-          
-          <m:Button 
-            icon="sap-icon://palette" 
-            press="onToggleTheme" 
-            class="themeSwitchButton"/>
-            
-        </m:content>
-      </m:Page>
-    </m:pages>
-  </m:App>
+    <App class="appShell">
+        <pages>
+            <SplitApp id="splitApp">
+                <masterPages>
+                    <mvc:XMLView viewName="sap_ui5.view.Search"/>
+                </masterPages>
+                <detailPages>
+                    <mvc:XMLView viewName="sap_ui5.view.Detail"/>
+                </detailPages>
+            </SplitApp>
+        </pages>
+    </App>
+
 </mvc:View>
