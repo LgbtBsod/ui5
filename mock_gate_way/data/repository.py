@@ -1,4 +1,4 @@
-from .generator import generate_checklist
+from .data_generator import generate_checklist
 
 CHECKLISTS = {}
 BASICS = {}
