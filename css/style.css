@@ -1,245 +1,246 @@
+/* =========================================================
+   THEME TOKENS (Интеграция стиля Тема 10)
+========================================================= */
+
 :root {
-  --bg-main: #f2f5fb;
-  --bg-gradient-a: #eef4ff;
-  --bg-gradient-b: #f8f0ff;
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.65);
+  /* Светлая тема (Blue Glass) */
+  --bg-main: linear-gradient(180deg, #f4f7fb, #e9eef5);
+  --bg-grad-a: rgba(10, 110, 209, 0.25);
+  --bg-grad-b: rgba(10, 110, 209, 0.18);
+
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  
   --text-main: #1a2333;
-  --text-muted: #5e6a7f;
-  --accent: #5d5fef;
-  --accent-2: #22c3a6;
-  --shadow-soft: 0 20px 60px rgba(26, 35, 51, 0.12);
+  --text-muted: #6b768a;
+
+  --accent: #0a6ed1;
+  --accent-grad: linear-gradient(145deg, #0a6ed1, #0962b8);
+  
+  --shadow-glass: 0 25px 70px rgba(0, 0, 0, 0.12);
 }
 
-body,
-html,
-#content {
-  height: 100%;
-}
+/* ТЕМНАЯ ТЕМА (Amber Night из Тема 10) */
+body.appDark, .darkMode {
+  --bg-main: linear-gradient(180deg, #0c0f14, #151a22);
+  --bg-grad-a: rgba(255, 170, 0, 0.25);
+  --bg-grad-b: rgba(255, 200, 0, 0.15);
 
-body {
-  background: radial-gradient(circle at 15% 20%, var(--bg-gradient-a), transparent 35%),
-              radial-gradient(circle at 85% 10%, var(--bg-gradient-b), transparent 35%),
-              var(--bg-main);
-  color: var(--text-main);
-}
+  --glass-bg: rgba(28, 32, 40, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
-body.appDark {
-  --bg-main: #0b1020;
-  --bg-gradient-a: rgba(76, 110, 245, 0.25);
-  --bg-gradient-b: rgba(162, 84, 255, 0.18);
-  --glass-bg: rgba(17, 24, 39, 0.72);
-  --glass-border: rgba(148, 163, 184, 0.22);
   --text-main: #e5edf8;
   --text-muted: #a9b7cd;
-  --accent: #8b93ff;
-  --accent-2: #2dd4bf;
-  --shadow-soft: 0 24px 70px rgba(2, 8, 23, 0.58);
+
+  --accent: #ffb300;
+  --accent-grad: linear-gradient(145deg, #ffb300, #ff8800);
+
+  --shadow-glass: 0 25px 80px rgba(0, 0, 0, 0.6);
 }
 
-.sapMPage {
-  background: transparent;
+/* =========================================================
+   GLOBAL BACKGROUND
+========================================================= */
+
+body {
+  background:
+    radial-gradient(circle at 15% 20%, var(--bg-grad-a), transparent 45%),
+    radial-gradient(circle at 85% 80%, var(--bg-grad-b), transparent 55%),
+    var(--bg-main) !important;
+  color: var(--text-main);
+  transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 0;
 }
 
-.contentWrap {
-  max-width: 1120px;
-  margin: 80px auto;
-  padding: 0 40px;
+/* =========================================================
+   GLASS CONTAINERS (Карточки и Контейнеры)
+========================================================= */
+
+.sapUxAPObjectPageContainer, 
+.infoCard, 
+.glassCard, 
+.participantPanel {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(22px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(150%) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 32px !important;
+  box-shadow: var(--shadow-glass) !important;
+  transition: all 0.4s ease;
 }
 
-.glassHero,
-.glassSurface,
-.glassPanel {
-  background: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0.32));
-  border: 1px solid var(--glass-border);
-  border-radius: 28px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-soft);
+/* =========================================================
+   BUTTONS (Исправленное "нормальное" отображение)
+========================================================= */
+
+/* Стилизуем внутреннюю часть кнопки UI5, чтобы не ломать верстку */
+.sapMBtn {
+  height: auto !important;
+  margin: 4px !important;
 }
 
-.glassHero {
+.sapMBtnInner {
+  border-radius: 50px !important; /* Округлая форма из Темы 10 */
+  border: none !important;
+  font-weight: 600 !important;
+  padding: 0 24px !important; /* Нормальные боковые отступы */
+  height: 2.5rem !important; /* Стандартная высота SAPUI5 */
+  line-height: 2.5rem !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Акцентные кнопки (Emphasized) */
+.sapMBtn.sapMBtnEmphasized .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  color: #fff !important;
+  text-shadow: none !important;
+  box-shadow: 0 8px 20px rgba(10, 110, 209, 0.3) !important;
+}
+
+body.appDark .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
+  box-shadow: 0 8px 25px rgba(255, 170, 0, 0.4) !important;
+}
+
+/* Эффект при наведении */
+.sapMBtn:hover .sapMBtnInner {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* =========================================================
+   LISTS & TABLES
+========================================================= */
+
+.sapMLIB {
+  border-radius: 18px !important;
+  margin: 8px 0 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.sapMLIB:hover {
+  transform: translateX(8px) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* =========================================================
+   TITLES & TEXT
+========================================================= */
+
+.sapMTitle {
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+}
+
+.sapMText {
+  color: var(--text-main) !important;
+}
+
+/* ================= ROOT ================= */
+
+.luxRoot {
+  padding: 80px;
+  max-width: 1500px;
+  margin: 0 auto;
+  gap: 60px;
+}
+
+/* ================= BACKGROUND ================= */
+
+.sapUiBody {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(10,110,209,.25), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(10,110,209,.18), transparent 55%),
+    linear-gradient(180deg,#f4f7fb,#e9eef5) !important;
+}
+
+/* ================= GLASS ================= */
+
+.luxGlass {
+  backdrop-filter: blur(30px) saturate(160%);
+  background: rgba(255,255,255,.65);
+  border-radius: 40px;
+  padding: 40px;
+  box-shadow: 0 30px 100px rgba(0,0,0,.12);
+  transition: .3s ease;
+}
+
+.luxGlass:hover {
+  transform: translateY(-4px);
+}
+
+body.appDark .luxGlass {
+  background: rgba(28,32,40,.7);
+  box-shadow: 0 40px 120px rgba(0,0,0,.8);
+}
+
+/* ================= HERO ================= */
+
+.luxHeroTitle {
+  font-size: 34px !important;
+  font-weight: 600 !important;
+}
+
+.luxHeroSub {
+  opacity: .6;
+  margin-top: 8px;
+}
+
+/* ================= MINI CARDS ================= */
+
+.luxGrid {
+  gap: 30px;
+}
+
+.luxMiniCard {
+  min-width: 240px;
+  flex: 1;
   padding: 30px;
-  margin-bottom: 22px;
+  border-radius: 28px;
+  background: rgba(255,255,255,.5);
+  transition: .2s ease;
 }
 
-.glassSurface {
-  padding: 22px;
-  margin-bottom: 22px;
-}
-
-.glassPanel {
-  padding: 18px;
-}
-
-.heroKicker {
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.heroSubtitle,
-.mutedText,
-.mutedText .sapMText {
-  color: var(--text-muted) !important;
-}
-
-.statusPill {
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-size: .75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.statusPill.status-loading {
-  background: rgba(93, 95, 239, .16);
-  color: var(--accent);
-}
-
-.statusPill.status-ok {
-  background: rgba(34, 195, 166, .18);
-  color: var(--accent-2);
-}
-
-.themeBtn {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1000;
-  border-radius: 14px;
-}
-
-.sapMBtn,
-.sapMSwt,
-.sapMInputBaseInner,
-.sapMTextAreaInner {
-  border-radius: 14px !important;
-}
-
-.sapMListTbl {
-  border-collapse: separate !important;
-  border-spacing: 0 12px !important;
-}
-
-.sapMListTblRow {
-  transition: transform .2s ease, box-shadow .2s ease;
-}
-
-.sapMListTblRow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(25, 36, 58, 0.12);
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 1.3s infinite;
-}
-
-.dot.ok {
-  background: var(--accent-2);
-}
-
-.metricCard {
-  min-width: 170px;
-}
-
-.gridGap {
-  gap: 14px;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  60% { transform: scale(1.7); opacity: .35; }
-  100% { transform: scale(1); opacity: 1; }
-}
-.pagePadding {
-  padding: 2rem;
-}
-
-.glassSurface {
-  margin: 1rem 0;
-  padding: 1.5rem;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-}
-
-.glassHero {
-  padding: 2rem;
-  border-radius: 24px;
-  background: linear-gradient(135deg,#f6f8fb,#eef2f7);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
-}
-
-.blockCard {
-  transition: all 0.2s ease;
-}
-
-.editMode .blockCard {
-  border: 2px solid #2ecc71;
-}
-
-.modernGrid .sapMLIB {
-  background: white;
-  border-radius: 12px;
-  padding: 1rem;
-  margin: 0.5rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  transition: 0.2s ease;
-}
-
-.modernGrid .sapMLIB:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-}
-
-.participantCard {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 14px;
-  width: 45%;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-  transition: 0.2s ease;
-}
-
-.participantCard:hover {
+.luxMiniCard:hover {
   transform: scale(1.02);
 }
 
-.modernTable .sapMListTblRow {
-  transition: 0.2s ease;
+/* ================= TABLE (ТЕМА 10 STYLE) ================= */
+
+.luxTableWrapper {
+  border-radius: 36px;
 }
 
-.modernTable .sapMListTblRow:hover {
-  background: #f5f7fa;
+.luxTable .sapMListTbl {
+  border-collapse: separate !important;
+  border-spacing: 0 14px !important;
 }
 
-
-.infoCard {
-  background: white;
-  padding: 1rem;
-  margin: 0.5rem;
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
-  transition: 0.2s ease;
+.luxTable .sapMListTblRow {
+  background: rgba(255,255,255,.85);
+  border-radius: 20px;
+  transition: .2s ease;
 }
 
-.infoCard:hover {
-  transform: translateY(-2px);
+.luxTable .sapMListTblRow:hover {
+  transform: scale(1.01);
 }
 
-.participantPanel {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+body.appDark .luxTable .sapMListTblRow {
+  background: rgba(255,255,255,.06);
 }
 
-.modernTable .sapMListTblRow:hover {
-  background: #f5f7fa;
+.luxTable .sapMListTblCell {
+  padding: 22px !important;
+}
+
+.luxTable .sapMListTblCell:first-child {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+.luxTable .sapMListTblCell:last-child {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
 }

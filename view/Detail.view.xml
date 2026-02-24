@@ -1,215 +1,109 @@
 <mvc:View
   controllerName="sap_ui5.controller.Detail"
   xmlns:mvc="sap.ui.core.mvc"
-  xmlns="sap.uxap"
-  xmlns:m="sap.m"
-  xmlns:layout="sap.ui.layout"
-  displayBlock="true">
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core">
 
-  <ObjectPageLayout
-    id="objectPage"
-    showFooter="false"
-    showAnchorBar="true"
-    class="sapUiContentPadding">
+  <VBox class="luxRoot">
 
-    <!-- ================= HEADER ================= -->
+    <!-- HERO -->
+    <VBox class="luxHero luxGlass">
+      <Title text="{root/id}" class="luxHeroTitle"/>
+      <Text text="Checklist Status: {root/status}" class="luxHeroSub"/>
+    </VBox>
 
-    <headerTitle>
-      <ObjectPageDynamicHeaderTitle>
+    <!-- GRID BLOCKS -->
+    <FlexBox
+      wrap="Wrap"
+      class="luxGrid"
+      id="kpiGrid">
 
-        <expandedHeading>
-          <m:VBox>
-            <m:Title text="{root/id}" level="H2"/>
-            <m:HBox class="sapUiTinyMarginTop" alignItems="Center">
+      <VBox class="luxMiniCard">
+        <Text text="Success Checks"/>
+        <Title text="{root/successRateChecks} %"/>
+      </VBox>
 
-              <m:ObjectStatus
-                text="{root/status}"
-                state="{
-                  = ${root/status} === 'SUCCESS' ? 'Success' :
-                    ${root/status} === 'WARNING' ? 'Warning' :
-                    'Error'
-                }"
-                class="sapUiSmallMarginEnd"/>
+      <VBox class="luxMiniCard">
+        <Text text="Success Barriers"/>
+        <Title text="{root/successRateBarriers} %"/>
+      </VBox>
 
-              <m:ObjectStatus
-                text="Integration: {root/integrationFlag}"
-                state="Information"
-                class="sapUiSmallMarginEnd"/>
+      <VBox class="luxMiniCard">
+        <Text text="LPC"/>
+        <Title text="{basic/LPC}"/>
+      </VBox>
 
-              <m:ObjectStatus
-                text="Checks {root/successRateChecks}%"
-                state="Success"
-                class="sapUiSmallMarginEnd"/>
+      <VBox class="luxMiniCard">
+        <Text text="Profession"/>
+        <Title text="{basic/profession}"/>
+      </VBox>
 
-              <m:ObjectStatus
-                text="Barriers {root/successRateBarriers}%"
-                state="Warning"/>
+    </FlexBox>
 
-            </m:HBox>
-          </m:VBox>
-        </expandedHeading>
+    <!-- BASIC INFO -->
+    <VBox class="luxGlass">
+      <Title text="Basic Information"/>
+      <Text text="Location: {basic/LOCATION_NAME}"/>
+      <Text text="Observer: {basic/observer_fullName}"/>
+      <Text text="Observed: {basic/observed_fullName}"/>
+    </VBox>
 
-      </ObjectPageDynamicHeaderTitle>
-    </headerTitle>
+    <!-- CHECKS TABLE -->
+    <VBox class="luxGlass luxTableWrapper">
+      <Title text="Checks"/>
+      <Table
+        items="{checks}"
+        class="luxTable">
 
-    <!-- ================= BASIC INFO ================= -->
+        <columns>
+          <Column>
+            <Text text="Check"/>
+          </Column>
+          <Column>
+            <Text text="Status"/>
+          </Column>
+        </columns>
 
-    <sections>
+        <items>
+          <ColumnListItem>
+            <cells>
+              <Text text="{title}"/>
+              <ObjectStatus text="{status}" state="Success"/>
+            </cells>
+          </ColumnListItem>
+        </items>
 
-      <ObjectPageSection title="Basic Information">
-        <subSections>
-          <ObjectPageSubSection>
+      </Table>
+    </VBox>
 
-            <blocks>
+    <!-- BARRIERS TABLE -->
+    <VBox class="luxGlass luxTableWrapper">
+      <Title text="Barriers"/>
+      <Table
+        items="{barriers}"
+        class="luxTable">
 
-              <layout:Grid defaultSpan="L4 M6 S12">
+        <columns>
+          <Column>
+            <Text text="Barrier"/>
+          </Column>
+          <Column>
+            <Text text="Status"/>
+          </Column>
+        </columns>
 
-                <m:VBox class="infoCard">
-                  <m:Text text="Date"/>
-                  <m:Title text="{basic/date}" level="H5"/>
-                </m:VBox>
+        <items>
+          <ColumnListItem>
+            <cells>
+              <Text text="{title}"/>
+              <ObjectStatus text="{status}" state="Warning"/>
+            </cells>
+          </ColumnListItem>
+        </items>
 
-                <m:VBox class="infoCard">
-                  <m:Text text="Time"/>
-                  <m:Title text="{basic/time}" level="H5"/>
-                </m:VBox>
+      </Table>
+    </VBox>
 
-                <m:VBox class="infoCard">
-                  <m:Text text="Timezone"/>
-                  <m:Title text="{basic/timezone}" level="H5"/>
-                </m:VBox>
+  </VBox>
 
-                <m:VBox class="infoCard">
-                  <m:Text text="Location"/>
-                  <m:Title text="{basic/LOCATION_NAME}" level="H5"/>
-                </m:VBox>
-
-                <m:VBox class="infoCard">
-                  <m:Text text="Equipment"/>
-                  <m:Title text="{basic/equipment}" level="H5"/>
-                </m:VBox>
-
-                <m:VBox class="infoCard">
-                  <m:Text text="LPC"/>
-                  <m:Title text="{basic/LPC}" level="H5"/>
-                </m:VBox>
-
-                <m:VBox class="infoCard">
-                  <m:Text text="Profession"/>
-                  <m:Title text="{basic/profession}" level="H5"/>
-                </m:VBox>
-
-              </layout:Grid>
-
-            </blocks>
-
-          </ObjectPageSubSection>
-        </subSections>
-      </ObjectPageSection>
-
-      <!-- ================= PARTICIPANTS ================= -->
-
-      <ObjectPageSection title="Participants">
-        <subSections>
-          <ObjectPageSubSection>
-
-            <blocks>
-
-              <layout:Grid defaultSpan="L6 M6 S12">
-
-                <m:Panel headerText="Observer" class="participantPanel">
-                  <m:Text text="{basic/observer_fullName}"/>
-                  <m:Text text="{basic/observer_position}"/>
-                  <m:Text text="{basic/observer_orgUnit}"/>
-                </m:Panel>
-
-                <m:Panel headerText="Observed" class="participantPanel">
-                  <m:Text text="{basic/observed_fullName}"/>
-                  <m:Text text="{basic/observed_position}"/>
-                  <m:Text text="{basic/observed_orgUnit}"/>
-                </m:Panel>
-
-              </layout:Grid>
-
-            </blocks>
-
-          </ObjectPageSubSection>
-        </subSections>
-      </ObjectPageSection>
-
-      <!-- ================= CHECKS ================= -->
-
-      <ObjectPageSection title="Checks">
-        <subSections>
-          <ObjectPageSubSection>
-            <blocks>
-
-              <m:Table items="{checks}" class="modernTable">
-
-                <m:columns>
-                  <m:Column><m:Text text="#"/></m:Column>
-                  <m:Column><m:Text text="Text"/></m:Column>
-                  <m:Column><m:Text text="Comment"/></m:Column>
-                  <m:Column><m:Text text="Result"/></m:Column>
-                </m:columns>
-
-                <m:items>
-                  <m:ColumnListItem>
-                    <m:cells>
-                      <m:Text text="{number}"/>
-                      <m:Text text="{text}"/>
-                      <m:Text text="{comment}"/>
-                      <m:ObjectStatus
-                        text="{result}"
-                        state="{= ${result} === 'YES' ? 'Success' : 'Error'}"/>
-                    </m:cells>
-                  </m:ColumnListItem>
-                </m:items>
-
-              </m:Table>
-
-            </blocks>
-          </ObjectPageSubSection>
-        </subSections>
-      </ObjectPageSection>
-
-      <!-- ================= BARRIERS ================= -->
-
-      <ObjectPageSection title="Barriers">
-        <subSections>
-          <ObjectPageSubSection>
-            <blocks>
-
-              <m:Table items="{barriers}" class="modernTable">
-
-                <m:columns>
-                  <m:Column><m:Text text="#"/></m:Column>
-                  <m:Column><m:Text text="Text"/></m:Column>
-                  <m:Column><m:Text text="Comment"/></m:Column>
-                  <m:Column><m:Text text="Result"/></m:Column>
-                </m:columns>
-
-                <m:items>
-                  <m:ColumnListItem>
-                    <m:cells>
-                      <m:Text text="{number}"/>
-                      <m:Text text="{text}"/>
-                      <m:Text text="{comment}"/>
-                      <m:ObjectStatus
-                        text="{result}"
-                        state="{= ${result} === 'YES' ? 'Success' : 'Error'}"/>
-                    </m:cells>
-                  </m:ColumnListItem>
-                </m:items>
-
-              </m:Table>
-
-            </blocks>
-          </ObjectPageSubSection>
-        </subSections>
-      </ObjectPageSection>
-
-    </sections>
-
-  </ObjectPageLayout>
 </mvc:View>
