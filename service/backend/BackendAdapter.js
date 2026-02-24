@@ -31,6 +31,14 @@ sap.ui.define([
             return BackendService.updateCheckList(sId, oData);
         },
 
+        deleteCheckList: function (sId) {
+            return BackendService.deleteCheckList(sId);
+        },
+
+        upsertRows: function (sId, sSection, aRows) {
+            return BackendService.upsertRows(sId, sSection, aRows);
+        },
+
         createObject: function (data) {
             return BackendService.create(data);
         },

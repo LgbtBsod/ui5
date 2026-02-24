@@ -1,13 +1,18 @@
 sap.ui.define([
   "sap_ui5/controller/Base.controller",
   "sap_ui5/service/backend/BackendAdapter",
-  "sap/m/MessageToast"
-], function (BaseController, BackendAdapter, MessageToast) {
+  "sap/m/MessageToast",
+  "sap/ui/model/json/JSONModel"
+], function (BaseController, BackendAdapter, MessageToast, JSONModel) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
 
     onInit: function () {
+      this.setModel(new JSONModel({
+        hasSelectedChecks: false,
+        hasSelectedBarriers: false
+      }), "view");
       this.attachRouteMatched("detail", this._onMatched);
     },
 
@@ -23,6 +28,7 @@ sap.ui.define([
 
       oDataModel.setProperty("/selectedChecklist", oSelected);
       this.getModel("selected").setData(oSelected || {});
+      this._updateSelectionState();
       oStateModel.setProperty("/layout", sLayout);
       oStateModel.setProperty("/mode", "READ");
     },
@@ -49,6 +55,35 @@ sap.ui.define([
       this.getModel("state").setProperty("/mode", "READ");
     },
 
+
+    _updateSelectionState: function () {
+      var oSelectedModel = this.getModel("selected");
+      var aChecks = oSelectedModel.getProperty("/checks") || [];
+      var aBarriers = oSelectedModel.getProperty("/barriers") || [];
+      this.getModel("view").setProperty("/hasSelectedChecks", aChecks.some(function (oItem) { return !!(oItem && oItem.selected); }));
+      this.getModel("view").setProperty("/hasSelectedBarriers", aBarriers.some(function (oItem) { return !!(oItem && oItem.selected); }));
+    },
+
+    onDeleteSelectedChecks: function () {
+      var oSelectedModel = this.getModel("selected");
+      var aChecks = (oSelectedModel.getProperty("/checks") || []).filter(function (oItem) { return !oItem.selected; });
+      aChecks.forEach(function (oItem, i) { oItem.no = i + 1; oItem.selected = false; });
+      oSelectedModel.setProperty("/checks", aChecks);
+      this._updateSelectionState();
+    },
+
+    onDeleteSelectedBarriers: function () {
+      var oSelectedModel = this.getModel("selected");
+      var aBarriers = (oSelectedModel.getProperty("/barriers") || []).filter(function (oItem) { return !oItem.selected; });
+      aBarriers.forEach(function (oItem, i) { oItem.no = i + 1; oItem.selected = false; });
+      oSelectedModel.setProperty("/barriers", aBarriers);
+      this._updateSelectionState();
+    },
+
+    onSelectionToggle: function () {
+      this._updateSelectionState();
+    },
+
     onSaveDetail: function () {
       var oStateModel = this.getModel("state");
       var oDataModel = this.getModel("data");
@@ -57,7 +92,7 @@ sap.ui.define([
       var sId = ((((oEdited || {}).root || {}).id) || "").trim();
 
       if (!sId) {
-        MessageToast.show("Checklist id not found");
+        MessageToast.show(oBundle.getText("checklistIdMissing"));
         return;
       }
 
@@ -95,10 +130,12 @@ sap.ui.define([
       aChecks.push({
         no: aChecks.length + 1,
         text: "",
-        result: false
+        result: false,
+        selected: false
       });
 
       oSelectedModel.setProperty("/checks", aChecks);
+      this._updateSelectionState();
     },
 
     onAddBarrierRow: function () {
@@ -108,10 +145,12 @@ sap.ui.define([
       aBarriers.push({
         no: aBarriers.length + 1,
         text: "",
-        result: false
+        result: false,
+        selected: false
       });
 
       oSelectedModel.setProperty("/barriers", aBarriers);
+      this._updateSelectionState();
     },
 
     resultText: function (bResult) {

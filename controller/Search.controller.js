@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap_ui5/controller/Base.controller",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageToast"
-], function (BaseController, JSONModel, MessageToast) {
+    "sap/m/MessageToast",
+    "sap_ui5/service/backend/BackendAdapter"
+], function (BaseController, JSONModel, MessageToast, BackendAdapter) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -10,19 +11,22 @@ sap.ui.define([
         onInit: function () {
             var oStateModel = this.getModel("state");
             var oViewModel = new JSONModel({
-                hasActiveFilters: false
+                hasActiveFilters: false,
+                hasSelection: false,
+                hasSearched: false,
+                resultSummary: ""
             });
 
             this.applyStoredTheme();
             this.setModel(oViewModel, "view");
 
             ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach(function (sPath) {
-                oStateModel.bindProperty(sPath).attachChange(this._updateFilterState, this);
+                oStateModel.bindProperty(sPath).attachChange(this._onFilterChanged, this);
             }.bind(this));
 
             this.attachRouteMatched("search", this._onSearchMatched);
-
             this._updateFilterState();
+            this._updateResultSummary();
         },
 
         _onSearchMatched: function () {
@@ -30,6 +34,15 @@ sap.ui.define([
 
             oStateModel.setProperty("/layout", "OneColumn");
             oStateModel.setProperty("/mode", "READ");
+            this._updateResultSummary();
+        },
+
+        _onFilterChanged: function () {
+            this._updateFilterState();
+
+            if (this.getView().getModel("view").getProperty("/hasSearched")) {
+                this._executeSearch();
+            }
         },
 
         _updateFilterState: function () {
@@ -42,44 +55,16 @@ sap.ui.define([
             this.getView().getModel("view").setProperty("/hasActiveFilters", bHasFilters);
         },
 
-        onSelect: function (oEvent) {
-            var oCtx = oEvent.getParameter("listItem").getBindingContext("data");
-            var oChecklist = oCtx.getObject();
-            var sId = oChecklist && oChecklist.root ? oChecklist.root.id : "";
-
-            if (!sId) {
-                MessageToast.show("Checklist id not found");
-                return;
-            }
-
-            this.getModel("selected").setData(oChecklist);
-            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            this.navTo("detail", { id: sId });
-        },
-
-        onCreate: function () {
-            this.getModel("state").setProperty("/objectAction", "CREATE");
-            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            this.navTo("object", { id: "__create" });
-        },
-
-        onCopy: function () {
+        _updateResultSummary: function () {
             var oDataModel = this.getModel("data");
-            var aVisible = oDataModel.getProperty("/visibleCheckLists") || [];
-            var oFirst = aVisible[0];
-            var sId = oFirst && oFirst.root ? oFirst.root.id : "";
+            var oBundle = this.getResourceBundle();
+            var iVisible = (oDataModel.getProperty("/visibleCheckLists") || []).length;
+            var iTotal = (oDataModel.getProperty("/checkLists") || []).length;
 
-            if (!sId) {
-                MessageToast.show("Nothing to copy");
-                return;
-            }
-
-            this.getModel("state").setProperty("/objectAction", "COPY");
-            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            this.navTo("object", { id: sId });
+            this.getView().getModel("view").setProperty("/resultSummary", oBundle.getText("resultSummary", [iVisible, iTotal]));
         },
 
-        onSearch: function () {
+        _executeSearch: function () {
             var oDataModel = this.getModel("data");
             var oStateModel = this.getModel("state");
             var aSource = oDataModel.getProperty("/checkLists") || [];
@@ -98,7 +83,6 @@ sap.ui.define([
 
                 var bIdMatch = !sFilterId || sId.includes(sFilterId);
                 var bLpcMatch = !sFilterLpc || sLpc === sFilterLpc;
-
                 var bChecksFailed = Number.isFinite(nChecks) && nChecks < 100;
                 var bBarriersFailed = Number.isFinite(nBarriers) && nBarriers < 100;
 
@@ -119,19 +103,82 @@ sap.ui.define([
 
                 if (sSearchMode === "LOOSE") {
                     var aActive = aEnabledRules.filter(function (oRule) { return oRule.enabled; });
-
-                    if (!aActive.length) {
-                        return true;
-                    }
-
-                    return aActive.some(function (oRule) { return oRule.value; });
+                    return !aActive.length || aActive.some(function (oRule) { return oRule.value; });
                 }
 
                 return bIdMatch && bLpcMatch && bChecksMatch && bBarriersMatch;
             });
 
             oDataModel.setProperty("/visibleCheckLists", aFiltered);
-            this._updateFilterState();
+            this._updateResultSummary();
+        },
+
+        onSelect: function (oEvent) {
+            this.getView().getModel("view").setProperty("/hasSelection", true);
+            var oCtx = oEvent.getParameter("listItem").getBindingContext("data");
+            var oChecklist = oCtx.getObject();
+            var sId = oChecklist && oChecklist.root ? oChecklist.root.id : "";
+
+            if (!sId) {
+                MessageToast.show(this.getResourceBundle().getText("checklistIdMissing"));
+                return;
+            }
+
+            this.getModel("selected").setData(oChecklist);
+            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            this.navTo("detail", { id: sId });
+        },
+
+        onCreate: function () {
+            this.getModel("state").setProperty("/objectAction", "CREATE");
+            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            this.navTo("object", { id: "__create" });
+        },
+
+        onCopy: function () {
+            var oSelected = this.getModel("selected").getData() || {};
+            var sId = oSelected && oSelected.root ? oSelected.root.id : "";
+
+            if (!sId) {
+                MessageToast.show(this.getResourceBundle().getText("nothingToCopy"));
+                return;
+            }
+
+            this.getModel("state").setProperty("/objectAction", "COPY");
+            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            this.navTo("object", { id: sId });
+        },
+
+        onDelete: function () {
+            var oSelected = this.getModel("selected").getData() || {};
+            var sId = oSelected && oSelected.root ? oSelected.root.id : "";
+            var oBundle = this.getResourceBundle();
+
+            if (!sId) {
+                MessageToast.show(oBundle.getText("nothingToDelete"));
+                return;
+            }
+
+            this.getModel("state").setProperty("/isBusy", true);
+
+            BackendAdapter.deleteCheckList(sId).then(function () {
+                return BackendAdapter.getCheckLists();
+            }).then(function (aUpdated) {
+                this.getModel("data").setProperty("/checkLists", aUpdated);
+                this._executeSearch();
+                this.getModel("selected").setData({});
+                this.getView().getModel("view").setProperty("/hasSelection", false);
+                MessageToast.show(oBundle.getText("deleted"));
+            }.bind(this)).catch(function (oError) {
+                MessageToast.show(oBundle.getText("deleteFailed", [((oError && oError.message) || "Unknown error")]));
+            }).finally(function () {
+                this.getModel("state").setProperty("/isBusy", false);
+            }.bind(this));
+        },
+
+        onSearch: function () {
+            this.getView().getModel("view").setProperty("/hasSearched", true);
+            this._executeSearch();
         },
 
         onResetFilters: function () {
@@ -142,11 +189,15 @@ sap.ui.define([
             oStateModel.setProperty("/filterFailedChecks", "ALL");
             oStateModel.setProperty("/filterFailedBarriers", "ALL");
 
-            this.onSearch();
+            this.getView().getModel("view").setProperty("/hasSearched", true);
+            this._executeSearch();
         },
 
-        onSearchModeChange: function () {
-            this.onSearch();
+        onSearchModeToggle: function (oEvent) {
+            var bLoose = oEvent.getParameter("state");
+            this.getModel("state").setProperty("/searchMode", bLoose ? "LOOSE" : "EXACT");
+            this.getView().getModel("view").setProperty("/hasSearched", true);
+            this._executeSearch();
         },
 
         formatStatus: function (sStatus) {

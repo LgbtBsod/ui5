@@ -44,6 +44,14 @@ sap.ui.define([
             return Promise.resolve(InMemoryDB.updateCheckList(sId, oData));
         },
 
+        deleteCheckList: function (sId) {
+            return Promise.resolve(InMemoryDB.deleteCheckList(sId));
+        },
+
+        upsertRows: function (sId, sSection, aRows) {
+            return Promise.resolve(InMemoryDB.upsertRows(sId, sSection, aRows));
+        },
+
         create: function (payload) {
             return Promise.resolve(InMemoryDB.createObject(payload));
         },

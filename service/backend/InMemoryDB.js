@@ -140,6 +140,35 @@ sap.ui.define([], function () {
             return _clone(obj);
         },
 
+
+        deleteCheckList: function (sId) {
+            var iIdx = _db.checkLists.findIndex(function (oItem) {
+                return oItem && oItem.root && oItem.root.id === sId;
+            });
+
+            if (iIdx < 0) {
+                return false;
+            }
+
+            _db.checkLists.splice(iIdx, 1);
+            _persist();
+            return true;
+        },
+
+        upsertRows: function (sId, sSection, aRows) {
+            var iIdx = _db.checkLists.findIndex(function (oItem) {
+                return oItem && oItem.root && oItem.root.id === sId;
+            });
+
+            if (iIdx < 0) {
+                return null;
+            }
+
+            _db.checkLists[iIdx][sSection] = _clone(aRows || []);
+            _persist();
+            return _clone(_db.checkLists[iIdx]);
+        },
+
         getAll: function () {
             return Object.values(_db.objects).map(_clone);
         }

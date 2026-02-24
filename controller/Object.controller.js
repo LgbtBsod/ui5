@@ -1,8 +1,9 @@
 sap.ui.define([
   "sap_ui5/controller/Base.controller",
   "sap_ui5/service/backend/BackendAdapter",
-  "sap/m/MessageToast"
-], function (BaseController, BackendAdapter, MessageToast) {
+  "sap/m/MessageToast",
+  "sap/ui/model/json/JSONModel"
+], function (BaseController, BackendAdapter, MessageToast, JSONModel) {
   "use strict";
 
   function _clone(vData) {
@@ -12,6 +13,10 @@ sap.ui.define([
   return BaseController.extend("sap_ui5.controller.Object", {
 
     onInit: function () {
+      this.setModel(new JSONModel({
+        hasSelectedChecks: false,
+        hasSelectedBarriers: false
+      }), "view");
       this.attachRouteMatched("object", this._onMatched);
     },
 
@@ -62,6 +67,7 @@ sap.ui.define([
       oState.setProperty("/objectAction", "");
       oModel.setProperty("/object", oObjectData);
       oModel.setProperty("/objectOriginal", _clone(oObjectData));
+      this._updateSelectionState();
 
       this.getOwnerComponent().getRootControl().byId("fcl").setLayout("TwoColumnsMidExpanded");
     },
@@ -79,10 +85,12 @@ sap.ui.define([
       aChecks.push({
         no: aChecks.length + 1,
         text: "",
-        result: false
+        result: false,
+        selected: false
       });
 
       oDataModel.setProperty("/object/checks", aChecks);
+      this._updateSelectionState();
     },
 
     onAddBarrierRow: function () {
@@ -92,10 +100,41 @@ sap.ui.define([
       aBarriers.push({
         no: aBarriers.length + 1,
         text: "",
-        result: false
+        result: false,
+        selected: false
       });
 
       oDataModel.setProperty("/object/barriers", aBarriers);
+      this._updateSelectionState();
+    },
+
+
+    _updateSelectionState: function () {
+      var oDataModel = this.getModel("data");
+      var aChecks = oDataModel.getProperty("/object/checks") || [];
+      var aBarriers = oDataModel.getProperty("/object/barriers") || [];
+      this.getModel("view").setProperty("/hasSelectedChecks", aChecks.some(function (oItem) { return !!(oItem && oItem.selected); }));
+      this.getModel("view").setProperty("/hasSelectedBarriers", aBarriers.some(function (oItem) { return !!(oItem && oItem.selected); }));
+    },
+
+    onSelectionToggle: function () {
+      this._updateSelectionState();
+    },
+
+    onDeleteSelectedChecks: function () {
+      var oDataModel = this.getModel("data");
+      var aChecks = (oDataModel.getProperty("/object/checks") || []).filter(function (oItem) { return !oItem.selected; });
+      aChecks.forEach(function (oItem, i) { oItem.no = i + 1; oItem.selected = false; });
+      oDataModel.setProperty("/object/checks", aChecks);
+      this._updateSelectionState();
+    },
+
+    onDeleteSelectedBarriers: function () {
+      var oDataModel = this.getModel("data");
+      var aBarriers = (oDataModel.getProperty("/object/barriers") || []).filter(function (oItem) { return !oItem.selected; });
+      aBarriers.forEach(function (oItem, i) { oItem.no = i + 1; oItem.selected = false; });
+      oDataModel.setProperty("/object/barriers", aBarriers);
+      this._updateSelectionState();
     },
 
     onSave: function () {
