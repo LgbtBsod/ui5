@@ -88,6 +88,7 @@ sap.ui.define([
             var sFilterLpc = oStateModel.getProperty("/filterLpc") || "";
             var sFilterFailedChecks = oStateModel.getProperty("/filterFailedChecks") || "ALL";
             var sFilterFailedBarriers = oStateModel.getProperty("/filterFailedBarriers") || "ALL";
+            var sSearchMode = oStateModel.getProperty("/searchMode") || "EXACT";
 
             var aFiltered = aSource.filter(function (oItem) {
                 var sId = (((oItem || {}).root || {}).id || "").toLowerCase();
@@ -109,6 +110,23 @@ sap.ui.define([
                     || (sFilterFailedBarriers === "TRUE" && bBarriersFailed)
                     || (sFilterFailedBarriers === "FALSE" && !bBarriersFailed);
 
+                var aEnabledRules = [
+                    { enabled: !!sFilterId, value: bIdMatch },
+                    { enabled: !!sFilterLpc, value: bLpcMatch },
+                    { enabled: sFilterFailedChecks !== "ALL", value: bChecksMatch },
+                    { enabled: sFilterFailedBarriers !== "ALL", value: bBarriersMatch }
+                ];
+
+                if (sSearchMode === "LOOSE") {
+                    var aActive = aEnabledRules.filter(function (oRule) { return oRule.enabled; });
+
+                    if (!aActive.length) {
+                        return true;
+                    }
+
+                    return aActive.some(function (oRule) { return oRule.value; });
+                }
+
                 return bIdMatch && bLpcMatch && bChecksMatch && bBarriersMatch;
             });
 
@@ -124,6 +142,10 @@ sap.ui.define([
             oStateModel.setProperty("/filterFailedChecks", "ALL");
             oStateModel.setProperty("/filterFailedBarriers", "ALL");
 
+            this.onSearch();
+        },
+
+        onSearchModeChange: function () {
             this.onSearch();
         },
 

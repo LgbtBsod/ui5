@@ -53,7 +53,14 @@
             </VBox>
 
             <VBox class="glassCard">
-                <Title text="Checks"/>
+                <Toolbar class="toolbarTransparent">
+                    <Title text="Checks"/>
+                    <ToolbarSpacer/>
+                    <Button
+                        text="Add row"
+                        press=".onAddCheckRow"
+                        visible="{= ${state>/mode} === 'EDIT' }"/>
+                </Toolbar>
                 <Table items="{selected>/checks}" class="glassTable roundedTable">
                     <columns>
                         <Column><Text text="Check"/></Column>
@@ -71,7 +78,14 @@
             </VBox>
 
             <VBox class="glassCard">
-                <Title text="Barriers"/>
+                <Toolbar class="toolbarTransparent">
+                    <Title text="Barriers"/>
+                    <ToolbarSpacer/>
+                    <Button
+                        text="Add row"
+                        press=".onAddBarrierRow"
+                        visible="{= ${state>/mode} === 'EDIT' }"/>
+                </Toolbar>
                 <Table items="{selected>/barriers}" class="glassTable roundedTable">
                     <columns>
                         <Column><Text text="Barrier"/></Column>

@@ -15,9 +15,6 @@
                 <VBox class="glassCard filterCard sapUiSmallMarginBottom">
                     <Toolbar class="toolbarTransparent">
                         <Title text="{i18n>filtersTitle}"/>
-                        <ToolbarSpacer/>
-                        <Button text="{i18n>createButton}" press=".onCreate"/>
-                        <Button text="{i18n>copyButton}" press=".onCopy"/>
                     </Toolbar>
 
                     <MessageStrip
@@ -46,7 +43,7 @@
                             </items>
                         </Select>
 
-                        <SegmentedButton selectedKey="{state>/filterFailedChecks}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                        <SegmentedButton selectedKey="{state>/filterFailedChecks}" class="statusSegment sapUiTinyMarginEnd sapUiTinyMarginBottom">
                             <items>
                                 <SegmentedButtonItem key="ALL" text="{i18n>allChecks}"/>
                                 <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
@@ -54,7 +51,7 @@
                             </items>
                         </SegmentedButton>
 
-                        <SegmentedButton selectedKey="{state>/filterFailedBarriers}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                        <SegmentedButton selectedKey="{state>/filterFailedBarriers}" class="statusSegment sapUiTinyMarginEnd sapUiTinyMarginBottom">
                             <items>
                                 <SegmentedButtonItem key="ALL" text="{i18n>allBarriers}"/>
                                 <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
@@ -68,6 +65,19 @@
                 </VBox>
 
                 <VBox class="glassCard">
+                    <Toolbar class="toolbarTransparent tableActionToolbar sapUiTinyMarginBottom">
+                        <Button text="{i18n>createButton}" press=".onCreate" class="sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>copyButton}" press=".onCopy"/>
+                        <ToolbarSpacer/>
+                        <SegmentedButton selectedKey="{state>/searchMode}" selectionChange=".onSearchModeChange" class="searchModeSwitch">
+                            <items>
+                                <SegmentedButtonItem key="EXACT" text="{i18n>searchModeExact}"/>
+                                <SegmentedButtonItem key="LOOSE" text="{i18n>searchModeLoose}"/>
+                            </items>
+                        </SegmentedButton>
+                        <ToolbarSpacer/>
+                    </Toolbar>
+
                     <Table
                         id="checkTable"
                         class="glassTable roundedTable"
