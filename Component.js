@@ -14,55 +14,47 @@ sap.ui.define([
         },
 
         init: function () {
+            // 1. Инициализация родителя
             UIComponent.prototype.init.apply(this, arguments);
 
+            // 2. Создание базовых моделей
             const oDataModel = ModelFactory.createDataModel();
             const oStateModel = ModelFactory.createStateModel();
             const oReferenceModel = ModelFactory.createReferenceModel();
 
             this.setModel(new JSONModel({}), "selected");
-
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
             this.setModel(oReferenceModel, "ref");
 
+            // 3. Запуск роутера (важно делать это СРАЗУ, чтобы вьюхи начали грузиться)
+            this.getRouter().initialize();
+
+            // 4. Загрузка данных
             oStateModel.setProperty("/isLoading", true);
-            oStateModel.setProperty("/loadError", false);
-            oStateModel.setProperty("/loadErrorMessage", "");
 
             Promise.all([
-                ChecklistService.loadCheckLists(),
-                ChecklistService.loadPersons(),
-                ChecklistService.loadLpc(),
-                ChecklistService.loadProfessions(),
-                ChecklistService.loadLocations()
+                ChecklistService.loadCheckLists().catch(() => []),
+                ChecklistService.loadPersons().catch(() => []),
+                ChecklistService.loadLpc().catch(() => []),
+                ChecklistService.loadProfessions().catch(() => []),
+                ChecklistService.loadLocations().catch(() => [])
             ]).then(([checkLists, persons, lpc, professions, locations]) => {
+                
+                oDataModel.setProperty("/checkLists", checkLists);
+                oDataModel.setProperty("/visibleCheckLists", checkLists);
+                
+                oReferenceModel.setProperty("/persons", persons);
+                oReferenceModel.setProperty("/lpc", lpc);
+                oReferenceModel.setProperty("/professions", professions);
+                oReferenceModel.setProperty("/locations", locations);
 
-                const aCheckLists = Array.isArray(checkLists) ? checkLists : [];
-                oDataModel.setProperty("/checkLists", aCheckLists);
-                oDataModel.setProperty("/visibleCheckLists", aCheckLists);
-                oReferenceModel.setProperty("/persons", Array.isArray(persons) ? persons : []);
-                oReferenceModel.setProperty("/lpc", Array.isArray(lpc) ? lpc : []);
-                oReferenceModel.setProperty("/professions", Array.isArray(professions) ? professions : []);
-                oReferenceModel.setProperty("/locations", Array.isArray(locations) ? locations : []);
-
-            }).catch(function (oError) {
-                oDataModel.setProperty("/checkLists", []);
-                oDataModel.setProperty("/visibleCheckLists", []);
-                oReferenceModel.setProperty("/persons", []);
-                oReferenceModel.setProperty("/lpc", []);
-                oReferenceModel.setProperty("/professions", []);
-                oReferenceModel.setProperty("/locations", []);
-
+            }).catch((oError) => {
                 oStateModel.setProperty("/loadError", true);
-                oStateModel.setProperty("/loadErrorMessage", oError && oError.message ? oError.message : "Unknown loading error");
-            }).finally(function () {
+                oStateModel.setProperty("/loadErrorMessage", "Ошибка при загрузке данных: " + oError.message);
+            }).finally(() => {
                 oStateModel.setProperty("/isLoading", false);
             });
-
-            this.getRouter().initialize();
         }
-
     });
-
 });

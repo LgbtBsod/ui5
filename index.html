@@ -2,22 +2,29 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise Checklist</title>
+
     <script
         id="sap-ui-bootstrap"
         src="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js"
         data-sap-ui-theme="sap_fiori_3"
-        data-sap-ui-libs="sap.m,sap.f,sap.ui.layout"
+        data-sap-ui-libs="sap.m, sap.f, sap.ui.layout"
         data-sap-ui-resourceroots='{"sap_ui5": "./"}'
         data-sap-ui-compatVersion="edge"
         data-sap-ui-async="true">
     </script>
 
-    <style>
-        html, body, #content {
-            height: 100%;
-        }
-    </style>
+<style>
+    html, body {
+        height: 100% !important;
+        margin: 0;
+    }
+    #ui5_container {
+        height: 100% !important;
+        width: 100%;
+    }
+</style>
 
     <script>
         sap.ui.getCore().attachInit(function () {
@@ -26,13 +33,15 @@
             ], function (ComponentContainer) {
                 new ComponentContainer({
                     name: "sap_ui5",
-                    settings: { id: "sap_ui5" },
+                    settings: { id: "sap_ui5_comp" },
                     async: true,
                     height: "100%"
-                }).placeAt("content");
+                }).placeAt("ui5_container");
             });
         });
     </script>
 </head>
-<body class="sapUiBody" id="content"></body>
+<body class="sapUiBody">
+    <div id="ui5_container"></div>
+</body>
 </html>
