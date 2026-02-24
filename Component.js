@@ -42,7 +42,7 @@ sap.ui.define([
 
             BackendAdapter.configure({
                 mode: this.getManifestEntry("/sap.ui5/config/backendMode") || "fake",
-                baseUrl: this.getManifestEntry("/sap.app/dataSources/mockGateway/uri") || "http://localhost:8000"
+                baseUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000"
             });
 
             var oDataModel = ModelFactory.createDataModel();

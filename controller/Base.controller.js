@@ -60,8 +60,7 @@ sap.ui.define([
             this._applyTheme(sTheme);
             return {
                 isDark: _isDarkTheme(sTheme),
-                theme: sTheme,
-                meta: ThemePhilosophy.getMeta(sTheme)
+                theme: sTheme
             };
         },
 
@@ -71,8 +70,7 @@ sap.ui.define([
             window.localStorage.setItem(THEME_STORAGE_KEY, sNextTheme);
             return {
                 isDark: _isDarkTheme(sNextTheme),
-                theme: sNextTheme,
-                meta: ThemePhilosophy.getMeta(sNextTheme)
+                theme: sNextTheme
             };
         },
 
