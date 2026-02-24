@@ -98,6 +98,10 @@ sap.ui.define([
         return sObserved || "-";
       }
 
+      if (sLocationName && sLocationText && sLocationName !== sLocationText) {
+        return sLocationName + " — " + sLocationText;
+      }
+
       return sLocationName || sLocationText || "-";
     },
 
@@ -127,6 +131,10 @@ sap.ui.define([
       var oViewModel = this.getModel("view");
       var aItems = (oViewModel.getProperty("/infoCards") || []).slice();
       var oMoved = aItems.splice(iDragged, 1)[0];
+      if (!oMoved) {
+        return;
+      }
+
       var iTarget = sDropPosition === "After" ? iDropped + 1 : iDropped;
 
       if (iDragged < iDropped) {
