@@ -1,7 +1,7 @@
 sap.ui.define([], function () {
     "use strict";
 
-    var _baseUrl = "http://localhost:8000";
+    var _baseUrl = "http://localhost:5000";   // ← ВАЖНО: не const
     var _userId = "demoUser";
     var _sessionGuid = "sess-" + Date.now();
 
@@ -196,51 +196,56 @@ sap.ui.define([], function () {
             });
         },
 
-        createCheckList: function (oData) {
-            var sChecklistId = (oData && oData.root && oData.root.id) || ("CL-" + Date.now());
-            mOptions = mOptions || {};
-            var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
-            var aChecks = (oData && oData.checks) || [];
-            var aBarriers = (oData && oData.barriers) || [];
+createCheckList: function (oData) {
 
-            return _request("/checklist/", {
-                method: "POST",
-                params: {
+    var sChecklistId = (oData && oData.root && oData.root.id) || ("CL-" + Date.now());
+    var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
+    var aChecks = (oData && oData.checks) || [];
+    var aBarriers = (oData && oData.barriers) || [];
+
+    return _request("/checklist/", {
+        method: "POST",
+        params: {
+            checklist_id: sChecklistId,
+            lpc: sLpc,
+            user_id: _userId
+        }
+    }).then(function (oCreated) {
+
+        var sNewId = (oCreated && oCreated.id) || sChecklistId;
+
+        return _acquireLock(sNewId)
+            .then(function () {
+                return _request("/checklist/" + encodeURIComponent(sNewId) + "/checks", {
+                    method: "PUT",
+                    params: { user_id: _userId },
+                    body: { rows: aChecks }
+                });
+            })
+            .then(function () {
+                return _request("/checklist/" + encodeURIComponent(sNewId) + "/barriers", {
+                    method: "PUT",
+                    params: { user_id: _userId },
+                    body: { rows: aBarriers }
+                }).catch(function () {
+                    return null;
+                });
+            })
+            .then(function () {
+                return _request("/checklist/" + encodeURIComponent(sNewId), {
+                    params: { expand: true }
+                });
+            })
+            .then(function (oDetails) {
+                return _mapChecklist(oCreated || {
+                    id: sNewId,
                     checklist_id: sChecklistId,
                     lpc: sLpc,
-                    user_id: _userId
-                }
-            }).then(function (oCreated) {
-                var sNewId = (oCreated && oCreated.id) || sChecklistId;
-                return _acquireLock(sNewId)
-                    .then(function () {
-                        return _request("/checklist/" + encodeURIComponent(sNewId) + "/checks", {
-                            method: "PUT",
-                            params: { user_id: _userId },
-                            body: { rows: aChecks }
-                        });
-                    })
-                    .then(function () {
-                        return _request("/checklist/" + encodeURIComponent(sNewId) + "/barriers", {
-                            method: "PUT",
-                            params: { user_id: _userId },
-                            body: { rows: aBarriers }
-                        }).catch(function () { return null; });
-                    })
-                    .then(function () {
-                        return _request("/checklist/" + encodeURIComponent(sNewId), { params: { expand: true } });
-                    })
-                    .then(function (oDetails) {
-                        return _mapChecklist(oCreated || {
-                            id: sNewId,
-                            checklist_id: sChecklistId,
-                            lpc: sLpc,
-                            status: "01"
-                        }, oDetails);
-                    });
+                    status: "01"
+                }, oDetails);
             });
-        },
-
+    });
+},
         updateCheckList: function (sId, oData, mOptions) {
             mOptions = mOptions || {};
             var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";

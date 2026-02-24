@@ -1,5 +1,6 @@
 {
   "_version": "1.12.0",
+
   "sap.app": {
     "id": "sap_ui5",
     "type": "application",
@@ -8,15 +9,17 @@
     "applicationVersion": {
       "version": "1.0.0"
     },
-"dataSources": {
-  "mainService": {
-    "uri": "http://localhost:5000/",
-    "type": "OData",
-    "settings": {
-      "odataVersion": "2.0"
+    "dataSources": {
+      "mainService": {
+        "uri": "http://localhost:5000/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0"
+        }
+      }
     }
-  }
-},
+  },
+
   "sap.ui": {
     "technology": "UI5",
     "icons": {},
@@ -26,6 +29,7 @@
       "phone": true
     }
   },
+
   "sap.ui5": {
     "resources": {
       "css": [
@@ -34,12 +38,14 @@
         }
       ]
     },
+
     "rootView": {
       "viewName": "sap_ui5.view.App",
       "type": "XML",
       "async": true,
       "id": "app"
     },
+
     "dependencies": {
       "minUI5Version": "1.71.70",
       "libs": {
@@ -50,10 +56,12 @@
         "sap.ui.comp": {}
       }
     },
+
     "contentDensities": {
       "compact": true,
       "cozy": true
     },
+
     "models": {
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
@@ -61,25 +69,14 @@
           "bundleName": "sap_ui5.i18n.i18n"
         }
       },
-      "data": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "state": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "layout": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "cache": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "masterData": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "mpl": {
-        "type": "sap.ui.model.json.JSONModel"
-      }
+      "data": { "type": "sap.ui.model.json.JSONModel" },
+      "state": { "type": "sap.ui.model.json.JSONModel" },
+      "layout": { "type": "sap.ui.model.json.JSONModel" },
+      "cache": { "type": "sap.ui.model.json.JSONModel" },
+      "masterData": { "type": "sap.ui.model.json.JSONModel" },
+      "mpl": { "type": "sap.ui.model.json.JSONModel" }
     },
+
     "routing": {
       "config": {
         "routerClass": "sap.m.routing.Router",
@@ -89,52 +86,34 @@
         "controlAggregation": "beginColumnPages",
         "async": true
       },
+
       "routes": [
         {
           "pattern": "",
           "name": "search",
-          "target": [
-            "search"
-          ],
+          "target": ["search"],
           "layout": "OneColumn"
         },
         {
           "pattern": "detail/{id}",
           "name": "detail",
-          "target": [
-            "search",
-            "detail"
-          ],
-          "layout": "TwoColumnsMidExpanded"
-        },
-        {
-          "pattern": "object/{id}",
-          "name": "object",
-          "target": [
-            "search",
-            "object"
-          ],
+          "target": ["search", "detail"],
           "layout": "TwoColumnsMidExpanded"
         }
       ],
+
       "targets": {
         "search": {
           "viewName": "Search",
-          "viewLevel": 1,
-          "controlAggregation": "beginColumnPages"
+          "viewLevel": 1
         },
         "detail": {
           "viewName": "Detail",
-          "viewLevel": 2,
-          "controlAggregation": "midColumnPages"
-        },
-        "object": {
-          "viewName": "Object",
-          "viewLevel": 2,
-          "controlAggregation": "midColumnPages"
+          "viewLevel": 2
         }
       }
     },
+
     "config": {
       "backendMode": "real"
     }
