@@ -333,70 +333,74 @@ body {
 }
 
 
-.statusSegmented.sapMSegB {
-  background-color: transparent !important;
+.statusToggleWrapper {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 16px;
+  display: inline-flex !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:root.light-mode .statusToggleWrapper {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.customStatusBtn {
+  margin: 0 4px !important;
+  transition: all 0.25s ease !important;
+}
+
+.customStatusBtn .sapMBtnInner {
+  border-radius: 12px !important;
   border: none !important;
-  border-radius: var(--radius-md) !important;
-  padding: 2px !important;
+  background: transparent !important;
+  padding: 0 20px !important;
 }
 
-.statusSegmented .sapMSegBBtn {
-  background-color: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: var(--radius-md) !important;
-  opacity: 0.88;
-  transition: all 0.25s ease;
+.btnAll .sapMBtnContent {
+  color: rgba(255, 83, 17, 0.5) !important;
 }
 
-.statusSegmented .sapMSegBBtn:hover {
-  background: var(--interactive-hover) !important;
-  opacity: 1;
+.btnFailed .sapMBtnContent {
+  color: rgba(255, 77, 77, 0.5) !important;
 }
 
-.statusSegmented .sapMSegBBtn .sapMBtnContent {
-  font-weight: 600;
+.btnPassed .sapMBtnContent {
+  color: rgba(0, 200, 83, 0.5) !important;
 }
 
-.statusSegmented .sapMSegBBtn + .sapMSegBBtn {
-  border-left: none !important;
+:root.light-mode .btnAll .sapMBtnContent {
+  color: rgba(0, 172, 238, 0.5) !important;
 }
 
-.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"] {
-  color: rgba(255, 83, 17, 0.68) !important;
+.activeStatus .sapMBtnContent {
+  color: #ffffff !important;
+  font-weight: bold !important;
 }
 
-.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"] {
-  color: rgba(255, 77, 77, 0.72) !important;
-}
-
-.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="FALSE"] {
-  color: rgba(0, 200, 83, 0.72) !important;
-}
-
-.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel {
+.activeStatus.btnAll .sapMBtnInner {
   background-color: #ff5311 !important;
-  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(255, 83, 17, 0.4) !important;
 }
 
-.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"].sapMSegBBtnSel {
-  background-color: #ff4d4d !important;
-  color: #fff !important;
-  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.3) !important;
-}
-
-.statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="FALSE"].sapMSegBBtnSel {
-  background-color: #00c853 !important;
-  color: #fff !important;
-  box-shadow: 0 6px 14px rgba(34, 197, 94, 0.3) !important;
-}
-
-.sapUiLight .statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel,
-:root.light-mode .statusSegmented .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel {
+:root.light-mode .activeStatus.btnAll .sapMBtnInner {
   background-color: #00acee !important;
+  box-shadow: 0 4px 12px rgba(0, 172, 238, 0.4) !important;
 }
 
-.sapMSegBBtnSel + .sapMSegBBtn {
-  border-left-color: transparent !important;
+.activeStatus.btnFailed .sapMBtnInner {
+  background-color: #ff4d4d !important;
+  box-shadow: 0 4px 12px rgba(255, 77, 77, 0.4) !important;
+}
+
+.activeStatus.btnPassed .sapMBtnInner {
+  background-color: #00c853 !important;
+  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.4) !important;
+}
+
+.sapMBtn:focus > .sapMBtnInner {
+  outline: none !important;
 }
 
 ::-webkit-scrollbar {

@@ -58,24 +58,68 @@
 
                         <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
                             <Label text="{i18n>filterChecksLabel}" labelFor="failedChecksSegment"/>
-                            <SegmentedButton id="failedChecksSegment" selectedKey="{state>/filterFailedChecks}" class="statusSegmented statusSegment" selectionChange=".onSearch">
-                            <items>
-                                <SegmentedButtonItem key="ALL" text="{i18n>allChecks}"/>
-                                <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
-                                <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
-                            </items>
-                            </SegmentedButton>
+                            <HBox class="statusToggleWrapper" renderType="Bare" id="failedChecksSegment">
+                                <Button
+                                    text="{i18n>allChecks}"
+                                    press=".onStatusFilterPress"
+                                    class="customStatusBtn btnAll {= ${state>/filterFailedChecks} === 'ALL' ? 'activeStatus' : '' }">
+                                    <customData>
+                                        <core:CustomData key="filterPath" value="/filterFailedChecks"/>
+                                        <core:CustomData key="filterValue" value="ALL"/>
+                                    </customData>
+                                </Button>
+                                <Button
+                                    text="{i18n>hasFailed}"
+                                    press=".onStatusFilterPress"
+                                    class="customStatusBtn btnFailed {= ${state>/filterFailedChecks} === 'TRUE' ? 'activeStatus' : '' }">
+                                    <customData>
+                                        <core:CustomData key="filterPath" value="/filterFailedChecks"/>
+                                        <core:CustomData key="filterValue" value="TRUE"/>
+                                    </customData>
+                                </Button>
+                                <Button
+                                    text="{i18n>allPassed}"
+                                    press=".onStatusFilterPress"
+                                    class="customStatusBtn btnPassed {= ${state>/filterFailedChecks} === 'FALSE' ? 'activeStatus' : '' }">
+                                    <customData>
+                                        <core:CustomData key="filterPath" value="/filterFailedChecks"/>
+                                        <core:CustomData key="filterValue" value="FALSE"/>
+                                    </customData>
+                                </Button>
+                            </HBox>
                         </VBox>
 
                         <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
                             <Label text="{i18n>filterBarriersLabel}" labelFor="failedBarriersSegment"/>
-                            <SegmentedButton id="failedBarriersSegment" selectedKey="{state>/filterFailedBarriers}" class="statusSegmented statusSegment" selectionChange=".onSearch">
-                            <items>
-                                <SegmentedButtonItem key="ALL" text="{i18n>allBarriers}"/>
-                                <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
-                                <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
-                            </items>
-                            </SegmentedButton>
+                            <HBox class="statusToggleWrapper" renderType="Bare" id="failedBarriersSegment">
+                                <Button
+                                    text="{i18n>allBarriers}"
+                                    press=".onStatusFilterPress"
+                                    class="customStatusBtn btnAll {= ${state>/filterFailedBarriers} === 'ALL' ? 'activeStatus' : '' }">
+                                    <customData>
+                                        <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
+                                        <core:CustomData key="filterValue" value="ALL"/>
+                                    </customData>
+                                </Button>
+                                <Button
+                                    text="{i18n>hasFailed}"
+                                    press=".onStatusFilterPress"
+                                    class="customStatusBtn btnFailed {= ${state>/filterFailedBarriers} === 'TRUE' ? 'activeStatus' : '' }">
+                                    <customData>
+                                        <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
+                                        <core:CustomData key="filterValue" value="TRUE"/>
+                                    </customData>
+                                </Button>
+                                <Button
+                                    text="{i18n>allPassed}"
+                                    press=".onStatusFilterPress"
+                                    class="customStatusBtn btnPassed {= ${state>/filterFailedBarriers} === 'FALSE' ? 'activeStatus' : '' }">
+                                    <customData>
+                                        <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
+                                        <core:CustomData key="filterValue" value="FALSE"/>
+                                    </customData>
+                                </Button>
+                            </HBox>
                         </VBox>
 
                         <Button text="{i18n>searchButton}" type="Emphasized" press=".onSearch" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
@@ -117,7 +161,6 @@
 
                     <Table
                         id="checkTable"
-                        autoPopinMode="true"
                         fixedLayout="false"
                         growing="true"
                         growingThreshold="20"
