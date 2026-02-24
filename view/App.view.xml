@@ -16,11 +16,6 @@
         class="themeDockButton"/>
 
 
-    <VBox class="themePhilosophyBadge sapUiTinyMarginBegin sapUiTinyMarginTop" renderType="Bare">
-        <Text text="{appView>/themeTitle}" class="themePhilosophyTitle"/>
-        <Text text="{appView>/themeSubtitle}" class="themePhilosophySubtitle"/>
-    </VBox>
-
     <Toolbar class="toolbarTransparent sapUiTinyMarginBegin sapUiTinyMarginTop">
         <Title level="H6" text="PCCT"/>
         <ToolbarSpacer/>

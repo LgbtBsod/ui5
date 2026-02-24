@@ -11,9 +11,7 @@ sap.ui.define([
         onInit: function () {
             var oApplied = this.applyStoredTheme();
             this.setModel(new JSONModel({
-                isDark: !!oApplied.isDark,
-                themeTitle: (oApplied.meta && oApplied.meta.title) || "",
-                themeSubtitle: (oApplied.meta && oApplied.meta.subtitle) || ""
+                isDark: !!oApplied.isDark
             }), "appView");
 
             var oState = this.getModel("state");
@@ -27,8 +25,6 @@ sap.ui.define([
             var oResult = this.toggleTheme();
             var oAppView = this.getView().getModel("appView");
             oAppView.setProperty("/isDark", !!oResult.isDark);
-            oAppView.setProperty("/themeTitle", (oResult.meta && oResult.meta.title) || "");
-            oAppView.setProperty("/themeSubtitle", (oResult.meta && oResult.meta.subtitle) || "");
         },
 
         _syncTestUserDialogState: function () {

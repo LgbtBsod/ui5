@@ -9,8 +9,8 @@
 ## Configuration in `manifest.json`
 - `sap.ui5.config.backendMode`
   - `"fake"` (default) or `"real"`
-- `sap.app.dataSources.mockGateway.uri`
-  - backend base URL (default: `http://localhost:8000`)
+- `sap.app.dataSources.mainService.uri`
+  - backend base URL (default: `http://localhost:5000`)
 
 You can also force runtime mode with URL query parameter:
 - `?backend=real`
@@ -30,7 +30,7 @@ You can also force runtime mode with URL query parameter:
 
 ## Recommendation
 For production-like end-to-end testing:
-1. Run backend `mock_gate_way` on `http://localhost:8000`.
+1. Run backend `mock_gate_way` on `http://localhost:5000`.
 2. Switch `backendMode` to `real` in manifest (or use `?backend=real`).
 3. Keep `fake` mode available for deterministic UI regression checks.
 
