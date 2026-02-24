@@ -3,28 +3,34 @@
   xmlns="sap.m"
   controllerName="sap_ui5.controller.Detail">
 
-  <Page title="Checklist details">
+  <Page title="{i18n>detailPageTitle}">
     <content>
-      <VBox class="contentWrap">
+      <VBox class="contentWrap" visible="{= !!${data>/selectedChecklist} }">
         <VBox class="glassSurface">
-          <Title text="Execution checklist" level="H2"/>
-          <Text text="Final validation steps before release." class="mutedText sapUiTinyMarginBottom"/>
+          <Title text="{i18n>executionChecklistTitle}" level="H2"/>
+          <Text text="{i18n>executionChecklistSubtitle}" class="mutedText sapUiTinyMarginBottom"/>
 
-          <List items="{dataModel>/object/checks}" showSeparators="Inner">
+          <List items="{data>/selectedChecklist/checks}" showSeparators="Inner">
             <CustomListItem>
               <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
                 <VBox>
-                  <Title text="{dataModel>title}" level="H4"/>
-                  <Text text="Operational control" class="mutedText"/>
+                  <Title text="{data>text}" level="H4"/>
+                  <Text text="{i18n>operationalControlText}" class="mutedText"/>
                 </VBox>
                 <ObjectStatus 
-                  text="{dataModel>status}" 
-                  state="{= ${dataModel>status} === 'OK' ? 'Success' : 'Warning' }"/>
+                  text="{= ${data>result} ? ${i18n>statusOk} : ${i18n>statusFailed} }" 
+                  state="{= ${data>result} ? 'Success' : 'Error' }"/>
               </HBox>
             </CustomListItem>
           </List>
         </VBox>
       </VBox>
+
+      <MessagePage
+        visible="{= !${data>/selectedChecklist} }"
+        text="{i18n>detailNotFoundText}"
+        description="{i18n>detailNotFoundDescription}"
+        showHeader="false"/>
     </content>
   </Page>
 </mvc:View>

@@ -15,6 +15,9 @@ sap.ui.define([
         createStateModel: function () {
             return new JSONModel({
                 mode: "READ",
+                isLoading: false,
+                loadError: false,
+                loadErrorMessage: "",
                 isBusy: false,
                 isDirty: false,
                 isLocked: false,

@@ -23,6 +23,10 @@ sap.ui.define([
             this.setModel(oStateModel, "state");
             this.setModel(oReferenceModel, "ref");
 
+            oStateModel.setProperty("/isLoading", true);
+            oStateModel.setProperty("/loadError", false);
+            oStateModel.setProperty("/loadErrorMessage", "");
+
             Promise.all([
                 ChecklistService.loadCheckLists(),
                 ChecklistService.loadPersons(),
@@ -31,12 +35,23 @@ sap.ui.define([
                 ChecklistService.loadLocations()
             ]).then(([checkLists, persons, lpc, professions, locations]) => {
 
-                oDataModel.setProperty("/checkLists", checkLists);
-                oReferenceModel.setProperty("/persons", persons);
-                oReferenceModel.setProperty("/lpc", lpc);
-                oReferenceModel.setProperty("/professions", professions);
-                oReferenceModel.setProperty("/locations", locations);
+                oDataModel.setProperty("/checkLists", Array.isArray(checkLists) ? checkLists : []);
+                oReferenceModel.setProperty("/persons", Array.isArray(persons) ? persons : []);
+                oReferenceModel.setProperty("/lpc", Array.isArray(lpc) ? lpc : []);
+                oReferenceModel.setProperty("/professions", Array.isArray(professions) ? professions : []);
+                oReferenceModel.setProperty("/locations", Array.isArray(locations) ? locations : []);
 
+            }).catch(function (oError) {
+                oDataModel.setProperty("/checkLists", []);
+                oReferenceModel.setProperty("/persons", []);
+                oReferenceModel.setProperty("/lpc", []);
+                oReferenceModel.setProperty("/professions", []);
+                oReferenceModel.setProperty("/locations", []);
+
+                oStateModel.setProperty("/loadError", true);
+                oStateModel.setProperty("/loadErrorMessage", oError && oError.message ? oError.message : "Unknown loading error");
+            }).finally(function () {
+                oStateModel.setProperty("/isLoading", false);
             });
 
             this.getRouter().initialize();

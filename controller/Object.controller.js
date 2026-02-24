@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (Controller) {
   "use strict";
 
-  return Controller.extend("theme7.controller.Object", {
+  return Controller.extend("sap_ui5.controller.Object", {
 
     onInit: function () {
       this.getOwnerComponent().getRouter()
@@ -13,7 +13,7 @@ sap.ui.define([
 
     _onMatched: function (oEvent) {
       var id = oEvent.getParameter("arguments").id;
-      var oModel = this.getOwnerComponent().getModel("dataModel");
+      var oModel = this.getOwnerComponent().getModel("data");
 
       if (id === "__create") {
         oModel.setProperty("/object", {});
@@ -37,7 +37,7 @@ sap.ui.define([
 
     onToggleEdit: function (oEvent) {
       var isEdit = oEvent.getParameter("state");
-      this.getOwnerComponent().getModel("stateModel").setProperty("/mode", isEdit ? "EDIT" : "READ");
+      this.getOwnerComponent().getModel("state").setProperty("/mode", isEdit ? "EDIT" : "READ");
     }
 
   });

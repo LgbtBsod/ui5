@@ -10,13 +10,12 @@ sap.ui.define([
         onInit: function () {
             const stateModel = this.getOwnerComponent().getModel("state");
 
-            stateModel.setData({
-                ...stateModel.getData(),
+            stateModel.setData(Object.assign({}, stateModel.getData(), {
                 filterId: "",
                 filterLpc: "",
                 filterFailedChecks: "ALL",
                 filterFailedBarriers: "ALL"
-            });
+            }));
         },
 
         formatStatus: function (status) {
@@ -31,6 +30,9 @@ sap.ui.define([
         onSearch: function () {
             const oTable = this.byId("checkTable");
             const oBinding = oTable.getBinding("items");
+            if (!oBinding) {
+                return;
+            }
 
             const state = this.getOwnerComponent().getModel("state").getData();
 
@@ -64,14 +66,22 @@ sap.ui.define([
         },
 
         onSelect: function (oEvent) {
-            const context = oEvent.getSource().getBindingContext("data");
+            const oListItem = oEvent.getParameter("listItem") || oEvent.getSource();
+            const context = oListItem.getBindingContext("data");
+            if (!context) {
+                return;
+            }
             const selected = context.getObject();
 
             this.getOwnerComponent()
                 .getModel("data")
                 .setProperty("/selectedChecklist", selected);
 
-            console.log("Selected:", selected);
+            this.getOwnerComponent()
+                .getRouter()
+                .navTo("detail", {
+                    id: selected.root.id
+                });
         },
 
         onCreate: function () {
