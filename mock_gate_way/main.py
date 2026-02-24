@@ -13,6 +13,7 @@ from api.dictionary_api import router as dictionary_router
 from api.hierarchy_api import router as hierarchy_router
 from api.location_api import router as location_router
 from api.lock_api import router as lock_router
+from api.metadata_api import router as metadata_router
 from api.person_api import router as person_router
 from config import LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
@@ -52,7 +53,7 @@ async def lifespan(_: FastAPI):
     task.cancel()
 
 
-app = FastAPI(title="SAP Gateway Simulator", version="1.1.0", lifespan=lifespan)
+app = FastAPI(title="SAP Gateway Simulator", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -69,6 +70,7 @@ app.include_router(location_router)
 app.include_router(person_router)
 app.include_router(hierarchy_router)
 app.include_router(actions_router)
+app.include_router(metadata_router)
 
 
 @app.get("/")

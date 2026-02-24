@@ -7,6 +7,12 @@
     "description": "Enterprise Checklist Management",
     "applicationVersion": {
       "version": "1.0.0"
+    },
+    "dataSources": {
+      "mockGateway": {
+        "uri": "http://localhost:8000",
+        "type": "REST"
+      }
     }
   },
   "sap.ui": {
@@ -126,6 +132,9 @@
           "controlAggregation": "midColumnPages"
         }
       }
+    },
+    "config": {
+      "backendMode": "fake"
     }
   }
 }

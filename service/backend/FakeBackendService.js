@@ -71,6 +71,32 @@ sap.ui.define([
             return FakeODataService.callFunctionImport("ServerState", {});
         },
 
+
+        getPersons: function () {
+            return fetch("mock/persons.json")
+                .then(function (oResponse) { return oResponse.json(); })
+                .then(function (oData) { return (oData && oData.persons) || []; });
+        },
+
+        getDictionary: function (sDomain) {
+            var mMap = {
+                LPC: "mock/lpc.json",
+                PROFESSION: "mock/professions.json"
+            };
+            var sUrl = mMap[sDomain] || "mock/lpc.json";
+            var sKey = sDomain === "PROFESSION" ? "professions" : "lpc";
+
+            return fetch(sUrl)
+                .then(function (oResponse) { return oResponse.json(); })
+                .then(function (oData) { return (oData && oData[sKey]) || []; });
+        },
+
+        getLocations: function () {
+            return fetch("mock/location_hierarchy.json")
+                .then(function (oResponse) { return oResponse.json(); })
+                .then(function (oData) { return (oData && oData.locations) || []; });
+        },
+
         create: function (payload) {
             return Promise.resolve(InMemoryDB.createObject(payload));
         },
