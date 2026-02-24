@@ -3,36 +3,50 @@ sap.ui.define([
 ], function (Log) {
     "use strict";
 
+    function requestJson(sUrl, sCollectionName) {
+        return fetch(sUrl)
+            .then(function (oResponse) {
+                if (!oResponse.ok) {
+                    throw new Error("Request failed for " + sUrl + ": " + oResponse.status + " " + oResponse.statusText);
+                }
+
+                return oResponse.json();
+            })
+            .then(function (oData) {
+                var vCollection = oData && oData[sCollectionName];
+
+                if (!Array.isArray(vCollection)) {
+                    throw new Error("Unexpected payload for " + sUrl + ": expected array in '" + sCollectionName + "'");
+                }
+
+                return vCollection;
+            })
+            .catch(function (oError) {
+                Log.error("ChecklistService error", oError && oError.message, "sap_ui5.service.ChecklistService");
+                throw oError;
+            });
+    }
+
     return {
 
         loadCheckLists: function () {
-            return fetch("mock/checklists.json")
-                .then(res => res.json())
-                .then(data => data.check_lists);
+            return requestJson("mock/checklists.json", "check_lists");
         },
 
         loadPersons: function () {
-            return fetch("mock/persons.json")
-                .then(res => res.json())
-                .then(data => data.persons);
+            return requestJson("mock/persons.json", "persons");
         },
 
         loadLpc: function () {
-            return fetch("mock/lpc.json")
-                .then(res => res.json())
-                .then(data => data.lpc);
+            return requestJson("mock/lpc.json", "lpc");
         },
 
         loadProfessions: function () {
-            return fetch("mock/professions.json")
-                .then(res => res.json())
-                .then(data => data.professions);
+            return requestJson("mock/professions.json", "professions");
         },
 
         loadLocations: function () {
-            return fetch("mock/location_hierarchy.json")
-                .then(res => res.json())
-                .then(data => data.locations);
+            return requestJson("mock/location_hierarchy.json", "locations");
         }
 
     };

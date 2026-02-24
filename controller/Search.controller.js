@@ -30,6 +30,9 @@ sap.ui.define([
         onSearch: function () {
             const oTable = this.byId("checkTable");
             const oBinding = oTable.getBinding("items");
+            if (!oBinding) {
+                return;
+            }
 
             const state = this.getOwnerComponent().getModel("state").getData();
 

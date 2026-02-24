@@ -4,7 +4,9 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core">
 
-    <Page title="Checklist Search">
+    <Page
+        title="{i18n>searchPageTitle}"
+        busy="{state>/isLoading}">
 
         <content>
 
@@ -12,16 +14,23 @@
             <VBox class="sapUiSmallMargin">
 
                 <Toolbar>
-                    <Title text="Filters"/>
+                    <Title text="{i18n>filtersTitle}"/>
                     <ToolbarSpacer/>
-                    <Button text="Create" press=".onCreate"/>
-                    <Button text="Copy" press=".onCopy"/>
+                    <Button text="{i18n>createButton}" press=".onCreate"/>
+                    <Button text="{i18n>copyButton}" press=".onCopy"/>
                 </Toolbar>
+
+                <MessageStrip
+                    visible="{state>/loadError}"
+                    type="Error"
+                    showIcon="true"
+                    text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
+                    class="sapUiTinyMarginTop"/>
 
                 <HBox class="sapUiSmallMarginTop" alignItems="Center" wrap="Wrap">
 
                     <Input
-                        placeholder="Checklist ID"
+                        placeholder="{i18n>checklistIdPlaceholder}"
                         value="{state>/filterId}"
                         width="200px"/>
 
@@ -29,32 +38,32 @@
                         width="200px"
                         selectedKey="{state>/filterLpc}">
                         <items>
-                            <core:Item key="" text="All LPC"/>
-                            <core:Item key="L1" text="Low"/>
-                            <core:Item key="L2" text="Medium"/>
-                            <core:Item key="L3" text="High"/>
+                            <core:Item key="" text="{i18n>allLpc}"/>
+                            <core:Item key="L1" text="{i18n>lpcLow}"/>
+                            <core:Item key="L2" text="{i18n>lpcMedium}"/>
+                            <core:Item key="L3" text="{i18n>lpcHigh}"/>
                         </items>
                     </Select>
 
                     <!-- Custom filter checks -->
                     <SegmentedButton selectedKey="{state>/filterFailedChecks}">
                         <items>
-                            <SegmentedButtonItem key="ALL" text="All Checks"/>
-                            <SegmentedButtonItem key="TRUE" text="Has Failed"/>
-                            <SegmentedButtonItem key="FALSE" text="All Passed"/>
+                            <SegmentedButtonItem key="ALL" text="{i18n>allChecks}"/>
+                            <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
+                            <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
                         </items>
                     </SegmentedButton>
 
                     <!-- Custom filter barriers -->
                     <SegmentedButton selectedKey="{state>/filterFailedBarriers}">
                         <items>
-                            <SegmentedButtonItem key="ALL" text="All Barriers"/>
-                            <SegmentedButtonItem key="TRUE" text="Has Failed"/>
-                            <SegmentedButtonItem key="FALSE" text="All Passed"/>
+                            <SegmentedButtonItem key="ALL" text="{i18n>allBarriers}"/>
+                            <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
+                            <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
                         </items>
                     </SegmentedButton>
 
-                    <Button text="Search" press=".onSearch"/>
+                    <Button text="{i18n>searchButton}" press=".onSearch"/>
                 </HBox>
 
             </VBox>
@@ -62,6 +71,8 @@
             <!-- TABLE -->
             <Table
                 id="checkTable"
+                busy="{state>/isLoading}"
+                noDataText="{= ${state>/loadError} ? ${i18n>noDataLoadError} : ${i18n>noDataDefault} }"
                 items="{
                     path: 'data>/checkLists'
                 }"
@@ -69,11 +80,11 @@
                 itemPress=".onSelect">
 
                 <columns>
-                    <Column><Text text="ID"/></Column>
-                    <Column><Text text="Status"/></Column>
-                    <Column><Text text="Checks %"/></Column>
-                    <Column><Text text="Barriers %"/></Column>
-                    <Column><Text text="Observer"/></Column>
+                    <Column><Text text="{i18n>columnId}"/></Column>
+                    <Column><Text text="{i18n>columnStatus}"/></Column>
+                    <Column><Text text="{i18n>columnChecks}"/></Column>
+                    <Column><Text text="{i18n>columnBarriers}"/></Column>
+                    <Column><Text text="{i18n>columnObserver}"/></Column>
                 </columns>
 
                 <items>

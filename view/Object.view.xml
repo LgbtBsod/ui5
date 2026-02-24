@@ -1,53 +1,55 @@
-<Page showHeader="false">
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  controllerName="sap_ui5.controller.Object">
 
-<VBox class="pagePadding">
+  <Page showHeader="false">
+    <VBox class="pagePadding">
 
-<!-- Header -->
-<HBox class="glassHero">
-  <Title text="{dataModel>/object/root/id}"/>
-  <ToolbarSpacer/>
-  <Switch state="{= ${stateModel>/mode} === 'EDIT' }"
-          change=".onToggleEdit"/>
-</HBox>
+      <HBox class="glassHero">
+        <Title text="{data>/object/root/id}"/>
+        <ToolbarSpacer/>
+        <Switch state="{= ${state>/mode} === 'EDIT' }"
+                change=".onToggleEdit"/>
+      </HBox>
 
-<!-- Basic Block -->
-<VBox class="glassSurface blockCard">
+      <VBox class="glassSurface blockCard">
+        <Label text="Date"/>
+        <DatePicker value="{data>/object/basic/date}"
+                    editable="{= ${state>/mode}==='EDIT'}"/>
 
-  <Label text="Date"/>
-  <DatePicker value="{dataModel>/object/basic/date}"
-              editable="{= ${stateModel>/mode}==='EDIT'}"/>
+        <Label text="Timezone"/>
+        <Select items="{ref>/timezones}"
+                selectedKey="{data>/object/basic/timezone}"
+                enabled="{= ${state>/mode}==='EDIT'}">
+          <core:Item key="{ref>key}" text="{ref>text}"/>
+        </Select>
+      </VBox>
 
-  <Label text="Timezone"/>
-  <Select items="{referenceModel>/timezones}"
-          selectedKey="{dataModel>/object/basic/timezone}"
-          enabled="{= ${stateModel>/mode}==='EDIT'}">
-      <core:Item key="{referenceModel>key}" text="{referenceModel>text}"
-      xmlns:core="sap.ui.core"/>
-  </Select>
+      <VBox class="glassSurface blockCard">
+        <Title text="Checks"/>
 
-</VBox>
+        <Table items="{data>/object/checks}">
+          <columns>
+            <Column><Text text="No"/></Column>
+            <Column><Text text="Text"/></Column>
+            <Column><Text text="Result"/></Column>
+          </columns>
 
-<!-- Checks Table -->
-<VBox class="glassSurface blockCard">
-  <Title text="Checks"/>
+          <items>
+            <ColumnListItem>
+              <cells>
+                <Text text="{data>no}"/>
+                <Text text="{data>text}"/>
+                <Switch state="{data>result}"
+                        enabled="{= ${state>/mode}==='EDIT'}"/>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </VBox>
 
-  <Table items="{dataModel>/object/checks}">
-    <columns>
-      <Column><Text text="No"/></Column>
-      <Column><Text text="Text"/></Column>
-      <Column><Text text="Result"/></Column>
-    </columns>
-
-    <ColumnListItem>
-      <cells>
-        <Text text="{dataModel>no}"/>
-        <Text text="{dataModel>text}"/>
-        <Switch state="{dataModel>result}"
-                enabled="{= ${stateModel>/mode}==='EDIT'}"/>
-      </cells>
-    </ColumnListItem>
-  </Table>
-</VBox>
-
-</VBox>
-</Page>
+    </VBox>
+  </Page>
+</mvc:View>

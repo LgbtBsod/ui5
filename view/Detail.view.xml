@@ -1,30 +1,42 @@
-<mvc:View
-  xmlns:mvc="sap.ui.core.mvc"
-  xmlns="sap.m"
-  controllerName="sap_ui5.controller.Detail">
+ <mvc:View
+   xmlns:mvc="sap.ui.core.mvc"
+   xmlns="sap.m"
+   controllerName="sap_ui5.controller.Detail">
+ 
 
-  <Page title="Checklist details">
-    <content>
-      <VBox class="contentWrap">
-        <VBox class="glassSurface">
-          <Title text="Execution checklist" level="H2"/>
-          <Text text="Final validation steps before release." class="mutedText sapUiTinyMarginBottom"/>
+  <Page title="{i18n>detailPageTitle}">
+     <content>
+
+      <VBox class="contentWrap" visible="{= !!${data>/selectedChecklist} }">
+         <VBox class="glassSurface">
+
+          <Title text="{i18n>executionChecklistTitle}" level="H2"/>
+         <Text text="{i18n>executionChecklistSubtitle}" class="mutedText sapUiTinyMarginBottom"/>
+ 
 
           <List items="{data>/selectedChecklist/checks}" showSeparators="Inner">
-            <CustomListItem>
-              <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
-                <VBox>
+             <CustomListItem>
+               <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                 <VBox>
+
                   <Title text="{data>text}" level="H4"/>
-                  <Text text="Operational control" class="mutedText"/>
-                </VBox>
-                <ObjectStatus 
-                  text="{= ${data>result} ? 'OK' : 'Failed' }" 
+                  <Text text="{i18n>operationalControlText}" class="mutedText"/>
+                 </VBox>
+                 <ObjectStatus 
+
+                  text="{= ${data>result} ? ${i18n>statusOk} : ${i18n>statusFailed} }" 
                   state="{= ${data>result} ? 'Success' : 'Error' }"/>
-              </HBox>
-            </CustomListItem>
-          </List>
-        </VBox>
-      </VBox>
-    </content>
-  </Page>
-</mvc:View>
+               </HBox>
+             </CustomListItem>
+           </List>
+         </VBox>
+       </VBox>
+
+      <MessagePage
+       visible="{= !${data>/selectedChecklist} }"
+        text="{i18n>detailNotFoundText}"
+        description="{i18n>detailNotFoundDescription}"
+       showHeader="false"/>
+     </content>
+   </Page>
+ </mvc:View>
