@@ -129,3 +129,15 @@ def list_checklists(filter: str = None, expand: str = None, top: int = DEFAULT_P
         for item in roots
     ]
     return {"value": value, "count": total}
+
+@router.put("/{root_id}/{section}")
+def replace_rows(root_id: str, section: str, payload: dict, user_id: str, db: Session = Depends(get_db)):
+    print("SECTION =", section)
+    print("PAYLOAD =", payload)
+
+    try:
+        rows = payload.get("rows") if isinstance(payload, dict) else []
+        return ChecklistService.replace_rows(db, root_id, user_id, section, rows or [])
+    except Exception as e:
+        print("ERROR =", e)
+        raise

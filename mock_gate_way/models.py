@@ -3,7 +3,8 @@ import uuid
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.sqlite import INTEGER
 from sqlalchemy.orm import relationship
-
+from sqlalchemy import Column, String, Date, DateTime, ForeignKey
+from utils.time import now_utc
 from database import Base
 from utils.time import now_utc
 
@@ -125,4 +126,16 @@ class DictionaryItem(Base):
     text = Column(String, nullable=False)
     begda = Column(Date, nullable=False)
     endda = Column(Date, nullable=True)
+    changed_on = Column(DateTime, default=now_utc)
+
+class Location(Base):
+    __tablename__ = "locations"
+
+    node_id = Column(String, primary_key=True)
+    parent_id = Column(String, ForeignKey("locations.node_id"), nullable=True)
+    location_name = Column(String)
+
+    begda = Column(Date, nullable=False)
+    endda = Column(Date, nullable=True)
+
     changed_on = Column(DateTime, default=now_utc)
