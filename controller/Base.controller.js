@@ -3,6 +3,10 @@ sap.ui.define([
 ], function (Controller) {
     "use strict";
 
+    var THEME_STORAGE_KEY = "sap_ui5_theme";
+    var DARK_THEME = "dark";
+    var LIGHT_THEME = "light";
+
     return Controller.extend("sap_ui5.controller.Base", {
 
         getRouter: function () {
@@ -30,13 +34,30 @@ sap.ui.define([
         },
 
         isDarkAccentEnabled: function () {
+            return this.isDarkThemeEnabled();
+        },
+
+        isDarkThemeEnabled: function () {
             return document.body.classList.contains("appDark");
         },
 
+        applyStoredTheme: function () {
+            var sTheme = window.localStorage.getItem(THEME_STORAGE_KEY) || DARK_THEME;
+            this._applyTheme(sTheme);
+            return sTheme;
+        },
+
         toggleTheme: function () {
-            var bIsDark = !this.isDarkAccentEnabled();
-            document.body.classList.toggle("appDark", bIsDark);
-            return bIsDark;
+            var sNextTheme = this.isDarkThemeEnabled() ? LIGHT_THEME : DARK_THEME;
+            this._applyTheme(sNextTheme);
+            window.localStorage.setItem(THEME_STORAGE_KEY, sNextTheme);
+            return sNextTheme === DARK_THEME;
+        },
+
+        _applyTheme: function (sTheme) {
+            var bDark = sTheme !== LIGHT_THEME;
+            document.body.classList.toggle("appDark", bDark);
+            document.body.classList.toggle("appLight", !bDark);
         }
     });
 });

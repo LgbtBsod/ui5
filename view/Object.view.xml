@@ -44,7 +44,7 @@
                   visible="{= ${state>/mode}==='EDIT'}"/>
         </Toolbar>
 
-        <Table items="{data>/object/checks}" class="glassTable">
+        <Table items="{data>/object/checks}" class="glassTable roundedTable">
           <columns>
             <Column><Text text="No"/></Column>
             <Column><Text text="Text"/></Column>
@@ -73,7 +73,7 @@
                   visible="{= ${state>/mode}==='EDIT'}"/>
         </Toolbar>
 
-        <Table items="{data>/object/barriers}" class="glassTable">
+        <Table items="{data>/object/barriers}" class="glassTable roundedTable">
           <columns>
             <Column><Text text="No"/></Column>
             <Column><Text text="Text"/></Column>

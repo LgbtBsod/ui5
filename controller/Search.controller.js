@@ -9,9 +9,10 @@ sap.ui.define([
 
         onInit: function () {
             var oStateModel = this.getModel("state");
+            var sTheme = this.applyStoredTheme();
             var oViewModel = new JSONModel({
                 hasActiveFilters: false,
-                isDarkAccent: this.isDarkAccentEnabled()
+                isDarkAccent: sTheme !== "light"
             });
 
             this.setModel(oViewModel, "view");
