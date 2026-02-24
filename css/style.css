@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --bg: #0b0b0f;
   --bg2: #14131c;
   --surface: rgba(255, 83, 17, 0.05);
@@ -24,9 +25,16 @@
   --text-main: var(--text);
   --text-muted: var(--text-sub);
   --accent-grad: linear-gradient(145deg, #ff5311, #ff8a5f);
+
+  --focus-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.22);
+  --interactive-hover: color-mix(in srgb, var(--surface2) 85%, rgba(var(--accent-rgb), 0.12));
+  --interactive-pressed: color-mix(in srgb, var(--surface2) 82%, rgba(var(--accent-rgb), 0.2));
+  --edit-field-bg: color-mix(in srgb, var(--surface2) 72%, rgba(255,255,255,0.12));
+  --readonly-field-bg: color-mix(in srgb, var(--surface2) 90%, transparent);
 }
 
 :root.light-mode {
+  color-scheme: light;
   --bg: #f5fbff;
   --bg2: #ebf6ff;
   --surface: rgba(255, 255, 255, 0.78);
@@ -48,6 +56,12 @@
   --text-main: var(--text);
   --text-muted: var(--text-sub);
   --accent-grad: linear-gradient(145deg, #00acee, #37d2ff);
+
+  --focus-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
+  --interactive-hover: color-mix(in srgb, var(--surface2) 80%, rgba(var(--accent-rgb), 0.14));
+  --interactive-pressed: color-mix(in srgb, var(--surface2) 74%, rgba(var(--accent-rgb), 0.22));
+  --edit-field-bg: color-mix(in srgb, var(--surface2) 82%, rgba(8,38,62,0.08));
+  --readonly-field-bg: color-mix(in srgb, var(--surface2) 95%, white);
 }
 
 .sapUiBody,
@@ -77,6 +91,7 @@ body {
   margin: 0;
   min-height: 100vh;
   position: relative;
+  font-feature-settings: "kern" 1, "liga" 1;
   color: var(--text-main);
   background:
     radial-gradient(circle at 14% 18%, var(--bg-grad-a), transparent 46%),
@@ -126,6 +141,8 @@ body {
 .appContent {
   padding: 2.35rem;
   gap: 1.35rem;
+  width: min(1480px, calc(100% - 3rem));
+  margin: 0 auto;
 }
 
 .detailContent {
@@ -141,12 +158,13 @@ body {
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
   padding: 1.5rem;
-  transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition);
+  transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition), transform 0.25s var(--transition);
 }
 
 .glassCard:hover,
 .filterCard:hover {
   box-shadow: 0 34px 100px rgba(var(--accent-rgb), 0.2), var(--glass-shadow);
+  transform: translateY(-1px);
 }
 
 .toolbarTransparent {
@@ -184,6 +202,10 @@ body {
   border: 1px solid rgba(var(--accent-rgb), 0.42) !important;
   color: #101015 !important;
   box-shadow: 0 12px 30px rgba(var(--accent-rgb), 0.35) !important;
+}
+
+.sapMBtn:not(.sapMBtnDisabled):hover .sapMBtnInner {
+  box-shadow: 0 10px 26px rgba(var(--accent-rgb), 0.26) !important;
 }
 
 :root.light-mode .sapMBtn.sapMBtnEmphasized .sapMBtnInner,
@@ -225,7 +247,7 @@ body {
 }
 
 .glassTable .sapMListTblRow:hover {
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
 .glassTable .sapMListTblCell {
@@ -249,6 +271,38 @@ body {
   border-right: none;
 }
 
+
+.flatEditorTable .sapMListTbl {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+}
+
+.flatEditorTable .sapMListTblCell {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 90%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 90%, transparent) !important;
+}
+
+.flatEditorTable .sapMListTblRow:hover {
+  transform: none !important;
+}
+
+.sapMSwt.sapMSwtOn .sapMSwtInner {
+  background: color-mix(in srgb, rgba(var(--accent-rgb), 0.36) 45%, var(--surface2)) !important;
+  border-color: rgba(var(--accent-rgb), 0.55) !important;
+}
+
+.sapMSwt.sapMSwtOn .sapMSwtHandle {
+  background: var(--accent) !important;
+}
+
+.sapMPI .sapMPIBar {
+  background: var(--accent-grad) !important;
+}
+
 .roundedTable .sapMListTbl {
   border-collapse: separate !important;
   border-spacing: 0 12px !important;
@@ -267,9 +321,16 @@ body {
 .sapMSlt {
   border-radius: 14px !important;
   border: 1px solid rgba(var(--accent-rgb), 0.2) !important;
-  background: var(--surface2) !important;
+  background: var(--readonly-field-bg) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: border-color .18s var(--transition), box-shadow .18s var(--transition), background-color .18s var(--transition);
 }
+
+.sapMInputBase:not(.sapMInputBaseReadonly) .sapMInputBaseContentWrapper,
+.sapMSlt:not(.sapMSltDisabled) {
+  background: var(--edit-field-bg) !important;
+}
+
 
 .cleanSegment.sapMSegB {
   background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.05)) !important;
@@ -283,8 +344,14 @@ body {
   border: none !important;
   border-radius: 10px !important;
   box-shadow: none !important;
-  background: rgba(255, 255, 255, 0.03) !important;
+  background: transparent !important;
   opacity: 0.76;
+  transition: background-color .18s var(--transition), opacity .18s var(--transition);
+}
+
+.cleanSegment .sapMSegBBtn:hover {
+  background: var(--interactive-hover) !important;
+  opacity: 1;
 }
 
 .cleanSegment .sapMSegBBtn .sapMBtnContent {
@@ -301,6 +368,10 @@ body {
   border-radius: 10px !important;
   box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.32), 0 6px 16px rgba(var(--accent-rgb), 0.22) !important;
   opacity: 1;
+}
+
+.cleanSegment .sapMSegBBtn:active {
+  background: var(--interactive-pressed) !important;
 }
 
 .statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"].sapMSegBBtnSel {
@@ -338,16 +409,16 @@ body {
 
 
 .searchResultTable .sapMListTblRow .sapMListTblCell {
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
 }
 
 .searchResultTable .sapMListTblRow .sapMListTblCell:first-child {
-  border-left: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-left: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
 }
 
 .searchResultTable .sapMListTblRow .sapMListTblCell:last-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-right: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
 }
 
 .modeHintText {
@@ -362,10 +433,6 @@ body {
 
 
 /* Enterprise UX polish */
-.appContent {
-  max-width: 1480px;
-  margin: 0 auto;
-}
 
 .filterCard {
   position: relative;
@@ -431,7 +498,7 @@ body {
 }
 
 .searchResultTable .sapMListTblRow:hover .sapMListTblCell {
-  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.08));
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.12));
 }
 
 .searchResultTable .sapMListTblCell {
@@ -441,7 +508,14 @@ body {
 .sapMInputBaseContentWrapper:focus-within,
 .sapMSlt:focus-within {
   border-color: rgba(var(--accent-rgb), 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.14), inset 0 1px 0 rgba(255, 255, 255, .22);
+  box-shadow: var(--focus-ring), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+
+.sapMBtn:focus-visible .sapMBtnInner,
+.sapMSegBBtn:focus-visible,
+.sapMInputBaseContentWrapper:focus-visible,
+.sapMSlt:focus-visible {
+  box-shadow: var(--focus-ring) !important;
 }
 
 @media (max-width: 1100px) {

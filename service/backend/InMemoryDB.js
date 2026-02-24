@@ -1,15 +1,28 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "sap_ui5/domain/ChecklistEngine"
+], function (ChecklistEngine) {
     "use strict";
 
     var STORAGE_KEY = "sap_ui5_fake_backend_db";
 
     var _db = {
         checkLists: [],
-        objects: {}
+        objects: {},
+        locks: {},
+        meta: {
+            lastChangeSet: null,
+            serverChangedOn: null
+        }
     };
 
     function _clone(vData) {
         return JSON.parse(JSON.stringify(vData));
+    }
+
+    function _touchMeta() {
+        var sNow = new Date().toISOString();
+        _db.meta.lastChangeSet = "cs-" + Date.now();
+        _db.meta.serverChangedOn = sNow;
     }
 
     function _persist() {
@@ -18,6 +31,19 @@ sap.ui.define([], function () {
         }
 
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(_db));
+    }
+
+    function _normalizeChecklist(oChecklist) {
+        if (!oChecklist) {
+            return oChecklist;
+        }
+
+        oChecklist.checks = Array.isArray(oChecklist.checks) ? oChecklist.checks : [];
+        oChecklist.barriers = Array.isArray(oChecklist.barriers) ? oChecklist.barriers : [];
+        oChecklist.root = oChecklist.root || {};
+        oChecklist.basic = oChecklist.basic || {};
+
+        return ChecklistEngine.recalculate(oChecklist);
     }
 
     function _tryRestoreFromStorage() {
@@ -32,8 +58,12 @@ sap.ui.define([], function () {
 
         try {
             var oParsed = JSON.parse(sRaw);
-            _db.checkLists = Array.isArray(oParsed.checkLists) ? oParsed.checkLists : [];
+            _db.checkLists = Array.isArray(oParsed.checkLists)
+                ? oParsed.checkLists.map(function (oChecklist) { return _normalizeChecklist(oChecklist); })
+                : [];
             _db.objects = oParsed.objects || {};
+            _db.locks = oParsed.locks || {};
+            _db.meta = oParsed.meta || _db.meta;
             return true;
         } catch (e) {
             window.localStorage.removeItem(STORAGE_KEY);
@@ -53,10 +83,14 @@ sap.ui.define([], function () {
 
         init: function (aCheckLists) {
             if (_tryRestoreFromStorage()) {
+                _persist();
                 return;
             }
 
-            _db.checkLists = Array.isArray(aCheckLists) ? _clone(aCheckLists) : [];
+            _db.checkLists = Array.isArray(aCheckLists)
+                ? _clone(aCheckLists).map(function (oChecklist) { return _normalizeChecklist(oChecklist); })
+                : [];
+            _touchMeta();
             _persist();
         },
 
@@ -64,8 +98,24 @@ sap.ui.define([], function () {
             return _clone(_db.checkLists);
         },
 
+        queryCheckLists: function (mQuery) {
+            var aData = _db.checkLists;
+            var sId = String((mQuery && mQuery.idContains) || "").toLowerCase().trim();
+            var sLpc = (mQuery && mQuery.lpcKey) || "";
+
+            var aFiltered = aData.filter(function (oItem) {
+                var sItemId = String((((oItem || {}).root || {}).id) || "").toLowerCase();
+                var sItemLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
+                var bId = !sId || sItemId.indexOf(sId) >= 0;
+                var bLpc = !sLpc || sLpc === sItemLpc;
+                return bId && bLpc;
+            });
+
+            return _clone(aFiltered);
+        },
+
         createCheckList: function (oData) {
-            var oNew = _clone(oData || {});
+            var oNew = _normalizeChecklist(_clone(oData || {}));
             var sId = (((oNew || {}).root || {}).id || "").trim();
 
             if (!oNew.root) {
@@ -86,6 +136,7 @@ sap.ui.define([], function () {
             }
 
             _db.checkLists.push(oNew);
+            _touchMeta();
             _persist();
             return _clone(oNew);
         },
@@ -99,7 +150,8 @@ sap.ui.define([], function () {
                 return null;
             }
 
-            _db.checkLists[iIdx] = _clone(oData);
+            _db.checkLists[iIdx] = _normalizeChecklist(_clone(oData));
+            _touchMeta();
             _persist();
             return _clone(_db.checkLists[iIdx]);
         },
@@ -117,6 +169,7 @@ sap.ui.define([], function () {
                 data: _clone(data)
             };
 
+            _touchMeta();
             _persist();
             return _clone(_db.objects[uuid]);
         },
@@ -136,10 +189,10 @@ sap.ui.define([], function () {
             obj.changed_on = new Date().toISOString();
             obj.server_changed_on = new Date().toISOString();
 
+            _touchMeta();
             _persist();
             return _clone(obj);
         },
-
 
         deleteCheckList: function (sId) {
             var iIdx = _db.checkLists.findIndex(function (oItem) {
@@ -151,6 +204,7 @@ sap.ui.define([], function () {
             }
 
             _db.checkLists.splice(iIdx, 1);
+            _touchMeta();
             _persist();
             return true;
         },
@@ -165,8 +219,39 @@ sap.ui.define([], function () {
             }
 
             _db.checkLists[iIdx][sSection] = _clone(aRows || []);
+            _db.checkLists[iIdx] = _normalizeChecklist(_db.checkLists[iIdx]);
+            _touchMeta();
             _persist();
             return _clone(_db.checkLists[iIdx]);
+        },
+
+        lockHeartbeat: function (sSessionId) {
+            var sId = sSessionId || "anonymous";
+            var sNow = new Date().toISOString();
+            _db.locks[sId] = {
+                sessionId: sId,
+                updatedAt: sNow,
+                isKilled: false
+            };
+
+            _persist();
+            return {
+                sessionId: sId,
+                is_killed: false,
+                server_changed_on: _db.meta.serverChangedOn,
+                last_change_set: _db.meta.lastChangeSet
+            };
+        },
+
+        lockRelease: function (sSessionId) {
+            var sId = sSessionId || "anonymous";
+            delete _db.locks[sId];
+            _persist();
+            return { released: true, sessionId: sId };
+        },
+
+        getServerState: function () {
+            return _clone(_db.meta);
         },
 
         getAll: function () {

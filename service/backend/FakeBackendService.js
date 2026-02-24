@@ -1,6 +1,7 @@
 sap.ui.define([
-    "sap_ui5/service/backend/InMemoryDB"
-], function (InMemoryDB) {
+    "sap_ui5/service/backend/InMemoryDB",
+    "sap_ui5/service/backend/FakeODataService"
+], function (InMemoryDB, FakeODataService) {
     "use strict";
 
     function _loadInitialChecklists() {
@@ -36,6 +37,12 @@ sap.ui.define([
             return Promise.resolve(InMemoryDB.getCheckLists());
         },
 
+        queryCheckLists: function (mQuery) {
+            return FakeODataService.readEntitySet("CheckLists", mQuery).then(function (oResult) {
+                return oResult.results || [];
+            });
+        },
+
         createCheckList: function (oData) {
             return Promise.resolve(InMemoryDB.createCheckList(oData));
         },
@@ -50,6 +57,18 @@ sap.ui.define([
 
         upsertRows: function (sId, sSection, aRows) {
             return Promise.resolve(InMemoryDB.upsertRows(sId, sSection, aRows));
+        },
+
+        lockHeartbeat: function (sSessionId) {
+            return FakeODataService.callFunctionImport("LockHeartbeat", { sessionId: sSessionId });
+        },
+
+        lockRelease: function (sSessionId) {
+            return FakeODataService.callFunctionImport("LockRelease", { sessionId: sSessionId });
+        },
+
+        getServerState: function () {
+            return FakeODataService.callFunctionImport("ServerState", {});
         },
 
         create: function (payload) {

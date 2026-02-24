@@ -3,10 +3,6 @@ sap.ui.define([
 ], function (FakeBackendService) {
     "use strict";
 
-    // Integration note:
-    // current UI runs against a fake backend for deterministic frontend development.
-    // planned productive backend: OData V2 service on SAP BASIS 750 SP15 + SAP HANA 2 SP7,
-    // with CDS-based entities as canonical data model.
     var BackendService = FakeBackendService;
 
     return {
@@ -23,6 +19,10 @@ sap.ui.define([
             return BackendService.getCheckLists();
         },
 
+        queryCheckLists: function (mQuery) {
+            return BackendService.queryCheckLists(mQuery);
+        },
+
         createCheckList: function (oData) {
             return BackendService.createCheckList(oData);
         },
@@ -37,6 +37,18 @@ sap.ui.define([
 
         upsertRows: function (sId, sSection, aRows) {
             return BackendService.upsertRows(sId, sSection, aRows);
+        },
+
+        lockHeartbeat: function (sSessionId) {
+            return BackendService.lockHeartbeat(sSessionId);
+        },
+
+        lockRelease: function (sSessionId) {
+            return BackendService.lockRelease(sSessionId);
+        },
+
+        getServerState: function () {
+            return BackendService.getServerState();
         },
 
         createObject: function (data) {
