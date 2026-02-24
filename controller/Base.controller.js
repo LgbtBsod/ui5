@@ -140,6 +140,21 @@ sap.ui.define([
             return { deleted: true, index: iIndex };
         },
 
+
+        /**
+         * Generic async wrapper for busy/loading flags.
+         * Prevents duplicated try/finally blocks in feature controllers.
+         */
+        runWithStateFlag: function (oStateModel, sPath, fnTask) {
+            if (!oStateModel || !sPath || typeof fnTask !== "function") {
+                return Promise.resolve(null);
+            }
+            oStateModel.setProperty(sPath, true);
+            return Promise.resolve().then(fnTask).finally(function () {
+                oStateModel.setProperty(sPath, false);
+            });
+        },
+
         _applyTheme: function (sTheme) {
             var bDark = _isDarkTheme(sTheme);
             sap.ui.getCore().applyTheme(sTheme);

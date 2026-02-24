@@ -105,23 +105,21 @@ sap.ui.define([
             var mPayload = this._buildFilterPayload();
             var sSearchMode = oStateModel.getProperty("/searchMode") || "EXACT";
 
-            oStateModel.setProperty("/isLoading", true);
-
-            return BackendAdapter.queryCheckLists({
-                idContains: mPayload.filterId,
-                lpcKey: mPayload.filterLpc
-            }).then(function (aPrefiltered) {
-                var aFiltered = SmartSearchAdapter.filterData(aPrefiltered, mPayload, sSearchMode);
-                oDataModel.setProperty("/visibleCheckLists", aFiltered);
-                this._updateResultSummary();
-            }.bind(this)).catch(function () {
-                var aSource = oDataModel.getProperty("/checkLists") || [];
-                var aFiltered = SmartSearchAdapter.filterData(aSource, mPayload, sSearchMode);
-                oDataModel.setProperty("/visibleCheckLists", aFiltered);
-                this._updateResultSummary();
-            }.bind(this)).finally(function () {
-                oStateModel.setProperty("/isLoading", false);
-            });
+            return this.runWithStateFlag(oStateModel, "/isLoading", function () {
+                return BackendAdapter.queryCheckLists({
+                    idContains: mPayload.filterId,
+                    lpcKey: mPayload.filterLpc
+                }).then(function (aPrefiltered) {
+                    var aFiltered = SmartSearchAdapter.filterData(aPrefiltered, mPayload, sSearchMode);
+                    oDataModel.setProperty("/visibleCheckLists", aFiltered);
+                    this._updateResultSummary();
+                }.bind(this)).catch(function () {
+                    var aSource = oDataModel.getProperty("/checkLists") || [];
+                    var aFiltered = SmartSearchAdapter.filterData(aSource, mPayload, sSearchMode);
+                    oDataModel.setProperty("/visibleCheckLists", aFiltered);
+                    this._updateResultSummary();
+                }.bind(this));
+            }.bind(this));
         },
 
         onSelect: function (oEvent) {
@@ -203,20 +201,18 @@ sap.ui.define([
                 return;
             }
 
-            this.getModel("state").setProperty("/isLoading", true);
-
-            BackendAdapter.deleteCheckList(sId).then(function () {
-                return BackendAdapter.getCheckLists();
-            }).then(function (aUpdated) {
-                this.getModel("data").setProperty("/checkLists", aUpdated);
-                this._executeSearch();
-                this.getModel("selected").setData({});
-                this.getView().getModel("view").setProperty("/hasSelection", false);
-                MessageToast.show(oBundle.getText("deleted"));
-            }.bind(this)).catch(function (oError) {
-                MessageToast.show(oBundle.getText("deleteFailed", [((oError && oError.message) || "Unknown error")]));
-            }).finally(function () {
-                this.getModel("state").setProperty("/isLoading", false);
+            this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
+                return BackendAdapter.deleteCheckList(sId).then(function () {
+                    return BackendAdapter.getCheckLists();
+                }).then(function (aUpdated) {
+                    this.getModel("data").setProperty("/checkLists", aUpdated);
+                    this._executeSearch();
+                    this.getModel("selected").setData({});
+                    this.getView().getModel("view").setProperty("/hasSelection", false);
+                    MessageToast.show(oBundle.getText("deleted"));
+                }.bind(this)).catch(function (oError) {
+                    MessageToast.show(oBundle.getText("deleteFailed", [((oError && oError.message) || "Unknown error")]));
+                });
             }.bind(this));
         },
 
@@ -246,23 +242,21 @@ sap.ui.define([
             var sSearchMode = this.getModel("state").getProperty("/searchMode") || "EXACT";
             var oBundle = this.getResourceBundle();
 
-            this.getModel("state").setProperty("/isLoading", true);
-
-            BackendAdapter.exportReport(sEntity, {
-                filters: mPayload,
-                searchMode: sSearchMode
-            }).then(function (oResult) {
-                var aRows = (oResult && oResult.rows) || [];
-                if (!aRows.length) {
-                    MessageToast.show(oBundle.getText("exportEmpty"));
-                    return;
-                }
-                ExcelExport.download("checklist_" + sEntity + "_" + Date.now(), aRows);
-                MessageToast.show(oBundle.getText("exportDone", [aRows.length]));
-            }).catch(function (oError) {
-                MessageToast.show(oBundle.getText("exportFailed", [((oError && oError.message) || "Unknown error")]));
-            }).finally(function () {
-                this.getModel("state").setProperty("/isLoading", false);
+            this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
+                return BackendAdapter.exportReport(sEntity, {
+                    filters: mPayload,
+                    searchMode: sSearchMode
+                }).then(function (oResult) {
+                    var aRows = (oResult && oResult.rows) || [];
+                    if (!aRows.length) {
+                        MessageToast.show(oBundle.getText("exportEmpty"));
+                        return;
+                    }
+                    ExcelExport.download("checklist_" + sEntity + "_" + Date.now(), aRows);
+                    MessageToast.show(oBundle.getText("exportDone", [aRows.length]));
+                }).catch(function (oError) {
+                    MessageToast.show(oBundle.getText("exportFailed", [((oError && oError.message) || "Unknown error")]));
+                });
             }.bind(this));
         },
 
@@ -270,20 +264,19 @@ sap.ui.define([
             var oStateModel = this.getModel("state");
             var oDataModel = this.getModel("data");
 
-            oStateModel.setProperty("/isLoading", true);
             oStateModel.setProperty("/loadError", false);
             oStateModel.setProperty("/loadErrorMessage", "");
 
-            return BackendAdapter.getCheckLists().then(function (aCheckLists) {
-                oDataModel.setProperty("/checkLists", aCheckLists);
-                oDataModel.setProperty("/visibleCheckLists", aCheckLists);
-                this._updateResultSummary();
-            }.bind(this)).catch(function (oError) {
-                oStateModel.setProperty("/loadError", true);
-                oStateModel.setProperty("/loadErrorMessage", (oError && oError.message) || "");
-            }).finally(function () {
-                oStateModel.setProperty("/isLoading", false);
-            });
+            return this.runWithStateFlag(oStateModel, "/isLoading", function () {
+                return BackendAdapter.getCheckLists().then(function (aCheckLists) {
+                    oDataModel.setProperty("/checkLists", aCheckLists);
+                    oDataModel.setProperty("/visibleCheckLists", aCheckLists);
+                    this._updateResultSummary();
+                }.bind(this)).catch(function (oError) {
+                    oStateModel.setProperty("/loadError", true);
+                    oStateModel.setProperty("/loadErrorMessage", (oError && oError.message) || "");
+                });
+            }.bind(this));
         },
 
         onResetFilters: function () {
