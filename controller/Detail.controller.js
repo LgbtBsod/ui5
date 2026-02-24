@@ -88,6 +88,32 @@ sap.ui.define([
         });
     },
 
+    onAddCheckRow: function () {
+      var oSelectedModel = this.getModel("selected");
+      var aChecks = oSelectedModel.getProperty("/checks") || [];
+
+      aChecks.push({
+        no: aChecks.length + 1,
+        text: "",
+        result: false
+      });
+
+      oSelectedModel.setProperty("/checks", aChecks);
+    },
+
+    onAddBarrierRow: function () {
+      var oSelectedModel = this.getModel("selected");
+      var aBarriers = oSelectedModel.getProperty("/barriers") || [];
+
+      aBarriers.push({
+        no: aBarriers.length + 1,
+        text: "",
+        result: false
+      });
+
+      oSelectedModel.setProperty("/barriers", aBarriers);
+    },
+
     resultText: function (bResult) {
       return bResult ? "Passed" : "Failed";
     },

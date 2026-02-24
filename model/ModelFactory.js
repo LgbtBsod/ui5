@@ -24,6 +24,7 @@ sap.ui.define([
                 filterLpc: "",
                 filterFailedChecks: "ALL",
                 filterFailedBarriers: "ALL",
+                searchMode: "EXACT",
                 isBusy: false,
                 isDirty: false,
                 isLocked: false,

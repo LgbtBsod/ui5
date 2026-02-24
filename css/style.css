@@ -1,53 +1,53 @@
 :root {
-  --bg: #08090d;
-  --bg2: #0e1017;
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface2: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.1);
-  --border-bright: rgba(255, 255, 255, 0.2);
-  --text: #f0f1f5;
-  --text-sub: rgba(240, 241, 245, 0.58);
-  --accent: #6c63ff;
-  --accent-rgb: 108, 99, 255;
-  --shadow: rgba(0, 0, 0, 0.52);
+  --bg: #0b0b0f;
+  --bg2: #14131c;
+  --surface: rgba(255, 83, 17, 0.05);
+  --surface2: rgba(255, 83, 17, 0.06);
+  --border: rgba(255, 122, 73, 0.2);
+  --border-bright: rgba(255, 122, 73, 0.35);
+  --text: #f6f2e8;
+  --text-sub: rgba(246, 242, 232, 0.64);
+  --accent: #ff5311;
+  --accent-rgb: 255, 83, 17;
+  --shadow: rgba(0, 0, 0, 0.62);
 
   --radius-xl: 28px;
   --radius-lg: 18px;
   --transition: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --bg-main: radial-gradient(circle at 15% 15%, #1f2536 0%, #0b0d14 52%, #07080d 100%);
-  --bg-grad-a: rgba(108, 99, 255, 0.22);
-  --bg-grad-b: rgba(255, 107, 157, 0.15);
-  --glass-bg: rgba(20, 24, 36, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  --bg-main: radial-gradient(circle at 20% 15%, #2d1711 0%, #16131b 46%, #0a0a0e 100%);
+  --bg-grad-a: rgba(255, 83, 17, 0.31);
+  --bg-grad-b: rgba(88, 223, 255, 0.16);
+  --glass-bg: rgba(19, 17, 17, 0.58);
+  --glass-border: rgba(255, 132, 90, 0.26);
+  --glass-shadow: 0 28px 95px rgba(0, 0, 0, 0.58);
   --text-main: var(--text);
   --text-muted: var(--text-sub);
-  --accent-grad: linear-gradient(145deg, #6c63ff, #9e6bff);
+  --accent-grad: linear-gradient(145deg, #ff5311, #ff8a5f);
 }
 
 :root.light-mode {
-  --bg: #f0f2f8;
-  --bg2: #e6e9f2;
-  --surface: rgba(255, 255, 255, 0.72);
-  --surface2: rgba(255, 255, 255, 0.88);
-  --border: rgba(0, 0, 0, 0.08);
-  --border-bright: rgba(0, 0, 0, 0.14);
-  --text: #1a1b21;
-  --text-sub: rgba(26, 27, 33, 0.58);
-  --accent: #5349e6;
-  --accent-rgb: 83, 73, 230;
-  --shadow: rgba(100, 110, 140, 0.14);
+  --bg: #f5fbff;
+  --bg2: #ebf6ff;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface2: rgba(255, 255, 255, 0.94);
+  --border: rgba(0, 128, 176, 0.14);
+  --border-bright: rgba(0, 128, 176, 0.28);
+  --text: #11263a;
+  --text-sub: rgba(17, 38, 58, 0.58);
+  --accent: #00acee;
+  --accent-rgb: 0, 172, 238;
+  --shadow: rgba(93, 138, 168, 0.18);
 
-  --bg-main: linear-gradient(180deg, #f7f8fe 0%, #edf1fb 100%);
-  --bg-grad-a: rgba(83, 73, 230, 0.2);
-  --bg-grad-b: rgba(99, 164, 255, 0.18);
-  --glass-bg: rgba(255, 255, 255, 0.84);
-  --glass-border: rgba(30, 45, 90, 0.12);
-  --glass-shadow: 0 24px 70px rgba(102, 117, 160, 0.18);
+  --bg-main: linear-gradient(180deg, #f8fdff 0%, #eef8ff 46%, #e4f3ff 100%);
+  --bg-grad-a: rgba(0, 172, 238, 0.2);
+  --bg-grad-b: rgba(143, 228, 255, 0.34);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(0, 136, 188, 0.18);
+  --glass-shadow: 0 26px 75px rgba(89, 152, 188, 0.18);
   --text-main: var(--text);
   --text-muted: var(--text-sub);
-  --accent-grad: linear-gradient(145deg, #5349e6, #6f8dff);
+  --accent-grad: linear-gradient(145deg, #00acee, #37d2ff);
 }
 
 .sapUiBody,
@@ -124,8 +124,8 @@ body {
 }
 
 .appContent {
-  padding: 2rem;
-  gap: 1rem;
+  padding: 2.35rem;
+  gap: 1.35rem;
 }
 
 .detailContent {
@@ -135,13 +135,18 @@ body {
 .glassCard,
 .filterCard {
   background: var(--glass-bg) !important;
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(30px) saturate(170%);
+  -webkit-backdrop-filter: blur(30px) saturate(170%);
   border: 1px solid var(--glass-border) !important;
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
-  padding: 1.2rem;
+  padding: 1.5rem;
   transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition);
+}
+
+.glassCard:hover,
+.filterCard:hover {
+  box-shadow: 0 34px 100px rgba(var(--accent-rgb), 0.2), var(--glass-shadow);
 }
 
 .toolbarTransparent {
@@ -154,6 +159,7 @@ body {
 .sapMLabel,
 .sapMObjStatusText,
 .sapMObjStatus,
+.sapMObjStatus>.sapMObjStatusText,
 .sapMListTblCell,
 .sapMListTblHeaderCell,
 .sapMListTblHeaderCell .sapMText,
@@ -175,9 +181,14 @@ body {
 
 .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
   background: var(--accent-grad) !important;
-  border: none !important;
-  color: #fff !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.42) !important;
+  color: #101015 !important;
   box-shadow: 0 12px 30px rgba(var(--accent-rgb), 0.35) !important;
+}
+
+:root.light-mode .sapMBtn.sapMBtnEmphasized .sapMBtnInner,
+:root.light-mode .sapMSegBBtnSel {
+  color: #ffffff !important;
 }
 
 .themeDockButton {
@@ -219,21 +230,23 @@ body {
 
 .glassTable .sapMListTblCell {
   background: var(--surface2);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   background-clip: padding-box;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .glassTable .sapMListTblCell:first-child {
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
-  border-left: 1px solid var(--border);
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .glassTable .sapMListTblCell:last-child {
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .roundedTable .sapMListTbl {
@@ -242,8 +255,8 @@ body {
 }
 
 .roundedTable .sapMListTblCell {
-  border-top: 1px solid var(--border) !important;
-  border-bottom: 1px solid var(--border) !important;
+  border-top: none !important;
+  border-bottom: none !important;
 }
 
 .roundedTable .sapMListTblRow:hover .sapMListTblCell {
@@ -253,13 +266,14 @@ body {
 .sapMInputBaseContentWrapper,
 .sapMSlt {
   border-radius: 14px !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.2) !important;
   background: var(--surface2) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .sapMSegB {
   background: var(--surface2) !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.2) !important;
   border-radius: 14px !important;
   padding: 2px !important;
 }
@@ -289,6 +303,42 @@ body {
   background: var(--accent-grad) !important;
   color: #fff !important;
   border-radius: 11px !important;
+}
+
+.statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="ALL"].sapMSegBBtnSel {
+  background: var(--accent-grad) !important;
+}
+
+.statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="TRUE"].sapMSegBBtnSel {
+  background: linear-gradient(145deg, #f43f5e, #dc2626) !important;
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.35) !important;
+}
+
+.statusSegment .sapMSegBBtn[data-sap-ui-segbutt-item-key="FALSE"].sapMSegBBtnSel {
+  background: linear-gradient(145deg, #34d399, #16a34a) !important;
+  box-shadow: 0 10px 22px rgba(22, 163, 74, 0.35) !important;
+}
+
+.sapMBtn:not(.sapMBtnEmphasized) .sapMBtnInner {
+  border: 1px solid rgba(var(--accent-rgb), 0.24) !important;
+  background: color-mix(in srgb, var(--surface2) 96%, rgba(var(--accent-rgb), 0.1)) !important;
+  color: var(--text-main) !important;
+}
+
+.sapMBtn:not(.sapMBtnEmphasized):hover .sapMBtnInner {
+  border-color: rgba(var(--accent-rgb), 0.45) !important;
+  box-shadow: 0 10px 20px rgba(var(--accent-rgb), 0.2) !important;
+}
+
+:root.light-mode .sapMListTblRow .sapMListTblCell,
+:root.light-mode .sapMListTblRow .sapMText,
+:root.light-mode .sapMListTblRow .sapMObjStatus,
+:root.light-mode .sapMListTblRow .sapMObjStatus>.sapMObjStatusText {
+  color: #15324a !important;
+}
+
+:root:not(.light-mode) .sapMListTblRow .sapMListTblCell {
+  background: rgba(255, 255, 255, 0.035) !important;
 }
 
 .sapMSegBBtnSel + .sapMSegBBtn {
