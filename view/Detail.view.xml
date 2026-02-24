@@ -9,9 +9,20 @@
         <VBox class="appContent detailContent">
 
             <HBox justifyContent="End" class="sapUiTinyMarginBottom" alignItems="Center" renderType="Bare">
+                <Button
+                    text="Save"
+                    type="Emphasized"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onSaveDetail"
+                    class="sapUiTinyMarginEnd"/>
+                <Button
+                    text="Cancel"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onCancelEditFromDetail"
+                    class="sapUiTinyMarginEnd"/>
                 <Label text="Edit mode" class="sapUiTinyMarginEnd"/>
                 <Switch
-                    state="false"
+                    state="{= ${state>/mode} === 'EDIT' }"
                     change=".onToggleEditFromDetail"
                     class="sapUiTinyMarginEnd"/>
                 <Button
@@ -24,19 +35,19 @@
             <VBox class="glassCard">
                 <Title text="Basic Information"/>
                 <form:SimpleForm
-                    editable="false"
+                    editable="true"
                     layout="ResponsiveGridLayout"
                     columnsL="2"
                     columnsM="2">
 
                     <Label text="Date"/>
-                    <Text text="{selected>/basic/date}"/>
+                    <Input value="{selected>/basic/date}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
                     <Label text="Equipment"/>
-                    <Text text="{selected>/basic/equipment}"/>
+                    <Input value="{selected>/basic/equipment}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
                     <Label text="LPC"/>
-                    <Text text="{selected>/basic/LPC_TEXT}"/>
+                    <Input value="{selected>/basic/LPC_TEXT}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
                 </form:SimpleForm>
             </VBox>
@@ -51,10 +62,8 @@
                     <items>
                         <ColumnListItem>
                             <cells>
-                                <Text text="{selected>text}"/>
-                                <ObjectStatus
-                                    text="{path: 'selected>result', formatter: '.resultText'}"
-                                    state="{path: 'selected>result', formatter: '.resultState'}"/>
+                                <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
+                                <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
                             </cells>
                         </ColumnListItem>
                     </items>
@@ -71,10 +80,8 @@
                     <items>
                         <ColumnListItem>
                             <cells>
-                                <Text text="{selected>text}"/>
-                                <ObjectStatus
-                                    text="{path: 'selected>result', formatter: '.resultText'}"
-                                    state="{path: 'selected>result', formatter: '.resultState'}"/>
+                                <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
+                                <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
                             </cells>
                         </ColumnListItem>
                     </items>

@@ -81,6 +81,10 @@ body.appDark ::-webkit-scrollbar-thumb {
   gap: 1rem;
 }
 
+.detailContent {
+  padding-top: 1.25rem;
+}
+
 .glassCard,
 .filterCard {
   background: var(--glass-bg) !important;
@@ -177,14 +181,7 @@ body.appDark .glassTable .sapMListTblCell:last-child {
 }
 
 
-.themeFloatingButton {
-  position: fixed;
-  left: 1rem;
-  bottom: 1rem;
-  z-index: 20;
-}
-
-.themeFloatingButton .sapMBtnInner {
+.themeInlineButton .sapMBtnInner {
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 999px !important;
@@ -225,6 +222,26 @@ body.appDark {
   --text-main: #eef1ff;
   --text-muted: #a8b2d3;
   --accent-grad: linear-gradient(145deg, #6c63ff, #9e6bff);
+}
+
+body.appDark .sapMTitle,
+body.appDark .sapMText,
+body.appDark .sapMLabel,
+body.appDark .sapMObjStatusText,
+body.appDark .sapMListTblCell,
+body.appDark .sapMColumnHeader {
+  color: #edf1ff !important;
+}
+
+body.appDark .sapMListTblHeaderCell,
+body.appDark .sapMListTblHeaderCell .sapMText {
+  color: #cdd7f5 !important;
+}
+
+body.appDark .sapMInputBaseContentWrapper input,
+body.appDark .sapMSltLabel,
+body.appDark .sapMSegBBtn .sapMBtnContent {
+  color: #edf1ff !important;
 }
 
 body.appLight {
