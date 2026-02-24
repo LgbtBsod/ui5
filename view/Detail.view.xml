@@ -47,17 +47,22 @@
                     type="Emphasized"
                     visible="{= ${state>/mode} === 'EDIT' }"
                     press=".onSaveDetail"
-                    class="sapUiTinyMarginEnd"/>
+                    class="sapUiTinyMarginEnd accentButton"/>
                 <Button
                     text="{i18n>objectCancel}"
                     visible="{= ${state>/mode} === 'EDIT' }"
                     press=".onCancelEditFromDetail"
                     class="sapUiTinyMarginEnd"/>
                 <Label text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
-                <Switch
-                    state="{= ${state>/mode} === 'EDIT' }"
-                    change=".onToggleEditFromDetail"
-                    class="sapUiTinyMarginEnd"/>
+                <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap sapUiTinyMarginEnd">
+                    <BusyIndicator visible="{state>/lockOperationPending}" size="1rem" class="sapUiTinyMarginEnd"/>
+                    <Switch
+                        state="{= ${state>/mode} === 'EDIT' }"
+                        enabled="{= !${state>/lockOperationPending} }"
+                        change=".onToggleEditFromDetail"
+                        class="accentSwitch"/>
+                    <ObjectStatus text="{state>/lockOperationText}" state="{= ${state>/lockOperationState} === 'SUCCESS' ? 'Success' : ${state>/lockOperationState} === 'ERROR' ? 'Error' : 'Information' }" class="sapUiTinyMarginBegin"/>
+                </HBox>
                 <Button
                     icon="sap-icon://decline"
                     type="Transparent"
@@ -165,7 +170,7 @@
                         press=".onAddCheckRow"
                         visible="{= ${state>/mode} === 'EDIT' }"/>
                 </Toolbar>
-                <Table items="{selected>/checks}" class="flatEditorTable">
+                <Table items="{selected>/checks}" class="flatEditorTable" busy="{view>/checksLoading}">
                     <columns>
                         <Column width="3rem"><Text text=""/></Column>
                         <Column><Text text="{i18n>checkLabel}"/></Column>
@@ -194,7 +199,7 @@
                         press=".onAddBarrierRow"
                         visible="{= ${state>/mode} === 'EDIT' }"/>
                 </Toolbar>
-                <Table items="{selected>/barriers}" class="flatEditorTable">
+                <Table items="{selected>/barriers}" class="flatEditorTable" busy="{view>/barriersLoading}">
                     <columns>
                         <Column width="3rem"><Text text=""/></Column>
                         <Column><Text text="{i18n>barrierLabel}"/></Column>

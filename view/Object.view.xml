@@ -15,8 +15,13 @@
 
       <HBox class="glassCard objectHeroCard" alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap" renderType="Bare">
         <VBox renderType="Bare"><Title text="{= ${data>/object/root/id} || ${i18n>newChecklist} }" class="detailHeroTitle"/><Text text="{i18n>detailHeroSubtitle}" class="modeHintText"/></VBox>
-        <Switch state="{= ${state>/mode} === 'EDIT' }"
-                change=".onToggleEdit"/>
+        <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap">
+          <BusyIndicator visible="{state>/lockOperationPending}" size="1rem" class="sapUiTinyMarginEnd"/>
+          <Switch state="{= ${state>/mode} === 'EDIT' }"
+                enabled="{= !${state>/lockOperationPending} }"
+                change=".onToggleEdit" class="accentSwitch"/>
+          <ObjectStatus text="{state>/lockOperationText}" state="{= ${state>/lockOperationState} === 'SUCCESS' ? 'Success' : ${state>/lockOperationState} === 'ERROR' ? 'Error' : 'Information' }" class="sapUiTinyMarginBegin"/>
+        </HBox>
       </HBox>
 
       <HBox class="sapUiTinyMarginBottom objectActionBar" justifyContent="End" alignItems="Center" renderType="Bare">
@@ -24,7 +29,7 @@
                 type="Emphasized"
                 press=".onSave"
                 visible="{= ${state>/mode}==='EDIT'}"
-                class="sapUiTinyMarginEnd"/>
+                class="sapUiTinyMarginEnd accentButton"/>
         <Button text="{i18n>objectCancel}" press=".onCancel"/>
       </HBox>
 

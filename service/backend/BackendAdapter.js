@@ -46,12 +46,43 @@ sap.ui.define([
             return _backendService.queryCheckLists(mQuery);
         },
 
+
+        getChecklistRoot: function (sId) {
+            if (_backendService.getChecklistRoot) {
+                return _backendService.getChecklistRoot(sId);
+            }
+            return _backendService.getCheckLists().then(function (aItems) {
+                var oFound = (aItems || []).find(function (o) { return o && o.root && o.root.id === sId; });
+                return oFound || null;
+            });
+        },
+
+        getChecklistChecks: function (sId) {
+            if (_backendService.getChecklistChecks) {
+                return _backendService.getChecklistChecks(sId);
+            }
+            return _backendService.getCheckLists().then(function (aItems) {
+                var oFound = (aItems || []).find(function (o) { return o && o.root && o.root.id === sId; });
+                return (oFound && oFound.checks) || [];
+            });
+        },
+
+        getChecklistBarriers: function (sId) {
+            if (_backendService.getChecklistBarriers) {
+                return _backendService.getChecklistBarriers(sId);
+            }
+            return _backendService.getCheckLists().then(function (aItems) {
+                var oFound = (aItems || []).find(function (o) { return o && o.root && o.root.id === sId; });
+                return (oFound && oFound.barriers) || [];
+            });
+        },
+
         createCheckList: function (oData) {
             return _backendService.createCheckList(oData);
         },
 
-        updateCheckList: function (sId, oData) {
-            return _backendService.updateCheckList(sId, oData);
+        updateCheckList: function (sId, oData, mOptions) {
+            return _backendService.updateCheckList(sId, oData, mOptions || {});
         },
 
         deleteCheckList: function (sId) {

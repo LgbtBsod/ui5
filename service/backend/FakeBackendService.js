@@ -43,6 +43,30 @@ sap.ui.define([
             });
         },
 
+
+        getChecklistRoot: function (sId) {
+            return Promise.resolve(InMemoryDB.getCheckLists().find(function (o) { return o && o.root && o.root.id === sId; }) || null)
+                .then(function (oItem) {
+                    if (!oItem) { return null; }
+                    return {
+                        root: oItem.root || {},
+                        basic: oItem.basic || {},
+                        checks: [],
+                        barriers: []
+                    };
+                });
+        },
+
+        getChecklistChecks: function (sId) {
+            return Promise.resolve(InMemoryDB.getCheckLists().find(function (o) { return o && o.root && o.root.id === sId; }) || null)
+                .then(function (oItem) { return (oItem && oItem.checks) || []; });
+        },
+
+        getChecklistBarriers: function (sId) {
+            return Promise.resolve(InMemoryDB.getCheckLists().find(function (o) { return o && o.root && o.root.id === sId; }) || null)
+                .then(function (oItem) { return (oItem && oItem.barriers) || []; });
+        },
+
         createCheckList: function (oData) {
             return Promise.resolve(InMemoryDB.createCheckList(oData));
         },

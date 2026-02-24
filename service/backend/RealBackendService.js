@@ -146,8 +146,59 @@ sap.ui.define([], function () {
             return this.getCheckLists();
         },
 
+
+        getChecklistRoot: function (sId) {
+            return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: false } }).then(function (oRoot) {
+                return {
+                    root: {
+                        id: oRoot.id,
+                        integrationFlag: true,
+                        successRateChecks: 0,
+                        successRateBarriers: 0,
+                        status: _mapStatusToUi(oRoot.status)
+                    },
+                    basic: {
+                        date: "",
+                        time: "",
+                        timezone: "Europe/Amsterdam",
+                        LPC_KEY: oRoot.lpc || "",
+                        checklist_id: oRoot.checklist_id || ""
+                    },
+                    checks: [],
+                    barriers: []
+                };
+            });
+        },
+
+        getChecklistChecks: function (sId) {
+            return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: true } }).then(function (oDetails) {
+                return ((oDetails && oDetails.checks) || []).map(function (oCheck, iIndex) {
+                    return {
+                        id: oCheck.id || (iIndex + 1),
+                        text: oCheck.text || "",
+                        comment: "",
+                        result: oCheck.status === "DONE"
+                    };
+                });
+            });
+        },
+
+        getChecklistBarriers: function (sId) {
+            return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: true } }).then(function (oDetails) {
+                return ((oDetails && oDetails.barriers) || []).map(function (oBarrier, iIndex) {
+                    return {
+                        id: oBarrier.id || (iIndex + 1),
+                        text: oBarrier.description || "",
+                        comment: "",
+                        result: !!oBarrier.is_active
+                    };
+                });
+            });
+        },
+
         createCheckList: function (oData) {
             var sChecklistId = (oData && oData.root && oData.root.id) || ("CL-" + Date.now());
+            mOptions = mOptions || {};
             var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
             var aChecks = (oData && oData.checks) || [];
             var aBarriers = (oData && oData.barriers) || [];
@@ -190,7 +241,8 @@ sap.ui.define([], function () {
             });
         },
 
-        updateCheckList: function (sId, oData) {
+        updateCheckList: function (sId, oData, mOptions) {
+            mOptions = mOptions || {};
             var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
             var aChecks = (oData && oData.checks) || [];
             var aBarriers = (oData && oData.barriers) || [];
@@ -201,7 +253,7 @@ sap.ui.define([], function () {
                         method: "PATCH",
                         params: {
                             user_id: _userId,
-                            force: true
+                            force: !!mOptions.force
                         },
                         body: {
                             lpc: sLpc

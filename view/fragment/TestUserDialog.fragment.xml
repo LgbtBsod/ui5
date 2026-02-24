@@ -1,0 +1,16 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+  <Dialog
+    title="{i18n>testUserDialogTitle}"
+    contentWidth="26rem"
+    draggable="true"
+    resizable="false"
+    afterClose=".onDialogClosed">
+    <VBox class="sapUiSmallMargin">
+      <Text text="{i18n>testUserDialogText}" class="sapUiTinyMarginBottom"/>
+      <Input value="{state>/testUserLogin}" placeholder="{i18n>testUserPlaceholder}" submit=".onConfirmTestUser"/>
+    </VBox>
+    <beginButton>
+      <Button text="{i18n>okButton}" type="Emphasized" press=".onConfirmTestUser" class="accentButton"/>
+    </beginButton>
+  </Dialog>
+</core:FragmentDefinition>

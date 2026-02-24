@@ -33,7 +33,17 @@ sap.ui.define([
                 sessionId: null,
                 activeObjectId: null,
                 lockExpires: null,
-                idleExpires: null
+                idleExpires: null,
+                requiresUserLogin: false,
+                testUser: "",
+                testUserLogin: "",
+                lockOperationPending: false,
+                lockOperationState: "IDLE",
+                lockOperationText: "",
+                navGuardBypass: false,
+                networkOnline: true,
+                networkGraceMode: false,
+                networkGraceExpiresAt: null
             });
         },
 
