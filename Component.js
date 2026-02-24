@@ -17,6 +17,23 @@ sap.ui.define([
             // 1. Инициализация родителя
             UIComponent.prototype.init.apply(this, arguments);
 
+     // dataModel
+            this.setModel(new JSONModel({
+                objects: []
+            }), "data");
+
+            // stateModel
+            this.setModel(new JSONModel({
+                mode: "READONLY",
+                isDirty: false,
+                sessionId: null
+            }), "state");
+
+            // login simulation
+            BackendAdapter.login("demoUser").then(function (result) {
+                this.getModel("state").setProperty("/sessionId", result.sessionId);
+            }.bind(this));
+
             // 2. Создание базовых моделей
             const oDataModel = ModelFactory.createDataModel();
             const oStateModel = ModelFactory.createStateModel();

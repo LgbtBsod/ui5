@@ -12,7 +12,20 @@ sap.ui.define([
 
             sap.ui.getCore().applyTheme(sNext);
             document.body.classList.toggle("appDark", sNext === "sap_fiori_3_dark");
-        }
+        },
+onCreate: function () {
+    var oData = {
+        title: "New Object",
+        description: "Test"
+    };
+
+    BackendAdapter.createObject(oData).then(function (result) {
+        var oModel = this.getModel("data");
+        var objects = oModel.getProperty("/objects");
+        objects.push(result);
+        oModel.refresh(true);
+    }.bind(this));
+}
 
     });
 });
