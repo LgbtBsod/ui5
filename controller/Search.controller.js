@@ -48,11 +48,25 @@ sap.ui.define([
         },
 
         onCreate: function () {
-            MessageToast.show("Create action is not implemented yet");
+            const oComponent = this.getOwnerComponent();
+            oComponent.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            oComponent.getRouter().navTo("object", { id: "__create" });
         },
 
         onCopy: function () {
-            MessageToast.show("Copy action is not implemented yet");
+            const oDataModel = this.getOwnerComponent().getModel("data");
+            const aVisible = oDataModel.getProperty("/visibleCheckLists") || [];
+            const oFirst = aVisible[0];
+            const sId = oFirst && oFirst.root ? oFirst.root.id : "";
+
+            if (!sId) {
+                MessageToast.show("Nothing to copy");
+                return;
+            }
+
+            const oComponent = this.getOwnerComponent();
+            oComponent.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            oComponent.getRouter().navTo("object", { id: sId });
         },
 
         onSearch: function () {

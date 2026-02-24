@@ -88,6 +88,15 @@
             "detail"
           ],
           "layout": "TwoColumnsMidExpanded"
+        },
+        {
+          "pattern": "object/{id}",
+          "name": "object",
+          "target": [
+            "search",
+            "object"
+          ],
+          "layout": "TwoColumnsMidExpanded"
         }
       ],
       "targets": {
@@ -98,6 +107,11 @@
         },
         "detail": {
           "viewName": "Detail",
+          "viewLevel": 2,
+          "controlAggregation": "midColumnPages"
+        },
+        "object": {
+          "viewName": "Object",
           "viewLevel": 2,
           "controlAggregation": "midColumnPages"
         }

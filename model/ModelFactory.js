@@ -39,7 +39,11 @@ sap.ui.define([
                 persons: [],
                 lpc: [],
                 professions: [],
-                locations: []
+                locations: [],
+                timezones: [
+                    { key: "Europe/Amsterdam", text: "Europe/Amsterdam" },
+                    { key: "UTC", text: "UTC" }
+                ]
             });
         }
 
