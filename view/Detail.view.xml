@@ -10,6 +10,25 @@
 
         <VBox class="appContent detailContent">
 
+            <VBox class="glassCard detailHeroCard">
+                <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap" class="detailHeroHeader" renderType="Bare">
+                    <VBox renderType="Bare" class="sapUiTinyMarginEnd">
+                        <Title text="{i18n>detailPageTitle}" class="detailHeroTitle"/>
+                        <Text text="{i18n>detailHeroSubtitle}" class="modeHintText"/>
+                    </VBox>
+                    <HBox class="uxStatRow" wrap="Wrap" renderType="Bare">
+                        <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>checklistLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{= ${selected>/root/id} || ${i18n>newChecklist} }"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{= ${state>/mode} === 'EDIT' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
+                        </HBox>
+                    </HBox>
+                </HBox>
+            </VBox>
+
             <HBox justifyContent="End" class="sapUiTinyMarginBottom" alignItems="Center" renderType="Bare">
                 <Button
                     text="{i18n>objectSave}"

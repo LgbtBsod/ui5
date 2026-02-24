@@ -21,47 +21,62 @@
                         <ObjectStatus text="Custom SmartFilter" state="Success" visible="{layout>/smartFilter/useCustomSmartFilters}" class="sapUiTinyMarginEnd"/>
                         <ObjectStatus text="Custom SmartTable" state="Success" visible="{layout>/smartTable/useCustomSmartTable}"/>
                     </HBox>
-                    <MessageStrip
-                        visible="{state>/loadError}"
-                        type="Error"
-                        showIcon="true"
-                        text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
-                        class="sapUiTinyMarginTop"/>
+                    <HBox class="sapUiTinyMarginTop" visible="{state>/loadError}" wrap="Wrap" alignItems="Center" renderType="Bare">
+                        <MessageStrip
+                            visible="{state>/loadError}"
+                            type="Error"
+                            showIcon="true"
+                            text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
+                            class="sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>retryButton}" type="Transparent" press=".onRetryLoad"/>
+                    </HBox>
 
                     <HBox class="sapUiSmallMarginTop filterWrap" alignItems="Center" wrap="Wrap" renderType="Bare">
-                        <Input
-                            placeholder="{i18n>checklistIdPlaceholder}"
-                            value="{state>/filterId}"
-                            width="14rem"
-                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
+                            <Label text="{i18n>filterChecklistIdLabel}" labelFor="filterIdInput"/>
+                            <Input
+                                id="filterIdInput"
+                                placeholder="{i18n>checklistIdPlaceholder}"
+                                value="{state>/filterId}"
+                                width="14rem"/>
+                        </VBox>
 
-                        <Select
-                            width="14rem"
-                            selectedKey="{state>/filterLpc}"
-                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
+                            <Label text="{i18n>filterLpcLabel}" labelFor="filterLpcSelect"/>
+                            <Select
+                                id="filterLpcSelect"
+                                width="14rem"
+                                selectedKey="{state>/filterLpc}">
                             <items>
                                 <core:Item key="" text="{i18n>allLpc}"/>
                                 <core:Item key="L1" text="{i18n>lpcLow}"/>
                                 <core:Item key="L2" text="{i18n>lpcMedium}"/>
                                 <core:Item key="L3" text="{i18n>lpcHigh}"/>
                             </items>
-                        </Select>
+                            </Select>
+                        </VBox>
 
-                        <SegmentedButton selectedKey="{state>/filterFailedChecks}" class="statusSegmented statusSegment sapUiTinyMarginEnd sapUiTinyMarginBottom" selectionChange=".onSearch">
+                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
+                            <Label text="{i18n>filterChecksLabel}" labelFor="failedChecksSegment"/>
+                            <SegmentedButton id="failedChecksSegment" selectedKey="{state>/filterFailedChecks}" class="statusSegmented statusSegment" selectionChange=".onSearch">
                             <items>
                                 <SegmentedButtonItem key="ALL" text="{i18n>allChecks}"/>
                                 <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
                                 <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
                             </items>
-                        </SegmentedButton>
+                            </SegmentedButton>
+                        </VBox>
 
-                        <SegmentedButton selectedKey="{state>/filterFailedBarriers}" class="statusSegmented statusSegment sapUiTinyMarginEnd sapUiTinyMarginBottom" selectionChange=".onSearch">
+                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
+                            <Label text="{i18n>filterBarriersLabel}" labelFor="failedBarriersSegment"/>
+                            <SegmentedButton id="failedBarriersSegment" selectedKey="{state>/filterFailedBarriers}" class="statusSegmented statusSegment" selectionChange=".onSearch">
                             <items>
                                 <SegmentedButtonItem key="ALL" text="{i18n>allBarriers}"/>
                                 <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
                                 <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
                             </items>
-                        </SegmentedButton>
+                            </SegmentedButton>
+                        </VBox>
 
                         <Button text="{i18n>searchButton}" type="Emphasized" press=".onSearch" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
                         <Button text="{i18n>resetButton}" visible="{view>/hasActiveFilters}" press=".onResetFilters" class="sapUiTinyMarginBottom"/>

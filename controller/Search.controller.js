@@ -189,6 +189,27 @@ sap.ui.define([
             this._executeSearch();
         },
 
+
+        onRetryLoad: function () {
+            var oStateModel = this.getModel("state");
+            var oDataModel = this.getModel("data");
+
+            oStateModel.setProperty("/isLoading", true);
+            oStateModel.setProperty("/loadError", false);
+            oStateModel.setProperty("/loadErrorMessage", "");
+
+            return BackendAdapter.getCheckLists().then(function (aCheckLists) {
+                oDataModel.setProperty("/checkLists", aCheckLists);
+                oDataModel.setProperty("/visibleCheckLists", aCheckLists);
+                this._updateResultSummary();
+            }.bind(this)).catch(function (oError) {
+                oStateModel.setProperty("/loadError", true);
+                oStateModel.setProperty("/loadErrorMessage", (oError && oError.message) || "");
+            }).finally(function () {
+                oStateModel.setProperty("/isLoading", false);
+            });
+        },
+
         onResetFilters: function () {
             var oStateModel = this.getModel("state");
 
