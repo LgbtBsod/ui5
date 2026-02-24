@@ -38,7 +38,9 @@ sap.ui.define([
                 ChecklistService.loadLocations()
             ]).then(([checkLists, persons, lpc, professions, locations]) => {
 
-                oDataModel.setProperty("/checkLists", Array.isArray(checkLists) ? checkLists : []);
+                const aCheckLists = Array.isArray(checkLists) ? checkLists : [];
+                oDataModel.setProperty("/checkLists", aCheckLists);
+                oDataModel.setProperty("/visibleCheckLists", aCheckLists);
                 oReferenceModel.setProperty("/persons", Array.isArray(persons) ? persons : []);
                 oReferenceModel.setProperty("/lpc", Array.isArray(lpc) ? lpc : []);
                 oReferenceModel.setProperty("/professions", Array.isArray(professions) ? professions : []);
@@ -46,6 +48,7 @@ sap.ui.define([
 
             }).catch(function (oError) {
                 oDataModel.setProperty("/checkLists", []);
+                oDataModel.setProperty("/visibleCheckLists", []);
                 oReferenceModel.setProperty("/persons", []);
                 oReferenceModel.setProperty("/lpc", []);
                 oReferenceModel.setProperty("/professions", []);

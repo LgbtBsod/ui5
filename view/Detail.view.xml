@@ -8,10 +8,17 @@
 
         <VBox class="detailContainer">
 
-            <Button
-                icon="sap-icon://lightbulb"
-                press=".onToggleTheme"
-                class="themeButton"/>
+            <HBox justifyContent="End" class="sapUiTinyMarginBottom">
+                <Button
+                    icon="sap-icon://lightbulb"
+                    press=".onToggleTheme"
+                    class="themeButton"/>
+                <Button
+                    icon="sap-icon://decline"
+                    type="Transparent"
+                    tooltip="Close details"
+                    press=".onCloseDetail"/>
+            </HBox>
 
             <VBox class="glassCard">
                 <Title text="Basic Information"/>

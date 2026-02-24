@@ -1,19 +1,16 @@
 <mvc:View
     controllerName="sap_ui5.controller.App"
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
     xmlns="sap.m">
 
-    <App class="appShell">
-        <pages>
-            <SplitApp id="splitApp">
-                <masterPages>
-                    <mvc:XMLView viewName="sap_ui5.view.Search"/>
-                </masterPages>
-                <detailPages>
-                    <mvc:XMLView viewName="sap_ui5.view.Detail"/>
-                </detailPages>
-            </SplitApp>
-        </pages>
-    </App>
+    <f:FlexibleColumnLayout id="fcl" layout="{state>/layout}">
+        <f:beginColumnPages>
+            <mvc:XMLView viewName="sap_ui5.view.Search"/>
+        </f:beginColumnPages>
+        <f:midColumnPages>
+            <mvc:XMLView viewName="sap_ui5.view.Detail"/>
+        </f:midColumnPages>
+    </f:FlexibleColumnLayout>
 
 </mvc:View>

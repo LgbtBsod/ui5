@@ -8,6 +8,7 @@ sap.ui.define([
         createDataModel: function () {
             return new JSONModel({
                 checkLists: [],
+                visibleCheckLists: [],
                 selectedChecklist: null
             });
         },
@@ -15,9 +16,14 @@ sap.ui.define([
         createStateModel: function () {
             return new JSONModel({
                 mode: "READ",
+                layout: "OneColumn",
                 isLoading: false,
                 loadError: false,
                 loadErrorMessage: "",
+                filterId: "",
+                filterLpc: "",
+                filterFailedChecks: "ALL",
+                filterFailedBarriers: "ALL",
                 isBusy: false,
                 isDirty: false,
                 isLocked: false,

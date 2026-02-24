@@ -13,6 +13,7 @@ sap.ui.define([
 
     _onMatched: function (oEvent) {
       const id = oEvent.getParameter("arguments").id;
+      const sLayout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
       const oComponent = this.getOwnerComponent();
       const oDataModel = oComponent.getModel("data");
       const aChecklists = oDataModel.getProperty("/checkLists") || [];
@@ -20,13 +21,22 @@ sap.ui.define([
 
       oDataModel.setProperty("/selectedChecklist", oSelected);
       oComponent.getModel("selected").setData(oSelected || {});
+      oComponent.getModel("state").setProperty("/layout", sLayout);
+    },
+
+    onCloseDetail: function () {
+      const oComponent = this.getOwnerComponent();
+      oComponent.getModel("state").setProperty("/layout", "OneColumn");
+      oComponent.getRouter().navTo("search", {}, true);
     },
 
     onToggleTheme: function () {
-      const bDark = document.body.classList.toggle("darkTheme");
-      if (!bDark) {
-        document.body.classList.remove("darkTheme");
-      }
+      const oConfig = sap.ui.getCore().getConfiguration();
+      const sCurrentTheme = oConfig.getTheme();
+      const sNextTheme = sCurrentTheme === "sap_fiori_3" ? "sap_fiori_3_dark" : "sap_fiori_3";
+
+      sap.ui.getCore().applyTheme(sNextTheme);
+      document.body.classList.toggle("appDark", sNextTheme === "sap_fiori_3_dark");
     },
 
     statusState: function (sStatus) {
