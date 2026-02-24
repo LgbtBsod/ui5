@@ -30,6 +30,7 @@ sap.ui.define([
       var oStateModel = this.getModel("state");
       oStateModel.setProperty("/layout", sLayout);
       oStateModel.setProperty("/mode", "READ");
+      oStateModel.setProperty("/activeObjectId", sId || null);
 
       this._bindChecklistById(sId);
     },
@@ -67,6 +68,7 @@ sap.ui.define([
 
     onCloseDetail: function () {
       this.getModel("state").setProperty("/layout", "OneColumn");
+      this.getModel("state").setProperty("/activeObjectId", null);
       this.navTo("search", {}, true);
     },
 
@@ -78,7 +80,14 @@ sap.ui.define([
         return;
       }
 
-      this.getModel("state").setProperty("/mode", "EDIT");
+      var oStateModel = this.getModel("state");
+      BackendAdapter.lockAcquire(
+        oStateModel.getProperty("/activeObjectId"),
+        oStateModel.getProperty("/sessionId")
+      ).catch(function () {
+        // lock conflict handled on save/heartbeat
+      });
+      oStateModel.setProperty("/mode", "EDIT");
     },
 
     onCancelEditFromDetail: function () {

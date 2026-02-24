@@ -62,12 +62,27 @@ sap.ui.define([
             return _backendService.upsertRows(sId, sSection, aRows);
         },
 
-        lockHeartbeat: function (sSessionId) {
-            return _backendService.lockHeartbeat(sSessionId);
+        lockAcquire: function (sObjectId, sSessionId, sUser, sStealFrom) {
+            if (_backendService.lockAcquire) {
+                return _backendService.lockAcquire(sObjectId, sSessionId, sUser, sStealFrom);
+            }
+            return Promise.resolve({ success: true, action: "ACQUIRED" });
         },
 
-        lockRelease: function (sSessionId) {
-            return _backendService.lockRelease(sSessionId);
+        lockHeartbeat: function (sObjectId, sSessionId) {
+            return _backendService.lockHeartbeat(sObjectId, sSessionId);
+        },
+
+        lockRelease: function (sObjectId, sSessionId, mOptions) {
+            return _backendService.lockRelease(sObjectId, sSessionId, mOptions);
+        },
+
+
+        buildReleaseBeaconPayload: function (sObjectId, sSessionId, mOptions) {
+            if (_backendService.buildReleaseBeaconPayload) {
+                return _backendService.buildReleaseBeaconPayload(sObjectId, sSessionId, mOptions);
+            }
+            return null;
         },
 
         getServerState: function () {

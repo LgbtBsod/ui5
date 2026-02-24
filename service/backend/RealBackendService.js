@@ -3,6 +3,7 @@ sap.ui.define([], function () {
 
     var _baseUrl = "http://localhost:8000";
     var _userId = "demoUser";
+    var _sessionGuid = "sess-" + Date.now();
 
     function _joinUrl(sBase, sPath) {
         var bBaseEnds = /\/$/.test(sBase);
@@ -90,12 +91,14 @@ sap.ui.define([], function () {
 
 
 
-    function _acquireLock(sId) {
+    function _acquireLock(sId, sStealFrom) {
         return _request("/lock/acquire", {
             method: "POST",
             params: {
-                pcct_uuid: sId,
-                user_id: _userId
+                object_uuid: sId,
+                session_guid: _sessionGuid,
+                uname: _userId,
+                iv_steal_from: sStealFrom || ""
             }
         });
     }
@@ -107,8 +110,9 @@ sap.ui.define([], function () {
 
         login: function (username) {
             _userId = username || _userId;
+            _sessionGuid = "sess-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
             return Promise.resolve({
-                sessionId: _userId,
+                sessionId: _sessionGuid,
                 user: _userId
             });
         },
@@ -250,12 +254,58 @@ sap.ui.define([], function () {
             });
         },
 
-        lockHeartbeat: function () {
-            return Promise.resolve({ status: "OK" });
+        lockAcquire: function (sObjectId, sSessionId, sUser, sStealFrom) {
+            if (sSessionId) { _sessionGuid = sSessionId; }
+            if (sUser) { _userId = sUser; }
+            return _acquireLock(sObjectId, sStealFrom);
         },
 
-        lockRelease: function () {
-            return Promise.resolve({ status: "RELEASED" });
+        lockHeartbeat: function (sObjectId, sSessionId) {
+            if (!sObjectId) {
+                return Promise.resolve({ success: true, is_killed: false });
+            }
+            if (sSessionId) { _sessionGuid = sSessionId; }
+            return _request("/lock/heartbeat", {
+                method: "POST",
+                params: {
+                    object_uuid: sObjectId,
+                    session_guid: _sessionGuid
+                }
+            });
+        },
+
+        lockRelease: function (sObjectId, sSessionId, mOptions) {
+            if (!sObjectId) {
+                return Promise.resolve({ released: true, save_status: "N" });
+            }
+            if (sSessionId) { _sessionGuid = sSessionId; }
+            mOptions = mOptions || {};
+            return _request("/lock/release", {
+                method: "POST",
+                params: {
+                    object_uuid: sObjectId,
+                    session_guid: _sessionGuid,
+                    iv_try_save: !!mOptions.trySave
+                },
+                body: mOptions.payload || {}
+            });
+        },
+
+        buildReleaseBeaconPayload: function (sObjectId, sSessionId, mOptions) {
+            if (!sObjectId) {
+                return null;
+            }
+            if (sSessionId) { _sessionGuid = sSessionId; }
+            mOptions = mOptions || {};
+            var oParams = new URLSearchParams({
+                object_uuid: sObjectId,
+                session_guid: _sessionGuid,
+                iv_try_save: !!mOptions.trySave
+            });
+            return {
+                url: _joinUrl(_baseUrl, "/lock/release") + "?" + oParams.toString(),
+                body: mOptions.payload || {}
+            };
         },
 
         getServerState: function () {

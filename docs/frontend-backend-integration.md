@@ -33,3 +33,10 @@ For production-like end-to-end testing:
 1. Run backend `mock_gate_way` on `http://localhost:8000`.
 2. Switch `backendMode` to `real` in manifest (or use `?backend=real`).
 3. Keep `fake` mode available for deterministic UI regression checks.
+
+
+## Lock behavior (web-oriented, SAP-portable)
+- Lock TTL is 5 minutes; heartbeat target interval is 4 minutes; cleanup interval is 5 minutes.
+- `lock/acquire` supports same-session refresh and own-session steal (`iv_steal_from`).
+- Heartbeat returns `is_killed`, `killed_by`, `server_changed_on`, and `version_number`.
+- Beacon unload uses best-effort release (`sendBeacon`, fallback sync XHR).

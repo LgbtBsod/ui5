@@ -59,12 +59,20 @@ sap.ui.define([
             return Promise.resolve(InMemoryDB.upsertRows(sId, sSection, aRows));
         },
 
-        lockHeartbeat: function (sSessionId) {
-            return FakeODataService.callFunctionImport("LockHeartbeat", { sessionId: sSessionId });
+        lockAcquire: function () {
+            return Promise.resolve({ success: true, action: "ACQUIRED", lock_expires: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
         },
 
-        lockRelease: function (sSessionId) {
-            return FakeODataService.callFunctionImport("LockRelease", { sessionId: sSessionId });
+        lockHeartbeat: function () {
+            return Promise.resolve({ success: true, is_killed: false, lock_expires: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
+        },
+
+        lockRelease: function () {
+            return Promise.resolve({ released: true, save_status: "N" });
+        },
+
+        buildReleaseBeaconPayload: function () {
+            return null;
         },
 
         getServerState: function () {

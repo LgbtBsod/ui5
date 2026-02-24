@@ -31,6 +31,7 @@ sap.ui.define([
                 isKilled: false,
                 hasConflict: false,
                 sessionId: null,
+                activeObjectId: null,
                 lockExpires: null,
                 idleExpires: null
             });

@@ -47,18 +47,26 @@ sap.ui.define([
             this._oSmartCache = new SmartCacheManager();
             this._oHeartbeat = new HeartbeatManager({
                 heartbeatFn: function () {
-                    return BackendAdapter.lockHeartbeat(oStateModel.getProperty("/sessionId"));
+                    return BackendAdapter.lockHeartbeat(
+                        oStateModel.getProperty("/activeObjectId"),
+                        oStateModel.getProperty("/sessionId")
+                    );
                 }
             });
             this._oGcd = new GCDManager();
             this._oActivity = new ActivityMonitor();
             this._fnUnregisterBeacon = BeaconManager.register(function () {
-                BackendAdapter.lockRelease(oStateModel.getProperty("/sessionId"));
+                return BackendAdapter.buildReleaseBeaconPayload(
+                    oStateModel.getProperty("/activeObjectId"),
+                    oStateModel.getProperty("/sessionId"),
+                    { trySave: true }
+                );
             });
 
             this._oHeartbeat.attachEvent("heartbeat", function (oEvent) {
                 var oPayload = oEvent.getParameters() || {};
                 oStateModel.setProperty("/isKilled", !!oPayload.is_killed);
+                oStateModel.setProperty("/lockExpires", oPayload.lock_expires || null);
                 oCacheModel.setProperty("/lastServerState", {
                     lastChangeSet: oPayload.last_change_set || null,
                     serverChangedOn: oPayload.server_changed_on || null,
