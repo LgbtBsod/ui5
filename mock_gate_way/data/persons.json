@@ -1,0 +1,32 @@
+{
+  "persons": [
+    {
+      "perner": "100001",
+      "fullName": "John Smith",
+      "position": "Safety Engineer",
+      "orgUnit": "EHS",
+      "integrationName": "INT-JSMITH"
+    },
+    {
+      "perner": "100002",
+      "fullName": "Anna Müller",
+      "position": "Supervisor",
+      "orgUnit": "Maintenance",
+      "integrationName": "INT-AMULLER"
+    },
+    {
+      "perner": "100003",
+      "fullName": "David Lee",
+      "position": "Quality Lead",
+      "orgUnit": "QA",
+      "integrationName": "INT-DLEE"
+    },
+    {
+      "perner": "200001",
+      "fullName": "Michael Brown",
+      "position": "Operator",
+      "orgUnit": "Production",
+      "integrationName": "INT-MBROWN"
+    }
+  ]
+}
