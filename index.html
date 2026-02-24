@@ -13,6 +13,12 @@
         data-sap-ui-async="true">
     </script>
 
+    <style>
+        html, body, #content {
+            height: 100%;
+        }
+    </style>
+
     <script>
         sap.ui.getCore().attachInit(function () {
             sap.ui.require([
@@ -21,13 +27,12 @@
                 new ComponentContainer({
                     name: "sap_ui5",
                     settings: { id: "sap_ui5" },
-                    async: true
+                    async: true,
+                    height: "100%"
                 }).placeAt("content");
             });
         });
     </script>
 </head>
-<body class="sapUiBody" id="uiControlContext">
-    <div id="content"></div>
-</body>
+<body class="sapUiBody" id="content"></body>
 </html>
