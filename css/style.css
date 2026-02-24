@@ -1,29 +1,53 @@
 :root {
-  --bg-main: linear-gradient(180deg, #f4f7fb 0%, #e9eef5 100%);
-  --bg-grad-a: rgba(10, 110, 209, 0.25);
-  --bg-grad-b: rgba(0, 195, 255, 0.16);
+  --bg: #08090d;
+  --bg2: #0e1017;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface2: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-bright: rgba(255, 255, 255, 0.2);
+  --text: #f0f1f5;
+  --text-sub: rgba(240, 241, 245, 0.58);
+  --accent: #6c63ff;
+  --accent-rgb: 108, 99, 255;
+  --shadow: rgba(0, 0, 0, 0.52);
 
-  --glass-bg: rgba(255, 255, 255, 0.56);
-  --glass-border: rgba(255, 255, 255, 0.68);
-  --glass-shadow: 0 24px 70px rgba(0, 38, 86, 0.14);
+  --radius-xl: 28px;
+  --radius-lg: 18px;
+  --transition: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --text-main: #15233a;
-  --text-muted: #5f6f89;
-  --accent-grad: linear-gradient(145deg, #0a6ed1, #0087e6);
+  --bg-main: radial-gradient(circle at 15% 15%, #1f2536 0%, #0b0d14 52%, #07080d 100%);
+  --bg-grad-a: rgba(108, 99, 255, 0.22);
+  --bg-grad-b: rgba(255, 107, 157, 0.15);
+  --glass-bg: rgba(20, 24, 36, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  --text-main: var(--text);
+  --text-muted: var(--text-sub);
+  --accent-grad: linear-gradient(145deg, #6c63ff, #9e6bff);
 }
 
-body.appDark {
-  --bg-main: linear-gradient(180deg, #0c0f14 0%, #151a22 100%);
-  --bg-grad-a: rgba(255, 170, 0, 0.22);
-  --bg-grad-b: rgba(255, 128, 0, 0.16);
+:root.light-mode {
+  --bg: #f0f2f8;
+  --bg2: #e6e9f2;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface2: rgba(255, 255, 255, 0.88);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-bright: rgba(0, 0, 0, 0.14);
+  --text: #1a1b21;
+  --text-sub: rgba(26, 27, 33, 0.58);
+  --accent: #5349e6;
+  --accent-rgb: 83, 73, 230;
+  --shadow: rgba(100, 110, 140, 0.14);
 
-  --glass-bg: rgba(28, 32, 40, 0.62);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 28px 85px rgba(0, 0, 0, 0.56);
-
-  --text-main: #eaf1ff;
-  --text-muted: #a5b2c7;
-  --accent-grad: linear-gradient(145deg, #ffb300, #ff8a00);
+  --bg-main: linear-gradient(180deg, #f7f8fe 0%, #edf1fb 100%);
+  --bg-grad-a: rgba(83, 73, 230, 0.2);
+  --bg-grad-b: rgba(99, 164, 255, 0.18);
+  --glass-bg: rgba(255, 255, 255, 0.84);
+  --glass-border: rgba(30, 45, 90, 0.12);
+  --glass-shadow: 0 24px 70px rgba(102, 117, 160, 0.18);
+  --text-main: var(--text);
+  --text-muted: var(--text-sub);
+  --accent-grad: linear-gradient(145deg, #5349e6, #6f8dff);
 }
 
 .sapUiBody,
@@ -34,46 +58,69 @@ body,
 .sapUiComponentContainer > div,
 .sapUiView,
 .sapMNav,
+.sapMShellGlobalInnerBackground,
+.sapMPage,
+.sapMShell,
 .sapFFCL,
 .sapFFCLColumn,
 .sapFFCLColumnContent,
-.sapMPage,
+.sapFCLColumn,
 .sapMPageEnableScrolling {
   height: 100%;
+  background: transparent !important;
+  border: none !important;
 }
 
 .sapUiBody,
+html,
 body {
   margin: 0;
   min-height: 100vh;
+  position: relative;
+  color: var(--text-main);
   background:
     radial-gradient(circle at 14% 18%, var(--bg-grad-a), transparent 46%),
     radial-gradient(circle at 86% 78%, var(--bg-grad-b), transparent 55%),
     var(--bg-main) !important;
-  color: var(--text-main);
-  transition: background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-::-webkit-scrollbar {
-  width: 11px;
-  height: 11px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(10, 110, 209, 0.55);
-  border-radius: 16px;
-}
-
-body.appDark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 170, 0, 0.55);
+  transition: background 0.55s var(--transition), color 0.3s var(--transition);
 }
 
 .pageTransparent {
   background: transparent !important;
+}
+
+.bg-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-blobs::before,
+.bg-blobs::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(88px);
+  transition: all 0.8s var(--transition);
+  opacity: 0.45;
+}
+
+.bg-blobs::before {
+  width: 560px;
+  height: 560px;
+  top: -110px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.35) 0%, transparent 70%);
+}
+
+.bg-blobs::after {
+  width: 460px;
+  height: 460px;
+  right: -130px;
+  bottom: -120px;
+  background: radial-gradient(circle, var(--bg-grad-b) 0%, transparent 70%);
 }
 
 .appContent {
@@ -81,15 +128,20 @@ body.appDark ::-webkit-scrollbar-thumb {
   gap: 1rem;
 }
 
+.detailContent {
+  padding-top: 1.25rem;
+}
+
 .glassCard,
 .filterCard {
   background: var(--glass-bg) !important;
-  backdrop-filter: blur(22px) saturate(150%);
-  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid var(--glass-border) !important;
-  border-radius: 28px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
   padding: 1.2rem;
+  transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition);
 }
 
 .toolbarTransparent {
@@ -100,13 +152,21 @@ body.appDark ::-webkit-scrollbar-thumb {
 .sapMTitle,
 .sapMText,
 .sapMLabel,
-.sapMObjStatusText {
+.sapMObjStatusText,
+.sapMObjStatus,
+.sapMListTblCell,
+.sapMListTblHeaderCell,
+.sapMListTblHeaderCell .sapMText,
+.sapMColumnHeader,
+.sapMInputBaseContentWrapper input,
+.sapMSltLabel,
+.sapMSegBBtn .sapMBtnContent {
   color: var(--text-main) !important;
 }
 
 .sapMBtnInner {
   border-radius: 999px !important;
-  transition: transform .2s ease, box-shadow .2s ease !important;
+  transition: transform .22s var(--transition), box-shadow .22s var(--transition) !important;
 }
 
 .sapMBtn:hover .sapMBtnInner {
@@ -117,17 +177,31 @@ body.appDark ::-webkit-scrollbar-thumb {
   background: var(--accent-grad) !important;
   border: none !important;
   color: #fff !important;
-  box-shadow: 0 12px 28px rgba(10, 110, 209, 0.3) !important;
+  box-shadow: 0 12px 30px rgba(var(--accent-rgb), 0.35) !important;
 }
 
-body.appDark .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
-  box-shadow: 0 12px 28px rgba(255, 170, 0, 0.34) !important;
+.themeDockButton {
+  position: fixed !important;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 30;
 }
 
-.themeButton .sapMBtnInner {
-  background: var(--accent-grad) !important;
-  border: none !important;
-  color: #fff !important;
+.themeDockButton .sapMBtnInner {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 12px !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 12px 28px var(--shadow) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.themeDockButton:hover .sapMBtnInner {
+  border-color: rgba(var(--accent-rgb), 0.65) !important;
+  transform: scale(1.05);
 }
 
 .glassTable .sapMListTbl {
@@ -144,168 +218,93 @@ body.appDark .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
 }
 
 .glassTable .sapMListTblCell {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--surface2);
   background-clip: padding-box;
-  border-top: 1px solid rgba(255, 255, 255, 0.44);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.44);
-}
-
-body.appDark .glassTable .sapMListTblCell {
-  background: rgba(255, 255, 255, 0.06);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .glassTable .sapMListTblCell:first-child {
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
-  border-left: 1px solid rgba(255, 255, 255, 0.44);
+  border-left: 1px solid var(--border);
 }
 
 .glassTable .sapMListTblCell:last-child {
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
-  border-right: 1px solid rgba(255, 255, 255, 0.44);
+  border-right: 1px solid var(--border);
 }
-
-body.appDark .glassTable .sapMListTblCell:first-child {
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-body.appDark .glassTable .sapMListTblCell:last-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-
-.themeFloatingButton {
-  position: fixed;
-  left: 1rem;
-  bottom: 1rem;
-  z-index: 20;
-}
-
-.themeFloatingButton .sapMBtnInner {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 999px !important;
-  background: var(--accent-grad) !important;
-  border: none !important;
-  color: #fff !important;
-  box-shadow: var(--glass-shadow);
-}
-
 
 .roundedTable .sapMListTbl {
   border-collapse: separate !important;
   border-spacing: 0 12px !important;
 }
 
-.roundedTable .sapMListTblRow {
-  box-shadow: none;
-}
-
 .roundedTable .sapMListTblCell {
-  border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-top: 1px solid var(--border) !important;
+  border-bottom: 1px solid var(--border) !important;
 }
 
-body.appDark .roundedTable .sapMListTblCell {
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Premium full-theme refinements */
-body.appDark {
-  --bg-main: radial-gradient(circle at 15% 15%, #1f2536 0%, #0b0d14 52%, #07080d 100%);
-  --bg-grad-a: rgba(108, 99, 255, 0.20);
-  --bg-grad-b: rgba(255, 107, 157, 0.12);
-  --glass-bg: rgba(20, 24, 36, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-  --text-main: #eef1ff;
-  --text-muted: #a8b2d3;
-  --accent-grad: linear-gradient(145deg, #6c63ff, #9e6bff);
-}
-
-body.appLight {
-  --bg-main: linear-gradient(180deg, #f7f8fe 0%, #edf1fb 100%);
-  --bg-grad-a: rgba(83, 73, 230, 0.16);
-  --bg-grad-b: rgba(99, 164, 255, 0.16);
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  --glass-border: rgba(30, 45, 90, 0.12);
-  --glass-shadow: 0 24px 70px rgba(102, 117, 160, 0.18);
-  --text-main: #1b2340;
-  --text-muted: #6c7692;
-  --accent-grad: linear-gradient(145deg, #5349e6, #6f8dff);
-}
-
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  border-radius: 999px;
-  pointer-events: none;
-  filter: blur(90px);
-  z-index: -1;
-}
-
-body::before {
-  top: -120px;
-  left: -100px;
-  width: 440px;
-  height: 440px;
-  background: var(--bg-grad-a);
-}
-
-body::after {
-  right: -120px;
-  bottom: -140px;
-  width: 460px;
-  height: 460px;
-  background: var(--bg-grad-b);
-}
-
-.sapMInputBaseContentWrapper,
-.sapMSlt,
-.sapMSegBBtn,
-.sapMSwt {
-  border-radius: 14px !important;
+.roundedTable .sapMListTblRow:hover .sapMListTblCell {
+  background: var(--surface2);
 }
 
 .sapMInputBaseContentWrapper,
 .sapMSlt {
-  border: 1px solid rgba(120, 132, 170, 0.26) !important;
-  background: rgba(255, 255, 255, 0.52) !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface2) !important;
 }
 
 .sapMSegB {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border: 1px solid rgba(130, 146, 187, 0.26) !important;
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 14px !important;
-  padding: 2px;
+  padding: 2px !important;
+}
+
+.sapMSegBBtn {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.sapMSegBBtn:first-child {
+  border-top-left-radius: 11px !important;
+  border-bottom-left-radius: 11px !important;
+}
+
+.sapMSegBBtn:last-child {
+  border-top-right-radius: 11px !important;
+  border-bottom-right-radius: 11px !important;
+}
+
+.sapMSegBBtn + .sapMSegBBtn {
+  border-left: 1px solid var(--border-bright) !important;
 }
 
 .sapMSegBBtnSel {
   background: var(--accent-grad) !important;
   color: #fff !important;
-  border-radius: 10px !important;
+  border-radius: 11px !important;
 }
 
-.roundedTable .sapMListTblRow:hover .sapMListTblCell {
-  background: rgba(255, 255, 255, 0.62);
+.sapMSegBBtnSel + .sapMSegBBtn {
+  border-left-color: transparent !important;
 }
 
-body.appDark .sapMInputBaseContentWrapper,
-body.appDark .sapMSlt {
-  background: rgba(255, 255, 255, 0.07) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
 }
 
-body.appDark .sapMSegB {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-body.appDark .roundedTable .sapMListTblRow:hover .sapMListTblCell {
-  background: rgba(255, 255, 255, 0.1);
+::-webkit-scrollbar-thumb {
+  background: var(--border-bright);
+  border-radius: 10px;
 }

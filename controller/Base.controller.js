@@ -58,6 +58,7 @@ sap.ui.define([
             var bDark = sTheme !== LIGHT_THEME;
             document.body.classList.toggle("appDark", bDark);
             document.body.classList.toggle("appLight", !bDark);
+            document.documentElement.classList.toggle("light-mode", !bDark);
         }
     });
 });

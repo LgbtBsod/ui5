@@ -101,12 +101,6 @@
                     </Table>
                 </VBox>
 
-                <Button
-                    text="{= ${view>/isDarkAccent} ? '☀️' : '🌙' }"
-                    tooltip="Toggle full theme"
-                    press=".onToggleTheme"
-                    class="themeFloatingButton"/>
-
             </VBox>
         </content>
     </Page>
