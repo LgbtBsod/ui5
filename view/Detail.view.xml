@@ -10,10 +10,6 @@
 
             <HBox justifyContent="End" class="sapUiTinyMarginBottom">
                 <Button
-                    icon="sap-icon://lightbulb"
-                    press=".onToggleTheme"
-                    class="themeButton"/>
-                <Button
                     icon="sap-icon://decline"
                     type="Transparent"
                     tooltip="Close details"

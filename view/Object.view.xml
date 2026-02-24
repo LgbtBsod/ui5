@@ -4,12 +4,11 @@
   xmlns:core="sap.ui.core"
   controllerName="sap_ui5.controller.Object">
 
-  <Page showHeader="false" busy="{state>/isBusy}">
-    <VBox class="pagePadding">
+  <Page showHeader="false" busy="{state>/isBusy}" class="pageTransparent">
+    <VBox class="appContent">
 
-      <HBox class="glassHero">
-        <Title text="{data>/object/root/id}"/>
-        <ToolbarSpacer/>
+      <HBox class="glassCard" alignItems="Center" justifyContent="SpaceBetween">
+        <Title text="{= ${data>/object/root/id} || 'New checklist' }"/>
         <Switch state="{= ${state>/mode} === 'EDIT' }"
                 change=".onToggleEdit"/>
       </HBox>
@@ -23,12 +22,12 @@
         <Button text="{i18n>objectCancel}" press=".onCancel"/>
       </HBox>
 
-      <VBox class="glassSurface blockCard">
+      <VBox class="glassCard">
         <Label text="Date"/>
         <DatePicker value="{data>/object/basic/date}"
                     editable="{= ${state>/mode}==='EDIT'}"/>
 
-        <Label text="Timezone"/>
+        <Label text="Timezone" class="sapUiSmallMarginTop"/>
         <Select items="{ref>/timezones}"
                 selectedKey="{data>/object/basic/timezone}"
                 enabled="{= ${state>/mode}==='EDIT'}">
@@ -36,10 +35,10 @@
         </Select>
       </VBox>
 
-      <VBox class="glassSurface blockCard">
+      <VBox class="glassCard">
         <Title text="Checks"/>
 
-        <Table items="{data>/object/checks}">
+        <Table items="{data>/object/checks}" class="glassTable">
           <columns>
             <Column><Text text="No"/></Column>
             <Column><Text text="Text"/></Column>

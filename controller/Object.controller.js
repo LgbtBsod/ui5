@@ -24,10 +24,11 @@ sap.ui.define([
         return oChecklist && oChecklist.root && oChecklist.root.id === sId;
       });
       var oObjectData;
+      var sAction = oState.getProperty("/objectAction") || "";
+      var bCreate = sId === "__create" || sAction === "CREATE";
+      var bCopy = sAction === "COPY";
 
-      oState.setProperty("/mode", "EDIT");
-
-      if (sId === "__create") {
+      if (bCreate) {
         oObjectData = {
           root: { id: "" },
           basic: {
@@ -51,6 +52,13 @@ sap.ui.define([
         };
       }
 
+
+      if (bCopy && oObjectData && oObjectData.root) {
+        oObjectData.root.id = "";
+      }
+
+      oState.setProperty("/mode", (bCreate || bCopy) ? "EDIT" : "READ");
+      oState.setProperty("/objectAction", "");
       oModel.setProperty("/object", oObjectData);
       oModel.setProperty("/objectOriginal", _clone(oObjectData));
 

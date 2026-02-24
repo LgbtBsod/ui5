@@ -14,6 +14,11 @@
 
                 <VBox class="glassCard filterCard sapUiSmallMarginBottom">
                     <Toolbar class="toolbarTransparent">
+                        <Button
+                            icon="sap-icon://lightbulb"
+                            tooltip="Toggle theme"
+                            press=".onToggleTheme"
+                            class="themeButton sapUiTinyMarginEnd"/>
                         <Title text="{i18n>filtersTitle}"/>
                         <ToolbarSpacer/>
                         <Button text="{i18n>createButton}" press=".onCreate"/>
