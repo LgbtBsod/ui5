@@ -27,6 +27,22 @@ body.appDark {
 }
 
 .sapUiBody,
+html,
+body,
+#ui5_container,
+.sapUiComponentContainer,
+.sapUiComponentContainer > div,
+.sapUiView,
+.sapMNav,
+.sapFFCL,
+.sapFFCLColumn,
+.sapFFCLColumnContent,
+.sapMPage,
+.sapMPageEnableScrolling {
+  height: 100%;
+}
+
+.sapUiBody,
 body {
   margin: 0;
   min-height: 100vh;
