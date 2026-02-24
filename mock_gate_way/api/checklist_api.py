@@ -81,6 +81,29 @@ def copy(root_id: str, user_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
+@router.put("/{root_id}/{section}")
+def replace_rows(root_id: str, section: str, payload: dict, user_id: str, db: Session = Depends(get_db)):
+    try:
+        rows = payload.get("rows") if isinstance(payload, dict) else []
+        return ChecklistService.replace_rows(db, root_id, user_id, section, rows or [])
+    except ValueError as exc:
+        message = str(exc)
+        if message == "NOT_FOUND":
+            raise HTTPException(status_code=404, detail=message) from exc
+        raise HTTPException(status_code=409, detail=message) from exc
+
+
+@router.delete("/{root_id}")
+def delete(root_id: str, user_id: str, db: Session = Depends(get_db)):
+    try:
+        return ChecklistService.delete(db, root_id, user_id)
+    except ValueError as exc:
+        message = str(exc)
+        if message == "NOT_FOUND":
+            raise HTTPException(status_code=404, detail=message) from exc
+        raise HTTPException(status_code=409, detail=message) from exc
+
+
 @router.get("")
 def list_checklists(filter: str = None, expand: str = None, top: int = DEFAULT_PAGE_SIZE, skip: int = 0, db: Session = Depends(get_db)):
     query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.is_(False))

@@ -88,6 +88,17 @@ sap.ui.define([], function () {
         };
     }
 
+
+
+    function _acquireLock(sId) {
+        return _request("/lock/acquire", {
+            method: "POST",
+            params: {
+                pcct_uuid: sId,
+                user_id: _userId
+            }
+        });
+    }
     return {
         configure: function (mConfig) {
             mConfig = mConfig || {};
@@ -134,6 +145,8 @@ sap.ui.define([], function () {
         createCheckList: function (oData) {
             var sChecklistId = (oData && oData.root && oData.root.id) || ("CL-" + Date.now());
             var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
+            var aChecks = (oData && oData.checks) || [];
+            var aBarriers = (oData && oData.barriers) || [];
 
             return _request("/checklist/", {
                 method: "POST",
@@ -143,58 +156,106 @@ sap.ui.define([], function () {
                     user_id: _userId
                 }
             }).then(function (oCreated) {
-                return _mapChecklist(oCreated || {
-                    id: sChecklistId,
-                    checklist_id: sChecklistId,
-                    lpc: sLpc,
-                    status: "01"
-                }, {});
+                var sNewId = (oCreated && oCreated.id) || sChecklistId;
+                return _acquireLock(sNewId)
+                    .then(function () {
+                        return _request("/checklist/" + encodeURIComponent(sNewId) + "/checks", {
+                            method: "PUT",
+                            params: { user_id: _userId },
+                            body: { rows: aChecks }
+                        });
+                    })
+                    .then(function () {
+                        return _request("/checklist/" + encodeURIComponent(sNewId) + "/barriers", {
+                            method: "PUT",
+                            params: { user_id: _userId },
+                            body: { rows: aBarriers }
+                        }).catch(function () { return null; });
+                    })
+                    .then(function () {
+                        return _request("/checklist/" + encodeURIComponent(sNewId), { params: { expand: true } });
+                    })
+                    .then(function (oDetails) {
+                        return _mapChecklist(oCreated || {
+                            id: sNewId,
+                            checklist_id: sChecklistId,
+                            lpc: sLpc,
+                            status: "01"
+                        }, oDetails);
+                    });
             });
         },
 
         updateCheckList: function (sId, oData) {
             var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
+            var aChecks = (oData && oData.checks) || [];
+            var aBarriers = (oData && oData.barriers) || [];
 
-            return _request("/checklist/" + encodeURIComponent(sId) + "/autosave", {
-                method: "PATCH",
-                params: {
-                    user_id: _userId,
-                    force: true
-                },
-                body: {
-                    lpc: sLpc
-                }
-            }).then(function () {
-                return oData;
+            return _acquireLock(sId)
+                .then(function () {
+                    return _request("/checklist/" + encodeURIComponent(sId) + "/autosave", {
+                        method: "PATCH",
+                        params: {
+                            user_id: _userId,
+                            force: true
+                        },
+                        body: {
+                            lpc: sLpc
+                        }
+                    });
+                })
+                .then(function () {
+                    return _request("/checklist/" + encodeURIComponent(sId) + "/checks", {
+                        method: "PUT",
+                        params: { user_id: _userId },
+                        body: { rows: aChecks }
+                    });
+                })
+                .then(function () {
+                    return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", {
+                        method: "PUT",
+                        params: { user_id: _userId },
+                        body: { rows: aBarriers }
+                    }).catch(function () { return null; });
+                })
+                .then(function () {
+                    return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: true } });
+                })
+                .then(function (oDetails) {
+                    return _mapChecklist({
+                        id: sId,
+                        checklist_id: ((oData && oData.basic && oData.basic.checklist_id) || sId),
+                        lpc: sLpc,
+                        status: "01"
+                    }, oDetails);
+                });
+        },
+
+        deleteCheckList: function (sId) {
+            return _acquireLock(sId).then(function () {
+                return _request("/checklist/" + encodeURIComponent(sId), {
+                    method: "DELETE",
+                    params: { user_id: _userId }
+                });
             });
         },
 
-        deleteCheckList: function () {
-            return Promise.reject(new Error("DELETE is not implemented on mock_gateway backend API"));
-        },
-
-        upsertRows: function () {
-            return Promise.resolve({ status: "SKIPPED" });
-        },
-
-        lockHeartbeat: function (sSessionId) {
-            return _request("/lock/heartbeat", {
-                method: "POST",
-                params: {
-                    pcct_uuid: sSessionId,
-                    user_id: _userId
-                }
+        upsertRows: function (sId, sSection, aRows) {
+            return _acquireLock(sId).then(function () {
+                return _request("/checklist/" + encodeURIComponent(sId) + "/" + encodeURIComponent(sSection), {
+                    method: "PUT",
+                    params: { user_id: _userId },
+                    body: { rows: aRows || [] }
+                });
             });
         },
 
-        lockRelease: function (sSessionId) {
-            return _request("/lock/release", {
-                method: "POST",
-                params: {
-                    pcct_uuid: sSessionId,
-                    user_id: _userId
-                }
-            });
+        lockHeartbeat: function () {
+            return Promise.resolve({ status: "OK" });
+        },
+
+        lockRelease: function () {
+            return Promise.resolve({ status: "RELEASED" });
         },
 
         getServerState: function () {

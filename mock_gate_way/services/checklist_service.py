@@ -139,6 +139,68 @@ class ChecklistService:
         db.refresh(barrier)
         return barrier
 
+
+
+    @staticmethod
+    def replace_rows(db: Session, root_id: str, user_id: str, section: str, rows: list[dict]):
+        LockService.validate_lock(db, root_id, user_id)
+
+        root = db.query(ChecklistRoot).filter(
+            ChecklistRoot.id == root_id,
+            ChecklistRoot.is_deleted.is_(False),
+        ).first()
+        if not root:
+            raise ValueError("NOT_FOUND")
+
+        if section == "checks":
+            db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root_id).delete()
+            for i, row in enumerate(rows or []):
+                db.add(
+                    ChecklistCheck(
+                        root_id=root_id,
+                        text=row.get("text") or "",
+                        status="DONE" if row.get("result") else "PENDING",
+                        position=i,
+                    )
+                )
+        elif section == "barriers":
+            if not lpc_allows_barriers(root.lpc):
+                raise ValueError("BARRIERS_NOT_ALLOWED_FOR_LPC")
+            db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
+            for i, row in enumerate(rows or []):
+                db.add(
+                    ChecklistBarrier(
+                        root_id=root_id,
+                        description=row.get("text") or row.get("description") or "",
+                        is_active=bool(row.get("result", row.get("is_active", True))),
+                        position=i,
+                    )
+                )
+        else:
+            raise ValueError("UNSUPPORTED_SECTION")
+
+        root.changed_by = user_id
+        root.changed_on = now_utc()
+        db.commit()
+        return ChecklistService.get(db, root_id, expand=True)
+
+    @staticmethod
+    def delete(db: Session, root_id: str, user_id: str):
+        LockService.validate_lock(db, root_id, user_id)
+
+        root = db.query(ChecklistRoot).filter(
+            ChecklistRoot.id == root_id,
+            ChecklistRoot.is_deleted.is_(False),
+        ).first()
+        if not root:
+            raise ValueError("NOT_FOUND")
+
+        root.is_deleted = True
+        root.changed_by = user_id
+        root.changed_on = now_utc()
+        db.commit()
+        return {"status": "DELETED", "id": root_id}
+
     @staticmethod
     def copy(db: Session, root_id: str, user_id: str):
         source = db.query(ChecklistRoot).filter(

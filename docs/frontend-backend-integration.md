@@ -25,9 +25,8 @@ You can also force runtime mode with URL query parameter:
 - lock heartbeat/release (`/lock/heartbeat`, `/lock/release`)
 
 ### Partial / needs backend expansion for full parity
-- checklist delete flow (frontend currently expects hard delete endpoint)
-- full checks/barriers row upsert semantics from object editor
 - exact status / KPI mapping parity between UI fake data and backend entities
+- object-lock UX is still simplified on frontend side (auto acquire in backend adapter)
 
 ## Recommendation
 For production-like end-to-end testing:
