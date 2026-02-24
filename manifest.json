@@ -8,13 +8,15 @@
     "applicationVersion": {
       "version": "1.0.0"
     },
-    "dataSources": {
-      "mockGateway": {
-        "uri": "http://localhost:8000",
-        "type": "REST"
-      }
+"dataSources": {
+  "mainService": {
+    "uri": "http://localhost:5000/",
+    "type": "OData",
+    "settings": {
+      "odataVersion": "2.0"
     }
-  },
+  }
+},
   "sap.ui": {
     "technology": "UI5",
     "icons": {},
