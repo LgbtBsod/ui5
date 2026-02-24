@@ -19,7 +19,16 @@ sap.ui.define([
                 oStateModel.bindProperty(sPath).attachChange(this._updateFilterState, this);
             }.bind(this));
 
+            this.attachRouteMatched("search", this._onSearchMatched);
+
             this._updateFilterState();
+        },
+
+        _onSearchMatched: function () {
+            var oStateModel = this.getModel("state");
+
+            oStateModel.setProperty("/layout", "OneColumn");
+            oStateModel.setProperty("/mode", "READ");
         },
 
         _updateFilterState: function () {
@@ -48,6 +57,7 @@ sap.ui.define([
         },
 
         onCreate: function () {
+            this.getModel("state").setProperty("/objectAction", "CREATE");
             this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
             this.navTo("object", { id: "__create" });
         },
@@ -63,6 +73,7 @@ sap.ui.define([
                 return;
             }
 
+            this.getModel("state").setProperty("/objectAction", "COPY");
             this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
             this.navTo("object", { id: sId });
         },
@@ -102,6 +113,10 @@ sap.ui.define([
 
             oDataModel.setProperty("/visibleCheckLists", aFiltered);
             this._updateFilterState();
+        },
+
+        onToggleTheme: function () {
+            this.toggleTheme();
         },
 
         onResetFilters: function () {

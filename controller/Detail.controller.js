@@ -28,9 +28,6 @@ sap.ui.define([
       this.navTo("search", {}, true);
     },
 
-    onToggleTheme: function () {
-      this.toggleTheme();
-    },
 
     resultText: function (bResult) {
       return bResult ? "Passed" : "Failed";
