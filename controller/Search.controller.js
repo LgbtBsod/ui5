@@ -10,7 +10,8 @@ sap.ui.define([
         onInit: function () {
             var oStateModel = this.getModel("state");
             var oViewModel = new JSONModel({
-                hasActiveFilters: false
+                hasActiveFilters: false,
+                isDarkAccent: this.isDarkAccentEnabled()
             });
 
             this.setModel(oViewModel, "view");
@@ -116,7 +117,8 @@ sap.ui.define([
         },
 
         onToggleTheme: function () {
-            this.toggleTheme();
+            var bIsDark = this.toggleTheme();
+            this.getView().getModel("view").setProperty("/isDarkAccent", bIsDark);
         },
 
         onResetFilters: function () {

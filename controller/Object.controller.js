@@ -70,6 +70,33 @@ sap.ui.define([
       this.getModel("state").setProperty("/mode", isEdit ? "EDIT" : "READ");
     },
 
+
+    onAddCheckRow: function () {
+      var oDataModel = this.getModel("data");
+      var aChecks = oDataModel.getProperty("/object/checks") || [];
+
+      aChecks.push({
+        no: aChecks.length + 1,
+        text: "",
+        result: false
+      });
+
+      oDataModel.setProperty("/object/checks", aChecks);
+    },
+
+    onAddBarrierRow: function () {
+      var oDataModel = this.getModel("data");
+      var aBarriers = oDataModel.getProperty("/object/barriers") || [];
+
+      aBarriers.push({
+        no: aBarriers.length + 1,
+        text: "",
+        result: false
+      });
+
+      oDataModel.setProperty("/object/barriers", aBarriers);
+    },
+
     onSave: function () {
       var oDataModel = this.getModel("data");
       var oStateModel = this.getModel("state");

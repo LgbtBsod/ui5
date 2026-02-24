@@ -10,6 +10,11 @@
 
             <HBox justifyContent="End" class="sapUiTinyMarginBottom">
                 <Button
+                    text="Edit"
+                    type="Emphasized"
+                    press=".onEdit"
+                    class="sapUiTinyMarginEnd"/>
+                <Button
                     icon="sap-icon://decline"
                     type="Transparent"
                     tooltip="Close details"

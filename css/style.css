@@ -175,3 +175,21 @@ body.appDark .glassTable .sapMListTblCell:first-child {
 body.appDark .glassTable .sapMListTblCell:last-child {
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+
+.themeFloatingButton {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+}
+
+.themeFloatingButton .sapMBtnInner {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px !important;
+  background: var(--accent-grad) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: var(--glass-shadow);
+}

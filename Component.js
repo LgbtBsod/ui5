@@ -47,7 +47,7 @@ sap.ui.define([
 
                 return BackendAdapter.getCheckLists().then(function (checkLists) {
                     oDataModel.setProperty("/checkLists", checkLists);
-                    oDataModel.setProperty("/visibleCheckLists", checkLists);
+                    oDataModel.setProperty("/visibleCheckLists", []);
                 }).then(function () {
                     oReferenceModel.setProperty("/persons", persons);
                     oReferenceModel.setProperty("/lpc", lpc);
