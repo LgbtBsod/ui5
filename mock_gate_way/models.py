@@ -10,6 +10,7 @@ from database import Base
 def now_utc():
     return datetime.utcnow()
 
+location_key = Column(String, nullable=True)
 
 class ChecklistRoot(Base):
     __tablename__ = "checklist_root"
@@ -89,7 +90,11 @@ class Person(Base):
     __tablename__ = "persons"
 
     perner = Column(String, primary_key=True)
-    full_name = Column(String)
+
+    first_name = Column(String)
+    last_name = Column(String)
+    middle_name = Column(String)
+
     position = Column(String)
     org_unit = Column(String)
     integration_name = Column(String)
@@ -98,3 +103,60 @@ class Person(Base):
     endda = Column(Date, nullable=True)
 
     changed_on = Column(DateTime, default=now_utc)
+
+class DictionaryItem(Base):
+    __tablename__ = "dictionary_items"
+
+    id = Column(String, primary_key=True)
+    domain = Column(String, nullable=False)   # LPC / PROFESSION / etc
+    key = Column(String, nullable=False)
+    text = Column(String, nullable=False)
+
+    begda = Column(Date, nullable=False)
+    endda = Column(Date, nullable=True)
+
+    changed_on = Column(DateTime, default=now_utc)
+
+    class ChecklistRoot(Base):
+    __tablename__ = "checklist_root"
+
+    id = Column(String, primary_key=True)
+    title = Column(String)
+    lpc_level = Column(String)
+    date_check = Column(Date)
+
+    changed_on = Column(DateTime, default=now_utc)
+
+    barriers = relationship(
+        "Barrier",
+        back_populates="root",
+        cascade="all, delete-orphan"
+    )
+
+    checks = relationship(
+        "Check",
+        back_populates="root",
+        cascade="all, delete-orphan"
+    )
+
+    class Barrier(Base):
+    __tablename__ = "barriers"
+
+    id = Column(String, primary_key=True)
+    root_id = Column(String, ForeignKey("checklist_root.id"))
+
+    name = Column(String)
+    changed_on = Column(DateTime, default=now_utc)
+
+    root = relationship("ChecklistRoot", back_populates="barriers")
+
+    class Check(Base):
+    __tablename__ = "checks"
+
+    id = Column(String, primary_key=True)
+    root_id = Column(String, ForeignKey("checklist_root.id"))
+
+    description = Column(String)
+    changed_on = Column(DateTime, default=now_utc)
+
+    root = relationship("ChecklistRoot", back_populates="checks")

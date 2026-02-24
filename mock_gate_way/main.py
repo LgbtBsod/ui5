@@ -34,3 +34,13 @@ def health():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(lock_cleanup_job())
+
+@app.on_event("startup")
+def startup():
+
+    db = SessionLocal()
+
+    load_dictionary(db, "data/lpc.json", "LPC")
+    load_dictionary(db, "data/professions.json", "PROFESSION")
+
+    db.close()
