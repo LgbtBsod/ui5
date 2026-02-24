@@ -1,31 +1,13 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], function (Controller, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/m/MessageToast"
+], function (Controller, JSONModel, MessageToast) {
     "use strict";
 
     return Controller.extend("sap_ui5.controller.Search", {
 
         onInit: function () {
-
-            const data = [
-                {
-                    id: "CL-1001",
-                    status: "SUCCESS",
-                    checks: 100,
-                    barriers: 100,
-                    observer: "John Smith",
-                    date: "2026-02-20",
-                    equipment: "Pump 01",
-                    lpc: "A",
-                    checksList: [],
-                    barriersList: []
-                }
-            ];
-
-            const model = new JSONModel(data);
-            this.getView().setModel(model, "checklists");
-
             const filterModel = new JSONModel({
                 id: "",
                 lpc: "ALL"
@@ -35,15 +17,25 @@ sap.ui.define([
         },
 
         onSelect: function (oEvent) {
-            const ctx = oEvent.getParameter("listItem").getBindingContext("checklists");
+            const ctx = oEvent.getParameter("listItem").getBindingContext("data");
             const data = ctx.getObject();
-
-            const detailModel = new JSONModel(data);
 
             this.getOwnerComponent().getModel("selected").setData(data);
         },
 
-        statusState: function (sStatus) {
+        onCreate: function () {
+            MessageToast.show("Create action is not implemented yet");
+        },
+
+        onCopy: function () {
+            MessageToast.show("Copy action is not implemented yet");
+        },
+
+        onSearch: function () {
+            MessageToast.show("Filters are applied automatically");
+        },
+
+        formatStatus: function (sStatus) {
             switch (sStatus) {
                 case "SUCCESS": return "Success";
                 case "WARNING": return "Warning";

@@ -2,8 +2,9 @@ sap.ui.define([
     "sap/ui/core/UIComponent",
     "sap/ui/Device",
     "sap_ui5/model/ModelFactory",
-    "sap_ui5/service/ChecklistService"
-], function (UIComponent, Device, ModelFactory, ChecklistService) {
+    "sap_ui5/service/ChecklistService",
+    "sap/ui/model/json/JSONModel"
+], function (UIComponent, Device, ModelFactory, ChecklistService, JSONModel) {
     "use strict";
 
     return UIComponent.extend("sap_ui5.Component", {
@@ -19,7 +20,7 @@ sap.ui.define([
             const oStateModel = ModelFactory.createStateModel();
             const oReferenceModel = ModelFactory.createReferenceModel();
 
-this.setModel(new sap.ui.model.json.JSONModel({}), "selected");
+            this.setModel(new JSONModel({}), "selected");
 
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
