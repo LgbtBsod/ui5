@@ -1,7 +1,20 @@
 sap.ui.define([
-    "ui5/services/backend/InMemoryDB"
+    "sap_ui5/service/backend/InMemoryDB"
 ], function (InMemoryDB) {
     "use strict";
+
+    function _loadInitialChecklists() {
+        return fetch("mock/checklists.json")
+            .then(function (oResponse) {
+                if (!oResponse.ok) {
+                    throw new Error("Failed to load mock/checklists.json");
+                }
+                return oResponse.json();
+            })
+            .then(function (oData) {
+                return oData && Array.isArray(oData.check_lists) ? oData.check_lists : [];
+            });
+    }
 
     return {
 
@@ -12,19 +25,35 @@ sap.ui.define([
             });
         },
 
+        init: function () {
+            return _loadInitialChecklists().then(function (aChecklists) {
+                InMemoryDB.init(aChecklists);
+                return aChecklists;
+            });
+        },
+
+        getCheckLists: function () {
+            return Promise.resolve(InMemoryDB.getCheckLists());
+        },
+
+        createCheckList: function (oData) {
+            return Promise.resolve(InMemoryDB.createCheckList(oData));
+        },
+
+        updateCheckList: function (sId, oData) {
+            return Promise.resolve(InMemoryDB.updateCheckList(sId, oData));
+        },
+
         create: function (payload) {
-            var result = InMemoryDB.createObject(payload);
-            return Promise.resolve(result);
+            return Promise.resolve(InMemoryDB.createObject(payload));
         },
 
         read: function (uuid) {
-            var result = InMemoryDB.readObject(uuid);
-            return Promise.resolve(result);
+            return Promise.resolve(InMemoryDB.readObject(uuid));
         },
 
         update: function (uuid, payload) {
-            var result = InMemoryDB.updateObject(uuid, payload);
-            return Promise.resolve(result);
+            return Promise.resolve(InMemoryDB.updateObject(uuid, payload));
         },
 
         getAll: function () {

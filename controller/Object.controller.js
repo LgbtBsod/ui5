@@ -1,25 +1,22 @@
 sap.ui.define([
-  "sap/ui/core/mvc/Controller"
-], function (Controller) {
+  "sap_ui5/controller/Base"
+], function (BaseController) {
   "use strict";
 
-  return Controller.extend("sap_ui5.controller.Object", {
+  return BaseController.extend("sap_ui5.controller.Object", {
 
     onInit: function () {
-      this.getOwnerComponent().getRouter()
-        .getRoute("object")
-        .attachPatternMatched(this._onMatched, this);
+      this.attachRouteMatched("object", this._onMatched);
     },
 
     _onMatched: function (oEvent) {
-      const sId = oEvent.getParameter("arguments").id;
-      const oComponent = this.getOwnerComponent();
-      const oModel = oComponent.getModel("data");
-      const aChecklists = oModel.getProperty("/checkLists") || [];
-      const oFoundChecklist = aChecklists.find(function (oChecklist) {
+      var sId = oEvent.getParameter("arguments").id;
+      var oModel = this.getModel("data");
+      var aChecklists = oModel.getProperty("/checkLists") || [];
+      var oFoundChecklist = aChecklists.find(function (oChecklist) {
         return oChecklist && oChecklist.root && oChecklist.root.id === sId;
       });
-      let oObjectData;
+      var oObjectData;
 
       if (sId === "__create") {
         oObjectData = {
@@ -60,14 +57,12 @@ sap.ui.define([
 
       oModel.setProperty("/object", oObjectData);
 
-      // Switch to mid column
-      const oFCL = oComponent.getRootControl().byId("fcl");
-      oFCL.setLayout("TwoColumnsMidExpanded");
+      this.getOwnerComponent().getRootControl().byId("fcl").setLayout("TwoColumnsMidExpanded");
     },
 
     onToggleEdit: function (oEvent) {
       var isEdit = oEvent.getParameter("state");
-      this.getOwnerComponent().getModel("state").setProperty("/mode", isEdit ? "EDIT" : "READ");
+      this.getModel("state").setProperty("/mode", isEdit ? "EDIT" : "READ");
     }
 
   });

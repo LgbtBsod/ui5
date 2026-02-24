@@ -1,30 +1,30 @@
 sap.ui.define([
-    "sap/ui/core/mvc/Controller",
+    "sap_ui5/controller/Base",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast"
-], function (Controller, JSONModel, MessageToast) {
+], function (BaseController, JSONModel, MessageToast) {
     "use strict";
 
-    return Controller.extend("sap_ui5.controller.Search", {
+    return BaseController.extend("sap_ui5.controller.Search", {
 
         onInit: function () {
-            const oStateModel = this.getOwnerComponent().getModel("state");
-            const oViewModel = new JSONModel({
+            var oStateModel = this.getModel("state");
+            var oViewModel = new JSONModel({
                 hasActiveFilters: false
             });
 
-            this.getView().setModel(oViewModel, "view");
+            this.setModel(oViewModel, "view");
 
-            ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach((sPath) => {
+            ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach(function (sPath) {
                 oStateModel.bindProperty(sPath).attachChange(this._updateFilterState, this);
-            });
+            }.bind(this));
 
             this._updateFilterState();
         },
 
         _updateFilterState: function () {
-            const oStateModel = this.getOwnerComponent().getModel("state");
-            const bHasFilters = Boolean((oStateModel.getProperty("/filterId") || "").trim())
+            var oStateModel = this.getModel("state");
+            var bHasFilters = Boolean((oStateModel.getProperty("/filterId") || "").trim())
                 || Boolean(oStateModel.getProperty("/filterLpc"))
                 || oStateModel.getProperty("/filterFailedChecks") !== "ALL"
                 || oStateModel.getProperty("/filterFailedBarriers") !== "ALL";
@@ -33,70 +33,67 @@ sap.ui.define([
         },
 
         onSelect: function (oEvent) {
-            const oCtx = oEvent.getParameter("listItem").getBindingContext("data");
-            const oChecklist = oCtx.getObject();
-            const sId = oChecklist && oChecklist.root ? oChecklist.root.id : "";
+            var oCtx = oEvent.getParameter("listItem").getBindingContext("data");
+            var oChecklist = oCtx.getObject();
+            var sId = oChecklist && oChecklist.root ? oChecklist.root.id : "";
 
             if (!sId) {
                 MessageToast.show("Checklist id not found");
                 return;
             }
 
-            this.getOwnerComponent().getModel("selected").setData(oChecklist);
-            this.getOwnerComponent().getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            this.getOwnerComponent().getRouter().navTo("detail", { id: sId });
+            this.getModel("selected").setData(oChecklist);
+            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            this.navTo("detail", { id: sId });
         },
 
         onCreate: function () {
-            const oComponent = this.getOwnerComponent();
-            oComponent.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            oComponent.getRouter().navTo("object", { id: "__create" });
+            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            this.navTo("object", { id: "__create" });
         },
 
         onCopy: function () {
-            const oDataModel = this.getOwnerComponent().getModel("data");
-            const aVisible = oDataModel.getProperty("/visibleCheckLists") || [];
-            const oFirst = aVisible[0];
-            const sId = oFirst && oFirst.root ? oFirst.root.id : "";
+            var oDataModel = this.getModel("data");
+            var aVisible = oDataModel.getProperty("/visibleCheckLists") || [];
+            var oFirst = aVisible[0];
+            var sId = oFirst && oFirst.root ? oFirst.root.id : "";
 
             if (!sId) {
                 MessageToast.show("Nothing to copy");
                 return;
             }
 
-            const oComponent = this.getOwnerComponent();
-            oComponent.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            oComponent.getRouter().navTo("object", { id: sId });
+            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            this.navTo("object", { id: sId });
         },
 
         onSearch: function () {
-            const oComponent = this.getOwnerComponent();
-            const oDataModel = oComponent.getModel("data");
-            const oStateModel = oComponent.getModel("state");
-            const aSource = oDataModel.getProperty("/checkLists") || [];
+            var oDataModel = this.getModel("data");
+            var oStateModel = this.getModel("state");
+            var aSource = oDataModel.getProperty("/checkLists") || [];
 
-            const sFilterId = (oStateModel.getProperty("/filterId") || "").trim().toLowerCase();
-            const sFilterLpc = oStateModel.getProperty("/filterLpc") || "";
-            const sFilterFailedChecks = oStateModel.getProperty("/filterFailedChecks") || "ALL";
-            const sFilterFailedBarriers = oStateModel.getProperty("/filterFailedBarriers") || "ALL";
+            var sFilterId = (oStateModel.getProperty("/filterId") || "").trim().toLowerCase();
+            var sFilterLpc = oStateModel.getProperty("/filterLpc") || "";
+            var sFilterFailedChecks = oStateModel.getProperty("/filterFailedChecks") || "ALL";
+            var sFilterFailedBarriers = oStateModel.getProperty("/filterFailedBarriers") || "ALL";
 
-            const aFiltered = aSource.filter(function (oItem) {
-                const sId = (((oItem || {}).root || {}).id || "").toLowerCase();
-                const sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
-                const nChecks = Number((((oItem || {}).root || {}).successRateChecks));
-                const nBarriers = Number((((oItem || {}).root || {}).successRateBarriers));
+            var aFiltered = aSource.filter(function (oItem) {
+                var sId = (((oItem || {}).root || {}).id || "").toLowerCase();
+                var sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
+                var nChecks = Number((((oItem || {}).root || {}).successRateChecks));
+                var nBarriers = Number((((oItem || {}).root || {}).successRateBarriers));
 
-                const bIdMatch = !sFilterId || sId.includes(sFilterId);
-                const bLpcMatch = !sFilterLpc || sLpc === sFilterLpc;
+                var bIdMatch = !sFilterId || sId.includes(sFilterId);
+                var bLpcMatch = !sFilterLpc || sLpc === sFilterLpc;
 
-                const bChecksFailed = Number.isFinite(nChecks) && nChecks < 100;
-                const bBarriersFailed = Number.isFinite(nBarriers) && nBarriers < 100;
+                var bChecksFailed = Number.isFinite(nChecks) && nChecks < 100;
+                var bBarriersFailed = Number.isFinite(nBarriers) && nBarriers < 100;
 
-                const bChecksMatch = sFilterFailedChecks === "ALL"
+                var bChecksMatch = sFilterFailedChecks === "ALL"
                     || (sFilterFailedChecks === "TRUE" && bChecksFailed)
                     || (sFilterFailedChecks === "FALSE" && !bChecksFailed);
 
-                const bBarriersMatch = sFilterFailedBarriers === "ALL"
+                var bBarriersMatch = sFilterFailedBarriers === "ALL"
                     || (sFilterFailedBarriers === "TRUE" && bBarriersFailed)
                     || (sFilterFailedBarriers === "FALSE" && !bBarriersFailed);
 
@@ -108,7 +105,7 @@ sap.ui.define([
         },
 
         onResetFilters: function () {
-            const oStateModel = this.getOwnerComponent().getModel("state");
+            var oStateModel = this.getModel("state");
 
             oStateModel.setProperty("/filterId", "");
             oStateModel.setProperty("/filterLpc", "");

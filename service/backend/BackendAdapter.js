@@ -1,5 +1,5 @@
 sap.ui.define([
-    "ui5/services/backend/FakeBackendService"
+    "sap_ui5/service/backend/FakeBackendService"
 ], function (FakeBackendService) {
     "use strict";
 
@@ -7,6 +7,22 @@ sap.ui.define([
 
         login: function (username) {
             return FakeBackendService.login(username);
+        },
+
+        init: function () {
+            return FakeBackendService.init();
+        },
+
+        getCheckLists: function () {
+            return FakeBackendService.getCheckLists();
+        },
+
+        createCheckList: function (oData) {
+            return FakeBackendService.createCheckList(oData);
+        },
+
+        updateCheckList: function (sId, oData) {
+            return FakeBackendService.updateCheckList(sId, oData);
         },
 
         createObject: function (data) {

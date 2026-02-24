@@ -1,44 +1,35 @@
 sap.ui.define([
-  "sap/ui/core/mvc/Controller"
-], function (Controller) {
+  "sap_ui5/controller/Base"
+], function (BaseController) {
   "use strict";
 
-  return Controller.extend("sap_ui5.controller.Detail", {
+  return BaseController.extend("sap_ui5.controller.Detail", {
 
     onInit: function () {
-      this.getOwnerComponent().getRouter()
-        .getRoute("detail")
-        .attachPatternMatched(this._onMatched, this);
+      this.attachRouteMatched("detail", this._onMatched);
     },
 
     _onMatched: function (oEvent) {
-      const sId = oEvent.getParameter("arguments").id;
-      const sLayout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
-      const oComponent = this.getOwnerComponent();
-      const oDataModel = oComponent.getModel("data");
-      const aChecklists = oDataModel.getProperty("/checkLists") || [];
-      const oSelected = aChecklists.find(function (item) {
+      var sId = oEvent.getParameter("arguments").id;
+      var sLayout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
+      var oDataModel = this.getModel("data");
+      var aChecklists = oDataModel.getProperty("/checkLists") || [];
+      var oSelected = aChecklists.find(function (item) {
         return item && item.root && item.root.id === sId;
       }) || null;
 
       oDataModel.setProperty("/selectedChecklist", oSelected);
-      oComponent.getModel("selected").setData(oSelected || {});
-      oComponent.getModel("state").setProperty("/layout", sLayout);
+      this.getModel("selected").setData(oSelected || {});
+      this.getModel("state").setProperty("/layout", sLayout);
     },
 
     onCloseDetail: function () {
-      const oComponent = this.getOwnerComponent();
-      oComponent.getModel("state").setProperty("/layout", "OneColumn");
-      oComponent.getRouter().navTo("search", {}, true);
+      this.getModel("state").setProperty("/layout", "OneColumn");
+      this.navTo("search", {}, true);
     },
 
     onToggleTheme: function () {
-      const oConfig = sap.ui.getCore().getConfiguration();
-      const sCurrentTheme = oConfig.getTheme();
-      const sNextTheme = sCurrentTheme === "sap_fiori_3" ? "sap_fiori_3_dark" : "sap_fiori_3";
-
-      sap.ui.getCore().applyTheme(sNextTheme);
-      document.body.classList.toggle("appDark", sNextTheme === "sap_fiori_3_dark");
+      this.toggleTheme();
     },
 
     resultText: function (bResult) {

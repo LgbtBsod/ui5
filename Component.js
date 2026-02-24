@@ -1,10 +1,10 @@
 sap.ui.define([
     "sap/ui/core/UIComponent",
-    "sap/ui/Device",
     "sap_ui5/model/ModelFactory",
     "sap_ui5/service/ChecklistService",
+    "sap_ui5/service/backend/BackendAdapter",
     "sap/ui/model/json/JSONModel"
-], function (UIComponent, Device, ModelFactory, ChecklistService, JSONModel) {
+], function (UIComponent, ModelFactory, ChecklistService, BackendAdapter, JSONModel) {
     "use strict";
 
     return UIComponent.extend("sap_ui5.Component", {
@@ -14,62 +14,50 @@ sap.ui.define([
         },
 
         init: function () {
-            // 1. Инициализация родителя
             UIComponent.prototype.init.apply(this, arguments);
 
-     // dataModel
-            this.setModel(new JSONModel({
-                objects: []
-            }), "data");
-
-            // stateModel
-            this.setModel(new JSONModel({
-                mode: "READONLY",
-                isDirty: false,
-                sessionId: null
-            }), "state");
-
-            // login simulation
-            BackendAdapter.login("demoUser").then(function (result) {
-                this.getModel("state").setProperty("/sessionId", result.sessionId);
-            }.bind(this));
-
-            // 2. Создание базовых моделей
-            const oDataModel = ModelFactory.createDataModel();
-            const oStateModel = ModelFactory.createStateModel();
-            const oReferenceModel = ModelFactory.createReferenceModel();
+            var oDataModel = ModelFactory.createDataModel();
+            var oStateModel = ModelFactory.createStateModel();
+            var oReferenceModel = ModelFactory.createReferenceModel();
 
             this.setModel(new JSONModel({}), "selected");
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
             this.setModel(oReferenceModel, "ref");
 
-            // 3. Запуск роутера (важно делать это СРАЗУ, чтобы вьюхи начали грузиться)
             this.getRouter().initialize();
 
-            // 4. Загрузка данных
             oStateModel.setProperty("/isLoading", true);
 
             Promise.all([
-                ChecklistService.loadCheckLists().catch(() => []),
-                ChecklistService.loadPersons().catch(() => []),
-                ChecklistService.loadLpc().catch(() => []),
-                ChecklistService.loadProfessions().catch(() => []),
-                ChecklistService.loadLocations().catch(() => [])
-            ]).then(([checkLists, persons, lpc, professions, locations]) => {
-                
-                oDataModel.setProperty("/checkLists", checkLists);
-                oDataModel.setProperty("/visibleCheckLists", checkLists);
-                
-                oReferenceModel.setProperty("/persons", persons);
-                oReferenceModel.setProperty("/lpc", lpc);
-                oReferenceModel.setProperty("/professions", professions);
-                oReferenceModel.setProperty("/locations", locations);
+                BackendAdapter.login("demoUser"),
+                BackendAdapter.init(),
+                ChecklistService.loadPersons().catch(function () { return []; }),
+                ChecklistService.loadLpc().catch(function () { return []; }),
+                ChecklistService.loadProfessions().catch(function () { return []; }),
+                ChecklistService.loadLocations().catch(function () { return []; })
+            ]).then(function (aResults) {
+                var oLogin = aResults[0];
+                var persons = aResults[2];
+                var lpc = aResults[3];
+                var professions = aResults[4];
+                var locations = aResults[5];
 
-            }).catch((oError) => {
+                oStateModel.setProperty("/sessionId", oLogin.sessionId);
+
+                return BackendAdapter.getCheckLists().then(function (checkLists) {
+                    oDataModel.setProperty("/checkLists", checkLists);
+                    oDataModel.setProperty("/visibleCheckLists", checkLists);
+                }).then(function () {
+                    oReferenceModel.setProperty("/persons", persons);
+                    oReferenceModel.setProperty("/lpc", lpc);
+                    oReferenceModel.setProperty("/professions", professions);
+                    oReferenceModel.setProperty("/locations", locations);
+                });
+            }).catch(function (oError) {
                 oStateModel.setProperty("/loadError", true);
                 oStateModel.setProperty("/loadErrorMessage", "Ошибка при загрузке данных: " + oError.message);
-            }).finally(() => {
+            }).finally(function () {
                 oStateModel.setProperty("/isLoading", false);
             });
         }
