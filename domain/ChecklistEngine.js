@@ -9,16 +9,22 @@ sap.ui.define([], function () {
         return String(vValue).trim().length > 0;
     }
 
-    function calculateSectionCompletion(aItems) {
+    function calculateSectionSuccess(aItems) {
         if (!Array.isArray(aItems) || aItems.length === 0) {
-            return 0;
+            return {
+                rate: 0,
+                hasFailed: null
+            };
         }
 
-        var iCompleted = aItems.filter(function (oItem) {
-            return _isFilled((oItem || {}).text);
+        var iSuccess = aItems.filter(function (oItem) {
+            return !!((oItem || {}).result);
         }).length;
 
-        return Math.round((iCompleted / aItems.length) * 100);
+        return {
+            rate: Math.round((iSuccess / aItems.length) * 100),
+            hasFailed: iSuccess < aItems.length
+        };
     }
 
     function calculateBasicCompletion(oBasic) {
@@ -57,14 +63,16 @@ sap.ui.define([], function () {
             oCheckList.root = oCheckList.root || {};
             oCheckList.basic = oCheckList.basic || {};
 
-            var iChecksRate = calculateSectionCompletion(oCheckList.checks);
-            var iBarriersRate = calculateSectionCompletion(oCheckList.barriers);
+            var oChecksStats = calculateSectionSuccess(oCheckList.checks);
+            var oBarriersStats = calculateSectionSuccess(oCheckList.barriers);
             var iBasicRate = calculateBasicCompletion(oCheckList.basic);
 
-            oCheckList.root.successRateChecks = iChecksRate;
-            oCheckList.root.successRateBarriers = iBarriersRate;
-            oCheckList.root.successRateOverall = Math.round((iChecksRate + iBarriersRate + iBasicRate) / 3);
-            oCheckList.root.status = deriveStatus(iChecksRate, iBarriersRate, iBasicRate);
+            oCheckList.root.successRateChecks = oChecksStats.rate;
+            oCheckList.root.successRateBarriers = oBarriersStats.rate;
+            oCheckList.root.hasFailedChecks = oChecksStats.hasFailed;
+            oCheckList.root.hasFailedBarriers = oBarriersStats.hasFailed;
+            oCheckList.root.successRateOverall = Math.round((oChecksStats.rate + oBarriersStats.rate + iBasicRate) / 3);
+            oCheckList.root.status = deriveStatus(oChecksStats.rate, oBarriersStats.rate, iBasicRate);
 
             return oCheckList;
         }

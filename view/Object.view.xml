@@ -39,7 +39,6 @@
         <Toolbar class="toolbarTransparent">
           <Title text="{i18n>checksTitle}"/>
           <ToolbarSpacer/>
-          <Button text="{i18n>deleteSelected}" press=".onDeleteSelectedChecks" type="Reject" enabled="{view>/hasSelectedChecks}" visible="{= ${state>/mode}==='EDIT'}" class="sapUiTinyMarginEnd"/>
           <Button text="{i18n>addRow}"
                   press=".onAddCheckRow"
                   visible="{= ${state>/mode}==='EDIT'}"/>
@@ -73,7 +72,6 @@
         <Toolbar class="toolbarTransparent">
           <Title text="{i18n>barriersTitle}"/>
           <ToolbarSpacer/>
-          <Button text="{i18n>deleteSelected}" press=".onDeleteSelectedBarriers" type="Reject" enabled="{view>/hasSelectedBarriers}" visible="{= ${state>/mode}==='EDIT'}" class="sapUiTinyMarginEnd"/>
           <Button text="{i18n>addRow}"
                   press=".onAddBarrierRow"
                   visible="{= ${state>/mode}==='EDIT'}"/>

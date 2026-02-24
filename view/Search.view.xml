@@ -5,7 +5,6 @@
     xmlns:core="sap.ui.core">
 
     <Page
-        title="{i18n>searchPageTitle}"
         class="pageTransparent"
         busy="{state>/isLoading}">
 
@@ -48,7 +47,7 @@
                             </items>
                         </Select>
 
-                        <SegmentedButton selectedKey="{state>/filterFailedChecks}" class="statusSegment cleanSegment sapUiTinyMarginEnd sapUiTinyMarginBottom" selectionChange=".onSearch">
+                        <SegmentedButton selectedKey="{state>/filterFailedChecks}" class="statusSegmented statusSegment sapUiTinyMarginEnd sapUiTinyMarginBottom" selectionChange=".onSearch">
                             <items>
                                 <SegmentedButtonItem key="ALL" text="{i18n>allChecks}"/>
                                 <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
@@ -56,7 +55,7 @@
                             </items>
                         </SegmentedButton>
 
-                        <SegmentedButton selectedKey="{state>/filterFailedBarriers}" class="statusSegment cleanSegment sapUiTinyMarginEnd sapUiTinyMarginBottom" selectionChange=".onSearch">
+                        <SegmentedButton selectedKey="{state>/filterFailedBarriers}" class="statusSegmented statusSegment sapUiTinyMarginEnd sapUiTinyMarginBottom" selectionChange=".onSearch">
                             <items>
                                 <SegmentedButtonItem key="ALL" text="{i18n>allBarriers}"/>
                                 <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
@@ -103,6 +102,8 @@
 
                     <Table
                         id="checkTable"
+                        autoPopinMode="true"
+                        fixedLayout="false"
                         growing="true"
                         growingThreshold="20"
                         class="glassTable roundedTable searchResultTable"
@@ -113,23 +114,23 @@
                         itemPress=".onSelect">
 
                         <columns>
-                            <Column><Text text="{i18n>columnId}"/></Column>
-                            <Column><Text text="{i18n>columnStatus}"/></Column>
-                            <Column><Text text="{i18n>columnChecks}"/></Column>
-                            <Column><Text text="{i18n>columnBarriers}"/></Column>
-                            <Column><Text text="{i18n>columnObserver}"/></Column>
+                            <Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>columnId}"/></Column>
+                            <Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>columnStatus}"/></Column>
+                            <Column width="10rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>columnChecks}"/></Column>
+                            <Column width="10rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>columnBarriers}"/></Column>
+                            <Column width="14rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>columnObserver}"/></Column>
                         </columns>
 
                         <items>
                             <ColumnListItem type="Navigation" class="searchResultRow">
                                 <cells>
-                                    <Text text="{data>root/id}"/>
+                                    <Text text="{data>root/id}" wrapping="false"/>
                                     <ObjectStatus
                                         text="{data>root/status}"
                                         state="{ path: 'data>root/status', formatter: '.formatStatus' }"/>
                                     <ProgressIndicator percentValue="{data>root/successRateChecks}" displayValue="{= ${data>root/successRateChecks} + '%' }" state="Information"/>
                                     <ProgressIndicator percentValue="{data>root/successRateBarriers}" displayValue="{= ${data>root/successRateBarriers} + '%' }" state="Information"/>
-                                    <Text text="{data>basic/OBSERVER_FULLNAME}"/>
+                                    <Text text="{data>basic/OBSERVER_FULLNAME}" wrapping="false"/>
                                 </cells>
                             </ColumnListItem>
                         </items>
