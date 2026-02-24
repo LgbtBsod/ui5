@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/controller/Base",
+    "sap_ui5/controller/Base.controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast"
 ], function (BaseController, JSONModel, MessageToast) {

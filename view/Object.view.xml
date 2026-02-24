@@ -4,7 +4,7 @@
   xmlns:core="sap.ui.core"
   controllerName="sap_ui5.controller.Object">
 
-  <Page showHeader="false">
+  <Page showHeader="false" busy="{state>/isBusy}">
     <VBox class="pagePadding">
 
       <HBox class="glassHero">
@@ -12,6 +12,15 @@
         <ToolbarSpacer/>
         <Switch state="{= ${state>/mode} === 'EDIT' }"
                 change=".onToggleEdit"/>
+      </HBox>
+
+      <HBox class="sapUiTinyMarginBottom" justifyContent="End">
+        <Button text="{i18n>objectSave}"
+                type="Emphasized"
+                press=".onSave"
+                visible="{= ${state>/mode}==='EDIT'}"
+                class="sapUiTinyMarginEnd"/>
+        <Button text="{i18n>objectCancel}" press=".onCancel"/>
       </HBox>
 
       <VBox class="glassSurface blockCard">
