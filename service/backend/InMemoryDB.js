@@ -36,12 +36,17 @@ sap.ui.define([], function () {
             _db.objects = oParsed.objects || {};
             return true;
         } catch (e) {
+            window.localStorage.removeItem(STORAGE_KEY);
             return false;
         }
     }
 
     function _generateUUID() {
         return "uuid-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
+    }
+
+    function _generateChecklistId() {
+        return "CHK-" + Date.now();
     }
 
     return {
@@ -60,9 +65,29 @@ sap.ui.define([], function () {
         },
 
         createCheckList: function (oData) {
-            _db.checkLists.push(_clone(oData));
+            var oNew = _clone(oData || {});
+            var sId = (((oNew || {}).root || {}).id || "").trim();
+
+            if (!oNew.root) {
+                oNew.root = {};
+            }
+
+            if (!sId) {
+                sId = _generateChecklistId();
+                oNew.root.id = sId;
+            }
+
+            var bExists = _db.checkLists.some(function (oItem) {
+                return oItem && oItem.root && oItem.root.id === sId;
+            });
+
+            if (bExists) {
+                throw new Error("Checklist with id '" + sId + "' already exists");
+            }
+
+            _db.checkLists.push(oNew);
             _persist();
-            return _clone(oData);
+            return _clone(oNew);
         },
 
         updateCheckList: function (sId, oData) {
