@@ -5,12 +5,8 @@
     xmlns="sap.m">
 
     <f:FlexibleColumnLayout id="fcl" layout="{state>/layout}">
-        <f:beginColumnPages>
-            <mvc:XMLView viewName="sap_ui5.view.Search"/>
-        </f:beginColumnPages>
-        <f:midColumnPages>
-            <mvc:XMLView viewName="sap_ui5.view.Detail"/>
-        </f:midColumnPages>
+        <f:beginColumnPages/>
+        <f:midColumnPages/>
     </f:FlexibleColumnLayout>
 
 </mvc:View>
