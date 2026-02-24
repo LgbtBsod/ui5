@@ -12,9 +12,9 @@
   --accent-rgb: 255, 83, 17;
   --shadow: rgba(0, 0, 0, 0.62);
 
-  --radius-xl: 24px;
-  --radius-lg: 16px;
-  --radius-md: 12px;
+  --radius-xl: 20px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
   --transition: cubic-bezier(0.4, 0, 0.2, 1);
 
   --bg-main: radial-gradient(circle at 20% 15%, #2d1711 0%, #16131b 46%, #0a0a0e 100%);
@@ -48,12 +48,12 @@
   --accent-rgb: 0, 172, 238;
   --shadow: rgba(93, 138, 168, 0.18);
 
-  --bg-main: linear-gradient(180deg, #f8fdff 0%, #eef8ff 46%, #e4f3ff 100%);
+  --bg-main: linear-gradient(180deg, #f7fbff 0%, #eef6ff 44%, #e8f1fb 100%);
   --bg-grad-a: rgba(0, 172, 238, 0.2);
   --bg-grad-b: rgba(143, 228, 255, 0.34);
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(0, 136, 188, 0.18);
-  --glass-shadow: 0 26px 75px rgba(89, 152, 188, 0.18);
+  --glass-shadow: 0 20px 45px rgba(89, 152, 188, 0.14);
   --text-main: var(--text);
   --text-muted: var(--text-sub);
   --accent-grad: linear-gradient(145deg, #00acee, #37d2ff);
@@ -153,11 +153,12 @@ body {
 .glassCard,
 .filterCard {
   background: var(--glass-bg) !important;
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(135%);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
   border: 1px solid var(--glass-border) !important;
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
+  -webkit-font-smoothing: antialiased;
   padding: 1.65rem;
   transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition), transform 0.25s var(--transition);
 }
@@ -224,7 +225,7 @@ body {
 .themeDockButton .sapMBtnInner {
   width: 3.05rem;
   height: 3.05rem;
-  border-radius: var(--radius-md) !important;
+  border-radius: 14px !important;
   background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.18)) !important;
   border: 1px solid rgba(var(--accent-rgb), 0.46) !important;
   color: var(--accent) !important;
@@ -749,4 +750,155 @@ body {
 
 :root.light-mode .flatEditorTable .sapMListTblRow .sapMListTblCell {
   background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.04)) !important;
+}
+
+/* --- Premium iOS-like polish pass --- */
+.appContent {
+  padding: 2.9rem;
+  gap: 1.65rem;
+}
+
+.glassCard,
+.filterCard {
+  background: color-mix(in srgb, var(--glass-bg) 90%, rgba(255,255,255,0.03)) !important;
+  backdrop-filter: blur(22px) saturate(130%);
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
+  border: 1px solid color-mix(in srgb, var(--glass-border) 92%, rgba(var(--accent-rgb), 0.15)) !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.sapMBtn .sapMBtnInner,
+.sapMBtnTransparent .sapMBtnInner,
+.sapMSegBBtn .sapMBtnInner {
+  border-color: rgba(var(--accent-rgb), 0.42) !important;
+}
+
+.sapMBtn,
+.sapMSegBBtn,
+.sapMSwt {
+  opacity: 0.9;
+  transition: opacity .22s var(--transition), transform .22s var(--transition), filter .22s var(--transition);
+}
+
+.sapMBtn:hover,
+.sapMSegBBtn:hover,
+.sapMSwt:hover {
+  opacity: 1;
+}
+
+.sapMSegBBtnSel .sapMBtnInner,
+.sapMSegBBtn.sapMSegBBtnSel .sapMBtnInner,
+.sapMSwt.sapMSwtOn .sapMSwtInner,
+.sapMSwt.sapMSwtOn .sapMSwtHandle {
+  border-color: rgba(var(--accent-rgb), 0.58) !important;
+}
+
+.themeDockButton {
+  right: 1rem;
+  bottom: 1rem;
+}
+
+.themeDockButton .sapMBtnInner {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 999px !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(255,255,255,0.08)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 82%, rgba(255,255,255,0.16)) !important;
+}
+
+.themeDockButton .sapUiIcon {
+  color: color-mix(in srgb, var(--text-main) 72%, transparent) !important;
+  font-size: 1.08rem !important;
+}
+
+.themeDockButton .sapMBtnContent {
+  color: color-mix(in srgb, var(--text-main) 72%, transparent) !important;
+}
+
+.themeDockButton:hover .sapMBtnInner {
+  transform: translateY(-1px) scale(1.03);
+  border-color: color-mix(in srgb, var(--glass-border) 72%, rgba(255,255,255,0.26)) !important;
+}
+
+.statusToggleWrapper {
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.09));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 10px 24px rgba(0,0,0,0.15);
+}
+
+.statusToggleWrapper .customStatusBtn .sapMBtnInner {
+  min-height: 2.35rem;
+}
+
+/* --- Object/Detail card luxury pass --- */
+.objectContent,
+.detailContent {
+  gap: 1.85rem;
+}
+
+.objectHeroCard,
+.detailHeroCard {
+  position: relative;
+  overflow: hidden;
+}
+
+.objectHeroCard::before,
+.detailHeroCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(var(--accent-rgb), 0.16), transparent 36%, rgba(255,255,255,0.04) 62%, transparent 100%);
+}
+
+.objectActionBar {
+  padding: .55rem .65rem;
+  border-radius: calc(var(--radius-lg) + 4px);
+  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.07));
+  border: 1px solid color-mix(in srgb, var(--glass-border) 85%, rgba(var(--accent-rgb), 0.15));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.objectActionBar .sapMBtn {
+  opacity: .93;
+}
+
+.objectActionBar .sapMBtn:hover {
+  opacity: 1;
+}
+
+.flatEditorTable .sapMListTblHeaderCell {
+  background: color-mix(in srgb, var(--surface2) 78%, transparent) !important;
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 80%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 80%, transparent) !important;
+}
+
+.flatEditorTable .sapMListTblHeaderCell:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.flatEditorTable .sapMListTblHeaderCell:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.flatEditorTable .sapMInputBaseContentWrapper {
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(255,255,255,0.05)) !important;
+}
+
+.sapMTree {
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--glass-border) 85%, rgba(var(--accent-rgb), 0.14));
+  background: color-mix(in srgb, var(--surface2) 90%, transparent);
+  padding: .35rem;
+}
+
+.sapMTree .sapMLIB {
+  border-radius: 10px;
+  margin: 2px 0;
+}
+
+.sapMTree .sapMLIB:hover {
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.12));
 }

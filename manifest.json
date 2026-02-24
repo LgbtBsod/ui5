@@ -134,7 +134,7 @@
       }
     },
     "config": {
-      "backendMode": "fake"
+      "backendMode": "real"
     }
   }
 }

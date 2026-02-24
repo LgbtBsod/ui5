@@ -104,11 +104,13 @@ sap.ui.define([
     onToggleEdit: function (oEvent) {
       var isEdit = oEvent.getParameter("state");
       var oState = this.getModel("state");
+      var sObjectId = oState.getProperty("/activeObjectId");
+      var sSessionId = oState.getProperty("/sessionId");
 
       if (isEdit) {
         BackendAdapter.lockAcquire(
-          oState.getProperty("/activeObjectId"),
-          oState.getProperty("/sessionId")
+          sObjectId,
+          sSessionId
         ).then(function () {
           oState.setProperty("/isLocked", true);
         }).catch(function () {
@@ -117,7 +119,9 @@ sap.ui.define([
           MessageToast.show(this.getResourceBundle().getText("lockConflictMessage"));
         }.bind(this));
       } else {
-        oState.setProperty("/isLocked", false);
+        this._releaseLock(sObjectId, sSessionId).finally(function () {
+          oState.setProperty("/isLocked", false);
+        });
       }
 
       oState.setProperty("/mode", isEdit ? "EDIT" : "READ");
@@ -256,14 +260,19 @@ sap.ui.define([
 
     onCancel: function () {
       var oDataModel = this.getModel("data");
+      var oStateModel = this.getModel("state");
       var oOriginal = oDataModel.getProperty("/objectOriginal");
       var sOriginalId = ((((oOriginal || {}).root || {}).id) || "").trim();
+      var sObjectId = oStateModel.getProperty("/activeObjectId");
+      var sSessionId = oStateModel.getProperty("/sessionId");
 
       if (oOriginal) {
         oDataModel.setProperty("/object", _clone(oOriginal));
       }
 
-      this.getModel("state").setProperty("/mode", "READ");
+      oStateModel.setProperty("/mode", "READ");
+      oStateModel.setProperty("/isLocked", false);
+      this._releaseLock(sObjectId, sSessionId);
 
       if (sOriginalId) {
         this.navTo("detail", { id: sOriginalId }, true);
@@ -271,6 +280,16 @@ sap.ui.define([
       }
 
       this.navTo("search", {}, true);
+    },
+
+    _releaseLock: function (sObjectId, sSessionId) {
+      if (!sObjectId || !sSessionId) {
+        return Promise.resolve();
+      }
+
+      return BackendAdapter.lockRelease(sObjectId, sSessionId).catch(function () {
+        return null;
+      });
     }
 
   });

@@ -7,12 +7,19 @@ sap.ui.define([
 ], function (BaseController, BackendAdapter, MessageToast, JSONModel, RowListHelper) {
   "use strict";
 
+  function _clone(vData) {
+    return JSON.parse(JSON.stringify(vData || {}));
+  }
+
   return BaseController.extend("sap_ui5.controller.Detail", {
 
     onInit: function () {
       var oViewModel = new JSONModel({
         hasSelectedChecks: false,
         hasSelectedBarriers: false,
+        observerSuggestions: [],
+        observedSuggestions: [],
+        locationTree: [],
         infoCards: [
           { key: "observer", title: this.getResourceBundle().getText("observerLabel") },
           { key: "observed", title: this.getResourceBundle().getText("observedLabel") },
@@ -32,7 +39,43 @@ sap.ui.define([
       oStateModel.setProperty("/mode", "READ");
       oStateModel.setProperty("/activeObjectId", sId || null);
 
+      this._prepareLocationTree();
       this._bindChecklistById(sId);
+    },
+
+    _prepareLocationTree: function () {
+      var aLocations = this.getModel("mpl").getProperty("/locations") || [];
+      this.getModel("view").setProperty("/locationTree", this._buildLocationTree(aLocations));
+    },
+
+    _buildLocationTree: function (aFlatNodes) {
+      var mById = {};
+      var aRoots = [];
+
+      (aFlatNodes || []).forEach(function (oNode) {
+        var sNodeId = oNode && oNode.node_id;
+        if (!sNodeId) {
+          return;
+        }
+        mById[sNodeId] = {
+          node_id: sNodeId,
+          parent_id: oNode.parent_id || null,
+          location_name: oNode.location_name || sNodeId,
+          hierarchy_level: oNode.hierarchy_level,
+          children: []
+        };
+      });
+
+      Object.keys(mById).forEach(function (sId) {
+        var oNode = mById[sId];
+        if (oNode.parent_id && mById[oNode.parent_id]) {
+          mById[oNode.parent_id].children.push(oNode);
+        } else {
+          aRoots.push(oNode);
+        }
+      });
+
+      return aRoots;
     },
 
     _bindChecklistById: function (sId) {
@@ -44,7 +87,7 @@ sap.ui.define([
 
       if (oLocalMatch) {
         oDataModel.setProperty("/selectedChecklist", oLocalMatch);
-        this.getModel("selected").setData(JSON.parse(JSON.stringify(oLocalMatch)));
+        this.getModel("selected").setData(_clone(oLocalMatch));
         this._updateSelectionState();
         return;
       }
@@ -59,11 +102,55 @@ sap.ui.define([
         oDataModel.setProperty("/checkLists", aSafeChecklists);
         oDataModel.setProperty("/visibleCheckLists", aSafeChecklists);
         oDataModel.setProperty("/selectedChecklist", oRemoteMatch);
-        this.getModel("selected").setData(JSON.parse(JSON.stringify(oRemoteMatch || {})));
+        this.getModel("selected").setData(_clone(oRemoteMatch));
         this._updateSelectionState();
       }.bind(this)).finally(function () {
         this.getModel("state").setProperty("/isLoading", false);
       }.bind(this));
+    },
+
+    onPersonSuggest: function (oEvent) {
+      var sValue = (oEvent.getParameter("suggestValue") || "").toLowerCase();
+      var sTarget = oEvent.getSource().data("target");
+      var aPersons = this.getModel("masterData").getProperty("/persons") || [];
+      var aFiltered = aPersons.filter(function (oPerson) {
+        var sName = (oPerson.fullName || "").toLowerCase();
+        var sPernr = (oPerson.perner || "").toLowerCase();
+        return sName.indexOf(sValue) >= 0 || sPernr.indexOf(sValue) >= 0;
+      }).slice(0, 10);
+
+      this.getModel("view").setProperty(sTarget === "observed" ? "/observedSuggestions" : "/observerSuggestions", aFiltered);
+    },
+
+    onPersonSuggestionSelected: function (oEvent) {
+      var oItem = oEvent.getParameter("selectedItem");
+      if (!oItem) {
+        return;
+      }
+
+      var sTarget = oEvent.getSource().data("target");
+      var oPerson = oItem.getBindingContext("view").getObject();
+      var sPrefix = sTarget === "observed" ? "OBSERVED_" : "OBSERVER_";
+      var oSelectedModel = this.getModel("selected");
+
+      oSelectedModel.setProperty("/basic/" + sPrefix + "PERNER", oPerson.perner || "");
+      oSelectedModel.setProperty("/basic/" + sPrefix + "FULLNAME", oPerson.fullName || "");
+      oSelectedModel.setProperty("/basic/" + sPrefix + "POSITION", oPerson.position || "");
+      oSelectedModel.setProperty("/basic/" + sPrefix + "ORGUNIT", oPerson.orgUnit || "");
+      oSelectedModel.setProperty("/basic/" + sPrefix + "INTEGRATION_NAME", oPerson.integrationName || "");
+    },
+
+    onLocationSelectionChange: function (oEvent) {
+      var oItem = oEvent.getParameter("listItem");
+      if (!oItem) {
+        return;
+      }
+
+      var oNode = oItem.getBindingContext("view").getObject();
+      var oSelectedModel = this.getModel("selected");
+      oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
+      oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
+      oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
     },
 
     onCloseDetail: function () {
@@ -96,10 +183,9 @@ sap.ui.define([
 
     onCancelEditFromDetail: function () {
       var oSelected = this.getModel("data").getProperty("/selectedChecklist") || {};
-      this.getModel("selected").setData(JSON.parse(JSON.stringify(oSelected)));
+      this.getModel("selected").setData(_clone(oSelected));
       this.getModel("state").setProperty("/mode", "READ");
     },
-
 
     _updateSelectionState: function () {
       var oSelectedModel = this.getModel("selected");
@@ -241,7 +327,6 @@ sap.ui.define([
       oSelectedModel.setProperty("/barriers", RowListHelper.addRow(aBarriers));
       this._updateSelectionState();
     },
-
 
     onDeleteCheckRow: function (oEvent) {
       var oCtx = oEvent.getSource().getBindingContext("selected");

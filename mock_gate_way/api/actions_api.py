@@ -32,3 +32,11 @@ def unlock_checklist(root_id: str, user_id: str, db: Session = Depends(get_db)):
         return {"d": True}
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/export")
+def export_report(payload: dict, db: Session = Depends(get_db)):
+    s_entity = (payload or {}).get("entity") or "checklist"
+    m_filters = (payload or {}).get("filters") or {}
+    s_mode = (payload or {}).get("search_mode") or "EXACT"
+    return ActionService.export_report(db, s_entity, m_filters, s_mode)

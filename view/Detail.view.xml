@@ -4,7 +4,8 @@
     xmlns="sap.m"
     xmlns:form="sap.ui.layout.form"
     xmlns:f="sap.f"
-    xmlns:dnd="sap.ui.core.dnd">
+    xmlns:dnd="sap.ui.core.dnd"
+    xmlns:core="sap.ui.core">
 
     <Page showHeader="false" class="pageTransparent">
 
@@ -108,10 +109,51 @@
                     <Label text="{i18n>equipmentLabel}"/>
                     <Input value="{selected>/basic/equipment}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
+                    <Label text="{i18n>observerLabel}"/>
+                    <Input value="{selected>/basic/OBSERVER_FULLNAME}"
+                           editable="{= ${state>/mode} === 'EDIT' }"
+                           showSuggestion="true"
+                           suggest=".onPersonSuggest"
+                           suggestionItemSelected=".onPersonSuggestionSelected"
+                           suggestionItems="{view>/observerSuggestions}">
+                        <core:CustomData key="target" value="observer" writeToDom="false"/>
+                        <suggestionItems>
+                            <core:Item key="{view>perner}" text="{view>fullName}" additionalText="{view>position}"/>
+                        </suggestionItems>
+                    </Input>
+
+                    <Label text="{i18n>observedLabel}"/>
+                    <Input value="{selected>/basic/OBSERVED_FULLNAME}"
+                           editable="{= ${state>/mode} === 'EDIT' }"
+                           showSuggestion="true"
+                           suggest=".onPersonSuggest"
+                           suggestionItemSelected=".onPersonSuggestionSelected"
+                           suggestionItems="{view>/observedSuggestions}">
+                        <core:CustomData key="target" value="observed" writeToDom="false"/>
+                        <suggestionItems>
+                            <core:Item key="{view>perner}" text="{view>fullName}" additionalText="{view>position}"/>
+                        </suggestionItems>
+                    </Input>
+
                     <Label text="{i18n>lpcLabel}"/>
                     <Input value="{selected>/basic/LPC_TEXT}" editable="{= ${state>/mode} === 'EDIT' }"/>
 
                 </form:SimpleForm>
+            </VBox>
+
+            <VBox class="glassCard">
+                <Toolbar class="toolbarTransparent">
+                    <Title text="{i18n>locationLabel}"/>
+                </Toolbar>
+                <Text text="{selected>/basic/LOCATION_NAME}" class="sapUiTinyMarginBottom"/>
+                <Tree
+                    items="{path: 'view>/locationTree', parameters: { arrayNames: ['children'] }}"
+                    mode="SingleSelectMaster"
+                    includeItemInSelection="true"
+                    selectionChange=".onLocationSelectionChange"
+                    visible="{= ${state>/mode} === 'EDIT' }">
+                    <StandardTreeItem title="{view>location_name}"/>
+                </Tree>
             </VBox>
 
             <VBox class="glassCard">
