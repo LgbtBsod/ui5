@@ -1,335 +1,144 @@
-/* =========================================================
-   THEME TOKENS (Интеграция стиля Тема 10)
-========================================================= */
-
 :root {
-  /* Светлая тема (Blue Glass) */
-  --bg-main: linear-gradient(180deg, #f4f7fb, #e9eef5);
+  --bg-main: linear-gradient(180deg, #f4f7fb 0%, #e9eef5 100%);
   --bg-grad-a: rgba(10, 110, 209, 0.25);
-  --bg-grad-b: rgba(10, 110, 209, 0.18);
+  --bg-grad-b: rgba(0, 195, 255, 0.16);
 
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  
-  --text-main: #1a2333;
-  --text-muted: #6b768a;
+  --glass-bg: rgba(255, 255, 255, 0.56);
+  --glass-border: rgba(255, 255, 255, 0.68);
+  --glass-shadow: 0 24px 70px rgba(0, 38, 86, 0.14);
 
-  --accent: #0a6ed1;
-  --accent-grad: linear-gradient(145deg, #0a6ed1, #0962b8);
-  
-  --shadow-glass: 0 25px 70px rgba(0, 0, 0, 0.12);
+  --text-main: #15233a;
+  --text-muted: #5f6f89;
+  --accent-grad: linear-gradient(145deg, #0a6ed1, #0087e6);
 }
 
-/* ТЕМНАЯ ТЕМА (Amber Night из Тема 10) */
-body.appDark, .darkMode {
-  --bg-main: linear-gradient(180deg, #0c0f14, #151a22);
-  --bg-grad-a: rgba(255, 170, 0, 0.25);
-  --bg-grad-b: rgba(255, 200, 0, 0.15);
+body.appDark {
+  --bg-main: linear-gradient(180deg, #0c0f14 0%, #151a22 100%);
+  --bg-grad-a: rgba(255, 170, 0, 0.22);
+  --bg-grad-b: rgba(255, 128, 0, 0.16);
 
-  --glass-bg: rgba(28, 32, 40, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(28, 32, 40, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 28px 85px rgba(0, 0, 0, 0.56);
 
-  --text-main: #e5edf8;
-  --text-muted: #a9b7cd;
-
-  --accent: #ffb300;
-  --accent-grad: linear-gradient(145deg, #ffb300, #ff8800);
-
-  --shadow-glass: 0 25px 80px rgba(0, 0, 0, 0.6);
+  --text-main: #eaf1ff;
+  --text-muted: #a5b2c7;
+  --accent-grad: linear-gradient(145deg, #ffb300, #ff8a00);
 }
 
-/* =========================================================
-   GLOBAL BACKGROUND
-========================================================= */
-
+.sapUiBody,
 body {
+  margin: 0;
+  min-height: 100vh;
   background:
-    radial-gradient(circle at 15% 20%, var(--bg-grad-a), transparent 45%),
-    radial-gradient(circle at 85% 80%, var(--bg-grad-b), transparent 55%),
+    radial-gradient(circle at 14% 18%, var(--bg-grad-a), transparent 46%),
+    radial-gradient(circle at 86% 78%, var(--bg-grad-b), transparent 55%),
     var(--bg-main) !important;
   color: var(--text-main);
-  transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  margin: 0;
+  transition: background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* =========================================================
-   GLASS CONTAINERS (Карточки и Контейнеры)
-========================================================= */
-
-.sapUxAPObjectPageContainer, 
-.infoCard, 
-.glassCard, 
-.participantPanel {
-  background: var(--glass-bg) !important;
-  backdrop-filter: blur(22px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(150%) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: 32px !important;
-  box-shadow: var(--shadow-glass) !important;
-  transition: all 0.4s ease;
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
 }
 
-/* =========================================================
-   BUTTONS (Исправленное "нормальное" отображение)
-========================================================= */
-
-/* Стилизуем внутреннюю часть кнопки UI5, чтобы не ломать верстку */
-.sapMBtn {
-  height: auto !important;
-  margin: 4px !important;
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.sapMBtnInner {
-  border-radius: 50px !important; /* Округлая форма из Темы 10 */
-  border: none !important;
-  font-weight: 600 !important;
-  padding: 0 24px !important; /* Нормальные боковые отступы */
-  height: 2.5rem !important; /* Стандартная высота SAPUI5 */
-  line-height: 2.5rem !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+::-webkit-scrollbar-thumb {
+  background: rgba(10, 110, 209, 0.55);
+  border-radius: 16px;
 }
 
-/* Акцентные кнопки (Emphasized) */
-.sapMBtn.sapMBtnEmphasized .sapMBtnInner {
-  background: var(--accent-grad) !important;
-  color: #fff !important;
-  text-shadow: none !important;
-  box-shadow: 0 8px 20px rgba(10, 110, 209, 0.3) !important;
-}
-
-body.appDark .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
-  box-shadow: 0 8px 25px rgba(255, 170, 0, 0.4) !important;
-}
-
-/* Эффект при наведении */
-.sapMBtn:hover .sapMBtnInner {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
-}
-
-/* =========================================================
-   LISTS & TABLES
-========================================================= */
-
-.sapMLIB {
-  border-radius: 18px !important;
-  margin: 8px 0 !important;
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: none !important;
-  transition: all 0.3s ease !important;
-}
-
-.sapMLIB:hover {
-  transform: translateX(8px) !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-}
-
-/* =========================================================
-   TITLES & TEXT
-========================================================= */
-
-.sapMTitle {
-  font-weight: 700 !important;
-  color: var(--text-main) !important;
-}
-
-.sapMText {
-  color: var(--text-main) !important;
-}
-
-/* ================= ROOT ================= */
-
-.luxRoot {
-  padding: 80px;
-  max-width: 1500px;
-  margin: 0 auto;
-  gap: 60px;
-}
-
-/* ================= BACKGROUND ================= */
-
-.sapUiBody {
-  background:
-    radial-gradient(circle at 15% 20%, rgba(10,110,209,.25), transparent 45%),
-    radial-gradient(circle at 85% 80%, rgba(10,110,209,.18), transparent 55%),
-    linear-gradient(180deg,#f4f7fb,#e9eef5) !important;
-}
-
-/* ================= GLASS ================= */
-
-.luxGlass {
-  backdrop-filter: blur(30px) saturate(160%);
-  background: rgba(255,255,255,.65);
-  border-radius: 40px;
-  padding: 40px;
-  box-shadow: 0 30px 100px rgba(0,0,0,.12);
-  transition: .3s ease;
-}
-
-.luxGlass:hover {
-  transform: translateY(-4px);
-}
-
-body.appDark .luxGlass {
-  background: rgba(28,32,40,.7);
-  box-shadow: 0 40px 120px rgba(0,0,0,.8);
-}
-
-/* ================= HERO ================= */
-
-.luxHeroTitle {
-  font-size: 34px !important;
-  font-weight: 600 !important;
-}
-
-.luxHeroSub {
-  opacity: .6;
-  margin-top: 8px;
-}
-
-/* ================= MINI CARDS ================= */
-
-.luxGrid {
-  gap: 30px;
-}
-
-.luxMiniCard {
-  min-width: 240px;
-  flex: 1;
-  padding: 30px;
-  border-radius: 28px;
-  background: rgba(255,255,255,.5);
-  transition: .2s ease;
-}
-
-.luxMiniCard:hover {
-  transform: scale(1.02);
-}
-
-/* ================= TABLE (ТЕМА 10 STYLE) ================= */
-
-.luxTableWrapper {
-  border-radius: 36px;
-}
-
-.luxTable .sapMListTbl {
-  border-collapse: separate !important;
-  border-spacing: 0 14px !important;
-}
-
-.luxTable .sapMListTblRow {
-  background: rgba(255,255,255,.85);
-  border-radius: 20px;
-  transition: .2s ease;
-}
-
-.luxTable .sapMListTblRow:hover {
-  transform: scale(1.01);
-}
-
-body.appDark .luxTable .sapMListTblRow {
-  background: rgba(255,255,255,.06);
-}
-
-.luxTable .sapMListTblCell {
-  padding: 22px !important;
-}
-
-.luxTable .sapMListTblCell:first-child {
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-}
-
-.luxTable .sapMListTblCell:last-child {
-  border-top-right-radius: 20px;
-  border-bottom-right-radius: 20px;
-}
-
-.themeSwitchButton {
-  position: fixed !important; /* Фиксирует кнопку относительно экрана, а не страницы */
-  bottom: 40px !important;    /* Расстояние от нижнего края */
-  right: 40px !important;     /* Расстояние от правого края */
-  
-  width: 64px !important;     /* Увеличенный размер для удобства */
-  height: 64px !important;
-  z-index: 5000 !important;   /* Гарантирует, что кнопка будет поверх всех "стеклянных" слоев */
-  
-  background: var(--accent-grad) !important;
-  border-radius: 50% !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
-  border: none !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-}
-
-/* Центрирование иконки внутри кнопки */
-.themeSwitchButton .sapMBtnInner {
-  background: transparent !important;
-  border: none !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.themeSwitchButton .sapMBtnIcon {
-  color: white !important;
-  font-size: 1.8rem !important; /* Крупная иконка */
-}
-
-.appShell {
-    min-height: 100vh;
-    background: radial-gradient(circle at 20% 20%, #1f2a3a, #0f1720 70%);
-    padding: 2rem;
+body.appDark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 170, 0, 0.55);
 }
 
 .pageTransparent {
-    background: transparent !important;
+  background: transparent !important;
 }
 
+.appContent {
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.glassCard,
 .filterCard {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.08);
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 28px;
+  box-shadow: var(--glass-shadow);
+  padding: 1.2rem;
 }
 
-.glassCard {
-    background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(25px);
-    border-radius: 24px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+.toolbarTransparent {
+  background: transparent !important;
+  border: none !important;
 }
 
-.glassTable .sapMListTbl {
-    border-collapse: separate !important;
-    border-spacing: 0 14px !important;
+.sapMTitle,
+.sapMText,
+.sapMLabel,
+.sapMObjStatusText {
+  color: var(--text-main) !important;
 }
 
-.glassTable .sapMListTblRow {
-    background: rgba(255,255,255,0.05);
-    border-radius: 16px;
-    transition: 0.25s ease;
+.sapMBtnInner {
+  border-radius: 999px !important;
+  transition: transform .2s ease, box-shadow .2s ease !important;
 }
 
-.glassTable .sapMListTblRow:hover {
-    transform: translateY(-3px);
-    background: rgba(255,255,255,0.08);
+.sapMBtn:hover .sapMBtnInner {
+  transform: translateY(-1px);
 }
 
-.sapMInputBaseInner {
-    border-radius: 12px !important;
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
+.sapMBtn.sapMBtnEmphasized .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 12px 28px rgba(10, 110, 209, 0.3) !important;
+}
+
+body.appDark .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
+  box-shadow: 0 12px 28px rgba(255, 170, 0, 0.34) !important;
 }
 
 .themeButton .sapMBtnInner {
-    border-radius: 50px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
+  background: var(--accent-grad) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.glassTable .sapMListTbl {
+  border-collapse: separate !important;
+  border-spacing: 0 10px !important;
+}
+
+.glassTable .sapMListTblRow {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  transition: transform .2s ease, background .2s ease;
+}
+
+body.appDark .glassTable .sapMListTblRow {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.glassTable .sapMListTblRow:hover {
+  transform: translateX(4px);
+}
+
+.glassTable .sapMListTblCell:first-child {
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+
+.glassTable .sapMListTblCell:last-child {
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
 }

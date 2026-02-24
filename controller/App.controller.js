@@ -4,18 +4,15 @@ sap.ui.define([
     "use strict";
 
     return Controller.extend("sap_ui5.controller.App", {
-        
-        // Все функции должны быть ВНУТРИ этих фигурных скобок
+
         onToggleTheme: function () {
             const oConfig = sap.ui.getCore().getConfiguration();
-            const current = oConfig.getTheme();
-            const next = current === "sap_fiori_3" ? "sap_fiori_3_dark" : "sap_fiori_3";
+            const sCurrent = oConfig.getTheme();
+            const sNext = sCurrent === "sap_fiori_3" ? "sap_fiori_3_dark" : "sap_fiori_3";
 
-            sap.ui.getCore().applyTheme(next);
-            
-            // Переключаем класс на body для работы CSS из style.css
-            document.body.classList.toggle("appDark");
+            sap.ui.getCore().applyTheme(sNext);
+            document.body.classList.toggle("appDark", sNext === "sap_fiori_3_dark");
         }
 
-    }); // Закрываем Controller.extend
-}); // Закрываем sap.ui.define
+    });
+});

@@ -12,12 +12,14 @@ sap.ui.define([
     },
 
     _onMatched: function (oEvent) {
-      const id = oEvent.getParameter("arguments").id;
+      const sId = oEvent.getParameter("arguments").id;
       const sLayout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
       const oComponent = this.getOwnerComponent();
       const oDataModel = oComponent.getModel("data");
       const aChecklists = oDataModel.getProperty("/checkLists") || [];
-      const oSelected = aChecklists.find((item) => item.root.id === id) || null;
+      const oSelected = aChecklists.find(function (item) {
+        return item && item.root && item.root.id === sId;
+      }) || null;
 
       oDataModel.setProperty("/selectedChecklist", oSelected);
       oComponent.getModel("selected").setData(oSelected || {});
@@ -39,13 +41,12 @@ sap.ui.define([
       document.body.classList.toggle("appDark", sNextTheme === "sap_fiori_3_dark");
     },
 
-    statusState: function (sStatus) {
-      switch (sStatus) {
-        case "SUCCESS": return "Success";
-        case "WARNING": return "Warning";
-        case "CRITICAL": return "Error";
-        default: return "None";
-      }
+    resultText: function (bResult) {
+      return bResult ? "Passed" : "Failed";
+    },
+
+    resultState: function (bResult) {
+      return bResult ? "Success" : "Error";
     }
 
   });

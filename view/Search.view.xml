@@ -6,106 +6,102 @@
 
     <Page
         title="{i18n>searchPageTitle}"
+        class="pageTransparent"
         busy="{state>/isLoading}">
 
         <content>
+            <VBox class="appContent sapUiSmallMargin">
 
-            <!-- FILTER BAR -->
-            <VBox class="sapUiSmallMargin">
+                <VBox class="glassCard filterCard sapUiSmallMarginBottom">
+                    <Toolbar class="toolbarTransparent">
+                        <Title text="{i18n>filtersTitle}"/>
+                        <ToolbarSpacer/>
+                        <Button text="{i18n>createButton}" press=".onCreate"/>
+                        <Button text="{i18n>copyButton}" press=".onCopy"/>
+                    </Toolbar>
 
-                <Toolbar>
-                    <Title text="{i18n>filtersTitle}"/>
-                    <ToolbarSpacer/>
-                    <Button text="{i18n>createButton}" press=".onCreate"/>
-                    <Button text="{i18n>copyButton}" press=".onCopy"/>
-                </Toolbar>
+                    <MessageStrip
+                        visible="{state>/loadError}"
+                        type="Error"
+                        showIcon="true"
+                        text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
+                        class="sapUiTinyMarginTop"/>
 
-                <MessageStrip
-                    visible="{state>/loadError}"
-                    type="Error"
-                    showIcon="true"
-                    text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
-                    class="sapUiTinyMarginTop"/>
+                    <HBox class="sapUiSmallMarginTop" alignItems="Center" wrap="Wrap" renderType="Bare">
+                        <Input
+                            placeholder="{i18n>checklistIdPlaceholder}"
+                            value="{state>/filterId}"
+                            width="14rem"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
 
-                <HBox class="sapUiSmallMarginTop" alignItems="Center" wrap="Wrap">
+                        <Select
+                            width="14rem"
+                            selectedKey="{state>/filterLpc}"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                            <items>
+                                <core:Item key="" text="{i18n>allLpc}"/>
+                                <core:Item key="L1" text="{i18n>lpcLow}"/>
+                                <core:Item key="L2" text="{i18n>lpcMedium}"/>
+                                <core:Item key="L3" text="{i18n>lpcHigh}"/>
+                            </items>
+                        </Select>
 
-                    <Input
-                        placeholder="{i18n>checklistIdPlaceholder}"
-                        value="{state>/filterId}"
-                        width="200px"/>
+                        <SegmentedButton selectedKey="{state>/filterFailedChecks}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                            <items>
+                                <SegmentedButtonItem key="ALL" text="{i18n>allChecks}"/>
+                                <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
+                                <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
+                            </items>
+                        </SegmentedButton>
 
-                    <Select
-                        width="200px"
-                        selectedKey="{state>/filterLpc}">
+                        <SegmentedButton selectedKey="{state>/filterFailedBarriers}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                            <items>
+                                <SegmentedButtonItem key="ALL" text="{i18n>allBarriers}"/>
+                                <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
+                                <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
+                            </items>
+                        </SegmentedButton>
+
+                        <Button text="{i18n>searchButton}" type="Emphasized" press=".onSearch" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <Button text="Reset" visible="{view>/hasActiveFilters}" press=".onResetFilters" class="sapUiTinyMarginBottom"/>
+                    </HBox>
+                </VBox>
+
+                <VBox class="glassCard">
+                    <Table
+                        id="checkTable"
+                        class="glassTable"
+                        busy="{state>/isLoading}"
+                        noDataText="{= ${state>/loadError} ? ${i18n>noDataLoadError} : ${i18n>noDataDefault} }"
+                        items="{ path: 'data>/visibleCheckLists' }"
+                        mode="SingleSelectMaster"
+                        itemPress=".onSelect">
+
+                        <columns>
+                            <Column><Text text="{i18n>columnId}"/></Column>
+                            <Column><Text text="{i18n>columnStatus}"/></Column>
+                            <Column><Text text="{i18n>columnChecks}"/></Column>
+                            <Column><Text text="{i18n>columnBarriers}"/></Column>
+                            <Column><Text text="{i18n>columnObserver}"/></Column>
+                        </columns>
+
                         <items>
-                            <core:Item key="" text="{i18n>allLpc}"/>
-                            <core:Item key="L1" text="{i18n>lpcLow}"/>
-                            <core:Item key="L2" text="{i18n>lpcMedium}"/>
-                            <core:Item key="L3" text="{i18n>lpcHigh}"/>
+                            <ColumnListItem type="Navigation">
+                                <cells>
+                                    <Text text="{data>root/id}"/>
+                                    <ObjectStatus
+                                        text="{data>root/status}"
+                                        state="{ path: 'data>root/status', formatter: '.formatStatus' }"/>
+                                    <Text text="{data>root/successRateChecks}"/>
+                                    <Text text="{data>root/successRateBarriers}"/>
+                                    <Text text="{data>basic/OBSERVER_FULLNAME}"/>
+                                </cells>
+                            </ColumnListItem>
                         </items>
-                    </Select>
-
-                    <!-- Custom filter checks -->
-                    <SegmentedButton selectedKey="{state>/filterFailedChecks}">
-                        <items>
-                            <SegmentedButtonItem key="ALL" text="{i18n>allChecks}"/>
-                            <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
-                            <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
-                        </items>
-                    </SegmentedButton>
-
-                    <!-- Custom filter barriers -->
-                    <SegmentedButton selectedKey="{state>/filterFailedBarriers}">
-                        <items>
-                            <SegmentedButtonItem key="ALL" text="{i18n>allBarriers}"/>
-                            <SegmentedButtonItem key="TRUE" text="{i18n>hasFailed}"/>
-                            <SegmentedButtonItem key="FALSE" text="{i18n>allPassed}"/>
-                        </items>
-                    </SegmentedButton>
-
-                    <Button text="{i18n>searchButton}" press=".onSearch"/>
-                </HBox>
+                    </Table>
+                </VBox>
 
             </VBox>
-
-            <!-- TABLE -->
-            <Table
-                id="checkTable"
-                busy="{state>/isLoading}"
-                noDataText="{= ${state>/loadError} ? ${i18n>noDataLoadError} : ${i18n>noDataDefault} }"
-                items="{
-                    path: 'data>/visibleCheckLists'
-                }"
-                mode="SingleSelectMaster"
-                itemPress=".onSelect">
-
-                <columns>
-                    <Column><Text text="{i18n>columnId}"/></Column>
-                    <Column><Text text="{i18n>columnStatus}"/></Column>
-                    <Column><Text text="{i18n>columnChecks}"/></Column>
-                    <Column><Text text="{i18n>columnBarriers}"/></Column>
-                    <Column><Text text="{i18n>columnObserver}"/></Column>
-                </columns>
-
-                <items>
-                    <ColumnListItem type="Navigation">
-                        <cells>
-                            <Text text="{data>root/id}"/>
-                            <ObjectStatus
-                                text="{data>root/status}"
-                                state="{
-                                    path: 'data>root/status',
-                                    formatter: '.formatStatus'
-                                }"/>
-                            <Text text="{data>root/successRateChecks}"/>
-                            <Text text="{data>root/successRateBarriers}"/>
-                            <Text text="{data>basic/OBSERVER_FULLNAME}"/>
-                        </cells>
-                    </ColumnListItem>
-                </items>
-
-            </Table>
-
         </content>
     </Page>
 </mvc:View>
