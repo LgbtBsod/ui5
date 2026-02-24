@@ -17,6 +17,9 @@ sap.ui.define([
                 resultSummary: ""
             });
 
+            this._iSearchDebounceMs = 180;
+            this._iSearchTimer = null;
+
             this.applyStoredTheme();
             this.setModel(oViewModel, "view");
 
@@ -41,8 +44,19 @@ sap.ui.define([
             this._updateFilterState();
 
             if (this.getView().getModel("view").getProperty("/hasSearched")) {
-                this._executeSearch();
+                this._scheduleSearch();
             }
+        },
+
+        _scheduleSearch: function () {
+            if (this._iSearchTimer) {
+                clearTimeout(this._iSearchTimer);
+            }
+
+            this._iSearchTimer = setTimeout(function () {
+                this._executeSearch();
+                this._iSearchTimer = null;
+            }.bind(this), this._iSearchDebounceMs);
         },
 
         _updateFilterState: function () {
@@ -74,7 +88,6 @@ sap.ui.define([
             var sFilterFailedChecks = oStateModel.getProperty("/filterFailedChecks") || "ALL";
             var sFilterFailedBarriers = oStateModel.getProperty("/filterFailedBarriers") || "ALL";
             var sSearchMode = oStateModel.getProperty("/searchMode") || "EXACT";
-
             var aFiltered = aSource.filter(function (oItem) {
                 var sId = (((oItem || {}).root || {}).id || "").toLowerCase();
                 var sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
@@ -198,6 +211,13 @@ sap.ui.define([
             this.getModel("state").setProperty("/searchMode", bLoose ? "LOOSE" : "EXACT");
             this.getView().getModel("view").setProperty("/hasSearched", true);
             this._executeSearch();
+        },
+
+        onExit: function () {
+            if (this._iSearchTimer) {
+                clearTimeout(this._iSearchTimer);
+                this._iSearchTimer = null;
+            }
         },
 
         formatStatus: function (sStatus) {
