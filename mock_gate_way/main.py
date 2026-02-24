@@ -6,10 +6,15 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.actions_api import router as actions_router
 from api.checklist_api import router as checklist_router
+from api.dictionary_api import legacy_router as dictionary_legacy_router
 from api.dictionary_api import router as dictionary_router
+from api.hierarchy_api import router as hierarchy_router
 from api.location_api import router as location_router
 from api.lock_api import router as lock_router
+from api.person_api import router as person_router
+from config import LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.dict_loader import load_dictionary
 from services.lock_service import LockService
@@ -27,7 +32,7 @@ async def lock_cleanup_job() -> None:
                 logger.info("Cleaned %s expired locks", cleaned)
         finally:
             db.close()
-        await asyncio.sleep(30)
+        await asyncio.sleep(LOCK_CLEANUP_INTERVAL_SECONDS)
 
 
 @asynccontextmanager
@@ -47,7 +52,7 @@ async def lifespan(_: FastAPI):
     task.cancel()
 
 
-app = FastAPI(title="SAP Gateway Simulator", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="SAP Gateway Simulator", version="1.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -59,7 +64,11 @@ app.add_middleware(
 app.include_router(lock_router)
 app.include_router(checklist_router)
 app.include_router(dictionary_router)
+app.include_router(dictionary_legacy_router)
 app.include_router(location_router)
+app.include_router(person_router)
+app.include_router(hierarchy_router)
+app.include_router(actions_router)
 
 
 @app.get("/")
