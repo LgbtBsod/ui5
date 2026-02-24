@@ -1,42 +1,215 @@
- <mvc:View
-   xmlns:mvc="sap.ui.core.mvc"
-   xmlns="sap.m"
-   controllerName="sap_ui5.controller.Detail">
- 
+<mvc:View
+  controllerName="sap_ui5.controller.Detail"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.uxap"
+  xmlns:m="sap.m"
+  xmlns:layout="sap.ui.layout"
+  displayBlock="true">
 
-  <Page title="{i18n>detailPageTitle}">
-     <content>
+  <ObjectPageLayout
+    id="objectPage"
+    showFooter="false"
+    showAnchorBar="true"
+    class="sapUiContentPadding">
 
-      <VBox class="contentWrap" visible="{= !!${data>/selectedChecklist} }">
-         <VBox class="glassSurface">
+    <!-- ================= HEADER ================= -->
 
-          <Title text="{i18n>executionChecklistTitle}" level="H2"/>
-         <Text text="{i18n>executionChecklistSubtitle}" class="mutedText sapUiTinyMarginBottom"/>
- 
+    <headerTitle>
+      <ObjectPageDynamicHeaderTitle>
 
-          <List items="{data>/selectedChecklist/checks}" showSeparators="Inner">
-             <CustomListItem>
-               <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
-                 <VBox>
+        <expandedHeading>
+          <m:VBox>
+            <m:Title text="{root/id}" level="H2"/>
+            <m:HBox class="sapUiTinyMarginTop" alignItems="Center">
 
-                  <Title text="{data>text}" level="H4"/>
-                  <Text text="{i18n>operationalControlText}" class="mutedText"/>
-                 </VBox>
-                 <ObjectStatus 
+              <m:ObjectStatus
+                text="{root/status}"
+                state="{
+                  = ${root/status} === 'SUCCESS' ? 'Success' :
+                    ${root/status} === 'WARNING' ? 'Warning' :
+                    'Error'
+                }"
+                class="sapUiSmallMarginEnd"/>
 
-                  text="{= ${data>result} ? ${i18n>statusOk} : ${i18n>statusFailed} }" 
-                  state="{= ${data>result} ? 'Success' : 'Error' }"/>
-               </HBox>
-             </CustomListItem>
-           </List>
-         </VBox>
-       </VBox>
+              <m:ObjectStatus
+                text="Integration: {root/integrationFlag}"
+                state="Information"
+                class="sapUiSmallMarginEnd"/>
 
-      <MessagePage
-       visible="{= !${data>/selectedChecklist} }"
-        text="{i18n>detailNotFoundText}"
-        description="{i18n>detailNotFoundDescription}"
-       showHeader="false"/>
-     </content>
-   </Page>
- </mvc:View>
+              <m:ObjectStatus
+                text="Checks {root/successRateChecks}%"
+                state="Success"
+                class="sapUiSmallMarginEnd"/>
+
+              <m:ObjectStatus
+                text="Barriers {root/successRateBarriers}%"
+                state="Warning"/>
+
+            </m:HBox>
+          </m:VBox>
+        </expandedHeading>
+
+      </ObjectPageDynamicHeaderTitle>
+    </headerTitle>
+
+    <!-- ================= BASIC INFO ================= -->
+
+    <sections>
+
+      <ObjectPageSection title="Basic Information">
+        <subSections>
+          <ObjectPageSubSection>
+
+            <blocks>
+
+              <layout:Grid defaultSpan="L4 M6 S12">
+
+                <m:VBox class="infoCard">
+                  <m:Text text="Date"/>
+                  <m:Title text="{basic/date}" level="H5"/>
+                </m:VBox>
+
+                <m:VBox class="infoCard">
+                  <m:Text text="Time"/>
+                  <m:Title text="{basic/time}" level="H5"/>
+                </m:VBox>
+
+                <m:VBox class="infoCard">
+                  <m:Text text="Timezone"/>
+                  <m:Title text="{basic/timezone}" level="H5"/>
+                </m:VBox>
+
+                <m:VBox class="infoCard">
+                  <m:Text text="Location"/>
+                  <m:Title text="{basic/LOCATION_NAME}" level="H5"/>
+                </m:VBox>
+
+                <m:VBox class="infoCard">
+                  <m:Text text="Equipment"/>
+                  <m:Title text="{basic/equipment}" level="H5"/>
+                </m:VBox>
+
+                <m:VBox class="infoCard">
+                  <m:Text text="LPC"/>
+                  <m:Title text="{basic/LPC}" level="H5"/>
+                </m:VBox>
+
+                <m:VBox class="infoCard">
+                  <m:Text text="Profession"/>
+                  <m:Title text="{basic/profession}" level="H5"/>
+                </m:VBox>
+
+              </layout:Grid>
+
+            </blocks>
+
+          </ObjectPageSubSection>
+        </subSections>
+      </ObjectPageSection>
+
+      <!-- ================= PARTICIPANTS ================= -->
+
+      <ObjectPageSection title="Participants">
+        <subSections>
+          <ObjectPageSubSection>
+
+            <blocks>
+
+              <layout:Grid defaultSpan="L6 M6 S12">
+
+                <m:Panel headerText="Observer" class="participantPanel">
+                  <m:Text text="{basic/observer_fullName}"/>
+                  <m:Text text="{basic/observer_position}"/>
+                  <m:Text text="{basic/observer_orgUnit}"/>
+                </m:Panel>
+
+                <m:Panel headerText="Observed" class="participantPanel">
+                  <m:Text text="{basic/observed_fullName}"/>
+                  <m:Text text="{basic/observed_position}"/>
+                  <m:Text text="{basic/observed_orgUnit}"/>
+                </m:Panel>
+
+              </layout:Grid>
+
+            </blocks>
+
+          </ObjectPageSubSection>
+        </subSections>
+      </ObjectPageSection>
+
+      <!-- ================= CHECKS ================= -->
+
+      <ObjectPageSection title="Checks">
+        <subSections>
+          <ObjectPageSubSection>
+            <blocks>
+
+              <m:Table items="{checks}" class="modernTable">
+
+                <m:columns>
+                  <m:Column><m:Text text="#"/></m:Column>
+                  <m:Column><m:Text text="Text"/></m:Column>
+                  <m:Column><m:Text text="Comment"/></m:Column>
+                  <m:Column><m:Text text="Result"/></m:Column>
+                </m:columns>
+
+                <m:items>
+                  <m:ColumnListItem>
+                    <m:cells>
+                      <m:Text text="{number}"/>
+                      <m:Text text="{text}"/>
+                      <m:Text text="{comment}"/>
+                      <m:ObjectStatus
+                        text="{result}"
+                        state="{= ${result} === 'YES' ? 'Success' : 'Error'}"/>
+                    </m:cells>
+                  </m:ColumnListItem>
+                </m:items>
+
+              </m:Table>
+
+            </blocks>
+          </ObjectPageSubSection>
+        </subSections>
+      </ObjectPageSection>
+
+      <!-- ================= BARRIERS ================= -->
+
+      <ObjectPageSection title="Barriers">
+        <subSections>
+          <ObjectPageSubSection>
+            <blocks>
+
+              <m:Table items="{barriers}" class="modernTable">
+
+                <m:columns>
+                  <m:Column><m:Text text="#"/></m:Column>
+                  <m:Column><m:Text text="Text"/></m:Column>
+                  <m:Column><m:Text text="Comment"/></m:Column>
+                  <m:Column><m:Text text="Result"/></m:Column>
+                </m:columns>
+
+                <m:items>
+                  <m:ColumnListItem>
+                    <m:cells>
+                      <m:Text text="{number}"/>
+                      <m:Text text="{text}"/>
+                      <m:Text text="{comment}"/>
+                      <m:ObjectStatus
+                        text="{result}"
+                        state="{= ${result} === 'YES' ? 'Success' : 'Error'}"/>
+                    </m:cells>
+                  </m:ColumnListItem>
+                </m:items>
+
+              </m:Table>
+
+            </blocks>
+          </ObjectPageSubSection>
+        </subSections>
+      </ObjectPageSection>
+
+    </sections>
+
+  </ObjectPageLayout>
+</mvc:View>

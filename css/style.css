@@ -185,3 +185,61 @@ body.appDark {
 .editMode .blockCard {
   border: 2px solid #2ecc71;
 }
+
+.modernGrid .sapMLIB {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: 0.2s ease;
+}
+
+.modernGrid .sapMLIB:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.participantCard {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 14px;
+  width: 45%;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  transition: 0.2s ease;
+}
+
+.participantCard:hover {
+  transform: scale(1.02);
+}
+
+.modernTable .sapMListTblRow {
+  transition: 0.2s ease;
+}
+
+.modernTable .sapMListTblRow:hover {
+  background: #f5f7fa;
+}
+
+
+.infoCard {
+  background: white;
+  padding: 1rem;
+  margin: 0.5rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  transition: 0.2s ease;
+}
+
+.infoCard:hover {
+  transform: translateY(-2px);
+}
+
+.participantPanel {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.modernTable .sapMListTblRow:hover {
+  background: #f5f7fa;
+}
