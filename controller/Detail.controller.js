@@ -28,6 +28,15 @@ sap.ui.define([
       this.navTo("search", {}, true);
     },
 
+    onEdit: function () {
+      var sId = (((this.getModel("selected").getData() || {}).root || {}).id || "");
+      if (!sId) {
+        return;
+      }
+
+      this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+      this.navTo("object", { id: sId });
+    },
 
     resultText: function (bResult) {
       return bResult ? "Passed" : "Failed";

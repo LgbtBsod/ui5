@@ -29,13 +29,14 @@ sap.ui.define([
             this.getRouter().getRoute(sRouteName).attachPatternMatched(fnHandler, this);
         },
 
-        toggleTheme: function () {
-            var oConfig = sap.ui.getCore().getConfiguration();
-            var sCurrentTheme = oConfig.getTheme();
-            var sNextTheme = sCurrentTheme === "sap_fiori_3" ? "sap_fiori_3_dark" : "sap_fiori_3";
+        isDarkAccentEnabled: function () {
+            return document.body.classList.contains("appDark");
+        },
 
-            sap.ui.getCore().applyTheme(sNextTheme);
-            document.body.classList.toggle("appDark", sNextTheme === "sap_fiori_3_dark");
+        toggleTheme: function () {
+            var bIsDark = !this.isDarkAccentEnabled();
+            document.body.classList.toggle("appDark", bIsDark);
+            return bIsDark;
         }
     });
 });
