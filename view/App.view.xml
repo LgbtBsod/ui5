@@ -1,12 +1,20 @@
 <mvc:View
-    controllerName="sap_ui5.controller.App"
+    displayBlock="true"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:f="sap.f"
-    xmlns="sap.m">
+    xmlns:html="http://www.w3.org/1999/xhtml">
 
-    <f:FlexibleColumnLayout id="fcl" layout="{state>/layout}">
-        <f:beginColumnPages/>
-        <f:midColumnPages/>
-    </f:FlexibleColumnLayout>
+    <html:div class="bg-blobs"></html:div>
 
+    <html:button class="themeToggle" onclick="sap.ui.getCore().byId('container-id---app').getController().toggleTheme()">
+        <html:svg class="moonIcon" viewBox="0 0 24 24"><html:path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></html:path></html:svg>
+        <html:svg class="sunIcon" viewBox="0 0 24 24">
+            <html:circle cx="12" cy="12" r="5"></html:circle>
+            <html:line x1="12" y1="1" x2="12" y2="3"></html:line>
+            <html:line x1="12" y1="21" x2="12" y2="23"></html:line>
+            <html:line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></html:line>
+            <html:line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></html:line>
+        </html:button>
+
+        <f:FlexibleColumnLayout id="fcl" layout="{/layout}" />
 </mvc:View>

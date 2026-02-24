@@ -1,0 +1,153 @@
+/* ========================================================================
+   1. ПЕРЕМЕННЫЕ И ТЕМЫ (Dark - default, Light - class .light-mode)
+   ======================================================================== */
+:root {
+  /* Dark Theme (Default) */
+  --bg: #08090d;
+  --bg2: #0e1017;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface2: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-bright: rgba(255, 255, 255, 0.15);
+  --text: #f0f1f5;
+  --text-sub: rgba(240, 241, 245, 0.45);
+  --accent: #6C63FF;
+  --accent-rgb: 108, 99, 255;
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+:root.light-mode {
+  /* Light Theme */
+  --bg: #f0f2f8;
+  --bg2: #e6e9f2;
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface2: rgba(255, 255, 255, 0.85);
+  --border: rgba(0, 0, 0, 0.07);
+  --border-bright: rgba(0, 0, 0, 0.12);
+  --text: #1a1b21;
+  --text-sub: rgba(26, 27, 33, 0.5);
+  --accent: #5349e6;
+  --accent-rgb: 83, 73, 230;
+  --shadow: rgba(100, 110, 140, 0.1);
+}
+
+/* Общие константы */
+:root {
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --transition: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================================================
+   2. СБРОС SAPUI5 (Убираем "фиолетовость" и серые фоны)
+   ======================================================================== */
+.sapUiBody, .sapMShellGlobalInnerBackground, .sapMPage, .sapMShell {
+  background: transparent !important;
+}
+
+/* Делаем FCL прозрачным, чтобы видеть наш кастомный фон */
+.sapFFCL, .sapFFCLColumn, .sapFCLColumn {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Скроллбары (для Webkit) */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+  background: var(--border-bright); 
+  border-radius: 10px; 
+}
+
+/* ========================================================================
+   3. ГЛОБАЛЬНЫЙ ФОН И АНИМАЦИИ
+   ======================================================================== */
+html, body {
+  background-color: var(--bg) !important;
+  transition: background-color 0.5s var(--transition);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Блюр-пятна на фоне */
+.bg-blobs {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: -1; pointer-events: none; overflow: hidden;
+}
+.bg-blobs::before, .bg-blobs::after {
+  content: ''; position: absolute; border-radius: 50%; 
+  filter: blur(80px); opacity: 0.15; transition: all 0.8s var(--transition);
+}
+.bg-blobs::before {
+  width: 600px; height: 600px; top: -100px; left: -100px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+}
+.bg-blobs::after {
+  width: 400px; height: 400px; bottom: -50px; right: -50px;
+  background: radial-gradient(circle, #ff6b9d 0%, transparent 70%);
+}
+
+/* ========================================================================
+   4. КОМПОНЕНТЫ: GLASS CARD (Для Master и Detail)
+   ======================================================================== */
+.glassCard {
+  background: var(--surface);
+  backdrop-filter: blur(25px) saturate(160%);
+  -webkit-backdrop-filter: blur(25px) saturate(160%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 50px var(--shadow);
+  margin: 16px;
+  height: calc(100% - 32px) !important;
+  transition: background 0.4s, border 0.4s;
+}
+
+/* Кастомный айтем списка */
+.orderItem {
+  padding: 12px 16px;
+  margin: 4px 12px;
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; gap: 12px;
+  transition: all 0.2s var(--transition);
+  cursor: pointer;
+}
+.orderItem:hover {
+  background: var(--surface2);
+  transform: translateX(5px);
+}
+.sapMLIBSelected .orderItem {
+  background: rgba(var(--accent-rgb), 0.15);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+}
+
+/* ========================================================================
+   5. ТА САМАЯ ИКОНКА (Theme Toggle)
+   ======================================================================== */
+.themeToggle {
+  position: fixed; top: 20px; right: 20px; z-index: 1000;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text);
+  transition: all 0.3s var(--transition);
+  backdrop-filter: blur(10px);
+}
+
+.themeToggle:hover {
+  transform: scale(1.1);
+  border-color: var(--accent);
+}
+
+.themeToggle svg {
+  width: 20px; height: 20px; fill: none;
+  stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* Скрываем/показываем солнце/луну */
+.sunIcon { display: none; }
+.light-mode .sunIcon { display: block; }
+.light-mode .moonIcon { display: none; }
