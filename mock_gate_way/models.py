@@ -1,15 +1,11 @@
 import uuid
-from datetime import datetime
 
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.sqlite import INTEGER
 from sqlalchemy.orm import relationship
 
 from database import Base
-
-
-def now_utc() -> datetime:
-    return datetime.utcnow()
+from utils.time import now_utc
 
 
 class ChecklistRoot(Base):

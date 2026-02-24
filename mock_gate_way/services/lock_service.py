@@ -1,14 +1,8 @@
-from datetime import datetime, timedelta
-
 from sqlalchemy.orm import Session
 
+from config import LOCK_TTL
 from models import LockEntry, LockLog
-
-LOCK_TTL_SECONDS = 300
-
-
-def now() -> datetime:
-    return datetime.utcnow()
+from utils.time import now_utc
 
 
 class LockService:
@@ -19,10 +13,11 @@ class LockService:
             LockEntry.is_killed.is_(False),
         ).first()
 
-        if existing and existing.expires_at and existing.expires_at > now():
+        current_time = now_utc()
+        if existing and existing.expires_at and existing.expires_at > current_time:
             if existing.user_id == user_id:
                 return existing
-            raise Exception("LOCKED_BY_OTHER")
+            raise ValueError("LOCKED_BY_OTHER")
 
         if existing:
             existing.is_killed = True
@@ -30,9 +25,9 @@ class LockService:
         lock = LockEntry(
             pcct_uuid=pcct_uuid,
             user_id=user_id,
-            locked_at=now(),
-            last_heartbeat=now(),
-            expires_at=now() + timedelta(seconds=LOCK_TTL_SECONDS),
+            locked_at=current_time,
+            last_heartbeat=current_time,
+            expires_at=current_time + LOCK_TTL,
         )
 
         db.add(lock)
@@ -49,16 +44,17 @@ class LockService:
         ).first()
 
         if not lock:
-            raise Exception("NO_LOCK")
+            raise ValueError("NO_LOCK")
         if lock.is_killed:
             return {"status": "KILLED"}
-        if lock.expires_at and lock.expires_at < now():
+        if lock.expires_at and lock.expires_at < now_utc():
             lock.is_killed = True
             db.commit()
             return {"status": "EXPIRED"}
 
-        lock.last_heartbeat = now()
-        lock.expires_at = now() + timedelta(seconds=LOCK_TTL_SECONDS)
+        current_time = now_utc()
+        lock.last_heartbeat = current_time
+        lock.expires_at = current_time + LOCK_TTL
         db.commit()
         return {"status": "OK"}
 
@@ -71,7 +67,7 @@ class LockService:
         ).first()
 
         if not lock:
-            raise Exception("NO_ACTIVE_LOCK")
+            raise ValueError("NO_ACTIVE_LOCK")
 
         lock.is_killed = True
         db.add(LockLog(pcct_uuid=pcct_uuid, user_id=user_id, action="RELEASE"))
@@ -92,12 +88,13 @@ class LockService:
         existing.is_killed = True
         db.add(LockLog(pcct_uuid=pcct_uuid, user_id=user_id, action="STEAL"))
 
+        current_time = now_utc()
         new_lock = LockEntry(
             pcct_uuid=pcct_uuid,
             user_id=user_id,
-            locked_at=now(),
-            last_heartbeat=now(),
-            expires_at=now() + timedelta(seconds=LOCK_TTL_SECONDS),
+            locked_at=current_time,
+            last_heartbeat=current_time,
+            expires_at=current_time + LOCK_TTL,
         )
         db.add(new_lock)
         db.commit()
@@ -108,7 +105,7 @@ class LockService:
     def cleanup(db: Session) -> int:
         expired = db.query(LockEntry).filter(
             LockEntry.is_killed.is_(False),
-            LockEntry.expires_at < now(),
+            LockEntry.expires_at < now_utc(),
         ).all()
 
         for lock in expired:
@@ -127,11 +124,11 @@ class LockService:
         ).first()
 
         if not lock:
-            raise Exception("NO_VALID_LOCK")
+            raise ValueError("NO_VALID_LOCK")
 
-        if lock.expires_at and lock.expires_at < now():
+        if lock.expires_at and lock.expires_at < now_utc():
             lock.is_killed = True
             db.commit()
-            raise Exception("LOCK_EXPIRED")
+            raise ValueError("LOCK_EXPIRED")
 
         return True

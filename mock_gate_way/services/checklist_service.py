@@ -1,14 +1,10 @@
-from datetime import datetime
-
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot
 from services.lock_service import LockService
-
-
-def now() -> datetime:
-    return datetime.utcnow()
+from utils.etag import format_etag
+from utils.time import now_utc
 
 
 def lpc_allows_barriers(lpc: str) -> bool:
@@ -29,6 +25,10 @@ class ChecklistService:
 
         dates = [d for d in (root_date, barrier_date, check_date) if d is not None]
         return max(dates) if dates else None
+
+    @staticmethod
+    def get_etag_value(db: Session, root_id: str) -> str | None:
+        return format_etag(ChecklistService.calculate_etag(db, root_id))
 
     @staticmethod
     def create(db: Session, checklist_id: str, lpc: str, user_id: str):
@@ -77,18 +77,33 @@ class ChecklistService:
         return result
 
     @staticmethod
+    def update_with_etag(db: Session, root_id: str, user_id: str, data: dict, if_match: str):
+        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.is_(False)).first()
+        if not root:
+            raise ValueError("NOT_FOUND")
+
+        if if_match is None:
+            raise ValueError("PRECONDITION_REQUIRED")
+
+        current_etag = ChecklistService.get_etag_value(db, root_id)
+        if current_etag != if_match:
+            raise ValueError("ETAG_MISMATCH")
+
+        return ChecklistService.autosave(db, root_id, user_id, data, force=data.get("force", False))
+
+    @staticmethod
     def autosave(db: Session, root_id: str, user_id: str, data: dict, force: bool = False):
         LockService.validate_lock(db, root_id, user_id)
 
         root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id).first()
         if not root:
-            raise Exception("NOT_FOUND")
+            raise ValueError("NOT_FOUND")
 
         if "lpc" in data and not lpc_allows_barriers(data["lpc"]):
             existing_barriers = db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).all()
             if existing_barriers:
                 if not force:
-                    raise Exception("CONFIRM_DOWNGRADE_REQUIRED")
+                    raise ValueError("CONFIRM_DOWNGRADE_REQUIRED")
                 for barrier in existing_barriers:
                     db.delete(barrier)
 
@@ -97,7 +112,7 @@ class ChecklistService:
                 setattr(root, field, data[field])
 
         root.changed_by = user_id
-        root.changed_on = now()
+        root.changed_on = now_utc()
         db.commit()
         db.refresh(root)
         return root
@@ -111,14 +126,14 @@ class ChecklistService:
             ChecklistRoot.is_deleted.is_(False),
         ).first()
         if not root:
-            raise Exception("NOT_FOUND")
+            raise ValueError("NOT_FOUND")
         if not lpc_allows_barriers(root.lpc):
-            raise Exception("BARRIERS_NOT_ALLOWED_FOR_LPC")
+            raise ValueError("BARRIERS_NOT_ALLOWED_FOR_LPC")
 
         barrier = ChecklistBarrier(root_id=root_id, description=description, position=position)
         db.add(barrier)
 
-        root.changed_on = now()
+        root.changed_on = now_utc()
         root.changed_by = user_id
         db.commit()
         db.refresh(barrier)
@@ -131,7 +146,7 @@ class ChecklistService:
             ChecklistRoot.is_deleted.is_(False),
         ).first()
         if not source:
-            raise Exception("NOT_FOUND")
+            raise ValueError("NOT_FOUND")
 
         new_root = ChecklistRoot(
             checklist_id=f"{source.checklist_id}_COPY",
