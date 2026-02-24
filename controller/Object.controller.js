@@ -109,9 +109,15 @@ sap.ui.define([
         BackendAdapter.lockAcquire(
           oState.getProperty("/activeObjectId"),
           oState.getProperty("/sessionId")
-        ).catch(function () {
-          // lock conflict handled on save/heartbeat
-        });
+        ).then(function () {
+          oState.setProperty("/isLocked", true);
+        }).catch(function () {
+          oState.setProperty("/mode", "READ");
+          oState.setProperty("/isLocked", false);
+          MessageToast.show(this.getResourceBundle().getText("lockConflictMessage"));
+        }.bind(this));
+      } else {
+        oState.setProperty("/isLocked", false);
       }
 
       oState.setProperty("/mode", isEdit ? "EDIT" : "READ");

@@ -10,6 +10,13 @@
 
         <VBox class="appContent detailContent">
 
+            <MessageStrip
+                text="{i18n>lockKilledMessage}"
+                type="Warning"
+                showIcon="true"
+                visible="{state>/isKilled}"
+                class="sapUiTinyMarginBottom"/>
+
             <VBox class="glassCard detailHeroCard">
                 <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap" class="detailHeroHeader" renderType="Bare">
                     <VBox renderType="Bare" class="sapUiTinyMarginEnd">
@@ -24,6 +31,10 @@
                         <HBox class="uxStatChip" renderType="Bare">
                             <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
                             <Text text="{= ${state>/mode} === 'EDIT' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare" visible="{= !!${state>/lockExpires} }">
+                            <Text text="{i18n>lockExpiresLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{state>/lockExpires}"/>
                         </HBox>
                     </HBox>
                 </HBox>

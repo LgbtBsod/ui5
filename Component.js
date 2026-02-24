@@ -65,8 +65,13 @@ sap.ui.define([
 
             this._oHeartbeat.attachEvent("heartbeat", function (oEvent) {
                 var oPayload = oEvent.getParameters() || {};
-                oStateModel.setProperty("/isKilled", !!oPayload.is_killed);
+                var bKilled = !!oPayload.is_killed;
+                oStateModel.setProperty("/isKilled", bKilled);
                 oStateModel.setProperty("/lockExpires", oPayload.lock_expires || null);
+                if (bKilled) {
+                    oStateModel.setProperty("/mode", "READ");
+                    oStateModel.setProperty("/isLocked", false);
+                }
                 oCacheModel.setProperty("/lastServerState", {
                     lastChangeSet: oPayload.last_change_set || null,
                     serverChangedOn: oPayload.server_changed_on || null,
