@@ -28,3 +28,18 @@ To keep migration low-risk:
 
 ## Controllers impact
 `Object.controller` now supports create/update in a backend-agnostic way through `BackendAdapter`; this was intentionally done to simplify replacement of fake service with OData V2 implementation.
+
+## Mock gateway test-data seeding (manual)
+For local UI testing against `mock_gate_way`, use manual seeder:
+
+```bash
+python mock_gate_way/scripts/seed_test_data.py
+```
+
+It will:
+- add **30 random people** to `persons` table;
+- create a small **MPL hierarchy** in `locations` table (only if empty).
+
+Safety:
+- seeder **does not truncate** existing data;
+- on regular server startup, we only call `Base.metadata.create_all(...)` and dictionary preload, so checklist business rows are **not reset/rewritten** automatically.
