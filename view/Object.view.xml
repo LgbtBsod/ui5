@@ -28,10 +28,10 @@
                     editable="{= ${state>/mode}==='EDIT'}"/>
 
         <Label text="{i18n>timezoneLabel}" class="sapUiSmallMarginTop"/>
-        <Select items="{ref>/timezones}"
+        <Select items="{masterData>/timezones}"
                 selectedKey="{data>/object/basic/timezone}"
                 enabled="{= ${state>/mode}==='EDIT'}">
-          <core:Item key="{ref>key}" text="{ref>text}"/>
+          <core:Item key="{masterData>key}" text="{masterData>text}"/>
         </Select>
       </VBox>
 
@@ -45,12 +45,13 @@
                   visible="{= ${state>/mode}==='EDIT'}"/>
         </Toolbar>
 
-        <Table items="{data>/object/checks}" class="glassTable roundedTable">
+        <Table items="{data>/object/checks}" class="flatEditorTable">
           <columns>
             <Column width="3rem"><Text text=""/></Column>
             <Column><Text text="{i18n>noLabel}"/></Column>
             <Column><Text text="{i18n>textLabel}"/></Column>
             <Column><Text text="{i18n>resultLabel}"/></Column>
+            <Column width="2.5rem" visible="{= ${state>/mode}==='EDIT'}"><Text text=""/></Column>
           </columns>
 
           <items>
@@ -61,6 +62,7 @@
                 <Input value="{data>text}" editable="{= ${state>/mode}==='EDIT'}"/>
                 <Switch state="{data>result}"
                         enabled="{= ${state>/mode}==='EDIT'}"/>
+                <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteCheckRow" visible="{= ${state>/mode}==='EDIT'}"/>
               </cells>
             </ColumnListItem>
           </items>
@@ -77,12 +79,13 @@
                   visible="{= ${state>/mode}==='EDIT'}"/>
         </Toolbar>
 
-        <Table items="{data>/object/barriers}" class="glassTable roundedTable">
+        <Table items="{data>/object/barriers}" class="flatEditorTable">
           <columns>
             <Column width="3rem"><Text text=""/></Column>
             <Column><Text text="{i18n>noLabel}"/></Column>
             <Column><Text text="{i18n>textLabel}"/></Column>
             <Column><Text text="{i18n>resultLabel}"/></Column>
+            <Column width="2.5rem" visible="{= ${state>/mode}==='EDIT'}"><Text text=""/></Column>
           </columns>
 
           <items>
@@ -93,6 +96,7 @@
                 <Input value="{data>text}" editable="{= ${state>/mode}==='EDIT'}"/>
                 <Switch state="{data>result}"
                         enabled="{= ${state>/mode}==='EDIT'}"/>
+                <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteBarrierRow" visible="{= ${state>/mode}==='EDIT'}"/>
               </cells>
             </ColumnListItem>
           </items>

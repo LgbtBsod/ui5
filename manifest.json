@@ -41,7 +41,8 @@
         "sap.m": {},
         "sap.ui.core": {},
         "sap.f": {},
-        "sap.ui.layout": {}
+        "sap.ui.layout": {},
+        "sap.ui.comp": {}
       }
     },
     "contentDensities": {
@@ -61,7 +62,16 @@
       "state": {
         "type": "sap.ui.model.json.JSONModel"
       },
-      "ref": {
+      "layout": {
+        "type": "sap.ui.model.json.JSONModel"
+      },
+      "cache": {
+        "type": "sap.ui.model.json.JSONModel"
+      },
+      "masterData": {
+        "type": "sap.ui.model.json.JSONModel"
+      },
+      "mpl": {
         "type": "sap.ui.model.json.JSONModel"
       }
     },

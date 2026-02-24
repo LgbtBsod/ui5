@@ -17,6 +17,11 @@
                         <Title text="{i18n>filtersTitle}"/>
                     </Toolbar>
 
+
+                    <HBox class="uxStatRow" wrap="Wrap" renderType="Bare">
+                        <ObjectStatus text="Custom SmartFilter" state="Success" visible="{layout>/smartFilter/useCustomSmartFilters}" class="sapUiTinyMarginEnd"/>
+                        <ObjectStatus text="Custom SmartTable" state="Success" visible="{layout>/smartTable/useCustomSmartTable}"/>
+                    </HBox>
                     <MessageStrip
                         visible="{state>/loadError}"
                         type="Error"
@@ -122,8 +127,8 @@
                                     <ObjectStatus
                                         text="{data>root/status}"
                                         state="{ path: 'data>root/status', formatter: '.formatStatus' }"/>
-                                    <Text text="{data>root/successRateChecks}"/>
-                                    <Text text="{data>root/successRateBarriers}"/>
+                                    <ProgressIndicator percentValue="{data>root/successRateChecks}" displayValue="{= ${data>root/successRateChecks} + '%' }" state="Information"/>
+                                    <ProgressIndicator percentValue="{data>root/successRateBarriers}" displayValue="{= ${data>root/successRateBarriers} + '%' }" state="Information"/>
                                     <Text text="{data>basic/OBSERVER_FULLNAME}"/>
                                 </cells>
                             </ColumnListItem>

@@ -153,6 +153,55 @@ sap.ui.define([
       this._updateSelectionState();
     },
 
+
+    onDeleteCheckRow: function (oEvent) {
+      var oCtx = oEvent.getSource().getBindingContext("selected");
+      if (!oCtx) {
+        return;
+      }
+
+      var iIndex = Number(oCtx.getPath().split("/").pop());
+      var sBasePath = "/checks";
+      var oModel = this.getModel("selected");
+      var aItems = oModel.getProperty(sBasePath) || [];
+
+      if (!Number.isInteger(iIndex) || iIndex < 0 || iIndex >= aItems.length) {
+        return;
+      }
+
+      aItems.splice(iIndex, 1);
+      aItems.forEach(function (oItem, i) {
+        oItem.no = i + 1;
+        oItem.selected = false;
+      });
+      oModel.setProperty(sBasePath, aItems);
+      this._updateSelectionState();
+    },
+
+    onDeleteBarrierRow: function (oEvent) {
+      var oCtx = oEvent.getSource().getBindingContext("selected");
+      if (!oCtx) {
+        return;
+      }
+
+      var iIndex = Number(oCtx.getPath().split("/").pop());
+      var sBasePath = "/barriers";
+      var oModel = this.getModel("selected");
+      var aItems = oModel.getProperty(sBasePath) || [];
+
+      if (!Number.isInteger(iIndex) || iIndex < 0 || iIndex >= aItems.length) {
+        return;
+      }
+
+      aItems.splice(iIndex, 1);
+      aItems.forEach(function (oItem, i) {
+        oItem.no = i + 1;
+        oItem.selected = false;
+      });
+      oModel.setProperty(sBasePath, aItems);
+      this._updateSelectionState();
+    },
+
     resultText: function (bResult) {
       return bResult ? "Passed" : "Failed";
     },

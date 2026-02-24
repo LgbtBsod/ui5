@@ -2,19 +2,23 @@ sap.ui.define([
     "sap_ui5/controller/Base.controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "sap_ui5/service/backend/BackendAdapter"
-], function (BaseController, JSONModel, MessageToast, BackendAdapter) {
+    "sap_ui5/service/backend/BackendAdapter",
+    "sap_ui5/service/SmartSearchAdapter"
+], function (BaseController, JSONModel, MessageToast, BackendAdapter, SmartSearchAdapter) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
 
         onInit: function () {
             var oStateModel = this.getModel("state");
+            var oLayoutModel = this.getModel("layout");
             var oViewModel = new JSONModel({
                 hasActiveFilters: false,
                 hasSelection: false,
                 hasSearched: false,
-                resultSummary: ""
+                resultSummary: "",
+                smartFilterReady: true,
+                smartTableReady: true
             });
 
             this._iSearchDebounceMs = 180;
@@ -22,6 +26,9 @@ sap.ui.define([
 
             this.applyStoredTheme();
             this.setModel(oViewModel, "view");
+
+            oLayoutModel.setProperty("/smartFilter/fields", SmartSearchAdapter.getSmartFilterConfig().fields);
+            oLayoutModel.setProperty("/smartTable/columns", SmartSearchAdapter.getSmartTableConfig().columns);
 
             ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach(function (sPath) {
                 oStateModel.bindProperty(sPath).attachChange(this._onFilterChanged, this);
@@ -59,12 +66,23 @@ sap.ui.define([
             }.bind(this), this._iSearchDebounceMs);
         },
 
-        _updateFilterState: function () {
+        _buildFilterPayload: function () {
             var oStateModel = this.getModel("state");
-            var bHasFilters = Boolean((oStateModel.getProperty("/filterId") || "").trim())
-                || Boolean(oStateModel.getProperty("/filterLpc"))
-                || oStateModel.getProperty("/filterFailedChecks") !== "ALL"
-                || oStateModel.getProperty("/filterFailedBarriers") !== "ALL";
+
+            return {
+                filterId: oStateModel.getProperty("/filterId"),
+                filterLpc: oStateModel.getProperty("/filterLpc"),
+                filterFailedChecks: oStateModel.getProperty("/filterFailedChecks"),
+                filterFailedBarriers: oStateModel.getProperty("/filterFailedBarriers")
+            };
+        },
+
+        _updateFilterState: function () {
+            var mPayload = this._buildFilterPayload();
+            var bHasFilters = Boolean((mPayload.filterId || "").trim())
+                || Boolean(mPayload.filterLpc)
+                || mPayload.filterFailedChecks !== "ALL"
+                || mPayload.filterFailedBarriers !== "ALL";
 
             this.getView().getModel("view").setProperty("/hasActiveFilters", bHasFilters);
         },
@@ -81,49 +99,26 @@ sap.ui.define([
         _executeSearch: function () {
             var oDataModel = this.getModel("data");
             var oStateModel = this.getModel("state");
-            var aSource = oDataModel.getProperty("/checkLists") || [];
-
-            var sFilterId = (oStateModel.getProperty("/filterId") || "").trim().toLowerCase();
-            var sFilterLpc = oStateModel.getProperty("/filterLpc") || "";
-            var sFilterFailedChecks = oStateModel.getProperty("/filterFailedChecks") || "ALL";
-            var sFilterFailedBarriers = oStateModel.getProperty("/filterFailedBarriers") || "ALL";
+            var mPayload = this._buildFilterPayload();
             var sSearchMode = oStateModel.getProperty("/searchMode") || "EXACT";
-            var aFiltered = aSource.filter(function (oItem) {
-                var sId = (((oItem || {}).root || {}).id || "").toLowerCase();
-                var sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
-                var nChecks = Number((((oItem || {}).root || {}).successRateChecks));
-                var nBarriers = Number((((oItem || {}).root || {}).successRateBarriers));
 
-                var bIdMatch = !sFilterId || sId.includes(sFilterId);
-                var bLpcMatch = !sFilterLpc || sLpc === sFilterLpc;
-                var bChecksFailed = Number.isFinite(nChecks) && nChecks < 100;
-                var bBarriersFailed = Number.isFinite(nBarriers) && nBarriers < 100;
+            oStateModel.setProperty("/isLoading", true);
 
-                var bChecksMatch = sFilterFailedChecks === "ALL"
-                    || (sFilterFailedChecks === "TRUE" && bChecksFailed)
-                    || (sFilterFailedChecks === "FALSE" && !bChecksFailed);
-
-                var bBarriersMatch = sFilterFailedBarriers === "ALL"
-                    || (sFilterFailedBarriers === "TRUE" && bBarriersFailed)
-                    || (sFilterFailedBarriers === "FALSE" && !bBarriersFailed);
-
-                var aEnabledRules = [
-                    { enabled: !!sFilterId, value: bIdMatch },
-                    { enabled: !!sFilterLpc, value: bLpcMatch },
-                    { enabled: sFilterFailedChecks !== "ALL", value: bChecksMatch },
-                    { enabled: sFilterFailedBarriers !== "ALL", value: bBarriersMatch }
-                ];
-
-                if (sSearchMode === "LOOSE") {
-                    var aActive = aEnabledRules.filter(function (oRule) { return oRule.enabled; });
-                    return !aActive.length || aActive.some(function (oRule) { return oRule.value; });
-                }
-
-                return bIdMatch && bLpcMatch && bChecksMatch && bBarriersMatch;
+            return BackendAdapter.queryCheckLists({
+                idContains: mPayload.filterId,
+                lpcKey: mPayload.filterLpc
+            }).then(function (aPrefiltered) {
+                var aFiltered = SmartSearchAdapter.filterData(aPrefiltered, mPayload, sSearchMode);
+                oDataModel.setProperty("/visibleCheckLists", aFiltered);
+                this._updateResultSummary();
+            }.bind(this)).catch(function () {
+                var aSource = oDataModel.getProperty("/checkLists") || [];
+                var aFiltered = SmartSearchAdapter.filterData(aSource, mPayload, sSearchMode);
+                oDataModel.setProperty("/visibleCheckLists", aFiltered);
+                this._updateResultSummary();
+            }.bind(this)).finally(function () {
+                oStateModel.setProperty("/isLoading", false);
             });
-
-            oDataModel.setProperty("/visibleCheckLists", aFiltered);
-            this._updateResultSummary();
         },
 
         onSelect: function (oEvent) {

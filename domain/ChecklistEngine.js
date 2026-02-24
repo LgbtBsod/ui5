@@ -1,30 +1,72 @@
 sap.ui.define([], function () {
     "use strict";
 
-    function calculateRate(items) {
-        if (!items || items.length === 0) return 0;
+    function _isFilled(vValue) {
+        if (vValue === null || vValue === undefined) {
+            return false;
+        }
 
-        const success = items.filter(i => i.result === true).length;
-        return Math.round((success / items.length) * 100);
+        return String(vValue).trim().length > 0;
     }
 
-    function deriveStatus(checkRate, barrierRate) {
-        if (barrierRate < 100) return "CRITICAL";
-        if (checkRate < 100) return "WARNING";
+    function calculateSectionCompletion(aItems) {
+        if (!Array.isArray(aItems) || aItems.length === 0) {
+            return 0;
+        }
+
+        var iCompleted = aItems.filter(function (oItem) {
+            return _isFilled((oItem || {}).text);
+        }).length;
+
+        return Math.round((iCompleted / aItems.length) * 100);
+    }
+
+    function calculateBasicCompletion(oBasic) {
+        var aFields = [
+            oBasic && oBasic.date,
+            oBasic && oBasic.equipment,
+            oBasic && oBasic.LPC_TEXT,
+            oBasic && oBasic.timezone
+        ];
+        var iFilled = aFields.filter(_isFilled).length;
+
+        return Math.round((iFilled / aFields.length) * 100);
+    }
+
+    function deriveStatus(iChecksRate, iBarriersRate, iBasicRate) {
+        var iMinRate = Math.min(iChecksRate, iBarriersRate, iBasicRate);
+
+        if (iMinRate < 50) {
+            return "CRITICAL";
+        }
+
+        if (iMinRate < 85) {
+            return "WARNING";
+        }
+
         return "SUCCESS";
     }
 
     return {
 
-        recalculate: function (checkList) {
-            const checkRate = calculateRate(checkList.checks);
-            const barrierRate = calculateRate(checkList.barriers);
+        recalculate: function (oCheckList) {
+            if (!oCheckList) {
+                return oCheckList;
+            }
 
-            checkList.root.successRateChecks = checkRate;
-            checkList.root.successRateBarriers = barrierRate;
-            checkList.root.status = deriveStatus(checkRate, barrierRate);
+            oCheckList.root = oCheckList.root || {};
+            oCheckList.basic = oCheckList.basic || {};
 
-            return checkList;
+            var iChecksRate = calculateSectionCompletion(oCheckList.checks);
+            var iBarriersRate = calculateSectionCompletion(oCheckList.barriers);
+            var iBasicRate = calculateBasicCompletion(oCheckList.basic);
+
+            oCheckList.root.successRateChecks = iChecksRate;
+            oCheckList.root.successRateBarriers = iBarriersRate;
+            oCheckList.root.successRateOverall = Math.round((iChecksRate + iBarriersRate + iBasicRate) / 3);
+            oCheckList.root.status = deriveStatus(iChecksRate, iBarriersRate, iBasicRate);
+
+            return oCheckList;
         }
 
     };
