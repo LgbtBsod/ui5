@@ -64,10 +64,7 @@
                         <dnd:DragInfo sourceAggregation="items" enabled="{= ${state>/mode} === 'EDIT' }"/>
                         <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} === 'EDIT' }" drop=".onInfoCardsDrop"/>
                     </f:dragDropConfig>
-                    <customLayout>
-                        <f:GridListDefaultLayout minColumnWidth="14rem"/>
-                    </customLayout>
-                    <items>
+                    <f:items>
                         <CustomListItem>
                             <VBox class="infoCardTile" renderType="Bare">
                                 <Text text="{view>title}" class="infoCardTitle"/>
@@ -82,7 +79,7 @@
                                     class="infoCardValue"/>
                             </VBox>
                         </CustomListItem>
-                    </items>
+                    </f:items>
                 </f:GridList>
             </VBox>
 
