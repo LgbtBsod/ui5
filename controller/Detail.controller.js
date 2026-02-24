@@ -10,7 +10,7 @@ sap.ui.define([
   return BaseController.extend("sap_ui5.controller.Detail", {
 
     onInit: function () {
-      this.setModel(new JSONModel({
+      var oViewModel = new JSONModel({
         hasSelectedChecks: false,
         hasSelectedBarriers: false,
         infoCards: [
@@ -18,7 +18,9 @@ sap.ui.define([
           { key: "observed", title: this.getResourceBundle().getText("observedLabel") },
           { key: "location", title: this.getResourceBundle().getText("locationLabel") }
         ]
-      }), "view");
+      });
+
+      this.getView().setModel(oViewModel, "view");
       this.attachRouteMatched("detail", this._onMatched);
     },
 
@@ -88,10 +90,16 @@ sap.ui.define([
 
     _updateSelectionState: function () {
       var oSelectedModel = this.getModel("selected");
+      var oViewModel = this.getView().getModel("view");
       var aChecks = oSelectedModel.getProperty("/checks") || [];
       var aBarriers = oSelectedModel.getProperty("/barriers") || [];
-      this.getModel("view").setProperty("/hasSelectedChecks", aChecks.some(function (oItem) { return !!(oItem && oItem.selected); }));
-      this.getModel("view").setProperty("/hasSelectedBarriers", aBarriers.some(function (oItem) { return !!(oItem && oItem.selected); }));
+
+      if (!oViewModel) {
+        return;
+      }
+
+      oViewModel.setProperty("/hasSelectedChecks", aChecks.some(function (oItem) { return !!(oItem && oItem.selected); }));
+      oViewModel.setProperty("/hasSelectedBarriers", aBarriers.some(function (oItem) { return !!(oItem && oItem.selected); }));
     },
 
     onDeleteSelectedChecks: function () {

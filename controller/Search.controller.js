@@ -123,8 +123,16 @@ sap.ui.define([
 
         onSelect: function (oEvent) {
             this.getView().getModel("view").setProperty("/hasSelection", true);
-            var oCtx = oEvent.getParameter("listItem").getBindingContext("data");
-            var oChecklist = oCtx.getObject();
+
+            var oListItem = oEvent.getParameter("listItem");
+            var oSource = oEvent.getSource();
+
+            if (!oListItem && oSource && typeof oSource.getSelectedItem === "function") {
+                oListItem = oSource.getSelectedItem();
+            }
+
+            var oCtx = oListItem ? oListItem.getBindingContext("data") : null;
+            var oChecklist = oCtx ? oCtx.getObject() : null;
             var sId = oChecklist && oChecklist.root ? oChecklist.root.id : "";
 
             if (!sId) {

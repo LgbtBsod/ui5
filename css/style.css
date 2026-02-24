@@ -334,69 +334,101 @@ body {
 
 
 .statusToggleWrapper {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 8px;
-  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.07));
+  padding: 4px;
+  border-radius: 999px;
   display: inline-flex !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: stretch;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 90%, rgba(var(--accent-rgb), 0.12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.16);
 }
 
 :root.light-mode .statusToggleWrapper {
-  background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: color-mix(in srgb, #ffffff 86%, rgba(var(--accent-rgb), 0.08));
+  border-color: color-mix(in srgb, var(--glass-border) 75%, rgba(var(--accent-rgb), 0.2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 18px rgba(93, 138, 168, 0.16);
 }
 
-.customStatusBtn {
-  margin: 0 4px !important;
+.statusToggleWrapper .customStatusBtn {
+  margin: 0 !important;
+  flex: 1 1 auto;
   transition: all 0.25s ease !important;
 }
 
-.customStatusBtn .sapMBtnInner {
-  border-radius: 12px !important;
+.statusToggleWrapper .customStatusBtn .sapMBtnInner {
   border: none !important;
+  border-radius: 0 !important;
   background: transparent !important;
-  padding: 0 20px !important;
+  padding: 0 18px !important;
+  min-width: 7.1rem;
+  min-height: 2.2rem;
+  box-shadow: none !important;
 }
 
-.btnAll .sapMBtnContent {
-  color: rgba(255, 83, 17, 0.5) !important;
+.statusToggleWrapper .customStatusBtn .sapMBtnContent {
+  font-weight: 600;
+  transition: color .2s ease;
 }
 
-.btnFailed .sapMBtnContent {
-  color: rgba(255, 77, 77, 0.5) !important;
+.statusToggleWrapper .btnSegStart .sapMBtnInner {
+  border-top-left-radius: 999px !important;
+  border-bottom-left-radius: 999px !important;
 }
 
-.btnPassed .sapMBtnContent {
-  color: rgba(0, 200, 83, 0.5) !important;
+.statusToggleWrapper .btnSegEnd .sapMBtnInner {
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
 }
 
-:root.light-mode .btnAll .sapMBtnContent {
-  color: rgba(0, 172, 238, 0.5) !important;
+.statusToggleWrapper .btnSegMiddle .sapMBtnInner {
+  border-left: 1px solid color-mix(in srgb, var(--glass-border) 75%, transparent) !important;
+  border-right: 1px solid color-mix(in srgb, var(--glass-border) 75%, transparent) !important;
 }
 
-.activeStatus .sapMBtnContent {
+.statusToggleWrapper .btnAll .sapMBtnContent {
+  color: rgba(var(--accent-rgb), 0.72) !important;
+}
+
+.statusToggleWrapper .btnFailed .sapMBtnContent {
+  color: rgba(255, 105, 105, 0.78) !important;
+}
+
+.statusToggleWrapper .btnPassed .sapMBtnContent {
+  color: rgba(68, 226, 132, 0.8) !important;
+}
+
+:root.light-mode .statusToggleWrapper .btnAll .sapMBtnContent {
+  color: rgba(var(--accent-rgb), 0.8) !important;
+}
+
+:root.light-mode .statusToggleWrapper .btnFailed .sapMBtnContent {
+  color: rgba(214, 58, 58, 0.78) !important;
+}
+
+:root.light-mode .statusToggleWrapper .btnPassed .sapMBtnContent {
+  color: rgba(11, 145, 74, 0.8) !important;
+}
+
+.statusToggleWrapper .activeStatus .sapMBtnContent {
   color: #ffffff !important;
-  font-weight: bold !important;
+  font-weight: 700 !important;
 }
 
-.activeStatus.btnAll .sapMBtnInner {
-  background-color: #ff5311 !important;
-  box-shadow: 0 4px 12px rgba(255, 83, 17, 0.4) !important;
+.statusToggleWrapper .activeStatus.btnAll .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 8px 18px rgba(var(--accent-rgb), 0.35) !important;
 }
 
-:root.light-mode .activeStatus.btnAll .sapMBtnInner {
-  background-color: #00acee !important;
-  box-shadow: 0 4px 12px rgba(0, 172, 238, 0.4) !important;
+.statusToggleWrapper .activeStatus.btnFailed .sapMBtnInner {
+  background: linear-gradient(145deg, #ff4d4d, #ff7676) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 8px 18px rgba(255, 77, 77, 0.32) !important;
 }
 
-.activeStatus.btnFailed .sapMBtnInner {
-  background-color: #ff4d4d !important;
-  box-shadow: 0 4px 12px rgba(255, 77, 77, 0.4) !important;
-}
-
-.activeStatus.btnPassed .sapMBtnInner {
-  background-color: #00c853 !important;
-  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.4) !important;
+.statusToggleWrapper .activeStatus.btnPassed .sapMBtnInner {
+  background: linear-gradient(145deg, #00c853, #31dd7b) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 8px 18px rgba(0, 200, 83, 0.3) !important;
 }
 
 .sapMBtn:focus > .sapMBtnInner {
@@ -503,6 +535,25 @@ body {
 .searchResultTable .sapMListTblHeaderCell {
   background: color-mix(in srgb, var(--surface2) 86%, rgba(var(--accent-rgb), 0.06)) !important;
 }
+
+
+.searchResultTable .sapMListTblSubCntRow,
+.searchResultTable .sapMListTblSubCnt {
+  background: color-mix(in srgb, var(--surface2) 86%, transparent) !important;
+}
+
+:root:not(.light-mode) .searchResultTable .sapMListTblSubCntRow,
+:root:not(.light-mode) .searchResultTable .sapMListTblSubCnt {
+  background: color-mix(in srgb, var(--surface2) 82%, rgba(220, 225, 236, 0.1)) !important;
+  color: color-mix(in srgb, var(--text-main) 82%, #d7deea 18%) !important;
+}
+
+.searchResultTable .sapMListTblSubCntHdr,
+.searchResultTable .sapMListTblSubCntSpr,
+.searchResultTable .sapMListTblSubCntVal {
+  color: var(--text-main) !important;
+}
+
 
 .modeHintText {
   min-width: 3.8rem;

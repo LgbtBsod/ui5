@@ -5,6 +5,7 @@
     xmlns:core="sap.ui.core">
 
     <Page
+        showHeader="false"
         class="pageTransparent"
         busy="{state>/isLoading}">
 
@@ -62,7 +63,7 @@
                                 <Button
                                     text="{i18n>allChecks}"
                                     press=".onStatusFilterPress"
-                                    class="customStatusBtn btnAll {= ${state>/filterFailedChecks} === 'ALL' ? 'activeStatus' : '' }">
+                                    class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedChecks} === 'ALL' ? 'activeStatus' : '' }">
                                     <customData>
                                         <core:CustomData key="filterPath" value="/filterFailedChecks"/>
                                         <core:CustomData key="filterValue" value="ALL"/>
@@ -71,7 +72,7 @@
                                 <Button
                                     text="{i18n>hasFailed}"
                                     press=".onStatusFilterPress"
-                                    class="customStatusBtn btnFailed {= ${state>/filterFailedChecks} === 'TRUE' ? 'activeStatus' : '' }">
+                                    class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedChecks} === 'TRUE' ? 'activeStatus' : '' }">
                                     <customData>
                                         <core:CustomData key="filterPath" value="/filterFailedChecks"/>
                                         <core:CustomData key="filterValue" value="TRUE"/>
@@ -80,7 +81,7 @@
                                 <Button
                                     text="{i18n>allPassed}"
                                     press=".onStatusFilterPress"
-                                    class="customStatusBtn btnPassed {= ${state>/filterFailedChecks} === 'FALSE' ? 'activeStatus' : '' }">
+                                    class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedChecks} === 'FALSE' ? 'activeStatus' : '' }">
                                     <customData>
                                         <core:CustomData key="filterPath" value="/filterFailedChecks"/>
                                         <core:CustomData key="filterValue" value="FALSE"/>
@@ -95,7 +96,7 @@
                                 <Button
                                     text="{i18n>allBarriers}"
                                     press=".onStatusFilterPress"
-                                    class="customStatusBtn btnAll {= ${state>/filterFailedBarriers} === 'ALL' ? 'activeStatus' : '' }">
+                                    class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedBarriers} === 'ALL' ? 'activeStatus' : '' }">
                                     <customData>
                                         <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
                                         <core:CustomData key="filterValue" value="ALL"/>
@@ -104,7 +105,7 @@
                                 <Button
                                     text="{i18n>hasFailed}"
                                     press=".onStatusFilterPress"
-                                    class="customStatusBtn btnFailed {= ${state>/filterFailedBarriers} === 'TRUE' ? 'activeStatus' : '' }">
+                                    class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedBarriers} === 'TRUE' ? 'activeStatus' : '' }">
                                     <customData>
                                         <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
                                         <core:CustomData key="filterValue" value="TRUE"/>
@@ -113,7 +114,7 @@
                                 <Button
                                     text="{i18n>allPassed}"
                                     press=".onStatusFilterPress"
-                                    class="customStatusBtn btnPassed {= ${state>/filterFailedBarriers} === 'FALSE' ? 'activeStatus' : '' }">
+                                    class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedBarriers} === 'FALSE' ? 'activeStatus' : '' }">
                                     <customData>
                                         <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
                                         <core:CustomData key="filterValue" value="FALSE"/>
