@@ -60,10 +60,10 @@
                     <Text text="{i18n>dragHint}" visible="{= ${state>/mode} === 'EDIT' }" class="modeHintText"/>
                 </Toolbar>
                 <f:GridList id="infoCardGrid" items="{view>/infoCards}" class="infoCardGrid">
-                    <dragDropConfig>
+                    <f:dragDropConfig>
                         <dnd:DragInfo sourceAggregation="items" enabled="{= ${state>/mode} === 'EDIT' }"/>
                         <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} === 'EDIT' }" drop=".onInfoCardsDrop"/>
-                    </dragDropConfig>
+                    </f:dragDropConfig>
                     <customLayout>
                         <f:GridListDefaultLayout minColumnWidth="14rem"/>
                     </customLayout>

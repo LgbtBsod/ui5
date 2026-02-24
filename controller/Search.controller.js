@@ -167,7 +167,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getModel("state").setProperty("/isBusy", true);
+            this.getModel("state").setProperty("/isLoading", true);
 
             BackendAdapter.deleteCheckList(sId).then(function () {
                 return BackendAdapter.getCheckLists();
@@ -180,7 +180,7 @@ sap.ui.define([
             }.bind(this)).catch(function (oError) {
                 MessageToast.show(oBundle.getText("deleteFailed", [((oError && oError.message) || "Unknown error")]));
             }).finally(function () {
-                this.getModel("state").setProperty("/isBusy", false);
+                this.getModel("state").setProperty("/isLoading", false);
             }.bind(this));
         },
 
