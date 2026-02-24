@@ -67,8 +67,8 @@
         "routerClass": "sap.m.routing.Router",
         "viewType": "XML",
         "viewPath": "sap_ui5.view",
-        "controlId": "splitApp",
-        "controlAggregation": "masterPages",
+        "controlId": "fcl",
+        "controlAggregation": "beginColumnPages",
         "async": true
       },
       "routes": [
@@ -79,7 +79,6 @@
             "search"
           ],
           "layout": "OneColumn"
-          ]
         },
         {
           "pattern": "detail/{id}",
@@ -89,19 +88,18 @@
             "detail"
           ],
           "layout": "TwoColumnsMidExpanded"
-          ]
         }
       ],
       "targets": {
         "search": {
           "viewName": "Search",
           "viewLevel": 1,
-          "controlAggregation": "masterPages"
+          "controlAggregation": "beginColumnPages"
         },
         "detail": {
           "viewName": "Detail",
           "viewLevel": 2,
-          "controlAggregation": "detailPages"
+          "controlAggregation": "midColumnPages"
         }
       }
     }

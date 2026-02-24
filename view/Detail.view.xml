@@ -6,7 +6,7 @@
 
     <Page showHeader="false" class="pageTransparent">
 
-        <VBox class="detailContainer">
+        <VBox class="appContent detailContent">
 
             <HBox justifyContent="End" class="sapUiTinyMarginBottom">
                 <Button
@@ -29,20 +29,20 @@
                     columnsM="2">
 
                     <Label text="Date"/>
-                    <Text text="{selected>/date}"/>
+                    <Text text="{selected>/basic/date}"/>
 
                     <Label text="Equipment"/>
-                    <Text text="{selected>/equipment}"/>
+                    <Text text="{selected>/basic/equipment}"/>
 
                     <Label text="LPC"/>
-                    <Text text="{selected>/lpc}"/>
+                    <Text text="{selected>/basic/LPC_TEXT}"/>
 
                 </form:SimpleForm>
             </VBox>
 
             <VBox class="glassCard">
                 <Title text="Checks"/>
-                <Table items="{selected>/checksList}">
+                <Table items="{selected>/checks}">
                     <columns>
                         <Column><Text text="Check"/></Column>
                         <Column><Text text="Status"/></Column>
@@ -52,8 +52,8 @@
                             <cells>
                                 <Text text="{selected>text}"/>
                                 <ObjectStatus
-                                    text="{selected>status}"
-                                    state="{path:'selected>status', formatter:'.statusState'}"/>
+                                    text="{path: 'selected>result', formatter: '.resultText'}"
+                                    state="{path: 'selected>result', formatter: '.resultState'}"/>
                             </cells>
                         </ColumnListItem>
                     </items>
@@ -62,7 +62,7 @@
 
             <VBox class="glassCard">
                 <Title text="Barriers"/>
-                <Table items="{selected>/barriersList}">
+                <Table items="{selected>/barriers}">
                     <columns>
                         <Column><Text text="Barrier"/></Column>
                         <Column><Text text="Status"/></Column>
@@ -72,8 +72,8 @@
                             <cells>
                                 <Text text="{selected>text}"/>
                                 <ObjectStatus
-                                    text="{selected>status}"
-                                    state="{path:'selected>status', formatter:'.statusState'}"/>
+                                    text="{path: 'selected>result', formatter: '.resultText'}"
+                                    state="{path: 'selected>result', formatter: '.resultState'}"/>
                             </cells>
                         </ColumnListItem>
                     </items>

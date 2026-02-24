@@ -1,7 +1,5 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/m/MessageToast"
-], function (Controller, MessageToast) {
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast"
 ], function (Controller, JSONModel, MessageToast) {
@@ -9,21 +7,40 @@ sap.ui.define([
 
     return Controller.extend("sap_ui5.controller.Search", {
 
+        onInit: function () {
+            const oStateModel = this.getOwnerComponent().getModel("state");
+            const oViewModel = new JSONModel({
+                hasActiveFilters: false
+            });
+
+            this.getView().setModel(oViewModel, "view");
+
+            ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach((sPath) => {
+                oStateModel.bindProperty(sPath).attachChange(this._updateFilterState, this);
+            });
+
+            this._updateFilterState();
+        },
+
+        _updateFilterState: function () {
+            const oStateModel = this.getOwnerComponent().getModel("state");
+            const bHasFilters = Boolean((oStateModel.getProperty("/filterId") || "").trim())
+                || Boolean(oStateModel.getProperty("/filterLpc"))
+                || oStateModel.getProperty("/filterFailedChecks") !== "ALL"
+                || oStateModel.getProperty("/filterFailedBarriers") !== "ALL";
+
+            this.getView().getModel("view").setProperty("/hasActiveFilters", bHasFilters);
+        },
+
         onSelect: function (oEvent) {
-            const oItem = oEvent.getParameter("listItem");
-            const oCtx = oItem.getBindingContext("data");
+            const oCtx = oEvent.getParameter("listItem").getBindingContext("data");
             const oChecklist = oCtx.getObject();
-            const sId = oChecklist && oChecklist.root ? oChecklist.root.id : null;
+            const sId = oChecklist && oChecklist.root ? oChecklist.root.id : "";
 
             if (!sId) {
                 MessageToast.show("Checklist id not found");
                 return;
             }
-        onInit: function () {
-            const filterModel = new JSONModel({
-                id: "",
-                lpc: "ALL"
-            });
 
             this.getOwnerComponent().getModel("selected").setData(oChecklist);
             this.getOwnerComponent().getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
@@ -49,17 +66,17 @@ sap.ui.define([
             const sFilterFailedChecks = oStateModel.getProperty("/filterFailedChecks") || "ALL";
             const sFilterFailedBarriers = oStateModel.getProperty("/filterFailedBarriers") || "ALL";
 
-            const aFiltered = aSource.filter((oItem) => {
+            const aFiltered = aSource.filter(function (oItem) {
                 const sId = (((oItem || {}).root || {}).id || "").toLowerCase();
-                const sLpc = (((oItem || {}).basic || {}).LPC || "");
+                const sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
                 const nChecks = Number((((oItem || {}).root || {}).successRateChecks));
                 const nBarriers = Number((((oItem || {}).root || {}).successRateBarriers));
 
                 const bIdMatch = !sFilterId || sId.includes(sFilterId);
                 const bLpcMatch = !sFilterLpc || sLpc === sFilterLpc;
 
-                const bChecksFailed = Number.isFinite(nChecks) ? nChecks < 100 : false;
-                const bBarriersFailed = Number.isFinite(nBarriers) ? nBarriers < 100 : false;
+                const bChecksFailed = Number.isFinite(nChecks) && nChecks < 100;
+                const bBarriersFailed = Number.isFinite(nBarriers) && nBarriers < 100;
 
                 const bChecksMatch = sFilterFailedChecks === "ALL"
                     || (sFilterFailedChecks === "TRUE" && bChecksFailed)
@@ -73,25 +90,18 @@ sap.ui.define([
             });
 
             oDataModel.setProperty("/visibleCheckLists", aFiltered);
+            this._updateFilterState();
         },
 
-        onSelect: function (oEvent) {
-            const ctx = oEvent.getParameter("listItem").getBindingContext("data");
-            const data = ctx.getObject();
+        onResetFilters: function () {
+            const oStateModel = this.getOwnerComponent().getModel("state");
 
-            this.getOwnerComponent().getModel("selected").setData(data);
-        },
+            oStateModel.setProperty("/filterId", "");
+            oStateModel.setProperty("/filterLpc", "");
+            oStateModel.setProperty("/filterFailedChecks", "ALL");
+            oStateModel.setProperty("/filterFailedBarriers", "ALL");
 
-        onCreate: function () {
-            MessageToast.show("Create action is not implemented yet");
-        },
-
-        onCopy: function () {
-            MessageToast.show("Copy action is not implemented yet");
-        },
-
-        onSearch: function () {
-            MessageToast.show("Filters are applied automatically");
+            this.onSearch();
         },
 
         formatStatus: function (sStatus) {
