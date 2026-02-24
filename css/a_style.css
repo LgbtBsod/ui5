@@ -20,7 +20,7 @@
   transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition);
 }
 
-.themeFloatingButton .sapMBtnInner {
+.themeDockButton .sapMBtnInner {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }

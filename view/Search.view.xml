@@ -16,11 +16,6 @@
                     <Toolbar class="toolbarTransparent">
                         <Title text="{i18n>filtersTitle}"/>
                         <ToolbarSpacer/>
-                        <Button
-                            text="{= ${view>/isDarkAccent} ? '☀️' : '🌙' }"
-                            tooltip="Toggle full theme"
-                            press=".onToggleTheme"
-                            class="themeInlineButton sapUiTinyMarginEnd"/>
                         <Button text="{i18n>createButton}" press=".onCreate"/>
                         <Button text="{i18n>copyButton}" press=".onCopy"/>
                     </Toolbar>

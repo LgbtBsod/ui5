@@ -46,6 +46,7 @@ body,
 body {
   margin: 0;
   min-height: 100vh;
+  position: relative;
   background:
     radial-gradient(circle at 14% 18%, var(--bg-grad-a), transparent 46%),
     radial-gradient(circle at 86% 78%, var(--bg-grad-b), transparent 55%),
@@ -126,6 +127,23 @@ body.appDark ::-webkit-scrollbar-thumb {
 
 body.appDark .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
   box-shadow: 0 12px 28px rgba(255, 170, 0, 0.34) !important;
+}
+
+.themeDockButton {
+  position: fixed !important;
+  left: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 30;
+}
+
+.themeDockButton .sapMBtnInner {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px !important;
+  background: var(--accent-grad) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.28) !important;
 }
 
 .themeButton .sapMBtnInner {
@@ -244,6 +262,10 @@ body.appDark .sapMSegBBtn .sapMBtnContent {
   color: #edf1ff !important;
 }
 
+body.appDark .sapMObjStatus {
+  color: #e9eeff !important;
+}
+
 body.appLight {
   --bg-main: linear-gradient(180deg, #f7f8fe 0%, #edf1fb 100%);
   --bg-grad-a: rgba(83, 73, 230, 0.16);
@@ -296,16 +318,40 @@ body::after {
 }
 
 .sapMSegB {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border: 1px solid rgba(130, 146, 187, 0.26) !important;
+  background: rgba(255, 255, 255, 0.38) !important;
+  border: 1px solid rgba(130, 146, 187, 0.2) !important;
   border-radius: 14px !important;
-  padding: 2px;
+  padding: 2px !important;
+}
+
+.sapMSegBBtn {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.sapMSegBBtn:first-child {
+  border-top-left-radius: 11px !important;
+  border-bottom-left-radius: 11px !important;
+}
+
+.sapMSegBBtn:last-child {
+  border-top-right-radius: 11px !important;
+  border-bottom-right-radius: 11px !important;
+}
+
+.sapMSegBBtn + .sapMSegBBtn {
+  border-left: 1px solid rgba(120, 135, 178, 0.16) !important;
 }
 
 .sapMSegBBtnSel {
   background: var(--accent-grad) !important;
   color: #fff !important;
-  border-radius: 10px !important;
+  border-radius: 11px !important;
+}
+
+.sapMSegBBtnSel + .sapMSegBBtn {
+  border-left-color: transparent !important;
 }
 
 .roundedTable .sapMListTblRow:hover .sapMListTblCell {
@@ -319,8 +365,12 @@ body.appDark .sapMSlt {
 }
 
 body.appDark .sapMSegB {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+body.appDark .sapMSegBBtn + .sapMSegBBtn {
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 body.appDark .roundedTable .sapMListTblRow:hover .sapMListTblCell {

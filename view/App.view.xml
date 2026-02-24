@@ -1,7 +1,15 @@
 <mvc:View
+    controllerName="sap_ui5.controller.App"
     displayBlock="true"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns="sap.m">
+
+    <Button
+        text="{= ${appView>/isDark} ? '☀️' : '🌙' }"
+        tooltip="Toggle theme"
+        press=".onToggleTheme"
+        class="themeDockButton"/>
 
     <f:FlexibleColumnLayout id="fcl" layout="{state>/layout}" />
 </mvc:View>

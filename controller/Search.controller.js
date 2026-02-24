@@ -9,12 +9,11 @@ sap.ui.define([
 
         onInit: function () {
             var oStateModel = this.getModel("state");
-            var sTheme = this.applyStoredTheme();
             var oViewModel = new JSONModel({
-                hasActiveFilters: false,
-                isDarkAccent: sTheme !== "light"
+                hasActiveFilters: false
             });
 
+            this.applyStoredTheme();
             this.setModel(oViewModel, "view");
 
             ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach(function (sPath) {
@@ -115,11 +114,6 @@ sap.ui.define([
 
             oDataModel.setProperty("/visibleCheckLists", aFiltered);
             this._updateFilterState();
-        },
-
-        onToggleTheme: function () {
-            var bIsDark = this.toggleTheme();
-            this.getView().getModel("view").setProperty("/isDarkAccent", bIsDark);
         },
 
         onResetFilters: function () {
