@@ -222,13 +222,13 @@ body {
 }
 
 .themeDockButton .sapMBtnInner {
-  width: 2.45rem;
-  height: 2.45rem;
+  width: 3.05rem;
+  height: 3.05rem;
   border-radius: var(--radius-md) !important;
-  background: var(--surface) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--text-main) !important;
-  box-shadow: 0 12px 28px var(--shadow) !important;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.18)) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.46) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.32) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -415,9 +415,28 @@ body {
 
 
 .themeDockButton .sapMBtnContent {
-  font-size: 1rem !important;
-  line-height: 1rem !important;
+  font-size: 1.18rem !important;
+  line-height: 1.18rem !important;
   font-weight: 600;
+}
+
+.themeDockButton .sapUiIcon {
+  font-size: 1.22rem !important;
+  color: var(--accent) !important;
+}
+
+.searchToolbar .sapMBtn:not(.sapMBtnReject):not(.sapMBtnTransparent) .sapMBtnInner,
+.searchToolbar .sapMSwt,
+.searchToolbar .sapMSegBBtnSel {
+  border-color: rgba(var(--accent-rgb), 0.55) !important;
+}
+
+.searchToolbar .sapMSwtOn {
+  background: var(--accent-grad) !important;
+}
+
+.searchToolbar .sapMSwtHandle {
+  border-color: color-mix(in srgb, var(--accent) 45%, white) !important;
 }
 
 
@@ -425,6 +444,16 @@ body {
   border-top: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
   border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
   vertical-align: middle !important;
+}
+
+:root:not(.light-mode) .searchResultTable .sapMListTblRow .sapMListTblCell {
+  background: color-mix(in srgb, var(--surface2) 78%, rgba(220, 225, 236, 0.12)) !important;
+}
+
+:root:not(.light-mode) .searchResultTable .sapMListTblCell .sapMText,
+:root:not(.light-mode) .searchResultTable .sapMObjStatusText,
+:root:not(.light-mode) .searchResultTable .sapMPIText {
+  color: color-mix(in srgb, var(--text-main) 76%, #d7deea 24%) !important;
 }
 
 .searchResultTable .sapMListTblHeaderCell {

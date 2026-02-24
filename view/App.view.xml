@@ -9,7 +9,7 @@
     <html:div class="bg-blobs"></html:div>
 
     <Button
-        text="{= ${appView>/isDark} ? '☀' : '☾' }"
+        icon="{= ${appView>/isDark} ? 'sap-icon://sun' : 'sap-icon://moon' }"
         tooltip="Toggle theme"
         press=".onToggleTheme"
         type="Transparent"
