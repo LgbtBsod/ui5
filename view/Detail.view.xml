@@ -1,7 +1,8 @@
 <mvc:View
     controllerName="sap_ui5.controller.Detail"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
+    xmlns="sap.m"
+    xmlns:form="sap.ui.layout.form">
 
     <Page showHeader="false" class="pageTransparent">
 
@@ -14,7 +15,7 @@
 
             <VBox class="glassCard">
                 <Title text="Basic Information"/>
-                <SimpleForm
+                <form:SimpleForm
                     editable="false"
                     layout="ResponsiveGridLayout"
                     columnsL="2"
@@ -29,7 +30,7 @@
                     <Label text="LPC"/>
                     <Text text="{selected>/lpc}"/>
 
-                </SimpleForm>
+                </form:SimpleForm>
             </VBox>
 
             <VBox class="glassCard">

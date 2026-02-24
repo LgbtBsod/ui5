@@ -9,7 +9,6 @@
       "version": "1.0.0"
     }
   },
-
   "sap.ui": {
     "technology": "UI5",
     "icons": {},
@@ -19,22 +18,20 @@
       "phone": true
     }
   },
-
   "sap.ui5": {
-	"resources": {
-    "css": [
-      {
-        "uri": "css/style.css"
-      }
-    ]
-  },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
     "rootView": {
       "viewName": "sap_ui5.view.App",
       "type": "XML",
       "async": true,
       "id": "splitApp"
     },
-
     "dependencies": {
       "minUI5Version": "1.71.70",
       "libs": {
@@ -44,76 +41,65 @@
         "sap.ui.layout": {}
       }
     },
-
     "contentDensities": {
       "compact": true,
       "cozy": true
     },
-
     "models": {
-
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
           "bundleName": "sap_ui5.i18n.i18n"
         }
       },
-
       "data": {
         "type": "sap.ui.model.json.JSONModel"
       },
-
       "state": {
         "type": "sap.ui.model.json.JSONModel"
       },
-
       "ref": {
         "type": "sap.ui.model.json.JSONModel"
       }
-
     },
-
     "routing": {
-
       "config": {
-        "routerClass": "sap.f.routing.Router",
+        "routerClass": "sap.m.routing.Router",
         "viewType": "XML",
         "viewPath": "sap_ui5.view",
-        "controlId": "fcl",
-        "controlAggregation": "beginColumnPages",
+        "controlId": "splitApp",
+        "controlAggregation": "masterPages",
         "async": true
       },
-
       "routes": [
         {
           "pattern": "",
           "name": "search",
-          "target": ["search"]
+          "target": [
+            "search"
+          ]
         },
         {
           "pattern": "detail/{id}",
           "name": "detail",
-          "target": ["search", "detail"]
+          "target": [
+            "search",
+            "detail"
+          ]
         }
       ],
-
       "targets": {
-
         "search": {
           "viewName": "Search",
           "viewLevel": 1,
-          "controlAggregation": "beginColumnPages"
+          "controlAggregation": "masterPages"
         },
-
         "detail": {
           "viewName": "Detail",
           "viewLevel": 2,
-          "controlAggregation": "midColumnPages"
+          "controlAggregation": "detailPages"
         }
-
       }
-
     }
-
   }
 }

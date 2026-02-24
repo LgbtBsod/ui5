@@ -19,10 +19,22 @@ sap.ui.define([
       const oSelected = aChecklists.find((item) => item.root.id === id) || null;
 
       oDataModel.setProperty("/selectedChecklist", oSelected);
+      oComponent.getModel("selected").setData(oSelected || {});
+    },
 
-      const oFcl = oComponent.getRootControl().byId("fcl");
-      if (oFcl) {
-        oFcl.setLayout("TwoColumnsMidExpanded");
+    onToggleTheme: function () {
+      const bDark = document.body.classList.toggle("darkTheme");
+      if (!bDark) {
+        document.body.classList.remove("darkTheme");
+      }
+    },
+
+    statusState: function (sStatus) {
+      switch (sStatus) {
+        case "SUCCESS": return "Success";
+        case "WARNING": return "Warning";
+        case "CRITICAL": return "Error";
+        default: return "None";
       }
     }
 
