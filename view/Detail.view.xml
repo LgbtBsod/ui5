@@ -8,11 +8,11 @@
 
         <VBox class="appContent detailContent">
 
-            <HBox justifyContent="End" class="sapUiTinyMarginBottom">
-                <Button
-                    text="Edit"
-                    type="Emphasized"
-                    press=".onEdit"
+            <HBox justifyContent="End" class="sapUiTinyMarginBottom" alignItems="Center" renderType="Bare">
+                <Label text="Edit mode" class="sapUiTinyMarginEnd"/>
+                <Switch
+                    state="false"
+                    change=".onToggleEditFromDetail"
                     class="sapUiTinyMarginEnd"/>
                 <Button
                     icon="sap-icon://decline"
@@ -43,7 +43,7 @@
 
             <VBox class="glassCard">
                 <Title text="Checks"/>
-                <Table items="{selected>/checks}">
+                <Table items="{selected>/checks}" class="glassTable roundedTable">
                     <columns>
                         <Column><Text text="Check"/></Column>
                         <Column><Text text="Status"/></Column>
@@ -63,7 +63,7 @@
 
             <VBox class="glassCard">
                 <Title text="Barriers"/>
-                <Table items="{selected>/barriers}">
+                <Table items="{selected>/barriers}" class="glassTable roundedTable">
                     <columns>
                         <Column><Text text="Barrier"/></Column>
                         <Column><Text text="Status"/></Column>

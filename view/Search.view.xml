@@ -70,7 +70,7 @@
                 <VBox class="glassCard">
                     <Table
                         id="checkTable"
-                        class="glassTable"
+                        class="glassTable roundedTable"
                         busy="{state>/isLoading}"
                         noDataText="{= ${state>/loadError} ? ${i18n>noDataLoadError} : ${i18n>noDataDefault} }"
                         items="{ path: 'data>/visibleCheckLists' }"
@@ -102,8 +102,8 @@
                 </VBox>
 
                 <Button
-                    text="{= ${view>/isDarkAccent} ? '🌙' : '☀️' }"
-                    tooltip="Toggle accent"
+                    text="{= ${view>/isDarkAccent} ? '☀️' : '🌙' }"
+                    tooltip="Toggle full theme"
                     press=".onToggleTheme"
                     class="themeFloatingButton"/>
 

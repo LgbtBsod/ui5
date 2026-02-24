@@ -28,12 +28,17 @@ sap.ui.define([
       this.navTo("search", {}, true);
     },
 
-    onEdit: function () {
+    onToggleEditFromDetail: function (oEvent) {
+      if (!oEvent.getParameter("state")) {
+        return;
+      }
+
       var sId = (((this.getModel("selected").getData() || {}).root || {}).id || "");
       if (!sId) {
         return;
       }
 
+      this.getModel("state").setProperty("/objectAction", "EDIT");
       this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
       this.navTo("object", { id: sId });
     },

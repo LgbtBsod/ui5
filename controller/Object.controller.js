@@ -27,6 +27,7 @@ sap.ui.define([
       var sAction = oState.getProperty("/objectAction") || "";
       var bCreate = sId === "__create" || sAction === "CREATE";
       var bCopy = sAction === "COPY";
+      var bEdit = sAction === "EDIT";
 
       if (bCreate) {
         oObjectData = {
@@ -57,7 +58,7 @@ sap.ui.define([
         oObjectData.root.id = "";
       }
 
-      oState.setProperty("/mode", (bCreate || bCopy) ? "EDIT" : "READ");
+      oState.setProperty("/mode", (bCreate || bCopy || bEdit) ? "EDIT" : "READ");
       oState.setProperty("/objectAction", "");
       oModel.setProperty("/object", oObjectData);
       oModel.setProperty("/objectOriginal", _clone(oObjectData));
