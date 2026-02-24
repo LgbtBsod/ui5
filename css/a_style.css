@@ -4,35 +4,13 @@
   --transition: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sapUiBody,
-.sapMShellGlobalInnerBackground,
-.sapMPage,
-.sapMShell,
-.sapFFCL,
-.sapFFCLColumn,
-.sapFCLColumn {
-  background: transparent !important;
-  border: none !important;
-}
-
 .glassCard {
   border-radius: var(--radius-xl) !important;
-  transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition);
 }
 
 .themeDockButton .sapMBtnInner {
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-body.appLight .glassCard {
-  background: rgba(255, 255, 255, 0.84) !important;
-  border-color: rgba(72, 88, 138, 0.14) !important;
-}
-
-body.appDark .glassCard {
-  background: rgba(20, 24, 36, 0.72) !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .glassTable .sapMListTblCell {

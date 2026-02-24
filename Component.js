@@ -30,6 +30,7 @@ sap.ui.define([
             var sStoredTheme = window.localStorage.getItem("sap_ui5_theme") || "dark";
             document.body.classList.toggle("appDark", sStoredTheme !== "light");
             document.body.classList.toggle("appLight", sStoredTheme === "light");
+            document.documentElement.classList.toggle("light-mode", sStoredTheme === "light");
 
             oStateModel.setProperty("/isLoading", true);
 
