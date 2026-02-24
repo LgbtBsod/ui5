@@ -123,7 +123,7 @@
                             </HBox>
                         </VBox>
 
-                        <Button text="{i18n>searchButton}" type="Emphasized" press=".onSearch" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
+                        <Button text="{i18n>searchButton}" type="Emphasized" press=".onSearch" class="sapUiTinyMarginEnd sapUiTinyMarginBottom accentButton"/>
                         <Button text="{i18n>resetButton}" visible="{view>/hasActiveFilters}" press=".onResetFilters" class="sapUiTinyMarginBottom"/>
                     </HBox>
                 </VBox>
@@ -146,7 +146,7 @@
                         <Label text="{i18n>searchModeLabel}" class="sapUiTinyMarginEnd"/>
                         <Text text="{i18n>searchModeExact}" class="sapUiTinyMarginEnd modeHintText" visible="{= ${state>/searchMode} !== 'LOOSE' }"/>
                         <Text text="{i18n>searchModeLoose}" class="sapUiTinyMarginEnd modeHintText" visible="{= ${state>/searchMode} === 'LOOSE' }"/>
-                        <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff=""/>
+                        <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff="" class="accentSwitch"/>
                     </Toolbar>
 
 

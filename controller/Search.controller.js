@@ -2,10 +2,12 @@ sap.ui.define([
     "sap_ui5/controller/Base.controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
+    "sap/m/MessageBox",
     "sap_ui5/service/backend/BackendAdapter",
     "sap_ui5/service/SmartSearchAdapter",
-    "sap_ui5/util/ExcelExport"
-], function (BaseController, JSONModel, MessageToast, BackendAdapter, SmartSearchAdapter, ExcelExport) {
+    "sap_ui5/util/ExcelExport",
+    "sap_ui5/util/FlowCoordinator"
+], function (BaseController, JSONModel, MessageToast, MessageBox, BackendAdapter, SmartSearchAdapter, ExcelExport, FlowCoordinator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -141,15 +143,35 @@ sap.ui.define([
                 return;
             }
 
-            this.getModel("selected").setData(oChecklist);
-            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            this.navTo("detail", { id: sId });
+            this._confirmNavigationFromDirty().then(function (bCanNavigate) {
+                if (!bCanNavigate) {
+                    return;
+                }
+                this.getModel("selected").setData(oChecklist);
+                this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+                this.navTo("detail", { id: sId });
+            }.bind(this));
+        },
+
+
+
+        _confirmNavigationFromDirty: function () {
+            return FlowCoordinator.confirmUnsavedAndHandle(this, function () {
+                return Promise.resolve(false);
+            }).then(function (sDecision) {
+                return sDecision !== "CANCEL";
+            });
         },
 
         onCreate: function () {
-            this.getModel("state").setProperty("/objectAction", "CREATE");
-            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            this.navTo("object", { id: "__create" });
+            this._confirmNavigationFromDirty().then(function (bCanNavigate) {
+                if (!bCanNavigate) {
+                    return;
+                }
+                this.getModel("state").setProperty("/objectAction", "CREATE");
+                this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+                this.navTo("object", { id: "__create" });
+            }.bind(this));
         },
 
         onCopy: function () {
@@ -161,9 +183,14 @@ sap.ui.define([
                 return;
             }
 
-            this.getModel("state").setProperty("/objectAction", "COPY");
-            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-            this.navTo("object", { id: sId });
+            this._confirmNavigationFromDirty().then(function (bCanNavigate) {
+                if (!bCanNavigate) {
+                    return;
+                }
+                this.getModel("state").setProperty("/objectAction", "COPY");
+                this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+                this.navTo("object", { id: sId });
+            }.bind(this));
         },
 
         onDelete: function () {
