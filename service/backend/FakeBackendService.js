@@ -59,16 +59,50 @@ sap.ui.define([
             return Promise.resolve(InMemoryDB.upsertRows(sId, sSection, aRows));
         },
 
-        lockHeartbeat: function (sSessionId) {
-            return FakeODataService.callFunctionImport("LockHeartbeat", { sessionId: sSessionId });
+        lockAcquire: function () {
+            return Promise.resolve({ success: true, action: "ACQUIRED", lock_expires: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
         },
 
-        lockRelease: function (sSessionId) {
-            return FakeODataService.callFunctionImport("LockRelease", { sessionId: sSessionId });
+        lockHeartbeat: function () {
+            return Promise.resolve({ success: true, is_killed: false, lock_expires: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
+        },
+
+        lockRelease: function () {
+            return Promise.resolve({ released: true, save_status: "N" });
+        },
+
+        buildReleaseBeaconPayload: function () {
+            return null;
         },
 
         getServerState: function () {
             return FakeODataService.callFunctionImport("ServerState", {});
+        },
+
+
+        getPersons: function () {
+            return fetch("mock/persons.json")
+                .then(function (oResponse) { return oResponse.json(); })
+                .then(function (oData) { return (oData && oData.persons) || []; });
+        },
+
+        getDictionary: function (sDomain) {
+            var mMap = {
+                LPC: "mock/lpc.json",
+                PROFESSION: "mock/professions.json"
+            };
+            var sUrl = mMap[sDomain] || "mock/lpc.json";
+            var sKey = sDomain === "PROFESSION" ? "professions" : "lpc";
+
+            return fetch(sUrl)
+                .then(function (oResponse) { return oResponse.json(); })
+                .then(function (oData) { return (oData && oData[sKey]) || []; });
+        },
+
+        getLocations: function () {
+            return fetch("mock/location_hierarchy.json")
+                .then(function (oResponse) { return oResponse.json(); })
+                .then(function (oData) { return (oData && oData.locations) || []; });
         },
 
         create: function (payload) {

@@ -1,70 +1,129 @@
 sap.ui.define([
-    "sap_ui5/service/backend/FakeBackendService"
-], function (FakeBackendService) {
+    "sap_ui5/service/backend/FakeBackendService",
+    "sap_ui5/service/backend/RealBackendService"
+], function (FakeBackendService, RealBackendService) {
     "use strict";
 
-    var BackendService = FakeBackendService;
+    var _backendService = FakeBackendService;
+
+    function _readUrlMode() {
+        try {
+            var oUrl = new URL(window.location.href);
+            return oUrl.searchParams.get("backend");
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _selectBackend(mConfig) {
+        var sMode = (mConfig && mConfig.mode) || _readUrlMode() || "fake";
+        _backendService = (sMode === "real") ? RealBackendService : FakeBackendService;
+
+        if (_backendService.configure) {
+            _backendService.configure(mConfig || {});
+        }
+    }
 
     return {
 
+        configure: function (mConfig) {
+            _selectBackend(mConfig || {});
+        },
+
         login: function (username) {
-            return BackendService.login(username);
+            return _backendService.login(username);
         },
 
         init: function () {
-            return BackendService.init();
+            return _backendService.init();
         },
 
         getCheckLists: function () {
-            return BackendService.getCheckLists();
+            return _backendService.getCheckLists();
         },
 
         queryCheckLists: function (mQuery) {
-            return BackendService.queryCheckLists(mQuery);
+            return _backendService.queryCheckLists(mQuery);
         },
 
         createCheckList: function (oData) {
-            return BackendService.createCheckList(oData);
+            return _backendService.createCheckList(oData);
         },
 
         updateCheckList: function (sId, oData) {
-            return BackendService.updateCheckList(sId, oData);
+            return _backendService.updateCheckList(sId, oData);
         },
 
         deleteCheckList: function (sId) {
-            return BackendService.deleteCheckList(sId);
+            return _backendService.deleteCheckList(sId);
         },
 
         upsertRows: function (sId, sSection, aRows) {
-            return BackendService.upsertRows(sId, sSection, aRows);
+            return _backendService.upsertRows(sId, sSection, aRows);
         },
 
-        lockHeartbeat: function (sSessionId) {
-            return BackendService.lockHeartbeat(sSessionId);
+        lockAcquire: function (sObjectId, sSessionId, sUser, sStealFrom) {
+            if (_backendService.lockAcquire) {
+                return _backendService.lockAcquire(sObjectId, sSessionId, sUser, sStealFrom);
+            }
+            return Promise.resolve({ success: true, action: "ACQUIRED" });
         },
 
-        lockRelease: function (sSessionId) {
-            return BackendService.lockRelease(sSessionId);
+        lockHeartbeat: function (sObjectId, sSessionId) {
+            return _backendService.lockHeartbeat(sObjectId, sSessionId);
+        },
+
+        lockRelease: function (sObjectId, sSessionId, mOptions) {
+            return _backendService.lockRelease(sObjectId, sSessionId, mOptions);
+        },
+
+
+        buildReleaseBeaconPayload: function (sObjectId, sSessionId, mOptions) {
+            if (_backendService.buildReleaseBeaconPayload) {
+                return _backendService.buildReleaseBeaconPayload(sObjectId, sSessionId, mOptions);
+            }
+            return null;
         },
 
         getServerState: function () {
-            return BackendService.getServerState();
+            return _backendService.getServerState();
+        },
+
+        getPersons: function () {
+            if (_backendService.getPersons) {
+                return _backendService.getPersons();
+            }
+            return Promise.resolve([]);
+        },
+
+        getDictionary: function (sDomain) {
+            if (_backendService.getDictionary) {
+                return _backendService.getDictionary(sDomain);
+            }
+            return Promise.resolve([]);
+        },
+
+        getLocations: function () {
+            if (_backendService.getLocations) {
+                return _backendService.getLocations();
+            }
+            return Promise.resolve([]);
         },
 
         createObject: function (data) {
-            return BackendService.create(data);
+            return _backendService.create(data);
         },
 
         readObject: function (uuid) {
-            return BackendService.read(uuid);
+            return _backendService.read(uuid);
         },
 
         updateObject: function (uuid, data) {
-            return BackendService.update(uuid, data);
+            return _backendService.update(uuid, data);
         },
 
         getAllObjects: function () {
-            return BackendService.getAll();
+            return _backendService.getAll();
         }
 
     };

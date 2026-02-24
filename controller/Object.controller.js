@@ -72,6 +72,7 @@ sap.ui.define([
       }
 
       oState.setProperty("/mode", (bCreate || bCopy || bEdit) ? "EDIT" : "READ");
+      oState.setProperty("/activeObjectId", sId && sId !== "__create" ? sId : null);
       oState.setProperty("/objectAction", "");
       oModel.setProperty("/object", oObjectData);
       oModel.setProperty("/objectOriginal", _clone(oObjectData));
@@ -102,7 +103,24 @@ sap.ui.define([
 
     onToggleEdit: function (oEvent) {
       var isEdit = oEvent.getParameter("state");
-      this.getModel("state").setProperty("/mode", isEdit ? "EDIT" : "READ");
+      var oState = this.getModel("state");
+
+      if (isEdit) {
+        BackendAdapter.lockAcquire(
+          oState.getProperty("/activeObjectId"),
+          oState.getProperty("/sessionId")
+        ).then(function () {
+          oState.setProperty("/isLocked", true);
+        }).catch(function () {
+          oState.setProperty("/mode", "READ");
+          oState.setProperty("/isLocked", false);
+          MessageToast.show(this.getResourceBundle().getText("lockConflictMessage"));
+        }.bind(this));
+      } else {
+        oState.setProperty("/isLocked", false);
+      }
+
+      oState.setProperty("/mode", isEdit ? "EDIT" : "READ");
     },
 
 

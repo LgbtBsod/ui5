@@ -71,12 +71,14 @@ class LockEntry(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     pcct_uuid = Column(String, nullable=False)
     user_id = Column(String, nullable=False)
+    session_guid = Column(String, nullable=True)
 
     locked_at = Column(DateTime, default=now_utc)
     last_heartbeat = Column(DateTime, default=now_utc)
     expires_at = Column(DateTime)
 
     is_killed = Column(Boolean, default=False)
+    killed_by = Column(String, nullable=True)
 
 
 class LockLog(Base):
@@ -85,6 +87,7 @@ class LockLog(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     pcct_uuid = Column(String, nullable=False)
     user_id = Column(String)
+    session_guid = Column(String, nullable=True)
     action = Column(String)
     timestamp = Column(DateTime, default=now_utc)
 

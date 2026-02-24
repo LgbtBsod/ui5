@@ -1,7 +1,6 @@
 sap.ui.define([
     "sap/ui/core/UIComponent",
     "sap_ui5/model/ModelFactory",
-    "sap_ui5/service/ChecklistService",
     "sap_ui5/service/backend/BackendAdapter",
     "sap_ui5/service/SmartSearchAdapter",
     "sap_ui5/manager/SmartCacheManager",
@@ -13,7 +12,6 @@ sap.ui.define([
 ], function (
     UIComponent,
     ModelFactory,
-    ChecklistService,
     BackendAdapter,
     SmartSearchAdapter,
     SmartCacheManager,
@@ -34,6 +32,11 @@ sap.ui.define([
         init: function () {
             UIComponent.prototype.init.apply(this, arguments);
 
+            BackendAdapter.configure({
+                mode: this.getManifestEntry("/sap.ui5/config/backendMode") || "fake",
+                baseUrl: this.getManifestEntry("/sap.app/dataSources/mockGateway/uri") || "http://localhost:8000"
+            });
+
             var oDataModel = ModelFactory.createDataModel();
             var oStateModel = ModelFactory.createStateModel();
             var oLayoutModel = ModelFactory.createLayoutModel();
@@ -44,18 +47,31 @@ sap.ui.define([
             this._oSmartCache = new SmartCacheManager();
             this._oHeartbeat = new HeartbeatManager({
                 heartbeatFn: function () {
-                    return BackendAdapter.lockHeartbeat(oStateModel.getProperty("/sessionId"));
+                    return BackendAdapter.lockHeartbeat(
+                        oStateModel.getProperty("/activeObjectId"),
+                        oStateModel.getProperty("/sessionId")
+                    );
                 }
             });
             this._oGcd = new GCDManager();
             this._oActivity = new ActivityMonitor();
             this._fnUnregisterBeacon = BeaconManager.register(function () {
-                BackendAdapter.lockRelease(oStateModel.getProperty("/sessionId"));
+                return BackendAdapter.buildReleaseBeaconPayload(
+                    oStateModel.getProperty("/activeObjectId"),
+                    oStateModel.getProperty("/sessionId"),
+                    { trySave: true }
+                );
             });
 
             this._oHeartbeat.attachEvent("heartbeat", function (oEvent) {
                 var oPayload = oEvent.getParameters() || {};
-                oStateModel.setProperty("/isKilled", !!oPayload.is_killed);
+                var bKilled = !!oPayload.is_killed;
+                oStateModel.setProperty("/isKilled", bKilled);
+                oStateModel.setProperty("/lockExpires", oPayload.lock_expires || null);
+                if (bKilled) {
+                    oStateModel.setProperty("/mode", "READ");
+                    oStateModel.setProperty("/isLocked", false);
+                }
                 oCacheModel.setProperty("/lastServerState", {
                     lastChangeSet: oPayload.last_change_set || null,
                     serverChangedOn: oPayload.server_changed_on || null,
@@ -96,10 +112,10 @@ sap.ui.define([
             Promise.all([
                 BackendAdapter.login("demoUser"),
                 BackendAdapter.init(),
-                ChecklistService.loadPersons().catch(function () { return []; }),
-                ChecklistService.loadLpc().catch(function () { return []; }),
-                ChecklistService.loadProfessions().catch(function () { return []; }),
-                ChecklistService.loadLocations().catch(function () { return []; }),
+                BackendAdapter.getPersons().catch(function () { return []; }),
+                BackendAdapter.getDictionary("LPC").catch(function () { return []; }),
+                BackendAdapter.getDictionary("PROFESSION").catch(function () { return []; }),
+                BackendAdapter.getLocations().catch(function () { return []; }),
                 BackendAdapter.getServerState().catch(function () { return null; })
             ]).then(function (aResults) {
                 var oLogin = aResults[0];

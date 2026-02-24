@@ -7,6 +7,12 @@
   <Page showHeader="false" busy="{state>/isBusy}" class="pageTransparent">
     <VBox class="appContent">
 
+      <MessageStrip text="{i18n>lockKilledMessage}"
+                    type="Warning"
+                    showIcon="true"
+                    visible="{state>/isKilled}"
+                    class="sapUiTinyMarginBottom"/>
+
       <HBox class="glassCard" alignItems="Center" justifyContent="SpaceBetween">
         <Title text="{= ${data>/object/root/id} || ${i18n>newChecklist} }"/>
         <Switch state="{= ${state>/mode} === 'EDIT' }"
