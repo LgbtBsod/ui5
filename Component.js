@@ -12,7 +12,8 @@ sap.ui.define([
     "sap_ui5/manager/ConnectivityCoordinator",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageBox",
-    "sap_ui5/util/FlowCoordinator"
+    "sap_ui5/util/FlowCoordinator",
+    "sap_ui5/util/DeltaPayloadBuilder"
 ], function (
     UIComponent,
     ModelFactory,
@@ -27,7 +28,8 @@ sap.ui.define([
     ConnectivityCoordinator,
     JSONModel,
     MessageBox,
-    FlowCoordinator
+    FlowCoordinator,
+    DeltaPayloadBuilder
 ) {
     "use strict";
 
@@ -75,14 +77,24 @@ sap.ui.define([
                     var sId = oStateModel.getProperty("/activeObjectId");
                     var oObj = oDataModel.getProperty("/object");
                     var oSelected = this.getModel("selected").getData() || {};
-                    var oPayload = (oObj && oObj.root && oObj.root.id === sId) ? oObj : oSelected;
-                    if (!sId || !oPayload || !oPayload.root) {
+                    var oCurrent = (oObj && oObj.root && oObj.root.id === sId) ? oObj : oSelected;
+                    if (!sId || !oCurrent || !oCurrent.root) {
                         return null;
                     }
-                    return { id: sId, payload: JSON.parse(JSON.stringify(oPayload)) };
+
+                    var oBase = (oDataModel.getProperty("/objectOriginal/root/id") === sId)
+                        ? (oDataModel.getProperty("/objectOriginal") || {})
+                        : (oDataModel.getProperty("/selectedChecklist") || {});
+
+                    var oDelta = DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oBase);
+                    if (!oDelta) {
+                        return null;
+                    }
+
+                    return { id: sId, payload: oDelta, fullPayload: JSON.parse(JSON.stringify(oCurrent)) };
                 }.bind(this),
                 saveFn: function (oPayload) {
-                    return BackendAdapter.updateCheckList(oPayload.id, oPayload.payload, { force: false }).then(function (oSaved) {
+                    return BackendAdapter.autoSaveCheckList(oPayload.id, oPayload.payload, oPayload.fullPayload, { force: false }).then(function (oSaved) {
                         oStateModel.setProperty("/isDirty", false);
                         if (oSaved && oSaved.root && oSaved.root.id === oPayload.id) {
                             if (oDataModel.getProperty("/object/root/id") === oPayload.id) {

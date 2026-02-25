@@ -75,6 +75,11 @@ sap.ui.define([
             return Promise.resolve(InMemoryDB.updateCheckList(sId, oData));
         },
 
+        autoSaveCheckList: function (sId, oDeltaPayload, oFullPayload) {
+            // Fake backend persists full snapshot; delta is accepted for interface compatibility.
+            return Promise.resolve(InMemoryDB.updateCheckList(sId, oFullPayload || {}));
+        },
+
         deleteCheckList: function (sId) {
             return Promise.resolve(InMemoryDB.deleteCheckList(sId));
         },
@@ -109,6 +114,18 @@ sap.ui.define([
                 .then(function (oResponse) { return oResponse.json(); })
                 .then(function (oData) { return (oData && oData.persons) || []; });
         },
+        suggestPersons: function (sQuery) {
+            var sNeedle = String(sQuery || "").trim().toLowerCase();
+            return this.getPersons().then(function (aPersons) {
+                return (aPersons || []).filter(function (oPerson) {
+                    var sName = String((oPerson && oPerson.fullName) || "").toLowerCase();
+                    var sPernr = String((oPerson && oPerson.perner) || "").toLowerCase();
+                    var sPos = String((oPerson && oPerson.position) || "").toLowerCase();
+                    return !sNeedle || sName.indexOf(sNeedle) >= 0 || sPernr.indexOf(sNeedle) >= 0 || sPos.indexOf(sNeedle) >= 0;
+                }).slice(0, 10);
+            });
+        },
+
 
         getDictionary: function (sDomain) {
             var mMap = {

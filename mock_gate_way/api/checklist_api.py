@@ -35,6 +35,16 @@ def get(root_id: str, request: Request, response: Response, expand: bool = False
     return data
 
 
+
+
+@router.get("/{root_id}/checks")
+def get_checks(root_id: str, top: int = DEFAULT_PAGE_SIZE, skip: int = 0, db: Session = Depends(get_db)):
+    return ChecklistService.list_checks(db, root_id, top=top, skip=skip)
+
+
+@router.get("/{root_id}/barriers")
+def get_barriers(root_id: str, top: int = DEFAULT_PAGE_SIZE, skip: int = 0, db: Session = Depends(get_db)):
+    return ChecklistService.list_barriers(db, root_id, top=top, skip=skip)
 @router.patch("/{root_id}")
 def update_with_etag(
     root_id: str,
@@ -130,14 +140,3 @@ def list_checklists(filter: str = None, expand: str = None, top: int = DEFAULT_P
     ]
     return {"value": value, "count": total}
 
-@router.put("/{root_id}/{section}")
-def replace_rows(root_id: str, section: str, payload: dict, user_id: str, db: Session = Depends(get_db)):
-    print("SECTION =", section)
-    print("PAYLOAD =", payload)
-
-    try:
-        rows = payload.get("rows") if isinstance(payload, dict) else []
-        return ChecklistService.replace_rows(db, root_id, user_id, section, rows or [])
-    except Exception as e:
-        print("ERROR =", e)
-        raise
