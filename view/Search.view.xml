@@ -23,85 +23,87 @@
                         id="searchSmartFilterBar"
                         entitySet="CheckListSet"
                         persistencyKey="pcctSmartFilter"
-                        useToolbar="true"
+                        useToolbar="false"
+                        visible="false"
+                        showGoOnFB="false"
                         search=".onSmartSearch"
-                        filterChange=".onSmartFilterChanged">
+                        filterChange=".onSmartFilterChanged"/>
 
-                        <smartFilterBar:controlConfiguration>
-                            <smartFilterBar:ControlConfiguration key="maxResults" label="{i18n>searchMaxResultsLabel}" visibleInAdvancedArea="true">
-                                <smartFilterBar:customControl>
-                                    <Input value="{state>/searchMaxResults}" width="10rem" type="Number"/>
-                                </smartFilterBar:customControl>
-                            </smartFilterBar:ControlConfiguration>
-
-                            <smartFilterBar:ControlConfiguration key="has_failed_checks" label="{i18n>filterChecksLabel}" visibleInAdvancedArea="true">
-                                <smartFilterBar:customControl>
-                                    <HBox class="statusToggleWrapper" renderType="Bare">
-                                        <Button text="{i18n>allChecks}" press=".onStatusFilterPress" class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedChecks} === 'ALL' ? 'activeStatus' : '' }">
-                                            <customData>
-                                                <core:CustomData key="filterPath" value="/filterFailedChecks"/>
-                                                <core:CustomData key="filterValue" value="ALL"/>
-                                            </customData>
-                                        </Button>
-                                        <Button text="{i18n>hasFailed}" press=".onStatusFilterPress" class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedChecks} === 'TRUE' ? 'activeStatus' : '' }">
-                                            <customData>
-                                                <core:CustomData key="filterPath" value="/filterFailedChecks"/>
-                                                <core:CustomData key="filterValue" value="TRUE"/>
-                                            </customData>
-                                        </Button>
-                                        <Button text="{i18n>allPassed}" press=".onStatusFilterPress" class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedChecks} === 'FALSE' ? 'activeStatus' : '' }">
-                                            <customData>
-                                                <core:CustomData key="filterPath" value="/filterFailedChecks"/>
-                                                <core:CustomData key="filterValue" value="FALSE"/>
-                                            </customData>
-                                        </Button>
-                                    </HBox>
-                                </smartFilterBar:customControl>
-                            </smartFilterBar:ControlConfiguration>
-
-                            <smartFilterBar:ControlConfiguration key="has_failed_barriers" label="{i18n>filterBarriersLabel}" visibleInAdvancedArea="true">
-                                <smartFilterBar:customControl>
-                                    <HBox class="statusToggleWrapper" renderType="Bare">
-                                        <Button text="{i18n>allBarriers}" press=".onStatusFilterPress" class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedBarriers} === 'ALL' ? 'activeStatus' : '' }">
-                                            <customData>
-                                                <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
-                                                <core:CustomData key="filterValue" value="ALL"/>
-                                            </customData>
-                                        </Button>
-                                        <Button text="{i18n>hasFailed}" press=".onStatusFilterPress" class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedBarriers} === 'TRUE' ? 'activeStatus' : '' }">
-                                            <customData>
-                                                <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
-                                                <core:CustomData key="filterValue" value="TRUE"/>
-                                            </customData>
-                                        </Button>
-                                        <Button text="{i18n>allPassed}" press=".onStatusFilterPress" class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedBarriers} === 'FALSE' ? 'activeStatus' : '' }">
-                                            <customData>
-                                                <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
-                                                <core:CustomData key="filterValue" value="FALSE"/>
-                                            </customData>
-                                        </Button>
-                                    </HBox>
-                                </smartFilterBar:customControl>
-                            </smartFilterBar:ControlConfiguration>
-                        </smartFilterBar:controlConfiguration>
-                    </smartFilterBar:SmartFilterBar>
+                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop">
+                        <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd"/>
+                        <Input value="{state>/filterId}" placeholder="{i18n>checklistIdPlaceholder}" width="12rem" class="sapUiTinyMarginEnd"/>
+                        <Label text="{i18n>filterLpcLabel}" class="sapUiTinyMarginEnd"/>
+                        <Select selectedKey="{state>/filterLpc}" width="9rem" class="sapUiTinyMarginEnd">
+                            <items>
+                                <core:Item key="" text="{i18n>allLpc}"/>
+                                <core:Item key="L1" text="{i18n>lpcLow}"/>
+                                <core:Item key="L2" text="{i18n>lpcMedium}"/>
+                                <core:Item key="L3" text="{i18n>lpcHigh}"/>
+                            </items>
+                        </Select>
+                        <ToolbarSpacer/>
+                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
+                    </Toolbar>
                 </VBox>
+
+                <HBox class="workflowRail" renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center">
+                    <VBox class="workflowStageCard">
+                        <Text text="{i18n>workflowTitle}" class="workflowEyebrow"/>
+                        <Title text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }" level="H4"/>
+                        <Text text="{i18n>workflowSubtitle}" class="sapUiTinyMarginTop"/>
+                        <Button text="{i18n>workflowAnalyticsButton}" icon="sap-icon://business-objects-experience" type="Transparent" press=".onOpenWorkflowAnalytics" class="brandActionBtn brandActionGhost sapUiTinyMarginTop"/>
+                    </VBox>
+                    <HBox class="workflowActions" renderType="Bare" wrap="Wrap">
+                        <Button text="{i18n>workflowActionCreate}" type="Emphasized" press=".onWorkflowQuickAction" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                            <customData><core:CustomData key="action" value="CREATE"/></customData>
+                        </Button>
+                        <Button text="{i18n>workflowActionRefresh}" type="Transparent" press=".onWorkflowQuickAction" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                            <customData><core:CustomData key="action" value="REFRESH"/></customData>
+                        </Button>
+                        <Button text="{i18n>workflowActionReset}" type="Transparent" press=".onWorkflowQuickAction" class="brandActionBtn brandActionGhost sapUiTinyMarginBottom">
+                            <customData><core:CustomData key="action" value="RESET"/></customData>
+                        </Button>
+                    </HBox>
+                </HBox>
+
+
+
+                <MessageStrip
+                    text="{= ${view>/smartControlsReason} || ${i18n>smartControlsUnavailable} }"
+                    type="Warning"
+                    visible="{= !${view>/useSmartControls} }"
+                    showIcon="true"
+                    class="sapUiTinyMarginBottom"/>
 
                 <VBox class="glassCard smartTableGlass">
                     <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar sapUiTinyMarginBottom">
-                        <Button text="{i18n>createButton}" press=".onCreate" class="sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>copyButton}" press=".onCopy" class="sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>deleteButton}" type="Reject" press=".onDelete" enabled="{view>/hasSelection}" class="sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>exportChecklistButton}" press=".onExportReport" type="Transparent" class="sapUiTinyMarginEnd">
-                            <customData><core:CustomData key="entity" value="checklist"/></customData>
-                        </Button>
-                        <Button text="{i18n>exportBarriersButton}" press=".onExportReport" type="Transparent" class="sapUiTinyMarginEnd">
-                            <customData><core:CustomData key="entity" value="barrier"/></customData>
-                        </Button>
-                        <Button text="{i18n>exportChecksButton}" press=".onExportReport" type="Transparent" class="sapUiTinyMarginEnd">
-                            <customData><core:CustomData key="entity" value="check"/></customData>
-                        </Button>
+                        <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" class="brandActionBtn sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
+                        <MenuButton text="{i18n>exportMenuButton}" buttonMode="Split" defaultAction=".onExportMenuDefault" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd" icon="sap-icon://excel-attachment">
+                            <menu>
+                                <Menu itemSelected=".onExportMenuAction">
+                                    <items>
+                                        <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view">
+                                            <customData><core:CustomData key="entity" value="screen"/></customData>
+                                        </MenuItem>
+                                        <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2">
+                                            <customData><core:CustomData key="entity" value="barrier"/></customData>
+                                        </MenuItem>
+                                        <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection">
+                                            <customData><core:CustomData key="entity" value="check"/></customData>
+                                        </MenuItem>
+                                    </items>
+                                </Menu>
+                            </menu>
+                        </MenuButton>
+                        <HBox class="maxRowsWrap" alignItems="Center" renderType="Bare">
+                            <Label text="{i18n>searchMaxResultsLabel}" class="sapUiTinyMarginEnd"/>
+                            <Input value="{state>/searchMaxResults}" type="Number" placeholder="{i18n>maxRowsAllPlaceholder}" width="8rem" change=".onMaxRowsChange" class="maxRowsInput"/>
+                        </HBox>
                         <ToolbarSpacer/>
+                        <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/lastUpdatedAt} || '-') }" class="sapUiTinyMarginEnd"/>
                         <Label text="{i18n>searchModeLabel}" class="sapUiTinyMarginEnd"/>
                         <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff="" class="accentSwitch"/>
                     </Toolbar>
@@ -117,13 +119,35 @@
                         header="{i18n>resultsLabel}"
                         persistencyKey="pcctSmartTable"
                         enableAutoBinding="true"
+                        visible="{view>/useSmartControls}"
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
                         initiallyVisibleFields="id,status,LPC_TEXT,PROF_TEXT,date,time,OBSERVER_FULLNAME,OBSERVED_FULLNAME"
-                        requestAtLeastFields="id,status,LPC_KEY,has_failed_checks,has_failed_barriers"/>
+                        requestAtLeastFields="id,status,LPC_KEY,has_failed_checks,has_failed_barriers" growing="true" growingThreshold="100"/>
+
+                    <Table visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" class="glassTable" mode="SingleSelectMaster" itemPress=".onSelect" selectionChange=".onSelect" growing="true" growingThreshold="100" growingScrollToLoad="false">
+                        <columns>
+                            <Column><Text text="{i18n>columnId}"/></Column>
+                            <Column><Text text="{i18n>columnStatus}"/></Column>
+                            <Column><Text text="{i18n>headerLpcLabel}"/></Column>
+                            <Column><Text text="{i18n>columnObserver}"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <ObjectIdentifier title="{data>root/id}" text="{data>basic/checklist_id}"/>
+                                    <ObjectStatus text="{data>root/status}" state="{path:'data>root/status', formatter:'.formatStatus'}"/>
+                                    <Text text="{data>basic/LPC_TEXT}"/>
+                                    <Text text="{data>basic/OBSERVER_FULLNAME}"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
                 </VBox>
 
             </VBox>
+            <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsDialog" type="XML"/>
+
         </content>
     </Page>
 </mvc:View>

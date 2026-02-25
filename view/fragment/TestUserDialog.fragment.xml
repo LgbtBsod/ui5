@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-  <Dialog
+  <Dialog class="glassDialog"
     title="{i18n>testUserDialogTitle}"
     contentWidth="26rem"
     draggable="true"

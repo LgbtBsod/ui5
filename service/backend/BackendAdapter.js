@@ -176,6 +176,26 @@ sap.ui.define([
             return Promise.resolve([]);
         },
 
+
+        getProcessAnalytics: function (mPayload, sSearchMode) {
+            if (_backendService.getProcessAnalytics) {
+                return _backendService.getProcessAnalytics(mPayload || {}, sSearchMode || "EXACT");
+            }
+            return this.getCheckLists().then(function (aRows) {
+                return {
+                    total: (aRows || []).length,
+                    failedChecks: 0,
+                    failedBarriers: 0,
+                    healthy: (aRows || []).length,
+                    closedCount: 0,
+                    registeredCount: 0,
+                    avgChecksRate: 0,
+                    avgBarriersRate: 0,
+                    refreshedAt: new Date().toISOString()
+                };
+            });
+        },
+
         exportReport: function (sEntity, mPayload) {
             if (_backendService.exportReport) {
                 return _backendService.exportReport(sEntity, mPayload || {});

@@ -48,7 +48,9 @@ sap.ui.define([
                 networkGraceExpiresAt: null,
                 autosaveState: "IDLE",
                 autosaveAt: null,
-                requiredFields: []
+                requiredFields: [],
+                mainServiceMetadataOk: null,
+                mainServiceMetadataError: ""
             });
         },
 

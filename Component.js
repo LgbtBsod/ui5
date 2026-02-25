@@ -46,8 +46,10 @@ sap.ui.define([
         init: function () {
             UIComponent.prototype.init.apply(this, arguments);
 
+            var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "fake";
+            var bLocalHost = (window && window.location && /localhost|127\.0\.0\.1/.test(window.location.hostname || ""));
             BackendAdapter.configure({
-                mode: this.getManifestEntry("/sap.ui5/config/backendMode") || "fake",
+                mode: (sConfiguredMode === "real" && bLocalHost) ? "fake" : sConfiguredMode,
                 baseUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000"
             });
 
@@ -58,6 +60,19 @@ sap.ui.define([
                 useBatch: false,
                 defaultCountMode: "Inline"
             });
+            oStateModel.setProperty("/mainServiceMetadataOk", null);
+            oStateModel.setProperty("/mainServiceMetadataError", "");
+            oMainServiceModel.attachMetadataLoaded(function () {
+                oStateModel.setProperty("/mainServiceMetadataOk", true);
+                oStateModel.setProperty("/mainServiceMetadataError", "");
+            });
+            oMainServiceModel.attachMetadataFailed(function (oEvent) {
+                var oParams = oEvent.getParameters ? oEvent.getParameters() : {};
+                var sReason = (oParams && (oParams.message || oParams.responseText)) || "Metadata request failed";
+                oStateModel.setProperty("/mainServiceMetadataOk", false);
+                oStateModel.setProperty("/mainServiceMetadataError", sReason);
+            });
+
             var oLayoutModel = ModelFactory.createLayoutModel();
             var oCacheModel = ModelFactory.createCacheModel();
             var oMasterDataModel = ModelFactory.createMasterDataModel();

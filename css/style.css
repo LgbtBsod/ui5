@@ -1,3 +1,6 @@
+/* ==============================
+   Section: tokens-and-theme-modes
+   ============================== */
 :root {
   color-scheme: dark;
   --bg: #0b0b0f;
@@ -12,8 +15,8 @@
   --accent-rgb: 255, 83, 17;
   --shadow: rgba(0, 0, 0, 0.62);
 
-  --radius-xl: 20px;
-  --radius-lg: 14px;
+  --radius-xl: 28px;
+  --radius-lg: 18px;
   --radius-md: 10px;
   --transition: cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -65,6 +68,9 @@
   --readonly-field-bg: color-mix(in srgb, var(--surface2) 95%, white);
 }
 
+/* ==============================
+   Section: layout-shell-and-page-surfaces
+   ============================== */
 .sapUiBody,
 html,
 body,
@@ -150,6 +156,9 @@ body {
   padding-top: 1.25rem;
 }
 
+/* ==============================
+   Section: card-toolbar-button-primitives
+   ============================== */
 .glassCard,
 .filterCard {
   background: var(--glass-bg) !important;
@@ -1000,6 +1009,9 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 /* === Premium UX extensions === */
+/* ==============================
+   Section: forms-filters-smart-controls
+   ============================== */
 .smartFilterGlass,
 .smartTableGlass {
   background: color-mix(in srgb, var(--glass-bg) 86%, rgba(var(--accent-rgb), 0.08)) !important;
@@ -1076,6 +1088,9 @@ body.themeLifestyleNightOps .filterCard {
   z-index: 25;
 }
 
+/* ==============================
+   Section: detail-card-rail-and-dialogs
+   ============================== */
 /* Detail action sausage rail + rounded mushroom cards */
 .floatingControlSausage {
   border-radius: 999px !important;
@@ -1136,11 +1151,6 @@ body.themeLifestyleNightOps .filterCard {
     flex-wrap: wrap;
   }
 
-  .floatingControlSausage .sapMObjStatus,
-  .floatingControlSausage .lockSwitchWrap .sapMObjStatus {
-    display: inline-flex;
-  }
-
   .floatingControlSausage .sapMBtn {
     width: auto;
   }
@@ -1172,4 +1182,312 @@ body.themeLifestyleNightOps .filterCard {
 
 .smartTableGlass .sapMListTblRow .sapMListTblCell {
   background: color-mix(in srgb, var(--surface2) 88%, transparent) !important;
+}
+
+/* ==============================
+   Section: search-kpi-workflow-blocks
+   ============================== */
+.workflowRail {
+  gap: 1rem;
+  margin-top: .25rem;
+}
+
+.workflowStageCard {
+  background: color-mix(in srgb, var(--surface2) 78%, rgba(var(--accent-rgb), 0.08));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  min-width: 19rem;
+}
+
+.workflowEyebrow,
+.kpiLabel {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: .7rem;
+  color: var(--text-muted) !important;
+}
+
+.workflowActions {
+  gap: .4rem;
+  align-items: center;
+}
+
+.kpiGrid {
+  gap: .75rem;
+}
+
+.kpiCard {
+  min-width: 10rem;
+  flex: 1;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.1));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: .9rem 1rem;
+}
+
+/* Unified style for standard dialogs, VH and settings popups */
+.sapMDialog.glassDialog > .sapMDialogSection,
+.sapMDialog.sapUiPopupWithPadding > .sapMDialogSection,
+.sapMPopup-CTX .sapMDialog > .sapMDialogSection {
+  background: color-mix(in srgb, var(--surface2) 86%, rgba(var(--accent-rgb), 0.08)) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+}
+
+.sapMDialog.glassDialog .sapMDialogTitle,
+.sapMDialog.glassDialog .sapMDialogSubHeader,
+.sapMDialog.glassDialog .sapMDialogFooter,
+.sapMDialog.glassDialog .sapMBar {
+  background: transparent !important;
+  border: none !important;
+}
+
+.sapMDialog.glassDialog .sapMBtn .sapMBtnInner {
+  border-radius: 12px !important;
+}
+
+.sapMPopover,
+.sapMSelectList,
+.sapMPopoverCont {
+  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.06)) !important;
+  border-color: var(--glass-border) !important;
+}
+
+.detailWorkflowRail {
+  gap: .5rem;
+  margin-bottom: .7rem;
+}
+
+.detailWorkflowChip {
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.08));
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: .3rem .7rem;
+}
+
+.brandActionBtn .sapMBtnInner {
+  border-radius: 12px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.35) !important;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.1)) !important;
+  color: var(--text-main) !important;
+}
+
+.brandActionBtn.brandActionPrimary .sapMBtnInner,
+.brandActionBtn.sapMBtnEmphasized .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  border-color: rgba(var(--accent-rgb), 0.58) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 22px rgba(var(--accent-rgb), 0.32) !important;
+}
+
+.brandActionBtn.brandActionGhost .sapMBtnInner {
+  background: color-mix(in srgb, var(--surface2) 92%, transparent) !important;
+}
+
+.maxRowsWrap {
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: .2rem .55rem;
+  margin-right: .5rem;
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.06));
+}
+
+.maxRowsInput .sapMInputBaseContentWrapper {
+  border: 1px solid rgba(var(--accent-rgb), 0.35) !important;
+  border-radius: 10px !important;
+  background: var(--readonly-field-bg) !important;
+}
+
+/* Keep control rail pinned while checklist scrolls */
+.detailAsideRail {
+  position: fixed;
+  right: 1.4rem;
+  top: 7.2rem;
+  z-index: 22;
+  max-height: calc(100vh - 8.6rem);
+  overflow: auto;
+}
+
+/* SmartTable row rounded look */
+.smartTableGlass .sapMListTblRow .sapMListTblCell:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.smartTableGlass .sapMListTblRow .sapMListTblCell:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.smartTableGlass .sapMListTblRow {
+  overflow: hidden;
+}
+
+/* Strong accent for SmartFilterBar go button */
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner,
+.smartFilterGlass .sapUiCompFilterBar .sapMBtnEmphasized .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  color: #fff !important;
+  border-color: rgba(var(--accent-rgb), 0.55) !important;
+  box-shadow: 0 10px 24px rgba(var(--accent-rgb), 0.34) !important;
+}
+
+@media (max-width: 1400px) {
+  .detailAsideRail {
+    right: .8rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .detailAsideRail {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* Quick visible filters row */
+.quickFiltersRow {
+  margin-top: .55rem;
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 75%, rgba(255,255,255,0.12));
+  padding-top: .6rem;
+}
+
+/* Remove KPI strip from page flow spacing fallback */
+.workflowRail {
+  margin-bottom: .45rem;
+}
+
+/* Add more air to checklist tables */
+.tableScrollWrap {
+  padding: .85rem !important;
+}
+
+.flatEditorTable .sapMListTbl {
+  border-collapse: separate !important;
+  border-spacing: 0 10px !important;
+}
+
+.flatEditorTable .sapMListTblCell {
+  padding-top: .75rem !important;
+  padding-bottom: .75rem !important;
+}
+
+.flatEditorTable .sapMListTblRow .sapMListTblCell {
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+/* Mushroom cards as "cloud" blocks */
+.mushroomCard {
+  border-radius: 24px !important;
+  min-height: 11rem;
+  padding: 1.2rem 1.1rem !important;
+  background: color-mix(in srgb, var(--glass-bg) 74%, rgba(var(--accent-rgb), 0.05)) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+.infoCardTile {
+  margin: .35rem;
+}
+
+/* Force reset + restyle SmartFilterBar GO button */
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch,
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner,
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnContent {
+  all: unset;
+}
+
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner {
+  all: unset !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 2.25rem !important;
+  padding: 0 .95rem !important;
+  border-radius: 12px !important;
+  background: var(--accent-grad) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.62) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 10px 24px rgba(var(--accent-rgb), 0.36) !important;
+}
+
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnContent {
+  all: unset !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+
+/* Unified glass styling for all main cards/sections */
+.detailContent .glassCard,
+.smartTableGlass,
+.filterCard,
+.workflowStageCard,
+.infoCardTile,
+.mushroomCard,
+.flatEditorTable .sapMListTblRow .sapMListTblCell,
+.smartTableGlass .sapMListTblRow .sapMListTblCell {
+  background: color-mix(in srgb, var(--glass-bg) 78%, rgba(var(--accent-rgb), 0.05)) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 80%, rgba(var(--accent-rgb), 0.12)) !important;
+}
+
+.flatEditorTable .sapMListTblRow .sapMListTblCell {
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+/* Control rail should be visible and airy, not sausage-hidden */
+.floatingControlSausage {
+  border-radius: 18px !important;
+  width: min(15rem, 28vw);
+  min-width: 12.5rem;
+  padding: .8rem .75rem;
+  align-items: stretch;
+  gap: .45rem;
+}
+
+.floatingControlSausage .sapMObjStatus,
+.floatingControlSausage .lockSwitchWrap .sapMObjStatus {
+  display: inline-flex;
+}
+
+.detailAsideRail {
+  right: 1.2rem;
+  top: 7.5rem;
+}
+
+/* Quick filters responsive: stack in one column on smaller widths */
+.quickFiltersRow {
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+/* ==============================
+   Section: responsive-and-utility-overrides
+   ============================== */
+@media (max-width: 1024px) {
+  .quickFiltersRow {
+    display: block !important;
+  }
+
+  .quickFiltersRow .sapMLabel,
+  .quickFiltersRow .sapMInputBase,
+  .quickFiltersRow .sapMSlt,
+  .quickFiltersRow .sapMBtn,
+  .quickFiltersRow .sapMTBSpacer {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 .45rem 0 !important;
+  }
 }
