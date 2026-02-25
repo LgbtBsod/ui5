@@ -27,6 +27,27 @@
       "position": "Operator",
       "orgUnit": "Production",
       "integrationName": "INT-MBROWN"
+    },
+    {
+      "perner": "300001",
+      "fullName": "Иван Петров",
+      "position": "Инспектор",
+      "orgUnit": "ОТ и ПБ",
+      "integrationName": "INT-IPETROV"
+    },
+    {
+      "perner": "300002",
+      "fullName": "Мария Соколова",
+      "position": "Проверяющий",
+      "orgUnit": "Контроль качества",
+      "integrationName": "INT-MSOKOLOVA"
+    },
+    {
+      "perner": "300003",
+      "fullName": "Алексей Кузнецов",
+      "position": "Технолог",
+      "orgUnit": "Производство",
+      "integrationName": "INT-AKUZNETSOV"
     }
   ]
 }

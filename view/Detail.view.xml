@@ -2,7 +2,6 @@
     controllerName="sap_ui5.controller.Detail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:form="sap.ui.layout.form"
     xmlns:f="sap.f"
     xmlns:dnd="sap.ui.core.dnd"
     xmlns:core="sap.ui.core">
@@ -25,6 +24,34 @@
                             <Text text="{= ${selected>/root/id} || ${i18n>newChecklist} }"/>
                         </HBox>
                         <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>overallResultLabel}" class="sapUiTinyMarginEnd"/>
+                            <ObjectStatus text="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultText'}" state="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultState'}"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>objectStatusLabel}" class="sapUiTinyMarginEnd"/>
+                            <ObjectStatus text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}" state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>headerDateLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{selected>/basic/date}"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>headerProfessionLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{selected>/basic/PROF_TEXT}"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>headerLpcLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{selected>/basic/LPC_TEXT}"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare">
+                            <Text text="{i18n>checksRatioLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{path:'selected>/checks', formatter:'.formatPassedTotal'}"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
+                            <Text text="{i18n>barriersRatioLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{path:'selected>/barriers', formatter:'.formatPassedTotal'}"/>
+                        </HBox>
+                        <HBox class="uxStatChip" renderType="Bare">
                             <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
                             <Text text="{= ${state>/mode} === 'EDIT' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
                         </HBox>
@@ -35,29 +62,6 @@
                     </HBox>
                 </HBox>
             </VBox>
-
-            <HBox justifyContent="End" class="sapUiTinyMarginBottom" alignItems="Center" renderType="Bare">
-                <Button
-                    text="{i18n>objectSave}"
-                    type="Emphasized"
-                    visible="{= ${state>/mode} === 'EDIT' }"
-                    press=".onSaveDetail"
-                    class="sapUiTinyMarginEnd accentButton savePulseButton"/>
-                <Button
-                    text="{i18n>objectCancel}"
-                    visible="{= ${state>/mode} === 'EDIT' }"
-                    press=".onCancelEditFromDetail"
-                    class="sapUiTinyMarginEnd"/>
-                <Label text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
-                <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap sapUiTinyMarginEnd">
-                    <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
-                </HBox>
-                <Button
-                    icon="sap-icon://decline"
-                    type="Transparent"
-                    tooltip="{i18n>closeDetails}"
-                    press=".onCloseDetail"/>
-            </HBox>
 
             <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">
                 <Toolbar class="toolbarTransparent">
@@ -72,11 +76,16 @@
                     </f:dragDropConfig>
                     <f:items>
                         <f:GridListItem>
-                            <VBox class="infoCardTile" renderType="Bare">
+                            <VBox class="infoCardTile mushroomCard" renderType="Bare">
                                 <Text text="{view>title}" class="infoCardTitle"/>
                                 <Text
+                                    visible="{= !${state>/mode} || ${state>/mode} !== 'EDIT' }"
                                     text="{parts: [
                                         {path: 'view>key'},
+                                        {path: 'selected>/basic/date'},
+                                        {path: 'selected>/basic/time'},
+                                        {path: 'selected>/basic/timezone'},
+                                        {path: 'selected>/basic/equipment'},
                                         {path: 'selected>/basic/OBSERVER_FULLNAME'},
                                         {path: 'selected>/basic/OBSERVED_FULLNAME'},
                                         {path: 'selected>/basic/LOCATION_NAME'},
@@ -85,6 +94,74 @@
                                         {path: 'selected>/basic/PROF_TEXT'}
                                     ], formatter: '.formatInfoCardValue'}"
                                     class="infoCardValue"/>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'date' }" renderType="Bare">
+                                    <Input value="{selected>/basic/date}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'time' }" renderType="Bare">
+                                    <Input value="{selected>/basic/time}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationText'}"/>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'timezone' }" renderType="Bare">
+                                    <Input value="{selected>/basic/timezone}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationText'}"/>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'equipment' }" renderType="Bare">
+                                    <Input value="{selected>/basic/equipment}"/>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare">
+                                    <Input value="{selected>/basic/OBSERVER_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationText'}"
+                                           showSuggestion="true"
+                                           suggest=".onPersonSuggest"
+                                           suggestionItemSelected=".onPersonSuggestionSelected">
+                                        <customData>
+                                            <core:CustomData key="target" value="observer" writeToDom="false"/>
+                                        </customData>
+                                        <suggestionItems path="view>/observerSuggestions">
+                                            <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
+                                        </suggestionItems>
+                                    </Input>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare">
+                                    <Input value="{selected>/basic/OBSERVED_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationText'}"
+                                           showSuggestion="true"
+                                           suggest=".onPersonSuggest"
+                                           suggestionItemSelected=".onPersonSuggestionSelected">
+                                        <customData>
+                                            <core:CustomData key="target" value="observed" writeToDom="false"/>
+                                        </customData>
+                                        <suggestionItems path="view>/observedSuggestions">
+                                            <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
+                                        </suggestionItems>
+                                    </Input>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'location' }" renderType="Bare">
+                                    <Input value="{selected>/basic/LOCATION_NAME}" editable="false" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationText'}"/>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'lpc' }" renderType="Bare">
+                                    <Select
+                                        selectedKey="{selected>/basic/LPC_KEY}"
+                                        change=".onLpcChange"
+                                        forceSelection="false"
+                                        items="{masterData>/lpc}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationText'}">
+                                        <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                                    </Select>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'profession' }" renderType="Bare">
+                                    <Select
+                                        selectedKey="{selected>/basic/PROF_KEY}"
+                                        change=".onProfessionChange"
+                                        forceSelection="false"
+                                        items="{masterData>/professions}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationText'}">
+                                        <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                                    </Select>
+                                </VBox>
                             </VBox>
                         </f:GridListItem>
                     </f:items>
@@ -92,94 +169,25 @@
             </VBox>
 
 
-            <VBox class="floatingControlRail glassCard" renderType="Bare">
+            <VBox class="floatingControlRail floatingControlSausage glassCard detailAsideRail" renderType="Bare">
                 <ObjectStatus text="{i18n>heartbeatLabel}" state="{= !!${state>/lockExpires} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
                 <ObjectStatus text="{i18n>autosaveLabel}" state="{= ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : 'Success' }" class="sapUiTinyMarginBottom"/>
-                <Button text="{i18n>objectSave}" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginBottom accentButton savePulseButton"/>
-                <Button text="{i18n>objectCancel}" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom"/>
-                <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap">
+                <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginBottom accentButton savePulseButton" tooltip="{i18n>objectSave}"/>
+                <Button icon="sap-icon://inspection" visible="{= ${state>/mode} === 'EDIT' }" press=".onValidateChecklist" class="sapUiTinyMarginBottom" tooltip="{i18n>validateButton}"/>
+                <Button icon="sap-icon://status-inactive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusDraft}">
+                    <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
+                </Button>
+                <Button icon="sap-icon://status-critical" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusRegistered}">
+                    <customData><core:CustomData key="targetStatus" value="REGISTERED"/></customData>
+                </Button>
+                <Button icon="sap-icon://status-positive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusClosed}">
+                    <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
+                </Button>
+                <Button icon="sap-icon://undo" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom" tooltip="{i18n>objectCancel}"/>
+                <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap railSwitchWrap sapUiTinyMarginBottom">
                     <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
                 </HBox>
-            </VBox>
-
-            <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">
-                <Title text="{i18n>basicInformation}"/>
-                <form:SimpleForm
-                    editable="true"
-                    layout="ResponsiveGridLayout"
-                    columnsL="2"
-                    columnsM="2">
-
-                    <Label text="{i18n>dateLabel}"/>
-                    <Input value="{selected>/basic/date}" editable="{= ${state>/mode} === 'EDIT' }"/>
-
-                    <Label text="{i18n>equipmentLabel}"/>
-                    <Input value="{selected>/basic/equipment}" editable="{= ${state>/mode} === 'EDIT' }"/>
-
-                    <Label text="{i18n>observerLabel}"/>
-                    <Input value="{selected>/basic/OBSERVER_FULLNAME}"
-                           editable="{= ${state>/mode} === 'EDIT' }"
-                           showSuggestion="true"
-                           suggest=".onPersonSuggest"
-                           suggestionItemSelected=".onPersonSuggestionSelected">
-                        <customData>
-                            <core:CustomData key="target" value="observer" writeToDom="false"/>
-                        </customData>
-                        <suggestionItems path="view>/observerSuggestions">
-                            <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
-                        </suggestionItems>
-                    </Input>
-
-                    <Label text="{i18n>observedLabel}"/>
-                    <Input value="{selected>/basic/OBSERVED_FULLNAME}"
-                           editable="{= ${state>/mode} === 'EDIT' }"
-                           showSuggestion="true"
-                           suggest=".onPersonSuggest"
-                           suggestionItemSelected=".onPersonSuggestionSelected">
-                        <customData>
-                            <core:CustomData key="target" value="observed" writeToDom="false"/>
-                        </customData>
-                        <suggestionItems path="view>/observedSuggestions">
-                            <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
-                        </suggestionItems>
-                    </Input>
-
-                    <Label text="{i18n>lpcLabel}"/>
-                    <Select
-                        selectedKey="{selected>/basic/LPC_KEY}"
-                        enabled="{= ${state>/mode} === 'EDIT' }"
-                        change=".onLpcChange"
-                        forceSelection="false"
-                        items="{masterData>/lpc}">
-                        <core:Item key="{masterData>key}" text="{masterData>text}"/>
-                    </Select>
-
-                    <Label text="{i18n>professionLabel}"/>
-                    <Select
-                        selectedKey="{selected>/basic/PROF_KEY}"
-                        enabled="{= ${state>/mode} === 'EDIT' }"
-                        change=".onProfessionChange"
-                        forceSelection="false"
-                        items="{masterData>/professions}">
-                        <core:Item key="{masterData>key}" text="{masterData>text}"/>
-                    </Select>
-
-                </form:SimpleForm>
-            </VBox>
-
-            <VBox class="glassCard">
-                <Toolbar class="toolbarTransparent">
-                    <Title text="{i18n>locationLabel}"/>
-                </Toolbar>
-                <Text text="{selected>/basic/LOCATION_NAME}" class="sapUiTinyMarginBottom"/>
-                <Tree
-                    items="{path: 'view>/locationTree', parameters: { arrayNames: ['children'] }}"
-                    mode="{= ${state>/mode} === 'EDIT' ? 'SingleSelectMaster' : 'None' }"
-                    includeItemInSelection="true"
-                    selectionChange=".onLocationSelectionChange"
-                    visible="true">
-                    <StandardTreeItem title="{view>location_name}"/>
-                </Tree>
+                <Button icon="sap-icon://decline" type="Transparent" tooltip="{i18n>closeDetails}" press=".onCloseDetail"/>
             </VBox>
 
             <VBox class="glassCard" busy="{view>/checksLoading}">
@@ -214,7 +222,7 @@
                 </ScrollContainer>
             </VBox>
 
-            <VBox class="glassCard" busy="{view>/barriersLoading}">
+            <VBox class="glassCard" busy="{view>/barriersLoading}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                 <Toolbar class="toolbarTransparent">
                     <Title text="{i18n>barriersTitle}"/>
                     <ToolbarSpacer/>

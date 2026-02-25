@@ -7,8 +7,10 @@ sap.ui.define([
   "sap/ui/core/Fragment",
   "sap_ui5/util/RowListHelper",
   "sap_ui5/util/ChecklistDraftHelper",
-  "sap_ui5/util/FlowCoordinator"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, Fragment, RowListHelper, ChecklistDraftHelper, FlowCoordinator) {
+  "sap_ui5/util/FlowCoordinator",
+  "sap_ui5/util/ChecklistValidationService",
+  "sap_ui5/util/ChecklistUiState"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, Fragment, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -30,7 +32,7 @@ sap.ui.define([
         return Promise.reject(oError);
       }
 
-      return FlowCoordinator.confirmStealOwnLock(this).then(function (bShouldSteal) {
+      return FlowCoordinator.confirmStealOwnLock(this).then((bShouldSteal) => {
         if (!bShouldSteal) {
           return Promise.resolve({ success: false });
         }
@@ -41,7 +43,7 @@ sap.ui.define([
           this._getCurrentUser(),
           oDetail.owner_session
         );
-      }.bind(this)).then(function (oResult) {
+      }).then((oResult) => {
         if (!oResult || !oResult.success) {
           oStateModel.setProperty("/mode", "READ");
           oStateModel.setProperty("/isLocked", false);
@@ -53,7 +55,7 @@ sap.ui.define([
         oStateModel.setProperty("/mode", "EDIT");
         this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
         return oResult;
-      }.bind(this));
+      });
     },
 
     onInit: function () {
@@ -66,7 +68,18 @@ sap.ui.define([
         checksLoading: false,
         barriersLoading: false,
         detailSkeletonBusy: false,
+        validationShown: false,
+        validationMissing: {},
+        statusActions: [
+          { key: "DRAFT", title: "Draft" },
+          { key: "REGISTERED", title: "Registered" },
+          { key: "CLOSED", title: "Closed" }
+        ],
         infoCards: [
+          { key: "date", title: this.getResourceBundle().getText("dateLabel") },
+          { key: "time", title: this.getResourceBundle().getText("timeLabel") },
+          { key: "timezone", title: this.getResourceBundle().getText("timezoneLabel") },
+          { key: "equipment", title: this.getResourceBundle().getText("equipmentLabel") },
           { key: "observer", title: this.getResourceBundle().getText("observerLabel") },
           { key: "observed", title: this.getResourceBundle().getText("observedLabel") },
           { key: "location", title: this.getResourceBundle().getText("locationLabel") },
@@ -94,6 +107,7 @@ sap.ui.define([
         return;
       }
       this._syncDirtyFlag();
+      this._refreshValidationHighlights();
     },
 
     _syncDirtyFlag: function () {
@@ -104,6 +118,142 @@ sap.ui.define([
         return;
       }
       this.getModel("state").setProperty("/isDirty", ChecklistDraftHelper.hasChanges(oEdited, oOriginal));
+    },
+
+    _syncSelectionMeta: function () {
+      this._syncDirtyFlag();
+      this._updateSelectionState();
+      this._updateDerivedRootResult();
+    },
+
+    _closeExpandedDialogById: function (sDialogId) {
+      var oDialog = this.byId(sDialogId);
+      if (oDialog) {
+        oDialog.close();
+      }
+    },
+
+    _releaseEditLock: function (sObjectId, sSessionId, oStateModel) {
+      oStateModel.setProperty("/mode", "READ");
+      oStateModel.setProperty("/isLocked", false);
+      return this.releaseLock(sObjectId, sSessionId, { trySave: false }).finally(() => {
+        this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockReleased"));
+      });
+    },
+
+    _setBasicTextByDictionary: function (oEvent, sDictionaryPath, sKeyPath, sTextPath) {
+      var sKey = oEvent.getParameter("selectedItem")
+        ? oEvent.getParameter("selectedItem").getKey()
+        : oEvent.getSource().getSelectedKey();
+      var aDict = this.getModel("masterData").getProperty(sDictionaryPath) || [];
+      var oMatch = aDict.find((oItem) => oItem && oItem.key === sKey) || {};
+      var oSelectedModel = this.getModel("selected");
+      oSelectedModel.setProperty(sKeyPath, sKey || "");
+      oSelectedModel.setProperty(sTextPath, oMatch.text || "");
+    },
+
+    _mutateRows: function (sPath, fnMutator) {
+      var oSelectedModel = this.getModel("selected");
+      var aRows = oSelectedModel.getProperty(sPath) || [];
+      oSelectedModel.setProperty(sPath, fnMutator(aRows));
+      this._syncSelectionMeta();
+    },
+
+
+    _refreshValidationHighlights: function () {
+      var oViewModel = this.getView().getModel("view");
+      if (!oViewModel || !oViewModel.getProperty("/validationShown")) {
+        return;
+      }
+
+      var oValidation = this._runChecklistValidation();
+      oViewModel.setProperty("/validationMissing", ChecklistUiState.buildValidationMap(oValidation.missingPaths));
+      if (oValidation.valid) {
+        oViewModel.setProperty("/validationShown", false);
+      }
+    },
+
+    formatValidationState: function (bShown, bMissing) {
+      return (bShown && bMissing) ? "Error" : "None";
+    },
+
+    formatValidationText: function (bShown, bMissing) {
+      if (!(bShown && bMissing)) {
+        return "";
+      }
+      return this.getResourceBundle().getText("requiredFieldHint");
+    },
+
+    _getValidationRules: function () {
+      var oState = this.getModel("state");
+      return {
+        requiredFields: oState.getProperty("/requiredFields") || []
+      };
+    },
+
+    _isBarrierAllowedByLpc: function () {
+      var sLpcKey = this.getModel("selected").getProperty("/basic/LPC_KEY");
+      return ChecklistValidationService.isBarrierSectionAllowed(sLpcKey);
+    },
+
+    formatBooleanResultText: function (vValue) {
+      if (vValue === true) {
+        return this.getResourceBundle().getText("statusOk");
+      }
+      if (vValue === false) {
+        return this.getResourceBundle().getText("statusFailed");
+      }
+      return "-";
+    },
+
+    formatBooleanResultState: function (vValue) {
+      if (vValue === true) {
+        return "Success";
+      }
+      if (vValue === false) {
+        return "Error";
+      }
+      return "None";
+    },
+
+    formatLifecycleStatusText: function (sStatus) {
+      var oBundle = this.getResourceBundle();
+      switch (String(sStatus || "").toUpperCase()) {
+        case "DRAFT": return oBundle.getText("statusDraft");
+        case "REGISTERED": return oBundle.getText("statusRegistered");
+        case "CLOSED": return oBundle.getText("statusClosed");
+        default: return sStatus || "-";
+      }
+    },
+
+    formatLifecycleStatusState: function (sStatus) {
+      switch (String(sStatus || "").toUpperCase()) {
+        case "REGISTERED": return "Warning";
+        case "CLOSED": return "Success";
+        default: return "Information";
+      }
+    },
+
+    formatPassedTotal: function (aRows) {
+      var a = aRows || [];
+      var iTotal = a.length;
+      var iPassed = a.filter(function (oRow) { return !!(oRow && oRow.result); }).length;
+      return iPassed + "/" + iTotal;
+    },
+
+    isBarriersVisibleByLpc: function (sLpcKey) {
+      return ChecklistValidationService.isBarrierSectionAllowed(sLpcKey);
+    },
+
+    _updateDerivedRootResult: function () {
+      var oSelected = this.getModel("selected").getData() || {};
+      var vOverall = ChecklistValidationService.buildOverallResult(oSelected);
+      this.getModel("selected").setProperty("/root/overall_result", vOverall);
+    },
+
+    _runChecklistValidation: function () {
+      var oSelected = this.getModel("selected").getData() || {};
+      return ChecklistValidationService.validateForStatusChange(oSelected, this._getValidationRules());
     },
 
     _onMatched: function (oEvent) {
@@ -129,6 +279,7 @@ sap.ui.define([
         oStateModel.setProperty("/mode", "EDIT");
         oStateModel.setProperty("/isDirty", false);
         this._updateSelectionState();
+        this._updateDerivedRootResult();
         return;
       }
 
@@ -142,6 +293,7 @@ sap.ui.define([
         oStateModel.setProperty("/mode", "EDIT");
         oStateModel.setProperty("/isDirty", true);
         this._updateSelectionState();
+        this._updateDerivedRootResult();
         return;
       }
 
@@ -202,11 +354,11 @@ sap.ui.define([
     _reloadChecklistFromBackend: function (sId) {
       var oDataModel = this.getModel("data");
       return this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
-        return BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
+        return BackendAdapter.getChecklistRoot(sId).then((oRootOnly) => {
           oDataModel.setProperty("/selectedChecklist", oRootOnly || null);
           this._applyChecklistLazily(oRootOnly || {});
           return oRootOnly;
-        }.bind(this));
+        });
       }.bind(this));
     },
 
@@ -223,18 +375,19 @@ sap.ui.define([
     _bindChecklistById: function (sId) {
       var oDataModel = this.getModel("data");
       var aChecklists = oDataModel.getProperty("/checkLists") || [];
+      var sNeedle = String(sId || "").trim();
       var oLocalMatch = aChecklists.find(function (item) {
-        return item && item.root && item.root.id === sId;
+        return String((((item || {}).root || {}).id) || "").trim() === sNeedle;
       }) || null;
 
-      if (oLocalMatch && this._isChecklistCacheValid()) {
-        // Use cache when still valid (30 seconds window).
+      if (oLocalMatch) {
         oDataModel.setProperty("/selectedChecklist", oLocalMatch);
         this._applyChecklistLazily(oLocalMatch);
         return;
       }
 
       this._reloadChecklistFromBackend(sId);
+
     },
 
 
@@ -290,6 +443,7 @@ sap.ui.define([
         oView.setProperty("/barriersLoading", false);
         oView.setProperty("/detailSkeletonBusy", false);
         this._updateSelectionState();
+        this._updateDerivedRootResult();
         return;
       }
 
@@ -301,6 +455,7 @@ sap.ui.define([
           oView.setProperty("/detailSkeletonBusy", false);
         }
         this._updateSelectionState();
+        this._updateDerivedRootResult();
       }.bind(this));
 
       this._loadSectionPaged(sId, "barriers", iPageSize).then(function (aBarriers) {
@@ -311,6 +466,7 @@ sap.ui.define([
           oView.setProperty("/detailSkeletonBusy", false);
         }
         this._updateSelectionState();
+        this._updateDerivedRootResult();
       }.bind(this));
     },
 
@@ -318,19 +474,19 @@ sap.ui.define([
       var sValue = this._normalizeText(oEvent.getParameter("suggestValue"));
       var sTarget = oEvent.getSource().data("target");
       var aPersons = this.getModel("masterData").getProperty("/persons") || [];
-      var aFiltered = aPersons.filter(function (oPerson) {
+      var aFiltered = aPersons.filter((oPerson) => {
         var sName = this._normalizeText(oPerson.fullName);
         var sPernr = this._normalizeText(oPerson.perner);
         var sPosition = this._normalizeText(oPerson.position);
         return !sValue || sName.indexOf(sValue) >= 0 || sPernr.indexOf(sValue) >= 0 || sPosition.indexOf(sValue) >= 0;
-      }.bind(this)).slice(0, 10);
+      }).slice(0, 10);
 
       this._setPersonSuggestions(sTarget, aFiltered);
 
       if (sValue && aFiltered.length < 3 && BackendAdapter.suggestPersons) {
-        BackendAdapter.suggestPersons(sValue).then(function (aRemote) {
+        BackendAdapter.suggestPersons(sValue).then((aRemote) => {
           this._setPersonSuggestions(sTarget, (aRemote || []).slice(0, 10));
-        }.bind(this)).catch(function () {
+        }).catch(function () {
           // Keep local suggestions only when remote suggest is unavailable.
         });
       }
@@ -395,21 +551,40 @@ sap.ui.define([
     },
 
     onLpcChange: function (oEvent) {
-      var sKey = oEvent.getParameter("selectedItem") ? oEvent.getParameter("selectedItem").getKey() : oEvent.getSource().getSelectedKey();
-      var aLpc = this.getModel("masterData").getProperty("/lpc") || [];
-      var oMatch = aLpc.find(function (oItem) { return oItem && oItem.key === sKey; }) || {};
-      var oSelectedModel = this.getModel("selected");
-      oSelectedModel.setProperty("/basic/LPC_KEY", sKey || "");
-      oSelectedModel.setProperty("/basic/LPC_TEXT", oMatch.text || "");
+      this._setBasicTextByDictionary(oEvent, "/lpc", "/basic/LPC_KEY", "/basic/LPC_TEXT");
+      this._syncSelectionMeta();
+
+      var bAllowBarriers = this._isBarrierAllowedByLpc();
+      if (bAllowBarriers) {
+        return;
+      }
+
+      var aBarriers = this.getModel("selected").getProperty("/barriers") || [];
+      if (!aBarriers.length) {
+        return;
+      }
+
+      MessageBox.warning(this.getResourceBundle().getText("barriersWillBeRemovedPrompt"), {
+        actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+        emphasizedAction: MessageBox.Action.NO,
+        onClose: function (sAction) {
+          if (sAction === MessageBox.Action.YES) {
+            this.getModel("selected").setProperty("/barriers", []);
+            this._syncSelectionMeta();
+            return;
+          }
+
+          var oSelectedModel = this.getModel("selected");
+          oSelectedModel.setProperty("/basic/LPC_KEY", "");
+          oSelectedModel.setProperty("/basic/LPC_TEXT", "");
+          this._syncSelectionMeta();
+        }.bind(this)
+      });
     },
 
     onProfessionChange: function (oEvent) {
-      var sKey = oEvent.getParameter("selectedItem") ? oEvent.getParameter("selectedItem").getKey() : oEvent.getSource().getSelectedKey();
-      var aProf = this.getModel("masterData").getProperty("/professions") || [];
-      var oMatch = aProf.find(function (oItem) { return oItem && oItem.key === sKey; }) || {};
-      var oSelectedModel = this.getModel("selected");
-      oSelectedModel.setProperty("/basic/PROF_KEY", sKey || "");
-      oSelectedModel.setProperty("/basic/PROF_TEXT", oMatch.text || "");
+      this._setBasicTextByDictionary(oEvent, "/professions", "/basic/PROF_KEY", "/basic/PROF_TEXT");
+      this._syncSelectionMeta();
     },
 
     _confirmIntegrationEdit: function () {
@@ -434,7 +609,7 @@ sap.ui.define([
 
     onCloseDetail: function () {
       var oState = this.getModel("state");
-      var fnProceed = function () {
+      var fnProceed = () => {
         var sObjectId = oState.getProperty("/activeObjectId");
         var sSessionId = oState.getProperty("/sessionId");
         this.releaseLock(sObjectId, sSessionId);
@@ -442,15 +617,15 @@ sap.ui.define([
         oState.setProperty("/activeObjectId", null);
         oState.setProperty("/isDirty", false);
         this.navTo("search", {}, true);
-      }.bind(this);
+      };
 
       if (!oState.getProperty("/isDirty")) {
         fnProceed();
         return;
       }
 
-      FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this)).then(function (sDecision) {
-        if (sDecision === "DISCARD") {
+      FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this)).then((sDecision) => {
+        if (sDecision === "DISCARD" || sDecision === "SAVE") {
           fnProceed();
         }
       });
@@ -466,20 +641,28 @@ sap.ui.define([
       var sObjectId = oStateModel.getProperty("/activeObjectId");
       var sSessionId = oStateModel.getProperty("/sessionId");
 
+      var fnDisableEditAndRelease = () => this._releaseEditLock(sObjectId, sSessionId, oStateModel);
+
+      if (!bEditMode && oStateModel.getProperty("/isDirty")) {
+        FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this)).then((sDecision) => {
+          if (sDecision === "CANCEL") {
+            return;
+          }
+          this.setLockUiState(oStateModel, "PENDING", this.getResourceBundle().getText("lockPending"));
+          this.runWithStateFlag(oStateModel, "/lockOperationPending", fnDisableEditAndRelease);
+        });
+        return;
+      }
+
       this.setLockUiState(oStateModel, "PENDING", this.getResourceBundle().getText("lockPending"));
       this.runWithStateFlag(oStateModel, "/lockOperationPending", function () {
         if (!bEditMode) {
-          // First switch UI to read-only so periodic probes stop immediately.
-          oStateModel.setProperty("/mode", "READ");
-          oStateModel.setProperty("/isLocked", false);
-          return this.releaseLock(sObjectId, sSessionId).finally(function () {
-            this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockReleased"));
-          }.bind(this));
+          return fnDisableEditAndRelease();
         }
 
-        return this._ensureChecklistFreshBeforeEdit(sObjectId).then(function () {
+        return this._ensureChecklistFreshBeforeEdit(sObjectId).then(() => {
           return this._confirmIntegrationEdit();
-        }.bind(this)).then(function (bConfirmed) {
+        }).then((bConfirmed) => {
           if (!bConfirmed) {
             this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockStayReadOnly"));
             return null;
@@ -488,28 +671,33 @@ sap.ui.define([
             sObjectId,
             sSessionId
           );
-        }.bind(this)).then(function (oAcquireResult) {
+        }).then((oAcquireResult) => {
           if (!oAcquireResult) {
             return;
           }
           oStateModel.setProperty("/isLocked", true);
           oStateModel.setProperty("/mode", "EDIT");
           this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
-        }.bind(this)).catch(function (oError) {
-          return this._tryStealOwnLock(sObjectId, sSessionId, oError).catch(function () {
+        }).catch((oError) => {
+          return this._tryStealOwnLock(sObjectId, sSessionId, oError).catch(() => {
             oStateModel.setProperty("/mode", "READ");
             oStateModel.setProperty("/isLocked", false);
             this.setLockUiState(oStateModel, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
             return FlowCoordinator.handleBackendError(this, oError);
-          }.bind(this));
-        }.bind(this));
+          });
+        });
       }.bind(this));
     },
 
     onCancelEditFromDetail: function () {
       var oSelected = this.getModel("data").getProperty("/selectedChecklist") || {};
+      var oStateModel = this.getModel("state");
+      var sObjectId = oStateModel.getProperty("/activeObjectId");
+      var sSessionId = oStateModel.getProperty("/sessionId");
+
       this.getModel("selected").setData(ChecklistDraftHelper.clone(oSelected));
-      this.getModel("state").setProperty("/mode", "READ");
+      oStateModel.setProperty("/isDirty", false);
+      this._releaseEditLock(sObjectId, sSessionId, oStateModel);
     },
 
     _updateSelectionState: function () {
@@ -522,32 +710,39 @@ sap.ui.define([
         return;
       }
 
-      oViewModel.setProperty("/hasSelectedChecks", aChecks.some(function (oItem) { return !!(oItem && oItem.selected); }));
-      oViewModel.setProperty("/hasSelectedBarriers", aBarriers.some(function (oItem) { return !!(oItem && oItem.selected); }));
+      oViewModel.setProperty("/hasSelectedChecks", aChecks.some((oItem) => !!(oItem && oItem.selected)));
+      oViewModel.setProperty("/hasSelectedBarriers", aBarriers.some((oItem) => !!(oItem && oItem.selected)));
     },
 
     onDeleteSelectedChecks: function () {
-      var oSelectedModel = this.getModel("selected");
-      var aChecks = oSelectedModel.getProperty("/checks") || [];
-      oSelectedModel.setProperty("/checks", RowListHelper.removeSelectedRows(aChecks));
-      this._syncDirtyFlag();
-      this._updateSelectionState();
+      this._mutateRows("/checks", RowListHelper.removeSelectedRows);
     },
 
     onDeleteSelectedBarriers: function () {
-      var oSelectedModel = this.getModel("selected");
-      var aBarriers = oSelectedModel.getProperty("/barriers") || [];
-      oSelectedModel.setProperty("/barriers", RowListHelper.removeSelectedRows(aBarriers));
-      this._syncDirtyFlag();
-      this._updateSelectionState();
+      this._mutateRows("/barriers", RowListHelper.removeSelectedRows);
     },
 
     onSelectionToggle: function () {
-      this._syncDirtyFlag();
-      this._updateSelectionState();
+      this._syncSelectionMeta();
     },
 
-    formatInfoCardValue: function (sKey, sObserver, sObserved, sLocationName, sLocationText, sLpcText, sProfText) {
+    formatInfoCardValue: function (sKey, sDate, sTime, sTimezone, sEquipment, sObserver, sObserved, sLocationName, sLocationText, sLpcText, sProfText) {
+      if (sKey === "date") {
+        return sDate || "-";
+      }
+
+      if (sKey === "time") {
+        return sTime || "-";
+      }
+
+      if (sKey === "timezone") {
+        return sTimezone || "-";
+      }
+
+      if (sKey === "equipment") {
+        return sEquipment || "-";
+      }
+
       if (sKey === "observer") {
         return sObserver || "-";
       }
@@ -569,6 +764,63 @@ sap.ui.define([
       }
 
       return sLocationName || sLocationText || "-";
+    },
+
+    onValidateChecklist: function () {
+      var oValidation = this._runChecklistValidation();
+      var oViewModel = this.getView().getModel("view");
+      if (oViewModel) {
+        oViewModel.setProperty("/validationShown", !oValidation.valid);
+        oViewModel.setProperty("/validationMissing", ChecklistUiState.buildValidationMap(oValidation.missingPaths));
+      }
+
+      if (oValidation.valid) {
+        this.showI18nToast("checklistValidationPassed");
+        return Promise.resolve(true);
+      }
+
+      MessageBox.warning(this.getResourceBundle().getText("checklistValidationFailed", [oValidation.missingPaths.length + (oValidation.hasAtLeastOneCheck ? 0 : 1)]));
+      return Promise.resolve(false);
+    },
+
+    _applyStatusAndSave: function (sTargetStatus) {
+      var oSelectedModel = this.getModel("selected");
+      oSelectedModel.setProperty("/root/status", ChecklistUiState.normalizeStatus(sTargetStatus));
+      this.getModel("state").setProperty("/isDirty", true);
+      return this.onSaveDetail().then(function (oResult) {
+        this.showI18nToast("statusChanged");
+        return oResult;
+      }.bind(this));
+    },
+
+    onChangeChecklistStatus: function (oEvent) {
+      var sStatus = oEvent.getSource().data("targetStatus") || "";
+      if (!sStatus) {
+        return;
+      }
+
+      return this.onValidateChecklist().then(function (bValid) {
+        if (!bValid) {
+          return;
+        }
+
+        var oSelected = this.getModel("selected").getData() || {};
+
+        if (ChecklistUiState.isSameStatus((oSelected.root || {}).status, sStatus)) {
+          return;
+        }
+
+        if ((oSelected.root || {}).this_is_integration_data) {
+          return this._confirmIntegrationEdit().then(function (bConfirmed) {
+            if (!bConfirmed) {
+              return;
+            }
+            return this._applyStatusAndSave(sStatus);
+          }.bind(this));
+        }
+
+        return this._applyStatusAndSave(sStatus);
+      }.bind(this));
     },
 
     onInfoCardsDrop: function (oEvent) {
@@ -618,7 +870,6 @@ sap.ui.define([
     onSaveDetail: function () {
       var oStateModel = this.getModel("state");
       var oDataModel = this.getModel("data");
-      var oBundle = this.getResourceBundle();
       var oEdited = this.getModel("selected").getData() || {};
       var sId = ((((oEdited || {}).root || {}).id) || "").trim();
 
@@ -627,42 +878,44 @@ sap.ui.define([
       return this.runWithStateFlag(oStateModel, "/isLoading", function () {
 
       return (bCreateMode ? BackendAdapter.createCheckList(oEdited) : BackendAdapter.updateCheckList(sId, oEdited))
-        .then(function (oSavedChecklist) {
-          return BackendAdapter.getCheckLists().then(function (aUpdatedCheckLists) {
+        .then((oSavedChecklist) => {
+          return BackendAdapter.getCheckLists().then((aUpdatedCheckLists) => {
             return {
               savedChecklist: oSavedChecklist,
               checkLists: aUpdatedCheckLists
             };
           });
         })
-        .then(function (oResult) {
+        .then((oResult) => {
           oDataModel.setProperty("/checkLists", oResult.checkLists);
           oDataModel.setProperty("/visibleCheckLists", oResult.checkLists);
           oDataModel.setProperty("/selectedChecklist", oResult.savedChecklist);
           this.getModel("selected").setData(oResult.savedChecklist);
-          oStateModel.setProperty("/mode", "READ");
+          if (oStateModel.getProperty("/isLocked")) {
+            oStateModel.setProperty("/mode", "EDIT");
+          }
           oStateModel.setProperty("/isDirty", false);
           window.dispatchEvent(new CustomEvent("pcct:fullSave"));
           this.showI18nToast("objectSaved");
-        }.bind(this))
-        .catch(function (oError) {
+        })
+        .catch((oError) => {
           return FlowCoordinator.handleBackendError(this, oError, {
-            onConflictChoice: function (sChoice) {
+            onConflictChoice: (sChoice) => {
               if (sChoice === this.getResourceBundle().getText("reloadButton")) {
-                return BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
+                return BackendAdapter.getChecklistRoot(sId).then((oRootOnly) => {
                   if (oRootOnly) {
                     this.getModel("selected").setData(ChecklistDraftHelper.clone(oRootOnly));
                     this._applyChecklistLazily(oRootOnly);
                   }
-                }.bind(this));
+                });
               }
               if (sChoice === this.getResourceBundle().getText("overwriteButton")) {
                 return BackendAdapter.updateCheckList(sId, oEdited, { force: true });
               }
               return null;
-            }.bind(this)
+            }
           });
-        }.bind(this));
+        });
       }.bind(this));
     },
 
@@ -699,33 +952,19 @@ sap.ui.define([
     },
 
     onCloseChecksExpanded: function () {
-      var oDialog = this.byId("checksExpandedDialog");
-      if (oDialog) {
-        oDialog.close();
-      }
+      this._closeExpandedDialogById("checksExpandedDialog");
     },
 
     onCloseBarriersExpanded: function () {
-      var oDialog = this.byId("barriersExpandedDialog");
-      if (oDialog) {
-        oDialog.close();
-      }
+      this._closeExpandedDialogById("barriersExpandedDialog");
     },
 
     onAddCheckRow: function () {
-      var oSelectedModel = this.getModel("selected");
-      var aChecks = oSelectedModel.getProperty("/checks") || [];
-      oSelectedModel.setProperty("/checks", RowListHelper.addRow(aChecks));
-      this._syncDirtyFlag();
-      this._updateSelectionState();
+      this._mutateRows("/checks", RowListHelper.addRow);
     },
 
     onAddBarrierRow: function () {
-      var oSelectedModel = this.getModel("selected");
-      var aBarriers = oSelectedModel.getProperty("/barriers") || [];
-      oSelectedModel.setProperty("/barriers", RowListHelper.addRow(aBarriers));
-      this._syncDirtyFlag();
-      this._updateSelectionState();
+      this._mutateRows("/barriers", RowListHelper.addRow);
     },
 
     onDeleteCheckRow: function (oEvent) {
@@ -733,8 +972,7 @@ sap.ui.define([
       if (!oResult.deleted) {
         return;
       }
-      this._syncDirtyFlag();
-      this._updateSelectionState();
+      this._syncSelectionMeta();
     },
 
     onDeleteBarrierRow: function (oEvent) {
@@ -742,17 +980,16 @@ sap.ui.define([
       if (!oResult.deleted) {
         return;
       }
-      this._syncDirtyFlag();
-      this._updateSelectionState();
+      this._syncSelectionMeta();
     },
 
     onExit: function () {
-      ["checksExpandedDialog", "barriersExpandedDialog"].forEach(function (sId) {
+      ["checksExpandedDialog", "barriersExpandedDialog"].forEach((sId) => {
         var oDialog = this.byId(sId);
         if (oDialog) {
           oDialog.destroy();
         }
-      }.bind(this));
+      });
       this._pChecksDialog = null;
       this._pBarriersDialog = null;
     },

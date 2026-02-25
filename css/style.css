@@ -1062,3 +1062,114 @@ body.themeLifestyleNightOps .filterCard {
 .light-mode .themeDockButton .sapUiIcon {
   color: #f7fbff !important;
 }
+
+
+.detailContent {
+  position: relative;
+  padding-right: 6.4rem;
+}
+
+.detailAsideRail {
+  position: fixed;
+  top: 6.4rem;
+  right: 1rem;
+  z-index: 25;
+}
+
+/* Detail action sausage rail + rounded mushroom cards */
+.floatingControlSausage {
+  border-radius: 999px !important;
+  width: 4.4rem;
+  min-width: 4.4rem;
+  padding: .65rem .45rem;
+  align-items: center;
+  gap: .3rem;
+}
+
+.floatingControlSausage .sapMObjStatus,
+.floatingControlSausage .lockSwitchWrap .sapMObjStatus {
+  display: none;
+}
+
+.floatingControlSausage .sapMBtn {
+  width: 100%;
+}
+
+.floatingControlSausage .sapMBtnInner {
+  min-width: 3.2rem;
+}
+
+.railSwitchWrap {
+  justify-content: center;
+}
+
+.mushroomCard {
+  border-radius: 18px 18px 12px 12px !important;
+  min-height: 9.4rem;
+}
+
+.mushroomCard .sapMInputBaseContentWrapper,
+.mushroomCard .sapMSlt,
+.mushroomCard .sapMSltLabel,
+.mushroomCard .sapMSltArrow {
+  border-radius: 12px !important;
+}
+
+@media (max-width: 1200px) {
+  .detailContent {
+    padding-right: 0;
+  }
+
+  .detailAsideRail {
+    position: static;
+    top: auto;
+    right: auto;
+    z-index: auto;
+  }
+
+  .floatingControlSausage {
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--radius-lg) !important;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .floatingControlSausage .sapMObjStatus,
+  .floatingControlSausage .lockSwitchWrap .sapMObjStatus {
+    display: inline-flex;
+  }
+
+  .floatingControlSausage .sapMBtn {
+    width: auto;
+  }
+}
+
+/* SmartFilterBar search button should match branded accent style */
+.smartFilterGlass .sapUiCompFilterBar .sapMBtnEmphasized .sapMBtnInner,
+.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  border-color: rgba(var(--accent-rgb), 0.55) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 22px rgba(var(--accent-rgb), 0.3) !important;
+}
+
+.smartFilterGlass .sapUiCompFilterBar .sapMBtn .sapMBtnInner {
+  border-radius: 12px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.35) !important;
+}
+
+.smartFilterGlass .statusToggleWrapper {
+  margin-top: .25rem;
+}
+
+.smartTableGlass .sapMListTbl,
+.smartTableGlass .sapMListTblRow,
+.smartTableGlass .sapMListTblCell {
+  background: transparent !important;
+}
+
+.smartTableGlass .sapMListTblRow .sapMListTblCell {
+  background: color-mix(in srgb, var(--surface2) 88%, transparent) !important;
+}

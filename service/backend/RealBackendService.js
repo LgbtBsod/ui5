@@ -341,7 +341,6 @@ createCheckList: function (oData) {
                 });
         },
 
-
         autoSaveCheckList: function (sId, oDeltaPayload, oFullPayload, mOptions) {
             mOptions = mOptions || {};
             var oBasic = (oDeltaPayload && oDeltaPayload.basic) || {};
@@ -475,7 +474,17 @@ createCheckList: function (oData) {
             return _request("/config/frontend").catch(function () {
                 return {
                     search: { defaultMaxResults: 100, growingThreshold: 10 },
-                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, cacheValidMs: 30000 }
+                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, cacheValidMs: 30000 },
+                    requiredFields: [
+                        "/basic/date",
+                        "/basic/time",
+                        "/basic/timezone",
+                        "/basic/OBSERVER_FULLNAME",
+                        "/basic/OBSERVED_FULLNAME",
+                        "/basic/LOCATION_KEY",
+                        "/basic/LPC_KEY",
+                        "/basic/PROF_KEY"
+                    ]
                 };
             });
         },

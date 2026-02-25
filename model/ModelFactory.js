@@ -47,7 +47,8 @@ sap.ui.define([
                 networkGraceMode: false,
                 networkGraceExpiresAt: null,
                 autosaveState: "IDLE",
-                autosaveAt: null
+                autosaveAt: null,
+                requiredFields: []
             });
         },
 

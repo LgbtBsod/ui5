@@ -1,7 +1,14 @@
 {
   "lpc": [
-    { "key": "L1", "text": "Low" },
-    { "key": "L2", "text": "Medium" },
-    { "key": "L3", "text": "High" }
+    { "key": "lpc000", "text": "LPC 000" },
+    { "key": "lpc001", "text": "LPC 001" },
+    { "key": "lpc002", "text": "LPC 002" },
+    { "key": "lpc003", "text": "LPC 003" },
+    { "key": "lpc004", "text": "LPC 004" },
+    { "key": "lpc005", "text": "LPC 005" },
+    { "key": "lpc006", "text": "LPC 006" },
+    { "key": "lpc007", "text": "LPC 007" },
+    { "key": "lpc008", "text": "LPC 008" },
+    { "key": "lpc009", "text": "LPC 009" }
   ]
 }
