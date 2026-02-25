@@ -1062,10 +1062,10 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 .detailAsideRail {
-  position: fixed;
+  position: sticky;
   top: 6.4rem;
-  right: 1rem;
-  z-index: 25;
+  margin-left: auto;
+  z-index: 12;
 }
 
 /* ==============================
@@ -1361,11 +1361,12 @@ body.themeLifestyleNightOps .filterCard {
 
 /* Mushroom cards as "cloud" blocks */
 .mushroomCard {
-  border-radius: 24px !important;
-  min-height: 11rem;
-  padding: 1.2rem 1.1rem !important;
-  background: color-mix(in srgb, var(--glass-bg) 74%, rgba(var(--accent-rgb), 0.05)) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.10);
+  border-radius: 18px !important;
+  min-height: 9.6rem;
+  padding: 1.05rem .95rem !important;
+  background: color-mix(in srgb, var(--glass-bg) 70%, rgba(var(--accent-rgb), 0.03)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 74%, rgba(255,255,255,0.14)) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.22);
 }
 
 .infoCardTile {
@@ -1430,11 +1431,12 @@ body.themeLifestyleNightOps .filterCard {
 /* Control rail should be visible and airy, not sausage-hidden */
 .floatingControlSausage {
   border-radius: 18px !important;
-  width: min(15rem, 28vw);
-  min-width: 12.5rem;
-  padding: .8rem .75rem;
+  width: min(14rem, 26vw);
+  min-width: 11.5rem;
+  padding: .7rem .65rem;
   align-items: stretch;
-  gap: .45rem;
+  gap: .4rem;
+  backdrop-filter: blur(12px) saturate(120%);
 }
 
 .floatingControlSausage .sapMObjStatus,
@@ -1443,7 +1445,6 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 .detailAsideRail {
-  right: 1.2rem;
   top: 7.5rem;
 }
 
@@ -1470,4 +1471,36 @@ body.themeLifestyleNightOps .filterCard {
     width: 100% !important;
     margin: 0 0 .45rem 0 !important;
   }
+}
+
+/* Premium visual uplift: richer depth and softer glass for key surfaces */
+.glassCard,
+.workflowStageCard,
+.smartTableGlass,
+.smartFilterGlass {
+  box-shadow: 0 18px 42px rgba(11, 24, 44, 0.14), inset 0 1px 0 rgba(255,255,255,0.35) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 76%, rgba(118, 189, 255, 0.34)) !important;
+}
+
+.infoCardTile {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.infoCardTile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(8, 25, 49, 0.12), inset 0 1px 0 rgba(255,255,255,0.24) !important;
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+}
+
+.brandActionBtn .sapMBtnInner {
+  border-radius: 14px !important;
+  backdrop-filter: blur(6px) saturate(112%);
+}
+
+#locationValueHelpDialog .sapMDialogSection {
+  background: color-mix(in srgb, var(--surface2) 80%, rgba(255,255,255,0.1));
+}
+
+#locationValueHelpDialog .sapMListTblRow:hover .sapMListTblCell {
+  background: color-mix(in srgb, var(--glass-bg) 60%, rgba(var(--accent-rgb), 0.11)) !important;
 }

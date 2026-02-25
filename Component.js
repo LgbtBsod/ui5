@@ -187,11 +187,13 @@ sap.ui.define([
                 if (bKilled) {
                     this._handleKilledLock(oPayload);
                 }
+                var sCheckedAt = new Date().toISOString();
                 oCacheModel.setProperty("/lastServerState", {
                     lastChangeSet: oPayload.last_change_set || null,
                     serverChangedOn: oPayload.server_changed_on || null,
-                    checkedAt: new Date().toISOString()
+                    checkedAt: sCheckedAt
                 });
+                oStateModel.setProperty("/cacheValidationAt", sCheckedAt);
             }.bind(this));
 
 
@@ -342,10 +344,12 @@ sap.ui.define([
 
                     // Cache snapshot is the local source for diff/dirty calculations.
                     oCacheModel.setProperty("/pristineSnapshot", JSON.parse(JSON.stringify(aCheckLists)));
+                    var sCacheAt = (oServerState && (oServerState.checkedAt || oServerState.fetchedAt)) || new Date().toISOString();
                     oCacheModel.setProperty("/lastServerState", oServerState || {
-                        fetchedAt: new Date().toISOString(),
+                        fetchedAt: sCacheAt,
                         count: aCheckLists.length
                     });
+                    oStateModel.setProperty("/cacheValidationAt", sCacheAt);
                     oCacheModel.setProperty("/keyMapping", this._oSmartCache.snapshot().keyMapping);
                     this._oSmartCache.put("checkLists", aCheckLists);
                 }.bind(this)).then(function () {

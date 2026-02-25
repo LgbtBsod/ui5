@@ -21,19 +21,14 @@
 
                     <smartFilterBar:SmartFilterBar
                         id="searchSmartFilterBar"
-                        entitySet="CheckListSet"
+                        entitySet="ChecklistRoots"
                         persistencyKey="pcctSmartFilter"
-                        useToolbar="false"
+                        useToolbar="true"
                         visible="{view>/useSmartControls}"
-                        showGoOnFB="false"
+                        showGoOnFB="true"
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged"/>
 
-                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{view>/useSmartControls}">
-                        <ToolbarSpacer/>
-                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
-                    </Toolbar>
 
                     <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
                         <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd"/>
@@ -106,7 +101,7 @@
 
                     <smartTable:SmartTable
                         id="searchSmartTable"
-                        entitySet="CheckListSet"
+                        entitySet="ChecklistRoots"
                         smartFilterId="searchSmartFilterBar"
                         tableType="ResponsiveTable"
                         useVariantManagement="true"
@@ -118,6 +113,7 @@
                         visible="{view>/useSmartControls}"
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
+                        initiallyVisibleFields="id,checklist_id,status,lpc,changed_on"
                         growing="true" growingThreshold="100"/>
 
                     <Table visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" class="glassTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">

@@ -1,8 +1,8 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <VBox class="floatingControlRail floatingControlSausage glassCard detailAsideRail" renderType="Bare">
         <Title text="{i18n>detailControlTitle}" level="H6" class="sapUiTinyMarginBottom"/>
-        <ObjectStatus icon="sap-icon://history" text="{i18n>heartbeatLabel}" state="{= !!${state>/lockExpires} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
-        <ObjectStatus icon="sap-icon://synchronize" text="{i18n>autosaveLabel}" state="{= ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : 'Success' }" class="sapUiTinyMarginBottom"/>
+        <ObjectStatus icon="sap-icon://history" text="{i18n>heartbeatLabel}" state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
+        <ObjectStatus icon="sap-icon://synchronize" text="{i18n>autosaveLabel}" state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
         <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginBottom accentButton savePulseButton" tooltip="{i18n>objectSave}"/>
         <Button icon="sap-icon://inspection" visible="{= ${state>/mode} === 'EDIT' }" press=".onValidateChecklist" class="sapUiTinyMarginBottom" tooltip="{i18n>validateButton}"/>
         <Button icon="sap-icon://status-inactive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusDraft}">

@@ -1,0 +1,26 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="locationValueHelpDialog" title="{i18n>locationValueHelpTitle}" contentWidth="52rem" contentHeight="34rem" draggable="true" resizable="true">
+        <VBox class="sapUiSmallMargin" renderType="Bare">
+            <SearchField width="100%" liveChange=".onLocationValueHelpSearch" placeholder="{i18n>locationValueHelpSearchPlaceholder}" class="sapUiTinyMarginBottom"/>
+            <Table id="locationValueHelpTable" mode="SingleSelectMaster" selectionChange=".onLocationValueHelpSelectionChange" items="{view>/locationVhRows}" growing="true" growingThreshold="40">
+                <columns>
+                    <Column width="10rem"><Text text="{i18n>locationNodeLabel}"/></Column>
+                    <Column width="10rem"><Text text="{i18n>locationParentLabel}"/></Column>
+                    <Column><Text text="{i18n>locationLabel}"/></Column>
+                </columns>
+                <items>
+                    <ColumnListItem type="Active">
+                        <cells>
+                            <ObjectIdentifier title="{view>node_id}"/>
+                            <Text text="{view>parent_id}"/>
+                            <Text text="{view>location_name}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
+        <beginButton>
+            <Button text="{i18n>closeButton}" press=".onCloseLocationValueHelp"/>
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

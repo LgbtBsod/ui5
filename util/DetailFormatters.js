@@ -63,6 +63,9 @@ sap.ui.define([], function () {
     function passedTotal(aRows) {
         var aSafeRows = aRows || [];
         var iTotal = aSafeRows.length;
+        if (!iTotal) {
+            return "";
+        }
         var iPassed = aSafeRows.filter(function (oRow) { return !!(oRow && oRow.result); }).length;
         return iPassed + "/" + iTotal;
     }

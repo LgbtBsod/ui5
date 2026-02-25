@@ -86,7 +86,8 @@ sap.ui.define([
         validationShown: false,
         validationMissing: {},
         statusActions: DetailCardSchema.createStatusActions(oBundle),
-        infoCards: DetailCardSchema.createInfoCards(oBundle)
+        infoCards: DetailCardSchema.createInfoCards(oBundle),
+        locationVhRows: []
       });
 
       this.getView().setModel(oViewModel, "view");
@@ -224,6 +225,14 @@ sap.ui.define([
 
     formatPassedTotal: function (aRows) {
       return DetailFormatters.passedTotal(aRows);
+    },
+
+    hasRows: function (aRows) {
+      return Array.isArray(aRows) && aRows.length > 0;
+    },
+
+    isBarriersRatioVisible: function (sLpcKey, aRows) {
+      return ChecklistValidationService.isBarrierSectionAllowed(sLpcKey) && Array.isArray(aRows) && aRows.length > 0;
     },
 
     isBarriersVisibleByLpc: function (sLpcKey) {
@@ -525,6 +534,78 @@ sap.ui.define([
       }
 
       var oCtx = oItem.getBindingContext("view");
+      var oNode = oCtx ? oCtx.getObject() : null;
+      if (!oNode) {
+        return;
+      }
+      var oSelectedModel = this.getModel("selected");
+      oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
+      oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
+      oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+    },
+
+
+
+
+    onOpenLocationValueHelp: function () {
+      var oDialog = this.byId("locationValueHelpDialog");
+      if (oDialog) {
+        var aRows = this.getModel("mpl").getProperty("/locations") || [];
+        this.getView().getModel("view").setProperty("/locationVhRows", aRows);
+        oDialog.open();
+      }
+    },
+
+    onCloseLocationValueHelp: function () {
+      var oDialog = this.byId("locationValueHelpDialog");
+      if (oDialog) {
+        oDialog.close();
+      }
+    },
+
+    onLocationValueHelpSearch: function (oEvent) {
+      var sValue = this._normalizeText(oEvent.getParameter("newValue"));
+      var aRows = this.getModel("mpl").getProperty("/locations") || [];
+
+      if (!sValue) {
+        this.getView().getModel("view").setProperty("/locationVhRows", aRows);
+        return;
+      }
+
+      var aFiltered = aRows.filter(function (oRow) {
+        var sNodeId = this._normalizeText(oRow && oRow.node_id);
+        var sParentId = this._normalizeText(oRow && oRow.parent_id);
+        var sName = this._normalizeText(oRow && oRow.location_name);
+        return sNodeId.indexOf(sValue) >= 0 || sParentId.indexOf(sValue) >= 0 || sName.indexOf(sValue) >= 0;
+      }.bind(this));
+
+      this.getView().getModel("view").setProperty("/locationVhRows", aFiltered);
+    },
+
+    onLocationValueHelpSelectionChange: function (oEvent) {
+      var oItem = oEvent.getParameter("listItem");
+      if (!oItem) {
+        return;
+      }
+
+      var oCtx = oItem.getBindingContext("mpl") || oItem.getBindingContext("view");
+      var oNode = oCtx ? oCtx.getObject() : null;
+      if (!oNode) {
+        return;
+      }
+      var oSelectedModel = this.getModel("selected");
+      oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
+      oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
+      oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+      this.onCloseLocationValueHelp();
+    },
+
+    onLocationComboChange: function (oEvent) {
+      var oItem = oEvent.getParameter("selectedItem");
+      if (!oItem) {
+        return;
+      }
+      var oCtx = oItem.getBindingContext("mpl");
       var oNode = oCtx ? oCtx.getObject() : null;
       if (!oNode) {
         return;
