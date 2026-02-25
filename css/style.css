@@ -1504,3 +1504,54 @@ body.themeLifestyleNightOps .filterCard {
 #locationValueHelpDialog .sapMListTblRow:hover .sapMListTblCell {
   background: color-mix(in srgb, var(--glass-bg) 60%, rgba(var(--accent-rgb), 0.11)) !important;
 }
+
+/* Horizon-inspired refinement */
+:root {
+  --hzn-radius-s: 0.5rem;
+  --hzn-radius-m: 0.75rem;
+  --hzn-radius-l: 1rem;
+}
+
+.detailControlInlineCard {
+  border-radius: var(--hzn-radius-l) !important;
+  padding: 0.25rem 0.35rem 0.45rem;
+}
+
+.detailControlInline .detailControlStatusRow {
+  margin: 0.15rem 0.25rem 0.35rem;
+}
+
+.detailControlInline .detailControlActionRow {
+  padding: 0.1rem 0.2rem;
+}
+
+.infoCardGrid {
+  gap: 0.85rem !important;
+}
+
+.mushroomCard {
+  border-radius: var(--hzn-radius-l) !important;
+  min-height: 8.7rem;
+  box-shadow: 0 6px 18px rgba(0, 26, 60, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.infoCardTitle {
+  font-weight: 600;
+  letter-spacing: .015em;
+}
+
+#locationValueHelpDialog .sapMDialogScrollCont,
+#locationValueHelpDialog .sapMDialogSection {
+  border-radius: var(--hzn-radius-l);
+}
+
+#locationValueHelpTreeTable.sapUiTable,
+#locationValueHelpTreeTable .sapUiTableCnt,
+#locationValueHelpTreeTable .sapUiTableCtrl {
+  border-radius: var(--hzn-radius-m);
+  overflow: hidden;
+}
+
+#locationValueHelpTreeTable .sapUiTableRowHvr .sapUiTableCell {
+  background: color-mix(in srgb, var(--sapList_Hover_Background) 86%, rgba(var(--accent-rgb), 0.09));
+}

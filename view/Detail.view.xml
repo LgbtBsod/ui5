@@ -4,6 +4,7 @@
     xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:dnd="sap.ui.core.dnd"
+    xmlns:t="sap.ui.table"
     xmlns:core="sap.ui.core">
 
     <Page showHeader="false" class="pageTransparent" busy="{state>/isLoading}">
@@ -187,7 +188,12 @@
             </VBox>
 
 
-            <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
+            <VBox class="glassCard detailControlInlineCard">
+                <Toolbar class="toolbarTransparent">
+                    <Title text="{i18n>detailControlTitle}"/>
+                </Toolbar>
+                <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
+            </VBox>
 
             <core:Fragment fragmentName="sap_ui5.view.fragment.LocationValueHelpDialog" type="XML"/>
 

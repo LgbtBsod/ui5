@@ -87,7 +87,7 @@ sap.ui.define([
         validationMissing: {},
         statusActions: DetailCardSchema.createStatusActions(oBundle),
         infoCards: DetailCardSchema.createInfoCards(oBundle),
-        locationVhRows: []
+        locationVhTree: []
       });
 
       this.getView().setModel(oViewModel, "view");
@@ -551,7 +551,7 @@ sap.ui.define([
       var oDialog = this.byId("locationValueHelpDialog");
       if (oDialog) {
         var aRows = this.getModel("mpl").getProperty("/locations") || [];
-        this.getView().getModel("view").setProperty("/locationVhRows", aRows);
+        this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aRows));
         oDialog.open();
       }
     },
@@ -568,28 +568,42 @@ sap.ui.define([
       var aRows = this.getModel("mpl").getProperty("/locations") || [];
 
       if (!sValue) {
-        this.getView().getModel("view").setProperty("/locationVhRows", aRows);
+        this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aRows));
         return;
       }
 
-      var aFiltered = aRows.filter(function (oRow) {
+      var mById = {};
+      (aRows || []).forEach(function (oRow) {
+        if (oRow && oRow.node_id) {
+          mById[oRow.node_id] = oRow;
+        }
+      });
+
+      var mKeep = {};
+      (aRows || []).forEach(function (oRow) {
         var sNodeId = this._normalizeText(oRow && oRow.node_id);
         var sParentId = this._normalizeText(oRow && oRow.parent_id);
         var sName = this._normalizeText(oRow && oRow.location_name);
-        return sNodeId.indexOf(sValue) >= 0 || sParentId.indexOf(sValue) >= 0 || sName.indexOf(sValue) >= 0;
+        var bMatch = sNodeId.indexOf(sValue) >= 0 || sParentId.indexOf(sValue) >= 0 || sName.indexOf(sValue) >= 0;
+        if (!bMatch || !oRow || !oRow.node_id) {
+          return;
+        }
+        var sCursor = oRow.node_id;
+        while (sCursor && mById[sCursor]) {
+          mKeep[sCursor] = true;
+          sCursor = mById[sCursor].parent_id;
+        }
       }.bind(this));
 
-      this.getView().getModel("view").setProperty("/locationVhRows", aFiltered);
+      var aFiltered = aRows.filter(function (oRow) {
+        return !!(oRow && oRow.node_id && mKeep[oRow.node_id]);
+      });
+      this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aFiltered));
     },
 
-    onLocationValueHelpSelectionChange: function (oEvent) {
-      var oItem = oEvent.getParameter("listItem");
-      if (!oItem) {
-        return;
-      }
-
-      var oCtx = oItem.getBindingContext("mpl") || oItem.getBindingContext("view");
-      var oNode = oCtx ? oCtx.getObject() : null;
+    onLocationTreeSelectionChange: function (oEvent) {
+      var oContext = oEvent.getParameter("rowContext");
+      var oNode = oContext ? oContext.getObject() : null;
       if (!oNode) {
         return;
       }
