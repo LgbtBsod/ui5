@@ -96,6 +96,10 @@ sap.ui.define([
             return Promise.resolve({ success: true, is_killed: false, lock_expires: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
         },
 
+        lockStatus: function () {
+            return Promise.resolve({ success: true, is_killed: false, lock_expires: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
+        },
+
         lockRelease: function () {
             return Promise.resolve({ released: true, save_status: "N" });
         },
@@ -106,6 +110,13 @@ sap.ui.define([
 
         getServerState: function () {
             return FakeODataService.callFunctionImport("ServerState", {});
+        },
+
+        getFrontendConfig: function () {
+            return Promise.resolve({
+                search: { defaultMaxResults: 100, growingThreshold: 10 },
+                timers: { heartbeatMs: 240000, lockStatusMs: 60000, cacheValidMs: 30000 }
+            });
         },
 
 

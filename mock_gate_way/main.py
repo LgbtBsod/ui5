@@ -101,3 +101,11 @@ app.include_router(metadata_router)
 @app.get("/")
 def health():
     return {"status": "Gateway Simulator Running"}
+
+
+@app.get("/config/frontend")
+def frontend_config():
+    return {
+        "search": {"defaultMaxResults": 100, "growingThreshold": 10},
+        "timers": {"heartbeatMs": 240000, "lockStatusMs": 60000, "cacheValidMs": 30000}
+    }

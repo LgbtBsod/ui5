@@ -4,7 +4,8 @@ sap.ui.define([
     "use strict";
 
     var FRESH_MS = 30 * 1000;
-    var STALE_OK_MS = 90 * 1000;
+    // Cache validity window used by detail/edit flows.
+    var STALE_OK_MS = 30 * 1000;
     var DB_NAME = "pcct_smart_cache";
     var STORE_NAME = "entries";
 
@@ -123,6 +124,11 @@ sap.ui.define([
             }
 
             return "STALE";
+        },
+
+        isCacheValid: function (sKey) {
+            var sState = this.getFreshnessState(sKey);
+            return sState === "FRESH" || sState === "STALE_OK";
         },
 
         snapshot: function () {

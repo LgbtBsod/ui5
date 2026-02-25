@@ -2,13 +2,13 @@
 
 ## Current status
 - Frontend now supports **two backend modes** via `BackendAdapter`:
-  - `fake` (default): in-memory mock for stable local development.
-  - `real`: HTTP calls to `mock_gate_way` API.
+  - `real` (default): HTTP calls to SAP-like backend API (`mock_gate_way` locally, SAP Gateway in enterprise landscape).
+  - `fake`: in-memory fallback for deterministic UI diagnostics.
 - Mode and backend URL are configured through `manifest.json`.
 
 ## Configuration in `manifest.json`
 - `sap.ui5.config.backendMode`
-  - `"fake"` (default) or `"real"`
+  - `"real"` (default) or `"fake"`
 - `sap.app.dataSources.mainService.uri`
   - backend base URL (default: `http://localhost:5000`)
 

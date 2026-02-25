@@ -19,7 +19,7 @@ sap.ui.define([], function () {
 
   function buildDefaultChecklist(sId) {
     return {
-      root: { id: sId || "" },
+      root: { id: sId || "", integrationFlag: false, this_is_integration_data: false },
       basic: {
         date: "",
         timezone: "Europe/Amsterdam"

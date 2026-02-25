@@ -3,37 +3,30 @@ sap.ui.define([
 ], function (EventProvider) {
     "use strict";
 
-    return EventProvider.extend("sap_ui5.manager.HeartbeatManager", {
+    return EventProvider.extend("sap_ui5.manager.LockStatusMonitor", {
         constructor: function (mOptions) {
             EventProvider.apply(this, arguments);
-            this._iIntervalMs = (mOptions && mOptions.intervalMs) || 4 * 60 * 1000;
-            this._fnHeartbeat = (mOptions && mOptions.heartbeatFn) || function () { return Promise.resolve({}); };
+            this._iIntervalMs = (mOptions && mOptions.intervalMs) || 60 * 1000;
+            this._fnCheck = (mOptions && mOptions.checkFn) || function () { return Promise.resolve({}); };
             this._iTimer = null;
-            this._bRunning = false;
         },
 
         start: function () {
             this.stop();
-            this._bRunning = true;
             this._iTimer = setInterval(function () {
-                this._fnHeartbeat().then(function (oResult) {
-                    this.fireEvent("heartbeat", oResult || {});
+                this._fnCheck().then(function (oResult) {
+                    this.fireEvent("status", oResult || {});
                 }.bind(this)).catch(function (oError) {
-                    this.fireEvent("heartbeatError", { error: oError });
+                    this.fireEvent("statusError", { error: oError });
                 }.bind(this));
             }.bind(this), this._iIntervalMs);
         },
 
         stop: function () {
-            this._bRunning = false;
             if (this._iTimer) {
                 clearInterval(this._iTimer);
                 this._iTimer = null;
             }
-        },
-
-        isRunning: function () {
-            return this._bRunning;
         }
     });
 });

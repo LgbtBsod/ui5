@@ -7,16 +7,11 @@
     xmlns:dnd="sap.ui.core.dnd"
     xmlns:core="sap.ui.core">
 
-    <Page showHeader="false" class="pageTransparent">
+    <Page showHeader="false" class="pageTransparent" busy="{state>/isLoading}">
 
         <VBox class="appContent detailContent">
 
-            <MessageStrip
-                text="{i18n>lockKilledMessage}"
-                type="Warning"
-                showIcon="true"
-                visible="{state>/isKilled}"
-                class="sapUiTinyMarginBottom"/>
+            <core:Fragment fragmentName="sap_ui5.view.fragment.LockKilledBanner" type="XML"/>
 
             <VBox class="glassCard detailHeroCard">
                 <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap" class="detailHeroHeader" renderType="Bare">
@@ -47,7 +42,7 @@
                     type="Emphasized"
                     visible="{= ${state>/mode} === 'EDIT' }"
                     press=".onSaveDetail"
-                    class="sapUiTinyMarginEnd accentButton"/>
+                    class="sapUiTinyMarginEnd accentButton savePulseButton"/>
                 <Button
                     text="{i18n>objectCancel}"
                     visible="{= ${state>/mode} === 'EDIT' }"
@@ -55,13 +50,7 @@
                     class="sapUiTinyMarginEnd"/>
                 <Label text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
                 <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap sapUiTinyMarginEnd">
-                    <BusyIndicator visible="{state>/lockOperationPending}" size="1rem" class="sapUiTinyMarginEnd"/>
-                    <Switch
-                        state="{= ${state>/mode} === 'EDIT' }"
-                        enabled="{= !${state>/lockOperationPending} }"
-                        change=".onToggleEditFromDetail"
-                        class="accentSwitch"/>
-                    <ObjectStatus text="{state>/lockOperationText}" state="{= ${state>/lockOperationState} === 'SUCCESS' ? 'Success' : ${state>/lockOperationState} === 'ERROR' ? 'Error' : 'Information' }" class="sapUiTinyMarginBegin"/>
+                    <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
                 </HBox>
                 <Button
                     icon="sap-icon://decline"
@@ -70,7 +59,7 @@
                     press=".onCloseDetail"/>
             </HBox>
 
-            <VBox class="glassCard">
+            <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">
                 <Toolbar class="toolbarTransparent">
                     <Title text="{i18n>participantsTitle}"/>
                     <ToolbarSpacer/>
@@ -91,7 +80,9 @@
                                         {path: 'selected>/basic/OBSERVER_FULLNAME'},
                                         {path: 'selected>/basic/OBSERVED_FULLNAME'},
                                         {path: 'selected>/basic/LOCATION_NAME'},
-                                        {path: 'selected>/basic/LOCATION_TEXT'}
+                                        {path: 'selected>/basic/LOCATION_TEXT'},
+                                        {path: 'selected>/basic/LPC_TEXT'},
+                                        {path: 'selected>/basic/PROF_TEXT'}
                                     ], formatter: '.formatInfoCardValue'}"
                                     class="infoCardValue"/>
                             </VBox>
@@ -100,7 +91,18 @@
                 </f:GridList>
             </VBox>
 
-            <VBox class="glassCard">
+
+            <VBox class="floatingControlRail glassCard" renderType="Bare">
+                <ObjectStatus text="{i18n>heartbeatLabel}" state="{= !!${state>/lockExpires} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
+                <ObjectStatus text="{i18n>autosaveLabel}" state="{= ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : 'Success' }" class="sapUiTinyMarginBottom"/>
+                <Button text="{i18n>objectSave}" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginBottom accentButton savePulseButton"/>
+                <Button text="{i18n>objectCancel}" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom"/>
+                <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap">
+                    <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
+                </HBox>
+            </VBox>
+
+            <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">
                 <Title text="{i18n>basicInformation}"/>
                 <form:SimpleForm
                     editable="true"
@@ -143,7 +145,24 @@
                     </Input>
 
                     <Label text="{i18n>lpcLabel}"/>
-                    <Input value="{selected>/basic/LPC_TEXT}" editable="{= ${state>/mode} === 'EDIT' }"/>
+                    <Select
+                        selectedKey="{selected>/basic/LPC_KEY}"
+                        enabled="{= ${state>/mode} === 'EDIT' }"
+                        change=".onLpcChange"
+                        forceSelection="false"
+                        items="{masterData>/lpc}">
+                        <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                    </Select>
+
+                    <Label text="{i18n>professionLabel}"/>
+                    <Select
+                        selectedKey="{selected>/basic/PROF_KEY}"
+                        enabled="{= ${state>/mode} === 'EDIT' }"
+                        change=".onProfessionChange"
+                        forceSelection="false"
+                        items="{masterData>/professions}">
+                        <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                    </Select>
 
                 </form:SimpleForm>
             </VBox>
@@ -163,15 +182,17 @@
                 </Tree>
             </VBox>
 
-            <VBox class="glassCard">
+            <VBox class="glassCard" busy="{view>/checksLoading}">
                 <Toolbar class="toolbarTransparent">
                     <Title text="{i18n>checksTitle}"/>
                     <ToolbarSpacer/>
+                    <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecks" class="sapUiTinyMarginEnd"/>
                     <Button
                         text="{i18n>addRow}"
                         press=".onAddCheckRow"
                         visible="{= ${state>/mode} === 'EDIT' }"/>
                 </Toolbar>
+                <ScrollContainer height="18rem" vertical="true" horizontal="false" class="tableScrollWrap">
                 <Table items="{selected>/checks}" class="flatEditorTable" busy="{view>/checksLoading}">
                     <columns>
                         <Column width="3rem"><Text text=""/></Column>
@@ -182,25 +203,28 @@
                     <items>
                         <ColumnListItem>
                             <cells>
-                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' }"/>
-                                <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
-                                <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
-                                <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteCheckRow" visible="{= ${state>/mode} === 'EDIT' }"/>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteCheckRow" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
                             </cells>
                         </ColumnListItem>
                     </items>
                 </Table>
+                </ScrollContainer>
             </VBox>
 
-            <VBox class="glassCard">
+            <VBox class="glassCard" busy="{view>/barriersLoading}">
                 <Toolbar class="toolbarTransparent">
                     <Title text="{i18n>barriersTitle}"/>
                     <ToolbarSpacer/>
+                    <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd"/>
                     <Button
                         text="{i18n>addRow}"
                         press=".onAddBarrierRow"
                         visible="{= ${state>/mode} === 'EDIT' }"/>
                 </Toolbar>
+                <ScrollContainer height="18rem" vertical="true" horizontal="false" class="tableScrollWrap">
                 <Table items="{selected>/barriers}" class="flatEditorTable" busy="{view>/barriersLoading}">
                     <columns>
                         <Column width="3rem"><Text text=""/></Column>
@@ -211,14 +235,15 @@
                     <items>
                         <ColumnListItem>
                             <cells>
-                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' }"/>
-                                <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
-                                <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
-                                <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteBarrierRow" visible="{= ${state>/mode} === 'EDIT' }"/>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteBarrierRow" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
                             </cells>
                         </ColumnListItem>
                     </items>
                 </Table>
+                </ScrollContainer>
             </VBox>
 
         </VBox>

@@ -1,0 +1,29 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="barriersExpandedDialog" title="{i18n>barriersExpandedTitle}" contentWidth="72rem" contentHeight="36rem" draggable="true" resizable="true" stretchOnPhone="true">
+        <content>
+            <VBox class="expandedDialogContent" renderType="Bare">
+                <Table items="{selected>/barriers}" class="flatEditorTable" growing="true" growingThreshold="20">
+                    <columns>
+                        <Column width="3rem"><Text text=""/></Column>
+                        <Column><Text text="{i18n>barrierLabel}"/></Column>
+                        <Column><Text text="{i18n>statusLabel}"/></Column>
+                        <Column width="2.5rem" visible="{= ${state>/mode} === 'EDIT' }"><Text text=""/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' }"/>
+                                <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
+                                <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
+                                <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteBarrierRow" visible="{= ${state>/mode} === 'EDIT' }"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button text="{i18n>closeButton}" press=".onCloseBarriersExpanded"/>
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

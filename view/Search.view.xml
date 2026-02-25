@@ -16,12 +16,6 @@
                     <Toolbar class="toolbarTransparent">
                         <Title text="{i18n>filtersTitle}"/>
                     </Toolbar>
-
-
-                    <HBox class="uxStatRow" wrap="Wrap" renderType="Bare">
-                        <ObjectStatus text="SmartFilterBar" state="Success" visible="{layout>/smartFilter/useCustomSmartFilters}" class="sapUiTinyMarginEnd"/>
-                        <ObjectStatus text="SmartTable" state="Success" visible="{layout>/smartTable/useCustomSmartTable}"/>
-                    </HBox>
                     <HBox class="sapUiTinyMarginTop" visible="{state>/loadError}" wrap="Wrap" alignItems="Center" renderType="Bare">
                         <MessageStrip
                             visible="{state>/loadError}"
@@ -55,6 +49,17 @@
                                 <core:Item key="L3" text="{i18n>lpcHigh}"/>
                             </items>
                             </Select>
+                        </VBox>
+
+                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
+                            <Label text="{i18n>searchMaxResultsLabel}" labelFor="searchMaxResultsInput"/>
+                            <Input
+                                id="searchMaxResultsInput"
+                                value="{state>/searchMaxResults}"
+                                type="Number"
+                                placeholder="100"
+                                description="1..9999"
+                                width="11rem"/>
                         </VBox>
 
                         <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
@@ -166,14 +171,17 @@
                     <Toolbar class="toolbarTransparent sapUiTinyMarginBottom resultToolbar">
                         <Title level="H5" text="{i18n>resultsLabel}"/>
                         <ToolbarSpacer/>
-                        <ObjectStatus text="{view>/resultSummary}" state="Information"/>
                     </Toolbar>
+                    <HBox class="uxStatRow sapUiTinyMarginBottom" renderType="Bare">
+                        <ObjectStatus text="{view>/resultSummary}" state="Information"/>
+                    </HBox>
 
                     <Table
                         id="checkTable"
                         fixedLayout="false"
                         growing="true"
-                        growingThreshold="20"
+                        growingScrollToLoad="false"
+                        growingThreshold="10"
                         class="glassTable roundedTable searchResultTable"
                         busy="{state>/isLoading}"
                         noDataText="{= ${state>/loadError} ? ${i18n>noDataLoadError} : ${i18n>noDataDefault} }"
