@@ -74,9 +74,9 @@ class LockEntry(Base):
     user_id = Column(String, nullable=False)
     session_guid = Column(String, nullable=True)
 
-    locked_at = Column(DateTime, default=now_utc)
-    last_heartbeat = Column(DateTime, default=now_utc)
-    expires_at = Column(DateTime)
+    expires_at = Column(DateTime(timezone=True))
+    locked_at = Column(DateTime(timezone=True))
+    last_heartbeat = Column(DateTime(timezone=True))
 
     is_killed = Column(Boolean, default=False)
     killed_by = Column(String, nullable=True)
