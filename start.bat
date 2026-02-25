@@ -16,5 +16,3 @@ echo All servers started
 echo Gateway: http://localhost:5000
 echo UI5:     http://localhost:8080
 echo ==============================
-
-pause
