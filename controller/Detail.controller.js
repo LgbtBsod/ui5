@@ -4,13 +4,28 @@ sap.ui.define([
   "sap/m/MessageToast",
   "sap/m/MessageBox",
   "sap/ui/model/json/JSONModel",
-  "sap/ui/core/Fragment",
   "sap_ui5/util/RowListHelper",
   "sap_ui5/util/ChecklistDraftHelper",
   "sap_ui5/util/FlowCoordinator",
   "sap_ui5/util/ChecklistValidationService",
-  "sap_ui5/util/ChecklistUiState"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, Fragment, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState) {
+  "sap_ui5/util/ChecklistUiState",
+  "sap_ui5/util/DetailCardSchema",
+  "sap_ui5/util/DetailFormatters",
+  "sap_ui5/service/usecase/ChecklistCrudUseCase",
+  "sap_ui5/service/usecase/DetailLifecycleUseCase",
+  "sap_ui5/service/usecase/DetailCommandFlowUseCase",
+  "sap_ui5/service/usecase/DetailStatusRowUseCase",
+  "sap_ui5/service/usecase/DetailStatusCommandUseCase",
+  "sap_ui5/service/usecase/DetailRowDialogCommandUseCase",
+  "sap_ui5/service/usecase/DetailSaveOrchestrationUseCase",
+  "sap_ui5/service/usecase/DetailDialogLifecycleUseCase",
+  "sap_ui5/service/usecase/DetailLockEditFlowUseCase",
+  "sap_ui5/service/usecase/DetailLockReleaseUseCase",
+  "sap_ui5/service/usecase/DetailSaveConflictFlowUseCase",
+  "sap_ui5/service/usecase/DetailSaveSuccessFlowUseCase",
+  "sap_ui5/service/usecase/DetailCloseFlowUseCase",
+  "sap_ui5/service/usecase/DetailCloseNavigationUseCase"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailRowDialogCommandUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveConflictFlowUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailCloseNavigationUseCase) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -45,20 +60,19 @@ sap.ui.define([
         );
       }).then((oResult) => {
         if (!oResult || !oResult.success) {
-          oStateModel.setProperty("/mode", "READ");
-          oStateModel.setProperty("/isLocked", false);
+          DetailLifecycleUseCase.setReadUnlocked(oStateModel);
           this.setLockUiState(oStateModel, "ERROR", this.getResourceBundle().getText("lockStayReadOnly"));
           return null;
         }
 
-        oStateModel.setProperty("/isLocked", true);
-        oStateModel.setProperty("/mode", "EDIT");
+        DetailLifecycleUseCase.setEditLocked(oStateModel);
         this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
         return oResult;
       });
     },
 
     onInit: function () {
+      var oBundle = this.getResourceBundle();
       var oViewModel = new JSONModel({
         hasSelectedChecks: false,
         hasSelectedBarriers: false,
@@ -70,22 +84,8 @@ sap.ui.define([
         detailSkeletonBusy: false,
         validationShown: false,
         validationMissing: {},
-        statusActions: [
-          { key: "DRAFT", title: "Draft" },
-          { key: "REGISTERED", title: "Registered" },
-          { key: "CLOSED", title: "Closed" }
-        ],
-        infoCards: [
-          { key: "date", title: this.getResourceBundle().getText("dateLabel") },
-          { key: "time", title: this.getResourceBundle().getText("timeLabel") },
-          { key: "timezone", title: this.getResourceBundle().getText("timezoneLabel") },
-          { key: "equipment", title: this.getResourceBundle().getText("equipmentLabel") },
-          { key: "observer", title: this.getResourceBundle().getText("observerLabel") },
-          { key: "observed", title: this.getResourceBundle().getText("observedLabel") },
-          { key: "location", title: this.getResourceBundle().getText("locationLabel") },
-          { key: "lpc", title: this.getResourceBundle().getText("lpcLabel") },
-          { key: "profession", title: this.getResourceBundle().getText("professionLabel") }
-        ]
+        statusActions: DetailCardSchema.createStatusActions(oBundle),
+        infoCards: DetailCardSchema.createInfoCards(oBundle)
       });
 
       this.getView().setModel(oViewModel, "view");
@@ -134,10 +134,14 @@ sap.ui.define([
     },
 
     _releaseEditLock: function (sObjectId, sSessionId, oStateModel) {
-      oStateModel.setProperty("/mode", "READ");
-      oStateModel.setProperty("/isLocked", false);
-      return this.releaseLock(sObjectId, sSessionId, { trySave: false }).finally(() => {
-        this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockReleased"));
+      return DetailLockReleaseUseCase.runReleaseFlow({
+        stateModel: oStateModel,
+        releaseLock: function () {
+          return this.releaseLock(sObjectId, sSessionId, { trySave: false });
+        }.bind(this),
+        setLockUiIdle: function () {
+          this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockReleased"));
+        }.bind(this)
       });
     },
 
@@ -174,14 +178,11 @@ sap.ui.define([
     },
 
     formatValidationState: function (bShown, bMissing) {
-      return (bShown && bMissing) ? "Error" : "None";
+      return DetailFormatters.validationState(bShown, bMissing);
     },
 
     formatValidationText: function (bShown, bMissing) {
-      if (!(bShown && bMissing)) {
-        return "";
-      }
-      return this.getResourceBundle().getText("requiredFieldHint");
+      return DetailFormatters.validationText(bShown, bMissing, this.getResourceBundle());
     },
 
     _getValidationRules: function () {
@@ -197,48 +198,31 @@ sap.ui.define([
     },
 
     formatBooleanResultText: function (vValue) {
-      if (vValue === true) {
-        return this.getResourceBundle().getText("statusOk");
-      }
-      if (vValue === false) {
-        return this.getResourceBundle().getText("statusFailed");
-      }
-      return "-";
+      return DetailFormatters.booleanResultText(vValue, this.getResourceBundle());
     },
 
     formatBooleanResultState: function (vValue) {
-      if (vValue === true) {
-        return "Success";
-      }
-      if (vValue === false) {
-        return "Error";
-      }
-      return "None";
+      return DetailFormatters.booleanResultState(vValue);
     },
 
     formatLifecycleStatusText: function (sStatus) {
-      var oBundle = this.getResourceBundle();
-      switch (String(sStatus || "").toUpperCase()) {
-        case "DRAFT": return oBundle.getText("statusDraft");
-        case "REGISTERED": return oBundle.getText("statusRegistered");
-        case "CLOSED": return oBundle.getText("statusClosed");
-        default: return sStatus || "-";
-      }
+      return DetailFormatters.lifecycleStatusText(sStatus, this.getResourceBundle());
+    },
+
+    formatDraftStateText: function (bDirty) {
+      return DetailFormatters.draftStateText(bDirty, this.getResourceBundle());
+    },
+
+    formatDraftStateState: function (bDirty) {
+      return DetailFormatters.draftStateState(bDirty);
     },
 
     formatLifecycleStatusState: function (sStatus) {
-      switch (String(sStatus || "").toUpperCase()) {
-        case "REGISTERED": return "Warning";
-        case "CLOSED": return "Success";
-        default: return "Information";
-      }
+      return DetailFormatters.lifecycleStatusState(sStatus);
     },
 
     formatPassedTotal: function (aRows) {
-      var a = aRows || [];
-      var iTotal = a.length;
-      var iPassed = a.filter(function (oRow) { return !!(oRow && oRow.result); }).length;
-      return iPassed + "/" + iTotal;
+      return DetailFormatters.passedTotal(aRows);
     },
 
     isBarriersVisibleByLpc: function (sLpcKey) {
@@ -277,7 +261,7 @@ sap.ui.define([
         oDataModel.setProperty("/selectedChecklist", oDraft);
         this.getModel("selected").setData(ChecklistDraftHelper.clone(oDraft));
         oStateModel.setProperty("/mode", "EDIT");
-        oStateModel.setProperty("/isDirty", false);
+        DetailLifecycleUseCase.resetDirty(oStateModel);
         this._updateSelectionState();
         this._updateDerivedRootResult();
         return;
@@ -354,7 +338,7 @@ sap.ui.define([
     _reloadChecklistFromBackend: function (sId) {
       var oDataModel = this.getModel("data");
       return this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
-        return BackendAdapter.getChecklistRoot(sId).then((oRootOnly) => {
+        return ChecklistCrudUseCase.getChecklistRoot(sId).then((oRootOnly) => {
           oDataModel.setProperty("/selectedChecklist", oRootOnly || null);
           this._applyChecklistLazily(oRootOnly || {});
           return oRootOnly;
@@ -609,25 +593,23 @@ sap.ui.define([
 
     onCloseDetail: function () {
       var oState = this.getModel("state");
-      var fnProceed = () => {
-        var sObjectId = oState.getProperty("/activeObjectId");
-        var sSessionId = oState.getProperty("/sessionId");
-        this.releaseLock(sObjectId, sSessionId);
-        oState.setProperty("/layout", "OneColumn");
-        oState.setProperty("/activeObjectId", null);
-        oState.setProperty("/isDirty", false);
-        this.navTo("search", {}, true);
-      };
+      var fnProceed = DetailCloseNavigationUseCase.buildCloseProceedAction({
+        stateModel: oState,
+        releaseLock: this.releaseLock.bind(this),
+        prepareCloseNavigation: DetailLifecycleUseCase.prepareCloseNavigation,
+        navigateToSearch: function () {
+          this.navTo("search", {}, true);
+        }.bind(this)
+      });
 
-      if (!oState.getProperty("/isDirty")) {
-        fnProceed();
-        return;
-      }
-
-      FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this)).then((sDecision) => {
-        if (sDecision === "DISCARD" || sDecision === "SAVE") {
-          fnProceed();
-        }
+      return DetailCloseFlowUseCase.runCloseFlow({
+        isDirty: oState.getProperty("/isDirty"),
+        shouldPromptBeforeClose: DetailCommandFlowUseCase.shouldPromptBeforeClose,
+        shouldProceedAfterUnsavedDecision: DetailCommandFlowUseCase.shouldProceedAfterUnsavedDecision,
+        confirmUnsaved: function () {
+          return FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this));
+        }.bind(this),
+        proceed: fnProceed
       });
     },
 
@@ -640,53 +622,52 @@ sap.ui.define([
       var oStateModel = this.getModel("state");
       var sObjectId = oStateModel.getProperty("/activeObjectId");
       var sSessionId = oStateModel.getProperty("/sessionId");
+      var sPendingText = this.getResourceBundle().getText("lockPending");
 
       var fnDisableEditAndRelease = () => this._releaseEditLock(sObjectId, sSessionId, oStateModel);
 
-      if (!bEditMode && oStateModel.getProperty("/isDirty")) {
-        FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this)).then((sDecision) => {
-          if (sDecision === "CANCEL") {
-            return;
-          }
-          this.setLockUiState(oStateModel, "PENDING", this.getResourceBundle().getText("lockPending"));
-          this.runWithStateFlag(oStateModel, "/lockOperationPending", fnDisableEditAndRelease);
-        });
-        return;
-      }
-
-      this.setLockUiState(oStateModel, "PENDING", this.getResourceBundle().getText("lockPending"));
-      this.runWithStateFlag(oStateModel, "/lockOperationPending", function () {
-        if (!bEditMode) {
-          return fnDisableEditAndRelease();
-        }
-
-        return this._ensureChecklistFreshBeforeEdit(sObjectId).then(() => {
-          return this._confirmIntegrationEdit();
-        }).then((bConfirmed) => {
-          if (!bConfirmed) {
-            this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockStayReadOnly"));
-            return null;
-          }
-          return BackendAdapter.lockAcquire(
-            sObjectId,
-            sSessionId
-          );
-        }).then((oAcquireResult) => {
-          if (!oAcquireResult) {
-            return;
-          }
-          oStateModel.setProperty("/isLocked", true);
-          oStateModel.setProperty("/mode", "EDIT");
+      return DetailLockEditFlowUseCase.runToggleEditFlow({
+        editMode: bEditMode,
+        isDirty: oStateModel.getProperty("/isDirty"),
+        confirmUnsaved: function () {
+          return FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this));
+        }.bind(this),
+        runPendingRelease: function () {
+          this.setLockUiState(oStateModel, "PENDING", sPendingText);
+          return this.runWithStateFlag(oStateModel, "/lockOperationPending", fnDisableEditAndRelease);
+        }.bind(this),
+        runPendingToggle: function (fnFlow) {
+          this.setLockUiState(oStateModel, "PENDING", sPendingText);
+          return this.runWithStateFlag(oStateModel, "/lockOperationPending", fnFlow.bind(this));
+        }.bind(this),
+        releaseEdit: fnDisableEditAndRelease,
+        ensureFreshBeforeEdit: function () {
+          return this._ensureChecklistFreshBeforeEdit(sObjectId);
+        }.bind(this),
+        confirmIntegrationEdit: this._confirmIntegrationEdit.bind(this),
+        onStayReadOnly: function () {
+          this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockStayReadOnly"));
+        }.bind(this),
+        acquireLock: function () {
+          return BackendAdapter.lockAcquire(sObjectId, sSessionId);
+        },
+        onLockAcquired: function () {
+          DetailLifecycleUseCase.setEditLocked(oStateModel);
           this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
-        }).catch((oError) => {
-          return this._tryStealOwnLock(sObjectId, sSessionId, oError).catch(() => {
-            oStateModel.setProperty("/mode", "READ");
-            oStateModel.setProperty("/isLocked", false);
-            this.setLockUiState(oStateModel, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
-            return FlowCoordinator.handleBackendError(this, oError);
+        }.bind(this),
+        tryRecoverFromAcquireError: function (oError) {
+          return this._tryStealOwnLock(sObjectId, sSessionId, oError).then(function (oResult) {
+            return !!(oResult && oResult.success);
+          }).catch(function () {
+            return false;
           });
-        });
-      }.bind(this));
+        }.bind(this),
+        onAcquireFailed: function (oError) {
+          DetailLifecycleUseCase.setReadUnlocked(oStateModel);
+          this.setLockUiState(oStateModel, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
+          return FlowCoordinator.handleBackendError(this, oError);
+        }.bind(this)
+      });
     },
 
     onCancelEditFromDetail: function () {
@@ -696,7 +677,7 @@ sap.ui.define([
       var sSessionId = oStateModel.getProperty("/sessionId");
 
       this.getModel("selected").setData(ChecklistDraftHelper.clone(oSelected));
-      oStateModel.setProperty("/isDirty", false);
+      DetailLifecycleUseCase.resetDirty(oStateModel);
       this._releaseEditLock(sObjectId, sSessionId, oStateModel);
     },
 
@@ -727,43 +708,18 @@ sap.ui.define([
     },
 
     formatInfoCardValue: function (sKey, sDate, sTime, sTimezone, sEquipment, sObserver, sObserved, sLocationName, sLocationText, sLpcText, sProfText) {
-      if (sKey === "date") {
-        return sDate || "-";
-      }
-
-      if (sKey === "time") {
-        return sTime || "-";
-      }
-
-      if (sKey === "timezone") {
-        return sTimezone || "-";
-      }
-
-      if (sKey === "equipment") {
-        return sEquipment || "-";
-      }
-
-      if (sKey === "observer") {
-        return sObserver || "-";
-      }
-
-      if (sKey === "observed") {
-        return sObserved || "-";
-      }
-
-      if (sKey === "lpc") {
-        return sLpcText || "-";
-      }
-
-      if (sKey === "profession") {
-        return sProfText || "-";
-      }
-
-      if (sLocationName && sLocationText && sLocationName !== sLocationText) {
-        return sLocationName + " — " + sLocationText;
-      }
-
-      return sLocationName || sLocationText || "-";
+      return DetailStatusRowUseCase.formatInfoCardValue(sKey, {
+        date: sDate,
+        time: sTime,
+        timezone: sTimezone,
+        equipment: sEquipment,
+        observer: sObserver,
+        observed: sObserved,
+        locationName: sLocationName,
+        locationText: sLocationText,
+        lpcText: sLpcText,
+        profText: sProfText
+      });
     },
 
     onValidateChecklist: function () {
@@ -795,32 +751,18 @@ sap.ui.define([
 
     onChangeChecklistStatus: function (oEvent) {
       var sStatus = oEvent.getSource().data("targetStatus") || "";
-      if (!sStatus) {
-        return;
-      }
-
-      return this.onValidateChecklist().then(function (bValid) {
-        if (!bValid) {
-          return;
-        }
-
-        var oSelected = this.getModel("selected").getData() || {};
-
-        if (ChecklistUiState.isSameStatus((oSelected.root || {}).status, sStatus)) {
-          return;
-        }
-
-        if ((oSelected.root || {}).this_is_integration_data) {
-          return this._confirmIntegrationEdit().then(function (bConfirmed) {
-            if (!bConfirmed) {
-              return;
-            }
-            return this._applyStatusAndSave(sStatus);
-          }.bind(this));
-        }
-
-        return this._applyStatusAndSave(sStatus);
-      }.bind(this));
+      return DetailStatusCommandUseCase.runStatusChangeFlow({
+        targetStatus: sStatus,
+        validateChecklist: this.onValidateChecklist.bind(this),
+        getSelectedRoot: function () {
+          var oSelected = this.getModel("selected").getData() || {};
+          return oSelected.root || {};
+        }.bind(this),
+        shouldApplyStatusChange: DetailStatusRowUseCase.shouldApplyStatusChange,
+        requiresIntegrationConfirmation: DetailStatusRowUseCase.requiresIntegrationConfirmation,
+        confirmIntegrationEdit: this._confirmIntegrationEdit.bind(this),
+        applyStatusAndSave: this._applyStatusAndSave.bind(this)
+      });
     },
 
     onInfoCardsDrop: function (oEvent) {
@@ -876,45 +818,46 @@ sap.ui.define([
       var bCreateMode = !sId;
 
       return this.runWithStateFlag(oStateModel, "/isLoading", function () {
-
-      return (bCreateMode ? BackendAdapter.createCheckList(oEdited) : BackendAdapter.updateCheckList(sId, oEdited))
-        .then((oSavedChecklist) => {
-          return BackendAdapter.getCheckLists().then((aUpdatedCheckLists) => {
-            return {
-              savedChecklist: oSavedChecklist,
-              checkLists: aUpdatedCheckLists
-            };
-          });
-        })
-        .then((oResult) => {
-          oDataModel.setProperty("/checkLists", oResult.checkLists);
-          oDataModel.setProperty("/visibleCheckLists", oResult.checkLists);
-          oDataModel.setProperty("/selectedChecklist", oResult.savedChecklist);
-          this.getModel("selected").setData(oResult.savedChecklist);
-          if (oStateModel.getProperty("/isLocked")) {
-            oStateModel.setProperty("/mode", "EDIT");
-          }
-          oStateModel.setProperty("/isDirty", false);
-          window.dispatchEvent(new CustomEvent("pcct:fullSave"));
-          this.showI18nToast("objectSaved");
-        })
-        .catch((oError) => {
-          return FlowCoordinator.handleBackendError(this, oError, {
-            onConflictChoice: (sChoice) => {
-              if (sChoice === this.getResourceBundle().getText("reloadButton")) {
-                return BackendAdapter.getChecklistRoot(sId).then((oRootOnly) => {
+        return DetailSaveOrchestrationUseCase.runSaveFlow({
+          saveChecklist: function () {
+            return ChecklistCrudUseCase.saveChecklist(sId, oEdited, bCreateMode);
+          },
+          loadChecklistCollection: ChecklistCrudUseCase.getChecklistCollection,
+          applySaveResult: function (oResult) {
+            DetailSaveSuccessFlowUseCase.applySaveSuccess({
+              result: oResult,
+              dataModel: oDataModel,
+              selectedModel: this.getModel("selected"),
+              stateModel: oStateModel,
+              dispatchFullSave: function () {
+                window.dispatchEvent(new CustomEvent("pcct:fullSave"));
+              },
+              showSavedToast: function () {
+                this.showI18nToast("objectSaved");
+              }.bind(this)
+            });
+          }.bind(this),
+          handleSaveError: function (oError) {
+            var fnConflictHandler = DetailSaveConflictFlowUseCase.buildConflictHandler({
+              reloadLabel: this.getResourceBundle().getText("reloadButton"),
+              overwriteLabel: this.getResourceBundle().getText("overwriteButton"),
+              onReload: function () {
+                return ChecklistCrudUseCase.getChecklistRoot(sId).then((oRootOnly) => {
                   if (oRootOnly) {
                     this.getModel("selected").setData(ChecklistDraftHelper.clone(oRootOnly));
                     this._applyChecklistLazily(oRootOnly);
                   }
                 });
+              }.bind(this),
+              onOverwrite: function () {
+                return ChecklistCrudUseCase.forceUpdateChecklist(sId, oEdited);
               }
-              if (sChoice === this.getResourceBundle().getText("overwriteButton")) {
-                return BackendAdapter.updateCheckList(sId, oEdited, { force: true });
-              }
-              return null;
-            }
-          });
+            });
+
+            return FlowCoordinator.handleBackendError(this, oError, {
+              onConflictChoice: fnConflictHandler
+            });
+          }.bind(this)
         });
       }.bind(this));
     },
@@ -922,76 +865,71 @@ sap.ui.define([
 
 
     _openExpandedDialog: function (sType) {
-      var sProp = sType === "checks" ? "_pChecksDialog" : "_pBarriersDialog";
-      var sFragment = sType === "checks"
-        ? "sap_ui5.view.fragment.ChecksExpandedDialog"
-        : "sap_ui5.view.fragment.BarriersExpandedDialog";
-
-      if (!this[sProp]) {
-        this[sProp] = Fragment.load({
-          id: this.getView().getId(),
-          name: sFragment,
-          controller: this
-        }).then(function (oDialog) {
-          this.getView().addDependent(oDialog);
-          return oDialog;
-        }.bind(this));
-      }
-
-      return this[sProp].then(function (oDialog) {
-        oDialog.open();
+      var oMeta = DetailStatusRowUseCase.resolveExpandedDialogMeta(sType);
+      return DetailDialogLifecycleUseCase.openDialog({
+        host: this,
+        prop: oMeta.prop,
+        fragment: oMeta.fragment,
+        view: this.getView(),
+        controller: this
       });
+    },
+
+    _openExpandedDialogByType: function (sType) {
+      return this._openExpandedDialog(sType);
     },
 
     onExpandChecks: function () {
-      this._openExpandedDialog("checks");
+      this._openExpandedDialogByType("checks");
     },
 
     onExpandBarriers: function () {
-      this._openExpandedDialog("barriers");
+      this._openExpandedDialogByType("barriers");
     },
 
     onCloseChecksExpanded: function () {
-      this._closeExpandedDialogById("checksExpandedDialog");
+      this._closeExpandedDialogById(DetailRowDialogCommandUseCase.resolveExpandedDialogId("checks"));
     },
 
     onCloseBarriersExpanded: function () {
-      this._closeExpandedDialogById("barriersExpandedDialog");
+      this._closeExpandedDialogById(DetailRowDialogCommandUseCase.resolveExpandedDialogId("barriers"));
+    },
+
+    _addRowByType: function (sType) {
+      this._mutateRows(DetailRowDialogCommandUseCase.resolveRowPath(sType), RowListHelper.addRow);
     },
 
     onAddCheckRow: function () {
-      this._mutateRows("/checks", RowListHelper.addRow);
+      this._addRowByType("checks");
     },
 
     onAddBarrierRow: function () {
-      this._mutateRows("/barriers", RowListHelper.addRow);
+      this._addRowByType("barriers");
+    },
+
+    _deleteRowByType: function (oEvent, sType) {
+      var oResult = this.deleteRowFromEvent(oEvent, "selected", DetailRowDialogCommandUseCase.resolveRowPath(sType));
+      if (!DetailRowDialogCommandUseCase.shouldProcessRowDeleteResult(oResult)) {
+        return;
+      }
+      DetailStatusCommandUseCase.handleDeleteRowResult(oResult, DetailStatusRowUseCase.shouldSyncAfterDeleteResult, this._syncSelectionMeta.bind(this));
     },
 
     onDeleteCheckRow: function (oEvent) {
-      var oResult = this.deleteRowFromEvent(oEvent, "selected", "/checks");
-      if (!oResult.deleted) {
-        return;
-      }
-      this._syncSelectionMeta();
+      this._deleteRowByType(oEvent, "checks");
     },
 
     onDeleteBarrierRow: function (oEvent) {
-      var oResult = this.deleteRowFromEvent(oEvent, "selected", "/barriers");
-      if (!oResult.deleted) {
-        return;
-      }
-      this._syncSelectionMeta();
+      this._deleteRowByType(oEvent, "barriers");
     },
 
     onExit: function () {
-      ["checksExpandedDialog", "barriersExpandedDialog"].forEach((sId) => {
-        var oDialog = this.byId(sId);
-        if (oDialog) {
-          oDialog.destroy();
-        }
+      DetailDialogLifecycleUseCase.destroyDialogsByIds({
+        byId: this.byId.bind(this),
+        ids: ["checksExpandedDialog", "barriersExpandedDialog"],
+        host: this,
+        props: ["_pChecksDialog", "_pBarriersDialog"]
       });
-      this._pChecksDialog = null;
-      this._pBarriersDialog = null;
     },
 
     resultText: function (bResult) {

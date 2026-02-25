@@ -1,0 +1,47 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="workflowAnalyticsDialog" class="glassDialog" title="{i18n>workflowAnalyticsTitle}" contentWidth="48rem" contentHeight="30rem" draggable="true" resizable="true" busy="{view>/analyticsBusy}">
+        <content>
+            <VBox class="sapUiMediumMargin" renderType="Bare">
+                <MessageStrip text="{i18n>workflowAnalyticsBackendNote}" type="Information" showIcon="true" class="sapUiTinyMarginBottom"/>
+                <MessageStrip text="{view>/analyticsError}" type="Warning" showIcon="true" class="sapUiTinyMarginBottom" visible="{= !!${view>/analyticsError} }"/>
+                <HBox class="kpiGrid" renderType="Bare" wrap="Wrap">
+                    <VBox class="kpiCard">
+                        <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
+                        <Title text="{view>/analytics/total}" level="H3"/>
+                    </VBox>
+                    <VBox class="kpiCard">
+                        <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
+                        <Title text="{view>/analytics/failedChecks}" level="H3"/>
+                    </VBox>
+                    <VBox class="kpiCard">
+                        <Text text="{i18n>kpiFailedBarriers}" class="kpiLabel"/>
+                        <Title text="{view>/analytics/failedBarriers}" level="H3"/>
+                    </VBox>
+                </HBox>
+                <HBox class="kpiGrid sapUiSmallMarginTop" renderType="Bare" wrap="Wrap">
+                    <VBox class="kpiCard">
+                        <Text text="{i18n>analyticsClosedCount}" class="kpiLabel"/>
+                        <Title text="{view>/analytics/closedCount}" level="H4"/>
+                    </VBox>
+                    <VBox class="kpiCard">
+                        <Text text="{i18n>analyticsRegisteredCount}" class="kpiLabel"/>
+                        <Title text="{view>/analytics/registeredCount}" level="H4"/>
+                    </VBox>
+                    <VBox class="kpiCard">
+                        <Text text="{i18n>analyticsSource}" class="kpiLabel"/>
+                        <Title text="{= ${view>/analytics/source} === 'backend' ? ${i18n>analyticsSourceBackend} : ${i18n>analyticsSourceFallback} }" level="H5"/>
+                    </VBox>
+                </HBox>
+                <VBox class="analyticsBarsWrap sapUiSmallMarginTop">
+                    <Text text="{i18n>workflowAnalyticsBars}" class="kpiLabel sapUiTinyMarginBottom"/>
+                    <ProgressIndicator percentValue="{view>/analytics/avgChecksRate}" displayValue="{= ${i18n>analyticsAvgChecksRate} + ': ' + ${view>/analytics/avgChecksRate} + '%' }" state="Success" class="sapUiTinyMarginBottom"/>
+                    <ProgressIndicator percentValue="{view>/analytics/avgBarriersRate}" displayValue="{= ${i18n>analyticsAvgBarriersRate} + ': ' + ${view>/analytics/avgBarriersRate} + '%' }" state="Warning" class="sapUiTinyMarginBottom"/>
+                    <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analytics/refreshedAt} || '-') }" class="kpiLabel"/>
+                </VBox>
+            </VBox>
+        </content>
+        <endButton>
+            <Button text="{i18n>closeButton}" press=".onCloseWorkflowAnalytics"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

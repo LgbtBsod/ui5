@@ -154,6 +154,48 @@ sap.ui.define([
                 .then(function (oData) { return (oData && oData.locations) || []; });
         },
 
+
+        getProcessAnalytics: function () {
+            var aRows = InMemoryDB.getCheckLists() || [];
+            var iTotal = aRows.length;
+            var iFailedChecks = 0;
+            var iFailedBarriers = 0;
+            var iClosed = 0;
+            var iRegistered = 0;
+            var nChecks = 0;
+            var nBarriers = 0;
+
+            aRows.forEach(function (oItem) {
+                var oRoot = (oItem && oItem.root) || {};
+                if (oRoot.has_failed_checks === true || oRoot.hasFailedChecks === true) {
+                    iFailedChecks += 1;
+                }
+                if (oRoot.has_failed_barriers === true || oRoot.hasFailedBarriers === true) {
+                    iFailedBarriers += 1;
+                }
+                if (String(oRoot.status || "").toUpperCase() === "CLOSED") {
+                    iClosed += 1;
+                }
+                if (String(oRoot.status || "").toUpperCase() === "REGISTERED") {
+                    iRegistered += 1;
+                }
+                nChecks += Number(oRoot.successRateChecks) || 0;
+                nBarriers += Number(oRoot.successRateBarriers) || 0;
+            });
+
+            return Promise.resolve({
+                total: iTotal,
+                failedChecks: iFailedChecks,
+                failedBarriers: iFailedBarriers,
+                healthy: Math.max(0, iTotal - Math.max(iFailedChecks, iFailedBarriers)),
+                closedCount: iClosed,
+                registeredCount: iRegistered,
+                avgChecksRate: iTotal ? Math.round(nChecks / iTotal) : 0,
+                avgBarriersRate: iTotal ? Math.round(nBarriers / iTotal) : 0,
+                refreshedAt: new Date().toISOString()
+            });
+        },
+
         exportReport: function (sEntity, mPayload) {
             var mFilters = (mPayload && mPayload.filters) || {};
             var sSearchMode = (mPayload && mPayload.searchMode) || "EXACT";

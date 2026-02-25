@@ -516,6 +516,18 @@ createCheckList: function (oData) {
             });
         },
 
+        getProcessAnalytics: function (mPayload, sSearchMode) {
+            return _request("/analytics/process", {
+                params: {
+                    id: (mPayload && mPayload.filterId) || "",
+                    lpc: (mPayload && mPayload.filterLpc) || "",
+                    failed_checks: (mPayload && mPayload.filterFailedChecks) || "ALL",
+                    failed_barriers: (mPayload && mPayload.filterFailedBarriers) || "ALL",
+                    search_mode: sSearchMode || "EXACT"
+                }
+            });
+        },
+
         exportReport: function (sEntity, mPayload) {
             return _request("/actions/export", {
                 method: "POST",

@@ -46,4 +46,5 @@
 ## Статус на текущем бранче
 - **Задача 2 (унификация `/isLoading`)**: выполнена — в `controller/Search.controller.js` используется единый state-path `/isLoading` в async-потоках.
 - **Задача 3 (док по delete в fake backend)**: выполнена в связанных документах/аудитах; пункт можно считать закрытым.
-- **Задачи 1 и 4**: остаются актуальными.
+- **Задача 4 (unit-тесты SmartSearchAdapter filterData)**: выполнена — добавлены smoke-unit сценарии для EXACT/LOOSE и fallback-логики failed-статусов.
+- **Задача 1 (переименование `css/a_style.css`)**: выполнена — legacy-стили перенесены в `css/style.css`, файл `a_style.css` удален, точка подключения остается единой (`css/style.css`).

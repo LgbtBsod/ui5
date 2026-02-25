@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <Dialog id="checksExpandedDialog" title="{i18n>checksExpandedTitle}" contentWidth="72rem" contentHeight="36rem" draggable="true" resizable="true" stretchOnPhone="true">
+    <Dialog class="glassDialog" id="checksExpandedDialog" title="{i18n>checksExpandedTitle}" contentWidth="72rem" contentHeight="36rem" draggable="true" resizable="true" stretchOnPhone="true">
         <content>
             <VBox class="expandedDialogContent" renderType="Bare">
                 <Table items="{selected>/checks}" class="flatEditorTable" growing="true" growingThreshold="20">
@@ -7,6 +7,7 @@
                         <Column width="3rem"><Text text=""/></Column>
                         <Column><Text text="{i18n>checkLabel}"/></Column>
                         <Column><Text text="{i18n>statusLabel}"/></Column>
+                        <Column><Text text="{i18n>commentLabel}"/></Column>
                         <Column width="2.5rem" visible="{= ${state>/mode} === 'EDIT' }"><Text text=""/></Column>
                     </columns>
                     <items>
@@ -15,6 +16,7 @@
                                 <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' }"/>
                                 <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' }"/>
                                 <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' }"/>
+                                <Input value="{selected>comment}" editable="{= ${state>/mode} === 'EDIT' }" placeholder="{i18n>commentPlaceholder}"/>
                                 <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteCheckRow" visible="{= ${state>/mode} === 'EDIT' }"/>
                             </cells>
                         </ColumnListItem>
