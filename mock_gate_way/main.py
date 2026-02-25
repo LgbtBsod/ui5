@@ -15,6 +15,7 @@ from api.hierarchy_api import router as hierarchy_router
 from api.location_api import router as location_router
 from api.lock_api import router as lock_router
 from api.metadata_api import router as metadata_router
+from api.odata_compat_api import router as odata_compat_router
 from api.person_api import router as person_router
 from config import CORS_ALLOWED_ORIGINS, LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
@@ -96,6 +97,7 @@ app.include_router(person_router)
 app.include_router(hierarchy_router)
 app.include_router(actions_router)
 app.include_router(metadata_router)
+app.include_router(odata_compat_router)
 
 
 @app.get("/")

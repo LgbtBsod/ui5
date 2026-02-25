@@ -20,11 +20,20 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchExportOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchToolbarActionStateUseCase",
     "sap_ui5/service/usecase/SearchNavigationIntentUseCase",
+    "sap_ui5/service/usecase/SearchDeleteOrchestrationUseCase",
+    "sap_ui5/service/usecase/SearchActionMessagePresentationUseCase",
+    "sap_ui5/service/usecase/SearchSelectionHydrationUseCase",
+    "sap_ui5/service/usecase/SearchOpenDetailGuardUseCase",
+    "sap_ui5/service/usecase/SearchCreateCopyNavigationGuardUseCase",
+    "sap_ui5/service/usecase/SearchExportIntentGuardUseCase",
+    "sap_ui5/service/usecase/SearchRetryMessagePresentationUseCase",
+    "sap_ui5/service/usecase/SearchSummaryPresentationUseCase",
+    "sap_ui5/service/usecase/SearchEmptyStatePresentationUseCase",
     "sap_ui5/util/ExcelExport",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
     "sap_ui5/util/SearchSmartControlCoordinator"
-], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchToolbarActionStateUseCase, SearchNavigationIntentUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
+], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchToolbarActionStateUseCase, SearchNavigationIntentUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchSelectionHydrationUseCase, SearchOpenDetailGuardUseCase, SearchCreateCopyNavigationGuardUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -66,7 +75,9 @@ sap.ui.define([
                     source: "fallback"
                 },
                 analyticsBusy: false,
-                analyticsError: ""
+                analyticsError: "",
+                noDataText: "",
+                emptyStateKind: "default_empty"
             });
 
             this._iSearchDebounceMs = 180;
@@ -137,6 +148,7 @@ sap.ui.define([
                 onSelectionChange: this._onSmartTableSelectionChange.bind(this),
                 onItemPress: this._onSmartTableItemPress.bind(this)
             });
+            this._applyEmptyStatePresentation();
         },
 
         _extractChecklistIdFromObject: function (oObject) {
@@ -144,37 +156,39 @@ sap.ui.define([
         },
 
         _loadSelectedChecklistById: function (sId) {
-            if (!sId) {
-                return Promise.resolve(null);
-            }
-
-            return SearchApplicationService.getChecklistById(sId).catch(function () {
-                return { root: { id: sId } };
-            }).then(function (oChecklist) {
-                return SearchSelectionNavigationUseCase.applySelectedChecklist({
-                    checklist: oChecklist,
-                    selectedModel: this.getModel("selected"),
-                    viewModel: this._getViewModel()
-                });
-            }.bind(this));
+            return SearchSelectionHydrationUseCase.runSelectionHydration({
+                id: sId,
+                selectedModel: this.getModel("selected"),
+                viewModel: this._getViewModel(),
+                loadChecklistById: SearchApplicationService.getChecklistById
+            }).then(function (oResult) {
+                return (oResult && oResult.checklist) || null;
+            });
         },
 
-        _openDetailById: async function (sId) {
-            if (!sId) {
-                MessageToast.show(this.getResourceBundle().getText("checklistIdMissing"));
-                return;
-            }
-
-            var bCanNavigate = await this._confirmNavigationFromDirty();
-            if (!bCanNavigate) {
-                return;
-            }
-
-            SearchNavigationIntentUseCase.applyIntent({
-                intent: SearchNavigationIntentUseCase.buildOpenDetailIntent({ id: sId }),
-                stateModel: this.getModel("state"),
-                navTo: this.navTo.bind(this)
-            });
+        _openDetailById: function (sId) {
+            return SearchOpenDetailGuardUseCase.runOpenDetailFlow({
+                id: sId,
+                confirmNavigation: this._confirmNavigationFromDirty.bind(this),
+                buildIntent: function (sIntentId) {
+                    return SearchNavigationIntentUseCase.buildOpenDetailIntent({ id: sIntentId });
+                },
+                applyIntent: function (mIntent) {
+                    return SearchNavigationIntentUseCase.applyIntent({
+                        intent: mIntent,
+                        stateModel: this.getModel("state"),
+                        navTo: this.navTo.bind(this)
+                    });
+                }.bind(this)
+            }).then(function (oResult) {
+                if (oResult && oResult.reason === "missing_id") {
+                    SearchActionMessagePresentationUseCase.presentMissingChecklistId({
+                        bundle: this.getResourceBundle(),
+                        showToast: MessageToast.show
+                    });
+                }
+                return oResult;
+            }.bind(this));
         },
 
         _onSmartTableSelectionChange: function (oEvent) {
@@ -221,7 +235,8 @@ sap.ui.define([
                     filterLpc: this.getModel("state").getProperty("/filterLpc"),
                     filterFailedChecks: this.getModel("state").getProperty("/filterFailedChecks"),
                     filterFailedBarriers: this.getModel("state").getProperty("/filterFailedBarriers"),
-                    searchMaxResults: this.getModel("state").getProperty("/searchMaxResults")
+                    searchMaxResults: this.getModel("state").getProperty("/searchMaxResults"),
+                    searchMode: this.getModel("state").getProperty("/searchMode") || "EXACT"
                 },
                 onDataReceived: function (oDataEvent) {
                     this._updateSmartTableAnalytics(oDataEvent && oDataEvent.getParameter("data"));
@@ -246,25 +261,19 @@ sap.ui.define([
             this._syncSmartControlAvailability();
             this._syncSearchSelectionState();
             this._updateResultSummary();
+            this._applyEmptyStatePresentation();
         },
 
         _applySearchMetrics: function (aRows, iTotalOverride) {
-            var oViewModel = this._getViewModel();
             var oMetrics = SearchWorkflowOrchestrator.buildMetrics(aRows, iTotalOverride);
-            var oKpi = oMetrics.kpi;
-
-            oViewModel.setProperty("/kpiVisible", oKpi.visible);
-            oViewModel.setProperty("/kpiTotal", oKpi.total);
-            oViewModel.setProperty("/kpiFailedChecks", oKpi.failedChecks);
-            oViewModel.setProperty("/kpiFailedBarriers", oKpi.failedBarriers);
-            oViewModel.setProperty("/kpiHealthy", oKpi.healthy);
-            oViewModel.setProperty("/workflowStage", oKpi.workflowStage);
-            oViewModel.setProperty("/lastUpdatedAt", new Date().toLocaleTimeString());
-            oViewModel.setProperty("/resultSummary", this._buildResultSummaryText(oMetrics.visible, oMetrics.total));
-        },
-
-        _buildResultSummaryText: function (iVisible, iTotal) {
-            return this.getResourceBundle().getText("resultSummary", [iVisible, iTotal]);
+            return SearchSummaryPresentationUseCase.applySummaryPresentation({
+                viewModel: this._getViewModel(),
+                bundle: this.getResourceBundle(),
+                kpi: oMetrics.kpi,
+                visible: oMetrics.visible,
+                total: oMetrics.total,
+                lastUpdatedAt: new Date().toLocaleTimeString()
+            });
         },
 
         _updateSmartTableAnalytics: function (oRawData) {
@@ -337,6 +346,17 @@ sap.ui.define([
             var iTotal = (oDataModel.getProperty("/checkLists") || []).length;
 
             this._applySearchMetrics(aRows, iTotal);
+            this._applyEmptyStatePresentation();
+        },
+
+        _applyEmptyStatePresentation: function () {
+            return SearchEmptyStatePresentationUseCase.applyEmptyStatePresentation({
+                viewModel: this._getViewModel(),
+                dataModel: this.getModel("data"),
+                bundle: this.getResourceBundle(),
+                table: this._oSmartInnerTable || this.byId("searchSmartTable") || this.byId("searchFallbackTable"),
+                unknownFallbackKey: "noDataDefault"
+            });
         },
 
         _executeSearch: function () {
@@ -392,65 +412,79 @@ sap.ui.define([
         },
 
         onCreate: function () {
-            this._confirmNavigationFromDirty().then(function (bCanNavigate) {
-                if (!bCanNavigate) {
-                    return;
-                }
-                SearchNavigationIntentUseCase.applyIntent({
-                    intent: SearchNavigationIntentUseCase.buildCreateIntent(),
-                    stateModel: this.getModel("state"),
-                    navTo: this.navTo.bind(this)
-                });
-            }.bind(this));
+            return SearchCreateCopyNavigationGuardUseCase.runCreateNavigationFlow({
+                confirmNavigation: this._confirmNavigationFromDirty.bind(this),
+                buildCreateIntent: SearchNavigationIntentUseCase.buildCreateIntent,
+                applyIntent: function (mIntent) {
+                    return SearchNavigationIntentUseCase.applyIntent({
+                        intent: mIntent,
+                        stateModel: this.getModel("state"),
+                        navTo: this.navTo.bind(this)
+                    });
+                }.bind(this)
+            });
         },
 
         onCopy: function () {
-            var sId = SearchNavigationIntentUseCase.resolveSelectedId({
-                selectedModel: this.getModel("selected")
-            });
-
-            if (!sId) {
-                MessageToast.show(this.getResourceBundle().getText("nothingToCopy"));
-                return;
-            }
-
-            this._confirmNavigationFromDirty().then(function (bCanNavigate) {
-                if (!bCanNavigate) {
-                    return;
+            return SearchCreateCopyNavigationGuardUseCase.runCopyNavigationFlow({
+                resolveSelectedId: function () {
+                    return SearchNavigationIntentUseCase.resolveSelectedId({
+                        selectedModel: this.getModel("selected")
+                    });
+                }.bind(this),
+                confirmNavigation: this._confirmNavigationFromDirty.bind(this),
+                buildCopyIntent: function (sSelectedId) {
+                    return SearchNavigationIntentUseCase.buildCopyIntent({ selectedId: sSelectedId });
+                },
+                applyIntent: function (mIntent) {
+                    return SearchNavigationIntentUseCase.applyIntent({
+                        intent: mIntent,
+                        stateModel: this.getModel("state"),
+                        navTo: this.navTo.bind(this)
+                    });
+                }.bind(this)
+            }).then(function (oResult) {
+                if (oResult && oResult.reason === "missing_selection") {
+                    SearchActionMessagePresentationUseCase.presentCopyMissingSelection({
+                        bundle: this.getResourceBundle(),
+                        showToast: MessageToast.show
+                    });
                 }
-                SearchNavigationIntentUseCase.applyIntent({
-                    intent: SearchNavigationIntentUseCase.buildCopyIntent({ selectedId: sId }),
-                    stateModel: this.getModel("state"),
-                    navTo: this.navTo.bind(this)
-                });
+                return oResult;
             }.bind(this));
         },
 
         onDelete: function () {
-            var sId = SearchNavigationIntentUseCase.resolveSelectedId({
-                selectedModel: this.getModel("selected")
-            });
             var oBundle = this.getResourceBundle();
-
-            if (!sId) {
-                MessageToast.show(oBundle.getText("nothingToDelete"));
-                return;
-            }
-
-            this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
-                return SearchApplicationService.deleteChecklistAndReload(sId).then(function (aUpdated) {
+            return SearchDeleteOrchestrationUseCase.runDeleteFlow({
+                resolveSelectedId: function () {
+                    return SearchNavigationIntentUseCase.resolveSelectedId({
+                        selectedModel: this.getModel("selected")
+                    });
+                }.bind(this),
+                runWithLoading: function (fnTask) {
+                    return this.runWithStateFlag(this.getModel("state"), "/isLoading", fnTask);
+                }.bind(this),
+                deleteAndReload: SearchApplicationService.deleteChecklistAndReload,
+                applyRows: function (aUpdated) {
                     this.getModel("data").setProperty("/checkLists", aUpdated);
-                    this._rebindSmartTable();
+                }.bind(this),
+                rebind: this._rebindSmartTable.bind(this),
+                applySelectedChecklist: function (oChecklist) {
                     SearchSelectionNavigationUseCase.applySelectedChecklist({
-                        checklist: {},
+                        checklist: oChecklist,
                         selectedModel: this.getModel("selected"),
                         viewModel: this._getViewModel()
                     });
-                    MessageToast.show(oBundle.getText("deleted"));
-                }.bind(this)).catch(function (oError) {
-                    MessageToast.show(oBundle.getText("deleteFailed", [((oError && oError.message) || "Unknown error")]));
+                }.bind(this),
+                reloadSelectionState: this._syncSearchSelectionState.bind(this)
+            }).then(function (oResult) {
+                SearchActionMessagePresentationUseCase.presentDeleteFlowResult({
+                    bundle: oBundle,
+                    showToast: MessageToast.show,
+                    result: oResult
                 });
-            }.bind(this));
+            });
         },
 
         onSmartSearch: function () {
@@ -543,28 +577,45 @@ sap.ui.define([
         },
 
         onExportMenuDefault: function () {
-            this._runExport("screen");
+            return SearchExportIntentGuardUseCase.runExportIntent({
+                defaultEntity: "screen",
+                allowedEntities: ["screen", "barrier", "check"],
+                isEnabled: function () {
+                    return !!this._getViewModel().getProperty("/canExport");
+                }.bind(this),
+                runExport: this._runExport.bind(this)
+            });
         },
 
         onExportMenuAction: function (oEvent) {
-            var sEntity = SearchExportOrchestrationUseCase.resolveExportEntityFromAction({
+            return SearchExportIntentGuardUseCase.runExportIntent({
                 event: oEvent,
                 defaultEntity: "screen",
-                resolveEntityFromMenuEvent: SearchUiFlowUseCase.resolveExportEntityFromMenuEvent
+                allowedEntities: ["screen", "barrier", "check"],
+                resolveEntityFromMenuEvent: SearchUiFlowUseCase.resolveExportEntityFromMenuEvent,
+                isEnabled: function () {
+                    return !!this._getViewModel().getProperty("/canExport");
+                }.bind(this),
+                runExport: this._runExport.bind(this)
             });
-            this._runExport(sEntity);
         },
 
         onExportReport: function (oEvent) {
-            var sEntity = SearchExportOrchestrationUseCase.resolveExportEntityFromAction({
+            return SearchExportIntentGuardUseCase.runExportIntent({
                 source: oEvent.getSource(),
-                defaultEntity: "screen"
+                defaultEntity: "screen",
+                allowedEntities: ["screen", "barrier", "check"],
+                isEnabled: function () {
+                    return !!this._getViewModel().getProperty("/canExport");
+                }.bind(this),
+                runExport: this._runExport.bind(this)
             });
-            this._runExport(sEntity);
         },
 
         onRetryLoad: function () {
             var oStateModel = this.getModel("state");
+            var oBundle = this.getResourceBundle();
+
             return SearchRetryLoadPresentationUseCase.runRetryFlow({
                 stateModel: oStateModel,
                 dataModel: this.getModel("data"),
@@ -577,7 +628,17 @@ sap.ui.define([
                     this._updateResultSummary();
                 }.bind(this),
                 treatEmptyAsError: false,
-                maxAttempts: 1
+                maxAttempts: 2
+            }).then(function (oResult) {
+                SearchRetryMessagePresentationUseCase.presentRetryOutcome({
+                    result: oResult,
+                    bundle: oBundle,
+                    stateModel: oStateModel,
+                    showToast: MessageToast.show,
+                    unknownFallbackKey: "loadErrorMessage"
+                });
+                this._applyEmptyStatePresentation();
+                return oResult;
             });
         },
 
@@ -603,8 +664,7 @@ sap.ui.define([
         onSearchModeToggle: function (oEvent) {
             var bLoose = oEvent.getParameter("state");
             SearchLoadFilterUseCase.applySearchMode(this.getModel("state"), this._getViewModel(), bLoose);
-            this._rebindSmartTable();
-            this._syncSearchSelectionState();
+            this._updateFilterState();
         },
 
         onExit: function () {

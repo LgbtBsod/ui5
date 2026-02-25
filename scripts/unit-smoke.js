@@ -154,6 +154,26 @@ function testSearchSmartControlCoordinator() {
   });
 
   assert(bindingParams.filters.length >= 4, 'applyRebindParams should append expected filters');
+  const hasLpcGatewayLikeFilter = bindingParams.filters.some((f) => Array.isArray(f.filters)
+    && f.filters.some((inner) => inner.path === 'lpc')
+    && f.filters.some((inner) => inner.path === 'LPC_KEY'));
+  assert(hasLpcGatewayLikeFilter === true,
+    'applyRebindParams should compose LPC filter for both gateway-like and legacy field names');
+  const looseBinding = { filters: [], parameters: {}, events: {} };
+  mod.applyRebindParams({
+    bindingParams: looseBinding,
+    state: {
+      filterId: 'A',
+      filterLpc: 'L1',
+      filterFailedChecks: 'ALL',
+      filterFailedBarriers: 'ALL',
+      searchMaxResults: '10',
+      searchMode: 'LOOSE'
+    },
+    onDataReceived: () => {}
+  });
+  assert(looseBinding.filters.length === 1 && looseBinding.filters[0].and === false,
+    'applyRebindParams should compose a single OR filter group for LOOSE search mode');
   assert(bindingParams.parameters.top === 150, 'applyRebindParams should set top parameter');
   bindingParams.events.dataReceived({});
   assert(dataReceivedCalled === 1, 'applyRebindParams should chain dataReceived callback');
@@ -1458,6 +1478,513 @@ function testSearchNavigationIntentUseCase() {
     'applyIntent should fail gracefully when router adapter is missing');
 }
 
+
+
+
+
+
+
+function testSearchExportIntentGuardUseCase() {
+  const mod = loadSapModule('service/usecase/SearchExportIntentGuardUseCase.js');
+
+  assert(mod.normalizeEntity('check', 'screen', ['screen', 'check', 'barrier']) === 'check',
+    'normalizeEntity should keep allowed entity');
+  assert(mod.normalizeEntity('unknown', 'screen', ['screen', 'check', 'barrier']) === 'screen',
+    'normalizeEntity should fallback for unknown entity');
+
+  const menuIntent = mod.resolveEntityFromIntent({
+    event: { getParameter: () => ({ data: (k) => k === 'entity' ? 'barrier' : null }) },
+    defaultEntity: 'screen',
+    allowedEntities: ['screen', 'barrier', 'check'],
+    resolveEntityFromMenuEvent: (event, fallback) => {
+      const item = event.getParameter('item');
+      return item ? item.data('entity') : fallback;
+    }
+  });
+  assert(menuIntent.entity === 'barrier' && menuIntent.fallbackUsed === false,
+    'resolveEntityFromIntent should resolve menu-selected export entity');
+
+  const fallbackIntent = mod.resolveEntityFromIntent({
+    source: { data: () => 'unknown' },
+    defaultEntity: 'screen',
+    allowedEntities: ['screen', 'barrier', 'check']
+  });
+  assert(fallbackIntent.entity === 'screen' && fallbackIntent.fallbackUsed === true,
+    'resolveEntityFromIntent should fallback for unsupported source entity');
+
+  return mod.runExportIntent({
+    defaultEntity: 'screen',
+    runExport: null
+  }).then((missingRunner) => {
+    assert(missingRunner.ok === false && missingRunner.reason === 'missing_run_export',
+      'runExportIntent should guard missing export runner');
+
+    return mod.runExportIntent({
+      defaultEntity: 'screen',
+      isEnabled: () => false,
+      runExport: () => Promise.resolve()
+    }).then((disabled) => {
+      assert(disabled.ok === false && disabled.reason === 'disabled',
+        'runExportIntent should short-circuit when export is disabled');
+
+      let runCalls = 0;
+      return mod.runExportIntent({
+        source: { data: () => 'check' },
+        defaultEntity: 'screen',
+        allowedEntities: ['screen', 'barrier', 'check'],
+        isEnabled: () => true,
+        runExport: (entity) => {
+          runCalls += 1;
+          assert(entity === 'check', 'runExportIntent should pass resolved entity to runner');
+          return Promise.resolve();
+        }
+      }).then((applied) => {
+        assert(applied.ok === true && applied.reason === 'applied' && runCalls === 1,
+          'runExportIntent should apply export intent when adapters are valid');
+
+        return mod.runExportIntent({
+          defaultEntity: 'screen',
+          isEnabled: () => true,
+          runExport: () => Promise.reject(new Error('export-run-failed'))
+        }).then((runError) => {
+          assert(runError.ok === false && runError.reason === 'run_error',
+            'runExportIntent should report runner errors');
+        });
+      });
+    });
+  });
+}
+
+function testSearchCreateCopyNavigationGuardUseCase() {
+  const mod = loadSapModule('service/usecase/SearchCreateCopyNavigationGuardUseCase.js');
+
+  return mod.runCreateNavigationFlow({
+    confirmNavigation: () => Promise.resolve(true),
+    buildCreateIntent: () => ({ route: 'detail', routeParams: { id: '__create' } }),
+    applyIntent: null
+  }).then((missingNav) => {
+    assert(missingNav.ok === false && missingNav.reason === 'missing_nav_adapter',
+      'runCreateNavigationFlow should guard missing nav adapter');
+
+    return mod.runCreateNavigationFlow({
+      confirmNavigation: () => Promise.resolve(false),
+      buildCreateIntent: () => ({ route: 'detail', routeParams: { id: '__create' } }),
+      applyIntent: () => true
+    }).then((cancelled) => {
+      assert(cancelled.ok === false && cancelled.reason === 'cancelled',
+        'runCreateNavigationFlow should cancel on rejected unsaved decision');
+
+      return mod.runCopyNavigationFlow({
+        resolveSelectedId: () => '',
+        confirmNavigation: () => Promise.resolve(true),
+        buildCopyIntent: (id) => ({ route: 'detail', routeParams: { id } }),
+        applyIntent: () => true
+      }).then((missingSelection) => {
+        assert(missingSelection.ok === false && missingSelection.reason === 'missing_selection',
+          'runCopyNavigationFlow should guard missing selected id');
+
+        return mod.runCopyNavigationFlow({
+          resolveSelectedId: () => 'CHK-1',
+          confirmNavigation: () => Promise.resolve(true),
+          buildCopyIntent: () => null,
+          applyIntent: () => true
+        }).then((nullIntent) => {
+          assert(nullIntent.ok === false && nullIntent.reason === 'null_intent',
+            'runCopyNavigationFlow should guard null intent');
+
+          return mod.runCopyNavigationFlow({
+            resolveSelectedId: () => 'CHK-2',
+            confirmNavigation: () => Promise.resolve(true),
+            buildCopyIntent: (id) => ({ route: 'detail', routeParams: { id } }),
+            applyIntent: () => false
+          }).then((missingAdapter) => {
+            assert(missingAdapter.ok === false && missingAdapter.reason === 'missing_nav_adapter',
+              'runCopyNavigationFlow should guard missing nav adapter response');
+
+            return mod.runCopyNavigationFlow({
+              resolveSelectedId: () => 'CHK-3',
+              confirmNavigation: () => Promise.resolve(true),
+              buildCopyIntent: (id) => ({ route: 'detail', routeParams: { id } }),
+              applyIntent: () => true
+            }).then((applied) => {
+              assert(applied.ok === true && applied.reason === 'applied' && applied.selectedId === 'CHK-3',
+                'runCopyNavigationFlow should apply when all adapters are valid');
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+function testSearchOpenDetailGuardUseCase() {
+  const mod = loadSapModule('service/usecase/SearchOpenDetailGuardUseCase.js');
+
+  assert(mod.normalizeId('  A-1 ') === 'A-1', 'normalizeId should trim id values');
+
+  return mod.runOpenDetailFlow({ id: '' }).then((missingId) => {
+    assert(missingId.ok === false && missingId.reason === 'missing_id',
+      'runOpenDetailFlow should return missing_id when id is empty');
+
+    return mod.runOpenDetailFlow({
+      id: 'CHK-1',
+      confirmNavigation: () => Promise.resolve(false),
+      buildIntent: (id) => ({ route: 'detail', routeParams: { id } }),
+      applyIntent: () => true
+    }).then((cancelled) => {
+      assert(cancelled.ok === false && cancelled.reason === 'cancelled',
+        'runOpenDetailFlow should return cancelled when unsaved decision rejects navigation');
+
+      return mod.runOpenDetailFlow({
+        id: 'CHK-2',
+        confirmNavigation: () => Promise.resolve(true),
+        buildIntent: () => null,
+        applyIntent: () => true
+      }).then((nullIntent) => {
+        assert(nullIntent.ok === false && nullIntent.reason === 'null_intent',
+          'runOpenDetailFlow should guard null intent branch');
+
+        return mod.runOpenDetailFlow({
+          id: 'CHK-3',
+          confirmNavigation: () => Promise.resolve(true),
+          buildIntent: (id) => ({ route: 'detail', routeParams: { id } }),
+          applyIntent: () => false
+        }).then((missingRouter) => {
+          assert(missingRouter.ok === false && missingRouter.reason === 'missing_router_adapter',
+            'runOpenDetailFlow should report missing router adapter when applyIntent returns false');
+
+          return mod.runOpenDetailFlow({
+            id: 'CHK-4',
+            confirmNavigation: () => Promise.reject(new Error('confirm-failed')),
+            buildIntent: (id) => ({ route: 'detail', routeParams: { id } }),
+            applyIntent: () => true
+          }).then((confirmError) => {
+            assert(confirmError.ok === false && confirmError.reason === 'confirm_error',
+              'runOpenDetailFlow should handle rejected confirm promise');
+
+            return mod.runOpenDetailFlow({
+              id: 'CHK-5',
+              confirmNavigation: () => Promise.resolve(true),
+              buildIntent: (id) => ({ route: 'detail', routeParams: { id } }),
+              applyIntent: () => true
+            }).then((applied) => {
+              assert(applied.ok === true && applied.reason === 'applied' && applied.id === 'CHK-5',
+                'runOpenDetailFlow should apply intent when all adapters are valid');
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+function testSearchSelectionHydrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchSelectionHydrationUseCase.js');
+
+  const missingIdModel = { setData: () => { throw new Error('should-not-write'); } };
+  return mod.runSelectionHydration({ id: '', selectedModel: missingIdModel }).then((missingId) => {
+    assert(missingId.ok === false && missingId.reason === 'missing_id',
+      'runSelectionHydration should short-circuit when id is missing');
+
+    return mod.runSelectionHydration({ id: 'CHK-1', selectedModel: null }).then((missingModel) => {
+      assert(missingModel.ok === false && missingModel.reason === 'missing_selected_model',
+        'runSelectionHydration should guard missing selected model');
+
+      const selected = { data: null, setData(v){ this.data = v; } };
+      const view = { m: {}, setProperty(k,v){ this.m[k]=v; } };
+
+      return mod.runSelectionHydration({
+        id: 'CHK-2',
+        selectedModel: selected,
+        viewModel: view,
+        loadChecklistById: () => Promise.resolve({ root: { id: 'CHK-2' }, basic: { checklist_id: 'X' } })
+      }).then((okRes) => {
+        assert(okRes.ok === true && okRes.reason === 'loaded' && selected.data.root.id === 'CHK-2' && view.m['/hasSelection'] === true,
+          'runSelectionHydration should apply loaded checklist and mark selection');
+
+        return mod.runSelectionHydration({
+          id: 'CHK-3',
+          selectedModel: selected,
+          viewModel: view,
+          loadChecklistById: () => Promise.resolve({ invalid: true })
+        }).then((invalidShape) => {
+          assert(invalidShape.ok === true && invalidShape.checklist.root.id === 'CHK-3',
+            'runSelectionHydration should normalize invalid checklist shape to fallback object');
+
+          return mod.runSelectionHydration({
+            id: 'CHK-4',
+            selectedModel: selected,
+            viewModel: view,
+            loadChecklistById: () => Promise.reject(new Error('network-failed'))
+          }).then((failed) => {
+            assert(failed.ok === false && failed.reason === 'load_error' && failed.checklist.root.id === 'CHK-4',
+              'runSelectionHydration should fallback to id-only checklist when hydration promise rejects');
+          });
+        });
+      });
+    });
+  });
+}
+
+
+
+
+function testSearchEmptyStatePresentationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchEmptyStatePresentationUseCase.js');
+
+  assert(mod.resolveEmptyStateKind({ hasRows: true, loadError: false, useSmartControls: true }) === 'has_data',
+    'resolveEmptyStateKind should resolve has_data for non-empty dataset');
+  assert(mod.resolveEmptyStateKind({ hasRows: false, loadError: true, useSmartControls: true }) === 'load_error',
+    'resolveEmptyStateKind should prioritize load_error when load flag is set');
+  assert(mod.resolveEmptyStateKind({ hasRows: false, loadError: false, useSmartControls: false }) === 'smart_degraded_empty',
+    'resolveEmptyStateKind should map smart-controls degraded empty branch');
+
+  const bundle = { getText: (k) => ({ noDataDefault: 'No checklists found.', noDataLoadError: 'Unable to load data.' }[k]) };
+
+  const missingView = mod.applyEmptyStatePresentation({
+    viewModel: null,
+    dataModel: { getProperty: () => [] },
+    bundle
+  });
+  assert(missingView.ok === false && missingView.reason === 'missing_view_model',
+    'applyEmptyStatePresentation should guard missing view model');
+
+  const missingData = mod.applyEmptyStatePresentation({
+    viewModel: { setProperty: () => {}, getProperty: () => false },
+    dataModel: null,
+    bundle
+  });
+  assert(missingData.ok === false && missingData.reason === 'missing_data_model',
+    'applyEmptyStatePresentation should guard missing data model');
+
+  const view = { m: { '/useSmartControls': false, '/loadError': false }, setProperty(k,v){ this.m[k]=v; }, getProperty(k){ return this.m[k]; } };
+  const data = { getProperty: (k) => k === '/visibleCheckLists' ? [] : [] };
+  const table = { text: '', setNoDataText(t){ this.text=t; } };
+
+  const applied = mod.applyEmptyStatePresentation({
+    viewModel: view,
+    dataModel: data,
+    bundle,
+    table,
+    unknownFallbackKey: 'unknown_key'
+  });
+
+  assert(applied.ok === true && applied.kind === 'smart_degraded_empty' && view.m['/noDataText'] === 'No checklists found.' && table.text === 'No checklists found.',
+    'applyEmptyStatePresentation should apply no-data text for degraded empty branch');
+}
+
+function testSearchSummaryPresentationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchSummaryPresentationUseCase.js');
+
+  assert(mod.normalizeCount(7.9) === 7 && mod.normalizeCount(-1) === 0,
+    'normalizeCount should floor positives and clamp negatives');
+  assert(mod.normalizeStage('review') === 'REVIEW' && mod.normalizeStage('unexpected') === 'DISCOVER',
+    'normalizeStage should normalize allowed values and fallback unknown stage');
+
+  const bundle = {
+    getText: (key, params) => {
+      if (key === 'resultSummary') {
+        return `${(params || [])[0]} of ${(params || [])[1]}`;
+      }
+      throw new Error('missing-key');
+    }
+  };
+
+  const missingModel = mod.applySummaryPresentation({
+    viewModel: null,
+    bundle,
+    kpi: { visible: 1, total: 2 },
+    visible: 1,
+    total: 2
+  });
+  assert(missingModel.ok === false && missingModel.reason === 'missing_view_model',
+    'applySummaryPresentation should guard missing view model');
+
+  const view = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  const applied = mod.applySummaryPresentation({
+    viewModel: view,
+    bundle,
+    kpi: { visible: 'bad', total: null, failedChecks: -3, failedBarriers: 2, healthy: 1.8, workflowStage: 'unknown' },
+    visible: 'NaN-like',
+    total: 5
+  });
+
+  assert(applied.ok === true && view.m['/workflowStage'] === 'DISCOVER' && view.m['/kpiFailedChecks'] === 0,
+    'applySummaryPresentation should sanitize invalid counters and unknown stage');
+  assert(view.m['/resultSummary'] === '0 of 5',
+    'applySummaryPresentation should build result summary with sanitized counters');
+}
+
+function testSearchRetryMessagePresentationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchRetryMessagePresentationUseCase.js');
+
+  const bundle = {
+    getText: (key, params) => {
+      const m = {
+        retryLoadSuccess: `Data reloaded: ${(params || [])[0]} rows`,
+        retryLoadEmpty: 'No rows loaded.',
+        retryLoadUnavailable: 'Retry is unavailable.',
+        retryLoadEmptyError: 'No rows returned from backend.',
+        retryLoadFailed: `Retry failed: ${(params || [])[0] || ''}`,
+        retryLoadFailedAfterRetries: `Retry failed after ${(params || [])[0]} attempts: ${(params || [])[1] || ''}`,
+        loadErrorMessage: 'Fallback load error message'
+      };
+      if (!m[key]) {
+        throw new Error('missing-key');
+      }
+      return m[key];
+    }
+  };
+
+  const state = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  const toasts = [];
+
+  const success = mod.presentRetryOutcome({
+    result: { ok: true, rows: [{ id: 1 }, { id: 2 }] },
+    bundle,
+    stateModel: state,
+    showToast: (t) => toasts.push(t)
+  });
+  assert(success.ok === true && success.message === 'Data reloaded: 2 rows' && state.m['/loadError'] === false,
+    'presentRetryOutcome should show success toast and clear error banner');
+
+  const repeatedError = mod.presentRetryOutcome({
+    result: { ok: false, reason: 'error', attempts: 2, error: new Error('network') },
+    bundle,
+    stateModel: state,
+    showToast: (t) => toasts.push(t)
+  });
+  assert(repeatedError.ok === true && state.m['/loadError'] === true && state.m['/loadErrorMessage'] === 'network',
+    'presentRetryOutcome should set banner for repeated errors');
+
+  const missingToast = mod.presentRetryOutcome({
+    result: { ok: false, reason: 'missing_loader' },
+    bundle,
+    stateModel: state
+  });
+  assert(missingToast.ok === false && missingToast.reason === 'missing_toast_adapter' && state.m['/loadError'] === true,
+    'presentRetryOutcome should report missing toast adapter and still update banner state');
+
+  const unknownFallback = mod.presentRetryOutcome({
+    result: { ok: false, reason: 'unknown_reason' },
+    bundle,
+    stateModel: state,
+    showToast: (t) => toasts.push(t),
+    unknownFallbackKey: 'notExistingKey'
+  });
+  assert(unknownFallback.ok === true && unknownFallback.message === 'Unexpected retry result',
+    'presentRetryOutcome should fallback for unknown reason and missing bundle key');
+}
+
+function testSearchActionMessagePresentationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchActionMessagePresentationUseCase.js');
+
+  const bundle = {
+    getText: (key, params) => {
+      const m = {
+        checklistIdMissing: 'Checklist id not found',
+        nothingToCopy: 'Select a checklist to copy.',
+        deleted: 'Checklist deleted.',
+        nothingToDelete: 'Select a checklist to delete.',
+        deleteFailed: `Delete failed: ${(params || [])[0] || ''}`
+      };
+      if (!m[key]) {
+        throw new Error('missing-key');
+      }
+      return m[key];
+    }
+  };
+
+  const messages = [];
+  const showToast = (text) => { messages.push(text); };
+
+  assert(mod.presentMissingChecklistId({ bundle, showToast }) === true && messages[messages.length - 1] === 'Checklist id not found',
+    'presentMissingChecklistId should show checklist-id-missing message');
+
+  assert(mod.presentCopyMissingSelection({ bundle, showToast }) === true && messages[messages.length - 1] === 'Select a checklist to copy.',
+    'presentCopyMissingSelection should show copy-missing-selection message');
+
+  assert(mod.presentDeleteFlowResult({ bundle, showToast, result: { ok: true } }) === true && messages[messages.length - 1] === 'Checklist deleted.',
+    'presentDeleteFlowResult should show deleted message for success');
+
+  assert(mod.presentDeleteFlowResult({ bundle, showToast, result: { ok: false, reason: 'missing_id' } }) === true && messages[messages.length - 1] === 'Select a checklist to delete.',
+    'presentDeleteFlowResult should show nothing-to-delete message for missing id');
+
+  assert(mod.presentDeleteFlowResult({ bundle, showToast, result: { ok: false, reason: 'delete_error', error: new Error('boom') } }) === true
+    && messages[messages.length - 1] === 'Delete failed: boom',
+    'presentDeleteFlowResult should include backend error message in delete-failed toast');
+
+  const fallbackMessages = [];
+  assert(mod.presentToastMessage({
+    bundle: { getText: () => { throw new Error('bundle-broken'); } },
+    showToast: (text) => { fallbackMessages.push(text); },
+    messageKey: 'deleteFailed',
+    fallbackText: 'fallback-delete-message'
+  }) === true && fallbackMessages[0] === 'fallback-delete-message',
+    'presentToastMessage should fallback when bundle adapter fails');
+
+  assert(mod.presentToastMessage({
+    bundle,
+    showToast: () => { throw new Error('toast-adapter-failed'); },
+    messageKey: 'deleted',
+    fallbackText: 'fallback'
+  }) === false,
+    'presentToastMessage should return false when toast adapter throws');
+
+  assert(mod.presentToastMessage({
+    bundle: null,
+    showToast,
+    messageKey: 'unknown',
+    fallbackText: ''
+  }) === false,
+    'presentToastMessage should return false for unknown message without fallback text');
+}
+
+function testSearchDeleteOrchestrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchDeleteOrchestrationUseCase.js');
+
+  return mod.runDeleteFlow({
+    resolveSelectedId: () => ''
+  }).then((missingId) => {
+    assert(missingId.ok === false && missingId.reason === 'missing_id',
+      'runDeleteFlow should short-circuit when selected id is missing');
+
+    return mod.runDeleteFlow({
+      resolveSelectedId: () => 'CHK-1'
+    }).then((missingAdapter) => {
+      assert(missingAdapter.ok === false && missingAdapter.reason === 'missing_delete_adapter',
+        'runDeleteFlow should guard missing backend delete adapter');
+
+      const trace = { rebind: 0, reload: 0, clear: 0 };
+      let rowsApplied = null;
+
+      return mod.runDeleteFlow({
+        resolveSelectedId: () => 'CHK-2',
+        runWithLoading: (fn) => fn(),
+        deleteAndReload: (id) => Promise.resolve([{ root: { id: id } }]),
+        applyRows: (rows) => { rowsApplied = rows; },
+        rebind: () => { trace.rebind += 1; },
+        applySelectedChecklist: (checklist) => { if (!checklist || Object.keys(checklist).length === 0) { trace.clear += 1; } },
+        reloadSelectionState: () => { trace.reload += 1; }
+      }).then((okResult) => {
+        assert(okResult.ok === true && okResult.id === 'CHK-2' && (rowsApplied || []).length === 1,
+          'runDeleteFlow should run delete lifecycle and propagate updated rows');
+        assert(trace.rebind === 1 && trace.reload === 1 && trace.clear === 1,
+          'runDeleteFlow should rebind, clear selection and reload selection state');
+
+        return mod.runDeleteFlow({
+          resolveSelectedId: () => 'CHK-3',
+          runWithLoading: (fn) => fn(),
+          deleteAndReload: () => Promise.reject(new Error('delete-failed'))
+        }).then((errorResult) => {
+          assert(errorResult.ok === false && errorResult.reason === 'delete_error' && errorResult.error.message === 'delete-failed',
+            'runDeleteFlow should surface delete_error branch when backend delete rejects');
+        });
+      });
+    });
+  });
+}
+
 function testSearchToolbarActionStateUseCase() {
   const mod = loadSapModule('service/usecase/SearchToolbarActionStateUseCase.js', {
     'sap_ui5/service/usecase/SearchActionUseCase': loadSapModule('service/usecase/SearchActionUseCase.js')
@@ -2017,6 +2544,15 @@ async function main() {
   await runTest('SearchRetryLoadPresentationUseCase', testSearchRetryLoadPresentationUseCase);
   await runTest('SearchToolbarActionStateUseCase', testSearchToolbarActionStateUseCase);
   await runTest('SearchNavigationIntentUseCase', testSearchNavigationIntentUseCase);
+  await runTest('SearchDeleteOrchestrationUseCase', testSearchDeleteOrchestrationUseCase);
+  await runTest('SearchActionMessagePresentationUseCase', testSearchActionMessagePresentationUseCase);
+  await runTest('SearchRetryMessagePresentationUseCase', testSearchRetryMessagePresentationUseCase);
+  await runTest('SearchSummaryPresentationUseCase', testSearchSummaryPresentationUseCase);
+  await runTest('SearchEmptyStatePresentationUseCase', testSearchEmptyStatePresentationUseCase);
+  await runTest('SearchSelectionHydrationUseCase', testSearchSelectionHydrationUseCase);
+  await runTest('SearchOpenDetailGuardUseCase', testSearchOpenDetailGuardUseCase);
+  await runTest('SearchCreateCopyNavigationGuardUseCase', testSearchCreateCopyNavigationGuardUseCase);
+  await runTest('SearchExportIntentGuardUseCase', testSearchExportIntentGuardUseCase);
   await runTest('SearchSmartFilterFlowUseCase', testSearchSmartFilterFlowUseCase);
   await runTest('SearchWorkflowAnalyticsDialogUseCase', testSearchWorkflowAnalyticsDialogUseCase);
   await runTest('SearchExportOrchestrationUseCase', testSearchExportOrchestrationUseCase);

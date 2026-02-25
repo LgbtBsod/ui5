@@ -141,8 +141,8 @@ sap.ui.define([], function () {
         getCheckLists: function () {
             return _request("/checklist", {
                 params: {
-                    top: 200,
-                    skip: 0
+                    "$top": 200,
+                    "$skip": 0
                 }
             }).then(function (oList) {
                 var aRoots = oList && oList.value ? oList.value : [];
@@ -175,9 +175,9 @@ sap.ui.define([], function () {
 
             return _request("/checklist", {
                 params: {
-                    top: iTop,
-                    skip: 0,
-                    filter: aFilterParts.length ? aFilterParts.join(" and ") : undefined
+                    "$top": iTop,
+                    "$skip": 0,
+                    "$filter": aFilterParts.length ? aFilterParts.join(" and ") : undefined
                 }
             }).then(function (oList) {
                 var aRoots = oList && oList.value ? oList.value : [];
@@ -189,7 +189,7 @@ sap.ui.define([], function () {
 
 
         getChecklistRoot: function (sId) {
-            return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: false } }).then(function (oRoot) {
+            return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } }).then(function (oRoot) {
                 return {
                     root: {
                         id: oRoot.id,
@@ -230,7 +230,7 @@ sap.ui.define([], function () {
         getChecklistChecks: function (sId, mPaging) {
             var iTop = Number((mPaging && mPaging.top) || 20);
             var iSkip = Number((mPaging && mPaging.skip) || 0);
-            return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { top: iTop, skip: iSkip } }).then(function (oData) {
+            return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oData) {
                 return ((oData && oData.value) || []).map(function (oCheck, iIndex) {
                     return {
                         id: oCheck.id || (iIndex + 1),
@@ -245,7 +245,7 @@ sap.ui.define([], function () {
         getChecklistBarriers: function (sId, mPaging) {
             var iTop = Number((mPaging && mPaging.top) || 20);
             var iSkip = Number((mPaging && mPaging.skip) || 0);
-            return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { top: iTop, skip: iSkip } }).then(function (oData) {
+            return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oData) {
                 return ((oData && oData.value) || []).map(function (oBarrier, iIndex) {
                     return {
                         id: oBarrier.id || (iIndex + 1),
@@ -343,7 +343,7 @@ createCheckList: function (oData) {
                     }).catch(function () { return null; });
                 })
                 .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: false } });
+                    return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } });
                 })
                 .then(function (oDetails) {
                     return _mapChecklist({
@@ -380,7 +380,7 @@ createCheckList: function (oData) {
                     });
                 })
                 .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: false } });
+                    return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } });
                 })
                 .then(function (oRoot) {
                     return _mapChecklist(oRoot || { id: sId }, {

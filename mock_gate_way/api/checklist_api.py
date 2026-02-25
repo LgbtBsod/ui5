@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, Query
 from sqlalchemy.orm import Session
 
 from config import DEFAULT_PAGE_SIZE
@@ -20,7 +20,7 @@ def create(checklist_id: str, lpc: str, user_id: str, db: Session = Depends(get_
 
 
 @router.get("/{root_id}")
-def get(root_id: str, request: Request, response: Response, expand: bool = False, db: Session = Depends(get_db)):
+def get(root_id: str, request: Request, response: Response, expand: bool = Query(False, alias="$expand"), db: Session = Depends(get_db)):
     data = ChecklistService.get(db, root_id, expand=expand)
     if not data:
         raise HTTPException(status_code=404, detail="NOT_FOUND")
@@ -38,12 +38,22 @@ def get(root_id: str, request: Request, response: Response, expand: bool = False
 
 
 @router.get("/{root_id}/checks")
-def get_checks(root_id: str, top: int = DEFAULT_PAGE_SIZE, skip: int = 0, db: Session = Depends(get_db)):
+def get_checks(
+    root_id: str,
+    top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"),
+    skip: int = Query(0, alias="$skip"),
+    db: Session = Depends(get_db)
+):
     return ChecklistService.list_checks(db, root_id, top=top, skip=skip)
 
 
 @router.get("/{root_id}/barriers")
-def get_barriers(root_id: str, top: int = DEFAULT_PAGE_SIZE, skip: int = 0, db: Session = Depends(get_db)):
+def get_barriers(
+    root_id: str,
+    top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"),
+    skip: int = Query(0, alias="$skip"),
+    db: Session = Depends(get_db)
+):
     return ChecklistService.list_barriers(db, root_id, top=top, skip=skip)
 @router.patch("/{root_id}")
 def update_with_etag(
@@ -115,7 +125,13 @@ def delete(root_id: str, user_id: str, db: Session = Depends(get_db)):
 
 
 @router.get("")
-def list_checklists(filter: str = None, expand: str = None, top: int = DEFAULT_PAGE_SIZE, skip: int = 0, db: Session = Depends(get_db)):
+def list_checklists(
+    filter: str | None = Query(default=None, alias="$filter"),
+    expand: str | None = Query(default=None, alias="$expand"),
+    top: int = Query(default=DEFAULT_PAGE_SIZE, alias="$top"),
+    skip: int = Query(default=0, alias="$skip"),
+    db: Session = Depends(get_db)
+):
     query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.is_(False))
 
     expression = FilterParser.parse(ChecklistRoot, filter)

@@ -57,7 +57,7 @@
                         </Select>
                         <ToolbarSpacer/>
                         <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" enabled="{view>/canRetryLoad}" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" enabled="{view>/canRetryLoad}" class="brandActionBtn brandActionGhost searchRetryLoadActionBtn sapUiTinyMarginEnd"/>
                         <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
                     </Toolbar>
                 </VBox>
@@ -80,12 +80,19 @@
                     showIcon="true"
                     class="sapUiTinyMarginBottom searchLoadStateBanner"/>
 
-                <VBox class="glassCard smartTableGlass">
-                    <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar searchActionToolbarDensity sapUiTinyMarginBottom">
-                        <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/canDelete}" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
-                        <MenuButton text="{i18n>exportMenuButton}" buttonMode="Split" defaultAction=".onExportMenuDefault" enabled="{view>/canExport}" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd" icon="sap-icon://excel-attachment">
+                <MessageStrip
+                    text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
+                    type="Error"
+                    visible="{state>/loadError}"
+                    showIcon="true"
+                    class="sapUiTinyMarginBottom searchLoadStateBanner searchLoadErrorBanner"/>
+
+                <VBox class="glassCard smartTableGlass searchResultsTable">
+                    <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar searchActionToolbarDensity searchFeedbackToolbar sapUiTinyMarginBottom">
+                        <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" visible="{view>/hasSelection}" class="brandActionBtn brandActionGhost searchCopyActionBtn sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/canDelete}" visible="{view>/hasSelection}" class="brandActionBtn searchDeleteActionBtn sapUiTinyMarginEnd"/>
+                        <MenuButton text="{i18n>exportMenuButton}" buttonMode="Split" defaultAction=".onExportMenuDefault" enabled="{view>/canExport}" class="brandActionBtn brandActionGhost searchExportActionBtn sapUiTinyMarginEnd" icon="sap-icon://excel-attachment">
                             <menu>
                                 <Menu itemSelected=".onExportMenuAction">
                                     <items>
@@ -107,8 +114,10 @@
                             <Input value="{state>/searchMaxResults}" type="Number" placeholder="{i18n>maxRowsAllPlaceholder}" width="8rem" change=".onMaxRowsChange" class="maxRowsInput"/>
                         </HBox>
                         <ToolbarSpacer/>
-                        <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/lastUpdatedAt} || '-') }" class="sapUiTinyMarginEnd"/>
-                        <Label text="{i18n>searchModeLabel}" class="sapUiTinyMarginEnd"/>
+                        <ObjectStatus text="{view>/resultSummary}" state="Information" class="searchSummaryStatusChip sapUiTinyMarginEnd"/>
+                        <ObjectStatus text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }" state="Success" class="searchStageStatusChip sapUiTinyMarginEnd"/>
+                        <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/lastUpdatedAt} || '-') }" class="searchUpdatedAtText sapUiTinyMarginEnd"/>
+                        <Label text="{i18n>searchModeLabel}" class="searchModeLabel sapUiTinyMarginEnd"/>
                         <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff="" class="accentSwitch"/>
                     </Toolbar>
 
@@ -124,14 +133,14 @@
                         demandPopin="true"
                         header="{i18n>resultsLabel}"
                         persistencyKey="pcctSmartTable"
-                        enableAutoBinding="true"
+                        enableAutoBinding="false"
                         visible="{view>/useSmartControls}"
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
                         initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
                         growing="true" growingThreshold="100" useExportToExcel="true" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
 
-                    <Table visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" class="glassTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
+                    <Table id="searchFallbackTable" visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>
                             <Column><Text text="{i18n>columnId}"/></Column>
                             <Column><Text text="{i18n>columnStatus}"/></Column>
