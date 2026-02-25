@@ -10,6 +10,21 @@ sap.ui.define([
     return m ? Number(m[1]) : 0;
   }
 
+  function _extractBackendDetail(oError) {
+    var sMessage = String((oError && oError.message) || "");
+    var iJsonStart = sMessage.indexOf("{");
+    if (iJsonStart < 0) {
+      return null;
+    }
+
+    try {
+      var oParsed = JSON.parse(sMessage.slice(iJsonStart));
+      return oParsed && oParsed.detail ? oParsed.detail : oParsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function _showConflict(oHostController) {
     var oBundle = oHostController.getResourceBundle();
     return new Promise(function (resolve) {
@@ -23,6 +38,28 @@ sap.ui.define([
   }
 
   return {
+    extractBackendDetail: _extractBackendDetail,
+
+    confirmStealOwnLock: function (oHostController) {
+      var oBundle = oHostController.getResourceBundle();
+      return new Promise(function (resolve) {
+        MessageBox.warning(oBundle.getText("lockStealOwnSessionPrompt"), {
+          actions: [oBundle.getText("yesButton"), oBundle.getText("noButton")],
+          emphasizedAction: oBundle.getText("yesButton"),
+          onClose: function (sAction) {
+            resolve(sAction === oBundle.getText("yesButton"));
+          }
+        });
+      });
+    },
+
+    showLockKilledNotice: function (oHostController) {
+      var oBundle = oHostController.getResourceBundle();
+      MessageBox.warning(oBundle.getText("lockKilledMessage"), {
+        actions: [oBundle.getText("okButton")]
+      });
+    },
+
     releaseWithTrySave: function (oHostController, mPayload) {
       var oState = oHostController.getModel("state");
       return BackendAdapter.lockRelease(

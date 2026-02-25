@@ -120,7 +120,9 @@
                            showSuggestion="true"
                            suggest=".onPersonSuggest"
                            suggestionItemSelected=".onPersonSuggestionSelected">
-                        <core:CustomData key="target" value="observer" writeToDom="false"/>
+                        <customData>
+                            <core:CustomData key="target" value="observer" writeToDom="false"/>
+                        </customData>
                         <suggestionItems path="view>/observerSuggestions">
                             <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
                         </suggestionItems>
@@ -132,7 +134,9 @@
                            showSuggestion="true"
                            suggest=".onPersonSuggest"
                            suggestionItemSelected=".onPersonSuggestionSelected">
-                        <core:CustomData key="target" value="observed" writeToDom="false"/>
+                        <customData>
+                            <core:CustomData key="target" value="observed" writeToDom="false"/>
+                        </customData>
                         <suggestionItems path="view>/observedSuggestions">
                             <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
                         </suggestionItems>
