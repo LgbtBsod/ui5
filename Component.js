@@ -14,7 +14,8 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageBox",
     "sap_ui5/util/FlowCoordinator",
-    "sap_ui5/util/DeltaPayloadBuilder"
+    "sap_ui5/util/DeltaPayloadBuilder",
+    "sap/ui/model/odata/v2/ODataModel"
 ], function (
     UIComponent,
     ModelFactory,
@@ -31,7 +32,8 @@ sap.ui.define([
     JSONModel,
     MessageBox,
     FlowCoordinator,
-    DeltaPayloadBuilder
+    DeltaPayloadBuilder,
+    ODataModel
 ) {
     "use strict";
 
@@ -51,6 +53,11 @@ sap.ui.define([
 
             var oDataModel = ModelFactory.createDataModel();
             var oStateModel = ModelFactory.createStateModel();
+            var oMainServiceModel = new ODataModel({
+                serviceUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000/",
+                useBatch: false,
+                defaultCountMode: "Inline"
+            });
             var oLayoutModel = ModelFactory.createLayoutModel();
             var oCacheModel = ModelFactory.createCacheModel();
             var oMasterDataModel = ModelFactory.createMasterDataModel();
@@ -209,6 +216,7 @@ sap.ui.define([
             this.setModel(new JSONModel({}), "selected");
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
+            this.setModel(oMainServiceModel, "mainService");
             this.setModel(oLayoutModel, "layout");
             this.setModel(oCacheModel, "cache");
             this.setModel(oMasterDataModel, "masterData");
@@ -266,7 +274,7 @@ sap.ui.define([
                     getModel: this.getModel.bind(this),
                     getResourceBundle: function () { return this.getModel("i18n").getResourceBundle(); }.bind(this)
                 }, function () { return Promise.resolve(false); }).then(function (sDecision) {
-                    if (sDecision === "DISCARD" || sDecision === "NO_CHANGES") {
+                    if (sDecision === "DISCARD" || sDecision === "SAVE" || sDecision === "NO_CHANGES") {
                         oStateModel.setProperty("/navGuardBypass", true);
                         var sName = oEvent.getParameter("name");
                         var oArgs = oEvent.getParameter("arguments") || {};
@@ -301,6 +309,9 @@ sap.ui.define([
                 oStateModel.setProperty("/sessionId", oLogin.sessionId);
                 if (oFrontendConfig.search && oFrontendConfig.search.defaultMaxResults) {
                     oStateModel.setProperty("/searchMaxResults", String(oFrontendConfig.search.defaultMaxResults));
+                }
+                if (Array.isArray(oFrontendConfig.requiredFields)) {
+                    oStateModel.setProperty("/requiredFields", oFrontendConfig.requiredFields);
                 }
 
                 return this._oSmartCache.getWithFallback("checkLists").then(function (aCached) {

@@ -1,11 +1,9 @@
 sap.ui.define([], function () {
     "use strict";
 
-    function toLow(v) {
-        return String(v || "").toLowerCase();
-    }
+    var toLow = (v) => String(v || "").toLowerCase();
 
-    function evaluateRateMatch(sFilterKey, nRate, vHasFailed) {
+    var evaluateRateMatch = (sFilterKey, nRate, vHasFailed) => {
         var bFailed = typeof vHasFailed === "boolean" ? vHasFailed : (Number.isFinite(nRate) && nRate < 100);
         if (sFilterKey === "ALL") {
             return true;
@@ -13,7 +11,7 @@ sap.ui.define([], function () {
 
         return (sFilterKey === "TRUE" && bFailed)
             || (sFilterKey === "FALSE" && !bFailed);
-    }
+    };
 
     return {
         getSmartFilterConfig: function () {
@@ -40,7 +38,7 @@ sap.ui.define([], function () {
             var sChecks = mFilters.filterFailedChecks || "ALL";
             var sBarriers = mFilters.filterFailedBarriers || "ALL";
 
-            return (aData || []).filter(function (oItem) {
+            return (aData || []).filter((oItem) => {
                 var sId = toLow((((oItem || {}).root || {}).id));
                 var sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
                 var oRoot = ((oItem || {}).root || {});
@@ -60,9 +58,9 @@ sap.ui.define([], function () {
                         { enabled: !!sFilterLpc, value: bLpcMatch },
                         { enabled: sChecks !== "ALL", value: bChecksMatch },
                         { enabled: sBarriers !== "ALL", value: bBarriersMatch }
-                    ].filter(function (oRule) { return oRule.enabled; });
+                    ].filter((oRule) => oRule.enabled);
 
-                    return !aRules.length || aRules.some(function (oRule) { return oRule.value; });
+                    return !aRules.length || aRules.some((oRule) => oRule.value);
                 }
 
                 return bIdMatch && bLpcMatch && bChecksMatch && bBarriersMatch;

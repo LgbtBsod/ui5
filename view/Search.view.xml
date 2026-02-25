@@ -2,7 +2,9 @@
     controllerName="sap_ui5.controller.Search"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:smartTable="sap.ui.comp.smarttable">
 
     <Page
         showHeader="false"
@@ -12,128 +14,80 @@
         <content>
             <VBox class="appContent sapUiSmallMargin">
 
-                <VBox class="glassCard filterCard sapUiSmallMarginBottom">
+                <VBox class="glassCard filterCard smartFilterGlass sapUiSmallMarginBottom">
                     <Toolbar class="toolbarTransparent">
                         <Title text="{i18n>filtersTitle}"/>
                     </Toolbar>
-                    <HBox class="sapUiTinyMarginTop" visible="{state>/loadError}" wrap="Wrap" alignItems="Center" renderType="Bare">
-                        <MessageStrip
-                            visible="{state>/loadError}"
-                            type="Error"
-                            showIcon="true"
-                            text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
-                            class="sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>retryButton}" type="Transparent" press=".onRetryLoad"/>
-                    </HBox>
 
-                    <HBox class="sapUiSmallMarginTop filterWrap" alignItems="Center" wrap="Wrap" renderType="Bare">
-                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
-                            <Label text="{i18n>filterChecklistIdLabel}" labelFor="filterIdInput"/>
-                            <Input
-                                id="filterIdInput"
-                                placeholder="{i18n>checklistIdPlaceholder}"
-                                value="{state>/filterId}"
-                                width="14rem"/>
-                        </VBox>
+                    <smartFilterBar:SmartFilterBar
+                        id="searchSmartFilterBar"
+                        entitySet="CheckListSet"
+                        persistencyKey="pcctSmartFilter"
+                        useToolbar="true"
+                        search=".onSmartSearch"
+                        filterChange=".onSmartFilterChanged">
 
-                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
-                            <Label text="{i18n>filterLpcLabel}" labelFor="filterLpcSelect"/>
-                            <Select
-                                id="filterLpcSelect"
-                                width="14rem"
-                                selectedKey="{state>/filterLpc}">
-                            <items>
-                                <core:Item key="" text="{i18n>allLpc}"/>
-                                <core:Item key="L1" text="{i18n>lpcLow}"/>
-                                <core:Item key="L2" text="{i18n>lpcMedium}"/>
-                                <core:Item key="L3" text="{i18n>lpcHigh}"/>
-                            </items>
-                            </Select>
-                        </VBox>
+                        <smartFilterBar:controlConfiguration>
+                            <smartFilterBar:ControlConfiguration key="maxResults" label="{i18n>searchMaxResultsLabel}" visibleInAdvancedArea="true">
+                                <smartFilterBar:customControl>
+                                    <Input value="{state>/searchMaxResults}" width="10rem" type="Number"/>
+                                </smartFilterBar:customControl>
+                            </smartFilterBar:ControlConfiguration>
 
-                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
-                            <Label text="{i18n>searchMaxResultsLabel}" labelFor="searchMaxResultsInput"/>
-                            <Input
-                                id="searchMaxResultsInput"
-                                value="{state>/searchMaxResults}"
-                                type="Number"
-                                placeholder="100"
-                                description="1..9999"
-                                width="11rem"/>
-                        </VBox>
+                            <smartFilterBar:ControlConfiguration key="has_failed_checks" label="{i18n>filterChecksLabel}" visibleInAdvancedArea="true">
+                                <smartFilterBar:customControl>
+                                    <HBox class="statusToggleWrapper" renderType="Bare">
+                                        <Button text="{i18n>allChecks}" press=".onStatusFilterPress" class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedChecks} === 'ALL' ? 'activeStatus' : '' }">
+                                            <customData>
+                                                <core:CustomData key="filterPath" value="/filterFailedChecks"/>
+                                                <core:CustomData key="filterValue" value="ALL"/>
+                                            </customData>
+                                        </Button>
+                                        <Button text="{i18n>hasFailed}" press=".onStatusFilterPress" class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedChecks} === 'TRUE' ? 'activeStatus' : '' }">
+                                            <customData>
+                                                <core:CustomData key="filterPath" value="/filterFailedChecks"/>
+                                                <core:CustomData key="filterValue" value="TRUE"/>
+                                            </customData>
+                                        </Button>
+                                        <Button text="{i18n>allPassed}" press=".onStatusFilterPress" class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedChecks} === 'FALSE' ? 'activeStatus' : '' }">
+                                            <customData>
+                                                <core:CustomData key="filterPath" value="/filterFailedChecks"/>
+                                                <core:CustomData key="filterValue" value="FALSE"/>
+                                            </customData>
+                                        </Button>
+                                    </HBox>
+                                </smartFilterBar:customControl>
+                            </smartFilterBar:ControlConfiguration>
 
-                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
-                            <Label text="{i18n>filterChecksLabel}" labelFor="failedChecksSegment"/>
-                            <HBox class="statusToggleWrapper" renderType="Bare" id="failedChecksSegment">
-                                <Button
-                                    text="{i18n>allChecks}"
-                                    press=".onStatusFilterPress"
-                                    class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedChecks} === 'ALL' ? 'activeStatus' : '' }">
-                                    <customData>
-                                        <core:CustomData key="filterPath" value="/filterFailedChecks"/>
-                                        <core:CustomData key="filterValue" value="ALL"/>
-                                    </customData>
-                                </Button>
-                                <Button
-                                    text="{i18n>hasFailed}"
-                                    press=".onStatusFilterPress"
-                                    class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedChecks} === 'TRUE' ? 'activeStatus' : '' }">
-                                    <customData>
-                                        <core:CustomData key="filterPath" value="/filterFailedChecks"/>
-                                        <core:CustomData key="filterValue" value="TRUE"/>
-                                    </customData>
-                                </Button>
-                                <Button
-                                    text="{i18n>allPassed}"
-                                    press=".onStatusFilterPress"
-                                    class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedChecks} === 'FALSE' ? 'activeStatus' : '' }">
-                                    <customData>
-                                        <core:CustomData key="filterPath" value="/filterFailedChecks"/>
-                                        <core:CustomData key="filterValue" value="FALSE"/>
-                                    </customData>
-                                </Button>
-                            </HBox>
-                        </VBox>
-
-                        <VBox class="sapUiTinyMarginEnd sapUiTinyMarginBottom" renderType="Bare">
-                            <Label text="{i18n>filterBarriersLabel}" labelFor="failedBarriersSegment"/>
-                            <HBox class="statusToggleWrapper" renderType="Bare" id="failedBarriersSegment">
-                                <Button
-                                    text="{i18n>allBarriers}"
-                                    press=".onStatusFilterPress"
-                                    class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedBarriers} === 'ALL' ? 'activeStatus' : '' }">
-                                    <customData>
-                                        <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
-                                        <core:CustomData key="filterValue" value="ALL"/>
-                                    </customData>
-                                </Button>
-                                <Button
-                                    text="{i18n>hasFailed}"
-                                    press=".onStatusFilterPress"
-                                    class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedBarriers} === 'TRUE' ? 'activeStatus' : '' }">
-                                    <customData>
-                                        <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
-                                        <core:CustomData key="filterValue" value="TRUE"/>
-                                    </customData>
-                                </Button>
-                                <Button
-                                    text="{i18n>allPassed}"
-                                    press=".onStatusFilterPress"
-                                    class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedBarriers} === 'FALSE' ? 'activeStatus' : '' }">
-                                    <customData>
-                                        <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
-                                        <core:CustomData key="filterValue" value="FALSE"/>
-                                    </customData>
-                                </Button>
-                            </HBox>
-                        </VBox>
-
-                        <Button text="{i18n>searchButton}" type="Emphasized" press=".onSearch" class="sapUiTinyMarginEnd sapUiTinyMarginBottom accentButton"/>
-                        <Button text="{i18n>resetButton}" visible="{view>/hasActiveFilters}" press=".onResetFilters" class="sapUiTinyMarginBottom"/>
-                    </HBox>
+                            <smartFilterBar:ControlConfiguration key="has_failed_barriers" label="{i18n>filterBarriersLabel}" visibleInAdvancedArea="true">
+                                <smartFilterBar:customControl>
+                                    <HBox class="statusToggleWrapper" renderType="Bare">
+                                        <Button text="{i18n>allBarriers}" press=".onStatusFilterPress" class="customStatusBtn btnAll btnSegStart {= ${state>/filterFailedBarriers} === 'ALL' ? 'activeStatus' : '' }">
+                                            <customData>
+                                                <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
+                                                <core:CustomData key="filterValue" value="ALL"/>
+                                            </customData>
+                                        </Button>
+                                        <Button text="{i18n>hasFailed}" press=".onStatusFilterPress" class="customStatusBtn btnFailed btnSegMiddle {= ${state>/filterFailedBarriers} === 'TRUE' ? 'activeStatus' : '' }">
+                                            <customData>
+                                                <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
+                                                <core:CustomData key="filterValue" value="TRUE"/>
+                                            </customData>
+                                        </Button>
+                                        <Button text="{i18n>allPassed}" press=".onStatusFilterPress" class="customStatusBtn btnPassed btnSegEnd {= ${state>/filterFailedBarriers} === 'FALSE' ? 'activeStatus' : '' }">
+                                            <customData>
+                                                <core:CustomData key="filterPath" value="/filterFailedBarriers"/>
+                                                <core:CustomData key="filterValue" value="FALSE"/>
+                                            </customData>
+                                        </Button>
+                                    </HBox>
+                                </smartFilterBar:customControl>
+                            </smartFilterBar:ControlConfiguration>
+                        </smartFilterBar:controlConfiguration>
+                    </smartFilterBar:SmartFilterBar>
                 </VBox>
 
-                <VBox class="glassCard">
+                <VBox class="glassCard smartTableGlass">
                     <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar sapUiTinyMarginBottom">
                         <Button text="{i18n>createButton}" press=".onCreate" class="sapUiTinyMarginEnd"/>
                         <Button text="{i18n>copyButton}" press=".onCopy" class="sapUiTinyMarginEnd"/>
@@ -149,68 +103,24 @@
                         </Button>
                         <ToolbarSpacer/>
                         <Label text="{i18n>searchModeLabel}" class="sapUiTinyMarginEnd"/>
-                        <Text text="{i18n>searchModeExact}" class="sapUiTinyMarginEnd modeHintText" visible="{= ${state>/searchMode} !== 'LOOSE' }"/>
-                        <Text text="{i18n>searchModeLoose}" class="sapUiTinyMarginEnd modeHintText" visible="{= ${state>/searchMode} === 'LOOSE' }"/>
                         <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff="" class="accentSwitch"/>
                     </Toolbar>
 
-
-                    <HBox class="uxStatRow" wrap="Wrap" renderType="Bare">
-                        <HBox class="uxStatChip" renderType="Bare">
-                            <Text text="{i18n>searchModeLabel}" class="sapUiTinyMarginEnd"/>
-                            <Text text="{= ${state>/searchMode} === 'LOOSE' ? ${i18n>searchModeLoose} : ${i18n>searchModeExact} }"/>
-                        </HBox>
-                        <HBox class="uxStatChip" renderType="Bare">
-                            <Text text="{i18n>resultsLabel}" class="sapUiTinyMarginEnd"/>
-                            <Text text="{view>/resultSummary}"/>
-                        </HBox>
-                        <HBox class="uxStatChip" renderType="Bare" visible="{view>/hasActiveFilters}">
-                            <Text text="{i18n>activeFilters}"/>
-                        </HBox>
-                    </HBox>
-                    <Toolbar class="toolbarTransparent sapUiTinyMarginBottom resultToolbar">
-                        <Title level="H5" text="{i18n>resultsLabel}"/>
-                        <ToolbarSpacer/>
-                    </Toolbar>
-                    <HBox class="uxStatRow sapUiTinyMarginBottom" renderType="Bare">
-                        <ObjectStatus text="{view>/resultSummary}" state="Information"/>
-                    </HBox>
-
-                    <Table
-                        id="checkTable"
-                        fixedLayout="false"
-                        growing="true"
-                        growingScrollToLoad="false"
-                        growingThreshold="10"
-                        class="glassTable roundedTable searchResultTable"
-                        busy="{state>/isLoading}"
-                        noDataText="{= ${state>/loadError} ? ${i18n>noDataLoadError} : ${i18n>noDataDefault} }"
-                        items="{ path: 'data>/visibleCheckLists' }"
-                        mode="SingleSelectMaster"
-                        itemPress=".onSelect">
-
-                        <columns>
-                            <Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>columnId}"/></Column>
-                            <Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>columnStatus}"/></Column>
-                            <Column width="10rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>columnChecks}"/></Column>
-                            <Column width="10rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>columnBarriers}"/></Column>
-                            <Column width="14rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>columnObserver}"/></Column>
-                        </columns>
-
-                        <items>
-                            <ColumnListItem type="Navigation" class="searchResultRow">
-                                <cells>
-                                    <Text text="{data>root/id}" class="searchIdCellText" tooltip="{data>root/id}"/>
-                                    <ObjectStatus
-                                        text="{data>root/status}"
-                                        state="{ path: 'data>root/status', formatter: '.formatStatus' }"/>
-                                    <ProgressIndicator percentValue="{data>root/successRateChecks}" displayValue="{= ${data>root/successRateChecks} + '%' }" state="Information"/>
-                                    <ProgressIndicator percentValue="{data>root/successRateBarriers}" displayValue="{= ${data>root/successRateBarriers} + '%' }" state="Information"/>
-                                    <Text text="{data>basic/OBSERVER_FULLNAME}" class="searchObserverCellText" tooltip="{data>basic/OBSERVER_FULLNAME}"/>
-                                </cells>
-                            </ColumnListItem>
-                        </items>
-                    </Table>
+                    <smartTable:SmartTable
+                        id="searchSmartTable"
+                        entitySet="CheckListSet"
+                        smartFilterId="searchSmartFilterBar"
+                        tableType="ResponsiveTable"
+                        useVariantManagement="true"
+                        useTablePersonalisation="true"
+                        showRowCount="true"
+                        header="{i18n>resultsLabel}"
+                        persistencyKey="pcctSmartTable"
+                        enableAutoBinding="true"
+                        beforeRebindTable=".onBeforeSmartTableRebind"
+                        initialise=".onSmartTableInitialise"
+                        initiallyVisibleFields="id,status,LPC_TEXT,PROF_TEXT,date,time,OBSERVER_FULLNAME,OBSERVED_FULLNAME"
+                        requestAtLeastFields="id,status,LPC_KEY,has_failed_checks,has_failed_barriers"/>
                 </VBox>
 
             </VBox>

@@ -85,7 +85,6 @@ sap.ui.define([
             return _backendService.updateCheckList(sId, oData, mOptions || {});
         },
 
-
         autoSaveCheckList: function (sId, oDeltaPayload, oFullPayload, mOptions) {
             if (_backendService.autoSaveCheckList) {
                 return _backendService.autoSaveCheckList(sId, oDeltaPayload || {}, oFullPayload || {}, mOptions || {});

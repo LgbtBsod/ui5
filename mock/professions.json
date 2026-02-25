@@ -1,7 +1,16 @@
 {
   "professions": [
-    { "key": "PR1", "text": "Operator" },
-    { "key": "PR2", "text": "Technician" },
-    { "key": "PR3", "text": "Supervisor" }
+    { "key": "prof000", "text": "Profession 000" },
+    { "key": "prof001", "text": "Profession 001" },
+    { "key": "prof002", "text": "Profession 002" },
+    { "key": "prof003", "text": "Profession 003" },
+    { "key": "prof004", "text": "Profession 004" },
+    { "key": "prof005", "text": "Profession 005" },
+    { "key": "prof006", "text": "Profession 006" },
+    { "key": "prof007", "text": "Profession 007" },
+    { "key": "prof008", "text": "Profession 008" },
+    { "key": "prof009", "text": "Profession 009" },
+    { "key": "prof010", "text": "Profession 010" },
+    { "key": "prof011", "text": "Profession 011" }
   ]
 }

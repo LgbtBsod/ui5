@@ -75,19 +75,6 @@ sap.ui.define([
             return Promise.resolve(InMemoryDB.updateCheckList(sId, oData));
         },
 
-        autoSaveCheckList: function (sId, oDeltaPayload, oFullPayload) {
-            // Fake backend persists full snapshot; delta is accepted for interface compatibility.
-            return Promise.resolve(InMemoryDB.updateCheckList(sId, oFullPayload || {}));
-        },
-
-        deleteCheckList: function (sId) {
-            return Promise.resolve(InMemoryDB.deleteCheckList(sId));
-        },
-
-        upsertRows: function (sId, sSection, aRows) {
-            return Promise.resolve(InMemoryDB.upsertRows(sId, sSection, aRows));
-        },
-
         lockAcquire: function () {
             return Promise.resolve({ success: true, action: "ACQUIRED", lock_expires: new Date(Date.now() + 5 * 60 * 1000).toISOString() });
         },
@@ -115,7 +102,17 @@ sap.ui.define([
         getFrontendConfig: function () {
             return Promise.resolve({
                 search: { defaultMaxResults: 100, growingThreshold: 10 },
-                timers: { heartbeatMs: 240000, lockStatusMs: 60000, cacheValidMs: 30000 }
+                timers: { heartbeatMs: 240000, lockStatusMs: 60000, cacheValidMs: 30000 },
+                requiredFields: [
+                    "/basic/date",
+                    "/basic/time",
+                    "/basic/timezone",
+                    "/basic/OBSERVER_FULLNAME",
+                    "/basic/OBSERVED_FULLNAME",
+                    "/basic/LOCATION_KEY",
+                    "/basic/LPC_KEY",
+                    "/basic/PROF_KEY"
+                ]
             });
         },
 

@@ -6,8 +6,10 @@ sap.ui.define([
     "sap_ui5/service/backend/BackendAdapter",
     "sap_ui5/service/SmartSearchAdapter",
     "sap_ui5/util/ExcelExport",
-    "sap_ui5/util/FlowCoordinator"
-], function (BaseController, JSONModel, MessageToast, MessageBox, BackendAdapter, SmartSearchAdapter, ExcelExport, FlowCoordinator) {
+    "sap_ui5/util/FlowCoordinator",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], function (BaseController, JSONModel, MessageToast, MessageBox, BackendAdapter, SmartSearchAdapter, ExcelExport, FlowCoordinator, Filter, FilterOperator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -21,7 +23,9 @@ sap.ui.define([
                 hasSearched: false,
                 resultSummary: "",
                 smartFilterReady: true,
-                smartTableReady: true
+                smartTableReady: true,
+                useSmartControls: true,
+                smartControlError: ""
             });
 
             this._iSearchDebounceMs = 180;
@@ -29,6 +33,7 @@ sap.ui.define([
 
             this.applyStoredTheme();
             this.setModel(oViewModel, "view");
+            this.getView().setModel(this.getOwnerComponent().getModel("mainService"));
 
             oLayoutModel.setProperty("/smartFilter/fields", SmartSearchAdapter.getSmartFilterConfig().fields);
             oLayoutModel.setProperty("/smartTable/columns", SmartSearchAdapter.getSmartTableConfig().columns);
@@ -38,8 +43,166 @@ sap.ui.define([
             }.bind(this));
 
             this.attachRouteMatched("search", this._onSearchMatched);
+            this._bootstrapSmartControls();
             this._updateFilterState();
             this._updateResultSummary();
+        },
+
+
+
+        _isSmartControlsEnabled: function () {
+            return !!this.getView().getModel("view").getProperty("/useSmartControls");
+        },
+
+        _setSmartControlsEnabled: function (bEnabled, sError) {
+            var oViewModel = this.getView().getModel("view");
+            oViewModel.setProperty("/useSmartControls", !!bEnabled);
+            oViewModel.setProperty("/smartControlError", sError || "");
+        },
+
+        _bootstrapSmartControls: async function () {
+            var oSmartTable = this.byId("searchSmartTable");
+            if (!oSmartTable) {
+                this._setSmartControlsEnabled(false, "SmartTable control not found");
+                return;
+            }
+
+            try {
+                if (oSmartTable.isInitialised && oSmartTable.isInitialised()) {
+                    this._onSmartTableReady();
+                    return;
+                }
+
+                await new Promise((resolve) => {
+                    oSmartTable.attachInitialise(resolve);
+                });
+                this._onSmartTableReady();
+            } catch (oError) {
+                this._setSmartControlsEnabled(false, (oError && oError.message) || "Smart controls init failed");
+            }
+        },
+
+        _onSmartTableReady: function () {
+            var oSmartTable = this.byId("searchSmartTable");
+            if (!oSmartTable || !oSmartTable.getTable) {
+                this._setSmartControlsEnabled(false, "SmartTable inner table unavailable");
+                return;
+            }
+
+            this._oSmartInnerTable = oSmartTable.getTable();
+            if (!this._oSmartInnerTable) {
+                this._setSmartControlsEnabled(false, "SmartTable inner table missing");
+                return;
+            }
+
+            if (this._oSmartInnerTable.attachItemPress) {
+                this._oSmartInnerTable.attachItemPress(this._onSmartTableSelectionChange, this);
+            }
+            if (this._oSmartInnerTable.attachSelectionChange) {
+                this._oSmartInnerTable.attachSelectionChange(this._onSmartTableSelectionChange, this);
+            }
+        },
+
+        _extractChecklistIdFromObject: function (oObject) {
+            if (!oObject) {
+                return "";
+            }
+            return String(
+                oObject.id
+                || oObject.ID
+                || oObject.ChecklistId
+                || oObject.CHECKLIST_ID
+                || (((oObject.root || {}).id) || "")
+            ).trim();
+        },
+
+        _selectChecklistById: async function (sId) {
+            if (!sId) {
+                MessageToast.show(this.getResourceBundle().getText("checklistIdMissing"));
+                return;
+            }
+
+            var bCanNavigate = await this._confirmNavigationFromDirty();
+            if (!bCanNavigate) {
+                return;
+            }
+
+            var oChecklist = await BackendAdapter.getChecklistRoot(sId).catch(function () { return null; });
+            if (!oChecklist || !oChecklist.root) {
+                oChecklist = { root: { id: sId } };
+            }
+
+            this.getModel("selected").setData(oChecklist);
+            this.getView().getModel("view").setProperty("/hasSelection", true);
+            this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
+            this.navTo("detail", { id: sId });
+        },
+
+        _onSmartTableSelectionChange: function (oEvent) {
+            var oListItem = oEvent.getParameter("listItem") || oEvent.getParameter("item");
+            var oCtx = oListItem ? oListItem.getBindingContext() : null;
+            var oObj = oCtx ? oCtx.getObject() : null;
+            var sId = this._extractChecklistIdFromObject(oObj);
+            this._selectChecklistById(sId);
+        },
+
+        onSmartTableInitialise: function () {
+            this._onSmartTableReady();
+        },
+
+        onSmartFilterChanged: function () {
+            this._updateFilterState();
+        },
+
+        onBeforeSmartTableRebind: function (oEvent) {
+            if (!this._isSmartControlsEnabled()) {
+                return;
+            }
+
+            var oState = this.getModel("state");
+            var oBindingParams = oEvent.getParameter("bindingParams") || {};
+            var aFilters = oBindingParams.filters || [];
+
+            var sFilterId = String(oState.getProperty("/filterId") || "").trim();
+            var sFilterLpc = oState.getProperty("/filterLpc") || "";
+
+            if (sFilterId) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("id", FilterOperator.Contains, sFilterId),
+                        new Filter("checklist_id", FilterOperator.Contains, sFilterId)
+                    ],
+                    and: false
+                }));
+            }
+            if (sFilterLpc) {
+                aFilters.push(new Filter("LPC_KEY", FilterOperator.EQ, sFilterLpc));
+            }
+
+            var sChecks = oState.getProperty("/filterFailedChecks") || "ALL";
+            var sBarriers = oState.getProperty("/filterFailedBarriers") || "ALL";
+            if (sChecks !== "ALL") {
+                aFilters.push(new Filter("has_failed_checks", FilterOperator.EQ, sChecks === "TRUE"));
+            }
+            if (sBarriers !== "ALL") {
+                aFilters.push(new Filter("has_failed_barriers", FilterOperator.EQ, sBarriers === "TRUE"));
+            }
+
+            var sMax = String(oState.getProperty("/searchMaxResults") || "").trim();
+            var iMax = sMax ? Math.max(1, Math.min(9999, Number(sMax) || 0)) : 0;
+            oBindingParams.parameters = oBindingParams.parameters || {};
+            if (iMax > 0) {
+                oBindingParams.parameters.top = iMax;
+            }
+
+            oBindingParams.filters = aFilters;
+        },
+
+        _rebindSmartTable: function () {
+            var oSmartTable = this.byId("searchSmartTable");
+            if (oSmartTable && oSmartTable.rebindTable) {
+                oSmartTable.rebindTable();
+            }
         },
 
         _onSearchMatched: function () {
@@ -127,7 +290,7 @@ sap.ui.define([
             }.bind(this));
         },
 
-        onSelect: function (oEvent) {
+        onSelect: async function (oEvent) {
             this.getView().getModel("view").setProperty("/hasSelection", true);
 
             var oListItem = oEvent.getParameter("listItem");
@@ -140,20 +303,7 @@ sap.ui.define([
             var oCtx = oListItem ? oListItem.getBindingContext("data") : null;
             var oChecklist = oCtx ? oCtx.getObject() : null;
             var sId = oChecklist && oChecklist.root ? oChecklist.root.id : "";
-
-            if (!sId) {
-                MessageToast.show(this.getResourceBundle().getText("checklistIdMissing"));
-                return;
-            }
-
-            this._confirmNavigationFromDirty().then(function (bCanNavigate) {
-                if (!bCanNavigate) {
-                    return;
-                }
-                this.getModel("selected").setData(oChecklist);
-                this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-                this.navTo("detail", { id: sId });
-            }.bind(this));
+            await this._selectChecklistById(sId);
         },
 
 
@@ -161,7 +311,7 @@ sap.ui.define([
         _confirmNavigationFromDirty: function () {
             return FlowCoordinator.confirmUnsavedAndHandle(this, function () {
                 return Promise.resolve(false);
-            }).then(function (sDecision) {
+            }).then((sDecision) => {
                 return sDecision !== "CANCEL";
             });
         },
@@ -213,7 +363,7 @@ sap.ui.define([
                     return BackendAdapter.getCheckLists();
                 }).then(function (aUpdated) {
                     this.getModel("data").setProperty("/checkLists", aUpdated);
-                    this._executeSearch();
+                    this._rebindSmartTable();
                     this.getModel("selected").setData({});
                     this.getView().getModel("view").setProperty("/hasSelection", false);
                     MessageToast.show(oBundle.getText("deleted"));
@@ -224,12 +374,13 @@ sap.ui.define([
         },
 
         onSmartSearch: function () {
-            this.onSearch();
+            this.getView().getModel("view").setProperty("/hasSearched", true);
+            this._rebindSmartTable();
         },
 
         onSearch: function () {
             this.getView().getModel("view").setProperty("/hasSearched", true);
-            this._executeSearch();
+            this._rebindSmartTable();
         },
 
         onStatusFilterPress: function (oEvent) {
@@ -242,7 +393,7 @@ sap.ui.define([
             }
 
             this.getModel("state").setProperty(sFilterPath, sFilterValue);
-            this.onSearch();
+            this._rebindSmartTable();
         },
 
 
@@ -299,14 +450,14 @@ sap.ui.define([
             oStateModel.setProperty("/filterFailedBarriers", "ALL");
 
             this.getView().getModel("view").setProperty("/hasSearched", true);
-            this._executeSearch();
+            this._rebindSmartTable();
         },
 
         onSearchModeToggle: function (oEvent) {
             var bLoose = oEvent.getParameter("state");
             this.getModel("state").setProperty("/searchMode", bLoose ? "LOOSE" : "EXACT");
             this.getView().getModel("view").setProperty("/hasSearched", true);
-            this._executeSearch();
+            this._rebindSmartTable();
         },
 
         onExit: function () {
@@ -316,10 +467,29 @@ sap.ui.define([
             }
         },
 
+
+        formatOverallResultText: function (vResult, sLifecycleStatus) {
+            if (vResult === true) { return this.getResourceBundle().getText("statusOk"); }
+            if (vResult === false) { return this.getResourceBundle().getText("statusFailed"); }
+            return sLifecycleStatus || "-";
+        },
+
+        formatOverallResultState: function (vResult, sLifecycleStatus) {
+            if (vResult === true) { return "Success"; }
+            if (vResult === false) { return "Error"; }
+            switch (String(sLifecycleStatus || "").toUpperCase()) {
+                case "CLOSED": return "Success";
+                case "REGISTERED": return "Warning";
+                default: return "Information";
+            }
+        },
+
         formatStatus: function (sStatus) {
-            switch (sStatus) {
-                case "SUCCESS": return "Success";
-                case "WARNING": return "Warning";
+            switch (String(sStatus || "").toUpperCase()) {
+                case "SUCCESS":
+                case "CLOSED": return "Success";
+                case "WARNING":
+                case "REGISTERED": return "Warning";
                 case "CRITICAL": return "Error";
                 default: return "None";
             }
