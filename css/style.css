@@ -513,13 +513,19 @@ body {
   border-right: 1px solid color-mix(in srgb, var(--glass-border) 92%, transparent) !important;
 }
 
-.searchResultTable .sapMListTblSubCnt,
-.searchResultTable .sapMText,
-.searchResultTable .sapMObjStatus,
+.searchResultTable .sapMListTblHeaderCell .sapMText,
+.searchResultTable .sapMObjStatusText,
 .searchResultTable .sapMPIText {
   white-space: nowrap !important;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.searchResultTable .sapMListTblCell .sapMText,
+.searchResultTable .sapMListTblSubCntVal {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 
@@ -965,3 +971,15 @@ body.themeLifestyleNightOps .filterCard {
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.58), 0 0 0 1px rgba(var(--accent-rgb), 0.12);
 }
 
+
+
+.searchIdCellText,
+.searchObserverCellText {
+  display: block;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+.searchResultTable .sapMListTblCell {
+  vertical-align: top;
+}

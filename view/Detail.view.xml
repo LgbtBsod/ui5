@@ -119,11 +119,10 @@
                            editable="{= ${state>/mode} === 'EDIT' }"
                            showSuggestion="true"
                            suggest=".onPersonSuggest"
-                           suggestionItemSelected=".onPersonSuggestionSelected"
-                           suggestionItems="{view>/observerSuggestions}">
+                           suggestionItemSelected=".onPersonSuggestionSelected">
                         <core:CustomData key="target" value="observer" writeToDom="false"/>
-                        <suggestionItems>
-                            <core:Item key="{view>perner}" text="{view>fullName}" additionalText="{view>position}"/>
+                        <suggestionItems path="view>/observerSuggestions">
+                            <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
                         </suggestionItems>
                     </Input>
 
@@ -132,11 +131,10 @@
                            editable="{= ${state>/mode} === 'EDIT' }"
                            showSuggestion="true"
                            suggest=".onPersonSuggest"
-                           suggestionItemSelected=".onPersonSuggestionSelected"
-                           suggestionItems="{view>/observedSuggestions}">
+                           suggestionItemSelected=".onPersonSuggestionSelected">
                         <core:CustomData key="target" value="observed" writeToDom="false"/>
-                        <suggestionItems>
-                            <core:Item key="{view>perner}" text="{view>fullName}" additionalText="{view>position}"/>
+                        <suggestionItems path="view>/observedSuggestions">
+                            <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
                         </suggestionItems>
                     </Input>
 

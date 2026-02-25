@@ -3,8 +3,7 @@ import uuid
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.sqlite import INTEGER
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Date, DateTime, ForeignKey
-from utils.time import now_utc
+
 from database import Base
 from utils.time import now_utc
 
@@ -16,6 +15,26 @@ class ChecklistRoot(Base):
     checklist_id = Column(String, nullable=False)
     lpc = Column(String, nullable=False)
     status = Column(String, default="01")
+
+    date = Column(String, default="")
+    equipment = Column(String, default="")
+    lpc_text = Column(String, default="")
+
+    observer_fullname = Column(String, default="")
+    observer_perner = Column(String, default="")
+    observer_position = Column(String, default="")
+    observer_orgunit = Column(String, default="")
+    observer_integration_name = Column(String, default="")
+
+    observed_fullname = Column(String, default="")
+    observed_perner = Column(String, default="")
+    observed_position = Column(String, default="")
+    observed_orgunit = Column(String, default="")
+    observed_integration_name = Column(String, default="")
+
+    location_key = Column(String, default="")
+    location_name = Column(String, default="")
+    location_text = Column(String, default="")
 
     created_on = Column(DateTime, default=now_utc)
     created_by = Column(String)
