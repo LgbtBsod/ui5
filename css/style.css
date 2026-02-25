@@ -1058,14 +1058,16 @@ body.themeLifestyleNightOps .filterCard {
 
 .detailContent {
   position: relative;
-  padding-right: 6.4rem;
+  padding-right: 1rem;
+  max-width: 1320px;
+  margin: 0 auto;
 }
 
 .detailAsideRail {
-  position: fixed;
+  position: sticky;
   top: 6.4rem;
-  right: 1rem;
-  z-index: 25;
+  margin-left: auto;
+  z-index: 12;
 }
 
 /* ==============================
@@ -1361,36 +1363,24 @@ body.themeLifestyleNightOps .filterCard {
 
 /* Mushroom cards as "cloud" blocks */
 .mushroomCard {
-  border-radius: 24px !important;
-  min-height: 11rem;
-  padding: 1.2rem 1.1rem !important;
-  background: color-mix(in srgb, var(--glass-bg) 74%, rgba(var(--accent-rgb), 0.05)) !important;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.10);
+  border-radius: 18px !important;
+  min-height: 9.6rem;
+  padding: 1.05rem .95rem !important;
+  background: color-mix(in srgb, var(--glass-bg) 70%, rgba(var(--accent-rgb), 0.03)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 74%, rgba(255,255,255,0.14)) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.22);
 }
 
 .infoCardTile {
   margin: .35rem;
 }
 
-/* Force reset + restyle SmartFilterBar GO button */
-.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch,
-.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner,
-.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnContent {
-  all: unset;
-}
-
+/* Safe restyle SmartFilterBar GO button (no full reset, keeps responsive behavior) */
 .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
+  display: inline-block !important;
 }
 
 .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner {
-  all: unset !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
   min-height: 2.25rem !important;
   padding: 0 .95rem !important;
   border-radius: 12px !important;
@@ -1402,7 +1392,6 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnContent {
-  all: unset !important;
   color: #fff !important;
   font-weight: 700 !important;
   line-height: 1 !important;
@@ -1430,11 +1419,12 @@ body.themeLifestyleNightOps .filterCard {
 /* Control rail should be visible and airy, not sausage-hidden */
 .floatingControlSausage {
   border-radius: 18px !important;
-  width: min(15rem, 28vw);
-  min-width: 12.5rem;
-  padding: .8rem .75rem;
+  width: min(14rem, 26vw);
+  min-width: 11.5rem;
+  padding: .7rem .65rem;
   align-items: stretch;
-  gap: .45rem;
+  gap: .4rem;
+  backdrop-filter: blur(12px) saturate(120%);
 }
 
 .floatingControlSausage .sapMObjStatus,
@@ -1443,7 +1433,6 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 .detailAsideRail {
-  right: 1.2rem;
   top: 7.5rem;
 }
 
@@ -1469,5 +1458,162 @@ body.themeLifestyleNightOps .filterCard {
     display: block !important;
     width: 100% !important;
     margin: 0 0 .45rem 0 !important;
+  }
+}
+
+/* Premium visual uplift: richer depth and softer glass for key surfaces */
+.glassCard,
+.workflowStageCard,
+.smartTableGlass,
+.smartFilterGlass {
+  box-shadow: 0 18px 42px rgba(11, 24, 44, 0.14), inset 0 1px 0 rgba(255,255,255,0.35) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 76%, rgba(118, 189, 255, 0.34)) !important;
+}
+
+.infoCardTile {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.infoCardTile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(8, 25, 49, 0.12), inset 0 1px 0 rgba(255,255,255,0.24) !important;
+  border-color: rgba(var(--accent-rgb), 0.34) !important;
+}
+
+.brandActionBtn .sapMBtnInner {
+  border-radius: 14px !important;
+  backdrop-filter: blur(6px) saturate(112%);
+}
+
+#locationValueHelpDialog .sapMDialogSection {
+  background: color-mix(in srgb, var(--surface2) 80%, rgba(255,255,255,0.1));
+}
+
+#locationValueHelpDialog .sapMListTblRow:hover .sapMListTblCell {
+  background: color-mix(in srgb, var(--glass-bg) 60%, rgba(var(--accent-rgb), 0.11)) !important;
+}
+
+/* Horizon-inspired refinement */
+:root {
+  --hzn-radius-s: 0.5rem;
+  --hzn-radius-m: 0.75rem;
+  --hzn-radius-l: 1rem;
+}
+
+.detailControlInlineCard {
+  border-radius: var(--hzn-radius-l) !important;
+  padding: 0.25rem 0.35rem 0.45rem;
+  position: sticky;
+  top: 0.85rem;
+  z-index: 6;
+  width: 4.4rem;
+  margin-left: auto;
+}
+
+.detailControlInline .detailControlStatusRow {
+  margin: 0.15rem 0.25rem 0.35rem;
+}
+
+.detailControlInline .detailControlActionRow {
+  padding: 0.1rem 0.2rem;
+}
+
+.infoCardGrid {
+  gap: 1rem !important;
+  padding: .2rem;
+}
+
+.mushroomCard {
+  border-radius: var(--hzn-radius-l) !important;
+  min-height: 8.7rem;
+  box-shadow: 0 6px 18px rgba(0, 26, 60, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.infoCardTitle {
+  font-weight: 600;
+  letter-spacing: .015em;
+}
+
+#locationValueHelpDialog .sapMDialogScrollCont,
+#locationValueHelpDialog .sapMDialogSection {
+  border-radius: var(--hzn-radius-l);
+}
+
+#locationValueHelpTreeTable.sapUiTable,
+#locationValueHelpTreeTable .sapUiTableCnt,
+#locationValueHelpTreeTable .sapUiTableCtrl {
+  border-radius: var(--hzn-radius-m);
+  overflow: hidden;
+}
+
+#locationValueHelpTreeTable .sapUiTableRowHvr .sapUiTableCell {
+  background: color-mix(in srgb, var(--sapList_Hover_Background) 86%, rgba(var(--accent-rgb), 0.09));
+}
+
+
+.detailControlAsideHost {
+  position: relative;
+}
+
+.detailControlInlineCard {
+  width: min(12rem, 32vw) !important;
+  min-width: 9.5rem;
+  padding: .55rem .45rem !important;
+  position: sticky;
+  top: 1rem;
+  z-index: 8;
+  margin-left: auto;
+}
+
+.detailControlVerticalRail {
+  align-items: center;
+}
+
+.detailControlVerticalRail .sapMTitle {
+  font-size: .72rem;
+  text-align: center;
+}
+
+
+.detailControlVerticalRail .sapMBtn {
+  width: 100%;
+}
+
+#locationValueHelpDialog {
+  max-width: 40rem;
+}
+
+#locationValueHelpTreeTable .sapUiTableCol {
+  font-weight: 600;
+}
+
+
+.smartFilterGlass .sapUiCompFilterBar {
+  padding: .2rem .1rem;
+}
+
+.smartFilterGlass .sapUiCompFilterBar .sapMInputBase,
+.smartFilterGlass .sapUiCompFilterBar .sapMSlt,
+.smartFilterGlass .sapUiCompFilterBar .sapMTokenizer {
+  border-radius: 10px;
+}
+
+.smartTableGlass .sapMListTblHdrCell {
+  font-weight: 600;
+}
+
+.smartTableGlass .sapMListTblRow:hover .sapMListTblCell {
+  background: color-mix(in srgb, var(--glass-bg) 62%, rgba(var(--accent-rgb), 0.09)) !important;
+}
+
+@media (max-width: 980px) {
+  .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch {
+    display: block !important;
+    width: 100% !important;
+    margin-top: .4rem;
+  }
+
+  .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner {
+    width: 100% !important;
   }
 }

@@ -86,7 +86,8 @@ sap.ui.define([
         validationShown: false,
         validationMissing: {},
         statusActions: DetailCardSchema.createStatusActions(oBundle),
-        infoCards: DetailCardSchema.createInfoCards(oBundle)
+        infoCards: DetailCardSchema.createInfoCards(oBundle),
+        locationVhTree: []
       });
 
       this.getView().setModel(oViewModel, "view");
@@ -226,6 +227,18 @@ sap.ui.define([
       return DetailFormatters.passedTotal(aRows);
     },
 
+    formatHeaderDate: function (sDate) {
+      return DetailStatusRowUseCase.formatHumanDateLong(sDate);
+    },
+
+    hasRows: function (aRows) {
+      return Array.isArray(aRows) && aRows.length > 0;
+    },
+
+    isBarriersRatioVisible: function (sLpcKey, aRows) {
+      return ChecklistValidationService.isBarrierSectionAllowed(sLpcKey) && Array.isArray(aRows) && aRows.length > 0;
+    },
+
     isBarriersVisibleByLpc: function (sLpcKey) {
       return ChecklistValidationService.isBarrierSectionAllowed(sLpcKey);
     },
@@ -239,6 +252,33 @@ sap.ui.define([
     _runChecklistValidation: function () {
       var oSelected = this.getModel("selected").getData() || {};
       return ChecklistValidationService.validateForStatusChange(oSelected, this._getValidationRules());
+    },
+
+
+    _buildFrontendNowPayload: function () {
+      var oNow = new Date();
+      var sDate = oNow.toISOString().slice(0, 10);
+      var sTime = String(oNow.getHours()).padStart(2, "0") + ":" + String(oNow.getMinutes()).padStart(2, "0");
+      var sTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      return { date: sDate, time: sTime, timezone: sTimezone };
+    },
+
+    _applyFrontendNowDefaults: function (oChecklist, bForce) {
+      if (!oChecklist) {
+        return oChecklist;
+      }
+      oChecklist.basic = oChecklist.basic || {};
+      var oNow = this._buildFrontendNowPayload();
+      if (bForce || !oChecklist.basic.date) {
+        oChecklist.basic.date = oNow.date;
+      }
+      if (bForce || !oChecklist.basic.time) {
+        oChecklist.basic.time = oNow.time;
+      }
+      if (bForce || !oChecklist.basic.timezone) {
+        oChecklist.basic.timezone = oNow.timezone;
+      }
+      return oChecklist;
     },
 
     _onMatched: function (oEvent) {
@@ -259,6 +299,7 @@ sap.ui.define([
       if (bCreate) {
         // Single-card flow: create is handled on detail card directly.
         var oDraft = ChecklistDraftHelper.buildDefaultChecklist("");
+        this._applyFrontendNowDefaults(oDraft, true);
         oDataModel.setProperty("/selectedChecklist", oDraft);
         this.getModel("selected").setData(ChecklistDraftHelper.clone(oDraft));
         oStateModel.setProperty("/mode", "EDIT");
@@ -271,6 +312,7 @@ sap.ui.define([
       if (bCopy) {
         var oSeed = this.getModel("selected").getData() || oDataModel.getProperty("/selectedChecklist") || {};
         var oCopy = ChecklistDraftHelper.clone(oSeed);
+        this._applyFrontendNowDefaults(oCopy, true);
         if (!oCopy.root) { oCopy.root = {}; }
         oCopy.root.id = "";
         oDataModel.setProperty("/selectedChecklist", oCopy);
@@ -529,10 +571,98 @@ sap.ui.define([
       if (!oNode) {
         return;
       }
+      this._applyLocationSelection(oNode);
+    },
+
+
+
+
+    onOpenLocationValueHelp: function () {
+      var oDialog = this.byId("locationValueHelpDialog");
+      if (oDialog) {
+        var aRows = this.getModel("mpl").getProperty("/locations") || [];
+        this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aRows));
+        oDialog.open();
+      }
+    },
+
+    onCloseLocationValueHelp: function () {
+      var oDialog = this.byId("locationValueHelpDialog");
+      if (oDialog) {
+        oDialog.close();
+      }
+    },
+
+    onLocationValueHelpSearch: function (oEvent) {
+      var sValue = this._normalizeText(oEvent.getParameter("newValue"));
+      var aRows = this.getModel("mpl").getProperty("/locations") || [];
+
+      if (!sValue) {
+        this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aRows));
+        return;
+      }
+
+      var mById = {};
+      (aRows || []).forEach(function (oRow) {
+        if (oRow && oRow.node_id) {
+          mById[oRow.node_id] = oRow;
+        }
+      });
+
+      var mKeep = {};
+      (aRows || []).forEach(function (oRow) {
+        var sNodeId = this._normalizeText(oRow && oRow.node_id);
+        var sParentId = this._normalizeText(oRow && oRow.parent_id);
+        var sName = this._normalizeText(oRow && oRow.location_name);
+        var bMatch = sNodeId.indexOf(sValue) >= 0 || sParentId.indexOf(sValue) >= 0 || sName.indexOf(sValue) >= 0;
+        if (!bMatch || !oRow || !oRow.node_id) {
+          return;
+        }
+        var sCursor = oRow.node_id;
+        while (sCursor && mById[sCursor]) {
+          mKeep[sCursor] = true;
+          sCursor = mById[sCursor].parent_id;
+        }
+      }.bind(this));
+
+      var aFiltered = aRows.filter(function (oRow) {
+        return !!(oRow && oRow.node_id && mKeep[oRow.node_id]);
+      });
+      this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aFiltered));
+    },
+
+
+    _applyLocationSelection: function (oNode) {
+      if (!oNode) {
+        return;
+      }
       var oSelectedModel = this.getModel("selected");
       oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
       oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
       oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+    },
+
+    onLocationTreeSelectionChange: function (oEvent) {
+      var oContext = oEvent.getParameter("rowContext");
+      var oNode = oContext ? oContext.getObject() : null;
+      if (!oNode) {
+        return;
+      }
+      this._applyLocationSelection(oNode);
+      this.onCloseLocationValueHelp();
+    },
+
+    onLocationComboChange: function (oEvent) {
+      var oItem = oEvent.getParameter("selectedItem");
+      if (!oItem) {
+        return;
+      }
+      var oCtx = oItem.getBindingContext("mpl");
+      var oNode = oCtx ? oCtx.getObject() : null;
+      if (!oNode) {
+        return;
+      }
+      this._applyLocationSelection(oNode);
     },
 
     onLpcChange: function (oEvent) {

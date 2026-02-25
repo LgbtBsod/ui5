@@ -1,9 +1,10 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox class="floatingControlRail floatingControlSausage glassCard detailAsideRail" renderType="Bare">
+    <VBox class="detailControlVerticalRail" renderType="Bare">
         <Title text="{i18n>detailControlTitle}" level="H6" class="sapUiTinyMarginBottom"/>
-        <ObjectStatus icon="sap-icon://history" text="{i18n>heartbeatLabel}" state="{= !!${state>/lockExpires} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
-        <ObjectStatus icon="sap-icon://synchronize" text="{i18n>autosaveLabel}" state="{= ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : 'Success' }" class="sapUiTinyMarginBottom"/>
-        <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginBottom accentButton savePulseButton" tooltip="{i18n>objectSave}"/>
+        <ObjectStatus icon="sap-icon://history" text="{i18n>heartbeatLabel}" state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
+        <ObjectStatus icon="sap-icon://synchronize" text="{i18n>autosaveLabel}" state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
+        <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
+        <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginTop sapUiTinyMarginBottom" tooltip="{i18n>objectSave}"/>
         <Button icon="sap-icon://inspection" visible="{= ${state>/mode} === 'EDIT' }" press=".onValidateChecklist" class="sapUiTinyMarginBottom" tooltip="{i18n>validateButton}"/>
         <Button icon="sap-icon://status-inactive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusDraft}">
             <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
@@ -15,9 +16,6 @@
             <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
         </Button>
         <Button icon="sap-icon://undo" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom" tooltip="{i18n>objectCancel}"/>
-        <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap railSwitchWrap sapUiTinyMarginBottom">
-            <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
-        </HBox>
-        <Button icon="sap-icon://decline" type="Transparent" tooltip="{i18n>closeDetails}" press=".onCloseDetail"/>
+        <Button icon="sap-icon://decline" type="Transparent" press=".onCloseDetail" tooltip="{i18n>closeDetails}"/>
     </VBox>
 </core:FragmentDefinition>

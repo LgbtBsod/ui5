@@ -4,6 +4,7 @@
     xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:dnd="sap.ui.core.dnd"
+    xmlns:t="sap.ui.table"
     xmlns:core="sap.ui.core">
 
     <Page showHeader="false" class="pageTransparent" busy="{state>/isLoading}">
@@ -33,7 +34,7 @@
                         </HBox>
                         <HBox class="uxStatChip" renderType="Bare">
                             <Text text="{i18n>headerDateLabel}" class="sapUiTinyMarginEnd"/>
-                            <Text text="{selected>/basic/date}"/>
+                            <Text text="{path:'selected>/basic/date', formatter:'.formatHeaderDate'}"/>
                         </HBox>
                         <HBox class="uxStatChip" renderType="Bare">
                             <Text text="{i18n>headerProfessionLabel}" class="sapUiTinyMarginEnd"/>
@@ -43,11 +44,11 @@
                             <Text text="{i18n>headerLpcLabel}" class="sapUiTinyMarginEnd"/>
                             <Text text="{selected>/basic/LPC_TEXT}"/>
                         </HBox>
-                        <HBox class="uxStatChip" renderType="Bare">
+                        <HBox class="uxStatChip" renderType="Bare" visible="{path:'selected>/checks', formatter:'.hasRows'}">
                             <Text text="{i18n>checksRatioLabel}" class="sapUiTinyMarginEnd"/>
                             <Text text="{path:'selected>/checks', formatter:'.formatPassedTotal'}"/>
                         </HBox>
-                        <HBox class="uxStatChip" renderType="Bare" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
+                        <HBox class="uxStatChip" renderType="Bare" visible="{parts:[{path:'selected>/basic/LPC_KEY'},{path:'selected>/barriers'}], formatter:'.isBarriersRatioVisible'}">
                             <Text text="{i18n>barriersRatioLabel}" class="sapUiTinyMarginEnd"/>
                             <Text text="{path:'selected>/barriers', formatter:'.formatPassedTotal'}"/>
                         </HBox>
@@ -55,9 +56,9 @@
                             <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
                             <Text text="{= ${state>/mode} === 'EDIT' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
                         </HBox>
-                        <HBox class="uxStatChip" renderType="Bare" visible="{= !!${state>/lockExpires} }">
-                            <Text text="{i18n>lockExpiresLabel}" class="sapUiTinyMarginEnd"/>
-                            <Text text="{state>/lockExpires}"/>
+                        <HBox class="uxStatChip" renderType="Bare" visible="{= !!${state>/cacheValidationAt} }">
+                            <Text text="{i18n>cacheValidationAtLabel}" class="sapUiTinyMarginEnd"/>
+                            <Text text="{state>/cacheValidationAt}"/>
                         </HBox>
                     </HBox>
                 </HBox>
@@ -103,15 +104,17 @@
                                     class="infoCardValue"/>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'date' }" renderType="Bare">
-                                    <Input value="{selected>/basic/date}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
+                                    <DatePicker value="{selected>/basic/date}" displayFormat="EEE, dd MMM yyyy" valueFormat="yyyy-MM-dd" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'time' }" renderType="Bare">
-                                    <Input value="{selected>/basic/time}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationText'}"/>
+                                    <TimePicker value="{selected>/basic/time}" displayFormat="HH:mm" valueFormat="HH:mm" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationText'}"/>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'timezone' }" renderType="Bare">
-                                    <Input value="{selected>/basic/timezone}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationText'}"/>
+                                    <Select selectedKey="{selected>/basic/timezone}" forceSelection="false" items="{masterData>/timezones}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationText'}">
+                                        <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                                    </Select>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'equipment' }" renderType="Bare">
@@ -121,6 +124,8 @@
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare">
                                     <Input value="{selected>/basic/OBSERVER_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationText'}"
                                            showSuggestion="true"
+                                           startSuggestion="1"
+                                           filterSuggests="false"
                                            suggest=".onPersonSuggest"
                                            suggestionItemSelected=".onPersonSuggestionSelected">
                                         <customData>
@@ -135,6 +140,8 @@
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare">
                                     <Input value="{selected>/basic/OBSERVED_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationText'}"
                                            showSuggestion="true"
+                                           startSuggestion="1"
+                                           filterSuggests="false"
                                            suggest=".onPersonSuggest"
                                            suggestionItemSelected=".onPersonSuggestionSelected">
                                         <customData>
@@ -147,7 +154,12 @@
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'location' }" renderType="Bare">
-                                    <Input value="{selected>/basic/LOCATION_NAME}" editable="false" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationText'}"/>
+                                    <HBox renderType="Bare" alignItems="Center">
+                                        <ComboBox selectedKey="{selected>/basic/LOCATION_KEY}" value="{selected>/basic/LOCATION_NAME}" showSecondaryValues="true" filterSecondaryValues="true" selectionChange=".onLocationComboChange" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationText'}" items="{mpl>/locations}" width="100%" class="sapUiTinyMarginEnd">
+                                            <core:ListItem key="{mpl>node_id}" text="{mpl>location_name}" additionalText="{mpl>node_id}"/>
+                                        </ComboBox>
+                                        <Button icon="sap-icon://value-help" type="Transparent" press=".onOpenLocationValueHelp" tooltip="{i18n>locationValueHelpTooltip}" class="brandActionBtn brandActionGhost"/>
+                                    </HBox>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'lpc' }" renderType="Bare">
@@ -176,7 +188,13 @@
             </VBox>
 
 
-            <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
+            <HBox justifyContent="End" renderType="Bare" class="detailControlAsideHost">
+                <VBox class="glassCard detailControlInlineCard">
+                    <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
+                </VBox>
+            </HBox>
+
+            <core:Fragment fragmentName="sap_ui5.view.fragment.LocationValueHelpDialog" type="XML"/>
 
 
             <VBox class="glassCard" busy="{view>/checksLoading}">

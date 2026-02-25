@@ -21,19 +21,27 @@
 
                     <smartFilterBar:SmartFilterBar
                         id="searchSmartFilterBar"
-                        entitySet="CheckListSet"
+                        entitySet="ChecklistRoots"
                         persistencyKey="pcctSmartFilter"
-                        useToolbar="false"
+                        useToolbar="true"
                         visible="{view>/useSmartControls}"
-                        showGoOnFB="false"
+                        showGoOnFB="true"
+                        showClearOnFB="true"
+                        liveMode="false"
+                        enableBasicSearch="true"
+                        useDateRangeType="true"
                         search=".onSmartSearch"
-                        filterChange=".onSmartFilterChanged"/>
+                        filterChange=".onSmartFilterChanged">
+                        <smartFilterBar:controlConfiguration>
+                            <smartFilterBar:ControlConfiguration key="checklist_id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
+                            <smartFilterBar:ControlConfiguration key="lpc" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="status" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="date" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="equipment" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="changed_on" visibleInAdvancedArea="true"/>
+                        </smartFilterBar:controlConfiguration>
+                    </smartFilterBar:SmartFilterBar>
 
-                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{view>/useSmartControls}">
-                        <ToolbarSpacer/>
-                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
-                    </Toolbar>
 
                     <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
                         <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd"/>
@@ -106,19 +114,22 @@
 
                     <smartTable:SmartTable
                         id="searchSmartTable"
-                        entitySet="CheckListSet"
+                        entitySet="ChecklistRoots"
                         smartFilterId="searchSmartFilterBar"
                         tableType="ResponsiveTable"
                         useVariantManagement="true"
                         useTablePersonalisation="true"
                         showRowCount="true"
+                        showFullScreenButton="true"
+                        demandPopin="true"
                         header="{i18n>resultsLabel}"
                         persistencyKey="pcctSmartTable"
                         enableAutoBinding="true"
                         visible="{view>/useSmartControls}"
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
-                        growing="true" growingThreshold="100"/>
+                        initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
+                        growing="true" growingThreshold="100" useExportToExcel="true" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
 
                     <Table visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" class="glassTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>

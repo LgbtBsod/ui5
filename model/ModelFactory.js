@@ -35,6 +35,7 @@ sap.ui.define([
                 sessionId: null,
                 activeObjectId: null,
                 lockExpires: null,
+                cacheValidationAt: "",
                 idleExpires: null,
                 requiresUserLogin: true,
                 testUser: "",

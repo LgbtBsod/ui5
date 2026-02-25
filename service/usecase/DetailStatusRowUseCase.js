@@ -3,9 +3,29 @@ sap.ui.define([
 ], function (ChecklistUiState) {
     "use strict";
 
+
+    function formatHumanDateLong(sDate) {
+        if (!sDate) {
+            return "-";
+        }
+        var oDate = new Date(sDate);
+        if (Number.isNaN(oDate.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(sDate)) {
+            oDate = new Date(sDate + "T00:00:00");
+        }
+        if (Number.isNaN(oDate.getTime())) {
+            return sDate;
+        }
+        return oDate.toLocaleDateString(undefined, {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    }
+
     function formatInfoCardValue(sKey, mValues) {
         if (sKey === "date") {
-            return mValues.date || "-";
+            return formatHumanDateLong(mValues.date);
         }
         if (sKey === "time") {
             return mValues.time || "-";
@@ -54,6 +74,7 @@ sap.ui.define([
     }
 
     return {
+        formatHumanDateLong: formatHumanDateLong,
         formatInfoCardValue: formatInfoCardValue,
         shouldApplyStatusChange: shouldApplyStatusChange,
         requiresIntegrationConfirmation: requiresIntegrationConfirmation,
