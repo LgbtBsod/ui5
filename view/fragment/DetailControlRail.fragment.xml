@@ -4,7 +4,7 @@
         <ObjectStatus icon="sap-icon://history" text="{i18n>heartbeatLabel}" state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
         <ObjectStatus icon="sap-icon://synchronize" text="{i18n>autosaveLabel}" state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
         <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
-        <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginTop sapUiTinyMarginBottom" tooltip="{i18n>objectSave}"/>
+        <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginTop sapUiTinyMarginBottom detailRailEditAction" tooltip="{i18n>objectSave}"/>
         <Button icon="sap-icon://inspection" visible="{= ${state>/mode} === 'EDIT' }" press=".onValidateChecklist" class="sapUiTinyMarginBottom" tooltip="{i18n>validateButton}"/>
         <Button icon="sap-icon://status-inactive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusDraft}">
             <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
@@ -15,7 +15,7 @@
         <Button icon="sap-icon://status-positive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusClosed}">
             <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
         </Button>
-        <Button icon="sap-icon://undo" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom" tooltip="{i18n>objectCancel}"/>
-        <Button icon="sap-icon://decline" type="Transparent" press=".onCloseDetail" tooltip="{i18n>closeDetails}"/>
+        <Button icon="sap-icon://undo" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom detailRailEditAction" tooltip="{i18n>objectCancel}"/>
+        <Button icon="sap-icon://decline" type="Transparent" press=".onCloseDetail" tooltip="{i18n>closeDetails}" class="detailRailCloseAction"/>
     </VBox>
 </core:FragmentDefinition>

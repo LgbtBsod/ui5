@@ -16,17 +16,23 @@ sap.ui.define([
   "sap_ui5/service/usecase/DetailCommandFlowUseCase",
   "sap_ui5/service/usecase/DetailStatusRowUseCase",
   "sap_ui5/service/usecase/DetailStatusCommandUseCase",
-  "sap_ui5/service/usecase/DetailRowDialogCommandUseCase",
+  "sap_ui5/service/usecase/DetailExpandedRowsFlowUseCase",
   "sap_ui5/service/usecase/DetailSaveOrchestrationUseCase",
   "sap_ui5/service/usecase/DetailDialogLifecycleUseCase",
   "sap_ui5/service/usecase/DetailLockEditFlowUseCase",
   "sap_ui5/service/usecase/DetailLockReleaseUseCase",
   "sap_ui5/service/usecase/DetailSaveSuccessFlowUseCase",
   "sap_ui5/service/usecase/DetailCloseFlowUseCase",
-  "sap_ui5/service/usecase/DetailCloseNavigationUseCase",
   "sap_ui5/service/usecase/DetailToolbarValidationUseCase",
-  "sap_ui5/service/usecase/DetailSaveErrorPresentationUseCase"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailRowDialogCommandUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailCloseNavigationUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase) {
+  "sap_ui5/service/usecase/DetailSaveErrorPresentationUseCase",
+  "sap_ui5/service/usecase/DetailLocationValueHelpUseCase",
+  "sap_ui5/service/usecase/DetailPersonSuggestionUseCase",
+  "sap_ui5/service/usecase/DetailDictionarySelectionUseCase",
+  "sap_ui5/service/usecase/DetailLpcBarrierWarningFlowUseCase",
+  "sap_ui5/service/usecase/DetailIntegrationEditWarningUseCase",
+  "sap_ui5/service/usecase/DetailUnsavedDecisionFlowUseCase",
+  "sap_ui5/service/usecase/DetailCloseNavigationFlowUseCase"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, DetailUnsavedDecisionFlowUseCase, DetailCloseNavigationFlowUseCase) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -128,13 +134,6 @@ sap.ui.define([
       this._updateDerivedRootResult();
     },
 
-    _closeExpandedDialogById: function (sDialogId) {
-      var oDialog = this.byId(sDialogId);
-      if (oDialog) {
-        oDialog.close();
-      }
-    },
-
     _releaseEditLock: function (sObjectId, sSessionId, oStateModel) {
       return DetailLockReleaseUseCase.runReleaseFlow({
         stateModel: oStateModel,
@@ -148,21 +147,23 @@ sap.ui.define([
     },
 
     _setBasicTextByDictionary: function (oEvent, sDictionaryPath, sKeyPath, sTextPath) {
-      var sKey = oEvent.getParameter("selectedItem")
-        ? oEvent.getParameter("selectedItem").getKey()
-        : oEvent.getSource().getSelectedKey();
-      var aDict = this.getModel("masterData").getProperty(sDictionaryPath) || [];
-      var oMatch = aDict.find((oItem) => oItem && oItem.key === sKey) || {};
-      var oSelectedModel = this.getModel("selected");
-      oSelectedModel.setProperty(sKeyPath, sKey || "");
-      oSelectedModel.setProperty(sTextPath, oMatch.text || "");
+      var sKey = DetailDictionarySelectionUseCase.resolveSelectedKey(oEvent);
+      DetailDictionarySelectionUseCase.applyDictionarySelection({
+        key: sKey,
+        dictionary: this.getModel("masterData").getProperty(sDictionaryPath) || [],
+        keyPath: sKeyPath,
+        textPath: sTextPath,
+        selectedModel: this.getModel("selected")
+      });
     },
 
     _mutateRows: function (sPath, fnMutator) {
-      var oSelectedModel = this.getModel("selected");
-      var aRows = oSelectedModel.getProperty(sPath) || [];
-      oSelectedModel.setProperty(sPath, fnMutator(aRows));
-      this._syncSelectionMeta();
+      DetailExpandedRowsFlowUseCase.mutateRows({
+        selectedModel: this.getModel("selected"),
+        path: sPath,
+        mutator: fnMutator,
+        onMutated: this._syncSelectionMeta.bind(this)
+      });
     },
 
 
@@ -498,33 +499,40 @@ sap.ui.define([
     },
 
     onPersonSuggest: function (oEvent) {
-      var sValue = this._normalizeText(oEvent.getParameter("suggestValue"));
+      var sQueryRaw = oEvent.getParameter("suggestValue") || "";
+      var sQuery = this._normalizeText(sQueryRaw);
       var sTarget = oEvent.getSource().data("target");
       var aPersons = this.getModel("masterData").getProperty("/persons") || [];
-      var aFiltered = aPersons.filter((oPerson) => {
-        var sName = this._normalizeText(oPerson.fullName);
-        var sPernr = this._normalizeText(oPerson.perner);
-        var sPosition = this._normalizeText(oPerson.position);
-        return !sValue || sName.indexOf(sValue) >= 0 || sPernr.indexOf(sValue) >= 0 || sPosition.indexOf(sValue) >= 0;
-      }).slice(0, 10);
+      var aFiltered = DetailPersonSuggestionUseCase.filterSuggestions({
+        query: sQueryRaw,
+        persons: aPersons,
+        normalizeText: this._normalizeText.bind(this),
+        limit: 10
+      });
 
       this._setPersonSuggestions(sTarget, aFiltered);
 
-      if (sValue && aFiltered.length < 3 && BackendAdapter.suggestPersons) {
-        BackendAdapter.suggestPersons(sValue).then((aRemote) => {
-          this._setPersonSuggestions(sTarget, (aRemote || []).slice(0, 10));
-        }).catch(function () {
+      if (BackendAdapter.suggestPersons
+        && DetailPersonSuggestionUseCase.shouldFetchRemoteSuggestions({
+          query: sQuery,
+          localCount: aFiltered.length,
+          minLocalBeforeRemote: 3
+        })) {
+        BackendAdapter.suggestPersons(sQuery).then(function (aRemote) {
+          var aMerged = DetailPersonSuggestionUseCase.dedupeSuggestions((aRemote || []).concat(aFiltered || [])).slice(0, 10);
+          this._setPersonSuggestions(sTarget, aMerged);
+        }.bind(this)).catch(function () {
           // Keep local suggestions only when remote suggest is unavailable.
         });
       }
     },
 
     _setPersonSuggestions: function (sTarget, aSuggestions) {
-      var oViewModel = this.getView().getModel("view");
-      if (!oViewModel) {
-        return;
-      }
-      oViewModel.setProperty(sTarget === "observed" ? "/observedSuggestions" : "/observerSuggestions", aSuggestions || []);
+      DetailPersonSuggestionUseCase.applySuggestionsToViewModel({
+        target: sTarget,
+        suggestions: aSuggestions,
+        viewModel: this.getView().getModel("view")
+      });
     },
 
     _normalizeText: function (sValue) {
@@ -539,25 +547,16 @@ sap.ui.define([
     },
 
     onPersonSuggestionSelected: function (oEvent) {
-      var oItem = oEvent.getParameter("selectedItem");
-      if (!oItem) {
+      var oResolved = DetailPersonSuggestionUseCase.resolvePersonFromSuggestionEvent(oEvent);
+      if (!oResolved.person) {
         return;
       }
 
-      var sTarget = oEvent.getSource().data("target");
-      var oCtx = oItem.getBindingContext("view");
-      var oPerson = oCtx ? oCtx.getObject() : null;
-      if (!oPerson) {
-        return;
-      }
-      var sPrefix = sTarget === "observed" ? "OBSERVED_" : "OBSERVER_";
-      var oSelectedModel = this.getModel("selected");
-
-      oSelectedModel.setProperty("/basic/" + sPrefix + "PERNER", oPerson.perner || "");
-      oSelectedModel.setProperty("/basic/" + sPrefix + "FULLNAME", oPerson.fullName || "");
-      oSelectedModel.setProperty("/basic/" + sPrefix + "POSITION", oPerson.position || "");
-      oSelectedModel.setProperty("/basic/" + sPrefix + "ORGUNIT", oPerson.orgUnit || "");
-      oSelectedModel.setProperty("/basic/" + sPrefix + "INTEGRATION_NAME", oPerson.integrationName || "");
+      DetailPersonSuggestionUseCase.applyPersonSelection({
+        target: oResolved.target,
+        person: oResolved.person,
+        selectedModel: this.getModel("selected")
+      });
     },
 
     onLocationSelectionChange: function (oEvent) {
@@ -578,73 +577,40 @@ sap.ui.define([
 
 
     onOpenLocationValueHelp: function () {
-      var oDialog = this.byId("locationValueHelpDialog");
-      if (oDialog) {
-        var aRows = this.getModel("mpl").getProperty("/locations") || [];
-        this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aRows));
-        oDialog.open();
-      }
+      DetailLocationValueHelpUseCase.openValueHelp({
+        dialog: this.byId("locationValueHelpDialog"),
+        locations: this.getModel("mpl").getProperty("/locations") || [],
+        viewModel: this.getView().getModel("view"),
+        buildLocationTree: this._buildLocationTree.bind(this)
+      });
     },
 
     onCloseLocationValueHelp: function () {
-      var oDialog = this.byId("locationValueHelpDialog");
-      if (oDialog) {
-        oDialog.close();
-      }
+      DetailLocationValueHelpUseCase.closeValueHelp({
+        dialog: this.byId("locationValueHelpDialog")
+      });
     },
 
     onLocationValueHelpSearch: function (oEvent) {
-      var sValue = this._normalizeText(oEvent.getParameter("newValue"));
-      var aRows = this.getModel("mpl").getProperty("/locations") || [];
-
-      if (!sValue) {
-        this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aRows));
-        return;
-      }
-
-      var mById = {};
-      (aRows || []).forEach(function (oRow) {
-        if (oRow && oRow.node_id) {
-          mById[oRow.node_id] = oRow;
-        }
+      DetailLocationValueHelpUseCase.applyFilteredTreeToViewModel({
+        query: oEvent.getParameter("newValue"),
+        locations: this.getModel("mpl").getProperty("/locations") || [],
+        viewModel: this.getView().getModel("view"),
+        buildLocationTree: this._buildLocationTree.bind(this),
+        normalizeText: this._normalizeText.bind(this)
       });
-
-      var mKeep = {};
-      (aRows || []).forEach(function (oRow) {
-        var sNodeId = this._normalizeText(oRow && oRow.node_id);
-        var sParentId = this._normalizeText(oRow && oRow.parent_id);
-        var sName = this._normalizeText(oRow && oRow.location_name);
-        var bMatch = sNodeId.indexOf(sValue) >= 0 || sParentId.indexOf(sValue) >= 0 || sName.indexOf(sValue) >= 0;
-        if (!bMatch || !oRow || !oRow.node_id) {
-          return;
-        }
-        var sCursor = oRow.node_id;
-        while (sCursor && mById[sCursor]) {
-          mKeep[sCursor] = true;
-          sCursor = mById[sCursor].parent_id;
-        }
-      }.bind(this));
-
-      var aFiltered = aRows.filter(function (oRow) {
-        return !!(oRow && oRow.node_id && mKeep[oRow.node_id]);
-      });
-      this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aFiltered));
     },
 
 
     _applyLocationSelection: function (oNode) {
-      if (!oNode) {
-        return;
-      }
-      var oSelectedModel = this.getModel("selected");
-      oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
-      oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
-      oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+      DetailLocationValueHelpUseCase.applyLocationSelection({
+        node: oNode,
+        selectedModel: this.getModel("selected")
+      });
     },
 
     onLocationTreeSelectionChange: function (oEvent) {
-      var oContext = oEvent.getParameter("rowContext");
-      var oNode = oContext ? oContext.getObject() : null;
+      var oNode = DetailLocationValueHelpUseCase.resolveNodeFromTreeSelectionEvent(oEvent);
       if (!oNode) {
         return;
       }
@@ -653,12 +619,7 @@ sap.ui.define([
     },
 
     onLocationComboChange: function (oEvent) {
-      var oItem = oEvent.getParameter("selectedItem");
-      if (!oItem) {
-        return;
-      }
-      var oCtx = oItem.getBindingContext("mpl");
-      var oNode = oCtx ? oCtx.getObject() : null;
+      var oNode = DetailLocationValueHelpUseCase.resolveNodeFromComboChangeEvent(oEvent, "mpl");
       if (!oNode) {
         return;
       }
@@ -669,31 +630,13 @@ sap.ui.define([
       this._setBasicTextByDictionary(oEvent, "/lpc", "/basic/LPC_KEY", "/basic/LPC_TEXT");
       this._syncSelectionMeta();
 
-      var bAllowBarriers = this._isBarrierAllowedByLpc();
-      if (bAllowBarriers) {
-        return;
-      }
-
-      var aBarriers = this.getModel("selected").getProperty("/barriers") || [];
-      if (!aBarriers.length) {
-        return;
-      }
-
-      MessageBox.warning(this.getResourceBundle().getText("barriersWillBeRemovedPrompt"), {
-        actions: [MessageBox.Action.YES, MessageBox.Action.NO],
-        emphasizedAction: MessageBox.Action.NO,
-        onClose: function (sAction) {
-          if (sAction === MessageBox.Action.YES) {
-            this.getModel("selected").setProperty("/barriers", []);
-            this._syncSelectionMeta();
-            return;
-          }
-
-          var oSelectedModel = this.getModel("selected");
-          oSelectedModel.setProperty("/basic/LPC_KEY", "");
-          oSelectedModel.setProperty("/basic/LPC_TEXT", "");
-          this._syncSelectionMeta();
-        }.bind(this)
+      DetailLpcBarrierWarningFlowUseCase.openWarningDialog({
+        messageBox: MessageBox,
+        promptText: this.getResourceBundle().getText("barriersWillBeRemovedPrompt"),
+        barrierAllowed: this._isBarrierAllowedByLpc(),
+        barriers: this.getModel("selected").getProperty("/barriers") || [],
+        selectedModel: this.getModel("selected"),
+        onAfterApply: this._syncSelectionMeta.bind(this)
       });
     },
 
@@ -703,43 +646,36 @@ sap.ui.define([
     },
 
     _confirmIntegrationEdit: function () {
-      var oRoot = this.getModel("selected").getProperty("/root") || this.getModel("data").getProperty("/selectedChecklist/root") || {};
-      var bIntegrationData = !!(oRoot.this_is_integration_data || oRoot.integrationFlag);
-      if (!bIntegrationData) {
-        return Promise.resolve(true);
-      }
-
-      var oBundle = this.getResourceBundle();
-      return new Promise(function (resolve) {
-        MessageBox.warning(oBundle.getText("integrationEditWarning"), {
-          title: oBundle.getText("integrationEditTitle"),
-          actions: [MessageBox.Action.YES, MessageBox.Action.NO],
-          emphasizedAction: MessageBox.Action.NO,
-          onClose: function (sAction) {
-            resolve(sAction === MessageBox.Action.YES);
-          }
-        });
+      return DetailIntegrationEditWarningUseCase.confirmIntegrationEdit({
+        selectedRoot: this.getModel("selected").getProperty("/root"),
+        dataRoot: this.getModel("data").getProperty("/selectedChecklist/root"),
+        messageBox: MessageBox,
+        bundle: this.getResourceBundle()
       });
     },
 
     onCloseDetail: function () {
       var oState = this.getModel("state");
-      var fnProceed = DetailCloseNavigationUseCase.buildCloseProceedAction({
-        stateModel: oState,
-        releaseLock: this.releaseLock.bind(this),
-        prepareCloseNavigation: DetailLifecycleUseCase.prepareCloseNavigation,
-        navigateToSearch: function () {
-          this.navTo("search", {}, true);
-        }.bind(this)
-      });
+      var fnProceed = function () {
+        return DetailCloseNavigationFlowUseCase.runCloseNavigation({
+          stateModel: oState,
+          releaseLock: this.releaseLock.bind(this),
+          prepareCloseNavigation: DetailLifecycleUseCase.prepareCloseNavigation,
+          navigateToSearch: function () {
+            this.navTo("search", {}, true);
+          }.bind(this)
+        });
+      }.bind(this);
 
       return DetailCloseFlowUseCase.runCloseFlow({
         isDirty: oState.getProperty("/isDirty"),
         shouldPromptBeforeClose: DetailCommandFlowUseCase.shouldPromptBeforeClose,
-        shouldProceedAfterUnsavedDecision: DetailCommandFlowUseCase.shouldProceedAfterUnsavedDecision,
-        confirmUnsaved: function () {
-          return FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this));
-        }.bind(this),
+        shouldProceedAfterUnsavedDecision: DetailUnsavedDecisionFlowUseCase.shouldProceedAfterDecision,
+        confirmUnsaved: DetailUnsavedDecisionFlowUseCase.buildConfirmUnsavedAction({
+          host: this,
+          onSave: this.onSaveDetail.bind(this),
+          confirmUnsavedAndHandle: FlowCoordinator.confirmUnsavedAndHandle
+        }),
         proceed: fnProceed
       });
     },
@@ -760,9 +696,11 @@ sap.ui.define([
       return DetailLockEditFlowUseCase.runToggleEditFlow({
         editMode: bEditMode,
         isDirty: oStateModel.getProperty("/isDirty"),
-        confirmUnsaved: function () {
-          return FlowCoordinator.confirmUnsavedAndHandle(this, this.onSaveDetail.bind(this));
-        }.bind(this),
+        confirmUnsaved: DetailUnsavedDecisionFlowUseCase.buildConfirmUnsavedAction({
+          host: this,
+          onSave: this.onSaveDetail.bind(this),
+          confirmUnsavedAndHandle: FlowCoordinator.confirmUnsavedAndHandle
+        }),
         runPendingRelease: function () {
           this.setLockUiState(oStateModel, "PENDING", sPendingText);
           return this.runWithStateFlag(oStateModel, "/lockOperationPending", fnDisableEditAndRelease);
@@ -995,11 +933,9 @@ sap.ui.define([
 
 
     _openExpandedDialog: function (sType) {
-      var oMeta = DetailStatusRowUseCase.resolveExpandedDialogMeta(sType);
-      return DetailDialogLifecycleUseCase.openDialog({
+      return DetailExpandedRowsFlowUseCase.openExpandedDialogByType({
+        type: sType,
         host: this,
-        prop: oMeta.prop,
-        fragment: oMeta.fragment,
         view: this.getView(),
         controller: this
       });
@@ -1018,15 +954,25 @@ sap.ui.define([
     },
 
     onCloseChecksExpanded: function () {
-      this._closeExpandedDialogById(DetailRowDialogCommandUseCase.resolveExpandedDialogId("checks"));
+      DetailExpandedRowsFlowUseCase.closeExpandedDialogByType({
+        type: "checks",
+        byId: this.byId.bind(this)
+      });
     },
 
     onCloseBarriersExpanded: function () {
-      this._closeExpandedDialogById(DetailRowDialogCommandUseCase.resolveExpandedDialogId("barriers"));
+      DetailExpandedRowsFlowUseCase.closeExpandedDialogByType({
+        type: "barriers",
+        byId: this.byId.bind(this)
+      });
     },
 
     _addRowByType: function (sType) {
-      this._mutateRows(DetailRowDialogCommandUseCase.resolveRowPath(sType), RowListHelper.addRow);
+      DetailExpandedRowsFlowUseCase.addRowByType({
+        type: sType,
+        selectedModel: this.getModel("selected"),
+        onMutated: this._syncSelectionMeta.bind(this)
+      });
     },
 
     onAddCheckRow: function () {
@@ -1038,11 +984,12 @@ sap.ui.define([
     },
 
     _deleteRowByType: function (oEvent, sType) {
-      var oResult = this.deleteRowFromEvent(oEvent, "selected", DetailRowDialogCommandUseCase.resolveRowPath(sType));
-      if (!DetailRowDialogCommandUseCase.shouldProcessRowDeleteResult(oResult)) {
-        return;
-      }
-      DetailStatusCommandUseCase.handleDeleteRowResult(oResult, DetailStatusRowUseCase.shouldSyncAfterDeleteResult, this._syncSelectionMeta.bind(this));
+      DetailExpandedRowsFlowUseCase.deleteRowByType({
+        event: oEvent,
+        type: sType,
+        deleteRowFromEvent: this.deleteRowFromEvent.bind(this),
+        onSyncSelectionMeta: this._syncSelectionMeta.bind(this)
+      });
     },
 
     onDeleteCheckRow: function (oEvent) {

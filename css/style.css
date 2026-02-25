@@ -438,7 +438,7 @@ body {
 
 
 
-.searchToolbar .sapMBtn:not(.sapMBtnReject):not(.sapMBtnTransparent) .sapMBtnInner,
+.searchToolbar .sapMBtn:not(.brandActionBtn):not(.sapMBtnReject):not(.sapMBtnTransparent) .sapMBtnInner,
 .searchToolbar .sapMSwt,
 .searchToolbar .sapMSegBBtnSel {
   border-color: rgba(var(--accent-rgb), 0.55) !important;
@@ -933,26 +933,65 @@ body {
 }
 
 
-/* Glass styling for floating dialogs/messages. */
-.sapMMessageToast,
-.sapMMessageDialog .sapMDialogSection,
-.sapMDialog.sapMMessageDialog .sapMDialogScroll,
-.sapMDialog.sapMMessageDialog .sapMDialogTitle {
+/* Glass styling for floating messages. */
+.sapMMessageToast {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
   backdrop-filter: blur(14px) saturate(125%);
   -webkit-backdrop-filter: blur(14px) saturate(125%);
   border-radius: var(--radius-lg) !important;
   color: var(--text-main) !important;
-}
-
-.sapMMessageToast {
   box-shadow: var(--glass-shadow);
   padding: 0.75rem 1rem;
 }
 
 .sapMMessageDialog .sapMBtnInner {
   border-radius: 999px !important;
+}
+
+
+/* Detail warning/info dialog typography consistency */
+.sapMDialog.sapMMessageDialog .sapMDialogTitle,
+.sapMDialog.sapMMessageDialog .sapMDialogScrollCont,
+.sapMDialog.sapMMessageDialog .sapMText,
+.sapMDialog.sapMMessageDialog .sapMLabel {
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+}
+
+.sapMDialog.sapMMessageDialog .sapMDialogScrollCont {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+/* Detail unsaved/integration dialog footer spacing alignment */
+.sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBarRight,
+.sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBarPH {
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBtn {
+  margin-inline-start: 0 !important;
+}
+
+/* Detail warning-dialog action emphasis consistency */
+.sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBtn .sapMBtnInner {
+  border-radius: 12px !important;
+}
+
+.sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBtn.sapMBtnEmphasized .sapMBtnInner {
+  background: color-mix(in srgb, var(--surface2) 90%, transparent) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.28) !important;
+  color: var(--text-main) !important;
+  box-shadow: none !important;
+}
+
+.sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBtn:not(.sapMBtnEmphasized) .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.58) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(var(--accent-rgb), 0.24) !important;
 }
 
 /* Lock-status helper visuals. */
@@ -1096,6 +1135,17 @@ body.themeLifestyleNightOps .filterCard {
   min-width: 3.2rem;
 }
 
+
+/* Detail rail close/edit action hierarchy consistency */
+.floatingControlSausage .detailRailEditAction .sapMBtnInner {
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.08)) !important;
+}
+
+.floatingControlSausage .detailRailCloseAction .sapMBtnInner {
+  border-color: color-mix(in srgb, var(--glass-border) 78%, rgba(255, 89, 89, 0.32)) !important;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(255, 89, 89, 0.12)) !important;
+}
+
 .railSwitchWrap {
   justify-content: center;
 }
@@ -1110,6 +1160,46 @@ body.themeLifestyleNightOps .filterCard {
 .mushroomCard .sapMSltLabel,
 .mushroomCard .sapMSltArrow {
   border-radius: 12px !important;
+}
+
+
+
+
+/* Detail dictionary select/value-state readability harmonization */
+.detailDictionarySelect.sapMSlt,
+.detailDictionarySelect.sapMSlt .sapMSltLabel,
+.detailDictionarySelect.sapMSlt .sapMSltArrow {
+  color: var(--text-main) !important;
+}
+
+.detailDictionarySelect.sapMSlt.sapMSltState,
+.detailDictionarySelect.sapMSlt.sapMSltState .sapMSltLabel,
+.detailDictionarySelect.sapMSlt.sapMSltState .sapMSltArrow {
+  color: var(--text-main) !important;
+}
+/* Detail person suggestion/value-state readability harmonization */
+.detailPersonSuggestInput .sapMInputBaseContentWrapper {
+  background: color-mix(in srgb, var(--edit-field-bg) 88%, rgba(var(--accent-rgb), 0.04)) !important;
+}
+
+.detailPersonSuggestInput .sapMInputBaseContentWrapper.sapMInputBaseContentWrapperError,
+.detailPersonSuggestInput .sapMInputBaseContentWrapper.sapMInputBaseContentWrapperWarning,
+.detailPersonSuggestInput .sapMInputBaseContentWrapper.sapMInputBaseContentWrapperSuccess {
+  color: var(--text-main) !important;
+}
+
+.sapMPopup-CTX .sapMSuL {
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.06)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 82%, rgba(var(--accent-rgb), 0.16));
+}
+
+.sapMPopup-CTX .sapMSuL .sapMLIB {
+  color: var(--text-main) !important;
+}
+
+.sapMPopup-CTX .sapMSuL .sapMLIB.sapMLIBHoverable:hover,
+.sapMPopup-CTX .sapMSuL .sapMLIBSelected {
+  background: color-mix(in srgb, var(--sapList_Hover_Background) 84%, rgba(var(--accent-rgb), 0.08)) !important;
 }
 
 @media (max-width: 1200px) {
@@ -1158,14 +1248,33 @@ body.themeLifestyleNightOps .filterCard {
 
 .smartTableGlass .sapMListTbl,
 .smartTableGlass .sapMListTblRow,
-.smartTableGlass .sapMListTblCell {
+.smartTableGlass .sapMListTblCell,
+.glassTable .sapMListTbl,
+.glassTable .sapMListTblRow,
+.glassTable .sapMListTblCell {
   background: transparent !important;
 }
 
-.smartTableGlass .sapMListTblRow .sapMListTblCell {
+.smartTableGlass .sapMListTblRow .sapMListTblCell,
+.glassTable .sapMListTblRow .sapMListTblCell {
   background: color-mix(in srgb, var(--surface2) 88%, transparent) !important;
+  padding-top: .7rem !important;
+  padding-bottom: .7rem !important;
 }
 
+
+
+/* Search header KPI/loading/error banner consistency */
+.searchHeaderKpiRail {
+  align-items: stretch;
+  gap: 0.85rem;
+}
+
+.searchLoadStateBanner {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 78%, rgba(var(--accent-rgb), 0.16));
+  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.06));
+}
 /* ==============================
    Section: search-kpi-workflow-blocks
    ============================== */
@@ -1208,10 +1317,26 @@ body.themeLifestyleNightOps .filterCard {
   padding: .9rem 1rem;
 }
 
+.workflowStageCard,
+.kpiCard {
+  box-shadow: 0 12px 26px rgba(11, 24, 44, 0.10), inset 0 1px 0 rgba(255,255,255,0.22);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.workflowStageCard:hover,
+.kpiCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(8, 25, 49, 0.14), inset 0 1px 0 rgba(255,255,255,0.24);
+  border-color: color-mix(in srgb, var(--glass-border) 72%, rgba(var(--accent-rgb), 0.2));
+}
+
 /* Unified style for standard dialogs, VH and settings popups */
 .sapMDialog.glassDialog > .sapMDialogSection,
 .sapMDialog.sapUiPopupWithPadding > .sapMDialogSection,
-.sapMPopup-CTX .sapMDialog > .sapMDialogSection {
+.sapMPopup-CTX .sapMDialog > .sapMDialogSection,
+.sapMDialog.sapMMessageDialog > .sapMDialogSection,
+.sapMDialog.sapMMessageDialog .sapMDialogScroll,
+.sapMDialog.sapMMessageDialog .sapMDialogTitle {
   background: color-mix(in srgb, var(--surface2) 86%, rgba(var(--accent-rgb), 0.08)) !important;
   border: 1px solid var(--glass-border) !important;
   backdrop-filter: blur(14px) saturate(125%);
@@ -1292,18 +1417,21 @@ body.themeLifestyleNightOps .filterCard {
   overflow: auto;
 }
 
-/* SmartTable row rounded look */
-.smartTableGlass .sapMListTblRow .sapMListTblCell:first-child {
+/* Smart/fallback table row rounded look */
+.smartTableGlass .sapMListTblRow .sapMListTblCell:first-child,
+.glassTable .sapMListTblRow .sapMListTblCell:first-child {
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
 }
 
-.smartTableGlass .sapMListTblRow .sapMListTblCell:last-child {
+.smartTableGlass .sapMListTblRow .sapMListTblCell:last-child,
+.glassTable .sapMListTblRow .sapMListTblCell:last-child {
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
 }
 
-.smartTableGlass .sapMListTblRow {
+.smartTableGlass .sapMListTblRow,
+.glassTable .sapMListTblRow {
   overflow: hidden;
 }
 
@@ -1330,11 +1458,13 @@ body.themeLifestyleNightOps .filterCard {
   }
 }
 
-/* Quick visible filters row */
+/* Quick visible filters row (shared desktop/mobile baseline). */
 .quickFiltersRow {
   margin-top: .55rem;
   border-top: 1px solid color-mix(in srgb, var(--glass-border) 75%, rgba(255,255,255,0.12));
   padding-top: .6rem;
+  flex-wrap: wrap;
+  gap: .45rem;
 }
 
 /* Remove KPI strip from page flow spacing fallback */
@@ -1436,17 +1566,12 @@ body.themeLifestyleNightOps .filterCard {
   top: 7.5rem;
 }
 
-/* Quick filters responsive: stack in one column on smaller widths */
-.quickFiltersRow {
-  flex-wrap: wrap;
-  gap: .45rem;
-}
-
 /* ==============================
    Section: responsive-and-utility-overrides
    ============================== */
 @media (max-width: 1024px) {
-  .quickFiltersRow {
+  .quickFiltersRow,
+  .searchToolbar {
     display: block !important;
   }
 
@@ -1454,7 +1579,11 @@ body.themeLifestyleNightOps .filterCard {
   .quickFiltersRow .sapMInputBase,
   .quickFiltersRow .sapMSlt,
   .quickFiltersRow .sapMBtn,
-  .quickFiltersRow .sapMTBSpacer {
+  .quickFiltersRow .sapMTBSpacer,
+  .searchToolbar .sapMBtn,
+  .searchToolbar .sapMMenuBtn,
+  .searchToolbar .maxRowsWrap,
+  .searchToolbar .sapMSwt {
     display: block !important;
     width: 100% !important;
     margin: 0 0 .45rem 0 !important;
@@ -1463,7 +1592,6 @@ body.themeLifestyleNightOps .filterCard {
 
 /* Premium visual uplift: richer depth and softer glass for key surfaces */
 .glassCard,
-.workflowStageCard,
 .smartTableGlass,
 .smartFilterGlass {
   box-shadow: 0 18px 42px rgba(11, 24, 44, 0.14), inset 0 1px 0 rgba(255,255,255,0.35) !important;
@@ -1480,17 +1608,46 @@ body.themeLifestyleNightOps .filterCard {
   border-color: rgba(var(--accent-rgb), 0.34) !important;
 }
 
-.brandActionBtn .sapMBtnInner {
-  border-radius: 14px !important;
+
+
+/* Search action-toolbar density consistency */
+
+
+/* Search quick-filters + action-toolbar cross-mode alignment */
+.quickFiltersRow .sapMBtn,
+.searchActionToolbarDensity .sapMBtn,
+.searchActionToolbarDensity .sapMMenuBtn .sapMBtn {
+  min-height: 2.25rem;
+}
+
+.quickFiltersRow .sapMInputBase,
+.quickFiltersRow .sapMSlt {
+  min-height: 2.25rem;
+}
+.searchActionToolbarDensity {
+  gap: 0.45rem;
+}
+
+.searchActionToolbarDensity .sapMBtn,
+.searchActionToolbarDensity .sapMMenuBtn {
+  margin-right: 0 !important;
+}
+
+.searchActionToolbarDensity .sapMMenuBtn > .sapMBtn {
+  min-width: 10.5rem;
+}
+.searchToolbar .brandActionBtn .sapMBtnInner {
+  border-radius: 13px !important;
   backdrop-filter: blur(6px) saturate(112%);
 }
 
-#locationValueHelpDialog .sapMDialogSection {
-  background: color-mix(in srgb, var(--surface2) 80%, rgba(255,255,255,0.1));
+.searchToolbar .brandActionBtn.brandActionPrimary .sapMBtnInner,
+.searchToolbar .brandActionBtn.sapMBtnEmphasized .sapMBtnInner {
+  box-shadow: 0 10px 24px rgba(var(--accent-rgb), 0.34) !important;
 }
 
-#locationValueHelpDialog .sapMListTblRow:hover .sapMListTblCell {
-  background: color-mix(in srgb, var(--glass-bg) 60%, rgba(var(--accent-rgb), 0.11)) !important;
+.searchToolbar .brandActionBtn.brandActionGhost .sapMBtnInner {
+  border-color: color-mix(in srgb, rgba(var(--accent-rgb), 0.35) 70%, var(--glass-border)) !important;
 }
 
 /* Horizon-inspired refinement */
@@ -1537,6 +1694,7 @@ body.themeLifestyleNightOps .filterCard {
 #locationValueHelpDialog .sapMDialogScrollCont,
 #locationValueHelpDialog .sapMDialogSection {
   border-radius: var(--hzn-radius-l);
+  background: color-mix(in srgb, var(--surface2) 80%, rgba(255,255,255,0.1));
 }
 
 #locationValueHelpTreeTable.sapUiTable,
@@ -1546,9 +1704,15 @@ body.themeLifestyleNightOps .filterCard {
   overflow: hidden;
 }
 
+#locationValueHelpTreeTable .sapUiTableCell {
+  color: var(--text-main) !important;
+}
+
+#locationValueHelpTreeTable .sapUiTableRowSel .sapUiTableCell,
 #locationValueHelpTreeTable .sapUiTableRowHvr .sapUiTableCell {
   background: color-mix(in srgb, var(--sapList_Hover_Background) 86%, rgba(var(--accent-rgb), 0.09));
 }
+
 
 
 .detailControlAsideHost {

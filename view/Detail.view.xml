@@ -127,7 +127,7 @@
                                            startSuggestion="1"
                                            filterSuggests="false"
                                            suggest=".onPersonSuggest"
-                                           suggestionItemSelected=".onPersonSuggestionSelected">
+                                           suggestionItemSelected=".onPersonSuggestionSelected" class="detailPersonSuggestInput">
                                         <customData>
                                             <core:CustomData key="target" value="observer" writeToDom="false"/>
                                         </customData>
@@ -143,7 +143,7 @@
                                            startSuggestion="1"
                                            filterSuggests="false"
                                            suggest=".onPersonSuggest"
-                                           suggestionItemSelected=".onPersonSuggestionSelected">
+                                           suggestionItemSelected=".onPersonSuggestionSelected" class="detailPersonSuggestInput">
                                         <customData>
                                             <core:CustomData key="target" value="observed" writeToDom="false"/>
                                         </customData>
@@ -167,7 +167,7 @@
                                         selectedKey="{selected>/basic/LPC_KEY}"
                                         change=".onLpcChange"
                                         forceSelection="false"
-                                        items="{masterData>/lpc}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationText'}">
+                                        items="{masterData>/lpc}" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationText'}">
                                         <core:Item key="{masterData>key}" text="{masterData>text}"/>
                                     </Select>
                                 </VBox>
@@ -177,7 +177,7 @@
                                         selectedKey="{selected>/basic/PROF_KEY}"
                                         change=".onProfessionChange"
                                         forceSelection="false"
-                                        items="{masterData>/professions}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationText'}">
+                                        items="{masterData>/professions}" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationText'}">
                                         <core:Item key="{masterData>key}" text="{masterData>text}"/>
                                     </Select>
                                 </VBox>
