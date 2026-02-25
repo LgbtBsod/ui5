@@ -12,6 +12,49 @@ sap.ui.define([
 
   return BaseController.extend("sap_ui5.controller.Object", {
 
+    _getCurrentUser: function () {
+      var oState = this.getModel("state");
+      return oState.getProperty("/testUser") || oState.getProperty("/testUserLogin") || "demoUser";
+    },
+
+    _tryStealOwnLock: function (sObjectId, sSessionId, oError) {
+      var oState = this.getModel("state");
+      var oDetail = FlowCoordinator.extractBackendDetail(oError) || {};
+      var bOwnLockConflict = oDetail.action === "LOCKED"
+        && oDetail.owner
+        && oDetail.owner === this._getCurrentUser()
+        && oDetail.owner_session;
+
+      if (!bOwnLockConflict) {
+        return Promise.reject(oError);
+      }
+
+      return FlowCoordinator.confirmStealOwnLock(this).then(function (bShouldSteal) {
+        if (!bShouldSteal) {
+          return Promise.resolve({ success: false });
+        }
+
+        return BackendAdapter.lockAcquire(
+          sObjectId,
+          sSessionId,
+          this._getCurrentUser(),
+          oDetail.owner_session
+        );
+      }.bind(this)).then(function (oResult) {
+        if (!oResult || !oResult.success) {
+          oState.setProperty("/mode", "READ");
+          oState.setProperty("/isLocked", false);
+          this.setLockUiState(oState, "ERROR", this.getResourceBundle().getText("lockStayReadOnly"));
+          return null;
+        }
+
+        oState.setProperty("/isLocked", true);
+        oState.setProperty("/mode", "EDIT");
+        this.setLockUiState(oState, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
+        return oResult;
+      }.bind(this));
+    },
+
     onInit: function () {
       this.setModel(new JSONModel({
         hasSelectedChecks: false,
@@ -114,10 +157,12 @@ sap.ui.define([
             oState.setProperty("/mode", "EDIT");
             this.setLockUiState(oState, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
           }.bind(this)).catch(function (oError) {
-            oState.setProperty("/mode", "READ");
-            oState.setProperty("/isLocked", false);
-            this.setLockUiState(oState, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
-            return FlowCoordinator.handleBackendError(this, oError);
+            return this._tryStealOwnLock(sObjectId, sSessionId, oError).catch(function () {
+              oState.setProperty("/mode", "READ");
+              oState.setProperty("/isLocked", false);
+              this.setLockUiState(oState, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
+              return FlowCoordinator.handleBackendError(this, oError);
+            }.bind(this));
           }.bind(this));
         }
 
