@@ -250,6 +250,33 @@ sap.ui.define([
       return ChecklistValidationService.validateForStatusChange(oSelected, this._getValidationRules());
     },
 
+
+    _buildFrontendNowPayload: function () {
+      var oNow = new Date();
+      var sDate = oNow.toISOString().slice(0, 10);
+      var sTime = String(oNow.getHours()).padStart(2, "0") + ":" + String(oNow.getMinutes()).padStart(2, "0");
+      var sTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      return { date: sDate, time: sTime, timezone: sTimezone };
+    },
+
+    _applyFrontendNowDefaults: function (oChecklist, bForce) {
+      if (!oChecklist) {
+        return oChecklist;
+      }
+      oChecklist.basic = oChecklist.basic || {};
+      var oNow = this._buildFrontendNowPayload();
+      if (bForce || !oChecklist.basic.date) {
+        oChecklist.basic.date = oNow.date;
+      }
+      if (bForce || !oChecklist.basic.time) {
+        oChecklist.basic.time = oNow.time;
+      }
+      if (bForce || !oChecklist.basic.timezone) {
+        oChecklist.basic.timezone = oNow.timezone;
+      }
+      return oChecklist;
+    },
+
     _onMatched: function (oEvent) {
       var sId = oEvent.getParameter("arguments").id;
       var sLayout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
@@ -268,6 +295,7 @@ sap.ui.define([
       if (bCreate) {
         // Single-card flow: create is handled on detail card directly.
         var oDraft = ChecklistDraftHelper.buildDefaultChecklist("");
+        this._applyFrontendNowDefaults(oDraft, true);
         oDataModel.setProperty("/selectedChecklist", oDraft);
         this.getModel("selected").setData(ChecklistDraftHelper.clone(oDraft));
         oStateModel.setProperty("/mode", "EDIT");
@@ -280,6 +308,7 @@ sap.ui.define([
       if (bCopy) {
         var oSeed = this.getModel("selected").getData() || oDataModel.getProperty("/selectedChecklist") || {};
         var oCopy = ChecklistDraftHelper.clone(oSeed);
+        this._applyFrontendNowDefaults(oCopy, true);
         if (!oCopy.root) { oCopy.root = {}; }
         oCopy.root.id = "";
         oDataModel.setProperty("/selectedChecklist", oCopy);
@@ -538,10 +567,7 @@ sap.ui.define([
       if (!oNode) {
         return;
       }
-      var oSelectedModel = this.getModel("selected");
-      oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
-      oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
-      oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+      this._applyLocationSelection(oNode);
     },
 
 
@@ -601,9 +627,8 @@ sap.ui.define([
       this.getView().getModel("view").setProperty("/locationVhTree", this._buildLocationTree(aFiltered));
     },
 
-    onLocationTreeSelectionChange: function (oEvent) {
-      var oContext = oEvent.getParameter("rowContext");
-      var oNode = oContext ? oContext.getObject() : null;
+
+    _applyLocationSelection: function (oNode) {
       if (!oNode) {
         return;
       }
@@ -611,6 +636,15 @@ sap.ui.define([
       oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
       oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
       oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+    },
+
+    onLocationTreeSelectionChange: function (oEvent) {
+      var oContext = oEvent.getParameter("rowContext");
+      var oNode = oContext ? oContext.getObject() : null;
+      if (!oNode) {
+        return;
+      }
+      this._applyLocationSelection(oNode);
       this.onCloseLocationValueHelp();
     },
 
@@ -624,10 +658,7 @@ sap.ui.define([
       if (!oNode) {
         return;
       }
-      var oSelectedModel = this.getModel("selected");
-      oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
-      oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
-      oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+      this._applyLocationSelection(oNode);
     },
 
     onLpcChange: function (oEvent) {

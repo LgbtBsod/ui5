@@ -77,6 +77,19 @@ sap.ui.define([
             var oCacheModel = ModelFactory.createCacheModel();
             var oMasterDataModel = ModelFactory.createMasterDataModel();
             var oMplModel = ModelFactory.createMplModel();
+            var fnFormatHumanDateTime = function (vDate) {
+                var oDate = vDate instanceof Date ? vDate : new Date(vDate || Date.now());
+                if (Number.isNaN(oDate.getTime())) {
+                    oDate = new Date();
+                }
+                return oDate.toLocaleString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+            };
 
             this._oSmartCache = new SmartCacheManager();
             this._oHeartbeat = new HeartbeatManager({
@@ -187,7 +200,7 @@ sap.ui.define([
                 if (bKilled) {
                     this._handleKilledLock(oPayload);
                 }
-                var sCheckedAt = new Date().toISOString();
+                var sCheckedAt = fnFormatHumanDateTime(new Date());
                 oCacheModel.setProperty("/lastServerState", {
                     lastChangeSet: oPayload.last_change_set || null,
                     serverChangedOn: oPayload.server_changed_on || null,
@@ -344,7 +357,8 @@ sap.ui.define([
 
                     // Cache snapshot is the local source for diff/dirty calculations.
                     oCacheModel.setProperty("/pristineSnapshot", JSON.parse(JSON.stringify(aCheckLists)));
-                    var sCacheAt = (oServerState && (oServerState.checkedAt || oServerState.fetchedAt)) || new Date().toISOString();
+                    var sCacheAtRaw = (oServerState && (oServerState.checkedAt || oServerState.fetchedAt)) || new Date();
+                    var sCacheAt = fnFormatHumanDateTime(sCacheAtRaw);
                     oCacheModel.setProperty("/lastServerState", oServerState || {
                         fetchedAt: sCacheAt,
                         count: aCheckLists.length

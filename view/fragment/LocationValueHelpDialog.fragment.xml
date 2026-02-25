@@ -17,22 +17,10 @@
                             <Text text="{view>location_name}" wrapping="false"/>
                         </t:template>
                     </t:Column>
-                    <t:Column width="8rem">
-                        <Label text="{i18n>locationHierarchyLevelLabel}"/>
-                        <t:template>
-                            <Text text="{view>hierarchy_level}" wrapping="false"/>
-                        </t:template>
-                    </t:Column>
                     <t:Column width="12rem">
                         <Label text="{i18n>locationNodeLabel}"/>
                         <t:template>
                             <Text text="{view>node_id}" wrapping="false"/>
-                        </t:template>
-                    </t:Column>
-                    <t:Column width="12rem">
-                        <Label text="{i18n>locationParentLabel}"/>
-                        <t:template>
-                            <Text text="{view>parent_id}" wrapping="false"/>
                         </t:template>
                     </t:Column>
                 </t:columns>

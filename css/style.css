@@ -1515,6 +1515,9 @@ body.themeLifestyleNightOps .filterCard {
 .detailControlInlineCard {
   border-radius: var(--hzn-radius-l) !important;
   padding: 0.25rem 0.35rem 0.45rem;
+  position: sticky;
+  top: 0.85rem;
+  z-index: 6;
 }
 
 .detailControlInline .detailControlStatusRow {
