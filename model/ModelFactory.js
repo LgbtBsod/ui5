@@ -25,6 +25,8 @@ sap.ui.define([
                 filterFailedChecks: "ALL",
                 filterFailedBarriers: "ALL",
                 searchMode: "EXACT",
+                // Search cap requested by user; empty means load all available rows.
+                searchMaxResults: "100",
                 isBusy: false,
                 isDirty: false,
                 isLocked: false,
@@ -34,7 +36,7 @@ sap.ui.define([
                 activeObjectId: null,
                 lockExpires: null,
                 idleExpires: null,
-                requiresUserLogin: false,
+                requiresUserLogin: true,
                 testUser: "",
                 testUserLogin: "",
                 lockOperationPending: false,
@@ -43,7 +45,9 @@ sap.ui.define([
                 navGuardBypass: false,
                 networkOnline: true,
                 networkGraceMode: false,
-                networkGraceExpiresAt: null
+                networkGraceExpiresAt: null,
+                autosaveState: "IDLE",
+                autosaveAt: null
             });
         },
 

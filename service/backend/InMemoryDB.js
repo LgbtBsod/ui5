@@ -42,6 +42,9 @@ sap.ui.define([
         oChecklist.barriers = Array.isArray(oChecklist.barriers) ? oChecklist.barriers : [];
         oChecklist.root = oChecklist.root || {};
         oChecklist.basic = oChecklist.basic || {};
+        if (typeof oChecklist.root.this_is_integration_data === "undefined") {
+            oChecklist.root.this_is_integration_data = !!oChecklist.root.integrationFlag;
+        }
 
         return ChecklistEngine.recalculate(oChecklist);
     }
@@ -110,6 +113,11 @@ sap.ui.define([
                 var bLpc = !sLpc || sLpc === sItemLpc;
                 return bId && bLpc;
             });
+
+            var iMax = Number((mQuery && mQuery.maxResults) || 0);
+            if (iMax > 0) {
+                aFiltered = aFiltered.slice(0, iMax);
+            }
 
             return _clone(aFiltered);
         },

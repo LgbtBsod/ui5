@@ -55,10 +55,12 @@ sap.ui.define([], function () {
 
     function _mapChecklist(oRoot, oDetails) {
         var oData = oDetails || {};
+        var bIntegrationData = typeof oRoot.this_is_integration_data === "boolean" ? oRoot.this_is_integration_data : true;
         return {
             root: {
                 id: oRoot.id,
-                integrationFlag: true,
+                integrationFlag: bIntegrationData,
+                this_is_integration_data: bIntegrationData,
                 successRateChecks: 0,
                 successRateBarriers: 0,
                 status: _mapStatusToUi(oRoot.status)
@@ -150,8 +152,25 @@ sap.ui.define([], function () {
             });
         },
 
-        queryCheckLists: function () {
-            return this.getCheckLists();
+        queryCheckLists: function (mQuery) {
+            var iTop = Number(mQuery && mQuery.maxResults);
+            // Empty max means "all" for enterprise search use-case.
+            if (!iTop || iTop < 1) {
+                iTop = 9999;
+            }
+            iTop = Math.min(9999, iTop);
+
+            return _request("/checklist", {
+                params: {
+                    top: iTop,
+                    skip: 0
+                }
+            }).then(function (oList) {
+                var aRoots = oList && oList.value ? oList.value : [];
+                return aRoots.map(function (oRoot) {
+                    return _mapChecklist(oRoot, { checks: [], barriers: [] });
+                });
+            });
         },
 
 
@@ -160,7 +179,8 @@ sap.ui.define([], function () {
                 return {
                     root: {
                         id: oRoot.id,
-                        integrationFlag: true,
+                        integrationFlag: (typeof oRoot.this_is_integration_data === "boolean" ? oRoot.this_is_integration_data : true),
+                        this_is_integration_data: (typeof oRoot.this_is_integration_data === "boolean" ? oRoot.this_is_integration_data : true),
                         successRateChecks: 0,
                         successRateBarriers: 0,
                         status: _mapStatusToUi(oRoot.status)
@@ -193,8 +213,10 @@ sap.ui.define([], function () {
             });
         },
 
-        getChecklistChecks: function (sId) {
-            return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { top: 50, skip: 0 } }).then(function (oData) {
+        getChecklistChecks: function (sId, mPaging) {
+            var iTop = Number((mPaging && mPaging.top) || 20);
+            var iSkip = Number((mPaging && mPaging.skip) || 0);
+            return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { top: iTop, skip: iSkip } }).then(function (oData) {
                 return ((oData && oData.value) || []).map(function (oCheck, iIndex) {
                     return {
                         id: oCheck.id || (iIndex + 1),
@@ -206,8 +228,10 @@ sap.ui.define([], function () {
             });
         },
 
-        getChecklistBarriers: function (sId) {
-            return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { top: 50, skip: 0 } }).then(function (oData) {
+        getChecklistBarriers: function (sId, mPaging) {
+            var iTop = Number((mPaging && mPaging.top) || 20);
+            var iSkip = Number((mPaging && mPaging.skip) || 0);
+            return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { top: iTop, skip: iSkip } }).then(function (oData) {
                 return ((oData && oData.value) || []).map(function (oBarrier, iIndex) {
                     return {
                         id: oBarrier.id || (iIndex + 1),
@@ -392,6 +416,20 @@ createCheckList: function (oData) {
             });
         },
 
+        lockStatus: function (sObjectId, sSessionId) {
+            if (!sObjectId) {
+                return Promise.resolve({ success: true, is_killed: false });
+            }
+            if (sSessionId) { _sessionGuid = sSessionId; }
+            return _request("/lock/status", {
+                method: "POST",
+                params: {
+                    object_uuid: sObjectId,
+                    session_guid: _sessionGuid
+                }
+            });
+        },
+
         lockRelease: function (sObjectId, sSessionId, mOptions) {
             if (!sObjectId) {
                 return Promise.resolve({ released: true, save_status: "N" });
@@ -430,6 +468,15 @@ createCheckList: function (oData) {
             return Promise.resolve({
                 backend: "mock_gateway",
                 checkedAt: new Date().toISOString()
+            });
+        },
+
+        getFrontendConfig: function () {
+            return _request("/config/frontend").catch(function () {
+                return {
+                    search: { defaultMaxResults: 100, growingThreshold: 10 },
+                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, cacheValidMs: 30000 }
+                };
             });
         },
 

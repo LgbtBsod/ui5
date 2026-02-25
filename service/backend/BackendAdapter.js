@@ -57,9 +57,9 @@ sap.ui.define([
             });
         },
 
-        getChecklistChecks: function (sId) {
+        getChecklistChecks: function (sId, mPaging) {
             if (_backendService.getChecklistChecks) {
-                return _backendService.getChecklistChecks(sId);
+                return _backendService.getChecklistChecks(sId, mPaging);
             }
             return _backendService.getCheckLists().then(function (aItems) {
                 var oFound = (aItems || []).find(function (o) { return o && o.root && o.root.id === sId; });
@@ -67,9 +67,9 @@ sap.ui.define([
             });
         },
 
-        getChecklistBarriers: function (sId) {
+        getChecklistBarriers: function (sId, mPaging) {
             if (_backendService.getChecklistBarriers) {
-                return _backendService.getChecklistBarriers(sId);
+                return _backendService.getChecklistBarriers(sId, mPaging);
             }
             return _backendService.getCheckLists().then(function (aItems) {
                 var oFound = (aItems || []).find(function (o) { return o && o.root && o.root.id === sId; });
@@ -112,6 +112,13 @@ sap.ui.define([
             return _backendService.lockHeartbeat(sObjectId, sSessionId);
         },
 
+        lockStatus: function (sObjectId, sSessionId) {
+            if (_backendService.lockStatus) {
+                return _backendService.lockStatus(sObjectId, sSessionId);
+            }
+            return this.lockHeartbeat(sObjectId, sSessionId);
+        },
+
         lockRelease: function (sObjectId, sSessionId, mOptions) {
             return _backendService.lockRelease(sObjectId, sSessionId, mOptions);
         },
@@ -126,6 +133,13 @@ sap.ui.define([
 
         getServerState: function () {
             return _backendService.getServerState();
+        },
+
+        getFrontendConfig: function () {
+            if (_backendService.getFrontendConfig) {
+                return _backendService.getFrontendConfig();
+            }
+            return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 } });
         },
 
         getPersons: function () {

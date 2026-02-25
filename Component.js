@@ -10,6 +10,7 @@ sap.ui.define([
     "sap_ui5/manager/BeaconManager",
     "sap_ui5/manager/AutoSaveCoordinator",
     "sap_ui5/manager/ConnectivityCoordinator",
+    "sap_ui5/manager/LockStatusMonitor",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageBox",
     "sap_ui5/util/FlowCoordinator",
@@ -26,6 +27,7 @@ sap.ui.define([
     BeaconManager,
     AutoSaveCoordinator,
     ConnectivityCoordinator,
+    LockStatusMonitor,
     JSONModel,
     MessageBox,
     FlowCoordinator,
@@ -58,6 +60,10 @@ sap.ui.define([
             this._oHeartbeat = new HeartbeatManager({
                 intervalMs: 4 * 60 * 1000,
                 heartbeatFn: function () {
+                    // Do not send heartbeat outside explicit edit/lock mode.
+                    if (oStateModel.getProperty("/mode") !== "EDIT" || !oStateModel.getProperty("/isLocked")) {
+                        return Promise.resolve({ success: true, is_killed: false, skipped: true });
+                    }
                     return BackendAdapter.lockHeartbeat(
                         oStateModel.getProperty("/activeObjectId"),
                         oStateModel.getProperty("/sessionId")
@@ -105,7 +111,44 @@ sap.ui.define([
                     });
                 }
             });
+            this._oAutoSave.attachEvent("autosaveStart", function () {
+                oStateModel.setProperty("/autosaveState", "SAVING");
+            });
+            this._oAutoSave.attachEvent("autosaveDone", function () {
+                oStateModel.setProperty("/autosaveState", "SAVED");
+                oStateModel.setProperty("/autosaveAt", new Date().toISOString());
+            });
+            this._oAutoSave.attachEvent("autosaveError", function () {
+                oStateModel.setProperty("/autosaveState", "ERROR");
+            });
+
             this._oConnectivity = new ConnectivityCoordinator({ graceMs: 60 * 1000 });
+            this._oLockStatus = new LockStatusMonitor({
+                intervalMs: 60 * 1000,
+                checkFn: function () {
+                    // Fast killed-lock probe (1 minute) that complements heartbeat.
+                    if (oStateModel.getProperty("/mode") !== "EDIT" || !oStateModel.getProperty("/isLocked")) {
+                        return Promise.resolve({ success: true, is_killed: false, skipped: true });
+                    }
+                    return BackendAdapter.lockStatus(
+                        oStateModel.getProperty("/activeObjectId"),
+                        oStateModel.getProperty("/sessionId")
+                    );
+                }
+            });
+            // Centralized transition used by both heartbeat and lock-status probe.
+            this._handleKilledLock = function (oPayload) {
+                oStateModel.setProperty("/isKilled", true);
+                oStateModel.setProperty("/lockExpires", (oPayload && oPayload.lock_expires) || null);
+                oStateModel.setProperty("/mode", "READ");
+                oStateModel.setProperty("/isLocked", false);
+                this._oHeartbeat.stop();
+                this._oLockStatus.stop();
+                this._oGcd.destroyManager();
+                MessageBox.warning(this.getModel("i18n").getResourceBundle().getText("lockKilledMessage"));
+                FlowCoordinator.releaseWithTrySave({ getModel: this.getModel.bind(this), getResourceBundle: function(){ return this.getModel("i18n").getResourceBundle();}.bind(this) });
+            }.bind(this);
+
             this._fnUnregisterBeacon = BeaconManager.register(function () {
                 return BackendAdapter.buildReleaseBeaconPayload(
                     oStateModel.getProperty("/activeObjectId"),
@@ -120,12 +163,7 @@ sap.ui.define([
                 oStateModel.setProperty("/isKilled", bKilled);
                 oStateModel.setProperty("/lockExpires", oPayload.lock_expires || null);
                 if (bKilled) {
-                    oStateModel.setProperty("/mode", "READ");
-                    oStateModel.setProperty("/isLocked", false);
-                    this._oHeartbeat.stop();
-                    this._oGcd.destroyManager();
-                    MessageBox.warning(this.getModel("i18n").getResourceBundle().getText("lockKilledMessage"));
-                    FlowCoordinator.releaseWithTrySave({ getModel: this.getModel.bind(this), getResourceBundle: function(){ return this.getModel("i18n").getResourceBundle();}.bind(this) });
+                    this._handleKilledLock(oPayload);
                 }
                 oCacheModel.setProperty("/lastServerState", {
                     lastChangeSet: oPayload.last_change_set || null,
@@ -141,6 +179,19 @@ sap.ui.define([
 
             this._oGcd.attachEvent("gcdExpired", function () {
                 oStateModel.setProperty("/hasConflict", true);
+            });
+
+            this._oLockStatus.attachEvent("status", function (oEvent) {
+                var oPayload = oEvent.getParameters() || {};
+                var bKilled = !!oPayload.is_killed;
+                if (!bKilled) {
+                    return;
+                }
+                this._handleKilledLock(oPayload);
+            }.bind(this));
+
+            this._oLockStatus.attachEvent("statusError", function () {
+                // status probe is best-effort; heartbeat remains the source of truth.
             });
 
             this._oActivity.attachEvent("idleTimeout", function () {
@@ -236,7 +287,8 @@ sap.ui.define([
                 BackendAdapter.getDictionary("LPC").catch(function () { return []; }),
                 BackendAdapter.getDictionary("PROFESSION").catch(function () { return []; }),
                 BackendAdapter.getLocations().catch(function () { return []; }),
-                BackendAdapter.getServerState().catch(function () { return null; })
+                BackendAdapter.getServerState().catch(function () { return null; }),
+                BackendAdapter.getFrontendConfig().catch(function () { return null; })
             ]).then(function (aResults) {
                 var oLogin = aResults[0];
                 var aPersons = aResults[2];
@@ -244,8 +296,12 @@ sap.ui.define([
                 var aProfessions = aResults[4];
                 var aLocations = aResults[5];
                 var oServerState = aResults[6];
+                var oFrontendConfig = aResults[7] || {};
 
                 oStateModel.setProperty("/sessionId", oLogin.sessionId);
+                if (oFrontendConfig.search && oFrontendConfig.search.defaultMaxResults) {
+                    oStateModel.setProperty("/searchMaxResults", String(oFrontendConfig.search.defaultMaxResults));
+                }
 
                 return this._oSmartCache.getWithFallback("checkLists").then(function (aCached) {
                     if (Array.isArray(aCached) && aCached.length) {
@@ -281,6 +337,7 @@ sap.ui.define([
                 this._oActivity.start();
                 this._oAutoSave.start();
                 this._oConnectivity.start();
+                this._oLockStatus.start();
             }.bind(this));
         },
 
@@ -299,6 +356,9 @@ sap.ui.define([
             }
             if (this._oConnectivity) {
                 this._oConnectivity.stop();
+            }
+            if (this._oLockStatus) {
+                this._oLockStatus.stop();
             }
             if (this._fnUnregisterBeacon) {
                 this._fnUnregisterBeacon();

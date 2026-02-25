@@ -110,6 +110,41 @@ class LockService:
         }
 
     @staticmethod
+    def status(db: Session, object_uuid: str, session_guid: str) -> dict:
+        lock = (
+            db.query(LockEntry)
+            .filter(LockEntry.pcct_uuid == object_uuid, LockEntry.session_guid == session_guid)
+            .first()
+        )
+
+        if not lock:
+            raise ValueError("NO_LOCK")
+
+        if lock.is_killed:
+            return {
+                "success": False,
+                "is_killed": True,
+                "killed_by": lock.killed_by,
+                "lock_expires": lock.expires_at,
+                "server_changed_on": LockService._server_changed_on(db, object_uuid),
+                "version_number": LockService._version_number(db, object_uuid),
+            }
+
+        if lock.expires_at and _as_utc(lock.expires_at) < now_utc():
+            lock.is_killed = True
+            db.commit()
+            raise ValueError("LOCK_EXPIRED")
+
+        return {
+            "success": True,
+            "is_killed": False,
+            "killed_by": None,
+            "lock_expires": lock.expires_at,
+            "server_changed_on": LockService._server_changed_on(db, object_uuid),
+            "version_number": LockService._version_number(db, object_uuid),
+        }
+
+    @staticmethod
     def heartbeat(db: Session, object_uuid: str, session_guid: str) -> dict:
         lock = (
             db.query(LockEntry)

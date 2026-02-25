@@ -918,6 +918,21 @@ body {
   box-shadow: 0 10px 22px rgba(var(--accent-rgb), 0.3) !important;
 }
 
+
+@keyframes savePulseGlow {
+  0%, 100% { box-shadow: 0 10px 22px rgba(var(--accent-rgb), 0.30); transform: translateY(0); }
+  50% { box-shadow: 0 14px 28px rgba(var(--accent-rgb), 0.42); transform: translateY(-1px); }
+}
+
+.savePulseButton .sapMBtnInner {
+  animation: savePulseGlow 1.8s ease-in-out infinite;
+}
+
+.savePulseButton:hover .sapMBtnInner,
+.savePulseButton:active .sapMBtnInner,
+.savePulseButton.sapMBtnActive .sapMBtnInner {
+  animation-play-state: paused;
+}
 .accentSwitch.sapMSwtOn,
 .sapMSwt.accentSwitch.sapMSwtOn,
 .searchToolbar .accentSwitch.sapMSwtOn {
@@ -982,4 +997,68 @@ body.themeLifestyleNightOps .filterCard {
 
 .searchResultTable .sapMListTblCell {
   vertical-align: top;
+}
+
+/* === Premium UX extensions === */
+.smartFilterGlass,
+.smartTableGlass {
+  background: color-mix(in srgb, var(--glass-bg) 86%, rgba(var(--accent-rgb), 0.08)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 82%, rgba(var(--accent-rgb), 0.18)) !important;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+}
+
+.smartFilterGlass .sapUiCompFilterBar,
+.smartTableGlass .sapUiCompSmartTable {
+  background: transparent !important;
+}
+
+.tableScrollWrap {
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--glass-border) 70%, rgba(255,255,255,0.08));
+  padding: 0.25rem;
+}
+
+.floatingControlRail {
+  position: sticky;
+  top: 28vh;
+  margin-left: auto;
+  width: min(16rem, 100%);
+  z-index: 3;
+  backdrop-filter: blur(14px) saturate(130%);
+}
+
+.expandedDialogContent {
+  height: 100%;
+}
+
+.expandedDialogContent .sapMListTbl {
+  min-height: 18rem;
+}
+
+@media (max-width: 1200px) {
+  .floatingControlRail {
+    position: static;
+    width: 100%;
+    top: auto;
+  }
+}
+
+
+/* Theme switch button: inverse style per active theme */
+.appDark .themeDockButton .sapMBtnInner {
+  background: rgba(255,255,255,0.16) !important;
+  border-color: rgba(255,255,255,0.28) !important;
+}
+.appDark .themeDockButton .sapUiIcon {
+  color: #ffe4bf !important;
+}
+.appLight .themeDockButton .sapMBtnInner,
+.light-mode .themeDockButton .sapMBtnInner {
+  background: rgba(12, 23, 38, 0.82) !important;
+  border-color: rgba(10, 26, 48, 0.9) !important;
+}
+.appLight .themeDockButton .sapUiIcon,
+.light-mode .themeDockButton .sapUiIcon {
+  color: #f7fbff !important;
 }

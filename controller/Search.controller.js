@@ -53,9 +53,7 @@ sap.ui.define([
         _onFilterChanged: function () {
             this._updateFilterState();
 
-            if (this.getView().getModel("view").getProperty("/hasSearched")) {
-                this._scheduleSearch();
-            }
+            // By product decision search starts only on explicit Search button.
         },
 
         _scheduleSearch: function () {
@@ -71,12 +69,18 @@ sap.ui.define([
 
         _buildFilterPayload: function () {
             var oStateModel = this.getModel("state");
+            var sRawMax = String(oStateModel.getProperty("/searchMaxResults") || "").trim();
+            var iMax = sRawMax ? Number(sRawMax) : null;
+            if (iMax !== null) {
+                iMax = Math.max(1, Math.min(9999, iMax || 0));
+            }
 
             return {
                 filterId: oStateModel.getProperty("/filterId"),
                 filterLpc: oStateModel.getProperty("/filterLpc"),
                 filterFailedChecks: oStateModel.getProperty("/filterFailedChecks"),
-                filterFailedBarriers: oStateModel.getProperty("/filterFailedBarriers")
+                filterFailedBarriers: oStateModel.getProperty("/filterFailedBarriers"),
+                maxResults: iMax
             };
         },
 
@@ -108,7 +112,8 @@ sap.ui.define([
             return this.runWithStateFlag(oStateModel, "/isLoading", function () {
                 return BackendAdapter.queryCheckLists({
                     idContains: mPayload.filterId,
-                    lpcKey: mPayload.filterLpc
+                    lpcKey: mPayload.filterLpc,
+                    maxResults: mPayload.maxResults
                 }).then(function (aPrefiltered) {
                     var aFiltered = SmartSearchAdapter.filterData(aPrefiltered, mPayload, sSearchMode);
                     oDataModel.setProperty("/visibleCheckLists", aFiltered);
@@ -168,7 +173,8 @@ sap.ui.define([
                 }
                 this.getModel("state").setProperty("/objectAction", "CREATE");
                 this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-                this.navTo("object", { id: "__create" });
+                // Unified single object card: detail route handles create mode too.
+                this.navTo("detail", { id: "__create" });
             }.bind(this));
         },
 
@@ -187,7 +193,8 @@ sap.ui.define([
                 }
                 this.getModel("state").setProperty("/objectAction", "COPY");
                 this.getModel("state").setProperty("/layout", "TwoColumnsMidExpanded");
-                this.navTo("object", { id: sId });
+                // Unified single object card.
+                this.navTo("detail", { id: sId });
             }.bind(this));
         },
 
@@ -214,6 +221,10 @@ sap.ui.define([
                     MessageToast.show(oBundle.getText("deleteFailed", [((oError && oError.message) || "Unknown error")]));
                 });
             }.bind(this));
+        },
+
+        onSmartSearch: function () {
+            this.onSearch();
         },
 
         onSearch: function () {

@@ -4,10 +4,11 @@ sap.ui.define([
   "sap/m/MessageToast",
   "sap/m/MessageBox",
   "sap/ui/model/json/JSONModel",
+  "sap/ui/core/Fragment",
   "sap_ui5/util/RowListHelper",
   "sap_ui5/util/ChecklistDraftHelper",
   "sap_ui5/util/FlowCoordinator"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator) {
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, Fragment, RowListHelper, ChecklistDraftHelper, FlowCoordinator) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -64,10 +65,13 @@ sap.ui.define([
         locationTree: [],
         checksLoading: false,
         barriersLoading: false,
+        detailSkeletonBusy: false,
         infoCards: [
           { key: "observer", title: this.getResourceBundle().getText("observerLabel") },
           { key: "observed", title: this.getResourceBundle().getText("observedLabel") },
-          { key: "location", title: this.getResourceBundle().getText("locationLabel") }
+          { key: "location", title: this.getResourceBundle().getText("locationLabel") },
+          { key: "lpc", title: this.getResourceBundle().getText("lpcLabel") },
+          { key: "profession", title: this.getResourceBundle().getText("professionLabel") }
         ]
       });
 
@@ -95,6 +99,10 @@ sap.ui.define([
     _syncDirtyFlag: function () {
       var oEdited = this.getModel("selected").getData() || {};
       var oOriginal = this.getModel("data").getProperty("/selectedChecklist") || {};
+      if ((oEdited.checks || []).some(function (oRow) { return oRow && oRow.__loading; })
+        || (oEdited.barriers || []).some(function (oRow) { return oRow && oRow.__loading; })) {
+        return;
+      }
       this.getModel("state").setProperty("/isDirty", ChecklistDraftHelper.hasChanges(oEdited, oOriginal));
     },
 
@@ -102,11 +110,42 @@ sap.ui.define([
       var sId = oEvent.getParameter("arguments").id;
       var sLayout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
       var oStateModel = this.getModel("state");
+      var oDataModel = this.getModel("data");
+      var sAction = oStateModel.getProperty("/objectAction") || "";
+      var bCreate = sAction === "CREATE" || sId === "__create";
+      var bCopy = sAction === "COPY";
+
       oStateModel.setProperty("/layout", sLayout);
-      oStateModel.setProperty("/mode", "READ");
-      oStateModel.setProperty("/activeObjectId", sId || null);
+      oStateModel.setProperty("/activeObjectId", bCreate ? null : (sId || null));
+      oStateModel.setProperty("/objectAction", "");
 
       this._prepareLocationTree();
+
+      if (bCreate) {
+        // Single-card flow: create is handled on detail card directly.
+        var oDraft = ChecklistDraftHelper.buildDefaultChecklist("");
+        oDataModel.setProperty("/selectedChecklist", oDraft);
+        this.getModel("selected").setData(ChecklistDraftHelper.clone(oDraft));
+        oStateModel.setProperty("/mode", "EDIT");
+        oStateModel.setProperty("/isDirty", false);
+        this._updateSelectionState();
+        return;
+      }
+
+      if (bCopy) {
+        var oSeed = this.getModel("selected").getData() || oDataModel.getProperty("/selectedChecklist") || {};
+        var oCopy = ChecklistDraftHelper.clone(oSeed);
+        if (!oCopy.root) { oCopy.root = {}; }
+        oCopy.root.id = "";
+        oDataModel.setProperty("/selectedChecklist", oCopy);
+        this.getModel("selected").setData(ChecklistDraftHelper.clone(oCopy));
+        oStateModel.setProperty("/mode", "EDIT");
+        oStateModel.setProperty("/isDirty", true);
+        this._updateSelectionState();
+        return;
+      }
+
+      oStateModel.setProperty("/mode", "READ");
       this._bindChecklistById(sId);
       oStateModel.setProperty("/isDirty", false);
     },
@@ -153,6 +192,34 @@ sap.ui.define([
       return aRoots;
     },
 
+
+
+    _isChecklistCacheValid: function () {
+      var oComp = this.getOwnerComponent();
+      return !!(oComp && oComp._oSmartCache && oComp._oSmartCache.isCacheValid && oComp._oSmartCache.isCacheValid("checkLists"));
+    },
+
+    _reloadChecklistFromBackend: function (sId) {
+      var oDataModel = this.getModel("data");
+      return this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
+        return BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
+          oDataModel.setProperty("/selectedChecklist", oRootOnly || null);
+          this._applyChecklistLazily(oRootOnly || {});
+          return oRootOnly;
+        }.bind(this));
+      }.bind(this));
+    },
+
+    _ensureChecklistFreshBeforeEdit: function (sId) {
+      if (!sId) {
+        return Promise.resolve(null);
+      }
+      if (this._isChecklistCacheValid()) {
+        return Promise.resolve(this.getModel("data").getProperty("/selectedChecklist") || null);
+      }
+      return this._reloadChecklistFromBackend(sId);
+    },
+
     _bindChecklistById: function (sId) {
       var oDataModel = this.getModel("data");
       var aChecklists = oDataModel.getProperty("/checkLists") || [];
@@ -160,21 +227,47 @@ sap.ui.define([
         return item && item.root && item.root.id === sId;
       }) || null;
 
-      if (oLocalMatch) {
+      if (oLocalMatch && this._isChecklistCacheValid()) {
+        // Use cache when still valid (30 seconds window).
         oDataModel.setProperty("/selectedChecklist", oLocalMatch);
         this._applyChecklistLazily(oLocalMatch);
         return;
       }
 
-      this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
-        return BackendAdapter.getChecklistRoot(sId).then(function (oRootOnly) {
-          oDataModel.setProperty("/selectedChecklist", oRootOnly);
-          this._applyChecklistLazily(oRootOnly);
-        }.bind(this));
-      }.bind(this));
+      this._reloadChecklistFromBackend(sId);
     },
 
 
+
+    _buildSkeletonRows: function (iCount) {
+      return Array.from({ length: iCount }, function (_, iIndex) {
+        return {
+          id: "skeleton-" + (iIndex + 1),
+          text: "",
+          comment: "",
+          result: false,
+          __loading: true
+        };
+      });
+    },
+
+    _loadSectionPaged: function (sId, sSection, iPageSize) {
+      var fnLoader = sSection === "checks" ? BackendAdapter.getChecklistChecks : BackendAdapter.getChecklistBarriers;
+      var aAllRows = [];
+      var iSkip = 0;
+      var fnNext = function () {
+        return fnLoader.call(BackendAdapter, sId, { top: iPageSize, skip: iSkip }).then(function (aRows) {
+          var aChunk = aRows || [];
+          aAllRows = aAllRows.concat(aChunk);
+          iSkip += aChunk.length;
+          if (aChunk.length < iPageSize) {
+            return aAllRows;
+          }
+          return fnNext();
+        });
+      };
+      return fnNext();
+    },
 
     _applyChecklistLazily: function (oChecklist) {
       var oView = this.getView().getModel("view");
@@ -183,32 +276,40 @@ sap.ui.define([
       }
       var oSelected = ChecklistDraftHelper.clone(oChecklist || {});
       var sId = (((oSelected || {}).root || {}).id) || "";
+      var iPageSize = 20;
 
-      oSelected.checks = [];
-      oSelected.barriers = [];
+      oSelected.checks = this._buildSkeletonRows(iPageSize);
+      oSelected.barriers = this._buildSkeletonRows(iPageSize);
       this.getModel("selected").setData(oSelected);
       oView.setProperty("/checksLoading", true);
       oView.setProperty("/barriersLoading", true);
+      oView.setProperty("/detailSkeletonBusy", true);
 
       if (!sId) {
         oView.setProperty("/checksLoading", false);
         oView.setProperty("/barriersLoading", false);
+        oView.setProperty("/detailSkeletonBusy", false);
         this._updateSelectionState();
         return;
       }
 
-      // Fast root/basic first, then sequential lazy requests (checks -> barriers) without UI-level expand binding.
-      BackendAdapter.getChecklistChecks(sId).then(function (aChecks) {
+      this._loadSectionPaged(sId, "checks", iPageSize).then(function (aChecks) {
         this.getModel("selected").setProperty("/checks", aChecks || []);
       }.bind(this)).finally(function () {
         oView.setProperty("/checksLoading", false);
+        if (!oView.getProperty("/barriersLoading")) {
+          oView.setProperty("/detailSkeletonBusy", false);
+        }
         this._updateSelectionState();
       }.bind(this));
 
-      BackendAdapter.getChecklistBarriers(sId).then(function (aBarriers) {
+      this._loadSectionPaged(sId, "barriers", iPageSize).then(function (aBarriers) {
         this.getModel("selected").setProperty("/barriers", aBarriers || []);
       }.bind(this)).finally(function () {
         oView.setProperty("/barriersLoading", false);
+        if (!oView.getProperty("/checksLoading")) {
+          oView.setProperty("/detailSkeletonBusy", false);
+        }
         this._updateSelectionState();
       }.bind(this));
     },
@@ -229,7 +330,9 @@ sap.ui.define([
       if (sValue && aFiltered.length < 3 && BackendAdapter.suggestPersons) {
         BackendAdapter.suggestPersons(sValue).then(function (aRemote) {
           this._setPersonSuggestions(sTarget, (aRemote || []).slice(0, 10));
-        }.bind(this));
+        }.bind(this)).catch(function () {
+          // Keep local suggestions only when remote suggest is unavailable.
+        });
       }
     },
 
@@ -259,7 +362,11 @@ sap.ui.define([
       }
 
       var sTarget = oEvent.getSource().data("target");
-      var oPerson = oItem.getBindingContext("view").getObject();
+      var oCtx = oItem.getBindingContext("view");
+      var oPerson = oCtx ? oCtx.getObject() : null;
+      if (!oPerson) {
+        return;
+      }
       var sPrefix = sTarget === "observed" ? "OBSERVED_" : "OBSERVER_";
       var oSelectedModel = this.getModel("selected");
 
@@ -276,11 +383,53 @@ sap.ui.define([
         return;
       }
 
-      var oNode = oItem.getBindingContext("view").getObject();
+      var oCtx = oItem.getBindingContext("view");
+      var oNode = oCtx ? oCtx.getObject() : null;
+      if (!oNode) {
+        return;
+      }
       var oSelectedModel = this.getModel("selected");
       oSelectedModel.setProperty("/basic/LOCATION_KEY", oNode.node_id || "");
       oSelectedModel.setProperty("/basic/LOCATION_NAME", oNode.location_name || "");
       oSelectedModel.setProperty("/basic/LOCATION_TEXT", oNode.location_name || "");
+    },
+
+    onLpcChange: function (oEvent) {
+      var sKey = oEvent.getParameter("selectedItem") ? oEvent.getParameter("selectedItem").getKey() : oEvent.getSource().getSelectedKey();
+      var aLpc = this.getModel("masterData").getProperty("/lpc") || [];
+      var oMatch = aLpc.find(function (oItem) { return oItem && oItem.key === sKey; }) || {};
+      var oSelectedModel = this.getModel("selected");
+      oSelectedModel.setProperty("/basic/LPC_KEY", sKey || "");
+      oSelectedModel.setProperty("/basic/LPC_TEXT", oMatch.text || "");
+    },
+
+    onProfessionChange: function (oEvent) {
+      var sKey = oEvent.getParameter("selectedItem") ? oEvent.getParameter("selectedItem").getKey() : oEvent.getSource().getSelectedKey();
+      var aProf = this.getModel("masterData").getProperty("/professions") || [];
+      var oMatch = aProf.find(function (oItem) { return oItem && oItem.key === sKey; }) || {};
+      var oSelectedModel = this.getModel("selected");
+      oSelectedModel.setProperty("/basic/PROF_KEY", sKey || "");
+      oSelectedModel.setProperty("/basic/PROF_TEXT", oMatch.text || "");
+    },
+
+    _confirmIntegrationEdit: function () {
+      var oRoot = this.getModel("selected").getProperty("/root") || this.getModel("data").getProperty("/selectedChecklist/root") || {};
+      var bIntegrationData = !!(oRoot.this_is_integration_data || oRoot.integrationFlag);
+      if (!bIntegrationData) {
+        return Promise.resolve(true);
+      }
+
+      var oBundle = this.getResourceBundle();
+      return new Promise(function (resolve) {
+        MessageBox.warning(oBundle.getText("integrationEditWarning"), {
+          title: oBundle.getText("integrationEditTitle"),
+          actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+          emphasizedAction: MessageBox.Action.NO,
+          onClose: function (sAction) {
+            resolve(sAction === MessageBox.Action.YES);
+          }
+        });
+      });
     },
 
     onCloseDetail: function () {
@@ -307,6 +456,10 @@ sap.ui.define([
       });
     },
 
+    onToggleEdit: function (oEvent) {
+      return this.onToggleEditFromDetail(oEvent);
+    },
+
     onToggleEditFromDetail: function (oEvent) {
       var bEditMode = oEvent.getParameter("state");
       var oStateModel = this.getModel("state");
@@ -316,17 +469,29 @@ sap.ui.define([
       this.setLockUiState(oStateModel, "PENDING", this.getResourceBundle().getText("lockPending"));
       this.runWithStateFlag(oStateModel, "/lockOperationPending", function () {
         if (!bEditMode) {
+          // First switch UI to read-only so periodic probes stop immediately.
+          oStateModel.setProperty("/mode", "READ");
+          oStateModel.setProperty("/isLocked", false);
           return this.releaseLock(sObjectId, sSessionId).finally(function () {
-            oStateModel.setProperty("/mode", "READ");
-            oStateModel.setProperty("/isLocked", false);
             this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockReleased"));
           }.bind(this));
         }
 
-        return BackendAdapter.lockAcquire(
-          sObjectId,
-          sSessionId
-        ).then(function () {
+        return this._ensureChecklistFreshBeforeEdit(sObjectId).then(function () {
+          return this._confirmIntegrationEdit();
+        }.bind(this)).then(function (bConfirmed) {
+          if (!bConfirmed) {
+            this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockStayReadOnly"));
+            return null;
+          }
+          return BackendAdapter.lockAcquire(
+            sObjectId,
+            sSessionId
+          );
+        }.bind(this)).then(function (oAcquireResult) {
+          if (!oAcquireResult) {
+            return;
+          }
           oStateModel.setProperty("/isLocked", true);
           oStateModel.setProperty("/mode", "EDIT");
           this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
@@ -382,13 +547,21 @@ sap.ui.define([
       this._updateSelectionState();
     },
 
-    formatInfoCardValue: function (sKey, sObserver, sObserved, sLocationName, sLocationText) {
+    formatInfoCardValue: function (sKey, sObserver, sObserved, sLocationName, sLocationText, sLpcText, sProfText) {
       if (sKey === "observer") {
         return sObserver || "-";
       }
 
       if (sKey === "observed") {
         return sObserved || "-";
+      }
+
+      if (sKey === "lpc") {
+        return sLpcText || "-";
+      }
+
+      if (sKey === "profession") {
+        return sProfText || "-";
       }
 
       if (sLocationName && sLocationText && sLocationName !== sLocationText) {
@@ -449,14 +622,11 @@ sap.ui.define([
       var oEdited = this.getModel("selected").getData() || {};
       var sId = ((((oEdited || {}).root || {}).id) || "").trim();
 
-      if (!sId) {
-        this.showI18nToast("checklistIdMissing");
-        return;
-      }
+      var bCreateMode = !sId;
 
-      return this.runWithStateFlag(oStateModel, "/isBusy", function () {
+      return this.runWithStateFlag(oStateModel, "/isLoading", function () {
 
-      return BackendAdapter.updateCheckList(sId, oEdited)
+      return (bCreateMode ? BackendAdapter.createCheckList(oEdited) : BackendAdapter.updateCheckList(sId, oEdited))
         .then(function (oSavedChecklist) {
           return BackendAdapter.getCheckLists().then(function (aUpdatedCheckLists) {
             return {
@@ -496,6 +666,52 @@ sap.ui.define([
       }.bind(this));
     },
 
+
+
+    _openExpandedDialog: function (sType) {
+      var sProp = sType === "checks" ? "_pChecksDialog" : "_pBarriersDialog";
+      var sFragment = sType === "checks"
+        ? "sap_ui5.view.fragment.ChecksExpandedDialog"
+        : "sap_ui5.view.fragment.BarriersExpandedDialog";
+
+      if (!this[sProp]) {
+        this[sProp] = Fragment.load({
+          id: this.getView().getId(),
+          name: sFragment,
+          controller: this
+        }).then(function (oDialog) {
+          this.getView().addDependent(oDialog);
+          return oDialog;
+        }.bind(this));
+      }
+
+      return this[sProp].then(function (oDialog) {
+        oDialog.open();
+      });
+    },
+
+    onExpandChecks: function () {
+      this._openExpandedDialog("checks");
+    },
+
+    onExpandBarriers: function () {
+      this._openExpandedDialog("barriers");
+    },
+
+    onCloseChecksExpanded: function () {
+      var oDialog = this.byId("checksExpandedDialog");
+      if (oDialog) {
+        oDialog.close();
+      }
+    },
+
+    onCloseBarriersExpanded: function () {
+      var oDialog = this.byId("barriersExpandedDialog");
+      if (oDialog) {
+        oDialog.close();
+      }
+    },
+
     onAddCheckRow: function () {
       var oSelectedModel = this.getModel("selected");
       var aChecks = oSelectedModel.getProperty("/checks") || [];
@@ -528,6 +744,17 @@ sap.ui.define([
       }
       this._syncDirtyFlag();
       this._updateSelectionState();
+    },
+
+    onExit: function () {
+      ["checksExpandedDialog", "barriersExpandedDialog"].forEach(function (sId) {
+        var oDialog = this.byId(sId);
+        if (oDialog) {
+          oDialog.destroy();
+        }
+      }.bind(this));
+      this._pChecksDialog = null;
+      this._pBarriersDialog = null;
     },
 
     resultText: function (bResult) {

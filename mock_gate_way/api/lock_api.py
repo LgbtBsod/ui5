@@ -70,3 +70,24 @@ def release(
         raise HTTPException(status_code=400, detail="MISSING_LOCK_PARAMS")
 
     return LockService.release(db, obj, session, iv_try_save, iv_payload)
+
+
+@router.post("/status")
+def status(
+    object_uuid: str | None = None,
+    session_guid: str | None = None,
+    pcct_uuid: str | None = None,
+    user_id: str | None = None,
+    db: Session = Depends(get_db),
+):
+    obj = _param(object_uuid, pcct_uuid)
+    session = _param(session_guid, user_id)
+    if not obj or not session:
+        raise HTTPException(status_code=400, detail="MISSING_LOCK_PARAMS")
+
+    try:
+        return LockService.status(db, obj, session)
+    except ValueError as exc:
+        code = 410 if str(exc) == "LOCK_EXPIRED" else 409
+        raise HTTPException(status_code=code, detail=str(exc)) from exc
+
