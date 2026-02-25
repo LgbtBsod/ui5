@@ -71,7 +71,13 @@ sap.ui.define([
     _prepareLocationTree: function () {
       var aLocations = this.getModel("mpl").getProperty("/locations") || [];
       var aTree = this._buildLocationTree(aLocations);
-      this.getModel("view").setProperty("/locationTree", aTree);
+      var oView = this.getView();
+      var oViewModel = oView && oView.getModel("view");
+      if (!oViewModel) {
+        oViewModel = new JSONModel({});
+        oView.setModel(oViewModel, "view");
+      }
+      oViewModel.setProperty("/locationTree", aTree);
     },
 
     _buildLocationTree: function (aFlatNodes) {
@@ -128,7 +134,10 @@ sap.ui.define([
 
 
     _applyChecklistLazily: function (oChecklist) {
-      var oView = this.getModel("view");
+      var oView = this.getView().getModel("view");
+      if (!oView) {
+        return;
+      }
       var oSelected = ChecklistDraftHelper.clone(oChecklist || {});
       var sId = (((oSelected || {}).root || {}).id) || "";
 
@@ -182,11 +191,22 @@ sap.ui.define([
     },
 
     _setPersonSuggestions: function (sTarget, aSuggestions) {
-      this.getModel("view").setProperty(sTarget === "observed" ? "/observedSuggestions" : "/observerSuggestions", aSuggestions || []);
+      var oViewModel = this.getView().getModel("view");
+      if (!oViewModel) {
+        return;
+      }
+      oViewModel.setProperty(sTarget === "observed" ? "/observedSuggestions" : "/observerSuggestions", aSuggestions || []);
     },
 
     _normalizeText: function (sValue) {
       return String(sValue || "").trim().toLowerCase();
+    },
+
+    formatPersonSuggestion: function (sFullName, sPosition) {
+      if (!sPosition) {
+        return sFullName || "";
+      }
+      return (sFullName || "") + " — " + sPosition;
     },
 
     onPersonSuggestionSelected: function (oEvent) {
@@ -356,7 +376,10 @@ sap.ui.define([
         return;
       }
 
-      var oViewModel = this.getModel("view");
+      var oViewModel = this.getView().getModel("view");
+      if (!oViewModel) {
+        return;
+      }
       var aItems = (oViewModel.getProperty("/infoCards") || []).slice();
       var oMoved = aItems.splice(iDragged, 1)[0];
       if (!oMoved) {

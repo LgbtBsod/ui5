@@ -7,6 +7,26 @@ from utils.etag import format_etag
 from utils.time import now_utc
 
 
+BASIC_FIELD_MAP = {
+    "date": "date",
+    "equipment": "equipment",
+    "LPC_TEXT": "lpc_text",
+    "OBSERVER_FULLNAME": "observer_fullname",
+    "OBSERVER_PERNER": "observer_perner",
+    "OBSERVER_POSITION": "observer_position",
+    "OBSERVER_ORGUNIT": "observer_orgunit",
+    "OBSERVER_INTEGRATION_NAME": "observer_integration_name",
+    "OBSERVED_FULLNAME": "observed_fullname",
+    "OBSERVED_PERNER": "observed_perner",
+    "OBSERVED_POSITION": "observed_position",
+    "OBSERVED_ORGUNIT": "observed_orgunit",
+    "OBSERVED_INTEGRATION_NAME": "observed_integration_name",
+    "LOCATION_KEY": "location_key",
+    "LOCATION_NAME": "location_name",
+    "LOCATION_TEXT": "location_text",
+}
+
+
 def lpc_allows_barriers(lpc: str) -> bool:
     if not lpc or len(lpc) < 2:
         return False
@@ -58,6 +78,22 @@ class ChecklistService:
             "lpc": root.lpc,
             "status": root.status,
             "changed_on": root.changed_on,
+            "date": root.date or "",
+            "equipment": root.equipment or "",
+            "lpc_text": root.lpc_text or "",
+            "observer_fullname": root.observer_fullname or "",
+            "observer_perner": root.observer_perner or "",
+            "observer_position": root.observer_position or "",
+            "observer_orgunit": root.observer_orgunit or "",
+            "observer_integration_name": root.observer_integration_name or "",
+            "observed_fullname": root.observed_fullname or "",
+            "observed_perner": root.observed_perner or "",
+            "observed_position": root.observed_position or "",
+            "observed_orgunit": root.observed_orgunit or "",
+            "observed_integration_name": root.observed_integration_name or "",
+            "location_key": root.location_key or "",
+            "location_name": root.location_name or "",
+            "location_text": root.location_text or "",
         }
 
         if expand:
@@ -142,6 +178,16 @@ class ChecklistService:
         for field in ("lpc", "status"):
             if field in data:
                 setattr(root, field, data[field])
+
+        basic_payload = data.get("basic") if isinstance(data, dict) else None
+        if isinstance(basic_payload, dict):
+            for incoming_key, model_field in BASIC_FIELD_MAP.items():
+                if incoming_key in basic_payload:
+                    setattr(root, model_field, basic_payload.get(incoming_key) or "")
+
+        for incoming_key, model_field in BASIC_FIELD_MAP.items():
+            if incoming_key in data:
+                setattr(root, model_field, data.get(incoming_key) or "")
 
         root.changed_by = user_id
         root.changed_on = now_utc()
@@ -246,6 +292,22 @@ class ChecklistService:
             checklist_id=f"{source.checklist_id}_COPY",
             lpc=source.lpc,
             status="01",
+            date=source.date,
+            equipment=source.equipment,
+            lpc_text=source.lpc_text,
+            observer_fullname=source.observer_fullname,
+            observer_perner=source.observer_perner,
+            observer_position=source.observer_position,
+            observer_orgunit=source.observer_orgunit,
+            observer_integration_name=source.observer_integration_name,
+            observed_fullname=source.observed_fullname,
+            observed_perner=source.observed_perner,
+            observed_position=source.observed_position,
+            observed_orgunit=source.observed_orgunit,
+            observed_integration_name=source.observed_integration_name,
+            location_key=source.location_key,
+            location_name=source.location_name,
+            location_text=source.location_text,
             created_by=user_id,
             changed_by=user_id,
         )

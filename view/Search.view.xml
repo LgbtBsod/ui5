@@ -192,13 +192,13 @@
                         <items>
                             <ColumnListItem type="Navigation" class="searchResultRow">
                                 <cells>
-                                    <Text text="{data>root/id}" wrapping="false"/>
+                                    <Text text="{data>root/id}" class="searchIdCellText" tooltip="{data>root/id}"/>
                                     <ObjectStatus
                                         text="{data>root/status}"
                                         state="{ path: 'data>root/status', formatter: '.formatStatus' }"/>
                                     <ProgressIndicator percentValue="{data>root/successRateChecks}" displayValue="{= ${data>root/successRateChecks} + '%' }" state="Information"/>
                                     <ProgressIndicator percentValue="{data>root/successRateBarriers}" displayValue="{= ${data>root/successRateBarriers} + '%' }" state="Information"/>
-                                    <Text text="{data>basic/OBSERVER_FULLNAME}" wrapping="false"/>
+                                    <Text text="{data>basic/OBSERVER_FULLNAME}" class="searchObserverCellText" tooltip="{data>basic/OBSERVER_FULLNAME}"/>
                                 </cells>
                             </ColumnListItem>
                         </items>

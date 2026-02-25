@@ -1,8 +1,17 @@
+from datetime import timezone
 from sqlalchemy.orm import Session
 
 from config import LOCK_KILLED_RETENTION, LOCK_TTL
 from models import ChecklistRoot, LockEntry, LockLog
 from utils.time import now_utc
+
+
+def _as_utc(dt):
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 class LockService:
@@ -20,7 +29,7 @@ class LockService:
         if not lock:
             return None
 
-        if lock.expires_at and lock.expires_at < current_time:
+        if lock.expires_at and _as_utc(lock.expires_at) < current_time:
             lock.is_killed = True
             db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, action="EXPIRED"))
             db.commit()
@@ -121,7 +130,7 @@ class LockService:
                 "version_number": LockService._version_number(db, object_uuid),
             }
 
-        if lock.expires_at and lock.expires_at < now_utc():
+        if lock.expires_at and _as_utc(lock.expires_at) < now_utc():
             lock.is_killed = True
             db.commit()
             raise ValueError("LOCK_EXPIRED")
@@ -205,7 +214,7 @@ class LockService:
         if not lock:
             raise ValueError("NO_VALID_LOCK")
 
-        if lock.expires_at and lock.expires_at < now_utc():
+        if lock.expires_at and _as_utc(lock.expires_at) < now_utc():
             lock.is_killed = True
             db.commit()
             raise ValueError("LOCK_EXPIRED")

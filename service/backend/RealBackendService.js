@@ -64,11 +64,26 @@ sap.ui.define([], function () {
                 status: _mapStatusToUi(oRoot.status)
             },
             basic: {
-                date: "",
+                date: oRoot.date || "",
                 time: "",
                 timezone: "Europe/Amsterdam",
+                equipment: oRoot.equipment || "",
                 LPC_KEY: oRoot.lpc || "",
-                checklist_id: oRoot.checklist_id || ""
+                LPC_TEXT: oRoot.lpc_text || "",
+                checklist_id: oRoot.checklist_id || "",
+                OBSERVER_FULLNAME: oRoot.observer_fullname || "",
+                OBSERVER_PERNER: oRoot.observer_perner || "",
+                OBSERVER_POSITION: oRoot.observer_position || "",
+                OBSERVER_ORGUNIT: oRoot.observer_orgunit || "",
+                OBSERVER_INTEGRATION_NAME: oRoot.observer_integration_name || "",
+                OBSERVED_FULLNAME: oRoot.observed_fullname || "",
+                OBSERVED_PERNER: oRoot.observed_perner || "",
+                OBSERVED_POSITION: oRoot.observed_position || "",
+                OBSERVED_ORGUNIT: oRoot.observed_orgunit || "",
+                OBSERVED_INTEGRATION_NAME: oRoot.observed_integration_name || "",
+                LOCATION_KEY: oRoot.location_key || "",
+                LOCATION_NAME: oRoot.location_name || "",
+                LOCATION_TEXT: oRoot.location_text || ""
             },
             checks: (oData.checks || []).map(function (oCheck, iIndex) {
                 return {
@@ -151,11 +166,26 @@ sap.ui.define([], function () {
                         status: _mapStatusToUi(oRoot.status)
                     },
                     basic: {
-                        date: "",
+                        date: oRoot.date || "",
                         time: "",
                         timezone: "Europe/Amsterdam",
+                        equipment: oRoot.equipment || "",
                         LPC_KEY: oRoot.lpc || "",
-                        checklist_id: oRoot.checklist_id || ""
+                        LPC_TEXT: oRoot.lpc_text || "",
+                        checklist_id: oRoot.checklist_id || "",
+                        OBSERVER_FULLNAME: oRoot.observer_fullname || "",
+                        OBSERVER_PERNER: oRoot.observer_perner || "",
+                        OBSERVER_POSITION: oRoot.observer_position || "",
+                        OBSERVER_ORGUNIT: oRoot.observer_orgunit || "",
+                        OBSERVER_INTEGRATION_NAME: oRoot.observer_integration_name || "",
+                        OBSERVED_FULLNAME: oRoot.observed_fullname || "",
+                        OBSERVED_PERNER: oRoot.observed_perner || "",
+                        OBSERVED_POSITION: oRoot.observed_position || "",
+                        OBSERVED_ORGUNIT: oRoot.observed_orgunit || "",
+                        OBSERVED_INTEGRATION_NAME: oRoot.observed_integration_name || "",
+                        LOCATION_KEY: oRoot.location_key || "",
+                        LOCATION_NAME: oRoot.location_name || "",
+                        LOCATION_TEXT: oRoot.location_text || ""
                     },
                     checks: [],
                     barriers: []
@@ -241,7 +271,8 @@ createCheckList: function (oData) {
 },
         updateCheckList: function (sId, oData, mOptions) {
             mOptions = mOptions || {};
-            var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
+            var oBasic = (oData && oData.basic) || {};
+            var sLpc = oBasic.LPC_KEY || "L2";
             var aChecks = (oData && oData.checks) || [];
             var aBarriers = (oData && oData.barriers) || [];
 
@@ -254,7 +285,8 @@ createCheckList: function (oData) {
                             force: !!mOptions.force
                         },
                         body: {
-                            lpc: sLpc
+                            lpc: sLpc,
+                            basic: oBasic
                         }
                     });
                 })
@@ -305,7 +337,8 @@ createCheckList: function (oData) {
                             force: !!mOptions.force
                         },
                         body: {
-                            lpc: oBasic.LPC_KEY
+                            lpc: oBasic.LPC_KEY,
+                            basic: oBasic
                         }
                     });
                 })
