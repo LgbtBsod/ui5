@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
-    <Dialog id="locationValueHelpDialog" title="{i18n>locationValueHelpTitle}" contentWidth="60rem" contentHeight="36rem" draggable="true" resizable="true">
+    <Dialog id="locationValueHelpDialog" title="{i18n>locationValueHelpTitle}" contentWidth="40rem" contentHeight="26rem" draggable="true" resizable="true">
         <VBox class="sapUiSmallMargin" renderType="Bare">
             <SearchField width="100%" liveChange=".onLocationValueHelpSearch" placeholder="{i18n>locationValueHelpSearchPlaceholder}" class="sapUiTinyMarginBottom"/>
             <t:TreeTable
@@ -11,16 +11,10 @@
                 rowSelectionChange=".onLocationTreeSelectionChange"
                 rows="{path:'view>/locationVhTree', parameters:{arrayNames:['children']}}">
                 <t:columns>
-                    <t:Column width="17rem">
+                    <t:Column width="24rem">
                         <Label text="{i18n>locationLabel}"/>
                         <t:template>
                             <Text text="{view>location_name}" wrapping="false"/>
-                        </t:template>
-                    </t:Column>
-                    <t:Column width="12rem">
-                        <Label text="{i18n>locationNodeLabel}"/>
-                        <t:template>
-                            <Text text="{view>node_id}" wrapping="false"/>
                         </t:template>
                     </t:Column>
                 </t:columns>

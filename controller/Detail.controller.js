@@ -227,6 +227,10 @@ sap.ui.define([
       return DetailFormatters.passedTotal(aRows);
     },
 
+    formatHeaderDate: function (sDate) {
+      return DetailStatusRowUseCase.formatHumanDateLong(sDate);
+    },
+
     hasRows: function (aRows) {
       return Array.isArray(aRows) && aRows.length > 0;
     },

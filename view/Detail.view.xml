@@ -34,7 +34,7 @@
                         </HBox>
                         <HBox class="uxStatChip" renderType="Bare">
                             <Text text="{i18n>headerDateLabel}" class="sapUiTinyMarginEnd"/>
-                            <Text text="{selected>/basic/date}"/>
+                            <Text text="{path:'selected>/basic/date', formatter:'.formatHeaderDate'}"/>
                         </HBox>
                         <HBox class="uxStatChip" renderType="Bare">
                             <Text text="{i18n>headerProfessionLabel}" class="sapUiTinyMarginEnd"/>
