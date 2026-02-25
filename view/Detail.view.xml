@@ -82,7 +82,7 @@
                         <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} === 'EDIT' }" drop=".onInfoCardsDrop"/>
                     </f:dragDropConfig>
                     <f:items>
-                        <CustomListItem>
+                        <f:GridListItem>
                             <VBox class="infoCardTile" renderType="Bare">
                                 <Text text="{view>title}" class="infoCardTitle"/>
                                 <Text
@@ -95,7 +95,7 @@
                                     ], formatter: '.formatInfoCardValue'}"
                                     class="infoCardValue"/>
                             </VBox>
-                        </CustomListItem>
+                        </f:GridListItem>
                     </f:items>
                 </f:GridList>
             </VBox>
@@ -153,10 +153,10 @@
                 <Text text="{selected>/basic/LOCATION_NAME}" class="sapUiTinyMarginBottom"/>
                 <Tree
                     items="{path: 'view>/locationTree', parameters: { arrayNames: ['children'] }}"
-                    mode="SingleSelectMaster"
+                    mode="{= ${state>/mode} === 'EDIT' ? 'SingleSelectMaster' : 'None' }"
                     includeItemInSelection="true"
                     selectionChange=".onLocationSelectionChange"
-                    visible="{= ${state>/mode} === 'EDIT' }">
+                    visible="true">
                     <StandardTreeItem title="{view>location_name}"/>
                 </Tree>
             </VBox>

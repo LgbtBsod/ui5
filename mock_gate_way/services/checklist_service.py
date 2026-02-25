@@ -77,6 +77,38 @@ class ChecklistService:
         return result
 
     @staticmethod
+    def list_checks(db: Session, root_id: str, top: int = 50, skip: int = 0):
+        query = db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root_id).order_by(ChecklistCheck.position.asc())
+        total = query.count()
+        rows = query.offset(skip).limit(top).all()
+        return {
+            "value": [
+                {"id": row.id, "text": row.text, "status": row.status, "position": row.position}
+                for row in rows
+            ],
+            "count": total,
+        }
+
+    @staticmethod
+    def list_barriers(db: Session, root_id: str, top: int = 50, skip: int = 0):
+        query = db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).order_by(ChecklistBarrier.position.asc())
+        total = query.count()
+        rows = query.offset(skip).limit(top).all()
+        return {
+            "value": [
+                {
+                    "id": row.id,
+                    "description": row.description,
+                    "is_active": row.is_active,
+                    "position": row.position,
+                }
+                for row in rows
+            ],
+            "count": total,
+        }
+
+
+    @staticmethod
     def update_with_etag(db: Session, root_id: str, user_id: str, data: dict, if_match: str):
         root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.is_(False)).first()
         if not root:

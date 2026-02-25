@@ -85,6 +85,14 @@ sap.ui.define([
             return _backendService.updateCheckList(sId, oData, mOptions || {});
         },
 
+
+        autoSaveCheckList: function (sId, oDeltaPayload, oFullPayload, mOptions) {
+            if (_backendService.autoSaveCheckList) {
+                return _backendService.autoSaveCheckList(sId, oDeltaPayload || {}, oFullPayload || {}, mOptions || {});
+            }
+            return _backendService.updateCheckList(sId, oFullPayload || {}, mOptions || {});
+        },
+
         deleteCheckList: function (sId) {
             return _backendService.deleteCheckList(sId);
         },
@@ -132,6 +140,20 @@ sap.ui.define([
                 return _backendService.getDictionary(sDomain);
             }
             return Promise.resolve([]);
+        },
+
+        suggestPersons: function (sQuery) {
+            if (_backendService.suggestPersons) {
+                return _backendService.suggestPersons(sQuery || "");
+            }
+            return this.getPersons().then(function (aItems) {
+                var sNeedle = String(sQuery || "").trim().toLowerCase();
+                return (aItems || []).filter(function (oPerson) {
+                    var sName = String((oPerson && oPerson.fullName) || "").toLowerCase();
+                    var sPernr = String((oPerson && oPerson.perner) || "").toLowerCase();
+                    return !sNeedle || sName.indexOf(sNeedle) >= 0 || sPernr.indexOf(sNeedle) >= 0;
+                }).slice(0, 10);
+            });
         },
 
         getLocations: function () {

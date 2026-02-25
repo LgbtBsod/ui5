@@ -31,9 +31,15 @@ sap.ui.define([
       this.getView().setModel(oViewModel, "view");
       this.attachRouteMatched("detail", this._onMatched);
       this.getModel("selected").attachPropertyChange(this._onSelectedChanged, this);
+      this.getModel("mpl").attachPropertyChange(this._onMplChanged, this);
     },
 
-
+    _onMplChanged: function (oEvent) {
+      if ((oEvent.getParameter("path") || "") !== "/locations") {
+        return;
+      }
+      this._prepareLocationTree();
+    },
 
     _onSelectedChanged: function (oEvent) {
       var sPath = oEvent.getParameter("path") || "";
@@ -64,7 +70,8 @@ sap.ui.define([
 
     _prepareLocationTree: function () {
       var aLocations = this.getModel("mpl").getProperty("/locations") || [];
-      this.getModel("view").setProperty("/locationTree", this._buildLocationTree(aLocations));
+      var aTree = this._buildLocationTree(aLocations);
+      this.getModel("view").setProperty("/locationTree", aTree);
     },
 
     _buildLocationTree: function (aFlatNodes) {
@@ -155,16 +162,31 @@ sap.ui.define([
     },
 
     onPersonSuggest: function (oEvent) {
-      var sValue = (oEvent.getParameter("suggestValue") || "").toLowerCase();
+      var sValue = this._normalizeText(oEvent.getParameter("suggestValue"));
       var sTarget = oEvent.getSource().data("target");
       var aPersons = this.getModel("masterData").getProperty("/persons") || [];
       var aFiltered = aPersons.filter(function (oPerson) {
-        var sName = (oPerson.fullName || "").toLowerCase();
-        var sPernr = (oPerson.perner || "").toLowerCase();
-        return sName.indexOf(sValue) >= 0 || sPernr.indexOf(sValue) >= 0;
-      }).slice(0, 10);
+        var sName = this._normalizeText(oPerson.fullName);
+        var sPernr = this._normalizeText(oPerson.perner);
+        var sPosition = this._normalizeText(oPerson.position);
+        return !sValue || sName.indexOf(sValue) >= 0 || sPernr.indexOf(sValue) >= 0 || sPosition.indexOf(sValue) >= 0;
+      }.bind(this)).slice(0, 10);
 
-      this.getModel("view").setProperty(sTarget === "observed" ? "/observedSuggestions" : "/observerSuggestions", aFiltered);
+      this._setPersonSuggestions(sTarget, aFiltered);
+
+      if (sValue && aFiltered.length < 3 && BackendAdapter.suggestPersons) {
+        BackendAdapter.suggestPersons(sValue).then(function (aRemote) {
+          this._setPersonSuggestions(sTarget, (aRemote || []).slice(0, 10));
+        }.bind(this));
+      }
+    },
+
+    _setPersonSuggestions: function (sTarget, aSuggestions) {
+      this.getModel("view").setProperty(sTarget === "observed" ? "/observedSuggestions" : "/observerSuggestions", aSuggestions || []);
+    },
+
+    _normalizeText: function (sValue) {
+      return String(sValue || "").trim().toLowerCase();
     },
 
     onPersonSuggestionSelected: function (oEvent) {
@@ -347,6 +369,7 @@ sap.ui.define([
         iTarget -= 1;
       }
 
+      iTarget = Math.max(0, Math.min(iTarget, aItems.length));
       aItems.splice(iTarget, 0, oMoved);
       oViewModel.setProperty("/infoCards", aItems);
     },

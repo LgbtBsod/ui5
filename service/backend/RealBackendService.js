@@ -129,16 +129,9 @@ sap.ui.define([], function () {
                 }
             }).then(function (oList) {
                 var aRoots = oList && oList.value ? oList.value : [];
-
-                return Promise.all(aRoots.map(function (oRoot) {
-                    return _request("/checklist/" + encodeURIComponent(oRoot.id), {
-                        params: { expand: true }
-                    }).then(function (oDetails) {
-                        return _mapChecklist(oRoot, oDetails);
-                    }).catch(function () {
-                        return _mapChecklist(oRoot, {});
-                    });
-                }));
+                return aRoots.map(function (oRoot) {
+                    return _mapChecklist(oRoot, { checks: [], barriers: [] });
+                });
             });
         },
 
@@ -171,8 +164,8 @@ sap.ui.define([], function () {
         },
 
         getChecklistChecks: function (sId) {
-            return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: true } }).then(function (oDetails) {
-                return ((oDetails && oDetails.checks) || []).map(function (oCheck, iIndex) {
+            return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { top: 50, skip: 0 } }).then(function (oData) {
+                return ((oData && oData.value) || []).map(function (oCheck, iIndex) {
                     return {
                         id: oCheck.id || (iIndex + 1),
                         text: oCheck.text || "",
@@ -184,8 +177,8 @@ sap.ui.define([], function () {
         },
 
         getChecklistBarriers: function (sId) {
-            return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: true } }).then(function (oDetails) {
-                return ((oDetails && oDetails.barriers) || []).map(function (oBarrier, iIndex) {
+            return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { top: 50, skip: 0 } }).then(function (oData) {
+                return ((oData && oData.value) || []).map(function (oBarrier, iIndex) {
                     return {
                         id: oBarrier.id || (iIndex + 1),
                         text: oBarrier.description || "",
@@ -233,16 +226,16 @@ createCheckList: function (oData) {
             })
             .then(function () {
                 return _request("/checklist/" + encodeURIComponent(sNewId), {
-                    params: { expand: true }
+                    params: { expand: false }
                 });
             })
-            .then(function (oDetails) {
-                return _mapChecklist(oCreated || {
+            .then(function (oRoot) {
+                return _mapChecklist(oRoot || oCreated || {
                     id: sNewId,
                     checklist_id: sChecklistId,
                     lpc: sLpc,
                     status: "01"
-                }, oDetails);
+                }, { checks: aChecks, barriers: aBarriers });
             });
     });
 },
@@ -280,7 +273,7 @@ createCheckList: function (oData) {
                     }).catch(function () { return null; });
                 })
                 .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: true } });
+                    return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: false } });
                 })
                 .then(function (oDetails) {
                     return _mapChecklist({
@@ -288,7 +281,42 @@ createCheckList: function (oData) {
                         checklist_id: ((oData && oData.basic && oData.basic.checklist_id) || sId),
                         lpc: sLpc,
                         status: "01"
-                    }, oDetails);
+                    }, { checks: aChecks, barriers: aBarriers });
+                });
+        },
+
+
+        autoSaveCheckList: function (sId, oDeltaPayload, oFullPayload, mOptions) {
+            mOptions = mOptions || {};
+            var oBasic = (oDeltaPayload && oDeltaPayload.basic) || {};
+            var bHasRows = !!((oDeltaPayload && oDeltaPayload.checks && oDeltaPayload.checks.length) || (oDeltaPayload && oDeltaPayload.barriers && oDeltaPayload.barriers.length));
+
+            if (bHasRows) {
+                // Current mock gateway row API is replace-style; for safety fallback to full update.
+                return this.updateCheckList(sId, oFullPayload || {}, mOptions);
+            }
+
+            return _acquireLock(sId)
+                .then(function () {
+                    return _request("/checklist/" + encodeURIComponent(sId) + "/autosave", {
+                        method: "PATCH",
+                        params: {
+                            user_id: _userId,
+                            force: !!mOptions.force
+                        },
+                        body: {
+                            lpc: oBasic.LPC_KEY
+                        }
+                    });
+                })
+                .then(function () {
+                    return _request("/checklist/" + encodeURIComponent(sId), { params: { expand: false } });
+                })
+                .then(function (oRoot) {
+                    return _mapChecklist(oRoot || { id: sId }, {
+                        checks: (oFullPayload && oFullPayload.checks) || [],
+                        barriers: (oFullPayload && oFullPayload.barriers) || []
+                    });
                 });
         },
 
@@ -378,6 +406,12 @@ createCheckList: function (oData) {
             });
         },
 
+        suggestPersons: function (sQuery) {
+            return _request("/persons/suggest", { params: { search: sQuery || "" } }).then(function (oData) {
+                return oData && oData.value ? oData.value : [];
+            });
+        },
+
         getDictionary: function (sDomain) {
             return _request("/dict", { params: { domain: sDomain } }).then(function (oData) {
                 return oData && oData.value ? oData.value : [];
@@ -386,7 +420,9 @@ createCheckList: function (oData) {
 
         getLocations: function () {
             var sToday = new Date().toISOString().slice(0, 10);
-            return _request("/location", { params: { date: sToday } }).then(function (oData) {
+            return _request("/location", { params: { date: sToday } }).catch(function () {
+                return _request("/hierarchy", { params: { date: sToday } });
+            }).then(function (oData) {
                 return oData && oData.value ? oData.value : [];
             });
         },
