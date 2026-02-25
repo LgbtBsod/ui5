@@ -1375,25 +1375,12 @@ body.themeLifestyleNightOps .filterCard {
   margin: .35rem;
 }
 
-/* Force reset + restyle SmartFilterBar GO button */
-.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch,
-.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner,
-.smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnContent {
-  all: unset;
-}
-
+/* Safe restyle SmartFilterBar GO button (no full reset, keeps responsive behavior) */
 .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
+  display: inline-block !important;
 }
 
 .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner {
-  all: unset !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
   min-height: 2.25rem !important;
   padding: 0 .95rem !important;
   border-radius: 12px !important;
@@ -1405,7 +1392,6 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnContent {
-  all: unset !important;
   color: #fff !important;
   font-weight: 700 !important;
   line-height: 1 !important;
@@ -1570,7 +1556,7 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 .detailControlInlineCard {
-  width: min(11rem, 30vw) !important;
+  width: min(12rem, 32vw) !important;
   min-width: 9.5rem;
   padding: .55rem .45rem !important;
   position: sticky;
@@ -1599,4 +1585,35 @@ body.themeLifestyleNightOps .filterCard {
 
 #locationValueHelpTreeTable .sapUiTableCol {
   font-weight: 600;
+}
+
+
+.smartFilterGlass .sapUiCompFilterBar {
+  padding: .2rem .1rem;
+}
+
+.smartFilterGlass .sapUiCompFilterBar .sapMInputBase,
+.smartFilterGlass .sapUiCompFilterBar .sapMSlt,
+.smartFilterGlass .sapUiCompFilterBar .sapMTokenizer {
+  border-radius: 10px;
+}
+
+.smartTableGlass .sapMListTblHdrCell {
+  font-weight: 600;
+}
+
+.smartTableGlass .sapMListTblRow:hover .sapMListTblCell {
+  background: color-mix(in srgb, var(--glass-bg) 62%, rgba(var(--accent-rgb), 0.09)) !important;
+}
+
+@media (max-width: 980px) {
+  .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch {
+    display: block !important;
+    width: 100% !important;
+    margin-top: .4rem;
+  }
+
+  .smartFilterGlass .sapUiCompFilterBar .sapUiCompFilterBarSearch .sapMBtnInner {
+    width: 100% !important;
+  }
 }

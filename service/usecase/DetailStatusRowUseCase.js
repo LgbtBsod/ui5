@@ -16,9 +16,9 @@ sap.ui.define([
             return sDate;
         }
         return oDate.toLocaleDateString(undefined, {
-            weekday: "long",
+            weekday: "short",
             day: "2-digit",
-            month: "long",
+            month: "short",
             year: "numeric"
         });
     }

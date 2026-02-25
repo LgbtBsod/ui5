@@ -104,7 +104,7 @@
                                     class="infoCardValue"/>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'date' }" renderType="Bare">
-                                    <DatePicker value="{selected>/basic/date}" displayFormat="EEEE, dd MMMM yyyy" valueFormat="yyyy-MM-dd" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
+                                    <DatePicker value="{selected>/basic/date}" displayFormat="EEE, dd MMM yyyy" valueFormat="yyyy-MM-dd" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'time' }" renderType="Bare">

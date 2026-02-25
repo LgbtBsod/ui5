@@ -27,6 +27,8 @@
                         visible="{view>/useSmartControls}"
                         showGoOnFB="true"
                         showClearOnFB="true"
+                        liveMode="false"
+                        enableBasicSearch="true"
                         useDateRangeType="true"
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged">
@@ -34,6 +36,8 @@
                             <smartFilterBar:ControlConfiguration key="checklist_id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
                             <smartFilterBar:ControlConfiguration key="lpc" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="status" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="date" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="equipment" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="changed_on" visibleInAdvancedArea="true"/>
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
@@ -116,6 +120,8 @@
                         useVariantManagement="true"
                         useTablePersonalisation="true"
                         showRowCount="true"
+                        showFullScreenButton="true"
+                        demandPopin="true"
                         header="{i18n>resultsLabel}"
                         persistencyKey="pcctSmartTable"
                         enableAutoBinding="true"
