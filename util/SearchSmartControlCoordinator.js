@@ -130,27 +130,63 @@ sap.ui.define([
 
         var sFilterId = String(mState.filterId || "").trim();
         var sFilterLpc = mState.filterLpc || "";
+        var sSearchMode = mState.searchMode || "EXACT";
 
+        var oIdFilter = null;
         if (sFilterId) {
-            aFilters.push(new Filter({
+            oIdFilter = new Filter({
                 filters: [
                     new Filter("id", FilterOperator.Contains, sFilterId),
                     new Filter("checklist_id", FilterOperator.Contains, sFilterId)
                 ],
                 and: false
-            }));
+            });
         }
+
+        var oLpcFilter = null;
         if (sFilterLpc) {
-            aFilters.push(new Filter("LPC_KEY", FilterOperator.EQ, sFilterLpc));
+            oLpcFilter = new Filter({
+                filters: [
+                    new Filter("lpc", FilterOperator.EQ, sFilterLpc),
+                    new Filter("LPC_KEY", FilterOperator.EQ, sFilterLpc)
+                ],
+                and: false
+            });
         }
 
         var sChecks = mState.filterFailedChecks || "ALL";
         var sBarriers = mState.filterFailedBarriers || "ALL";
+        var aStatusFilters = [];
         if (sChecks !== "ALL") {
-            aFilters.push(new Filter("has_failed_checks", FilterOperator.EQ, sChecks === "TRUE"));
+            aStatusFilters.push(new Filter("has_failed_checks", FilterOperator.EQ, sChecks === "TRUE"));
         }
         if (sBarriers !== "ALL") {
-            aFilters.push(new Filter("has_failed_barriers", FilterOperator.EQ, sBarriers === "TRUE"));
+            aStatusFilters.push(new Filter("has_failed_barriers", FilterOperator.EQ, sBarriers === "TRUE"));
+        }
+
+        if (sSearchMode === "LOOSE") {
+            var aLooseParts = [];
+            if (oIdFilter) {
+                aLooseParts.push(oIdFilter);
+            }
+            if (oLpcFilter) {
+                aLooseParts.push(oLpcFilter);
+            }
+            Array.prototype.push.apply(aLooseParts, aStatusFilters);
+            if (aLooseParts.length) {
+                aFilters.push(new Filter({
+                    filters: aLooseParts,
+                    and: false
+                }));
+            }
+        } else {
+            if (oIdFilter) {
+                aFilters.push(oIdFilter);
+            }
+            if (oLpcFilter) {
+                aFilters.push(oLpcFilter);
+            }
+            Array.prototype.push.apply(aFilters, aStatusFilters);
         }
 
         var sMax = String(mState.searchMaxResults || "").trim();

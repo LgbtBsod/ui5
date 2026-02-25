@@ -1781,3 +1781,187 @@ body.themeLifestyleNightOps .filterCard {
     width: 100% !important;
   }
 }
+
+/* Wave 41: search delete/copy/create action emphasis consistency */
+.searchToolbar .searchCreateActionBtn .sapMBtnInner {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--hzn-accent) 30%, transparent) inset;
+}
+
+.searchToolbar .searchCopyActionBtn .sapMBtnInner {
+  border-style: dashed;
+}
+
+.searchToolbar .searchDeleteActionBtn .sapMBtnInner {
+  font-weight: 700;
+}
+
+/* Wave 42: search message-strip + toolbar feedback hierarchy */
+.searchLoadStateBanner {
+  box-shadow: 0 6px 18px rgba(20, 28, 46, 0.12);
+}
+
+.searchFeedbackToolbar {
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 75%, rgba(var(--accent-rgb), 0.14));
+  padding-top: 0.35rem;
+}
+
+.searchLoadStateBanner + .glassCard .searchFeedbackToolbar {
+  margin-top: 0.1rem;
+}
+
+/* Wave 43: search selection highlight/readability consistency (smart + fallback) */
+.glassTable .sapMLIBSelected .sapMListTblCell,
+.smartTableGlass .sapMLIBSelected .sapMListTblCell {
+  background: color-mix(in srgb, var(--surface2) 78%, rgba(var(--accent-rgb), 0.18)) !important;
+  color: var(--text-main) !important;
+}
+
+.glassTable .sapMLIBSelected .sapMObjIdentifierTitle,
+.glassTable .sapMLIBSelected .sapMText,
+.smartTableGlass .sapMLIBSelected .sapMText,
+.smartTableGlass .sapMLIBSelected .sapMObjIdentifierTitle {
+  color: var(--text-main) !important;
+  font-weight: 600;
+}
+
+/* Wave 44: search detail-open affordance consistency */
+.searchResultsTable .sapMListTblRow,
+.searchResultsTable .sapMLIB {
+  cursor: pointer;
+}
+
+.searchResultsTable .sapMLIBActive .sapMListTblCell,
+.searchResultsTable .sapMListTblRow:active .sapMListTblCell {
+  background: color-mix(in srgb, var(--surface2) 72%, rgba(var(--accent-rgb), 0.22)) !important;
+}
+
+.searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell {
+  outline: 1px solid color-mix(in srgb, rgba(var(--accent-rgb), 0.7) 55%, transparent);
+  outline-offset: -1px;
+}
+
+/* Wave 46 UX hotfix: move detail control rail to sticky/fixed aside and simplify cards */
+.detailControlAsideHost {
+  position: fixed;
+  right: clamp(.7rem, 1.6vw, 1.4rem);
+  top: 8.2rem;
+  z-index: 40;
+  width: min(12.2rem, 24vw);
+  pointer-events: none;
+}
+
+.detailControlAsideHost .detailControlInlineCard {
+  width: 100% !important;
+  margin-left: 0 !important;
+  pointer-events: auto;
+  box-shadow: 0 10px 24px rgba(16, 47, 86, 0.16);
+}
+
+.mushroomCard {
+  border-radius: 12px !important;
+  min-height: 7.1rem;
+  box-shadow: 0 4px 12px rgba(10, 33, 62, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+@media (max-width: 1180px) {
+  .detailControlAsideHost {
+    position: static;
+    width: 100%;
+    margin-bottom: .6rem;
+    pointer-events: auto;
+  }
+
+  .detailControlAsideHost .detailControlInlineCard {
+    width: 100% !important;
+  }
+}
+
+/* Wave 47: create/copy toolbar active/disabled readability consistency */
+.searchToolbar .searchCreateActionBtn.sapMBtnActive .sapMBtnInner,
+.searchToolbar .searchCopyActionBtn.sapMBtnActive .sapMBtnInner {
+  transform: translateY(1px);
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.22) !important;
+}
+
+.searchToolbar .searchCopyActionBtn.sapMBtnDisabled .sapMBtnInner,
+.searchToolbar .searchCreateActionBtn.sapMBtnDisabled .sapMBtnInner {
+  opacity: .58;
+  border-style: solid;
+}
+
+/* Wave 48: export split-button active/menu readability consistency */
+.searchToolbar .searchExportActionBtn.sapMBtnActive .sapMBtnInner,
+.searchToolbar .searchExportActionBtn .sapMBtnActive .sapMBtnInner {
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.22) !important;
+}
+
+.searchToolbar .searchExportActionBtn .sapMBtnInner {
+  letter-spacing: .01em;
+}
+
+.searchToolbar .searchExportActionBtn.sapMBtnDisabled .sapMBtnInner,
+.searchToolbar .searchExportActionBtn .sapMBtn.sapMBtnDisabled .sapMBtnInner {
+  opacity: .58;
+}
+
+/* Wave 49: retry/load-error banner + retry action emphasis consistency */
+.searchLoadErrorBanner {
+  border-color: color-mix(in srgb, #c62828 62%, var(--glass-border)) !important;
+  background: color-mix(in srgb, #ffebee 72%, var(--surface2)) !important;
+  box-shadow: 0 8px 20px rgba(183, 28, 28, 0.14);
+}
+
+.searchToolbar .searchRetryLoadActionBtn .sapMBtnInner,
+.quickFiltersRow .searchRetryLoadActionBtn .sapMBtnInner {
+  border-style: dashed;
+  border-width: 1px;
+}
+
+.searchToolbar .searchRetryLoadActionBtn.sapMBtnActive .sapMBtnInner,
+.quickFiltersRow .searchRetryLoadActionBtn.sapMBtnActive .sapMBtnInner {
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2) !important;
+}
+
+/* Wave 50: summary/status chip readability + toolbar micro-spacing consistency */
+.searchFeedbackToolbar .searchSummaryStatusChip,
+.searchFeedbackToolbar .searchStageStatusChip {
+  border-radius: 999px;
+  padding: 0 .5rem;
+}
+
+.searchFeedbackToolbar .searchSummaryStatusChip .sapMObjStatusText,
+.searchFeedbackToolbar .searchStageStatusChip .sapMObjStatusText {
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.searchFeedbackToolbar .searchSummaryStatusChip {
+  background: color-mix(in srgb, var(--surface2) 82%, rgba(var(--accent-rgb), 0.14));
+}
+
+.searchFeedbackToolbar .searchStageStatusChip {
+  background: color-mix(in srgb, var(--surface2) 78%, rgba(var(--accent-rgb), 0.18));
+}
+
+.searchFeedbackToolbar .searchUpdatedAtText,
+.searchFeedbackToolbar .searchModeLabel {
+  opacity: .92;
+}
+
+.searchFeedbackToolbar .searchModeLabel {
+  margin-left: .1rem;
+}
+
+/* Wave 51: no-data/empty-state visual hierarchy consistency */
+.searchResultsTable .sapMListNoData,
+.smartTableGlass .sapMListTblEmptyRow {
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.08)) !important;
+  border: 1px dashed color-mix(in srgb, var(--glass-border) 78%, rgba(var(--accent-rgb), 0.18));
+  border-radius: 12px;
+}
+
+.searchResultsTable .sapMListNoDataText,
+.smartTableGlass .sapMListTblEmptyCell {
+  color: var(--text-muted) !important;
+  font-weight: 600;
+}

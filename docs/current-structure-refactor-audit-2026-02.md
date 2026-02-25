@@ -281,13 +281,120 @@
 3. Проведен CSS cleanup pass для search quick-filters + action toolbar alignment consistency between smart/fallback modes.
 4. Расширен smoke coverage для negative веток navigation intent (missing selected id for copy, missing router adapter) в `scripts/unit-smoke.js`.
 
-### Wave 41 — следующий этап
-1. Продолжить декомпозицию `Search.controller`: вынести delete-confirmation orchestration (selection validation + backend delete + post-delete selection reset) в отдельный usecase.
-2. Добавить browser-smoke сценарий search delete orchestration flow (no-selection, success delete, backend error branches) с assertions по toast/error state и selection reset.
-3. Провести CSS cleanup pass для delete/copy/create action emphasis consistency в search toolbar.
-4. Расширить smoke coverage для negative веток delete orchestration (missing id, stale selected model, reload promise reject).
+### Wave 41 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchDeleteOrchestrationUseCase` для delete orchestration (selection validation + backend delete + post-delete selection reset).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-delete-orchestration-flow.py` для search delete flow (no-selection, success delete, backend error branches) с assertions по lifecycle hooks и selection reset callbacks.
+3. Проведен CSS cleanup pass для delete/copy/create action emphasis consistency в search toolbar (`searchCreateActionBtn`/`searchCopyActionBtn`/`searchDeleteActionBtn`).
+4. Расширен smoke coverage для negative веток delete orchestration (missing id, missing delete adapter, backend delete reject) в `scripts/unit-smoke.js`.
+
+### Wave 42 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchActionMessagePresentationUseCase` для toast/message presentation policy (delete/copy/navigation warnings + checklist-id-missing).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-action-messaging-flow.py` для search action messaging flow (id-missing, nothing-to-copy/delete, success/error delete) с assertions по message adapter вызовам.
+3. Проведен CSS cleanup pass для message-strip + toolbar feedback visual hierarchy в search header зоне (`searchFeedbackToolbar` + banner elevation/alignment).
+4. Расширен smoke coverage для negative веток messaging orchestration (bundle adapter throw, toast adapter throw, unknown message without fallback) в `scripts/unit-smoke.js`.
+
+### Wave 43 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchSelectionHydrationUseCase` для selection hydration/load policy (selected checklist lazy-hydration + fallback object policy).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-selection-hydration-flow.py` для search selection hydration flow (missing id, backend miss, backend error fallback branches) с assertions по selected model state.
+3. Проведен CSS cleanup pass для selection highlight/readability consistency в search table между smart/fallback режимами (selected row background/text policy).
+4. Расширен smoke coverage для negative веток selection hydration orchestration (missing selected model, invalid checklist shape, hydration promise reject) в `scripts/unit-smoke.js`.
+
+### Wave 44 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchOpenDetailGuardUseCase` для open-detail navigation guard orchestration (confirm unsaved + intent apply + id validation).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-open-detail-guard-flow.py` для search open-detail guard flow (missing id, cancel unsaved decision, proceed branch) с assertions по nav adapter вызовам.
+3. Проведен CSS cleanup pass для detail-open affordance consistency (table row active/press visual feedback) в search results.
+4. Расширен smoke coverage для negative веток detail-open guard orchestration (missing router adapter, null intent, rejected confirm promise) в `scripts/unit-smoke.js`.
+
+### Wave 45 — завершено
+1. Проведен backend hardening для более SAP Gateway-like поведения: `RealBackendService` переведен на OData query keys (`$top/$skip/$filter/$expand`) для checklist/read/list/paging путей.
+2. Обновлен mock gateway API (`mock_gate_way/api/checklist_api.py`) для явной поддержки OData-style aliases (`$filter/$expand/$top/$skip`) в checklist list/root/checks/barriers endpoints.
+3. Исправлена smart-filter интеграция в smart-table rebind: LPC-фильтр формируется gateway-compatible (`lpc`) с legacy fallback (`LPC_KEY`), а пустые фильтры по-прежнему не участвуют в поиске.
+4. Расширен smoke coverage для filter composition policy (`SearchSmartControlCoordinator.applyRebindParams`) в `scripts/unit-smoke.js`.
+
+### Wave 46 — завершено
+1. Исправлен стартовый smart-object запрос: добавлен OData compatibility endpoint `/ChecklistRoots` в mock gateway, устраняющий `404` при инициализации SmartTable.
+2. Приведен search-поток к UX-политике "поиск только по кнопке": отключен `enableAutoBinding` для SmartTable и убран auto-rebind на переключении search mode.
+3. Восстановлено участие max-results в запросе SmartTable (`top`) + расширен SmartFilter rebind для `LOOSE` режима (единый OR-групповой фильтр).
+4. Проведен UI hotfix Detail rail: control-block вынесен в sticky/fixed aside, а mushroom-card стилистика смягчена для более цельной карточки.
+
+### Wave 47 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchCreateCopyNavigationGuardUseCase` для copy/create navigation orchestration (selection guard + unsaved confirm + intent apply).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-create-copy-navigation-guard-flow.py` для create/copy navigation guard flow (missing selection, cancel unsaved, proceed) с assertions по route intent/state.
+3. Проведен CSS cleanup pass для create/copy button active/disabled readability consistency в toolbar.
+4. Расширен smoke coverage для negative веток create/copy navigation orchestration (missing nav adapter, null intent, missing selection, nav adapter reject) в `scripts/unit-smoke.js`.
+
+### Wave 48 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchExportIntentGuardUseCase` для export default/action intent routing (screen/barrier/check entity resolve + intent guards).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-export-intent-guard-flow.py` для export intent guard flow (default entity, menu entity, disabled/missing runner branches) с assertions по orchestration callbacks.
+3. Проведен CSS cleanup pass для export split-button active/menu readability consistency (`searchExportActionBtn`).
+4. Расширен smoke coverage для negative веток export intent routing (missing menu event data, unknown entity fallback, disabled export state, missing runExport adapter) в `scripts/unit-smoke.js`.
+
+### Wave 49 — завершено
+1. Продолжена декомпозиция `Search.controller`: вынесен `SearchRetryMessagePresentationUseCase` для retry/load-error user feedback policy (toast + banner mapping).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-retry-messaging-flow.py` для retry messaging flow (success/empty/error/repeated error) с assertions по callback/state trace.
+3. Проведен CSS cleanup pass для load-error banner + retry action emphasis consistency (`searchLoadErrorBanner`, `searchRetryLoadActionBtn`).
+4. Расширен smoke coverage для negative веток retry messaging orchestration (missing bundle key, missing toast adapter, unknown fallback key) в `scripts/unit-smoke.js`.
+
+### Wave 50 — завершено
+1. Продолжена декомпозиция `Search.controller`: вынесен `SearchSummaryPresentationUseCase` для policy вычисления `resultSummary`/`workflowStage` и KPI-safe normalization.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-summary-workflow-sync-flow.py` для summary/workflow stage sync flow (search/reset/retry/smart-table dataReceived).
+3. Проведен CSS cleanup pass для summary/status chip readability и toolbar micro-spacing consistency (`searchSummaryStatusChip`, `searchStageStatusChip`).
+4. Расширен smoke coverage для negative веток summary presentation orchestration (missing model, invalid counters payload, unknown stage) в `scripts/unit-smoke.js`.
+
+### Wave 51 — завершено
+1. Продолжена декомпозиция `Search.controller`: вынесен `SearchEmptyStatePresentationUseCase` для SmartTable/Fallback no-data + load-error empty-state policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-empty-state-message-flow.py` для empty-state message flow (default empty, load-error empty, smart-controls degraded).
+3. Проведен CSS cleanup pass для no-data/empty-state visual hierarchy consistency (`sapMListNoData`, `sapMListTblEmptyRow`).
+4. Расширен smoke coverage для negative веток empty-state presentation orchestration (missing view model, missing data model, unknown empty-state kind).
+
+### Wave 52 — следующий этап
+1. Продолжить декомпозицию `Search.controller`: вынести presentation policy для SmartFilter/quick-filters active-state hint messaging в отдельный usecase.
+2. Добавить browser-smoke сценарий search filter-hint messaging flow (smart filters active, fallback filters active, cleared state).
+3. Провести CSS cleanup pass для filter-hint/info strip readability и spacing consistency.
+4. Расширить smoke coverage для negative веток filter-hint presentation orchestration (missing state model, unsupported filter payload shape, missing bundle key).
 
 ## 5) Целевые метрики рефакторинга
 - Сократить размер `Search.controller.js` до ~450-500 LOC.
 - Сократить размер `Detail.controller.js` до ~700-750 LOC.
 - Довести покрытие unit-тестов util/usecase до baseline 60%+ по критическим веткам.
+
+
+## 6) Реестр текущих заглушек и план их реализации
+
+### 6.1 Найденные заглушки/временные контуры (проверка на текущий момент)
+1. **Локальное принудительное переключение `real -> fake` backend режима**
+   - В `Component.js` при `localhost/127.0.0.1` режим `real` принудительно переводится в `fake`.
+   - Это удобно для локального DX, но тормозит full-path проверку real-интеграции в dev-контуре.
+
+2. **Fallback-заглушки для server/frontend config в bootstrap**
+   - В bootstrap-потоке `BackendAdapter.getServerState()` и `getFrontendConfig()` падения скрываются через `catch(() => null)`.
+   - В итоге часть capability-flags может silently деградировать без явного операционного сигнала.
+
+3. **Доминирование fake/mock data пути в backend adapter/runtime**
+   - `BackendAdapter` по умолчанию выбирает `fake` контур, а mock-файлы (`mock/*.json`) остаются основной data-подложкой для части локальных сценариев.
+   - Реальный путь существует, но организационно всё ещё вторичен в ежедневном цикле разработки.
+
+4. **SAP backend placeholders на стороне контракта интеграции**
+   - В `sap_backend/README.md` явно зафиксированы placeholder BO/Node/Association/DDIC/FM артефакты, требующие замены на production namespace.
+
+### 6.2 Добавление в roadmap (Wave 45+)
+- **Wave 45 (дополнение):**
+  1. Добавить реализацию `copy/create navigation orchestration` (как уже запланировано).
+  2. Ввести `backend capability diagnostics` usecase в Search bootstrap: явная фиксация missing server/frontend config вместо silent-null only.
+  3. Добавить smoke-проверку startup capabilities (fake/real mode matrix + config available/missing branches).
+
+- **Wave 46 (новый): реализация заглушек backend-контуров**
+  1. Убрать hard-switch `real -> fake` для localhost, заменить на feature-flag policy (`allowRealOnLocalhost`) в manifest/env-конфиге.
+  2. Перевести `BackendAdapter`/startup на явную стратегию degraded-mode с user-visible diagnostics banner.
+  3. Закрыть SAP placeholders (BO/DDIC/FM mapping) по шагам из `sap_backend/README.md` и зафиксировать migration checklist.
+  4. Добавить integration smoke lane для real-backend режима (non-blocking nightly -> blocking pre-release).
+
+- **Wave 47 (новый): системный reset базовых UI5-стилей под кастомную дизайн-систему**
+  1. Ввести контролируемый `base-reset layer` (token-first: spacing/typography/radius/states) без одномоментного глобального обнуления всех sap* классов.
+  2. Сформировать allowlist UI5 control families для поэтапного reset (`sapMBtn`, `sapMInputBase`, `sapMList*`, `sapUiTable*`, dialogs).
+  3. Добавить visual regression baseline (скриншоты ключевых экранов Search/Detail/dialogs) до/после reset.
+  4. Включить phased rollout: pilot only на Search view -> stabilization -> Detail -> shared fragments.
+
+### 6.3 Рекомендация по "сбросить все базовые стили UI5"
+- **Да, можно, но только поэтапно**: полный одномоментный global reset для всех `sap*` селекторов высокорисковый (доступность, focus states, high-contrast, responsive behavior).
+- Практически безопасный путь: tokenized partial reset + контрольный visual regression gate на каждом шаге.
