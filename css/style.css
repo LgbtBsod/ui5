@@ -1520,7 +1520,7 @@ body.themeLifestyleNightOps .filterCard {
   position: sticky;
   top: 0.85rem;
   z-index: 6;
-  width: min(22rem, 100%);
+  width: 4.4rem;
   margin-left: auto;
 }
 
@@ -1562,4 +1562,41 @@ body.themeLifestyleNightOps .filterCard {
 
 #locationValueHelpTreeTable .sapUiTableRowHvr .sapUiTableCell {
   background: color-mix(in srgb, var(--sapList_Hover_Background) 86%, rgba(var(--accent-rgb), 0.09));
+}
+
+
+.detailControlAsideHost {
+  position: relative;
+}
+
+.detailControlInlineCard {
+  width: min(11rem, 30vw) !important;
+  min-width: 9.5rem;
+  padding: .55rem .45rem !important;
+  position: sticky;
+  top: 1rem;
+  z-index: 8;
+  margin-left: auto;
+}
+
+.detailControlVerticalRail {
+  align-items: center;
+}
+
+.detailControlVerticalRail .sapMTitle {
+  font-size: .72rem;
+  text-align: center;
+}
+
+
+.detailControlVerticalRail .sapMBtn {
+  width: 100%;
+}
+
+#locationValueHelpDialog {
+  max-width: 40rem;
+}
+
+#locationValueHelpTreeTable .sapUiTableCol {
+  font-weight: 600;
 }

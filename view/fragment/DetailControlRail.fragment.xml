@@ -1,27 +1,21 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox class="detailControlInline" renderType="Bare">
-        <HBox class="detailControlStatusRow" wrap="Wrap" renderType="Bare">
-            <ObjectStatus icon="sap-icon://history" text="{i18n>heartbeatLabel}" state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-            <ObjectStatus icon="sap-icon://synchronize" text="{i18n>autosaveLabel}" state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }" class="sapUiTinyMarginEnd sapUiTinyMarginBottom"/>
-            <HBox alignItems="Center" renderType="Bare" class="lockSwitchWrap sapUiTinyMarginBottom">
-                <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
-            </HBox>
-        </HBox>
-        <OverflowToolbar class="toolbarTransparent detailControlActionRow">
-            <Button icon="sap-icon://save" text="{i18n>objectSave}" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="brandActionBtn brandActionPrimary"/>
-            <Button icon="sap-icon://inspection" text="{i18n>validateButton}" visible="{= ${state>/mode} === 'EDIT' }" press=".onValidateChecklist" class="brandActionBtn brandActionGhost"/>
-            <Button icon="sap-icon://status-inactive" text="{i18n>statusDraft}" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="brandActionBtn brandActionGhost">
-                <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
-            </Button>
-            <Button icon="sap-icon://status-critical" text="{i18n>statusRegistered}" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="brandActionBtn brandActionGhost">
-                <customData><core:CustomData key="targetStatus" value="REGISTERED"/></customData>
-            </Button>
-            <Button icon="sap-icon://status-positive" text="{i18n>statusClosed}" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="brandActionBtn brandActionGhost">
-                <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
-            </Button>
-            <ToolbarSpacer/>
-            <Button icon="sap-icon://undo" text="{i18n>objectCancel}" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="brandActionBtn brandActionGhost"/>
-            <Button icon="sap-icon://decline" type="Transparent" text="{i18n>closeDetails}" press=".onCloseDetail" class="brandActionBtn brandActionGhost"/>
-        </OverflowToolbar>
+    <VBox class="detailControlVerticalRail" renderType="Bare">
+        <Title text="{i18n>detailControlTitle}" level="H6" class="sapUiTinyMarginBottom"/>
+        <ObjectStatus icon="sap-icon://history" text="{i18n>heartbeatLabel}" state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
+        <ObjectStatus icon="sap-icon://synchronize" text="{i18n>autosaveLabel}" state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom"/>
+        <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
+        <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginTop sapUiTinyMarginBottom" tooltip="{i18n>objectSave}"/>
+        <Button icon="sap-icon://inspection" visible="{= ${state>/mode} === 'EDIT' }" press=".onValidateChecklist" class="sapUiTinyMarginBottom" tooltip="{i18n>validateButton}"/>
+        <Button icon="sap-icon://status-inactive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusDraft}">
+            <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
+        </Button>
+        <Button icon="sap-icon://status-critical" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusRegistered}">
+            <customData><core:CustomData key="targetStatus" value="REGISTERED"/></customData>
+        </Button>
+        <Button icon="sap-icon://status-positive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusClosed}">
+            <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
+        </Button>
+        <Button icon="sap-icon://undo" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom" tooltip="{i18n>objectCancel}"/>
+        <Button icon="sap-icon://decline" type="Transparent" press=".onCloseDetail" tooltip="{i18n>closeDetails}"/>
     </VBox>
 </core:FragmentDefinition>

@@ -26,8 +26,17 @@
                         useToolbar="true"
                         visible="{view>/useSmartControls}"
                         showGoOnFB="true"
+                        showClearOnFB="true"
+                        useDateRangeType="true"
                         search=".onSmartSearch"
-                        filterChange=".onSmartFilterChanged"/>
+                        filterChange=".onSmartFilterChanged">
+                        <smartFilterBar:controlConfiguration>
+                            <smartFilterBar:ControlConfiguration key="checklist_id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
+                            <smartFilterBar:ControlConfiguration key="lpc" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="status" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="changed_on" visibleInAdvancedArea="true"/>
+                        </smartFilterBar:controlConfiguration>
+                    </smartFilterBar:SmartFilterBar>
 
 
                     <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
@@ -113,8 +122,8 @@
                         visible="{view>/useSmartControls}"
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
-                        initiallyVisibleFields="id,checklist_id,status,lpc,changed_on"
-                        growing="true" growingThreshold="100"/>
+                        initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
+                        growing="true" growingThreshold="100" useExportToExcel="true" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
 
                     <Table visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" class="glassTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>
