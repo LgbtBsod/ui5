@@ -9,8 +9,8 @@
     <html:div class="bg-blobs"></html:div>
 
     <Button
-        icon="{= ${appView>/isDark} ? 'sap-icon://moon' : 'sap-icon://sun' }"
-        tooltip="Switch Fiori theme"
+        icon="{= ${appView>/isDark} ? 'sap-icon://sun' : 'sap-icon://moon' }"
+        tooltip="{= ${appView>/isDark} ? ${i18n>themeSwitchToLight} : ${i18n>themeSwitchToDark} }"
         press=".onToggleTheme"
         type="Transparent"
         class="themeDockButton"/>

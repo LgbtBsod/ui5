@@ -178,11 +178,24 @@
 3. Проведен CSS clean pass для responsive override selectors: удален повторяющийся override-блок `floatingControlSausage` в media section.
 4. Расширен smoke/ci-gate сценариями для backend conflict/timeout комбинаций в search/detail flows (`SearchApplicationService`, `DetailSaveOrchestrationUseCase`, `DetailSaveConflictFlowUseCase`).
 
-### Wave 24 — следующий этап
-1. Продолжить снижение LOC `Detail.controller` через extraction detail toolbar/validation orchestration участков.
-2. Добавить browser-smoke сценарий для detail save conflict UI interaction с runtime message/decision assertions.
-3. Провести cleanup pass по CSS повторяющимся theme override selectors.
-4. Расширить smoke coverage для backend flaky/network error recovery в search/detail pipeline.
+### Wave 24 — завершено
+1. Продолжено снижение orchestration-доли в `Detail.controller`: toolbar/validation status-change ветки вынесены в `DetailToolbarValidationUseCase`.
+2. Browser-smoke сценарий `scripts/browser-smoke-detail-save-conflict-flow.py` усилен runtime decision/message assertions для reload/overwrite/unknown choice веток.
+3. Проведен cleanup pass по CSS повторяющимся theme override selectors: legacy-блоки `.themeDockButton*` дедуплицированы в пользу единого late override.
+4. Расширен smoke coverage для backend flaky/network error recovery в search/detail pipeline (`SearchApplicationService`, `DetailSaveOrchestrationUseCase`) в `scripts/unit-smoke.js`.
+
+### Wave 25 — завершено
+1. Продолжена декомпозиция `Detail.controller`: save error presentation + backend error mapping adapters вынесены в `DetailSaveErrorPresentationUseCase`.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-toolbar-status-flow.py` для toolbar status switch interaction (validate → status apply → save success toast path) и подключен в nightly/non-blocking CI lane.
+3. Выполнен CSS cleanup pass по duplicated status-toggle/theme polish selectors: удалены повторяющиеся late override блоки и сохранен единый baseline для status-toggle.
+4. Усилено smoke coverage негативными сценариями lock-acquire retry exhaustion + save retry abort в detail pipeline (`DetailEditOrchestrationUseCase`, `DetailSaveErrorPresentationUseCase`).
+5. Search UX harmonization follow-up: устранено дублирование action-кнопок между rail/table toolbar, theme-dock переведен на контекстные moon/sun иконки, SmartFilterBar/SmartTable переведены на metadata-first режим (backend OData filters/columns) с fallback-панелью только для degraded режима.
+
+### Wave 26 — следующий этап
+1. Продолжить декомпозицию `Detail.controller` через extraction expanded-dialog row mutation flows в отдельный usecase-слой.
+2. Добавить browser-smoke сценарий для detail expanded rows lifecycle (open/add/delete/close) с runtime assertions по selected-model sync.
+3. Провести CSS cleanup pass для message/dialog glass overrides с устранением пересекающихся theme branches.
+4. Расширить smoke coverage для metadata degraded mode + fallback edit restrictions в search/detail связке.
 
 ## 5) Целевые метрики рефакторинга
 - Сократить размер `Search.controller.js` до ~450-500 LOC.

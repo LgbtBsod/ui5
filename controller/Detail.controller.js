@@ -21,11 +21,12 @@ sap.ui.define([
   "sap_ui5/service/usecase/DetailDialogLifecycleUseCase",
   "sap_ui5/service/usecase/DetailLockEditFlowUseCase",
   "sap_ui5/service/usecase/DetailLockReleaseUseCase",
-  "sap_ui5/service/usecase/DetailSaveConflictFlowUseCase",
   "sap_ui5/service/usecase/DetailSaveSuccessFlowUseCase",
   "sap_ui5/service/usecase/DetailCloseFlowUseCase",
-  "sap_ui5/service/usecase/DetailCloseNavigationUseCase"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailRowDialogCommandUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveConflictFlowUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailCloseNavigationUseCase) {
+  "sap_ui5/service/usecase/DetailCloseNavigationUseCase",
+  "sap_ui5/service/usecase/DetailToolbarValidationUseCase",
+  "sap_ui5/service/usecase/DetailSaveErrorPresentationUseCase"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailRowDialogCommandUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailCloseNavigationUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -725,24 +726,24 @@ sap.ui.define([
     onValidateChecklist: function () {
       var oValidation = this._runChecklistValidation();
       var oViewModel = this.getView().getModel("view");
-      if (oViewModel) {
-        oViewModel.setProperty("/validationShown", !oValidation.valid);
-        oViewModel.setProperty("/validationMissing", ChecklistUiState.buildValidationMap(oValidation.missingPaths));
-      }
+
+      DetailToolbarValidationUseCase.applyValidationState(oViewModel, oValidation, ChecklistUiState.buildValidationMap);
 
       if (oValidation.valid) {
         this.showI18nToast("checklistValidationPassed");
         return Promise.resolve(true);
       }
 
-      MessageBox.warning(this.getResourceBundle().getText("checklistValidationFailed", [oValidation.missingPaths.length + (oValidation.hasAtLeastOneCheck ? 0 : 1)]));
+      MessageBox.warning(this.getResourceBundle().getText("checklistValidationFailed", [
+        DetailToolbarValidationUseCase.resolveValidationWarningCount(oValidation)
+      ]));
       return Promise.resolve(false);
     },
 
     _applyStatusAndSave: function (sTargetStatus) {
       var oSelectedModel = this.getModel("selected");
-      oSelectedModel.setProperty("/root/status", ChecklistUiState.normalizeStatus(sTargetStatus));
-      this.getModel("state").setProperty("/isDirty", true);
+      var oStateModel = this.getModel("state");
+      DetailToolbarValidationUseCase.markDirtyStatusAndNormalize(oSelectedModel, oStateModel, sTargetStatus);
       return this.onSaveDetail().then(function (oResult) {
         this.showI18nToast("statusChanged");
         return oResult;
@@ -838,7 +839,10 @@ sap.ui.define([
             });
           }.bind(this),
           handleSaveError: function (oError) {
-            var fnConflictHandler = DetailSaveConflictFlowUseCase.buildConflictHandler({
+            return DetailSaveErrorPresentationUseCase.handleSaveError({
+              host: this,
+              error: oError,
+              handleBackendError: FlowCoordinator.handleBackendError,
               reloadLabel: this.getResourceBundle().getText("reloadButton"),
               overwriteLabel: this.getResourceBundle().getText("overwriteButton"),
               onReload: function () {
@@ -852,10 +856,6 @@ sap.ui.define([
               onOverwrite: function () {
                 return ChecklistCrudUseCase.forceUpdateChecklist(sId, oEdited);
               }
-            });
-
-            return FlowCoordinator.handleBackendError(this, oError, {
-              onConflictChoice: fnConflictHandler
             });
           }.bind(this)
         });

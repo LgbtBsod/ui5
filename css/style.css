@@ -224,29 +224,6 @@ body {
   color: #ffffff !important;
 }
 
-.themeDockButton {
-  position: fixed !important;
-  right: 1.1rem;
-  bottom: 1.1rem;
-  z-index: 30;
-}
-
-.themeDockButton .sapMBtnInner {
-  width: 3.05rem;
-  height: 3.05rem;
-  border-radius: 14px !important;
-  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.18)) !important;
-  border: 1px solid rgba(var(--accent-rgb), 0.46) !important;
-  color: var(--accent) !important;
-  box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.32) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.themeDockButton:hover .sapMBtnInner {
-  border-color: rgba(var(--accent-rgb), 0.65) !important;
-  transform: scale(1.05);
-}
 
 .glassTable .sapMListTbl {
   border-collapse: separate !important;
@@ -373,7 +350,7 @@ body {
   background: transparent !important;
   padding: 0 18px !important;
   min-width: 7.1rem;
-  min-height: 2.2rem;
+  min-height: 2.35rem;
   box-shadow: none !important;
 }
 
@@ -460,16 +437,6 @@ body {
 }
 
 
-.themeDockButton .sapMBtnContent {
-  font-size: 1.18rem !important;
-  line-height: 1.18rem !important;
-  font-weight: 600;
-}
-
-.themeDockButton .sapUiIcon {
-  font-size: 1.22rem !important;
-  color: var(--accent) !important;
-}
 
 .searchToolbar .sapMBtn:not(.sapMBtnReject):not(.sapMBtnTransparent) .sapMBtnInner,
 .searchToolbar .sapMSwt,
@@ -836,13 +803,29 @@ body {
   border-color: color-mix(in srgb, var(--glass-border) 72%, rgba(255,255,255,0.26)) !important;
 }
 
-.statusToggleWrapper {
-  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.09));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 10px 24px rgba(0,0,0,0.15);
+
+.themeDockButton .sapMBtnInner {
+  position: relative;
+  overflow: hidden;
 }
 
-.statusToggleWrapper .customStatusBtn .sapMBtnInner {
-  min-height: 2.35rem;
+.themeDockButton .sapMBtnInner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 10px 10px;
+  border-color: transparent transparent rgba(255,255,255,0.35) transparent;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.appLight .themeDockButton .sapMBtnInner::after,
+.light-mode .themeDockButton .sapMBtnInner::after {
+  border-color: transparent transparent rgba(0,0,0,0.28) transparent;
 }
 
 /* --- Object/Detail card luxury pass --- */
@@ -949,9 +932,6 @@ body {
   border-color: rgba(var(--accent-rgb), 0.55) !important;
 }
 
-.statusToggleWrapper .btnAll .sapMBtnInner {
-  background: color-mix(in srgb, var(--accent) 24%, transparent) !important;
-}
 
 /* Glass styling for floating dialogs/messages. */
 .sapMMessageToast,
