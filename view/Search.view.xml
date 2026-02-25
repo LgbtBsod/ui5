@@ -24,12 +24,18 @@
                         entitySet="CheckListSet"
                         persistencyKey="pcctSmartFilter"
                         useToolbar="false"
-                        visible="false"
+                        visible="{view>/useSmartControls}"
                         showGoOnFB="false"
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged"/>
 
-                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop">
+                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{view>/useSmartControls}">
+                        <ToolbarSpacer/>
+                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
+                    </Toolbar>
+
+                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
                         <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd"/>
                         <Input value="{state>/filterId}" placeholder="{i18n>checklistIdPlaceholder}" width="12rem" class="sapUiTinyMarginEnd"/>
                         <Label text="{i18n>filterLpcLabel}" class="sapUiTinyMarginEnd"/>
@@ -43,6 +49,7 @@
                         </Select>
                         <ToolbarSpacer/>
                         <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd"/>
                         <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
                     </Toolbar>
                 </VBox>
@@ -54,17 +61,6 @@
                         <Text text="{i18n>workflowSubtitle}" class="sapUiTinyMarginTop"/>
                         <Button text="{i18n>workflowAnalyticsButton}" icon="sap-icon://business-objects-experience" type="Transparent" press=".onOpenWorkflowAnalytics" class="brandActionBtn brandActionGhost sapUiTinyMarginTop"/>
                     </VBox>
-                    <HBox class="workflowActions" renderType="Bare" wrap="Wrap">
-                        <Button text="{i18n>workflowActionCreate}" type="Emphasized" press=".onWorkflowQuickAction" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd sapUiTinyMarginBottom">
-                            <customData><core:CustomData key="action" value="CREATE"/></customData>
-                        </Button>
-                        <Button text="{i18n>workflowActionRefresh}" type="Transparent" press=".onWorkflowQuickAction" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd sapUiTinyMarginBottom">
-                            <customData><core:CustomData key="action" value="REFRESH"/></customData>
-                        </Button>
-                        <Button text="{i18n>workflowActionReset}" type="Transparent" press=".onWorkflowQuickAction" class="brandActionBtn brandActionGhost sapUiTinyMarginBottom">
-                            <customData><core:CustomData key="action" value="RESET"/></customData>
-                        </Button>
-                    </HBox>
                 </HBox>
 
 
@@ -79,8 +75,8 @@
                 <VBox class="glassCard smartTableGlass">
                     <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar sapUiTinyMarginBottom">
                         <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" class="brandActionBtn sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
                         <MenuButton text="{i18n>exportMenuButton}" buttonMode="Split" defaultAction=".onExportMenuDefault" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd" icon="sap-icon://excel-attachment">
                             <menu>
                                 <Menu itemSelected=".onExportMenuAction">
@@ -122,10 +118,9 @@
                         visible="{view>/useSmartControls}"
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
-                        initiallyVisibleFields="id,status,LPC_TEXT,PROF_TEXT,date,time,OBSERVER_FULLNAME,OBSERVED_FULLNAME"
-                        requestAtLeastFields="id,status,LPC_KEY,has_failed_checks,has_failed_barriers" growing="true" growingThreshold="100"/>
+                        growing="true" growingThreshold="100"/>
 
-                    <Table visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" class="glassTable" mode="SingleSelectMaster" itemPress=".onSelect" selectionChange=".onSelect" growing="true" growingThreshold="100" growingScrollToLoad="false">
+                    <Table visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" class="glassTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>
                             <Column><Text text="{i18n>columnId}"/></Column>
                             <Column><Text text="{i18n>columnStatus}"/></Column>

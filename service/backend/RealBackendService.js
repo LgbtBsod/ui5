@@ -154,16 +154,30 @@ sap.ui.define([], function () {
 
         queryCheckLists: function (mQuery) {
             var iTop = Number(mQuery && mQuery.maxResults);
+            var sIdContains = String((mQuery && mQuery.idContains) || "").trim();
+            var sLpcKey = String((mQuery && mQuery.lpcKey) || "").trim();
+            var aFilterParts = [];
+
             // Empty max means "all" for enterprise search use-case.
             if (!iTop || iTop < 1) {
                 iTop = 9999;
             }
             iTop = Math.min(9999, iTop);
 
+            if (sIdContains) {
+                var sEscapedId = sIdContains.replace(/'/g, "''");
+                aFilterParts.push("contains(id,'" + sEscapedId + "') or contains(checklist_id,'" + sEscapedId + "')");
+            }
+            if (sLpcKey) {
+                var sEscapedLpc = sLpcKey.replace(/'/g, "''");
+                aFilterParts.push("lpc eq '" + sEscapedLpc + "'");
+            }
+
             return _request("/checklist", {
                 params: {
                     top: iTop,
-                    skip: 0
+                    skip: 0,
+                    filter: aFilterParts.length ? aFilterParts.join(" and ") : undefined
                 }
             }).then(function (oList) {
                 var aRoots = oList && oList.value ? oList.value : [];

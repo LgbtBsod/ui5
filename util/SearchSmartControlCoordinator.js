@@ -71,6 +71,7 @@ sap.ui.define([
         var oSmartTable = mArgs.smartTable;
         var fnSetEnabled = mArgs.setEnabled;
         var fnSelectionChange = mArgs.onSelectionChange;
+        var fnItemPress = mArgs.onItemPress || fnSelectionChange;
 
         if (!oSmartTable || !oSmartTable.getTable) {
             fnSetEnabled(false, "SmartTable inner table unavailable");
@@ -83,13 +84,16 @@ sap.ui.define([
             return null;
         }
 
+        if (oInnerTable.setMode) {
+            oInnerTable.setMode("SingleSelectLeft");
+        }
         if (oInnerTable.setGrowing) {
             oInnerTable.setGrowing(true);
             oInnerTable.setGrowingThreshold(100);
             oInnerTable.setGrowingScrollToLoad(false);
         }
         if (oInnerTable.attachItemPress) {
-            oInnerTable.attachItemPress(fnSelectionChange);
+            oInnerTable.attachItemPress(fnItemPress);
         }
         if (oInnerTable.attachSelectionChange) {
             oInnerTable.attachSelectionChange(fnSelectionChange);

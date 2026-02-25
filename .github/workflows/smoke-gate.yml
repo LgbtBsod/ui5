@@ -102,3 +102,24 @@ jobs:
         run: python -m http.server 8080 &
       - name: Run detail save-conflict browser smoke (non-blocking nightly)
         run: python scripts/browser-smoke-detail-save-conflict-flow.py http://127.0.0.1:8080/index.html
+
+
+  browser-smoke-detail-toolbar-status-flow:
+    if: github.event_name == 'schedule'
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Playwright for Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Start local static server
+        run: python -m http.server 8080 &
+      - name: Run detail toolbar status-flow browser smoke (non-blocking nightly)
+        run: python scripts/browser-smoke-detail-toolbar-status-flow.py http://127.0.0.1:8080/index.html

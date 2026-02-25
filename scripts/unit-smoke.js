@@ -264,6 +264,107 @@ function testSearchPresentationUseCase() {
   assert(mod.formatStatus('CRITICAL') === 'Error', 'formatStatus should map CRITICAL to Error');
 }
 
+
+function testDetailToolbarValidationUseCase() {
+  const ChecklistUiState = { normalizeStatus: (s) => String(s || '').toUpperCase() };
+  const mod = loadSapModule('service/usecase/DetailToolbarValidationUseCase.js', {
+    'sap_ui5/util/ChecklistUiState': ChecklistUiState
+  });
+
+  const viewState = {};
+  const viewModel = { setProperty: (k, v) => { viewState[k] = v; } };
+  mod.applyValidationState(viewModel, { valid: false, missingPaths: ['a', 'b'], hasAtLeastOneCheck: false }, (a) => ({ count: a.length }));
+  assert(viewState['/validationShown'] === true, 'applyValidationState should toggle validationShown for invalid checklist');
+  assert(viewState['/validationMissing'].count === 2, 'applyValidationState should apply mapped missing paths');
+
+  assert(mod.resolveValidationWarningCount({ missingPaths: ['a'], hasAtLeastOneCheck: false }) === 2,
+    'resolveValidationWarningCount should include missing checks marker');
+
+  const selectedState = {};
+  const selectedModel = { setProperty: (k, v) => { selectedState[k] = v; } };
+  const appState = {};
+  const stateModel = { setProperty: (k, v) => { appState[k] = v; } };
+  mod.markDirtyStatusAndNormalize(selectedModel, stateModel, 'registered');
+  assert(selectedState['/root/status'] === 'REGISTERED', 'markDirtyStatusAndNormalize should normalize and set status');
+  assert(appState['/isDirty'] === true, 'markDirtyStatusAndNormalize should mark state as dirty');
+}
+
+
+function testDetailSaveErrorPresentationUseCase() {
+  let conflictCalls = 0;
+  const DetailSaveConflictFlowUseCase = {
+    buildConflictHandler: (cfg) => {
+      return (choice) => {
+        conflictCalls += 1;
+        if (choice === cfg.reloadLabel) {
+          return cfg.onReload();
+        }
+        if (choice === cfg.overwriteLabel) {
+          return cfg.onOverwrite();
+        }
+        return Promise.resolve(null);
+      };
+    }
+  };
+
+  const mod = loadSapModule('service/usecase/DetailSaveErrorPresentationUseCase.js', {
+    'sap_ui5/service/usecase/DetailSaveConflictFlowUseCase': DetailSaveConflictFlowUseCase
+  });
+
+  let reloadCalls = 0;
+  let overwriteCalls = 0;
+  let backendCalls = 0;
+
+  return mod.handleSaveError({
+    host: { id: 'H1' },
+    error: new Error('conflict'),
+    handleBackendError: (host, err, adapter) => {
+      backendCalls += 1;
+      return adapter.onConflictChoice('reload').then(() => adapter.onConflictChoice('cancel')).then((v) => {
+        assert(v === null, 'handleSaveError should allow retry abort path on unknown conflict choice');
+        return { hostId: host.id, error: err.message };
+      });
+    },
+    reloadLabel: 'reload',
+    overwriteLabel: 'overwrite',
+    onReload: () => { reloadCalls += 1; return Promise.resolve('reloaded'); },
+    onOverwrite: () => { overwriteCalls += 1; return Promise.resolve('overwritten'); }
+  }).then((res) => {
+    assert(res.hostId === 'H1' && res.error === 'conflict', 'handleSaveError should delegate to backend error adapter with host+error');
+    assert(backendCalls === 1, 'handleSaveError should call backend error handler once');
+    assert(conflictCalls === 2 && reloadCalls === 1 && overwriteCalls === 0,
+      'createConflictAdapter should route reload and keep abort decision side-effect free');
+  });
+}
+
+function testDetailEditOrchestrationRetryExhaustion() {
+  const mod = loadSapModule('service/usecase/DetailEditOrchestrationUseCase.js');
+  let recoverCalls = 0;
+  let acquireFailedCalls = 0;
+
+  return mod.runToggleEditFlow({
+    editMode: true,
+    isDirty: false,
+    shouldPromptBeforeDisableEdit: () => false,
+    isCancelDecision: () => false,
+    confirmUnsaved: () => Promise.resolve('SAVE'),
+    runPendingRelease: () => Promise.resolve(),
+    runPendingToggle: (fn) => fn(),
+    releaseEdit: () => Promise.resolve(),
+    ensureFreshBeforeEdit: () => Promise.resolve(),
+    confirmIntegrationEdit: () => Promise.resolve(true),
+    onStayReadOnly: () => {},
+    acquireLock: () => Promise.reject(new Error('acquire failed')),
+    onLockAcquired: () => {},
+    tryRecoverFromAcquireError: () => { recoverCalls += 1; return Promise.resolve(false); },
+    onAcquireFailed: () => { acquireFailedCalls += 1; return Promise.resolve('failed'); }
+  }).then((res) => {
+    assert(res === 'failed', 'runToggleEditFlow should return acquire-failed result when recovery is exhausted');
+    assert(recoverCalls === 1 && acquireFailedCalls === 1,
+      'runToggleEditFlow should try recovery once and then call onAcquireFailed once');
+  });
+}
+
 function testDetailDialogLifecycleUseCase() {
   const Fragment = {
     load: () => Promise.resolve({
@@ -878,6 +979,37 @@ function testDetailSaveOrchestrationUseCaseConflictBranch() {
   });
 }
 
+
+function testSearchApplicationServiceNetworkFallback() {
+  const BackendAdapter = {
+    queryCheckLists: () => Promise.reject(new Error('network unreachable'))
+  };
+  const SmartSearchAdapter = {
+    filterData: (rows) => rows
+  };
+  const mod = loadSapModule('service/usecase/SearchApplicationService.js', {
+    'sap_ui5/service/backend/BackendAdapter': BackendAdapter,
+    'sap_ui5/service/SmartSearchAdapter': SmartSearchAdapter
+  });
+
+  return mod.runSearch({ filterId: '' }, 'EXACT', [{ root: { id: 'N-1' } }]).then((rows) => {
+    assert(rows.length === 1 && rows[0].root.id === 'N-1', 'runSearch should fallback to local collection on network errors');
+  });
+}
+
+function testDetailSaveOrchestrationUseCaseNetworkBranch() {
+  const mod = loadSapModule('service/usecase/DetailSaveOrchestrationUseCase.js');
+  let handled = 0;
+  return mod.runSaveFlow({
+    saveChecklist: () => Promise.reject(new Error('network unreachable')),
+    loadChecklistCollection: () => Promise.resolve([]),
+    applySaveResult: () => {},
+    handleSaveError: () => { handled += 1; return Promise.resolve('network-handled'); }
+  }).then((res) => {
+    assert(handled === 1 && res === 'network-handled', 'runSaveFlow should delegate network errors to handleSaveError');
+  });
+}
+
 function testSearchLoadFilterUseCase() {
   const mod = loadSapModule('service/usecase/SearchLoadFilterUseCase.js');
   const state = { m: {}, setProperty(k, v) { this.m[k] = v; } };
@@ -943,6 +1075,8 @@ async function main() {
   await runTest('ChecklistValidationService', testChecklistValidationService);
   await runTest('DeltaPayloadBuilder', testDeltaPayloadBuilder);
   await runTest('SearchPresentationUseCase', testSearchPresentationUseCase);
+  await runTest('DetailToolbarValidationUseCase', testDetailToolbarValidationUseCase);
+  await runTest('DetailSaveErrorPresentationUseCase', testDetailSaveErrorPresentationUseCase);
   await runTest('DetailDialogLifecycleUseCase', testDetailDialogLifecycleUseCase);
   await runTest('SmartSearchAdapterFilterModes', testSmartSearchAdapterFilterModes);
   await runTest('SearchActionUseCase', testSearchActionUseCase);
@@ -966,11 +1100,14 @@ async function main() {
   await runTest('WorkflowAnalyticsUseCaseFallback', testWorkflowAnalyticsUseCaseFallback);
   await runTest('WorkflowAnalyticsUseCaseFallbackNegative', testWorkflowAnalyticsUseCaseFallbackNegative);
   await runTest('DetailEditOrchestrationRecoverBranch', testDetailEditOrchestrationRecoverBranch);
+  await runTest('DetailEditOrchestrationRetryExhaustion', testDetailEditOrchestrationRetryExhaustion);
   await runTest('DetailSaveOrchestrationUseCase', testDetailSaveOrchestrationUseCase);
   await runTest('SearchApplicationServiceTimeoutFallback', testSearchApplicationServiceTimeoutFallback);
   await runTest('SearchApplicationServiceConflictFallback', testSearchApplicationServiceConflictFallback);
+  await runTest('SearchApplicationServiceNetworkFallback', testSearchApplicationServiceNetworkFallback);
   await runTest('DetailSaveOrchestrationUseCaseErrorBranch', testDetailSaveOrchestrationUseCaseErrorBranch);
   await runTest('DetailSaveOrchestrationUseCaseConflictBranch', testDetailSaveOrchestrationUseCaseConflictBranch);
+  await runTest('DetailSaveOrchestrationUseCaseNetworkBranch', testDetailSaveOrchestrationUseCaseNetworkBranch);
   await runTest('SearchLoadFilterUseCase', testSearchLoadFilterUseCase);
   await runTest('SearchLoadFilterUseCaseNegative', testSearchLoadFilterUseCaseNegative);
   await runTest('SearchSmartCoordinatorMetadataRecoveryIntegration', testSearchSmartCoordinatorMetadataRecoveryIntegration);

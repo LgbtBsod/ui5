@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser smoke: detail save-conflict flow adapter routing (reload/overwrite)."""
+"""Browser smoke: detail save-conflict UI decision wiring assertions (reload/overwrite/message)."""
 
 import json
 import sys
@@ -18,21 +18,42 @@ def main():
             """
             () => new Promise((resolve) => {
                 sap.ui.require([
-                    'sap_ui5/service/usecase/DetailSaveConflictFlowUseCase'
-                ], function (FlowUseCase) {
-                    var state = { reloadCalls: 0, overwriteCalls: 0 };
+                    'sap_ui5/service/usecase/DetailSaveConflictFlowUseCase',
+                    'sap_ui5/service/usecase/DetailSaveConflictUseCase'
+                ], function (FlowUseCase, ConflictUseCase) {
+                    var labels = { reload: 'reload', overwrite: 'overwrite' };
+                    var state = {
+                        reloadCalls: 0,
+                        overwriteCalls: 0,
+                        unknownChoiceResult: 'uninitialized',
+                        decisionChecks: {
+                            reloadMatch: ConflictUseCase.shouldReloadChoice(labels.reload, labels.reload),
+                            overwriteMatch: ConflictUseCase.shouldOverwriteChoice(labels.overwrite, labels.overwrite),
+                            mismatch: ConflictUseCase.shouldOverwriteChoice(labels.reload, labels.overwrite)
+                        },
+                        message: ''
+                    };
+
                     var fn = FlowUseCase.buildConflictHandler({
-                        reloadLabel: 'reload',
-                        overwriteLabel: 'overwrite',
-                        onReload: function () { state.reloadCalls += 1; return Promise.resolve(); },
-                        onOverwrite: function () { state.overwriteCalls += 1; return Promise.resolve(); }
+                        reloadLabel: labels.reload,
+                        overwriteLabel: labels.overwrite,
+                        onReload: function () { state.reloadCalls += 1; state.message = 'runtime:reload'; return Promise.resolve('reloaded'); },
+                        onOverwrite: function () { state.overwriteCalls += 1; state.message = 'runtime:overwrite'; return Promise.resolve('overwritten'); }
                     });
 
                     fn('reload').then(function () {
                         return fn('overwrite');
                     }).then(function () {
+                        return fn('cancel');
+                    }).then(function (vUnknown) {
+                        state.unknownChoiceResult = vUnknown;
                         resolve({
-                            ok: state.reloadCalls === 1 && state.overwriteCalls === 1,
+                            ok: state.reloadCalls === 1
+                              && state.overwriteCalls === 1
+                              && state.unknownChoiceResult === null
+                              && state.decisionChecks.reloadMatch === true
+                              && state.decisionChecks.overwriteMatch === true
+                              && state.decisionChecks.mismatch === false,
                             state: state
                         });
                     });
