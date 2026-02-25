@@ -57,12 +57,12 @@
                         </Select>
                         <ToolbarSpacer/>
                         <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" enabled="{view>/canRetryLoad}" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd"/>
                         <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
                     </Toolbar>
                 </VBox>
 
-                <HBox class="workflowRail" renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center">
+                <HBox class="workflowRail searchHeaderKpiRail" renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center">
                     <VBox class="workflowStageCard">
                         <Text text="{i18n>workflowTitle}" class="workflowEyebrow"/>
                         <Title text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }" level="H4"/>
@@ -78,14 +78,14 @@
                     type="Warning"
                     visible="{= !${view>/useSmartControls} }"
                     showIcon="true"
-                    class="sapUiTinyMarginBottom"/>
+                    class="sapUiTinyMarginBottom searchLoadStateBanner"/>
 
                 <VBox class="glassCard smartTableGlass">
-                    <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar sapUiTinyMarginBottom">
+                    <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar searchActionToolbarDensity sapUiTinyMarginBottom">
                         <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
-                        <MenuButton text="{i18n>exportMenuButton}" buttonMode="Split" defaultAction=".onExportMenuDefault" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd" icon="sap-icon://excel-attachment">
+                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/canDelete}" visible="{view>/hasSelection}" class="brandActionBtn sapUiTinyMarginEnd"/>
+                        <MenuButton text="{i18n>exportMenuButton}" buttonMode="Split" defaultAction=".onExportMenuDefault" enabled="{view>/canExport}" class="brandActionBtn brandActionGhost sapUiTinyMarginEnd" icon="sap-icon://excel-attachment">
                             <menu>
                                 <Menu itemSelected=".onExportMenuAction">
                                     <items>

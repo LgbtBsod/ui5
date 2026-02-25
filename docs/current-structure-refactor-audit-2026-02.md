@@ -191,11 +191,101 @@
 4. Усилено smoke coverage негативными сценариями lock-acquire retry exhaustion + save retry abort в detail pipeline (`DetailEditOrchestrationUseCase`, `DetailSaveErrorPresentationUseCase`).
 5. Search UX harmonization follow-up: устранено дублирование action-кнопок между rail/table toolbar, theme-dock переведен на контекстные moon/sun иконки, SmartFilterBar/SmartTable переведены на metadata-first режим (backend OData filters/columns) с fallback-панелью только для degraded режима.
 
-### Wave 26 — следующий этап
-1. Продолжить декомпозицию `Detail.controller` через extraction expanded-dialog row mutation flows в отдельный usecase-слой.
-2. Добавить browser-smoke сценарий для detail expanded rows lifecycle (open/add/delete/close) с runtime assertions по selected-model sync.
-3. Провести CSS cleanup pass для message/dialog glass overrides с устранением пересекающихся theme branches.
-4. Расширить smoke coverage для metadata degraded mode + fallback edit restrictions в search/detail связке.
+### Wave 26 — завершено
+1. Продолжена декомпозиция `Detail.controller`: expanded-dialog row mutation/lifecycle ветки вынесены в `DetailExpandedRowsFlowUseCase` (open/close/add/delete/sync).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-expanded-rows-lifecycle.py` для detail expanded rows lifecycle (open/add/delete/close) с runtime assertions по selected-model sync и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для message/dialog glass overrides: устранено пересечение message-dialog и unified dialog веток, сохранен единый стиль в section-level override блоке.
+4. Расширен smoke coverage для metadata degraded mode + fallback edit restrictions в search/detail связке (`SearchSmartControlCoordinator`, `DetailStatusCommandUseCase`, `DetailExpandedRowsFlowUseCase`) в `scripts/unit-smoke.js`.
+
+### Wave 27 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchSelectionNavigationUseCase` для selection/navigation + result-panel selection-state synchronization.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-selection-lifecycle.py` для search selection lifecycle (select → navigation intent → cancel/back → restore selection state) и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для search rail/toolbar responsive overrides: объединены quick-filters mobile branches и нормализован adaptive stack для `.searchToolbar`.
+4. Расширен smoke coverage для selection persistence + navigation cancellation branches в search/detail cross-flow (`SearchSelectionNavigationUseCase`) в `scripts/unit-smoke.js`.
+
+### Wave 28 — завершено
+1. Продолжена декомпозиция `Search.controller`: вынесен `SearchSmartFilterFlowUseCase` для SmartFilter state-sync + rebind preparation policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-smartfilter-fallback-transition.py` для SmartFilter fallback transitions (metadata ok → degraded → recovery) с UI assertions по toolbar/filter visibility и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для smart table/fallback table density/spacing overrides: объединены table-row visual branches и унифицированы row spacing/rounding селекторы.
+4. Расширен smoke coverage для SmartFilter max-results normalization + rebind parameter policy branches (`SearchSmartFilterFlowUseCase`, `SearchSmartControlCoordinator`) в `scripts/unit-smoke.js`.
+
+### Wave 29 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchWorkflowAnalyticsDialogUseCase` для workflow analytics dialog lifecycle + busy/error presentation policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-analytics-dialog-lifecycle.py` для analytics dialog lifecycle (open → load fallback/success → close/reopen) с assertions по busy/error/summary state и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для analytics/workflow cards hover-depth and spacing overrides: добавлен единый hover-depth baseline для `workflowStageCard`/`kpiCard` и убрано пересечение с глобальной premium shadow веткой.
+4. Расширен smoke coverage для analytics fallback source mapping + dialog export empty/error branches (`SearchWorkflowAnalyticsDialogUseCase`, `SearchAnalyticsDialogExportFlowUseCase`) в `scripts/unit-smoke.js`.
+
+### Wave 30 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchExportOrchestrationUseCase` для export menu orchestration + user feedback/toast policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-export-lifecycle.py` для export lifecycle (menu default/specific entity → empty/success/error branches) с runtime assertions по routing/rows callback path и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для export/action toolbar density and button hierarchy overrides: устранено пересечение accent branches между generic `.searchToolbar` и `.brandActionBtn*`.
+4. Расширен smoke coverage для export promise routing (screen/backend), empty result short-circuit и error presentation branches (`SearchAnalyticsExportUseCase`, `SearchExportOrchestrationUseCase`, `SearchAnalyticsDialogExportFlowUseCase`) в `scripts/unit-smoke.js`.
+
+### Wave 31 — завершено
+1. Продолжена декомпозиция `Detail.controller`: выделен `DetailLocationValueHelpUseCase` для location value-help lifecycle + selection propagation policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-location-valuehelp-flow.py` для location value-help flow (open/search/select/close) с assertions по selected basic/location sync и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для detail value-help/table hover/readability overrides: устранены пересекающиеся theme branches и объединен unified background/hover/readability блок для `locationValueHelp` table.
+4. Расширен smoke coverage для location tree filtering + selection fallback branches (`DetailLocationValueHelpUseCase`) в `scripts/unit-smoke.js`.
+
+### Wave 32 — завершено
+1. Продолжена декомпозиция `Detail.controller`: выделен `DetailPersonSuggestionUseCase` для suggestion flow (observer/observed) + dictionary propagation policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-person-suggestion-flow.py` для person suggestion lifecycle (suggest/query/select/apply) с assertions по `OBSERVER_*`/`OBSERVED_*` field sync.
+3. Проведен CSS cleanup pass для detail suggestion/value-state readability overrides с устранением пересекающихся form-field branches.
+4. Расширен smoke coverage для suggestion filtering edge branches (empty query, perner fallback, duplicate position names) в `scripts/unit-smoke.js`.
+
+### Wave 33 — завершено
+1. Продолжена декомпозиция `Detail.controller`: выделен `DetailDictionarySelectionUseCase` для dictionary key/text propagation и LPC barrier-reset decision policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-dictionary-selection-flow.py` для dictionary selection lifecycle (resolve/apply/confirm-branch) и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для detail dictionary select/value-state readability overrides с выравниванием readable text policy для LPC/Profession селекторов.
+4. Расширен smoke coverage для dictionary edge branches (`selectedItem`/fallback source key, confirm/reject barrier reset) в `scripts/unit-smoke.js`.
+
+### Wave 34 — завершено
+1. Продолжена декомпозиция `Detail.controller`: выделен `DetailLpcBarrierWarningFlowUseCase` для barrier/LPC warning orchestration (prompt adapter + decision side-effects).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-lpc-barrier-warning-flow.py` для LPC warning flow (open → reject/confirm branches) с assertions по `/barriers` и `/basic/LPC_*` и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для warning-dialog action emphasis consistency (brand/ghost hierarchy) в message-dialog footer actions.
+4. Расширен smoke coverage для negative веток warning-dialog integration (no barriers, already-allowed LPC, missing selected model hooks) в `scripts/unit-smoke.js`.
+
+### Wave 35 — завершено
+1. Продолжена декомпозиция `Detail.controller`: выделен `DetailIntegrationEditWarningUseCase` для integration-edit warning dialog orchestration (prompt + resolve policy).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-integration-warning-flow.py` для integration warning flow (non-integration + yes/no branches) и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для consistency warning/info dialog typography spacing в detail-related message dialogs.
+4. Расширен smoke coverage для integration warning negative branches (missing root, non-integration root, missing messageBox adapter) в `scripts/unit-smoke.js`.
+
+### Wave 36 — завершено
+1. Продолжена декомпозиция `Detail.controller`: выделен `DetailUnsavedDecisionFlowUseCase` для unsaved-confirmation prompt adapter (save/cancel/close decision routing).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-unsaved-decision-flow.py` для unsaved decision flow (clean/save/discard/cancel branches) с assertions по transition policy и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для unsaved/integration dialog footer button spacing/alignment consistency.
+4. Расширен smoke coverage для negative веток unsaved decision routing (missing save handler, rejected promise, no-dirty short-circuit) в `scripts/unit-smoke.js`.
+
+### Wave 37 — завершено
+1. Продолжена декомпозиция `Detail.controller`: выделен `DetailCloseNavigationFlowUseCase` для close-navigation orchestration (lock release + route intent adapter + finalize fallback).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-detail-close-navigation-flow.py` для close-navigation flow (missing object id / release success / release error branches) с assertions по route intent/state finalize и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для detail control rail close-action consistency (spacing/hierarchy for close + edit actions).
+4. Расширен smoke coverage для negative веток close flow (release error fallback, missing router adapter, no active object id) в `scripts/unit-smoke.js`.
+
+### Wave 38 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchRetryLoadPresentationUseCase` для retry/load-error presentation orchestration на adapter-уровне.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-load-retry-flow.py` для search load retry flow (missing loader / empty rows / retry error / success branches) и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для search header KPI/loading/error banner consistency (spacing + visual hierarchy).
+4. Расширен smoke coverage для negative веток retry/load orchestration (missing loader callback, empty rows after retry, repeated retry failures) в `scripts/unit-smoke.js`.
+
+### Wave 39 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchToolbarActionStateUseCase` для toolbar action-state orchestration (selection-dependent enable/disable + loading/smart-mode guards).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-toolbar-action-state-flow.py` для toolbar action-state flow (selection + smart/fallback + loading branches) и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для search table action-toolbar density consistency (button spacing + split menu alignment).
+4. Расширен smoke coverage для negative веток toolbar orchestration (missing selection context, stale selection after reload, hidden smart-controls branch) в `scripts/unit-smoke.js`.
+
+### Wave 40 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchNavigationIntentUseCase` для search navigation intent orchestration (create/copy/detail route state preparation).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-navigation-intent-flow.py` для search navigation intent flow (create/copy/open detail + missing router branch) и подключен в nightly/non-blocking CI lane.
+3. Проведен CSS cleanup pass для search quick-filters + action toolbar alignment consistency between smart/fallback modes.
+4. Расширен smoke coverage для negative веток navigation intent (missing selected id for copy, missing router adapter) в `scripts/unit-smoke.js`.
+
+### Wave 41 — следующий этап
+1. Продолжить декомпозицию `Search.controller`: вынести delete-confirmation orchestration (selection validation + backend delete + post-delete selection reset) в отдельный usecase.
+2. Добавить browser-smoke сценарий search delete orchestration flow (no-selection, success delete, backend error branches) с assertions по toast/error state и selection reset.
+3. Провести CSS cleanup pass для delete/copy/create action emphasis consistency в search toolbar.
+4. Расширить smoke coverage для negative веток delete orchestration (missing id, stale selected model, reload promise reject).
 
 ## 5) Целевые метрики рефакторинга
 - Сократить размер `Search.controller.js` до ~450-500 LOC.

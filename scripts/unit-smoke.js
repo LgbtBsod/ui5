@@ -161,6 +161,21 @@ function testSearchSmartControlCoordinator() {
   let fallbackCalls = 0;
   mod.rebindOrFallback({ enabled: false, fallbackSearch: () => { fallbackCalls += 1; } });
   assert(fallbackCalls === 1, 'rebindOrFallback should call fallback when disabled');
+
+  const bindingNoTop = { filters: [], parameters: { top: 500 }, events: {} };
+  mod.applyRebindParams({
+    bindingParams: bindingNoTop,
+    state: {
+      filterId: '',
+      filterLpc: '',
+      filterFailedChecks: 'ALL',
+      filterFailedBarriers: 'ALL',
+      searchMaxResults: '  '
+    },
+    onDataReceived: () => {}
+  });
+  assert(!Object.prototype.hasOwnProperty.call(bindingNoTop.parameters, 'top'),
+    'applyRebindParams should remove top parameter when max-results is empty/invalid');
 }
 
 
@@ -568,6 +583,10 @@ function testSearchAnalyticsExportUseCase() {
 
   return mod.buildExportPromise('screen', () => [{ id: '1' }], () => Promise.resolve({ rows: [] })).then((oRes) => {
     assert(Array.isArray(oRes.rows) && oRes.rows.length === 1, 'buildExportPromise should use screen rows for screen entity');
+    return mod.buildExportPromise('barrier', () => [{ id: 'screen' }], () => Promise.resolve({ rows: [{ id: 'remote-1' }] }));
+  }).then((oRemote) => {
+    assert(Array.isArray(oRemote.rows) && oRemote.rows[0].id === 'remote-1',
+      'buildExportPromise should route non-screen entities to remote export promise');
   });
 }
 
@@ -835,6 +854,694 @@ function testDetailRowDialogCommandUseCase() {
   assert(mod.shouldProcessRowDeleteResult({ deleted: true }) === true, 'shouldProcessRowDeleteResult should respect deleted flag');
 }
 
+function testDetailExpandedRowsFlowUseCase() {
+  const DetailStatusRowUseCase = {
+    resolveExpandedDialogMeta: (type) => type === 'checks'
+      ? { prop: '_pChecksDialog', fragment: 'sap_ui5.view.fragment.ChecksExpandedDialog' }
+      : { prop: '_pBarriersDialog', fragment: 'sap_ui5.view.fragment.BarriersExpandedDialog' },
+    shouldSyncAfterDeleteResult: (res) => !!(res && res.deleted)
+  };
+  const DetailDialogLifecycleUseCase = {
+    openDialog: (args) => Promise.resolve({ openedWith: args })
+  };
+  const DetailRowDialogCommandUseCase = {
+    resolveRowPath: (type) => type === 'checks' ? '/checks' : '/barriers',
+    resolveExpandedDialogId: (type) => type === 'checks' ? 'checksExpandedDialog' : 'barriersExpandedDialog',
+    shouldProcessRowDeleteResult: (res) => !!(res && res.deleted)
+  };
+  const DetailStatusCommandUseCase = {
+    handleDeleteRowResult: (res, shouldSync, sync) => {
+      if (!shouldSync(res)) {
+        return false;
+      }
+      sync();
+      return true;
+    }
+  };
+  const RowListHelper = {
+    addRow: (rows) => (rows || []).concat([{ id: 'new-row' }])
+  };
+
+  const mod = loadSapModule('service/usecase/DetailExpandedRowsFlowUseCase.js', {
+    'sap_ui5/service/usecase/DetailStatusRowUseCase': DetailStatusRowUseCase,
+    'sap_ui5/service/usecase/DetailDialogLifecycleUseCase': DetailDialogLifecycleUseCase,
+    'sap_ui5/service/usecase/DetailRowDialogCommandUseCase': DetailRowDialogCommandUseCase,
+    'sap_ui5/service/usecase/DetailStatusCommandUseCase': DetailStatusCommandUseCase,
+    'sap_ui5/util/RowListHelper': RowListHelper
+  });
+
+  let closeCalls = 0;
+  mod.closeExpandedDialogByType({ type: 'checks', byId: () => ({ close: () => { closeCalls += 1; } }) });
+  assert(closeCalls === 1, 'closeExpandedDialogByType should close mapped dialog');
+
+  const selectedState = { '/checks': [{ id: 'c1' }] };
+  const selectedModel = {
+    getProperty: (path) => selectedState[path],
+    setProperty: (path, value) => { selectedState[path] = value; }
+  };
+  let syncCalls = 0;
+  mod.addRowByType({ type: 'checks', selectedModel, onMutated: () => { syncCalls += 1; } });
+  assert(selectedState['/checks'].length === 2 && syncCalls === 1,
+    'addRowByType should mutate rows and trigger sync callback');
+
+  const deleteResult = mod.deleteRowByType({
+    event: { id: 'E' },
+    type: 'checks',
+    deleteRowFromEvent: () => ({ deleted: true }),
+    onSyncSelectionMeta: () => { syncCalls += 1; }
+  });
+  assert(deleteResult.deleted === true && syncCalls === 2,
+    'deleteRowByType should propagate delete result and sync selected meta');
+
+  return mod.openExpandedDialogByType({
+    type: 'checks',
+    host: {},
+    view: {},
+    controller: {}
+  }).then((dialog) => {
+    assert(dialog.openedWith.prop === '_pChecksDialog', 'openExpandedDialogByType should pass checks dialog metadata');
+  });
+}
+
+function testDetailLocationValueHelpUseCase() {
+  const mod = loadSapModule('service/usecase/DetailLocationValueHelpUseCase.js');
+
+  let opened = 0;
+  let closed = 0;
+  const dialog = { open: () => { opened += 1; }, close: () => { closed += 1; } };
+  const viewModel = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  const selectedModel = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+
+  const rows = [
+    { node_id: 'ROOT', parent_id: '', location_name: 'Root' },
+    { node_id: 'A-1', parent_id: 'ROOT', location_name: 'Assembly' },
+    { node_id: 'B-2', parent_id: 'ROOT', location_name: 'Buffer' }
+  ];
+  const buildTree = (flat) => (flat || []).map((r) => ({ node_id: r.node_id, parent_id: r.parent_id, location_name: r.location_name }));
+  const norm = (v) => String(v || '').trim().toLowerCase();
+
+  const openedOk = mod.openValueHelp({ dialog, locations: rows, viewModel, buildLocationTree: buildTree });
+  assert(openedOk === true && opened === 1, 'openValueHelp should open dialog and initialize tree');
+  assert(Array.isArray(viewModel.m['/locationVhTree']) && viewModel.m['/locationVhTree'].length === 3,
+    'openValueHelp should hydrate location value-help tree');
+
+  const filteredTree = mod.buildFilteredLocationTree({ query: 'assem', locations: rows, buildLocationTree: buildTree, normalizeText: norm });
+  assert(filteredTree.length >= 1, 'buildFilteredLocationTree should keep matching nodes and ancestors');
+
+  const appliedTree = mod.applyFilteredTreeToViewModel({
+    query: 'zzz',
+    locations: rows,
+    viewModel,
+    buildLocationTree: buildTree,
+    normalizeText: norm
+  });
+  assert(Array.isArray(appliedTree) && appliedTree.length === 0,
+    'applyFilteredTreeToViewModel should support empty-result filter branch');
+
+  const node = mod.resolveNodeFromTreeSelectionEvent({
+    getParameter: (name) => name === 'rowContext' ? { getObject: () => rows[1] } : null
+  });
+  assert(node && node.node_id === 'A-1', 'resolveNodeFromTreeSelectionEvent should resolve row context node');
+
+  const comboNode = mod.resolveNodeFromComboChangeEvent({
+    getParameter: (name) => name === 'selectedItem'
+      ? { getBindingContext: () => ({ getObject: () => rows[2] }) }
+      : null
+  }, 'mpl');
+  assert(comboNode && comboNode.node_id === 'B-2', 'resolveNodeFromComboChangeEvent should resolve selected item node');
+
+  let afterApply = 0;
+  const applied = mod.applyLocationSelection({ node, selectedModel, onAfterApply: () => { afterApply += 1; } });
+  assert(applied === true && afterApply === 1, 'applyLocationSelection should update selected model and invoke callback');
+  assert(selectedModel.m['/basic/LOCATION_KEY'] === 'A-1', 'applyLocationSelection should map node_id to LOCATION_KEY');
+
+  const failedApply = mod.applyLocationSelection({ node: null, selectedModel });
+  assert(failedApply === false, 'applyLocationSelection should return false for invalid node input');
+
+  const closedOk = mod.closeValueHelp({ dialog });
+  assert(closedOk === true && closed === 1, 'closeValueHelp should close dialog');
+}
+
+function testDetailDictionarySelectionUseCase() {
+  const mod = loadSapModule('service/usecase/DetailDictionarySelectionUseCase.js');
+
+  const selectedKey = mod.resolveSelectedKey({
+    getParameter: (name) => name === 'selectedItem' ? { getKey: () => 'L2' } : null,
+    getSource: () => ({ getSelectedKey: () => 'fallback' })
+  });
+  assert(selectedKey === 'L2', 'resolveSelectedKey should prefer selected item key when available');
+
+  const fallbackKey = mod.resolveSelectedKey({
+    getParameter: () => null,
+    getSource: () => ({ getSelectedKey: () => 'P1' })
+  });
+  assert(fallbackKey === 'P1', 'resolveSelectedKey should fallback to source selected key');
+
+  const selectedState = {};
+  const applied = mod.applyDictionarySelection({
+    key: 'L2',
+    dictionary: [{ key: 'L1', text: 'Local-1' }, { key: 'L2', text: 'Local-2' }],
+    keyPath: '/basic/LPC_KEY',
+    textPath: '/basic/LPC_TEXT',
+    selectedModel: { setProperty: (path, value) => { selectedState[path] = value; } }
+  });
+  assert(applied === true && selectedState['/basic/LPC_TEXT'] === 'Local-2',
+    'applyDictionarySelection should map key and text from dictionary');
+
+  const shouldConfirm = mod.shouldConfirmBarrierReset({ barrierAllowed: false, barriers: [{ id: 1 }] });
+  assert(shouldConfirm === true, 'shouldConfirmBarrierReset should require confirmation when barriers would be lost');
+  assert(mod.shouldConfirmBarrierReset({ barrierAllowed: true, barriers: [{ id: 1 }] }) === false,
+    'shouldConfirmBarrierReset should skip confirmation when barriers are allowed');
+
+  const lpcState = {};
+  mod.applyLpcDecision({
+    confirmed: false,
+    selectedModel: { setProperty: (path, value) => { lpcState[path] = value; } }
+  });
+  assert(lpcState['/basic/LPC_KEY'] === '' && lpcState['/basic/LPC_TEXT'] === '',
+    'applyLpcDecision should rollback LPC fields when user rejects barrier cleanup');
+
+  const barrierState = {};
+  mod.applyLpcDecision({
+    confirmed: true,
+    selectedModel: { setProperty: (path, value) => { barrierState[path] = value; } }
+  });
+  assert(Array.isArray(barrierState['/barriers']) && barrierState['/barriers'].length === 0,
+    'applyLpcDecision should clear barriers when user confirms cleanup');
+}
+
+
+function testDetailLpcBarrierWarningFlowUseCase() {
+  const mod = loadSapModule('service/usecase/DetailLpcBarrierWarningFlowUseCase.js', {
+    'sap_ui5/service/usecase/DetailDictionarySelectionUseCase': loadSapModule('service/usecase/DetailDictionarySelectionUseCase.js')
+  });
+
+  assert(mod.shouldPromptWarning({ barrierAllowed: false, barriers: [{ id: 1 }] }) === true,
+    'shouldPromptWarning should require prompt when barriers exist and LPC disallows barriers');
+  assert(mod.shouldPromptWarning({ barrierAllowed: true, barriers: [{ id: 1 }] }) === false,
+    'shouldPromptWarning should skip prompt when barriers are allowed');
+  assert(mod.shouldPromptWarning({ barrierAllowed: false, barriers: [] }) === false,
+    'shouldPromptWarning should skip prompt when there are no barriers to reset');
+
+  const selectedStateReject = {};
+  const appliedReject = mod.applyWarningDecision({
+    confirmed: false,
+    selectedModel: { setProperty: (path, value) => { selectedStateReject[path] = value; } }
+  });
+  assert(appliedReject === true && selectedStateReject['/basic/LPC_KEY'] === '' && selectedStateReject['/basic/LPC_TEXT'] === '',
+    'applyWarningDecision should rollback LPC fields when warning is rejected');
+
+  const selectedStateConfirm = {};
+  let afterApplyCalls = 0;
+  const appliedConfirm = mod.applyWarningDecision({
+    confirmed: true,
+    selectedModel: { setProperty: (path, value) => { selectedStateConfirm[path] = value; } },
+    onAfterApply: () => { afterApplyCalls += 1; }
+  });
+  assert(appliedConfirm === true && Array.isArray(selectedStateConfirm['/barriers']) && selectedStateConfirm['/barriers'].length === 0 && afterApplyCalls === 1,
+    'applyWarningDecision should clear barriers and trigger callback when confirmed');
+
+  assert(mod.applyWarningDecision({ confirmed: true, selectedModel: null }) === false,
+    'applyWarningDecision should guard missing selected model');
+
+  let warningCalls = 0;
+  const messageBox = {
+    Action: { YES: 'YES', NO: 'NO' },
+    warning: (text, opts) => {
+      warningCalls += 1;
+      opts.onClose('YES');
+    }
+  };
+  const openState = {};
+  return mod.openWarningDialog({
+    messageBox,
+    promptText: 'barriers-warn',
+    barrierAllowed: false,
+    barriers: [{ id: 1 }],
+    selectedModel: { setProperty: (path, value) => { openState[path] = value; } }
+  }).then((opened) => {
+    assert(opened === true && warningCalls === 1 && Array.isArray(openState['/barriers']) && openState['/barriers'].length === 0,
+      'openWarningDialog should show warning and apply confirmed decision branch');
+    return mod.openWarningDialog({
+      messageBox,
+      promptText: 'noop',
+      barrierAllowed: true,
+      barriers: [{ id: 1 }],
+      selectedModel: { setProperty: () => {} }
+    }).then((noOpen) => {
+      assert(noOpen === false,
+        'openWarningDialog should short-circuit when prompt preconditions are not met');
+    });
+  });
+}
+
+
+function testDetailIntegrationEditWarningUseCase() {
+  const mod = loadSapModule('service/usecase/DetailIntegrationEditWarningUseCase.js');
+
+  const resolvedRoot = mod.resolveRoot({ selectedRoot: { id: 'SEL' }, dataRoot: { id: 'DATA' } });
+  assert(resolvedRoot.id === 'SEL', 'resolveRoot should prefer selected root when present');
+  const fallbackRoot = mod.resolveRoot({ selectedRoot: null, dataRoot: { id: 'DATA' } });
+  assert(fallbackRoot.id === 'DATA', 'resolveRoot should fallback to data root when selected root is missing');
+
+  assert(mod.isIntegrationRoot({ this_is_integration_data: true }) === true,
+    'isIntegrationRoot should detect integration root by this_is_integration_data');
+  assert(mod.isIntegrationRoot({ integrationFlag: true }) === true,
+    'isIntegrationRoot should detect integration root by integrationFlag');
+  assert(mod.isIntegrationRoot({}) === false,
+    'isIntegrationRoot should return false for non-integration root');
+
+  assert(mod.shouldPrompt({ selectedRoot: { this_is_integration_data: true } }) === true,
+    'shouldPrompt should require warning for integration root');
+  assert(mod.shouldPrompt({ selectedRoot: { this_is_integration_data: false } }) === false,
+    'shouldPrompt should skip warning for non-integration root');
+
+  return mod.confirmIntegrationEdit({
+    selectedRoot: { this_is_integration_data: false },
+    messageBox: null,
+    bundle: { getText: (k) => k }
+  }).then((allowedWithoutPrompt) => {
+    assert(allowedWithoutPrompt === true,
+      'confirmIntegrationEdit should allow edit immediately when warning is not required');
+
+    return mod.confirmIntegrationEdit({
+      selectedRoot: { this_is_integration_data: true },
+      messageBox: null,
+      bundle: { getText: (k) => k }
+    }).then((blockedWithoutAdapter) => {
+      assert(blockedWithoutAdapter === false,
+        'confirmIntegrationEdit should fail-safe block edit when warning is required but adapter missing');
+
+      const messageBoxYes = {
+        Action: { YES: 'YES', NO: 'NO' },
+        warning: (_text, opts) => opts.onClose('YES')
+      };
+      return mod.confirmIntegrationEdit({
+        selectedRoot: { integrationFlag: true },
+        messageBox: messageBoxYes,
+        bundle: { getText: (k) => k }
+      }).then((allowedByYes) => {
+        assert(allowedByYes === true,
+          'confirmIntegrationEdit should allow edit when warning dialog resolves YES');
+
+        const messageBoxNo = {
+          Action: { YES: 'YES', NO: 'NO' },
+          warning: (_text, opts) => opts.onClose('NO')
+        };
+        return mod.confirmIntegrationEdit({
+          selectedRoot: { integrationFlag: true },
+          messageBox: messageBoxNo,
+          bundle: { getText: (k) => k }
+        }).then((blockedByNo) => {
+          assert(blockedByNo === false,
+            'confirmIntegrationEdit should block edit when warning dialog resolves NO');
+        });
+      });
+    });
+  });
+}
+
+
+function testDetailUnsavedDecisionFlowUseCase() {
+  const mod = loadSapModule('service/usecase/DetailUnsavedDecisionFlowUseCase.js');
+
+  assert(mod.shouldProceedAfterDecision('SAVE') === true,
+    'shouldProceedAfterDecision should allow SAVE decision');
+  assert(mod.shouldProceedAfterDecision('DISCARD') === true,
+    'shouldProceedAfterDecision should allow DISCARD decision');
+  assert(mod.shouldProceedAfterDecision('CANCEL') === false,
+    'shouldProceedAfterDecision should block CANCEL decision');
+
+  return mod.requestUnsavedDecision({
+    host: {},
+    onSave: () => Promise.resolve(),
+    confirmUnsavedAndHandle: () => Promise.resolve('SAVE')
+  }).then((saveDecision) => {
+    assert(saveDecision === 'SAVE',
+      'requestUnsavedDecision should resolve with adapter decision result');
+
+    return mod.requestUnsavedDecision({
+      host: {},
+      onSave: null,
+      confirmUnsavedAndHandle: null
+    }).then((fallbackDecision) => {
+      assert(fallbackDecision === 'CANCEL',
+        'requestUnsavedDecision should fail-safe to CANCEL when adapter is missing');
+
+      return mod.requestUnsavedDecision({
+        host: {},
+        onSave: () => Promise.resolve(),
+        confirmUnsavedAndHandle: () => Promise.reject(new Error('dialog failed'))
+      }).then((rejectedDecision) => {
+        assert(rejectedDecision === 'CANCEL',
+          'requestUnsavedDecision should fail-safe to CANCEL when adapter promise rejects');
+
+        var cleanProceeded = 0;
+        return mod.runUnsavedCloseFlow({
+          isDirty: false,
+          proceed: () => { cleanProceeded += 1; }
+        }).then((cleanResult) => {
+          assert(cleanResult.proceeded === true && cleanResult.decision === 'CLEAN' && cleanProceeded === 1,
+            'runUnsavedCloseFlow should short-circuit clean branch and proceed immediately');
+
+          var dirtyProceeded = 0;
+          return mod.runUnsavedCloseFlow({
+            isDirty: true,
+            host: {},
+            onSave: () => Promise.resolve(),
+            confirmUnsavedAndHandle: () => Promise.resolve('CANCEL'),
+            proceed: () => { dirtyProceeded += 1; }
+          }).then((cancelResult) => {
+            assert(cancelResult.proceeded === false && cancelResult.decision === 'CANCEL' && dirtyProceeded === 0,
+              'runUnsavedCloseFlow should block proceed on CANCEL decision');
+
+            var saveProceeded = 0;
+            return mod.runUnsavedCloseFlow({
+              isDirty: true,
+              host: {},
+              onSave: () => Promise.resolve(),
+              confirmUnsavedAndHandle: () => Promise.resolve('SAVE'),
+              proceed: () => { saveProceeded += 1; }
+            }).then((saveResult) => {
+              assert(saveResult.proceeded === true && saveResult.decision === 'SAVE' && saveProceeded === 1,
+                'runUnsavedCloseFlow should proceed on SAVE decision');
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+
+function testDetailCloseNavigationFlowUseCase() {
+  const mod = loadSapModule('service/usecase/DetailCloseNavigationFlowUseCase.js');
+
+  const ctx = mod.resolveCloseContext({
+    stateModel: { getProperty: (path) => path === '/activeObjectId' ? 'CHK-1' : 'S-1' }
+  });
+  assert(ctx.objectId === 'CHK-1' && ctx.sessionId === 'S-1',
+    'resolveCloseContext should read active object id and session id from state model');
+
+  let prepareCalls = 0;
+  let navigateCalls = 0;
+  return mod.runCloseNavigation({
+    stateModel: { getProperty: () => '' },
+    prepareCloseNavigation: () => { prepareCalls += 1; },
+    navigateToSearch: () => { navigateCalls += 1; }
+  }).then((skipResult) => {
+    assert(skipResult.skippedRelease === true && skipResult.navigated === true && prepareCalls === 1 && navigateCalls === 1,
+      'runCloseNavigation should skip release and still navigate when active object id is missing');
+
+    let releaseCalls = 0;
+    return mod.runCloseNavigation({
+      stateModel: { getProperty: (path) => path === '/activeObjectId' ? 'CHK-2' : 'S-2' },
+      releaseLock: () => { releaseCalls += 1; return Promise.resolve(); },
+      prepareCloseNavigation: () => { prepareCalls += 1; },
+      navigateToSearch: () => { navigateCalls += 1; }
+    }).then((okResult) => {
+      assert(okResult.released === true && okResult.navigated === true && releaseCalls === 1,
+        'runCloseNavigation should release lock and navigate on success');
+
+      let errorCalls = 0;
+      return mod.runCloseNavigation({
+        stateModel: { getProperty: (path) => path === '/activeObjectId' ? 'CHK-3' : 'S-3' },
+        releaseLock: () => Promise.reject(new Error('release-failed')),
+        prepareCloseNavigation: () => { prepareCalls += 1; },
+        navigateToSearch: () => { navigateCalls += 1; },
+        onReleaseError: () => { errorCalls += 1; }
+      }).then((errorResult) => {
+        assert(errorResult.releaseError === true && errorResult.navigated === true && errorCalls === 1,
+          'runCloseNavigation should fallback to navigation when release fails and report release error');
+
+        return mod.runCloseNavigation({
+          stateModel: { getProperty: (path) => path === '/activeObjectId' ? 'CHK-4' : 'S-4' },
+          releaseLock: () => Promise.resolve(),
+          prepareCloseNavigation: () => {}
+        }).then((missingRouterResult) => {
+          assert(missingRouterResult.navigated === false,
+            'runCloseNavigation should report non-navigated branch when navigate adapter is missing');
+        });
+      });
+    });
+  });
+}
+
+function testDetailPersonSuggestionUseCase() {
+  const mod = loadSapModule('service/usecase/DetailPersonSuggestionUseCase.js');
+
+  const persons = [
+    { perner: '10001', fullName: 'Alex Stone', position: 'Inspector', orgUnit: 'Q1', integrationName: 'INT-A' },
+    { perner: '10001', fullName: 'Alex Stone', position: 'Inspector', orgUnit: 'Q1', integrationName: 'INT-A' },
+    { perner: '10002', fullName: 'Mira Lane', position: 'Observer', orgUnit: 'Q3', integrationName: 'INT-C' }
+  ];
+  const normalize = (v) => String(v || '').trim().toLowerCase();
+
+  const filtered = mod.filterSuggestions({
+    query: 'alex',
+    persons,
+    normalizeText: normalize,
+    limit: 10
+  });
+  assert(filtered.length === 1 && filtered[0].perner === '10001',
+    'filterSuggestions should apply contains filter and dedupe duplicated person rows');
+
+  assert(mod.shouldFetchRemoteSuggestions({ query: 'ax', localCount: 1, minLocalBeforeRemote: 3 }) === true,
+    'shouldFetchRemoteSuggestions should request remote when local matches are below threshold');
+  assert(mod.shouldFetchRemoteSuggestions({ query: '', localCount: 0, minLocalBeforeRemote: 3 }) === false,
+    'shouldFetchRemoteSuggestions should skip remote for empty queries');
+
+  const viewState = {};
+  const appliedView = mod.applySuggestionsToViewModel({
+    target: 'observed',
+    suggestions: filtered,
+    viewModel: { setProperty: (path, value) => { viewState[path] = value; } }
+  });
+  assert(appliedView === true && (viewState['/observedSuggestions'] || []).length === 1,
+    'applySuggestionsToViewModel should map observed target to observed suggestions path');
+
+  const resolved = mod.resolvePersonFromSuggestionEvent({
+    getParameter: (name) => name === 'selectedItem'
+      ? { getBindingContext: () => ({ getObject: () => filtered[0] }) }
+      : null,
+    getSource: () => ({ data: () => 'observer' })
+  });
+  assert(resolved.target === 'observer' && resolved.person && resolved.person.perner === '10001',
+    'resolvePersonFromSuggestionEvent should resolve both target and person from selected item context');
+
+  const selectedState = {};
+  const appliedSelection = mod.applyPersonSelection({
+    target: resolved.target,
+    person: resolved.person,
+    selectedModel: { setProperty: (path, value) => { selectedState[path] = value; } }
+  });
+  assert(appliedSelection === true && selectedState['/basic/OBSERVER_FULLNAME'] === 'Alex Stone',
+    'applyPersonSelection should write observer fields to selected model');
+}
+
+
+function testSearchRetryLoadPresentationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchRetryLoadPresentationUseCase.js');
+
+  assert(Array.isArray(mod.normalizeRows(null)) && mod.normalizeRows(null).length === 0,
+    'normalizeRows should fallback non-array input to empty array');
+
+  const state = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  const data = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+
+  const resetOk = mod.resetLoadErrorState(state);
+  assert(resetOk === true && state.m['/loadError'] === false,
+    'resetLoadErrorState should clear load error flags');
+
+  let afterApplyCalls = 0;
+  const successOk = mod.applyLoadSuccess({
+    dataModel: data,
+    rows: [{ id: 1 }],
+    onAfterApply: () => { afterApplyCalls += 1; }
+  });
+  assert(successOk === true && (data.m['/visibleCheckLists'] || []).length === 1 && afterApplyCalls === 1,
+    'applyLoadSuccess should map rows to both data collections and invoke callback');
+
+  const errorOk = mod.applyLoadError({
+    stateModel: state,
+    error: new Error('retry-failed')
+  });
+  assert(errorOk === true && state.m['/loadError'] === true && state.m['/loadErrorMessage'] === 'retry-failed',
+    'applyLoadError should set load error flags and message');
+
+  return mod.runRetryFlow({
+    stateModel: state,
+    dataModel: data,
+    getCheckLists: null
+  }).then((missingLoaderResult) => {
+    assert(missingLoaderResult.ok === false && missingLoaderResult.reason === 'missing_loader',
+      'runRetryFlow should fail-safe with missing_loader when loader callback is absent');
+
+    return mod.runRetryFlow({
+      stateModel: state,
+      dataModel: data,
+      getCheckLists: () => Promise.resolve([]),
+      treatEmptyAsError: true,
+      emptyRowsMessage: 'empty-after-retry'
+    }).then((emptyRowsResult) => {
+      assert(emptyRowsResult.ok === false && emptyRowsResult.reason === 'empty_rows' && state.m['/loadErrorMessage'] === 'empty-after-retry',
+        'runRetryFlow should report empty_rows branch when retry returns no data');
+
+      let failCalls = 0;
+      return mod.runRetryFlow({
+        stateModel: state,
+        dataModel: data,
+        getCheckLists: () => {
+          failCalls += 1;
+          return Promise.reject(new Error('still-failing'));
+        },
+        maxAttempts: 2
+      }).then((repeatedFailResult) => {
+        assert(repeatedFailResult.ok === false && repeatedFailResult.reason === 'error' && repeatedFailResult.attempts === 2 && failCalls === 2,
+          'runRetryFlow should support repeated retry failures up to maxAttempts');
+
+        return mod.runRetryFlow({
+          stateModel: state,
+          dataModel: data,
+          getCheckLists: () => Promise.resolve([{ id: 'OK' }]),
+          runWithLoading: (fn) => fn()
+        }).then((okResult) => {
+          assert(okResult.ok === true && (data.m['/checkLists'] || []).length === 1,
+            'runRetryFlow should apply successful retry rows to data model');
+        });
+      });
+    });
+  });
+}
+
+
+
+function testSearchNavigationIntentUseCase() {
+  const mod = loadSapModule('service/usecase/SearchNavigationIntentUseCase.js', {
+    'sap_ui5/service/usecase/SearchActionUseCase': loadSapModule('service/usecase/SearchActionUseCase.js')
+  });
+
+  const createIntent = mod.buildCreateIntent();
+  assert(createIntent.objectAction === 'CREATE' && createIntent.routeParams.id === '__create',
+    'buildCreateIntent should build create route intent');
+
+  const copyMissing = mod.buildCopyIntent({ selectedId: '' });
+  assert(copyMissing === null, 'buildCopyIntent should return null when selected id is missing');
+
+  const copyIntent = mod.buildCopyIntent({ selectedId: 'CHK-1' });
+  assert(copyIntent && copyIntent.objectAction === 'COPY' && copyIntent.routeParams.id === 'CHK-1',
+    'buildCopyIntent should build copy route intent');
+
+  const openDetailMissing = mod.buildOpenDetailIntent({ id: '' });
+  assert(openDetailMissing === null, 'buildOpenDetailIntent should return null when detail id is missing');
+
+  const openDetailIntent = mod.buildOpenDetailIntent({ id: 'CHK-2' });
+  assert(openDetailIntent && openDetailIntent.route === 'detail' && openDetailIntent.routeParams.id === 'CHK-2',
+    'buildOpenDetailIntent should build detail route intent');
+
+  const selectedId = mod.resolveSelectedId({
+    selectedModel: { getData: () => ({ root: { id: 'CHK-3' } }) }
+  });
+  assert(selectedId === 'CHK-3', 'resolveSelectedId should extract selected checklist id via SearchActionUseCase');
+
+  const stateModel = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  let navCalls = 0;
+  const applied = mod.applyIntent({
+    intent: copyIntent,
+    stateModel,
+    navTo: (_route, _params) => { navCalls += 1; }
+  });
+  assert(applied === true && stateModel.m['/layout'] === 'TwoColumnsMidExpanded' && stateModel.m['/objectAction'] === 'COPY' && navCalls === 1,
+    'applyIntent should apply state and call nav adapter');
+
+  assert(mod.applyIntent({ intent: copyIntent, stateModel, navTo: null }) === false,
+    'applyIntent should fail gracefully when router adapter is missing');
+}
+
+function testSearchToolbarActionStateUseCase() {
+  const mod = loadSapModule('service/usecase/SearchToolbarActionStateUseCase.js', {
+    'sap_ui5/service/usecase/SearchActionUseCase': loadSapModule('service/usecase/SearchActionUseCase.js')
+  });
+
+  const selectedModel = { getData: () => ({ root: { id: 'CHK-1' } }) };
+  const dataModel = { getProperty: (path) => path === '/visibleCheckLists' ? [{ root: { id: 'CHK-1' } }] : [] };
+
+  const state = mod.resolveActionState({
+    selectedModel,
+    dataModel,
+    isLoading: false,
+    useSmartControls: true
+  });
+  assert(state.hasSelection === true && state.canCopy === true && state.canDelete === true && state.canExport === true,
+    'resolveActionState should enable toolbar actions when selection/rows are valid');
+
+  const staleSelectionState = mod.resolveActionState({
+    selectedModel,
+    dataModel: { getProperty: () => [{ root: { id: 'DIFF' } }] },
+    isLoading: false,
+    useSmartControls: false
+  });
+  assert(staleSelectionState.hasSelection === false && staleSelectionState.canCopy === false,
+    'resolveActionState should disable selection actions for stale selection in fallback mode');
+
+  const loadingState = mod.resolveActionState({
+    selectedModel,
+    dataModel,
+    isLoading: true,
+    useSmartControls: true
+  });
+  assert(loadingState.canCopy === false && loadingState.canDelete === false && loadingState.canExport === false && loadingState.canRetryLoad === false,
+    'resolveActionState should disable actions while loading');
+
+  const view = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  const applied = mod.applyActionStateToViewModel({
+    selectedModel,
+    dataModel,
+    viewModel: view,
+    isLoading: false,
+    useSmartControls: true
+  });
+  assert(applied === true && view.m['/hasSelection'] === true && view.m['/canExport'] === true,
+    'applyActionStateToViewModel should write resolved action state to view model');
+
+  assert(mod.applyActionStateToViewModel({ viewModel: null }) === false,
+    'applyActionStateToViewModel should guard missing view model adapter');
+}
+
+function testSearchSmartCoordinatorMetadataDegradedMode() {
+  const Filter = createFilterStub();
+  const FilterOperator = { Contains: 'Contains', EQ: 'EQ' };
+  const mod = loadSapModule('util/SearchSmartControlCoordinator.js', {
+    'sap/ui/model/Filter': Filter,
+    'sap/ui/model/FilterOperator': FilterOperator
+  });
+
+  const vm = { m: {}, getProperty(k){ return this.m[k]; }, setProperty(k,v){ this.m[k]=v; } };
+  const state = { m: { '/mainServiceMetadataOk': false, '/mainServiceMetadataError': '' }, getProperty(k){ return this.m[k]; } };
+
+  mod.syncAvailability({ stateModel: state, viewModel: vm, unavailableText: 'smartUnavailable', bootstrap: () => {} });
+  assert(vm.m['/useSmartControls'] === false, 'syncAvailability should disable smart controls in degraded metadata mode');
+  assert(vm.m['/smartControlsReason'] === 'smartUnavailable', 'syncAvailability should use fallback unavailable reason when metadata error is empty');
+}
+
+function testDetailStatusCommandUseCaseIntegrationRestriction() {
+  const mod = loadSapModule('service/usecase/DetailStatusCommandUseCase.js');
+  let applyCalls = 0;
+
+  return mod.runStatusChangeFlow({
+    targetStatus: 'REGISTERED',
+    validateChecklist: () => Promise.resolve(true),
+    getSelectedRoot: () => ({ status: 'DRAFT', this_is_integration_data: true }),
+    shouldApplyStatusChange: () => true,
+    requiresIntegrationConfirmation: () => true,
+    confirmIntegrationEdit: () => Promise.resolve(false),
+    applyStatusAndSave: () => { applyCalls += 1; return Promise.resolve(); }
+  }).then((res) => {
+    assert(res === null, 'runStatusChangeFlow should abort when integration confirmation is rejected');
+    assert(applyCalls === 0, 'runStatusChangeFlow should not save when integration edit is not confirmed');
+  });
+}
+
 function testSearchIntentUseCase() {
   const mod = loadSapModule('service/usecase/SearchIntentUseCase.js');
   const view = { m: {}, setProperty(k, v) { this.m[k] = v; } };
@@ -845,6 +1552,205 @@ function testSearchIntentUseCase() {
   const state = { m: {}, setProperty(k, v) { this.m[k] = v; } };
   const applied = mod.applyStatusFilter(state, '/filterFailedChecks', 'TRUE', () => { rebound += 1; });
   assert(applied === true && state.m['/filterFailedChecks'] === 'TRUE', 'applyStatusFilter should write state and rebind');
+}
+
+function testSearchSelectionNavigationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchSelectionNavigationUseCase.js');
+
+  const selectedModel = {
+    data: {},
+    setData(v) { this.data = v; },
+    getData() { return this.data; }
+  };
+  const viewModel = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  const dataModel = {
+    m: {
+      '/visibleCheckLists': [{ root: { id: 'A-1' } }],
+      '/checkLists': [{ root: { id: 'A-1' } }, { root: { id: 'B-2' } }]
+    },
+    getProperty(k) { return this.m[k]; }
+  };
+
+  mod.applySelectedChecklist({ checklist: { root: { id: 'A-1' } }, selectedModel, viewModel });
+  assert(viewModel.m['/hasSelection'] === true, 'applySelectedChecklist should mark hasSelection for valid id');
+
+  const persisted = mod.syncSelectionState({ selectedModel, dataModel, viewModel });
+  assert(persisted === true && viewModel.m['/hasSelection'] === true,
+    'syncSelectionState should keep selection when selected id exists in visible scope');
+
+  dataModel.m['/visibleCheckLists'] = [{ root: { id: 'C-3' } }];
+  const dropped = mod.syncSelectionState({ selectedModel, dataModel, viewModel });
+  assert(dropped === false && viewModel.m['/hasSelection'] === false,
+    'syncSelectionState should drop selection flag when selected id is not present after data refresh');
+
+  assert(mod.shouldProceedAfterUnsavedDecision('CANCEL') === false,
+    'shouldProceedAfterUnsavedDecision should block navigation for cancel decision');
+  assert(mod.shouldProceedAfterUnsavedDecision('DISCARD') === true,
+    'shouldProceedAfterUnsavedDecision should allow navigation for non-cancel decisions');
+
+  const nav = mod.buildNavigationState('ZX-9');
+  assert(nav.layout === 'TwoColumnsMidExpanded' && nav.routeParams.id === 'ZX-9',
+    'buildNavigationState should produce detail navigation state');
+}
+
+function testSearchSmartFilterFlowUseCase() {
+  const mod = loadSapModule('service/usecase/SearchSmartFilterFlowUseCase.js');
+  const Filter = createFilterStub();
+  const FilterOperator = { Contains: 'Contains', EQ: 'EQ' };
+  const coordinator = loadSapModule('util/SearchSmartControlCoordinator.js', {
+    'sap/ui/model/Filter': Filter,
+    'sap/ui/model/FilterOperator': FilterOperator
+  });
+
+  assert(mod.extractSmartFilterValue({ ranges: [{ value1: 'AA-01' }] }) === 'AA-01',
+    'extractSmartFilterValue should read range value1 payloads');
+
+  const patch = mod.resolveFilterPatch({ checklist_id: [{ key: 'CHK-1' }], LPC_KEY: { value: 'L3' } });
+  assert(patch.filterId === 'CHK-1' && patch.filterLpc === 'L3',
+    'resolveFilterPatch should normalize SmartFilter data into state patch');
+
+  const stateBag = {};
+  const stateModel = { setProperty: (k, v) => { stateBag[k] = v; } };
+  mod.syncStateFiltersFromSmartFilter({
+    stateModel,
+    smartFilterBar: { getFilterData: () => ({ id: { value: 'R-77' }, lpc: { key: 'L2' } }) }
+  });
+  assert(stateBag['/filterId'] === 'R-77' && stateBag['/filterLpc'] === 'L2',
+    'syncStateFiltersFromSmartFilter should write normalized id/lpc values to state model');
+
+  const bindingParams = { filters: [], parameters: { top: 9 }, events: {} };
+  mod.prepareRebindParams({
+    bindingParams,
+    state: {
+      filterId: 'ID-5',
+      filterLpc: 'L1',
+      filterFailedChecks: 'ALL',
+      filterFailedBarriers: 'ALL',
+      searchMaxResults: ''
+    },
+    onDataReceived: () => {},
+    applyRebindParams: coordinator.applyRebindParams
+  });
+
+  assert(bindingParams.filters.length >= 2,
+    'prepareRebindParams should delegate filter composition through applyRebindParams policy');
+  assert(!Object.prototype.hasOwnProperty.call(bindingParams.parameters, 'top'),
+    'prepareRebindParams should preserve max-results policy and clear top when searchMaxResults is empty');
+}
+
+function testSearchWorkflowAnalyticsDialogUseCase() {
+  const mod = loadSapModule('service/usecase/SearchWorkflowAnalyticsDialogUseCase.js');
+
+  const vm = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  let opened = 0;
+  let closed = 0;
+
+  mod.openDialogLifecycle({
+    dialog: {},
+    runLoad: () => {},
+    openDialog: () => { opened += 1; }
+  });
+  mod.closeDialogLifecycle({
+    dialog: {},
+    closeDialog: () => { closed += 1; }
+  });
+  assert(opened === 1 && closed === 1, 'dialog lifecycle helpers should delegate open/close callbacks');
+
+  return mod.runAnalyticsLoadFlow({
+    viewModel: vm,
+    loadAnalytics: () => Promise.resolve({ total: 5 })
+  }).then(() => {
+    assert(vm.m['/analyticsBusy'] === false, 'runAnalyticsLoadFlow should always clear busy state after success');
+    assert(vm.m['/analytics'].source === 'fallback', 'runAnalyticsLoadFlow should normalize missing source to fallback');
+
+    return mod.runAnalyticsLoadFlow({
+      viewModel: vm,
+      loadAnalytics: () => Promise.reject(new Error('analytics-failed'))
+    });
+  }).then((res) => {
+    assert(res === null, 'runAnalyticsLoadFlow should resolve null on analytics errors');
+    assert(vm.m['/analyticsError'] === 'analytics-failed', 'runAnalyticsLoadFlow should write analytics error on failure');
+    assert(vm.m['/analyticsBusy'] === false, 'runAnalyticsLoadFlow should clear busy state after error');
+  });
+}
+
+function testSearchExportOrchestrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchExportOrchestrationUseCase.js');
+
+  const menuEntity = mod.resolveExportEntityFromAction({
+    event: { getParameter: () => ({ data: (key) => key === 'entity' ? 'check' : null }) },
+    defaultEntity: 'screen',
+    resolveEntityFromMenuEvent: (event, fallback) => {
+      const item = event.getParameter('item');
+      return item ? item.data('entity') : fallback;
+    }
+  });
+  assert(menuEntity === 'check', 'resolveExportEntityFromAction should resolve entity from menu event payload');
+
+  const reportEntity = mod.resolveExportEntityFromAction({
+    source: { data: (key) => key === 'entity' ? 'barrier' : null },
+    defaultEntity: 'screen'
+  });
+  assert(reportEntity === 'barrier', 'resolveExportEntityFromAction should resolve entity from source custom data');
+
+  assert(mod.buildExportFilename('screen', () => 42) === 'checklist_screen_42',
+    'buildExportFilename should build deterministic export name pattern');
+
+  let successRows = 0;
+  let emptyCalls = 0;
+  let errorCalls = 0;
+
+  return mod.runExportLifecycle({
+    runExportFlow: (args) => args.runWithLoading(() => args.buildExportPromise().then((res) => {
+      const rows = (res && res.rows) || [];
+      if (!rows.length) {
+        args.onEmpty();
+        return null;
+      }
+      args.onSuccess(rows);
+      return rows;
+    }).catch((e) => {
+      args.onError(e);
+      return null;
+    })),
+    runWithLoading: (fn) => fn(),
+    buildExportPromise: () => Promise.resolve({ rows: [{ id: '1' }] }),
+    onEmpty: () => { emptyCalls += 1; },
+    onSuccess: (rows) => { successRows += rows.length; },
+    onError: () => { errorCalls += 1; }
+  }).then(() => {
+    return mod.runExportLifecycle({
+      runExportFlow: (args) => args.runWithLoading(() => args.buildExportPromise().then((res) => {
+        const rows = (res && res.rows) || [];
+        if (!rows.length) {
+          args.onEmpty();
+          return null;
+        }
+        args.onSuccess(rows);
+        return rows;
+      })),
+      runWithLoading: (fn) => fn(),
+      buildExportPromise: () => Promise.resolve({ rows: [] }),
+      onEmpty: () => { emptyCalls += 1; },
+      onSuccess: () => {},
+      onError: () => { errorCalls += 1; }
+    });
+  }).then(() => {
+    return mod.runExportLifecycle({
+      runExportFlow: (args) => args.runWithLoading(() => args.buildExportPromise().catch((e) => {
+        args.onError(e);
+        return null;
+      })),
+      runWithLoading: (fn) => fn(),
+      buildExportPromise: () => Promise.reject(new Error('fail')), 
+      onEmpty: () => {},
+      onSuccess: () => {},
+      onError: () => { errorCalls += 1; }
+    });
+  }).then(() => {
+    assert(successRows === 1 && emptyCalls === 1 && errorCalls === 1,
+      'runExportLifecycle should preserve success/empty/error callback routing');
+  });
 }
 
 function testWorkflowAnalyticsUseCaseFallback() {
@@ -1096,7 +2002,24 @@ async function main() {
   await runTest('SearchAnalyticsDialogExportFlowUseCase', testSearchAnalyticsDialogExportFlowUseCase);
   await runTest('SearchAnalyticsDialogExportFlowUseCaseNegative', testSearchAnalyticsDialogExportFlowUseCaseNegative);
   await runTest('DetailRowDialogCommandUseCase', testDetailRowDialogCommandUseCase);
+  await runTest('DetailExpandedRowsFlowUseCase', testDetailExpandedRowsFlowUseCase);
+  await runTest('DetailLocationValueHelpUseCase', testDetailLocationValueHelpUseCase);
+  await runTest('DetailPersonSuggestionUseCase', testDetailPersonSuggestionUseCase);
+  await runTest('DetailDictionarySelectionUseCase', testDetailDictionarySelectionUseCase);
+  await runTest('DetailLpcBarrierWarningFlowUseCase', testDetailLpcBarrierWarningFlowUseCase);
+  await runTest('DetailIntegrationEditWarningUseCase', testDetailIntegrationEditWarningUseCase);
+  await runTest('DetailUnsavedDecisionFlowUseCase', testDetailUnsavedDecisionFlowUseCase);
+  await runTest('DetailCloseNavigationFlowUseCase', testDetailCloseNavigationFlowUseCase);
+  await runTest('SearchSmartCoordinatorMetadataDegradedMode', testSearchSmartCoordinatorMetadataDegradedMode);
+  await runTest('DetailStatusCommandUseCaseIntegrationRestriction', testDetailStatusCommandUseCaseIntegrationRestriction);
   await runTest('SearchIntentUseCase', testSearchIntentUseCase);
+  await runTest('SearchSelectionNavigationUseCase', testSearchSelectionNavigationUseCase);
+  await runTest('SearchRetryLoadPresentationUseCase', testSearchRetryLoadPresentationUseCase);
+  await runTest('SearchToolbarActionStateUseCase', testSearchToolbarActionStateUseCase);
+  await runTest('SearchNavigationIntentUseCase', testSearchNavigationIntentUseCase);
+  await runTest('SearchSmartFilterFlowUseCase', testSearchSmartFilterFlowUseCase);
+  await runTest('SearchWorkflowAnalyticsDialogUseCase', testSearchWorkflowAnalyticsDialogUseCase);
+  await runTest('SearchExportOrchestrationUseCase', testSearchExportOrchestrationUseCase);
   await runTest('WorkflowAnalyticsUseCaseFallback', testWorkflowAnalyticsUseCaseFallback);
   await runTest('WorkflowAnalyticsUseCaseFallbackNegative', testWorkflowAnalyticsUseCaseFallbackNegative);
   await runTest('DetailEditOrchestrationRecoverBranch', testDetailEditOrchestrationRecoverBranch);
