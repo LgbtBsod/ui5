@@ -102,6 +102,15 @@ sap.ui.define([
                     minute: "2-digit"
                 });
             };
+            var fnEventPayload = function (oEvent) {
+                return (oEvent && typeof oEvent.getParameters === "function" && oEvent.getParameters()) || {};
+            };
+            var fnApplyLockProbeState = function (oPayload) {
+                var bKilled = !!(oPayload && oPayload.is_killed);
+                oStateModel.setProperty("/isKilled", bKilled);
+                oStateModel.setProperty("/lockExpires", (oPayload && oPayload.lock_expires) || null);
+                return bKilled;
+            };
 
             this._oSmartCache = new SmartCacheManager({ freshMs: mTimerDefaults.cacheFreshMs, staleOkMs: mTimerDefaults.cacheStaleOkMs });
             this._oHeartbeat = new HeartbeatManager({
@@ -162,13 +171,16 @@ sap.ui.define([
             });
             this._oAutoSave.attachEvent("autosaveStart", function () {
                 oStateModel.setProperty("/autosaveState", "SAVING");
+                console.info("[autosave] start", { objectId: oStateModel.getProperty("/activeObjectId") || null });
             });
             this._oAutoSave.attachEvent("autosaveDone", function () {
                 oStateModel.setProperty("/autosaveState", "SAVED");
                 oStateModel.setProperty("/autosaveAt", new Date().toISOString());
+                console.info("[autosave] done", { objectId: oStateModel.getProperty("/activeObjectId") || null });
             });
-            this._oAutoSave.attachEvent("autosaveError", function () {
+            this._oAutoSave.attachEvent("autosaveError", function (oEvent) {
                 oStateModel.setProperty("/autosaveState", "ERROR");
+                console.warn("[autosave] error", oEvent && oEvent.getParameters ? oEvent.getParameters() : {});
             });
 
             this._oConnectivity = new ConnectivityCoordinator({ graceMs: Number(mTimerDefaults.networkGraceMs) || 60 * 1000 });
@@ -207,11 +219,9 @@ sap.ui.define([
             });
 
             this._oHeartbeat.attachEvent("heartbeat", function (oEvent) {
-                var oPayload = oEvent.getParameters() || {};
-                var bKilled = !!oPayload.is_killed;
-                oStateModel.setProperty("/isKilled", bKilled);
-                oStateModel.setProperty("/lockExpires", oPayload.lock_expires || null);
-                if (bKilled) {
+                var oPayload = fnEventPayload(oEvent);
+                console.info("[lock] heartbeat", oPayload);
+                if (fnApplyLockProbeState(oPayload)) {
                     this._handleKilledLock(oPayload);
                 }
                 var sCheckedAt = fnFormatHumanDateTime(new Date());
@@ -224,8 +234,9 @@ sap.ui.define([
             }.bind(this));
 
 
-            this._oHeartbeat.attachEvent("heartbeatError", function () {
+            this._oHeartbeat.attachEvent("heartbeatError", function (oEvent) {
                 oStateModel.setProperty("/hasConflict", true);
+                console.warn("[lock] heartbeat error", fnEventPayload(oEvent));
             });
 
             this._oGcd.attachEvent("gcdExpired", function () {
@@ -233,16 +244,17 @@ sap.ui.define([
             });
 
             this._oLockStatus.attachEvent("status", function (oEvent) {
-                var oPayload = oEvent.getParameters() || {};
-                var bKilled = !!oPayload.is_killed;
-                if (!bKilled) {
+                var oPayload = fnEventPayload(oEvent);
+                if (fnApplyLockProbeState(oPayload)) {
+                    this._handleKilledLock(oPayload);
                     return;
                 }
-                this._handleKilledLock(oPayload);
+                oStateModel.setProperty("/hasConflict", false);
             }.bind(this));
 
             this._oLockStatus.attachEvent("statusError", function () {
                 // status probe is best-effort; heartbeat remains the source of truth.
+                oStateModel.setProperty("/hasConflict", true);
             });
 
             this._oActivity.attachEvent("idleTimeout", function () {
@@ -360,12 +372,10 @@ sap.ui.define([
                 if (oFrontendConfig.search && oFrontendConfig.search.defaultMaxResults) {
                     oStateModel.setProperty("/searchMaxResults", String(oFrontendConfig.search.defaultMaxResults));
                 }
-                if (Array.isArray(oFrontendConfig.requiredFields)) {
-                    oStateModel.setProperty("/requiredFields", oFrontendConfig.requiredFields);
-                }
+                this._applyFrontendValidationAndVariables(oFrontendConfig || {}, oStateModel, oEnvModel);
                 this._applyFrontendRuntimeConfig(oFrontendConfig || {}, oStateModel, oEnvModel);
 
-                this._loadMasterDataAsync(oMasterDataModel, oStateModel);
+                this._loadMasterDataAsync(oMasterDataModel, oStateModel, oEnvModel);
 
                 return this._oSmartCache.getWithFallback("checkLists").then(function (aCached) {
                     if (Array.isArray(aCached) && aCached.length) {
@@ -501,7 +511,21 @@ sap.ui.define([
             }
         },
 
-        _loadMasterDataAsync: function (oMasterDataModel, oStateModel) {
+
+        _applyFrontendValidationAndVariables: function (oFrontendConfig, oStateModel, oEnvModel) {
+            var oConfig = oFrontendConfig || {};
+            var aRequired = Array.isArray(oConfig.requiredFields) ? oConfig.requiredFields.slice() : [];
+            var mVars = (oConfig.variables && typeof oConfig.variables === "object") ? Object.assign({}, oConfig.variables) : {};
+
+            oStateModel.setProperty("/requiredFields", aRequired);
+            oStateModel.setProperty("/frontendVariables", mVars);
+            oStateModel.setProperty("/frontendConfigSource", oConfig.source || "defaults");
+            if (oEnvModel) {
+                oEnvModel.setProperty("/variables", mVars);
+            }
+        },
+
+        _loadMasterDataAsync: function (oMasterDataModel, oStateModel, oEnvModel) {
             var pBundle = BackendAdapter.getReferenceBundle().catch(function () {
                 var pPersons = BackendAdapter.getPersons().catch(function () { return []; });
                 var pLpc = BackendAdapter.getDictionary("LPC").catch(function () { return []; });
@@ -522,6 +546,12 @@ sap.ui.define([
                 oMasterDataModel.setProperty("/persons", (oBundle && oBundle.persons) || []);
                 oMasterDataModel.setProperty("/lpc", mDict.LPC || []);
                 oMasterDataModel.setProperty("/professions", mDict.PROFESSION || []);
+                if (oEnvModel && oEnvModel.setProperty) {
+                    var mRuntimeVars = (oBundle && oBundle.variables && typeof oBundle.variables === "object") ? oBundle.variables : {};
+                    var mCurrentVars = oEnvModel.getProperty("/variables") || {};
+                    oEnvModel.setProperty("/variables", Object.assign({}, mCurrentVars, mRuntimeVars));
+                    oStateModel.setProperty("/frontendVariables", Object.assign({}, mCurrentVars, mRuntimeVars));
+                }
             }).finally(function () {
                 oStateModel.setProperty("/masterDataLoading", false);
             });

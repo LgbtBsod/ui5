@@ -51,6 +51,8 @@ sap.ui.define([
                 autosaveState: "IDLE",
                 autosaveAt: null,
                 requiredFields: [],
+                frontendVariables: {},
+                frontendConfigSource: "defaults",
                 mainServiceMetadataOk: null,
                 mainServiceMetadataError: "",
                 capabilityStatus: "pending",
@@ -152,6 +154,7 @@ sap.ui.define([
             return new JSONModel({
                 source: "defaults",
                 loadedAt: "",
+                variables: {},
                 timers: {
                     heartbeatMs: 240000,
                     lockStatusMs: 60000,

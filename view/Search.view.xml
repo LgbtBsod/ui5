@@ -32,7 +32,7 @@
                             <Text text="{i18n>kpiMonthTotal}" class="kpiLabel"/>
                             <BusyIndicator visible="{view>/analyticsRailBusy}" size="0.9rem" class="sapUiTinyMarginTop sapUiTinyMarginBottom"/>
                             <Title text="{view>/analyticsRail/monthly}" level="H4" visible="{= !${view>/analyticsRailBusy} }"/>
-                            <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analyticsRail/refreshedAt} || '-') }" class="searchAnalyticsMeta"/>
+                            <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analyticsRail/refreshedAtText} || '-') }" class="searchAnalyticsMeta"/>
                         </VBox>
                         <VBox class="kpiCard searchAnalyticsCard">
                             <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
@@ -77,7 +77,6 @@
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
 
-
                     <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
                         <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd"/>
                         <Input value="{state>/filterId}" placeholder="{i18n>checklistIdPlaceholder}" width="12rem" class="sapUiTinyMarginEnd"/>
@@ -94,20 +93,23 @@
                         <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" enabled="{view>/canRetryLoad}" class="brandActionBtn brandActionGhost searchRetryLoadActionBtn sapUiTinyMarginEnd"/>
                         <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
                     </Toolbar>
+
+                    <OverflowToolbar class="toolbarTransparent searchCriteriaActions sapUiTinyMarginTop">
+                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd"/>
+                        <ToolbarSpacer/>
+                        <HBox class="maxRowsWrap" alignItems="Center" renderType="Bare">
+                            <Label text="{i18n>searchMaxResultsLabel}" class="sapUiTinyMarginEnd"/>
+                            <Input value="{state>/searchMaxResults}" type="Number" placeholder="{i18n>maxRowsAllPlaceholder}" width="8rem" change=".onMaxRowsChange" class="maxRowsInput"/>
+                        </HBox>
+                        <Label text="{i18n>searchModeLabel}" class="searchModeLabel sapUiTinyMarginBegin sapUiTinyMarginEnd"/>
+                        <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff="" class="accentSwitch"/>
+                    </OverflowToolbar>
                 </VBox>
-
-
-
 
                 <core:Fragment fragmentName="sap_ui5.view.fragment.SearchLoadStatePanel" type="XML"/>
 
                 <VBox class="glassCard smartTableGlass searchResultsTable">
                     <OverflowToolbar class="toolbarTransparent tableActionToolbar searchToolbar searchActionToolbarDensity searchFeedbackToolbar sapUiTinyMarginBottom">
-                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd">
-                            <layoutData>
-                                <OverflowToolbarLayoutData priority="NeverOverflow"/>
-                            </layoutData>
-                        </Button>
                         <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
                             <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
                         </Button>
@@ -135,18 +137,6 @@
                                 </Menu>
                             </menu>
                         </MenuButton>
-                        <HBox class="maxRowsWrap" alignItems="Center" renderType="Bare">
-                            <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
-                            <Label text="{i18n>searchMaxResultsLabel}" class="sapUiTinyMarginEnd"/>
-                            <Input value="{state>/searchMaxResults}" type="Number" placeholder="{i18n>maxRowsAllPlaceholder}" width="8rem" change=".onMaxRowsChange" class="maxRowsInput"/>
-                        </HBox>
-                        <ToolbarSpacer/>
-                        <Label text="{i18n>searchModeLabel}" class="searchModeLabel sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
-                        </Label>
-                        <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff="" class="accentSwitch">
-                            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
-                        </Switch>
                     </OverflowToolbar>
 
                     <HBox class="searchToolbarMetaRail sapUiTinyMarginBottom" renderType="Bare" wrap="Wrap" alignItems="Center" justifyContent="Start">
@@ -172,7 +162,7 @@
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
                         initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
-                        useExportToExcel="true" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
+                        useExportToExcel="false" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
 
                     <Table id="searchFallbackTable" visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>
@@ -193,9 +183,8 @@
                         </items>
                     </Table>
                 </VBox>
-
+                <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsDialog" type="XML"/>
             </VBox>
-            <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsDialog" type="XML"/>
 
         </content>
     </Page>

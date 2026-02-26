@@ -23,21 +23,53 @@ sap.ui.define([], function () {
         }
     }
 
+    function formatUpdatedDate(sIso) {
+        if (!sIso) {
+            return "-";
+        }
+        var oDate = new Date(sIso);
+        if (Number.isNaN(oDate.getTime())) {
+            return normalizeText(sIso, "-");
+        }
+        return oDate.toLocaleDateString(undefined, {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    }
+
+    function normalizeRate(vRate, iTotal, iFailed) {
+        var nRate = Number(vRate);
+        if (Number.isFinite(nRate)) {
+            return Math.max(0, Math.min(100, Math.round(nRate)));
+        }
+        if (iTotal <= 0) {
+            return 0;
+        }
+        return Math.max(0, Math.min(100, Math.round((iFailed / iTotal) * 100)));
+    }
+
     function mapInlineAnalytics(mArgs) {
         var oAnalytics = (mArgs && mArgs.analytics) || {};
         var oBundle = mArgs && mArgs.bundle;
 
         var sSource = String(oAnalytics.source || "fallback").toLowerCase() === "backend" ? "backend" : "fallback";
+        var iTotal = normalizeNumber(oAnalytics.total);
+        var iMonthly = normalizeNumber(oAnalytics.monthly);
+        var iFailedChecks = normalizeNumber(oAnalytics.failedChecks);
+        var iFailedBarriers = normalizeNumber(oAnalytics.failedBarriers);
 
         return {
-            total: normalizeNumber(oAnalytics.total),
-            monthly: normalizeNumber(oAnalytics.monthly),
-            failedChecks: normalizeNumber(oAnalytics.failedChecks),
-            failedBarriers: normalizeNumber(oAnalytics.failedBarriers),
+            total: iTotal,
+            monthly: iMonthly,
+            failedChecks: iFailedChecks,
+            failedBarriers: iFailedBarriers,
             healthy: normalizeNumber(oAnalytics.healthy),
-            avgChecksRate: normalizeNumber(oAnalytics.avgChecksRate),
-            avgBarriersRate: normalizeNumber(oAnalytics.avgBarriersRate),
+            avgChecksRate: normalizeRate(oAnalytics.avgChecksRate, iMonthly || iTotal, iFailedChecks),
+            avgBarriersRate: normalizeRate(oAnalytics.avgBarriersRate, iMonthly || iTotal, iFailedBarriers),
             refreshedAt: normalizeText(oAnalytics.refreshedAt, "-"),
+            refreshedAtText: formatUpdatedDate(oAnalytics.refreshedAt),
             source: sSource,
             sourceText: resolveSourceText(oBundle, sSource)
         };

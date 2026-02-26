@@ -85,8 +85,8 @@ sap.ui.define([
                     healthy: _safeNumber(oPayload.healthy || oPayload.HEALTHY, 0),
                     closedCount: _safeNumber(oPayload.closedCount || oPayload.CLOSED_COUNT, 0),
                     registeredCount: _safeNumber(oPayload.registeredCount || oPayload.REGISTERED_COUNT, 0),
-                    avgChecksRate: _safeNumber(oPayload.avgChecksRate || oPayload.AVG_CHECKS_RATE, 0),
-                    avgBarriersRate: _safeNumber(oPayload.avgBarriersRate || oPayload.AVG_BARRIERS_RATE, 0),
+                    avgChecksRate: _safeNumber(oPayload.avgChecksRate || oPayload.AVG_CHECKS_RATE || oPayload.failedChecksRate || oPayload.FAILED_CHECKS_RATE || oPayload.failed_checks_pct || oPayload.FAILED_CHECKS_PCT, 0),
+                    avgBarriersRate: _safeNumber(oPayload.avgBarriersRate || oPayload.AVG_BARRIERS_RATE || oPayload.failedBarriersRate || oPayload.FAILED_BARRIERS_RATE || oPayload.failed_barriers_pct || oPayload.FAILED_BARRIERS_PCT, 0),
                     refreshedAt: (oPayload.refreshedAt || oPayload.REFRESHED_AT) || new Date().toISOString(),
                     source: "backend"
                 };
@@ -111,8 +111,8 @@ sap.ui.define([
                     healthy: _safeNumber(oPayload.healthy || oPayload.HEALTHY, 0),
                     closedCount: _safeNumber(oPayload.closedCount || oPayload.CLOSED_COUNT, 0),
                     registeredCount: _safeNumber(oPayload.registeredCount || oPayload.REGISTERED_COUNT, 0),
-                    avgChecksRate: _safeNumber(oPayload.avgChecksRate || oPayload.AVG_CHECKS_RATE, 0),
-                    avgBarriersRate: _safeNumber(oPayload.avgBarriersRate || oPayload.AVG_BARRIERS_RATE, 0),
+                    avgChecksRate: _safeNumber(oPayload.avgChecksRate || oPayload.AVG_CHECKS_RATE || oPayload.failedChecksRate || oPayload.FAILED_CHECKS_RATE || oPayload.failed_checks_pct || oPayload.FAILED_CHECKS_PCT, 0),
+                    avgBarriersRate: _safeNumber(oPayload.avgBarriersRate || oPayload.AVG_BARRIERS_RATE || oPayload.failedBarriersRate || oPayload.FAILED_BARRIERS_RATE || oPayload.failed_barriers_pct || oPayload.FAILED_BARRIERS_PCT, 0),
                     refreshedAt: (oPayload.refreshedAt || oPayload.REFRESHED_AT) || new Date().toISOString(),
                     source: "backend"
                 };

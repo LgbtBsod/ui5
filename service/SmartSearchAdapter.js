@@ -3,6 +3,19 @@ sap.ui.define([], function () {
 
     var toLow = (v) => String(v || "").toLowerCase();
 
+    function readFlag(oRoot, sCamel, sSnake) {
+        if (!oRoot || typeof oRoot !== "object") {
+            return undefined;
+        }
+        if (typeof oRoot[sCamel] === "boolean") {
+            return oRoot[sCamel];
+        }
+        if (typeof oRoot[sSnake] === "boolean") {
+            return oRoot[sSnake];
+        }
+        return undefined;
+    }
+
     var evaluateRateMatch = (sFilterKey, nRate, vHasFailed) => {
         var bFailed = typeof vHasFailed === "boolean" ? vHasFailed : (Number.isFinite(nRate) && nRate < 100);
         if (sFilterKey === "ALL") {
@@ -39,15 +52,17 @@ sap.ui.define([], function () {
             var sBarriers = mFilters.filterFailedBarriers || "ALL";
 
             return (aData || []).filter((oItem) => {
-                var sId = toLow((((oItem || {}).root || {}).id));
-                var sLpc = (((oItem || {}).basic || {}).LPC_KEY || "");
                 var oRoot = ((oItem || {}).root || {});
-                var nChecks = Number(oRoot.successRateChecks);
-                var nBarriers = Number(oRoot.successRateBarriers);
-                var vChecksFailed = oRoot.hasFailedChecks;
-                var vBarriersFailed = oRoot.hasFailedBarriers;
+                var oBasic = ((oItem || {}).basic || {});
+                var sId = toLow((oRoot.id));
+                var sChecklistId = toLow(oBasic.checklist_id || oRoot.checklist_id || oRoot.CHECKLIST_ID);
+                var sLpc = (oBasic.LPC_KEY || oRoot.lpc || oRoot.LPC || "");
+                var nChecks = Number(oRoot.successRateChecks || oRoot.success_rate_checks);
+                var nBarriers = Number(oRoot.successRateBarriers || oRoot.success_rate_barriers);
+                var vChecksFailed = readFlag(oRoot, "hasFailedChecks", "has_failed_checks");
+                var vBarriersFailed = readFlag(oRoot, "hasFailedBarriers", "has_failed_barriers");
 
-                var bIdMatch = !sFilterId || sId.includes(sFilterId);
+                var bIdMatch = !sFilterId || sId.includes(sFilterId) || sChecklistId.includes(sFilterId);
                 var bLpcMatch = !sFilterLpc || sLpc === sFilterLpc;
                 var bChecksMatch = evaluateRateMatch(sChecks, nChecks, vChecksFailed);
                 var bBarriersMatch = evaluateRateMatch(sBarriers, nBarriers, vBarriersFailed);
