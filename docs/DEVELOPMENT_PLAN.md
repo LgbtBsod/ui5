@@ -887,3 +887,20 @@ DONE CRITERIA (all must pass)
 - Execute work in PR packs from Section 15.4.
 - If a gate cannot run due to environment limitations, explicitly log it as warning and keep all available gates green.
 - Do not ship partial migration without parity and accessibility evidence artifacts.
+
+
+---
+
+## 18. Full Migration Closure Criteria and Certificate
+
+The migration theme is considered fully complete only when:
+- `scripts/finalize-style-migration.js` exits with code 0.
+- `docs/artifacts/final-style-migration-certificate.json` is generated with `migrationStatus = completed`.
+- All mandatory gates and smoke checks are listed as pass in certificate results.
+- Rollback playbook artifact remains present and review-ready.
+
+Closure command:
+- `node scripts/finalize-style-migration.js`
+
+Closure artifact:
+- `docs/artifacts/final-style-migration-certificate.json`
