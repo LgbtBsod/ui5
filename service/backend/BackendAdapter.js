@@ -30,6 +30,11 @@ sap.ui.define([
             _selectBackend(mConfig || {});
         },
 
+        getMode: function () {
+            return _backendService === RealBackendService ? "real" : "fake";
+        },
+
+
         login: function (username) {
             return _backendService.login(username);
         },

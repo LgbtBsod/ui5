@@ -15,7 +15,8 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/DeltaPayloadBuilder",
-    "sap/ui/model/odata/v2/ODataModel"
+    "sap/ui/model/odata/v2/ODataModel",
+    "sap_ui5/service/usecase/ComponentStartupDiagnosticsOrchestrationUseCase"
 ], function (
     UIComponent,
     ModelFactory,
@@ -33,7 +34,8 @@ sap.ui.define([
     MessageBox,
     FlowCoordinator,
     DeltaPayloadBuilder,
-    ODataModel
+    ODataModel,
+    ComponentStartupDiagnosticsOrchestrationUseCase
 ) {
     "use strict";
 
@@ -55,22 +57,19 @@ sap.ui.define([
 
             var oDataModel = ModelFactory.createDataModel();
             var oStateModel = ModelFactory.createStateModel();
+            var fnSyncCapabilityDiagnostics = ComponentStartupDiagnosticsOrchestrationUseCase.createCapabilitySync({
+                stateModel: oStateModel,
+                getBackendMode: BackendAdapter.getMode
+            });
             var oMainServiceModel = new ODataModel({
                 serviceUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000/",
                 useBatch: false,
                 defaultCountMode: "Inline"
             });
-            oStateModel.setProperty("/mainServiceMetadataOk", null);
-            oStateModel.setProperty("/mainServiceMetadataError", "");
-            oMainServiceModel.attachMetadataLoaded(function () {
-                oStateModel.setProperty("/mainServiceMetadataOk", true);
-                oStateModel.setProperty("/mainServiceMetadataError", "");
-            });
-            oMainServiceModel.attachMetadataFailed(function (oEvent) {
-                var oParams = oEvent.getParameters ? oEvent.getParameters() : {};
-                var sReason = (oParams && (oParams.message || oParams.responseText)) || "Metadata request failed";
-                oStateModel.setProperty("/mainServiceMetadataOk", false);
-                oStateModel.setProperty("/mainServiceMetadataError", sReason);
+            ComponentStartupDiagnosticsOrchestrationUseCase.wireMetadataEvents({
+                mainServiceModel: oMainServiceModel,
+                stateModel: oStateModel,
+                syncCapability: fnSyncCapabilityDiagnostics
             });
 
             var oLayoutModel = ModelFactory.createLayoutModel();

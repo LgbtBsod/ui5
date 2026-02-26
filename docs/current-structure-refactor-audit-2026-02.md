@@ -483,3 +483,161 @@
 - Real-backend gate стабилен и не деградирует fallback behavior.
 - Документация и roadmap синхронизированы в едином каноническом наборе артефактов.
 
+
+
+## 7) Актуализированный аудит текущей версии (Lead SAP Architect / Auditor, update)
+
+### 7.1 Текущее состояние зрелости
+1. **Policy/usecase decomposition — strong**: ключевые workflow-решения в Search/Detail уже вынесены в `service/usecase/*`, что снижает риск хаотичных правок в UI-контроллерах.
+2. **Deterministic UX contracts — strong**: save/conflict/retry/export ветки опираются на структурированные outcome-объекты.
+3. **Operational diagnostics — medium**: появилась capability/KPI база, но исторические SLA-отчеты и централизованная diagnostics panel пока не финализированы end-to-end.
+4. **Governance — medium**: добавлены gate-артефакты и freeze-документы, но нужен единый "рефакторинг-конвейер" для полного покрытия всего репозитория одним проходом.
+
+### 7.2 Главные ограничения текущей версии
+1. **Controller orchestration still heavy**: Search/Detail остаются крупными, часть интеграционного glue-кода не завершила extraction.
+2. **Bootstrap density in Component**: инфраструктурные concern-ветки сконцентрированы в одном месте; это усложняет изоляционное тестирование и эволюцию startup-политик.
+3. **Refactor done-definition не унифицирована**: для разных модулей различается глубина декомпозиции, naming и контрактные инварианты.
+4. **Cross-module consistency drift**: часть docs/gates уже опережает код, а часть кода — документацию.
+
+### 7.3 Обновленная целевая архитектурная рамка (project-wide)
+- **Layering standard (mandatory):** `usecase(policy) -> controller(adapter) -> view/fragment(presentation)`.
+- **State contract standard:** централизованные группы state-path, без ad-hoc setProperty-цепочек в бизнес-ветках.
+- **Error taxonomy standard:** одинаковая схема ошибок для save/lock/retry/search/export, обязательные deterministic outcome-коды.
+- **Governance standard:** каждый refactor-блок обязан закрываться набором `unit-smoke + ci-smoke-gate + wave gates + doc update`.
+
+## 8) Обновленный план рефакторинга (current-structure-refactor-audit-2026-02)
+
+### Phase R1 — Controller & bootstrap decomposition
+1. Декомпозировать остаточные orchestration-блоки Search/Detail в usecase/coordinator.
+2. Вынести startup/bootstrap orchestration из `Component.js` в специализированные application services.
+3. Утвердить invariants для controller thin-adapter профиля (макс. orchestration depth, max branch density).
+
+### Phase R2 — State/contract normalization
+1. Сгруппировать state-path контракты в domain-oriented sections (search/detail/lock/diagnostics).
+2. Нормализовать outcome-объекты и error taxonomy для всех критичных flow.
+3. Убрать повторяющиеся state mutation fragments в единые apply-процедуры usecase-уровня.
+
+### Phase R3 — Test and regression hardening
+1. Расширить smoke матрицу на архитектурные инварианты рефакторинга (thin controllers, no duplicate state paths, outcome taxonomy).
+2. Добавить wave-level regression gates для ключевых refactor contracts.
+3. Ввести обязательный diff-аудит docs↔code parity в release lane.
+
+### Phase R4 — Governance and rollout
+1. Закрепить ADR/change-log cadence: один значимый рефактор-пакет = один ADR/change-log блок.
+2. Синхронизировать documentation freeze и rollback playbook с фактическими артефактами.
+3. Подготовить release-readiness checklist для fake/real backend и degraded-mode messaging.
+
+## 9) Единый промт для автономного полного рефакторинга всего проекта (one-shot)
+
+```text
+Ты — SAP Lead Architect Auditor + Principal Refactoring Executor в UI5 репозитории.
+Твоя цель: выполнить полный архитектурный рефакторинг проекта за один сквозной проход по установленным стандартам, без запроса промежуточных подтверждений.
+
+КОНСТИТУЦИЯ РЕФАКТОРИНГА (обязательна)
+1) Любое UX/workflow изменение строго через цепочку:
+   usecase (policy) -> controller (adapter) -> view/fragment (presentation).
+2) Контроллеры — thin adapters: запрещено добавлять новую бизнес-orchestration логику в контроллеры.
+3) Любые повторяющиеся visual/state patterns выносятся в fragment/usecase/coordinator.
+4) Любая lock/edit/save операция обязана обновлять status indicators и pending flags.
+5) Все error paths нормализуются в deterministic outcomes (без неявных catch-all веток).
+
+ОБЪЕМ ONE-SHOT РЕФАКТОРИНГА
+A. Search/Detail controller slimming до целевого thin-adapter профиля.
+B. Component/bootstrap decomposition в app-lifecycle/model-bootstrap/startup-diagnostics сервисы.
+C. State contract normalization (search/detail/lock/diagnostics), устранение duplicate state paths.
+D. Outcome taxonomy unification (save/lock/retry/search/export/create/copy).
+E. KPI/diagnostics maturity: snapshot/export/presentation contracts + deterministic degraded-mode messaging.
+F. Governance completion: ADR/change-log/freeze/rollback docs синхронизированы с фактическим кодом.
+
+РЕЖИМ АВТОИСПОЛНЕНИЯ (без ручных пингов)
+1) Построй полный план 10–20 шагов и сразу исполняй его последовательно.
+2) После каждого шага:
+   - обновляй план (pending -> in_progress -> completed),
+   - выполняй релевантные тесты,
+   - фиксируй артефакты в документации.
+3) При блокере:
+   - документируй root cause,
+   - применяй fallback,
+   - продолжай остальные незаблокированные задачи.
+4) Запрещено останавливаться до закрытия всех пунктов A–F, кроме hard blocker уровня environment.
+
+КРИТЕРИИ ГОТОВНОСТИ (Definition of Done)
+1) Код:
+   - контроллеры slimmed,
+   - orchestration перенесен в usecase/coordinator,
+   - state/outcome контракты нормализованы.
+2) Тесты/гейты:
+   - node scripts/unit-smoke.js
+   - node scripts/unit-smoke.js --json > /tmp/unit-smoke-report.json
+   - node scripts/ci-smoke-gate.js /tmp/unit-smoke-report.json
+   - wave-specific regression gates (C/D/E) проходят.
+3) Документация:
+   - unified-development-plan updated,
+   - current-structure-refactor-audit updated,
+   - ADR/change-log/freeze/rollback синхронизированы с кодом.
+4) Release safety:
+   - no regressions в lock lifecycle/save conflict/search fallback parity,
+   - deterministic degraded-mode и startup capability matrix сохранены.
+
+ФОРМАТ КОММИТОВ И PR
+1) Атомарные коммиты по доменам: Search, Detail, Component/bootstrap, State, Tests/Gates, Docs.
+2) Финальный PR обязан содержать:
+   - список закрытых задач A–F,
+   - таблицу "изменение -> артефакт -> тест",
+   - список остаточных рисков и ограничений,
+   - rollback plan по критическим флоу.
+
+ОГРАНИЧЕНИЯ КАЧЕСТВА
+- Никаких try/catch вокруг imports.
+- Никаких silent fallback, скрывающих контрактные сбои в real-mode.
+- Никаких незадокументированных state-path и ad-hoc сообщений.
+```
+
+
+## 10) One-shot refactor pass results (implemented)
+
+### Implemented extraction set
+1. `Component.js` startup diagnostics wiring refactored to `ComponentStartupDiagnosticsOrchestrationUseCase` (sync + metadata event wiring).
+2. `Search.controller.js` selection/open-detail orchestration refactored to `SearchSelectionOpenFlowUseCase`.
+3. Regression gates/tests updated to enforce presence of new orchestration contracts.
+
+### Architectural effect
+- Снижен orchestration density в `Component` и `Search.controller`.
+- Укреплен policy-first профиль: wiring и deterministic outcomes концентрируются в usecase-слое.
+- Улучшена maintainability для дальнейшего extraction в Detail/controller/bootstrap направлениях.
+
+
+## 11) Search.controller refactor result (full-pass report)
+
+### Before -> After architecture slice
+- **Before:** Search controller contained mixed adapter + orchestration logic for route defaults, execute-search lifecycle, selection/action-state sync, and create/copy intent branches.
+- **After:** these orchestration segments are delegated to dedicated usecases (`SearchStateSyncUseCase`, `SearchExecuteFlowUseCase`, `SearchCreateCopyFlowUseCase`, `SearchSelectionOpenFlowUseCase`), while controller focuses on wiring and adapter callbacks.
+
+### Achieved metrics
+- Reduced controller orchestration density by extracting repeated flow branches to policy layer.
+- Improved testability by adding dedicated smoke tests for each extracted usecase contract.
+- Strengthened deterministic outcomes (`ok/reason`) for create/copy/execute-search/state-sync paths.
+
+### Residual backlog
+- Continue analytics/filter-hint lifecycle synchronization extraction for remaining Search branches.
+- Continue Detail controller decomposition to align both major controllers with final thin-adapter baseline.
+
+
+## 12) Detail.controller refactor result (full-pass report)
+
+### Before -> After architecture slice
+- **Before:** Detail controller contained embedded orchestration for close/unsaved-decision, toggle-edit lock lifecycle, and save flow envelope.
+- **After:** these branches are delegated to `DetailCloseFlowOrchestrationUseCase`, `DetailToggleEditOrchestrationUseCase`, `DetailSaveFlowOrchestrationUseCase`; controller keeps adapter wiring and callbacks.
+
+### Achieved metrics
+- Reduced orchestration density of critical lock/save/close branches.
+- Improved testability with dedicated smoke tests for extracted Detail orchestration usecases.
+- Standardized deterministic outcomes (`ok/reason`) for extracted branches.
+
+### Residual backlog
+- Further extract dictionary/value-help/suggestion and expanded-dialog lifecycle wrappers.
+- Continue reducing controller LOC to target thin-adapter threshold.
+
+
+- Follow-up normalization pass added `DetailSelectionMetaSyncUseCase` to enforce grouped apply semantics for dirty/selection/derived result synchronization.
+- Deterministic outcome taxonomy tightened in extracted flow wrappers by replacing ambiguous fallback reason with `no_result`.

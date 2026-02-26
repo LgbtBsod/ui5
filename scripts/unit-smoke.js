@@ -3125,6 +3125,314 @@ function testWaveB3CriticalJourneysMatrix() {
   });
 }
 
+
+function testKpiSnapshotExportUseCase() {
+  const mod = loadSapModule('service/usecase/KpiSnapshotExportUseCase.js');
+  const state = {
+    '/mode': 'EDIT',
+    '/activeObjectId': 'CHK-77',
+    '/operationalKpi': {
+      saveAttempts: 2,
+      saveSuccess: 1,
+      saveFailed: 1,
+      saveLatencyMsLast: 90,
+      saveLatencyMsAvg: 75.5,
+      conflictCount: 3,
+      validationFailures: 4,
+      retryFailures: 5,
+      retryLatencyMsLast: 120,
+      retryLatencyMsAvg: 110
+    },
+    '/operationalKpiSnapshotLimit': 2
+  };
+  const model = {
+    getProperty: (k) => state[k],
+    setProperty: (k, v) => { state[k] = v; }
+  };
+
+  const built = mod.buildSnapshot(model, { source: 'diagnostics-panel' });
+  assert(built.ok === true && built.snapshot.source === 'diagnostics-panel',
+    'buildSnapshot should return structured KPI snapshot with custom source');
+  assert(built.snapshot.metrics.conflictCount === 3,
+    'buildSnapshot should carry KPI metric counters');
+
+  mod.appendSnapshot(model, built.snapshot);
+  mod.appendSnapshot(model, built.snapshot);
+  const appendRes = mod.appendSnapshot(model, built.snapshot);
+  assert(appendRes.ok === true && appendRes.count === 2,
+    'appendSnapshot should enforce state snapshot limit');
+
+  const exported = mod.exportSnapshots(state['/operationalKpiSnapshots']);
+  assert(exported.total === 2 && Array.isArray(exported.snapshots),
+    'exportSnapshots should return export payload with total and snapshots');
+}
+
+function testStartupCapabilityDiagnosticsUseCase() {
+  const mod = loadSapModule('service/usecase/StartupCapabilityDiagnosticsUseCase.js');
+  const degraded = mod.buildDiagnostics({ backendMode: 'fake', metadataOk: true });
+  assert(degraded.status === 'degraded' && degraded.degradedReason === 'backend_fake_mode',
+    'buildDiagnostics should mark fake mode as degraded with deterministic reason');
+
+  const ready = mod.buildDiagnostics({ backendMode: 'real', metadataOk: true });
+  assert(ready.status === 'ready' && ready.messageKey === 'capabilityReady',
+    'buildDiagnostics should mark real+metadata as ready');
+
+  const metadataDown = mod.buildDiagnostics({ backendMode: 'real', metadataOk: false, metadataError: 'down' });
+  assert(metadataDown.degradedReason === 'metadata_unavailable' && metadataDown.metadata.error === 'down',
+    'buildDiagnostics should capture metadata degraded diagnostics');
+
+  const st = {};
+  const m = { setProperty: (k, v) => { st[k] = v; } };
+  const applyRes = mod.applyToStateModel(m, metadataDown);
+  assert(applyRes.ok === true && st['/capabilityStatus'] === 'degraded',
+    'applyToStateModel should map diagnostics into deterministic state paths');
+}
+
+
+
+
+function testDetailCloseFlowOrchestrationUseCase() {
+  const lifecycle = loadSapModule('service/usecase/DetailLifecycleUseCase.js');
+  const lockRelease = loadSapModule('service/usecase/DetailLockReleaseUseCase.js', {
+    'sap_ui5/service/usecase/DetailLifecycleUseCase': lifecycle
+  });
+  const closeNav = loadSapModule('service/usecase/DetailCloseNavigationFlowUseCase.js', {
+    'sap_ui5/service/usecase/DetailLockReleaseUseCase': lockRelease,
+    'sap_ui5/service/usecase/DetailLifecycleUseCase': lifecycle
+  });
+  const closeFlow = loadSapModule('service/usecase/DetailCloseFlowUseCase.js');
+  const cmd = loadSapModule('service/usecase/DetailCommandFlowUseCase.js');
+  const unsaved = loadSapModule('service/usecase/DetailUnsavedDecisionFlowUseCase.js');
+  const flowCoord = { confirmUnsavedAndHandle: () => Promise.resolve('DISCARD') };
+  const mod = loadSapModule('service/usecase/DetailCloseFlowOrchestrationUseCase.js', {
+    'sap_ui5/service/usecase/DetailCloseNavigationFlowUseCase': closeNav,
+    'sap_ui5/service/usecase/DetailCloseFlowUseCase': closeFlow,
+    'sap_ui5/service/usecase/DetailCommandFlowUseCase': cmd,
+    'sap_ui5/service/usecase/DetailUnsavedDecisionFlowUseCase': unsaved,
+    'sap_ui5/service/usecase/DetailLifecycleUseCase': lifecycle,
+    'sap_ui5/util/FlowCoordinator': flowCoord
+  });
+  const st = { '/isDirty': false };
+  return mod.runCloseFlow({
+    stateModel: { getProperty: (k) => st[k], setProperty: (k, v) => { st[k] = v; } },
+    host: {},
+    onSave: () => Promise.resolve({ ok: true }),
+    releaseLock: () => Promise.resolve({ ok: true }),
+    navigateToSearch: () => true
+  }).then((res) => {
+    assert(typeof res.reason === 'string', 'DetailCloseFlowOrchestrationUseCase should return deterministic reason');
+  });
+}
+
+function testDetailToggleEditOrchestrationUseCase() {
+  const editOrch = loadSapModule('service/usecase/DetailEditOrchestrationUseCase.js');
+  const cmd = loadSapModule('service/usecase/DetailCommandFlowUseCase.js');
+  const lockEdit = loadSapModule('service/usecase/DetailLockEditFlowUseCase.js', {
+    'sap_ui5/service/usecase/DetailEditOrchestrationUseCase': editOrch,
+    'sap_ui5/service/usecase/DetailCommandFlowUseCase': cmd
+  });
+  const unsaved = loadSapModule('service/usecase/DetailUnsavedDecisionFlowUseCase.js');
+  const lifecycle = loadSapModule('service/usecase/DetailLifecycleUseCase.js');
+  const flowCoord = { confirmUnsavedAndHandle: () => Promise.resolve('DISCARD') };
+  const mod = loadSapModule('service/usecase/DetailToggleEditOrchestrationUseCase.js', {
+    'sap_ui5/service/usecase/DetailLockEditFlowUseCase': lockEdit,
+    'sap_ui5/service/usecase/DetailUnsavedDecisionFlowUseCase': unsaved,
+    'sap_ui5/service/usecase/DetailLifecycleUseCase': lifecycle,
+    'sap_ui5/util/FlowCoordinator': flowCoord
+  });
+  const st = { '/isDirty': false, '/mode': 'READ', '/isLocked': false };
+  const sm = { getProperty: (k) => st[k], setProperty: (k, v) => { st[k] = v; } };
+  return mod.runToggleFlow({
+    host: {}, stateModel: sm, editMode: true, onSave: () => Promise.resolve({ ok: true }),
+    pendingText: 'p', stayReadOnlyText: 'r', lockOwnedText: 'ok', lockOwnedByOtherText: 'other',
+    setLockUiState: () => {}, runWithStateFlag: (p, fn) => Promise.resolve(fn()),
+    releaseEdit: () => Promise.resolve({ ok: true }),
+    ensureFreshBeforeEdit: () => Promise.resolve({ ok: true }),
+    confirmIntegrationEdit: () => Promise.resolve(true),
+    acquireLock: () => Promise.resolve({ ok: true }),
+    tryRecoverFromAcquireError: () => Promise.resolve(false),
+    onAcquireFailed: () => Promise.resolve(false)
+  }).then((res) => {
+    assert(res.ok === true && st['/mode'] === 'EDIT', 'DetailToggleEditOrchestrationUseCase should acquire lock and switch mode');
+  });
+}
+
+function testDetailSaveFlowOrchestrationUseCase() {
+  const saveOrch = loadSapModule('service/usecase/DetailSaveOrchestrationUseCase.js');
+  const mod = loadSapModule('service/usecase/DetailSaveFlowOrchestrationUseCase.js', {
+    'sap_ui5/service/usecase/DetailSaveOrchestrationUseCase': saveOrch
+  });
+  return mod.runSaveFlow({
+    runWithLoading: (fn) => Promise.resolve(fn()),
+    saveChecklist: () => Promise.resolve({ root: { id: '1' } }),
+    loadChecklistCollection: () => Promise.resolve([{ root: { id: '1' } }]),
+    applySaveResult: () => {},
+    handleSaveError: () => Promise.resolve({ ok: false })
+  }).then((res) => {
+    assert(res.ok === true && res.reason === 'saved', 'DetailSaveFlowOrchestrationUseCase should return deterministic saved result');
+  });
+}
+
+
+function testDetailSelectionMetaSyncUseCase() {
+  const mod = loadSapModule('service/usecase/DetailSelectionMetaSyncUseCase.js');
+  let seq = [];
+  const res = mod.runSelectionMetaSync({
+    syncDirty: () => { seq.push('dirty'); },
+    updateSelectionState: () => { seq.push('selection'); },
+    updateDerivedRootResult: () => { seq.push('derived'); }
+  });
+  assert(res.ok === true && res.reason === 'selection_meta_synced',
+    'DetailSelectionMetaSyncUseCase should return deterministic selection_meta_synced result');
+  assert(seq.join('>') === 'dirty>selection>derived',
+    'DetailSelectionMetaSyncUseCase should execute sync pipeline in deterministic order');
+}
+
+function testSearchStateSyncUseCase() {
+  const selNav = loadSapModule('service/usecase/SearchSelectionNavigationUseCase.js');
+  const searchAction = loadSapModule('service/usecase/SearchActionUseCase.js');
+  const toolbar = loadSapModule('service/usecase/SearchToolbarActionStateUseCase.js', {
+    'sap_ui5/service/usecase/SearchActionUseCase': searchAction
+  });
+  const mod = loadSapModule('service/usecase/SearchStateSyncUseCase.js', {
+    'sap_ui5/service/usecase/SearchSelectionNavigationUseCase': selNav,
+    'sap_ui5/service/usecase/SearchToolbarActionStateUseCase': toolbar
+  });
+
+  const view = {};
+  const viewModel = { getProperty: (k) => view[k], setProperty: (k, v) => { view[k] = v; } };
+  const selectedModel = { getData: () => ({ root: { id: 'A' } }) };
+  const dataModel = { getProperty: (k) => (k === '/checkLists' ? [{ root: { id: 'A' } }] : null) };
+  const syncRes = mod.syncSelectionAndActionState({ selectedModel, dataModel, viewModel, isLoading: false, useSmartControls: true });
+  assert(syncRes.ok === true && view['/hasSelection'] === true,
+    'syncSelectionAndActionState should update selection/action state deterministically');
+
+  const st = {};
+  const stateModel = { setProperty: (k, v) => { st[k] = v; } };
+  const routeRes = mod.applyRouteMatchedDefaults(stateModel);
+  assert(routeRes.ok === true && st['/layout'] === 'OneColumn' && st['/mode'] === 'READ',
+    'applyRouteMatchedDefaults should apply deterministic route defaults');
+}
+
+function testSearchExecuteFlowUseCase() {
+  const mod = loadSapModule('service/usecase/SearchExecuteFlowUseCase.js');
+  const out = {};
+  return mod.runExecuteSearchFlow({
+    runWithLoading: (fn) => Promise.resolve(fn()),
+    runSearch: () => Promise.resolve([{ root: { id: 'X' } }]),
+    applyRows: (rows) => { out.rows = rows; },
+    afterApply: () => { out.after = true; }
+  }).then((res) => {
+    assert(res.ok === true && res.reason === 'applied' && res.count === 1,
+      'runExecuteSearchFlow should return deterministic applied result');
+    assert(Array.isArray(out.rows) && out.after === true,
+      'runExecuteSearchFlow should call applyRows and afterApply callbacks');
+  });
+}
+
+function testSearchCreateCopyFlowUseCase() {
+  const guard = loadSapModule('service/usecase/SearchCreateCopyNavigationGuardUseCase.js');
+  const action = loadSapModule('service/usecase/SearchActionUseCase.js');
+  const nav = loadSapModule('service/usecase/SearchNavigationIntentUseCase.js', {
+    'sap_ui5/service/usecase/SearchActionUseCase': action
+  });
+  const presenter = loadSapModule('service/usecase/SearchActionMessagePresentationUseCase.js');
+  const mod = loadSapModule('service/usecase/SearchCreateCopyFlowUseCase.js', {
+    'sap_ui5/service/usecase/SearchCreateCopyNavigationGuardUseCase': guard,
+    'sap_ui5/service/usecase/SearchNavigationIntentUseCase': nav,
+    'sap_ui5/service/usecase/SearchActionMessagePresentationUseCase': presenter
+  });
+
+  return mod.runCreateFlow({
+    confirmNavigation: () => true,
+    stateModel: { setProperty: () => {} },
+    navTo: () => {}
+  }).then((createRes) => {
+    assert(createRes.ok === true && createRes.reason === 'applied',
+      'runCreateFlow should return deterministic applied outcome');
+    return mod.runCopyFlow({
+      selectedModel: { getData: () => ({ root: { id: 'CHK-1' } }) },
+      confirmNavigation: () => true,
+      stateModel: { setProperty: () => {} },
+      navTo: () => {},
+      bundle: { getText: (k) => k },
+      showToast: () => {}
+    });
+  }).then((copyRes) => {
+    assert(copyRes.ok === true && copyRes.reason === 'applied',
+      'runCopyFlow should return deterministic applied outcome');
+  });
+}
+
+function testComponentStartupDiagnosticsOrchestrationUseCase() {
+  const startupDiag = loadSapModule('service/usecase/StartupCapabilityDiagnosticsUseCase.js');
+  const mod = loadSapModule('service/usecase/ComponentStartupDiagnosticsOrchestrationUseCase.js', {
+    'sap_ui5/service/usecase/StartupCapabilityDiagnosticsUseCase': startupDiag
+  });
+
+  const st = { '/mainServiceMetadataOk': null, '/mainServiceMetadataError': '' };
+  const model = {
+    getProperty: (k) => st[k],
+    setProperty: (k, v) => { st[k] = v; }
+  };
+  const sync = mod.createCapabilitySync({ stateModel: model, getBackendMode: () => 'real' });
+  const syncRes = sync({ metadataOk: false, metadataError: 'meta down' });
+  assert(syncRes.ok === true && st['/capabilityStatus'] === 'degraded' && st['/capabilityDegradedReason'] === 'metadata_unavailable',
+    'createCapabilitySync should apply deterministic degraded diagnostics to state');
+
+  const listeners = {};
+  const mainService = {
+    attachMetadataLoaded: (fn) => { listeners.loaded = fn; },
+    attachMetadataFailed: (fn) => { listeners.failed = fn; }
+  };
+  const wireRes = mod.wireMetadataEvents({ mainServiceModel: mainService, stateModel: model, syncCapability: sync });
+  assert(wireRes.ok === true && typeof listeners.loaded === 'function' && typeof listeners.failed === 'function',
+    'wireMetadataEvents should register metadata listeners');
+  listeners.loaded();
+  assert(st['/mainServiceMetadataOk'] === true && st['/capabilityStatus'] === 'ready',
+    'wireMetadataEvents loaded branch should mark capability ready');
+}
+
+function testSearchSelectionOpenFlowUseCase() {
+  const hydration = loadSapModule('service/usecase/SearchSelectionHydrationUseCase.js');
+  const openGuard = loadSapModule('service/usecase/SearchOpenDetailGuardUseCase.js');
+  const searchAction = loadSapModule('service/usecase/SearchActionUseCase.js');
+  const navIntent = loadSapModule('service/usecase/SearchNavigationIntentUseCase.js', {
+    'sap_ui5/service/usecase/SearchActionUseCase': searchAction
+  });
+  const actionPresenter = loadSapModule('service/usecase/SearchActionMessagePresentationUseCase.js');
+  const mod = loadSapModule('service/usecase/SearchSelectionOpenFlowUseCase.js', {
+    'sap_ui5/service/usecase/SearchSelectionHydrationUseCase': hydration,
+    'sap_ui5/service/usecase/SearchOpenDetailGuardUseCase': openGuard,
+    'sap_ui5/service/usecase/SearchNavigationIntentUseCase': navIntent,
+    'sap_ui5/service/usecase/SearchActionMessagePresentationUseCase': actionPresenter
+  });
+
+  let synced = 0;
+  return mod.hydrateSelection({
+    id: 'CHK-1',
+    selectedModel: { setData: () => {} },
+    viewModel: { setProperty: () => {} },
+    loadChecklistById: () => Promise.resolve({ root: { id: 'CHK-1' } }),
+    syncSelectionState: () => { synced += 1; }
+  }).then((res) => {
+    assert(res.ok === true && res.checklist.root.id === 'CHK-1' && synced === 1,
+      'hydrateSelection should return deterministic hydration result and sync selection state');
+
+    return mod.openDetail({
+      id: 'CHK-1',
+      confirmNavigation: () => true,
+      stateModel: { setProperty: () => {} },
+      navTo: () => {},
+      bundle: { getText: (k) => k },
+      showToast: () => {}
+    });
+  }).then((openRes) => {
+    assert(openRes.ok === true && openRes.reason === 'applied',
+      'openDetail should return deterministic open outcome');
+  });
+}
+
 async function main() {
   await runTest('DetailLifecycleUseCase', testDetailLifecycleUseCase);
   await runTest('DetailFormattersLockOperationPresentation', testDetailFormattersLockOperationPresentation);
@@ -3204,6 +3512,17 @@ async function main() {
   await runTest('SearchFilterHintPresentationUseCase', testSearchFilterHintPresentationUseCase);
   await runTest('SearchInlineAnalyticsPresentationUseCase', testSearchInlineAnalyticsPresentationUseCase);
   await runTest('SearchInlineAnalyticsRefreshOrchestrationUseCase', testSearchInlineAnalyticsRefreshOrchestrationUseCase);
+  await runTest('KpiSnapshotExportUseCase', testKpiSnapshotExportUseCase);
+  await runTest('StartupCapabilityDiagnosticsUseCase', testStartupCapabilityDiagnosticsUseCase);
+  await runTest('DetailCloseFlowOrchestrationUseCase', testDetailCloseFlowOrchestrationUseCase);
+  await runTest('DetailToggleEditOrchestrationUseCase', testDetailToggleEditOrchestrationUseCase);
+  await runTest('DetailSaveFlowOrchestrationUseCase', testDetailSaveFlowOrchestrationUseCase);
+  await runTest('DetailSelectionMetaSyncUseCase', testDetailSelectionMetaSyncUseCase);
+  await runTest('SearchStateSyncUseCase', testSearchStateSyncUseCase);
+  await runTest('SearchExecuteFlowUseCase', testSearchExecuteFlowUseCase);
+  await runTest('SearchCreateCopyFlowUseCase', testSearchCreateCopyFlowUseCase);
+  await runTest('ComponentStartupDiagnosticsOrchestrationUseCase', testComponentStartupDiagnosticsOrchestrationUseCase);
+  await runTest('SearchSelectionOpenFlowUseCase', testSearchSelectionOpenFlowUseCase);
 
   if (process.argv.includes('--json')) {
     console.log(JSON.stringify({ status: 'ok', results }, null, 2));
