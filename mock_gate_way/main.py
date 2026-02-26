@@ -1,5 +1,8 @@
 import asyncio
 import logging
+import random
+import uuid
+from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -29,7 +32,7 @@ from config import CORS_ALLOWED_ORIGINS, LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.dict_loader import load_dictionary
 from services.lock_service import LockService
-from models import FrontendRuntimeSettings
+from models import ChecklistRoot, FrontendRuntimeSettings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
@@ -58,6 +61,49 @@ def ensure_schema_compatibility() -> None:
             logger.info("Added missing checklist_root column: %s", col)
 
 
+def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
+    current_count = db.query(ChecklistRoot).filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))).count()
+    if current_count >= minimum_rows:
+        return 0
+
+    lpc_pool = ["LPC-01", "LPC-02", "LPC-03", "LPC-04", "LPC-05"]
+    status_pool = ["01", "02", "03"]
+    equipment_pool = ["Pump", "Compressor", "Conveyor", "Boiler", "Generator"]
+    observer_pool = [
+        "Ivan Ivanov",
+        "Anna Petrova",
+        "Sergey Smirnov",
+        "Olga Sokolova",
+        "Petr Kuznetsov",
+    ]
+
+    to_create = minimum_rows - current_count
+    now = datetime.now(timezone.utc)
+    for index in range(to_create):
+        sequence = current_count + index + 1
+        changed_on = now - timedelta(minutes=index)
+        db.add(
+            ChecklistRoot(
+                id=str(uuid.uuid4()),
+                checklist_id=f"CHK-{sequence:05d}",
+                lpc=random.choice(lpc_pool),
+                status=random.choice(status_pool),
+                date=changed_on.date().isoformat(),
+                equipment=random.choice(equipment_pool),
+                observer_fullname=random.choice(observer_pool),
+                changed_on=changed_on,
+                changed_by="SYSTEM",
+                created_on=changed_on,
+                created_by="SYSTEM",
+                is_deleted=False,
+            )
+        )
+
+    db.commit()
+    logger.info("Seeded checklist roots for search compatibility: added=%s total=%s", to_create, minimum_rows)
+    return to_create
+
+
 async def lock_cleanup_job() -> None:
     while True:
         db = SessionLocal()
@@ -80,6 +126,7 @@ async def lifespan(_: FastAPI):
         data_dir = Path(__file__).resolve().parent / "data"
         load_dictionary(db, str(data_dir / "lpc.json"), "LPC")
         load_dictionary(db, str(data_dir / "professions.json"), "PROFESSION")
+        _seed_checklist_roots_if_needed(db, minimum_rows=100)
         oSettings = db.query(FrontendRuntimeSettings).first()
         if not oSettings:
             db.add(FrontendRuntimeSettings(environment="default"))

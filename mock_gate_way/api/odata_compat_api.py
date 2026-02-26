@@ -46,7 +46,7 @@ def checklist_roots(
         inlinecount,
     )
 
-    query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True))
+    query = db.query(ChecklistRoot).filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False)))
 
     expression = FilterParser.parse(ChecklistRoot, filter)
     if expression is not None:

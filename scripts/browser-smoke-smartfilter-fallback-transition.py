@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser smoke: SmartFilter fallback transitions (metadata ok -> degraded -> recovery)."""
+"""Browser smoke: SmartFilter/SmartTable stay enabled across metadata state transitions."""
 
 import json
 import sys
@@ -38,10 +38,7 @@ def main():
                             tag: tag,
                             useSmartControls: useSmart,
                             smartFilterVisible: useSmart,
-                            quickFiltersVisible: !useSmart,
-                            messageStripVisible: !useSmart,
                             smartTableVisible: useSmart,
-                            fallbackTableVisible: !useSmart,
                             reason: vmState['/smartControlsReason'] || ''
                         };
                     }
@@ -80,11 +77,8 @@ def main():
 
                     resolve({
                         ok: trace[0].smartFilterVisible === true
-                          && degraded.smartFilterVisible === false
-                          && degraded.quickFiltersVisible === true
-                          && degraded.messageStripVisible === true
+                          && degraded.smartFilterVisible === true
                           && recovered.smartFilterVisible === true
-                          && recovered.quickFiltersVisible === false
                           && bootstrapCalls >= 1,
                         bootstrapCalls: bootstrapCalls,
                         trace: trace

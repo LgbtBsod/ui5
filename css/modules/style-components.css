@@ -1,0 +1,161 @@
+/* Extracted component-level styling */
+/* Search header KPI/loading/error banner consistency */
+.searchHeaderKpiRail {
+  align-items: stretch;
+  gap: 0.85rem;
+}
+
+.searchLoadStateBanner {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 78%, rgba(var(--accent-rgb), 0.16));
+  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.06));
+}
+/* ==============================
+   Section: search-kpi-workflow-blocks
+   ============================== */
+.workflowRail {
+  gap: 1rem;
+  margin-top: .25rem;
+}
+
+.workflowStageCard {
+  background: color-mix(in srgb, var(--surface2) 78%, rgba(var(--accent-rgb), 0.08));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  min-width: 19rem;
+}
+
+.workflowEyebrow,
+.kpiLabel {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: .7rem;
+  color: var(--text-muted) !important;
+}
+
+.workflowActions {
+  gap: .4rem;
+  align-items: center;
+}
+
+.kpiGrid {
+  gap: .75rem;
+}
+
+.kpiCard {
+  min-width: 10rem;
+  flex: 1;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.1));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: .9rem 1rem;
+}
+
+.workflowStageCard,
+.kpiCard {
+  box-shadow: 0 8px 20px rgba(11, 24, 44, 0.08), inset 0 1px 0 rgba(255,255,255,0.18);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.workflowStageCard:hover,
+.kpiCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(8, 25, 49, 0.11), inset 0 1px 0 rgba(255,255,255,0.20);
+  border-color: color-mix(in srgb, var(--glass-border) 72%, rgba(var(--accent-rgb), 0.2));
+}
+
+/* Unified style for standard dialogs, VH and settings popups */
+.sapMDialog.glassDialog > .sapMDialogSection,
+.sapMDialog.sapUiPopupWithPadding > .sapMDialogSection,
+.sapMPopup-CTX .sapMDialog > .sapMDialogSection,
+.sapMDialog.sapMMessageDialog > .sapMDialogSection,
+.sapMDialog.sapMMessageDialog .sapMDialogScroll,
+.sapMDialog.sapMMessageDialog .sapMDialogTitle {
+  background: color-mix(in srgb, var(--surface2) 86%, rgba(var(--accent-rgb), 0.08)) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+}
+
+.sapMDialog.glassDialog .sapMDialogTitle,
+.sapMDialog.glassDialog .sapMDialogSubHeader,
+.sapMDialog.glassDialog .sapMDialogFooter,
+.sapMDialog.glassDialog .sapMBar {
+  background: transparent !important;
+  border: none !important;
+}
+
+.sapMDialog.glassDialog .sapMBtn .sapMBtnInner {
+  border-radius: 12px !important;
+}
+
+.sapMPopover,
+.sapMSelectList,
+.sapMPopoverCont {
+  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.06)) !important;
+  border-color: var(--glass-border) !important;
+}
+
+.detailWorkflowRail {
+  gap: .5rem;
+  margin-bottom: .7rem;
+}
+
+.detailWorkflowChip {
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.08));
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: .3rem .7rem;
+}
+
+.brandActionBtn .sapMBtnInner {
+  border-radius: 12px !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.35) !important;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.1)) !important;
+  color: var(--text-main) !important;
+}
+
+.brandActionBtn.brandActionPrimary .sapMBtnInner,
+.brandActionBtn.sapMBtnEmphasized .sapMBtnInner {
+  background: var(--accent-grad) !important;
+  border-color: rgba(var(--accent-rgb), 0.58) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 22px rgba(var(--accent-rgb), 0.32) !important;
+}
+
+.brandActionBtn.brandActionGhost .sapMBtnInner {
+  background: color-mix(in srgb, var(--surface2) 92%, transparent) !important;
+}
+
+.maxRowsWrap {
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: .2rem .55rem;
+  margin-right: .5rem;
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.06));
+}
+
+.maxRowsInput .sapMInputBaseContentWrapper {
+  border: 1px solid rgba(var(--accent-rgb), 0.35) !important;
+  border-radius: 10px !important;
+  background: var(--readonly-field-bg) !important;
+}
+
+/* Smart/fallback table row rounded look */
+.smartTableGlass .sapMListTblRow .sapMListTblCell:first-child,
+.glassTable .sapMListTblRow .sapMListTblCell:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.smartTableGlass .sapMListTblRow .sapMListTblCell:last-child,
+.glassTable .sapMListTblRow .sapMListTblCell:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.smartTableGlass .sapMListTblRow,
+.glassTable .sapMListTblRow {
+  overflow: hidden;
+}

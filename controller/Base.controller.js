@@ -10,6 +10,8 @@ sap.ui.define([
     var THEME_STORAGE_KEY = "sap_ui5_theme";
     var LIGHT_THEME = "sap_fiori_3";
     var DARK_THEME = "sap_fiori_3_dark";
+    var THEME_SWITCH_CLASS = "theme-switching";
+    var THEME_SWITCH_DURATION_MS = 260;
 
     function _isDarkTheme(sTheme) {
         return sTheme === DARK_THEME;
@@ -173,6 +175,7 @@ sap.ui.define([
 
         _applyTheme: function (sTheme) {
             var bDark = _isDarkTheme(sTheme);
+            this._markThemeSwitching();
             sap.ui.getCore().applyTheme(sTheme);
             document.body.classList.toggle("appDark", bDark);
             document.body.classList.toggle("appLight", !bDark);
@@ -182,6 +185,18 @@ sap.ui.define([
             var oMeta = ThemePhilosophy.getMeta(sTheme);
             document.body.classList.remove("themeLifestyleClarity", "themeLifestyleNightOps");
             document.body.classList.add(oMeta.lifestyleClass);
+        },
+
+        _markThemeSwitching: function () {
+            if (this._iThemeSwitchTimer) {
+                window.clearTimeout(this._iThemeSwitchTimer);
+            }
+
+            document.documentElement.classList.add(THEME_SWITCH_CLASS);
+            this._iThemeSwitchTimer = window.setTimeout(function () {
+                document.documentElement.classList.remove(THEME_SWITCH_CLASS);
+                this._iThemeSwitchTimer = null;
+            }.bind(this), THEME_SWITCH_DURATION_MS);
         }
     });
 });
