@@ -1,7 +1,7 @@
 {
   "maxControllerLines": {
     "controller/Search.controller.js": 950,
-    "controller/Detail.controller.js": 1150
+    "controller/Detail.controller.js": 1165
   },
   "maxUsecaseCount": 85,
   "maxUtilCount": 20

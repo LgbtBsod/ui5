@@ -13,5 +13,10 @@
 
 ## PR evidence (mandatory)
 - Attach completed checklist artifact (`docs/ux/baselines/state-coverage.json`).
-- Attach Morning + Night screenshots for key state snapshots.
+- Attach Morning + Night screenshots for key state snapshots (auto-generate via `python scripts/generate-ux-baseline-screenshots.py`).
 - Attach gate outputs: state coverage, a11y, SLO, message taxonomy.
+
+
+## Browser validation matrix (confirmed)
+- Required: Microsoft Edge, Google Chrome, Yandex Browser, Firefox.
+- Single visual specification shared across desktop/mobile for now (no separate mobile variant yet).

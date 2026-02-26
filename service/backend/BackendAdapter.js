@@ -359,6 +359,13 @@ sap.ui.define([
             return _backendService.getServerState();
         },
 
+        executeBatch: function (aOperations) {
+            if (_backendService.executeBatch) {
+                return _backendService.executeBatch(aOperations || []);
+            }
+            return Promise.resolve({ __batchResponses: [] });
+        },
+
         getFrontendConfig: function () {
             if (_backendService.getFrontendConfig) {
                 return _backendService.getFrontendConfig();

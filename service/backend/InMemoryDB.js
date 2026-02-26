@@ -33,6 +33,22 @@ sap.ui.define([
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(_db));
     }
 
+    function _ensureChecklistServerState(oChecklist, mOptions) {
+        if (!oChecklist || !oChecklist.root) {
+            return oChecklist;
+        }
+
+        var sNow = (mOptions && mOptions.nowIso) || new Date().toISOString();
+        var iVersion = Number(oChecklist.root.version_number);
+        if (!Number.isFinite(iVersion) || iVersion < 1) {
+            iVersion = 1;
+        }
+        oChecklist.root.version_number = iVersion;
+        oChecklist.root.changed_on = oChecklist.root.changed_on || sNow;
+        oChecklist.root.server_changed_on = oChecklist.root.server_changed_on || sNow;
+        return oChecklist;
+    }
+
     function _normalizeChecklist(oChecklist) {
         if (!oChecklist) {
             return oChecklist;
@@ -46,6 +62,7 @@ sap.ui.define([
             oChecklist.root.this_is_integration_data = !!oChecklist.root.integrationFlag;
         }
 
+        _ensureChecklistServerState(oChecklist);
         return ChecklistEngine.recalculate(oChecklist);
     }
 
@@ -101,6 +118,13 @@ sap.ui.define([
             return _clone(_db.checkLists);
         },
 
+        getCheckListById: function (sId) {
+            var oItem = _db.checkLists.find(function (oChecklist) {
+                return oChecklist && oChecklist.root && oChecklist.root.id === sId;
+            });
+            return oItem ? _clone(oItem) : null;
+        },
+
         queryCheckLists: function (mQuery) {
             var aData = _db.checkLists;
             var sId = String((mQuery && mQuery.idContains) || "").toLowerCase().trim();
@@ -143,6 +167,11 @@ sap.ui.define([
                 throw new Error("Checklist with id '" + sId + "' already exists");
             }
 
+            var sNow = new Date().toISOString();
+            oNew.root.version_number = 1;
+            oNew.root.changed_on = sNow;
+            oNew.root.server_changed_on = sNow;
+
             _db.checkLists.push(oNew);
             _touchMeta();
             _persist();
@@ -158,7 +187,14 @@ sap.ui.define([
                 return null;
             }
 
+            var oPrev = _db.checkLists[iIdx] || {};
+            var iPrevVersion = Number((((oPrev || {}).root || {}).version_number) || 1);
+            var sNow = new Date().toISOString();
+
             _db.checkLists[iIdx] = _normalizeChecklist(_clone(oData));
+            _db.checkLists[iIdx].root.version_number = iPrevVersion + 1;
+            _db.checkLists[iIdx].root.changed_on = sNow;
+            _db.checkLists[iIdx].root.server_changed_on = sNow;
             _touchMeta();
             _persist();
             return _clone(_db.checkLists[iIdx]);
@@ -228,6 +264,9 @@ sap.ui.define([
 
             _db.checkLists[iIdx][sSection] = _clone(aRows || []);
             _db.checkLists[iIdx] = _normalizeChecklist(_db.checkLists[iIdx]);
+            _db.checkLists[iIdx].root.version_number = Number((_db.checkLists[iIdx].root && _db.checkLists[iIdx].root.version_number) || 1) + 1;
+            _db.checkLists[iIdx].root.changed_on = new Date().toISOString();
+            _db.checkLists[iIdx].root.server_changed_on = _db.checkLists[iIdx].root.changed_on;
             _touchMeta();
             _persist();
             return _clone(_db.checkLists[iIdx]);

@@ -1063,5 +1063,25 @@
     "severity": "info",
     "tone": "clear-actionable",
     "owner": "detail-team"
+  },
+  "dateTimeBlockLabel": {
+    "severity": "info",
+    "tone": "clear-actionable",
+    "owner": "detail-team"
+  },
+  "personPernerLabel": {
+    "severity": "info",
+    "tone": "clear-actionable",
+    "owner": "detail-team"
+  },
+  "personPositionLabel": {
+    "severity": "info",
+    "tone": "clear-actionable",
+    "owner": "detail-team"
+  },
+  "personOrgUnitLabel": {
+    "severity": "info",
+    "tone": "clear-actionable",
+    "owner": "detail-team"
   }
 }
