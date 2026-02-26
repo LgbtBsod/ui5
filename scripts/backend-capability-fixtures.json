@@ -20,7 +20,8 @@
     "dictionaryLookup",
     "personSuggestion",
     "locationsHierarchy",
-    "exportReport"
+    "exportReport",
+    "themePreferences"
   ],
   "modeExpectations": {
     "fake": {

@@ -94,7 +94,8 @@ sap.ui.define([
                     dictionaryLookup: true,
                     personSuggestion: true,
                     locationsHierarchy: true,
-                    exportReport: true
+                    exportReport: true,
+                    themePreferences: true
                 },
                 compatibility: {
                     minUiContractVersion: "1.0.0",

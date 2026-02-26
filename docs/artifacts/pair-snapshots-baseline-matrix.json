@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-02-26T00:00:00Z",
+  "ui5Baseline": "1.71.28",
+  "flows": {
+    "search": {
+      "morning": {"path": "artifacts/baseline-morning-search.png", "status": "pass"},
+      "night": {"path": "artifacts/baseline-night-search.png", "status": "pass"}
+    },
+    "detail": {
+      "morning": {"path": "artifacts/baseline-morning-detail.png", "status": "pass"},
+      "night": {"path": "artifacts/baseline-night-detail.png", "status": "pass"}
+    },
+    "dialogs": {
+      "morning": {"path": "artifacts/baseline-morning-dialogs.png", "status": "pass"},
+      "night": {"path": "artifacts/baseline-night-dialogs.png", "status": "pass"}
+    }
+  },
+  "summary": {
+    "coverage": 1,
+    "pairedStates": 3,
+    "criticalDiffs": 0
+  }
+}

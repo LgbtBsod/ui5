@@ -90,7 +90,7 @@
                             <VBox class="infoCardTile mushroomCard" renderType="Bare">
                                 <Text text="{view>title}" class="infoCardTitle"/>
                                 <Text
-                                    visible="{= (${state>/mode} !== 'EDIT') && ${view>key} !== 'observer' && ${view>key} !== 'observed' }"
+                                    visible="{= (${state>/mode} !== 'EDIT') &amp;&amp; ${view>key} !== 'observer' &amp;&amp; ${view>key} !== 'observed' }"
                                     text="{parts: [
                                         {path: 'view>key'},
                                         {path: 'selected>/basic/date'},

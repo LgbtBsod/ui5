@@ -1,0 +1,10 @@
+{
+  "criticalFlows": {
+    "search": ["loading", "empty", "error", "conflict", "permission"],
+    "detail": ["loading", "empty", "error", "conflict", "permission"]
+  },
+  "visualBaselines": {
+    "morning": "artifacts/baseline-morning-search-detail.png",
+    "night": "artifacts/baseline-night-search-detail.png"
+  }
+}

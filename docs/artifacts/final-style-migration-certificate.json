@@ -1,0 +1,106 @@
+{
+  "generatedAt": "2026-02-26T21:49:28.997Z",
+  "ui5Baseline": "1.71.28",
+  "migrationStatus": "completed",
+  "doneCriteria": {
+    "hardcodedAccent": true,
+    "criticalA11yZero": true,
+    "parity100": true,
+    "smartFallbackStable": true,
+    "allGatesGreen": true,
+    "rollbackAttached": true
+  },
+  "results": [
+    {
+      "command": "node scripts/css-accent-governance-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "CSS accent governance gate passed: no hardcoded accent-like colors outside token section.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/a11y-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "C2 gate passed: reduced-motion and tooltip accessibility baseline checks passed.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/message-taxonomy-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "C4 gate passed: 5 taxonomy entries validated.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/ux-state-coverage-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "C1 gate passed: WS-C plan and state coverage artifacts are present.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/theme-parity-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "Theme parity gate passed: Morning/Night parity report is fully green.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/pair-snapshots-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "Pair snapshots gate passed: baseline matrix is complete for Morning/Night flows.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/control-token-mapping-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "Control-token mapping gate passed: all required control families and token roles are covered.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/theme-preferences-contract-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "Theme preferences contract gate passed: RFC and capability flags are in place.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/semantic-contrast-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "Semantic contrast gate passed: semantic variables and dual theme scopes detected.",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/unit-smoke.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "unit-smoke: ok",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/ci-smoke-gate.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "Smoke gate passed: 113 test(s).",
+      "stderr": ""
+    },
+    {
+      "command": "bash scripts/ci/enterprise-ux-gate.sh",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "C1 gate passed: WS-C plan and state coverage artifacts are present.\nC2 gate passed: reduced-motion and tooltip accessibility baseline checks passed.\nC4 gate passed: 5 taxonomy entries validated.\nSemantic contrast gate passed: semantic variables and dual theme scopes detected.\nCSS accent governance gate passed: no hardcoded accent-like colors outside token section.\nTheme parity gate passed: Morning/Night parity report is fully green.\nPair snapshots gate passed: baseline matrix is complete for Morning/Night flows.\nControl-token mapping gate passed: all required control families and token roles are covered.\nTheme preferences contract gate passed: RFC and capability flags are in place.\n[PASS] search.execute p95=950ms\n[PASS] detail.save p95=1180ms\n[PASS] dialog.workflowAnalytics.open p95=220ms",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/full-style-migration-report.js",
+      "exitCode": 0,
+      "status": "pass",
+      "stdout": "Full style migration report generated: docs/artifacts/full-style-migration-report.json",
+      "stderr": ""
+    }
+  ]
+}

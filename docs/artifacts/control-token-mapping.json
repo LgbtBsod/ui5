@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-02-26T00:00:00Z",
+  "ui5Baseline": "1.71.28",
+  "tokenRoles": ["radius", "glass-bg", "glass-border", "focus-ring", "motion", "opacity"],
+  "families": {
+    "shellLayout": {
+      "controls": ["sap.m.Page", "sap.m.NavContainer", "sap.f.FlexibleColumnLayout"],
+      "roles": ["glass-bg", "glass-border", "motion", "opacity"]
+    },
+    "primaryInputs": {
+      "controls": ["sap.m.Button", "sap.m.Input", "sap.m.SearchField", "sap.m.Select", "sap.m.ComboBox", "sap.m.MultiComboBox", "sap.m.DatePicker", "sap.m.TimePicker", "sap.m.Switch", "sap.m.CheckBox", "sap.m.SegmentedButton", "sap.m.MenuButton"],
+      "roles": ["radius", "focus-ring", "motion", "opacity"]
+    },
+    "dataSurfaces": {
+      "controls": ["sap.m.Table", "sap.m.List", "sap.m.ColumnListItem", "sap.m.ObjectStatus", "sap.m.ObjectIdentifier", "sap.m.MessageStrip", "sap.m.Title", "sap.m.Text"],
+      "roles": ["glass-bg", "glass-border", "opacity"]
+    },
+    "overlays": {
+      "controls": ["sap.m.Dialog", "sap.m.Popover", "sap.m.ResponsivePopover", "sap.m.ActionSheet", "sap.m.BusyDialog", "sap.m.SelectDialog", "sap.m.ViewSettingsDialog"],
+      "roles": ["radius", "glass-bg", "glass-border", "motion", "opacity"]
+    },
+    "smartControls": {
+      "controls": ["sap.ui.comp.smarttable.SmartTable", "sap.ui.comp.smartfilterbar.SmartFilterBar", "sap.ui.comp.filterbar.FilterBar", "sap.ui.comp.valuehelpdialog.ValueHelpDialog", "sap.ui.comp.personalization.P13nDialog"],
+      "roles": ["radius", "focus-ring", "motion", "opacity"]
+    },
+    "advancedTables": {
+      "controls": ["sap.ui.table.Table", "sap.ui.table.TreeTable", "sap.ui.table.AnalyticalTable", "sap.ui.table.Column"],
+      "roles": ["glass-bg", "glass-border", "opacity"]
+    },
+    "fioriCards": {
+      "controls": ["sap.f.GridList", "sap.f.Card", "sap.f.DynamicPage", "sap.f.ShellBar"],
+      "roles": ["radius", "glass-bg", "glass-border", "motion", "opacity"]
+    },
+    "runtimeModules": {
+      "controls": ["sap/m/MessageBox", "sap/m/MessageToast", "sap/ui/core/Fragment"],
+      "roles": ["motion", "opacity", "focus-ring"]
+    }
+  }
+}
