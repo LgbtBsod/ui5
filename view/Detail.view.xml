@@ -72,7 +72,15 @@
                     class="detailWorkflowChip sapUiTinyMarginBottom"
                     text="{parts:[{path:'state>/lockOperationText'},{path:'state>/mode'}], formatter:'.formatLockOperationText'}"
                     state="{parts:[{path:'state>/lockOperationState'},{path:'state>/mode'}], formatter:'.formatLockOperationState'}"/>
+                <Button text="{i18n>objectSave}" type="Emphasized" press=".onSaveDetail" visible="{= ${state>/mode} === 'EDIT' }" class="brandActionBtn brandActionPrimary detailInlineSaveButton sapUiTinyMarginBottom"/>
             </HBox>
+
+            <VBox class="detailControlBlockHost" renderType="Bare">
+                <VBox class="glassCard detailControlInlineCard detailControlStickyBlock" visible="{= !${view>/detailControlCollapsed} }">
+                    <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
+                </VBox>
+                <Button icon="{= ${view>/detailControlCollapsed} ? 'sap-icon://open-command-field' : 'sap-icon://collapse-group' }" type="Transparent" press=".onToggleDetailControlRail" class="detailControlPeekButton"/>
+            </VBox>
 
             <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">
                 <Toolbar class="toolbarTransparent">
@@ -194,13 +202,6 @@
                 </f:GridList>
             </VBox>
 
-
-            <HBox justifyContent="End" renderType="Bare" class="detailControlAsideHost">
-                <VBox class="glassCard detailControlInlineCard" visible="{= !${view>/detailControlCollapsed} }">
-                    <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
-                </VBox>
-                <Button icon="{= ${view>/detailControlCollapsed} ? 'sap-icon://open-command-field' : 'sap-icon://collapse-group' }" type="Transparent" press=".onToggleDetailControlRail" class="detailControlPeekButton"/>
-            </HBox>
 
             <core:Fragment fragmentName="sap_ui5.view.fragment.LocationValueHelpDialog" type="XML"/>
 

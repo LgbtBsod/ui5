@@ -77,7 +77,7 @@
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
 
-                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
+                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="false">
                         <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd"/>
                         <Input value="{state>/filterId}" placeholder="{i18n>checklistIdPlaceholder}" width="12rem" class="sapUiTinyMarginEnd"/>
                         <Label text="{i18n>filterLpcLabel}" class="sapUiTinyMarginEnd"/>
@@ -95,7 +95,7 @@
                     </Toolbar>
 
                     <OverflowToolbar class="toolbarTransparent searchCriteriaActions sapUiTinyMarginTop">
-                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="{= !${view>/useSmartControls} }"/>
+                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="false"/>
 
                     </OverflowToolbar>
                 </VBox>
@@ -194,7 +194,7 @@
     </smartTable:customToolbar>
 </smartTable:SmartTable>
 
-                    <Table id="searchFallbackTable" visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
+                    <Table id="searchFallbackTable" visible="false" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>
                             <Column><Text text="{i18n>columnId}"/></Column>
                             <Column><Text text="{i18n>columnStatus}"/></Column>
