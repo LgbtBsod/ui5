@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "criticalFlows": {
+    "search": ["loading", "empty", "error", "conflict", "permission"],
+    "detail": ["loading", "empty", "error", "conflict", "permission"],
+    "unsavedClose": ["prompt", "cancel", "discard", "save"]
+  },
+  "visualBaselines": {
+    "morning": "docs/ux/baselines/morning-key-states.md",
+    "night": "docs/ux/baselines/night-key-states.md"
+  }
+}

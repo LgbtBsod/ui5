@@ -31,8 +31,9 @@ sap.ui.define([
   "sap_ui5/service/usecase/DetailCloseFlowOrchestrationUseCase",
   "sap_ui5/service/usecase/DetailToggleEditOrchestrationUseCase",
   "sap_ui5/service/usecase/DetailSaveFlowOrchestrationUseCase",
-  "sap_ui5/service/usecase/DetailSelectionMetaSyncUseCase"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailDialogLifecycleUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, OperationalKpiInstrumentationUseCase, DetailCloseFlowOrchestrationUseCase, DetailToggleEditOrchestrationUseCase, DetailSaveFlowOrchestrationUseCase, DetailSelectionMetaSyncUseCase) {
+  "sap_ui5/service/usecase/DetailSelectionMetaSyncUseCase",
+  "sap_ui5/util/UxTelemetry"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailDialogLifecycleUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, OperationalKpiInstrumentationUseCase, DetailCloseFlowOrchestrationUseCase, DetailToggleEditOrchestrationUseCase, DetailSaveFlowOrchestrationUseCase, DetailSelectionMetaSyncUseCase, UxTelemetry) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -598,6 +599,13 @@ sap.ui.define([
       return this.getResourceBundle().getText("heartbeatInactive");
     },
 
+    formatAutosaveAt: function (sAutosaveAt) {
+      if (!sAutosaveAt) {
+        return this.getResourceBundle().getText("autosaveLastSyncNever");
+      }
+      return this.getResourceBundle().getText("autosaveLastSyncAt", [new Date(sAutosaveAt).toLocaleTimeString()]);
+    },
+
     formatAutosaveText: function (sMode, sAutosaveState) {
       if (sMode !== "EDIT") {
         return this.getResourceBundle().getText("autosaveDisabled");
@@ -960,6 +968,7 @@ sap.ui.define([
       OperationalKpiInstrumentationUseCase.markSaveAttempt(oStateModel);
       var iSaveLatencyStartedAt = OperationalKpiInstrumentationUseCase.beginLatencySample();
 
+      var oTelemetrySample = UxTelemetry.begin("detail.save", { mode: bCreateMode ? "create" : "update" });
       return DetailSaveFlowOrchestrationUseCase.runSaveFlow({
         runWithLoading: function (fnTask) {
           return this.runWithStateFlag(oStateModel, "/isLoading", fnTask);
@@ -992,6 +1001,7 @@ sap.ui.define([
             this._syncCreateCopyKeyMappingAfterSave(sSavedId, bCreateMode);
             OperationalKpiInstrumentationUseCase.markSaveSuccess(oStateModel);
             OperationalKpiInstrumentationUseCase.finishLatencySample(oStateModel, "save", iSaveLatencyStartedAt);
+            UxTelemetry.end(oTelemetrySample, "success", oStateModel);
           }.bind(this),
           handleSaveError: function (oError) {
             return DetailSaveErrorPresentationUseCase.handleSaveError({
@@ -1027,6 +1037,7 @@ sap.ui.define([
                 },
                 startedAt: iSaveLatencyStartedAt
               });
+              UxTelemetry.end(oTelemetrySample, oHandledResult && oHandledResult.success === false ? "error" : "success", oStateModel);
               return oHandledResult;
             }.bind(this));
           }.bind(this)

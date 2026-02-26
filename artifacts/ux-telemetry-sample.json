@@ -1,0 +1,10 @@
+{
+  "events": [
+    {"operation":"search.execute","durationMs":820},
+    {"operation":"search.execute","durationMs":950},
+    {"operation":"detail.save","durationMs":1020},
+    {"operation":"detail.save","durationMs":1180},
+    {"operation":"dialog.workflowAnalytics.open","durationMs":180},
+    {"operation":"dialog.workflowAnalytics.open","durationMs":220}
+  ]
+}

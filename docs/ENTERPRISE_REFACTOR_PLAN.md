@@ -42,10 +42,10 @@
 - [x] B3. Add idempotency and conflict-resolution test suite for save/lock flows (deterministic matrix and no-duplicate-side-effect checks).
 
 ### C. UX/UI enterprise readiness
-- [ ] C1. Create design governance checklist (loading, empty, error, conflict, permission states).
-- [ ] C2. Define accessibility baseline (keyboard flows, focus order, aria, contrast checks).
-- [ ] C3. Add UX latency SLOs and user-journey telemetry dashboards.
-- [ ] C4. Standardize message catalog tone and severity taxonomy.
+- [x] C1. Create design governance checklist (loading, empty, error, conflict, permission states).
+- [x] C2. Define accessibility baseline (keyboard flows, focus order, aria, contrast checks).
+- [x] C3. Add UX latency SLOs and user-journey telemetry dashboards.
+- [x] C4. Standardize message catalog tone and severity taxonomy.
 
 ### D. Security & compliance
 - [ ] D1. Threat model for lock/save/export/data lookup flows.
@@ -71,6 +71,7 @@
 ## 3) What was implemented now (execution of required work from this list)
 
 ### Completed now
+4. **C1-C4 UX enterprise readiness delivered** via design governance checklist + state coverage baseline + a11y/reduced-motion gate + UX SLO telemetry/report/runbook + message taxonomy metadata/lint gates.
 1. **Refactor program baseline created** (`A1`) in this file with full block inventory and success criteria.
 2. **Architecture readiness gate implemented** (`A2`, `E1`) via:
    - `scripts/enterprise-readiness-gate.js` (enforces non-regression thresholds).

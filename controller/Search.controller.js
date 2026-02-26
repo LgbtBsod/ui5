@@ -53,8 +53,9 @@ sap.ui.define([
     "sap_ui5/util/ExcelExport",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
-    "sap_ui5/util/SearchSmartControlCoordinator"
-], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchWorkflowAnalyticsLoadOrchestrationUseCase, SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchInlineAnalyticsRailUseCase, SearchInlineAnalyticsAutoRefreshUseCase, SearchFilterLifecycleUseCase, SearchFilterInteractionOrchestrationUseCase, SearchRetryLifecycleUseCase, SearchRetryLoadOrchestrationUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchTriggerExecutionUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
+    "sap_ui5/util/SearchSmartControlCoordinator",
+    "sap_ui5/util/UxTelemetry"
+], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchWorkflowAnalyticsLoadOrchestrationUseCase, SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchInlineAnalyticsRailUseCase, SearchInlineAnalyticsAutoRefreshUseCase, SearchFilterLifecycleUseCase, SearchFilterInteractionOrchestrationUseCase, SearchRetryLifecycleUseCase, SearchRetryLoadOrchestrationUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchTriggerExecutionUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator, UxTelemetry) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -552,7 +553,17 @@ sap.ui.define([
         },
 
         onSearch: function () {
-            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(this._isSmartControlsEnabled()));
+            var oStateModel = this.getModel("state");
+            var oSample = UxTelemetry.begin("search.execute", { source: "search_button" });
+            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(this._isSmartControlsEnabled()))
+                .then(function (oResult) {
+                    UxTelemetry.end(oSample, "success", oStateModel);
+                    return oResult;
+                })
+                .catch(function (oError) {
+                    UxTelemetry.end(oSample, "error", oStateModel);
+                    throw oError;
+                });
         },
 
         onStatusFilterPress: function (oEvent) {
@@ -664,7 +675,17 @@ sap.ui.define([
         },
 
         onOpenWorkflowAnalytics: function () {
-            return SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase.runOpen(this._buildWorkflowAnalyticsDialogArgs());
+            var oStateModel = this.getModel("state");
+            var oSample = UxTelemetry.begin("dialog.workflowAnalytics.open", { dialog: "workflowAnalytics" });
+            return SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase.runOpen(this._buildWorkflowAnalyticsDialogArgs())
+                .then(function (oResult) {
+                    UxTelemetry.end(oSample, "success", oStateModel);
+                    return oResult;
+                })
+                .catch(function (oError) {
+                    UxTelemetry.end(oSample, "error", oStateModel);
+                    throw oError;
+                });
         },
 
         onCloseWorkflowAnalytics: function () {

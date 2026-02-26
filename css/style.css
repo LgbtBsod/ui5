@@ -2574,3 +2574,60 @@ body.themeLifestyleNightOps .filterCard {
 .searchToolbarMetaRail .searchUpdatedAtText {
   opacity: .82;
 }
+
+/* ==============================
+   Section: motion-policy-and-qol
+   ============================== */
+:root {
+  --motion-duration-fast: 120ms;
+  --motion-duration-standard: 220ms;
+  --motion-duration-slow: 360ms;
+  --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-easing-emphasized: cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+.glassCard,
+.filterCard,
+.sapMBtnInner,
+.searchLoadStateBanner,
+.detailControlInlineCard {
+  transition-duration: var(--motion-duration-standard) !important;
+  transition-timing-function: var(--motion-easing-standard) !important;
+}
+
+.searchStatusStripStack .sapMMsgStrip,
+.detailRailHint {
+  animation: subtleFadeIn var(--motion-duration-slow) var(--motion-easing-emphasized);
+}
+
+@keyframes subtleFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.searchAnalyticsCard .sapMBusyIndicator,
+.tableScrollWrap[aria-busy="true"] {
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.16), transparent);
+  background-size: 240% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
+
+.detailRailHint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
