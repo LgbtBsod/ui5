@@ -33,6 +33,56 @@ sap.ui.define([], function () {
         return true;
     }
 
+
+    function runDictionarySelectionLifecycle(mArgs) {
+        var sKey = resolveSelectedKey(mArgs && mArgs.event);
+        var bApplied = applyDictionarySelection({
+            key: sKey,
+            dictionary: mArgs && mArgs.dictionary,
+            keyPath: mArgs && mArgs.keyPath,
+            textPath: mArgs && mArgs.textPath,
+            selectedModel: mArgs && mArgs.selectedModel
+        });
+        if (bApplied && typeof (mArgs && mArgs.onAfterApply) === "function") {
+            mArgs.onAfterApply();
+        }
+        return { ok: bApplied, reason: bApplied ? "selection_applied" : "missing_selected_model", key: sKey };
+    }
+
+
+    function runLpcSelectionLifecycle(mArgs) {
+        runDictionarySelectionLifecycle({
+            event: mArgs && mArgs.event,
+            dictionary: mArgs && mArgs.dictionary,
+            keyPath: mArgs && mArgs.keyPath,
+            textPath: mArgs && mArgs.textPath,
+            selectedModel: mArgs && mArgs.selectedModel,
+            onAfterApply: mArgs && mArgs.onAfterApply
+        });
+
+        return mArgs.openWarningDialog({
+            messageBox: mArgs.messageBox,
+            promptText: mArgs.promptText,
+            barrierAllowed: mArgs.barrierAllowed,
+            barriers: mArgs.barriers,
+            selectedModel: mArgs.selectedModel,
+            onAfterApply: mArgs.onAfterApply
+        });
+    }
+
+
+
+    function runProfessionSelectionLifecycle(mArgs) {
+        return runDictionarySelectionLifecycle({
+            event: mArgs && mArgs.event,
+            dictionary: mArgs && mArgs.dictionary,
+            keyPath: mArgs && mArgs.keyPath,
+            textPath: mArgs && mArgs.textPath,
+            selectedModel: mArgs && mArgs.selectedModel,
+            onAfterApply: mArgs && mArgs.onAfterApply
+        });
+    }
+
     function shouldConfirmBarrierReset(mArgs) {
         var bAllowed = !!(mArgs && mArgs.barrierAllowed);
         var aBarriers = (mArgs && mArgs.barriers) || [];
@@ -59,6 +109,9 @@ sap.ui.define([], function () {
         resolveSelectedKey: resolveSelectedKey,
         resolveDictionaryMatch: resolveDictionaryMatch,
         applyDictionarySelection: applyDictionarySelection,
+        runDictionarySelectionLifecycle: runDictionarySelectionLifecycle,
+        runLpcSelectionLifecycle: runLpcSelectionLifecycle,
+        runProfessionSelectionLifecycle: runProfessionSelectionLifecycle,
         shouldConfirmBarrierReset: shouldConfirmBarrierReset,
         applyLpcDecision: applyLpcDecision
     };

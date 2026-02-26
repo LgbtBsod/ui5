@@ -151,17 +151,6 @@ sap.ui.define([
       });
     },
 
-    _setBasicTextByDictionary: function (oEvent, sDictionaryPath, sKeyPath, sTextPath) {
-      var sKey = DetailDictionarySelectionUseCase.resolveSelectedKey(oEvent);
-      DetailDictionarySelectionUseCase.applyDictionarySelection({
-        key: sKey,
-        dictionary: this.getModel("masterData").getProperty(sDictionaryPath) || [],
-        keyPath: sKeyPath,
-        textPath: sTextPath,
-        selectedModel: this.getModel("selected")
-      });
-    },
-
     _mutateRows: function (sPath, fnMutator) {
       DetailExpandedRowsFlowUseCase.mutateRows({
         selectedModel: this.getModel("selected"),
@@ -430,7 +419,7 @@ sap.ui.define([
           this._applyChecklistLazily(oRootOnly || {});
           return oRootOnly;
         });
-      });
+      }.bind(this));
     },
 
     _ensureChecklistFreshBeforeEdit: function (sId) {
@@ -632,39 +621,23 @@ sap.ui.define([
     },
 
     onLocationSelectionChange: function (oEvent) {
-      var oItem = oEvent.getParameter("listItem");
-      if (!oItem) {
-        return;
-      }
-
-      var oCtx = oItem.getBindingContext("view");
-      var oNode = oCtx ? oCtx.getObject() : null;
-      if (!oNode) {
-        return;
-      }
-      this._applyLocationSelection(oNode);
+      return DetailLocationValueHelpUseCase.runListSelectionLifecycle({
+        event: oEvent,
+        selectedModel: this.getModel("selected")
+      });
     },
 
 
 
 
     onOpenLocationValueHelp: function () {
-      var oDialog = this.byId("locationValueHelpDialog");
-      DetailLocationValueHelpUseCase.openValueHelp({
-        dialog: oDialog,
+      return DetailLocationValueHelpUseCase.runOpenValueHelpLifecycle({
+        dialog: this.byId("locationValueHelpDialog"),
         locations: this.getModel("mpl").getProperty("/locations") || [],
         viewModel: this.getView().getModel("view"),
-        buildLocationTree: this._buildLocationTree.bind(this)
-      });
-
-      this._ensureMplLocationsLoaded().then(function (aLocations) {
-        DetailLocationValueHelpUseCase.applyFilteredTreeToViewModel({
-          query: "",
-          locations: aLocations || [],
-          viewModel: this.getView().getModel("view"),
-          buildLocationTree: this._buildLocationTree.bind(this),
-          normalizeText: this._normalizeText.bind(this)
-        });
+        buildLocationTree: this._buildLocationTree.bind(this),
+        normalizeText: this._normalizeText.bind(this),
+        ensureLocationsLoaded: this._ensureMplLocationsLoaded.bind(this)
       });
     },
 
@@ -693,39 +666,46 @@ sap.ui.define([
     },
 
     onLocationTreeSelectionChange: function (oEvent) {
-      var oNode = DetailLocationValueHelpUseCase.resolveNodeFromTreeSelectionEvent(oEvent);
-      if (!oNode) {
-        return;
-      }
-      this._applyLocationSelection(oNode);
-      this.onCloseLocationValueHelp();
+      return DetailLocationValueHelpUseCase.runTreeSelectionLifecycle({
+        event: oEvent,
+        selectedModel: this.getModel("selected"),
+        onClose: this.onCloseLocationValueHelp.bind(this)
+      });
     },
 
     onLocationComboChange: function (oEvent) {
-      var oNode = DetailLocationValueHelpUseCase.resolveNodeFromComboChangeEvent(oEvent, "mpl");
-      if (!oNode) {
-        return;
-      }
-      this._applyLocationSelection(oNode);
+      return DetailLocationValueHelpUseCase.runComboSelectionLifecycle({
+        event: oEvent,
+        modelName: "mpl",
+        selectedModel: this.getModel("selected")
+      });
     },
 
     onLpcChange: function (oEvent) {
-      this._setBasicTextByDictionary(oEvent, "/lpc", "/basic/LPC_KEY", "/basic/LPC_TEXT");
-      this._syncSelectionMeta();
-
-      DetailLpcBarrierWarningFlowUseCase.openWarningDialog({
+      return DetailDictionarySelectionUseCase.runLpcSelectionLifecycle({
+        event: oEvent,
+        dictionary: this.getModel("masterData").getProperty("/lpc") || [],
+        keyPath: "/basic/LPC_KEY",
+        textPath: "/basic/LPC_TEXT",
+        selectedModel: this.getModel("selected"),
+        onAfterApply: this._syncSelectionMeta.bind(this),
+        openWarningDialog: DetailLpcBarrierWarningFlowUseCase.openWarningDialog,
         messageBox: MessageBox,
         promptText: this.getResourceBundle().getText("barriersWillBeRemovedPrompt"),
         barrierAllowed: this._isBarrierAllowedByLpc(),
-        barriers: this.getModel("selected").getProperty("/barriers") || [],
-        selectedModel: this.getModel("selected"),
-        onAfterApply: this._syncSelectionMeta.bind(this)
+        barriers: this.getModel("selected").getProperty("/barriers") || []
       });
     },
 
     onProfessionChange: function (oEvent) {
-      this._setBasicTextByDictionary(oEvent, "/professions", "/basic/PROF_KEY", "/basic/PROF_TEXT");
-      this._syncSelectionMeta();
+      return DetailDictionarySelectionUseCase.runProfessionSelectionLifecycle({
+        event: oEvent,
+        dictionary: this.getModel("masterData").getProperty("/professions") || [],
+        keyPath: "/basic/PROF_KEY",
+        textPath: "/basic/PROF_TEXT",
+        selectedModel: this.getModel("selected"),
+        onAfterApply: this._syncSelectionMeta.bind(this)
+      });
     },
 
     _confirmIntegrationEdit: function () {
@@ -799,14 +779,17 @@ sap.ui.define([
     },
 
     onCancelEditFromDetail: function () {
-      var oSelected = this.getModel("data").getProperty("/selectedChecklist") || {};
       var oStateModel = this.getModel("state");
       var sObjectId = oStateModel.getProperty("/activeObjectId");
       var sSessionId = oStateModel.getProperty("/sessionId");
 
-      this.getModel("selected").setData(ChecklistDraftHelper.clone(oSelected));
-      DetailLifecycleUseCase.resetDirty(oStateModel);
-      this._releaseEditLock(sObjectId, sSessionId, oStateModel);
+      return DetailToggleEditOrchestrationUseCase.runCancelEditFlow({
+        sourceChecklist: this.getModel("data").getProperty("/selectedChecklist") || {},
+        cloneChecklist: ChecklistDraftHelper.clone,
+        selectedModel: this.getModel("selected"),
+        stateModel: oStateModel,
+        releaseEdit: this._releaseEditLock.bind(this, sObjectId, sSessionId, oStateModel)
+      });
     },
 
     _updateSelectionState: function () {
@@ -1029,21 +1012,25 @@ sap.ui.define([
                 return ChecklistCrudUseCase.forceUpdateChecklist(sId, oEdited);
               }
             }).then(function (oHandledResult) {
-              DetailSaveErrorOutcomePresentationUseCase.presentOutcome({
+              DetailSaveErrorOutcomePresentationUseCase.runOutcomeLifecycle({
                 result: oHandledResult,
                 bundle: this.getResourceBundle(),
-                showToast: MessageToast.show
+                showToast: MessageToast.show,
+                markSaveFailed: function () {
+                  OperationalKpiInstrumentationUseCase.markSaveFailed(oStateModel);
+                },
+                markConflict: function () {
+                  OperationalKpiInstrumentationUseCase.markConflict(oStateModel);
+                },
+                finishLatency: function (sMetric, iStartedAt) {
+                  OperationalKpiInstrumentationUseCase.finishLatencySample(oStateModel, sMetric, iStartedAt);
+                },
+                startedAt: iSaveLatencyStartedAt
               });
-              OperationalKpiInstrumentationUseCase.markSaveFailed(oStateModel);
-              if (["reloaded", "legacy_reload", "overwritten", "legacy_overwrite", "cancelled"].indexOf(String((oHandledResult || {}).reason || "")) >= 0) {
-                OperationalKpiInstrumentationUseCase.markConflict(oStateModel);
-              }
-              OperationalKpiInstrumentationUseCase.finishLatencySample(oStateModel, "save", iSaveLatencyStartedAt);
               return oHandledResult;
             }.bind(this));
           }.bind(this)
         });
-      });
     },
 
 

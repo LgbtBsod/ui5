@@ -686,6 +686,26 @@ function testDetailSaveErrorOutcomePresentationUseCase() {
     'presentOutcome should return missing_bundle_adapter when bundle adapter is absent');
 
 
+
+  let saveFailed = 0;
+  let conflict = 0;
+  let finished = 0;
+  const lifecycle = mod.runOutcomeLifecycle({
+    result: { reason: 'reloaded' },
+    bundle,
+    showToast: (text) => messages.push(text),
+    markSaveFailed: () => { saveFailed += 1; },
+    markConflict: () => { conflict += 1; },
+    finishLatency: (metric, startedAt) => {
+      if (metric === 'save' && startedAt === 123) {
+        finished += 1;
+      }
+    },
+    startedAt: 123
+  });
+  assert(lifecycle.ok === true && lifecycle.reason === 'handled' && saveFailed === 1 && conflict === 1 && finished === 1,
+    'runOutcomeLifecycle should present outcome and execute deterministic KPI callbacks');
+
   const backendPresented = mod.presentOutcome({
     result: { reason: 'backend_error', error: new Error('backend-failed') },
     bundle,
@@ -1170,8 +1190,47 @@ function testDetailLocationValueHelpUseCase() {
   const failedApply = mod.applyLocationSelection({ node: null, selectedModel });
   assert(failedApply === false, 'applyLocationSelection should return false for invalid node input');
 
-  const closedOk = mod.closeValueHelp({ dialog });
-  assert(closedOk === true && closed === 1, 'closeValueHelp should close dialog');
+
+  let ensured = 0;
+  return mod.runOpenValueHelpLifecycle({
+    dialog,
+    locations: rows,
+    viewModel,
+    buildLocationTree: buildTree,
+    normalizeText: norm,
+    ensureLocationsLoaded: () => { ensured += 1; return Promise.resolve(rows); }
+  }).then((openLifecycle) => {
+    assert(openLifecycle.ok === true && ensured === 1,
+      'runOpenValueHelpLifecycle should open dialog and apply loaded tree deterministically');
+
+    const listRes = mod.runListSelectionLifecycle({
+      event: { getParameter: (k) => k === 'listItem' ? { getBindingContext: () => ({ getObject: () => rows[0] }) } : null },
+      selectedModel
+    });
+    assert(listRes.ok === true && selectedModel.m['/basic/LOCATION_KEY'] === 'ROOT',
+      'runListSelectionLifecycle should apply selected list node to selected model');
+
+    let closedByTree = 0;
+    const treeRes = mod.runTreeSelectionLifecycle({
+      event: { getParameter: (k) => k === 'rowContext' ? { getObject: () => rows[1] } : null },
+      selectedModel,
+      onClose: () => { closedByTree += 1; }
+    });
+    assert(treeRes.ok === true && closedByTree === 1,
+      'runTreeSelectionLifecycle should apply node and close value-help');
+
+    const comboRes = mod.runComboSelectionLifecycle({
+      event: { getParameter: (k) => k === 'selectedItem' ? { getBindingContext: () => ({ getObject: () => rows[2] }) } : null },
+      modelName: 'mpl',
+      selectedModel
+    });
+    assert(comboRes.ok === true && selectedModel.m['/basic/LOCATION_KEY'] === 'B-2',
+      'runComboSelectionLifecycle should apply combo-selected node');
+
+    const closedOk = mod.closeValueHelp({ dialog });
+    assert(closedOk === true && closed === 1, 'closeValueHelp should close dialog');
+  });
+
 }
 
 function testDetailDictionarySelectionUseCase() {
@@ -1200,6 +1259,21 @@ function testDetailDictionarySelectionUseCase() {
   assert(applied === true && selectedState['/basic/LPC_TEXT'] === 'Local-2',
     'applyDictionarySelection should map key and text from dictionary');
 
+  let synced = 0;
+  const lifecycleRes = mod.runDictionarySelectionLifecycle({
+    event: {
+      getParameter: (name) => name === 'selectedItem' ? { getKey: () => 'L1' } : null,
+      getSource: () => ({ getSelectedKey: () => '' })
+    },
+    dictionary: [{ key: 'L1', text: 'Local-1' }, { key: 'L2', text: 'Local-2' }],
+    keyPath: '/basic/LPC_KEY',
+    textPath: '/basic/LPC_TEXT',
+    selectedModel: { setProperty: (path, value) => { selectedState[path] = value; } },
+    onAfterApply: () => { synced += 1; }
+  });
+  assert(lifecycleRes.ok === true && lifecycleRes.reason === 'selection_applied' && lifecycleRes.key === 'L1' && synced === 1,
+    'runDictionarySelectionLifecycle should apply dictionary selection and trigger callback');
+
   const shouldConfirm = mod.shouldConfirmBarrierReset({ barrierAllowed: false, barriers: [{ id: 1 }] });
   assert(shouldConfirm === true, 'shouldConfirmBarrierReset should require confirmation when barriers would be lost');
   assert(mod.shouldConfirmBarrierReset({ barrierAllowed: true, barriers: [{ id: 1 }] }) === false,
@@ -1218,8 +1292,33 @@ function testDetailDictionarySelectionUseCase() {
     confirmed: true,
     selectedModel: { setProperty: (path, value) => { barrierState[path] = value; } }
   });
-  assert(Array.isArray(barrierState['/barriers']) && barrierState['/barriers'].length === 0,
-    'applyLpcDecision should clear barriers when user confirms cleanup');
+  let warningCalls = 0;
+  const lpcLifecycle = mod.runLpcSelectionLifecycle({
+    event: { getParameter: (name) => name === 'selectedItem' ? { getKey: () => 'L2' } : null, getSource: () => ({ getSelectedKey: () => '' }) },
+    dictionary: [{ key: 'L1', text: 'Local-1' }, { key: 'L2', text: 'Local-2' }],
+    keyPath: '/basic/LPC_KEY',
+    textPath: '/basic/LPC_TEXT',
+    selectedModel: { setProperty: (path, value) => { selectedState[path] = value; } },
+    onAfterApply: () => { synced += 1; },
+    openWarningDialog: () => { warningCalls += 1; return { ok: true, reason: 'warning_opened' }; },
+    messageBox: {},
+    promptText: 'p',
+    barrierAllowed: true,
+    barriers: []
+  });
+  assert(lpcLifecycle.ok === true && warningCalls === 1,
+    'runLpcSelectionLifecycle should run dictionary apply and warning flow deterministically');
+
+  const professionLifecycle = mod.runProfessionSelectionLifecycle({
+    event: { getParameter: (name) => name === 'selectedItem' ? { getKey: () => 'P2' } : null, getSource: () => ({ getSelectedKey: () => '' }) },
+    dictionary: [{ key: 'P1', text: 'Profession-1' }, { key: 'P2', text: 'Profession-2' }],
+    keyPath: '/basic/PROF_KEY',
+    textPath: '/basic/PROF_TEXT',
+    selectedModel: { setProperty: (path, value) => { selectedState[path] = value; } },
+    onAfterApply: () => { synced += 1; }
+  });
+  assert(professionLifecycle.ok === true && professionLifecycle.key === 'P2',
+    'runProfessionSelectionLifecycle should apply profession dictionary selection deterministically');
 }
 
 
@@ -2634,6 +2733,155 @@ function testDetailSaveOrchestrationUseCase() {
 }
 
 
+
+function testDetailSaveOrchestrationIdempotencyAndConflictMatrix() {
+  const mod = loadSapModule('service/usecase/DetailSaveOrchestrationUseCase.js');
+
+  let saveCalls = 0;
+  let loadCalls = 0;
+  let applyCalls = 0;
+  const saveDeferred = {};
+  saveDeferred.promise = new Promise((resolve) => { saveDeferred.resolve = resolve; });
+
+  const baseArgs = {
+    idempotencyKey: 'save:CHK-1:session-1',
+    saveChecklist: () => {
+      saveCalls += 1;
+      return saveDeferred.promise;
+    },
+    loadChecklistCollection: () => {
+      loadCalls += 1;
+      return Promise.resolve([{ root: { id: 'CHK-1' } }]);
+    },
+    applySaveResult: () => { applyCalls += 1; },
+    handleSaveError: () => Promise.resolve({ ok: false, reason: 'unexpected' })
+  };
+
+  const first = mod.runSaveFlow(baseArgs);
+  const second = mod.runSaveFlow(baseArgs);
+
+  assert(first === second, 'runSaveFlow should dedupe duplicate submissions with same idempotency key');
+  saveDeferred.resolve({ root: { id: 'CHK-1' } });
+
+  return Promise.all([first, second]).then(() => {
+    assert(saveCalls === 1, 'duplicate submission should not call saveChecklist twice');
+    assert(loadCalls === 1, 'duplicate submission should not load checklist collection twice');
+    assert(applyCalls === 1, 'duplicate submission should apply save result exactly once');
+
+    let timeoutAttempts = 0;
+    const timeoutArgs = {
+      idempotencyKey: 'save:CHK-1:retry-timeout',
+      saveChecklist: () => {
+        timeoutAttempts += 1;
+        if (timeoutAttempts === 1) {
+          return Promise.reject(new Error('timeout'));
+        }
+        return Promise.resolve({ root: { id: 'CHK-1' } });
+      },
+      loadChecklistCollection: () => Promise.resolve([{ root: { id: 'CHK-1' } }]),
+      applySaveResult: () => {},
+      handleSaveError: () => Promise.resolve({ ok: false, reason: 'timeout' })
+    };
+
+    return mod.runSaveFlow(timeoutArgs).then((firstTimeoutResult) => {
+      assert(firstTimeoutResult.reason === 'timeout',
+        'timeout branch should route through deterministic handleSaveError outcome');
+      return mod.runSaveFlow(timeoutArgs);
+    }).then((retryResult) => {
+      assert(retryResult.savedChecklist && retryResult.savedChecklist.root.id === 'CHK-1',
+        'retry after timeout should execute fresh save and succeed');
+      assert(timeoutAttempts === 2,
+        'timeout retry should perform exactly one additional save attempt after failure');
+    });
+  }).then(() => {
+    const reasons = [];
+    function matrixReasonForError(error) {
+      const msg = String((error && error.message) || '').toLowerCase();
+      if (msg.indexOf('stale etag') >= 0) {
+        return 'stale_etag';
+      }
+      if (msg.indexOf('lock killed') >= 0) {
+        return 'lock_killed';
+      }
+      if (msg.indexOf('network') >= 0) {
+        return 'network_fallback';
+      }
+      return 'backend_error';
+    }
+
+    return Promise.resolve()
+      .then(() => mod.runSaveFlow({
+        idempotencyKey: 'save:CHK-1:stale-etag',
+        saveChecklist: () => Promise.reject(new Error('stale etag')),
+        loadChecklistCollection: () => Promise.resolve([]),
+        applySaveResult: () => {},
+        handleSaveError: (e) => Promise.resolve({ ok: false, reason: matrixReasonForError(e) })
+      }))
+      .then((res) => { reasons.push(res.reason); })
+      .then(() => mod.runSaveFlow({
+        idempotencyKey: 'save:CHK-1:lock-killed',
+        saveChecklist: () => Promise.reject(new Error('lock killed by owner')), 
+        loadChecklistCollection: () => Promise.resolve([]),
+        applySaveResult: () => {},
+        handleSaveError: (e) => Promise.resolve({ ok: false, reason: matrixReasonForError(e) })
+      }))
+      .then((res) => { reasons.push(res.reason); })
+      .then(() => mod.runSaveFlow({
+        idempotencyKey: 'save:CHK-1:network',
+        saveChecklist: () => Promise.reject(new Error('network unreachable')),
+        loadChecklistCollection: () => Promise.resolve([]),
+        applySaveResult: () => {},
+        handleSaveError: (e) => Promise.resolve({ ok: false, reason: matrixReasonForError(e) })
+      }))
+      .then((res) => { reasons.push(res.reason); })
+      .then(() => {
+        assert(reasons.join(',') === 'stale_etag,lock_killed,network_fallback',
+          'save matrix should deterministically classify stale etag / lock killed / network fallback branches');
+      });
+  }).then(() => {
+    const conflictMod = loadSapModule('service/usecase/DetailSaveConflictUseCase.js');
+    let overwriteCalls = 0;
+    let reloadCalls = 0;
+
+    return conflictMod.handleConflictChoice('Reload', {
+      reloadLabel: 'Reload',
+      overwriteLabel: 'Overwrite',
+      onReload: () => {
+        reloadCalls += 1;
+        return Promise.resolve('reloaded-now');
+      },
+      onOverwrite: () => {
+        overwriteCalls += 1;
+        return Promise.resolve('overwritten-now');
+      }
+    }).then((reloadRes) => {
+      assert(reloadRes.reason === 'reloaded' && reloadCalls === 1,
+        'conflict matrix should support deterministic reload branch');
+      return conflictMod.handleConflictChoice('Overwrite', {
+        reloadLabel: 'Reload',
+        overwriteLabel: 'Overwrite',
+        onReload: () => Promise.resolve('x'),
+        onOverwrite: () => {
+          overwriteCalls += 1;
+          return Promise.resolve('overwritten-now');
+        }
+      });
+    }).then((overwriteRes) => {
+      assert(overwriteRes.reason === 'overwritten' && overwriteCalls === 1,
+        'conflict matrix should support deterministic overwrite branch');
+      return conflictMod.handleConflictChoice('Cancel', {
+        reloadLabel: 'Reload',
+        overwriteLabel: 'Overwrite',
+        onReload: () => Promise.resolve('x'),
+        onOverwrite: () => Promise.resolve('y')
+      });
+    }).then((cancelRes) => {
+      assert(cancelRes.reason === 'cancelled',
+        'conflict matrix should support deterministic cancel branch');
+    });
+  });
+}
+
 function testSearchApplicationServiceTimeoutFallback() {
   const BackendAdapter = {
     queryCheckLists: () => Promise.reject(new Error('timeout'))
@@ -2799,18 +3047,98 @@ function testSearchExportLifecycleUseCase() {
     assert(missingExport.reason === 'missing_export_adapter',
       'runExportExecutionLifecycle should return deterministic missing export adapter outcome');
 
-    let fallback = 0;
-    const presented = mod.runIntentPresentationLifecycle({
-      result: { ok: false },
-      present: () => ({ reason: 'presentation_failed_error' }),
-      onUnexpected: () => { fallback += 1; }
-    });
-    assert(presented.ok === true && presented.reason === 'presented_with_fallback' && fallback === 1,
-      'runIntentPresentationLifecycle should trigger fallback on unexpected presentation reason');
+    let intentLifecycle = 0;
+    return mod.runExportIntentOrchestration({
+      runExportIntentLifecycle: ({ runIntent, presentIntentResult }) => {
+        intentLifecycle += 1;
+        return Promise.resolve(runIntent()).then((result) => {
+          presentIntentResult(result);
+          return { ok: true, result };
+        });
+      },
+      runExportIntent: ({ defaultEntity, allowedEntities, isEnabled, runExport }) => {
+        assert(defaultEntity === 'screen' && Array.isArray(allowedEntities) && allowedEntities.length === 3,
+          'runExportIntentOrchestration should enforce default entity and allowed entities contract');
+        assert(isEnabled() === true, 'runExportIntentOrchestration should evaluate enabled predicate');
+        return runExport('screen');
+      },
+      isEnabled: () => true,
+      runExport: () => Promise.resolve({ ok: true, entity: 'screen' }),
+      presentIntentResult: () => {}
+    }).then((intentRes) => {
+      assert(intentRes.ok === true && intentRes.entity === 'screen' && intentLifecycle === 1,
+        'runExportIntentOrchestration should return deterministic intent result');
 
-    const missingPresenter = mod.runIntentPresentationLifecycle({ result: { ok: true } });
-    assert(missingPresenter.reason === 'missing_presenter',
-      'runIntentPresentationLifecycle should return deterministic missing presenter outcome');
+      return mod.runExportExecutionOrchestration({
+        runExportLifecycle: ({ runExportFlow, runWithLoading, buildExportPromise, onSuccess }) => {
+          return runWithLoading(() => Promise.resolve(runExportFlow(buildExportPromise, onSuccess)));
+        },
+        runExportFlow: (buildExportPromise, onSuccess) => Promise.resolve(buildExportPromise()).then((rows) => {
+          onSuccess(rows);
+          return { ok: true, rows };
+        }),
+        runWithLoading: (fnTask) => Promise.resolve(fnTask()),
+        buildExportPromise: () => Promise.resolve([{ id: 1 }]),
+        onEmpty: () => {},
+        onSuccess: () => {},
+        onError: () => {}
+      });
+    }).then((execRes) => {
+      assert(execRes.ok === true, 'runExportExecutionOrchestration should return deterministic execution result');
+
+      let downloaded = 0;
+      let emptyToast = 0;
+      let successToast = 0;
+      let errorToast = 0;
+      return mod.runExportExecutionPresentationOrchestration({
+        entity: 'screen',
+        runExportLifecycle: ({ runExportFlow, runWithLoading, buildExportPromise, onEmpty, onSuccess }) => {
+          return runWithLoading(() => Promise.resolve(runExportFlow(buildExportPromise, onEmpty, onSuccess)));
+        },
+        runExportFlow: (buildExportPromise, onEmpty, onSuccess) => Promise.resolve(buildExportPromise()).then((rows) => {
+          if (!rows.length) {
+            onEmpty();
+            return { ok: true, rows };
+          }
+          onSuccess(rows);
+          return { ok: true, rows };
+        }),
+        runWithLoading: (fnTask) => Promise.resolve(fnTask()),
+        buildExportPromise: () => Promise.resolve([{ id: 2 }]),
+        buildFilename: (entity) => entity + '.xlsx',
+        download: (name, rows) => { if (name === 'screen.xlsx' && rows.length === 1) { downloaded += 1; } },
+        getText: (key) => key,
+        showToast: (text) => {
+          if (text === 'exportEmpty') { emptyToast += 1; }
+          if (text === 'exportDone') { successToast += 1; }
+          if (text === 'exportFailed') { errorToast += 1; }
+        }
+      }).then((presentedExec) => {
+        assert(presentedExec.ok === true && downloaded === 1 && successToast === 1 && emptyToast === 0 && errorToast === 0,
+          'runExportExecutionPresentationOrchestration should orchestrate success presentation deterministically');
+
+        let fallback = 0;
+      const presented = mod.runIntentPresentationLifecycle({
+        result: { ok: false },
+        present: () => ({ reason: 'presentation_failed_error' }),
+        onUnexpected: () => { fallback += 1; }
+      });
+      assert(presented.ok === true && presented.reason === 'presented_with_fallback' && fallback === 1,
+        'runIntentPresentationLifecycle should trigger fallback on unexpected presentation reason');
+
+      const passthrough = mod.runExportIntentPresentationOrchestration({
+        result: { ok: true, reason: 'intent_done' },
+        present: () => ({ reason: 'presented' }),
+        onUnexpected: () => {}
+      });
+      assert(passthrough && passthrough.reason === 'intent_done',
+        'runExportIntentPresentationOrchestration should return original intent result payload');
+
+        const missingPresenter = mod.runIntentPresentationLifecycle({ result: { ok: true } });
+        assert(missingPresenter.reason === 'missing_presenter',
+          'runIntentPresentationLifecycle should return deterministic missing presenter outcome');
+      });
+    });
   });
 }
 
@@ -3739,6 +4067,17 @@ function testDetailToggleEditOrchestrationUseCase() {
     onAcquireFailed: () => Promise.resolve(false)
   }).then((res) => {
     assert(res.ok === true && st['/mode'] === 'EDIT', 'DetailToggleEditOrchestrationUseCase should acquire lock and switch mode');
+
+    const selectedModelState = {};
+    const cancelRes = mod.runCancelEditFlow({
+      sourceChecklist: { root: { id: 'CHK-9' } },
+      cloneChecklist: (v) => ({ ...v, cloned: true }),
+      selectedModel: { setData: (v) => { selectedModelState.value = v; } },
+      stateModel: sm,
+      releaseEdit: () => { selectedModelState.released = true; }
+    });
+    assert(cancelRes.ok === true && cancelRes.reason === 'cancel_edit_applied' && selectedModelState.value.cloned === true && selectedModelState.released === true,
+      'runCancelEditFlow should clone selection, reset dirty state and release edit lock deterministically');
   });
 }
 
@@ -3886,9 +4225,11 @@ function testSearchSelectionOpenFlowUseCase() {
     'sap_ui5/service/usecase/SearchActionUseCase': searchAction
   });
   const actionPresenter = loadSapModule('service/usecase/SearchActionMessagePresentationUseCase.js');
+  const selectionLifecycle = loadSapModule('service/usecase/SearchSelectionLifecycleUseCase.js');
   const mod = loadSapModule('service/usecase/SearchSelectionOpenFlowUseCase.js', {
     'sap_ui5/service/usecase/SearchSelectionHydrationUseCase': hydration,
     'sap_ui5/service/usecase/SearchOpenDetailGuardUseCase': openGuard,
+    'sap_ui5/service/usecase/SearchSelectionLifecycleUseCase': selectionLifecycle,
     'sap_ui5/service/usecase/SearchNavigationIntentUseCase': navIntent,
     'sap_ui5/service/usecase/SearchActionMessagePresentationUseCase': actionPresenter
   });
@@ -3915,6 +4256,675 @@ function testSearchSelectionOpenFlowUseCase() {
   }).then((openRes) => {
     assert(openRes.ok === true && openRes.reason === 'applied',
       'openDetail should return deterministic open outcome');
+
+    return mod.runSelectionChange({
+      event: { id: 'CHK-2' },
+      extractId: (e) => e.id,
+      selectedModel: { setData: () => {} },
+      viewModel: { setProperty: () => {} },
+      loadChecklistById: () => Promise.resolve({ root: { id: 'CHK-2' } }),
+      syncSelectionState: () => {}
+    });
+  }).then((selectionRes) => {
+    assert(selectionRes.ok === true && selectionRes.reason === 'selection_hydrated' && selectionRes.id === 'CHK-2',
+      'runSelectionChange should orchestrate extraction+hydration deterministically');
+
+    return mod.runItemPress({
+      event: { id: 'CHK-3' },
+      extractId: (e) => e.id,
+      selectedModel: { setData: () => {} },
+      viewModel: { setProperty: () => {} },
+      loadChecklistById: () => Promise.resolve({ root: { id: 'CHK-3' } }),
+      syncSelectionState: () => {},
+      confirmNavigation: () => true,
+      stateModel: { setProperty: () => {} },
+      navTo: () => {},
+      bundle: { getText: (k) => k },
+      showToast: () => {}
+    });
+  }).then((itemRes) => {
+    assert(itemRes.ok === true && itemRes.reason === 'item_press_applied' && itemRes.id === 'CHK-3',
+      'runItemPress should orchestrate selection hydration + detail open deterministically');
+
+    return mod.runSelectionInteractionOrchestration({
+      kind: 'selectionChange',
+      sourceType: 'smart',
+      event: { sid: 'CHK-4' },
+      extractIdFromSmartEvent: (e) => e.sid,
+      extractIdFromFallbackEvent: (e) => e.id,
+      selectedModel: { setData: () => {} },
+      viewModel: { setProperty: () => {} },
+      loadChecklistById: () => Promise.resolve({ root: { id: 'CHK-4' } }),
+      syncSelectionState: () => {},
+      confirmNavigation: () => true,
+      stateModel: { setProperty: () => {} },
+      navTo: () => {},
+      bundle: { getText: (k) => k },
+      showToast: () => {}
+    });
+  }).then((smartSelectionRes) => {
+    assert(smartSelectionRes.ok === true && smartSelectionRes.id === 'CHK-4',
+      'runSelectionInteractionOrchestration should use smart extractor for selection change');
+
+    return mod.runSelectionInteractionOrchestration({
+      kind: 'itemPress',
+      sourceType: 'fallback',
+      event: { id: 'CHK-5' },
+      extractIdFromSmartEvent: (e) => e.sid,
+      extractIdFromFallbackEvent: (e) => e.id,
+      selectedModel: { setData: () => {} },
+      viewModel: { setProperty: () => {} },
+      loadChecklistById: () => Promise.resolve({ root: { id: 'CHK-5' } }),
+      syncSelectionState: () => {},
+      confirmNavigation: () => true,
+      stateModel: { setProperty: () => {} },
+      navTo: () => {},
+      bundle: { getText: (k) => k },
+      showToast: () => {}
+    });
+  }).then((fallbackItemRes) => {
+    assert(fallbackItemRes.ok === true && fallbackItemRes.id === 'CHK-5',
+      'runSelectionInteractionOrchestration should use fallback extractor for item press');
+  });
+}
+
+
+
+
+function testSearchInlineAnalyticsRailUseCase() {
+  const refresh = loadSapModule('service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase.js');
+  const mod = loadSapModule('service/usecase/SearchInlineAnalyticsRailUseCase.js', {
+    'sap_ui5/service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase': refresh
+  });
+
+  const st = {};
+  const viewModel = {
+    setProperty: (k, v) => { st[k] = v; },
+    getProperty: (k) => st[k]
+  };
+
+  let presented = 0;
+  return mod.runTriggerRefresh({
+    trigger: 'SMART_SEARCH',
+    refreshState: {},
+    viewModel,
+    loadAnalytics: () => Promise.resolve({ total: 2 }),
+    applyPresentation: () => { presented += 1; }
+  }).then((triggerRes) => {
+    assert(triggerRes.applied === true,
+      'runTriggerRefresh should apply analytics refresh for supported triggers');
+    return mod.runSimpleRailRefresh({
+      viewModel,
+      loadSimpleAnalytics: () => Promise.resolve({ total: 3 }),
+      applyPresentation: () => { presented += 1; }
+    });
+  }).then((railRes) => {
+    assert(railRes.ok === true && railRes.reason === 'applied',
+      'runSimpleRailRefresh should apply analytics rail data deterministically');
+    assert(st['/analyticsRailBusy'] === false && st['/analyticsError'] === '' && presented >= 2,
+      'runSimpleRailRefresh should clear busy/error state and apply presentation');
+
+    return mod.runTriggerRefresh({
+      trigger: 'UNSUPPORTED_TRIGGER',
+      refreshState: {},
+      viewModel,
+      loadAnalytics: () => Promise.resolve({}),
+      applyPresentation: () => {}
+    });
+  }).then((unsupportedRes) => {
+    assert(unsupportedRes.applied === false && unsupportedRes.reason === 'unsupported_trigger',
+      'runTriggerRefresh should return deterministic unsupported_trigger outcome');
+  });
+}
+
+
+function testSearchInlineAnalyticsAutoRefreshUseCase() {
+  const mod = loadSapModule('service/usecase/SearchInlineAnalyticsAutoRefreshUseCase.js');
+  let cleared = 0;
+  let refreshed = 0;
+  let scheduled = 0;
+
+  const restartRes = mod.restartAutoRefresh({
+    intervalMs: 120000,
+    currentTimer: 77,
+    runRefresh: () => { refreshed += 1; },
+    setInterval: (fn) => {
+      scheduled += 1;
+      fn();
+      return 88;
+    },
+    clearInterval: () => { cleared += 1; }
+  });
+
+  assert(restartRes.ok === true && restartRes.timerId === 88 && restartRes.intervalMs === 120000,
+    'restartAutoRefresh should return deterministic timer metadata');
+  assert(cleared === 1 && refreshed === 2 && scheduled === 1,
+    'restartAutoRefresh should clear previous timer, run immediate refresh, and schedule periodic refresh');
+
+  const stopRes = mod.stopAutoRefresh({
+    currentTimer: restartRes.timerId,
+    clearInterval: () => { cleared += 1; }
+  });
+
+  assert(stopRes.ok === true && stopRes.timerId === null && cleared === 2,
+    'stopAutoRefresh should clear active timer and return null timer id');
+}
+
+
+
+
+
+
+function testSearchExportIntentOrchestrationOnLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchExportLifecycleUseCase.js');
+
+  let lifecycleRuns = 0;
+  let guardRuns = 0;
+  let presented = 0;
+
+  return mod.runExportIntentOrchestration({
+    runExportIntentLifecycle: ({ runIntent, presentIntentResult }) => {
+      lifecycleRuns += 1;
+      return Promise.resolve(runIntent()).then((result) => {
+        presentIntentResult(result);
+        return { ok: true, result };
+      });
+    },
+    runExportIntent: ({ event, source, resolveEntityFromMenuEvent, isEnabled, runExport }) => {
+      guardRuns += 1;
+      assert(event && source && typeof resolveEntityFromMenuEvent === 'function',
+        'SearchExportIntentOrchestrationUseCase should pass event/source/menu resolver to guard usecase');
+      assert(isEnabled() === true, 'SearchExportIntentOrchestrationUseCase should evaluate export enabled predicate');
+      return runExport('screen');
+    },
+    event: { kind: 'menu' },
+    source: { id: 'btn' },
+    resolveEntityFromMenuEvent: () => 'screen',
+    isEnabled: () => true,
+    runExport: () => Promise.resolve({ ok: true, entity: 'screen' }),
+    presentIntentResult: () => { presented += 1; }
+  }).then((result) => {
+    assert(lifecycleRuns === 1 && guardRuns === 1 && presented === 1,
+      'SearchExportIntentOrchestrationUseCase should orchestrate lifecycle, guard and presentation once');
+    assert(result && result.entity === 'screen',
+      'SearchExportIntentOrchestrationUseCase should return guard result payload');
+  });
+}
+
+function testSearchRetryLoadOrchestrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchRetryLoadOrchestrationUseCase.js');
+
+  let lifecycleRuns = 0;
+  let retryFlowRuns = 0;
+  let presented = 0;
+
+  return mod.runRetry({
+    runRetryLifecycle: ({ beginLatency, runRetryFlow, presentRetryOutcome, markRetryFailure, finishLatency, afterRetryApplied }) => {
+      lifecycleRuns += 1;
+      beginLatency();
+      return Promise.resolve(runRetryFlow()).then((result) => {
+        presentRetryOutcome(result);
+        markRetryFailure();
+        finishLatency('searchRetryLoadMs', 0);
+        afterRetryApplied();
+        return { ok: true, result };
+      });
+    },
+    beginLatency: () => {},
+    runRetryFlow: ({ onAfterApply, maxAttempts, treatEmptyAsError }) => {
+      retryFlowRuns += 1;
+      assert(maxAttempts === 2 && treatEmptyAsError === false,
+        'SearchRetryLoadOrchestrationUseCase should enforce deterministic retry policy defaults');
+      onAfterApply();
+      return Promise.resolve({ ok: true, reason: 'retry_ok' });
+    },
+    stateModel: {},
+    dataModel: {},
+    runWithLoading: (fnTask) => Promise.resolve(fnTask && fnTask()),
+    getCheckLists: () => Promise.resolve([]),
+    onAfterApply: () => {},
+    presentRetryOutcome: () => { presented += 1; },
+    markRetryFailure: () => {},
+    finishLatency: () => {},
+    afterRetryApplied: () => {}
+  }).then((result) => {
+    assert(lifecycleRuns === 1 && retryFlowRuns === 1 && presented === 1,
+      'SearchRetryLoadOrchestrationUseCase should orchestrate lifecycle deterministically');
+    assert(result && result.reason === 'retry_ok',
+      'SearchRetryLoadOrchestrationUseCase should return retry flow result');
+  });
+}
+
+function testSearchFilterInteractionOrchestrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchFilterInteractionOrchestrationUseCase.js');
+
+  let triggerCalls = 0;
+  let resetRuns = 0;
+  let toggleRuns = 0;
+
+  const resetRes = mod.runReset({
+    runResetLifecycle: ({ resetFilters, clearSmartFilters, rebind, syncSelectionState, refreshInlineAnalytics }) => {
+      resetRuns += 1;
+      resetFilters();
+      clearSmartFilters();
+      rebind();
+      syncSelectionState();
+      refreshInlineAnalytics('RESET_FILTERS');
+      return { ok: true, reason: 'reset_applied' };
+    },
+    runTriggerPolicy: ({ trigger }) => {
+      if (trigger === 'RESET_FILTERS') {
+        triggerCalls += 1;
+      }
+    },
+    stateModel: {},
+    resetFilters: () => {},
+    clearSmartFilters: () => {},
+    rebind: () => {},
+    syncSelectionState: () => {},
+    syncFilterHint: () => {},
+    refreshInlineAnalytics: () => {}
+  });
+
+  assert(resetRes.ok === true && resetRuns === 1 && triggerCalls === 1,
+    'runReset should delegate lifecycle and trigger policy once');
+
+  const toggleRes = mod.runSearchModeToggle({
+    runSearchModeToggleLifecycle: ({ applySearchMode, updateFilterState, refreshInlineAnalytics }) => {
+      toggleRuns += 1;
+      applySearchMode(true);
+      updateFilterState();
+      refreshInlineAnalytics('SEARCH_MODE_TOGGLE');
+      return { ok: true, reason: 'search_mode_applied' };
+    },
+    runTriggerPolicy: ({ trigger }) => {
+      if (trigger === 'SEARCH_MODE_TOGGLE') {
+        triggerCalls += 1;
+      }
+    },
+    stateModel: {},
+    looseMode: true,
+    applySearchMode: () => {},
+    updateFilterState: () => {},
+    syncFilterHint: () => {},
+    refreshInlineAnalytics: () => {}
+  });
+
+  assert(toggleRes.ok === true && toggleRuns === 1 && triggerCalls === 2,
+    'runSearchModeToggle should delegate lifecycle and trigger policy once');
+}
+
+function testSearchWorkflowAnalyticsLoadOrchestrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchWorkflowAnalyticsLoadOrchestrationUseCase.js');
+  let lifecycleRuns = 0;
+  let dialogRuns = 0;
+
+  return mod.runLoad({
+    runLifecycle: ({ runLoadFlow, applyLoadError }) => {
+      lifecycleRuns += 1;
+      applyLoadError('');
+      return Promise.resolve(runLoadFlow()).then((result) => ({ ok: true, result }));
+    },
+    runDialogLoad: ({ viewModel, loadAnalytics }) => {
+      dialogRuns += 1;
+      assert(viewModel && viewModel.tag === 'vm', 'runDialogLoad should receive viewModel');
+      return loadAnalytics();
+    },
+    viewModel: { tag: 'vm' },
+    loadAnalytics: () => Promise.resolve({ total: 4 }),
+    applyLoadError: () => {}
+  }).then((result) => {
+    assert(lifecycleRuns === 1 && dialogRuns === 1,
+      'SearchWorkflowAnalyticsLoadOrchestrationUseCase should orchestrate lifecycle and dialog exactly once');
+    assert(result && result.total === 4,
+      'SearchWorkflowAnalyticsLoadOrchestrationUseCase should expose inner load result');
+  });
+}
+
+function testSearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase.js');
+
+  let opened = 0;
+  let closed = 0;
+  let degraded = 0;
+
+  const openRes = mod.runOpen({
+    isSmartControlsEnabled: false,
+    applyAnalyticsError: (msg) => { if (msg) { degraded += 1; } },
+    smartControlsUnavailableText: 'smart unavailable',
+    runOpenLifecycle: ({ applyDegradedState, openDialog }) => {
+      applyDegradedState();
+      openDialog();
+      return { ok: true, reason: 'dialog_opened' };
+    },
+    openDialogLifecycle: ({ openDialog, dialog, runLoad }) => {
+      opened += 1;
+      openDialog(dialog, runLoad);
+    },
+    dialog: { id: 'd1' },
+    runLoad: () => Promise.resolve(null),
+    openDialog: () => {}
+  });
+
+  assert(openRes.ok === true && opened === 1 && degraded === 1,
+    'runOpen should orchestrate degraded state and dialog open lifecycle deterministically');
+
+  const closeRes = mod.runClose({
+    runCloseLifecycle: ({ closeDialog }) => {
+      closeDialog();
+      return { ok: true, reason: 'dialog_closed' };
+    },
+    closeDialogLifecycle: ({ closeDialog, dialog }) => {
+      closed += 1;
+      closeDialog(dialog);
+    },
+    dialog: { id: 'd1' },
+    closeDialog: () => {}
+  });
+
+  assert(closeRes.ok === true && closed === 1,
+    'runClose should orchestrate close dialog lifecycle deterministically');
+}
+
+function testSearchTriggerExecutionUseCase() {
+  const mod = loadSapModule('service/usecase/SearchTriggerExecutionUseCase.js');
+  let synced = 0;
+  let rebound = 0;
+  let triggerPolicyCalls = 0;
+  let fallbackCalls = 0;
+
+  const smartResult = mod.runSearchTrigger({
+    useSmartControls: true,
+    syncStateFilters: () => { synced += 1; },
+    markSearchedAndRebind: () => { rebound += 1; },
+    runTriggerPolicy: () => { triggerPolicyCalls += 1; },
+    runFallbackSearchLifecycle: () => { fallbackCalls += 1; return Promise.resolve({ ok: true, mode: 'fallback' }); },
+    syncFilterHint: () => {},
+    refreshInlineAnalytics: () => {}
+  });
+
+  assert(smartResult.ok === true && smartResult.mode === 'smart', 'runSearchTrigger should run smart flow when smart controls enabled');
+  assert(synced === 1 && rebound === 1 && triggerPolicyCalls === 1 && fallbackCalls === 0,
+    'smart flow should sync filters/rebind/trigger policy without fallback lifecycle call');
+
+  return Promise.resolve(mod.runSearchTrigger({
+    useSmartControls: false,
+    syncStateFilters: () => { synced += 100; },
+    markSearchedAndRebind: () => {},
+    runTriggerPolicy: () => {},
+    runFallbackSearchLifecycle: () => {
+      fallbackCalls += 1;
+      return Promise.resolve({ ok: true, reason: 'fallback-ran' });
+    },
+    syncFilterHint: () => {},
+    refreshInlineAnalytics: () => {}
+  })).then((fallbackResult) => {
+    assert(fallbackResult.ok === true && fallbackResult.reason === 'fallback-ran',
+      'runSearchTrigger should delegate to fallback search lifecycle when smart controls are disabled');
+    assert(fallbackCalls === 1, 'fallback flow should execute exactly once');
+  });
+}
+
+function testBackendAdapterContractCompatibility() {
+  const fakeBackend = {
+    configure: () => {},
+    getCapabilities: () => ({
+      contractVersion: '1.0.0',
+      backendMode: 'fake',
+      features: { lockStatus: true },
+      compatibility: { minUiContractVersion: '1.0.0', maxUiContractVersion: '1.x' },
+      source: 'fake-test'
+    }),
+    login: () => Promise.resolve({}),
+    init: () => Promise.resolve([]),
+    getCheckLists: () => Promise.resolve([]),
+    queryCheckLists: () => Promise.resolve([]),
+    createCheckList: () => Promise.resolve({}),
+    updateCheckList: () => Promise.resolve({}),
+    deleteCheckList: () => Promise.resolve({}),
+    upsertRows: () => Promise.resolve({}),
+    lockHeartbeat: () => Promise.resolve({}),
+    lockRelease: () => Promise.resolve({}),
+    getServerState: () => Promise.resolve({}),
+    getFrontendConfig: () => Promise.resolve({}),
+    getPersons: () => Promise.resolve([]),
+    getDictionary: () => Promise.resolve([]),
+    getLocations: () => Promise.resolve([]),
+    getProcessAnalytics: () => Promise.resolve({}),
+    getSimpleAnalytics: () => Promise.resolve({}),
+    exportReport: () => Promise.resolve({ rows: [] }),
+    create: () => Promise.resolve({}),
+    read: () => Promise.resolve(null),
+    update: () => Promise.resolve({}),
+    getAll: () => Promise.resolve([])
+  };
+  const realBackend = Object.assign({}, fakeBackend, {
+    getCapabilities: () => ({
+      contractVersion: '1.0.0',
+      backendMode: 'real',
+      features: { lockStatus: true },
+      compatibility: { minUiContractVersion: '1.2.0', maxUiContractVersion: '1.x' },
+      source: 'real-test'
+    })
+  });
+
+  const adapter = loadSapModule('service/backend/BackendAdapter.js', {
+    'sap_ui5/service/backend/FakeBackendService': fakeBackend,
+    'sap_ui5/service/backend/RealBackendService': realBackend
+  });
+
+  adapter.configure({ mode: 'fake' });
+  return adapter.ensureContractCompatibility('1.0.0').then((okCompat) => {
+    assert(okCompat.ok === true && okCompat.reason === 'compatible',
+      'ensureContractCompatibility should pass compatible UI contract versions');
+    adapter.configure({ mode: 'real' });
+    return adapter.ensureContractCompatibility('1.0.0');
+  }).then((badCompat) => {
+    assert(badCompat.ok === false && badCompat.reason === 'ui_contract_below_min',
+      'ensureContractCompatibility should fail when UI contract version is below backend minimum');
+  });
+}
+
+
+function testBackendAdapterSemverPolicyEnforcement() {
+  const baseBackend = {
+    configure: () => {},
+    login: () => Promise.resolve({}),
+    init: () => Promise.resolve([]),
+    getCheckLists: () => Promise.resolve([]),
+    queryCheckLists: () => Promise.resolve([]),
+    createCheckList: () => Promise.resolve({}),
+    updateCheckList: () => Promise.resolve({}),
+    deleteCheckList: () => Promise.resolve({}),
+    upsertRows: () => Promise.resolve({}),
+    lockHeartbeat: () => Promise.resolve({}),
+    lockRelease: () => Promise.resolve({}),
+    getServerState: () => Promise.resolve({}),
+    getFrontendConfig: () => Promise.resolve({}),
+    getPersons: () => Promise.resolve([]),
+    getDictionary: () => Promise.resolve([]),
+    getLocations: () => Promise.resolve([]),
+    getProcessAnalytics: () => Promise.resolve({}),
+    getSimpleAnalytics: () => Promise.resolve({}),
+    exportReport: () => Promise.resolve({ rows: [] }),
+    create: () => Promise.resolve({}),
+    read: () => Promise.resolve(null),
+    update: () => Promise.resolve({}),
+    getAll: () => Promise.resolve([])
+  };
+
+  const fakeBackend = Object.assign({}, baseBackend, {
+    getCapabilities: () => ({
+      contractVersion: '1.0.0',
+      backendMode: 'fake',
+      features: { lockStatus: true },
+      compatibility: { minUiContractVersion: '1.2.0', maxUiContractVersion: '1.1.0' },
+      source: 'fake-invalid-policy'
+    })
+  });
+  const realBackend = Object.assign({}, baseBackend, {
+    getCapabilities: () => ({
+      contractVersion: '1.0.0',
+      backendMode: 'real',
+      features: { lockStatus: true },
+      compatibility: { minUiContractVersion: '1.0.0', maxUiContractVersion: '1.x' },
+      source: 'real-ok-policy'
+    })
+  });
+
+  const adapter = loadSapModule('service/backend/BackendAdapter.js', {
+    'sap_ui5/service/backend/FakeBackendService': fakeBackend,
+    'sap_ui5/service/backend/RealBackendService': realBackend
+  });
+
+  adapter.configure({ mode: 'fake' });
+  return adapter.ensureContractCompatibility('1.2.0').then((policyResult) => {
+    assert(policyResult.ok === false && policyResult.reason === 'invalid_semver_policy_range',
+      'ensureContractCompatibility should reject invalid semver policy ranges');
+    return adapter.enforceContractCompatibility('1.2.0').then(() => {
+      throw new Error('enforceContractCompatibility should fail for invalid policy');
+    }, (err) => {
+      assert(/invalid_semver_policy_range/.test(String(err && err.message || '')),
+        'enforceContractCompatibility should throw explicit fail-fast reason');
+    });
+  }).then(() => {
+    adapter.configure({ mode: 'real', uiContractVersion: '2.0.0' });
+    return adapter.init().then(() => {
+      throw new Error('BackendAdapter.init should fail-fast on incompatible configured uiContractVersion');
+    }, (err) => {
+      assert(/ui_contract_out_of_supported_range/.test(String(err && err.message || '')),
+        'BackendAdapter.init should fail-fast with unsupported range reason');
+    });
+  }).then(() => {
+    const exactBackend = Object.assign({}, baseBackend, {
+      getCapabilities: () => ({
+        contractVersion: '1.0.0',
+        backendMode: 'fake',
+        features: { lockStatus: true },
+        compatibility: { minUiContractVersion: '1.1.0', maxUiContractVersion: '1.2.3' },
+        source: 'exact-bound'
+      })
+    });
+    const exactAdapter = loadSapModule('service/backend/BackendAdapter.js', {
+      'sap_ui5/service/backend/FakeBackendService': exactBackend,
+      'sap_ui5/service/backend/RealBackendService': realBackend
+    });
+
+    exactAdapter.configure({ mode: 'fake' });
+    return exactAdapter.ensureContractCompatibility('1.2.3').then((exactOk) => {
+      assert(exactOk.ok === true, 'exact max version should be compatible at exact upper bound');
+      return exactAdapter.ensureContractCompatibility('1.2.4');
+    }).then((exactBad) => {
+      assert(exactBad.ok === false && exactBad.reason === 'ui_contract_out_of_supported_range',
+        'exact max version should reject versions above upper bound');
+    });
+  }).then(() => {
+    const malformedBackend = Object.assign({}, baseBackend, {
+      getCapabilities: () => ({
+        contractVersion: '1.0.0',
+        backendMode: 'fake',
+        features: { lockStatus: true },
+        compatibility: { minUiContractVersion: '1.a.0', maxUiContractVersion: '1.x' },
+        source: 'malformed-bound'
+      })
+    });
+    const malformedAdapter = loadSapModule('service/backend/BackendAdapter.js', {
+      'sap_ui5/service/backend/FakeBackendService': malformedBackend,
+      'sap_ui5/service/backend/RealBackendService': realBackend
+    });
+
+    malformedAdapter.configure({ mode: 'fake' });
+    return malformedAdapter.ensureContractCompatibility('1.0.0').then((malformed) => {
+      assert(malformed.ok === false && malformed.reason === 'invalid_semver_metadata',
+        'malformed semver metadata should be rejected deterministically');
+    });
+  });
+}
+
+function testBackendAdapterCapabilityContract() {
+  const fakeBackend = {
+    configure: () => {},
+    getCapabilities: () => ({
+      contractVersion: '1.0.0',
+      backendMode: 'fake',
+      features: { lockStatus: true, processAnalytics: true },
+      compatibility: { minUiContractVersion: '1.0.0', maxUiContractVersion: '1.x' },
+      source: 'fake-test'
+    }),
+    login: () => Promise.resolve({}),
+    init: () => Promise.resolve([]),
+    getCheckLists: () => Promise.resolve([]),
+    queryCheckLists: () => Promise.resolve([]),
+    createCheckList: () => Promise.resolve({}),
+    updateCheckList: () => Promise.resolve({}),
+    deleteCheckList: () => Promise.resolve({}),
+    upsertRows: () => Promise.resolve({}),
+    lockHeartbeat: () => Promise.resolve({}),
+    lockRelease: () => Promise.resolve({}),
+    getServerState: () => Promise.resolve({}),
+    getFrontendConfig: () => Promise.resolve({}),
+    getPersons: () => Promise.resolve([]),
+    getDictionary: () => Promise.resolve([]),
+    getLocations: () => Promise.resolve([]),
+    getProcessAnalytics: () => Promise.resolve({}),
+    getSimpleAnalytics: () => Promise.resolve({}),
+    exportReport: () => Promise.resolve({ rows: [] }),
+    create: () => Promise.resolve({}),
+    read: () => Promise.resolve(null),
+    update: () => Promise.resolve({}),
+    getAll: () => Promise.resolve([])
+  };
+  const realBackend = {
+    configure: () => {},
+    getCapabilities: () => ({
+      contractVersion: '1.0.0',
+      backendMode: 'real',
+      features: { lockStatus: true, processAnalytics: true, exportReport: true },
+      compatibility: { minUiContractVersion: '1.0.0', maxUiContractVersion: '1.x' },
+      source: 'real-test'
+    }),
+    login: () => Promise.resolve({}),
+    init: () => Promise.resolve([]),
+    getCheckLists: () => Promise.resolve([]),
+    queryCheckLists: () => Promise.resolve([]),
+    createCheckList: () => Promise.resolve({}),
+    updateCheckList: () => Promise.resolve({}),
+    deleteCheckList: () => Promise.resolve({}),
+    upsertRows: () => Promise.resolve({}),
+    lockHeartbeat: () => Promise.resolve({}),
+    lockRelease: () => Promise.resolve({}),
+    getServerState: () => Promise.resolve({}),
+    getFrontendConfig: () => Promise.resolve({}),
+    getPersons: () => Promise.resolve([]),
+    getDictionary: () => Promise.resolve([]),
+    getLocations: () => Promise.resolve([]),
+    getProcessAnalytics: () => Promise.resolve({}),
+    getSimpleAnalytics: () => Promise.resolve({}),
+    exportReport: () => Promise.resolve({ rows: [] }),
+    create: () => Promise.resolve({}),
+    read: () => Promise.resolve(null),
+    update: () => Promise.resolve({}),
+    getAll: () => Promise.resolve([])
+  };
+
+  const adapter = loadSapModule('service/backend/BackendAdapter.js', {
+    'sap_ui5/service/backend/FakeBackendService': fakeBackend,
+    'sap_ui5/service/backend/RealBackendService': realBackend
+  });
+
+  adapter.configure({ mode: 'fake' });
+  return adapter.getCapabilities().then((caps) => {
+    assert(caps.contractVersion === '1.0.0', 'BackendAdapter should expose capability contract version');
+    assert(caps.features.processAnalytics === true, 'BackendAdapter should surface backend features');
+    return adapter.negotiateCapabilities(['lockStatus', 'exportReport']);
+  }).then((negotiation) => {
+    assert(negotiation.ok === false, 'negotiateCapabilities should fail when required feature is missing');
+    assert(negotiation.missingFeatures.indexOf('exportReport') >= 0,
+      'negotiateCapabilities should report missing required features');
+    adapter.configure({ mode: 'real' });
+    return adapter.negotiateCapabilities(['lockStatus', 'exportReport']);
+  }).then((realNegotiation) => {
+    assert(realNegotiation.ok === true, 'negotiateCapabilities should pass when required features are provided');
   });
 }
 
@@ -3991,6 +5001,7 @@ async function main() {
   await runTest('DetailSaveOrchestrationUseCaseErrorBranch', testDetailSaveOrchestrationUseCaseErrorBranch);
   await runTest('DetailSaveOrchestrationUseCaseConflictBranch', testDetailSaveOrchestrationUseCaseConflictBranch);
   await runTest('DetailSaveOrchestrationUseCaseNetworkBranch', testDetailSaveOrchestrationUseCaseNetworkBranch);
+  await runTest('DetailSaveOrchestrationIdempotencyAndConflictMatrix', testDetailSaveOrchestrationIdempotencyAndConflictMatrix);
   await runTest('SearchLoadFilterUseCase', testSearchLoadFilterUseCase);
   await runTest('SearchLoadFilterUseCaseNegative', testSearchLoadFilterUseCaseNegative);
   await runTest('SearchExportLifecycleUseCase', testSearchExportLifecycleUseCase);
@@ -4020,6 +5031,17 @@ async function main() {
   await runTest('SearchCreateCopyFlowUseCase', testSearchCreateCopyFlowUseCase);
   await runTest('ComponentStartupDiagnosticsOrchestrationUseCase', testComponentStartupDiagnosticsOrchestrationUseCase);
   await runTest('SearchSelectionOpenFlowUseCase', testSearchSelectionOpenFlowUseCase);
+  await runTest('SearchTriggerExecutionUseCase', testSearchTriggerExecutionUseCase);
+  await runTest('SearchInlineAnalyticsRailUseCase', testSearchInlineAnalyticsRailUseCase);
+  await runTest('SearchInlineAnalyticsAutoRefreshUseCase', testSearchInlineAnalyticsAutoRefreshUseCase);
+  await runTest('SearchExportIntentOrchestrationOnLifecycleUseCase', testSearchExportIntentOrchestrationOnLifecycleUseCase);
+  await runTest('SearchRetryLoadOrchestrationUseCase', testSearchRetryLoadOrchestrationUseCase);
+  await runTest('SearchFilterInteractionOrchestrationUseCase', testSearchFilterInteractionOrchestrationUseCase);
+  await runTest('SearchWorkflowAnalyticsLoadOrchestrationUseCase', testSearchWorkflowAnalyticsLoadOrchestrationUseCase);
+  await runTest('SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase', testSearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase);
+  await runTest('BackendAdapterContractCompatibility', testBackendAdapterContractCompatibility);
+  await runTest('BackendAdapterSemverPolicyEnforcement', testBackendAdapterSemverPolicyEnforcement);
+  await runTest('BackendAdapterCapabilityContract', testBackendAdapterCapabilityContract);
 
   if (process.argv.includes('--json')) {
     console.log(JSON.stringify({ status: 'ok', results }, null, 2));

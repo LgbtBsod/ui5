@@ -138,6 +138,30 @@ sap.ui.define([], function () {
             return Promise.resolve([]);
         },
 
+        getCapabilities: function () {
+            return _request("/capabilities").catch(function () {
+                return {
+                    contractVersion: "1.0.0",
+                    backendMode: "real",
+                    features: {
+                        lockStatus: true,
+                        lockHeartbeat: true,
+                        autoSave: true,
+                        processAnalytics: true,
+                        dictionaryLookup: true,
+                        personSuggestion: true,
+                        locationsHierarchy: true,
+                        exportReport: true
+                    },
+                    compatibility: {
+                        minUiContractVersion: "1.0.0",
+                        maxUiContractVersion: "1.x"
+                    },
+                    source: "real_backend_fallback"
+                };
+            });
+        },
+
         getCheckLists: function () {
             return _request("/checklist", {
                 params: {

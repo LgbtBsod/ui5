@@ -50,8 +50,10 @@ sap.ui.define([
 
             var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "fake";
             var bLocalHost = (window && window.location && /localhost|127\.0\.0\.1/.test(window.location.hostname || ""));
+            var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
             BackendAdapter.configure({
                 mode: (sConfiguredMode === "real" && bLocalHost) ? "fake" : sConfiguredMode,
+                uiContractVersion: sUiContractVersion,
                 baseUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000"
             });
 

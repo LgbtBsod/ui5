@@ -33,6 +33,28 @@ sap.ui.define([
             });
         },
 
+        getCapabilities: function () {
+            return Promise.resolve({
+                contractVersion: "1.0.0",
+                backendMode: "fake",
+                features: {
+                    lockStatus: true,
+                    lockHeartbeat: true,
+                    autoSave: true,
+                    processAnalytics: true,
+                    dictionaryLookup: true,
+                    personSuggestion: true,
+                    locationsHierarchy: true,
+                    exportReport: true
+                },
+                compatibility: {
+                    minUiContractVersion: "1.0.0",
+                    maxUiContractVersion: "1.x"
+                },
+                source: "fake_backend"
+            });
+        },
+
         getCheckLists: function () {
             return Promise.resolve(InMemoryDB.getCheckLists());
         },
