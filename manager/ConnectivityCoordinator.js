@@ -27,6 +27,14 @@ sap.ui.define([
       }
     },
 
+
+    setGraceMs: function (iGraceMs) {
+      var iNext = Number(iGraceMs);
+      if (!Number.isFinite(iNext) || iNext < 1000) {
+        return;
+      }
+      this._iGraceMs = iNext;
+    },
     _onOffline: function () {
       var sGraceUntil = new Date(Date.now() + this._iGraceMs).toISOString();
       this.fireEvent("state", { online: false, isGrace: true, graceExpiresAt: sGraceUntil });

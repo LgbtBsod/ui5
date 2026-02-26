@@ -22,3 +22,10 @@ def process_analytics(db: Session = Depends(get_db)):
     payload = AnalyticsService.get_process_summary(db)
     logger.info("analytics/process payload=%s", payload)
     return payload
+
+
+@router.get("/SimpleAnalytical")
+def simple_analytical(db: Session = Depends(get_db)):
+    payload = AnalyticsService.get_process_summary(db)
+    logger.info("SimpleAnalytical payload=%s", payload)
+    return payload

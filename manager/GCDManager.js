@@ -21,6 +21,15 @@ sap.ui.define([
             }.bind(this), this._iIntervalMs);
         },
 
+
+        setIntervalMs: function (iIntervalMs) {
+            var iNext = Number(iIntervalMs);
+            if (!Number.isFinite(iNext) || iNext < 1000) {
+                return;
+            }
+            this._iIntervalMs = iNext;
+            this.resetOnFullSave();
+        },
         destroyManager: function () {
             if (this._iTimer) {
                 clearTimeout(this._iTimer);

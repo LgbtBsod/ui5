@@ -36,6 +36,10 @@
   --interactive-pressed: color-mix(in srgb, var(--surface2) 82%, rgba(var(--accent-rgb), 0.2));
   --edit-field-bg: color-mix(in srgb, var(--surface2) 72%, rgba(255,255,255,0.12));
   --readonly-field-bg: color-mix(in srgb, var(--surface2) 90%, transparent);
+  --sapPositive: #30914c;
+  --sapNegative: #bb0000;
+  --sapCritical: #a93e00;
+  --sapInformation: #0064d9;
 
   /* SAP typography baseline */
   --sap-font-family-stack: "72", "72full", "SAP-icons", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -70,6 +74,10 @@
   --interactive-pressed: color-mix(in srgb, var(--surface2) 74%, rgba(var(--accent-rgb), 0.22));
   --edit-field-bg: color-mix(in srgb, var(--surface2) 82%, rgba(8,38,62,0.08));
   --readonly-field-bg: color-mix(in srgb, var(--surface2) 95%, white);
+  --sapPositive: #188918;
+  --sapNegative: #aa0808;
+  --sapCritical: #8f5200;
+  --sapInformation: #0057d2;
 }
 
 /* Horizon-inspired morning/night refinements layered over fiori_3/fiori_3_dark */
@@ -78,8 +86,8 @@ body.appLight,
   --bg-main: linear-gradient(180deg, #f7f9ff 0%, #eef3ff 44%, #e8eeff 100%);
   --bg-grad-a: rgba(78, 120, 255, 0.14);
   --bg-grad-b: rgba(84, 214, 255, 0.24);
-  --accent: #3b6df0;
-  --accent-rgb: 59, 109, 240;
+  --accent: #0070f2;
+  --accent-rgb: 0, 112, 242;
   --accent-grad: linear-gradient(135deg, #4b7bff, #5aa7ff);
   --glass-bg: rgba(255, 255, 255, 0.78);
   --glass-border: rgba(82, 117, 220, 0.20);
@@ -89,8 +97,8 @@ body.appDark {
   --bg-main: radial-gradient(circle at 20% 15%, #151b35 0%, #0f1830 44%, #0a1226 100%);
   --bg-grad-a: rgba(89, 133, 255, 0.24);
   --bg-grad-b: rgba(84, 214, 255, 0.14);
-  --accent: #7ea4ff;
-  --accent-rgb: 126, 164, 255;
+  --accent: #91c8f6;
+  --accent-rgb: 145, 200, 246;
   --accent-grad: linear-gradient(135deg, #729cff, #8bc2ff);
   --glass-bg: rgba(12, 22, 42, 0.78);
   --glass-border: rgba(117, 156, 255, 0.24);
@@ -1348,14 +1356,14 @@ body.themeLifestyleNightOps .filterCard {
 
 .workflowStageCard,
 .kpiCard {
-  box-shadow: 0 12px 26px rgba(11, 24, 44, 0.10), inset 0 1px 0 rgba(255,255,255,0.22);
+  box-shadow: 0 8px 20px rgba(11, 24, 44, 0.08), inset 0 1px 0 rgba(255,255,255,0.18);
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
 .workflowStageCard:hover,
 .kpiCard:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 30px rgba(8, 25, 49, 0.14), inset 0 1px 0 rgba(255,255,255,0.24);
+  box-shadow: 0 12px 24px rgba(8, 25, 49, 0.11), inset 0 1px 0 rgba(255,255,255,0.20);
   border-color: color-mix(in srgb, var(--glass-border) 72%, rgba(var(--accent-rgb), 0.2));
 }
 
@@ -2287,6 +2295,7 @@ body.themeLifestyleNightOps .filterCard {
   row-gap: .45rem;
   column-gap: .35rem;
   align-items: center;
+  min-height: 3rem;
 }
 
 .searchActionToolbarDensity .brandActionBtn,
@@ -2363,6 +2372,7 @@ body.themeLifestyleNightOps .filterCard {
 .searchSummaryStatusChip,
 .searchStageStatusChip {
   transition: transform .16s ease, box-shadow .2s ease, border-color .2s ease;
+  transition: opacity .16s ease, transform .16s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
 .searchSummaryStatusChip .sapMObjStatusText,
@@ -2506,4 +2516,61 @@ body.themeLifestyleNightOps .filterCard {
 
 .searchToolbar .searchExportActionBtn.sapMBtnActive .sapMBtnInner {
   box-shadow: 0 6px 16px rgba(var(--accent-rgb), 0.22) !important;
+}
+
+
+/* Horizon accessibility refinements */
+.sapMFocus .sapMInputBaseContentWrapper,
+.sapMFocus .sapMSlt,
+.sapMFocus .sapMBtnInner {
+  box-shadow: var(--focus-ring) !important;
+}
+
+.searchSummaryStatusChip .sapMObjStatusText {
+  color: var(--sapInformation) !important;
+}
+
+.searchStageStatusChip .sapMObjStatusText {
+  color: var(--sapPositive) !important;
+}
+
+.searchToolbar.sapMOTB .sapMBtn.searchPinnedActionBtn {
+  flex-shrink: 0;
+}
+
+
+/* Horizon toolbar overflow affordance */
+.searchToolbar .sapMOTAPButton .sapMBtnInner {
+  border-radius: 10px !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 85%, rgba(var(--accent-rgb), 0.2)) !important;
+}
+
+.searchToolbar .sapMOTAPButton:hover .sapMBtnInner {
+  box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.2) !important;
+}
+
+
+.appDark .searchToolbarMetaRail .searchUpdatedAtText {
+  color: rgba(229, 238, 255, 0.86) !important;
+}
+
+/* Wave 66: KPI hierarchy + toolbar meta rail clarity */
+.searchAnalyticsCardPrimary {
+  border-color: color-mix(in srgb, var(--glass-border) 68%, rgba(var(--accent-rgb), 0.24));
+  background: color-mix(in srgb, var(--surface2) 80%, rgba(var(--accent-rgb), 0.16));
+}
+
+.searchAnalyticsCardPrimary .sapMTitle {
+  font-size: 1.55rem !important;
+  letter-spacing: -0.01em;
+}
+
+.searchToolbarMetaRail {
+  gap: .45rem;
+  padding: .2rem .1rem .1rem;
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 82%, transparent);
+}
+
+.searchToolbarMetaRail .searchUpdatedAtText {
+  opacity: .82;
 }

@@ -76,6 +76,8 @@ sap.ui.define([
             var oCacheModel = ModelFactory.createCacheModel();
             var oMasterDataModel = ModelFactory.createMasterDataModel();
             var oMplModel = ModelFactory.createMplModel();
+            var oEnvModel = ModelFactory.createEnvModel();
+            var mTimerDefaults = oStateModel.getProperty("/timers") || {};
             var fnFormatHumanDateTime = function (vDate) {
                 var oDate = vDate instanceof Date ? vDate : new Date(vDate || Date.now());
                 if (Number.isNaN(oDate.getTime())) {
@@ -90,9 +92,9 @@ sap.ui.define([
                 });
             };
 
-            this._oSmartCache = new SmartCacheManager();
+            this._oSmartCache = new SmartCacheManager({ freshMs: mTimerDefaults.cacheFreshMs, staleOkMs: mTimerDefaults.cacheStaleOkMs });
             this._oHeartbeat = new HeartbeatManager({
-                intervalMs: 4 * 60 * 1000,
+                intervalMs: Number(mTimerDefaults.heartbeatMs) || 4 * 60 * 1000,
                 heartbeatFn: function () {
                     // Do not send heartbeat outside explicit edit/lock mode.
                     if (oStateModel.getProperty("/mode") !== "EDIT" || !oStateModel.getProperty("/isLocked")) {
@@ -104,9 +106,11 @@ sap.ui.define([
                     );
                 }
             });
-            this._oGcd = new GCDManager({ intervalMs: 5 * 60 * 1000 });
-            this._oActivity = new ActivityMonitor();
+            this._oGcd = new GCDManager({ intervalMs: Number(mTimerDefaults.gcdMs) || 5 * 60 * 1000 });
+            this._oActivity = new ActivityMonitor({ idleMs: Number(mTimerDefaults.idleMs) || 10 * 60 * 1000 });
             this._oAutoSave = new AutoSaveCoordinator({
+                intervalMs: Number(mTimerDefaults.autoSaveIntervalMs) || 60 * 1000,
+                debounceMs: Number(mTimerDefaults.autoSaveDebounceMs) || 30 * 1000,
                 shouldSave: function () {
                     return oStateModel.getProperty("/mode") === "EDIT"
                         && !!oStateModel.getProperty("/isDirty")
@@ -156,9 +160,9 @@ sap.ui.define([
                 oStateModel.setProperty("/autosaveState", "ERROR");
             });
 
-            this._oConnectivity = new ConnectivityCoordinator({ graceMs: 60 * 1000 });
+            this._oConnectivity = new ConnectivityCoordinator({ graceMs: Number(mTimerDefaults.networkGraceMs) || 60 * 1000 });
             this._oLockStatus = new LockStatusMonitor({
-                intervalMs: 60 * 1000,
+                intervalMs: Number(mTimerDefaults.lockStatusMs) || 60 * 1000,
                 checkFn: function () {
                     // Fast killed-lock probe (1 minute) that complements heartbeat.
                     if (oStateModel.getProperty("/mode") !== "EDIT" || !oStateModel.getProperty("/isLocked")) {
@@ -250,6 +254,7 @@ sap.ui.define([
             this.setModel(oCacheModel, "cache");
             this.setModel(oMasterDataModel, "masterData");
             this.setModel(oMplModel, "mpl");
+            this.setModel(oEnvModel, "env");
 
 
             var sStoredUser = window.sessionStorage.getItem("pcct_test_user") || "";
@@ -342,6 +347,7 @@ sap.ui.define([
                 if (Array.isArray(oFrontendConfig.requiredFields)) {
                     oStateModel.setProperty("/requiredFields", oFrontendConfig.requiredFields);
                 }
+                this._applyFrontendRuntimeConfig(oFrontendConfig || {}, oStateModel, oEnvModel);
 
                 this._loadMasterDataAsync(oMasterDataModel, oStateModel);
 
@@ -379,6 +385,61 @@ sap.ui.define([
                 this._oConnectivity.start();
                 this._oLockStatus.start();
             }.bind(this));
+        },
+
+
+        _sanitizeTimers: function (mIncoming, mFallback) {
+            var mBase = mFallback || {};
+            var mRaw = mIncoming || {};
+            function pick(sKey, iDefault) {
+                var iVal = Number(mRaw[sKey]);
+                return Number.isFinite(iVal) && iVal >= 1000 ? iVal : iDefault;
+            }
+            return {
+                heartbeatMs: pick("heartbeatMs", Number(mBase.heartbeatMs) || 240000),
+                lockStatusMs: pick("lockStatusMs", Number(mBase.lockStatusMs) || 60000),
+                gcdMs: pick("gcdMs", Number(mBase.gcdMs) || 300000),
+                idleMs: pick("idleMs", Number(mBase.idleMs) || 600000),
+                autoSaveIntervalMs: pick("autoSaveIntervalMs", Number(mBase.autoSaveIntervalMs) || 60000),
+                autoSaveDebounceMs: pick("autoSaveDebounceMs", Number(mBase.autoSaveDebounceMs) || 30000),
+                networkGraceMs: pick("networkGraceMs", Number(mBase.networkGraceMs) || 60000),
+                cacheFreshMs: pick("cacheFreshMs", Number(mBase.cacheFreshMs) || 30000),
+                cacheStaleOkMs: pick("cacheStaleOkMs", Number(mBase.cacheStaleOkMs) || 90000),
+                analyticsRefreshMs: pick("analyticsRefreshMs", Number(mBase.analyticsRefreshMs) || 900000)
+            };
+        },
+
+        _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvModel) {
+            var mTimers = this._sanitizeTimers((oFrontendConfig && oFrontendConfig.timers) || {}, oStateModel.getProperty("/timers") || {});
+            oStateModel.setProperty("/timers", mTimers);
+            oEnvModel.setProperty("/source", (oFrontendConfig && oFrontendConfig.source) || "config_frontend");
+            oEnvModel.setProperty("/loadedAt", new Date().toISOString());
+            oEnvModel.setProperty("/timers", mTimers);
+
+            if (this._oHeartbeat && this._oHeartbeat.setIntervalMs) {
+                this._oHeartbeat.setIntervalMs(mTimers.heartbeatMs);
+            }
+            if (this._oLockStatus && this._oLockStatus.setIntervalMs) {
+                this._oLockStatus.setIntervalMs(mTimers.lockStatusMs);
+            }
+            if (this._oGcd && this._oGcd.setIntervalMs) {
+                this._oGcd.setIntervalMs(mTimers.gcdMs);
+            }
+            if (this._oActivity && this._oActivity.setIdleMs) {
+                this._oActivity.setIdleMs(mTimers.idleMs);
+            }
+            if (this._oAutoSave && this._oAutoSave.setIntervals) {
+                this._oAutoSave.setIntervals({
+                    intervalMs: mTimers.autoSaveIntervalMs,
+                    debounceMs: mTimers.autoSaveDebounceMs
+                });
+            }
+            if (this._oConnectivity && this._oConnectivity.setGraceMs) {
+                this._oConnectivity.setGraceMs(mTimers.networkGraceMs);
+            }
+            if (this._oSmartCache && this._oSmartCache.configureFreshness) {
+                this._oSmartCache.configureFreshness({ freshMs: mTimers.cacheFreshMs, staleOkMs: mTimers.cacheStaleOkMs });
+            }
         },
 
         _loadMasterDataAsync: function (oMasterDataModel, oStateModel) {

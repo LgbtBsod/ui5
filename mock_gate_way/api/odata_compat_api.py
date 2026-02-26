@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from config import DEFAULT_PAGE_SIZE
 from database import get_db
 from models import ChecklistRoot
-from util.expand_parser import ExpandParser
 from utils.filter_parser import FilterParser
 
 router = APIRouter(tags=["ODataCompatibility"])
@@ -55,8 +54,7 @@ def checklist_roots(
         query = query.filter(expression)
 
     if expand:
-        logger.info("ChecklistRoots applying expand=%s", expand)
-        query = ExpandParser.apply(query, ChecklistRoot, expand)
+        logger.warning("ChecklistRoots ignores $expand=%s by design (lazy object-flow policy)", expand)
 
     total = query.count()
     roots = query.offset(skip).limit(top).all()

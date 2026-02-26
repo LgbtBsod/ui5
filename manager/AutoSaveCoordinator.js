@@ -36,6 +36,20 @@ sap.ui.define([
       }
     },
 
+
+    setIntervals: function (mIntervals) {
+      var iDebounce = Number(mIntervals && mIntervals.debounceMs);
+      var iInterval = Number(mIntervals && mIntervals.intervalMs);
+      if (Number.isFinite(iDebounce) && iDebounce >= 1000) {
+        this._iDebounceMs = iDebounce;
+      }
+      if (Number.isFinite(iInterval) && iInterval >= 1000) {
+        this._iIntervalMs = iInterval;
+      }
+      if (this._bRunning) {
+        this.start();
+      }
+    },
     touch: function () {
       if (!this._bRunning) {
         return;

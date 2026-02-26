@@ -31,6 +31,7 @@ sap.ui.define([], function () {
 
         return {
             total: normalizeNumber(oAnalytics.total),
+            monthly: normalizeNumber(oAnalytics.monthly),
             failedChecks: normalizeNumber(oAnalytics.failedChecks),
             failedBarriers: normalizeNumber(oAnalytics.failedBarriers),
             healthy: normalizeNumber(oAnalytics.healthy),

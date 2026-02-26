@@ -169,3 +169,21 @@ class AnalyticsSnapshot(Base):
     failed_checks = Column(INTEGER, default=0)
     failed_barriers = Column(INTEGER, default=0)
     created_on = Column(DateTime, default=now_utc)
+
+
+class FrontendRuntimeSettings(Base):
+    __tablename__ = "frontend_runtime_settings"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    environment = Column(String, nullable=False, default="default")
+    heartbeat_ms = Column(INTEGER, default=240000)
+    lock_status_ms = Column(INTEGER, default=60000)
+    gcd_ms = Column(INTEGER, default=300000)
+    idle_ms = Column(INTEGER, default=600000)
+    autosave_interval_ms = Column(INTEGER, default=60000)
+    autosave_debounce_ms = Column(INTEGER, default=30000)
+    network_grace_ms = Column(INTEGER, default=60000)
+    cache_fresh_ms = Column(INTEGER, default=30000)
+    cache_stale_ok_ms = Column(INTEGER, default=90000)
+    analytics_refresh_ms = Column(INTEGER, default=900000)
+    changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
