@@ -2731,94 +2731,65 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 
-/* Wave 61: explicit reset+skin layer for used UI5 1.71.28 controls (from ui5-api-usage report) */
-.sapMBtn,
-.sapMBtnInner,
-.sapMInputBase,
-.sapMInputBaseContentWrapper,
-.sapMSlt,
-.sapMSltLabel,
-.sapMSwt,
-.sapMDialog,
-.sapMDialogSection,
-.sapMMessageBox,
-.sapMMsgStrip,
-.sapMList,
-.sapMListTbl,
-.sapMTable,
-.sapMBar,
-.sapMTitle,
-.sapMLabel,
-.sapMText,
-.sapMObjectStatus,
-.sapMObjStatus,
-.sapUiTable,
-.sapUiTableCnt,
-.sapUiTableCtrl,
-.sapUiCompFilterBar,
-.sapMSegB,
-.sapMMenu,
-.sapMMenuBtn,
-.sapMTokenizer,
-.sapMToken {
+/* Wave 61/62 consolidated: explicit reset + skin layer for UI5 1.71.28 controls */
+:root {
+  --ui-shell-radius: 16px;
+  --ui-control-radius: 14px;
+  --ui-overlay-radius: 18px;
+  --ui-air-gap: 1.85rem;
+  --ui-air-gap-compact: 1.15rem;
+  --ui-gradient-top: color-mix(in srgb, var(--bg-grad-a) 88%, rgba(var(--accent-rgb), 0.08));
+  --ui-gradient-bottom: color-mix(in srgb, var(--bg-grad-b) 86%, rgba(var(--accent-rgb), 0.04));
+}
+
+:is(.sapMBtn,.sapMBtnInner,.sapMInputBase,.sapMInputBaseContentWrapper,.sapMSlt,.sapMSltLabel,.sapMSwt,.sapMDialog,.sapMDialogSection,.sapMMessageBox,.sapMMsgStrip,.sapMList,.sapMListTbl,.sapMTable,.sapMBar,.sapMTitle,.sapMLabel,.sapMText,.sapMObjectStatus,.sapMObjStatus,.sapUiTable,.sapUiTableCnt,.sapUiTableCtrl,.sapUiCompFilterBar,.sapMSegB,.sapMMenu,.sapMMenuBtn,.sapMTokenizer,.sapMToken) {
   border: none;
   outline: none;
   box-shadow: none;
 }
 
-.sapMBtnInner,
-.sapMInputBaseContentWrapper,
-.sapMSlt,
-.sapMSegB,
-.sapMSwt,
-.sapMDialog,
-.sapMMsgStrip,
-.sapUiCompFilterBar,
-.sapUiTable,
-.sapMTable,
-.sapMMenu {
-  border-radius: 14px !important;
-  border: 1px solid color-mix(in srgb, var(--glass-border) 76%, rgba(var(--accent-rgb), .22)) !important;
-  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), .08)) !important;
+:is(.sapMBtnInner,.sapMInputBaseContentWrapper,.sapMSlt,.sapMSegB,.sapMSwt,.sapMDialog,.sapMMsgStrip,.sapUiCompFilterBar,.sapUiTable,.sapMTable,.sapMMenu) {
+  border-radius: var(--ui-control-radius) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 78%, rgba(var(--accent-rgb), .2)) !important;
+  background: linear-gradient(180deg, var(--ui-gradient-top) 0%, var(--ui-gradient-bottom) 100%) !important;
 }
 
-
-/* Wave 62: implicit/standard UI5 runtime surfaces (dialogs/popovers/settings/value-help) */
-.sapMSelectDialog,
-.sapMSelectDialog .sapMDialogSection,
-.sapMViewSettingsDialog,
-.sapMViewSettingsDialog .sapMDialogSection,
-.sapMPopover,
-.sapMPopover .sapMDialogSection,
-.sapMActionSheet,
-.sapMBusyDialog,
-.sapUiCompValueHelpDialog,
-.sapMP13nDialog,
-.sapMP13nDialog .sapMDialogSection,
-.sapMDialog.sapMMessageDialog {
-  border-radius: 16px !important;
-  border: 1px solid color-mix(in srgb, var(--glass-border) 70%, rgba(var(--accent-rgb), .2)) !important;
-  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), .1)) !important;
-  box-shadow: 0 20px 46px rgba(var(--accent-rgb), .16) !important;
-  backdrop-filter: blur(14px) saturate(130%);
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
+/* airy spacing and breathing room */
+.appContent {
+  padding: clamp(2.7rem, 3.8vw, 3.6rem);
+  gap: var(--ui-air-gap);
 }
 
-.sapMSelectDialog .sapMBtnInner,
-.sapMViewSettingsDialog .sapMBtnInner,
-.sapMPopover .sapMBtnInner,
-.sapMActionSheet .sapMBtnInner,
-.sapUiCompValueHelpDialog .sapMBtnInner,
-.sapMP13nDialog .sapMBtnInner {
+.glassCard,
+.filterCard {
+  padding: clamp(1.55rem, 2.2vw, 2.15rem);
+  border-radius: var(--ui-shell-radius);
+  backdrop-filter: blur(24px) saturate(135%);
+  -webkit-backdrop-filter: blur(24px) saturate(135%);
+}
+
+.detailContent .glassCard,
+.searchResultsTable,
+.flatEditorTable {
+  margin-bottom: var(--ui-air-gap-compact);
+}
+
+/* implicit/standard UI5 runtime surfaces (dialogs/popovers/settings/value-help) */
+:is(.sapMSelectDialog,.sapMSelectDialog .sapMDialogSection,.sapMViewSettingsDialog,.sapMViewSettingsDialog .sapMDialogSection,.sapMPopover,.sapMPopover .sapMDialogSection,.sapMActionSheet,.sapMBusyDialog,.sapUiCompValueHelpDialog,.sapMP13nDialog,.sapMP13nDialog .sapMDialogSection,.sapMDialog.sapMMessageDialog) {
+  border-radius: var(--ui-overlay-radius) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 72%, rgba(var(--accent-rgb), .2)) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), .11)) 0%, color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), .06)) 100%) !important;
+  box-shadow: 0 22px 52px rgba(var(--accent-rgb), .14) !important;
+  backdrop-filter: blur(16px) saturate(132%);
+  -webkit-backdrop-filter: blur(16px) saturate(132%);
+}
+
+:is(.sapMSelectDialog .sapMBtnInner,.sapMViewSettingsDialog .sapMBtnInner,.sapMPopover .sapMBtnInner,.sapMActionSheet .sapMBtnInner,.sapUiCompValueHelpDialog .sapMBtnInner,.sapMP13nDialog .sapMBtnInner) {
   border-radius: 999px !important;
 }
 
-.sapMSelectDialog .sapMInputBaseContentWrapper,
-.sapMViewSettingsDialog .sapMInputBaseContentWrapper,
-.sapMPopover .sapMInputBaseContentWrapper,
-.sapUiCompValueHelpDialog .sapMInputBaseContentWrapper,
-.sapMP13nDialog .sapMInputBaseContentWrapper {
+:is(.sapMSelectDialog .sapMInputBaseContentWrapper,.sapMViewSettingsDialog .sapMInputBaseContentWrapper,.sapMPopover .sapMInputBaseContentWrapper,.sapUiCompValueHelpDialog .sapMInputBaseContentWrapper,.sapMP13nDialog .sapMInputBaseContentWrapper) {
   border-radius: 12px !important;
-  border-color: color-mix(in srgb, var(--glass-border) 74%, rgba(var(--accent-rgb), .2)) !important;
-  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), .08)) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 76%, rgba(var(--accent-rgb), .18)) !important;
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), .06)) !important;
 }
