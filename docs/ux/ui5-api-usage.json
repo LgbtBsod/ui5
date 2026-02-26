@@ -1,0 +1,531 @@
+{
+  "generatedAt": "2026-02-26T16:30:44.484Z",
+  "ui5VersionTarget": "1.71.28",
+  "modules": [
+    {
+      "name": "sap/m/MessageBox",
+      "files": [
+        "Component.js",
+        "controller/Base.controller.js",
+        "controller/Detail.controller.js",
+        "util/FlowCoordinator.js"
+      ]
+    },
+    {
+      "name": "sap/m/MessageToast",
+      "files": [
+        "controller/Base.controller.js",
+        "controller/Detail.controller.js",
+        "controller/Search.controller.js",
+        "controller/TestUserDialog.controller.js"
+      ]
+    },
+    {
+      "name": "sap/ui/base/EventProvider",
+      "files": [
+        "manager/ActivityMonitor.js",
+        "manager/AutoSaveCoordinator.js",
+        "manager/ConnectivityCoordinator.js",
+        "manager/GCDManager.js",
+        "manager/HeartbeatManager.js",
+        "manager/LockStatusMonitor.js",
+        "manager/SmartCacheManager.js"
+      ]
+    },
+    {
+      "name": "sap/ui/core/Fragment",
+      "files": [
+        "controller/App.controller.js",
+        "scripts/unit-smoke.js",
+        "service/usecase/DetailDialogLifecycleUseCase.js"
+      ]
+    },
+    {
+      "name": "sap/ui/core/mvc/Controller",
+      "files": [
+        "controller/Base.controller.js"
+      ]
+    },
+    {
+      "name": "sap/ui/core/UIComponent",
+      "files": [
+        "Component.js"
+      ]
+    },
+    {
+      "name": "sap/ui/model/Filter",
+      "files": [
+        "scripts/unit-smoke.js",
+        "util/SearchSmartControlCoordinator.js"
+      ]
+    },
+    {
+      "name": "sap/ui/model/FilterOperator",
+      "files": [
+        "scripts/unit-smoke.js",
+        "util/SearchSmartControlCoordinator.js"
+      ]
+    },
+    {
+      "name": "sap/ui/model/json/JSONModel",
+      "files": [
+        "Component.js",
+        "controller/App.controller.js",
+        "controller/Detail.controller.js",
+        "controller/Search.controller.js",
+        "model/ModelFactory.js"
+      ]
+    },
+    {
+      "name": "sap/ui/model/odata/v2/ODataModel",
+      "files": [
+        "Component.js"
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "name": "sap.f.dragDropConfig",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.f.FlexibleColumnLayout",
+      "files": [
+        "view/App.view.xml"
+      ]
+    },
+    {
+      "name": "sap.f.GridList",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.f.GridListItem",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.f.items",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.beginButton",
+      "files": [
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/LocationValueHelpDialog.fragment.xml",
+        "view/fragment/TestUserDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.BusyIndicator",
+      "files": [
+        "view/Search.view.xml",
+        "view/fragment/LockSwitchStatus.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Button",
+      "files": [
+        "view/App.view.xml",
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/DetailControlRail.fragment.xml",
+        "view/fragment/LocationValueHelpDialog.fragment.xml",
+        "view/fragment/TestUserDialog.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.cells",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.CheckBox",
+      "files": [
+        "view/Detail.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Column",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.ColumnListItem",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.columns",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.content",
+      "files": [
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.customData",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/DetailControlRail.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.DatePicker",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Dialog",
+      "files": [
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/LocationValueHelpDialog.fragment.xml",
+        "view/fragment/TestUserDialog.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.endButton",
+      "files": [
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.HBox",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/DetailControlRail.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Input",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/TestUserDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.items",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Label",
+      "files": [
+        "view/Search.view.xml",
+        "view/fragment/LocationValueHelpDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.layoutData",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.menu",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Menu",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.MenuButton",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.MenuItem",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.MessageStrip",
+      "files": [
+        "view/fragment/LockKilledBanner.fragment.xml",
+        "view/fragment/SearchLoadStatePanel.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.ObjectIdentifier",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.ObjectStatus",
+      "files": [
+        "view/App.view.xml",
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/DetailControlRail.fragment.xml",
+        "view/fragment/LockSwitchStatus.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.OverflowToolbar",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.OverflowToolbarLayoutData",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Page",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.ProgressIndicator",
+      "files": [
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.ScrollContainer",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.SearchField",
+      "files": [
+        "view/fragment/LocationValueHelpDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Select",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.suggestionItems",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Switch",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/LockSwitchStatus.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Table",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Text",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/DetailControlRail.fragment.xml",
+        "view/fragment/LocationValueHelpDialog.fragment.xml",
+        "view/fragment/TestUserDialog.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.TimePicker",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Title",
+      "files": [
+        "view/App.view.xml",
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/DetailControlRail.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.m.Toolbar",
+      "files": [
+        "view/App.view.xml",
+        "view/Detail.view.xml",
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.ToolbarSpacer",
+      "files": [
+        "view/App.view.xml",
+        "view/Detail.view.xml",
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.m.VBox",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/BarriersExpandedDialog.fragment.xml",
+        "view/fragment/ChecksExpandedDialog.fragment.xml",
+        "view/fragment/DetailControlRail.fragment.xml",
+        "view/fragment/LocationValueHelpDialog.fragment.xml",
+        "view/fragment/SearchLoadStatePanel.fragment.xml",
+        "view/fragment/TestUserDialog.fragment.xml",
+        "view/fragment/WorkflowAnalyticsDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.comp.smartfilterbar.controlConfiguration",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.comp.smartfilterbar.ControlConfiguration",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.comp.smartfilterbar.SmartFilterBar",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.comp.smarttable.SmartTable",
+      "files": [
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.core.CustomData",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/DetailControlRail.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.core.dnd.DragInfo",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.core.dnd.DropInfo",
+      "files": [
+        "view/Detail.view.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.core.Fragment",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml",
+        "view/fragment/DetailControlRail.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.core.Item",
+      "files": [
+        "view/Detail.view.xml",
+        "view/Search.view.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.table.Column",
+      "files": [
+        "view/fragment/LocationValueHelpDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.table.columns",
+      "files": [
+        "view/fragment/LocationValueHelpDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.table.template",
+      "files": [
+        "view/fragment/LocationValueHelpDialog.fragment.xml"
+      ]
+    },
+    {
+      "name": "sap.ui.table.TreeTable",
+      "files": [
+        "view/fragment/LocationValueHelpDialog.fragment.xml"
+      ]
+    }
+  ]
+}

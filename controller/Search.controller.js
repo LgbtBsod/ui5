@@ -109,6 +109,7 @@ sap.ui.define([
                     avgChecksRate: 0,
                     avgBarriersRate: 0,
                     refreshedAt: "-",
+                    refreshedAtText: "-",
                     source: "fallback",
                     sourceText: "fallback"
                 },
@@ -122,7 +123,7 @@ sap.ui.define([
 
             this._iSearchDebounceMs = 180;
             this._iSearchTimer = null;
-            this._analyticsRefreshMs = Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || 15 * 60 * 1000;
+            this._analyticsRefreshMs = Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || 10 * 60 * 1000;
             this._analyticsRefreshTimer = null;
             this._inlineAnalyticsRefreshState = SearchInlineAnalyticsRefreshOrchestrationUseCase.ensureRefreshState({});
 
@@ -646,7 +647,7 @@ sap.ui.define([
 
         _startSimpleAnalyticsAutoRefresh: function () {
             var oResult = SearchInlineAnalyticsAutoRefreshUseCase.restartAutoRefresh({
-                intervalMs: Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || this._analyticsRefreshMs || 15 * 60 * 1000,
+                intervalMs: Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || this._analyticsRefreshMs || 10 * 60 * 1000,
                 currentTimer: this._analyticsRefreshTimer,
                 runRefresh: this._refreshSimpleAnalyticsRail.bind(this),
                 setInterval: window.setInterval.bind(window),

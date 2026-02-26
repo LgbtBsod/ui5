@@ -161,7 +161,6 @@ sap.ui.define([
       });
     },
 
-
     _refreshValidationHighlights: function () {
       var oViewModel = this.getView().getModel("view");
       if (!oViewModel || !oViewModel.getProperty("/validationShown")) {
@@ -257,7 +256,6 @@ sap.ui.define([
       var oSelected = this.getModel("selected").getData() || {};
       return ChecklistValidationService.validateForStatusChange(oSelected, this._getValidationRules());
     },
-
 
     _buildFrontendNowPayload: function () {
       var oNow = new Date();
@@ -400,8 +398,6 @@ sap.ui.define([
       return aRoots;
     },
 
-
-
     _isChecklistCacheValid: function () {
       var oComp = this.getOwnerComponent();
       return !!(oComp && oComp._oSmartCache && oComp._oSmartCache.isCacheValid && oComp._oSmartCache.isCacheValid("checkLists"));
@@ -452,8 +448,6 @@ sap.ui.define([
       this._reloadChecklistFromBackend(sId);
 
     },
-
-
 
     _buildSkeletonRows: function (iCount) {
       return Array.from({ length: iCount }, function (_, iIndex) {
@@ -591,7 +585,6 @@ sap.ui.define([
       });
     },
 
-
     formatHeartbeatText: function (sMode, bIsLocked) {
       if (sMode === "EDIT" && bIsLocked) {
         return this.getResourceBundle().getText("heartbeatLockedActive");
@@ -635,9 +628,6 @@ sap.ui.define([
       });
     },
 
-
-
-
     onOpenLocationValueHelp: function () {
       return DetailLocationValueHelpUseCase.runOpenValueHelpLifecycle({
         dialog: this.byId("locationValueHelpDialog"),
@@ -645,7 +635,8 @@ sap.ui.define([
         viewModel: this.getView().getModel("view"),
         buildLocationTree: this._buildLocationTree.bind(this),
         normalizeText: this._normalizeText.bind(this),
-        ensureLocationsLoaded: this._ensureMplLocationsLoaded.bind(this)
+        ensureLocationsLoaded: this._ensureMplLocationsLoaded.bind(this),
+        table: this.byId("locationValueHelpTreeTable")
       });
     },
 
@@ -743,8 +734,20 @@ sap.ui.define([
     },
 
     onToggleEditFromDetail: function (oEvent) {
+      this._syncDirtyFlag();
       var bEditMode = oEvent.getParameter("state");
+      var oSource = oEvent.getSource && oEvent.getSource();
       var oStateModel = this.getModel("state");
+      if (oSource && typeof oSource.setState === "function") {
+        oSource.setState(oStateModel.getProperty("/mode") === "EDIT");
+      }
+      if (oStateModel.getProperty("/lockOperationPending")) {
+        if (oSource && typeof oSource.setState === "function") {
+          oSource.setState(oStateModel.getProperty("/mode") === "EDIT");
+        }
+        return Promise.resolve({ ok: false, reason: "pending_lock_operation" });
+      }
+
       var sObjectId = oStateModel.getProperty("/activeObjectId");
       var sSessionId = oStateModel.getProperty("/sessionId");
       var fnDisableEditAndRelease = () => this._releaseEditLock(sObjectId, sSessionId, oStateModel);
@@ -767,12 +770,15 @@ sap.ui.define([
         }.bind(this),
         releaseEdit: fnDisableEditAndRelease,
         ensureFreshBeforeEdit: function () {
+          if (!sObjectId) {
+            return Promise.resolve();
+          }
           return this._ensureChecklistFreshBeforeEdit(sObjectId);
         }.bind(this),
         confirmIntegrationEdit: this._confirmIntegrationEdit.bind(this),
         acquireLock: function () {
-          return BackendAdapter.lockAcquire(sObjectId, sSessionId);
-        },
+          return BackendAdapter.lockAcquire(sObjectId, sSessionId, this._getCurrentUser());
+        }.bind(this),
         tryRecoverFromAcquireError: function (oError) {
           return this._tryStealOwnLock(sObjectId, sSessionId, oError).then(function (oResult) {
             return !!(oResult && oResult.success);
@@ -783,10 +789,15 @@ sap.ui.define([
         onAcquireFailed: function (oError) {
           return FlowCoordinator.handleBackendError(this, oError);
         }.bind(this)
+      }).finally(function () {
+        if (oSource && typeof oSource.setState === "function") {
+          oSource.setState(oStateModel.getProperty("/mode") === "EDIT");
+        }
       });
     },
 
     onCancelEditFromDetail: function () {
+      this._syncDirtyFlag();
       var oStateModel = this.getModel("state");
       var sObjectId = oStateModel.getProperty("/activeObjectId");
       var sSessionId = oStateModel.getProperty("/sessionId");
