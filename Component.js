@@ -65,8 +65,17 @@ sap.ui.define([
             });
             var oMainServiceModel = new ODataModel({
                 serviceUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000/",
-                useBatch: false,
-                defaultCountMode: "Inline"
+                useBatch: true,
+                defaultCountMode: "Inline",
+                refreshAfterChange: false
+            });
+            oMainServiceModel.setDeferredGroups(["changes", "autosave", "saveFlow"]);
+            oMainServiceModel.setChangeGroups({
+                "*": {
+                    groupId: "changes",
+                    changeSetId: "ChecklistSave",
+                    single: false
+                }
             });
             ComponentStartupDiagnosticsOrchestrationUseCase.wireMetadataEvents({
                 mainServiceModel: oMainServiceModel,
@@ -285,6 +294,11 @@ sap.ui.define([
             oStateModel.bindProperty("/isDirty").attachChange(function () {
                 this._oAutoSave.touch();
             }.bind(this));
+            ["/isLocked", "/mode"].forEach(function (sPath) {
+                oStateModel.bindProperty(sPath).attachChange(function () {
+                    this._syncLockScopedManagers(oStateModel);
+                }.bind(this));
+            }.bind(this));
 
             this._oConnectivity.attachEvent("state", function (oEvent) {
                 var m = oEvent.getParameters() || {};
@@ -386,9 +400,52 @@ sap.ui.define([
                 this._oAutoSave.start();
                 this._oConnectivity.start();
                 this._oLockStatus.start();
+                this._syncLockScopedManagers(oStateModel);
             }.bind(this));
         },
 
+
+        _isLockRuntimeActive: function (oStateModel) {
+            return oStateModel.getProperty("/mode") === "EDIT" && !!oStateModel.getProperty("/isLocked");
+        },
+
+        _syncLockScopedManagers: function (oStateModel) {
+            var bActive = this._isLockRuntimeActive(oStateModel);
+            if (bActive) {
+                if (this._oHeartbeat && !this._oHeartbeat.isRunning()) {
+                    this._oHeartbeat.start();
+                }
+                if (this._oAutoSave) {
+                    this._oAutoSave.start();
+                }
+                if (this._oLockStatus) {
+                    this._oLockStatus.start();
+                }
+                if (this._oGcd) {
+                    this._oGcd.resetOnFullSave();
+                }
+                if (this._oActivity) {
+                    this._oActivity.start();
+                }
+                return;
+            }
+
+            if (this._oHeartbeat) {
+                this._oHeartbeat.stop();
+            }
+            if (this._oAutoSave) {
+                this._oAutoSave.stop();
+            }
+            if (this._oLockStatus) {
+                this._oLockStatus.stop();
+            }
+            if (this._oGcd) {
+                this._oGcd.destroyManager();
+            }
+            if (this._oActivity) {
+                this._oActivity.stop();
+            }
+        },
 
         _sanitizeTimers: function (mIncoming, mFallback) {
             var mBase = mFallback || {};
@@ -445,14 +502,26 @@ sap.ui.define([
         },
 
         _loadMasterDataAsync: function (oMasterDataModel, oStateModel) {
-            var pPersons = BackendAdapter.getPersons().catch(function () { return []; });
-            var pLpc = BackendAdapter.getDictionary("LPC").catch(function () { return []; });
-            var pProfessions = BackendAdapter.getDictionary("PROFESSION").catch(function () { return []; });
+            var pBundle = BackendAdapter.getReferenceBundle().catch(function () {
+                var pPersons = BackendAdapter.getPersons().catch(function () { return []; });
+                var pLpc = BackendAdapter.getDictionary("LPC").catch(function () { return []; });
+                var pProfessions = BackendAdapter.getDictionary("PROFESSION").catch(function () { return []; });
+                return Promise.all([pPersons, pLpc, pProfessions]).then(function (aResults) {
+                    return {
+                        persons: aResults[0],
+                        dictionaries: {
+                            LPC: aResults[1],
+                            PROFESSION: aResults[2]
+                        }
+                    };
+                });
+            });
 
-            Promise.all([pPersons, pLpc, pProfessions]).then(function (aResults) {
-                oMasterDataModel.setProperty("/persons", aResults[0]);
-                oMasterDataModel.setProperty("/lpc", aResults[1]);
-                oMasterDataModel.setProperty("/professions", aResults[2]);
+            pBundle.then(function (oBundle) {
+                var mDict = (oBundle && oBundle.dictionaries) || {};
+                oMasterDataModel.setProperty("/persons", (oBundle && oBundle.persons) || []);
+                oMasterDataModel.setProperty("/lpc", mDict.LPC || []);
+                oMasterDataModel.setProperty("/professions", mDict.PROFESSION || []);
             }).finally(function () {
                 oStateModel.setProperty("/masterDataLoading", false);
             });

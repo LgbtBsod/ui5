@@ -859,3 +859,35 @@
 8. **Documentation governance**: H7 complete; no conflicting strategic docs outside master-plan.
 
 Если хотя бы один из блоков выше не закрыт, статус "15/10" не присваивается.
+
+
+## 6) Gateway-alignment correction plan (updated with latest scope)
+
+### Confirmed corrections from current implementation
+- [x] Search now has a lightweight entity projection strategy (`SearchRows`) and routing by row `db_key`; heavy detail is loaded on demand.
+- [x] Save/Autosave run through function-import style actions with request idempotency (`request_guid` + dedup ledger).
+- [x] Lock observability has dedicated OData-like history entity (`LockLogs`) with `$filter/$orderby/$top/$skip`.
+- [x] Runtime capabilities endpoint exists to drive UI paths without hardcoded assumptions.
+
+### Remaining hardening tasks (next sprint)
+- [ ] Add backend integration tests for lock expiry/takeover and idempotent save replay at API level.
+- [ ] Add workflow tests for unsaved-decision matrix (`YES/NO/CANCEL`) including release-lock side effects.
+- [ ] Add persistence policy tests:
+  - Smart cache survives browser restart for UI binding data and theme.
+  - Session-only datasets (dictionary/variables/hierarchy) are cleared on tab refresh.
+- [ ] Add routing resilience tests for refresh/tab-close/navigation while in `EDIT` with dirty state.
+
+### Target behavior matrix (must remain green)
+1. `READ` mode -> no edit timers (heartbeat/autosave/lock-status/activity/GCD).
+2. Enter `EDIT` with lock -> all lock-scoped timers start from zero.
+3. Exit to `READ` (unlock) -> all lock-scoped timers stop and state resets.
+4. Re-enter `EDIT` with fresh lock -> timers restart from zero (no stale carry-over).
+5. Unsaved-close dialog:
+   - `YES` -> save + unlock/release flow,
+   - `NO` -> discard local dirty without cache overwrite + unlock/release,
+   - `CANCEL` -> stay on card, no release.
+6. Search list uses lightweight entity only; detail payload loads by `db_key` on demand.
+
+### Delivery notes
+- Keep Gateway-like contracts backward-compatible using fallback endpoints until migration cutover.
+- Keep capability flags as single source of truth for client routing decisions.

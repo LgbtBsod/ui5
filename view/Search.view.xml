@@ -172,7 +172,7 @@
                         beforeRebindTable=".onBeforeSmartTableRebind"
                         initialise=".onSmartTableInitialise"
                         initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
-                        growing="true" growingThreshold="100" useExportToExcel="true" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
+                        useExportToExcel="true" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
 
                     <Table id="searchFallbackTable" visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>

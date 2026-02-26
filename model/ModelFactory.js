@@ -57,6 +57,15 @@ sap.ui.define([
                 capabilityDegradedReason: "",
                 capabilityMessageKey: "capabilityPending",
                 capabilityDiagnostics: {},
+                requestGroups: {
+                    save: "saveFlow",
+                    autosave: "autosave",
+                    lock: "$direct",
+                    unlock: "$direct",
+                    lockHeartbeat: "$direct",
+                    lockStatus: "$direct",
+                    functionImport: "$direct"
+                },
                 timers: {
                     heartbeatMs: 240000,
                     lockStatusMs: 60000,
