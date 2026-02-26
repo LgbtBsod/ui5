@@ -14,12 +14,22 @@ sap.ui.define([], function () {
         var sOverwriteLabel = mOptions.overwriteLabel;
 
         if (shouldReloadChoice(sChoice, sReloadLabel)) {
-            return mOptions.onReload();
+            if (typeof mOptions.onReload !== "function") {
+                return Promise.resolve({ ok: false, reason: "missing_reload_handler" });
+            }
+            return Promise.resolve(mOptions.onReload()).then(function (vResult) {
+                return { ok: true, reason: "reloaded", result: vResult };
+            });
         }
         if (shouldOverwriteChoice(sChoice, sOverwriteLabel)) {
-            return mOptions.onOverwrite();
+            if (typeof mOptions.onOverwrite !== "function") {
+                return Promise.resolve({ ok: false, reason: "missing_overwrite_handler" });
+            }
+            return Promise.resolve(mOptions.onOverwrite()).then(function (vResult) {
+                return { ok: true, reason: "overwritten", result: vResult };
+            });
         }
-        return Promise.resolve(null);
+        return Promise.resolve({ ok: false, reason: "cancelled" });
     }
 
     return {

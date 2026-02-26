@@ -68,7 +68,10 @@
             <HBox class="detailWorkflowRail" renderType="Bare" wrap="Wrap">
                 <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}" state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"/>
                 <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{path:'state>/isDirty', formatter:'.formatDraftStateText'}" state="{path:'state>/isDirty', formatter:'.formatDraftStateState'}"/>
-                <ObjectStatus class="detailWorkflowChip sapUiTinyMarginBottom" text="{= ${state>/mode} === 'EDIT' ? ${i18n>lockOwnedByMe} : ${i18n>modeRead} }" state="{= ${state>/mode} === 'EDIT' ? 'Success' : 'Information' }"/>
+                <ObjectStatus
+                    class="detailWorkflowChip sapUiTinyMarginBottom"
+                    text="{parts:[{path:'state>/lockOperationText'},{path:'state>/mode'}], formatter:'.formatLockOperationText'}"
+                    state="{parts:[{path:'state>/lockOperationState'},{path:'state>/mode'}], formatter:'.formatLockOperationState'}"/>
             </HBox>
 
             <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">

@@ -13,6 +13,8 @@ sap.ui.define([
         mArgs.selectedModel.setData(oSaved);
         if (mArgs.stateModel && typeof mArgs.stateModel.setProperty === "function") {
             mArgs.stateModel.setProperty("/activeObjectId", sSavedId || null);
+            mArgs.stateModel.setProperty("/copySourceId", null);
+            mArgs.stateModel.setProperty("/objectAction", "");
         }
 
         DetailLifecycleUseCase.keepEditModeAfterSave(mArgs.stateModel);

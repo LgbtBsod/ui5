@@ -4,6 +4,23 @@ sap.ui.define([], function () {
     function runToggleEditFlow(mArgs) {
         var bEditMode = !!mArgs.editMode;
 
+        function runAcquireWithRecovery() {
+            return mArgs.acquireLock().then(function (oAcquireResult) {
+                if (!oAcquireResult) {
+                    return null;
+                }
+                mArgs.onLockAcquired();
+                return oAcquireResult;
+            }).catch(function (oError) {
+                return mArgs.tryRecoverFromAcquireError(oError).then(function (bRecovered) {
+                    if (bRecovered) {
+                        return null;
+                    }
+                    return mArgs.onAcquireFailed(oError);
+                });
+            });
+        }
+
         if (mArgs.shouldPromptBeforeDisableEdit(bEditMode, mArgs.isDirty)) {
             return mArgs.confirmUnsaved().then(function (sDecision) {
                 if (mArgs.isCancelDecision(sDecision)) {
@@ -25,20 +42,9 @@ sap.ui.define([], function () {
                     mArgs.onStayReadOnly();
                     return null;
                 }
-                return mArgs.acquireLock();
-            }).then(function (oAcquireResult) {
-                if (!oAcquireResult) {
-                    return null;
-                }
-                mArgs.onLockAcquired();
-                return oAcquireResult;
+                return runAcquireWithRecovery();
             }).catch(function (oError) {
-                return mArgs.tryRecoverFromAcquireError(oError).then(function (bRecovered) {
-                    if (bRecovered) {
-                        return null;
-                    }
-                    return mArgs.onAcquireFailed(oError);
-                });
+                return mArgs.onAcquireFailed(oError);
             });
         });
     }

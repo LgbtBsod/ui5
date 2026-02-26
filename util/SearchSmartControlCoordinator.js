@@ -17,18 +17,51 @@ sap.ui.define([
         oViewModel.setProperty("/smartControlError", sError || "");
     }
 
+
+    function resolveMetadataAvailability(mArgs) {
+        var bMetadataOk = mArgs && mArgs.metadataOk;
+        var sMetaError = String((mArgs && mArgs.metadataError) || "").trim();
+        var sUnavailableText = String((mArgs && mArgs.unavailableText) || "").trim();
+
+        if (bMetadataOk === false) {
+            return {
+                enabled: false,
+                reasonCode: sMetaError ? "metadata_error" : "metadata_unavailable",
+                reasonText: buildReason(sMetaError, sUnavailableText)
+            };
+        }
+
+        if (bMetadataOk === null || typeof bMetadataOk === "undefined") {
+            return {
+                enabled: true,
+                reasonCode: "metadata_pending",
+                reasonText: ""
+            };
+        }
+
+        return {
+            enabled: true,
+            reasonCode: "metadata_ready",
+            reasonText: ""
+        };
+    }
+
     function syncAvailability(mArgs) {
         var oStateModel = mArgs.stateModel;
         var oViewModel = mArgs.viewModel;
-        var bMetadataOk = oStateModel.getProperty("/mainServiceMetadataOk");
-        var sMetaError = oStateModel.getProperty("/mainServiceMetadataError") || "";
-        var sUnavailableText = mArgs.unavailableText || "";
         var fnBootstrap = mArgs.bootstrap;
 
-        if (bMetadataOk === false) {
-            var sReason = buildReason(sMetaError, sUnavailableText);
-            setEnabled(oViewModel, false, sReason);
-            oViewModel.setProperty("/smartControlsReason", sReason);
+        var oAvailability = resolveMetadataAvailability({
+            metadataOk: oStateModel.getProperty("/mainServiceMetadataOk"),
+            metadataError: oStateModel.getProperty("/mainServiceMetadataError") || "",
+            unavailableText: mArgs.unavailableText || ""
+        });
+
+        oViewModel.setProperty("/smartControlsReasonCode", oAvailability.reasonCode);
+
+        if (!oAvailability.enabled) {
+            setEnabled(oViewModel, false, oAvailability.reasonText);
+            oViewModel.setProperty("/smartControlsReason", oAvailability.reasonText);
             return;
         }
 
@@ -305,6 +338,8 @@ sap.ui.define([
     }
 
     return {
+        buildReason: buildReason,
+        resolveMetadataAvailability: resolveMetadataAvailability,
         isEnabled: isEnabled,
         setEnabled: setEnabled,
         syncAvailability: syncAvailability,

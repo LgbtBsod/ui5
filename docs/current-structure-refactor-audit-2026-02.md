@@ -1,5 +1,14 @@
 # Аудит текущей структуры и план продолжения рефакторинга (2026-02)
 
+> Обновление после закрытия Wave C: документ переведен в режим "current architecture + next modernization backlog".
+
+## 0) Executive summary (post-Wave C)
+
+1. **Wave C закрыта**: metadata-driven search consolidation, KPI instrumentation, regression/documentation freeze внедрены.
+2. **Архитектура стабилизирована по policy-слою**: большая часть UX/workflow решений вынесена в `service/usecase/*` и `util/* coordinator`.
+3. **Основной техдолг сместился**: от workflow-детерминизма к **масштабируемости контроллеров**, **операционной наблюдаемости v2** и **release governance**.
+4. **Следующая фаза (Wave D/E)**: controller slimming phase-2, KPI snapshot/export contract, real-backend release lanes и ADR governance.
+
 ## 1) Срез архитектуры на текущий момент
 
 ### UI слой
@@ -19,6 +28,24 @@
 ### Infra слой
 - `service/backend/*` — адаптер и реализации fake/real backend.
 - `Component.js` — wiring моделей, metadata-health, lock/heartbeat/autosave/monitoring.
+### Ключевые структурные изменения, зафиксированные после Wave C
+- `service/usecase/OperationalKpiInstrumentationUseCase.js` — единый policy слой для operational KPI counters + latency samples (save/retry/validation/conflict).
+- `util/SearchSmartControlCoordinator.js` — metadata availability reason-codes (`metadata_pending/metadata_ready/metadata_error/metadata_unavailable`) и deterministic smart-controls governance.
+- `scripts/wave-c-regression-gate.js` + `docs/documentation-freeze-wave-c.md` — формализованный regression/documentation freeze контур.
+- `docs/unified-development-plan.md` — канонический roadmap, Wave C отмечена как completed; активирован следующий modernization backlog (Wave D/E).
+
+## 1.1) Current architecture assessment (what is strong / what limits scale)
+
+### Strong now
+1. **Deterministic workflow contracts**: save/conflict/retry/export paths возвращают структурированные outcome-объекты.
+2. **Policy-first decomposition**: presentation/orchestration decisions вынесены из XML/controller в usecase-слой.
+3. **Operational baseline telemetry**: в state-model введен `operationalKpi` bag + latency sampling hooks.
+4. **Regression discipline**: smoke + CI smoke gate + Wave C regression gate синхронизированы.
+
+### Scale limitations now
+1. **Controller orchestration density**: `Search.controller.js` и `Detail.controller.js` по-прежнему содержат много связующего кода.
+2. **Telemetry depth**: KPI есть на runtime-уровне, но нет snapshot/export/historical contract.
+3. **Release governance gap**: real-backend lane и архитектурный ADR-process не формализованы как обязательный gate.
 
 ## 2) Выявленные проблемные зоны
 
@@ -107,7 +134,7 @@
    - `SearchAnalyticsDialogExportFlowUseCase` (analytics dialog orchestration + export run flow).
 2. `Detail.controller` и `Search.controller` обновлены на делегирование этих веток.
 3. Smoke coverage расширена тестами для новых Wave 14 модулей.
-4. Подготовлен migration guide `docs/usecase-coordinator-migration-guide.md` и CI quality-gate script `scripts/ci-smoke-gate.js` для smoke-json отчета.
+4. Подготовлен migration guide `docs/unified-development-plan.md` и CI quality-gate script `scripts/ci-smoke-gate.js` для smoke-json отчета.
 
 ### Wave 15 — завершено
 1. Продолжен вынос save/row/dialog command веток из `Detail.controller`:
@@ -144,7 +171,7 @@
 ### Wave 19 — завершено
 1. Продолжен вынос save/edit orchestration из `Detail.controller`: lock/edit toggle flow вынесен в `DetailLockEditFlowUseCase`.
 2. Добавлен browser-level smoke сценарий metadata recovery + smart-controls fallback rendering (`scripts/browser-smoke-metadata-recovery.py`).
-3. Подготовлен semantically named CSS decomposition plan для `css/style.css` с сохранением единой точки подключения (`docs/style-css-decomposition-plan-wave19.md`).
+3. Подготовлен semantically named CSS decomposition plan для `css/style.css` с сохранением единой точки подключения (`docs/unified-development-plan.md`).
 4. Smoke-gate усилен дополнительными негативными smoke-сценариями для workflow analytics/export/error handling в `scripts/unit-smoke.js`.
 
 ### Wave 20 — завершено
@@ -431,3 +458,28 @@
 4. Тестовый контур wave:
    - browser smoke для Go/search/filter combinations;
    - unit smoke для mapping/usecase контрактов.
+
+## 7) Post-Wave C modernization backlog (active)
+
+### Wave D — Maintainability and operationalization
+1. **Controller slimming phase-2**
+   - Декомпозировать оставшиеся orchestration ветки из Search/Detail в usecase/coordinator.
+   - Уменьшить controller surface до adapter-only функций и lifecycle wiring.
+2. **Operational KPI phase-2**
+   - Добавить KPI snapshot/export usecase (JSON/csv-ready payload contract).
+   - Определить diagnostics-panel contract (без UI-breaking изменений).
+3. **Capability diagnostics hardening**
+   - Ввести explicit startup capability matrix для fake/real mode.
+   - Зафиксировать deterministic degraded-mode copy/presentation contract.
+
+### Wave E — Release governance and enterprise rollout
+1. **Real-backend lane**: nightly non-blocking -> pre-release blocking integration gate.
+2. **ADR governance**: ввести architecture decision records на каждую крупную волну.
+3. **Documentation freeze v2**: versioned freeze checklist + rollback playbook для Search/Detail критических flows.
+
+### KPI for modernization success
+- Search/Detail controller LOC trend снижается wave-by-wave.
+- KPI snapshot pipeline deterministic и покрыт smoke/unit.
+- Real-backend gate стабилен и не деградирует fallback behavior.
+- Документация и roadmap синхронизированы в едином каноническом наборе артефактов.
+

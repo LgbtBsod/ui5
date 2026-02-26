@@ -32,11 +32,12 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchFilterHintPresentationUseCase",
     "sap_ui5/service/usecase/SearchInlineAnalyticsPresentationUseCase",
     "sap_ui5/service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase",
+    "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase",
     "sap_ui5/util/ExcelExport",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
     "sap_ui5/util/SearchSmartControlCoordinator"
-], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchToolbarActionStateUseCase, SearchNavigationIntentUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchSelectionHydrationUseCase, SearchOpenDetailGuardUseCase, SearchCreateCopyNavigationGuardUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
+], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchToolbarActionStateUseCase, SearchNavigationIntentUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchSelectionHydrationUseCase, SearchOpenDetailGuardUseCase, SearchCreateCopyNavigationGuardUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, OperationalKpiInstrumentationUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -64,6 +65,7 @@ sap.ui.define([
                 smartTableReady: true,
                 useSmartControls: true,
                 smartControlsReason: "",
+                smartControlsReasonCode: "",
                 smartControlError: "",
                 analytics: {
                     total: 0,
@@ -185,8 +187,9 @@ sap.ui.define([
                 viewModel: this._getViewModel(),
                 loadChecklistById: SearchApplicationService.getChecklistById
             }).then(function (oResult) {
+                this._syncSearchSelectionState();
                 return (oResult && oResult.checklist) || null;
-            });
+            }.bind(this));
         },
 
         _openDetailById: function (sId) {
@@ -618,6 +621,23 @@ sap.ui.define([
             });
         },
 
+        _presentExportIntentResult: function (oResult) {
+            var oPresentation = SearchActionMessagePresentationUseCase.presentExportIntentResult({
+                result: oResult,
+                bundle: this.getResourceBundle(),
+                showToast: MessageToast.show
+            });
+            if (oPresentation && (
+                oPresentation.reason === "unknown_result_reason"
+                || oPresentation.reason === "presentation_failed_disabled"
+                || oPresentation.reason === "presentation_failed_error"
+            )) {
+                OperationalKpiInstrumentationUseCase.markRetryFailure(this.getModel("state"));
+                this._setLoadError("Unexpected export state");
+            }
+            return oResult;
+        },
+
         onExportMenuDefault: function () {
             return SearchExportIntentGuardUseCase.runExportIntent({
                 defaultEntity: "screen",
@@ -626,7 +646,7 @@ sap.ui.define([
                     return !!this._getViewModel().getProperty("/canExport");
                 }.bind(this),
                 runExport: this._runExport.bind(this)
-            });
+            }).then(this._presentExportIntentResult.bind(this));
         },
 
         onExportMenuAction: function (oEvent) {
@@ -639,7 +659,7 @@ sap.ui.define([
                     return !!this._getViewModel().getProperty("/canExport");
                 }.bind(this),
                 runExport: this._runExport.bind(this)
-            });
+            }).then(this._presentExportIntentResult.bind(this));
         },
 
         onExportReport: function (oEvent) {
@@ -651,12 +671,13 @@ sap.ui.define([
                     return !!this._getViewModel().getProperty("/canExport");
                 }.bind(this),
                 runExport: this._runExport.bind(this)
-            });
+            }).then(this._presentExportIntentResult.bind(this));
         },
 
         onRetryLoad: function () {
             var oStateModel = this.getModel("state");
             var oBundle = this.getResourceBundle();
+            var iRetryLatencyStartedAt = OperationalKpiInstrumentationUseCase.beginLatencySample();
 
             return SearchRetryLoadPresentationUseCase.runRetryFlow({
                 stateModel: oStateModel,
@@ -673,16 +694,20 @@ sap.ui.define([
                 treatEmptyAsError: false,
                 maxAttempts: 2
             }).then(function (oResult) {
-                SearchRetryMessagePresentationUseCase.presentRetryOutcome({
+                var oRetryPresentation = SearchRetryMessagePresentationUseCase.presentRetryOutcome({
                     result: oResult,
                     bundle: oBundle,
                     stateModel: oStateModel,
                     showToast: MessageToast.show,
                     unknownFallbackKey: "loadErrorMessage"
                 });
+                if (!oResult || oResult.ok !== true || (oRetryPresentation && oRetryPresentation.ok === false)) {
+                    OperationalKpiInstrumentationUseCase.markRetryFailure(oStateModel);
+                }
+                OperationalKpiInstrumentationUseCase.finishLatencySample(oStateModel, "retry", iRetryLatencyStartedAt);
                 this._applyEmptyStatePresentation();
                 return oResult;
-            });
+            }.bind(this));
         },
 
         onResetFilters: function () {

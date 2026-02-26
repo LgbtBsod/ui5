@@ -60,6 +60,31 @@ sap.ui.define([], function () {
         }
     }
 
+
+    function lockOperationText(sOperationText, sMode, oBundle) {
+        if (sOperationText) {
+            return sOperationText;
+        }
+        if (String(sMode || "").toUpperCase() === "EDIT") {
+            return oBundle ? oBundle.getText("modeEdit") : "EDIT";
+        }
+        return oBundle ? oBundle.getText("modeRead") : "READ";
+    }
+
+    function lockOperationState(sOperationState, sMode) {
+        var sState = String(sOperationState || "").toUpperCase();
+        if (sState === "SUCCESS") {
+            return "Success";
+        }
+        if (sState === "ERROR") {
+            return "Error";
+        }
+        if (String(sMode || "").toUpperCase() === "EDIT") {
+            return "Success";
+        }
+        return "Information";
+    }
+
     function passedTotal(aRows) {
         var aSafeRows = aRows || [];
         var iTotal = aSafeRows.length;
@@ -79,6 +104,8 @@ sap.ui.define([], function () {
         draftStateText: draftStateText,
         draftStateState: draftStateState,
         lifecycleStatusState: lifecycleStatusState,
+        lockOperationText: lockOperationText,
+        lockOperationState: lockOperationState,
         passedTotal: passedTotal
     };
 });

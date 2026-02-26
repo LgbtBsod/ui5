@@ -34,6 +34,7 @@ sap.ui.define([
                 hasConflict: false,
                 sessionId: null,
                 activeObjectId: null,
+                copySourceId: null,
                 lockExpires: null,
                 cacheValidationAt: "",
                 idleExpires: null,
@@ -53,7 +54,21 @@ sap.ui.define([
                 mainServiceMetadataOk: null,
                 mainServiceMetadataError: "",
                 masterDataLoading: false,
-                locationsLoading: false
+                locationsLoading: false,
+                operationalKpi: {
+                    saveAttempts: 0,
+                    saveSuccess: 0,
+                    saveFailed: 0,
+                    saveLatencyMsLast: 0,
+                    saveLatencyMsAvg: 0,
+                    saveLatencySamples: 0,
+                    conflictCount: 0,
+                    validationFailures: 0,
+                    retryFailures: 0,
+                    retryLatencyMsLast: 0,
+                    retryLatencyMsAvg: 0,
+                    retryLatencySamples: 0
+                }
             });
         },
 
