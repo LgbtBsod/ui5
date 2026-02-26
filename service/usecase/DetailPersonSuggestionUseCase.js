@@ -44,9 +44,7 @@ sap.ui.define([], function () {
 
     function shouldFetchRemoteSuggestions(mArgs) {
         var sQuery = String((mArgs && mArgs.query) || "").trim();
-        var iLocalCount = Number(mArgs && mArgs.localCount) || 0;
-        var iThreshold = typeof (mArgs && mArgs.minLocalBeforeRemote) === "number" ? mArgs.minLocalBeforeRemote : 3;
-        return !!sQuery && iLocalCount < iThreshold;
+        return !!sQuery;
     }
 
     function applySuggestionsToViewModel(mArgs) {

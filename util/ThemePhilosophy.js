@@ -7,6 +7,12 @@ sap.ui.define([], function () {
     },
     sap_fiori_3_dark: {
       lifestyleClass: "themeLifestyleNightOps"
+    },
+    sap_horizon: {
+      lifestyleClass: "themeLifestyleClarity"
+    },
+    sap_horizon_dark: {
+      lifestyleClass: "themeLifestyleNightOps"
     }
   };
 

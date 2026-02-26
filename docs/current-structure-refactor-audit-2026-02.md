@@ -347,11 +347,29 @@
 3. Проведен CSS cleanup pass для no-data/empty-state visual hierarchy consistency (`sapMListNoData`, `sapMListTblEmptyRow`).
 4. Расширен smoke coverage для negative веток empty-state presentation orchestration (missing view model, missing data model, unknown empty-state kind).
 
-### Wave 52 — следующий этап
-1. Продолжить декомпозицию `Search.controller`: вынести presentation policy для SmartFilter/quick-filters active-state hint messaging в отдельный usecase.
-2. Добавить browser-smoke сценарий search filter-hint messaging flow (smart filters active, fallback filters active, cleared state).
-3. Провести CSS cleanup pass для filter-hint/info strip readability и spacing consistency.
-4. Расширить smoke coverage для negative веток filter-hint presentation orchestration (missing state model, unsupported filter payload shape, missing bundle key).
+### Wave 52 — завершено
+1. Продолжена декомпозиция `Search.controller`: вынесен `SearchFilterHintPresentationUseCase` для SmartFilter/quick-filters active-state hint messaging policy.
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-filter-hint-messaging-flow.py` для filter-hint flow (smart filters active, fallback filters active, cleared state).
+3. Проведен CSS cleanup pass для filter-hint/info strip readability и spacing consistency (`searchFilterHintBanner`, dense filter spacing).
+4. Расширен smoke coverage для negative веток filter-hint presentation orchestration (missing state model, unsupported filter payload shape, missing bundle key) в `scripts/unit-smoke.js`.
+
+### Wave 53 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchInlineAnalyticsPresentationUseCase` для inline analytics rail mapping (source/refreshed-at/number normalization).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-inline-analytics-rail-flow.py` для inline analytics rail lifecycle с assertions по source switch backend/fallback.
+3. Проведен CSS cleanup pass для analytics rail hover/press micro-interactions и dark-mode typography contrast consistency.
+4. Расширен smoke coverage для negative веток backend analytics adapter (entity payload variants, missing counters, malformed date/source) в `scripts/unit-smoke.js`.
+
+### Wave 54 — завершено
+1. Продолжена декомпозиция `Search.controller`: вынесен orchestration lifecycle inline analytics refresh в `SearchInlineAnalyticsRefreshOrchestrationUseCase` (trigger policy + stale-request guard).
+2. Добавлен browser-smoke сценарий `scripts/browser-smoke-search-inline-analytics-orchestration-flow.py` для trigger matrix и idempotent refresh behavior.
+3. Проведен CSS cleanup pass для filter+analytics stacked layout under 1200px (compact spacing + priority order stability).
+4. Расширен smoke coverage для negative веток analytics refresh orchestration (missing view model, rejected load promise, stale payload race) в `scripts/unit-smoke.js`.
+
+### Wave 55 — следующий этап
+1. Продолжить декомпозицию `Search.controller`: выделить usecase для lifecycle синхронизации analytics + filter-hint после rebind/dataReceived, чтобы исключить scattered trigger calls.
+2. Добавить browser-smoke сценарий для синхронизации analytics/hint после SmartTable dataReceived и fallback search.
+3. Провести CSS cleanup pass для unified status-strip hierarchy (filter hint + smart-controls degraded + load-error).
+4. Расширить smoke coverage для negative веток lifecycle sync usecase (missing table adapter, empty data payload, delayed dataReceived callback).
 
 ## 5) Целевые метрики рефакторинга
 - Сократить размер `Search.controller.js` до ~450-500 LOC.

@@ -2501,6 +2501,208 @@ function testSearchSmartCoordinatorMetadataRecoveryIntegration() {
   assert(vm.m['/useSmartControls'] === true && bootstrapCalls === 1, 'syncAvailability should re-enable and bootstrap on recovery');
 }
 
+
+
+
+function testSearchInlineAnalyticsRefreshOrchestrationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase.js');
+  const state = mod.ensureRefreshState({});
+  const viewModel = { setProperty: () => {}, getProperty: () => ({ total: 0 }) };
+
+  let appliedCount = 0;
+  return Promise.all([
+    mod.runRefreshLifecycle({
+      refreshState: state,
+      viewModel,
+      loadAnalytics: () => new Promise((resolve) => setTimeout(() => resolve({ total: 1 }), 25)),
+      applyPresentation: () => { appliedCount += 1; }
+    }),
+    mod.runRefreshLifecycle({
+      refreshState: state,
+      viewModel,
+      loadAnalytics: () => new Promise((resolve) => setTimeout(() => resolve({ total: 2 }), 5)),
+      applyPresentation: () => { appliedCount += 1; }
+    })
+  ]).then((pair) => {
+    assert(pair.some((r) => r.stale === true), 'runRefreshLifecycle should mark stale earlier request');
+    assert(appliedCount === 1, 'runRefreshLifecycle should apply only latest request presentation');
+
+    return mod.runRefreshLifecycle({
+      refreshState: state,
+      viewModel,
+      loadAnalytics: () => Promise.reject(new Error('boom')),
+      applyPresentation: () => { appliedCount += 100; }
+    });
+  }).then((failed) => {
+    assert(failed.applied === false && failed.error === 'boom', 'runRefreshLifecycle should map rejected load promise');
+
+    return mod.runRefreshLifecycle({
+      refreshState: state,
+      viewModel: null,
+      loadAnalytics: () => Promise.resolve({ total: 1 }),
+      applyPresentation: () => {}
+    });
+  }).then((missingAdapter) => {
+    assert(missingAdapter.reason === 'missing_adapter', 'runRefreshLifecycle should handle missing view model');
+
+    assert(mod.shouldRefreshForTrigger('ROUTE_MATCHED') === true,
+      'shouldRefreshForTrigger should allow ROUTE_MATCHED trigger');
+    assert(mod.shouldRefreshForTrigger('UNKNOWN') === false,
+      'shouldRefreshForTrigger should reject unknown trigger');
+  });
+}
+
+function testSearchInlineAnalyticsPresentationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchInlineAnalyticsPresentationUseCase.js');
+  const viewState = {};
+  const viewModel = {
+    setProperty: (k, v) => { viewState[k] = v; },
+    getProperty: (k) => viewState[k]
+  };
+  const bundle = {
+    getText: (k) => ({
+      analyticsSourceBackend: 'Backend aggregate',
+      analyticsSourceFallback: 'Client fallback'
+    }[k] || k)
+  };
+
+  const mapped = mod.applyInlineAnalyticsPresentation({
+    viewModel,
+    bundle,
+    analytics: {
+      total: '8',
+      failedChecks: 2,
+      failedBarriers: 1,
+      healthy: 5,
+      avgChecksRate: '88',
+      avgBarriersRate: 95,
+      refreshedAt: '',
+      source: 'backend'
+    }
+  });
+
+  assert(mapped.total === 8 && mapped.avgChecksRate === 88, 'applyInlineAnalyticsPresentation should normalize numbers');
+  assert(mapped.refreshedAt === '-', 'applyInlineAnalyticsPresentation should normalize refreshedAt fallback');
+  assert(mapped.sourceText === 'Backend aggregate', 'applyInlineAnalyticsPresentation should map backend source text');
+
+  const nullModel = mod.applyInlineAnalyticsPresentation({ viewModel: null, analytics: {} });
+  assert(nullModel === null, 'applyInlineAnalyticsPresentation should return null when viewModel missing');
+}
+
+function testWorkflowAnalyticsUseCaseBackendEntityPayloadVariants() {
+  const BackendAdapter = {
+    getProcessAnalytics: () => Promise.resolve({
+      value: [{
+        TOTAL: 9,
+        FAILED_CHECKS: 2,
+        FAILED_BARRIERS: 1,
+        HEALTHY: 7,
+        CLOSED_COUNT: 3,
+        REGISTERED_COUNT: 4,
+        AVG_CHECKS_RATE: 91,
+        AVG_BARRIERS_RATE: 89,
+        REFRESHED_AT: '2026-02-26T10:00:00Z'
+      }]
+    })
+  };
+  const SmartSearchAdapter = { filterData: () => [] };
+  const mod = loadSapModule('service/usecase/WorkflowAnalyticsUseCase.js', {
+    'sap_ui5/service/backend/BackendAdapter': BackendAdapter,
+    'sap_ui5/service/SmartSearchAdapter': SmartSearchAdapter
+  });
+
+  return mod.loadProcessAnalytics({}, 'EXACT', []).then((a) => {
+    assert(a.source === 'backend' && a.total === 9 && a.failedChecks === 2,
+      'WorkflowAnalyticsUseCase should map entity payload/uppercase fields');
+    assert(a.refreshedAt === '2026-02-26T10:00:00Z',
+      'WorkflowAnalyticsUseCase should map refreshedAt from REFRESHED_AT');
+  });
+}
+
+function testWorkflowAnalyticsUseCaseBackendMalformedPayloadFallback() {
+  const BackendAdapter = {
+    getProcessAnalytics: () => Promise.resolve({ total: 'oops', failedChecks: null, source: 'backend' })
+  };
+  const SmartSearchAdapter = { filterData: () => [] };
+  const mod = loadSapModule('service/usecase/WorkflowAnalyticsUseCase.js', {
+    'sap_ui5/service/backend/BackendAdapter': BackendAdapter,
+    'sap_ui5/service/SmartSearchAdapter': SmartSearchAdapter
+  });
+
+  return mod.loadProcessAnalytics({}, 'EXACT', []).then((a) => {
+    assert(a.source === 'backend', 'WorkflowAnalyticsUseCase should keep backend source when payload exists');
+    assert(a.total === 0 && a.failedChecks === 0 && a.failedBarriers === 0,
+      'WorkflowAnalyticsUseCase should safe-normalize malformed backend counters');
+    assert(typeof a.refreshedAt === 'string' && a.refreshedAt.length > 0,
+      'WorkflowAnalyticsUseCase should provide fallback refreshedAt for malformed payload');
+  });
+}
+
+function testSearchFilterHintPresentationUseCase() {
+  const mod = loadSapModule('service/usecase/SearchFilterHintPresentationUseCase.js');
+  const viewData = {};
+  const viewModel = { setProperty: (k, v) => { viewData[k] = v; } };
+  const stateModel = { getProperty: () => null };
+  const bundle = {
+    getText: (k) => {
+      const m = {
+        filterHintSmartActive: 'smart-active',
+        filterHintFallbackActive: 'fallback-active',
+        filterHintCleared: 'cleared'
+      };
+      if (!m[k]) {
+        throw new Error('missing-key');
+      }
+      return m[k];
+    }
+  };
+
+  const smart = mod.applyHintPresentation({
+    viewModel,
+    stateModel,
+    useSmartControls: true,
+    hasSmartFilters: true,
+    fallbackPayload: { filterId: '', filterLpc: '', filterFailedChecks: 'ALL', filterFailedBarriers: 'ALL' },
+    bundle
+  });
+  assert(smart.visible === true && smart.text === 'smart-active' && smart.hasActiveFilters === true,
+    'applyHintPresentation should map smart-active branch');
+
+  const fallback = mod.applyHintPresentation({
+    viewModel,
+    stateModel,
+    useSmartControls: false,
+    hasSmartFilters: false,
+    fallbackPayload: { filterId: 'X-1', filterLpc: '', filterFailedChecks: 'ALL', filterFailedBarriers: 'ALL' },
+    bundle
+  });
+  assert(fallback.visible === true && fallback.type === 'Warning' && fallback.text === 'fallback-active',
+    'applyHintPresentation should map fallback-active branch');
+
+  const missingModel = mod.applyHintPresentation({
+    viewModel: null,
+    stateModel,
+    useSmartControls: true,
+    hasSmartFilters: false,
+    fallbackPayload: {},
+    bundle
+  });
+  assert(missingModel === null, 'applyHintPresentation should return null when viewModel missing');
+
+  const noBundleText = mod.resolveHintText({ bundle: null, textKey: 'filterHintSmartActive' });
+  assert(noBundleText === '', 'resolveHintText should return empty string without bundle');
+
+  const missingBundleKey = mod.resolveHintText({
+    bundle: { getText: () => { throw new Error('no-key'); } },
+    textKey: 'unknown_key'
+  });
+  assert(missingBundleKey === '', 'resolveHintText should return empty string for missing bundle key');
+
+  const malformedState = mod.resolveHintState({ stateModel: null, useSmartControls: true, hasSmartFilters: true, fallbackPayload: {} });
+  assert(malformedState.hasActiveFilters === false && malformedState.visible === false,
+    'resolveHintState should safely handle missing state model');
+}
+
 async function main() {
   await runTest('DetailLifecycleUseCase', testDetailLifecycleUseCase);
   await runTest('SearchSmartControlCoordinator', testSearchSmartControlCoordinator);
@@ -2558,6 +2760,8 @@ async function main() {
   await runTest('SearchExportOrchestrationUseCase', testSearchExportOrchestrationUseCase);
   await runTest('WorkflowAnalyticsUseCaseFallback', testWorkflowAnalyticsUseCaseFallback);
   await runTest('WorkflowAnalyticsUseCaseFallbackNegative', testWorkflowAnalyticsUseCaseFallbackNegative);
+  await runTest('WorkflowAnalyticsUseCaseBackendEntityPayloadVariants', testWorkflowAnalyticsUseCaseBackendEntityPayloadVariants);
+  await runTest('WorkflowAnalyticsUseCaseBackendMalformedPayloadFallback', testWorkflowAnalyticsUseCaseBackendMalformedPayloadFallback);
   await runTest('DetailEditOrchestrationRecoverBranch', testDetailEditOrchestrationRecoverBranch);
   await runTest('DetailEditOrchestrationRetryExhaustion', testDetailEditOrchestrationRetryExhaustion);
   await runTest('DetailSaveOrchestrationUseCase', testDetailSaveOrchestrationUseCase);
@@ -2570,6 +2774,9 @@ async function main() {
   await runTest('SearchLoadFilterUseCase', testSearchLoadFilterUseCase);
   await runTest('SearchLoadFilterUseCaseNegative', testSearchLoadFilterUseCaseNegative);
   await runTest('SearchSmartCoordinatorMetadataRecoveryIntegration', testSearchSmartCoordinatorMetadataRecoveryIntegration);
+  await runTest('SearchFilterHintPresentationUseCase', testSearchFilterHintPresentationUseCase);
+  await runTest('SearchInlineAnalyticsPresentationUseCase', testSearchInlineAnalyticsPresentationUseCase);
+  await runTest('SearchInlineAnalyticsRefreshOrchestrationUseCase', testSearchInlineAnalyticsRefreshOrchestrationUseCase);
 
   if (process.argv.includes('--json')) {
     console.log(JSON.stringify({ status: 'ok', results }, null, 2));
