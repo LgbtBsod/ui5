@@ -1,10 +1,10 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <Dialog id="workflowAnalyticsDialog" class="glassDialog" title="{i18n>workflowAnalyticsTitle}" contentWidth="48rem" contentHeight="30rem" draggable="true" resizable="true" busy="{view>/analyticsBusy}">
+    <Dialog id="workflowAnalyticsDialog" class="glassDialog searchAnalyticsDialog" title="{i18n>workflowAnalyticsTitle}" contentWidth="48rem" contentHeight="30rem" draggable="true" resizable="true" busy="{view>/analyticsBusy}">
         <content>
-            <VBox class="sapUiMediumMargin" renderType="Bare">
-                <MessageStrip text="{i18n>workflowAnalyticsBackendNote}" type="Information" showIcon="true" class="sapUiTinyMarginBottom"/>
-                <MessageStrip text="{view>/analyticsError}" type="Warning" showIcon="true" class="sapUiTinyMarginBottom" visible="{= !!${view>/analyticsError} }"/>
-                <HBox class="kpiGrid" renderType="Bare" wrap="Wrap">
+            <VBox class="sapUiMediumMargin searchAnalyticsDialogBody" renderType="Bare">
+                <MessageStrip text="{i18n>workflowAnalyticsBackendNote}" type="Information" showIcon="true" class="sapUiTinyMarginBottom searchAnalyticsDialogInfo"/>
+                <MessageStrip text="{view>/analyticsError}" type="Warning" showIcon="true" class="sapUiTinyMarginBottom searchAnalyticsDialogError" visible="{= !!${view>/analyticsError} }"/>
+                <HBox class="kpiGrid searchAnalyticsDialogGrid" renderType="Bare" wrap="Wrap">
                     <VBox class="kpiCard">
                         <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
                         <Title text="{view>/analytics/total}" level="H3"/>
@@ -18,7 +18,7 @@
                         <Title text="{view>/analytics/failedBarriers}" level="H3"/>
                     </VBox>
                 </HBox>
-                <HBox class="kpiGrid sapUiSmallMarginTop" renderType="Bare" wrap="Wrap">
+                <HBox class="kpiGrid sapUiSmallMarginTop searchAnalyticsDialogGrid" renderType="Bare" wrap="Wrap">
                     <VBox class="kpiCard">
                         <Text text="{i18n>analyticsClosedCount}" class="kpiLabel"/>
                         <Title text="{view>/analytics/closedCount}" level="H4"/>
@@ -32,7 +32,7 @@
                         <Title text="{= ${view>/analytics/source} === 'backend' ? ${i18n>analyticsSourceBackend} : ${i18n>analyticsSourceFallback} }" level="H5"/>
                     </VBox>
                 </HBox>
-                <VBox class="analyticsBarsWrap sapUiSmallMarginTop">
+                <VBox class="analyticsBarsWrap sapUiSmallMarginTop searchAnalyticsDialogBars">
                     <Text text="{i18n>workflowAnalyticsBars}" class="kpiLabel sapUiTinyMarginBottom"/>
                     <ProgressIndicator percentValue="{view>/analytics/avgChecksRate}" displayValue="{= ${i18n>analyticsAvgChecksRate} + ': ' + ${view>/analytics/avgChecksRate} + '%' }" state="Success" class="sapUiTinyMarginBottom"/>
                     <ProgressIndicator percentValue="{view>/analytics/avgBarriersRate}" displayValue="{= ${i18n>analyticsAvgBarriersRate} + ': ' + ${view>/analytics/avgBarriersRate} + '%' }" state="Warning" class="sapUiTinyMarginBottom"/>

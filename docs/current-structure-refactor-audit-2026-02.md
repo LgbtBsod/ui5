@@ -392,11 +392,66 @@
 3. Проведен CSS cleanup pass для filter+analytics stacked layout under 1200px (compact spacing + priority order stability).
 4. Расширен smoke coverage для negative веток analytics refresh orchestration (missing view model, rejected load promise, stale payload race) в `scripts/unit-smoke.js`.
 
-### Wave 55 — следующий этап
-1. Продолжить декомпозицию `Search.controller`: выделить usecase для lifecycle синхронизации analytics + filter-hint после rebind/dataReceived, чтобы исключить scattered trigger calls.
-2. Добавить browser-smoke сценарий для синхронизации analytics/hint после SmartTable dataReceived и fallback search.
-3. Провести CSS cleanup pass для unified status-strip hierarchy (filter hint + smart-controls degraded + load-error).
-4. Расширить smoke coverage для negative веток lifecycle sync usecase (missing table adapter, empty data payload, delayed dataReceived callback).
+### Wave 55 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchLifecycleSyncUseCase` для lifecycle синхронизации analytics + filter-hint после SmartTable `dataReceived` и fallback search, чтобы убрать scattered trigger calls.
+2. Проведен CSS cleanup pass для unified status-strip hierarchy (filter hint + smart-controls degraded + load-error) через общий stack-контракт.
+3. Расширен smoke coverage для lifecycle sync usecase (success + missing adapter branches) в `scripts/unit-smoke.js`.
+
+### Wave 56 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchToolbarLifecycleUseCase` для unified action-toolbar lifecycle envelope (create/copy/delete/export intent) с уменьшением controller glue.
+2. Проведен CSS cleanup pass для action-toolbar hierarchy (button group spacing + status chips alignment + responsive wrap under 1200px).
+3. Расширен smoke coverage для toolbar lifecycle usecase (success + missing adapter branches) в `scripts/unit-smoke.js`.
+
+### Wave 57 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchWorkflowAnalyticsLifecycleUseCase` для workflow analytics dialog lifecycle (open/load/close + degraded handling) с дальнейшим снижением controller orchestration density.
+2. Проведен CSS cleanup pass для analytics dialog hierarchy (header/actions/body spacing + dark/light contrast tokens).
+3. Расширен smoke coverage для analytics dialog lifecycle usecase (success + missing adapter + load rejection branches) в `scripts/unit-smoke.js`.
+
+### Wave 58 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchStatusFilterLifecycleUseCase` для unified status-filter press lifecycle (event/source data extraction -> state apply/rebind -> post-apply sync).
+2. Проведен CSS cleanup pass для status-chip/action emphasis consistency (readability + hover emphasis + dark-mode border contrast).
+3. Расширен smoke coverage для status-filter lifecycle usecase (success + missing event source/filter path/apply adapter branches) в `scripts/unit-smoke.js`.
+
+### Wave 59 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchTriggerPolicyUseCase` для unified trigger policy (SmartFilter change/search-mode/status-filter/reset) с single trigger-map для analytics refresh + filter-hint sync.
+2. Проведен CSS cleanup pass для SmartFilter + chips interaction consistency under compact breakpoints.
+3. Расширен smoke coverage для trigger policy usecase (unsupported trigger, missing refresh adapter, missing state model + success branch) в `scripts/unit-smoke.js`.
+
+### Wave 60 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchRouteLifecycleUseCase` для route-matched lifecycle bundle (state defaults + selection sync + summary + empty-state + analytics refresh contract).
+2. Проведен CSS cleanup pass для route-entry visual stability (initial card spacing + status strip transition + smart/fallback table first-frame consistency).
+3. Расширен smoke coverage для route lifecycle usecase (success + missing state model + missing selection adapter branches) в `scripts/unit-smoke.js`.
+
+### Wave 61 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchRebindLifecycleUseCase` для SmartTable rebind parameter lifecycle (state snapshot + dataReceived analytics contract + filter state preservation).
+2. Проведен CSS cleanup pass для SmartTable header/actions consistency (table toolbar wrap + no-data transition + compact header readability).
+3. Расширен smoke coverage для rebind lifecycle usecase (success + missing binding params + malformed dataReceived payload + missing adapter branches) в `scripts/unit-smoke.js`.
+
+### Wave 62 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchResultConvergenceLifecycleUseCase` для summary+empty-state convergence lifecycle (single bundle after search/retry/rebind).
+2. Проведен CSS cleanup pass для summary/no-data transition consistency.
+3. Расширен smoke coverage для convergence lifecycle usecase (success + missing data model + missing presenter + malformed rows branches) в `scripts/unit-smoke.js`.
+
+### Wave 63 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchSelectionLifecycleUseCase` для smart/fallback selection lifecycle (selection change/item press + hydration + open-detail convergence).
+2. Проведен CSS cleanup pass для selection affordance consistency (selected row emphasis + keyboard focus visibility + compact width).
+3. Расширен smoke coverage для selection lifecycle usecase (success + missing event adapter + missing hydration/open adapters branches) в `scripts/unit-smoke.js`.
+
+### Wave 64 — завершено
+1. Продолжена декомпозиция `Search.controller`: выделен `SearchExportLifecycleUseCase` для export lifecycle convergence (`_runExport` + intent presentation fallback path).
+2. Проведен CSS cleanup pass для export action emphasis consistency.
+3. Расширен smoke coverage для export lifecycle usecase (missing export adapter + export failed + presentation fallback + missing presenter branches) в `scripts/unit-smoke.js`.
+
+### Wave 65 — следующий этап
+1. Продолжить декомпозицию `Search.controller`: выделить usecase для SmartFilter bootstrap/change debounce lifecycle (debounced search intent + hint/analytics trigger alignment).
+2. Добавить browser-smoke сценарий для SmartFilter debounce lifecycle.
+3. Провести CSS cleanup pass для SmartFilter input/action debounce feedback consistency.
+4. Расширить smoke coverage для negative веток debounce lifecycle usecase (missing timer adapter, invalid debounce window, missing callback).
+
+### Правило execution wave (code+styles)
+- Начиная с Wave 55, каждый этап Search/Detail включает обязательную пару улучшений: 
+  1) code/orchestration extraction в usecase/coordinator,
+  2) CSS/style consistency pass для того же функционального блока (без visual contract break).
 
 ## 5) Целевые метрики рефакторинга
 - Сократить размер `Search.controller.js` до ~450-500 LOC.
