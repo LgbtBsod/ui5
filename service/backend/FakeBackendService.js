@@ -4,6 +4,55 @@ sap.ui.define([
 ], function (InMemoryDB, FakeODataService) {
     "use strict";
 
+    function _parseIfMatchVersion(vIfMatch) {
+        if (vIfMatch == null || vIfMatch === "") {
+            return null;
+        }
+
+        var sRaw = String(vIfMatch).trim();
+        if (sRaw === "*") {
+            return "*";
+        }
+
+        var oWeak = /^W\/"(\d+)"$/.exec(sRaw);
+        if (oWeak) {
+            return Number(oWeak[1]);
+        }
+
+        var oStrong = /^"(\d+)"$/.exec(sRaw);
+        if (oStrong) {
+            return Number(oStrong[1]);
+        }
+
+        var iPlain = Number(sRaw);
+        if (Number.isFinite(iPlain)) {
+            return iPlain;
+        }
+
+        return null;
+    }
+
+    function _buildODataError(sCode, sMessage, iStatusCode) {
+        var sErrCode = sCode || "FAKE_BACKEND_ERROR";
+        var sErrMessage = sMessage || "Fake backend error";
+        var iStatus = Number(iStatusCode || 500);
+        var oError = new Error(sErrMessage);
+        oError.code = sErrCode;
+        oError.statusCode = iStatus;
+        oError.odata = {
+            error: {
+                code: sErrCode,
+                message: { lang: "en", value: sErrMessage },
+                innererror: {
+                    transactionid: "FAKE-" + Date.now(),
+                    timestamp: new Date().toISOString(),
+                    errordetails: [{ code: sErrCode, message: sErrMessage, severity: "error" }]
+                }
+            }
+        };
+        return oError;
+    }
+
     function _loadInitialChecklists() {
         return fetch("mock/checklists.json")
             .then(function (oResponse) {
@@ -51,7 +100,16 @@ sap.ui.define([
                     minUiContractVersion: "1.0.0",
                     maxUiContractVersion: "1.x"
                 },
-                source: "fake_backend"
+                source: "fake_backend",
+                protocolProfile: {
+                    odataVersion: "2.0",
+                    gatewayCompatibilityScore: 0.99,
+                    notes: [
+                        "v2 envelope for entity set responses",
+                        "$top/$skip/$filter/$orderby/$select emulation",
+                        "function import wrapper with d payload"
+                    ]
+                }
             });
         },
 
@@ -61,7 +119,7 @@ sap.ui.define([
 
         queryCheckLists: function (mQuery) {
             return FakeODataService.readEntitySet("CheckLists", mQuery).then(function (oResult) {
-                return oResult.results || [];
+                return oResult.results || (oResult.d && oResult.d.results) || [];
             });
         },
 
@@ -90,11 +148,42 @@ sap.ui.define([
         },
 
         createCheckList: function (oData) {
-            return Promise.resolve(InMemoryDB.createCheckList(oData));
+            try {
+                var oCreated = InMemoryDB.createCheckList(oData);
+                return Promise.resolve(oCreated);
+            } catch (oError) {
+                if (/already exists/i.test(String((oError && oError.message) || ""))) {
+                    return Promise.reject(_buildODataError("DUPLICATE_KEY", oError.message, 409));
+                }
+                return Promise.reject(_buildODataError("CREATE_FAILED", (oError && oError.message) || "Create failed", 500));
+            }
         },
 
-        updateCheckList: function (sId, oData) {
-            return Promise.resolve(InMemoryDB.updateCheckList(sId, oData));
+        updateCheckList: function (sId, oData, mOptions) {
+            mOptions = mOptions || {};
+            var oCurrent = InMemoryDB.getCheckListById(sId);
+            if (!oCurrent) {
+                return Promise.reject(_buildODataError("NOT_FOUND", "Checklist not found: " + sId, 404));
+            }
+
+            var vIfMatchRaw = mOptions.ifMatch;
+            if (typeof vIfMatchRaw === "undefined" && oData && oData.__metadata && oData.__metadata.etag) {
+                vIfMatchRaw = oData.__metadata.etag;
+            }
+
+            var vIfMatch = _parseIfMatchVersion(vIfMatchRaw);
+            var iCurrentVersion = Number((((oCurrent || {}).root || {}).version_number) || 1);
+
+            if (vIfMatch !== null && vIfMatch !== "*" && Number(vIfMatch) !== iCurrentVersion) {
+                return Promise.reject(_buildODataError("PRECONDITION_FAILED", "ETag mismatch: stale entity state", 412));
+            }
+
+            var oUpdated = InMemoryDB.updateCheckList(sId, oData);
+            if (!oUpdated) {
+                return Promise.reject(_buildODataError("NOT_FOUND", "Checklist not found: " + sId, 404));
+            }
+
+            return Promise.resolve(oUpdated);
         },
 
         lockAcquire: function () {
@@ -118,7 +207,13 @@ sap.ui.define([
         },
 
         getServerState: function () {
-            return FakeODataService.callFunctionImport("ServerState", {});
+            return FakeODataService.callFunctionImport("ServerState", {}).then(function (oResult) {
+                return (oResult && oResult.d) || oResult || {};
+            });
+        },
+
+        executeBatch: function (aOperations) {
+            return FakeODataService.executeBatch(aOperations || []);
         },
 
         getFrontendConfig: function () {
