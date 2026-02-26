@@ -17,6 +17,13 @@ class ODataFilterParser:
         "le": "__le__"
     }
 
+
+
+    @staticmethod
+    def _is_blank_filter_value(value: str) -> bool:
+        normalized = str(value or "").strip()
+        return normalized in {"", "''", '""'}
+
     @staticmethod
     def parse(model, filter_string: str):
         if not filter_string:
@@ -43,7 +50,7 @@ class ODataFilterParser:
             if token_lower == "contains" and i + 2 < len(tokens):
                 field = tokens[i + 1]
                 value = tokens[i + 2].strip("'")
-                if value == "":
+                if ODataFilterParser._is_blank_filter_value(value):
                     logger.info("Skipping empty contains filter for field=%s", field)
                     i += 3
                     continue
@@ -62,7 +69,7 @@ class ODataFilterParser:
             field = token
             operator = tokens[i + 1].lower()
             value = tokens[i + 2].strip("'")
-            if value == "":
+            if ODataFilterParser._is_blank_filter_value(value):
                 logger.info("Skipping empty filter for field=%s operator=%s", field, operator)
                 i += 3
                 continue

@@ -7,7 +7,7 @@ from utils.time import now_utc
 class ActionService:
     @staticmethod
     def set_status(db: Session, root_id: str, status: str, user_id: str):
-        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.is_(False)).first()
+        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.isnot(True)).first()
         if not root:
             raise ValueError("NOT_FOUND")
         root.status = status
@@ -20,7 +20,7 @@ class ActionService:
     @staticmethod
     def export_report(db: Session, entity: str, filters: dict | None = None, search_mode: str = "EXACT"):
         filters = filters or {}
-        query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.is_(False))
+        query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True))
         roots = query.all()
 
         s_filter_id = str(filters.get("filterId") or "").lower().strip()

@@ -68,7 +68,7 @@ class ChecklistService:
     def get(db: Session, root_id: str, expand: bool = False):
         root = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
         ).first()
         if not root:
             return None
@@ -147,7 +147,7 @@ class ChecklistService:
 
     @staticmethod
     def update_with_etag(db: Session, root_id: str, user_id: str, data: dict, if_match: str):
-        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.is_(False)).first()
+        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.isnot(True)).first()
         if not root:
             raise ValueError("NOT_FOUND")
 
@@ -217,7 +217,7 @@ class ChecklistService:
 
         root = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
         ).first()
         if not root:
             raise ValueError("NOT_FOUND")
@@ -286,7 +286,7 @@ class ChecklistService:
 
         root = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
         ).first()
         if not root:
             raise ValueError("NOT_FOUND")
@@ -310,7 +310,7 @@ class ChecklistService:
 
         root = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
         ).first()
         if not root:
             raise ValueError("NOT_FOUND")
@@ -353,7 +353,7 @@ class ChecklistService:
 
         root = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
         ).first()
         if not root:
             raise ValueError("NOT_FOUND")
@@ -368,7 +368,7 @@ class ChecklistService:
     def copy(db: Session, root_id: str, user_id: str):
         source = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
         ).first()
         if not source:
             raise ValueError("NOT_FOUND")

@@ -95,6 +95,8 @@ sap.ui.define([
         statusActions: DetailCardSchema.createStatusActions(oBundle),
         infoCards: DetailCardSchema.createInfoCards(oBundle),
         locationVhTree: [],
+        locationVhSelectedNode: null,
+        locationVhHasSelection: false,
         detailControlCollapsed: false
       });
 
@@ -629,6 +631,8 @@ sap.ui.define([
     },
 
     onOpenLocationValueHelp: function () {
+      this.getView().getModel("view").setProperty("/locationVhSelectedNode", null);
+      this.getView().getModel("view").setProperty("/locationVhHasSelection", false);
       return DetailLocationValueHelpUseCase.runOpenValueHelpLifecycle({
         dialog: this.byId("locationValueHelpDialog"),
         locations: this.getModel("mpl").getProperty("/locations") || [],
@@ -641,6 +645,9 @@ sap.ui.define([
     },
 
     onCloseLocationValueHelp: function () {
+      var oViewModel = this.getView().getModel("view");
+      oViewModel.setProperty("/locationVhSelectedNode", null);
+      oViewModel.setProperty("/locationVhHasSelection", false);
       DetailLocationValueHelpUseCase.closeValueHelp({
         dialog: this.byId("locationValueHelpDialog")
       });
@@ -665,11 +672,22 @@ sap.ui.define([
     },
 
     onLocationTreeSelectionChange: function (oEvent) {
-      return DetailLocationValueHelpUseCase.runTreeSelectionLifecycle({
-        event: oEvent,
-        selectedModel: this.getModel("selected"),
-        onClose: this.onCloseLocationValueHelp.bind(this)
-      });
+      var oNode = DetailLocationValueHelpUseCase.resolveNodeFromTreeSelectionEvent(oEvent);
+      var oViewModel = this.getView().getModel("view");
+      oViewModel.setProperty("/locationVhSelectedNode", oNode || null);
+      oViewModel.setProperty("/locationVhHasSelection", !!oNode);
+      return { ok: !!oNode, reason: oNode ? "node_selected" : "missing_node" };
+    },
+
+    onConfirmLocationValueHelp: function () {
+      var oViewModel = this.getView().getModel("view");
+      var oNode = oViewModel.getProperty("/locationVhSelectedNode");
+      if (!oNode) {
+        return { ok: false, reason: "missing_node" };
+      }
+      this._applyLocationSelection(oNode);
+      this.onCloseLocationValueHelp();
+      return { ok: true, reason: "selection_applied" };
     },
 
     onLocationComboChange: function (oEvent) {

@@ -60,7 +60,7 @@
                         persistencyKey="pcctSmartFilter"
                         useToolbar="true"
                         visible="{view>/useSmartControls}"
-                        showGoOnFB="false"
+                        showGoOnFB="true"
                         showClearOnFB="true"
                         liveMode="false"
                         enableBasicSearch="false"
@@ -95,7 +95,7 @@
                     </Toolbar>
 
                     <OverflowToolbar class="toolbarTransparent searchCriteriaActions sapUiTinyMarginTop">
-                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd"/>
+                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="{= !${view>/useSmartControls} }"/>
                         <ToolbarSpacer/>
                         <HBox class="maxRowsWrap" alignItems="Center" renderType="Bare">
                             <Label text="{i18n>searchMaxResultsLabel}" class="sapUiTinyMarginEnd"/>

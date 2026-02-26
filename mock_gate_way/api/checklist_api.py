@@ -132,7 +132,7 @@ def list_checklists(
     skip: int = Query(default=0, alias="$skip"),
     db: Session = Depends(get_db)
 ):
-    query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.is_(False))
+    query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True))
 
     expression = FilterParser.parse(ChecklistRoot, filter)
     if expression is not None:
