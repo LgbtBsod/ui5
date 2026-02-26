@@ -17,20 +17,20 @@ class AnalyticsService:
     @staticmethod
     def get_process_summary(db: Session):
         month = AnalyticsService._month_prefix()
-        total = db.query(func.count(ChecklistRoot.id)).filter(ChecklistRoot.is_deleted.is_(False)).scalar() or 0
+        total = db.query(func.count(ChecklistRoot.id)).filter(ChecklistRoot.is_deleted.isnot(True)).scalar() or 0
         monthly = db.query(func.count(ChecklistRoot.id)).filter(
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
             ChecklistRoot.date.like(f"{month}%")
         ).scalar() or 0
 
         failed_checks_month = db.query(func.count(ChecklistCheck.id)).join(ChecklistRoot, ChecklistCheck.root_id == ChecklistRoot.id).filter(
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
             ChecklistRoot.date.like(f"{month}%"),
             func.upper(ChecklistCheck.status) == "FAILED"
         ).scalar() or 0
 
         failed_barriers_month = db.query(func.count(ChecklistBarrier.id)).join(ChecklistRoot, ChecklistBarrier.root_id == ChecklistRoot.id).filter(
-            ChecklistRoot.is_deleted.is_(False),
+            ChecklistRoot.is_deleted.isnot(True),
             ChecklistRoot.date.like(f"{month}%"),
             ChecklistBarrier.is_active.is_(True)
         ).scalar() or 0

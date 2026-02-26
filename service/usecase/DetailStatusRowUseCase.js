@@ -24,14 +24,11 @@ sap.ui.define([
     }
 
     function formatInfoCardValue(sKey, mValues) {
-        if (sKey === "date") {
-            return formatHumanDateLong(mValues.date);
-        }
-        if (sKey === "time") {
-            return mValues.time || "-";
-        }
-        if (sKey === "timezone") {
-            return mValues.timezone || "-";
+        if (sKey === "datetime") {
+            var sDate = formatHumanDateLong(mValues.date);
+            var sTime = mValues.time || "-";
+            var sTimezone = mValues.timezone || "-";
+            return sDate + " • " + sTime + " • " + sTimezone;
         }
         if (sKey === "equipment") {
             return mValues.equipment || "-";

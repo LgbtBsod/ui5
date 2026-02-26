@@ -90,7 +90,7 @@
                             <VBox class="infoCardTile mushroomCard" renderType="Bare">
                                 <Text text="{view>title}" class="infoCardTitle"/>
                                 <Text
-                                    visible="{= !${state>/mode} || ${state>/mode} !== 'EDIT' }"
+                                    visible="{= (${state>/mode} !== 'EDIT') && ${view>key} !== 'observer' && ${view>key} !== 'observed' }"
                                     text="{parts: [
                                         {path: 'view>key'},
                                         {path: 'selected>/basic/date'},
@@ -106,15 +106,9 @@
                                     ], formatter: '.formatInfoCardValue'}"
                                     class="infoCardValue"/>
 
-                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'date' }" renderType="Bare">
+                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'datetime' }" renderType="Bare" class="detailDateTimeGrid">
                                     <DatePicker value="{selected>/basic/date}" displayFormat="EEE, dd MMM yyyy" valueFormat="yyyy-MM-dd" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
-                                </VBox>
-
-                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'time' }" renderType="Bare">
                                     <TimePicker value="{selected>/basic/time}" displayFormat="HH:mm" valueFormat="HH:mm" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationText'}"/>
-                                </VBox>
-
-                                <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'timezone' }" renderType="Bare">
                                     <Select selectedKey="{selected>/basic/timezone}" forceSelection="false" items="{masterData>/timezones}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationText'}">
                                         <core:Item key="{masterData>key}" text="{masterData>text}"/>
                                     </Select>
@@ -122,6 +116,13 @@
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'equipment' }" renderType="Bare">
                                     <Input value="{selected>/basic/equipment}"/>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} !== 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare" class="detailSemanticMetaBlock">
+                                    <Text text="{selected>/basic/OBSERVER_FULLNAME}" class="infoCardValue"/>
+                                    <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVER_PERNER} || '-') }" state="Information"/>
+                                    <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVER_POSITION} || '-') }" state="Information"/>
+                                    <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVER_ORGUNIT} || '-') }" state="Information"/>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare">
@@ -138,6 +139,13 @@
                                             <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
                                         </suggestionItems>
                                     </Input>
+                                </VBox>
+
+                                <VBox visible="{= ${state>/mode} !== 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare" class="detailSemanticMetaBlock">
+                                    <Text text="{selected>/basic/OBSERVED_FULLNAME}" class="infoCardValue"/>
+                                    <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVED_PERNER} || '-') }" state="Information"/>
+                                    <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVED_POSITION} || '-') }" state="Information"/>
+                                    <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVED_ORGUNIT} || '-') }" state="Information"/>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare">

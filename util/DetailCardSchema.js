@@ -4,9 +4,7 @@ sap.ui.define([], function () {
     return {
         createInfoCards: function (oBundle) {
             return [
-                { key: "date", title: oBundle.getText("dateLabel") },
-                { key: "time", title: oBundle.getText("timeLabel") },
-                { key: "timezone", title: oBundle.getText("timezoneLabel") },
+                { key: "datetime", title: oBundle.getText("dateTimeBlockLabel") },
                 { key: "equipment", title: oBundle.getText("equipmentLabel") },
                 { key: "observer", title: oBundle.getText("observerLabel") },
                 { key: "observed", title: oBundle.getText("observedLabel") },

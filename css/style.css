@@ -741,6 +741,32 @@ body {
   font-weight: 600;
 }
 
+
+.detailDateTimeGrid {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) minmax(6.5rem, .8fr);
+  gap: .55rem;
+}
+
+.detailDateTimeGrid .sapMSlt {
+  grid-column: 1 / -1;
+}
+
+.detailSemanticMetaBlock {
+  gap: .35rem;
+}
+
+.detailSemanticMetaBlock .sapMObjStatus {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.08));
+  padding: .15rem .45rem;
+}
+
+.detailSemanticMetaBlock .sapMObjStatusText {
+  font-size: .72rem;
+  color: var(--text-muted) !important;
+}
+
 .sapMListUl > .sapMLIB.infoCardTileDrag {
   opacity: .7;
 }
@@ -1186,21 +1212,6 @@ body.themeLifestyleNightOps .filterCard {
 .railSwitchWrap {
   justify-content: center;
 }
-
-.mushroomCard {
-  border-radius: 18px 18px 12px 12px !important;
-  min-height: 9.4rem;
-}
-
-.mushroomCard .sapMInputBaseContentWrapper,
-.mushroomCard .sapMSlt,
-.mushroomCard .sapMSltLabel,
-.mushroomCard .sapMSltArrow {
-  border-radius: 12px !important;
-}
-
-
-
 
 /* Detail dictionary select/value-state readability harmonization */
 .detailDictionarySelect.sapMSlt,
@@ -1875,42 +1886,6 @@ body.themeLifestyleNightOps .filterCard {
 .searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell {
   outline: 1px solid color-mix(in srgb, rgba(var(--accent-rgb), 0.7) 55%, transparent);
   outline-offset: -1px;
-}
-
-/* Wave 46 UX hotfix: move detail control rail to sticky/fixed aside and simplify cards */
-.detailControlAsideHost {
-  position: fixed;
-  right: clamp(.7rem, 1.6vw, 1.4rem);
-  top: 8.2rem;
-  z-index: 40;
-  width: min(12.2rem, 24vw);
-  pointer-events: none;
-}
-
-.detailControlAsideHost .detailControlInlineCard {
-  width: 100% !important;
-  margin-left: 0 !important;
-  pointer-events: auto;
-  box-shadow: 0 10px 24px rgba(16, 47, 86, 0.16);
-}
-
-.mushroomCard {
-  border-radius: 12px !important;
-  min-height: 7.1rem;
-  box-shadow: 0 4px 12px rgba(10, 33, 62, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
-@media (max-width: 1180px) {
-  .detailControlAsideHost {
-    position: static;
-    width: 100%;
-    margin-bottom: .6rem;
-    pointer-events: auto;
-  }
-
-  .detailControlAsideHost .detailControlInlineCard {
-    width: 100% !important;
-  }
 }
 
 /* Wave 47: create/copy toolbar active/disabled readability consistency */
@@ -2633,34 +2608,34 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 
-/* Wave 58: detach checklist control rail from content flow and pin to viewport side */
+/* Wave 58: consolidated detail rail + card language (Horizon + iOS/macOS) */
 .detailControlAsideHost {
-  position: fixed !important;
-  left: .75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 20;
-  align-items: flex-start;
+  position: relative !important;
+  justify-content: flex-end;
 }
 
 .detailControlInlineCard {
-  width: 13.75rem !important;
-  min-width: 13.75rem;
-  max-height: calc(100vh - 3rem);
+  width: min(18rem, 100%) !important;
+  min-width: 14rem;
+  max-height: calc(100vh - 8rem);
   overflow-y: auto;
   margin-left: 0;
+  position: sticky;
+  top: 6rem;
+  box-shadow: 0 10px 24px rgba(16, 47, 86, 0.16);
 }
 
 .detailControlPeekButton {
   margin-top: 0;
-  position: static;
+  position: sticky;
+  top: 6.2rem;
 }
 
 @media (max-width: 1100px) {
-  .detailControlAsideHost {
+  .detailControlInlineCard,
+  .detailControlPeekButton {
+    position: static;
     top: auto;
-    bottom: 1rem;
-    transform: none;
   }
 }
 

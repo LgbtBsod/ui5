@@ -22,7 +22,10 @@
             </t:TreeTable>
         </VBox>
         <beginButton>
-            <Button text="{i18n>closeButton}" press=".onCloseLocationValueHelp"/>
+            <Button text="{i18n>okButton}" type="Emphasized" press=".onConfirmLocationValueHelp" visible="{view>/locationVhHasSelection}"/>
         </beginButton>
+        <endButton>
+            <Button text="{i18n>closeButton}" press=".onCloseLocationValueHelp"/>
+        </endButton>
     </Dialog>
 </core:FragmentDefinition>

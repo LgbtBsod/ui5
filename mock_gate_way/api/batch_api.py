@@ -2,6 +2,7 @@ import json
 import re
 import uuid
 from dataclasses import dataclass
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -91,6 +92,27 @@ def _parse_multipart(body: str, boundary: str) -> list[str]:
     return parts
 
 
+
+
+def _sanitize_operation_path(path: str) -> str:
+    if not path:
+        return path
+
+    # Defensive normalization for mixed-locale encoding typos (%2с with cyrillic "с")
+    path = path.replace("%2с", "%2c").replace("%2С", "%2C")
+
+    parsed = urlsplit(path)
+    query_items = parse_qsl(parsed.query, keep_blank_values=True)
+    sanitized_items = []
+    for key, value in query_items:
+        if key == "$filter" and not str(value or "").strip():
+            continue
+        sanitized_items.append((key, value))
+
+    query = urlencode(sanitized_items, doseq=True)
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, query, parsed.fragment))
+
+
 def _parse_batch_request(body: str, boundary: str) -> list[BatchOperation | list[BatchOperation]]:
     parsed: list[BatchOperation | list[BatchOperation]] = []
     for part in _parse_multipart(body, boundary):
@@ -115,7 +137,7 @@ async def _execute_operation(request: Request, op: BatchOperation) -> httpx.Resp
         content = op.body.encode("utf-8")
     transport = httpx.ASGITransport(app=request.app)
     async with httpx.AsyncClient(transport=transport, base_url="http://batch.local") as client:
-        return await client.request(op.method, op.path, headers=headers, content=content)
+        return await client.request(op.method, _sanitize_operation_path(op.path), headers=headers, content=content)
 
 
 def _format_http_response(part_response: httpx.Response, content_id: str | None = None) -> str:
