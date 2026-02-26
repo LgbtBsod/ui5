@@ -2243,3 +2243,267 @@ body.themeLifestyleNightOps .filterCard {
     padding: 1rem 1rem !important;
   }
 }
+
+/* Wave 55: unified status-strip hierarchy (filter hint + degraded + load-error) */
+.searchStatusStripStack {
+  gap: .45rem;
+}
+
+.searchStatusStripStack .sapMMsgStrip {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 78%, rgba(var(--accent-rgb), 0.14));
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.05));
+  box-shadow: 0 7px 18px rgba(16, 34, 62, 0.1);
+}
+
+.searchStatusStripStack .sapMMsgStrip .sapMMsgStripMessage {
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.searchStatusStripStack .searchDegradedStateBanner {
+  border-color: color-mix(in srgb, #c28700 54%, var(--glass-border)) !important;
+  background: color-mix(in srgb, #fff6d9 74%, var(--surface2)) !important;
+}
+
+.searchStatusStripStack .searchLoadErrorBanner {
+  border-color: color-mix(in srgb, #c62828 62%, var(--glass-border)) !important;
+  background: color-mix(in srgb, #ffebee 72%, var(--surface2)) !important;
+  box-shadow: 0 8px 20px rgba(183, 28, 28, 0.14);
+}
+
+.appDark .searchStatusStripStack .sapMMsgStrip {
+  color: rgba(229, 238, 255, 0.95) !important;
+}
+
+@media (max-width: 1200px) {
+  .searchStatusStripStack {
+    gap: .35rem;
+  }
+}
+
+/* Wave 56: action-toolbar hierarchy consistency (spacing + chips alignment + responsive wrap) */
+.searchActionToolbarDensity {
+  row-gap: .45rem;
+  column-gap: .35rem;
+  align-items: center;
+}
+
+.searchActionToolbarDensity .brandActionBtn,
+.searchActionToolbarDensity .maxRowsWrap,
+.searchActionToolbarDensity .searchSummaryStatusChip,
+.searchActionToolbarDensity .searchStageStatusChip,
+.searchActionToolbarDensity .searchUpdatedAtText,
+.searchActionToolbarDensity .searchModeLabel {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.searchActionToolbarDensity .searchSummaryStatusChip,
+.searchActionToolbarDensity .searchStageStatusChip {
+  align-self: center;
+}
+
+@media (max-width: 1200px) {
+  .searchActionToolbarDensity {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .searchActionToolbarDensity .sapMTBSpacer {
+    display: none;
+  }
+
+  .searchActionToolbarDensity .searchUpdatedAtText {
+    width: 100%;
+    order: 8;
+    opacity: .86;
+  }
+
+  .searchActionToolbarDensity .searchModeLabel,
+  .searchActionToolbarDensity .accentSwitch {
+    order: 7;
+  }
+}
+
+/* Wave 57: workflow analytics dialog hierarchy consistency */
+.searchAnalyticsDialog .sapMDialogTitle,
+.searchAnalyticsDialog .sapMBar {
+  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.08)) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--glass-border) 78%, rgba(var(--accent-rgb), 0.18));
+}
+
+.searchAnalyticsDialogBody {
+  gap: .5rem;
+}
+
+.searchAnalyticsDialogGrid {
+  gap: .55rem;
+}
+
+.searchAnalyticsDialogInfo,
+.searchAnalyticsDialogError {
+  border-radius: 12px;
+}
+
+.searchAnalyticsDialogBars {
+  padding: .5rem .55rem;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 76%, rgba(var(--accent-rgb), 0.14));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.05));
+}
+
+.appDark .searchAnalyticsDialogBars,
+.appDark .searchAnalyticsDialogInfo,
+.appDark .searchAnalyticsDialogError {
+  color: rgba(229, 238, 255, 0.94) !important;
+}
+
+/* Wave 58: status-chip/action emphasis consistency */
+.searchSummaryStatusChip,
+.searchStageStatusChip {
+  transition: transform .16s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.searchSummaryStatusChip .sapMObjStatusText,
+.searchStageStatusChip .sapMObjStatusText {
+  font-variant-numeric: tabular-nums;
+}
+
+.searchFeedbackToolbar .searchSummaryStatusChip:hover,
+.searchFeedbackToolbar .searchStageStatusChip:hover {
+  transform: translateY(-1px);
+}
+
+.searchFeedbackToolbar .searchSummaryStatusChip {
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.14);
+}
+
+.searchFeedbackToolbar .searchStageStatusChip {
+  box-shadow: 0 4px 12px rgba(70, 160, 110, 0.14);
+}
+
+.appDark .searchFeedbackToolbar .searchSummaryStatusChip,
+.appDark .searchFeedbackToolbar .searchStageStatusChip {
+  border-color: color-mix(in srgb, var(--glass-border) 80%, rgba(226, 236, 255, 0.18));
+}
+
+/* Wave 59: SmartFilter + chips interaction consistency under compact breakpoints */
+@media (max-width: 980px) {
+  .quickFiltersRow {
+    gap: .35rem;
+    align-items: center;
+  }
+
+  .quickFiltersRow .sapMLabel,
+  .quickFiltersRow .sapMInputBase,
+  .quickFiltersRow .sapMSlt {
+    min-width: 7rem;
+  }
+
+  .searchActionToolbarDensity .searchSummaryStatusChip,
+  .searchActionToolbarDensity .searchStageStatusChip {
+    order: 6;
+  }
+
+  .searchActionToolbarDensity .searchSummaryStatusChip .sapMObjStatusText,
+  .searchActionToolbarDensity .searchStageStatusChip .sapMObjStatusText {
+    font-size: .74rem;
+  }
+}
+
+/* Wave 60: route-entry visual stability */
+.searchHeaderKpiRail,
+.searchStatusStripStack,
+.searchResultsTable {
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.searchHeaderKpiRail {
+  will-change: transform, opacity;
+}
+
+.searchStatusStripStack {
+  min-height: 0.1px;
+}
+
+.searchResultsTable {
+  content-visibility: auto;
+  contain-intrinsic-size: 640px;
+}
+
+@media (max-width: 980px) {
+  .searchHeaderKpiRail {
+    margin-top: .2rem;
+  }
+}
+
+/* Wave 61: SmartTable header/actions consistency */
+.searchResultsTable .sapMListTblHeaderCell,
+.smartTableGlass .sapMListTblHeaderCell {
+  white-space: nowrap;
+}
+
+.searchResultsTable .sapMListTbl,
+.smartTableGlass .sapMListTbl {
+  transition: opacity .16s ease;
+}
+
+@media (max-width: 1100px) {
+  .searchActionToolbarDensity {
+    row-gap: .5rem;
+  }
+
+  .smartTableGlass .sapMListTblHeaderCell {
+    font-size: .74rem;
+  }
+}
+
+/* Wave 62: summary/no-data transition consistency */
+.searchResultsTable .sapMListNoData,
+.searchResultsTable .sapMListTblEmptyRow,
+.searchResultsTable .sapMListTblEmptyCell {
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+.searchResultsTable .sapMListNoData {
+  opacity: .92;
+}
+
+.searchSummaryStatusChip,
+.searchStageStatusChip {
+  transition: opacity .16s ease, transform .16s ease, box-shadow .2s ease;
+}
+
+/* Wave 63: selection affordance consistency */
+.searchResultsTable .sapMLIBSelected .sapMListTblCell,
+.searchResultsTable .sapMLIBSelected .sapMListTblCell .sapMText {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, rgba(var(--accent-rgb), 0.36) 75%, transparent);
+}
+
+.searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell,
+.searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell .sapMText {
+  outline: 1px solid color-mix(in srgb, rgba(var(--accent-rgb), 0.74) 60%, transparent);
+  outline-offset: -1px;
+}
+
+@media (max-width: 980px) {
+  .searchResultsTable .sapMListTblCell {
+    padding-top: .48rem !important;
+    padding-bottom: .48rem !important;
+  }
+}
+
+/* Wave 64: export action emphasis consistency */
+.searchToolbar .searchExportActionBtn .sapMBtnInner,
+.searchToolbar .searchExportActionBtn .sapMBtnIcon {
+  transition: transform .16s ease, box-shadow .2s ease, opacity .2s ease;
+}
+
+.searchToolbar .searchExportActionBtn:not(.sapMBtnDisabled):hover .sapMBtnInner {
+  transform: translateY(-1px);
+}
+
+.searchToolbar .searchExportActionBtn.sapMBtnActive .sapMBtnInner {
+  box-shadow: 0 6px 16px rgba(var(--accent-rgb), 0.22) !important;
+}

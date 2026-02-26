@@ -2766,6 +2766,491 @@ function testSearchLoadFilterUseCaseNegative() {
   });
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+function testSearchExportLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchExportLifecycleUseCase.js');
+
+  return mod.runExportExecutionLifecycle({
+    runLifecycle: () => Promise.resolve({ ok: true, reason: 'done' })
+  }).then((okRes) => {
+    assert(okRes.ok === true && okRes.reason === 'export_executed' && okRes.result.reason === 'done',
+      'runExportExecutionLifecycle should return deterministic export executed outcome');
+
+    return mod.runExportExecutionLifecycle({
+      runLifecycle: () => Promise.reject(new Error('boom'))
+    });
+  }).then((failedRes) => {
+    assert(failedRes.ok === false && failedRes.reason === 'export_failed' && failedRes.error === 'boom',
+      'runExportExecutionLifecycle should return deterministic export failed outcome');
+
+    return mod.runExportExecutionLifecycle({});
+  }).then((missingExport) => {
+    assert(missingExport.reason === 'missing_export_adapter',
+      'runExportExecutionLifecycle should return deterministic missing export adapter outcome');
+
+    let fallback = 0;
+    const presented = mod.runIntentPresentationLifecycle({
+      result: { ok: false },
+      present: () => ({ reason: 'presentation_failed_error' }),
+      onUnexpected: () => { fallback += 1; }
+    });
+    assert(presented.ok === true && presented.reason === 'presented_with_fallback' && fallback === 1,
+      'runIntentPresentationLifecycle should trigger fallback on unexpected presentation reason');
+
+    const missingPresenter = mod.runIntentPresentationLifecycle({ result: { ok: true } });
+    assert(missingPresenter.reason === 'missing_presenter',
+      'runIntentPresentationLifecycle should return deterministic missing presenter outcome');
+  });
+}
+
+function testSearchSelectionLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchSelectionLifecycleUseCase.js');
+
+  return mod.runSelectionChangeLifecycle({
+    event: { id: 'E1' },
+    extractId: (e) => e.id,
+    hydrateSelection: (id) => Promise.resolve({ id })
+  }).then((selectionRes) => {
+    assert(selectionRes.ok === true && selectionRes.reason === 'selection_hydrated' && selectionRes.id === 'E1',
+      'runSelectionChangeLifecycle should return deterministic hydrated selection outcome');
+
+    return mod.runItemPressLifecycle({
+      event: { id: 'E2' },
+      extractId: (e) => e.id,
+      hydrateSelection: (id) => Promise.resolve({ id }),
+      openDetail: (id) => Promise.resolve({ ok: true, id })
+    });
+  }).then((itemRes) => {
+    assert(itemRes.ok === true && itemRes.reason === 'item_press_applied' && itemRes.id === 'E2',
+      'runItemPressLifecycle should return deterministic item press outcome');
+
+    return Promise.all([
+      mod.runSelectionChangeLifecycle({ hydrateSelection: () => Promise.resolve() }),
+      mod.runSelectionChangeLifecycle({ event: {}, extractId: () => 'A' }),
+      mod.runItemPressLifecycle({ event: {}, extractId: () => 'A', hydrateSelection: () => Promise.resolve() })
+    ]);
+  }).then((missing) => {
+    assert(missing[0].reason === 'missing_event_adapter',
+      'runSelectionChangeLifecycle should return deterministic missing event adapter outcome');
+    assert(missing[1].reason === 'missing_hydration_adapter',
+      'runSelectionChangeLifecycle should return deterministic missing hydration adapter outcome');
+    assert(missing[2].reason === 'missing_open_adapter',
+      'runItemPressLifecycle should return deterministic missing open adapter outcome');
+  });
+}
+
+function testSearchResultConvergenceLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchResultConvergenceLifecycleUseCase.js');
+
+  const dataModel = {
+    getProperty: (p) => ({
+      '/visibleCheckLists': [{ id: '1' }, { id: '2' }],
+      '/checkLists': [{ id: '1' }, { id: '2' }, { id: '3' }]
+    }[p])
+  };
+
+  const calls = [];
+  const okRes = mod.runConvergenceLifecycle({
+    dataModel,
+    applySummary: (rows, total) => { calls.push(`summary:${rows.length}:${total}`); },
+    applyEmptyState: () => { calls.push('empty'); }
+  });
+  assert(okRes.ok === true && okRes.reason === 'convergence_applied' && okRes.visible === 2 && okRes.total === 3,
+    'runConvergenceLifecycle should return deterministic convergence outcome with visible/total counters');
+  assert(calls.join('|') === 'summary:2:3|empty',
+    'runConvergenceLifecycle should execute summary and empty-state adapters in deterministic order');
+
+  const missingModel = mod.runConvergenceLifecycle({
+    applySummary: () => {}
+  });
+  assert(missingModel.reason === 'missing_data_model',
+    'runConvergenceLifecycle should return deterministic missing data model outcome');
+
+  const missingPresenter = mod.runConvergenceLifecycle({
+    dataModel
+  });
+  assert(missingPresenter.reason === 'missing_presenter',
+    'runConvergenceLifecycle should return deterministic missing presenter outcome');
+
+  const malformedRows = mod.runConvergenceLifecycle({
+    dataModel: { getProperty: (p) => (p === '/visibleCheckLists' ? {} : []) },
+    applySummary: () => {}
+  });
+  assert(malformedRows.reason === 'malformed_rows',
+    'runConvergenceLifecycle should return deterministic malformed rows outcome');
+}
+
+function testSearchRebindLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchRebindLifecycleUseCase.js');
+
+  const calls = [];
+  const okRebind = mod.runRebindLifecycle({
+    bindingParams: {},
+    state: { filterId: 'X' },
+    smartFilterData: { id: 'A' },
+    prepareRebind: (args) => {
+      calls.push('prepare');
+      if (args && typeof args.onDataReceived === 'function') {
+        args.onDataReceived({ getParameter: (k) => (k === 'data' ? { __count: '1' } : null) });
+      }
+    },
+    onDataReceived: () => { calls.push('dataReceived'); }
+  });
+  assert(okRebind.ok === true && okRebind.reason === 'rebind_prepared',
+    'runRebindLifecycle should return deterministic prepared outcome');
+  assert(calls.join('|') === 'prepare|dataReceived',
+    'runRebindLifecycle should execute prepare and forwarded dataReceived hook');
+
+  const okData = mod.runDataReceivedLifecycle({
+    dataEvent: { getParameter: () => ({ __count: '2' }) },
+    syncLifecycle: () => { calls.push('sync'); }
+  });
+  assert(okData.ok === true && okData.reason === 'data_received_synced',
+    'runDataReceivedLifecycle should return deterministic synced outcome');
+
+  const missingBinding = mod.runRebindLifecycle({ prepareRebind: () => {} });
+  assert(missingBinding.reason === 'missing_binding_params',
+    'runRebindLifecycle should return deterministic missing binding params outcome');
+
+  const missingAdapter = mod.runRebindLifecycle({ bindingParams: {} });
+  assert(missingAdapter.reason === 'missing_rebind_adapter',
+    'runRebindLifecycle should return deterministic missing rebind adapter outcome');
+
+  const malformedData = mod.runDataReceivedLifecycle({ dataEvent: {} });
+  assert(malformedData.reason === 'malformed_data_received',
+    'runDataReceivedLifecycle should return deterministic malformed dataReceived outcome');
+
+  const missingSync = mod.runDataReceivedLifecycle({
+    dataEvent: { getParameter: () => ({}) }
+  });
+  assert(missingSync.reason === 'missing_sync_adapter',
+    'runDataReceivedLifecycle should return deterministic missing sync adapter outcome');
+}
+
+function testSearchRouteLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchRouteLifecycleUseCase.js');
+
+  const calls = [];
+  return mod.runRouteMatchedLifecycle({
+    applyDefaults: () => { calls.push('defaults'); },
+    syncSmartControls: () => { calls.push('smart'); },
+    syncSelection: () => { calls.push('selection'); return Promise.resolve(); },
+    updateSummary: () => { calls.push('summary'); },
+    refreshAnalytics: (trigger) => { calls.push(trigger); },
+    applyEmptyState: () => { calls.push('empty'); }
+  }).then((okRes) => {
+    assert(okRes.ok === true && okRes.reason === 'route_matched_applied',
+      'runRouteMatchedLifecycle should return deterministic success outcome');
+    assert(calls.join('|') === 'defaults|smart|selection|summary|ROUTE_MATCHED|empty',
+      'runRouteMatchedLifecycle should execute route adapters in deterministic order');
+
+    return Promise.all([
+      mod.runRouteMatchedLifecycle({}),
+      mod.runRouteMatchedLifecycle({ applyDefaults: () => {} })
+    ]);
+  }).then((missing) => {
+    assert(missing[0].reason === 'missing_state_model',
+      'runRouteMatchedLifecycle should return deterministic missing state model outcome');
+    assert(missing[1].reason === 'missing_selection_adapter',
+      'runRouteMatchedLifecycle should return deterministic missing selection adapter outcome');
+  });
+}
+
+function testSearchTriggerPolicyUseCase() {
+  const mod = loadSapModule('service/usecase/SearchTriggerPolicyUseCase.js');
+
+  const calls = [];
+  const smartSearch = mod.runTriggerPolicy({
+    trigger: 'SMART_SEARCH',
+    syncFilterHint: () => { calls.push('sync'); },
+    refreshInlineAnalytics: (trigger) => { calls.push(trigger); }
+  });
+  assert(smartSearch.ok === true && smartSearch.analyticsTrigger === 'SMART_SEARCH',
+    'runTriggerPolicy should apply SMART_SEARCH trigger with deterministic analytics trigger');
+  assert(calls.join('|') === 'sync|SMART_SEARCH',
+    'runTriggerPolicy should call sync and refresh adapters for SMART_SEARCH trigger');
+
+  const unsupported = mod.runTriggerPolicy({ trigger: 'UNKNOWN' });
+  assert(unsupported.reason === 'unsupported_trigger',
+    'runTriggerPolicy should return deterministic unsupported trigger outcome');
+
+  const missingRefresh = mod.runTriggerPolicy({
+    trigger: 'RESET_FILTERS',
+    syncFilterHint: () => {}
+  });
+  assert(missingRefresh.reason === 'missing_refresh_adapter',
+    'runTriggerPolicy should return deterministic missing refresh adapter outcome');
+
+  const missingState = mod.runTriggerPolicy({
+    trigger: 'SEARCH_MODE_TOGGLE',
+    refreshInlineAnalytics: () => {}
+  });
+  assert(missingState.reason === 'missing_state_model',
+    'runTriggerPolicy should return deterministic missing state model outcome for SEARCH_MODE_TOGGLE');
+}
+
+function testSearchStatusFilterLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchStatusFilterLifecycleUseCase.js');
+
+  const calls = [];
+  const res = mod.runStatusFilterLifecycle({
+    event: { getSource: () => ({ data: (k) => ({ filterPath: '/filterFailedChecks', filterValue: 'X' }[k]) }) },
+    getSource: (e) => e.getSource(),
+    readData: (source, key) => source.data(key),
+    applyStatusFilter: (path, value) => { calls.push(`apply:${path}:${value}`); },
+    afterApply: () => { calls.push('after'); }
+  });
+
+  assert(res.ok === true && res.reason === 'status_filter_applied' && res.filterPath === '/filterFailedChecks',
+    'runStatusFilterLifecycle should apply filter and return deterministic success outcome');
+  assert(calls.join('|') === 'apply:/filterFailedChecks:X|after',
+    'runStatusFilterLifecycle should execute apply and after hooks in deterministic order');
+
+  const missingSource = mod.runStatusFilterLifecycle({
+    event: null,
+    getSource: () => null
+  });
+  assert(missingSource.reason === 'missing_event_source',
+    'runStatusFilterLifecycle should return deterministic missing source outcome');
+
+  const missingPath = mod.runStatusFilterLifecycle({
+    event: { getSource: () => ({ data: () => '' }) },
+    getSource: (e) => e.getSource(),
+    readData: (source, key) => source.data(key),
+    applyStatusFilter: () => {}
+  });
+  assert(missingPath.reason === 'missing_filter_path',
+    'runStatusFilterLifecycle should return deterministic missing filter path outcome');
+
+  const missingApply = mod.runStatusFilterLifecycle({
+    event: { getSource: () => ({ data: (k) => ({ filterPath: '/a', filterValue: 'b' }[k]) }) },
+    getSource: (e) => e.getSource(),
+    readData: (source, key) => source.data(key)
+  });
+  assert(missingApply.reason === 'missing_apply_adapter',
+    'runStatusFilterLifecycle should return deterministic missing apply adapter outcome');
+}
+
+function testSearchWorkflowAnalyticsLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchWorkflowAnalyticsLifecycleUseCase.js');
+
+  const openCalls = [];
+  const openRes = mod.runOpenLifecycle({
+    applyDegradedState: () => { openCalls.push('degraded'); },
+    openDialog: () => { openCalls.push('open'); }
+  });
+  assert(openRes.ok === true && openRes.reason === 'dialog_opened',
+    'runOpenLifecycle should return deterministic opened outcome');
+  assert(openCalls.join('|') === 'degraded|open',
+    'runOpenLifecycle should execute degraded hook before open adapter');
+
+  return mod.runLoadLifecycle({
+    runLoadFlow: () => Promise.resolve({ source: 'backend' })
+  }).then((loadRes) => {
+    assert(loadRes.ok === true && loadRes.reason === 'dialog_load_completed' && loadRes.result.source === 'backend',
+      'runLoadLifecycle should map successful load flow to deterministic outcome');
+
+    let mappedError = '';
+    return mod.runLoadLifecycle({
+      runLoadFlow: () => Promise.reject(new Error('dialog failed')),
+      applyLoadError: (msg) => { mappedError = msg; }
+    }).then((failedRes) => {
+      assert(failedRes.ok === false && failedRes.reason === 'dialog_load_failed' && mappedError === 'dialog failed',
+        'runLoadLifecycle should map rejected load flow and propagate error message');
+
+      const closeRes = mod.runCloseLifecycle({ closeDialog: () => {} });
+      assert(closeRes.ok === true && closeRes.reason === 'dialog_closed',
+        'runCloseLifecycle should return deterministic close outcome');
+
+      const missingOpen = mod.runOpenLifecycle({});
+      const missingClose = mod.runCloseLifecycle({});
+      return mod.runLoadLifecycle({}).then((missingLoad) => {
+        assert(missingOpen.reason === 'missing_open_adapter',
+          'runOpenLifecycle should return deterministic missing open adapter outcome');
+        assert(missingClose.reason === 'missing_close_adapter',
+          'runCloseLifecycle should return deterministic missing close adapter outcome');
+        assert(missingLoad.reason === 'missing_load_flow',
+          'runLoadLifecycle should return deterministic missing load flow outcome');
+      });
+    });
+  });
+}
+
+function testSearchToolbarLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchToolbarLifecycleUseCase.js');
+
+  return mod.runCreateLifecycle({
+    runCreateFlow: () => Promise.resolve({ ok: true, reason: 'created' })
+  }).then((createRes) => {
+    assert(createRes.ok === true && createRes.reason === 'create_flow_completed' && createRes.result.reason === 'created',
+      'runCreateLifecycle should wrap create flow into deterministic lifecycle outcome');
+
+    return mod.runCopyLifecycle({
+      runCopyFlow: () => Promise.resolve({ ok: true, reason: 'copied' })
+    });
+  }).then((copyRes) => {
+    assert(copyRes.ok === true && copyRes.reason === 'copy_flow_completed' && copyRes.result.reason === 'copied',
+      'runCopyLifecycle should wrap copy flow into deterministic lifecycle outcome');
+
+    let presentedDelete = 0;
+    return mod.runDeleteLifecycle({
+      runDeleteFlow: () => Promise.resolve({ ok: true, reason: 'deleted' }),
+      presentDeleteOutcome: () => { presentedDelete += 1; }
+    }).then((deleteRes) => {
+      assert(deleteRes.ok === true && deleteRes.reason === 'delete_flow_completed' && presentedDelete === 1,
+        'runDeleteLifecycle should present and map delete flow outcome');
+
+      let presentedExport = 0;
+      return mod.runExportIntentLifecycle({
+        runIntent: () => Promise.resolve({ ok: true, reason: 'exported' }),
+        presentIntentResult: () => { presentedExport += 1; }
+      }).then((exportRes) => {
+        assert(exportRes.ok === true && exportRes.reason === 'export_intent_completed' && presentedExport === 1,
+          'runExportIntentLifecycle should present and map export intent outcome');
+      });
+    });
+  }).then(() => {
+    return Promise.all([
+      mod.runCreateLifecycle({}),
+      mod.runCopyLifecycle({}),
+      mod.runDeleteLifecycle({}),
+      mod.runExportIntentLifecycle({})
+    ]);
+  }).then((missingResults) => {
+    assert(missingResults[0].reason === 'missing_create_flow',
+      'runCreateLifecycle should return deterministic missing create adapter outcome');
+    assert(missingResults[1].reason === 'missing_copy_flow',
+      'runCopyLifecycle should return deterministic missing copy adapter outcome');
+    assert(missingResults[2].reason === 'missing_delete_flow',
+      'runDeleteLifecycle should return deterministic missing delete adapter outcome');
+    assert(missingResults[3].reason === 'missing_export_intent',
+      'runExportIntentLifecycle should return deterministic missing export adapter outcome');
+  });
+}
+
+function testSearchLifecycleSyncUseCase() {
+  const mod = loadSapModule('service/usecase/SearchLifecycleSyncUseCase.js');
+
+  const calls = [];
+  const smartResult = mod.runSmartTableDataReceivedLifecycle({
+    rawData: { __count: '1' },
+    applyMetrics: () => { calls.push('metrics'); },
+    syncFilterHint: () => { calls.push('hint'); },
+    refreshInlineAnalytics: (trigger) => { calls.push(trigger); }
+  });
+
+  assert(smartResult.ok === true && smartResult.reason === 'smart_table_data_received_synced',
+    'runSmartTableDataReceivedLifecycle should return deterministic success outcome');
+  assert(calls.join('|') === 'metrics|hint|SMART_SEARCH',
+    'runSmartTableDataReceivedLifecycle should execute metrics/hint/analytics adapters in deterministic order');
+
+  const fallbackCalls = [];
+  const fallbackResult = mod.runFallbackSearchLifecycle({
+    markSearchedAndRebind: () => { fallbackCalls.push('rebind'); },
+    syncFilterHint: () => { fallbackCalls.push('hint'); },
+    refreshInlineAnalytics: (trigger) => { fallbackCalls.push(trigger); }
+  });
+
+  assert(fallbackResult.ok === true && fallbackResult.reason === 'fallback_search_synced',
+    'runFallbackSearchLifecycle should return deterministic success outcome');
+  assert(fallbackCalls.join('|') === 'rebind|hint|FALLBACK_SEARCH',
+    'runFallbackSearchLifecycle should execute rebind/hint/analytics adapters in deterministic order');
+
+  const missingMetrics = mod.runSmartTableDataReceivedLifecycle({
+    syncFilterHint: () => {}
+  });
+  assert(missingMetrics.ok === false && missingMetrics.reason === 'missing_metrics_adapter',
+    'runSmartTableDataReceivedLifecycle should return deterministic missing adapter outcome');
+
+  const missingRebind = mod.runFallbackSearchLifecycle({
+    refreshInlineAnalytics: () => {}
+  });
+  assert(missingRebind.ok === false && missingRebind.reason === 'missing_rebind_adapter',
+    'runFallbackSearchLifecycle should return deterministic missing adapter outcome');
+}
+
+function testSearchRetryLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchRetryLifecycleUseCase.js');
+
+  const calls = [];
+  return mod.runRetryLifecycle({
+    beginLatency: () => 123,
+    runRetryFlow: () => Promise.resolve({ ok: true, reason: 'retry_ok' }),
+    presentRetryOutcome: () => ({ ok: true, reason: 'presented' }),
+    markRetryFailure: () => { calls.push('mark-failure'); },
+    finishLatency: (metric, startedAt) => { calls.push(`finish:${metric}:${startedAt}`); },
+    afterRetryApplied: () => { calls.push('after'); }
+  }).then((okResult) => {
+    assert(okResult.ok === true && okResult.reason === 'retry_ok',
+      'runRetryLifecycle should map successful retry result to deterministic lifecycle outcome');
+    assert(calls.join('|') === 'finish:retry:123|after',
+      'runRetryLifecycle should finish latency and execute after hook on success without marking failure');
+
+    calls.length = 0;
+    return mod.runRetryLifecycle({
+      beginLatency: () => 456,
+      runRetryFlow: () => Promise.resolve({ ok: false, reason: 'retry_failed' }),
+      presentRetryOutcome: () => ({ ok: false, reason: 'present_failed' }),
+      markRetryFailure: () => { calls.push('mark-failure'); },
+      finishLatency: (metric, startedAt) => { calls.push(`finish:${metric}:${startedAt}`); }
+    });
+  }).then((failedResult) => {
+    assert(failedResult.ok === false && failedResult.reason === 'retry_failed',
+      'runRetryLifecycle should keep deterministic failed reason from retry flow');
+    assert(calls.join('|') === 'mark-failure|finish:retry:456',
+      'runRetryLifecycle should mark failure before finishing latency on unsuccessful presentation/outcome');
+
+    return mod.runRetryLifecycle({
+      beginLatency: () => 0
+    });
+  }).then((missingAdapter) => {
+    assert(missingAdapter.ok === false && missingAdapter.reason === 'missing_retry_flow',
+      'runRetryLifecycle should return deterministic missing adapter outcome when retry flow is absent');
+  });
+}
+
+function testSearchFilterLifecycleUseCase() {
+  const mod = loadSapModule('service/usecase/SearchFilterLifecycleUseCase.js');
+
+  const calls = [];
+  const resetResult = mod.runResetLifecycle({
+    resetFilters: () => { calls.push('reset'); },
+    clearSmartFilters: () => { calls.push('clear'); },
+    rebind: () => { calls.push('rebind'); },
+    syncSelectionState: () => { calls.push('sync'); },
+    refreshInlineAnalytics: (trigger) => { calls.push(trigger); }
+  });
+
+  assert(resetResult.ok === true && resetResult.reason === 'reset_applied',
+    'runResetLifecycle should return deterministic reset result');
+  assert(calls.join('|') === 'reset|clear|rebind|sync|RESET_FILTERS',
+    'runResetLifecycle should execute reset adapters in deterministic order');
+
+  const toggleCalls = [];
+  const toggleResult = mod.runSearchModeToggleLifecycle({
+    looseMode: 1,
+    applySearchMode: (isLoose) => { toggleCalls.push(isLoose ? 'loose' : 'exact'); },
+    updateFilterState: () => { toggleCalls.push('state'); },
+    refreshInlineAnalytics: (trigger) => { toggleCalls.push(trigger); }
+  });
+
+  assert(toggleResult.ok === true && toggleResult.reason === 'search_mode_applied' && toggleResult.looseMode === true,
+    'runSearchModeToggleLifecycle should map loose mode and return deterministic outcome');
+  assert(toggleCalls.join('|') === 'loose|state|SEARCH_MODE_TOGGLE',
+    'runSearchModeToggleLifecycle should execute adapter lifecycle in deterministic order');
+}
+
 function testSearchSmartCoordinatorMetadataRecoveryIntegration() {
   const Filter = createFilterStub();
   const FilterOperator = { Contains: 'Contains', EQ: 'EQ' };
@@ -3508,6 +3993,18 @@ async function main() {
   await runTest('DetailSaveOrchestrationUseCaseNetworkBranch', testDetailSaveOrchestrationUseCaseNetworkBranch);
   await runTest('SearchLoadFilterUseCase', testSearchLoadFilterUseCase);
   await runTest('SearchLoadFilterUseCaseNegative', testSearchLoadFilterUseCaseNegative);
+  await runTest('SearchExportLifecycleUseCase', testSearchExportLifecycleUseCase);
+  await runTest('SearchSelectionLifecycleUseCase', testSearchSelectionLifecycleUseCase);
+  await runTest('SearchResultConvergenceLifecycleUseCase', testSearchResultConvergenceLifecycleUseCase);
+  await runTest('SearchRebindLifecycleUseCase', testSearchRebindLifecycleUseCase);
+  await runTest('SearchRouteLifecycleUseCase', testSearchRouteLifecycleUseCase);
+  await runTest('SearchTriggerPolicyUseCase', testSearchTriggerPolicyUseCase);
+  await runTest('SearchStatusFilterLifecycleUseCase', testSearchStatusFilterLifecycleUseCase);
+  await runTest('SearchWorkflowAnalyticsLifecycleUseCase', testSearchWorkflowAnalyticsLifecycleUseCase);
+  await runTest('SearchToolbarLifecycleUseCase', testSearchToolbarLifecycleUseCase);
+  await runTest('SearchLifecycleSyncUseCase', testSearchLifecycleSyncUseCase);
+  await runTest('SearchRetryLifecycleUseCase', testSearchRetryLifecycleUseCase);
+  await runTest('SearchFilterLifecycleUseCase', testSearchFilterLifecycleUseCase);
   await runTest('SearchSmartCoordinatorMetadataRecoveryIntegration', testSearchSmartCoordinatorMetadataRecoveryIntegration);
   await runTest('SearchFilterHintPresentationUseCase', testSearchFilterHintPresentationUseCase);
   await runTest('SearchInlineAnalyticsPresentationUseCase', testSearchInlineAnalyticsPresentationUseCase);

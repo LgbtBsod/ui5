@@ -204,7 +204,8 @@
 2. Выполнение без ручных подтверждений между шагами.
 3. После каждого шага: code/test/docs sync.
 4. При блокере: root cause + fallback + продолжение незаблокированных задач.
-5. Финал wave: commit + PR с change->artifact->test + risks + rollback.
+5. Каждый wave обязан включать pair-delivery: code refactor + CSS/style consistency pass для того же блока.
+6. Финал wave: commit + PR с change->artifact->test + risks + rollback.
 
 ---
 
