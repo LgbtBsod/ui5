@@ -15,3 +15,27 @@
 - Wave Detail-FullRefactor: Detail controller full-pass extraction completed for close-flow orchestration, toggle-edit lock flow, and save-flow envelope using `DetailCloseFlowOrchestrationUseCase`, `DetailToggleEditOrchestrationUseCase`, `DetailSaveFlowOrchestrationUseCase`; smoke and Wave D gates updated.
 
 - Wave Refactor-Normalization: grouped Detail selection-meta sync extracted to `DetailSelectionMetaSyncUseCase`; extracted flow wrappers standardized fallback outcome to `no_result`; wave-d regression matrix extended.
+
+- Wave Search-FilterLifecycle: extracted search filter reset/toggle orchestration from `Search.controller.js` into `SearchFilterLifecycleUseCase` to advance thin-adapter profile and deterministic lifecycle ordering; smoke coverage extended.
+
+- Wave Search-RetryLifecycle: extracted retry-load lifecycle envelope from `Search.controller.js` into `SearchRetryLifecycleUseCase` (latency start/finish, failure instrumentation, message presentation hook, post-apply hook) with deterministic fallback `missing_retry_flow`; smoke coverage extended.
+
+- Wave Search-LifecycleSync+StatusStrip: extracted analytics/filter-hint lifecycle synchronization to `SearchLifecycleSyncUseCase` (SmartTable dataReceived + fallback search sync) and completed CSS unified status-strip hierarchy pass for filter-hint/degraded/load-error stack.
+
+- Wave Search-ToolbarLifecycle+ToolbarCSS: extracted Search action-toolbar lifecycle envelope to `SearchToolbarLifecycleUseCase` (create/copy/delete/export intent) and completed toolbar hierarchy CSS pass for spacing/chips alignment/responsive wrap.
+
+- Wave Search-AnalyticsDialogLifecycle+DialogCSS: extracted workflow analytics dialog lifecycle envelope to `SearchWorkflowAnalyticsLifecycleUseCase` (open/load/close + degraded handling) and completed analytics dialog hierarchy CSS pass.
+
+- Wave Search-StatusFilterLifecycle+StatusChipCSS: extracted status-filter press lifecycle to `SearchStatusFilterLifecycleUseCase` and completed status-chip/action emphasis CSS consistency pass.
+
+- Wave Search-TriggerPolicy+CompactCSS: extracted unified SmartFilter/search-mode/status-filter/reset trigger policy to `SearchTriggerPolicyUseCase` and completed compact breakpoint CSS consistency pass for SmartFilter+chips interactions.
+
+- Wave Search-RouteLifecycle+RouteEntryCSS: extracted route-matched lifecycle bundle to `SearchRouteLifecycleUseCase` and completed route-entry visual stability CSS pass for first-frame consistency.
+
+- Wave Search-RebindLifecycle+SmartTableCSS: extracted SmartTable rebind/dataReceived lifecycle to `SearchRebindLifecycleUseCase` and completed SmartTable header/actions compact consistency CSS pass.
+
+- Wave Search-ConvergenceLifecycle+NoDataCSS: extracted search-result summary+empty-state convergence bundle to `SearchResultConvergenceLifecycleUseCase` and completed summary/no-data transition CSS consistency pass.
+
+- Wave Search-SelectionLifecycle+SelectionCSS: extracted smart/fallback selection lifecycle to `SearchSelectionLifecycleUseCase` and completed selection affordance CSS pass for selected/focus/compact states.
+
+- Wave Search-ExportLifecycle+ExportCSS: extracted export execution/intent presentation convergence to `SearchExportLifecycleUseCase` and completed export action emphasis CSS consistency pass.
