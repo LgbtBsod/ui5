@@ -769,8 +769,8 @@ This addendum operationalizes the branded UI transition and aligns with the requ
 - [x] Plan updated with Horizon + iOS/macOS brand migration chapters (C5/C6).
 - [x] CSS governance gate script scaffolded: `scripts/css-accent-governance-gate.js`.
 - [x] Enterprise UX gate chain updated to include CSS governance gate.
-- [ ] Pair snapshots baseline matrix wired into CI.
-- [ ] Theme preferences contract RFC + backend capability flag.
+- [x] Pair snapshots baseline matrix wired into CI.
+- [x] Theme preferences contract RFC + backend capability flag.
 
 ---
 

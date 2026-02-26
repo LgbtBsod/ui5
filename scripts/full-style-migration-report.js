@@ -7,13 +7,17 @@ const checks = [
   'docs/DEVELOPMENT_PLAN.md',
   'docs/artifacts/control-token-mapping.json',
   'docs/artifacts/theme-parity-report.json',
+  'docs/artifacts/pair-snapshots-baseline-matrix.json',
+  'docs/artifacts/theme-preferences-contract-rfc.md',
   'docs/artifacts/ux-state-coverage.json',
   'docs/artifacts/message-taxonomy-meta.json',
   'docs/artifacts/rollback-playbook-template.md',
   'scripts/css-accent-governance-gate.js',
   'scripts/semantic-contrast-gate.js',
   'scripts/theme-parity-gate.js',
-  'scripts/control-token-mapping-gate.js'
+  'scripts/pair-snapshots-gate.js',
+  'scripts/control-token-mapping-gate.js',
+  'scripts/theme-preferences-contract-gate.js'
 ];
 
 const missing = checks.filter((p) => !fs.existsSync(p));
@@ -36,7 +40,7 @@ const report = {
     },
     themeParityMotion: {
       status: 'done',
-      evidence: ['docs/artifacts/theme-parity-report.json', 'scripts/theme-parity-gate.js']
+      evidence: ['docs/artifacts/theme-parity-report.json', 'docs/artifacts/pair-snapshots-baseline-matrix.json', 'scripts/theme-parity-gate.js', 'scripts/pair-snapshots-gate.js']
     },
     accessibilitySemantics: {
       status: 'done',
@@ -44,7 +48,7 @@ const report = {
     },
     releaseHardening: {
       status: 'done',
-      evidence: ['scripts/ci/enterprise-ux-gate.sh', 'docs/artifacts/rollback-playbook-template.md']
+      evidence: ['scripts/ci/enterprise-ux-gate.sh', 'docs/artifacts/rollback-playbook-template.md', 'docs/artifacts/theme-preferences-contract-rfc.md', 'scripts/theme-preferences-contract-gate.js']
     }
   },
   doneCriteria: {

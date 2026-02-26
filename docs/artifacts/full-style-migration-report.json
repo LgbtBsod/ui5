@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-26T21:35:30.242Z",
+  "generatedAt": "2026-02-26T21:49:28.976Z",
   "ui5Baseline": "1.71.28",
   "phases": {
     "foundationGovernance": {
@@ -20,7 +20,9 @@
       "status": "done",
       "evidence": [
         "docs/artifacts/theme-parity-report.json",
-        "scripts/theme-parity-gate.js"
+        "docs/artifacts/pair-snapshots-baseline-matrix.json",
+        "scripts/theme-parity-gate.js",
+        "scripts/pair-snapshots-gate.js"
       ]
     },
     "accessibilitySemantics": {
@@ -35,7 +37,9 @@
       "status": "done",
       "evidence": [
         "scripts/ci/enterprise-ux-gate.sh",
-        "docs/artifacts/rollback-playbook-template.md"
+        "docs/artifacts/rollback-playbook-template.md",
+        "docs/artifacts/theme-preferences-contract-rfc.md",
+        "scripts/theme-preferences-contract-gate.js"
       ]
     }
   },
