@@ -5,6 +5,7 @@
             <t:TreeTable
                 id="locationValueHelpTreeTable"
                 selectionMode="Single"
+                selectionBehavior="RowOnly"
                 enableColumnReordering="false"
                 visibleRowCountMode="Auto"
                 minAutoRowCount="8"

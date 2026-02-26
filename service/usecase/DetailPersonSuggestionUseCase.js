@@ -8,6 +8,26 @@ sap.ui.define([], function () {
         return String(vValue || "").trim().toLowerCase();
     }
 
+    function getField(oPerson, aKeys) {
+        for (var i = 0; i < aKeys.length; i += 1) {
+            var sKey = aKeys[i];
+            if (oPerson && oPerson[sKey] !== undefined && oPerson[sKey] !== null) {
+                return oPerson[sKey];
+            }
+        }
+        return "";
+    }
+
+    function normalizePerson(oPerson) {
+        return {
+            perner: getField(oPerson, ["perner", "PERNER", "personnel_number"]),
+            fullName: getField(oPerson, ["fullName", "full_name", "FULL_NAME", "name"]),
+            position: getField(oPerson, ["position", "POSITION"]),
+            orgUnit: getField(oPerson, ["orgUnit", "org_unit", "ORG_UNIT"]),
+            integrationName: getField(oPerson, ["integrationName", "integration_name", "INTEGRATION_NAME"])
+        };
+    }
+
     function resolveSuggestionTargetPath(sTarget) {
         return sTarget === "observed" ? "/observedSuggestions" : "/observerSuggestions";
     }
@@ -17,7 +37,7 @@ sap.ui.define([], function () {
         var aPersons = (mArgs && mArgs.persons) || [];
         var iLimit = (mArgs && mArgs.limit) || 10;
 
-        var aFiltered = aPersons.filter(function (oPerson) {
+        var aFiltered = aPersons.map(normalizePerson).filter(function (oPerson) {
             var sName = normalize(oPerson && oPerson.fullName, mArgs && mArgs.normalizeText);
             var sPernr = normalize(oPerson && oPerson.perner, mArgs && mArgs.normalizeText);
             var sPosition = normalize(oPerson && oPerson.position, mArgs && mArgs.normalizeText);
@@ -33,7 +53,8 @@ sap.ui.define([], function () {
     function dedupeSuggestions(aSuggestions) {
         var mSeen = {};
         return (aSuggestions || []).filter(function (oPerson) {
-            var sKey = String((oPerson && oPerson.perner) || "") + "|" + String((oPerson && oPerson.fullName) || "") + "|" + String((oPerson && oPerson.position) || "");
+            var oNormalized = normalizePerson(oPerson);
+            var sKey = String((oNormalized && oNormalized.perner) || "") + "|" + String((oNormalized && oNormalized.fullName) || "") + "|" + String((oNormalized && oNormalized.position) || "");
             if (mSeen[sKey]) {
                 return false;
             }
@@ -52,7 +73,7 @@ sap.ui.define([], function () {
         if (!oViewModel || typeof oViewModel.setProperty !== "function") {
             return false;
         }
-        oViewModel.setProperty(resolveSuggestionTargetPath(mArgs && mArgs.target), (mArgs && mArgs.suggestions) || []);
+        oViewModel.setProperty(resolveSuggestionTargetPath(mArgs && mArgs.target), ((mArgs && mArgs.suggestions) || []).map(normalizePerson));
         return true;
     }
 
@@ -66,12 +87,12 @@ sap.ui.define([], function () {
         var oCtx = oItem.getBindingContext("view");
         return {
             target: sTarget,
-            person: oCtx && oCtx.getObject ? oCtx.getObject() : null
+            person: normalizePerson(oCtx && oCtx.getObject ? oCtx.getObject() : null)
         };
     }
 
     function applyPersonSelection(mArgs) {
-        var oPerson = mArgs && mArgs.person;
+        var oPerson = normalizePerson(mArgs && mArgs.person);
         var oSelectedModel = mArgs && mArgs.selectedModel;
         if (!oPerson || !oSelectedModel || typeof oSelectedModel.setProperty !== "function") {
             return false;
@@ -93,6 +114,7 @@ sap.ui.define([], function () {
         applySuggestionsToViewModel: applySuggestionsToViewModel,
         resolvePersonFromSuggestionEvent: resolvePersonFromSuggestionEvent,
         applyPersonSelection: applyPersonSelection,
-        dedupeSuggestions: dedupeSuggestions
+        dedupeSuggestions: dedupeSuggestions,
+        normalizePerson: normalizePerson
     };
 });

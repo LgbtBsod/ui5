@@ -91,7 +91,20 @@ sap.ui.define([], function () {
 
     function resolveNodeFromTreeSelectionEvent(oEvent) {
         var oContext = oEvent && oEvent.getParameter ? oEvent.getParameter("rowContext") : null;
-        return oContext && oContext.getObject ? oContext.getObject() : null;
+        if (oContext && oContext.getObject) {
+            return oContext.getObject();
+        }
+
+        var oTable = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+        if (!oTable || typeof oTable.getSelectedIndex !== "function" || typeof oTable.getContextByIndex !== "function") {
+            return null;
+        }
+        var iIndex = oTable.getSelectedIndex();
+        if (iIndex < 0) {
+            return null;
+        }
+        var oSelectedContext = oTable.getContextByIndex(iIndex);
+        return oSelectedContext && oSelectedContext.getObject ? oSelectedContext.getObject() : null;
     }
 
     function resolveNodeFromComboChangeEvent(oEvent, sModelName) {
@@ -111,6 +124,10 @@ sap.ui.define([], function () {
             viewModel: mArgs.viewModel,
             buildLocationTree: mArgs.buildLocationTree
         });
+
+        if (mArgs.table && typeof mArgs.table.clearSelection === "function") {
+            mArgs.table.clearSelection();
+        }
 
         return Promise.resolve(mArgs.ensureLocationsLoaded()).then(function (aLocations) {
             applyFilteredTreeToViewModel({

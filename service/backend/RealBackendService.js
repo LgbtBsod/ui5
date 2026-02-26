@@ -20,8 +20,21 @@ sap.ui.define([], function () {
         return sBase + sPath;
     }
 
+
+    function _isLifecycleTracePath(sPath) {
+        return /lock|autosave|checklist|update|create|release|heartbeat|status/i.test(String(sPath || ""));
+    }
+
+    function _logRequestPhase(sPhase, sPath, mDetails) {
+        if (!_isLifecycleTracePath(sPath)) {
+            return;
+        }
+        var fn = sPhase === "error" ? console.warn : console.info;
+        fn.call(console, "[backend:" + sPhase + "]", Object.assign({ path: sPath }, mDetails || {}));
+    }
     function _request(sPath, mOptions) {
         var mOpts = mOptions || {};
+        var sMethod = mOpts.method || "GET";
         var sUrl = _joinUrl(_baseUrl, sPath);
 
         if (mOpts.params) {
@@ -29,22 +42,41 @@ sap.ui.define([], function () {
             sUrl += (sUrl.indexOf("?") >= 0 ? "&" : "?") + oParams.toString();
         }
 
+        _logRequestPhase("request", sPath, {
+            method: sMethod,
+            session_guid: _sessionGuid,
+            hasBody: !!mOpts.body
+        });
+
         return fetch(sUrl, {
-            method: mOpts.method || "GET",
+            method: sMethod,
             headers: Object.assign({ "Content-Type": "application/json" }, mOpts.headers || {}),
             body: mOpts.body ? JSON.stringify(mOpts.body) : undefined
         }).then(function (oResponse) {
             if (!oResponse.ok) {
                 return oResponse.text().then(function (sText) {
+                    _logRequestPhase("error", sPath, {
+                        method: sMethod,
+                        status: oResponse.status,
+                        responseText: sText || ""
+                    });
                     throw new Error(("HTTP " + oResponse.status + " for " + sPath + (sText ? ": " + sText : "")));
                 });
             }
 
             if (oResponse.status === 204) {
+                _logRequestPhase("response", sPath, { method: sMethod, status: oResponse.status });
                 return null;
             }
 
-            return oResponse.json();
+            return oResponse.json().then(function (oJson) {
+                _logRequestPhase("response", sPath, {
+                    method: sMethod,
+                    status: oResponse.status,
+                    ok: true
+                });
+                return oJson;
+            });
         });
     }
 
@@ -618,8 +650,9 @@ createCheckList: function (oData) {
             return _request("/config/frontend").catch(function () {
                 return {
                     search: { defaultMaxResults: 100, growingThreshold: 10 },
-                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000 },
+                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 600000 },
                 source: "fallback_defaults",
+                    variables: { validationSource: "real_frontend_fallback" },
                     requiredFields: [
                         "/basic/date",
                         "/basic/time",

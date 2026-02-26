@@ -3,6 +3,7 @@
     <Switch
         state="{= ${state>/mode} === 'EDIT' }"
         enabled="{= !${state>/lockOperationPending} }"
+        busy="{state>/lockOperationPending}"
         change=".onToggleEdit"
         class="accentSwitch"/>
     <ObjectStatus

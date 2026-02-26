@@ -1,0 +1,478 @@
+{
+  "generatedAt": "2026-02-26T16:23:08.857Z",
+  "fileCount": 12,
+  "entities": [
+    {
+      "file": "view/App.view.xml",
+      "type": "view",
+      "lines": 27,
+      "topControls": [
+        {
+          "tag": "html:div",
+          "count": 1
+        },
+        {
+          "tag": "Button",
+          "count": 1
+        },
+        {
+          "tag": "Toolbar",
+          "count": 1
+        },
+        {
+          "tag": "Title",
+          "count": 1
+        },
+        {
+          "tag": "ToolbarSpacer",
+          "count": 1
+        },
+        {
+          "tag": "ObjectStatus",
+          "count": 1
+        },
+        {
+          "tag": "f:FlexibleColumnLayout",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/Detail.view.xml",
+      "type": "view",
+      "lines": 272,
+      "topControls": [
+        {
+          "tag": "Text",
+          "count": 32
+        },
+        {
+          "tag": "VBox",
+          "count": 17
+        },
+        {
+          "tag": "HBox",
+          "count": 14
+        },
+        {
+          "tag": "Column",
+          "count": 10
+        },
+        {
+          "tag": "Input",
+          "count": 8
+        },
+        {
+          "tag": "Button",
+          "count": 7
+        },
+        {
+          "tag": "ObjectStatus",
+          "count": 6
+        },
+        {
+          "tag": "core:Item",
+          "count": 5
+        },
+        {
+          "tag": "Title",
+          "count": 4
+        },
+        {
+          "tag": "core:Fragment",
+          "count": 3
+        },
+        {
+          "tag": "Toolbar",
+          "count": 3
+        },
+        {
+          "tag": "ToolbarSpacer",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "file": "view/Search.view.xml",
+      "type": "view",
+      "lines": 191,
+      "topControls": [
+        {
+          "tag": "Text",
+          "count": 17
+        },
+        {
+          "tag": "VBox",
+          "count": 8
+        },
+        {
+          "tag": "Button",
+          "count": 7
+        },
+        {
+          "tag": "Title",
+          "count": 6
+        },
+        {
+          "tag": "smartFilterBar:ControlConfiguration",
+          "count": 6
+        },
+        {
+          "tag": "HBox",
+          "count": 4
+        },
+        {
+          "tag": "BusyIndicator",
+          "count": 4
+        },
+        {
+          "tag": "Label",
+          "count": 4
+        },
+        {
+          "tag": "core:Item",
+          "count": 4
+        },
+        {
+          "tag": "layoutData",
+          "count": 4
+        },
+        {
+          "tag": "OverflowToolbarLayoutData",
+          "count": 4
+        },
+        {
+          "tag": "Column",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/BarriersExpandedDialog.fragment.xml",
+      "type": "fragment",
+      "lines": 32,
+      "topControls": [
+        {
+          "tag": "Column",
+          "count": 5
+        },
+        {
+          "tag": "Text",
+          "count": 5
+        },
+        {
+          "tag": "Input",
+          "count": 2
+        },
+        {
+          "tag": "Button",
+          "count": 2
+        },
+        {
+          "tag": "Dialog",
+          "count": 1
+        },
+        {
+          "tag": "content",
+          "count": 1
+        },
+        {
+          "tag": "VBox",
+          "count": 1
+        },
+        {
+          "tag": "Table",
+          "count": 1
+        },
+        {
+          "tag": "columns",
+          "count": 1
+        },
+        {
+          "tag": "items",
+          "count": 1
+        },
+        {
+          "tag": "ColumnListItem",
+          "count": 1
+        },
+        {
+          "tag": "cells",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/ChecksExpandedDialog.fragment.xml",
+      "type": "fragment",
+      "lines": 32,
+      "topControls": [
+        {
+          "tag": "Column",
+          "count": 5
+        },
+        {
+          "tag": "Text",
+          "count": 5
+        },
+        {
+          "tag": "Input",
+          "count": 2
+        },
+        {
+          "tag": "Button",
+          "count": 2
+        },
+        {
+          "tag": "Dialog",
+          "count": 1
+        },
+        {
+          "tag": "content",
+          "count": 1
+        },
+        {
+          "tag": "VBox",
+          "count": 1
+        },
+        {
+          "tag": "Table",
+          "count": 1
+        },
+        {
+          "tag": "columns",
+          "count": 1
+        },
+        {
+          "tag": "items",
+          "count": 1
+        },
+        {
+          "tag": "ColumnListItem",
+          "count": 1
+        },
+        {
+          "tag": "cells",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/DetailControlRail.fragment.xml",
+      "type": "fragment",
+      "lines": 28,
+      "topControls": [
+        {
+          "tag": "Button",
+          "count": 8
+        },
+        {
+          "tag": "ObjectStatus",
+          "count": 3
+        },
+        {
+          "tag": "customData",
+          "count": 3
+        },
+        {
+          "tag": "core:CustomData",
+          "count": 3
+        },
+        {
+          "tag": "Text",
+          "count": 2
+        },
+        {
+          "tag": "VBox",
+          "count": 1
+        },
+        {
+          "tag": "HBox",
+          "count": 1
+        },
+        {
+          "tag": "Title",
+          "count": 1
+        },
+        {
+          "tag": "core:Fragment",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/LocationValueHelpDialog.fragment.xml",
+      "type": "fragment",
+      "lines": 29,
+      "topControls": [
+        {
+          "tag": "Dialog",
+          "count": 1
+        },
+        {
+          "tag": "VBox",
+          "count": 1
+        },
+        {
+          "tag": "SearchField",
+          "count": 1
+        },
+        {
+          "tag": "t:TreeTable",
+          "count": 1
+        },
+        {
+          "tag": "t:columns",
+          "count": 1
+        },
+        {
+          "tag": "t:Column",
+          "count": 1
+        },
+        {
+          "tag": "Label",
+          "count": 1
+        },
+        {
+          "tag": "t:template",
+          "count": 1
+        },
+        {
+          "tag": "Text",
+          "count": 1
+        },
+        {
+          "tag": "beginButton",
+          "count": 1
+        },
+        {
+          "tag": "Button",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/LockKilledBanner.fragment.xml",
+      "type": "fragment",
+      "lines": 9,
+      "topControls": [
+        {
+          "tag": "MessageStrip",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/LockSwitchStatus.fragment.xml",
+      "type": "fragment",
+      "lines": 14,
+      "topControls": [
+        {
+          "tag": "BusyIndicator",
+          "count": 1
+        },
+        {
+          "tag": "Switch",
+          "count": 1
+        },
+        {
+          "tag": "ObjectStatus",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/SearchLoadStatePanel.fragment.xml",
+      "type": "fragment",
+      "lines": 27,
+      "topControls": [
+        {
+          "tag": "MessageStrip",
+          "count": 3
+        },
+        {
+          "tag": "VBox",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/TestUserDialog.fragment.xml",
+      "type": "fragment",
+      "lines": 17,
+      "topControls": [
+        {
+          "tag": "Dialog",
+          "count": 1
+        },
+        {
+          "tag": "VBox",
+          "count": 1
+        },
+        {
+          "tag": "Text",
+          "count": 1
+        },
+        {
+          "tag": "Input",
+          "count": 1
+        },
+        {
+          "tag": "beginButton",
+          "count": 1
+        },
+        {
+          "tag": "Button",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "view/fragment/WorkflowAnalyticsDialog.fragment.xml",
+      "type": "fragment",
+      "lines": 48,
+      "topControls": [
+        {
+          "tag": "VBox",
+          "count": 8
+        },
+        {
+          "tag": "Text",
+          "count": 8
+        },
+        {
+          "tag": "Title",
+          "count": 6
+        },
+        {
+          "tag": "MessageStrip",
+          "count": 2
+        },
+        {
+          "tag": "HBox",
+          "count": 2
+        },
+        {
+          "tag": "ProgressIndicator",
+          "count": 2
+        },
+        {
+          "tag": "Dialog",
+          "count": 1
+        },
+        {
+          "tag": "content",
+          "count": 1
+        },
+        {
+          "tag": "endButton",
+          "count": 1
+        },
+        {
+          "tag": "Button",
+          "count": 1
+        }
+      ]
+    }
+  ]
+}
