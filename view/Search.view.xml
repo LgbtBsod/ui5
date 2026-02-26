@@ -96,13 +96,7 @@
 
                     <OverflowToolbar class="toolbarTransparent searchCriteriaActions sapUiTinyMarginTop">
                         <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="{= !${view>/useSmartControls} }"/>
-                        <ToolbarSpacer/>
-                        <HBox class="maxRowsWrap" alignItems="Center" renderType="Bare">
-                            <Label text="{i18n>searchMaxResultsLabel}" class="sapUiTinyMarginEnd"/>
-                            <Input value="{state>/searchMaxResults}" type="Number" placeholder="{i18n>maxRowsAllPlaceholder}" width="8rem" change=".onMaxRowsChange" class="maxRowsInput"/>
-                        </HBox>
-                        <Label text="{i18n>searchModeLabel}" class="searchModeLabel sapUiTinyMarginBegin sapUiTinyMarginEnd"/>
-                        <Switch state="{= ${state>/searchMode} === 'LOOSE' }" change=".onSearchModeToggle" customTextOn="" customTextOff="" class="accentSwitch"/>
+
                     </OverflowToolbar>
                 </VBox>
 
@@ -119,25 +113,7 @@
                         <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/canDelete}" visible="{view>/hasSelection}" class="brandActionBtn searchDeleteActionBtn sapUiTinyMarginEnd">
                             <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                         </Button>
-                        <MenuButton text="{i18n>exportMenuButton}" buttonMode="Split" defaultAction=".onExportMenuDefault" enabled="{view>/canExport}" class="brandActionBtn brandActionGhost searchExportActionBtn sapUiTinyMarginEnd" icon="sap-icon://excel-attachment">
-                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
-                            <menu>
-                                <Menu itemSelected=".onExportMenuAction">
-                                    <items>
-                                        <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view">
-                                            <customData><core:CustomData key="entity" value="screen"/></customData>
-                                        </MenuItem>
-                                        <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2">
-                                            <customData><core:CustomData key="entity" value="barrier"/></customData>
-                                        </MenuItem>
-                                        <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection">
-                                            <customData><core:CustomData key="entity" value="check"/></customData>
-                                        </MenuItem>
-                                    </items>
-                                </Menu>
-                            </menu>
-                        </MenuButton>
-                    </OverflowToolbar>
+                        </OverflowToolbar>
 
                     <HBox class="searchToolbarMetaRail sapUiTinyMarginBottom" renderType="Bare" wrap="Wrap" alignItems="Center" justifyContent="Start">
                         <ObjectStatus text="{view>/resultSummary}" state="Information" class="searchSummaryStatusChip sapUiTinyMarginEnd"/>
@@ -146,23 +122,77 @@
                     </HBox>
 
                     <smartTable:SmartTable
-                        id="searchSmartTable"
-                        entitySet="ChecklistRoots"
-                        smartFilterId="searchSmartFilterBar"
-                        tableType="ResponsiveTable"
-                        useVariantManagement="true"
-                        useTablePersonalisation="true"
-                        showRowCount="true"
-                        showFullScreenButton="true"
-                        demandPopin="true"
-                        header="{i18n>resultsLabel}"
-                        persistencyKey="pcctSmartTable"
-                        enableAutoBinding="false"
-                        visible="{view>/useSmartControls}"
-                        beforeRebindTable=".onBeforeSmartTableRebind"
-                        initialise=".onSmartTableInitialise"
-                        initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
-                        useExportToExcel="false" requestAtLeastFields="id,checklist_id,status,lpc,changed_on"/>
+    id="searchSmartTable"
+    entitySet="ChecklistRoots"
+    smartFilterId="searchSmartFilterBar"
+    tableType="ResponsiveTable"
+    useVariantManagement="true"
+    useTablePersonalisation="true"
+    showRowCount="true"
+    showFullScreenButton="true"
+    demandPopin="true"
+    header="{i18n>resultsLabel}"
+    persistencyKey="pcctSmartTable"
+    enableAutoBinding="false"
+    visible="{view>/useSmartControls}"
+    beforeRebindTable=".onBeforeSmartTableRebind"
+    initialise=".onSmartTableInitialise"
+    initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
+    useExportToExcel="false" 
+    requestAtLeastFields="id,checklist_id,status,lpc,changed_on">
+
+    <smartTable:customToolbar>
+        <OverflowToolbar id="smartTableCustomToolbar" class="toolbarTransparent">
+            <ToolbarSpacer />
+
+            <Input 
+                value="{state>/searchMaxResults}" 
+                type="Number" 
+                placeholder="{i18n>searchMaxResultsLabel}" 
+                width="10rem" 
+                change=".onMaxRowsChange" 
+                class="maxRowsInput"/>
+
+            <Switch 
+                state="{= ${state>/searchMode} === 'LOOSE' }" 
+                change=".onSearchModeToggle" 
+                customTextOn="" 
+                customTextOff="" 
+                class="accentSwitch">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="Low" />
+                </layoutData>
+            </Switch>
+
+            <MenuButton 
+                text="{i18n>exportMenuButton}" 
+                buttonMode="Split" 
+                defaultAction=".onExportMenuDefault" 
+                enabled="{view>/canExport}" 
+                class="brandActionBtn brandActionGhost" 
+                icon="sap-icon://excel-attachment">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="Low"/>
+                </layoutData>
+                <menu>
+                    <Menu itemSelected=".onExportMenuAction">
+                        <items>
+                            <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view">
+                                <customData><core:CustomData key="entity" value="screen"/></customData>
+                            </MenuItem>
+                            <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2">
+                                <customData><core:CustomData key="entity" value="barrier"/></customData>
+                            </MenuItem>
+                            <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection">
+                                <customData><core:CustomData key="entity" value="check"/></customData>
+                            </MenuItem>
+                        </items>
+                    </Menu>
+                </menu>
+            </MenuButton>
+        </OverflowToolbar>
+    </smartTable:customToolbar>
+</smartTable:SmartTable>
 
                     <Table id="searchFallbackTable" visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>
