@@ -28,9 +28,20 @@ sap.ui.define([], function () {
 
     function resolveFilterPatch(mData) {
         var oData = mData || {};
+
+        function pickFirstNonEmptyValue(aCandidates) {
+            for (var iIndex = 0; iIndex < aCandidates.length; iIndex += 1) {
+                var sCandidate = extractSmartFilterValue(aCandidates[iIndex]);
+                if (String(sCandidate || "").trim()) {
+                    return sCandidate;
+                }
+            }
+            return "";
+        }
+
         return {
-            filterId: extractSmartFilterValue(oData.id || oData.checklist_id || oData.CHECKLIST_ID),
-            filterLpc: extractSmartFilterValue(oData.lpc || oData.LPC_KEY || oData.LPC)
+            filterId: pickFirstNonEmptyValue([oData.checklist_id, oData.CHECKLIST_ID, oData.id, oData.ID]),
+            filterLpc: pickFirstNonEmptyValue([oData.lpc, oData.LPC_KEY, oData.LPC])
         };
     }
 

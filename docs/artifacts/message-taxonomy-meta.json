@@ -1,0 +1,7 @@
+{
+  "searchLoadError": { "severity": "error", "owner": "FE", "tone": "actionable" },
+  "saveConflictMessage": { "severity": "warning", "owner": "FE", "tone": "informative" },
+  "deleteSuccess": { "severity": "success", "owner": "FE", "tone": "confirming" },
+  "validationRequiredField": { "severity": "warning", "owner": "FE", "tone": "guidance" },
+  "networkRetryInfo": { "severity": "info", "owner": "FE", "tone": "reassuring" }
+}

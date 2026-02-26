@@ -2,13 +2,19 @@
 const fs = require('fs');
 
 const requiredDocs = [
-  'docs/ux/accessibility-baseline.md',
+  'docs/DEVELOPMENT_PLAN.md',
   'css/style.css',
   'view/fragment/DetailControlRail.fragment.xml'
 ];
 const missing = requiredDocs.filter((p) => !fs.existsSync(p));
 if (missing.length) {
   console.error(`C2 gate failed: missing required artifacts: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
+const plan = fs.readFileSync('docs/DEVELOPMENT_PLAN.md', 'utf8');
+if (!plan.includes('reduced-motion') || !plan.includes('contrast-safe')) {
+  console.error('C2 gate failed: reduced-motion / contrast-safe requirements missing in DEVELOPMENT_PLAN.');
   process.exit(1);
 }
 

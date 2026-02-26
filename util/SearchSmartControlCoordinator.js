@@ -143,6 +143,7 @@ sap.ui.define([
             oObject.id
             || oObject.ID
             || oObject.ChecklistId
+            || oObject.checklist_id
             || oObject.CHECKLIST_ID
             || (((oObject.root || {}).id) || "")
         ).trim();

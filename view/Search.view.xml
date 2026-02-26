@@ -204,7 +204,7 @@
                         <items>
                             <ColumnListItem>
                                 <cells>
-                                    <ObjectIdentifier title="{data>root/id}" text="{data>basic/checklist_id}"/>
+                                    <ObjectIdentifier title="{data>root/id}" text="{= ${data>basic/CHECKLIST_ID} || ${data>basic/checklist_id} || ${data>root/id} }"/>
                                     <ObjectStatus text="{data>root/status}" state="{path:'data>root/status', formatter:'.formatStatus'}"/>
                                     <Text text="{data>basic/LPC_TEXT}"/>
                                     <Text text="{data>basic/OBSERVER_FULLNAME}"/>
