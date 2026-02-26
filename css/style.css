@@ -2371,6 +2371,7 @@ body.themeLifestyleNightOps .filterCard {
 /* Wave 58: status-chip/action emphasis consistency */
 .searchSummaryStatusChip,
 .searchStageStatusChip {
+  transition: transform .16s ease, box-shadow .2s ease, border-color .2s ease;
   transition: opacity .16s ease, transform .16s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
@@ -2468,11 +2469,21 @@ body.themeLifestyleNightOps .filterCard {
   }
 }
 
+/* Wave 62: summary/no-data transition consistency */
+.searchResultsTable .sapMListNoData,
+.searchResultsTable .sapMListTblEmptyRow,
+.searchResultsTable .sapMListTblEmptyCell {
+  transition: opacity .16s ease, transform .16s ease;
+}
 
 .searchResultsTable .sapMListNoData {
   opacity: .92;
 }
 
+.searchSummaryStatusChip,
+.searchStageStatusChip {
+  transition: opacity .16s ease, transform .16s ease, box-shadow .2s ease;
+}
 
 /* Wave 63: selection affordance consistency */
 .searchResultsTable .sapMLIBSelected .sapMListTblCell,
