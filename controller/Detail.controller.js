@@ -25,14 +25,16 @@ sap.ui.define([
   "sap_ui5/service/usecase/DetailCloseFlowUseCase",
   "sap_ui5/service/usecase/DetailToolbarValidationUseCase",
   "sap_ui5/service/usecase/DetailSaveErrorPresentationUseCase",
+  "sap_ui5/service/usecase/DetailSaveErrorOutcomePresentationUseCase",
   "sap_ui5/service/usecase/DetailLocationValueHelpUseCase",
   "sap_ui5/service/usecase/DetailPersonSuggestionUseCase",
   "sap_ui5/service/usecase/DetailDictionarySelectionUseCase",
   "sap_ui5/service/usecase/DetailLpcBarrierWarningFlowUseCase",
   "sap_ui5/service/usecase/DetailIntegrationEditWarningUseCase",
   "sap_ui5/service/usecase/DetailUnsavedDecisionFlowUseCase",
-  "sap_ui5/service/usecase/DetailCloseNavigationFlowUseCase"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, DetailUnsavedDecisionFlowUseCase, DetailCloseNavigationFlowUseCase) {
+  "sap_ui5/service/usecase/DetailCloseNavigationFlowUseCase",
+  "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, DetailUnsavedDecisionFlowUseCase, DetailCloseNavigationFlowUseCase, OperationalKpiInstrumentationUseCase) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -223,6 +225,14 @@ sap.ui.define([
       return DetailFormatters.draftStateState(bDirty);
     },
 
+    formatLockOperationText: function (sOperationText, sMode) {
+      return DetailFormatters.lockOperationText(sOperationText, sMode, this.getResourceBundle());
+    },
+
+    formatLockOperationState: function (sOperationState, sMode) {
+      return DetailFormatters.lockOperationState(sOperationState, sMode);
+    },
+
     formatLifecycleStatusState: function (sStatus) {
       return DetailFormatters.lifecycleStatusState(sStatus);
     },
@@ -297,6 +307,7 @@ sap.ui.define([
       oStateModel.setProperty("/layout", sLayout);
       oStateModel.setProperty("/activeObjectId", bCreate ? null : (sId || null));
       oStateModel.setProperty("/objectAction", "");
+      oStateModel.setProperty("/copySourceId", bCopy ? (sId || null) : null);
 
       this._prepareLocationTree();
 
@@ -321,6 +332,7 @@ sap.ui.define([
         oCopy.root.id = "";
         oDataModel.setProperty("/selectedChecklist", oCopy);
         this.getModel("selected").setData(ChecklistDraftHelper.clone(oCopy));
+        oStateModel.setProperty("/activeObjectId", null);
         oStateModel.setProperty("/mode", "EDIT");
         oStateModel.setProperty("/isDirty", true);
         this._updateSelectionState();
@@ -407,6 +419,11 @@ sap.ui.define([
       return !!(oComp && oComp._oSmartCache && oComp._oSmartCache.isCacheValid && oComp._oSmartCache.isCacheValid("checkLists"));
     },
 
+    _isChecklistCacheStrictFresh: function () {
+      var oComp = this.getOwnerComponent();
+      return !!(oComp && oComp._oSmartCache && oComp._oSmartCache.isCacheStrictFresh && oComp._oSmartCache.isCacheStrictFresh("checkLists"));
+    },
+
     _reloadChecklistFromBackend: function (sId) {
       var oDataModel = this.getModel("data");
       return this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
@@ -422,9 +439,11 @@ sap.ui.define([
       if (!sId) {
         return Promise.resolve(null);
       }
-      if (this._isChecklistCacheValid()) {
+
+      if (this._isChecklistCacheStrictFresh()) {
         return Promise.resolve(this.getModel("data").getProperty("/selectedChecklist") || null);
       }
+
       return this._reloadChecklistFromBackend(sId);
     },
 
@@ -874,6 +893,7 @@ sap.ui.define([
       MessageBox.warning(this.getResourceBundle().getText("checklistValidationFailed", [
         DetailToolbarValidationUseCase.resolveValidationWarningCount(oValidation)
       ]));
+      OperationalKpiInstrumentationUseCase.markValidationFailure(this.getModel("state"));
       return Promise.resolve(false);
     },
 
@@ -947,6 +967,35 @@ sap.ui.define([
       oViewModel.setProperty("/infoCards", aItems);
     },
 
+
+    _syncCreateCopyKeyMappingAfterSave: function (sSavedId, bCreateMode) {
+      var sRealId = String(sSavedId || "").trim();
+      if (!sRealId) {
+        return;
+      }
+
+      var oComp = this.getOwnerComponent();
+      var oSmartCache = oComp && oComp._oSmartCache;
+      if (!oSmartCache || typeof oSmartCache.setKeyMapping !== "function") {
+        return;
+      }
+
+      if (bCreateMode) {
+        oSmartCache.setKeyMapping("__create", sRealId);
+      }
+
+      var oStateModel = this.getModel("state");
+      var sCopySourceId = String((oStateModel && oStateModel.getProperty("/copySourceId")) || "").trim();
+      if (sCopySourceId) {
+        oSmartCache.setKeyMapping(sCopySourceId, sRealId);
+      }
+
+      var oCacheModel = this.getModel("cache");
+      if (oCacheModel && typeof oCacheModel.setProperty === "function" && typeof oSmartCache.snapshot === "function") {
+        oCacheModel.setProperty("/keyMapping", oSmartCache.snapshot().keyMapping);
+      }
+    },
+
     onSaveDetail: function () {
       var oStateModel = this.getModel("state");
       var oDataModel = this.getModel("data");
@@ -954,6 +1003,8 @@ sap.ui.define([
       var sId = ((((oEdited || {}).root || {}).id) || "").trim();
 
       var bCreateMode = !sId;
+      OperationalKpiInstrumentationUseCase.markSaveAttempt(oStateModel);
+      var iSaveLatencyStartedAt = OperationalKpiInstrumentationUseCase.beginLatencySample();
 
       return this.runWithStateFlag(oStateModel, "/isLoading", function () {
         return DetailSaveOrchestrationUseCase.runSaveFlow({
@@ -980,6 +1031,11 @@ sap.ui.define([
                 this.navTo("detail", { id: sSavedId, layout: "TwoColumnsMidExpanded" }, true);
               }.bind(this)
             });
+
+            var sSavedId = String(((((oResult || {}).savedChecklist || {}).root || {}).id) || "").trim();
+            this._syncCreateCopyKeyMappingAfterSave(sSavedId, bCreateMode);
+            OperationalKpiInstrumentationUseCase.markSaveSuccess(oStateModel);
+            OperationalKpiInstrumentationUseCase.finishLatencySample(oStateModel, "save", iSaveLatencyStartedAt);
           }.bind(this),
           handleSaveError: function (oError) {
             return DetailSaveErrorPresentationUseCase.handleSaveError({
@@ -999,7 +1055,19 @@ sap.ui.define([
               onOverwrite: function () {
                 return ChecklistCrudUseCase.forceUpdateChecklist(sId, oEdited);
               }
-            });
+            }).then(function (oHandledResult) {
+              DetailSaveErrorOutcomePresentationUseCase.presentOutcome({
+                result: oHandledResult,
+                bundle: this.getResourceBundle(),
+                showToast: MessageToast.show
+              });
+              OperationalKpiInstrumentationUseCase.markSaveFailed(oStateModel);
+              if (["reloaded", "legacy_reload", "overwritten", "legacy_overwrite", "cancelled"].indexOf(String((oHandledResult || {}).reason || "")) >= 0) {
+                OperationalKpiInstrumentationUseCase.markConflict(oStateModel);
+              }
+              OperationalKpiInstrumentationUseCase.finishLatencySample(oStateModel, "save", iSaveLatencyStartedAt);
+              return oHandledResult;
+            }.bind(this));
           }.bind(this)
         });
       }.bind(this));

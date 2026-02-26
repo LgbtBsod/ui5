@@ -131,6 +131,11 @@ sap.ui.define([
             return sState === "FRESH" || sState === "STALE_OK";
         },
 
+
+        isCacheStrictFresh: function (sKey) {
+            return this.getFreshnessState(sKey) === "FRESH";
+        },
+
         snapshot: function () {
             return {
                 freshness: Object.assign({}, this._mFreshness),

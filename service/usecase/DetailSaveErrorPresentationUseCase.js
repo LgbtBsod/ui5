@@ -18,14 +18,63 @@ sap.ui.define([
         };
     }
 
+
+    function isErrorLike(vResult) {
+        return !!(vResult && typeof vResult === "object" && typeof vResult.message === "string"
+            && (typeof vResult.name === "string" || typeof vResult.stack === "string"));
+    }
+
+    function normalizeHandledResult(vResult, mArgs) {
+        if (vResult && typeof vResult === "object" && vResult.reason) {
+            return {
+                ok: vResult.ok !== false,
+                reason: vResult.reason,
+                result: Object.prototype.hasOwnProperty.call(vResult, "result") ? vResult.result : vResult
+            };
+        }
+
+        if (isErrorLike(vResult)) {
+            return {
+                ok: false,
+                reason: "backend_error",
+                result: null,
+                error: vResult
+            };
+        }
+
+        if (vResult === null || typeof vResult === "undefined") {
+            return { ok: false, reason: "cancelled", result: null };
+        }
+
+        if (vResult === mArgs.reloadLabel) {
+            return { ok: true, reason: "legacy_reload", result: vResult };
+        }
+
+        if (vResult === mArgs.overwriteLabel) {
+            return { ok: true, reason: "legacy_overwrite", result: vResult };
+        }
+
+        return { ok: true, reason: "handled", result: vResult };
+    }
+
     function handleSaveError(mArgs) {
         var mAdapter = createBackendErrorAdapter(mArgs);
-        return mArgs.handleBackendError(mArgs.host, mArgs.error, mAdapter);
+        return mArgs.handleBackendError(mArgs.host, mArgs.error, mAdapter).then(function (vResult) {
+            return normalizeHandledResult(vResult, mArgs);
+        }).catch(function (oError) {
+            return {
+                ok: false,
+                reason: "backend_error",
+                result: null,
+                error: oError || null
+            };
+        });
     }
 
     return {
         createConflictAdapter: createConflictAdapter,
         createBackendErrorAdapter: createBackendErrorAdapter,
+        normalizeHandledResult: normalizeHandledResult,
         handleSaveError: handleSaveError
     };
 });

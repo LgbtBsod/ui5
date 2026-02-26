@@ -88,13 +88,19 @@ sap.ui.define([], function () {
     function applyBannerState(mArgs) {
         var oStateModel = mArgs && mArgs.stateModel;
         if (!oStateModel || typeof oStateModel.setProperty !== "function") {
-            return false;
+            return {
+                ok: false,
+                reason: "missing_state_model_adapter"
+            };
         }
 
         var bShouldSetBanner = !!(mArgs && mArgs.shouldSetBanner);
         oStateModel.setProperty("/loadError", bShouldSetBanner);
         oStateModel.setProperty("/loadErrorMessage", bShouldSetBanner ? String((mArgs && mArgs.bannerText) || "") : "");
-        return true;
+        return {
+            ok: true,
+            reason: "applied"
+        };
     }
 
     function presentRetryOutcome(mArgs) {
@@ -106,11 +112,20 @@ sap.ui.define([], function () {
             fallbackText: oPresentation.fallbackText
         });
 
-        applyBannerState({
+        var oBannerStateResult = applyBannerState({
             stateModel: mArgs && mArgs.stateModel,
             shouldSetBanner: oPresentation.shouldSetBanner,
             bannerText: oPresentation.bannerText
         });
+
+        if (oPresentation.shouldSetBanner && (!oBannerStateResult || !oBannerStateResult.ok)) {
+            return {
+                ok: false,
+                reason: "missing_state_model_adapter",
+                message: sText,
+                presentation: oPresentation
+            };
+        }
 
         var fnShowToast = mArgs && mArgs.showToast;
         if (typeof fnShowToast === "function" && sText) {
@@ -125,11 +140,20 @@ sap.ui.define([], function () {
             } catch (_e) {
                 return {
                     ok: false,
-                    reason: "toast_error",
+                    reason: oPresentation.shouldSetBanner ? "toast_error_banner_applied" : "toast_error",
                     message: sText,
                     presentation: oPresentation
                 };
             }
+        }
+
+        if (oPresentation.shouldSetBanner) {
+            return {
+                ok: true,
+                reason: "banner_only",
+                message: sText,
+                presentation: oPresentation
+            };
         }
 
         return {

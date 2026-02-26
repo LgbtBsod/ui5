@@ -96,26 +96,7 @@
 
 
 
-                <MessageStrip
-                    text="{view>/filterHintText}"
-                    type="{view>/filterHintType}"
-                    visible="{view>/filterHintVisible}"
-                    showIcon="true"
-                    class="sapUiTinyMarginBottom searchFilterHintBanner"/>
-
-                <MessageStrip
-                    text="{= ${view>/smartControlsReason} || ${i18n>smartControlsUnavailable} }"
-                    type="Warning"
-                    visible="{= !${view>/useSmartControls} }"
-                    showIcon="true"
-                    class="sapUiTinyMarginBottom searchLoadStateBanner"/>
-
-                <MessageStrip
-                    text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
-                    type="Error"
-                    visible="{state>/loadError}"
-                    showIcon="true"
-                    class="sapUiTinyMarginBottom searchLoadStateBanner searchLoadErrorBanner"/>
+                <core:Fragment fragmentName="sap_ui5.view.fragment.SearchLoadStatePanel" type="XML"/>
 
                 <VBox class="glassCard smartTableGlass searchResultsTable">
                     <Toolbar class="toolbarTransparent tableActionToolbar searchToolbar searchActionToolbarDensity searchFeedbackToolbar sapUiTinyMarginBottom">

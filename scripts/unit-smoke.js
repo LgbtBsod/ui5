@@ -58,6 +58,30 @@ function createFilterStub() {
   return Filter;
 }
 
+
+function testDetailFormattersLockOperationPresentation() {
+  const mod = loadSapModule('util/DetailFormatters.js');
+  const bundle = {
+    getText: (k) => ({ modeEdit: 'Edit mode', modeRead: 'Read mode' }[k] || k)
+  };
+
+  assert(mod.lockOperationText('Custom text', 'READ', bundle) === 'Custom text',
+    'lockOperationText should prefer explicit operation text');
+  assert(mod.lockOperationText('', 'EDIT', bundle) === 'Edit mode',
+    'lockOperationText should fallback to modeEdit text in EDIT mode');
+  assert(mod.lockOperationText('', 'READ', bundle) === 'Read mode',
+    'lockOperationText should fallback to modeRead text in READ mode');
+
+  assert(mod.lockOperationState('SUCCESS', 'READ') === 'Success',
+    'lockOperationState should map SUCCESS to Success');
+  assert(mod.lockOperationState('ERROR', 'EDIT') === 'Error',
+    'lockOperationState should map ERROR to Error');
+  assert(mod.lockOperationState('', 'EDIT') === 'Success',
+    'lockOperationState should fallback to Success in EDIT mode');
+  assert(mod.lockOperationState('', 'READ') === 'Information',
+    'lockOperationState should fallback to Information in READ mode');
+}
+
 function testDetailLifecycleUseCase() {
   const mod = loadSapModule('service/usecase/DetailLifecycleUseCase.js');
   const m = {};
@@ -122,11 +146,19 @@ function testSearchSmartControlCoordinator() {
   mod.syncAvailability({ stateModel, viewModel, unavailableText: 'fallback', bootstrap: () => { bootCalled += 1; } });
   assert(viewState['/useSmartControls'] === false, 'syncAvailability should disable controls when metadata failed');
   assert(viewState['/smartControlsReason'] === 'meta-fail', 'syncAvailability should set explicit reason');
+  assert(viewState['/smartControlsReasonCode'] === 'metadata_error',
+    'syncAvailability should expose metadata_error reason code for consolidation');
   assert(bootCalled === 0, 'syncAvailability should not bootstrap when metadata failed');
+
+  const pendingAvailability = mod.resolveMetadataAvailability({ metadataOk: null, metadataError: '', unavailableText: 'fallback' });
+  assert(pendingAvailability.enabled === true && pendingAvailability.reasonCode === 'metadata_pending',
+    'resolveMetadataAvailability should expose metadata_pending state while metadata is unresolved');
 
   state['/mainServiceMetadataOk'] = true;
   mod.syncAvailability({ stateModel, viewModel, unavailableText: 'fallback', bootstrap: () => { bootCalled += 1; } });
   assert(viewState['/useSmartControls'] === true, 'syncAvailability should re-enable controls on metadata recovery');
+  assert(viewState['/smartControlsReasonCode'] === 'metadata_ready',
+    'syncAvailability should expose metadata_ready reason code after recovery');
   assert(bootCalled === 1, 'syncAvailability should bootstrap exactly once on recovery');
 
   const id = mod.extractChecklistId({ root: { id: 'A1' } });
@@ -355,20 +387,83 @@ function testDetailSaveErrorPresentationUseCase() {
     error: new Error('conflict'),
     handleBackendError: (host, err, adapter) => {
       backendCalls += 1;
-      return adapter.onConflictChoice('reload').then(() => adapter.onConflictChoice('cancel')).then((v) => {
-        assert(v === null, 'handleSaveError should allow retry abort path on unknown conflict choice');
-        return { hostId: host.id, error: err.message };
-      });
+      return adapter.onConflictChoice('reload').then(() => adapter.onConflictChoice('cancel'));
     },
     reloadLabel: 'reload',
     overwriteLabel: 'overwrite',
     onReload: () => { reloadCalls += 1; return Promise.resolve('reloaded'); },
     onOverwrite: () => { overwriteCalls += 1; return Promise.resolve('overwritten'); }
   }).then((res) => {
-    assert(res.hostId === 'H1' && res.error === 'conflict', 'handleSaveError should delegate to backend error adapter with host+error');
+    assert(res.ok === false && res.reason === 'cancelled' && res.result === null,
+      'handleSaveError should normalize cancelled conflict flow outcome');
     assert(backendCalls === 1, 'handleSaveError should call backend error handler once');
     assert(conflictCalls === 2 && reloadCalls === 1 && overwriteCalls === 0,
       'createConflictAdapter should route reload and keep abort decision side-effect free');
+
+    const normalizedLegacy = mod.normalizeHandledResult('reload', { reloadLabel: 'reload', overwriteLabel: 'overwrite' });
+    assert(normalizedLegacy.ok === true && normalizedLegacy.reason === 'legacy_reload',
+      'normalizeHandledResult should map legacy reload label to structured outcome');
+
+    const normalizedError = mod.normalizeHandledResult(new Error('resolved-backend-error'), { reloadLabel: 'reload', overwriteLabel: 'overwrite' });
+    assert(normalizedError.ok === false && normalizedError.reason === 'backend_error' && normalizedError.error.message === 'resolved-backend-error',
+      'normalizeHandledResult should map resolved Error objects to backend_error outcome');
+
+    return mod.handleSaveError({
+      host: { id: 'H2' },
+      error: new Error('network-error'),
+      handleBackendError: () => Promise.resolve(new Error('backend-returned-error-object')),
+      reloadLabel: 'reload',
+      overwriteLabel: 'overwrite',
+      onReload: () => Promise.resolve(),
+      onOverwrite: () => Promise.resolve()
+    });
+  }).then((backendResolvedError) => {
+    assert(backendResolvedError.ok === false && backendResolvedError.reason === 'backend_error' && backendResolvedError.error && backendResolvedError.error.message === 'backend-returned-error-object',
+      'handleSaveError should normalize resolved Error objects from backend adapter to backend_error outcome');
+
+    return mod.handleSaveError({
+      host: { id: 'H3' },
+      error: new Error('network-error'),
+      handleBackendError: () => Promise.reject(new Error('backend-failed')),
+      reloadLabel: 'reload',
+      overwriteLabel: 'overwrite',
+      onReload: () => Promise.resolve(),
+      onOverwrite: () => Promise.resolve()
+    });
+  }).then((backendFailure) => {
+    assert(backendFailure.ok === false && backendFailure.reason === 'backend_error' && backendFailure.error && backendFailure.error.message === 'backend-failed',
+      'handleSaveError should normalize backend adapter rejections to backend_error outcome');
+  });
+}
+
+
+function testDetailEditOrchestrationFreshnessFailure() {
+  const mod = loadSapModule('service/usecase/DetailEditOrchestrationUseCase.js');
+  let recoverCalls = 0;
+  let acquireCalls = 0;
+  let acquireFailedCalls = 0;
+
+  return mod.runToggleEditFlow({
+    editMode: true,
+    isDirty: false,
+    shouldPromptBeforeDisableEdit: () => false,
+    isCancelDecision: () => false,
+    confirmUnsaved: () => Promise.resolve('SAVE'),
+    runPendingRelease: () => Promise.resolve(),
+    runPendingToggle: (fn) => fn(),
+    releaseEdit: () => Promise.resolve(),
+    ensureFreshBeforeEdit: () => Promise.reject(new Error('freshness check failed')),
+    confirmIntegrationEdit: () => Promise.resolve(true),
+    onStayReadOnly: () => {},
+    acquireLock: () => { acquireCalls += 1; return Promise.resolve({ success: true }); },
+    onLockAcquired: () => {},
+    tryRecoverFromAcquireError: () => { recoverCalls += 1; return Promise.resolve(false); },
+    onAcquireFailed: () => { acquireFailedCalls += 1; return Promise.resolve('freshness-failed'); }
+  }).then((res) => {
+    assert(res === 'freshness-failed', 'runToggleEditFlow should route freshness failures to onAcquireFailed');
+    assert(acquireCalls === 0, 'runToggleEditFlow should not attempt acquireLock when freshness check fails');
+    assert(recoverCalls === 0 && acquireFailedCalls === 1,
+      'runToggleEditFlow should not try recovery for pre-acquire failures and should call onAcquireFailed once');
   });
 }
 
@@ -551,18 +646,89 @@ function testSearchUiFlowUseCase() {
   assert(mod.hasDialog({}) === true, 'hasDialog should detect existing dialog');
 }
 
+
+function testDetailSaveErrorOutcomePresentationUseCase() {
+  const mod = loadSapModule('service/usecase/DetailSaveErrorOutcomePresentationUseCase.js');
+
+  assert(mod.resolveMessageKey('reloaded') === 'saveConflictReloaded',
+    'resolveMessageKey should map reloaded outcome');
+  assert(mod.resolveMessageKey('missing_overwrite_handler') === 'saveConflictHandlerMissing',
+    'resolveMessageKey should map missing-handler outcome');
+  assert(mod.resolveMessageKey('unknown') === '',
+    'resolveMessageKey should return empty key for unknown outcomes');
+
+  const bundle = {
+    getText: (k, params) => ({
+      saveConflictCancelled: 'Save cancelled by user.',
+      genericOperationFailed: `Operation failed: ${(params || [])[0] || ''}`
+    }[k] || '')
+  };
+  const messages = [];
+
+  const presented = mod.presentOutcome({
+    result: { reason: 'cancelled' },
+    bundle,
+    showToast: (text) => messages.push(text)
+  });
+  assert(presented.ok === true && presented.reason === 'presented' && presented.messageKey === 'saveConflictCancelled' && messages[0] === 'Save cancelled by user.',
+    'presentOutcome should return structured presented outcome for cancelled branch');
+
+  const unknown = mod.presentOutcome({ result: { reason: 'unknown' }, bundle, showToast: () => {} });
+  assert(unknown.ok === false && unknown.reason === 'unknown_outcome',
+    'presentOutcome should return structured unknown_outcome for unmapped branches');
+
+  const missingAdapter = mod.presentOutcome({ result: { reason: 'cancelled' }, bundle, showToast: null });
+  assert(missingAdapter.ok === false && missingAdapter.reason === 'missing_toast_adapter',
+    'presentOutcome should return missing_toast_adapter when toast callback is absent');
+
+  const missingBundle = mod.presentOutcome({ result: { reason: 'cancelled' }, bundle: null, showToast: () => {} });
+  assert(missingBundle.ok === false && missingBundle.reason === 'missing_bundle_adapter',
+    'presentOutcome should return missing_bundle_adapter when bundle adapter is absent');
+
+
+  const backendPresented = mod.presentOutcome({
+    result: { reason: 'backend_error', error: new Error('backend-failed') },
+    bundle,
+    showToast: (text) => messages.push(text)
+  });
+  assert(backendPresented.ok === true && backendPresented.messageKey === 'genericOperationFailed' && messages[messages.length - 1] === 'Operation failed: backend-failed',
+    'presentOutcome should map backend_error to genericOperationFailed message with error param');
+}
+
 function testDetailSaveConflictUseCase() {
   const mod = loadSapModule('service/usecase/DetailSaveConflictUseCase.js');
 
   let reloaded = 0;
   let overwritten = 0;
-  mod.handleConflictChoice('reload', {
+  return mod.handleConflictChoice('reload', {
     reloadLabel: 'reload',
     overwriteLabel: 'overwrite',
-    onReload: () => { reloaded += 1; return Promise.resolve(); },
-    onOverwrite: () => { overwritten += 1; return Promise.resolve(); }
+    onReload: () => { reloaded += 1; return Promise.resolve('reloaded'); },
+    onOverwrite: () => { overwritten += 1; return Promise.resolve('overwritten'); }
+  }).then((reloadRes) => {
+    assert(reloaded === 1 && overwritten === 0 && reloadRes.ok === true && reloadRes.reason === 'reloaded',
+      'handleConflictChoice should dispatch reload and return reloaded outcome');
+
+    return mod.handleConflictChoice('cancel', {
+      reloadLabel: 'reload',
+      overwriteLabel: 'overwrite',
+      onReload: () => Promise.resolve(),
+      onOverwrite: () => Promise.resolve()
+    });
+  }).then((cancelRes) => {
+    assert(cancelRes.ok === false && cancelRes.reason === 'cancelled',
+      'handleConflictChoice should return cancelled outcome on unknown choice');
+
+    return mod.handleConflictChoice('overwrite', {
+      reloadLabel: 'reload',
+      overwriteLabel: 'overwrite',
+      onReload: null,
+      onOverwrite: null
+    });
+  }).then((missingHandlerRes) => {
+    assert(missingHandlerRes.ok === false && missingHandlerRes.reason === 'missing_overwrite_handler',
+      'handleConflictChoice should return missing handler outcome when overwrite adapter is absent');
   });
-  assert(reloaded === 1 && overwritten === 0, 'handleConflictChoice should dispatch reload');
 }
 
 
@@ -727,6 +893,10 @@ function testDetailSaveSuccessFlowUseCase() {
   const selectedModel = { setData: (v) => { selected = v; } };
   let dispatched = 0;
   let toasted = 0;
+  const stateChanges = {};
+  const stateModel = {
+    setProperty: (k, v) => { stateChanges[k] = v; }
+  };
 
   const result = {
     checkLists: [{ id: '1' }],
@@ -737,7 +907,7 @@ function testDetailSaveSuccessFlowUseCase() {
     result,
     dataModel,
     selectedModel,
-    stateModel: {},
+    stateModel,
     dispatchFullSave: () => { dispatched += 1; },
     showSavedToast: () => { toasted += 1; }
   });
@@ -745,6 +915,8 @@ function testDetailSaveSuccessFlowUseCase() {
   assert(Array.isArray(dataState['/checkLists']) && dataState['/visibleCheckLists'].length === 1,
     'applySaveSuccess should write checklist collections');
   assert(selected && selected.root.id === '1', 'applySaveSuccess should refresh selected model');
+  assert(stateChanges['/activeObjectId'] === '1' && stateChanges['/copySourceId'] === null && stateChanges['/objectAction'] === '',
+    'applySaveSuccess should normalize state object references after save');
   assert(dispatched === 1 && toasted === 1, 'applySaveSuccess should call post-save hooks once');
 }
 
@@ -1681,10 +1853,13 @@ function testSearchOpenDetailGuardUseCase() {
 function testSearchSelectionHydrationUseCase() {
   const mod = loadSapModule('service/usecase/SearchSelectionHydrationUseCase.js');
 
-  const missingIdModel = { setData: () => { throw new Error('should-not-write'); } };
-  return mod.runSelectionHydration({ id: '', selectedModel: missingIdModel }).then((missingId) => {
-    assert(missingId.ok === false && missingId.reason === 'missing_id',
-      'runSelectionHydration should short-circuit when id is missing');
+  const missingIdModel = { data: { root: { id: 'STALE' } }, setData(v) { this.data = v; } };
+  const viewMissing = { m: {}, setProperty(k, v) { this.m[k] = v; } };
+  return mod.runSelectionHydration({ id: '', selectedModel: missingIdModel, viewModel: viewMissing }).then((missingId) => {
+    assert(missingId.ok === false && missingId.reason === 'missing_id' && viewMissing.m['/hasSelection'] === false,
+      'runSelectionHydration should short-circuit when id is missing and clear selection flag');
+    assert(Object.keys(missingIdModel.data || {}).length === 0,
+      'runSelectionHydration should clear stale selected model data when id is missing');
 
     return mod.runSelectionHydration({ id: 'CHK-1', selectedModel: null }).then((missingModel) => {
       assert(missingModel.ok === false && missingModel.reason === 'missing_selected_model',
@@ -1862,8 +2037,34 @@ function testSearchRetryMessagePresentationUseCase() {
     bundle,
     stateModel: state
   });
-  assert(missingToast.ok === false && missingToast.reason === 'missing_toast_adapter' && state.m['/loadError'] === true,
-    'presentRetryOutcome should report missing toast adapter and still update banner state');
+  assert(missingToast.ok === true && missingToast.reason === 'banner_only' && state.m['/loadError'] === true,
+    'presentRetryOutcome should return banner_only outcome when toast adapter is absent but banner is applied');
+
+  const toastErrorWithBanner = mod.presentRetryOutcome({
+    result: { ok: false, reason: 'error', attempts: 1, error: new Error('timeout') },
+    bundle,
+    stateModel: state,
+    showToast: () => { throw new Error('toast-failed'); }
+  });
+  assert(toastErrorWithBanner.ok === false && toastErrorWithBanner.reason === 'toast_error_banner_applied'
+    && state.m['/loadError'] === true && state.m['/loadErrorMessage'] === 'timeout',
+    'presentRetryOutcome should expose toast_error_banner_applied when banner is set but toast fails');
+
+  const missingToastNoBanner = mod.presentRetryOutcome({
+    result: { ok: true, rows: [{ id: 1 }] },
+    bundle,
+    stateModel: state
+  });
+
+  const missingStateModel = mod.presentRetryOutcome({
+    result: { ok: false, reason: 'missing_loader' },
+    bundle,
+    showToast: (t) => toasts.push(t)
+  });
+  assert(missingStateModel.ok === false && missingStateModel.reason === 'missing_state_model_adapter',
+    'presentRetryOutcome should fail deterministically when banner branch has no state model adapter');
+  assert(missingToastNoBanner.ok === false && missingToastNoBanner.reason === 'missing_toast_adapter',
+    'presentRetryOutcome should keep missing_toast_adapter for non-banner success branch without toast adapter');
 
   const unknownFallback = mod.presentRetryOutcome({
     result: { ok: false, reason: 'unknown_reason' },
@@ -1874,6 +2075,14 @@ function testSearchRetryMessagePresentationUseCase() {
   });
   assert(unknownFallback.ok === true && unknownFallback.message === 'Unexpected retry result',
     'presentRetryOutcome should fallback for unknown reason and missing bundle key');
+
+  const stateApply = mod.applyBannerState({ stateModel: state, shouldSetBanner: true, bannerText: 'oops' });
+  assert(stateApply.ok === true && stateApply.reason === 'applied',
+    'applyBannerState should return structured applied outcome on valid state model');
+
+  const stateMissing = mod.applyBannerState({ stateModel: null, shouldSetBanner: true, bannerText: 'oops' });
+  assert(stateMissing.ok === false && stateMissing.reason === 'missing_state_model_adapter',
+    'applyBannerState should return missing_state_model_adapter when state model adapter is absent');
 }
 
 function testSearchActionMessagePresentationUseCase() {
@@ -1886,7 +2095,9 @@ function testSearchActionMessagePresentationUseCase() {
         nothingToCopy: 'Select a checklist to copy.',
         deleted: 'Checklist deleted.',
         nothingToDelete: 'Select a checklist to delete.',
-        deleteFailed: `Delete failed: ${(params || [])[0] || ''}`
+        deleteFailed: `Delete failed: ${(params || [])[0] || ''}`,
+        exportEmpty: 'No data to export',
+        exportFailed: `Export failed: ${(params || [])[0] || ''}`
       };
       if (!m[key]) {
         throw new Error('missing-key');
@@ -1914,6 +2125,46 @@ function testSearchActionMessagePresentationUseCase() {
     && messages[messages.length - 1] === 'Delete failed: boom',
     'presentDeleteFlowResult should include backend error message in delete-failed toast');
 
+
+  const disabledExport = mod.presentExportIntentResult({ bundle, showToast, result: { ok: false, reason: 'disabled' } });
+  assert(disabledExport.ok === true && disabledExport.reason === 'presented_disabled' && disabledExport.messageKey === 'exportEmpty'
+    && messages[messages.length - 1] === 'No data to export',
+    'presentExportIntentResult should return presented_disabled and show export-empty message');
+
+  const erroredExport = mod.presentExportIntentResult({ bundle, showToast, result: { ok: false, reason: 'run_error', error: new Error('x') } });
+  assert(erroredExport.ok === true && erroredExport.reason === 'presented_error' && erroredExport.messageKey === 'exportFailed'
+    && messages[messages.length - 1] === 'Export failed: x',
+    'presentExportIntentResult should return presented_error and show export-failed message for run_error');
+
+  const missingRunnerExport = mod.presentExportIntentResult({ bundle, showToast, result: { ok: false, reason: 'missing_run_export' } });
+  assert(missingRunnerExport.ok === true && missingRunnerExport.reason === 'presented_error' && missingRunnerExport.messageKey === 'exportFailed'
+    && messages[messages.length - 1] === 'Export failed: Unknown error',
+    'presentExportIntentResult should return presented_error fallback for missing export runner');
+
+
+
+  const failedDisabledPresentation = mod.presentExportIntentResult({
+    bundle,
+    showToast: () => { throw new Error('toast-failed'); },
+    result: { ok: false, reason: 'disabled' }
+  });
+  assert(failedDisabledPresentation.ok === false && failedDisabledPresentation.reason === 'presentation_failed_disabled',
+    'presentExportIntentResult should return presentation_failed_disabled when disabled toast presentation fails');
+
+  const failedErrorPresentation = mod.presentExportIntentResult({
+    bundle,
+    showToast: () => { throw new Error('toast-failed'); },
+    result: { ok: false, reason: 'run_error', error: new Error('boom') }
+  });
+  assert(failedErrorPresentation.ok === false && failedErrorPresentation.reason === 'presentation_failed_error',
+    'presentExportIntentResult should return presentation_failed_error when error toast presentation fails');
+  const unknownExportReason = mod.presentExportIntentResult({ bundle, showToast, result: { ok: false, reason: 'weird' } });
+  assert(unknownExportReason.ok === false && unknownExportReason.reason === 'unknown_result_reason',
+    'presentExportIntentResult should return unknown_result_reason for unsupported export outcomes');
+
+  const noPresentation = mod.presentExportIntentResult({ bundle, showToast, result: { ok: true } });
+  assert(noPresentation.ok === false && noPresentation.reason === 'no_presentation_needed',
+    'presentExportIntentResult should return no_presentation_needed for successful export intents');
   const fallbackMessages = [];
   assert(mod.presentToastMessage({
     bundle: { getText: () => { throw new Error('bundle-broken'); } },
@@ -2163,6 +2414,40 @@ function testSearchSmartFilterFlowUseCase() {
     'prepareRebindParams should delegate filter composition through applyRebindParams policy');
   assert(!Object.prototype.hasOwnProperty.call(bindingParams.parameters, 'top'),
     'prepareRebindParams should preserve max-results policy and clear top when searchMaxResults is empty');
+}
+
+
+function testOperationalKpiInstrumentationUseCase() {
+  const mod = loadSapModule('service/usecase/OperationalKpiInstrumentationUseCase.js');
+  const state = {
+    m: {},
+    getProperty(k) { return this.m[k]; },
+    setProperty(k, v) { this.m[k] = v; }
+  };
+
+  const bag = mod.ensureKpiBag(state);
+  assert(!!bag && bag.saveAttempts === 0, 'ensureKpiBag should initialize operational KPI bag');
+
+  mod.markSaveAttempt(state);
+  mod.markSaveSuccess(state);
+  mod.markSaveFailed(state);
+  mod.markConflict(state);
+  mod.markValidationFailure(state);
+  mod.markRetryFailure(state);
+
+  assert(state.m['/operationalKpi/saveAttempts'] === 1
+    && state.m['/operationalKpi/saveSuccess'] === 1
+    && state.m['/operationalKpi/saveFailed'] === 1
+    && state.m['/operationalKpi/conflictCount'] === 1
+    && state.m['/operationalKpi/validationFailures'] === 1
+    && state.m['/operationalKpi/retryFailures'] === 1,
+    'KPI counters should increment deterministically');
+
+  const startedAt = mod.beginLatencySample();
+  const done = mod.finishLatencySample(state, 'save', startedAt - 8);
+  assert(done.ok === true && state.m['/operationalKpi/saveLatencySamples'] === 1
+    && Number(state.m['/operationalKpi/saveLatencyMsLast']) >= 0,
+    'finishLatencySample should persist latency sample stats for save prefix');
 }
 
 function testSearchWorkflowAnalyticsDialogUseCase() {
@@ -2703,8 +2988,146 @@ function testSearchFilterHintPresentationUseCase() {
     'resolveHintState should safely handle missing state model');
 }
 
+
+function testWaveB3CriticalJourneysMatrix() {
+  const SearchOpenDetailGuardUseCase = loadSapModule('service/usecase/SearchOpenDetailGuardUseCase.js');
+  const DetailEditOrchestrationUseCase = loadSapModule('service/usecase/DetailEditOrchestrationUseCase.js');
+  const DetailCommandFlowUseCase = loadSapModule('service/usecase/DetailCommandFlowUseCase.js');
+  const DetailLockEditFlowUseCase = loadSapModule('service/usecase/DetailLockEditFlowUseCase.js', {
+    'sap_ui5/service/usecase/DetailEditOrchestrationUseCase': DetailEditOrchestrationUseCase,
+    'sap_ui5/service/usecase/DetailCommandFlowUseCase': DetailCommandFlowUseCase
+  });
+  const DetailSaveOrchestrationUseCase = loadSapModule('service/usecase/DetailSaveOrchestrationUseCase.js');
+  const DetailLifecycleUseCase = loadSapModule('service/usecase/DetailLifecycleUseCase.js');
+  const DetailLockReleaseUseCase = loadSapModule('service/usecase/DetailLockReleaseUseCase.js', {
+    'sap_ui5/service/usecase/DetailLifecycleUseCase': DetailLifecycleUseCase
+  });
+  const SearchCreateCopyNavigationGuardUseCase = loadSapModule('service/usecase/SearchCreateCopyNavigationGuardUseCase.js');
+  const SearchRetryLoadPresentationUseCase = loadSapModule('service/usecase/SearchRetryLoadPresentationUseCase.js');
+  const DetailSaveConflictUseCase = loadSapModule('service/usecase/DetailSaveConflictUseCase.js');
+
+  const stateModel = {
+    m: {},
+    setProperty: function (k, v) { this.m[k] = v; },
+    getProperty: function (k) { return this.m[k]; }
+  };
+
+  return SearchOpenDetailGuardUseCase.runOpenDetailFlow({
+    id: 'CHK-A',
+    confirmNavigation: () => true,
+    buildIntent: (id) => ({ route: 'detail', id }),
+    applyIntent: () => true
+  }).then((openRes) => {
+    assert(openRes.ok === true && openRes.reason === 'applied',
+      'A(read/open): open detail flow should produce applied outcome');
+
+    let acquired = 0;
+    return DetailLockEditFlowUseCase.runToggleEditFlow({
+      editMode: true,
+      isDirty: false,
+      runPendingToggle: (fn) => Promise.resolve(fn()),
+      runPendingRelease: () => Promise.resolve({ ok: true }),
+      releaseEdit: () => Promise.resolve({ ok: true }),
+      confirmUnsaved: () => Promise.resolve('DISCARD'),
+      ensureFreshBeforeEdit: () => Promise.resolve({ ok: true }),
+      confirmIntegrationEdit: () => Promise.resolve(true),
+      acquireLock: () => Promise.resolve({ ok: true }),
+      onLockAcquired: () => { acquired += 1; },
+      tryRecoverFromAcquireError: () => Promise.resolve({ ok: false }),
+      onAcquireFailed: () => {}
+    }).then((editRes) => {
+      assert(editRes.ok === true && acquired === 1,
+        'B(edit/lock): toggle-edit flow should acquire lock and enter edit');
+
+      return DetailSaveOrchestrationUseCase.runSaveFlow({
+        saveChecklist: () => Promise.resolve({ root: { id: 'CHK-C' } }),
+        loadChecklistCollection: () => Promise.resolve([{ root: { id: 'CHK-C' } }]),
+        applySaveResult: () => {},
+        handleSaveError: () => Promise.resolve({ ok: false })
+      }).then((saveRes) => {
+        assert(saveRes.savedChecklist.root.id === 'CHK-C',
+          'C(autosave/fullsave): save orchestration should resolve saved checklist payload');
+
+        let releaseCalled = 0;
+        let idleCalled = 0;
+        return DetailLockReleaseUseCase.runReleaseFlow({
+          stateModel,
+          releaseLock: () => { releaseCalled += 1; return Promise.resolve(); },
+          setLockUiIdle: () => { idleCalled += 1; }
+        }).then(() => {
+          assert(releaseCalled === 1 && idleCalled === 1 && stateModel.getProperty('/mode') === 'READ',
+            'D(unload/release): release flow should set READ mode and clear lock UI pending state');
+
+          let recoverAttempts = 0;
+          let recoveredLock = 0;
+          return DetailLockEditFlowUseCase.runToggleEditFlow({
+            editMode: true,
+            isDirty: false,
+            runPendingToggle: (fn) => Promise.resolve(fn()),
+            runPendingRelease: () => Promise.resolve({ ok: true }),
+            releaseEdit: () => Promise.resolve({ ok: true }),
+            confirmUnsaved: () => Promise.resolve('DISCARD'),
+            ensureFreshBeforeEdit: () => Promise.resolve({ ok: true }),
+            confirmIntegrationEdit: () => Promise.resolve(true),
+            acquireLock: () => Promise.reject(new Error('acquire-failed')),
+            onLockAcquired: () => { recoveredLock += 1; },
+            tryRecoverFromAcquireError: () => {
+              recoverAttempts += 1;
+              return Promise.resolve({ ok: true });
+            },
+            onAcquireFailed: () => {}
+          }).then((recoverRes) => {
+            assert(recoverRes === null && recoverAttempts === 1 && recoveredLock === 0,
+              'E(steal/session-killed recovery): toggle-edit should complete deterministic recovery branch without acquire-failure escalation');
+
+            return SearchCreateCopyNavigationGuardUseCase.runCreateNavigationFlow({
+              confirmNavigation: () => true,
+              buildCreateIntent: () => ({ route: 'detail', mode: 'create' }),
+              applyIntent: () => true
+            }).then((createRes) => {
+              assert(createRes.ok === true && createRes.reason === 'applied',
+                'F(copy/create): create navigation should apply intent');
+
+              return SearchCreateCopyNavigationGuardUseCase.runCopyNavigationFlow({
+                resolveSelectedId: () => 'CHK-F',
+                confirmNavigation: () => true,
+                buildCopyIntent: (id) => ({ route: 'detail', mode: 'copy', id }),
+                applyIntent: () => true
+              }).then((copyRes) => {
+                assert(copyRes.ok === true && copyRes.reason === 'applied',
+                  'F(copy/create): copy navigation should apply intent with selected id');
+
+                return SearchRetryLoadPresentationUseCase.runRetryFlow({
+                  stateModel,
+                  dataModel: { setProperty: () => {} },
+                  getCheckLists: () => Promise.resolve([{ root: { id: 'CHK-G' } }]),
+                  runWithLoading: (fn) => fn(),
+                  maxAttempts: 2
+                }).then((retryRes) => {
+                  assert(retryRes.ok === true && retryRes.rows.length === 1,
+                    'G(retry): retry flow should load rows successfully');
+
+                  return DetailSaveConflictUseCase.handleConflictChoice('Reload', {
+                    reloadLabel: 'Reload',
+                    overwriteLabel: 'Overwrite',
+                    onReload: () => Promise.resolve('done')
+                  }).then((conflictRes) => {
+                    assert(conflictRes.ok === true && conflictRes.reason === 'reloaded',
+                      'H(save conflict): conflict flow should return deterministic reloaded outcome');
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
 async function main() {
   await runTest('DetailLifecycleUseCase', testDetailLifecycleUseCase);
+  await runTest('DetailFormattersLockOperationPresentation', testDetailFormattersLockOperationPresentation);
   await runTest('SearchSmartControlCoordinator', testSearchSmartControlCoordinator);
   await runTest('SearchWorkflowOrchestrator', testSearchWorkflowOrchestrator);
   await runTest('ChecklistValidationService', testChecklistValidationService);
@@ -2712,13 +3135,16 @@ async function main() {
   await runTest('SearchPresentationUseCase', testSearchPresentationUseCase);
   await runTest('DetailToolbarValidationUseCase', testDetailToolbarValidationUseCase);
   await runTest('DetailSaveErrorPresentationUseCase', testDetailSaveErrorPresentationUseCase);
+  await runTest('DetailSaveErrorOutcomePresentationUseCase', testDetailSaveErrorOutcomePresentationUseCase);
   await runTest('DetailDialogLifecycleUseCase', testDetailDialogLifecycleUseCase);
   await runTest('SmartSearchAdapterFilterModes', testSmartSearchAdapterFilterModes);
   await runTest('SearchActionUseCase', testSearchActionUseCase);
   await runTest('DetailCommandFlowUseCase', testDetailCommandFlowUseCase);
   await runTest('SearchUiFlowUseCase', testSearchUiFlowUseCase);
   await runTest('DetailSaveConflictUseCase', testDetailSaveConflictUseCase);
+  await runTest('WaveB3CriticalJourneysMatrix', testWaveB3CriticalJourneysMatrix);
   await runTest('DetailEditOrchestrationUseCase', testDetailEditOrchestrationUseCase);
+  await runTest('DetailEditOrchestrationFreshnessFailure', testDetailEditOrchestrationFreshnessFailure);
   await runTest('SearchAnalyticsExportUseCase', testSearchAnalyticsExportUseCase);
   await runTest('DetailCloseFlowUseCase', testDetailCloseFlowUseCase);
   await runTest('DetailLockReleaseUseCaseNegative', testDetailLockReleaseUseCaseNegative);
@@ -2757,6 +3183,7 @@ async function main() {
   await runTest('SearchExportIntentGuardUseCase', testSearchExportIntentGuardUseCase);
   await runTest('SearchSmartFilterFlowUseCase', testSearchSmartFilterFlowUseCase);
   await runTest('SearchWorkflowAnalyticsDialogUseCase', testSearchWorkflowAnalyticsDialogUseCase);
+  await runTest('OperationalKpiInstrumentationUseCase', testOperationalKpiInstrumentationUseCase);
   await runTest('SearchExportOrchestrationUseCase', testSearchExportOrchestrationUseCase);
   await runTest('WorkflowAnalyticsUseCaseFallback', testWorkflowAnalyticsUseCaseFallback);
   await runTest('WorkflowAnalyticsUseCaseFallbackNegative', testWorkflowAnalyticsUseCaseFallbackNegative);
