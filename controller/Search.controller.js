@@ -18,13 +18,12 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchSmartFilterFlowUseCase",
     "sap_ui5/service/usecase/SearchWorkflowAnalyticsDialogUseCase",
     "sap_ui5/service/usecase/SearchExportOrchestrationUseCase",
-    "sap_ui5/service/usecase/SearchToolbarActionStateUseCase",
     "sap_ui5/service/usecase/SearchNavigationIntentUseCase",
+    "sap_ui5/service/usecase/SearchStateSyncUseCase",
+    "sap_ui5/service/usecase/SearchExecuteFlowUseCase",
+    "sap_ui5/service/usecase/SearchCreateCopyFlowUseCase",
     "sap_ui5/service/usecase/SearchDeleteOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchActionMessagePresentationUseCase",
-    "sap_ui5/service/usecase/SearchSelectionHydrationUseCase",
-    "sap_ui5/service/usecase/SearchOpenDetailGuardUseCase",
-    "sap_ui5/service/usecase/SearchCreateCopyNavigationGuardUseCase",
     "sap_ui5/service/usecase/SearchExportIntentGuardUseCase",
     "sap_ui5/service/usecase/SearchRetryMessagePresentationUseCase",
     "sap_ui5/service/usecase/SearchSummaryPresentationUseCase",
@@ -33,11 +32,12 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchInlineAnalyticsPresentationUseCase",
     "sap_ui5/service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase",
     "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase",
+    "sap_ui5/service/usecase/SearchSelectionOpenFlowUseCase",
     "sap_ui5/util/ExcelExport",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
     "sap_ui5/util/SearchSmartControlCoordinator"
-], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchToolbarActionStateUseCase, SearchNavigationIntentUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchSelectionHydrationUseCase, SearchOpenDetailGuardUseCase, SearchCreateCopyNavigationGuardUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, OperationalKpiInstrumentationUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
+], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -181,40 +181,26 @@ sap.ui.define([
         },
 
         _loadSelectedChecklistById: function (sId) {
-            return SearchSelectionHydrationUseCase.runSelectionHydration({
+            return SearchSelectionOpenFlowUseCase.hydrateSelection({
                 id: sId,
                 selectedModel: this.getModel("selected"),
                 viewModel: this._getViewModel(),
-                loadChecklistById: SearchApplicationService.getChecklistById
+                loadChecklistById: SearchApplicationService.getChecklistById,
+                syncSelectionState: this._syncSearchSelectionState.bind(this)
             }).then(function (oResult) {
-                this._syncSearchSelectionState();
                 return (oResult && oResult.checklist) || null;
-            }.bind(this));
+            });
         },
 
         _openDetailById: function (sId) {
-            return SearchOpenDetailGuardUseCase.runOpenDetailFlow({
+            return SearchSelectionOpenFlowUseCase.openDetail({
                 id: sId,
                 confirmNavigation: this._confirmNavigationFromDirty.bind(this),
-                buildIntent: function (sIntentId) {
-                    return SearchNavigationIntentUseCase.buildOpenDetailIntent({ id: sIntentId });
-                },
-                applyIntent: function (mIntent) {
-                    return SearchNavigationIntentUseCase.applyIntent({
-                        intent: mIntent,
-                        stateModel: this.getModel("state"),
-                        navTo: this.navTo.bind(this)
-                    });
-                }.bind(this)
-            }).then(function (oResult) {
-                if (oResult && oResult.reason === "missing_id") {
-                    SearchActionMessagePresentationUseCase.presentMissingChecklistId({
-                        bundle: this.getResourceBundle(),
-                        showToast: MessageToast.show
-                    });
-                }
-                return oResult;
-            }.bind(this));
+                stateModel: this.getModel("state"),
+                navTo: this.navTo.bind(this),
+                bundle: this.getResourceBundle(),
+                showToast: MessageToast.show
+            });
         },
 
         _onSmartTableSelectionChange: function (oEvent) {
@@ -281,10 +267,7 @@ sap.ui.define([
         },
 
         _onSearchMatched: function () {
-            var oStateModel = this.getModel("state");
-
-            oStateModel.setProperty("/layout", "OneColumn");
-            oStateModel.setProperty("/mode", "READ");
+            SearchStateSyncUseCase.applyRouteMatchedDefaults(this.getModel("state"));
             this._syncSmartControlAvailability();
             this._syncSearchSelectionState();
             this._updateResultSummary();
@@ -389,12 +372,18 @@ sap.ui.define([
             var mPayload = this._buildFilterPayload();
             var sSearchMode = oStateModel.getProperty("/searchMode") || "EXACT";
 
-            return this.runWithStateFlag(oStateModel, "/isLoading", function () {
-                return SearchApplicationService.runSearch(mPayload, sSearchMode, oDataModel.getProperty("/checkLists") || []).then(function (aFiltered) {
-                    oDataModel.setProperty("/visibleCheckLists", aFiltered);
-                    this._updateResultSummary();
-                }.bind(this));
-            }.bind(this));
+            return SearchExecuteFlowUseCase.runExecuteSearchFlow({
+                runWithLoading: function (fnTask) {
+                    return this.runWithStateFlag(oStateModel, "/isLoading", fnTask);
+                }.bind(this),
+                runSearch: function () {
+                    return SearchApplicationService.runSearch(mPayload, sSearchMode, oDataModel.getProperty("/checkLists") || []);
+                },
+                applyRows: function (aFiltered) {
+                    oDataModel.setProperty("/visibleCheckLists", aFiltered || []);
+                },
+                afterApply: this._updateResultSummary.bind(this)
+            });
         },
 
         onFallbackSelectionChange: function (oEvent) {
@@ -420,13 +409,7 @@ sap.ui.define([
         },
 
         _syncSearchSelectionState: function () {
-            SearchSelectionNavigationUseCase.syncSelectionState({
-                selectedModel: this.getModel("selected"),
-                dataModel: this.getModel("data"),
-                viewModel: this._getViewModel()
-            });
-
-            SearchToolbarActionStateUseCase.applyActionStateToViewModel({
+            return SearchStateSyncUseCase.syncSelectionAndActionState({
                 selectedModel: this.getModel("selected"),
                 dataModel: this.getModel("data"),
                 viewModel: this._getViewModel(),
@@ -436,46 +419,22 @@ sap.ui.define([
         },
 
         onCreate: function () {
-            return SearchCreateCopyNavigationGuardUseCase.runCreateNavigationFlow({
+            return SearchCreateCopyFlowUseCase.runCreateFlow({
                 confirmNavigation: this._confirmNavigationFromDirty.bind(this),
-                buildCreateIntent: SearchNavigationIntentUseCase.buildCreateIntent,
-                applyIntent: function (mIntent) {
-                    return SearchNavigationIntentUseCase.applyIntent({
-                        intent: mIntent,
-                        stateModel: this.getModel("state"),
-                        navTo: this.navTo.bind(this)
-                    });
-                }.bind(this)
+                stateModel: this.getModel("state"),
+                navTo: this.navTo.bind(this)
             });
         },
 
         onCopy: function () {
-            return SearchCreateCopyNavigationGuardUseCase.runCopyNavigationFlow({
-                resolveSelectedId: function () {
-                    return SearchNavigationIntentUseCase.resolveSelectedId({
-                        selectedModel: this.getModel("selected")
-                    });
-                }.bind(this),
+            return SearchCreateCopyFlowUseCase.runCopyFlow({
+                selectedModel: this.getModel("selected"),
                 confirmNavigation: this._confirmNavigationFromDirty.bind(this),
-                buildCopyIntent: function (sSelectedId) {
-                    return SearchNavigationIntentUseCase.buildCopyIntent({ selectedId: sSelectedId });
-                },
-                applyIntent: function (mIntent) {
-                    return SearchNavigationIntentUseCase.applyIntent({
-                        intent: mIntent,
-                        stateModel: this.getModel("state"),
-                        navTo: this.navTo.bind(this)
-                    });
-                }.bind(this)
-            }).then(function (oResult) {
-                if (oResult && oResult.reason === "missing_selection") {
-                    SearchActionMessagePresentationUseCase.presentCopyMissingSelection({
-                        bundle: this.getResourceBundle(),
-                        showToast: MessageToast.show
-                    });
-                }
-                return oResult;
-            }.bind(this));
+                stateModel: this.getModel("state"),
+                navTo: this.navTo.bind(this),
+                bundle: this.getResourceBundle(),
+                showToast: MessageToast.show
+            });
         },
 
         onDelete: function () {

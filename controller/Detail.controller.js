@@ -13,16 +13,12 @@ sap.ui.define([
   "sap_ui5/util/DetailFormatters",
   "sap_ui5/service/usecase/ChecklistCrudUseCase",
   "sap_ui5/service/usecase/DetailLifecycleUseCase",
-  "sap_ui5/service/usecase/DetailCommandFlowUseCase",
   "sap_ui5/service/usecase/DetailStatusRowUseCase",
   "sap_ui5/service/usecase/DetailStatusCommandUseCase",
   "sap_ui5/service/usecase/DetailExpandedRowsFlowUseCase",
-  "sap_ui5/service/usecase/DetailSaveOrchestrationUseCase",
   "sap_ui5/service/usecase/DetailDialogLifecycleUseCase",
-  "sap_ui5/service/usecase/DetailLockEditFlowUseCase",
   "sap_ui5/service/usecase/DetailLockReleaseUseCase",
   "sap_ui5/service/usecase/DetailSaveSuccessFlowUseCase",
-  "sap_ui5/service/usecase/DetailCloseFlowUseCase",
   "sap_ui5/service/usecase/DetailToolbarValidationUseCase",
   "sap_ui5/service/usecase/DetailSaveErrorPresentationUseCase",
   "sap_ui5/service/usecase/DetailSaveErrorOutcomePresentationUseCase",
@@ -31,10 +27,12 @@ sap.ui.define([
   "sap_ui5/service/usecase/DetailDictionarySelectionUseCase",
   "sap_ui5/service/usecase/DetailLpcBarrierWarningFlowUseCase",
   "sap_ui5/service/usecase/DetailIntegrationEditWarningUseCase",
-  "sap_ui5/service/usecase/DetailUnsavedDecisionFlowUseCase",
-  "sap_ui5/service/usecase/DetailCloseNavigationFlowUseCase",
-  "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailCommandFlowUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailSaveOrchestrationUseCase, DetailDialogLifecycleUseCase, DetailLockEditFlowUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailCloseFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, DetailUnsavedDecisionFlowUseCase, DetailCloseNavigationFlowUseCase, OperationalKpiInstrumentationUseCase) {
+  "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase",
+  "sap_ui5/service/usecase/DetailCloseFlowOrchestrationUseCase",
+  "sap_ui5/service/usecase/DetailToggleEditOrchestrationUseCase",
+  "sap_ui5/service/usecase/DetailSaveFlowOrchestrationUseCase",
+  "sap_ui5/service/usecase/DetailSelectionMetaSyncUseCase"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailDialogLifecycleUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, OperationalKpiInstrumentationUseCase, DetailCloseFlowOrchestrationUseCase, DetailToggleEditOrchestrationUseCase, DetailSaveFlowOrchestrationUseCase, DetailSelectionMetaSyncUseCase) {
   "use strict";
 
   return BaseController.extend("sap_ui5.controller.Detail", {
@@ -134,9 +132,11 @@ sap.ui.define([
     },
 
     _syncSelectionMeta: function () {
-      this._syncDirtyFlag();
-      this._updateSelectionState();
-      this._updateDerivedRootResult();
+      return DetailSelectionMetaSyncUseCase.runSelectionMetaSync({
+        syncDirty: this._syncDirtyFlag.bind(this),
+        updateSelectionState: this._updateSelectionState.bind(this),
+        updateDerivedRootResult: this._updateDerivedRootResult.bind(this)
+      });
     },
 
     _releaseEditLock: function (sObjectId, sSessionId, oStateModel) {
@@ -319,8 +319,7 @@ sap.ui.define([
         this.getModel("selected").setData(ChecklistDraftHelper.clone(oDraft));
         oStateModel.setProperty("/mode", "EDIT");
         DetailLifecycleUseCase.resetDirty(oStateModel);
-        this._updateSelectionState();
-        this._updateDerivedRootResult();
+        this._syncSelectionMeta();
         return;
       }
 
@@ -335,8 +334,7 @@ sap.ui.define([
         oStateModel.setProperty("/activeObjectId", null);
         oStateModel.setProperty("/mode", "EDIT");
         oStateModel.setProperty("/isDirty", true);
-        this._updateSelectionState();
-        this._updateDerivedRootResult();
+        this._syncSelectionMeta();
         return;
       }
 
@@ -432,7 +430,7 @@ sap.ui.define([
           this._applyChecklistLazily(oRootOnly || {});
           return oRootOnly;
         });
-      }.bind(this));
+      });
     },
 
     _ensureChecklistFreshBeforeEdit: function (sId) {
@@ -517,8 +515,7 @@ sap.ui.define([
         oView.setProperty("/checksLoading", false);
         oView.setProperty("/barriersLoading", false);
         oView.setProperty("/detailSkeletonBusy", false);
-        this._updateSelectionState();
-        this._updateDerivedRootResult();
+        this._syncSelectionMeta();
         return;
       }
 
@@ -529,8 +526,7 @@ sap.ui.define([
         if (!oView.getProperty("/barriersLoading")) {
           oView.setProperty("/detailSkeletonBusy", false);
         }
-        this._updateSelectionState();
-        this._updateDerivedRootResult();
+        this._syncSelectionMeta();
       }.bind(this));
 
       this._loadSectionPaged(sId, "barriers", iPageSize).then(function (aBarriers) {
@@ -540,8 +536,7 @@ sap.ui.define([
         if (!oView.getProperty("/checksLoading")) {
           oView.setProperty("/detailSkeletonBusy", false);
         }
-        this._updateSelectionState();
-        this._updateDerivedRootResult();
+        this._syncSelectionMeta();
       }.bind(this));
     },
 
@@ -670,7 +665,7 @@ sap.ui.define([
           buildLocationTree: this._buildLocationTree.bind(this),
           normalizeText: this._normalizeText.bind(this)
         });
-      }.bind(this));
+      });
     },
 
     onCloseLocationValueHelp: function () {
@@ -744,27 +739,14 @@ sap.ui.define([
 
     onCloseDetail: function () {
       var oState = this.getModel("state");
-      var fnProceed = function () {
-        return DetailCloseNavigationFlowUseCase.runCloseNavigation({
-          stateModel: oState,
-          releaseLock: this.releaseLock.bind(this),
-          prepareCloseNavigation: DetailLifecycleUseCase.prepareCloseNavigation,
-          navigateToSearch: function () {
-            this.navTo("search", {}, true);
-          }.bind(this)
-        });
-      }.bind(this);
-
-      return DetailCloseFlowUseCase.runCloseFlow({
-        isDirty: oState.getProperty("/isDirty"),
-        shouldPromptBeforeClose: DetailCommandFlowUseCase.shouldPromptBeforeClose,
-        shouldProceedAfterUnsavedDecision: DetailUnsavedDecisionFlowUseCase.shouldProceedAfterDecision,
-        confirmUnsaved: DetailUnsavedDecisionFlowUseCase.buildConfirmUnsavedAction({
-          host: this,
-          onSave: this.onSaveDetail.bind(this),
-          confirmUnsavedAndHandle: FlowCoordinator.confirmUnsavedAndHandle
-        }),
-        proceed: fnProceed
+      return DetailCloseFlowOrchestrationUseCase.runCloseFlow({
+        stateModel: oState,
+        host: this,
+        onSave: this.onSaveDetail.bind(this),
+        releaseLock: this.releaseLock.bind(this),
+        navigateToSearch: function () {
+          this.navTo("search", {}, true);
+        }.bind(this)
       });
     },
 
@@ -777,41 +759,32 @@ sap.ui.define([
       var oStateModel = this.getModel("state");
       var sObjectId = oStateModel.getProperty("/activeObjectId");
       var sSessionId = oStateModel.getProperty("/sessionId");
-      var sPendingText = this.getResourceBundle().getText("lockPending");
-
       var fnDisableEditAndRelease = () => this._releaseEditLock(sObjectId, sSessionId, oStateModel);
+      var oBundle = this.getResourceBundle();
 
-      return DetailLockEditFlowUseCase.runToggleEditFlow({
+      return DetailToggleEditOrchestrationUseCase.runToggleFlow({
+        host: this,
+        stateModel: oStateModel,
         editMode: bEditMode,
-        isDirty: oStateModel.getProperty("/isDirty"),
-        confirmUnsaved: DetailUnsavedDecisionFlowUseCase.buildConfirmUnsavedAction({
-          host: this,
-          onSave: this.onSaveDetail.bind(this),
-          confirmUnsavedAndHandle: FlowCoordinator.confirmUnsavedAndHandle
-        }),
-        runPendingRelease: function () {
-          this.setLockUiState(oStateModel, "PENDING", sPendingText);
-          return this.runWithStateFlag(oStateModel, "/lockOperationPending", fnDisableEditAndRelease);
+        onSave: this.onSaveDetail.bind(this),
+        pendingText: oBundle.getText("lockPending"),
+        stayReadOnlyText: oBundle.getText("lockStayReadOnly"),
+        lockOwnedText: oBundle.getText("lockOwnedByMe"),
+        lockOwnedByOtherText: oBundle.getText("lockOwnedByOther"),
+        setLockUiState: function (sState, sText) {
+          this.setLockUiState(oStateModel, sState, sText);
         }.bind(this),
-        runPendingToggle: function (fnFlow) {
-          this.setLockUiState(oStateModel, "PENDING", sPendingText);
-          return this.runWithStateFlag(oStateModel, "/lockOperationPending", fnFlow.bind(this));
+        runWithStateFlag: function (sPath, fnTask) {
+          return this.runWithStateFlag(oStateModel, sPath, fnTask);
         }.bind(this),
         releaseEdit: fnDisableEditAndRelease,
         ensureFreshBeforeEdit: function () {
           return this._ensureChecklistFreshBeforeEdit(sObjectId);
         }.bind(this),
         confirmIntegrationEdit: this._confirmIntegrationEdit.bind(this),
-        onStayReadOnly: function () {
-          this.setLockUiState(oStateModel, "IDLE", this.getResourceBundle().getText("lockStayReadOnly"));
-        }.bind(this),
         acquireLock: function () {
           return BackendAdapter.lockAcquire(sObjectId, sSessionId);
         },
-        onLockAcquired: function () {
-          DetailLifecycleUseCase.setEditLocked(oStateModel);
-          this.setLockUiState(oStateModel, "SUCCESS", this.getResourceBundle().getText("lockOwnedByMe"));
-        }.bind(this),
         tryRecoverFromAcquireError: function (oError) {
           return this._tryStealOwnLock(sObjectId, sSessionId, oError).then(function (oResult) {
             return !!(oResult && oResult.success);
@@ -820,8 +793,6 @@ sap.ui.define([
           });
         }.bind(this),
         onAcquireFailed: function (oError) {
-          DetailLifecycleUseCase.setReadUnlocked(oStateModel);
-          this.setLockUiState(oStateModel, "ERROR", this.getResourceBundle().getText("lockOwnedByOther"));
           return FlowCoordinator.handleBackendError(this, oError);
         }.bind(this)
       });
@@ -1006,8 +977,10 @@ sap.ui.define([
       OperationalKpiInstrumentationUseCase.markSaveAttempt(oStateModel);
       var iSaveLatencyStartedAt = OperationalKpiInstrumentationUseCase.beginLatencySample();
 
-      return this.runWithStateFlag(oStateModel, "/isLoading", function () {
-        return DetailSaveOrchestrationUseCase.runSaveFlow({
+      return DetailSaveFlowOrchestrationUseCase.runSaveFlow({
+        runWithLoading: function (fnTask) {
+          return this.runWithStateFlag(oStateModel, "/isLoading", fnTask);
+        }.bind(this),
           saveChecklist: function () {
             return ChecklistCrudUseCase.saveChecklist(sId, oEdited, bCreateMode);
           },
@@ -1070,7 +1043,7 @@ sap.ui.define([
             }.bind(this));
           }.bind(this)
         });
-      }.bind(this));
+      });
     },
 
 

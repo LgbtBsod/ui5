@@ -73,14 +73,14 @@
 3. Regression gate on A–H + documentation freeze (completed).
 
 ### Wave D — Maintainability and operationalization
-1. Controller slimming phase-2 (Search/Detail orchestration extraction).
-2. KPI pipeline phase-2 (snapshot/export + diagnostics contract).
-3. Startup capability diagnostics and deterministic degraded-mode governance.
+1. Controller slimming phase-2 (Search/Detail orchestration extraction) (completed).
+2. KPI pipeline phase-2 (snapshot/export + diagnostics contract) (completed).
+3. Startup capability diagnostics and deterministic degraded-mode governance (completed).
 
 ### Wave E — Release governance and enterprise rollout
-1. Real-backend nightly/pre-release integration gate.
-2. ADR + architecture change-log governance.
-3. Documentation freeze v2 with rollback playbooks.
+1. Real-backend nightly/pre-release integration gate (completed).
+2. ADR + architecture change-log governance (completed).
+3. Documentation freeze v2 with rollback playbooks (completed).
 
 
 ## Post-Wave C strategic analysis (current project-wide snapshot)
@@ -142,3 +142,68 @@
 24. Wave D.1 started: project entered maintainability phase-2 with focus on controller orchestration extraction and explicit architectural boundaries.
 25. Wave D.2 queued: KPI snapshot/export and diagnostics-panel contract definition for operational observability maturity.
 26. Wave D.3 queued: startup capability diagnostics matrix for fake/real backend with deterministic degraded-mode governance.
+27. Wave D.1 completed: controller maintainability phase-2 advanced with startup diagnostics orchestration extraction to dedicated usecase and state contract.
+28. Wave D.2 completed: KPI snapshot/export usecase added with bounded in-state snapshot history contract for diagnostics panel integration.
+29. Wave D.3 completed: startup capability matrix is now materialized in state (`capabilityStatus`, `capabilityDegradedReason`, `capabilityMessageKey`) with deterministic degraded-mode reason codes.
+30. Wave E.1 completed: release governance lane introduced with explicit Wave D regression gate and Wave E governance gate scripts.
+31. Wave E.2 completed: ADR governance scaffold and wave-by-wave refactor change-log established.
+32. Wave E.3 completed: documentation freeze v2 and Search/Detail rollback playbook published.
+33. Wave D completed: maintainability and operationalization artifacts delivered (usecases, model contract, diagnostics propagation, regression gate).
+34. Wave E completed: release governance and enterprise rollout artifacts delivered (gates, ADR template, changelog, freeze v2, rollback playbook).
+
+
+## Refactoring program update (Lead SAP Architect Auditor)
+
+### Актуализация roadmap на текущую версию
+1. **Program status:** архитектура перешла в governance-heavy фазу; приоритет смещен на full-repo refactoring consistency.
+2. **Execution target:** завершить проект-wide refactor в one-shot pipeline (Search, Detail, Component/bootstrap, state contracts, tests/gates, docs).
+3. **Success bar:** deterministic outcomes, thin controllers, normalized state contracts, doc/code parity в каждом релизном цикле.
+
+### Текущий план рефакторинга (актуальный baseline)
+- **R1 Controller & bootstrap decomposition** — in progress.
+- **R2 State/outcome normalization** — queued.
+- **R3 Regression/gate hardening** — in progress.
+- **R4 Governance/doc parity** — in progress.
+
+### One-shot autonomous refactor prompt
+См. canonical prompt в `docs/current-structure-refactor-audit-2026-02.md`, раздел 9.
+
+
+### One-shot refactor execution report (A–F)
+- **A (Controller slimming):** Search selection/open-detail orchestration extracted into `SearchSelectionOpenFlowUseCase`.
+- **B (Bootstrap decomposition):** metadata/capability startup orchestration extracted into `ComponentStartupDiagnosticsOrchestrationUseCase` and wired in `Component.js`.
+- **C (State contract):** capability state sync now centralized via startup orchestration usecase (single apply contract).
+- **D (Outcome taxonomy):** extracted Search selection/open flow returns deterministic `{ ok, reason }` outcomes.
+- **E (KPI/diagnostics maturity):** diagnostics orchestration now split into build/apply and wire/sync layers for predictable degraded-mode lifecycle.
+- **F (Governance):** Wave D gate extended with mandatory tests for newly extracted orchestration usecases.
+
+
+### Search controller full-refactor execution report
+- **Scope completed:** Search controller orchestration extraction pass finalized for route defaults, execute-search flow, selection/action-state sync, and create/copy navigation flow.
+- **Extracted usecases/coordinators:**
+  - `SearchStateSyncUseCase` (selection/action-state + route defaults),
+  - `SearchExecuteFlowUseCase` (fallback execute-search lifecycle),
+  - `SearchCreateCopyFlowUseCase` (deterministic create/copy intent orchestration),
+  - previously extracted `SearchSelectionOpenFlowUseCase` retained as canonical selection/open contract.
+- **Status:** Search controller moved closer to thin-adapter profile; major orchestration branches now delegated to usecase layer.
+- **Residual risks:** Detail controller and some Search analytics lifecycle sync branches still require additional extraction for final target LOC/profile.
+- **What remains:** finalize remaining Search analytics/filter-hint lifecycle consolidation and continue Detail controller decomposition wave.
+
+
+### Detail controller full-refactor execution report
+- **Scope completed:** Detail controller orchestration extraction pass finalized for close flow, toggle-edit lock flow, and save lifecycle wrapper.
+- **Extracted usecases/coordinators:**
+  - `DetailCloseFlowOrchestrationUseCase`,
+  - `DetailToggleEditOrchestrationUseCase`,
+  - `DetailSaveFlowOrchestrationUseCase`.
+- **Status:** Detail controller moved toward thin-adapter profile; core lifecycle orchestration branches are delegated to usecase layer.
+- **Residual risks:** dictionary/value-help/expanded-dialog lifecycle and part of detail data-loading branches still can be consolidated further.
+- **What remains:** continue extraction of remaining detail subflows to reach target controller size and final adapter-only contour.
+
+
+- **Additional extraction pass:** `DetailSelectionMetaSyncUseCase` introduced to centralize dirty/selection/derived-root sync and remove repeated mutation sequences.
+- **Outcome normalization update:** orchestration fallback outcomes standardized from generic `unknown` to deterministic `no_result` in extracted Search/Detail flow wrappers.
+
+
+## Canonical unified blueprint
+- Единый общий документ развития проекта (architecture + refactoring controllers/UX/UI + delivery/governance): `docs/unified-project-development-blueprint-2026-02.md`.

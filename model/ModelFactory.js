@@ -53,6 +53,12 @@ sap.ui.define([
                 requiredFields: [],
                 mainServiceMetadataOk: null,
                 mainServiceMetadataError: "",
+                capabilityStatus: "pending",
+                capabilityDegradedReason: "",
+                capabilityMessageKey: "capabilityPending",
+                capabilityDiagnostics: {},
+                operationalKpiSnapshots: [],
+                operationalKpiSnapshotLimit: 50,
                 masterDataLoading: false,
                 locationsLoading: false,
                 operationalKpi: {
