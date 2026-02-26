@@ -3,9 +3,9 @@ sap.ui.define([
 ], function (EventProvider) {
     "use strict";
 
-    var FRESH_MS = 30 * 1000;
+    var DEFAULT_FRESH_MS = 30 * 1000;
     // Cache validity window used by detail/edit flows.
-    var STALE_OK_MS = 5 * 60 * 1000;
+    var DEFAULT_STALE_OK_MS = 90 * 1000;
     var DB_NAME = "pcct_smart_cache";
     var STORE_NAME = "entries";
 
@@ -62,8 +62,10 @@ sap.ui.define([
     }
 
     return EventProvider.extend("sap_ui5.manager.SmartCacheManager", {
-        constructor: function () {
+        constructor: function (mOptions) {
             EventProvider.apply(this, arguments);
+            this._iFreshMs = Number((mOptions && mOptions.freshMs) || DEFAULT_FRESH_MS);
+            this._iStaleOkMs = Number((mOptions && mOptions.staleOkMs) || DEFAULT_STALE_OK_MS);
             this._mL1 = {};
             this._mFreshness = {};
             this._mKeyMapping = {};
@@ -115,11 +117,11 @@ sap.ui.define([
             }
 
             var iAge = Date.now() - iTs;
-            if (iAge <= FRESH_MS) {
+            if (iAge <= this._iFreshMs) {
                 return "FRESH";
             }
 
-            if (iAge <= STALE_OK_MS) {
+            if (iAge <= this._iStaleOkMs) {
                 return "STALE_OK";
             }
 
@@ -134,6 +136,17 @@ sap.ui.define([
 
         isCacheStrictFresh: function (sKey) {
             return this.getFreshnessState(sKey) === "FRESH";
+        },
+
+        configureFreshness: function (mFreshness) {
+            var iFresh = Number(mFreshness && mFreshness.freshMs);
+            var iStale = Number(mFreshness && mFreshness.staleOkMs);
+            if (Number.isFinite(iFresh) && iFresh >= 1000) {
+                this._iFreshMs = iFresh;
+            }
+            if (Number.isFinite(iStale) && iStale >= this._iFreshMs) {
+                this._iStaleOkMs = iStale;
+            }
         },
 
         snapshot: function () {

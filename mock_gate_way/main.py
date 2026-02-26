@@ -18,10 +18,12 @@ from api.lock_api import router as lock_router
 from api.metadata_api import router as metadata_router
 from api.odata_compat_api import router as odata_compat_router
 from api.person_api import router as person_router
+from api.settings_api import router as settings_router
 from config import CORS_ALLOWED_ORIGINS, LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.dict_loader import load_dictionary
 from services.lock_service import LockService
+from models import FrontendRuntimeSettings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
@@ -72,6 +74,10 @@ async def lifespan(_: FastAPI):
         data_dir = Path(__file__).resolve().parent / "data"
         load_dictionary(db, str(data_dir / "lpc.json"), "LPC")
         load_dictionary(db, str(data_dir / "professions.json"), "PROFESSION")
+        oSettings = db.query(FrontendRuntimeSettings).first()
+        if not oSettings:
+            db.add(FrontendRuntimeSettings(environment="default"))
+            db.commit()
     finally:
         db.close()
 
@@ -110,6 +116,7 @@ app.include_router(actions_router)
 app.include_router(metadata_router)
 app.include_router(odata_compat_router)
 app.include_router(analytics_router)
+app.include_router(settings_router)
 
 
 @app.get("/")
@@ -118,8 +125,29 @@ def health():
 
 
 @app.get("/config/frontend")
-def frontend_config():
-    return {
-        "search": {"defaultMaxResults": 100, "growingThreshold": 10},
-        "timers": {"heartbeatMs": 240000, "lockStatusMs": 60000, "cacheValidMs": 30000}
-    }
+def frontend_config(db = SessionLocal()):
+    try:
+        row = db.query(FrontendRuntimeSettings).order_by(FrontendRuntimeSettings.changed_on.desc()).first()
+        if not row:
+            row = FrontendRuntimeSettings(environment="default")
+            db.add(row)
+            db.commit()
+            db.refresh(row)
+        return {
+            "environment": row.environment,
+            "search": {"defaultMaxResults": 100, "growingThreshold": 10},
+            "timers": {
+                "heartbeatMs": int(row.heartbeat_ms or 240000),
+                "lockStatusMs": int(row.lock_status_ms or 60000),
+                "gcdMs": int(row.gcd_ms or 300000),
+                "idleMs": int(row.idle_ms or 600000),
+                "autoSaveIntervalMs": int(row.autosave_interval_ms or 60000),
+                "autoSaveDebounceMs": int(row.autosave_debounce_ms or 30000),
+                "networkGraceMs": int(row.network_grace_ms or 60000),
+                "cacheFreshMs": int(row.cache_fresh_ms or 30000),
+                "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
+                "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
+            }
+        }
+    finally:
+        db.close()

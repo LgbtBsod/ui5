@@ -2,7 +2,6 @@ sap.ui.define([
     "sap_ui5/controller/Base.controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "sap/m/MessageBox",
     "sap_ui5/service/SmartSearchAdapter",
     "sap_ui5/service/usecase/SearchApplicationService",
     "sap_ui5/service/usecase/WorkflowAnalyticsUseCase",
@@ -49,7 +48,7 @@ sap.ui.define([
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
     "sap_ui5/util/SearchSmartControlCoordinator"
-], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchFilterLifecycleUseCase, SearchRetryLifecycleUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchSelectionLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
+], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchFilterLifecycleUseCase, SearchRetryLifecycleUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchSelectionLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -81,6 +80,7 @@ sap.ui.define([
                 smartControlError: "",
                 analytics: {
                     total: 0,
+                    monthly: 0,
                     failedChecks: 0,
                     failedBarriers: 0,
                     healthy: 0,
@@ -95,6 +95,7 @@ sap.ui.define([
                 analyticsError: "",
                 analyticsRail: {
                     total: 0,
+                    monthly: 0,
                     failedChecks: 0,
                     failedBarriers: 0,
                     healthy: 0,
@@ -104,6 +105,7 @@ sap.ui.define([
                     source: "fallback",
                     sourceText: "fallback"
                 },
+                analyticsRailBusy: true,
                 filterHintVisible: false,
                 filterHintType: "Information",
                 filterHintText: "",
@@ -113,6 +115,8 @@ sap.ui.define([
 
             this._iSearchDebounceMs = 180;
             this._iSearchTimer = null;
+            this._analyticsRefreshMs = Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || 15 * 60 * 1000;
+            this._analyticsRefreshTimer = null;
             this._inlineAnalyticsRefreshState = SearchInlineAnalyticsRefreshOrchestrationUseCase.ensureRefreshState({});
 
             this.applyStoredTheme();
@@ -139,6 +143,7 @@ sap.ui.define([
             this._bootstrapSmartControls();
             this._updateFilterState();
             this._updateResultSummary();
+            this._startSimpleAnalyticsAutoRefresh();
 
             var oDataModel = this.getModel("data");
             ["/visibleCheckLists", "/checkLists"].forEach(function (sPath) {
@@ -541,7 +546,10 @@ sap.ui.define([
         },
 
         onSearch: function () {
-            SearchLifecycleSyncUseCase.runFallbackSearchLifecycle({
+            if (this._isSmartControlsEnabled()) {
+                return this.onSmartSearch();
+            }
+            return SearchLifecycleSyncUseCase.runFallbackSearchLifecycle({
                 markSearchedAndRebind: function () {
                     SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
                 }.bind(this),
@@ -620,6 +628,34 @@ sap.ui.define([
                     });
                 }.bind(this)
             });
+        },
+
+        _refreshSimpleAnalyticsRail: function () {
+            var oViewModel = this._getViewModel();
+            oViewModel.setProperty("/analyticsRailBusy", true);
+            return WorkflowAnalyticsUseCase.loadSimpleAnalytics(this.getModel("data").getProperty("/checkLists") || []).then(function (oAnalytics) {
+                SearchInlineAnalyticsPresentationUseCase.applyInlineAnalyticsPresentation({
+                    viewModel: oViewModel,
+                    analytics: oAnalytics || {},
+                    bundle: this.getResourceBundle()
+                });
+                oViewModel.setProperty("/analyticsError", "");
+            }.bind(this)).catch(function (oError) {
+                oViewModel.setProperty("/analyticsError", (oError && oError.message) || "");
+            }).finally(function () {
+                oViewModel.setProperty("/analyticsRailBusy", false);
+            });
+        },
+
+        _startSimpleAnalyticsAutoRefresh: function () {
+            this._analyticsRefreshMs = Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || this._analyticsRefreshMs || 15 * 60 * 1000;
+            this._refreshSimpleAnalyticsRail();
+            if (this._analyticsRefreshTimer) {
+                clearInterval(this._analyticsRefreshTimer);
+            }
+            this._analyticsRefreshTimer = setInterval(function () {
+                this._refreshSimpleAnalyticsRail();
+            }.bind(this), this._analyticsRefreshMs);
         },
 
         onOpenWorkflowAnalytics: function () {
@@ -866,6 +902,10 @@ sap.ui.define([
             if (this._iSearchTimer) {
                 clearTimeout(this._iSearchTimer);
                 this._iSearchTimer = null;
+            }
+            if (this._analyticsRefreshTimer) {
+                clearInterval(this._analyticsRefreshTimer);
+                this._analyticsRefreshTimer = null;
             }
         },
 

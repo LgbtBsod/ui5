@@ -488,7 +488,8 @@ createCheckList: function (oData) {
             return _request("/config/frontend").catch(function () {
                 return {
                     search: { defaultMaxResults: 100, growingThreshold: 10 },
-                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, cacheValidMs: 30000 },
+                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000 },
+                source: "fallback_defaults",
                     requiredFields: [
                         "/basic/date",
                         "/basic/time",
@@ -539,8 +540,23 @@ createCheckList: function (oData) {
                 search_mode: sSearchMode || "EXACT"
             };
 
+            Object.keys(mParams).forEach(function (sKey) {
+                var vValue = mParams[sKey];
+                if (typeof vValue === "string" && !vValue.trim()) {
+                    delete mParams[sKey];
+                }
+            });
+
             return _request("/WorkflowAnalytics", { params: mParams }).catch(function () {
                 return _request("/analytics/process", { params: mParams });
+            });
+        },
+
+        getSimpleAnalytics: function () {
+            return _request("/SimpleAnalytical").catch(function () {
+                return _request("/WorkflowAnalytics");
+            }).catch(function () {
+                return _request("/analytics/process");
             });
         },
 

@@ -22,6 +22,17 @@ sap.ui.define([
             }.bind(this), this._iIntervalMs);
         },
 
+
+        setIntervalMs: function (iIntervalMs) {
+            var iNext = Number(iIntervalMs);
+            if (!Number.isFinite(iNext) || iNext < 1000) {
+                return;
+            }
+            this._iIntervalMs = iNext;
+            if (this._iTimer) {
+                this.start();
+            }
+        },
         stop: function () {
             if (this._iTimer) {
                 clearInterval(this._iTimer);
