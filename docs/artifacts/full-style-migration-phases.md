@@ -2,6 +2,8 @@
 
 Generated for the WS-C full migration cycle in `docs/DEVELOPMENT_PLAN.md`.
 
+Last validation run (UTC): 2026-02-26T21:33:20Z
+
 ## Phase 1 — Foundation & governance
 1) **Что изменено**
 - Введена и закреплена token-first governance цепочка для стилей (accent governance + semantic contrast checks).
