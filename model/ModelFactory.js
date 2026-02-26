@@ -57,6 +57,18 @@ sap.ui.define([
                 capabilityDegradedReason: "",
                 capabilityMessageKey: "capabilityPending",
                 capabilityDiagnostics: {},
+                timers: {
+                    heartbeatMs: 240000,
+                    lockStatusMs: 60000,
+                    gcdMs: 300000,
+                    idleMs: 600000,
+                    autoSaveIntervalMs: 60000,
+                    autoSaveDebounceMs: 30000,
+                    networkGraceMs: 60000,
+                    cacheFreshMs: 30000,
+                    cacheStaleOkMs: 90000,
+                    analyticsRefreshMs: 900000
+                },
                 operationalKpiSnapshots: [],
                 operationalKpiSnapshotLimit: 50,
                 masterDataLoading: false,
@@ -124,6 +136,25 @@ sap.ui.define([
         createMplModel: function () {
             return new JSONModel({
                 locations: []
+            });
+        },
+
+        createEnvModel: function () {
+            return new JSONModel({
+                source: "defaults",
+                loadedAt: "",
+                timers: {
+                    heartbeatMs: 240000,
+                    lockStatusMs: 60000,
+                    gcdMs: 300000,
+                    idleMs: 600000,
+                    autoSaveIntervalMs: 60000,
+                    autoSaveDebounceMs: 30000,
+                    networkGraceMs: 60000,
+                    cacheFreshMs: 30000,
+                    cacheStaleOkMs: 90000,
+                    analyticsRefreshMs: 900000
+                }
             });
         }
 

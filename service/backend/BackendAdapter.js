@@ -143,7 +143,7 @@ sap.ui.define([
             if (_backendService.getFrontendConfig) {
                 return _backendService.getFrontendConfig();
             }
-            return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 } });
+            return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 }, timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000 }, source: "adapter_defaults" });
         },
 
         getPersons: function () {
@@ -189,6 +189,7 @@ sap.ui.define([
             return this.getCheckLists().then(function (aRows) {
                 return {
                     total: (aRows || []).length,
+                    monthly: (aRows || []).length,
                     failedChecks: 0,
                     failedBarriers: 0,
                     healthy: (aRows || []).length,
@@ -199,6 +200,13 @@ sap.ui.define([
                     refreshedAt: new Date().toISOString()
                 };
             });
+        },
+
+        getSimpleAnalytics: function () {
+            if (_backendService.getSimpleAnalytics) {
+                return _backendService.getSimpleAnalytics();
+            }
+            return this.getProcessAnalytics({}, "EXACT");
         },
 
         exportReport: function (sEntity, mPayload) {

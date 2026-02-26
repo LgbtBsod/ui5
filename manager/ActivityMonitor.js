@@ -29,6 +29,17 @@ sap.ui.define([
             }.bind(this), this._iIdleMs);
         },
 
+
+        setIdleMs: function (iIdleMs) {
+            var iNext = Number(iIdleMs);
+            if (!Number.isFinite(iNext) || iNext < 1000) {
+                return;
+            }
+            this._iIdleMs = iNext;
+            if (this._iTimer) {
+                this._reset();
+            }
+        },
         stop: function () {
             if (this._iTimer) {
                 clearTimeout(this._iTimer);

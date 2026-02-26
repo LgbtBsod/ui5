@@ -6,4 +6,7 @@ class FilterParser:
     def parse(model, expression: str):
         if not expression:
             return None
-        return ODataFilterParser.parse(model, expression)
+        normalized = expression.strip()
+        if not normalized:
+            return None
+        return ODataFilterParser.parse(model, normalized)
