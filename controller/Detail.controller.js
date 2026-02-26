@@ -107,7 +107,9 @@ sap.ui.define([
       if ((oEvent.getParameter("path") || "") !== "/locations") {
         return;
       }
-      this._prepareLocationTree();
+      if ((this.getModel("mpl").getProperty("/locations") || []).length) {
+        this._prepareLocationTree();
+      }
     },
 
     _onSelectedChanged: function (oEvent) {
@@ -329,6 +331,31 @@ sap.ui.define([
       oStateModel.setProperty("/mode", "READ");
       this._bindChecklistById(sId);
       oStateModel.setProperty("/isDirty", false);
+    },
+
+    _ensureMplLocationsLoaded: function () {
+      var oMplModel = this.getModel("mpl");
+      var oState = this.getModel("state");
+      var aExisting = oMplModel.getProperty("/locations") || [];
+
+      if (Array.isArray(aExisting) && aExisting.length) {
+        this._prepareLocationTree();
+        return Promise.resolve(aExisting);
+      }
+
+      oState.setProperty("/locationsLoading", true);
+      return BackendAdapter.getLocations().then(function (aRemote) {
+        var aLocations = Array.isArray(aRemote) ? aRemote : [];
+        if (aLocations.length) {
+          oMplModel.setProperty("/locations", aLocations);
+          this._prepareLocationTree();
+        }
+        return aLocations;
+      }.bind(this)).catch(function () {
+        return [];
+      }).finally(function () {
+        oState.setProperty("/locationsLoading", false);
+      });
     },
 
     _prepareLocationTree: function () {
@@ -608,12 +635,23 @@ sap.ui.define([
 
 
     onOpenLocationValueHelp: function () {
+      var oDialog = this.byId("locationValueHelpDialog");
       DetailLocationValueHelpUseCase.openValueHelp({
-        dialog: this.byId("locationValueHelpDialog"),
+        dialog: oDialog,
         locations: this.getModel("mpl").getProperty("/locations") || [],
         viewModel: this.getView().getModel("view"),
         buildLocationTree: this._buildLocationTree.bind(this)
       });
+
+      this._ensureMplLocationsLoaded().then(function (aLocations) {
+        DetailLocationValueHelpUseCase.applyFilteredTreeToViewModel({
+          query: "",
+          locations: aLocations || [],
+          viewModel: this.getView().getModel("view"),
+          buildLocationTree: this._buildLocationTree.bind(this),
+          normalizeText: this._normalizeText.bind(this)
+        });
+      }.bind(this));
     },
 
     onCloseLocationValueHelp: function () {
@@ -934,6 +972,12 @@ sap.ui.define([
               },
               showSavedToast: function () {
                 this.showI18nToast("objectSaved");
+              }.bind(this),
+              navigateToSaved: function (sSavedId) {
+                if (!sSavedId) {
+                  return;
+                }
+                this.navTo("detail", { id: sSavedId, layout: "TwoColumnsMidExpanded" }, true);
               }.bind(this)
             });
           }.bind(this),

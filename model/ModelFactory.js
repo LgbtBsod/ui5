@@ -51,7 +51,9 @@ sap.ui.define([
                 autosaveAt: null,
                 requiredFields: [],
                 mainServiceMetadataOk: null,
-                mainServiceMetadataError: ""
+                mainServiceMetadataError: "",
+                masterDataLoading: false,
+                locationsLoading: false
             });
         },
 

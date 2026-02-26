@@ -158,3 +158,14 @@ class Location(Base):
     endda = Column(Date, nullable=True)
 
     changed_on = Column(DateTime, default=now_utc)
+
+class AnalyticsSnapshot(Base):
+    __tablename__ = "analytics_snapshot"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    month_key = Column(String, nullable=False)
+    total_checklists = Column(INTEGER, default=0)
+    month_checklists = Column(INTEGER, default=0)
+    failed_checks = Column(INTEGER, default=0)
+    failed_barriers = Column(INTEGER, default=0)
+    created_on = Column(DateTime, default=now_utc)

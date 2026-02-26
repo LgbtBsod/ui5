@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -8,6 +9,7 @@ from util.expand_parser import ExpandParser
 from utils.filter_parser import FilterParser
 
 router = APIRouter(tags=["ODataCompatibility"])
+logger = logging.getLogger("gateway.odata")
 
 
 def _project_item(item: ChecklistRoot):
@@ -32,19 +34,33 @@ def checklist_roots(
     top: int = Query(default=DEFAULT_PAGE_SIZE, alias="$top"),
     skip: int = Query(default=0, alias="$skip"),
     inlinecount: str | None = Query(default=None, alias="$inlinecount"),
+    select: str | None = Query(default=None, alias="$select"),
     db: Session = Depends(get_db)
 ):
+    logger.info(
+        "ChecklistRoots query filter=%r expand=%r select=%r top=%s skip=%s inlinecount=%r",
+        filter,
+        expand,
+        select,
+        top,
+        skip,
+        inlinecount,
+    )
+
     query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.is_(False))
 
     expression = FilterParser.parse(ChecklistRoot, filter)
     if expression is not None:
+        logger.info("ChecklistRoots parsed filter expression=%s", expression)
         query = query.filter(expression)
 
     if expand:
+        logger.info("ChecklistRoots applying expand=%s", expand)
         query = ExpandParser.apply(query, ChecklistRoot, expand)
 
     total = query.count()
     roots = query.offset(skip).limit(top).all()
+    logger.info("ChecklistRoots result total=%s page_rows=%s", total, len(roots))
 
     response = {
         "d": {

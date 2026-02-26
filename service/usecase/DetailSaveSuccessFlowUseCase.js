@@ -4,10 +4,16 @@ sap.ui.define([
     "use strict";
 
     function applySaveSuccess(mArgs) {
+        var oSaved = mArgs.result.savedChecklist || {};
+        var sSavedId = String((((oSaved || {}).root || {}).id) || "").trim();
+
         mArgs.dataModel.setProperty("/checkLists", mArgs.result.checkLists);
         mArgs.dataModel.setProperty("/visibleCheckLists", mArgs.result.checkLists);
-        mArgs.dataModel.setProperty("/selectedChecklist", mArgs.result.savedChecklist);
-        mArgs.selectedModel.setData(mArgs.result.savedChecklist);
+        mArgs.dataModel.setProperty("/selectedChecklist", oSaved);
+        mArgs.selectedModel.setData(oSaved);
+        if (mArgs.stateModel && typeof mArgs.stateModel.setProperty === "function") {
+            mArgs.stateModel.setProperty("/activeObjectId", sSavedId || null);
+        }
 
         DetailLifecycleUseCase.keepEditModeAfterSave(mArgs.stateModel);
 
@@ -16,6 +22,9 @@ sap.ui.define([
         }
         if (typeof mArgs.showSavedToast === "function") {
             mArgs.showSavedToast();
+        }
+        if (typeof mArgs.navigateToSaved === "function" && sSavedId) {
+            mArgs.navigateToSaved(sSavedId);
         }
     }
 

@@ -29,6 +29,7 @@
   --text-main: var(--text);
   --text-muted: var(--text-sub);
   --accent-grad: linear-gradient(145deg, #ff5311, #ff8a5f);
+  --hzn-accent: var(--accent);
 
   --focus-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.22);
   --interactive-hover: color-mix(in srgb, var(--surface2) 85%, rgba(var(--accent-rgb), 0.12));
@@ -1997,11 +1998,16 @@ body.themeLifestyleNightOps .filterCard {
 /* Wave 50: control rail collapse affordance + settings dialog consistency */
 .detailControlAsideHost {
   gap: .35rem;
+  position: relative;
+  z-index: 6;
 }
 
 .detailControlPeekButton {
   align-self: flex-start;
   margin-top: .3rem;
+  position: sticky;
+  top: 5.5rem;
+  z-index: 8;
 }
 
 .detailControlPeekButton .sapMBtnInner {

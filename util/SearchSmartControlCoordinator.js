@@ -123,6 +123,31 @@ sap.ui.define([
     }
 
 
+    
+    function pickFilterValue(vValue) {
+        if (typeof vValue === "string") {
+            return vValue;
+        }
+        if (Array.isArray(vValue) && vValue.length) {
+            return pickFilterValue(vValue[0]);
+        }
+        if (vValue && typeof vValue === "object") {
+            if (typeof vValue.value !== "undefined") {
+                return String(vValue.value || "");
+            }
+            if (typeof vValue.key !== "undefined") {
+                return String(vValue.key || "");
+            }
+            if (Array.isArray(vValue.items) && vValue.items.length) {
+                return pickFilterValue(vValue.items[0]);
+            }
+            if (Array.isArray(vValue.ranges) && vValue.ranges.length) {
+                return String((vValue.ranges[0] || {}).value1 || "");
+            }
+        }
+        return "";
+    }
+
     function sanitizeFilter(oFilter) {
         if (!oFilter) {
             return null;
@@ -186,6 +211,12 @@ sap.ui.define([
             });
         }
 
+        var mSmartFilterData = mArgs.smartFilterData || {};
+        var sStatus = pickFilterValue(mSmartFilterData.status || mSmartFilterData.STATUS || "").trim();
+        var sEquipment = pickFilterValue(mSmartFilterData.equipment || mSmartFilterData.EQUIPMENT || "").trim();
+        var sObserver = pickFilterValue(mSmartFilterData.observer_fullname || mSmartFilterData.OBSERVER_FULLNAME || "").trim();
+        var sDate = pickFilterValue(mSmartFilterData.date || mSmartFilterData.DATE || "").trim();
+
         var sChecks = mState.filterFailedChecks || "ALL";
         var sBarriers = mState.filterFailedBarriers || "ALL";
         var aStatusFilters = [];
@@ -194,6 +225,19 @@ sap.ui.define([
         }
         if (sBarriers !== "ALL") {
             aStatusFilters.push(new Filter("has_failed_barriers", FilterOperator.EQ, sBarriers === "TRUE"));
+        }
+
+        if (sStatus) {
+            aFilters.push(new Filter("status", FilterOperator.Contains, sStatus));
+        }
+        if (sEquipment) {
+            aFilters.push(new Filter("equipment", FilterOperator.Contains, sEquipment));
+        }
+        if (sObserver) {
+            aFilters.push(new Filter("observer_fullname", FilterOperator.Contains, sObserver));
+        }
+        if (sDate) {
+            aFilters.push(new Filter("date", FilterOperator.Contains, sDate));
         }
 
         if (sSearchMode === "LOOSE") {

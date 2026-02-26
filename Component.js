@@ -252,6 +252,7 @@ sap.ui.define([
             this.setModel(oMasterDataModel, "masterData");
             this.setModel(oMplModel, "mpl");
 
+
             var sStoredUser = window.sessionStorage.getItem("pcct_test_user") || "";
             oStateModel.setProperty("/testUser", sStoredUser);
             oStateModel.setProperty("/testUserLogin", sStoredUser);
@@ -313,28 +314,27 @@ sap.ui.define([
                 }.bind(this));
             }.bind(this));
 
+            if (/detail\/__create(?:$|[?&])/.test(window.location.hash || "")) {
+                this.getRouter().getHashChanger().replaceHash("");
+                oStateModel.setProperty("/objectAction", "");
+            }
+
             this.getRouter().initialize();
 
             oStateModel.setProperty("/isLoading", true);
+            oStateModel.setProperty("/masterDataLoading", true);
+            oStateModel.setProperty("/locationsLoading", false);
 
             Promise.all([
                 // Outside SAP runtime user may be injected from a lightweight modal and sessionStorage.
                 BackendAdapter.login(oStateModel.getProperty("/testUser") || "demoUser"),
                 BackendAdapter.init(),
-                BackendAdapter.getPersons().catch(function () { return []; }),
-                BackendAdapter.getDictionary("LPC").catch(function () { return []; }),
-                BackendAdapter.getDictionary("PROFESSION").catch(function () { return []; }),
-                BackendAdapter.getLocations().catch(function () { return []; }),
                 BackendAdapter.getServerState().catch(function () { return null; }),
                 BackendAdapter.getFrontendConfig().catch(function () { return null; })
             ]).then(function (aResults) {
                 var oLogin = aResults[0];
-                var aPersons = aResults[2];
-                var aLpc = aResults[3];
-                var aProfessions = aResults[4];
-                var aLocations = aResults[5];
-                var oServerState = aResults[6];
-                var oFrontendConfig = aResults[7] || {};
+                var oServerState = aResults[2];
+                var oFrontendConfig = aResults[3] || {};
 
                 oStateModel.setProperty("/sessionId", oLogin.sessionId);
                 if (oFrontendConfig.search && oFrontendConfig.search.defaultMaxResults) {
@@ -343,6 +343,8 @@ sap.ui.define([
                 if (Array.isArray(oFrontendConfig.requiredFields)) {
                     oStateModel.setProperty("/requiredFields", oFrontendConfig.requiredFields);
                 }
+
+                this._loadMasterDataAsync(oMasterDataModel, oStateModel);
 
                 return this._oSmartCache.getWithFallback("checkLists").then(function (aCached) {
                     if (Array.isArray(aCached) && aCached.length) {
@@ -366,12 +368,7 @@ sap.ui.define([
                     oStateModel.setProperty("/cacheValidationAt", sCacheAt);
                     oCacheModel.setProperty("/keyMapping", this._oSmartCache.snapshot().keyMapping);
                     this._oSmartCache.put("checkLists", aCheckLists);
-                }.bind(this)).then(function () {
-                    oMasterDataModel.setProperty("/persons", aPersons);
-                    oMasterDataModel.setProperty("/lpc", aLpc);
-                    oMasterDataModel.setProperty("/professions", aProfessions);
-                    oMplModel.setProperty("/locations", aLocations);
-                });
+                }.bind(this));
             }.bind(this)).catch(function (oError) {
                 oStateModel.setProperty("/loadError", true);
                 oStateModel.setProperty("/loadErrorMessage", "Ошибка при загрузке данных: " + oError.message);
@@ -384,6 +381,22 @@ sap.ui.define([
                 this._oLockStatus.start();
             }.bind(this));
         },
+
+        _loadMasterDataAsync: function (oMasterDataModel, oStateModel) {
+            var pPersons = BackendAdapter.getPersons().catch(function () { return []; });
+            var pLpc = BackendAdapter.getDictionary("LPC").catch(function () { return []; });
+            var pProfessions = BackendAdapter.getDictionary("PROFESSION").catch(function () { return []; });
+
+            Promise.all([pPersons, pLpc, pProfessions]).then(function (aResults) {
+                oMasterDataModel.setProperty("/persons", aResults[0]);
+                oMasterDataModel.setProperty("/lpc", aResults[1]);
+                oMasterDataModel.setProperty("/professions", aResults[2]);
+            }).finally(function () {
+                oStateModel.setProperty("/masterDataLoading", false);
+            });
+
+        },
+
 
         exit: function () {
             if (this._oHeartbeat) {
