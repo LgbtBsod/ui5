@@ -861,6 +861,8 @@ REQUIRED CI/GATE VALIDATION
 - node scripts/a11y-gate.js
 - node scripts/message-taxonomy-gate.js
 - node scripts/ux-state-coverage-gate.js
+- node scripts/theme-parity-gate.js
+- node scripts/control-token-mapping-gate.js
 - node scripts/unit-smoke.js
 - node scripts/ci-smoke-gate.js
 - bash scripts/ci/enterprise-ux-gate.sh
@@ -869,7 +871,7 @@ DELIVERABLES
 - Updated CSS with token-first layered architecture.
 - Updated/added gates and scripts required by WS-C and Section 15/16.
 - Snapshot evidence and parity report for Morning/Night.
-- Control-to-token mapping report for all in-scope controls.
+- Control-to-token mapping report for all in-scope controls (artifact: docs/artifacts/control-token-mapping.json).
 - Changelog of completed chapters and unresolved risks.
 
 DONE CRITERIA (all must pass)
