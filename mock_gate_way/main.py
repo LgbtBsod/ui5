@@ -3,11 +3,12 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
 
 from api.actions_api import router as actions_router
+from api.analytics_api import router as analytics_router
 from api.checklist_api import router as checklist_router
 from api.dictionary_api import legacy_router as dictionary_legacy_router
 from api.dictionary_api import router as dictionary_router
@@ -80,6 +81,16 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="SAP Gateway Simulator", version="1.0.0", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def request_response_logging(request: Request, call_next):
+    logger.info("REQ %s %s query=%s", request.method, request.url.path, request.url.query or "-")
+    response = await call_next(request)
+    logger.info("RES %s %s status=%s", request.method, request.url.path, response.status_code)
+    return response
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOWED_ORIGINS,
@@ -98,6 +109,7 @@ app.include_router(hierarchy_router)
 app.include_router(actions_router)
 app.include_router(metadata_router)
 app.include_router(odata_compat_router)
+app.include_router(analytics_router)
 
 
 @app.get("/")

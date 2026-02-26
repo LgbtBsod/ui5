@@ -5,7 +5,7 @@ sap.ui.define([
 
     var FRESH_MS = 30 * 1000;
     // Cache validity window used by detail/edit flows.
-    var STALE_OK_MS = 30 * 1000;
+    var STALE_OK_MS = 5 * 60 * 1000;
     var DB_NAME = "pcct_smart_cache";
     var STORE_NAME = "entries";
 

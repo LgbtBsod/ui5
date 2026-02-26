@@ -56,6 +56,7 @@ sap.ui.define([], function () {
         return fnApplyRebindParams({
             bindingParams: (mArgs && mArgs.bindingParams) || {},
             state: (mArgs && mArgs.state) || {},
+            smartFilterData: (mArgs && mArgs.smartFilterData) || {},
             onDataReceived: mArgs && mArgs.onDataReceived
         });
     }

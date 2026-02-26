@@ -416,3 +416,18 @@
 ### 6.3 Рекомендация по "сбросить все базовые стили UI5"
 - **Да, можно, но только поэтапно**: полный одномоментный global reset для всех `sap*` селекторов высокорисковый (доступность, focus states, high-contrast, responsive behavior).
 - Практически безопасный путь: tokenized partial reset + контрольный visual regression gate на каждом шаге.
+
+
+### Wave 54 — planned as one delivery for Search block (batch)
+1. Восстановление базового SmartFilter use-case end-to-end:
+   - пустые фильтры не применяются на backend;
+   - max rows: пустое значение => без ограничения.
+2. Консолидация Search orchestration в один batch:
+   - unified rebind/filter mapping;
+   - единая стратегия summary/KPI refresh.
+3. UX/Loading:
+   - skeleton + progressive цифры для quick analytics;
+   - retry-hints для SmartFilter/SmartTable metadata fallbacks.
+4. Тестовый контур wave:
+   - browser smoke для Go/search/filter combinations;
+   - unit smoke для mapping/usecase контрактов.

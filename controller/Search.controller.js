@@ -264,6 +264,7 @@ sap.ui.define([
                 onDataReceived: function (oDataEvent) {
                     this._updateSmartTableAnalytics(oDataEvent && oDataEvent.getParameter("data"));
                 }.bind(this),
+                smartFilterData: this.byId("searchSmartFilterBar") && this.byId("searchSmartFilterBar").getFilterData ? this.byId("searchSmartFilterBar").getFilterData(true) : {},
                 applyRebindParams: SearchSmartControlCoordinator.applyRebindParams
             });
         },
