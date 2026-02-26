@@ -234,8 +234,19 @@ sap.ui.define([
             this._onSmartTableReady();
         },
 
+        _isSmartFilterReady: function () {
+            var oSmartFilterBar = this.byId("searchSmartFilterBar");
+            if (!oSmartFilterBar || !this._isSmartControlsEnabled()) {
+                return false;
+            }
+            if (typeof oSmartFilterBar.isInitialised === "function") {
+                return !!oSmartFilterBar.isInitialised();
+            }
+            return true;
+        },
+
         _syncStateFiltersFromSmartFilter: function () {
-            if (!this._isSmartControlsEnabled()) {
+            if (!this._isSmartFilterReady()) {
                 return;
             }
 
@@ -255,6 +266,9 @@ sap.ui.define([
 
         onBeforeSmartTableRebind: function (oEvent) {
             if (!this._isSmartControlsEnabled()) {
+                return;
+            }
+            if (!this._isSmartFilterReady()) {
                 return;
             }
 
@@ -368,7 +382,7 @@ sap.ui.define([
 
         _hasSmartFilters: function () {
             var oSmartFilterBar = this.byId("searchSmartFilterBar");
-            if (!oSmartFilterBar || !this._isSmartControlsEnabled() || !oSmartFilterBar.getFiltersWithValues) {
+            if (!oSmartFilterBar || !this._isSmartFilterReady() || !oSmartFilterBar.getFiltersWithValues) {
                 return false;
             }
             var aFilters = oSmartFilterBar.getFiltersWithValues(true) || [];
@@ -624,8 +638,8 @@ sap.ui.define([
                 intervalMs: Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || this._analyticsRefreshMs || 15 * 60 * 1000,
                 currentTimer: this._analyticsRefreshTimer,
                 runRefresh: this._refreshSimpleAnalyticsRail.bind(this),
-                setInterval: setInterval,
-                clearInterval: clearInterval
+                setInterval: window.setInterval.bind(window),
+                clearInterval: window.clearInterval.bind(window)
             });
             this._analyticsRefreshMs = oResult.intervalMs;
             this._analyticsRefreshTimer = oResult.timerId;
@@ -830,7 +844,7 @@ sap.ui.define([
             }
             var oAutoRefreshResult = SearchInlineAnalyticsAutoRefreshUseCase.stopAutoRefresh({
                 currentTimer: this._analyticsRefreshTimer,
-                clearInterval: clearInterval
+                clearInterval: window.clearInterval.bind(window)
             });
             this._analyticsRefreshTimer = oAutoRefreshResult.timerId;
         },

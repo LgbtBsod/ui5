@@ -132,6 +132,7 @@
     "config": {
       "backendMode": "real",
       "uiContractVersion": "1.0.0"
-    }
+    },
+    "flexEnabled": false
   }
 }

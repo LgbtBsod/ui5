@@ -9,16 +9,22 @@ from sqlalchemy import inspect, text
 
 from api.actions_api import router as actions_router
 from api.analytics_api import router as analytics_router
+from api.batch_api import router as batch_router
+from api.capabilities_api import router as capabilities_router
 from api.checklist_api import router as checklist_router
 from api.dictionary_api import legacy_router as dictionary_legacy_router
 from api.dictionary_api import router as dictionary_router
 from api.hierarchy_api import router as hierarchy_router
 from api.location_api import router as location_router
 from api.lock_api import router as lock_router
+from api.lock_entity_api import router as lock_entity_router
+from api.lock_history_api import router as lock_history_router
 from api.metadata_api import router as metadata_router
 from api.odata_compat_api import router as odata_compat_router
 from api.person_api import router as person_router
+from api.reference_api import router as reference_router
 from api.settings_api import router as settings_router
+from api.search_api import router as search_router
 from config import CORS_ALLOWED_ORIGINS, LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.dict_loader import load_dictionary
@@ -106,17 +112,23 @@ app.add_middleware(
 )
 
 app.include_router(lock_router)
+app.include_router(lock_entity_router)
+app.include_router(lock_history_router)
 app.include_router(checklist_router)
+app.include_router(search_router)
 app.include_router(dictionary_router)
 app.include_router(dictionary_legacy_router)
 app.include_router(location_router)
 app.include_router(person_router)
+app.include_router(reference_router)
 app.include_router(hierarchy_router)
 app.include_router(actions_router)
 app.include_router(metadata_router)
 app.include_router(odata_compat_router)
 app.include_router(analytics_router)
 app.include_router(settings_router)
+app.include_router(batch_router)
+app.include_router(capabilities_router)
 
 
 @app.get("/")

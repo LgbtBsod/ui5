@@ -112,6 +112,20 @@ class LockLog(Base):
     timestamp = Column(DateTime, default=now_utc)
 
 
+
+
+class SaveRequestLedger(Base):
+    __tablename__ = "save_request_ledger"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    request_guid = Column(String, nullable=False)
+    operation = Column(String, nullable=False)
+    root_id = Column(String, nullable=False)
+    user_id = Column(String, nullable=False)
+    response_payload = Column(Text, nullable=False)
+    created_on = Column(DateTime, default=now_utc)
+
+
 class LastChangeSet(Base):
     __tablename__ = "last_change_set"
 

@@ -366,6 +366,14 @@ sap.ui.define([
             return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 }, timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000 }, source: "adapter_defaults" });
         },
 
+
+        getReferenceBundle: function (mOptions) {
+            if (_backendService.getReferenceBundle) {
+                return _backendService.getReferenceBundle(mOptions || {});
+            }
+            return Promise.resolve({ persons: [], dictionaries: {}, locations: [], variables: {} });
+        },
+
         getPersons: function () {
             if (_backendService.getPersons) {
                 return _backendService.getPersons();

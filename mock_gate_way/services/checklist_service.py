@@ -1,7 +1,8 @@
 from sqlalchemy import func
+import json
 from sqlalchemy.orm import Session
 
-from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot
+from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, SaveRequestLedger
 from services.lock_service import LockService
 from utils.etag import format_etag
 from utils.time import now_utc
@@ -194,6 +195,90 @@ class ChecklistService:
         db.commit()
         db.refresh(root)
         return root
+
+
+    @staticmethod
+    def save_via_import(db: Session, root_id: str, user_id: str, payload: dict, is_autosave: bool = False, force: bool = False, request_guid: str | None = None):
+        operation = "AUTOSAVE" if is_autosave else "SAVE"
+        if request_guid:
+            existing = db.query(SaveRequestLedger).filter(
+                SaveRequestLedger.request_guid == request_guid,
+                SaveRequestLedger.operation == operation,
+                SaveRequestLedger.root_id == root_id,
+                SaveRequestLedger.user_id == user_id,
+            ).order_by(SaveRequestLedger.created_on.desc()).first()
+            if existing:
+                try:
+                    return json.loads(existing.response_payload)
+                except Exception:
+                    pass
+
+        LockService.validate_lock(db, root_id, user_id)
+
+        root = db.query(ChecklistRoot).filter(
+            ChecklistRoot.id == root_id,
+            ChecklistRoot.is_deleted.is_(False),
+        ).first()
+        if not root:
+            raise ValueError("NOT_FOUND")
+
+        data = payload or {}
+        basic_payload = data.get("basic") if isinstance(data, dict) else {}
+        checks_payload = data.get("checks") if isinstance(data, dict) else None
+        barriers_payload = data.get("barriers") if isinstance(data, dict) else None
+
+        s_lpc = data.get("lpc") or basic_payload.get("LPC_KEY") or root.lpc
+        if s_lpc:
+            root.lpc = s_lpc
+
+        if isinstance(basic_payload, dict):
+            for incoming_key, model_field in BASIC_FIELD_MAP.items():
+                if incoming_key in basic_payload:
+                    setattr(root, model_field, basic_payload.get(incoming_key) or "")
+
+        if checks_payload is not None and (not is_autosave or force):
+            db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root_id).delete()
+            for i, row in enumerate(checks_payload or []):
+                db.add(
+                    ChecklistCheck(
+                        root_id=root_id,
+                        text=(row or {}).get("text") or "",
+                        status="DONE" if (row or {}).get("result") else "PENDING",
+                        position=i,
+                    )
+                )
+
+        if barriers_payload is not None and (not is_autosave or force):
+            if lpc_allows_barriers(root.lpc):
+                db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
+                for i, row in enumerate(barriers_payload or []):
+                    db.add(
+                        ChecklistBarrier(
+                            root_id=root_id,
+                            description=(row or {}).get("text") or (row or {}).get("description") or "",
+                            is_active=bool((row or {}).get("result", (row or {}).get("is_active", True))),
+                            position=i,
+                        )
+                    )
+            else:
+                db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
+
+        root.changed_by = user_id
+        root.changed_on = now_utc()
+        db.commit()
+        result = ChecklistService.get(db, root_id, expand=True)
+
+        if request_guid and result:
+            db.add(SaveRequestLedger(
+                request_guid=request_guid,
+                operation=operation,
+                root_id=root_id,
+                user_id=user_id,
+                response_payload=json.dumps(result, default=str),
+            ))
+            db.commit()
+
+        return result
 
     @staticmethod
     def add_barrier(db: Session, root_id: str, user_id: str, description: str, position: int):

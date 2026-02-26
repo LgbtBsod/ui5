@@ -140,6 +140,26 @@ sap.ui.define([
         },
 
 
+        getReferenceBundle: function () {
+            return Promise.all([
+                fetch("mock/persons.json").then(function (oResponse) { return oResponse.json(); }),
+                fetch("mock/lpc.json").then(function (oResponse) { return oResponse.json(); }),
+                fetch("mock/professions.json").then(function (oResponse) { return oResponse.json(); }),
+                fetch("mock/location_hierarchy.json").then(function (oResponse) { return oResponse.json(); })
+            ]).then(function (aData) {
+                return {
+                    persons: (aData[0] && aData[0].persons) || [],
+                    dictionaries: {
+                        LPC: (aData[1] && aData[1].lpc) || [],
+                        PROFESSION: (aData[2] && aData[2].professions) || []
+                    },
+                    locations: (aData[3] && aData[3].locations) || [],
+                    variables: { source: "fake_reference_bundle" }
+                };
+            });
+        },
+
+
         getPersons: function () {
             return fetch("mock/persons.json")
                 .then(function (oResponse) { return oResponse.json(); })

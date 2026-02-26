@@ -4,6 +4,8 @@ sap.ui.define([], function () {
     var _baseUrl = "http://localhost:5000";   // ← ВАЖНО: не const
     var _userId = "demoUser";
     var _sessionGuid = "sess-" + Date.now();
+    var _referenceBundleCache = null;
+    var _referenceBundleLoadedAt = 0;
 
     function _joinUrl(sBase, sPath) {
         var bBaseEnds = /\/$/.test(sBase);
@@ -108,6 +110,32 @@ sap.ui.define([], function () {
 
 
 
+
+
+    function _mapSearchRow(oRow) {
+        return {
+            root: {
+                id: oRow.db_key || oRow.id,
+                db_key: oRow.db_key || oRow.id,
+                integrationFlag: true,
+                this_is_integration_data: true,
+                successRateChecks: 0,
+                successRateBarriers: 0,
+                status: _mapStatusToUi(oRow.status)
+            },
+            basic: {
+                date: oRow.date || "",
+                time: "",
+                timezone: "Europe/Amsterdam",
+                equipment: oRow.equipment || "",
+                LPC_KEY: oRow.lpc || "",
+                checklist_id: oRow.checklist_id || ""
+            },
+            checks: [],
+            barriers: []
+        };
+    }
+
     function _acquireLock(sId, sStealFrom) {
         return _request("/lock/acquire", {
             method: "POST",
@@ -117,6 +145,31 @@ sap.ui.define([], function () {
                 uname: _userId,
                 iv_steal_from: sStealFrom || ""
             }
+        });
+    }
+
+
+    function _buildRequestGuid(sPrefix, sObjectId, oPayload) {
+        var sRaw = sPrefix + "|" + String(sObjectId || "") + "|" + String(_sessionGuid || "") + "|" + JSON.stringify(oPayload || {});
+        var iHash = 0;
+        for (var i = 0; i < sRaw.length; i += 1) {
+            iHash = ((iHash << 5) - iHash) + sRaw.charCodeAt(i);
+            iHash |= 0;
+        }
+        return sPrefix + "-" + Math.abs(iHash);
+    }
+
+    function _getReferenceBundle(mOptions) {
+        var iNow = Date.now();
+        var bForce = !!(mOptions && mOptions.forceRefresh);
+        if (!bForce && _referenceBundleCache && (iNow - _referenceBundleLoadedAt) < 5 * 60 * 1000) {
+            return Promise.resolve(_referenceBundleCache);
+        }
+        return _request("/reference/bundle").then(function (oData) {
+            var oBundle = (oData && oData.value) || {};
+            _referenceBundleCache = oBundle;
+            _referenceBundleLoadedAt = Date.now();
+            return oBundle;
         });
     }
     return {
@@ -163,15 +216,26 @@ sap.ui.define([], function () {
         },
 
         getCheckLists: function () {
-            return _request("/checklist", {
+            return _request("/SearchRows", {
                 params: {
                     "$top": 200,
-                    "$skip": 0
+                    "$skip": 0,
+                    "$inlinecount": "allpages"
                 }
-            }).then(function (oList) {
-                var aRoots = oList && oList.value ? oList.value : [];
-                return aRoots.map(function (oRoot) {
-                    return _mapChecklist(oRoot, { checks: [], barriers: [] });
+            }).then(function (oData) {
+                var aRows = (oData && oData.d && oData.d.results) || [];
+                return aRows.map(_mapSearchRow);
+            }).catch(function () {
+                return _request("/checklist", {
+                    params: {
+                        "$top": 200,
+                        "$skip": 0
+                    }
+                }).then(function (oList) {
+                    var aRoots = oList && oList.value ? oList.value : [];
+                    return aRoots.map(function (oRoot) {
+                        return _mapChecklist(oRoot, { checks: [], barriers: [] });
+                    });
                 });
             });
         },
@@ -182,7 +246,6 @@ sap.ui.define([], function () {
             var sLpcKey = String((mQuery && mQuery.lpcKey) || "").trim();
             var aFilterParts = [];
 
-            // Empty max means "all" for enterprise search use-case.
             if (!iTop || iTop < 1) {
                 iTop = 9999;
             }
@@ -190,23 +253,34 @@ sap.ui.define([], function () {
 
             if (sIdContains) {
                 var sEscapedId = sIdContains.replace(/'/g, "''");
-                aFilterParts.push("contains(id,'" + sEscapedId + "') or contains(checklist_id,'" + sEscapedId + "')");
+                aFilterParts.push("contains(db_key,'" + sEscapedId + "') or contains(checklist_id,'" + sEscapedId + "')");
             }
             if (sLpcKey) {
                 var sEscapedLpc = sLpcKey.replace(/'/g, "''");
                 aFilterParts.push("lpc eq '" + sEscapedLpc + "'");
             }
 
-            return _request("/checklist", {
+            return _request("/SearchRows", {
                 params: {
                     "$top": iTop,
                     "$skip": 0,
                     "$filter": aFilterParts.length ? aFilterParts.join(" and ") : undefined
                 }
-            }).then(function (oList) {
-                var aRoots = oList && oList.value ? oList.value : [];
-                return aRoots.map(function (oRoot) {
-                    return _mapChecklist(oRoot, { checks: [], barriers: [] });
+            }).then(function (oData) {
+                var aRows = (oData && oData.d && oData.d.results) || [];
+                return aRows.map(_mapSearchRow);
+            }).catch(function () {
+                return _request("/checklist", {
+                    params: {
+                        "$top": iTop,
+                        "$skip": 0,
+                        "$filter": aFilterParts.length ? aFilterParts.join(" and ") : undefined
+                    }
+                }).then(function (oList) {
+                    var aRoots = oList && oList.value ? oList.value : [];
+                    return aRoots.map(function (oRoot) {
+                        return _mapChecklist(oRoot, { checks: [], barriers: [] });
+                    });
                 });
             });
         },
@@ -334,80 +408,58 @@ createCheckList: function (oData) {
         updateCheckList: function (sId, oData, mOptions) {
             mOptions = mOptions || {};
             var oBasic = (oData && oData.basic) || {};
-            var sLpc = oBasic.LPC_KEY || "L2";
             var aChecks = (oData && oData.checks) || [];
             var aBarriers = (oData && oData.barriers) || [];
 
             return _acquireLock(sId)
                 .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId) + "/autosave", {
-                        method: "PATCH",
+                    return _request("/actions/SaveChecklist", {
+                        method: "POST",
                         params: {
+                            root_id: sId,
                             user_id: _userId,
-                            force: !!mOptions.force
+                            force: !!mOptions.force,
+                            request_guid: _buildRequestGuid("SAVE", sId, oData)
                         },
                         body: {
-                            lpc: sLpc,
-                            basic: oBasic
+                            lpc: oBasic.LPC_KEY || "L2",
+                            basic: oBasic,
+                            checks: aChecks,
+                            barriers: aBarriers
                         }
                     });
                 })
-                .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId) + "/checks", {
-                        method: "PUT",
-                        params: { user_id: _userId },
-                        body: { rows: aChecks }
-                    });
-                })
-                .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", {
-                        method: "PUT",
-                        params: { user_id: _userId },
-                        body: { rows: aBarriers }
-                    }).catch(function () { return null; });
-                })
-                .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } });
-                })
-                .then(function (oDetails) {
-                    return _mapChecklist({
-                        id: sId,
-                        checklist_id: ((oData && oData.basic && oData.basic.checklist_id) || sId),
-                        lpc: sLpc,
-                        status: "01"
-                    }, { checks: aChecks, barriers: aBarriers });
+                .then(function (oSaved) {
+                    var oRoot = (oSaved && oSaved.d) || { id: sId };
+                    return _mapChecklist(oRoot, { checks: aChecks, barriers: aBarriers });
                 });
         },
 
         autoSaveCheckList: function (sId, oDeltaPayload, oFullPayload, mOptions) {
             mOptions = mOptions || {};
             var oBasic = (oDeltaPayload && oDeltaPayload.basic) || {};
-            var bHasRows = !!((oDeltaPayload && oDeltaPayload.checks && oDeltaPayload.checks.length) || (oDeltaPayload && oDeltaPayload.barriers && oDeltaPayload.barriers.length));
-
-            if (bHasRows) {
-                // Current mock gateway row API is replace-style; for safety fallback to full update.
-                return this.updateCheckList(sId, oFullPayload || {}, mOptions);
-            }
 
             return _acquireLock(sId)
                 .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId) + "/autosave", {
-                        method: "PATCH",
+                    return _request("/actions/AutoSaveChecklist", {
+                        method: "POST",
                         params: {
+                            root_id: sId,
                             user_id: _userId,
-                            force: !!mOptions.force
+                            force: !!mOptions.force,
+                            request_guid: _buildRequestGuid("AUTOSAVE", sId, oDeltaPayload)
                         },
                         body: {
                             lpc: oBasic.LPC_KEY,
-                            basic: oBasic
+                            basic: oBasic,
+                            checks: (oDeltaPayload && oDeltaPayload.checks) || [],
+                            barriers: (oDeltaPayload && oDeltaPayload.barriers) || []
                         }
                     });
                 })
-                .then(function () {
-                    return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } });
-                })
-                .then(function (oRoot) {
-                    return _mapChecklist(oRoot || { id: sId }, {
+                .then(function (oSaved) {
+                    var oRoot = (oSaved && oSaved.d) || { id: sId };
+                    return _mapChecklist(oRoot, {
                         checks: (oFullPayload && oFullPayload.checks) || [],
                         barriers: (oFullPayload && oFullPayload.barriers) || []
                     });
@@ -436,7 +488,19 @@ createCheckList: function (oData) {
         lockAcquire: function (sObjectId, sSessionId, sUser, sStealFrom) {
             if (sSessionId) { _sessionGuid = sSessionId; }
             if (sUser) { _userId = sUser; }
-            return _acquireLock(sObjectId, sStealFrom);
+            return _request("/actions/LockAcquire", {
+                method: "POST",
+                params: {
+                    root_id: sObjectId,
+                    user_id: _userId,
+                    session_guid: _sessionGuid,
+                    iv_steal_from: sStealFrom || ""
+                }
+            }).then(function (oData) {
+                return (oData && oData.d) || oData || { success: false };
+            }).catch(function () {
+                return _acquireLock(sObjectId, sStealFrom);
+            });
         },
 
         lockHeartbeat: function (sObjectId, sSessionId) {
@@ -444,12 +508,22 @@ createCheckList: function (oData) {
                 return Promise.resolve({ success: true, is_killed: false });
             }
             if (sSessionId) { _sessionGuid = sSessionId; }
-            return _request("/lock/heartbeat", {
+            return _request("/actions/LockHeartbeat", {
                 method: "POST",
                 params: {
-                    object_uuid: sObjectId,
+                    root_id: sObjectId,
                     session_guid: _sessionGuid
                 }
+            }).then(function (oData) {
+                return (oData && oData.d) || oData || { success: false };
+            }).catch(function () {
+                return _request("/lock/heartbeat", {
+                    method: "POST",
+                    params: {
+                        object_uuid: sObjectId,
+                        session_guid: _sessionGuid
+                    }
+                });
             });
         },
 
@@ -458,12 +532,32 @@ createCheckList: function (oData) {
                 return Promise.resolve({ success: true, is_killed: false });
             }
             if (sSessionId) { _sessionGuid = sSessionId; }
-            return _request("/lock/status", {
-                method: "POST",
+            return _request("/LockStatusSet", {
                 params: {
                     object_uuid: sObjectId,
                     session_guid: _sessionGuid
                 }
+            }).then(function (oData) {
+                var aRows = oData && oData.d && oData.d.results;
+                return (aRows && aRows[0]) || { success: true, is_killed: false };
+            }).catch(function () {
+                return _request("/actions/LockStatus", {
+                    method: "POST",
+                    params: {
+                        root_id: sObjectId,
+                        session_guid: _sessionGuid
+                    }
+                }).then(function (oData) {
+                    return (oData && oData.d) || oData || { success: false };
+                }).catch(function () {
+                    return _request("/lock/status", {
+                        method: "POST",
+                        params: {
+                            object_uuid: sObjectId,
+                            session_guid: _sessionGuid
+                        }
+                    });
+                });
             });
         },
 
@@ -473,14 +567,26 @@ createCheckList: function (oData) {
             }
             if (sSessionId) { _sessionGuid = sSessionId; }
             mOptions = mOptions || {};
-            return _request("/lock/release", {
+            return _request("/actions/LockRelease", {
                 method: "POST",
                 params: {
-                    object_uuid: sObjectId,
+                    root_id: sObjectId,
                     session_guid: _sessionGuid,
                     iv_try_save: !!mOptions.trySave
                 },
                 body: mOptions.payload || {}
+            }).then(function (oData) {
+                return (oData && oData.d) || oData || { released: false };
+            }).catch(function () {
+                return _request("/lock/release", {
+                    method: "POST",
+                    params: {
+                        object_uuid: sObjectId,
+                        session_guid: _sessionGuid,
+                        iv_try_save: !!mOptions.trySave
+                    },
+                    body: mOptions.payload || {}
+                });
             });
         },
 
@@ -529,8 +635,12 @@ createCheckList: function (oData) {
         },
 
         getPersons: function () {
-            return _request("/persons/suggest", { params: { search: "" } }).then(function (oData) {
-                return oData && oData.value ? oData.value : [];
+            return _getReferenceBundle().then(function (oBundle) {
+                return oBundle.persons || [];
+            }).catch(function () {
+                return _request("/persons/suggest", { params: { search: "" } }).then(function (oData) {
+                    return oData && oData.value ? oData.value : [];
+                });
             });
         },
 
@@ -541,17 +651,30 @@ createCheckList: function (oData) {
         },
 
         getDictionary: function (sDomain) {
-            return _request("/dict", { params: { domain: sDomain } }).then(function (oData) {
-                return oData && oData.value ? oData.value : [];
+            return _getReferenceBundle().then(function (oBundle) {
+                var mDict = oBundle.dictionaries || {};
+                return mDict[sDomain] || [];
+            }).catch(function () {
+                return _request("/dict", { params: { domain: sDomain } }).then(function (oData) {
+                    return oData && oData.value ? oData.value : [];
+                });
             });
         },
 
         getLocations: function () {
             var sToday = new Date().toISOString().slice(0, 10);
-            return _request("/location", { params: { date: sToday } }).catch(function () {
-                return _request("/hierarchy", { params: { date: sToday } });
-            }).then(function (oData) {
-                return oData && oData.value ? oData.value : [];
+            return _request("/actions/GetMplHierarchy", { method: "POST", params: { date: sToday } }).then(function (oData) {
+                return (oData && oData.d && oData.d.results) || [];
+            }).catch(function () {
+                return _getReferenceBundle().then(function (oBundle) {
+                    return oBundle.locations || [];
+                });
+            }).catch(function () {
+                return _request("/location", { params: { date: sToday } }).catch(function () {
+                    return _request("/hierarchy", { params: { date: sToday } });
+                }).then(function (oData) {
+                    return oData && oData.value ? oData.value : [];
+                });
             });
         },
 
