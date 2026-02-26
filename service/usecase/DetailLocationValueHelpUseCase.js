@@ -103,6 +103,62 @@ sap.ui.define([], function () {
         return oCtx && oCtx.getObject ? oCtx.getObject() : null;
     }
 
+
+    function runOpenValueHelpLifecycle(mArgs) {
+        openValueHelp({
+            dialog: mArgs.dialog,
+            locations: mArgs.locations,
+            viewModel: mArgs.viewModel,
+            buildLocationTree: mArgs.buildLocationTree
+        });
+
+        return Promise.resolve(mArgs.ensureLocationsLoaded()).then(function (aLocations) {
+            applyFilteredTreeToViewModel({
+                query: "",
+                locations: aLocations || [],
+                viewModel: mArgs.viewModel,
+                buildLocationTree: mArgs.buildLocationTree,
+                normalizeText: mArgs.normalizeText
+            });
+            return { ok: true, reason: "value_help_opened" };
+        });
+    }
+
+    function runListSelectionLifecycle(mArgs) {
+        var oItem = mArgs.event && mArgs.event.getParameter ? mArgs.event.getParameter("listItem") : null;
+        if (!oItem || typeof oItem.getBindingContext !== "function") {
+            return { ok: false, reason: "missing_list_item" };
+        }
+        var oCtx = oItem.getBindingContext("view");
+        var oNode = oCtx && oCtx.getObject ? oCtx.getObject() : null;
+        if (!oNode) {
+            return { ok: false, reason: "missing_node" };
+        }
+        applyLocationSelection({ node: oNode, selectedModel: mArgs.selectedModel, onAfterApply: mArgs.onAfterApply });
+        return { ok: true, reason: "selection_applied" };
+    }
+
+    function runTreeSelectionLifecycle(mArgs) {
+        var oNode = resolveNodeFromTreeSelectionEvent(mArgs.event);
+        if (!oNode) {
+            return { ok: false, reason: "missing_node" };
+        }
+        applyLocationSelection({ node: oNode, selectedModel: mArgs.selectedModel, onAfterApply: mArgs.onAfterApply });
+        if (typeof mArgs.onClose === "function") {
+            mArgs.onClose();
+        }
+        return { ok: true, reason: "selection_applied" };
+    }
+
+    function runComboSelectionLifecycle(mArgs) {
+        var oNode = resolveNodeFromComboChangeEvent(mArgs.event, mArgs.modelName || "mpl");
+        if (!oNode) {
+            return { ok: false, reason: "missing_node" };
+        }
+        applyLocationSelection({ node: oNode, selectedModel: mArgs.selectedModel, onAfterApply: mArgs.onAfterApply });
+        return { ok: true, reason: "selection_applied" };
+    }
+
     function applyFilteredTreeToViewModel(mArgs) {
         var oViewModel = mArgs && mArgs.viewModel;
         if (!oViewModel || typeof oViewModel.setProperty !== "function") {
@@ -120,6 +176,10 @@ sap.ui.define([], function () {
         applyLocationSelection: applyLocationSelection,
         resolveNodeFromTreeSelectionEvent: resolveNodeFromTreeSelectionEvent,
         resolveNodeFromComboChangeEvent: resolveNodeFromComboChangeEvent,
+        runOpenValueHelpLifecycle: runOpenValueHelpLifecycle,
+        runListSelectionLifecycle: runListSelectionLifecycle,
+        runTreeSelectionLifecycle: runTreeSelectionLifecycle,
+        runComboSelectionLifecycle: runComboSelectionLifecycle,
         applyFilteredTreeToViewModel: applyFilteredTreeToViewModel
     };
 });

@@ -18,6 +18,71 @@ sap.ui.define([], function () {
         });
     }
 
+
+    function runExportIntentOrchestration(mArgs) {
+        return mArgs.runExportIntentLifecycle({
+            runIntent: function () {
+                return mArgs.runExportIntent({
+                    event: mArgs.event,
+                    source: mArgs.source,
+                    defaultEntity: "screen",
+                    allowedEntities: ["screen", "barrier", "check"],
+                    resolveEntityFromMenuEvent: mArgs.resolveEntityFromMenuEvent,
+                    isEnabled: mArgs.isEnabled,
+                    runExport: mArgs.runExport
+                });
+            },
+            presentIntentResult: mArgs.presentIntentResult
+        }).then(function (oLifecycleResult) {
+            return (oLifecycleResult && oLifecycleResult.result) || oLifecycleResult;
+        });
+    }
+
+
+    function runExportExecutionOrchestration(mArgs) {
+        return runExportExecutionLifecycle({
+            runLifecycle: function () {
+                return mArgs.runExportLifecycle({
+                    runExportFlow: mArgs.runExportFlow,
+                    runWithLoading: mArgs.runWithLoading,
+                    buildExportPromise: mArgs.buildExportPromise,
+                    onEmpty: mArgs.onEmpty,
+                    onSuccess: mArgs.onSuccess,
+                    onError: mArgs.onError
+                });
+            }
+        }).then(function (oLifecycleResult) {
+            return (oLifecycleResult && oLifecycleResult.result) || oLifecycleResult;
+        });
+    }
+
+    function runExportExecutionPresentationOrchestration(mArgs) {
+        return runExportExecutionOrchestration({
+            runExportLifecycle: mArgs && mArgs.runExportLifecycle,
+            runExportFlow: mArgs && mArgs.runExportFlow,
+            runWithLoading: mArgs && mArgs.runWithLoading,
+            buildExportPromise: mArgs && mArgs.buildExportPromise,
+            onEmpty: function () {
+                if (typeof (mArgs && mArgs.showToast) === "function") {
+                    mArgs.showToast(mArgs.getText("exportEmpty"));
+                }
+            },
+            onSuccess: function (aRows) {
+                if (typeof (mArgs && mArgs.download) === "function") {
+                    mArgs.download(mArgs.buildFilename(mArgs && mArgs.entity), aRows || []);
+                }
+                if (typeof (mArgs && mArgs.showToast) === "function") {
+                    mArgs.showToast(mArgs.getText("exportDone", [(aRows || []).length]));
+                }
+            },
+            onError: function (oError) {
+                if (typeof (mArgs && mArgs.showToast) === "function") {
+                    mArgs.showToast(mArgs.getText("exportFailed", [((oError && oError.message) || "Unknown error")]));
+                }
+            }
+        });
+    }
+
     function runIntentPresentationLifecycle(mArgs) {
         var oResult = mArgs && mArgs.result;
         var fnPresent = mArgs && mArgs.present;
@@ -45,8 +110,23 @@ sap.ui.define([], function () {
         };
     }
 
+
+    function runExportIntentPresentationOrchestration(mArgs) {
+        runIntentPresentationLifecycle({
+            result: mArgs && mArgs.result,
+            present: mArgs && mArgs.present,
+            onUnexpected: mArgs && mArgs.onUnexpected
+        });
+        return (mArgs && mArgs.result) || null;
+    }
+
+
     return {
         runExportExecutionLifecycle: runExportExecutionLifecycle,
-        runIntentPresentationLifecycle: runIntentPresentationLifecycle
+        runExportIntentOrchestration: runExportIntentOrchestration,
+        runExportExecutionOrchestration: runExportExecutionOrchestration,
+        runExportExecutionPresentationOrchestration: runExportExecutionPresentationOrchestration,
+        runIntentPresentationLifecycle: runIntentPresentationLifecycle,
+        runExportIntentPresentationOrchestration: runExportIntentPresentationOrchestration
     };
 });

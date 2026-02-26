@@ -1,0 +1,49 @@
+{
+  "schema": {
+    "requiredRootKeys": [
+      "contractVersion",
+      "backendMode",
+      "features",
+      "compatibility",
+      "source"
+    ],
+    "requiredCompatibilityKeys": [
+      "minUiContractVersion",
+      "maxUiContractVersion"
+    ]
+  },
+  "requiredFeatures": [
+    "lockStatus",
+    "lockHeartbeat",
+    "autoSave",
+    "processAnalytics",
+    "dictionaryLookup",
+    "personSuggestion",
+    "locationsHierarchy",
+    "exportReport"
+  ],
+  "modeExpectations": {
+    "fake": {
+      "backendMode": "fake"
+    },
+    "real": {
+      "backendMode": "real"
+    }
+  },
+  "uiContractVersion": "1.0.0",
+  "unsupportedUiContractVersions": [
+    "0.9.0",
+    "2.0.0"
+  ],
+  "exactUpperBoundCompatibility": {
+    "minUiContractVersion": "1.1.0",
+    "maxUiContractVersion": "1.2.3",
+    "supportedUiContractVersion": "1.2.3",
+    "unsupportedUiContractVersion": "1.2.4"
+  },
+  "malformedSemverCompatibility": {
+    "minUiContractVersion": "1.a.0",
+    "maxUiContractVersion": "1.x",
+    "uiContractVersion": "1.0.0"
+  }
+}

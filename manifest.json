@@ -130,7 +130,8 @@
       }
     },
     "config": {
-      "backendMode": "real"
+      "backendMode": "real",
+      "uiContractVersion": "1.0.0"
     }
   }
 }

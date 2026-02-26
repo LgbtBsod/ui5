@@ -16,6 +16,8 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchSelectionNavigationUseCase",
     "sap_ui5/service/usecase/SearchSmartFilterFlowUseCase",
     "sap_ui5/service/usecase/SearchWorkflowAnalyticsDialogUseCase",
+    "sap_ui5/service/usecase/SearchWorkflowAnalyticsLoadOrchestrationUseCase",
+    "sap_ui5/service/usecase/SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchExportOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchNavigationIntentUseCase",
     "sap_ui5/service/usecase/SearchStateSyncUseCase",
@@ -30,17 +32,21 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchFilterHintPresentationUseCase",
     "sap_ui5/service/usecase/SearchInlineAnalyticsPresentationUseCase",
     "sap_ui5/service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase",
+    "sap_ui5/service/usecase/SearchInlineAnalyticsRailUseCase",
+    "sap_ui5/service/usecase/SearchInlineAnalyticsAutoRefreshUseCase",
     "sap_ui5/service/usecase/SearchFilterLifecycleUseCase",
+    "sap_ui5/service/usecase/SearchFilterInteractionOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchRetryLifecycleUseCase",
+    "sap_ui5/service/usecase/SearchRetryLoadOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchLifecycleSyncUseCase",
     "sap_ui5/service/usecase/SearchToolbarLifecycleUseCase",
     "sap_ui5/service/usecase/SearchWorkflowAnalyticsLifecycleUseCase",
     "sap_ui5/service/usecase/SearchStatusFilterLifecycleUseCase",
     "sap_ui5/service/usecase/SearchTriggerPolicyUseCase",
+    "sap_ui5/service/usecase/SearchTriggerExecutionUseCase",
     "sap_ui5/service/usecase/SearchRouteLifecycleUseCase",
     "sap_ui5/service/usecase/SearchRebindLifecycleUseCase",
     "sap_ui5/service/usecase/SearchResultConvergenceLifecycleUseCase",
-    "sap_ui5/service/usecase/SearchSelectionLifecycleUseCase",
     "sap_ui5/service/usecase/SearchExportLifecycleUseCase",
     "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase",
     "sap_ui5/service/usecase/SearchSelectionOpenFlowUseCase",
@@ -48,8 +54,7 @@ sap.ui.define([
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
     "sap_ui5/util/SearchSmartControlCoordinator"
-], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchFilterLifecycleUseCase, SearchRetryLifecycleUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchSelectionLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
-], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchFilterLifecycleUseCase, SearchRetryLifecycleUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchSelectionLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
+], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchWorkflowAnalyticsLoadOrchestrationUseCase, SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchInlineAnalyticsRailUseCase, SearchInlineAnalyticsAutoRefreshUseCase, SearchFilterLifecycleUseCase, SearchFilterInteractionOrchestrationUseCase, SearchRetryLifecycleUseCase, SearchRetryLoadOrchestrationUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchTriggerExecutionUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -198,21 +203,17 @@ sap.ui.define([
             return SearchSmartControlCoordinator.extractChecklistId(oObject);
         },
 
-        _loadSelectedChecklistById: function (sId) {
-            return SearchSelectionOpenFlowUseCase.hydrateSelection({
-                id: sId,
+        _runSelectionInteraction: function (sKind, sSourceType, oEvent) {
+            return SearchSelectionOpenFlowUseCase.runSelectionInteractionOrchestration({
+                kind: sKind,
+                sourceType: sSourceType,
+                event: oEvent,
+                extractIdFromSmartEvent: SearchSmartControlCoordinator.extractChecklistIdFromSelectionEvent,
+                extractIdFromFallbackEvent: SearchUiFlowUseCase.extractIdFromListSelectionEvent,
                 selectedModel: this.getModel("selected"),
                 viewModel: this._getViewModel(),
                 loadChecklistById: SearchApplicationService.getChecklistById,
-                syncSelectionState: this._syncSearchSelectionState.bind(this)
-            }).then(function (oResult) {
-                return (oResult && oResult.checklist) || null;
-            });
-        },
-
-        _openDetailById: function (sId) {
-            return SearchSelectionOpenFlowUseCase.openDetail({
-                id: sId,
+                syncSelectionState: this._syncSearchSelectionState.bind(this),
                 confirmNavigation: this._confirmNavigationFromDirty.bind(this),
                 stateModel: this.getModel("state"),
                 navTo: this.navTo.bind(this),
@@ -222,20 +223,11 @@ sap.ui.define([
         },
 
         _onSmartTableSelectionChange: function (oEvent) {
-            return SearchSelectionLifecycleUseCase.runSelectionChangeLifecycle({
-                event: oEvent,
-                extractId: SearchSmartControlCoordinator.extractChecklistIdFromSelectionEvent,
-                hydrateSelection: this._loadSelectedChecklistById.bind(this)
-            });
+            return this._runSelectionInteraction("selectionChange", "smart", oEvent);
         },
 
         _onSmartTableItemPress: function (oEvent) {
-            return SearchSelectionLifecycleUseCase.runItemPressLifecycle({
-                event: oEvent,
-                extractId: SearchSmartControlCoordinator.extractChecklistIdFromSelectionEvent,
-                hydrateSelection: this._loadSelectedChecklistById.bind(this),
-                openDetail: this._openDetailById.bind(this)
-            });
+            return this._runSelectionInteraction("itemPress", "smart", oEvent);
         },
 
         onSmartTableInitialise: function () {
@@ -433,20 +425,11 @@ sap.ui.define([
         },
 
         onFallbackSelectionChange: function (oEvent) {
-            return SearchSelectionLifecycleUseCase.runSelectionChangeLifecycle({
-                event: oEvent,
-                extractId: SearchUiFlowUseCase.extractIdFromListSelectionEvent,
-                hydrateSelection: this._loadSelectedChecklistById.bind(this)
-            });
+            return this._runSelectionInteraction("selectionChange", "fallback", oEvent);
         },
 
         onFallbackItemPress: function (oEvent) {
-            return SearchSelectionLifecycleUseCase.runItemPressLifecycle({
-                event: oEvent,
-                extractId: SearchUiFlowUseCase.extractIdFromListSelectionEvent,
-                hydrateSelection: this._loadSelectedChecklistById.bind(this),
-                openDetail: this._openDetailById.bind(this)
-            });
+            return this._runSelectionInteraction("itemPress", "fallback", oEvent);
         },
 
 
@@ -536,28 +519,26 @@ sap.ui.define([
             });
         },
 
-        onSmartSearch: function () {
-            this._syncStateFiltersFromSmartFilter();
-            SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
-            SearchTriggerPolicyUseCase.runTriggerPolicy({
-                trigger: "SMART_SEARCH",
-                syncFilterHint: this._updateFilterState.bind(this),
-                refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
-            });
-        },
-
-        onSearch: function () {
-            SearchLifecycleSyncUseCase.runFallbackSearchLifecycle({
-            if (this._isSmartControlsEnabled()) {
-                return this.onSmartSearch();
-            }
-            return SearchLifecycleSyncUseCase.runFallbackSearchLifecycle({
+        _buildSearchTriggerArgs: function (bUseSmartControls) {
+            return {
+                useSmartControls: !!bUseSmartControls,
+                syncStateFilters: this._syncStateFiltersFromSmartFilter.bind(this),
                 markSearchedAndRebind: function () {
                     SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
                 }.bind(this),
+                runTriggerPolicy: SearchTriggerPolicyUseCase.runTriggerPolicy,
+                runFallbackSearchLifecycle: SearchLifecycleSyncUseCase.runFallbackSearchLifecycle,
                 syncFilterHint: this._updateFilterState.bind(this),
                 refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
-            });
+            };
+        },
+
+        onSmartSearch: function () {
+            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true));
+        },
+
+        onSearch: function () {
+            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(this._isSmartControlsEnabled()));
         },
 
         onStatusFilterPress: function (oEvent) {
@@ -596,96 +577,84 @@ sap.ui.define([
             var sSearchMode = this.getModel("state").getProperty("/searchMode") || "EXACT";
             var aFallback = this.getModel("data").getProperty("/checkLists") || [];
 
-            return SearchWorkflowAnalyticsLifecycleUseCase.runLoadLifecycle({
-                runLoadFlow: function () {
-                    return SearchWorkflowAnalyticsDialogUseCase.runAnalyticsLoadFlow({
-                        viewModel: this._getViewModel(),
-                        loadAnalytics: function () {
-                            return WorkflowAnalyticsUseCase.loadProcessAnalytics(mPayload, sSearchMode, aFallback);
-                        }
-                    });
-                }.bind(this),
+            return SearchWorkflowAnalyticsLoadOrchestrationUseCase.runLoad({
+                runLifecycle: SearchWorkflowAnalyticsLifecycleUseCase.runLoadLifecycle,
+                runDialogLoad: SearchWorkflowAnalyticsDialogUseCase.runAnalyticsLoadFlow,
+                viewModel: this._getViewModel(),
+                loadAnalytics: function () {
+                    return WorkflowAnalyticsUseCase.loadProcessAnalytics(mPayload, sSearchMode, aFallback);
+                },
                 applyLoadError: function (sErrorText) {
                     this._getViewModel().setProperty("/analyticsError", sErrorText || "");
                 }.bind(this)
-            }).then(function (oLifecycleResult) {
-                return (oLifecycleResult && oLifecycleResult.result) || null;
             });
         },
 
-        _refreshInlineAnalyticsByTrigger: function (sTrigger) {
-            if (!SearchInlineAnalyticsRefreshOrchestrationUseCase.shouldRefreshForTrigger(sTrigger)) {
-                return Promise.resolve({ applied: false, reason: "unsupported_trigger" });
-            }
-
-            return SearchInlineAnalyticsRefreshOrchestrationUseCase.runRefreshLifecycle({
+        _buildInlineAnalyticsRailArgs: function () {
+            var oViewModel = this._getViewModel();
+            return {
                 refreshState: this._inlineAnalyticsRefreshState,
-                viewModel: this._getViewModel(),
+                viewModel: oViewModel,
                 loadAnalytics: this._loadWorkflowAnalytics.bind(this),
+                loadSimpleAnalytics: function () {
+                    return WorkflowAnalyticsUseCase.loadSimpleAnalytics(this.getModel("data").getProperty("/checkLists") || []);
+                }.bind(this),
                 applyPresentation: function (oAnalytics) {
                     SearchInlineAnalyticsPresentationUseCase.applyInlineAnalyticsPresentation({
-                        viewModel: this._getViewModel(),
-                        analytics: oAnalytics || this._getViewModel().getProperty("/analytics"),
+                        viewModel: oViewModel,
+                        analytics: oAnalytics || oViewModel.getProperty("/analytics"),
                         bundle: this.getResourceBundle()
                     });
                 }.bind(this)
-            });
+            };
+        },
+
+        _refreshInlineAnalyticsByTrigger: function (sTrigger) {
+            var mArgs = this._buildInlineAnalyticsRailArgs();
+            mArgs.trigger = sTrigger;
+            return SearchInlineAnalyticsRailUseCase.runTriggerRefresh(mArgs);
         },
 
         _refreshSimpleAnalyticsRail: function () {
-            var oViewModel = this._getViewModel();
-            oViewModel.setProperty("/analyticsRailBusy", true);
-            return WorkflowAnalyticsUseCase.loadSimpleAnalytics(this.getModel("data").getProperty("/checkLists") || []).then(function (oAnalytics) {
-                SearchInlineAnalyticsPresentationUseCase.applyInlineAnalyticsPresentation({
-                    viewModel: oViewModel,
-                    analytics: oAnalytics || {},
-                    bundle: this.getResourceBundle()
-                });
-                oViewModel.setProperty("/analyticsError", "");
-            }.bind(this)).catch(function (oError) {
-                oViewModel.setProperty("/analyticsError", (oError && oError.message) || "");
-            }).finally(function () {
-                oViewModel.setProperty("/analyticsRailBusy", false);
-            });
+            return SearchInlineAnalyticsRailUseCase.runSimpleRailRefresh(this._buildInlineAnalyticsRailArgs());
         },
 
         _startSimpleAnalyticsAutoRefresh: function () {
-            this._analyticsRefreshMs = Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || this._analyticsRefreshMs || 15 * 60 * 1000;
-            this._refreshSimpleAnalyticsRail();
-            if (this._analyticsRefreshTimer) {
-                clearInterval(this._analyticsRefreshTimer);
-            }
-            this._analyticsRefreshTimer = setInterval(function () {
-                this._refreshSimpleAnalyticsRail();
-            }.bind(this), this._analyticsRefreshMs);
+            var oResult = SearchInlineAnalyticsAutoRefreshUseCase.restartAutoRefresh({
+                intervalMs: Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || this._analyticsRefreshMs || 15 * 60 * 1000,
+                currentTimer: this._analyticsRefreshTimer,
+                runRefresh: this._refreshSimpleAnalyticsRail.bind(this),
+                setInterval: setInterval,
+                clearInterval: clearInterval
+            });
+            this._analyticsRefreshMs = oResult.intervalMs;
+            this._analyticsRefreshTimer = oResult.timerId;
+        },
+
+        _buildWorkflowAnalyticsDialogArgs: function () {
+            return {
+                isSmartControlsEnabled: this._isSmartControlsEnabled(),
+                applyAnalyticsError: function (sMessage) {
+                    this._getViewModel().setProperty("/analyticsError", sMessage || "");
+                }.bind(this),
+                smartControlsUnavailableText: this.getResourceBundle().getText("smartControlsUnavailable"),
+                runOpenLifecycle: SearchWorkflowAnalyticsLifecycleUseCase.runOpenLifecycle,
+                runCloseLifecycle: SearchWorkflowAnalyticsLifecycleUseCase.runCloseLifecycle,
+                openDialogLifecycle: SearchWorkflowAnalyticsDialogUseCase.openDialogLifecycle,
+                closeDialogLifecycle: SearchWorkflowAnalyticsDialogUseCase.closeDialogLifecycle,
+                dialog: this.byId("workflowAnalyticsDialog"),
+                runLoad: this._loadWorkflowAnalytics.bind(this),
+                openDialog: SearchAnalyticsDialogExportFlowUseCase.openAnalyticsDialog,
+                closeDialog: SearchAnalyticsDialogExportFlowUseCase.closeAnalyticsDialog
+            };
         },
 
         onOpenWorkflowAnalytics: function () {
-            return SearchWorkflowAnalyticsLifecycleUseCase.runOpenLifecycle({
-                applyDegradedState: function () {
-                    if (!this._isSmartControlsEnabled()) {
-                        this._getViewModel().setProperty("/analyticsError", this.getResourceBundle().getText("smartControlsUnavailable"));
-                    }
-                }.bind(this),
-                openDialog: function () {
-                    SearchWorkflowAnalyticsDialogUseCase.openDialogLifecycle({
-                        dialog: this.byId("workflowAnalyticsDialog"),
-                        runLoad: this._loadWorkflowAnalytics.bind(this),
-                        openDialog: SearchAnalyticsDialogExportFlowUseCase.openAnalyticsDialog
-                    });
-                }.bind(this)
-            });
+            return SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase.runOpen(this._buildWorkflowAnalyticsDialogArgs());
         },
 
         onCloseWorkflowAnalytics: function () {
-            return SearchWorkflowAnalyticsLifecycleUseCase.runCloseLifecycle({
-                closeDialog: function () {
-                    SearchWorkflowAnalyticsDialogUseCase.closeDialogLifecycle({
-                        dialog: this.byId("workflowAnalyticsDialog"),
-                        closeDialog: SearchAnalyticsDialogExportFlowUseCase.closeAnalyticsDialog
-                    });
-                }.bind(this)
-            });
+            return SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase.runClose(this._buildWorkflowAnalyticsDialogArgs());
         },
 
         _collectScreenRowsForExport: function () {
@@ -698,39 +667,29 @@ sap.ui.define([
             var sSearchMode = this.getModel("state").getProperty("/searchMode") || "EXACT";
             var oBundle = this.getResourceBundle();
 
-            return SearchExportLifecycleUseCase.runExportExecutionLifecycle({
-                runLifecycle: function () {
-                    return SearchExportOrchestrationUseCase.runExportLifecycle({
-                        runExportFlow: SearchAnalyticsDialogExportFlowUseCase.runExportFlow,
-                        runWithLoading: function (fnTask) {
-                            return this.runWithStateFlag(this.getModel("state"), "/isLoading", fnTask);
-                        }.bind(this),
-                        buildExportPromise: function () {
-                            return SearchAnalyticsExportUseCase.buildExportPromise(
-                                sEntity,
-                                this._collectScreenRowsForExport.bind(this),
-                                function () { return SearchApplicationService.exportRows(sEntity, mPayload, sSearchMode); }
-                            );
-                        }.bind(this),
-                        onEmpty: function () {
-                            MessageToast.show(oBundle.getText("exportEmpty"));
-                        },
-                        onSuccess: function (aRows) {
-                            ExcelExport.download(SearchExportOrchestrationUseCase.buildExportFilename(sEntity), aRows);
-                            MessageToast.show(oBundle.getText("exportDone", [aRows.length]));
-                        },
-                        onError: function (oError) {
-                            MessageToast.show(oBundle.getText("exportFailed", [((oError && oError.message) || "Unknown error")]));
-                        }
-                    });
-                }.bind(this)
-            }).then(function (oLifecycleResult) {
-                return (oLifecycleResult && oLifecycleResult.result) || oLifecycleResult;
+            return SearchExportLifecycleUseCase.runExportExecutionPresentationOrchestration({
+                entity: sEntity,
+                runExportLifecycle: SearchExportOrchestrationUseCase.runExportLifecycle,
+                runExportFlow: SearchAnalyticsDialogExportFlowUseCase.runExportFlow,
+                runWithLoading: function (fnTask) {
+                    return this.runWithStateFlag(this.getModel("state"), "/isLoading", fnTask);
+                }.bind(this),
+                buildExportPromise: function () {
+                    return SearchAnalyticsExportUseCase.buildExportPromise(
+                        sEntity,
+                        this._collectScreenRowsForExport.bind(this),
+                        function () { return SearchApplicationService.exportRows(sEntity, mPayload, sSearchMode); }
+                    );
+                }.bind(this),
+                buildFilename: SearchExportOrchestrationUseCase.buildExportFilename,
+                download: ExcelExport.download,
+                getText: oBundle.getText.bind(oBundle),
+                showToast: MessageToast.show
             });
         },
 
         _presentExportIntentResult: function (oResult) {
-            SearchExportLifecycleUseCase.runIntentPresentationLifecycle({
+            return SearchExportLifecycleUseCase.runExportIntentPresentationOrchestration({
                 result: oResult,
                 present: function (oRawResult) {
                     return SearchActionMessagePresentationUseCase.presentExportIntentResult({
@@ -744,88 +703,59 @@ sap.ui.define([
                     this._setLoadError("Unexpected export state");
                 }.bind(this)
             });
-            return oResult;
+        },
+
+        _buildExportIntentArgs: function (mOverrides) {
+            var mArgs = mOverrides || {};
+            return {
+                runExportIntentLifecycle: SearchToolbarLifecycleUseCase.runExportIntentLifecycle,
+                runExportIntent: SearchExportIntentGuardUseCase.runExportIntent,
+                event: mArgs.event,
+                source: mArgs.source,
+                resolveEntityFromMenuEvent: mArgs.resolveEntityFromMenuEvent,
+                isEnabled: function () {
+                    return !!this._getViewModel().getProperty("/canExport");
+                }.bind(this),
+                runExport: this._runExport.bind(this),
+                presentIntentResult: this._presentExportIntentResult.bind(this)
+            };
         },
 
         onExportMenuDefault: function () {
-            return SearchToolbarLifecycleUseCase.runExportIntentLifecycle({
-                runIntent: function () {
-                    return SearchExportIntentGuardUseCase.runExportIntent({
-                        defaultEntity: "screen",
-                        allowedEntities: ["screen", "barrier", "check"],
-                        isEnabled: function () {
-                            return !!this._getViewModel().getProperty("/canExport");
-                        }.bind(this),
-                        runExport: this._runExport.bind(this)
-                    });
-                }.bind(this),
-                presentIntentResult: this._presentExportIntentResult.bind(this)
-            }).then(function (oLifecycleResult) {
-                return (oLifecycleResult && oLifecycleResult.result) || oLifecycleResult;
-            });
+            return SearchExportLifecycleUseCase.runExportIntentOrchestration(this._buildExportIntentArgs());
         },
 
         onExportMenuAction: function (oEvent) {
-            return SearchToolbarLifecycleUseCase.runExportIntentLifecycle({
-                runIntent: function () {
-                    return SearchExportIntentGuardUseCase.runExportIntent({
-                        event: oEvent,
-                        defaultEntity: "screen",
-                        allowedEntities: ["screen", "barrier", "check"],
-                        resolveEntityFromMenuEvent: SearchUiFlowUseCase.resolveExportEntityFromMenuEvent,
-                        isEnabled: function () {
-                            return !!this._getViewModel().getProperty("/canExport");
-                        }.bind(this),
-                        runExport: this._runExport.bind(this)
-                    });
-                }.bind(this),
-                presentIntentResult: this._presentExportIntentResult.bind(this)
-            }).then(function (oLifecycleResult) {
-                return (oLifecycleResult && oLifecycleResult.result) || oLifecycleResult;
-            });
+            return SearchExportLifecycleUseCase.runExportIntentOrchestration(this._buildExportIntentArgs({
+                event: oEvent,
+                resolveEntityFromMenuEvent: SearchUiFlowUseCase.resolveExportEntityFromMenuEvent
+            }));
         },
 
         onExportReport: function (oEvent) {
-            return SearchToolbarLifecycleUseCase.runExportIntentLifecycle({
-                runIntent: function () {
-                    return SearchExportIntentGuardUseCase.runExportIntent({
-                        source: oEvent.getSource(),
-                        defaultEntity: "screen",
-                        allowedEntities: ["screen", "barrier", "check"],
-                        isEnabled: function () {
-                            return !!this._getViewModel().getProperty("/canExport");
-                        }.bind(this),
-                        runExport: this._runExport.bind(this)
-                    });
-                }.bind(this),
-                presentIntentResult: this._presentExportIntentResult.bind(this)
-            }).then(function (oLifecycleResult) {
-                return (oLifecycleResult && oLifecycleResult.result) || oLifecycleResult;
-            });
+            return SearchExportLifecycleUseCase.runExportIntentOrchestration(this._buildExportIntentArgs({
+                source: oEvent.getSource()
+            }));
         },
 
         onRetryLoad: function () {
             var oStateModel = this.getModel("state");
             var oBundle = this.getResourceBundle();
 
-            return SearchRetryLifecycleUseCase.runRetryLifecycle({
+            return SearchRetryLoadOrchestrationUseCase.runRetry({
+                runRetryLifecycle: SearchRetryLifecycleUseCase.runRetryLifecycle,
                 beginLatency: OperationalKpiInstrumentationUseCase.beginLatencySample,
-                runRetryFlow: function () {
-                    return SearchRetryLoadPresentationUseCase.runRetryFlow({
-                        stateModel: oStateModel,
-                        dataModel: this.getModel("data"),
-                        runWithLoading: function (fnTask) {
-                            return this.runWithStateFlag(oStateModel, "/isLoading", fnTask);
-                        }.bind(this),
-                        getCheckLists: SearchApplicationService.getCheckLists,
-                        onAfterApply: function () {
-                            this._syncSearchSelectionState();
-                            this._updateResultSummary();
-                            this._refreshInlineAnalyticsByTrigger("RETRY_LOAD");
-                        }.bind(this),
-                        treatEmptyAsError: false,
-                        maxAttempts: 2
-                    });
+                runRetryFlow: SearchRetryLoadPresentationUseCase.runRetryFlow,
+                stateModel: oStateModel,
+                dataModel: this.getModel("data"),
+                runWithLoading: function (fnTask) {
+                    return this.runWithStateFlag(oStateModel, "/isLoading", fnTask);
+                }.bind(this),
+                getCheckLists: SearchApplicationService.getCheckLists,
+                onAfterApply: function () {
+                    this._syncSearchSelectionState();
+                    this._updateResultSummary();
+                    this._refreshInlineAnalyticsByTrigger("RETRY_LOAD");
                 }.bind(this),
                 presentRetryOutcome: function (oResult) {
                     return SearchRetryMessagePresentationUseCase.presentRetryOutcome({
@@ -843,13 +773,14 @@ sap.ui.define([
                     OperationalKpiInstrumentationUseCase.finishLatencySample(oStateModel, sMetric, iStartedAt);
                 },
                 afterRetryApplied: this._applyEmptyStatePresentation.bind(this)
-            }).then(function (oLifecycleResult) {
-                return (oLifecycleResult && oLifecycleResult.result) || oLifecycleResult;
             });
         },
 
         onResetFilters: function () {
-            SearchFilterLifecycleUseCase.runResetLifecycle({
+            SearchFilterInteractionOrchestrationUseCase.runReset({
+                runResetLifecycle: SearchFilterLifecycleUseCase.runResetLifecycle,
+                runTriggerPolicy: SearchTriggerPolicyUseCase.runTriggerPolicy,
+                stateModel: this.getModel("state"),
                 resetFilters: function () {
                     SearchLoadFilterUseCase.resetFilters(this.getModel("state"), this._getViewModel());
                 }.bind(this),
@@ -865,13 +796,8 @@ sap.ui.define([
                 }.bind(this),
                 rebind: this._rebindSmartTable.bind(this),
                 syncSelectionState: this._syncSearchSelectionState.bind(this),
-                refreshInlineAnalytics: function (sTrigger) {
-                    SearchTriggerPolicyUseCase.runTriggerPolicy({
-                        trigger: sTrigger,
-                        syncFilterHint: this._updateFilterState.bind(this),
-                        refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
-                    });
-                }.bind(this)
+                syncFilterHint: this._updateFilterState.bind(this),
+                refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
             });
         },
 
@@ -883,20 +809,17 @@ sap.ui.define([
         },
 
         onSearchModeToggle: function (oEvent) {
-            SearchFilterLifecycleUseCase.runSearchModeToggleLifecycle({
+            SearchFilterInteractionOrchestrationUseCase.runSearchModeToggle({
+                runSearchModeToggleLifecycle: SearchFilterLifecycleUseCase.runSearchModeToggleLifecycle,
+                runTriggerPolicy: SearchTriggerPolicyUseCase.runTriggerPolicy,
+                stateModel: this.getModel("state"),
                 looseMode: oEvent.getParameter("state"),
                 applySearchMode: function (bLoose) {
                     SearchLoadFilterUseCase.applySearchMode(this.getModel("state"), this._getViewModel(), bLoose);
                 }.bind(this),
                 updateFilterState: this._updateFilterState.bind(this),
-                refreshInlineAnalytics: function (sTrigger) {
-                    SearchTriggerPolicyUseCase.runTriggerPolicy({
-                        trigger: sTrigger,
-                        stateModel: this.getModel("state"),
-                        syncFilterHint: this._updateFilterState.bind(this),
-                        refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
-                    });
-                }.bind(this)
+                syncFilterHint: this._updateFilterState.bind(this),
+                refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
             });
         },
 
@@ -905,10 +828,11 @@ sap.ui.define([
                 clearTimeout(this._iSearchTimer);
                 this._iSearchTimer = null;
             }
-            if (this._analyticsRefreshTimer) {
-                clearInterval(this._analyticsRefreshTimer);
-                this._analyticsRefreshTimer = null;
-            }
+            var oAutoRefreshResult = SearchInlineAnalyticsAutoRefreshUseCase.stopAutoRefresh({
+                currentTimer: this._analyticsRefreshTimer,
+                clearInterval: clearInterval
+            });
+            this._analyticsRefreshTimer = oAutoRefreshResult.timerId;
         },
 
 

@@ -53,7 +53,25 @@ sap.ui.define([
         });
     }
 
+    function runCancelEditFlow(mDeps) {
+        var oSourceChecklist = mDeps && mDeps.sourceChecklist;
+        var fnCloneChecklist = mDeps && mDeps.cloneChecklist;
+        var oDraft = typeof fnCloneChecklist === "function" ? fnCloneChecklist(oSourceChecklist || {}) : (oSourceChecklist || {});
+
+        if (mDeps && mDeps.selectedModel && typeof mDeps.selectedModel.setData === "function") {
+            mDeps.selectedModel.setData(oDraft);
+        }
+        DetailLifecycleUseCase.resetDirty(mDeps && mDeps.stateModel);
+        if (typeof (mDeps && mDeps.releaseEdit) === "function") {
+            mDeps.releaseEdit();
+        }
+
+        return { ok: true, reason: "cancel_edit_applied" };
+    }
+
+
     return {
-        runToggleFlow: runToggleFlow
+        runToggleFlow: runToggleFlow,
+        runCancelEditFlow: runCancelEditFlow
     };
 });

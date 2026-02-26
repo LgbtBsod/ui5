@@ -39,3 +39,31 @@
 - Wave Search-SelectionLifecycle+SelectionCSS: extracted smart/fallback selection lifecycle to `SearchSelectionLifecycleUseCase` and completed selection affordance CSS pass for selected/focus/compact states.
 
 - Wave Search-ExportLifecycle+ExportCSS: extracted export execution/intent presentation convergence to `SearchExportLifecycleUseCase` and completed export action emphasis CSS consistency pass.
+
+- Wave ContractSemver+A3-TriggerExtraction: completed B1 semver-compatibility enforcement via `ensureContractCompatibility` and fixture-driven contract drift gate checks; started A3 by extracting Search trigger execution orchestration into `SearchTriggerExecutionUseCase` and slimming `Search.controller` trigger handlers; smoke coverage extended.
+
+- Wave A3-InlineAnalyticsRailExtraction: extracted inline analytics trigger/rail refresh orchestration from `Search.controller.js` into `SearchInlineAnalyticsRailUseCase`; controller switched to argument-builder + usecase delegation pattern; smoke coverage added for supported/unsupported trigger and rail refresh state transitions.
+
+- Wave A3-InlineAnalyticsAutoRefreshExtraction: extracted analytics auto-refresh timer lifecycle from `Search.controller.js` into `SearchInlineAnalyticsAutoRefreshUseCase`; controller onExit/refresh-start now use deterministic usecase delegation; smoke coverage added for timer restart/stop semantics.
+
+- Wave A3-WorkflowAnalyticsDialogExtraction: extracted workflow analytics open/close degraded orchestration from `Search.controller.js` into `SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase`; controller now delegates dialog envelope through argument-builder pattern; smoke coverage added for deterministic open/close lifecycle behavior.
+
+- Wave B1-SemverPolicyHardening+A3-AnalyticsLoadExtraction: completed production-grade B1 semver policy validation (invalid policy range detection + fail-fast `enforceContractCompatibility` + startup `init` enforcement + dedicated semver gate in pre-push) and extracted workflow analytics load envelope from `Search.controller.js` to `SearchWorkflowAnalyticsLoadOrchestrationUseCase`; smoke coverage extended.
+
+- Wave A3-FilterInteractionPolicyExtraction+B1-ExactUpperBoundCoverage: extracted Search reset/toggle filter interaction policy orchestration into `SearchFilterInteractionOrchestrationUseCase` (controller keeps wiring-only callbacks) and extended B1 gates/tests with exact semver upper-bound compatibility scenarios to harden policy enforcement determinism.
+
+- Wave A3-RetryLoadExtraction+B1-MalformedSemverCoverage: extracted Search retry-load orchestration envelope into `SearchRetryLoadOrchestrationUseCase` (controller reduced to callback wiring) and hardened B1 gates/tests with malformed semver metadata compatibility rejection checks (`invalid_semver_metadata`).
+
+- Wave A3-ExportIntentExtraction+B1-SemverGateMalformedCoverage: extracted Search export intent lifecycle envelope into `SearchExportLifecycleUseCase.runExportIntentOrchestration` (default/menu/report handlers now use a shared args-builder + delegation path) and expanded `backend-semver-policy-gate.js` with malformed semver metadata rejection coverage.
+
+- Wave A4-SaveErrorOutcomeLifecycleExtraction: started A4 by extracting Detail save-error outcome lifecycle envelope (presentation + KPI markers + conflict classification + latency finish) from `Detail.controller.js` into `DetailSaveErrorOutcomePresentationUseCase.runOutcomeLifecycle`, keeping controller as wiring shell for callback adapters.
+
+- Wave A3-ExportExecutionEnvelope+A4-LocationValueHelpLifecycle: extracted Search export execution envelope into `SearchExportLifecycleUseCase.runExportExecutionOrchestration` and reduced `Search.controller.js` export execution path to adapter wiring; continued A4 by extracting Detail location value-help open/list/tree/combo lifecycle envelopes into `DetailLocationValueHelpUseCase` orchestration methods with controller callback-only adapters.
+
+- Wave A3-SelectionOpenInteractionEnvelope+A4-DictionarySelectionLifecycle: extracted Search selection/open interaction lifecycle envelope into `SearchSelectionOpenFlowUseCase.runSelectionChange/runItemPress` and switched Search controller smart/fallback selection handlers to shared args-builder delegation; continued A4 by extracting dictionary selection lifecycle envelope into `DetailDictionarySelectionUseCase.runDictionarySelectionLifecycle` and delegating Detail LPC/profession handlers to callback-only controller wiring.
+
+- Wave A3A4-LifecycleConsolidationPass: consolidated Search selection/open controller handlers through `SearchSelectionOpenFlowUseCase` interaction APIs and consolidated Detail LPC dictionary+warning sequencing via `DetailDictionarySelectionUseCase.runLpcSelectionLifecycle`; smoke coverage expanded for lifecycle passthrough guarantees.
+
+- Wave A3A4-ExecutionPresentationAndProfessionLifecycle: moved Search export execution presentation callbacks (empty/success/error + file naming/download) into `SearchExportLifecycleUseCase.runExportExecutionPresentationOrchestration` and reduced controller `_runExport` to adapter wiring; continued A4 with profession dictionary delegation via `DetailDictionarySelectionUseCase.runProfessionSelectionLifecycle` and added smoke assertions for both orchestration paths.
+
+- Wave A3A4-SelectionInteractionAndCancelEditLifecycle: consolidated Search smart/fallback selection+item orchestration via `SearchSelectionOpenFlowUseCase.runSelectionInteractionOrchestration` (controller handlers now route through a single interaction adapter) and continued A4 by extracting Detail cancel-edit lifecycle into `DetailToggleEditOrchestrationUseCase.runCancelEditFlow`; smoke tests extended for both orchestration branches.

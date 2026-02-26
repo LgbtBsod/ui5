@@ -54,9 +54,46 @@ sap.ui.define([], function () {
         }
     }
 
+
+    function runOutcomeLifecycle(mArgs) {
+        var oResult = (mArgs && mArgs.result) || {};
+
+        var oPresentation = presentOutcome({
+            result: oResult,
+            bundle: mArgs && mArgs.bundle,
+            showToast: mArgs && mArgs.showToast
+        });
+
+        var fnMarkSaveFailed = mArgs && mArgs.markSaveFailed;
+        if (typeof fnMarkSaveFailed === "function") {
+            fnMarkSaveFailed();
+        }
+
+        var sReason = String(oResult.reason || "");
+        var aConflictReasons = ["reloaded", "legacy_reload", "overwritten", "legacy_overwrite", "cancelled"];
+        var fnMarkConflict = mArgs && mArgs.markConflict;
+        if (aConflictReasons.indexOf(sReason) >= 0 && typeof fnMarkConflict === "function") {
+            fnMarkConflict();
+        }
+
+        var fnFinishLatency = mArgs && mArgs.finishLatency;
+        if (typeof fnFinishLatency === "function") {
+            fnFinishLatency("save", mArgs && mArgs.startedAt);
+        }
+
+        return {
+            ok: true,
+            reason: "handled",
+            result: oResult,
+            presentation: oPresentation
+        };
+    }
+
+
     return {
         resolveMessageSpec: resolveMessageSpec,
         resolveMessageKey: resolveMessageKey,
-        presentOutcome: presentOutcome
+        presentOutcome: presentOutcome,
+        runOutcomeLifecycle: runOutcomeLifecycle
     };
 });
