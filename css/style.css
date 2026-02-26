@@ -35,6 +35,9 @@
   --interactive-pressed: color-mix(in srgb, var(--surface2) 82%, rgba(var(--accent-rgb), 0.2));
   --edit-field-bg: color-mix(in srgb, var(--surface2) 72%, rgba(255,255,255,0.12));
   --readonly-field-bg: color-mix(in srgb, var(--surface2) 90%, transparent);
+
+  /* SAP typography baseline */
+  --sap-font-family-stack: "72", "72full", "SAP-icons", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 :root.light-mode {
@@ -68,6 +71,30 @@
   --readonly-field-bg: color-mix(in srgb, var(--surface2) 95%, white);
 }
 
+/* Horizon-inspired morning/night refinements layered over fiori_3/fiori_3_dark */
+body.appLight,
+:root.light-mode body {
+  --bg-main: linear-gradient(180deg, #f7f9ff 0%, #eef3ff 44%, #e8eeff 100%);
+  --bg-grad-a: rgba(78, 120, 255, 0.14);
+  --bg-grad-b: rgba(84, 214, 255, 0.24);
+  --accent: #3b6df0;
+  --accent-rgb: 59, 109, 240;
+  --accent-grad: linear-gradient(135deg, #4b7bff, #5aa7ff);
+  --glass-bg: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(82, 117, 220, 0.20);
+}
+
+body.appDark {
+  --bg-main: radial-gradient(circle at 20% 15%, #151b35 0%, #0f1830 44%, #0a1226 100%);
+  --bg-grad-a: rgba(89, 133, 255, 0.24);
+  --bg-grad-b: rgba(84, 214, 255, 0.14);
+  --accent: #7ea4ff;
+  --accent-rgb: 126, 164, 255;
+  --accent-grad: linear-gradient(135deg, #729cff, #8bc2ff);
+  --glass-bg: rgba(12, 22, 42, 0.78);
+  --glass-border: rgba(117, 156, 255, 0.24);
+}
+
 /* ==============================
    Section: layout-shell-and-page-surfaces
    ============================== */
@@ -99,6 +126,7 @@ body {
   min-height: 100vh;
   position: relative;
   font-feature-settings: "kern" 1, "liga" 1;
+  font-family: var(--sap-font-family-stack);
   color: var(--text-main);
   background:
     radial-gradient(circle at 14% 18%, var(--bg-grad-a), transparent 46%),
@@ -1964,4 +1992,248 @@ body.themeLifestyleNightOps .filterCard {
 .smartTableGlass .sapMListTblEmptyCell {
   color: var(--text-muted) !important;
   font-weight: 600;
+}
+
+/* Wave 50: control rail collapse affordance + settings dialog consistency */
+.detailControlAsideHost {
+  gap: .35rem;
+}
+
+.detailControlPeekButton {
+  align-self: flex-start;
+  margin-top: .3rem;
+}
+
+.detailControlPeekButton .sapMBtnInner {
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 72%, rgba(var(--accent-rgb), 0.28)) !important;
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.08)) !important;
+}
+
+.detailRailHeader {
+  width: 100%;
+  margin-bottom: .25rem;
+}
+
+.detailRailCollapseBtn .sapMBtnInner {
+  min-width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50% !important;
+}
+
+.detailRailStatusText .sapMObjStatusText {
+  font-size: .78rem;
+  letter-spacing: .01em;
+}
+
+.detailLocationInput .sapMInputBaseContentWrapper {
+  border-radius: 12px !important;
+}
+
+/* View settings dialog (SmartTable personalization) aligned to app glass style */
+.sapMViewSettingsDialog .sapMDialogSection,
+.sapMViewSettingsDialog .sapMDialogScroll,
+.sapMViewSettingsDialog .sapMDialogTitle,
+.sapMViewSettingsDialog .sapMBar {
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.08)) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 78%, rgba(var(--accent-rgb), 0.18)) !important;
+}
+
+.sapMViewSettingsDialog .sapMInputBaseContentWrapper,
+.sapMViewSettingsDialog .sapMListTblCell,
+.sapMViewSettingsDialog .sapMLIB {
+  background: color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.06)) !important;
+}
+
+/* Theme toggle: make inversion visually stronger */
+.appDark .themeDockButton .sapMBtnInner {
+  background: rgba(250, 253, 255, 0.92) !important;
+  border-color: rgba(208, 223, 238, 0.92) !important;
+}
+
+.appDark .themeDockButton .sapUiIcon {
+  color: #0f223a !important;
+}
+
+.appLight .themeDockButton .sapMBtnInner,
+.light-mode .themeDockButton .sapMBtnInner {
+  background: rgba(14, 28, 44, 0.94) !important;
+  border-color: rgba(20, 38, 58, 0.95) !important;
+}
+
+
+/* Wave 52: Horizon visual polish */
+.filterCard .sapMTitle,
+.detailHeroTitle,
+.workflowStageCard .sapMTitle,
+.sapMDialog .sapMTitle {
+  letter-spacing: 0.01em;
+  font-weight: 700;
+}
+
+.sapMInputBaseContentWrapper,
+.sapMSlt,
+.sapMBtn .sapMBtnInner {
+  border-radius: 0.75rem !important;
+}
+
+.smartTableGlass .sapMListTblHdrCell,
+.sapUiTableColCell {
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.08)) !important;
+}
+
+.sapMFocus .sapMInputBaseContentWrapper,
+.sapMFocus .sapMSlt,
+.sapMBtn:focus .sapMBtnInner {
+  box-shadow: var(--focus-ring) !important;
+}
+
+/* Wave 53: micro-interactions + dark contrast + Horizon spacing grid */
+.brandActionBtn,
+.kpiCard,
+.workflowStageCard,
+.glassCard,
+.filterCard,
+.smartTableGlass .sapMListTblRow {
+  transition: transform .18s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease, opacity .2s ease;
+}
+
+.brandActionBtn:hover .sapMBtnInner,
+.searchAnalyticsCard:hover,
+.workflowStageCard:hover,
+.kpiCard:hover {
+  transform: translateY(-1px);
+}
+
+.brandActionBtn:active .sapMBtnInner,
+.sapMBtn.sapMBtnActive .sapMBtnInner {
+  transform: translateY(1px) scale(0.995);
+}
+
+.smartTableGlass .sapMListTblRow:hover .sapMListTblCell {
+  transition: background .18s ease, box-shadow .18s ease;
+}
+
+.appDark .workflowEyebrow,
+.appDark .kpiLabel,
+.appDark .searchUpdatedAtText,
+.appDark .searchModeLabel,
+.appDark .modeHintText,
+.appDark .searchAnalyticsMeta {
+  color: rgba(227, 236, 255, 0.86) !important;
+}
+
+.appDark .sapMObjStatusText,
+.appDark .sapMText {
+  text-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.searchFilterCardDense {
+  padding: 1.2rem 1.35rem !important;
+}
+
+.searchFilterCardDense .sapUiCompFilterBar {
+  row-gap: .45rem;
+}
+
+.searchAnalyticsGrid {
+  gap: .7rem;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.searchAnalyticsCard {
+  min-width: 11rem;
+  padding: .85rem .95rem;
+}
+
+.searchAnalyticsMeta {
+  margin-top: .2rem;
+  font-size: .74rem;
+  opacity: .9;
+}
+
+.searchHeaderKpiRail {
+  margin-bottom: .55rem;
+}
+
+.filterCard,
+.workflowStageCard,
+.kpiCard,
+.smartTableGlass {
+  border-radius: 1rem !important;
+}
+
+@media (max-width: 1180px) {
+  .searchAnalyticsGrid {
+    justify-content: flex-start;
+  }
+
+  .searchAnalyticsCard {
+    min-width: 9.5rem;
+    flex: 1;
+  }
+}
+
+/* Wave 52: filter hint/info strip readability + spacing consistency */
+.searchFilterHintBanner {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 76%, rgba(var(--accent-rgb), 0.16));
+  background: color-mix(in srgb, var(--surface2) 90%, rgba(var(--accent-rgb), 0.06));
+  box-shadow: 0 6px 16px rgba(16, 34, 62, 0.10);
+}
+
+.searchFilterHintBanner .sapMMsgStripMessage {
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.appDark .searchFilterHintBanner {
+  color: #e7f1ff;
+}
+
+/* Wave 53: analytics rail consistency pass */
+.searchAnalyticsCard .sapMTitle {
+  font-variant-numeric: tabular-nums;
+}
+
+.searchAnalyticsCard .kpiLabel {
+  opacity: .92;
+}
+
+.searchAnalyticsCard .searchAnalyticsMeta {
+  min-height: 1.1rem;
+}
+
+.appDark .searchAnalyticsCard .kpiLabel,
+.appDark .searchAnalyticsCard .searchAnalyticsMeta {
+  color: rgba(229, 238, 255, 0.9) !important;
+}
+
+/* Wave 54 prep: stacked layout stability for analytics+filters under 1200px */
+@media (max-width: 1200px) {
+  .searchHeaderKpiRail {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: .55rem;
+    margin-bottom: .45rem;
+  }
+
+  .searchHeaderKpiRail > .workflowStageCard,
+  .searchHeaderKpiRail > .searchAnalyticsGrid {
+    width: 100%;
+  }
+
+  .searchHeaderKpiRail > .workflowStageCard {
+    order: 1;
+  }
+
+  .searchHeaderKpiRail > .searchAnalyticsGrid {
+    order: 2;
+    margin-top: 0;
+  }
+
+  .searchFilterCardDense {
+    padding: 1rem 1rem !important;
+  }
 }

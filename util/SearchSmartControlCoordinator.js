@@ -122,11 +122,43 @@ sap.ui.define([
         return extractChecklistId(oObj);
     }
 
+
+    function sanitizeFilter(oFilter) {
+        if (!oFilter) {
+            return null;
+        }
+
+        if (Array.isArray(oFilter.aFilters)) {
+            var aChildren = oFilter.aFilters.map(sanitizeFilter).filter(Boolean);
+            if (!aChildren.length) {
+                return null;
+            }
+            if (aChildren.length === 1) {
+                return aChildren[0];
+            }
+            return new Filter({
+                filters: aChildren,
+                and: oFilter.bAnd !== false
+            });
+        }
+
+        if ((oFilter.oValue1 === "" || oFilter.oValue1 === null || typeof oFilter.oValue1 === "undefined")
+            && oFilter.sOperator !== FilterOperator.BT) {
+            return null;
+        }
+
+        return oFilter;
+    }
+
+    function sanitizeFilters(aFilters) {
+        return (aFilters || []).map(sanitizeFilter).filter(Boolean);
+    }
+
     function applyRebindParams(mArgs) {
         var oBindingParams = mArgs.bindingParams || {};
         var mState = mArgs.state || {};
         var fnDataReceived = mArgs.onDataReceived;
-        var aFilters = oBindingParams.filters || [];
+        var aFilters = sanitizeFilters(oBindingParams.filters || []);
 
         var sFilterId = String(mState.filterId || "").trim();
         var sFilterLpc = mState.filterLpc || "";

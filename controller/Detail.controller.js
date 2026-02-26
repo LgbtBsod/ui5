@@ -93,7 +93,8 @@ sap.ui.define([
         validationMissing: {},
         statusActions: DetailCardSchema.createStatusActions(oBundle),
         infoCards: DetailCardSchema.createInfoCards(oBundle),
-        locationVhTree: []
+        locationVhTree: [],
+        detailControlCollapsed: false
       });
 
       this.getView().setModel(oViewModel, "view");
@@ -557,6 +558,36 @@ sap.ui.define([
         person: oResolved.person,
         selectedModel: this.getModel("selected")
       });
+    },
+
+
+    formatHeartbeatText: function (sMode, bIsLocked) {
+      if (sMode === "EDIT" && bIsLocked) {
+        return this.getResourceBundle().getText("heartbeatLockedActive");
+      }
+      return this.getResourceBundle().getText("heartbeatInactive");
+    },
+
+    formatAutosaveText: function (sMode, sAutosaveState) {
+      if (sMode !== "EDIT") {
+        return this.getResourceBundle().getText("autosaveDisabled");
+      }
+      if (sAutosaveState === "ERROR") {
+        return this.getResourceBundle().getText("autosaveError");
+      }
+      if (sAutosaveState === "SAVING") {
+        return this.getResourceBundle().getText("autosaveSaving");
+      }
+      if (sAutosaveState === "SAVED") {
+        return this.getResourceBundle().getText("autosaveSaved");
+      }
+      return this.getResourceBundle().getText("autosaveWaiting");
+    },
+
+    onToggleDetailControlRail: function () {
+      var oViewModel = this.getView().getModel("view");
+      var bCollapsed = !!oViewModel.getProperty("/detailControlCollapsed");
+      oViewModel.setProperty("/detailControlCollapsed", !bCollapsed);
     },
 
     onLocationSelectionChange: function (oEvent) {

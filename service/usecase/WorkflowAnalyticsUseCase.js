@@ -9,6 +9,14 @@ sap.ui.define([
         return Number.isFinite(n) ? n : (iFallback || 0);
     }
 
+
+    function _extractBackendPayload(oData) {
+        if (oData && Array.isArray(oData.value) && oData.value.length) {
+            return oData.value[0] || {};
+        }
+        return oData || {};
+    }
+
     function _buildFromCollection(aRows) {
         var a = Array.isArray(aRows) ? aRows : [];
         var iTotal = a.length;
@@ -61,16 +69,17 @@ sap.ui.define([
                 : Promise.reject(new Error("Analytics API unavailable")));
 
             return pBackend.then(function (oData) {
+                var oPayload = _extractBackendPayload(oData);
                 return {
-                    total: _safeNumber(oData && oData.total, 0),
-                    failedChecks: _safeNumber(oData && oData.failedChecks, 0),
-                    failedBarriers: _safeNumber(oData && oData.failedBarriers, 0),
-                    healthy: _safeNumber(oData && oData.healthy, 0),
-                    closedCount: _safeNumber(oData && oData.closedCount, 0),
-                    registeredCount: _safeNumber(oData && oData.registeredCount, 0),
-                    avgChecksRate: _safeNumber(oData && oData.avgChecksRate, 0),
-                    avgBarriersRate: _safeNumber(oData && oData.avgBarriersRate, 0),
-                    refreshedAt: (oData && oData.refreshedAt) || new Date().toISOString(),
+                    total: _safeNumber(oPayload.total || oPayload.TOTAL, 0),
+                    failedChecks: _safeNumber(oPayload.failedChecks || oPayload.FAILED_CHECKS, 0),
+                    failedBarriers: _safeNumber(oPayload.failedBarriers || oPayload.FAILED_BARRIERS, 0),
+                    healthy: _safeNumber(oPayload.healthy || oPayload.HEALTHY, 0),
+                    closedCount: _safeNumber(oPayload.closedCount || oPayload.CLOSED_COUNT, 0),
+                    registeredCount: _safeNumber(oPayload.registeredCount || oPayload.REGISTERED_COUNT, 0),
+                    avgChecksRate: _safeNumber(oPayload.avgChecksRate || oPayload.AVG_CHECKS_RATE, 0),
+                    avgBarriersRate: _safeNumber(oPayload.avgBarriersRate || oPayload.AVG_BARRIERS_RATE, 0),
+                    refreshedAt: (oPayload.refreshedAt || oPayload.REFRESHED_AT) || new Date().toISOString(),
                     source: "backend"
                 };
             }).catch(function () {

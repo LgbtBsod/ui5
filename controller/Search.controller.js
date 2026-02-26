@@ -29,11 +29,14 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchRetryMessagePresentationUseCase",
     "sap_ui5/service/usecase/SearchSummaryPresentationUseCase",
     "sap_ui5/service/usecase/SearchEmptyStatePresentationUseCase",
+    "sap_ui5/service/usecase/SearchFilterHintPresentationUseCase",
+    "sap_ui5/service/usecase/SearchInlineAnalyticsPresentationUseCase",
+    "sap_ui5/service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase",
     "sap_ui5/util/ExcelExport",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
     "sap_ui5/util/SearchSmartControlCoordinator"
-], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchToolbarActionStateUseCase, SearchNavigationIntentUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchSelectionHydrationUseCase, SearchOpenDetailGuardUseCase, SearchCreateCopyNavigationGuardUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
+], function (BaseController, JSONModel, MessageToast, MessageBox, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchExportOrchestrationUseCase, SearchToolbarActionStateUseCase, SearchNavigationIntentUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchSelectionHydrationUseCase, SearchOpenDetailGuardUseCase, SearchCreateCopyNavigationGuardUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -76,15 +79,35 @@ sap.ui.define([
                 },
                 analyticsBusy: false,
                 analyticsError: "",
+                analyticsRail: {
+                    total: 0,
+                    failedChecks: 0,
+                    failedBarriers: 0,
+                    healthy: 0,
+                    avgChecksRate: 0,
+                    avgBarriersRate: 0,
+                    refreshedAt: "-",
+                    source: "fallback",
+                    sourceText: "fallback"
+                },
+                filterHintVisible: false,
+                filterHintType: "Information",
+                filterHintText: "",
                 noDataText: "",
                 emptyStateKind: "default_empty"
             });
 
             this._iSearchDebounceMs = 180;
             this._iSearchTimer = null;
+            this._inlineAnalyticsRefreshState = SearchInlineAnalyticsRefreshOrchestrationUseCase.ensureRefreshState({});
 
             this.applyStoredTheme();
             this.setModel(oViewModel, "view");
+            SearchInlineAnalyticsPresentationUseCase.applyInlineAnalyticsPresentation({
+                viewModel: oViewModel,
+                analytics: oViewModel.getProperty("/analytics"),
+                bundle: this.getResourceBundle()
+            });
             this.getView().setModel(this.getOwnerComponent().getModel("mainService"));
 
             oLayoutModel.setProperty("/smartFilter/fields", SmartSearchAdapter.getSmartFilterConfig().fields);
@@ -261,6 +284,7 @@ sap.ui.define([
             this._syncSmartControlAvailability();
             this._syncSearchSelectionState();
             this._updateResultSummary();
+            this._refreshInlineAnalyticsByTrigger("ROUTE_MATCHED");
             this._applyEmptyStatePresentation();
         },
 
@@ -326,18 +350,14 @@ sap.ui.define([
         },
 
         _updateFilterState: function () {
-            if (this._isSmartControlsEnabled()) {
-                this._getViewModel().setProperty("/hasActiveFilters", this._hasSmartFilters());
-                return;
-            }
-
-            var mPayload = this._buildFilterPayload();
-            var bHasFilters = Boolean((mPayload.filterId || "").trim())
-                || Boolean(mPayload.filterLpc)
-                || mPayload.filterFailedChecks !== "ALL"
-                || mPayload.filterFailedBarriers !== "ALL";
-
-            this._getViewModel().setProperty("/hasActiveFilters", bHasFilters);
+            SearchFilterHintPresentationUseCase.applyHintPresentation({
+                viewModel: this._getViewModel(),
+                stateModel: this.getModel("state"),
+                useSmartControls: this._isSmartControlsEnabled(),
+                hasSmartFilters: this._hasSmartFilters(),
+                fallbackPayload: this._buildFilterPayload(),
+                bundle: this.getResourceBundle()
+            });
         },
 
         _updateResultSummary: function () {
@@ -490,10 +510,12 @@ sap.ui.define([
         onSmartSearch: function () {
             this._syncStateFiltersFromSmartFilter();
             SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
+            this._refreshInlineAnalyticsByTrigger("SMART_SEARCH");
         },
 
         onSearch: function () {
             SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
+            this._refreshInlineAnalyticsByTrigger("FALLBACK_SEARCH");
         },
 
         onStatusFilterPress: function (oEvent) {
@@ -523,6 +545,25 @@ sap.ui.define([
                 loadAnalytics: function () {
                     return WorkflowAnalyticsUseCase.loadProcessAnalytics(mPayload, sSearchMode, aFallback);
                 }
+            });
+        },
+
+        _refreshInlineAnalyticsByTrigger: function (sTrigger) {
+            if (!SearchInlineAnalyticsRefreshOrchestrationUseCase.shouldRefreshForTrigger(sTrigger)) {
+                return Promise.resolve({ applied: false, reason: "unsupported_trigger" });
+            }
+
+            return SearchInlineAnalyticsRefreshOrchestrationUseCase.runRefreshLifecycle({
+                refreshState: this._inlineAnalyticsRefreshState,
+                viewModel: this._getViewModel(),
+                loadAnalytics: this._loadWorkflowAnalytics.bind(this),
+                applyPresentation: function (oAnalytics) {
+                    SearchInlineAnalyticsPresentationUseCase.applyInlineAnalyticsPresentation({
+                        viewModel: this._getViewModel(),
+                        analytics: oAnalytics || this._getViewModel().getProperty("/analytics"),
+                        bundle: this.getResourceBundle()
+                    });
+                }.bind(this)
             });
         },
 
@@ -626,6 +667,7 @@ sap.ui.define([
                 onAfterApply: function () {
                     this._syncSearchSelectionState();
                     this._updateResultSummary();
+                    this._refreshInlineAnalyticsByTrigger("RETRY_LOAD");
                 }.bind(this),
                 treatEmptyAsError: false,
                 maxAttempts: 2
@@ -652,6 +694,7 @@ sap.ui.define([
             }
             this._rebindSmartTable();
             this._syncSearchSelectionState();
+            this._refreshInlineAnalyticsByTrigger("RESET_FILTERS");
         },
 
 
@@ -665,6 +708,7 @@ sap.ui.define([
             var bLoose = oEvent.getParameter("state");
             SearchLoadFilterUseCase.applySearchMode(this.getModel("state"), this._getViewModel(), bLoose);
             this._updateFilterState();
+            this._refreshInlineAnalyticsByTrigger("SEARCH_MODE_TOGGLE");
         },
 
         onExit: function () {

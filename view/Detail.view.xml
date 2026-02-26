@@ -154,12 +154,8 @@
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'location' }" renderType="Bare">
-                                    <HBox renderType="Bare" alignItems="Center">
-                                        <ComboBox selectedKey="{selected>/basic/LOCATION_KEY}" value="{selected>/basic/LOCATION_NAME}" showSecondaryValues="true" filterSecondaryValues="true" selectionChange=".onLocationComboChange" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationText'}" items="{mpl>/locations}" width="100%" class="sapUiTinyMarginEnd">
-                                            <core:ListItem key="{mpl>node_id}" text="{mpl>location_name}" additionalText="{mpl>node_id}"/>
-                                        </ComboBox>
-                                        <Button icon="sap-icon://value-help" type="Transparent" press=".onOpenLocationValueHelp" tooltip="{i18n>locationValueHelpTooltip}" class="brandActionBtn brandActionGhost"/>
-                                    </HBox>
+                                    <Input value="{selected>/basic/LOCATION_NAME}" editable="false" showValueHelp="true" valueHelpRequest=".onOpenLocationValueHelp" placeholder="{i18n>locationValueHelpPlaceholder}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationText'}" class="detailLocationInput"/>
+                                    <ObjectStatus text="{= ${i18n>locationCodeLabel} + ': ' + (${selected>/basic/LOCATION_KEY} || '-') }" state="Information" class="sapUiTinyMarginTop"/>
                                 </VBox>
 
                                 <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'lpc' }" renderType="Bare">
@@ -189,9 +185,10 @@
 
 
             <HBox justifyContent="End" renderType="Bare" class="detailControlAsideHost">
-                <VBox class="glassCard detailControlInlineCard">
+                <VBox class="glassCard detailControlInlineCard" visible="{= !${view>/detailControlCollapsed} }">
                     <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
                 </VBox>
+                <Button icon="{= ${view>/detailControlCollapsed} ? 'sap-icon://open-command-field' : 'sap-icon://collapse-group' }" type="Transparent" press=".onToggleDetailControlRail" class="detailControlPeekButton"/>
             </HBox>
 
             <core:Fragment fragmentName="sap_ui5.view.fragment.LocationValueHelpDialog" type="XML"/>

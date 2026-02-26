@@ -14,7 +14,38 @@
         <content>
             <VBox class="appContent sapUiSmallMargin">
 
-                <VBox class="glassCard filterCard smartFilterGlass sapUiSmallMarginBottom">
+                <HBox class="workflowRail searchHeaderKpiRail" renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Stretch">
+                    <VBox class="workflowStageCard">
+                        <Text text="{i18n>workflowTitle}" class="workflowEyebrow"/>
+                        <Title text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }" level="H4"/>
+                        <Text text="{i18n>workflowSubtitle}" class="sapUiTinyMarginTop"/>
+                        <Button text="{i18n>workflowAnalyticsButton}" icon="sap-icon://business-objects-experience" type="Transparent" press=".onOpenWorkflowAnalytics" class="brandActionBtn brandActionGhost sapUiTinyMarginTop"/>
+                    </VBox>
+                    <HBox class="kpiGrid searchAnalyticsGrid" renderType="Bare" wrap="Wrap">
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
+                            <Title text="{view>/analyticsRail/total}" level="H4"/>
+                            <Text text="{= ${i18n>analyticsSource} + ': ' + (${view>/analyticsRail/sourceText} || '-') }" class="searchAnalyticsMeta"/>
+                        </VBox>
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
+                            <Title text="{view>/analyticsRail/failedChecks}" level="H4"/>
+                            <Text text="{= ${i18n>analyticsAvgChecksRate} + ': ' + (${view>/analyticsRail/avgChecksRate} || 0) + '%' }" class="searchAnalyticsMeta"/>
+                        </VBox>
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <Text text="{i18n>kpiFailedBarriers}" class="kpiLabel"/>
+                            <Title text="{view>/analyticsRail/failedBarriers}" level="H4"/>
+                            <Text text="{= ${i18n>analyticsAvgBarriersRate} + ': ' + (${view>/analyticsRail/avgBarriersRate} || 0) + '%' }" class="searchAnalyticsMeta"/>
+                        </VBox>
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <Text text="{i18n>kpiHealthy}" class="kpiLabel"/>
+                            <Title text="{view>/analyticsRail/healthy}" level="H4"/>
+                            <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analyticsRail/refreshedAt} || '-') }" class="searchAnalyticsMeta"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+
+                <VBox class="glassCard filterCard smartFilterGlass sapUiSmallMarginBottom searchFilterCardDense">
                     <Toolbar class="toolbarTransparent">
                         <Title text="{i18n>filtersTitle}"/>
                     </Toolbar>
@@ -28,7 +59,7 @@
                         showGoOnFB="true"
                         showClearOnFB="true"
                         liveMode="false"
-                        enableBasicSearch="true"
+                        enableBasicSearch="false"
                         useDateRangeType="true"
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged">
@@ -62,16 +93,15 @@
                     </Toolbar>
                 </VBox>
 
-                <HBox class="workflowRail searchHeaderKpiRail" renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Center">
-                    <VBox class="workflowStageCard">
-                        <Text text="{i18n>workflowTitle}" class="workflowEyebrow"/>
-                        <Title text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }" level="H4"/>
-                        <Text text="{i18n>workflowSubtitle}" class="sapUiTinyMarginTop"/>
-                        <Button text="{i18n>workflowAnalyticsButton}" icon="sap-icon://business-objects-experience" type="Transparent" press=".onOpenWorkflowAnalytics" class="brandActionBtn brandActionGhost sapUiTinyMarginTop"/>
-                    </VBox>
-                </HBox>
 
 
+
+                <MessageStrip
+                    text="{view>/filterHintText}"
+                    type="{view>/filterHintType}"
+                    visible="{view>/filterHintVisible}"
+                    showIcon="true"
+                    class="sapUiTinyMarginBottom searchFilterHintBanner"/>
 
                 <MessageStrip
                     text="{= ${view>/smartControlsReason} || ${i18n>smartControlsUnavailable} }"
