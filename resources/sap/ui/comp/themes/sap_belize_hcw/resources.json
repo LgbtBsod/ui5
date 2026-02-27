@@ -1,0 +1,65 @@
+{
+	"_version": "1.1.0",
+	"resources": [
+		{
+			"name": ".theming",
+			"size": 181,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "P13nConditionPanel.less",
+			"size": 492,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "SmartTable.less",
+			"size": 381,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "ValueHelpDialog.less",
+			"size": 1086,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library-RTL.css",
+			"size": 25734,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library-parameters.json",
+			"module": "sap/ui/comp/themes/sap_belize_hcw/library-parameters.json",
+			"size": 145,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library.css",
+			"size": 25721,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library.less",
+			"size": 3316,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library.source.less",
+			"size": 968,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "resources.json",
+			"size": 1137
+		},
+		{
+			"name": "shared.css",
+			"size": 66,
+			"theme": "sap_belize_hcw"
+		}
+	]
+}

@@ -1,0 +1,90 @@
+{
+	"_version": "1.1.0",
+	"resources": [
+		{
+			"name": ".theming",
+			"size": 181,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "Card.less",
+			"size": 247,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "CardHeaders.less",
+			"size": 253,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "DynamicPage.less",
+			"size": 2004,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "DynamicPageTitle.less",
+			"size": 1967,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "FlexibleColumnLayout.less",
+			"size": 1277,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "GridContainer.less",
+			"size": 215,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "ShellBar.less",
+			"size": 777,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "SidePanel.less",
+			"size": 1062,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library-RTL.css",
+			"size": 109219,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library-parameters.json",
+			"module": "sap/f/themes/sap_belize_hcw/library-parameters.json",
+			"size": 2409,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library.css",
+			"size": 109216,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library.less",
+			"size": 9094,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "library.source.less",
+			"size": 1116,
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "resources.json",
+			"size": 1594
+		}
+	]
+}

@@ -1,0 +1,186 @@
+{
+	"_version": "1.1.0",
+	"resources": [
+		{
+			"name": ".theming",
+			"size": 116,
+			"theme": "base"
+		},
+		{
+			"name": "AvatarGroup.less",
+			"size": 4703,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "CalendarPlaceholder.less",
+			"size": 1636,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "Card.less",
+			"size": 8503,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "CardBadge.less",
+			"size": 1282,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "CardHeaders.less",
+			"size": 9795,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "CardLoading.less",
+			"size": 6924,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "CardNumericIndicators.less",
+			"size": 874,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "DynamicPage.less",
+			"size": 9521,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "DynamicPageHeader.less",
+			"size": 1662,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "DynamicPageTitle.less",
+			"size": 7684,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "FlexibleColumnLayout.less",
+			"size": 6379,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "GridContainer.less",
+			"size": 1204,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "GridDragAndDrop.less",
+			"size": 172,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "GridList.less",
+			"size": 2591,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "GridListItem.less",
+			"size": 2705,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "ListPlaceholder.less",
+			"size": 1028,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "ObjectPlaceholder.less",
+			"size": 918,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "ProductSwitch.less",
+			"size": 247,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "ProductSwitchItem.less",
+			"size": 3241,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "SemanticPage.less",
+			"size": 744,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "ShellBar.less",
+			"size": 9492,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "SidePanel.less",
+			"size": 16948,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "TablePlaceholder.less",
+			"size": 770,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "TimelinePlaceholder.less",
+			"size": 1450,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "library-RTL.css",
+			"size": 113190,
+			"theme": "base"
+		},
+		{
+			"name": "library-parameters.json",
+			"module": "sap/f/themes/base/library-parameters.json",
+			"size": 3041,
+			"theme": "base"
+		},
+		{
+			"name": "library.css",
+			"size": 113196,
+			"theme": "base"
+		},
+		{
+			"name": "library.less",
+			"size": 102534,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "library.source.less",
+			"size": 996,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "resources.json",
+			"size": 3084
+		}
+	]
+}

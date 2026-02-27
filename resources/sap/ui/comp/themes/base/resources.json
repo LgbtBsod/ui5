@@ -1,0 +1,195 @@
+{
+	"_version": "1.1.0",
+	"resources": [
+		{
+			"name": ".theming",
+			"size": 116,
+			"theme": "base"
+		},
+		{
+			"name": "DateRangeType.css",
+			"size": 309,
+			"theme": "base"
+		},
+		{
+			"name": "DialogContent.css",
+			"size": 1402,
+			"theme": "base"
+		},
+		{
+			"name": "FieldListNode.css",
+			"size": 400,
+			"theme": "base"
+		},
+		{
+			"name": "FieldSelector.css",
+			"size": 718,
+			"theme": "base"
+		},
+		{
+			"name": "FilterBar.css",
+			"size": 6290,
+			"theme": "base"
+		},
+		{
+			"name": "FullScreenDialog.css",
+			"size": 284,
+			"theme": "base"
+		},
+		{
+			"name": "GroupElement.css",
+			"size": 409,
+			"theme": "base"
+		},
+		{
+			"name": "MultiCurrency.css",
+			"size": 488,
+			"theme": "base"
+		},
+		{
+			"name": "NavigationPopover.css",
+			"size": 3657,
+			"theme": "base"
+		},
+		{
+			"name": "P13nColumnsPanel.less",
+			"size": 1970,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "P13nConditionPanel.css",
+			"size": 343,
+			"theme": "base"
+		},
+		{
+			"name": "P13nConditionPanel.less",
+			"size": 1149,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "P13nDialog.less",
+			"size": 625,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "P13nFilterPanel.less",
+			"size": 832,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "P13nSortPanel.less",
+			"size": 346,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "SmartChart.css",
+			"size": 1199,
+			"theme": "base"
+		},
+		{
+			"name": "SmartField.css",
+			"size": 2223,
+			"theme": "base"
+		},
+		{
+			"name": "SmartForm.css",
+			"size": 480,
+			"theme": "base"
+		},
+		{
+			"name": "SmartLink.css",
+			"size": 917,
+			"theme": "base"
+		},
+		{
+			"name": "SmartMultiEdit.css",
+			"size": 574,
+			"theme": "base"
+		},
+		{
+			"name": "SmartTable.css",
+			"size": 1640,
+			"theme": "base"
+		},
+		{
+			"name": "TransportDialog.css",
+			"size": 516,
+			"theme": "base"
+		},
+		{
+			"name": "ValueHelpDialog.css",
+			"size": 9846,
+			"theme": "base"
+		},
+		{
+			"name": "ValueListProvider.css",
+			"size": 293,
+			"theme": "base"
+		},
+		{
+			"name": "VariantManagement.css",
+			"size": 2934,
+			"theme": "base"
+		},
+		{
+			"name": "library-RTL.css",
+			"size": 31466,
+			"theme": "base"
+		},
+		{
+			"name": "library-parameters.json",
+			"module": "sap/ui/comp/themes/base/library-parameters.json",
+			"size": 199,
+			"theme": "base"
+		},
+		{
+			"name": "library.css",
+			"size": 31452,
+			"theme": "base"
+		},
+		{
+			"name": "library.less",
+			"size": 44621,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "library.source.less",
+			"size": 1200,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "p13n.Container.less",
+			"size": 426,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "p13n.QueryPanel.less",
+			"size": 343,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "p13n.SelectionPanel.less",
+			"size": 1567,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "resources.json",
+			"size": 3075
+		},
+		{
+			"name": "shared.css",
+			"size": 161,
+			"theme": "base"
+		}
+	]
+}

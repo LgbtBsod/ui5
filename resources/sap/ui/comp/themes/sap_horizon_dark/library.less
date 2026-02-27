@@ -1,0 +1,99 @@
+/* NOTE: This file was generated as an optimized version of "library.source.less" for the Theme Designer. */
+
+/*!
+ * SAPUI5
+ * (c) Copyright 2025 SAP SE. All rights reserved.
+ */
+@import "../base/library.less";
+@import "../../../../../../Base/baseLib/sap_horizon_dark/base.less"; /* ORIGINAL IMPORT PATH: "../../../../../sap/ui/core/themes/sap_horizon_dark/base.less" */
+
+@import "../../../../../sap/ui/core/themes/sap_horizon_dark/global.less";
+
+/* START "SmartTable.less" */
+/* ======================================= */
+/* CSS for control sap.ui.comp/SmartTable  */
+/* Evening Horizon theme                   */
+/* ======================================= */
+
+@_sap_ui_comp_SmartTable_ExportButton: ~"Transparent";
+@_sap_ui_comp_SmartTable_ToolbarDesign: ~"Solid";
+@_sap_ui_comp_SmartTable_HeaderStyle: ~"H5";
+
+.sapUiCompSmartTable .sapUiCompCurrencyMonoFont,
+.sapUiCompMultiCurrency .sapUiCompCurrencyMonoFont {
+	font-family: var(--sapContent_MonospaceFontFamily);
+}
+
+.sapUiCompSmartTableToolbar,
+.sapUiCompSmartTable .sapMIBar.sapMTBHeader-CTX {
+	border-top-right-radius: var(--sapElement_BorderCornerRadius);
+	border-top-left-radius: var(--sapElement_BorderCornerRadius);
+}
+/* END "SmartTable.less" */
+
+/* START "SmartChart.less" */
+/* ======================================= */
+/* CSS for control sap.ui.comp/SmartChart  */
+/* Evening Horizon theme                   */
+/* ======================================= */
+
+@_sap_ui_comp_SmartChart_ToolbarDesign: ~"Solid";
+
+.sapUiCompSmartChart {
+	background: @sapUiChartBackgroundColor;
+	border-radius: var(--sapElement_BorderCornerRadius);
+    padding-bottom: 1rem;
+}
+/* END "SmartChart.less" */
+
+/* START "ValueHelpDialog.less" */
+/* ============================================ */
+/* CSS for control sap.ui.comp/ValueHelpDialog  */
+/* Evening Horizon theme                        */
+/* ============================================ */
+
+.compVHContentContainerVbox {
+	background-color: var(--sapGroup_ContentBackground);
+}
+
+html.sap-desktop .compValueHelpDialog .sapMIBar.sapMFooter-CTX {
+	border-top: 1px solid var(--sapPageFooter_BorderColor);
+}
+
+.compVHMainTable .sapUiTableHdr,
+.compVHMainTable .sapUiTableCCnt {
+	border-bottom: none;
+}
+
+.compValueHelpDialog .compVHTokenizerHLayout {
+	padding-left: 3px;
+}
+
+.compValueHelpDialog .compVHTokensDiv {
+	border-top: 0;
+	border-left: 0;
+	border-right: 0;
+	box-shadow: var(--sapField_Shadow);
+}
+/* END "ValueHelpDialog.less" */
+
+/* START "FilterBar.less" */
+/* ====================================== */
+/* CSS for control sap.ui.comp/FilterBar  */
+/* Evening Horizon theme                  */
+/* ====================================== */
+
+.sapUiCompFilterBar .sapMInputBase,
+.sapUiCompFilterBar .sapMSF {
+	padding-left: 0.125rem;
+	padding-right: 0.125rem;
+}
+
+.sapUiCompFilterBarNonPhone .sapMIBar > .sapMBarChild:last-child {
+	padding-right: 0.125rem;
+}
+
+.sapMTB.sapMTBStandard.sapUiCompFilterBarToolbar {
+	border-bottom: none;
+}
+/* END "FilterBar.less" */
