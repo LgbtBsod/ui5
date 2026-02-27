@@ -1,6 +1,9 @@
 /* Modular style bundle entry */
-/* Section: tokens-and-theme-modes */
+@import url("modules/style-core.css");
+@import url("modules/style-components.css");
+@import url("modules/style-overrides.css");
 
+/* Section: tokens-and-theme-modes */
 :root {
   --sapPositive: var(--sapPositiveColor, #188918);
   --sapNegative: var(--sapNegativeColor, #aa0808);
@@ -15,10 +18,6 @@
 body.appDark {
   --sapPositive: var(--sapPositiveColor, #6edb8a);
 }
-@import url("modules/style-core.css");
-/* Section: layout-shell-and-page-surfaces */
-@import url("modules/style-components.css");
-@import url("modules/style-overrides.css");
 
 /* ============================== */
 /* Section: animated-philosophy-gradient */

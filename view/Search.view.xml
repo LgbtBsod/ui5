@@ -79,11 +79,18 @@
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
 
-                    <Toolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
-                        <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd"/>
-                        <Input value="{state>/filterId}" placeholder="{i18n>checklistIdPlaceholder}" width="12rem" class="sapUiTinyMarginEnd"/>
-                        <Label text="{i18n>filterLpcLabel}" class="sapUiTinyMarginEnd"/>
+                    <OverflowToolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
+                        <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd">
+                            <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+                        </Label>
+                        <Input value="{state>/filterId}" placeholder="{i18n>checklistIdPlaceholder}" width="12rem" class="sapUiTinyMarginEnd">
+                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
+                        </Input>
+                        <Label text="{i18n>filterLpcLabel}" class="sapUiTinyMarginEnd">
+                            <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+                        </Label>
                         <Select selectedKey="{state>/filterLpc}" width="9rem" class="sapUiTinyMarginEnd">
+                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                             <items>
                                 <core:Item key="" text="{i18n>allLpc}"/>
                                 <core:Item key="L1" text="{i18n>lpcLow}"/>
@@ -92,9 +99,13 @@
                             </items>
                         </Select>
                         <ToolbarSpacer/>
-                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" enabled="{view>/canRetryLoad}" class="brandActionBtn brandActionGhost searchRetryLoadActionBtn sapUiTinyMarginEnd"/>
-                        <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost"/>
-                    </Toolbar>
+                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" enabled="{view>/canRetryLoad}" class="brandActionBtn brandActionGhost searchRetryLoadActionBtn sapUiTinyMarginEnd">
+                            <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+                        </Button>
+                        <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost">
+                            <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+                        </Button>
+                    </OverflowToolbar>
 
                     <OverflowToolbar class="toolbarTransparent searchCriteriaActions sapUiTinyMarginTop">
                         <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="{= !${view>/useSmartControls} }"/>
