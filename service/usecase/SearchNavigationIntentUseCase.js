@@ -3,12 +3,32 @@ sap.ui.define([
 ], function (SearchActionUseCase) {
     "use strict";
 
-    function buildCreateIntent() {
+    function normalizeLayout(sLayout) {
+        var sValue = String(sLayout || "").trim();
+        var aAllowed = [
+            "OneColumn",
+            "TwoColumnsBeginExpanded",
+            "TwoColumnsMidExpanded",
+            "ThreeColumnsMidExpanded",
+            "ThreeColumnsEndExpanded"
+        ];
+        return aAllowed.indexOf(sValue) >= 0 ? sValue : "TwoColumnsMidExpanded";
+    }
+
+    function resolveDetailLayout(mArgs) {
+        var oStateModel = mArgs && mArgs.stateModel;
+        var sPreferred = oStateModel && typeof oStateModel.getProperty === "function"
+            ? (oStateModel.getProperty("/preferredDetailLayout") || oStateModel.getProperty("/layout"))
+            : "";
+        return normalizeLayout(sPreferred);
+    }
+
+    function buildCreateIntent(mArgs) {
         return {
             objectAction: "CREATE",
-            layout: "TwoColumnsMidExpanded",
-            route: "detail",
-            routeParams: { id: "__create" }
+            layout: resolveDetailLayout(mArgs),
+            route: "detailLayout",
+            routeParams: { id: "__create", layout: resolveDetailLayout(mArgs) }
         };
     }
 
@@ -19,9 +39,9 @@ sap.ui.define([
         }
         return {
             objectAction: "COPY",
-            layout: "TwoColumnsMidExpanded",
-            route: "detail",
-            routeParams: { id: sId }
+            layout: resolveDetailLayout(mArgs),
+            route: "detailLayout",
+            routeParams: { id: sId, layout: resolveDetailLayout(mArgs) }
         };
     }
 
@@ -32,9 +52,9 @@ sap.ui.define([
         }
         return {
             objectAction: "",
-            layout: "TwoColumnsMidExpanded",
-            route: "detail",
-            routeParams: { id: sId }
+            layout: resolveDetailLayout(mArgs),
+            route: "detailLayout",
+            routeParams: { id: sId, layout: resolveDetailLayout(mArgs) }
         };
     }
 

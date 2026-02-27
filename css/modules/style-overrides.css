@@ -456,3 +456,82 @@ body::after {
 .sapMBtnContent {
   color: inherit !important;
 }
+
+/* ============================== */
+/* Section: workflow-stability-style-polish */
+.searchFilterCardDense,
+.searchResultsTable,
+.detailHeroCard,
+.detailControlInlineCard {
+  border-radius: calc(var(--radius-lg) + 0.1rem) !important;
+}
+
+.searchResultsTable .sapMLIB,
+#searchFallbackTable .sapMListTblRow {
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.searchResultsTable .sapMLIB:hover,
+#searchFallbackTable .sapMListTblRow:hover {
+  background: color-mix(in srgb, var(--ui-common-accent) 10%, transparent) !important;
+}
+
+.brandActionBtn .sapMBtnInner:focus-visible,
+.sapMBtn .sapMBtnInner:focus-visible,
+.sapMSwt:focus-visible {
+  outline: none !important;
+  box-shadow: var(--ui-common-focus-ring) !important;
+}
+
+.detailControlVerticalRail .sapMObjStatus {
+  border-radius: 0.55rem;
+  padding: 0.1rem 0.35rem;
+  background: color-mix(in srgb, var(--ui-common-accent) 9%, transparent);
+}
+
+.searchSummaryStatusChip,
+.searchStageStatusChip {
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  background: color-mix(in srgb, var(--ui-common-accent) 8%, transparent);
+}
+
+/* ============================== */
+/* Section: button-opacity-and-switch-trigger-fix */
+.brandActionBtn .sapMBtnInner,
+.sapMBtn .sapMBtnInner {
+  opacity: 0.96;
+}
+
+.brandActionBtn:hover .sapMBtnInner,
+.sapMBtn:hover .sapMBtnInner {
+  opacity: 1;
+}
+
+.brandActionBtn.sapMBtnDisabled .sapMBtnInner,
+.sapMBtn.sapMBtnDisabled .sapMBtnInner {
+  opacity: 0.55 !important;
+}
+
+/* Fix switch thumb visibility in both OFF/ON states */
+.sapMSwt,
+.accentSwitch.sapMSwt {
+  overflow: visible;
+}
+
+.sapMSwt .sapMSwtHandle {
+  opacity: 1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(236, 243, 255, 0.94)) !important;
+  box-shadow: 0 2px 7px rgba(5, 12, 28, 0.35) !important;
+}
+
+.sapMSwt.sapMSwtOn .sapMSwtHandle {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(248, 251, 255, 0.98)) !important;
+}
+
+.sapMSwt.sapMSwtOff,
+.sapMSwt:not(.sapMSwtOn) {
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.08)) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 84%, rgba(var(--accent-rgb), 0.25)) !important;
+}
