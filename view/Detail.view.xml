@@ -8,19 +8,13 @@
     xmlns:uxap="sap.uxap"
     xmlns:core="sap.ui.core">
 
-    <!-- Важно: Page без собственного скролла, скроллит ObjectPageLayout -->
-    <Page
-        showHeader="false"
-        enableScrolling="false"
-        class="pageTransparent"
-        busy="{state>/isLoading}">
+    <Page showHeader="false" enableScrolling="false" class="pageTransparent" busy="{state>/isLoading}">
 
-        <!-- Floating control bar host (поверх секций) -->
+        <!-- Floating control bar (same visual language as hero, stays above blocks while scrolling) -->
         <VBox class="detailControlBlockHost" renderType="Bare">
-            <VBox
-                class="glassCard detailHeroCard detailControlInlineCard detailControlStickyBlock"
-                renderType="Bare"
-                visible="{= !${view>/detailControlCollapsed} }">
+            <VBox class="glassCard detailHeroCard detailControlInlineCard detailControlStickyBlock"
+                  renderType="Bare"
+                  visible="{= !${view>/detailControlCollapsed} }">
                 <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
             </VBox>
 
@@ -28,10 +22,10 @@
                 icon="{= ${view>/detailControlCollapsed} ? 'sap-icon://open-command-field' : 'sap-icon://collapse-group' }"
                 type="Transparent"
                 press=".onToggleDetailControlRail"
-                class="detailControlPeekButton"/>
+                class="detailControlPeekButton"
+                tooltip="{= ${view>/detailControlCollapsed} ? ${i18n>expandControls} : ${i18n>collapseControls} }"/>
         </VBox>
 
-        <!-- Main content -->
         <VBox class="appContent detailContent" renderType="Bare">
 
             <uxap:ObjectPageLayout
@@ -41,212 +35,283 @@
                 alwaysShowContentHeader="true"
                 showTitleInHeaderContent="true">
 
-                <!-- ===== HEADER CONTENT (твой hero 1:1 + inline actions) ===== -->
                 <uxap:headerContent>
-
                     <core:Fragment fragmentName="sap_ui5.view.fragment.LockKilledBanner" type="XML"/>
 
-                    <!-- HERO CARD (оставлено 1:1 из твоего файла) -->
                     <VBox class="glassCard detailHeroCard">
                         <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap" class="detailHeroHeader" renderType="Bare">
                             <VBox renderType="Bare" class="sapUiTinyMarginEnd">
                                 <Title text="{i18n>detailPageTitle}" class="detailHeroTitle"/>
                                 <Text text="{i18n>detailHeroSubtitle}" class="modeHintText"/>
                             </VBox>
-
                             <HBox class="uxStatRow" wrap="Wrap" renderType="Bare">
                                 <HBox class="uxStatChip" renderType="Bare">
                                     <Text text="{i18n>checklistLabel}" class="sapUiTinyMarginEnd"/>
                                     <Text text="{= ${selected>/root/id} || ${i18n>newChecklist} }"/>
                                 </HBox>
-
                                 <HBox class="uxStatChip" renderType="Bare">
                                     <Text text="{i18n>overallResultLabel}" class="sapUiTinyMarginEnd"/>
-                                    <ObjectStatus
-                                        text="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultText'}"
-                                        state="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultState'}"/>
+                                    <ObjectStatus text="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultText'}" state="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultState'}"/>
                                 </HBox>
-
                                 <HBox class="uxStatChip" renderType="Bare">
                                     <Text text="{i18n>objectStatusLabel}" class="sapUiTinyMarginEnd"/>
-                                    <ObjectStatus
-                                        text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}"
-                                        state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"/>
+                                    <ObjectStatus text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}" state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"/>
                                 </HBox>
-
                                 <HBox class="uxStatChip" renderType="Bare">
                                     <Text text="{i18n>headerDateLabel}" class="sapUiTinyMarginEnd"/>
                                     <Text text="{path:'selected>/basic/date', formatter:'.formatHeaderDate'}"/>
                                 </HBox>
-
                                 <HBox class="uxStatChip" renderType="Bare">
                                     <Text text="{i18n>headerProfessionLabel}" class="sapUiTinyMarginEnd"/>
                                     <Text text="{selected>/basic/PROF_TEXT}"/>
                                 </HBox>
-
                                 <HBox class="uxStatChip" renderType="Bare">
                                     <Text text="{i18n>headerLpcLabel}" class="sapUiTinyMarginEnd"/>
                                     <Text text="{selected>/basic/LPC_TEXT}"/>
                                 </HBox>
-
                                 <HBox class="uxStatChip" renderType="Bare" visible="{path:'selected>/checks', formatter:'.hasRows'}">
                                     <Text text="{i18n>checksRatioLabel}" class="sapUiTinyMarginEnd"/>
                                     <Text text="{path:'selected>/checks', formatter:'.formatPassedTotal'}"/>
                                 </HBox>
-
-                                <HBox class="uxStatChip" renderType="Bare"
-                                      visible="{parts:[{path:'selected>/basic/LPC_KEY'},{path:'selected>/barriers'}], formatter:'.isBarriersRatioVisible'}">
+                                <HBox class="uxStatChip" renderType="Bare" visible="{parts:[{path:'selected>/basic/LPC_KEY'},{path:'selected>/barriers'}], formatter:'.isBarriersRatioVisible'}">
                                     <Text text="{i18n>barriersRatioLabel}" class="sapUiTinyMarginEnd"/>
                                     <Text text="{path:'selected>/barriers', formatter:'.formatPassedTotal'}"/>
                                 </HBox>
-
                                 <HBox class="uxStatChip" renderType="Bare">
                                     <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
                                     <Text text="{= ${state>/mode} === 'EDIT' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
                                 </HBox>
+                                <HBox class="uxStatChip" renderType="Bare" visible="{= !!${state>/cacheValidationAt} }">
+                                    <Text text="{i18n>cacheValidationAtLabel}" class="sapUiTinyMarginEnd"/>
+                                    <Text text="{state>/cacheValidationAt}"/>
+                                </HBox>
                             </HBox>
-                        </HBox>
-
-                        <!-- inline action row (оставлено из твоего файла) -->
-                        <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap" class="detailHeroActions" renderType="Bare">
-                            <HBox wrap="Wrap" renderType="Bare" class="sapUiTinyMarginBottom">
-                                <ObjectStatus
-                                    text="{parts:[{path:'state>/lockOperationText'},{path:'state>/mode'}], formatter:'.formatLockOperationText'}"
-                                    state="{parts:[{path:'state>/lockOperationState'},{path:'state>/mode'}], formatter:'.formatLockOperationState'}"/>
-                            </HBox>
-
-                            <Button
-                                text="{i18n>objectSave}"
-                                type="Emphasized"
-                                press=".onSaveDetail"
-                                visible="{= ${state>/mode} === 'EDIT' }"
-                                class="brandActionBtn brandActionPrimary detailInlineSaveButton sapUiTinyMarginBottom"/>
                         </HBox>
                     </VBox>
+
+                    <HBox class="detailWorkflowRail" renderType="Bare" wrap="Wrap">
+                        <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}" state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"/>
+                        <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{path:'state>/isDirty', formatter:'.formatDraftStateText'}" state="{path:'state>/isDirty', formatter:'.formatDraftStateState'}"/>
+                        <ObjectStatus
+                            class="detailWorkflowChip sapUiTinyMarginBottom"
+                            text="{parts:[{path:'state>/lockOperationText'},{path:'state>/mode'}], formatter:'.formatLockOperationText'}"
+                            state="{parts:[{path:'state>/lockOperationState'},{path:'state>/mode'}], formatter:'.formatLockOperationState'}"/>
+                        <Button text="{i18n>objectSave}" type="Emphasized" press=".onSaveDetail" visible="{= ${state>/mode} === 'EDIT' }" busy="{state>/isSaving}" enabled="{= !${state>/isSaving} }" class="brandActionBtn brandActionPrimary detailInlineSaveButton sapUiTinyMarginBottom"/>
+                    </HBox>
+
                 </uxap:headerContent>
 
-                <!-- ===== SECTIONS ===== -->
                 <uxap:sections>
 
-                    <!-- Participants (взято из твоего файла 1:1) -->
                     <uxap:ObjectPageSection title="{i18n>participantsTitle}">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-
                                     <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">
                                         <Toolbar class="toolbarTransparent">
                                             <Title text="{i18n>participantsTitle}"/>
                                             <ToolbarSpacer/>
-                                            <Text text="{i18n>dragHint}"
-                                                  visible="{= ${state>/mode} === 'EDIT' }"
-                                                  class="modeHintText"/>
+                                            <Text text="{i18n>dragHint}" visible="{= ${state>/mode} === 'EDIT' }" class="modeHintText"/>
                                         </Toolbar>
-
                                         <f:GridList id="infoCardGrid" items="{view>/infoCards}" class="infoCardGrid">
                                             <f:dragDropConfig>
                                                 <dnd:DragInfo sourceAggregation="items" enabled="{= ${state>/mode} === 'EDIT' }"/>
-                                                <dnd:DropInfo targetAggregation="items"
-                                                              dropPosition="Between"
-                                                              enabled="{= ${state>/mode} === 'EDIT' }"
-                                                              drop=".onInfoCardsDrop"/>
+                                                <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} === 'EDIT' }" drop=".onInfoCardsDrop"/>
                                             </f:dragDropConfig>
-
                                             <f:items>
                                                 <f:GridListItem>
-                                                    <VBox class="infoCardTile" renderType="Bare">
-
+                                                    <VBox class="infoCardTile mushroomCard" renderType="Bare">
                                                         <Text text="{view>title}" class="infoCardTitle"/>
-
                                                         <Text
                                                             visible="{= (${state>/mode} !== 'EDIT') &amp;&amp; ${view>key} !== 'observer' &amp;&amp; ${view>key} !== 'observed' }"
                                                             text="{parts: [
                                                                 {path: 'view>key'},
                                                                 {path: 'selected>/basic/date'},
                                                                 {path: 'selected>/basic/time'},
-                                                                {path: 'selected>/basic/PROF_KEY'},
-                                                                {path: 'selected>/basic/LPC_KEY'},
-                                                                {path: 'selected>/basic/LOCATION_KEY'},
-                                                                {path: 'selected>/basic/LOCATION_TEXT'},
+                                                                {path: 'selected>/basic/timezone'},
+                                                                {path: 'selected>/basic/equipment'},
+                                                                {path: 'selected>/basic/OBSERVER_FULLNAME'},
+                                                                {path: 'selected>/basic/OBSERVED_FULLNAME'},
                                                                 {path: 'selected>/basic/LOCATION_NAME'},
-                                                                {path: 'selected>/basic/PERSON_KEY'},
-                                                                {path: 'selected>/basic/PERSON_NAME'},
-                                                                {path: 'selected>/basic/PERSON_TEXT'},
-                                                                {path: 'ref>/locations'},
-                                                                {path: 'ref>/persons'},
-                                                                {path: 'ref>/professions'},
-                                                                {path: 'ref>/lpc'}
-                                                            ], formatter:'.formatInfoCardValue'}"/>
+                                                                {path: 'selected>/basic/LOCATION_TEXT'},
+                                                                {path: 'selected>/basic/LPC_TEXT'},
+                                                                {path: 'selected>/basic/PROF_TEXT'}
+                                                            ], formatter: '.formatInfoCardValue'}"
+                                                            class="infoCardValue"/>
 
-                                                        <!-- ВАЖНО:
-                                                             Ниже — твой EDIT-блок для карточек (селекты/valuhelp/инпуты),
-                                                             вставь сюда 1:1 из старого Detail.view.xml, если он у тебя был
-                                                             внутри GridListItem. Я не меняю твою бизнес-логику. -->
+                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'datetime' }" renderType="Bare" class="detailDateTimeGrid">
+                                                            <DatePicker value="{selected>/basic/date}" displayFormat="EEE, dd MMM yyyy" valueFormat="yyyy-MM-dd" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
+                                                            <TimePicker value="{selected>/basic/time}" displayFormat="HH:mm" valueFormat="HH:mm" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationText'}"/>
+                                                            <Select templateShareable="true" selectedKey="{selected>/basic/timezone}" forceSelection="false" items="{masterData>/timezones}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationText'}">
+                                                                <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                                                            </Select>
+                                                        </VBox>
 
+                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'equipment' }" renderType="Bare">
+                                                            <Input value="{selected>/basic/equipment}"/>
+                                                        </VBox>
+
+                                                        <VBox visible="{= ${state>/mode} !== 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare" class="detailSemanticMetaBlock">
+                                                            <Text text="{selected>/basic/OBSERVER_FULLNAME}" class="infoCardValue"/>
+                                                            <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVER_PERNER} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVER_POSITION} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVER_ORGUNIT} || '-') }" state="Information"/>
+                                                        </VBox>
+
+                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare">
+                                                            <Input value="{selected>/basic/OBSERVER_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationText'}"
+                                                                   showSuggestion="true"
+                                                                   startSuggestion="1"
+                                                                   filterSuggests="false"
+                                                                   suggest=".onPersonSuggest"
+                                                                   suggestionItemSelected=".onPersonSuggestionSelected" class="detailPersonSuggestInput">
+                                                                <customData>
+                                                                    <core:CustomData key="target" value="observer" writeToDom="false"/>
+                                                                </customData>
+                                                                <suggestionItems path="view>/observerSuggestions">
+                                                                    <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
+                                                                </suggestionItems>
+                                                            </Input>
+                                                        </VBox>
+
+                                                        <VBox visible="{= ${state>/mode} !== 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare" class="detailSemanticMetaBlock">
+                                                            <Text text="{selected>/basic/OBSERVED_FULLNAME}" class="infoCardValue"/>
+                                                            <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVED_PERNER} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVED_POSITION} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVED_ORGUNIT} || '-') }" state="Information"/>
+                                                        </VBox>
+
+                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare">
+                                                            <Input value="{selected>/basic/OBSERVED_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationText'}"
+                                                                   showSuggestion="true"
+                                                                   startSuggestion="1"
+                                                                   filterSuggests="false"
+                                                                   suggest=".onPersonSuggest"
+                                                                   suggestionItemSelected=".onPersonSuggestionSelected" class="detailPersonSuggestInput">
+                                                                <customData>
+                                                                    <core:CustomData key="target" value="observed" writeToDom="false"/>
+                                                                </customData>
+                                                                <suggestionItems path="view>/observedSuggestions">
+                                                                    <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
+                                                                </suggestionItems>
+                                                            </Input>
+                                                        </VBox>
+
+                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'location' }" renderType="Bare">
+                                                            <Input value="{selected>/basic/LOCATION_NAME}" showValueHelp="true" valueHelpOnly="true" valueHelpRequest=".onOpenLocationValueHelp" placeholder="{i18n>locationValueHelpPlaceholder}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LOCATION_KEY'}], formatter:'.formatValidationText'}" class="detailLocationInput"/>
+                                                            <ObjectStatus text="{= ${i18n>locationCodeLabel} + ': ' + (${selected>/basic/LOCATION_KEY} || '-') }" state="Information" class="sapUiTinyMarginTop"/>
+                                                        </VBox>
+
+                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'lpc' }" renderType="Bare">
+                                                            <Select templateShareable="true"
+                                                                selectedKey="{selected>/basic/LPC_KEY}"
+                                                                change=".onLpcChange"
+                                                                forceSelection="false"
+                                                                items="{masterData>/lpc}" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationText'}">
+                                                                <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                                                            </Select>
+                                                        </VBox>
+
+                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'profession' }" renderType="Bare">
+                                                            <Select
+                                                                templateShareable="true"
+                                                                selectedKey="{selected>/basic/PROF_KEY}"
+                                                                change=".onProfessionChange"
+                                                                forceSelection="false"
+                                                                items="{masterData>/professions}" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationText'}">
+                                                                <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                                                            </Select>
+                                                        </VBox>
                                                     </VBox>
                                                 </f:GridListItem>
                                             </f:items>
                                         </f:GridList>
                                     </VBox>
-
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
 
-                    <!-- Checks (взято из твоего файла 1:1) -->
                     <uxap:ObjectPageSection title="{i18n>checksTitle}">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-
                                     <VBox class="glassCard" busy="{view>/checksLoading}">
                                         <Toolbar class="toolbarTransparent">
                                             <Title text="{i18n>checksTitle}"/>
                                             <ToolbarSpacer/>
-                                            <Button icon="sap-icon://add" text="{i18n>addRow}" press=".onAddCheckRow"
-                                                    visible="{= ${state>/mode} === 'EDIT' }"/>
-                                            <Button icon="sap-icon://delete" text="{i18n>deleteRow}" press=".onDeleteCheckRow"
-                                                    visible="{= ${state>/mode} === 'EDIT' }"
-                                                    class="sapUiTinyMarginBegin"/>
+                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecks" class="sapUiTinyMarginEnd"/>
+                                            <Button
+                                                text="{i18n>addRow}"
+                                                press=".onAddCheckRow"
+                                                visible="{= ${state>/mode} === 'EDIT' }"/>
                                         </Toolbar>
-
-                                        <!-- Секция checks целиком остаётся твоей (включая таблицу/колонки/formatters) -->
-                                        <!-- Я оставляю её как “как было”: если у тебя здесь t:Table или sap.m.Table — вставь её 1:1 -->
-                                        <!-- Чтобы не гадать и не сломать, я оставляю место под твой текущий checks-table блок. -->
-                                        <!-- ===== вставь сюда тело checks-блока из старого файла (между <VBox class="glassCard" busy="{view>/checksLoading}"> и его </VBox>) ===== -->
-
+                                        <ScrollContainer height="18rem" vertical="true" horizontal="false" class="tableScrollWrap">
+                                            <Table items="{selected>/checks}" class="flatEditorTable" busy="{view>/checksLoading}" growing="true" growingThreshold="50" growingScrollToLoad="true" noDataText="{i18n>noChecksData}">
+                                                <columns>
+                                                    <Column width="3rem"><Text text=""/></Column>
+                                                    <Column><Text text="{i18n>checkLabel}"/></Column>
+                                                    <Column><Text text="{i18n>statusLabel}"/></Column>
+                                                    <Column><Text text="{i18n>commentLabel}"/></Column>
+                                                    <Column width="2.5rem" visible="{= ${state>/mode} === 'EDIT' }"><Text text=""/></Column>
+                                                </columns>
+                                                <items>
+                                                    <ColumnListItem>
+                                                        <cells>
+                                                            <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                            <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                            <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                            <Input value="{selected>comment}" editable="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }" placeholder="{i18n>commentPlaceholder}"/>
+                                                            <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteCheckRow" tooltip="{i18n>deleteRowTooltip}" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                        </cells>
+                                                    </ColumnListItem>
+                                                </items>
+                                            </Table>
+                                        </ScrollContainer>
                                     </VBox>
-
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
 
-                    <!-- Barriers (взято из твоего файла 1:1) -->
-                    <uxap:ObjectPageSection
-                        title="{i18n>barriersTitle}"
-                        visible="{parts:[{path:'selected>/basic/LPC_KEY'},{path:'selected>/barriers'}], formatter:'.isBarriersSectionVisible'}">
+                    <uxap:ObjectPageSection title="{i18n>barriersTitle}"
+                                            visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-
-                                    <VBox class="glassCard" busy="{view>/barriersLoading}">
+                                    <VBox class="glassCard" busy="{view>/barriersLoading}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                                         <Toolbar class="toolbarTransparent">
                                             <Title text="{i18n>barriersTitle}"/>
                                             <ToolbarSpacer/>
-                                            <Button icon="sap-icon://add" text="{i18n>addRow}" press=".onAddBarrierRow"
-                                                    visible="{= ${state>/mode} === 'EDIT' }"/>
-                                            <Button icon="sap-icon://delete" text="{i18n>deleteRow}" press=".onDeleteBarrierRow"
-                                                    visible="{= ${state>/mode} === 'EDIT' }"
-                                                    class="sapUiTinyMarginBegin"/>
+                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd"/>
+                                            <Button
+                                                text="{i18n>addRow}"
+                                                press=".onAddBarrierRow"
+                                                visible="{= ${state>/mode} === 'EDIT' }"/>
                                         </Toolbar>
-
-                                        <!-- Аналогично checks: вставь barriers-table блок 1:1 из старого Detail.view.xml -->
-                                        <!-- ===== вставь сюда тело barriers-блока из старого файла ===== -->
-
+                                        <ScrollContainer height="18rem" vertical="true" horizontal="false" class="tableScrollWrap">
+                                            <Table items="{selected>/barriers}" class="flatEditorTable" busy="{view>/barriersLoading}" growing="true" growingThreshold="50" growingScrollToLoad="true" noDataText="{i18n>noBarriersData}">
+                                                <columns>
+                                                    <Column width="3rem"><Text text=""/></Column>
+                                                    <Column><Text text="{i18n>barrierLabel}"/></Column>
+                                                    <Column><Text text="{i18n>statusLabel}"/></Column>
+                                                    <Column><Text text="{i18n>commentLabel}"/></Column>
+                                                    <Column width="2.5rem" visible="{= ${state>/mode} === 'EDIT' }"><Text text=""/></Column>
+                                                </columns>
+                                                <items>
+                                                    <ColumnListItem>
+                                                        <cells>
+                                                            <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                            <Input value="{selected>text}" editable="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                            <Switch state="{selected>result}" enabled="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                            <Input value="{selected>comment}" editable="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }" placeholder="{i18n>commentPlaceholder}"/>
+                                                            <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteBarrierRow" tooltip="{i18n>deleteRowTooltip}" visible="{= ${state>/mode} === 'EDIT' &amp;&amp; !${selected>__loading} }"/>
+                                                        </cells>
+                                                    </ColumnListItem>
+                                                </items>
+                                            </Table>
+                                        </ScrollContainer>
                                     </VBox>
-
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
@@ -256,7 +321,9 @@
 
             </uxap:ObjectPageLayout>
 
-        </VBox>
-    </Page>
+            <core:Fragment fragmentName="sap_ui5.view.fragment.LocationValueHelpDialog" type="XML"/>
 
+        </VBox>
+
+    </Page>
 </mvc:View>

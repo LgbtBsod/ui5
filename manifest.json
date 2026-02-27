@@ -50,7 +50,7 @@
         "sap.ui.layout": {},
         "sap.ui.comp": {},
         "sap.ui.table": {},
-	"sap.uxap": {}
+        "sap.uxap": {}
       }
     },
     "contentDensities": {

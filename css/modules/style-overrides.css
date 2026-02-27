@@ -124,3 +124,177 @@
 .appDark .smartTableGlass {
   box-shadow: 0 20px 44px rgba(2, 8, 18, 0.5), inset 0 1px 0 rgba(201, 224, 255, 0.08) !important;
 }
+
+/* Extracted override/final-pass styling */
+   Section: detail-control-and-theme-switching-consolidated
+   ============================== */
+:root.theme-switching,
+:root.theme-switching * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.detailControlBlockHost {
+  position: sticky;
+  top: 6rem;
+  z-index: 9;
+  display: block;
+}
+
+.detailControlStickyBlock {
+  width: 100%;
+  max-width: 20rem;
+  margin-left: auto;
+  max-height: calc(100vh - 7.5rem);
+  overflow-y: auto;
+}
+
+.detailControlInlineCard {
+  width: 100% !important;
+  min-width: 0;
+  padding: 0.75rem !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+.detailControlVerticalRail {
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.detailControlVerticalRail .sapMBtn {
+  width: 100%;
+}
+
+.detailControlPeekButton {
+  margin-top: 0.45rem;
+  margin-left: auto;
+  position: sticky;
+  top: calc(6rem + 0.5rem);
+  z-index: 10;
+}
+
+@media (max-width: 1200px) {
+  .detailControlBlockHost,
+  .detailControlPeekButton {
+    position: static;
+    top: auto;
+  }
+
+  .detailControlStickyBlock {
+    max-width: 100%;
+    max-height: none;
+  }
+}
+
+/* ==============================
+   Section: smart-controls-priority-and-detail-save-action
+   ============================== */
+.quickFiltersRow,
+#searchFallbackTable {
+  display: none !important;
+}
+
+.detailInlineSaveButton {
+  border-radius: 999px;
+}
+
+.detailInlineSaveButton .sapMBtnInner {
+  min-height: 2.1rem;
+  padding-inline: 1rem;
+}
+
+/* ==============================
+   Section: premium-air-glass-v2-final-pass
+   ============================== */
+:root {
+  --premium-air-gap: clamp(1rem, 1.7vw, 1.35rem);
+  --premium-glass-alpha: 76%;
+  --premium-glass-border-alpha: 72%;
+}
+
+.appContent {
+  gap: calc(var(--premium-air-gap) + 0.45rem);
+}
+
+.glassCard,
+.filterCard,
+.smartTableGlass,
+.workflowStageCard,
+.kpiCard {
+  background: color-mix(in srgb, var(--glass-bg) var(--premium-glass-alpha), rgba(255, 255, 255, 0.05)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) var(--premium-glass-border-alpha), rgba(var(--accent-rgb), 0.18)) !important;
+  box-shadow: 0 16px 36px rgba(12, 30, 54, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
+
+.detailHeroCard,
+.workflowStageCard,
+.kpiCard,
+.infoCardTile {
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.searchToolbar,
+.searchToolbarMetaRail,
+.searchStatusStripStack {
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.tableScrollWrap {
+  background: color-mix(in srgb, var(--surface2) 78%, rgba(var(--accent-rgb), 0.04));
+  border-color: color-mix(in srgb, var(--glass-border) 72%, rgba(var(--accent-rgb), 0.16));
+}
+
+.appDark .glassCard,
+.appDark .filterCard,
+.appDark .smartTableGlass {
+  box-shadow: 0 20px 44px rgba(2, 8, 18, 0.5), inset 0 1px 0 rgba(201, 224, 255, 0.08) !important;
+}
+
+/* ===== v1: Floating horizontal control bar, same visual as hero ===== */
+.detailContent .detailControlBlockHost {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+
+  width: calc(100% - 3rem);
+  max-width: 1100px;
+
+  pointer-events: none;
+}
+
+.detailContent .detailControlStickyBlock,
+.detailContent .detailControlPeekButton {
+  pointer-events: auto;
+}
+
+/* Horizontal bar: allow full width and no internal scroll */
+.detailContent .detailControlStickyBlock {
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Optional: chip-like look for ObjectStatus in toolbar (keeps your visual language) */
+.detailRailStatusChip {
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+}
+
+/* Don't break phones/tablets: fall back to sticky */
+@media (max-width: 900px) {
+  .detailContent .detailControlBlockHost {
+    position: sticky;
+    top: 6rem;
+    left: auto;
+    transform: none;
+    width: auto;
+    max-width: none;
+    pointer-events: auto;
+  }
+}
+
+

@@ -1,110 +1,85 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <!-- Горизонтальная панель управления -->
     <VBox class="detailControlBar" renderType="Bare">
 
-        <!-- Верхняя строка: заголовок + collapse -->
-        <HBox alignItems="Center" justifyContent="SpaceBetween" renderType="Bare" class="detailRailHeader">
+        <HBox alignItems="Center" justifyContent="SpaceBetween" class="detailRailHeader" renderType="Bare">
             <VBox renderType="Bare">
                 <Title text="{i18n>detailControlTitle}" level="H6"/>
                 <Text text="{path:'state>/autosaveAt', formatter:'.formatAutosaveAt'}" class="detailRailHint"/>
             </VBox>
-
-            <HBox alignItems="Center" renderType="Bare">
-                <Button
-                    icon="sap-icon://collapse-group"
+            <Button icon="sap-icon://collapse-group"
                     type="Transparent"
                     press=".onToggleDetailControlRail"
                     tooltip="{i18n>detailControlCollapse}"
                     class="detailRailCollapseBtn"/>
-            </HBox>
         </HBox>
 
-        <!-- Вторая строка: статусы + lock switch + actions -->
         <OverflowToolbar class="detailControlToolbar">
+            <ObjectStatus icon="sap-icon://edit"
+                          text="{= ${state>/isDirty} ? ${i18n>dirtyStateDirty} : ${i18n>dirtyStateSynced} }"
+                          state="{= ${state>/isDirty} ? 'Warning' : 'Success' }"
+                          class="detailRailStatusChip"/>
 
-            <!-- статусы (как “чипы”) -->
-            <ObjectStatus
-                icon="sap-icon://edit"
-                text="{= ${state>/isDirty} ? ${i18n>dirtyStateDirty} : ${i18n>dirtyStateSynced} }"
-                state="{= ${state>/isDirty} ? 'Warning' : 'Success' }"
-                class="detailRailStatusChip"/>
+            <ObjectStatus icon="sap-icon://history"
+                          text="{parts:[{path:'state>/mode'},{path:'state>/isLocked'}], formatter:'.formatHeartbeatText'}"
+                          state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }"
+                          class="detailRailStatusChip"/>
 
-            <ObjectStatus
-                icon="sap-icon://history"
-                text="{parts:[{path:'state>/mode'},{path:'state>/isLocked'}], formatter:'.formatHeartbeatText'}"
-                state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }"
-                class="detailRailStatusChip"/>
-
-            <ObjectStatus
-                icon="sap-icon://synchronize"
-                text="{parts:[{path:'state>/mode'},{path:'state>/autosaveState'}], formatter:'.formatAutosaveText'}"
-                state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }"
-                class="detailRailStatusChip"/>
+            <ObjectStatus icon="sap-icon://synchronize"
+                          text="{parts:[{path:'state>/mode'},{path:'state>/autosaveState'}], formatter:'.formatAutosaveText'}"
+                          state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }"
+                          class="detailRailStatusChip"/>
 
             <ToolbarSpacer/>
 
-            <!-- lock/edit switch (твой фрагмент уже горизонтальный) -->
-            <HBox alignItems="Center" renderType="Bare" class="detailRailLockRow">
-                <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
-            </HBox>
+            <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
 
-            <!-- действия -->
-            <Button
-                icon="sap-icon://save"
-                type="Emphasized"
-                visible="{= ${state>/mode} === 'EDIT' }"
-                press=".onSaveDetail"
-                tooltip="{i18n>objectSave}"/>
+            <ToolbarSpacer/>
 
-            <Button
-                icon="sap-icon://inspection"
-                visible="{= ${state>/mode} === 'EDIT' }"
-                press=".onValidateChecklist"
-                tooltip="{i18n>validateButton}"/>
+            <Button icon="sap-icon://save" type="Emphasized"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onSaveDetail"
+                    tooltip="{i18n>objectSave}"/>
 
-            <Button
-                icon="sap-icon://status-inactive"
-                visible="{= ${state>/mode} === 'EDIT' }"
-                press=".onChangeChecklistStatus"
-                tooltip="{i18n>statusDraft}">
+            <Button icon="sap-icon://inspection"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onValidateChecklist"
+                    tooltip="{i18n>validateButton}"/>
+
+            <Button icon="sap-icon://status-inactive"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onChangeChecklistStatus"
+                    tooltip="{i18n>statusDraft}">
                 <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
             </Button>
 
-            <Button
-                icon="sap-icon://status-critical"
-                visible="{= ${state>/mode} === 'EDIT' }"
-                press=".onChangeChecklistStatus"
-                tooltip="{i18n>statusRegistered}">
+            <Button icon="sap-icon://status-critical"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onChangeChecklistStatus"
+                    tooltip="{i18n>statusRegistered}">
                 <customData><core:CustomData key="targetStatus" value="REGISTERED"/></customData>
             </Button>
 
-            <Button
-                icon="sap-icon://status-positive"
-                visible="{= ${state>/mode} === 'EDIT' }"
-                press=".onChangeChecklistStatus"
-                tooltip="{i18n>statusClosed}">
+            <Button icon="sap-icon://status-positive"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onChangeChecklistStatus"
+                    tooltip="{i18n>statusClosed}">
                 <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
             </Button>
 
-            <Button
-                icon="sap-icon://undo"
-                visible="{= ${state>/mode} === 'EDIT' }"
-                press=".onCancelEditFromDetail"
-                tooltip="{i18n>objectCancel}"/>
+            <Button icon="sap-icon://undo"
+                    visible="{= ${state>/mode} === 'EDIT' }"
+                    press=".onCancelEditFromDetail"
+                    tooltip="{i18n>objectCancel}"/>
 
-            <Button
-                icon="sap-icon://decline"
-                type="Transparent"
-                press=".onCloseDetail"
-                tooltip="{i18n>closeDetails}"
-                class="detailRailCloseAction"/>
-
+            <Button icon="sap-icon://decline"
+                    type="Transparent"
+                    press=".onCloseDetail"
+                    tooltip="{i18n>closeDetails}"
+                    class="detailRailCloseAction"/>
         </OverflowToolbar>
 
-        <Text
-            text="{i18n>detailControlHint}"
-            class="detailRailHint sapUiTinyMarginTop"
-            visible="{layout>/personalization/showHints}"/>
-
+        <Text text="{i18n>detailControlHint}"
+              class="detailRailHint sapUiTinyMarginTop"
+              visible="{layout>/personalization/showHints}"/>
     </VBox>
 </core:FragmentDefinition>
