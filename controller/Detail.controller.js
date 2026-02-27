@@ -102,6 +102,7 @@ sap.ui.define([
 
       this.getView().setModel(oViewModel, "view");
       this.attachRouteMatched("detail", this._onMatched);
+      this.attachRouteMatched("detailLayout", this._onMatched);
       this.getModel("selected").attachPropertyChange(this._onSelectedChanged, this);
       this.getModel("mpl").attachPropertyChange(this._onMplChanged, this);
     },
@@ -287,14 +288,15 @@ sap.ui.define([
 
     _onMatched: function (oEvent) {
       var sId = oEvent.getParameter("arguments").id;
-      var sLayout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
       var oStateModel = this.getModel("state");
+      var sLayout = oEvent.getParameter("arguments").layout || oStateModel.getProperty("/preferredDetailLayout") || "TwoColumnsMidExpanded";
       var oDataModel = this.getModel("data");
       var sAction = oStateModel.getProperty("/objectAction") || "";
       var bCreate = sAction === "CREATE" || sId === "__create";
       var bCopy = sAction === "COPY";
 
       oStateModel.setProperty("/layout", sLayout);
+      oStateModel.setProperty("/preferredDetailLayout", sLayout);
       oStateModel.setProperty("/activeObjectId", bCreate ? null : (sId || null));
       oStateModel.setProperty("/objectAction", "");
       oStateModel.setProperty("/copySourceId", bCopy ? (sId || null) : null);
@@ -1022,7 +1024,8 @@ sap.ui.define([
                 if (!sSavedId) {
                   return;
                 }
-                this.navTo("detail", { id: sSavedId, layout: "TwoColumnsMidExpanded" }, true);
+                var sLayout = this.getModel("state").getProperty("/preferredDetailLayout") || "TwoColumnsMidExpanded";
+                this.navTo("detailLayout", { id: sSavedId, layout: sLayout }, true);
               }.bind(this)
             });
 

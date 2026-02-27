@@ -17,6 +17,7 @@ sap.ui.define([
             return new JSONModel({
                 mode: "READ",
                 layout: "OneColumn",
+                preferredDetailLayout: "TwoColumnsMidExpanded",
                 isLoading: false,
                 loadError: false,
                 loadErrorMessage: "",

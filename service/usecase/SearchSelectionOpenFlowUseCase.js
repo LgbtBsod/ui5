@@ -36,7 +36,7 @@ sap.ui.define([
             id: mDeps && mDeps.id,
             confirmNavigation: mDeps && mDeps.confirmNavigation,
             buildIntent: function (sIntentId) {
-                return SearchNavigationIntentUseCase.buildOpenDetailIntent({ id: sIntentId });
+                return SearchNavigationIntentUseCase.buildOpenDetailIntent({ id: sIntentId, stateModel: mDeps && mDeps.stateModel });
             },
             applyIntent: function (mIntent) {
                 return SearchNavigationIntentUseCase.applyIntent({

@@ -12,7 +12,9 @@ sap.ui.define([
     function runCreateFlow(mDeps) {
         return SearchCreateCopyNavigationGuardUseCase.runCreateNavigationFlow({
             confirmNavigation: mDeps && mDeps.confirmNavigation,
-            buildCreateIntent: SearchNavigationIntentUseCase.buildCreateIntent,
+            buildCreateIntent: function () {
+                return SearchNavigationIntentUseCase.buildCreateIntent({ stateModel: mDeps && mDeps.stateModel });
+            },
             applyIntent: function (mIntent) {
                 return SearchNavigationIntentUseCase.applyIntent({
                     intent: mIntent,
@@ -32,7 +34,7 @@ sap.ui.define([
             },
             confirmNavigation: mDeps && mDeps.confirmNavigation,
             buildCopyIntent: function (sSelectedId) {
-                return SearchNavigationIntentUseCase.buildCopyIntent({ selectedId: sSelectedId });
+                return SearchNavigationIntentUseCase.buildCopyIntent({ selectedId: sSelectedId, stateModel: mDeps && mDeps.stateModel });
             },
             applyIntent: function (mIntent) {
                 return SearchNavigationIntentUseCase.applyIntent({

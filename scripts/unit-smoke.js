@@ -1727,8 +1727,8 @@ function testSearchNavigationIntentUseCase() {
   assert(openDetailMissing === null, 'buildOpenDetailIntent should return null when detail id is missing');
 
   const openDetailIntent = mod.buildOpenDetailIntent({ id: 'CHK-2' });
-  assert(openDetailIntent && openDetailIntent.route === 'detail' && openDetailIntent.routeParams.id === 'CHK-2',
-    'buildOpenDetailIntent should build detail route intent');
+  assert(openDetailIntent && openDetailIntent.route === 'detailLayout' && openDetailIntent.routeParams.id === 'CHK-2',
+    'buildOpenDetailIntent should build detail layout route intent');
 
   const selectedId = mod.resolveSelectedId({
     selectedModel: { getData: () => ({ root: { id: 'CHK-3' } }) }
