@@ -2,33 +2,34 @@
 /* Section: tokens-and-theme-modes */
 :root {
   color-scheme: dark;
-  --bg: #0b0b0f;
-  --bg2: #14131c;
-  --surface: rgba(255, 83, 17, 0.05);
-  --surface2: rgba(24, 24, 32, 0.82);
-  --border: rgba(255, 122, 73, 0.2);
-  --border-bright: rgba(255, 122, 73, 0.35);
-  --text: #f6f2e8;
-  --text-sub: rgba(246, 242, 232, 0.64);
-  --accent: #ff5311;
-  --accent-rgb: 255, 83, 17;
-  --shadow: rgba(0, 0, 0, 0.62);
+  --bg: var(--sapBackgroundColor, #0b1220);
+  --bg2: var(--sapGroup_ContentBackground, #111a2c);
+  --surface: var(--sapTile_Background, rgba(138, 172, 255, 0.08));
+  --surface2: var(--sapList_Background, rgba(20, 30, 48, 0.84));
+  --border: var(--sapGroup_ContentBorderColor, rgba(140, 170, 225, 0.24));
+  --border-bright: rgba(166, 196, 255, 0.36);
+  --text: var(--sapTextColor, #edf3ff);
+  --text-sub: rgba(237, 243, 255, 0.68);
+  --accent: var(--sapLinkColor, #91c8f6);
+  --accent-rgb: 145, 200, 246;
+  --shadow: var(--sapContent_ShadowColor, rgba(2, 10, 26, 0.58));
 
   --radius-xl: 28px;
   --radius-lg: 18px;
   --radius-md: 10px;
   --transition: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-smooth: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-soft: 280ms var(--motion-smooth);
 
-  --bg-main: radial-gradient(circle at 20% 15%, #2d1711 0%, #16131b 46%, #0a0a0e 100%);
-  --bg-grad-a: rgba(255, 83, 17, 0.31);
-  --bg-grad-b: rgba(88, 223, 255, 0.16);
-  --glass-bg: rgba(17, 18, 26, 0.78);
-  --glass-border: rgba(255, 132, 90, 0.18);
-  --glass-shadow: 0 28px 95px rgba(0, 0, 0, 0.58);
+  --bg-main: radial-gradient(circle at 18% 12%, #1a2450 0%, #131d34 44%, #0a111f 100%);
+  --bg-grad-a: rgba(138, 126, 255, 0.3);
+  --bg-grad-b: rgba(110, 198, 255, 0.2);
+  --glass-bg: rgba(18, 29, 48, 0.8);
+  --glass-border: rgba(150, 182, 244, 0.24);
+  --glass-shadow: 0 26px 78px rgba(3, 12, 28, 0.52);
   --text-main: var(--text);
   --text-muted: var(--text-sub);
-  --accent-grad: linear-gradient(145deg, #ff5311, #ff8a5f);
-  --hzn-accent: var(--accent);
+  --accent-grad: linear-gradient(145deg, #6ea8fe, #91d7ff);
 
   --focus-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.22);
   --interactive-hover: color-mix(in srgb, var(--surface2) 85%, rgba(var(--accent-rgb), 0.12));
@@ -46,27 +47,27 @@
 
 :root.light-mode {
   color-scheme: light;
-  --bg: #f5fbff;
-  --bg2: #ebf6ff;
-  --surface: rgba(255, 255, 255, 0.78);
-  --surface2: rgba(255, 255, 255, 0.94);
-  --border: rgba(0, 128, 176, 0.14);
-  --border-bright: rgba(0, 128, 176, 0.28);
-  --text: #11263a;
-  --text-sub: rgba(17, 38, 58, 0.58);
-  --accent: #00acee;
-  --accent-rgb: 0, 172, 238;
-  --shadow: rgba(93, 138, 168, 0.18);
+  --bg: var(--sapBackgroundColor, #edf4ff);
+  --bg2: var(--sapGroup_ContentBackground, #e5eefb);
+  --surface: var(--sapTile_Background, rgba(255, 255, 255, 0.82));
+  --surface2: var(--sapList_Background, rgba(243, 248, 255, 0.94));
+  --border: var(--sapGroup_ContentBorderColor, rgba(114, 146, 212, 0.18));
+  --border-bright: rgba(118, 171, 243, 0.3);
+  --text: var(--sapTextColor, #12263f);
+  --text-sub: rgba(18, 38, 63, 0.6);
+  --accent: var(--sapLinkColor, #2f78ff);
+  --accent-rgb: 47, 120, 255;
+  --shadow: var(--sapContent_ShadowColor, rgba(77, 118, 176, 0.18));
 
-  --bg-main: linear-gradient(180deg, #f7fbff 0%, #eef6ff 44%, #e8f1fb 100%);
-  --bg-grad-a: rgba(0, 172, 238, 0.2);
-  --bg-grad-b: rgba(143, 228, 255, 0.34);
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(0, 136, 188, 0.18);
-  --glass-shadow: 0 20px 45px rgba(89, 152, 188, 0.14);
+  --bg-main: linear-gradient(180deg, #f6f9ff 0%, #ebf3ff 46%, #e2edfb 100%);
+  --bg-grad-a: rgba(123, 151, 245, 0.22);
+  --bg-grad-b: rgba(138, 222, 255, 0.3);
+  --glass-bg: rgba(241, 247, 255, 0.8);
+  --glass-border: rgba(124, 154, 216, 0.22);
+  --glass-shadow: 0 18px 44px rgba(84, 123, 188, 0.16);
   --text-main: var(--text);
   --text-muted: var(--text-sub);
-  --accent-grad: linear-gradient(145deg, #00acee, #37d2ff);
+  --accent-grad: linear-gradient(145deg, #5b95ff, #8fd7ff);
 
   --focus-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
   --interactive-hover: color-mix(in srgb, var(--surface2) 80%, rgba(var(--accent-rgb), 0.14));
@@ -79,13 +80,29 @@
   --sapInformation: #0057d2;
 }
 
-/* Horizon-inspired morning/night refinements layered over fiori_3/fiori_3_dark */
+@supports not (color: color-mix(in srgb, #fff 50%, #000)) {
+  :root {
+    --interactive-hover: rgba(40, 46, 68, 0.78);
+    --interactive-pressed: rgba(54, 62, 90, 0.82);
+    --edit-field-bg: rgba(36, 42, 64, 0.88);
+    --readonly-field-bg: rgba(24, 28, 44, 0.84);
+  }
+
+  :root.light-mode {
+    --interactive-hover: rgba(237, 245, 255, 0.96);
+    --interactive-pressed: rgba(223, 237, 255, 0.98);
+    --edit-field-bg: rgba(245, 250, 255, 0.98);
+    --readonly-field-bg: rgba(255, 255, 255, 0.98);
+  }
+}
+
+/* Horizon-inspired morning/night refinements layered over sap_horizon / sap_horizon_dark */
 body.appLight,
 :root.light-mode body {
   --bg-main: linear-gradient(180deg, #fcfeff 0%, #f2f7ff 42%, #ecf3fb 100%);
   --bg-grad-a: rgba(132, 175, 255, 0.28);
   --bg-grad-b: rgba(146, 222, 255, 0.32);
-  --accent: #2f78ff;
+  --accent: var(--sapLinkColor, #2f78ff);
   --accent-rgb: 47, 120, 255;
   --accent-grad: linear-gradient(135deg, #68a4ff, #86d0ff);
   --glass-bg: rgba(255, 255, 255, 0.84);
@@ -135,6 +152,7 @@ body {
   font-feature-settings: "kern" 1, "liga" 1;
   font-family: var(--sap-font-family-stack);
   color: var(--text-main);
+  background-color: var(--bg) !important;
   background:
     radial-gradient(circle at 14% 18%, var(--bg-grad-a), transparent 46%),
     radial-gradient(circle at 86% 78%, var(--bg-grad-b), transparent 55%),
@@ -195,15 +213,17 @@ body {
 /* Section: card-toolbar-button-primitives */
 .glassCard,
 .filterCard {
+  background: var(--surface2) !important;
   background: var(--glass-bg) !important;
   backdrop-filter: blur(16px) saturate(135%);
   -webkit-backdrop-filter: blur(16px) saturate(135%);
+  border: 1px solid var(--border) !important;
   border: 1px solid var(--glass-border) !important;
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
   -webkit-font-smoothing: antialiased;
   padding: 1.65rem;
-  transition: background 0.35s var(--transition), border-color 0.35s var(--transition), box-shadow 0.35s var(--transition), transform 0.25s var(--transition);
+  transition: background var(--motion-soft), border-color var(--motion-soft), box-shadow var(--motion-soft), transform 220ms var(--motion-smooth), opacity 220ms var(--motion-smooth), filter 220ms var(--motion-smooth);
 }
 
 .glassCard:hover,
@@ -910,6 +930,36 @@ body {
   background: linear-gradient(120deg, rgba(var(--accent-rgb), 0.16), transparent 36%, rgba(255,255,255,0.04) 62%, transparent 100%);
 }
 
+.objectHeroCard,
+.detailHeroCard {
+  background: color-mix(in srgb, var(--glass-bg) 88%, rgba(255, 255, 255, 0.08)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 84%, rgba(var(--accent-rgb), 0.2)) !important;
+  box-shadow: 0 20px 52px rgba(6, 18, 34, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(18px) saturate(126%);
+  -webkit-backdrop-filter: blur(18px) saturate(126%);
+}
+
+.objectHeroCard::after,
+.detailHeroCard::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 26%, transparent 100%);
+  opacity: 0.6;
+}
+
+.objectHeroCard .sapMTitle,
+.detailHeroCard .sapMTitle {
+  letter-spacing: 0.01em;
+}
+
+.objectHeroCard .sapMObjStatus,
+.detailHeroCard .sapMObjStatus {
+  filter: saturate(108%);
+}
+
 .objectActionBar {
   padding: .55rem .65rem;
   border-radius: calc(var(--radius-lg) + 4px);
@@ -1136,24 +1186,6 @@ body.themeLifestyleNightOps .filterCard {
 }
 
 
-/* Theme switch button: inverse style per active theme */
-.appDark .themeDockButton .sapMBtnInner {
-  background: rgba(255,255,255,0.16) !important;
-  border-color: rgba(255,255,255,0.28) !important;
-}
-.appDark .themeDockButton .sapUiIcon {
-  color: #ffe4bf !important;
-}
-.appLight .themeDockButton .sapMBtnInner,
-.light-mode .themeDockButton .sapMBtnInner {
-  background: rgba(12, 23, 38, 0.82) !important;
-  border-color: rgba(10, 26, 48, 0.9) !important;
-}
-.appLight .themeDockButton .sapUiIcon,
-.light-mode .themeDockButton .sapUiIcon {
-  color: #f7fbff !important;
-}
-
 
 .detailContent {
   position: relative;
@@ -1337,16 +1369,10 @@ body.themeLifestyleNightOps .filterCard {
 /* ============================== */
 /* Section: responsive-and-utility-overrides */
 @media (max-width: 1024px) {
-  .quickFiltersRow,
   .searchToolbar {
     display: block !important;
   }
 
-  .quickFiltersRow .sapMLabel,
-  .quickFiltersRow .sapMInputBase,
-  .quickFiltersRow .sapMSlt,
-  .quickFiltersRow .sapMBtn,
-  .quickFiltersRow .sapMTBSpacer,
   .searchToolbar .sapMBtn,
   .searchToolbar .sapMMenuBtn,
   .searchToolbar .maxRowsWrap,
@@ -2032,7 +2058,6 @@ body.themeLifestyleNightOps .filterCard {
 /* Wave 58: status-chip/action emphasis consistency */
 .searchSummaryStatusChip,
 .searchStageStatusChip {
-  transition: transform .16s ease, box-shadow .2s ease, border-color .2s ease;
   transition: opacity .16s ease, transform .16s ease, box-shadow .2s ease, border-color .2s ease;
 }
 

@@ -281,9 +281,10 @@ sap.ui.define([
 
 
             var sStoredUser = window.sessionStorage.getItem("pcct_test_user") || "";
-            oStateModel.setProperty("/testUser", sStoredUser);
-            oStateModel.setProperty("/testUserLogin", sStoredUser);
-            oStateModel.setProperty("/requiresUserLogin", !sStoredUser);
+            var sBootstrapUser = sStoredUser || "demoUser";
+            oStateModel.setProperty("/testUser", sBootstrapUser);
+            oStateModel.setProperty("/testUserLogin", sBootstrapUser);
+            oStateModel.setProperty("/requiresUserLogin", false);
 
             // Protect against accidental tab close while unsaved changes exist.
             this._fnBeforeUnload = function (oEvent) {
@@ -369,6 +370,11 @@ sap.ui.define([
                 var oFrontendConfig = aResults[3] || {};
 
                 oStateModel.setProperty("/sessionId", oLogin.sessionId);
+                var sResolvedUser = (oLogin && oLogin.user) || oStateModel.getProperty("/testUser") || "demoUser";
+                oStateModel.setProperty("/testUser", sResolvedUser);
+                oStateModel.setProperty("/testUserLogin", sResolvedUser);
+                oStateModel.setProperty("/requiresUserLogin", false);
+                window.sessionStorage.setItem("pcct_test_user", sResolvedUser);
                 if (oFrontendConfig.search && oFrontendConfig.search.defaultMaxResults) {
                     oStateModel.setProperty("/searchMaxResults", String(oFrontendConfig.search.defaultMaxResults));
                 }

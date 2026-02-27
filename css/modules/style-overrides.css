@@ -60,9 +60,12 @@
 
 /* ============================== */
 /* Section: smart-controls-priority-and-detail-save-action */
-.quickFiltersRow,
+.quickFiltersRow.sapMOTB {
+  display: block;
+}
+
 #searchFallbackTable {
-  display: none !important;
+  display: table !important;
 }
 
 .detailInlineSaveButton {
@@ -120,4 +123,336 @@
 .appDark .filterCard,
 .appDark .smartTableGlass {
   box-shadow: 0 20px 44px rgba(2, 8, 18, 0.5), inset 0 1px 0 rgba(201, 224, 255, 0.08) !important;
+}
+
+
+/* ============================== */
+/* Section: horizon-token-air-gradient-refinement */
+:root {
+  --premium-top-glow: color-mix(in srgb, var(--accent) 18%, transparent);
+  --premium-bottom-glow: color-mix(in srgb, var(--bg-grad-b) 22%, transparent);
+}
+
+body::before {
+  background:
+    radial-gradient(42% 48% at 12% 14%, var(--premium-top-glow), transparent 70%),
+    radial-gradient(36% 40% at 88% 78%, var(--premium-bottom-glow), transparent 72%),
+    linear-gradient(118deg, color-mix(in srgb, var(--premium-top-glow) 70%, transparent), transparent 62%) !important;
+}
+
+.glassCard,
+.filterCard,
+.smartTableGlass,
+.workflowStageCard,
+.kpiCard {
+  background-image: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--glass-bg) 90%, rgba(255, 255, 255, 0.08)) 0%,
+    color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.08)) 100%
+  ) !important;
+}
+
+
+/* ============================== */
+/* Section: common-style-render-baseline */
+:root {
+  --ui-common-bg: var(--sapBackgroundColor, #0c1018);
+  --ui-common-bg-grad: radial-gradient(circle at 18% 10%, color-mix(in srgb, var(--sapAccentColor7, #5f89ff) 28%, transparent), transparent 48%), var(--bg-main);
+  --ui-common-surface: color-mix(in srgb, var(--sapTile_Background, #1b2738) 86%, rgba(255, 255, 255, 0.06));
+  --ui-common-border: color-mix(in srgb, var(--sapGroup_ContentBorderColor, rgba(138, 164, 205, 0.3)) 86%, rgba(var(--accent-rgb), 0.18));
+  --ui-common-text: var(--sapTextColor, #eaf2ff);
+}
+
+:root.light-mode {
+  --ui-common-bg: var(--sapBackgroundColor, #e7eef8);
+  --ui-common-bg-grad: radial-gradient(circle at 84% 14%, color-mix(in srgb, var(--sapAccentColor6, #7cc3ff) 22%, transparent), transparent 52%), var(--bg-main);
+  --ui-common-surface: color-mix(in srgb, var(--sapTile_Background, #f6f9fd) 88%, rgba(255, 255, 255, 0.42));
+  --ui-common-border: color-mix(in srgb, var(--sapGroup_ContentBorderColor, rgba(130, 158, 198, 0.28)) 84%, rgba(126, 171, 239, 0.18));
+  --ui-common-text: var(--sapTextColor, #13263d);
+}
+
+.sapUiBody,
+html,
+body,
+#ui5_container,
+.sapUiComponentContainer,
+.sapUiComponentContainer > div,
+.sapUiView,
+.sapMPage,
+.sapMPageEnableScrolling {
+  background-color: var(--ui-common-bg) !important;
+  background-image: var(--ui-common-bg-grad) !important;
+  color: var(--ui-common-text) !important;
+}
+
+.glassCard,
+.filterCard,
+.smartTableGlass,
+.workflowStageCard,
+.kpiCard,
+.mushroomCard,
+.infoCardTile {
+  background: var(--ui-common-surface) !important;
+  border: 1px solid var(--ui-common-border) !important;
+  box-shadow: 0 14px 34px rgba(6, 16, 30, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+
+/* ============================== */
+/* Section: common-token-mapping-final */
+:root {
+  --bg: var(--sapBackgroundColor, #0d1220);
+  --bg-main: radial-gradient(circle at 18% 14%, color-mix(in srgb, var(--sapAccentColor7, #6a6dff) 30%, transparent), transparent 46%), linear-gradient(180deg, color-mix(in srgb, var(--sapBackgroundColor, #0d1220) 92%, #04070e) 0%, color-mix(in srgb, var(--sapBackgroundColor, #0d1220) 78%, #090f18) 100%);
+  --bg-grad-a: color-mix(in srgb, var(--sapAccentColor7, #8e76ff) 34%, transparent);
+  --bg-grad-b: color-mix(in srgb, var(--sapAccentColor6, #6ac7ff) 28%, transparent);
+  --surface2: color-mix(in srgb, var(--sapTile_Background, #1b2738) 84%, rgba(255, 255, 255, 0.05));
+  --glass-bg: color-mix(in srgb, var(--sapTile_Background, #1b2738) 80%, rgba(14, 22, 34, 0.12));
+  --glass-border: color-mix(in srgb, var(--sapGroup_ContentBorderColor, rgba(143, 130, 255, 0.28)) 82%, rgba(var(--accent-rgb), 0.2));
+  --border: var(--sapGroup_ContentBorderColor, rgba(134, 153, 201, 0.26));
+  --border-bright: color-mix(in srgb, var(--sapGroup_ContentBorderColor, rgba(164, 188, 255, 0.34)) 74%, rgba(198, 218, 255, 0.36));
+  --text-main: var(--sapTextColor, #edf3ff);
+  --text-muted: var(--sapContent_LabelColor, rgba(221, 232, 255, 0.74));
+}
+
+:root.light-mode {
+  --bg: var(--sapBackgroundColor, #e9f0fb);
+  --bg-main: radial-gradient(circle at 84% 10%, color-mix(in srgb, var(--sapAccentColor6, #8ed6ff) 30%, transparent), transparent 56%), linear-gradient(180deg, color-mix(in srgb, var(--sapBackgroundColor, #e9f0fb) 98%, #ffffff) 0%, color-mix(in srgb, var(--sapBackgroundColor, #e9f0fb) 92%, #d8e6f8) 100%);
+  --bg-grad-a: color-mix(in srgb, var(--sapAccentColor7, #7c9bff) 26%, transparent);
+  --bg-grad-b: color-mix(in srgb, var(--sapAccentColor6, #75d2ff) 28%, transparent);
+  --surface2: color-mix(in srgb, var(--sapTile_Background, #f5f8fd) 90%, rgba(255, 255, 255, 0.36));
+  --glass-bg: color-mix(in srgb, var(--sapTile_Background, #f5f8fd) 86%, rgba(255, 255, 255, 0.46));
+  --glass-border: color-mix(in srgb, var(--sapGroup_ContentBorderColor, rgba(120, 150, 216, 0.26)) 82%, rgba(126, 171, 239, 0.2));
+  --border: var(--sapGroup_ContentBorderColor, rgba(125, 155, 201, 0.24));
+  --border-bright: color-mix(in srgb, var(--sapGroup_ContentBorderColor, rgba(122, 172, 244, 0.32)) 72%, rgba(122, 172, 244, 0.24));
+  --text-main: var(--sapTextColor, #152942);
+  --text-muted: var(--sapContent_LabelColor, rgba(21, 41, 66, 0.62));
+}
+
+.sapUiBody,
+html,
+body {
+  background-color: var(--bg) !important;
+  background-image: var(--bg-main) !important;
+}
+
+.glassCard,
+.filterCard,
+.smartTableGlass,
+.workflowStageCard,
+.kpiCard,
+.infoCardTile,
+.mushroomCard {
+  background-image: none !important;
+}
+
+
+/* ============================== */
+/* Section: common-interactive-token-bridge */
+:root {
+  --ui-common-accent: #79a8ff;
+  --ui-common-accent-rgb: 121, 168, 255;
+  --ui-common-accent-grad: linear-gradient(135deg, #6e9dff, #7ec9ff);
+  --ui-common-focus-ring: 0 0 0 3px rgba(121, 168, 255, 0.26);
+  --ui-common-hover: rgba(38, 52, 79, 0.9);
+  --ui-common-pressed: rgba(49, 66, 98, 0.92);
+  --ui-common-edit-bg: rgba(28, 40, 62, 0.9);
+  --ui-common-readonly-bg: rgba(22, 32, 50, 0.86);
+}
+
+:root.light-mode {
+  --ui-common-accent: #2f78ff;
+  --ui-common-accent-rgb: 47, 120, 255;
+  --ui-common-accent-grad: linear-gradient(135deg, #67a0ff, #8bd3ff);
+  --ui-common-focus-ring: 0 0 0 3px rgba(47, 120, 255, 0.24);
+  --ui-common-hover: rgba(231, 241, 255, 0.96);
+  --ui-common-pressed: rgba(218, 233, 252, 0.98);
+  --ui-common-edit-bg: rgba(242, 248, 255, 0.98);
+  --ui-common-readonly-bg: rgba(249, 252, 255, 0.98);
+}
+
+:root,
+:root.light-mode {
+  --accent: var(--ui-common-accent);
+  --accent-rgb: var(--ui-common-accent-rgb);
+  --accent-grad: var(--ui-common-accent-grad);
+  --focus-ring: var(--ui-common-focus-ring);
+  --interactive-hover: var(--ui-common-hover);
+  --interactive-pressed: var(--ui-common-pressed);
+  --edit-field-bg: var(--ui-common-edit-bg);
+  --readonly-field-bg: var(--ui-common-readonly-bg);
+}
+
+.sapMInputBaseContentWrapper,
+.sapMSlt,
+.sapMBtnInner,
+.sapMObjStatusText,
+.sapMText,
+.sapMLabel {
+  color: var(--text-main) !important;
+}
+
+
+/* ============================== */
+/* Section: motion-and-air-transparency-uplift */
+:root {
+  --motion-fast: 180ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-base: 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  --motion-slow: 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --air-glass-alpha: 84%;
+}
+
+.glassCard,
+.filterCard,
+.smartTableGlass,
+.workflowStageCard,
+.kpiCard,
+.mushroomCard,
+.infoCardTile,
+.objectHeroCard,
+.detailHeroCard {
+  transition: transform var(--motion-fast), box-shadow var(--motion-base), border-color var(--motion-base), background var(--motion-base), opacity var(--motion-fast);
+  background-image:
+    linear-gradient(164deg,
+      color-mix(in srgb, var(--glass-bg) var(--air-glass-alpha), rgba(255, 255, 255, 0.1)) 0%,
+      color-mix(in srgb, var(--surface2) 94%, rgba(var(--accent-rgb), 0.08)) 100%
+    ) !important;
+}
+
+.searchToolbar,
+.quickFiltersRow,
+.searchCriteriaActions,
+.searchToolbarMetaRail {
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--glass-bg) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--glass-border) 70%, rgba(var(--accent-rgb), 0.14));
+  backdrop-filter: blur(10px) saturate(118%);
+  -webkit-backdrop-filter: blur(10px) saturate(118%);
+}
+
+.quickFiltersRow .sapMOTBOverflowButton,
+.searchToolbar .sapMOTBOverflowButton,
+.searchCriteriaActions .sapMOTBOverflowButton {
+  border-radius: 999px !important;
+}
+
+body::before {
+  transition: opacity var(--motion-slow), filter var(--motion-slow);
+  filter: blur(58px) saturate(130%);
+}
+
+@supports not (color: color-mix(in srgb, #fff 50%, #000)) {
+  .searchToolbar,
+  .quickFiltersRow,
+  .searchCriteriaActions,
+  .searchToolbarMetaRail {
+    background: rgba(31, 44, 68, 0.82);
+    border-color: rgba(145, 171, 218, 0.32);
+  }
+
+  :root.light-mode .searchToolbar,
+  :root.light-mode .quickFiltersRow,
+  :root.light-mode .searchCriteriaActions,
+  :root.light-mode .searchToolbarMetaRail {
+    background: rgba(242, 248, 255, 0.9);
+    border-color: rgba(124, 158, 214, 0.26);
+  }
+}
+
+/* ============================== */
+/* Section: hard-render-style-bundles */
+body.appDark,
+:root:not(.light-mode) body {
+  background-color: var(--bg) !important;
+  background-image: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+body.appLight,
+:root.light-mode body {
+  background-color: var(--bg) !important;
+  background-image: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+body.appDark .glassCard,
+body.appDark .filterCard,
+body.appDark .smartTableGlass,
+body.appDark .workflowStageCard,
+body.appDark .kpiCard,
+:root:not(.light-mode) .glassCard,
+:root:not(.light-mode) .filterCard,
+:root:not(.light-mode) .smartTableGlass,
+:root:not(.light-mode) .workflowStageCard,
+:root:not(.light-mode) .kpiCard {
+  background: color-mix(in srgb, var(--glass-bg) 86%, rgba(255, 255, 255, 0.04)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 84%, rgba(172, 198, 255, 0.2)) !important;
+  box-shadow: 0 18px 40px rgba(6, 16, 30, 0.26), inset 0 1px 0 rgba(214, 228, 255, 0.08) !important;
+  backdrop-filter: blur(16px) saturate(124%);
+  -webkit-backdrop-filter: blur(16px) saturate(124%);
+}
+
+body.appLight .glassCard,
+body.appLight .filterCard,
+body.appLight .smartTableGlass,
+body.appLight .workflowStageCard,
+body.appLight .kpiCard,
+:root.light-mode .glassCard,
+:root.light-mode .filterCard,
+:root.light-mode .smartTableGlass,
+:root.light-mode .workflowStageCard,
+:root.light-mode .kpiCard {
+  background: color-mix(in srgb, var(--glass-bg) 88%, rgba(255, 255, 255, 0.34)) !important;
+  border: 1px solid color-mix(in srgb, var(--glass-border) 80%, rgba(104, 158, 235, 0.2)) !important;
+  box-shadow: 0 15px 32px rgba(72, 102, 142, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.56) !important;
+  backdrop-filter: blur(14px) saturate(122%);
+  -webkit-backdrop-filter: blur(14px) saturate(122%);
+}
+
+/* ============================== */
+/* Section: object-card-air-glass-pass */
+.objectHeroCard,
+.detailHeroCard {
+  transition: transform .22s ease, box-shadow .26s ease, border-color .26s ease, background .26s ease;
+  background-image:
+    radial-gradient(120% 90% at 8% -20%, color-mix(in srgb, rgba(var(--accent-rgb), 0.22) 65%, transparent), transparent 62%),
+    linear-gradient(165deg, color-mix(in srgb, var(--glass-bg) 88%, rgba(255, 255, 255, 0.08)) 0%, color-mix(in srgb, var(--surface2) 92%, rgba(var(--accent-rgb), 0.08)) 100%) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 82%, rgba(var(--accent-rgb), 0.2)) !important;
+}
+
+.objectHeroCard:hover,
+.detailHeroCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 48px rgba(10, 22, 40, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.34) !important;
+}
+
+@supports not (color: color-mix(in srgb, #fff 50%, #000)) {
+  .objectHeroCard,
+  .detailHeroCard {
+    background: rgba(34, 48, 74, 0.88) !important;
+    border-color: rgba(146, 173, 227, 0.34) !important;
+  }
+
+  :root.light-mode .objectHeroCard,
+  :root.light-mode .detailHeroCard,
+  body.appLight .objectHeroCard,
+  body.appLight .detailHeroCard {
+    background: rgba(243, 248, 255, 0.94) !important;
+    border-color: rgba(120, 154, 216, 0.28) !important;
+  }
+}
+
+body::before {
+  opacity: 0.22 !important;
+}
+
+body::after {
+  opacity: 0 !important;
+}
+
+.sapMText,
+.sapMLabel,
+.sapMTitle,
+.sapMObjStatusText,
+.sapMBtnContent {
+  color: inherit !important;
 }
