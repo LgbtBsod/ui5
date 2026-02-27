@@ -51,9 +51,11 @@ sap.ui.define([], function () {
 
         var aRows = oDataModel.getProperty("/visibleCheckLists");
         var bHasRows = Array.isArray(aRows) && aRows.length > 0;
+        var oStateModel = mArgs && mArgs.stateModel;
+        var bLoadError = !!(oStateModel && typeof oStateModel.getProperty === "function" && oStateModel.getProperty("/loadError"));
         var sKind = resolveEmptyStateKind({
             hasRows: bHasRows,
-            loadError: oViewModel.getProperty("/loadError") || false,
+            loadError: bLoadError,
             useSmartControls: oViewModel.getProperty("/useSmartControls")
         });
         var sText = resolveNoDataText({

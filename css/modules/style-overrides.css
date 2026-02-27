@@ -535,3 +535,138 @@ body::after {
   background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.08)) !important;
   border-color: color-mix(in srgb, var(--glass-border) 84%, rgba(var(--accent-rgb), 0.25)) !important;
 }
+
+/* Section: global-rounded-contour-unification */
+.sapMDialog,
+.sapMPopup-CTX .sapMPopup,
+.sapMPopover,
+.sapMMessagePopover,
+.sapMViewSettingsDialog,
+.sapMResponsivePopover,
+.sapMPanel,
+.sapMList,
+.sapMTable,
+.sapMPage,
+.sapMPage > section,
+.sapMHeader-CTX,
+.sapMIBar,
+.sapMTB,
+.sapMTB-Transparent-CTX,
+.sapMInputBaseContentWrapper,
+.sapMInputBaseInner,
+.sapMBtnInner,
+.sapMSegBBtn,
+.sapMSlt,
+.sapMComboBoxBase,
+.sapMTokenizer,
+.sapMToken,
+.sapMTextAreaInner {
+  border-radius: var(--radius-md, 12px) !important;
+}
+
+.sapMDialog,
+.sapMPopover,
+.sapMResponsivePopover,
+.sapMViewSettingsDialog,
+.sapMMessagePopover {
+  overflow: hidden;
+}
+
+/* Section: switch-off-thumb-visibility */
+.sapMSwt,
+.accentSwitch.sapMSwt,
+.searchToolbar .sapMSwt {
+  min-width: 2.75rem;
+}
+
+.sapMSwt.sapMSwtOff .sapMSwtHandle,
+.sapMSwt:not(.sapMSwtOn) .sapMSwtHandle {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(237,243,252,0.95)) !important;
+  border-color: rgba(255,255,255,0.72) !important;
+}
+
+/* Section: fcl-custom-resizable-split */
+.fclCustomResizable.fclCustomSplitActive.sapFFCL.sapFFCLTwoColumnsBeginExpanded .sapFFCLColumnBegin,
+.fclCustomResizable.fclCustomSplitActive.sapFFCL.sapFFCLTwoColumnsMidExpanded .sapFFCLColumnBegin {
+  width: var(--fcl-begin-col, 38%) !important;
+  flex: 0 0 var(--fcl-begin-col, 38%) !important;
+  max-width: var(--fcl-begin-col, 38%) !important;
+}
+
+.fclCustomResizable.fclCustomSplitActive.sapFFCL.sapFFCLTwoColumnsBeginExpanded .sapFFCLColumnMid,
+.fclCustomResizable.fclCustomSplitActive.sapFFCL.sapFFCLTwoColumnsMidExpanded .sapFFCLColumnMid {
+  width: var(--fcl-mid-col, 62%) !important;
+  flex: 0 0 var(--fcl-mid-col, 62%) !important;
+  max-width: var(--fcl-mid-col, 62%) !important;
+}
+
+/* Section: search-resize-overlap-fixes */
+.searchFilterCardDense .sapUiCompFilterBarToolbar,
+.searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB {
+  flex-wrap: wrap;
+  row-gap: .35rem;
+}
+
+.searchFilterCardDense .sapUiCompFilterBarToolbar .sapMBtn,
+.searchFilterCardDense .sapUiCompFilterBarToolbar .sapMInputBase,
+.searchFilterCardDense .sapUiCompFilterBarToolbar .sapMSlt,
+.searchFilterCardDense .sapUiCompFilterBarToolbar .sapMFlexItem {
+  min-width: 0;
+}
+
+.searchSmartTableControl,
+.searchFallbackTableWrap {
+  overflow-x: auto;
+}
+
+.searchSmartTableControl .sapMListTbl,
+.searchFallbackTableWrap .sapMListTbl {
+  min-width: 42rem;
+}
+
+@media (max-width: 760px) {
+  .searchSmartTableControl .sapMListTbl,
+  .searchFallbackTableWrap .sapMListTbl {
+    min-width: 36rem;
+  }
+
+  .searchToolbarMetaRail .sapMObjStatus,
+  .searchToolbarMetaRail .sapMText {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .searchFeedbackToolbar .sapMBtn .sapMBtnContent {
+    font-size: .78rem;
+  }
+
+  .searchCreateActionBtn .sapMBtnContent,
+  .searchCopyActionBtn .sapMBtnContent,
+  .searchDeleteActionBtn .sapMBtnContent,
+  .searchExportActionBtn .sapMBtnContent {
+    display: none;
+  }
+
+  .searchCreateActionBtn .sapMBtnIcon,
+  .searchCopyActionBtn .sapMBtnIcon,
+  .searchDeleteActionBtn .sapMBtnIcon,
+  .searchExportActionBtn .sapMBtnIcon {
+    margin: 0 !important;
+  }
+
+  .searchToolbarMetaRail {
+    gap: .25rem;
+    padding-top: .3rem;
+  }
+
+  .searchToolbarMetaRail .searchUpdatedAtText {
+    font-size: .78rem;
+  }
+
+  .searchFilterCardDense {
+    padding: .75rem .7rem !important;
+  }
+}

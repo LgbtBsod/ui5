@@ -210,9 +210,9 @@ function testSearchSmartControlCoordinator() {
   bindingParams.events.dataReceived({});
   assert(dataReceivedCalled === 1, 'applyRebindParams should chain dataReceived callback');
 
-  let fallbackCalls = 0;
-  mod.rebindOrFallback({ enabled: false, fallbackSearch: () => { fallbackCalls += 1; } });
-  assert(fallbackCalls === 1, 'rebindOrFallback should call fallback when disabled');
+  let skippedReason = '';
+  mod.rebindOrFallback({ enabled: false, onSkipped: (reason) => { skippedReason = reason; } });
+  assert(skippedReason === 'smart_disabled', 'rebindOrFallback should skip rebind when smart controls are disabled');
 
   const bindingNoTop = { filters: [], parameters: { top: 500 }, events: {} };
   mod.applyRebindParams({

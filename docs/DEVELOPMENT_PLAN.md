@@ -15,7 +15,7 @@ This document is the single source of truth for product and engineering developm
 ## 2. Current-State Summary
 
 ### Product and UX
-- Multi-stage search experience with Smart controls and fallback mode.
+- Multi-stage search experience with Smart controls as the single source of truth; degraded metadata state is explicit and blocks misleading fallback search execution.
 - Detail card supports read/edit lifecycle, lock orchestration, validation, and expanded row editing.
 - UX governance assets exist but are fragmented across audit catalogs, taxonomies, and baselines.
 
@@ -33,7 +33,7 @@ This document is the single source of truth for product and engineering developm
 ## 3. Target-State Vision
 
 ### Product outcomes
-1. Search reliability: SmartFilter and fallback parity, deterministic filter behavior, resilient empty-state messaging.
+1. Search reliability: SmartFilter-first deterministic behavior, explicit degraded states, resilient empty-state messaging.
 2. Detail reliability: stable load/hydration, lock-aware edit flow, robust save conflict and retry handling.
 3. Decision support: trusted inline analytics and export with explicit source transparency.
 
@@ -49,7 +49,7 @@ This document is the single source of truth for product and engineering developm
 ## WS-A. Search and Smart Controls Hardening
 ### Objectives
 - Eliminate SmartFilter inconsistency and state-sync drift.
-- Ensure SmartTable/Fallback feature parity and navigation reliability.
+- Ensure SmartTable-first reliability and remove contradictory UI states when metadata/capabilities degrade.
 
 ### Deliverables
 - Unified filter extraction rules for id/lpc/status/date/equipment/observer.
@@ -113,7 +113,7 @@ This document is the single source of truth for product and engineering developm
 - Capability schema and semver policy validation in runtime and CI.
 - Backend contract drift gate with blocking thresholds.
 - Metadata availability strategy for Smart controls (ready/pending/unavailable handling).
-- Recovery pathways for partial backend failure (retry, fallback, warning state).
+- Recovery pathways for partial backend failure (retry + warning state) without misleading fake/fallback search results.
 
 ### KPIs
 - Contract drift incidents in production: 0.
@@ -1018,3 +1018,27 @@ Closure artifact:
 - **Operational drills**
   - Add weekly smoke scenario: lock expires during edit + pending autosave + route change.
   - Add release gate scenario: backend unavailable during autosave while lock status probe is degraded.
+
+
+## 11. 2026-Q1 Consistency and Performance Addendum
+
+### Model/View state invariants (must hold)
+- `state>/layout` controls FCL semantic state (OneColumn/TwoColumns*), while `state>/columnSplitPercent` controls optional visual split ratio only for wide screens.
+- Smart search execution is allowed only when `view>/useSmartControls === true`; degraded metadata state must show warning messaging and avoid implicit fallback execution.
+- Empty-state text is derived from `state>/loadError` + data presence and is applied to the currently active table binding target.
+- Runtime config may tune split percent through `layout.columnSplitPercent` or `variables.fclBeginColumnPercent` and must be clamped to [20..80].
+
+### UX/UI hardening checklist
+- No toolbar overlaps on <=760px: controls wrap or collapse to icon-only where required.
+- No table-header text crushing: horizontal overflow container with minimum semantic width is enforced.
+- Rounded contour and switch visibility standards apply consistently in ON/OFF and dark/light modes.
+- FCL custom split is disabled automatically on narrow viewports to prevent column collision and content clipping.
+
+### Performance checklist
+- Avoid excessive layout thrash during resize by scheduling FCL split application through `requestAnimationFrame`.
+- Avoid redundant DOM writes by caching the last applied split signature.
+- Detach model bindings and global listeners in controller `onExit` to prevent memory leaks in long sessions.
+
+### Governance updates
+- Mandatory pre-release checks: `unit-smoke`, `ci-smoke-gate`, and browser smoke flows where Playwright runtime is available.
+- Any UX/CSS changes that affect responsive behavior must include a mobile-width screenshot artifact in CI-capable environments.

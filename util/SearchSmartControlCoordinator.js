@@ -326,10 +326,6 @@ sap.ui.define([
 
     function rebindOrFallback(mArgs) {
         if (!mArgs.enabled) {
-            if (typeof mArgs.fallbackSearch === "function") {
-                mArgs.fallbackSearch();
-                return;
-            }
             if (typeof mArgs.onSkipped === "function") {
                 mArgs.onSkipped("smart_disabled");
             }

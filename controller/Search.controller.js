@@ -124,6 +124,7 @@ sap.ui.define([
             this._iSearchDebounceMs = 180;
             this._iSearchTimer = null;
             this._bSmartRebindInFlight = false;
+            this._iSmartRebindWatchdog = null;
             this._analyticsRefreshMs = Number(this.getModel("state").getProperty("/timers/analyticsRefreshMs")) || 10 * 60 * 1000;
             this._analyticsRefreshTimer = null;
             this._inlineAnalyticsRefreshState = SearchInlineAnalyticsRefreshOrchestrationUseCase.ensureRefreshState({});
@@ -165,6 +166,24 @@ sap.ui.define([
 
         _getViewModel: function () {
             return this.getView().getModel("view");
+        },
+
+
+        _armSmartRebindWatchdog: function () {
+            if (this._iSmartRebindWatchdog) {
+                clearTimeout(this._iSmartRebindWatchdog);
+            }
+            this._iSmartRebindWatchdog = setTimeout(function () {
+                this._bSmartRebindInFlight = false;
+                this._iSmartRebindWatchdog = null;
+            }.bind(this), 15000);
+        },
+
+        _clearSmartRebindWatchdog: function () {
+            if (this._iSmartRebindWatchdog) {
+                clearTimeout(this._iSmartRebindWatchdog);
+                this._iSmartRebindWatchdog = null;
+            }
         },
 
         _syncSmartControlAvailability: function () {
@@ -292,6 +311,7 @@ sap.ui.define([
                         state: mPrepareArgs.state,
                         onDataReceived: function (oDataEvent) {
                             this._bSmartRebindInFlight = false;
+                            this._clearSmartRebindWatchdog();
                             SearchRebindLifecycleUseCase.runDataReceivedLifecycle({
                                 dataEvent: oDataEvent,
                                 syncLifecycle: function (oRawData) {
@@ -317,15 +337,13 @@ sap.ui.define([
             }
 
             this._bSmartRebindInFlight = true;
+            this._armSmartRebindWatchdog();
             SearchSmartControlCoordinator.rebindOrFallback({
                 enabled: this._isSmartControlsEnabled(),
                 smartTable: this.byId("searchSmartTable"),
-                fallbackSearch: function () {
-                    this._bSmartRebindInFlight = false;
-                    return this._executeSearch();
-                }.bind(this),
                 onSkipped: function () {
                     this._bSmartRebindInFlight = false;
+                    this._clearSmartRebindWatchdog();
                 }.bind(this)
             });
         },
@@ -427,8 +445,9 @@ sap.ui.define([
             return SearchEmptyStatePresentationUseCase.applyEmptyStatePresentation({
                 viewModel: this._getViewModel(),
                 dataModel: this.getModel("data"),
+                stateModel: this.getModel("state"),
                 bundle: this.getResourceBundle(),
-                table: this._oSmartInnerTable || this.byId("searchSmartTable") || this.byId("searchFallbackTable"),
+                table: this._oSmartInnerTable || this.byId("searchSmartTable"),
                 unknownFallbackKey: "noDataDefault"
             });
         },
@@ -563,13 +582,21 @@ sap.ui.define([
         },
 
         onSmartSearch: function () {
+            if (!this._isSmartControlsEnabled()) {
+                MessageToast.show(this.getResourceBundle().getText("smartControlsUnavailable"));
+                return { ok: false, reason: "smart_controls_disabled" };
+            }
             return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true));
         },
 
         onSearch: function () {
+            if (!this._isSmartControlsEnabled()) {
+                MessageToast.show(this.getResourceBundle().getText("smartControlsUnavailable"));
+                return Promise.resolve({ ok: false, reason: "smart_controls_disabled" });
+            }
             var oStateModel = this.getModel("state");
             var oSample = UxTelemetry.begin("search.execute", { source: "search_button" });
-            return Promise.resolve(SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(this._isSmartControlsEnabled())))
+            return Promise.resolve(SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true)))
                 .then(function (oResult) {
                     UxTelemetry.end(oSample, "success", oStateModel);
                     return oResult;
@@ -878,6 +905,7 @@ sap.ui.define([
                 this._iSearchTimer = null;
             }
             this._bSmartRebindInFlight = false;
+            this._clearSmartRebindWatchdog();
             var oAutoRefreshResult = SearchInlineAnalyticsAutoRefreshUseCase.stopAutoRefresh({
                 currentTimer: this._analyticsRefreshTimer,
                 clearInterval: window.clearInterval.bind(window)

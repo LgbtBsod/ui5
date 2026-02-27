@@ -484,12 +484,29 @@ sap.ui.define([
             };
         },
 
+        _sanitizeColumnSplitPercent: function (vRaw, iDefault) {
+            var iParsed = Number(vRaw);
+            if (!Number.isFinite(iParsed)) {
+                return iDefault;
+            }
+            return Math.max(20, Math.min(80, Math.round(iParsed)));
+        },
+
         _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvModel) {
             var mTimers = this._sanitizeTimers((oFrontendConfig && oFrontendConfig.timers) || {}, oStateModel.getProperty("/timers") || {});
             oStateModel.setProperty("/timers", mTimers);
             oEnvModel.setProperty("/source", (oFrontendConfig && oFrontendConfig.source) || "config_frontend");
             oEnvModel.setProperty("/loadedAt", new Date().toISOString());
             oEnvModel.setProperty("/timers", mTimers);
+
+            var iCurrentSplit = Number(oStateModel.getProperty("/columnSplitPercent"));
+            var iSafeDefaultSplit = Number.isFinite(iCurrentSplit) ? iCurrentSplit : 38;
+            var iSplit = this._sanitizeColumnSplitPercent(
+                (oFrontendConfig && oFrontendConfig.layout && oFrontendConfig.layout.columnSplitPercent)
+                || (oFrontendConfig && oFrontendConfig.variables && oFrontendConfig.variables.fclBeginColumnPercent),
+                iSafeDefaultSplit
+            );
+            oStateModel.setProperty("/columnSplitPercent", iSplit);
 
             if (this._oHeartbeat && this._oHeartbeat.setIntervalMs) {
                 this._oHeartbeat.setIntervalMs(mTimers.heartbeatMs);

@@ -18,6 +18,7 @@ sap.ui.define([
                 mode: "READ",
                 layout: "OneColumn",
                 preferredDetailLayout: "TwoColumnsMidExpanded",
+                columnSplitPercent: 38,
                 isLoading: false,
                 loadError: false,
                 loadErrorMessage: "",

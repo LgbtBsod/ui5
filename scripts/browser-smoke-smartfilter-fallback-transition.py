@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser smoke: SmartFilter/SmartTable stay enabled across metadata state transitions."""
+"""Browser smoke: SmartFilter/SmartTable are disabled on metadata outage and recover after."""
 
 import json
 import sys
@@ -77,7 +77,7 @@ def main():
 
                     resolve({
                         ok: trace[0].smartFilterVisible === true
-                          && degraded.smartFilterVisible === true
+                          && degraded.smartFilterVisible === false
                           && recovered.smartFilterVisible === true
                           && bootstrapCalls >= 1,
                         bootstrapCalls: bootstrapCalls,
