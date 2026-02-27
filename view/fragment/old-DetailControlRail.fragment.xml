@@ -1,0 +1,27 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox class="detailControlVerticalRail" renderType="Bare">
+        <HBox alignItems="Center" justifyContent="SpaceBetween" class="detailRailHeader" renderType="Bare">
+            <Title text="{i18n>detailControlTitle}" level="H6"/>
+            <Button icon="sap-icon://collapse-group" type="Transparent" press=".onToggleDetailControlRail" tooltip="{i18n>detailControlCollapse}" class="detailRailCollapseBtn"/>
+        </HBox>
+        <ObjectStatus icon="sap-icon://edit" text="{= ${state>/isDirty} ? ${i18n>dirtyStateDirty} : ${i18n>dirtyStateSynced} }" state="{= ${state>/isDirty} ? 'Warning' : 'Success' }" class="sapUiTinyMarginBottom detailRailStatusText"/>
+        <ObjectStatus icon="sap-icon://history" text="{parts:[{path:'state>/mode'},{path:'state>/isLocked'}], formatter:'.formatHeartbeatText'}" state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/isLocked} ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom detailRailStatusText"/>
+        <ObjectStatus icon="sap-icon://synchronize" text="{parts:[{path:'state>/mode'},{path:'state>/autosaveState'}], formatter:'.formatAutosaveText'}" state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }" class="sapUiTinyMarginBottom detailRailStatusText"/>
+        <Text text="{path:'state>/autosaveAt', formatter:'.formatAutosaveAt'}" class="detailRailHint sapUiTinyMarginBottom"/>
+        <Text text="{i18n>detailControlHint}" class="detailRailHint sapUiTinyMarginBottom" visible="{layout>/personalization/showHints}"/>
+        <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
+        <Button icon="sap-icon://save" type="Emphasized" visible="{= ${state>/mode} === 'EDIT' }" press=".onSaveDetail" class="sapUiTinyMarginTop sapUiTinyMarginBottom detailRailEditAction" tooltip="{i18n>objectSave}"/>
+        <Button icon="sap-icon://inspection" visible="{= ${state>/mode} === 'EDIT' }" press=".onValidateChecklist" class="sapUiTinyMarginBottom" tooltip="{i18n>validateButton}"/>
+        <Button icon="sap-icon://status-inactive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusDraft}">
+            <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
+        </Button>
+        <Button icon="sap-icon://status-critical" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusRegistered}">
+            <customData><core:CustomData key="targetStatus" value="REGISTERED"/></customData>
+        </Button>
+        <Button icon="sap-icon://status-positive" visible="{= ${state>/mode} === 'EDIT' }" press=".onChangeChecklistStatus" class="sapUiTinyMarginBottom" tooltip="{i18n>statusClosed}">
+            <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
+        </Button>
+        <Button icon="sap-icon://undo" visible="{= ${state>/mode} === 'EDIT' }" press=".onCancelEditFromDetail" class="sapUiTinyMarginBottom detailRailEditAction" tooltip="{i18n>objectCancel}"/>
+        <Button icon="sap-icon://decline" type="Transparent" press=".onCloseDetail" tooltip="{i18n>closeDetails}" class="detailRailCloseAction"/>
+    </VBox>
+</core:FragmentDefinition>

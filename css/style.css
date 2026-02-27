@@ -62,3 +62,83 @@ html::before {
     animation: none !important;
   }
 }
+
+/* ===== Floating horizontal control bar over ObjectPage ===== */
+.detailContent .detailControlBlockHost {
+  position: fixed;
+  top: 1.25rem;                 /* подстрой: чтобы не конфликтовало с hero */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+
+  /* ширина как у hero: почти на весь экран, с отступами */
+  width: calc(100% - 3rem);
+  max-width: 1100px;
+
+  pointer-events: none;
+}
+
+.detailContent .detailControlStickyBlock,
+.detailContent .detailControlPeekButton {
+  pointer-events: auto;
+}
+
+/* rail внутри — горизонтально и аккуратно */
+.detailControlInlineCard {
+  padding: 0.75rem 1rem;
+}
+
+/* чип-вид для ObjectStatus (чтобы был в стиле твоих пилюль) */
+.detailRailStatusChip {
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+}
+
+/* тулбар без лишней высоты */
+.detailControlToolbar {
+  background: transparent;
+  padding: 0;
+}
+
+/* мобилка: лучше сделать статичным, чтобы не мешал */
+@media (max-width: 900px) {
+  .detailContent .detailControlBlockHost {
+    position: static;
+    left: auto;
+    transform: none;
+    width: auto;
+    max-width: none;
+    pointer-events: auto;
+  }
+}
+
+/* Floating horizontal control bar over the ObjectPage */
+.detailContent .detailControlBlockHost {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+
+  width: calc(100% - 3rem);
+  max-width: 1100px;
+
+  pointer-events: none;
+}
+
+.detailContent .detailControlStickyBlock,
+.detailContent .detailControlPeekButton {
+  pointer-events: auto;
+}
+
+/* На мобиле лучше не фиксировать */
+@media (max-width: 900px) {
+  .detailContent .detailControlBlockHost {
+    position: static;
+    left: auto;
+    transform: none;
+    width: auto;
+    max-width: none;
+    pointer-events: auto;
+  }
+}
