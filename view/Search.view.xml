@@ -79,7 +79,7 @@
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
 
-                    <OverflowToolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="{= !${view>/useSmartControls} }">
+                    <OverflowToolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="false">
                         <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd">
                             <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                         </Label>
@@ -108,7 +108,7 @@
                     </OverflowToolbar>
 
                     <OverflowToolbar class="toolbarTransparent searchCriteriaActions sapUiTinyMarginTop">
-                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="{= !${view>/useSmartControls} }"/>
+                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="false"/>
 
                     </OverflowToolbar>
                 </VBox>
@@ -150,7 +150,8 @@
     initialise=".onSmartTableInitialise"
     initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
     useExportToExcel="false" 
-    requestAtLeastFields="id,checklist_id,status,lpc,changed_on">
+    requestAtLeastFields="id,checklist_id,status,lpc,changed_on"
+    class="searchSmartTableControl">
 
     <smartTable:customToolbar>
         <OverflowToolbar id="smartTableCustomToolbar" class="toolbarTransparent">
@@ -209,7 +210,7 @@
     </smartTable:customToolbar>
 </smartTable:SmartTable>
 
-                    <Table id="searchFallbackTable" visible="{= !${view>/useSmartControls} }" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
+                    <Table id="searchFallbackTable" visible="false" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable searchFallbackTableWrap" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
                         <columns>
                             <Column><Text text="{i18n>columnId}"/></Column>
                             <Column><Text text="{i18n>columnStatus}"/></Column>

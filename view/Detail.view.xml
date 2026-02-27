@@ -153,7 +153,7 @@
                                                         <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'datetime' }" renderType="Bare" class="detailDateTimeGrid">
                                                             <DatePicker value="{selected>/basic/date}" displayFormat="EEE, dd MMM yyyy" valueFormat="yyyy-MM-dd" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.date'}], formatter:'.formatValidationText'}"/>
                                                             <TimePicker value="{selected>/basic/time}" displayFormat="HH:mm" valueFormat="HH:mm" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.time'}], formatter:'.formatValidationText'}"/>
-                                                            <Select templateShareable="true" selectedKey="{selected>/basic/timezone}" forceSelection="false" items="{masterData>/timezones}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationText'}">
+                                                            <Select selectedKey="{selected>/basic/timezone}" forceSelection="false" items="{ path: 'masterData>/timezones', templateShareable: true }" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.timezone'}], formatter:'.formatValidationText'}">
                                                                 <core:Item key="{masterData>key}" text="{masterData>text}"/>
                                                             </Select>
                                                         </VBox>
@@ -214,22 +214,21 @@
                                                         </VBox>
 
                                                         <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'lpc' }" renderType="Bare">
-                                                            <Select templateShareable="true"
+                                                            <Select
                                                                 selectedKey="{selected>/basic/LPC_KEY}"
                                                                 change=".onLpcChange"
                                                                 forceSelection="false"
-                                                                items="{masterData>/lpc}" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationText'}">
+                                                                items="{ path: 'masterData>/lpc', templateShareable: true }" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.LPC_KEY'}], formatter:'.formatValidationText'}">
                                                                 <core:Item key="{masterData>key}" text="{masterData>text}"/>
                                                             </Select>
                                                         </VBox>
 
                                                         <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'profession' }" renderType="Bare">
                                                             <Select
-                                                                templateShareable="true"
                                                                 selectedKey="{selected>/basic/PROF_KEY}"
                                                                 change=".onProfessionChange"
                                                                 forceSelection="false"
-                                                                items="{masterData>/professions}" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationText'}">
+                                                                items="{ path: 'masterData>/professions', templateShareable: true }" class="detailDictionarySelect" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.PROF_KEY'}], formatter:'.formatValidationText'}">
                                                                 <core:Item key="{masterData>key}" text="{masterData>text}"/>
                                                             </Select>
                                                         </VBox>
