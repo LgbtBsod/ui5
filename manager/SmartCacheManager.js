@@ -8,6 +8,7 @@ sap.ui.define([
     var DEFAULT_STALE_OK_MS = 90 * 1000;
     var DB_NAME = "pcct_smart_cache";
     var STORE_NAME = "entries";
+    var DEFAULT_ALLOWED_KEYS = ["checkLists"];
 
     function _openDb() {
         return new Promise(function (resolve) {
@@ -61,15 +62,27 @@ sap.ui.define([
         });
     }
 
+    function _buildAllowedMap(aAllowed) {
+        return (aAllowed || []).reduce(function (mAcc, sKey) {
+            mAcc[String(sKey)] = true;
+            return mAcc;
+        }, {});
+    }
+
     return EventProvider.extend("sap_ui5.manager.SmartCacheManager", {
         constructor: function (mOptions) {
             EventProvider.apply(this, arguments);
             this._iFreshMs = Number((mOptions && mOptions.freshMs) || DEFAULT_FRESH_MS);
             this._iStaleOkMs = Number((mOptions && mOptions.staleOkMs) || DEFAULT_STALE_OK_MS);
+            this._mAllowedKeys = _buildAllowedMap((mOptions && mOptions.allowedKeys) || DEFAULT_ALLOWED_KEYS);
             this._mL1 = {};
             this._mFreshness = {};
             this._mKeyMapping = {};
             this._pDb = _openDb();
+        },
+
+        _isKeyAllowed: function (sKey) {
+            return !!this._mAllowedKeys[String(sKey || "")];
         },
 
         setKeyMapping: function (sTempKey, sRealKey) {
@@ -82,19 +95,31 @@ sap.ui.define([
         },
 
         put: function (sKey, vValue) {
+            if (!this._isKeyAllowed(sKey)) {
+                this.fireEvent("cacheSkipped", { key: sKey, reason: "not_allowed" });
+                return false;
+            }
             this._mL1[sKey] = vValue;
             this._mFreshness[sKey] = Date.now();
             this._pDb.then(function (oDb) {
                 return _idbPut(oDb, sKey, vValue, this._mFreshness[sKey]);
             }.bind(this));
             this.fireEvent("cacheUpdated", { key: sKey });
+            return true;
         },
 
         get: function (sKey) {
+            if (!this._isKeyAllowed(sKey)) {
+                return undefined;
+            }
             return this._mL1[sKey];
         },
 
         getWithFallback: function (sKey) {
+            if (!this._isKeyAllowed(sKey)) {
+                this.fireEvent("cacheSkipped", { key: sKey, reason: "not_allowed" });
+                return Promise.resolve(null);
+            }
             if (typeof this._mL1[sKey] !== "undefined") {
                 return Promise.resolve(this._mL1[sKey]);
             }
@@ -111,6 +136,9 @@ sap.ui.define([
         },
 
         getFreshnessState: function (sKey) {
+            if (!this._isKeyAllowed(sKey)) {
+                return "MISS";
+            }
             var iTs = this._mFreshness[sKey];
             if (!iTs) {
                 return "MISS";
@@ -152,7 +180,8 @@ sap.ui.define([
         snapshot: function () {
             return {
                 freshness: Object.assign({}, this._mFreshness),
-                keyMapping: Object.assign({}, this._mKeyMapping)
+                keyMapping: Object.assign({}, this._mKeyMapping),
+                allowedKeys: Object.keys(this._mAllowedKeys)
             };
         }
     });

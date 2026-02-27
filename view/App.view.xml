@@ -17,7 +17,6 @@
 
 
     <Toolbar class="toolbarTransparent sapUiTinyMarginBegin sapUiTinyMarginTop">
-        <Title level="H6" text="PCCT"/>
         <ToolbarSpacer/>
         <ObjectStatus text="{= ${state>/testUser} ? ${state>/testUser} : 'demoUser' }" state="Information"/>
     </Toolbar>

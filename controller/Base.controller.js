@@ -8,10 +8,10 @@ sap.ui.define([
     "use strict";
 
     var THEME_STORAGE_KEY = "sap_ui5_theme";
-    var LIGHT_THEME = "sap_fiori_3";
-    var DARK_THEME = "sap_fiori_3_dark";
+    var LIGHT_THEME = "sap_horizon";
+    var DARK_THEME = "sap_horizon_dark";
     var THEME_SWITCH_CLASS = "theme-switching";
-    var THEME_SWITCH_DURATION_MS = 260;
+    var THEME_SWITCH_DURATION_MS = 600;
 
     function _isDarkTheme(sTheme) {
         return sTheme === DARK_THEME;
@@ -45,7 +45,7 @@ sap.ui.define([
 
         getCurrentTheme: function () {
             var sTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-            if (!sTheme) {
+            if (!sTheme || !ThemePhilosophy.hasTheme(sTheme)) {
                 // Light is the default baseline theme and is persisted per-site in browser storage.
                 window.localStorage.setItem(THEME_STORAGE_KEY, LIGHT_THEME);
                 return LIGHT_THEME;
@@ -173,8 +173,25 @@ sap.ui.define([
             });
         },
 
+        _ensureThemeSyncListener: function () {
+            if (this._fnThemeChangedHandler) {
+                return;
+            }
+
+            this._fnThemeChangedHandler = function () {
+                document.documentElement.classList.remove(THEME_SWITCH_CLASS);
+                if (this._iThemeSwitchTimer) {
+                    window.clearTimeout(this._iThemeSwitchTimer);
+                    this._iThemeSwitchTimer = null;
+                }
+            }.bind(this);
+
+            sap.ui.getCore().attachThemeChanged(this._fnThemeChangedHandler);
+        },
+
         _applyTheme: function (sTheme) {
             var bDark = _isDarkTheme(sTheme);
+            this._ensureThemeSyncListener();
             this._markThemeSwitching();
             sap.ui.getCore().applyTheme(sTheme);
             document.body.classList.toggle("appDark", bDark);

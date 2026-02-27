@@ -16,11 +16,16 @@ sap.ui.define([], function () {
     }
   };
 
+  function hasTheme(sTheme) {
+    return Object.prototype.hasOwnProperty.call(THEMES, sTheme);
+  }
+
   function getMeta(sTheme) {
-    return THEMES[sTheme] || THEMES.sap_fiori_3;
+    return THEMES[sTheme] || THEMES.sap_horizon;
   }
 
   return {
+    hasTheme: hasTheme,
     getMeta: getMeta
   };
 });
