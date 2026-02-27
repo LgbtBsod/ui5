@@ -1,7 +1,7 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <VBox class="searchStatusStripStack sapUiTinyMarginBottom">
+    <VBox class="searchStatusStripStack sapUiTinyMarginBottom mergeBlock mergeBlockMiddle">
         <MessageStrip
             text="{view>/filterHintText}"
             type="{view>/filterHintType}"

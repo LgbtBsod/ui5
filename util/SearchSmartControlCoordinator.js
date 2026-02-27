@@ -25,7 +25,7 @@ sap.ui.define([
 
         if (bMetadataOk === false) {
             return {
-                enabled: true,
+                enabled: false,
                 reasonCode: sMetaError ? "metadata_error" : "metadata_unavailable",
                 reasonText: buildReason(sMetaError, sUnavailableText)
             };
@@ -60,7 +60,7 @@ sap.ui.define([
         oViewModel.setProperty("/smartControlsReasonCode", oAvailability.reasonCode);
 
         if (!oAvailability.enabled) {
-            setEnabled(oViewModel, true, oAvailability.reasonText);
+            setEnabled(oViewModel, false, oAvailability.reasonText);
             oViewModel.setProperty("/smartControlsReason", oAvailability.reasonText);
             return;
         }
@@ -328,6 +328,10 @@ sap.ui.define([
         if (!mArgs.enabled) {
             if (typeof mArgs.fallbackSearch === "function") {
                 mArgs.fallbackSearch();
+                return;
+            }
+            if (typeof mArgs.onSkipped === "function") {
+                mArgs.onSkipped("smart_disabled");
             }
             return;
         }
@@ -335,6 +339,11 @@ sap.ui.define([
         var oSmartTable = mArgs.smartTable;
         if (oSmartTable && oSmartTable.rebindTable) {
             oSmartTable.rebindTable();
+            return;
+        }
+
+        if (typeof mArgs.onSkipped === "function") {
+            mArgs.onSkipped("smart_table_unavailable");
         }
     }
 

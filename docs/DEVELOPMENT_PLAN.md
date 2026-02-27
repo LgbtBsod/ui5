@@ -904,3 +904,117 @@ Closure command:
 
 Closure artifact:
 - `docs/artifacts/final-style-migration-certificate.json`
+
+---
+
+## 19. Remediation Update (2026-02)
+
+### 19.1 Completed fixes in current hardening cycle
+- Smart-search request stability: overlapping smart-table rebinds are now guarded by in-flight protection in Search flow.
+- Theme baseline switched to Horizon pair (`sap_horizon` / `sap_horizon_dark`) and bootstrap default aligned.
+- Theme lifecycle stabilization: switching marker cleanup is synchronized with UI5 `themeChanged` callback.
+- Smart-control availability logic corrected for metadata failure path (controls are now explicitly disabled when metadata is unavailable/failed).
+- Search trigger orchestration hardened in controller to handle both sync and async trigger outcomes safely.
+- CSS parsing hygiene improved: malformed section header lines in module stylesheets were normalized to valid CSS comments.
+
+### 19.2 Additional defects found and fixed during review
+- Incorrect SmartControl availability branch (`enabled=true` on metadata failure) caused unit smoke failure and invalid runtime behavior.
+- Promise-chain hazard in search trigger usage (controller expected Promise while smart path returned sync result).
+- Non-CSS comment text outside comment blocks in stylesheet modules, which could cause parser recovery side effects in some engines.
+
+### 19.3 Updated short-term roadmap (next 2 sprints)
+1. **Search observability uplift**
+   - Add explicit client telemetry counters for `rebind_started`, `rebind_skipped`, `rebind_completed`, `rebind_timeout`.
+   - Define alert threshold for rebind storms (e.g., >20 rebind attempts / 10s / session).
+2. **Theme reliability uplift**
+   - Add automated browser smoke that toggles theme rapidly (10+ toggles) and asserts final class/theme consistency.
+   - Add unit checks for localStorage theme fallback migration from legacy values.
+3. **CSS governance uplift**
+   - Add linter gate to reject non-comment decorative section lines and malformed block headers.
+   - Add duplicate-selector reporting for `css/modules/*.css` as non-blocking warning, then tighten to blocking.
+4. **Smart/Fallback parity uplift**
+   - Add explicit parity tests for filter composition (`id/lpc/status/date/equipment/observer`) across smart and fallback paths.
+   - Add test for metadata-failed startup ensuring fallback table remains operational and user-visible.
+
+### 19.4 Exit criteria for this remediation wave
+- `node scripts/unit-smoke.js` green.
+- `node scripts/ci-smoke-gate.js` green.
+- `node scripts/a11y-gate.js` green.
+- `node scripts/theme-parity-gate.js` green.
+- No known P1/P2 defects open for search trigger, smart-control availability, or theme switching.
+
+
+### 19.5 Responsive toolbar overflow improvements
+- Migrated key detail-card action rails from `Toolbar`/`HBox` to `OverflowToolbar` where actions can be clipped on resize.
+- Added explicit `OverflowToolbarLayoutData` priorities for save/add/expand actions, so low-priority actions collapse into the overflow menu (`...`) instead of disappearing or being cut off.
+- Added follow-up task to apply the same pattern to remaining dialogs/fragments with dense action rails.
+
+
+### 19.6 UI/CSS/Theme consolidation strategy (local + custom themes)
+- Keep **single CSS entrypoint** (`css/style.css`) as contract source, but enforce deduplication and parser-safe comments.
+- Maintain Horizon as default runtime pair (`sap_horizon` / `sap_horizon_dark`) and treat additional theme variants as opt-in.
+- Add a dedicated theme-loading compatibility check before enabling local `themes/` artifacts in production (verify runtime path compatibility with UI5 theme root conventions).
+- Introduce performance budget for styling:
+  - no duplicate selector blocks in style bundle,
+  - no repeated heavy backdrop/blur declarations without measurable value,
+  - preserve reduced-motion behavior and accessibility gates.
+- Phase rollout: (1) audit + dedupe, (2) parity tests, (3) optional local-theme activation behind capability flag.
+
+
+### 19.7 Animated theme-transition and background gradient tuning
+- Added a corner-origin theme transition overlay animation ("flood" effect) tied to `theme-switching` state for smoother perceived theme change.
+- Strengthened animated background gradient visibility and slowed drift speed for a calmer native-like motion profile.
+- Updated visual palette targets:
+  - Light mode: brighter white/blue/soft-gray gradient composition.
+  - Dark mode: richer violet/near-black/graphite gradient composition.
+- Kept reduced-motion fallback strict (`prefers-reduced-motion`) so accessibility behavior remains compliant.
+
+
+### 19.8 Duplicate selector governance rollout
+- Added `scripts/css-duplicate-selector-gate.js` as **non-blocking warning gate** in current phase.
+- Integrated warning gate into enterprise UX chain with `|| true` to collect signal without blocking releases.
+- Next phase action: remove known duplicates in `style-core.css`, then switch this gate to blocking mode.
+
+
+### 19.9 Card fusion + iOS switch visual polish
+- Implemented `mergeBlock` utilities to visually fuse adjacent content cards into a single rounded rectangle when blocks are in direct contact.
+- Increased glass depth (blur + transparency + saturation) for key content surfaces while preserving readability.
+- Added modern iOS-like switch styling (track/knob/shadow/on-state gradient) for a more native control feel.
+- Hardened test-login dialog corner rendering by applying unified glass clipping and section radius normalization.
+
+
+### 19.10 Theme-specific accent buttons, motion context, and contour fusion
+- Added theme-specific fully-filled accent button visual language for light and dark theme variants.
+- Added contextual interaction motion for action buttons (hover lift + press feedback) with restrained timing.
+- Added smoother Flexible Column Layout transitions (width/flex-basis/transform) for column open/close states.
+- Added bottom cone glow treatment for card surfaces and fusion logic for connected blocks (top/middle/bottom) to preserve single-contour perception.
+- Aligned test-login dialog footer surface and clipping to remove lower seam artifacts.
+
+
+### 19.11 Search shell recovery + metadata fallback UX
+- Moved request/load error strip above filter card to preserve user context and make degraded-state reason visible before interaction.
+- Enabled fallback quick-filters/search/fallback-table visibility when Smart controls are unavailable (metadata error path).
+- Removed static top-left brand label in app shell and finalized fully circular theme toggle button.
+- Unified search-shell background fill to remove footer-like seam and tuned card bottom-cone intensity for cleaner contour.
+
+### 19.12 Stability hardening checklist (locks / modes / autosave / cache boundaries)
+- **Workflow lock lifecycle**
+  - Enforce explicit lock finite-state machine (`READ_UNLOCKED -> EDIT_LOCK_PENDING -> EDIT_LOCKED -> READ_UNLOCKED`) with transition guards.
+  - Add stale-lock preemption strategy: when `lock_expires` is reached or heartbeat reports `is_killed`, force-switch to READ, disable edit switches/buttons, and present a single conflict banner.
+  - Add lock reacquire backoff (short retry budget) for intermittent network loss before full downgrade to READ.
+- **UI modes and unsaved changes safety**
+  - Keep centralized unsaved-change guard for route transitions and browser unload.
+  - On lock interception, run `trySave` only when delta exists; otherwise skip network write and mark decision as `NO_CHANGES`.
+  - Normalize mode-dependent switch behavior: all edit-only switches must be disabled when `isLocked=false` or `lockOperationPending=true`.
+- **Autosave and CRUD payload correctness**
+  - Continue delta-only autosave payloads with explicit operation semantics (`create|update|delete`) for rows in checks/barriers.
+  - Preserve immutable backend fields filtering (`changed_on`, `server_changed_on`, `version_number`, `_cacheTimestamp`) before transport.
+  - Add telemetry counters for autosave outcomes (`saved`, `skipped_no_delta`, `conflict`, `network_error`).
+- **Smart cache boundaries (critical policy)**
+  - Cache only checklist dataset snapshots (`checkLists`) in SmartCache.
+  - Do **not** cache UI layout state, field composition, or per-view rendering settings.
+  - Allowed UI persistence remains only user theme preference (`sap_ui5_theme`) in localStorage.
+  - Add guardrails to reject non-allowlisted cache keys and emit a `cacheSkipped:not_allowed` event for observability.
+- **Operational drills**
+  - Add weekly smoke scenario: lock expires during edit + pending autosave + route change.
+  - Add release gate scenario: backend unavailable during autosave while lock status probe is degraded.

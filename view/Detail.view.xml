@@ -89,15 +89,24 @@
                         </HBox>
                     </VBox>
 
-                    <HBox class="detailWorkflowRail" renderType="Bare" wrap="Wrap">
-                        <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}" state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"/>
-                        <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd sapUiTinyMarginBottom" text="{path:'state>/isDirty', formatter:'.formatDraftStateText'}" state="{path:'state>/isDirty', formatter:'.formatDraftStateState'}"/>
+                    <OverflowToolbar class="detailWorkflowRail sapUiTinyMarginBottom">
+                        <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd" text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}" state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}">
+                            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
+                        </ObjectStatus>
+                        <ObjectStatus class="detailWorkflowChip sapUiTinyMarginEnd" text="{path:'state>/isDirty', formatter:'.formatDraftStateText'}" state="{path:'state>/isDirty', formatter:'.formatDraftStateState'}">
+                            <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+                        </ObjectStatus>
                         <ObjectStatus
-                            class="detailWorkflowChip sapUiTinyMarginBottom"
+                            class="detailWorkflowChip"
                             text="{parts:[{path:'state>/lockOperationText'},{path:'state>/mode'}], formatter:'.formatLockOperationText'}"
-                            state="{parts:[{path:'state>/lockOperationState'},{path:'state>/mode'}], formatter:'.formatLockOperationState'}"/>
-                        <Button text="{i18n>objectSave}" type="Emphasized" press=".onSaveDetail" visible="{= ${state>/mode} === 'EDIT' }" busy="{state>/isSaving}" enabled="{= !${state>/isSaving} }" class="brandActionBtn brandActionPrimary detailInlineSaveButton sapUiTinyMarginBottom"/>
-                    </HBox>
+                            state="{parts:[{path:'state>/lockOperationState'},{path:'state>/mode'}], formatter:'.formatLockOperationState'}">
+                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
+                        </ObjectStatus>
+                        <ToolbarSpacer/>
+                        <Button text="{i18n>objectSave}" type="Emphasized" press=".onSaveDetail" visible="{= ${state>/mode} === 'EDIT' }" busy="{state>/isSaving}" enabled="{= !${state>/isSaving} }" class="brandActionBtn brandActionPrimary detailInlineSaveButton">
+                            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
+                        </Button>
+                    </OverflowToolbar>
 
                 </uxap:headerContent>
 
@@ -108,11 +117,13 @@
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="glassCard" busy="{view>/detailSkeletonBusy}">
-                                        <Toolbar class="toolbarTransparent">
+                                        <OverflowToolbar class="toolbarTransparent">
                                             <Title text="{i18n>participantsTitle}"/>
                                             <ToolbarSpacer/>
-                                            <Text text="{i18n>dragHint}" visible="{= ${state>/mode} === 'EDIT' }" class="modeHintText"/>
-                                        </Toolbar>
+                                            <Text text="{i18n>dragHint}" visible="{= ${state>/mode} === 'EDIT' }" class="modeHintText">
+                                                <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
+                                            </Text>
+                                        </OverflowToolbar>
                                         <f:GridList id="infoCardGrid" items="{view>/infoCards}" class="infoCardGrid">
                                             <f:dragDropConfig>
                                                 <dnd:DragInfo sourceAggregation="items" enabled="{= ${state>/mode} === 'EDIT' }"/>
@@ -151,15 +162,9 @@
                                                             <Input value="{selected>/basic/equipment}"/>
                                                         </VBox>
 
-                                                        <VBox visible="{= ${state>/mode} !== 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare" class="detailSemanticMetaBlock">
-                                                            <Text text="{selected>/basic/OBSERVER_FULLNAME}" class="infoCardValue"/>
-                                                            <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVER_PERNER} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVER_POSITION} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVER_ORGUNIT} || '-') }" state="Information"/>
-                                                        </VBox>
-
-                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observer' }" renderType="Bare">
-                                                            <Input value="{selected>/basic/OBSERVER_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationText'}"
+                                                        <VBox visible="{= ${view>key} === 'observer' }" renderType="Bare" class="detailSemanticMetaBlock">
+                                                            <Text visible="{= ${state>/mode} !== 'EDIT' }" text="{selected>/basic/OBSERVER_FULLNAME}" class="infoCardValue"/>
+                                                            <Input visible="{= ${state>/mode} === 'EDIT' }" value="{selected>/basic/OBSERVER_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVER_FULLNAME'}], formatter:'.formatValidationText'}"
                                                                    showSuggestion="true"
                                                                    startSuggestion="1"
                                                                    filterSuggests="false"
@@ -172,17 +177,17 @@
                                                                     <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
                                                                 </suggestionItems>
                                                             </Input>
+                                                            <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVER_PERNER} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVER_POSITION} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVER_ORGUNIT} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>dateLabel} + ': ' + (${selected>/basic/date} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>timeLabel} + ': ' + (${selected>/basic/time} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>timezoneLabel} + ': ' + (${selected>/basic/timezone} || '-') }" state="Information"/>
                                                         </VBox>
 
-                                                        <VBox visible="{= ${state>/mode} !== 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare" class="detailSemanticMetaBlock">
-                                                            <Text text="{selected>/basic/OBSERVED_FULLNAME}" class="infoCardValue"/>
-                                                            <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVED_PERNER} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVED_POSITION} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVED_ORGUNIT} || '-') }" state="Information"/>
-                                                        </VBox>
-
-                                                        <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'observed' }" renderType="Bare">
-                                                            <Input value="{selected>/basic/OBSERVED_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationText'}"
+                                                        <VBox visible="{= ${view>key} === 'observed' }" renderType="Bare" class="detailSemanticMetaBlock">
+                                                            <Text visible="{= ${state>/mode} !== 'EDIT' }" text="{selected>/basic/OBSERVED_FULLNAME}" class="infoCardValue"/>
+                                                            <Input visible="{= ${state>/mode} === 'EDIT' }" value="{selected>/basic/OBSERVED_FULLNAME}" valueState="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationState'}" valueStateText="{parts:[{path:'view>/validationShown'},{path:'view>/validationMissing/basic.OBSERVED_FULLNAME'}], formatter:'.formatValidationText'}"
                                                                    showSuggestion="true"
                                                                    startSuggestion="1"
                                                                    filterSuggests="false"
@@ -195,6 +200,12 @@
                                                                     <core:Item key="{view>perner}" text="{parts:[{path:'view>fullName'},{path:'view>position'}], formatter:'.formatPersonSuggestion'}"/>
                                                                 </suggestionItems>
                                                             </Input>
+                                                            <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVED_PERNER} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVED_POSITION} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVED_ORGUNIT} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>dateLabel} + ': ' + (${selected>/basic/date} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>timeLabel} + ': ' + (${selected>/basic/time} || '-') }" state="Information"/>
+                                                            <ObjectStatus text="{= ${i18n>timezoneLabel} + ': ' + (${selected>/basic/timezone} || '-') }" state="Information"/>
                                                         </VBox>
 
                                                         <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'location' }" renderType="Bare">
@@ -237,15 +248,19 @@
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="glassCard" busy="{view>/checksLoading}">
-                                        <Toolbar class="toolbarTransparent">
+                                        <OverflowToolbar class="toolbarTransparent">
                                             <Title text="{i18n>checksTitle}"/>
                                             <ToolbarSpacer/>
-                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecks" class="sapUiTinyMarginEnd"/>
+                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecks" class="sapUiTinyMarginEnd">
+                                                <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
+                                            </Button>
                                             <Button
                                                 text="{i18n>addRow}"
                                                 press=".onAddCheckRow"
-                                                visible="{= ${state>/mode} === 'EDIT' }"/>
-                                        </Toolbar>
+                                                visible="{= ${state>/mode} === 'EDIT' }">
+                                                <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+                                            </Button>
+                                        </OverflowToolbar>
                                         <ScrollContainer height="18rem" vertical="true" horizontal="false" class="tableScrollWrap">
                                             <Table items="{selected>/checks}" class="flatEditorTable" busy="{view>/checksLoading}" growing="true" growingThreshold="50" growingScrollToLoad="true" noDataText="{i18n>noChecksData}">
                                                 <columns>
@@ -280,15 +295,19 @@
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="glassCard" busy="{view>/barriersLoading}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
-                                        <Toolbar class="toolbarTransparent">
+                                        <OverflowToolbar class="toolbarTransparent">
                                             <Title text="{i18n>barriersTitle}"/>
                                             <ToolbarSpacer/>
-                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd"/>
+                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd">
+                                                <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
+                                            </Button>
                                             <Button
                                                 text="{i18n>addRow}"
                                                 press=".onAddBarrierRow"
-                                                visible="{= ${state>/mode} === 'EDIT' }"/>
-                                        </Toolbar>
+                                                visible="{= ${state>/mode} === 'EDIT' }">
+                                                <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+                                            </Button>
+                                        </OverflowToolbar>
                                         <ScrollContainer height="18rem" vertical="true" horizontal="false" class="tableScrollWrap">
                                             <Table items="{selected>/barriers}" class="flatEditorTable" busy="{view>/barriersLoading}" growing="true" growingThreshold="50" growingScrollToLoad="true" noDataText="{i18n>noBarriersData}">
                                                 <columns>
