@@ -1,0 +1,6 @@
+# Python runtime cache artifacts
+__pycache__/
+*.py[cod]
+
+# Local mock backend SQLite database
+mock_gate_way/gateway.db
