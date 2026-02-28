@@ -91,6 +91,18 @@
 
                             <smartFilterBar:ControlConfiguration key="FailSegmentControl" label="{i18n>filterFailSegmentLabel}" visibleInAdvancedArea="true">
                                 <smartFilterBar:customControl>
+                                    <SegmentedButton selectedKey="{state>/search/failSegment}" selectionChange=".onFailSegmentSelectionChange" width="16rem" class="sapUiTinyMarginBegin sapUiTinyMarginEnd resultSegmentControl">
+                                        <items>
+                                            <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
+                                            <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
+                                            <SegmentedButtonItem key="SUCCESS" text="{i18n>filterFailSegmentSuccess}"/>
+                                        </items>
+                                    </SegmentedButton>
+                                </smartFilterBar:customControl>
+                            </smartFilterBar:ControlConfiguration>
+                            <smartFilterBar:ControlConfiguration key="FailBarriersSegmentControl" label="{i18n>filterBarrierSegmentLabel}" visibleInAdvancedArea="true">
+                                <smartFilterBar:customControl>
+                                    <SegmentedButton selectedKey="{state>/search/barrierFailSegment}" selectionChange=".onBarrierFailSegmentSelectionChange" width="16rem" class="sapUiTinyMarginBegin sapUiTinyMarginEnd resultSegmentControl">
                                     <SegmentedButton
                                         selectedKey="{state>/search/failSegment}"
                                         selectionChange=".onFailSegmentSelectionChange"

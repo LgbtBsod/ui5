@@ -36,7 +36,7 @@ sap.ui.define([], function () {
     function _fetchCsrfToken() {
         return fetch(_joinUrl(_baseUrl, "/"), {
             method: "GET",
-            credentials: "same-origin",
+            credentials: "include",
             headers: {
                 "X-CSRF-Token": "Fetch"
             }
@@ -74,7 +74,7 @@ sap.ui.define([], function () {
             }
             return fetch(sUrl, {
             method: sMethod,
-            credentials: "same-origin",
+            credentials: "include",
             headers: mHeaders,
             body: mOpts.body ? JSON.stringify(mOpts.body) : undefined
             });
@@ -354,7 +354,17 @@ sap.ui.define([], function () {
     return {
         configure: function (mConfig) {
             mConfig = mConfig || {};
-            _baseUrl = mConfig.baseUrl || _baseUrl;
+            var sConfigured = mConfig.baseUrl || "";
+            if (!sConfigured && mConfig.model && typeof mConfig.model.sServiceUrl === "string") {
+                sConfigured = mConfig.model.sServiceUrl;
+            }
+            if (sConfigured) {
+                if (/^https?:\/\//i.test(sConfigured)) {
+                    _baseUrl = sConfigured.replace(/\/$/, "");
+                } else {
+                    _baseUrl = (window.location.origin || "http://localhost:8000") + "/" + String(sConfigured).replace(/^\/+/, "").replace(/\/$/, "");
+                }
+            }
         },
 
         login: function (username) {
@@ -405,18 +415,6 @@ sap.ui.define([], function () {
             }).then(function (oData) {
                 var aRows = (oData && oData.d && oData.d.results) || [];
                 return aRows.map(_mapSearchRow);
-            }).catch(function () {
-                return _request("/checklist", {
-                    params: {
-                        "$top": 200,
-                        "$skip": 0
-                    }
-                }).then(function (oList) {
-                    var aRoots = oList && oList.value ? oList.value : [];
-                    return aRoots.map(function (oRoot) {
-                        return _mapChecklist(oRoot, { checks: [], barriers: [] });
-                    });
-                });
             });
         },
 
@@ -449,19 +447,6 @@ sap.ui.define([], function () {
             }).then(function (oData) {
                 var aRows = (oData && oData.d && oData.d.results) || [];
                 return aRows.map(_mapSearchRow);
-            }).catch(function () {
-                return _request("/checklist", {
-                    params: {
-                        "$top": iTop,
-                        "$skip": 0,
-                        "$filter": aFilterParts.length ? aFilterParts.join(" and ") : undefined
-                    }
-                }).then(function (oList) {
-                    var aRoots = oList && oList.value ? oList.value : [];
-                    return aRoots.map(function (oRoot) {
-                        return _mapChecklist(oRoot, { checks: [], barriers: [] });
-                    });
-                });
             });
         },
 
@@ -542,43 +527,6 @@ sap.ui.define([], function () {
                         aggChangedOn: oLastChange.AggChangedOn || oRoot.ChangedOn || ""
                     }
                 };
-            }).catch(function () {
-                return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } }).then(function (oRootLegacy) {
-                    return {
-                        root: {
-                            id: oRootLegacy.id,
-                            integrationFlag: (typeof oRootLegacy.this_is_integration_data === "boolean" ? oRootLegacy.this_is_integration_data : true),
-                            this_is_integration_data: (typeof oRootLegacy.this_is_integration_data === "boolean" ? oRootLegacy.this_is_integration_data : true),
-                            successRateChecks: 0,
-                            successRateBarriers: 0,
-                            status: _mapStatusToUi(oRootLegacy.status)
-                        },
-                        basic: {
-                            date: oRootLegacy.date || "",
-                            time: "",
-                            timezone: "Europe/Amsterdam",
-                            equipment: oRootLegacy.equipment || "",
-                            LPC_KEY: oRootLegacy.lpc || "",
-                            LPC_TEXT: oRootLegacy.lpc_text || "",
-                            checklist_id: oRootLegacy.checklist_id || "",
-                            OBSERVER_FULLNAME: oRootLegacy.observer_fullname || "",
-                            OBSERVER_PERNER: oRootLegacy.observer_perner || "",
-                            OBSERVER_POSITION: oRootLegacy.observer_position || "",
-                            OBSERVER_ORGUNIT: oRootLegacy.observer_orgunit || "",
-                            OBSERVER_INTEGRATION_NAME: oRootLegacy.observer_integration_name || "",
-                            OBSERVED_FULLNAME: oRootLegacy.observed_fullname || "",
-                            OBSERVED_PERNER: oRootLegacy.observed_perner || "",
-                            OBSERVED_POSITION: oRootLegacy.observed_position || "",
-                            OBSERVED_ORGUNIT: oRootLegacy.observed_orgunit || "",
-                            OBSERVED_INTEGRATION_NAME: oRootLegacy.observed_integration_name || "",
-                            LOCATION_KEY: oRootLegacy.location_key || "",
-                            LOCATION_NAME: oRootLegacy.location_name || "",
-                            LOCATION_TEXT: oRootLegacy.location_text || ""
-                        },
-                        checks: [],
-                        barriers: []
-                    };
-                });
             });
         },
 
@@ -602,17 +550,6 @@ sap.ui.define([], function () {
                         result: !!oCheck.Result
                     };
                 });
-            }).catch(function () {
-                return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oDataLegacy) {
-                    return ((oDataLegacy && oDataLegacy.value) || []).map(function (oCheckLegacy, iIndex) {
-                        return {
-                            id: oCheckLegacy.id || (iIndex + 1),
-                            text: oCheckLegacy.text || "",
-                            comment: "",
-                            result: oCheckLegacy.status === "DONE"
-                        };
-                    });
-                });
             });
         },
 
@@ -635,17 +572,6 @@ sap.ui.define([], function () {
                         comment: oBarrier.Comment || "",
                         result: !!oBarrier.Result
                     };
-                });
-            }).catch(function () {
-                return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oDataLegacy) {
-                    return ((oDataLegacy && oDataLegacy.value) || []).map(function (oBarrierLegacy, iIndex) {
-                        return {
-                            id: oBarrierLegacy.id || (iIndex + 1),
-                            text: oBarrierLegacy.description || "",
-                            comment: "",
-                            result: !!oBarrierLegacy.is_active
-                        };
-                    });
                 });
             });
         },
@@ -1087,17 +1013,11 @@ createCheckList: function (oData) {
                 }
             });
 
-            return _request("/WorkflowAnalytics", { params: mParams }).catch(function () {
-                return _request("/analytics/process", { params: mParams });
-            });
+            return _request("/WorkflowAnalytics", { params: mParams });
         },
 
         getSimpleAnalytics: function () {
-            return _request("/SimpleAnalytical").catch(function () {
-                return _request("/WorkflowAnalytics");
-            }).catch(function () {
-                return _request("/analytics/process");
-            });
+            return _request("/SimpleAnalytical");
         },
 
         exportReport: function (sEntity, mPayload) {

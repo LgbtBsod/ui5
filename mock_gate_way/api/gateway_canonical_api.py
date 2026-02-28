@@ -15,8 +15,17 @@ from services.hierarchy_service import HierarchyService
 from services.lock_service import LockService
 from services.metadata_builder import build_metadata
 from utils.filter_parser import FilterParser
+from utils.filter_engine import parse_filter_to_predicate
+from utils.key_normalizer import normalize_raw16_hex
 from utils.odata import SERVICE_ROOT, format_datetime, format_entity_etag, odata_error_response, odata_payload
+from utils.odata_datetime import date_only_to_odata
+from utils.odata_response import odata_collection, odata_entity
+from utils.odata_etag import etag_for_datetime, validate_if_match
+from utils.odata_query import parse_paging, with_inlinecount
 from utils.time import now_utc
+from repo.settings_repo import SettingsRepo
+from services.settings_service import SettingsService
+from services.export_service import ExportService
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -84,13 +93,7 @@ def _uuid_from_hex(value: str) -> str:
 
 
 def _normalize_hex_key(value: str) -> str:
-    raw = str(value or "").strip().strip("\'").strip('"')
-    if raw.lower().startswith("0x"):
-        raise ValueError("VALIDATION_ERROR")
-    compact = raw.replace("-", "")
-    if len(compact) != 32 or not re.fullmatch(r"[0-9a-fA-F]{32}", compact):
-        raise ValueError("VALIDATION_ERROR")
-    return compact.upper()
+    return normalize_raw16_hex(value)
 
 
 def _entity_key(key_expr: str) -> str:
@@ -321,7 +324,7 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
     return {
         "Key": _hex(root.id),
         "Id": root.checklist_id or "",
-        "DateCheck": format_datetime(_datecheck_datetime(root)),
+        "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
         "TimeCheck": "12:00:00",
         "TimeZone": "UTC",
         "LocationKey": root.location_key or "",
@@ -372,7 +375,7 @@ def _to_basic(root: ChecklistRoot) -> dict:
         "ObservedOrgUnit": root.observed_orgunit or "",
         "Lpc": root.lpc or "",
         "Profession": root.observed_position or "",
-        "DateCheck": format_datetime(_datecheck_datetime(root)),
+        "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
         "TimeCheck": "12:00:00",
         "TimeZone": "UTC",
         "EquipName": root.equipment or "",
@@ -504,7 +507,7 @@ def _normalize_filter_hex_keys(filter_expr: str | None, fields: tuple[str, ...] 
 def _if_match_check(if_match: str | None, agg: datetime):
     if not if_match or if_match == "*":
         return
-    if if_match != format_entity_etag(agg):
+    if not validate_if_match(if_match, etag_for_datetime(agg)):
         raise ValueError("PRECONDITION_FAILED")
 
 
@@ -598,17 +601,17 @@ def _validate_status_change(root: ChecklistRoot, new_status: str):
         raise ValueError("VALIDATION_ERROR")
 
 
-@router.get(f"{SERVICE_ROOT}/")
+@router.api_route(f"{SERVICE_ROOT}/", methods=["GET", "HEAD"])
 def service_document():
-    return {"d": {"EntitySets": [
+    return odata_entity({"EntitySets": [
         "ChecklistSearchSet", "ChecklistRootSet", "ChecklistBasicInfoSet", "ChecklistCheckSet", "ChecklistBarrierSet",
         "DictionaryItemSet", "LastChangeSet", "LockStatusSet", "AttachmentFolderSet", "AttachmentSet", "RuntimeSettingsSet",
-    ]}}
+    ]})
 
 
 @router.get(f"{SERVICE_ROOT}/$metadata")
 def metadata():
-    return Response(content=build_metadata(), media_type="application/xml")
+    return Response(content=build_metadata(), media_type="application/xml; charset=utf-8")
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistSearchSet")
@@ -630,12 +633,21 @@ def checklist_search_set(
         return err
     roots = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)).all()
     mapped = [_to_search(r, db=db) for r in roots]
-    pred = _build_search_predicate(filter)
+    pred = parse_filter_to_predicate(filter)
     mapped = [row for row in mapped if pred(row)]
     mapped = _apply_orderby_rows(mapped, orderby)
+    top, skip = parse_paging(top, skip, DEFAULT_PAGE_SIZE)
     total = len(mapped)
     paged = mapped[skip: skip + top]
-    return odata_payload([_apply_select(r, select) for r in paged], total if inlinecount == "allpages" else None)
+    return odata_collection([_apply_select(r, select) for r in paged], with_inlinecount(inlinecount, total))
+
+
+@router.get(f"{SERVICE_ROOT}/ChecklistSearchSet/$count")
+def checklist_search_count(filter: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)):
+    roots = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)).all()
+    mapped = [_to_search(r, db=db) for r in roots]
+    pred = parse_filter_to_predicate(filter)
+    return Response(content=str(len([r for r in mapped if pred(r)])), media_type="text/plain")
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistRootSet")
@@ -651,7 +663,7 @@ def checklist_root_entity(entity_key: str, response: Response, db: Session = Dep
     if err:
         return err
     response.headers["ETag"] = format_entity_etag(_agg_changed_on(root))
-    return {"d": _to_root(root, db=db)}
+    return odata_entity(_to_root(root, db=db))
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistBasicInfoSet")
@@ -666,7 +678,7 @@ def checklist_basic_info_entity(entity_key: str, db: Session = Depends(get_db)):
     root, err = _load_root_or_error(db, entity_key)
     if err:
         return err
-    return {"d": _to_basic(root)}
+    return odata_entity(_to_basic(root))
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistCheckSet")
@@ -695,33 +707,8 @@ def dictionary_item_set(filter: str | None = Query(None, alias="$filter"), top: 
 
 @router.get(f"{SERVICE_ROOT}/RuntimeSettingsSet")
 def runtime_settings_set(db: Session = Depends(get_db)):
-    row = db.query(FrontendRuntimeSettings).order_by(FrontendRuntimeSettings.changed_on.desc()).first()
-    if not row:
-        row = FrontendRuntimeSettings(environment="default")
-        db.add(row)
-        db.commit()
-        db.refresh(row)
-    item = {
-        "Key": "GLOBAL",
-        "CacheToleranceMs": 5500,
-        "HeartbeatIntervalSec": max(1, int((row.heartbeat_ms or 240000) / 1000)),
-        "StatusPollIntervalSec": max(1, int((row.lock_status_ms or 60000) / 1000)),
-        "LockTtlSec": 300,
-        "IdleTimeoutSec": max(1, int((row.idle_ms or 600000) / 1000)),
-        "AutoSaveDebounceMs": 1200 if not row.autosave_debounce_ms or int(row.autosave_debounce_ms) > 5000 else int(row.autosave_debounce_ms),
-        "RequiredFieldsJson": json.dumps([
-            "/basic/date",
-            "/basic/time",
-            "/basic/timezone",
-            "/basic/OBSERVER_FULLNAME",
-            "/basic/OBSERVED_FULLNAME",
-            "/basic/LOCATION_KEY",
-            "/basic/LPC_KEY",
-            "/basic/PROF_KEY",
-        ]),
-        "UploadPolicyJson": json.dumps({"maxSizeMb": 15, "allowedMime": ["image/jpeg", "image/png", "application/pdf"]}),
-    }
-    return odata_payload([item])
+    item = SettingsService.load_global(SettingsRepo(db))
+    return odata_collection([item])
 
 
 @router.get(f"{SERVICE_ROOT}/RuntimeSettingsSet({{entity_key}})")
@@ -733,7 +720,7 @@ def runtime_settings_entity(entity_key: str, db: Session = Depends(get_db)):
     if cleaned and cleaned.upper() != "GLOBAL":
         return _err(404, "NOT_FOUND", "Runtime settings not found")
     rows = runtime_settings_set(db)
-    return {"d": (rows.get("d", {}).get("results") or [])[0]}
+    return odata_entity((rows.get("d", {}).get("results") or [])[0])
 
 
 @router.get(f"{SERVICE_ROOT}/LastChangeSet({{entity_key}})")
@@ -743,7 +730,7 @@ def last_change_entity(entity_key: str, response: Response, db: Session = Depend
         return err
     agg = _agg_changed_on(root)
     response.headers["ETag"] = format_entity_etag(agg)
-    return {"d": {"RootKey": _hex(root.id), "AggChangedOn": format_datetime(agg)}}
+    return odata_entity({"RootKey": _hex(root.id), "AggChangedOn": format_datetime(agg)})
 
 
 @router.get(f"{SERVICE_ROOT}/LastChangeSet")
@@ -795,7 +782,7 @@ def lock_status_set(
 
 @router.get(f"{SERVICE_ROOT}/LockStatusSet({{entity_key}})")
 def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="SessionGuid"), db: Session = Depends(get_db)):
-    return {"d": _build_lock_status_row(db, _entity_key(entity_key), session_guid=session_guid)}
+    return odata_entity(_build_lock_status_row(db, _entity_key(entity_key), session_guid=session_guid))
 
 
 @router.post(f"{SERVICE_ROOT}/LockControl")
@@ -814,21 +801,21 @@ def lock_control(payload: dict, db: Session = Depends(get_db)):
     if action == "ACQUIRE":
         r = LockService.acquire(db, root_uuid, session, uname, payload.get("StealFrom"))
         ok = bool(r.get("success"))
-        return {"d": {"Ok": ok, "ReasonCode": "OWNED_BY_YOU" if ok else "LOCKED_BY_OTHER", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed_flag"))}}
+        return odata_entity({"Ok": ok, "ReasonCode": "OWNED_BY_YOU" if ok else "LOCKED_BY_OTHER", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed_flag"))})
     if action == "HEARTBEAT":
         try:
             r = LockService.heartbeat(db, root_uuid, session)
             ok = bool(r.get("success"))
-            return {"d": {"Ok": ok, "ReasonCode": "OWNED_BY_YOU" if ok else "KILLED", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed"))}}
+            return odata_entity({"Ok": ok, "ReasonCode": "OWNED_BY_YOU" if ok else "KILLED", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed"))})
         except ValueError as exc:
             code = str(exc)
             if code == "NO_LOCK":
-                return {"d": {"Ok": False, "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False}}
+                return odata_entity({"Ok": False, "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False})
             return _err(410, "LOCK_EXPIRED", "Lock expired")
     if action == "RELEASE":
         r = LockService.release(db, root_uuid, session)
         released = bool(r.get("released"))
-        return {"d": {"Ok": released, "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False}}
+        return odata_entity({"Ok": released, "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False})
     return _err(400, "VALIDATION_ERROR", "Unsupported Action")
 
 
@@ -898,7 +885,7 @@ def lock_status_action_alias(
     sess = body.get("SessionGuid") or body.get("session_guid") or session_guid or ""
     if not root:
         return _err(400, "VALIDATION_ERROR", "RootKey is required")
-    return {"d": _build_lock_status_row(db, _entity_key(str(root)), session_guid=str(sess))}
+    return odata_entity(_build_lock_status_row(db, _entity_key(str(root)), session_guid=str(sess)))
 
 
 # Legacy /lock/* aliases routed to canonical lock semantics for migration-safe behavior.
@@ -981,7 +968,7 @@ def auto_save(payload: dict, if_match: str | None = Header(None, alias="If-Match
     root.changed_on = now_utc()
     db.commit()
     agg = _agg_changed_on(root)
-    return {"d": {"RootKey": _hex(root.id), "AggChangedOn": format_datetime(agg), "UpdatedKeysMapping": mappings}}
+    return odata_entity({"RootKey": _hex(root.id), "AggChangedOn": format_datetime(agg), "UpdatedKeysMapping": mappings})
 
 
 @router.post(f"{SERVICE_ROOT}/SaveChanges")
@@ -1029,7 +1016,7 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
     out = _to_root(root, db=db)
     out["RootKey"] = out["Key"]
     out["AggChangedOn"] = format_datetime(_agg_changed_on(root))
-    return {"d": out}
+    return odata_entity(out)
 
 
 @router.post(f"{SERVICE_ROOT}/SetChecklistStatus")
@@ -1058,7 +1045,7 @@ def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Matc
     root.status = new_status
     root.changed_on = now_utc()
     db.commit()
-    return {"d": {"RootKey": _hex(root.id), "Status": root.status, "AggChangedOn": format_datetime(_agg_changed_on(root))}}
+    return odata_entity({"RootKey": _hex(root.id), "Status": root.status, "AggChangedOn": format_datetime(_agg_changed_on(root))})
 
 
 @router.get(f"{SERVICE_ROOT}/GetHierarchy")
@@ -1080,7 +1067,7 @@ async def get_hierarchy(request: Request, date_check: str | None = Query(None, a
     except Exception:
         dt = now_utc()
     nodes = HierarchyService.get_tree(db, dt.date())
-    return {"d": {"Method": "location_tree", "DateCheck": format_datetime(datetime(dt.year, dt.month, dt.day, tzinfo=timezone.utc)), "results": nodes}}
+    return odata_entity({"Method": "location_tree", "DateCheck": format_datetime(datetime(dt.year, dt.month, dt.day, tzinfo=timezone.utc)), "results": nodes})
 
 
 @router.post(f"{SERVICE_ROOT}/ReportExport")
@@ -1103,7 +1090,7 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
         for b in barriers:
             txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "BARRIER", DictionaryItem.key == str(b["BarriersNum"])).first()
             rows.append({"RootKey": base["Key"], "Id": base["Id"], "Lpc": base["Lpc"], "Profession": base["Profession"], "DateCheck": base["DateCheck"], "Num": b["BarriersNum"], "Text": txt.text if txt else "", "Comment": b["Comment"], "Result": b["Result"]})
-    return {"d": {"results": rows}}
+    return odata_collection(rows)
 
 
 @router.get(f"{SERVICE_ROOT}/AttachmentFolderSet")
