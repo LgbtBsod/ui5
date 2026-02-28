@@ -3,6 +3,21 @@ sap.ui.define([
 ], function (JSONModel) {
     "use strict";
 
+    function createTimers() {
+        return {
+            heartbeatMs: 240000,
+            lockStatusMs: 60000,
+            gcdMs: 300000,
+            idleMs: 600000,
+            autoSaveIntervalMs: 60000,
+            autoSaveDebounceMs: 30000,
+            networkGraceMs: 60000,
+            cacheFreshMs: 30000,
+            cacheStaleOkMs: 90000,
+            analyticsRefreshMs: 900000
+        };
+    }
+
     return {
 
         createDataModel: function () {
@@ -13,6 +28,67 @@ sap.ui.define([
             });
         },
 
+        // New canonical models (migration-safe addition)
+        createUiStateModel: function () {
+            return new JSONModel({
+                mode: "READ",
+                busy: false,
+                currentRootKey: "",
+                sessionGuid: "",
+                lock: { ok: false, reason: "FREE", isKilled: false },
+                timers: createTimers(),
+                activity: { lastActiveAt: "", idleUntil: "" }
+            });
+        },
+
+        createViewModel: function () {
+            return new JSONModel({
+                root: {},
+                basicInfo: {},
+                checks: { items: [] },
+                barriers: { items: [] },
+                attachments: { items: [] },
+                meta: { aggChangedOn: "" }
+            });
+        },
+
+        createCacheModel: function () {
+            return new JSONModel({
+                // canonical cache storage
+                byRootKey: {},
+                // legacy props kept to avoid breakage
+                pristineSnapshot: null,
+                keyMapping: {},
+                lastServerState: null
+            });
+        },
+
+        createMasterDataModel: function () {
+            return new JSONModel({
+                // canonical dict storage
+                dict: {},
+                runtime: { timers: {}, requiredFields: [], uploadPolicy: { scan: "always-ok" } },
+                // legacy props used by existing controllers
+                persons: [],
+                lpc: [],
+                professions: [],
+                statuses: ["SUCCESS", "WARNING", "CRITICAL"],
+                resultTypes: ["PASS", "FAIL"],
+                types: [],
+                timezones: [
+                    { key: "Europe/Amsterdam", text: "Europe/Amsterdam" },
+                    { key: "UTC", text: "UTC" }
+                ]
+            });
+        },
+
+        createHierarchyModel: function () {
+            return new JSONModel({
+                byDate: {}
+            });
+        },
+
+        // Legacy model used throughout existing app code
         createStateModel: function () {
             return new JSONModel({
                 mode: "READ",
@@ -27,7 +103,6 @@ sap.ui.define([
                 filterFailedChecks: "ALL",
                 filterFailedBarriers: "ALL",
                 searchMode: "EXACT",
-                // Search cap requested by user; empty means load all available rows.
                 searchMaxResults: "100",
                 isBusy: false,
                 isDirty: false,
@@ -70,18 +145,7 @@ sap.ui.define([
                     lockStatus: "locks",
                     functionImport: "locks"
                 },
-                timers: {
-                    heartbeatMs: 240000,
-                    lockStatusMs: 60000,
-                    gcdMs: 300000,
-                    idleMs: 600000,
-                    autoSaveIntervalMs: 60000,
-                    autoSaveDebounceMs: 30000,
-                    networkGraceMs: 60000,
-                    cacheFreshMs: 30000,
-                    cacheStaleOkMs: 90000,
-                    analyticsRefreshMs: 900000
-                },
+                timers: createTimers(),
                 operationalKpiSnapshots: [],
                 operationalKpiSnapshotLimit: 50,
                 masterDataLoading: false,
@@ -123,29 +187,6 @@ sap.ui.define([
             });
         },
 
-        createCacheModel: function () {
-            return new JSONModel({
-                pristineSnapshot: null,
-                keyMapping: {},
-                lastServerState: null
-            });
-        },
-
-        createMasterDataModel: function () {
-            return new JSONModel({
-                persons: [],
-                lpc: [],
-                professions: [],
-                statuses: ["SUCCESS", "WARNING", "CRITICAL"],
-                resultTypes: ["PASS", "FAIL"],
-                types: [],
-                timezones: [
-                    { key: "Europe/Amsterdam", text: "Europe/Amsterdam" },
-                    { key: "UTC", text: "UTC" }
-                ]
-            });
-        },
-
         createMplModel: function () {
             return new JSONModel({
                 locations: []
@@ -157,18 +198,7 @@ sap.ui.define([
                 source: "defaults",
                 loadedAt: "",
                 variables: {},
-                timers: {
-                    heartbeatMs: 240000,
-                    lockStatusMs: 60000,
-                    gcdMs: 300000,
-                    idleMs: 600000,
-                    autoSaveIntervalMs: 60000,
-                    autoSaveDebounceMs: 30000,
-                    networkGraceMs: 60000,
-                    cacheFreshMs: 30000,
-                    cacheStaleOkMs: 90000,
-                    analyticsRefreshMs: 900000
-                }
+                timers: createTimers()
             });
         }
 

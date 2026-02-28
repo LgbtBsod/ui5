@@ -50,6 +50,9 @@ sap.ui.define([
             var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
             var oDataModel = ModelFactory.createDataModel();
             var oStateModel = ModelFactory.createStateModel();
+            var oUiStateModel = ModelFactory.createUiStateModel();
+            var oViewModel = ModelFactory.createViewModel();
+            var oHierarchyModel = ModelFactory.createHierarchyModel();
             var fnSyncCapabilityDiagnostics = ComponentStartupDiagnosticsOrchestrationUseCase.createCapabilitySync({
                 stateModel: oStateModel,
                 getBackendMode: BackendAdapter.getMode
@@ -280,6 +283,9 @@ sap.ui.define([
             this.setModel(new JSONModel({}), "selected");
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
+            this.setModel(oUiStateModel, "uiState");
+            this.setModel(oViewModel, "view");
+            this.setModel(oHierarchyModel, "hierarchy");
 
             this.setModel(oLayoutModel, "layout");
             this.setModel(oCacheModel, "cache");

@@ -19,6 +19,7 @@ from api.checklist_api import router as checklist_router
 from api.dictionary_api import legacy_router as dictionary_legacy_router
 from api.dictionary_api import router as dictionary_router
 from api.hierarchy_api import router as hierarchy_router
+from api.gateway_canonical_api import router as gateway_canonical_router
 from api.location_api import router as location_router
 from api.lock_api import router as lock_router
 from api.lock_entity_api import router as lock_entity_router
@@ -33,7 +34,7 @@ from config import CORS_ALLOWED_ORIGINS, LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.dict_loader import load_dictionary
 from services.lock_service import LockService
-from models import ChecklistRoot, FrontendRuntimeSettings
+from models import ChecklistRoot, FrontendRuntimeSettings, DictionaryItem
 from utils.odata import SERVICE_ROOT, odata_error_response
 
 logging.basicConfig(level=logging.INFO)
@@ -110,6 +111,34 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
     return to_create
 
 
+def _seed_static_domains(db) -> None:
+    from datetime import date
+    import uuid
+
+    defaults = {
+        "STATUS": [("01", "Draft"), ("02", "In Progress"), ("03", "Completed")],
+        "PROFESSION": [("OP", "Operator"), ("SUP", "Supervisor")],
+        "LPC": [("LPC-01", "LPC 01"), ("LPC-02", "LPC 02")],
+        "ATF_CAT": [("GEN", "General"), ("PHOTO", "Photo"), ("DOC", "Document")],
+        "TIME_ZONE": [("UTC", "UTC"), ("Europe/Amsterdam", "Europe/Amsterdam")],
+    }
+
+    for domain, entries in defaults.items():
+        for key, text in entries:
+            exists = db.query(DictionaryItem).filter(DictionaryItem.domain == domain, DictionaryItem.key == key).first()
+            if exists:
+                continue
+            db.add(DictionaryItem(
+                id=str(uuid.uuid4()),
+                domain=domain,
+                key=key,
+                text=text,
+                begda=date(2000, 1, 1),
+                endda=None,
+            ))
+    db.commit()
+
+
 async def lock_cleanup_job() -> None:
     while True:
         db = SessionLocal()
@@ -132,6 +161,7 @@ async def lifespan(_: FastAPI):
         data_dir = Path(__file__).resolve().parent / "data"
         load_dictionary(db, str(data_dir / "lpc.json"), "LPC")
         load_dictionary(db, str(data_dir / "professions.json"), "PROFESSION")
+        _seed_static_domains(db)
         _seed_checklist_roots_if_needed(db, minimum_rows=100)
         oSettings = db.query(FrontendRuntimeSettings).first()
         if not oSettings:
@@ -211,6 +241,7 @@ app.include_router(hierarchy_router)
 app.include_router(actions_router)
 app.include_router(metadata_router)
 app.include_router(odata_compat_router)
+app.include_router(gateway_canonical_router)
 app.include_router(analytics_router)
 app.include_router(settings_router)
 app.include_router(batch_router)
@@ -288,5 +319,5 @@ def component_preload_stub():
 @app.exception_handler(Exception)
 async def odata_exception_handler(request: Request, exc: Exception):
     if request.url.path.startswith(SERVICE_ROOT):
-        return odata_error_response(500, "INTERNAL_ERROR", str(exc))
+        return odata_error_response(500, "SYSTEM_ERROR", str(exc))
     return JSONResponse(status_code=500, content={"detail": str(exc)})
