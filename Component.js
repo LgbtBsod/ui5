@@ -569,7 +569,7 @@ sap.ui.define([
                 cacheFreshMs: pick("cacheFreshMs", Number(mBase.cacheFreshMs) || 30000),
                 cacheStaleOkMs: pick("cacheStaleOkMs", Number(mBase.cacheStaleOkMs) || 90000),
                 analyticsRefreshMs: pick("analyticsRefreshMs", Number(mBase.analyticsRefreshMs) || 900000),
-                cacheToleranceMs: pick("cacheToleranceMs", Number(mBase.cacheToleranceMs) || 15000)
+                cacheToleranceMs: pick("cacheToleranceMs", Number(mBase.cacheToleranceMs) || 8000)
             };
         },
 

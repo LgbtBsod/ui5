@@ -968,7 +968,7 @@ createCheckList: function (oData) {
             return _request("/config/frontend").catch(function () {
                 return {
                     search: { defaultMaxResults: 100, growingThreshold: 10 },
-                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 600000, cacheToleranceMs: 15000 },
+                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 600000, cacheToleranceMs: 8000 },
                 source: "fallback_defaults",
                     variables: { validationSource: "real_frontend_fallback" },
                     requiredFields: [
