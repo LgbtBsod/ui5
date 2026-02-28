@@ -545,6 +545,11 @@ body::after {
   overflow: hidden;
 }
 
+/* Keep SAPUI5 dialog lifecycle behavior: hidden state is opacity-driven, not display:none. */
+.sapMDialog {
+  display: flex !important;
+}
+
 /* Section: switch-off-thumb-visibility */
 .sapMSwt,
 .accentSwitch.sapMSwt,
