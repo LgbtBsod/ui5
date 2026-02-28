@@ -965,7 +965,7 @@ createCheckList: function (oData) {
         },
 
         getFrontendConfig: function () {
-            return _request("/RuntimeSettingsSet('GLOBAL')").then(function (oData) {
+            return _request("/RuntimeSettingsSet(Key='GLOBAL')").then(function (oData) {
                 var o = (oData && oData.d) || {};
                 var aRequired = [];
                 try { aRequired = JSON.parse(o.RequiredFieldsJson || "[]"); } catch (e) { aRequired = []; }

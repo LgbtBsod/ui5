@@ -144,6 +144,12 @@ sap.ui.define([
             ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach(function (sPath) {
                 oStateModel.bindProperty(sPath).attachChange(this._onFilterChanged, this);
             }.bind(this));
+            if (!oStateModel.getProperty("/search") || typeof oStateModel.getProperty("/search") !== "object") {
+                oStateModel.setProperty("/search", { failSegment: "ALL" });
+            } else if (!oStateModel.getProperty("/search/failSegment")) {
+                oStateModel.setProperty("/search/failSegment", "ALL");
+            }
+            oStateModel.bindProperty("/search/failSegment").attachChange(this._onFilterChanged, this);
             ["/mainServiceMetadataOk", "/mainServiceMetadataError"].forEach(function (sPath) {
                 oStateModel.bindProperty(sPath).attachChange(this._syncSmartControlAvailability, this);
             }.bind(this));
@@ -307,6 +313,9 @@ sap.ui.define([
                     filterLpc: this.getModel("state").getProperty("/filterLpc"),
                     filterFailedChecks: this.getModel("state").getProperty("/filterFailedChecks"),
                     filterFailedBarriers: this.getModel("state").getProperty("/filterFailedBarriers"),
+                    search: {
+                        failSegment: this.getModel("state").getProperty("/search/failSegment") || "ALL"
+                    },
                     searchMaxResults: this.getModel("state").getProperty("/searchMaxResults"),
                     searchMode: this.getModel("state").getProperty("/searchMode") || "EXACT"
                 },
@@ -894,6 +903,12 @@ sap.ui.define([
                 syncFilterHint: this._updateFilterState.bind(this),
                 refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
             });
+        },
+
+        onFailSegmentSelectionChange: function (oEvent) {
+            var sKey = ((oEvent.getParameter("item") || {}).getKey && oEvent.getParameter("item").getKey()) || oEvent.getParameter("key") || "ALL";
+            this.getModel("state").setProperty("/search/failSegment", String(sKey || "ALL").toUpperCase());
+            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true));
         },
 
         onExit: function () {

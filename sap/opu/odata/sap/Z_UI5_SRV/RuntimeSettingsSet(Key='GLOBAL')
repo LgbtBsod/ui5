@@ -1,0 +1,1 @@
+{"d":{"Key":"GLOBAL","CacheToleranceMs":5500,"HeartbeatIntervalSec":240,"StatusPollIntervalSec":60,"LockTtlSec":300,"IdleTimeoutSec":600,"AutoSaveDebounceMs":1200}}

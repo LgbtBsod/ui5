@@ -208,6 +208,17 @@ sap.ui.define([
         return (aFilters || []).map(sanitizeFilter).filter(Boolean);
     }
 
+    function buildFailSegmentFilter(sSegment) {
+        var sKey = String(sSegment || "ALL").toUpperCase();
+        if (sKey === "FAILED") {
+            return new Filter("HasFailedChecks", FilterOperator.EQ, true);
+        }
+        if (sKey === "SUCCESS") {
+            return new Filter("HasFailedChecks", FilterOperator.EQ, false);
+        }
+        return null;
+    }
+
     function applyRebindParams(mArgs) {
         var oBindingParams = mArgs.bindingParams || {};
         var mState = mArgs.state || {};
@@ -249,6 +260,7 @@ sap.ui.define([
 
         var sChecks = mState.filterFailedChecks || "ALL";
         var sBarriers = mState.filterFailedBarriers || "ALL";
+        var sFailSegment = ((mState.search || {}).failSegment) || mState.failSegment || "ALL";
         var aStatusFilters = [];
         if (sChecks !== "ALL") {
             aStatusFilters.push(new Filter("Status", FilterOperator.NE, sChecks === "TRUE" ? "03" : "ZZZ"));
@@ -256,6 +268,7 @@ sap.ui.define([
         if (sBarriers !== "ALL") {
             aStatusFilters.push(new Filter("Status", FilterOperator.NE, sBarriers === "TRUE" ? "03" : "ZZZ"));
         }
+        var oFailSegmentFilter = buildFailSegmentFilter(sFailSegment);
 
         if (sStatus) {
             aFilters.push(new Filter("Status", FilterOperator.Contains, sStatus));
@@ -279,6 +292,9 @@ sap.ui.define([
                 aLooseParts.push(oLpcFilter);
             }
             Array.prototype.push.apply(aLooseParts, aStatusFilters);
+            if (oFailSegmentFilter) {
+                aLooseParts.push(oFailSegmentFilter);
+            }
             if (aLooseParts.length) {
                 aFilters.push(new Filter({
                     filters: aLooseParts,
@@ -293,6 +309,9 @@ sap.ui.define([
                 aFilters.push(oLpcFilter);
             }
             Array.prototype.push.apply(aFilters, aStatusFilters);
+            if (oFailSegmentFilter) {
+                aFilters.push(oFailSegmentFilter);
+            }
         }
 
         var sMax = String(mState.searchMaxResults || "").trim();
@@ -349,6 +368,7 @@ sap.ui.define([
         wireInnerTable: wireInnerTable,
         extractChecklistId: extractChecklistId,
         extractChecklistIdFromSelectionEvent: extractChecklistIdFromSelectionEvent,
+        buildFailSegmentFilter: buildFailSegmentFilter,
         applyRebindParams: applyRebindParams,
         rebindOrFallback: rebindOrFallback
     };

@@ -15,6 +15,20 @@ Legacy alias'ы оставлены: `/ChecklistRoots`, `/SearchRows`, `/actions/
 - ChecklistSearchSet — канонический источник поиска; `SearchRows`/`ChecklistRoots` только migration alias.
 - `$expand` в канонических collection endpoints отклоняется (VALIDATION_ERROR/EXPAND_NOT_ALLOWED).
 
+## Canonical entity sets
+
+- `ChecklistSearchSet`
+- `ChecklistRootSet`
+- `ChecklistBasicInfoSet`
+- `ChecklistCheckSet`
+- `ChecklistBarrierSet`
+- `DictionaryItemSet`
+- `LastChangeSet`
+- `LockStatusSet`
+- `RuntimeSettingsSet`
+- `AttachmentSet`
+- `AttachmentFolderSet`
+
 ## CSRF fetch
 ```bash
 curl -i "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$top=1" -H "X-CSRF-Token: Fetch"
@@ -22,7 +36,12 @@ curl -i "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$t
 
 ## Search paging/filter by DateCheck
 ```bash
-curl "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$top=20&$skip=0&$inlinecount=allpages&$filter=DateCheck%20ge%20datetime'2025-01-01T00:00:00'&$orderby=ChangedOn%20desc"
+curl "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$top=20&$skip=0&$inlinecount=allpages&$filter=substringof('LPC',LpcText)%20and%20Status%20eq%20'DRAFT'&$orderby=ChangedOn%20desc"
+```
+
+## Runtime settings (GLOBAL)
+```bash
+curl "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/RuntimeSettingsSet(Key='GLOBAL')"
 ```
 
 ## Read LastChangeSet
@@ -69,14 +88,11 @@ curl -X POST "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/AutoSave" \
 curl -X POST "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/SaveChanges" \
   -H "Content-Type: application/json" -H "X-CSRF-Token: <token>" -b "SAP_SESSIONID=<sid>" \
   -d '{
-    "RootKey":"<ROOT_KEY_HEX>",
     "ClientAggChangedOn":"/Date(1735689600000)/",
-    "FullPayload":{
-      "root":{"Status":"02"},
+    "root":{"Key":"<ROOT_KEY_HEX>","Status":"SUBMITTED"},
       "basic":{"LocationKey":"LOC-100","LocationName":"Area A","EquipName":"Pump A"},
       "checks":[{"ChecksNum":10,"Comment":"ok","Result":true}],
       "barriers":[{"BarriersNum":20,"Comment":"warn","Result":false}]
-    }
   }'
 ```
 
@@ -84,12 +100,15 @@ curl -X POST "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/SaveChanges" \
 ```bash
 curl -X POST "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/SetChecklistStatus" \
   -H "Content-Type: application/json" -H "X-CSRF-Token: <token>" -b "SAP_SESSIONID=<sid>" \
-  -d '{"RootKey":"<ROOT_KEY_HEX>","NewStatus":"03","ClientAggChangedOn":"/Date(1735689600000)/"}'
+  -d '{"RootKey":"<ROOT_KEY_HEX>","NewStatus":"SUBMITTED","ClientAggChangedOn":"/Date(1735689600000)/"}'
 ```
 
 ## GetHierarchy sample
 ```bash
 curl "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/GetHierarchy?DateCheck=datetime'2025-01-01T00:00:00'&Method=MPL"
+
+# canonical method value:
+curl "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/GetHierarchy?DateCheck=datetime'2025-01-01T00:00:00'&Method=location_tree"
 ```
 
 ## ReportExport sample
