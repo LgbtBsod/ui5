@@ -426,7 +426,7 @@ async def legacy_lock_alias(request: Request, db: Session = Depends(get_db)):
 @router.post("/actions/AutoSave")
 @router.post("/actions/AutoSaveChecklist")
 async def autosave_alias(request: Request, db: Session = Depends(get_db)):
-    raw_payload = await request.json()
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
     payload = _payload_with_query(raw_payload, request)
     body = payload.get("payload") or payload.get("Payload") or {}
     adapted = {
@@ -440,7 +440,7 @@ async def autosave_alias(request: Request, db: Session = Depends(get_db)):
 @router.post("/actions/SaveChanges")
 @router.post("/actions/SaveChecklist")
 async def save_alias(request: Request, db: Session = Depends(get_db)):
-    raw_payload = await request.json()
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
     payload = _payload_with_query(raw_payload, request)
     body = payload.get("payload") or payload.get("Payload") or {}
     adapted = {
@@ -610,6 +610,17 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
 
 
 @router.post("/actions/SetChecklistStatus")
+async def set_status_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
+    adapted = {
+        "RootKey": payload.get("RootKey") or payload.get("root_id") or ((payload.get("payload") or {}).get("Uuid")),
+        "NewStatus": payload.get("NewStatus") or payload.get("new_status"),
+        "ClientAggChangedOn": payload.get("ClientAggChangedOn") or payload.get("client_agg_changed_on"),
+    }
+    return set_status(adapted, None, db)
+
+
 @router.post(f"{SERVICE_ROOT}/SetChecklistStatus")
 def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(payload.get("RootKey") or "")), ChecklistRoot.is_deleted.isnot(True)).first()
