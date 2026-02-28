@@ -25,7 +25,7 @@ sap.ui.define([
 
         if (bMetadataOk === false) {
             return {
-                enabled: true,
+                enabled: false,
                 reasonCode: sMetaError ? "metadata_error" : "metadata_unavailable",
                 reasonText: buildReason(sMetaError, sUnavailableText)
             };
@@ -61,11 +61,11 @@ sap.ui.define([
 
         oViewModel.setProperty("/smartControlsReason", oAvailability.reasonText || "");
 
-        if (!isEnabled(oViewModel)) {
-            setEnabled(oViewModel, true, "");
-            if (typeof fnBootstrap === "function") {
-                fnBootstrap();
-            }
+        var bWasEnabled = isEnabled(oViewModel);
+        setEnabled(oViewModel, oAvailability.enabled, oAvailability.enabled ? "" : (oAvailability.reasonText || ""));
+
+        if (oAvailability.enabled && !bWasEnabled && typeof fnBootstrap === "function") {
+            fnBootstrap();
         }
     }
 

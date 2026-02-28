@@ -13,6 +13,12 @@ sap.ui.define([], function () {
     }
 
     function runSearchTrigger(mArgs) {
+        if (!mArgs || mArgs.useSmartControls === false) {
+            if (mArgs && typeof mArgs.runFallbackSearchLifecycle === "function") {
+                return mArgs.runFallbackSearchLifecycle();
+            }
+            return { ok: false, reason: "smart_controls_disabled" };
+        }
         return runSmartSearch(mArgs);
     }
 

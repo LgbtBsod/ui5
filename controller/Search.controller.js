@@ -79,7 +79,7 @@ sap.ui.define([
                 kpiFailedBarriers: 0,
                 kpiHealthy: 0,
                 lastUpdatedAt: "",
-                smartFilterReady: true,
+                smartFilterReady: false,
                 smartTableReady: true,
                 useSmartControls: true,
                 smartControlsReason: "",
@@ -255,6 +255,13 @@ sap.ui.define([
             this._onSmartTableReady();
         },
 
+
+        onSmartFilterInitialise: function () {
+            this._getViewModel().setProperty("/smartFilterReady", true);
+            this._syncStateFiltersFromSmartFilter();
+            this._updateFilterState();
+        },
+
         _isSmartFilterReady: function () {
             var oSmartFilterBar = this.byId("searchSmartFilterBar");
             if (!oSmartFilterBar || !this._isSmartControlsEnabled()) {
@@ -263,7 +270,7 @@ sap.ui.define([
             if (typeof oSmartFilterBar.isInitialised === "function") {
                 return !!oSmartFilterBar.isInitialised();
             }
-            return true;
+            return !!this._getViewModel().getProperty("/smartFilterReady");
         },
 
         _syncStateFiltersFromSmartFilter: function () {
