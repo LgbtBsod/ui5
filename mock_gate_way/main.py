@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
 
@@ -33,6 +34,7 @@ from database import Base, SessionLocal, engine
 from services.dict_loader import load_dictionary
 from services.lock_service import LockService
 from models import ChecklistRoot, FrontendRuntimeSettings
+from utils.odata import SERVICE_ROOT, odata_error_response
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
@@ -50,14 +52,17 @@ def ensure_schema_compatibility() -> None:
         "date", "equipment", "lpc_text",
         "observer_fullname", "observer_perner", "observer_position", "observer_orgunit", "observer_integration_name",
         "observed_fullname", "observed_perner", "observed_position", "observed_orgunit", "observed_integration_name",
-        "location_key", "location_name", "location_text",
+        "location_key", "location_name", "location_text", "version_number",
     ]
 
     with engine.begin() as conn:
         for col in required:
             if col in existing:
                 continue
-            conn.execute(text(f"ALTER TABLE checklist_root ADD COLUMN {col} VARCHAR"))
+            if col == "version_number":
+                conn.execute(text("ALTER TABLE checklist_root ADD COLUMN version_number INTEGER DEFAULT 1"))
+            else:
+                conn.execute(text(f"ALTER TABLE checklist_root ADD COLUMN {col} VARCHAR"))
             logger.info("Added missing checklist_root column: %s", col)
 
 
@@ -93,6 +98,7 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
                 observer_fullname=random.choice(observer_pool),
                 changed_on=changed_on,
                 changed_by="SYSTEM",
+                version_number=1,
                 created_on=changed_on,
                 created_by="SYSTEM",
                 is_deleted=False,
@@ -140,6 +146,39 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="SAP Gateway Simulator", version="1.0.0", lifespan=lifespan)
+
+
+
+app.state.csrf_tokens = {}
+
+
+@app.middleware("http")
+async def odata_csrf_middleware(request: Request, call_next):
+    path = request.url.path
+    is_odata = path.startswith(SERVICE_ROOT)
+    if not is_odata:
+        return await call_next(request)
+
+    session_id = request.cookies.get("SAP_SESSIONID")
+    token = request.headers.get("X-CSRF-Token")
+    is_fetch = str(token).lower() == "fetch"
+
+    if request.method in {"POST", "PUT", "PATCH", "MERGE", "DELETE"} and not is_fetch:
+        expected = app.state.csrf_tokens.get(session_id) if session_id else None
+        if not expected or token != expected:
+            return odata_error_response(403, "CSRF_TOKEN_MISSING", "CSRF token validation failed")
+
+    response = await call_next(request)
+
+    if is_fetch:
+        import uuid
+
+        sid = session_id or uuid.uuid4().hex
+        new_token = uuid.uuid4().hex
+        app.state.csrf_tokens[sid] = new_token
+        response.headers["X-CSRF-Token"] = new_token
+        response.set_cookie("SAP_SESSIONID", sid, httponly=False, samesite="lax")
+    return response
 
 
 @app.middleware("http")
@@ -210,3 +249,10 @@ def frontend_config(db = SessionLocal()):
         }
     finally:
         db.close()
+
+
+@app.exception_handler(Exception)
+async def odata_exception_handler(request: Request, exc: Exception):
+    if request.url.path.startswith(SERVICE_ROOT):
+        return odata_error_response(500, "INTERNAL_ERROR", str(exc))
+    return JSONResponse(status_code=500, content={"detail": str(exc)})

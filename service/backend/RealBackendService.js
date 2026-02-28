@@ -1,7 +1,7 @@
 sap.ui.define([], function () {
     "use strict";
 
-    var _baseUrl = "http://localhost:5000";   // ← ВАЖНО: не const
+    var _baseUrl = "/sap/opu/odata/sap/Z_UI5_SRV";
     var _userId = "demoUser";
     var _sessionGuid = "sess-" + Date.now();
     var _referenceBundleCache = null;

@@ -140,7 +140,8 @@ sap.ui.define([
             return "";
         }
         return String(
-            oObject.id
+            oObject.Uuid
+            || oObject.id
             || oObject.ID
             || oObject.ChecklistId
             || oObject.checklist_id
@@ -227,8 +228,8 @@ sap.ui.define([
         if (sFilterId) {
             oIdFilter = new Filter({
                 filters: [
-                    new Filter("id", FilterOperator.Contains, sFilterId),
-                    new Filter("checklist_id", FilterOperator.Contains, sFilterId)
+                    new Filter("Uuid", FilterOperator.Contains, sFilterId),
+                    new Filter("ChecklistId", FilterOperator.Contains, sFilterId)
                 ],
                 and: false
             });
@@ -238,6 +239,7 @@ sap.ui.define([
         if (sFilterLpc) {
             oLpcFilter = new Filter({
                 filters: [
+                    new Filter("Lpc", FilterOperator.EQ, sFilterLpc),
                     new Filter("lpc", FilterOperator.EQ, sFilterLpc),
                     new Filter("LPC_KEY", FilterOperator.EQ, sFilterLpc)
                 ],
@@ -246,32 +248,32 @@ sap.ui.define([
         }
 
         var mSmartFilterData = mArgs.smartFilterData || {};
-        var sStatus = pickFilterValue(mSmartFilterData.status || mSmartFilterData.STATUS || "").trim();
-        var sEquipment = pickFilterValue(mSmartFilterData.equipment || mSmartFilterData.EQUIPMENT || "").trim();
-        var sObserver = pickFilterValue(mSmartFilterData.observer_fullname || mSmartFilterData.OBSERVER_FULLNAME || "").trim();
-        var sDate = pickFilterValue(mSmartFilterData.date || mSmartFilterData.DATE || "").trim();
+        var sStatus = pickFilterValue(mSmartFilterData.Status || mSmartFilterData.status || mSmartFilterData.STATUS || "").trim();
+        var sEquipment = pickFilterValue(mSmartFilterData.Equipment || mSmartFilterData.equipment || mSmartFilterData.EQUIPMENT || "").trim();
+        var sObserver = pickFilterValue(mSmartFilterData.ObserverFullname || mSmartFilterData.observer_fullname || mSmartFilterData.OBSERVER_FULLNAME || "").trim();
+        var sDate = pickFilterValue(mSmartFilterData.Date || mSmartFilterData.date || mSmartFilterData.DATE || "").trim();
 
         var sChecks = mState.filterFailedChecks || "ALL";
         var sBarriers = mState.filterFailedBarriers || "ALL";
         var aStatusFilters = [];
         if (sChecks !== "ALL") {
-            aStatusFilters.push(new Filter("has_failed_checks", FilterOperator.EQ, sChecks === "TRUE"));
+            aStatusFilters.push(new Filter("Status", FilterOperator.NE, sChecks === "TRUE" ? "03" : "ZZZ"));
         }
         if (sBarriers !== "ALL") {
-            aStatusFilters.push(new Filter("has_failed_barriers", FilterOperator.EQ, sBarriers === "TRUE"));
+            aStatusFilters.push(new Filter("Status", FilterOperator.NE, sBarriers === "TRUE" ? "03" : "ZZZ"));
         }
 
         if (sStatus) {
-            aFilters.push(new Filter("status", FilterOperator.Contains, sStatus));
+            aFilters.push(new Filter("Status", FilterOperator.Contains, sStatus));
         }
         if (sEquipment) {
-            aFilters.push(new Filter("equipment", FilterOperator.Contains, sEquipment));
+            aFilters.push(new Filter("Equipment", FilterOperator.Contains, sEquipment));
         }
         if (sObserver) {
-            aFilters.push(new Filter("observer_fullname", FilterOperator.Contains, sObserver));
+            aFilters.push(new Filter("ObserverFullname", FilterOperator.Contains, sObserver));
         }
         if (sDate) {
-            aFilters.push(new Filter("date", FilterOperator.Contains, sDate));
+            aFilters.push(new Filter("Date", FilterOperator.Contains, sDate));
         }
 
         if (sSearchMode === "LOOSE") {

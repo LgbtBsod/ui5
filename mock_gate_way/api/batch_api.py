@@ -181,8 +181,11 @@ async def batch(request: Request):
             changeset_chunks: list[str] = []
             for index, op in enumerate(item, start=1):
                 op_response = await _execute_operation(request, op)
+                if op_response.status_code >= 400:
+                    raise HTTPException(status_code=op_response.status_code, detail=op_response.text)
+                content_id = op.headers.get("Content-ID") or str(index)
                 changeset_chunks.append(
-                    f"--{changeset_boundary}\r\n{_format_http_response(op_response, content_id=str(index))}\r\n"
+                    f"--{changeset_boundary}\r\n{_format_http_response(op_response, content_id=content_id)}\r\n"
                 )
             changeset_chunks.append(f"--{changeset_boundary}--\r\n")
             response_parts.append(

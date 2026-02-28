@@ -10,7 +10,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "http://localhost:5000/",
+        "uri": "/sap/opu/odata/sap/Z_UI5_SRV/",
         "type": "OData",
         "settings": {
           "odataVersion": "2.0"
@@ -58,6 +58,27 @@
       "cozy": true
     },
     "models": {
+      "mainService": {
+        "type": "sap.ui.model.odata.v2.ODataModel",
+        "dataSource": "mainService",
+        "settings": {
+          "useBatch": true,
+          "defaultBindingMode": "TwoWay",
+          "defaultCountMode": "Inline",
+          "refreshAfterChange": false,
+          "defaultOperationMode": "Server",
+          "deferredGroups": ["changes", "autosave"],
+          "changeGroups": {
+            "*": {
+              "groupId": "changes",
+              "single": false
+            },
+            "LockAcquireType": {"groupId": "locks", "single": true},
+            "LockHeartbeatType": {"groupId": "locks", "single": true},
+            "LockReleaseType": {"groupId": "locks", "single": true}
+          }
+        }
+      },
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {

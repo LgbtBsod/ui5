@@ -15,7 +15,6 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/DeltaPayloadBuilder",
-    "sap/ui/model/odata/v2/ODataModel",
     "sap_ui5/service/usecase/ComponentStartupDiagnosticsOrchestrationUseCase"
 ], function (
     UIComponent,
@@ -34,7 +33,6 @@ sap.ui.define([
     MessageBox,
     FlowCoordinator,
     DeltaPayloadBuilder,
-    ODataModel,
     ComponentStartupDiagnosticsOrchestrationUseCase
 ) {
     "use strict";
@@ -48,23 +46,16 @@ sap.ui.define([
         init: function () {
             UIComponent.prototype.init.apply(this, arguments);
 
-            var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "fake";
-            var bLocalHost = (window && window.location && /localhost|127\.0\.0\.1/.test(window.location.hostname || ""));
+            var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "real";
             var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
-            BackendAdapter.configure({
-                mode: (sConfiguredMode === "real" && bLocalHost) ? "fake" : sConfiguredMode,
-                uiContractVersion: sUiContractVersion,
-                baseUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000"
-            });
-
             var oDataModel = ModelFactory.createDataModel();
             var oStateModel = ModelFactory.createStateModel();
             var fnSyncCapabilityDiagnostics = ComponentStartupDiagnosticsOrchestrationUseCase.createCapabilitySync({
                 stateModel: oStateModel,
                 getBackendMode: BackendAdapter.getMode
             });
-            var oMainServiceModel = new ODataModel({
-                serviceUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "http://localhost:5000/",
+            var oMainServiceModel = this.getModel("mainService") || new sap.ui.model.odata.v2.ODataModel({
+                serviceUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_UI5_SRV/",
                 useBatch: true,
                 defaultCountMode: "Inline",
                 refreshAfterChange: false
@@ -76,6 +67,12 @@ sap.ui.define([
                     changeSetId: "ChecklistSave",
                     single: false
                 }
+            });
+            this.setModel(oMainServiceModel, "mainService");
+            BackendAdapter.configure({
+                mode: sConfiguredMode,
+                uiContractVersion: sUiContractVersion,
+                model: oMainServiceModel
             });
             ComponentStartupDiagnosticsOrchestrationUseCase.wireMetadataEvents({
                 mainServiceModel: oMainServiceModel,
@@ -272,7 +269,7 @@ sap.ui.define([
             this.setModel(new JSONModel({}), "selected");
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
-            this.setModel(oMainServiceModel, "mainService");
+
             this.setModel(oLayoutModel, "layout");
             this.setModel(oCacheModel, "cache");
             this.setModel(oMasterDataModel, "masterData");

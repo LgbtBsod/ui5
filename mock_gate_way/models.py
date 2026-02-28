@@ -40,6 +40,7 @@ class ChecklistRoot(Base):
     created_by = Column(String)
     changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
     changed_by = Column(String)
+    version_number = Column(INTEGER, default=1)
 
     is_deleted = Column(Boolean, default=False)
 
