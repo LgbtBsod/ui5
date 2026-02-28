@@ -1445,6 +1445,19 @@ body,
   background-color: transparent !important;
 }
 
+body.appDark,
+:root:not(.light-mode) body,
+body.appDark #ui5_container,
+body.appDark .sapUiComponentContainer,
+body.appDark .sapUiComponentContainer > div,
+body.appDark .sapUiView,
+:root:not(.light-mode) #ui5_container,
+:root:not(.light-mode) .sapUiComponentContainer,
+:root:not(.light-mode) .sapUiComponentContainer > div,
+:root:not(.light-mode) .sapUiView {
+  background-color: transparent !important;
+}
+
 .searchHeaderKpiRail,
 .searchFilterCardDense,
 .searchResultsTable,
@@ -1505,7 +1518,7 @@ body.appDark .workflowStageCard,
 .detailContent .infoCardGrid .sapFGridListDefault,
 .detailContent .infoCardGrid .sapFGridList {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(15rem, 1fr));
+  grid-template-columns: repeat(3, minmax(12rem, 1fr));
   gap: 0.85rem;
   align-items: start;
 }
@@ -1519,7 +1532,7 @@ body.appDark .workflowStageCard,
 
 .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"],
 .detailContent .infoCardGrid .sapFGLI[data-cardkey="location"] {
-  grid-column: span 2;
+  grid-column: span 1;
 }
 
 .detailContent .infoCardGrid .infoCardTile {
@@ -1529,7 +1542,7 @@ body.appDark .workflowStageCard,
 }
 
 .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] .infoCardTile {
-  min-height: 12rem !important;
+  min-height: 9.5rem !important;
 }
 
 .detailContent .infoCardGrid .sapFGLI[data-cardkey="observer"] .infoCardTile,
@@ -1561,4 +1574,105 @@ body.appDark .workflowStageCard,
   .detailContent .infoCardGrid .sapFGLI[data-cardkey="location"] {
     grid-column: span 1;
   }
+}
+
+/* Section: detail-checks-barriers-table-render-fixes */
+.detailContent .tableScrollWrap {
+  overflow: auto !important;
+  height: 14rem !important;
+  background: linear-gradient(165deg,
+    color-mix(in srgb, var(--glass-bg) 90%, rgba(var(--accent-rgb), 0.06)) 0%,
+    color-mix(in srgb, var(--surface2) 86%, rgba(var(--accent-rgb), 0.05)) 100%) !important;
+}
+
+.detailContent .flatEditorTable,
+.detailContent .flatEditorTable .sapMListTbl,
+.detailContent .flatEditorTable .sapMListTblCnt {
+  width: 100% !important;
+}
+
+.detailContent .flatEditorTable .sapMListTbl {
+  table-layout: fixed;
+}
+
+.detailContent .flatEditorTable .sapMListTblCell,
+.detailContent .flatEditorTable .sapMListTblHeaderCell {
+  vertical-align: top;
+}
+
+.detailContent .flatEditorTable .sapMInputBase {
+  width: 100%;
+  min-width: 0;
+}
+
+.detailContent .flatEditorTable .sapMSwt {
+  min-width: 2.5rem;
+}
+
+.detailContent .flatEditorTable .sapMText,
+.detailContent .flatEditorTable .sapMLabel {
+  white-space: normal;
+  word-break: break-word;
+}
+
+
+body.appDark .detailContent .tableScrollWrap,
+:root:not(.light-mode) .detailContent .tableScrollWrap {
+  background: linear-gradient(165deg,
+    color-mix(in srgb, var(--glass-bg) 86%, rgba(var(--accent-rgb), 0.07)) 0%,
+    color-mix(in srgb, var(--surface2) 84%, rgba(var(--accent-rgb), 0.09)) 100%) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 78%, rgba(255, 255, 255, 0.08)) !important;
+  backdrop-filter: blur(8px) saturate(112%);
+  -webkit-backdrop-filter: blur(8px) saturate(112%);
+}
+
+body.appDark .detailContent .flatEditorTable .sapMListTbl,
+body.appDark .detailContent .flatEditorTable .sapMListTblCnt,
+:root:not(.light-mode) .detailContent .flatEditorTable .sapMListTbl,
+:root:not(.light-mode) .detailContent .flatEditorTable .sapMListTblCnt {
+  background: transparent !important;
+}
+
+body.appDark .detailContent .flatEditorTable .sapMListTblEmptyRow,
+body.appDark .detailContent .flatEditorTable .sapMListTblEmptyCell,
+:root:not(.light-mode) .detailContent .flatEditorTable .sapMListTblEmptyRow,
+:root:not(.light-mode) .detailContent .flatEditorTable .sapMListTblEmptyCell {
+  background: color-mix(in srgb, var(--glass-bg) 90%, rgba(var(--accent-rgb), 0.08)) !important;
+}
+
+
+
+/* Section: dark-search-footer-and-hidden-dialog-surface-fixes */
+body.appDark .searchResultsTable .sapMListTblEmptyRow,
+body.appDark .searchResultsTable .sapMListTblEmptyCell,
+:root:not(.light-mode) .searchResultsTable .sapMListTblEmptyRow,
+:root:not(.light-mode) .searchResultsTable .sapMListTblEmptyCell {
+  background: color-mix(in srgb, var(--glass-bg) 86%, rgba(var(--accent-rgb), 0.08)) !important;
+}
+
+.sapMDialog:not(.sapMDialogOpen) {
+  display: none !important;
+}
+
+
+body.appDark .searchResultsTable .sapMListTbl,
+:root:not(.light-mode) .searchResultsTable .sapMListTbl {
+  background: transparent !important;
+}
+
+body.appDark .searchResultsTable .sapMListTblRow .sapMListTblCell,
+:root:not(.light-mode) .searchResultsTable .sapMListTblRow .sapMListTblCell {
+  background: color-mix(in srgb, var(--glass-bg) 88%, rgba(var(--accent-rgb), 0.08)) !important;
+}
+
+
+.searchResultsTable .sapMListTblEmptyRow,
+.searchResultsTable .sapMListTblEmptyCell {
+  background: color-mix(in srgb, var(--glass-bg) 90%, rgba(var(--accent-rgb), 0.06)) !important;
+}
+
+
+.detailContent .flatEditorTable .sapMListTblEmptyCell,
+.detailContent .flatEditorTable .sapMListTblEmptyCell .sapMText {
+  color: var(--text-main) !important;
 }
