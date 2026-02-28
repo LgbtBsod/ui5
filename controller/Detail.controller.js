@@ -463,9 +463,6 @@ sap.ui.define([
         }
         return this._reloadChecklistFromBackend(sId);
       }.bind(this)).catch(function () {
-        if (this._isChecklistCacheStrictFresh()) {
-          return oCached;
-        }
         return this._reloadChecklistFromBackend(sId);
       }.bind(this));
     },
@@ -487,8 +484,7 @@ sap.ui.define([
           }
           return this._reloadChecklistFromBackend(sId);
         }.bind(this)).catch(function () {
-          oDataModel.setProperty("/selectedChecklist", oLocalMatch);
-          this._applyChecklistLazily(oLocalMatch);
+          return this._reloadChecklistFromBackend(sId);
         }.bind(this));
       }
 
