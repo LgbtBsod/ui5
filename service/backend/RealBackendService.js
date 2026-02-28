@@ -455,6 +455,17 @@ sap.ui.define([], function () {
         },
 
 
+        getLastChangeSet: function (sId) {
+            var sKey = String(sId || "").replace(/-/g, "");
+            return _request("/LastChangeSet('" + encodeURIComponent(sKey) + "')").then(function (oData) {
+                var o = (oData && oData.d) || {};
+                return {
+                    RootKey: o.RootKey || sKey,
+                    AggChangedOn: o.AggChangedOn || ""
+                };
+            });
+        },
+
         getChecklistRoot: function (sId) {
             var sKey = String(sId || "").replace(/-/g, "");
             return Promise.all([

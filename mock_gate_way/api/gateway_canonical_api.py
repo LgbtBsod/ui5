@@ -219,6 +219,22 @@ def _is_valid_attachment_category(db: Session, category_key: str) -> bool:
     return bool(exists)
 
 
+def _parse_odata_datetime(value: str | None) -> datetime:
+    if not value:
+        return now_utc()
+    raw = str(value).strip()
+    if raw.startswith("/Date(") and raw.endswith(")/"):
+        try:
+            millis = int(raw[6:-2])
+            from datetime import timezone
+            return datetime.fromtimestamp(millis / 1000, tz=timezone.utc)
+        except ValueError:
+            pass
+    if raw.lower().startswith("datetime'") and raw.endswith("'"):
+        raw = raw[9:-1]
+    return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+
+
 def _apply_order_filter(query, model, fmap, filter_expr, orderby, top, skip):
     expr = FilterParser.parse(model, filter_expr, field_map=fmap)
     if expr is not None:
@@ -629,7 +645,13 @@ def get_hierarchy(date_check: str | None = Query(None, alias="DateCheck"), metho
         method = payload.get("Method") or method
     if not date_check:
         date_check = now_utc().date().isoformat()
-    dt = datetime.fromisoformat(str(date_check).replace("Z", "+00:00")).date()
+    method = str(method or "LOCATION").upper()
+    if method not in {"LOCATION", "MPL"}:
+        return _err(400, "VALIDATION_ERROR", "Unsupported hierarchy method")
+    try:
+        dt = _parse_odata_datetime(str(date_check)).date()
+    except Exception:
+        return _err(400, "VALIDATION_ERROR", "Invalid DateCheck")
     rows = HierarchyService.get_tree(db, dt)
     return {"d": {"results": [{
         "hierarchy_rank": r.get("hierarchy_rank", 0),
