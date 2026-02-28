@@ -85,10 +85,15 @@ sap.ui.define([
                             uiContractVersion: sUiContractVersion,
                             model: oMainServiceModel
                         });
+                        this._pMetadataFallbackInit = (this._pMetadataFallbackInit || Promise.resolve())
+                            .catch(function () { return null; })
+                            .then(function () {
+                                return BackendAdapter.init();
+                            });
                         oStateModel.setProperty("/backendMode", "fake");
                         oStateModel.setProperty("/metadataFallbackMode", true);
                     }
-                }
+                }.bind(this)
             });
 
             var oLayoutModel = ModelFactory.createLayoutModel();
@@ -391,7 +396,9 @@ sap.ui.define([
 
                 this._loadMasterDataAsync(oMasterDataModel, oStateModel, oEnvModel);
 
-                return this._oSmartCache.getWithFallback("checkLists").then(function (aCached) {
+                return (this._pMetadataFallbackInit || Promise.resolve()).then(function () {
+                    return this._oSmartCache.getWithFallback("checkLists");
+                }.bind(this)).then(function (aCached) {
                     if (Array.isArray(aCached) && aCached.length) {
                         oDataModel.setProperty("/checkLists", aCached);
                         oDataModel.setProperty("/visibleCheckLists", aCached);
