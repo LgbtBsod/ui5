@@ -76,6 +76,17 @@
                             <smartFilterBar:ControlConfiguration key="DateCheck" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="EquipName" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="ChangedOn" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="FailSegmentControl" label="{i18n>filterFailSegmentLabel}" visibleInAdvancedArea="true">
+                                <smartFilterBar:customControl>
+                                    <SegmentedButton selectedKey="{state>/search/failSegment}" selectionChange=".onFailSegmentSelectionChange" width="16rem" class="sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                                        <items>
+                                            <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
+                                            <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
+                                            <SegmentedButtonItem key="SUCCESS" text="{i18n>filterFailSegmentSuccess}"/>
+                                        </items>
+                                    </SegmentedButton>
+                                </smartFilterBar:customControl>
+                            </smartFilterBar:ControlConfiguration>
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
 

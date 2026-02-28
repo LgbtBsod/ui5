@@ -103,6 +103,9 @@ sap.ui.define([
                 filterLpc: "",
                 filterFailedChecks: "ALL",
                 filterFailedBarriers: "ALL",
+                search: {
+                    failSegment: "ALL"
+                },
                 searchMode: "EXACT",
                 searchMaxResults: "100",
                 isBusy: false,

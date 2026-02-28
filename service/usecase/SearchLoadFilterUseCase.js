@@ -6,6 +6,7 @@ sap.ui.define([], function () {
         oStateModel.setProperty("/filterLpc", "");
         oStateModel.setProperty("/filterFailedChecks", "ALL");
         oStateModel.setProperty("/filterFailedBarriers", "ALL");
+        oStateModel.setProperty("/search/failSegment", "ALL");
         oViewModel.setProperty("/hasSearched", true);
     }
 

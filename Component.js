@@ -44,6 +44,7 @@ sap.ui.define([
         },
 
         init: function () {
+            sap.ui.requireSync("sap_ui5/util/FlexibleRouter");
             UIComponent.prototype.init.apply(this, arguments);
 
             var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "real";

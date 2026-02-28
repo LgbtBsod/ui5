@@ -13,7 +13,8 @@
         "uri": "/sap/opu/odata/sap/Z_UI5_SRV/",
         "type": "OData",
         "settings": {
-          "odataVersion": "2.0"
+          "odataVersion": "2.0",
+          "localUri": "localService/metadata.xml"
         }
       }
     }
@@ -67,15 +68,27 @@
           "defaultCountMode": "Inline",
           "refreshAfterChange": false,
           "defaultOperationMode": "Server",
-          "deferredGroups": ["changes", "autosave"],
+          "deferredGroups": [
+            "changes",
+            "autosave"
+          ],
           "changeGroups": {
             "*": {
               "groupId": "changes",
               "single": false
             },
-            "LockAcquireType": {"groupId": "locks", "single": true},
-            "LockHeartbeatType": {"groupId": "locks", "single": true},
-            "LockReleaseType": {"groupId": "locks", "single": true}
+            "LockAcquireType": {
+              "groupId": "locks",
+              "single": true
+            },
+            "LockHeartbeatType": {
+              "groupId": "locks",
+              "single": true
+            },
+            "LockReleaseType": {
+              "groupId": "locks",
+              "single": true
+            }
           }
         }
       },

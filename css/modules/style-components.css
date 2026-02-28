@@ -367,6 +367,12 @@ body.appDark .brandActionBtn.brandActionPrimary .sapMBtnInner,
 }
 
 .themeDockButton {
+  position: fixed;
+  top: .75rem;
+  left: .75rem;
+  z-index: 50;
+  width: auto !important;
+  display: inline-block !important;
   border-radius: 999px !important;
 }
 

@@ -14,6 +14,7 @@ from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryIt
 from services.hierarchy_service import HierarchyService
 from services.lock_service import LockService
 from services.metadata_builder import build_metadata
+from utils.filter_parser import FilterParser
 from utils.odata import SERVICE_ROOT, format_datetime, format_entity_etag, odata_error_response, odata_payload
 from utils.time import now_utc
 
@@ -82,12 +83,31 @@ def _uuid_from_hex(value: str) -> str:
         return str(value or "")
 
 
+def _normalize_hex_key(value: str) -> str:
+    raw = str(value or "").strip().strip("\'").strip('"')
+    if raw.lower().startswith("0x"):
+        raise ValueError("VALIDATION_ERROR")
+    compact = raw.replace("-", "")
+    if len(compact) != 32 or not re.fullmatch(r"[0-9a-fA-F]{32}", compact):
+        raise ValueError("VALIDATION_ERROR")
+    return compact.upper()
+
+
 def _entity_key(key_expr: str) -> str:
     cleaned = str(key_expr or "").strip().strip("'")
     for prefix in ("Key=", "RootKey="):
         if cleaned.startswith(prefix):
             cleaned = cleaned.split("=", 1)[1].strip().strip("'")
     return _uuid_from_hex(cleaned)
+
+
+def _resolve_root_from_payload(payload: dict) -> str:
+    root_key = str(payload.get("RootKey") or payload.get("root_id") or "")
+    if root_key:
+        return root_key
+    full = payload.get("FullPayload") or payload
+    root_block = full.get("root") if isinstance(full, dict) else {}
+    return str((root_block or {}).get("Key") or (root_block or {}).get("RootKey") or (root_block or {}).get("id") or "")
 
 
 def _datecheck_datetime(root: ChecklistRoot) -> datetime:
@@ -498,6 +518,10 @@ def _optimistic_check(client_agg: str | None, root: ChecklistRoot):
 
 
 def _load_root_or_error(db: Session, root_key: str):
+    try:
+        _normalize_hex_key(root_key)
+    except ValueError:
+        return None, _err(400, "VALIDATION_ERROR", "RootKey must be RAW16 HEX (32 chars)")
     root = db.query(ChecklistRoot).filter(
         ChecklistRoot.id == _entity_key(root_key),
         ChecklistRoot.is_deleted.isnot(True),
@@ -964,7 +988,7 @@ def auto_save(payload: dict, if_match: str | None = Header(None, alias="If-Match
 @router.post("/actions/SaveChanges")
 @router.post("/actions/SaveChecklist")
 def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
-    root, err = _load_root_or_error(db, str(payload.get("RootKey") or payload.get("root_id") or ""))
+    root, err = _load_root_or_error(db, _resolve_root_from_payload(payload))
     if err:
         return err
     try:
@@ -977,7 +1001,7 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
             return _err(400, "VALIDATION_ERROR", "ClientAggChangedOn is required")
         return _err(409, "CONFLICT", "AggChangedOn mismatch")
 
-    full = payload.get("FullPayload") or {}
+    full = payload.get("FullPayload") or payload
     for k, v in (full.get("root") or {}).items():
         attr = ROOT_MAP.get(k)
         if attr and hasattr(root, attr):
@@ -1011,7 +1035,7 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
 @router.post(f"{SERVICE_ROOT}/SetChecklistStatus")
 @router.post("/actions/SetChecklistStatus")
 def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
-    root, err = _load_root_or_error(db, str(payload.get("RootKey") or payload.get("root_id") or ""))
+    root, err = _load_root_or_error(db, _resolve_root_from_payload(payload))
     if err:
         return err
     try:
@@ -1107,6 +1131,7 @@ def attachment_set(filter: str | None = Query(None, alias="$filter"), expand: st
         if meta.get("is_folder"):
             continue
         rows.append({
+            "Key": key,
             "AttachmentKey": key,
             "RootKey": meta.get("root_key"),
             "FolderKey": meta.get("folder_key"),
@@ -1129,7 +1154,13 @@ async def attachment_value_put(entity_key: str, request: Request, db: Session = 
     content_type = request.headers.get("content-type") or "application/octet-stream"
     file_name = request.headers.get("Slug") or f"{key}.bin"
     root_key = request.headers.get("X-RootKey") or ""
-    root_uuid = _entity_key(root_key)
+    root_uuid = ""
+    if root_key:
+        try:
+            _normalize_hex_key(root_key)
+            root_uuid = _entity_key(root_key)
+        except ValueError:
+            return _err(400, "VALIDATION_ERROR", "X-RootKey must be RAW16 HEX (32 chars)")
     now = now_utc()
 
     file_path = _UPLOAD_DIR / key
