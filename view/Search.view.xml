@@ -51,11 +51,7 @@
 
                 <core:Fragment fragmentName="sap_ui5.view.fragment.SearchLoadStatePanel" type="XML"/>
 
-                <VBox class="glassCard filterCard smartFilterGlass sapUiSmallMarginBottom searchFilterCardDense mergeBlock mergeBlockTop">
-                    <Toolbar class="toolbarTransparent">
-                        <Title text="{i18n>filtersTitle}"/>
-                    </Toolbar>
-
+                <VBox class="glassCard filterCard smartFilterGlass sapUiSmallMarginBottom searchFilterCardDense">
                     <smartFilterBar:SmartFilterBar
                         id="searchSmartFilterBar"
                         entitySet="ChecklistFlatSet"
@@ -63,9 +59,11 @@
                         useToolbar="true"
                         showGoOnFB="true"
                         showClearOnFB="true"
+                        searchEnabled="{view>/smartFilterReady}"
                         liveMode="false"
                         enableBasicSearch="false"
                         useDateRangeType="true"
+                        initialise=".onSmartFilterInitialise"
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged">
                         <smartFilterBar:controlConfiguration>
@@ -80,8 +78,8 @@
 
                 </VBox>
 
-                <VBox class="glassCard smartTableGlass searchResultsTable mergeBlock mergeBlockBottom">
-                    <OverflowToolbar class="toolbarTransparent tableActionToolbar searchToolbar searchActionToolbarDensity searchFeedbackToolbar sapUiTinyMarginBottom">
+                <VBox class="glassCard smartTableGlass searchResultsTable">
+                    <OverflowToolbar class="toolbarTransparent tableActionToolbar searchActionToolbarDensity sapUiTinyMarginBottom">
                         <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
                             <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
                         </Button>
@@ -91,7 +89,7 @@
                         <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/canDelete}" visible="{view>/hasSelection}" class="brandActionBtn searchDeleteActionBtn sapUiTinyMarginEnd">
                             <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                         </Button>
-                        </OverflowToolbar>
+                    </OverflowToolbar>
 
                     <HBox class="searchToolbarMetaRail sapUiTinyMarginBottom" renderType="Bare" wrap="Wrap" alignItems="Center" justifyContent="Start">
                         <ObjectStatus text="{view>/resultSummary}" state="Information" class="searchSummaryStatusChip sapUiTinyMarginEnd"/>

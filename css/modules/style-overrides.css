@@ -1461,3 +1461,104 @@ body,
     color-mix(in srgb, var(--card-glass-light) 82%, rgba(255,255,255,0.30)) 0%,
     color-mix(in srgb, var(--surface2) 78%, rgba(var(--accent-rgb), 0.12)) 100%) !important;
 }
+
+/* Section: dark-workflow-card-solid-fill-fix */
+body.appDark .workflowStageCard,
+:root:not(.light-mode) .workflowStageCard {
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--surface2, #101a2d) 92%, rgba(138, 172, 255, 0.18)) 0%,
+    color-mix(in srgb, var(--surface2, #101a2d) 86%, rgba(28, 45, 78, 0.78)) 100%) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 78%, rgba(173, 202, 255, 0.28)) !important;
+}
+
+/* Section: dialog-single-contour-footer-fix */
+.sapMDialog.glassDialog {
+  border-radius: 1.15rem !important;
+  overflow: hidden !important;
+}
+
+.sapMDialog.glassDialog .sapMDialogTitle,
+.sapMDialog.glassDialog > .sapMDialogSection,
+.sapMDialog.glassDialog .sapMDialogScroll,
+.sapMDialog.glassDialog .sapMDialogFooter,
+.sapMDialog.glassDialog .sapMDialogFooter .sapMBar,
+.sapMDialog.glassDialog .sapMDialogFooter .sapMBarLeft,
+.sapMDialog.glassDialog .sapMDialogFooter .sapMBarMiddle,
+.sapMDialog.glassDialog .sapMDialogFooter .sapMBarRight,
+.sapMDialog.glassDialog .sapMDialogFooter .sapMIBar {
+  border-radius: 0 !important;
+}
+
+.sapMDialog.glassDialog .sapMDialogFooter {
+  border-bottom-left-radius: 1.15rem !important;
+  border-bottom-right-radius: 1.15rem !important;
+  background: color-mix(in srgb, var(--surface2) 88%, rgba(var(--accent-rgb), 0.1)) !important;
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 76%, rgba(var(--accent-rgb), 0.16));
+}
+
+/* Section: search-shell-remove-extra-header-blocks */
+.searchFilterCardDense {
+  padding-top: .85rem !important;
+}
+
+/* Section: detail-info-grid-variable-block-sizes */
+.detailContent .infoCardGrid .sapFGridListDefault,
+.detailContent .infoCardGrid .sapFGridList {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(15rem, 1fr));
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.detailContent .infoCardGrid .sapFGLI {
+  margin: 0 !important;
+  min-width: 0;
+  grid-column: span 1;
+  height: auto !important;
+}
+
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"],
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="location"] {
+  grid-column: span 2;
+}
+
+.detailContent .infoCardGrid .infoCardTile {
+  height: 100%;
+  min-height: 8.75rem !important;
+  margin: 0 !important;
+}
+
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] .infoCardTile {
+  min-height: 12rem !important;
+}
+
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="observer"] .infoCardTile,
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="observed"] .infoCardTile {
+  min-height: 10.75rem !important;
+}
+
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="equipment"] .infoCardTile,
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="lpc"] .infoCardTile,
+.detailContent .infoCardGrid .sapFGLI[data-cardkey="profession"] .infoCardTile {
+  min-height: 7.75rem !important;
+}
+
+@media (max-width: 1200px) {
+  .detailContent .infoCardGrid .sapFGridListDefault,
+  .detailContent .infoCardGrid .sapFGridList {
+    grid-template-columns: repeat(2, minmax(13rem, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .detailContent .infoCardGrid .sapFGridListDefault,
+  .detailContent .infoCardGrid .sapFGridList {
+    grid-template-columns: 1fr;
+  }
+
+  .detailContent .infoCardGrid .sapFGLI,
+  .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"],
+  .detailContent .infoCardGrid .sapFGLI[data-cardkey="location"] {
+    grid-column: span 1;
+  }
+}

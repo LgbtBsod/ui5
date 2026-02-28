@@ -126,7 +126,10 @@
                                                 <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} === 'EDIT' }" drop=".onInfoCardsDrop"/>
                                             </f:dragDropConfig>
                                             <f:items>
-                                                <f:GridListItem>
+                                                <f:GridListItem class="infoCardGridItem">
+                                                    <f:customData>
+                                                        <core:CustomData key="cardkey" value="{view>key}" writeToDom="true"/>
+                                                    </f:customData>
                                                     <VBox class="infoCardTile mushroomCard" renderType="Bare">
                                                         <Text text="{view>title}" class="infoCardTitle"/>
                                                         <Text
