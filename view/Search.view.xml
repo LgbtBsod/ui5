@@ -17,10 +17,18 @@
                 <HBox class="workflowRail searchHeaderKpiRail" renderType="Bare" wrap="Wrap" justifyContent="SpaceBetween" alignItems="Stretch">
                     <VBox class="workflowStageCard">
                         <Text text="{i18n>workflowTitle}" class="workflowEyebrow"/>
-                        <Title text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }" level="H4"/>
+                        <Title
+                            text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }"
+                            level="H4"/>
                         <Text text="{i18n>workflowSubtitle}" class="sapUiTinyMarginTop"/>
-                        <Button text="{i18n>workflowAnalyticsButton}" icon="sap-icon://business-objects-experience" type="Transparent" press=".onOpenWorkflowAnalytics" class="brandActionBtn brandActionGhost sapUiTinyMarginTop"/>
+                        <Button
+                            text="{i18n>workflowAnalyticsButton}"
+                            icon="sap-icon://business-objects-experience"
+                            type="Transparent"
+                            press=".onOpenWorkflowAnalytics"
+                            class="brandActionBtn brandActionGhost sapUiTinyMarginTop"/>
                     </VBox>
+
                     <HBox class="kpiGrid searchAnalyticsGrid" renderType="Bare" wrap="Wrap">
                         <VBox class="kpiCard searchAnalyticsCard searchAnalyticsCardPrimary">
                             <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
@@ -28,18 +36,21 @@
                             <Title text="{view>/analyticsRail/total}" level="H4" visible="{= !${view>/analyticsRailBusy} }"/>
                             <Text text="{= ${i18n>analyticsSource} + ': ' + (${view>/analyticsRail/sourceText} || '-') }" class="searchAnalyticsMeta"/>
                         </VBox>
+
                         <VBox class="kpiCard searchAnalyticsCard">
                             <Text text="{i18n>kpiMonthTotal}" class="kpiLabel"/>
                             <BusyIndicator visible="{view>/analyticsRailBusy}" size="0.9rem" class="sapUiTinyMarginTop sapUiTinyMarginBottom"/>
                             <Title text="{view>/analyticsRail/monthly}" level="H4" visible="{= !${view>/analyticsRailBusy} }"/>
                             <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analyticsRail/refreshedAtText} || '-') }" class="searchAnalyticsMeta"/>
                         </VBox>
+
                         <VBox class="kpiCard searchAnalyticsCard">
                             <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
                             <BusyIndicator visible="{view>/analyticsRailBusy}" size="0.9rem" class="sapUiTinyMarginTop sapUiTinyMarginBottom"/>
                             <Title text="{view>/analyticsRail/failedChecks}" level="H4" visible="{= !${view>/analyticsRailBusy} }"/>
                             <Text text="{= ${i18n>analyticsAvgChecksRate} + ': ' + (${view>/analyticsRail/avgChecksRate} || 0) + '%' }" class="searchAnalyticsMeta"/>
                         </VBox>
+
                         <VBox class="kpiCard searchAnalyticsCard">
                             <Text text="{i18n>kpiFailedBarriers}" class="kpiLabel"/>
                             <BusyIndicator visible="{view>/analyticsRailBusy}" size="0.9rem" class="sapUiTinyMarginTop sapUiTinyMarginBottom"/>
@@ -66,6 +77,7 @@
                         initialise=".onSmartFilterInitialise"
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged">
+
                         <smartFilterBar:controlConfiguration>
                             <smartFilterBar:ControlConfiguration key="Id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
                             <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
@@ -76,6 +88,7 @@
                             <smartFilterBar:ControlConfiguration key="DateCheck" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="EquipName" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="ChangedOn" visibleInAdvancedArea="true"/>
+
                             <smartFilterBar:ControlConfiguration key="FailSegmentControl" label="{i18n>filterFailSegmentLabel}" visibleInAdvancedArea="true">
                                 <smartFilterBar:customControl>
                                     <SegmentedButton selectedKey="{state>/search/failSegment}" selectionChange=".onFailSegmentSelectionChange" width="16rem" class="sapUiTinyMarginBegin sapUiTinyMarginEnd resultSegmentControl">
@@ -90,6 +103,11 @@
                             <smartFilterBar:ControlConfiguration key="FailBarriersSegmentControl" label="{i18n>filterBarrierSegmentLabel}" visibleInAdvancedArea="true">
                                 <smartFilterBar:customControl>
                                     <SegmentedButton selectedKey="{state>/search/barrierFailSegment}" selectionChange=".onBarrierFailSegmentSelectionChange" width="16rem" class="sapUiTinyMarginBegin sapUiTinyMarginEnd resultSegmentControl">
+                                    <SegmentedButton
+                                        selectedKey="{state>/search/failSegment}"
+                                        selectionChange=".onFailSegmentSelectionChange"
+                                        width="16rem"
+                                        class="sapUiTinyMarginBegin sapUiTinyMarginEnd">
                                         <items>
                                             <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
                                             <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
@@ -99,110 +117,149 @@
                                 </smartFilterBar:customControl>
                             </smartFilterBar:ControlConfiguration>
                         </smartFilterBar:controlConfiguration>
-                    </smartFilterBar:SmartFilterBar>
 
+                    </smartFilterBar:SmartFilterBar>
                 </VBox>
 
                 <VBox class="glassCard smartTableGlass searchResultsTable">
+
                     <OverflowToolbar class="toolbarTransparent tableActionToolbar searchActionToolbarDensity sapUiTinyMarginBottom">
-                        <Button text="{i18n>createButton}" icon="sap-icon://add" press=".onCreate" class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+                        <Button
+                            text="{i18n>createButton}"
+                            icon="sap-icon://add"
+                            press=".onCreate"
+                            class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="High"/>
+                            </layoutData>
                         </Button>
-                        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" visible="{view>/hasSelection}" class="brandActionBtn brandActionGhost searchCopyActionBtn sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
+
+                        <Button
+                            text="{i18n>copyButton}"
+                            icon="sap-icon://copy"
+                            press=".onCopy"
+                            enabled="{view>/canCopy}"
+                            visible="{view>/hasSelection}"
+                            class="brandActionBtn brandActionGhost searchCopyActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low"/>
+                            </layoutData>
                         </Button>
-                        <Button text="{i18n>deleteButton}" icon="sap-icon://delete" type="Reject" press=".onDelete" enabled="{view>/canDelete}" visible="{view>/hasSelection}" class="brandActionBtn searchDeleteActionBtn sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
+
+                        <Button
+                            text="{i18n>deleteButton}"
+                            icon="sap-icon://delete"
+                            type="Reject"
+                            press=".onDelete"
+                            enabled="{view>/canDelete}"
+                            visible="{view>/hasSelection}"
+                            class="brandActionBtn searchDeleteActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low"/>
+                            </layoutData>
                         </Button>
                     </OverflowToolbar>
 
                     <HBox class="searchToolbarMetaRail sapUiTinyMarginBottom" renderType="Bare" wrap="Wrap" alignItems="Center" justifyContent="Start">
                         <ObjectStatus text="{view>/resultSummary}" state="Information" class="searchSummaryStatusChip sapUiTinyMarginEnd"/>
-                        <ObjectStatus text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }" state="Success" class="searchStageStatusChip sapUiTinyMarginEnd"/>
+                        <ObjectStatus
+                            text="{= ${view>/workflowStage} === 'ANALYZE' ? ${i18n>workflowStageAnalyze} : ${view>/workflowStage} === 'REVIEW' ? ${i18n>workflowStageReview} : ${i18n>workflowStageDiscover} }"
+                            state="Success"
+                            class="searchStageStatusChip sapUiTinyMarginEnd"/>
                         <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/lastUpdatedAt} || '-') }" class="searchUpdatedAtText"/>
                     </HBox>
 
                     <smartTable:SmartTable
-    id="searchSmartTable"
-    entitySet="ChecklistSearchSet"
-    smartFilterId="searchSmartFilterBar"
-    tableType="ResponsiveTable"
-    useVariantManagement="true"
-    useTablePersonalisation="true"
-    showRowCount="true"
-    showFullScreenButton="true"
-    demandPopin="true"
-    header="{i18n>resultsLabel}"
-    persistencyKey="pcctSmartTable"
-    enableAutoBinding="false"
-    beforeRebindTable=".onBeforeSmartTableRebind"
-    initialise=".onSmartTableInitialise"
-    initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,DateCheck,EquipName,ChangedOn"
-    useExportToExcel="false" 
-    requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,DateCheck,EquipName,ChangedOn"
-    class="searchSmartTableControl">
+                        id="searchSmartTable"
+                        entitySet="ChecklistSearchSet"
+                        smartFilterId="searchSmartFilterBar"
+                        tableType="ResponsiveTable"
+                        useVariantManagement="true"
+                        useTablePersonalisation="true"
+                        showRowCount="true"
+                        showFullScreenButton="true"
+                        demandPopin="true"
+                        header="{i18n>resultsLabel}"
+                        persistencyKey="pcctSmartTable"
+                        enableAutoBinding="false"
+                        beforeRebindTable=".onBeforeSmartTableRebind"
+                        initialise=".onSmartTableInitialise"
+                        initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,DateCheck,EquipName,ChangedOn"
+                        useExportToExcel="false"
+                        requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,DateCheck,EquipName,ChangedOn"
+                        class="searchSmartTableControl">
 
-    <smartTable:customToolbar>
-        <OverflowToolbar id="smartTableCustomToolbar" class="toolbarTransparent">
-            <ToolbarSpacer />
+                        <smartTable:customToolbar>
+                            <OverflowToolbar id="smartTableCustomToolbar" class="toolbarTransparent">
+                                <ToolbarSpacer/>
 
-            <Input 
-                value="{state>/searchMaxResults}" 
-                type="Number" 
-                placeholder="{i18n>searchMaxResultsLabel}" 
-                width="10rem" 
-                change=".onMaxRowsChange" 
-                class="maxRowsInput">
-                <layoutData>
-                    <OverflowToolbarLayoutData priority="Low" shrinkable="true" minWidth="8rem"/>
-                </layoutData>
-            </Input>
+                                <Input
+                                    value="{state>/searchMaxResults}"
+                                    type="Number"
+                                    placeholder="{i18n>searchMaxResultsLabel}"
+                                    width="10rem"
+                                    change=".onMaxRowsChange"
+                                    class="maxRowsInput">
+                                    <layoutData>
+                                        <OverflowToolbarLayoutData priority="Low" shrinkable="true" minWidth="8rem"/>
+                                    </layoutData>
+                                </Input>
 
-            <Switch 
-                state="{= ${state>/searchMode} === 'LOOSE' }" 
-                change=".onSearchModeToggle" 
-                customTextOn="" 
-                customTextOff="" 
-                class="accentSwitch">
-                <layoutData>
-                    <OverflowToolbarLayoutData priority="Disappear" />
-                </layoutData>
-            </Switch>
+                                <Switch
+                                    state="{= ${state>/searchMode} === 'LOOSE' }"
+                                    change=".onSearchModeToggle"
+                                    customTextOn=""
+                                    customTextOff=""
+                                    class="accentSwitch">
+                                    <layoutData>
+                                        <OverflowToolbarLayoutData priority="Disappear"/>
+                                    </layoutData>
+                                </Switch>
 
-            <MenuButton 
-                text="{i18n>exportMenuButton}" 
-                buttonMode="Split" 
-                defaultAction=".onExportMenuDefault" 
-                enabled="{view>/canExport}" 
-                class="brandActionBtn brandActionGhost" 
-                icon="sap-icon://excel-attachment">
-                <layoutData>
-                    <OverflowToolbarLayoutData priority="Low"/>
-                </layoutData>
-                <menu>
-                    <Menu itemSelected=".onExportMenuAction">
-                        <items>
-                            <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view">
-                                <customData><core:CustomData key="entity" value="screen"/></customData>
-                            </MenuItem>
-                            <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2">
-                                <customData><core:CustomData key="entity" value="barrier"/></customData>
-                            </MenuItem>
-                            <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection">
-                                <customData><core:CustomData key="entity" value="check"/></customData>
-                            </MenuItem>
-                        </items>
-                    </Menu>
-                </menu>
-            </MenuButton>
-        </OverflowToolbar>
-    </smartTable:customToolbar>
-</smartTable:SmartTable>
+                                <MenuButton
+                                    text="{i18n>exportMenuButton}"
+                                    buttonMode="Split"
+                                    defaultAction=".onExportMenuDefault"
+                                    enabled="{view>/canExport}"
+                                    class="brandActionBtn brandActionGhost"
+                                    icon="sap-icon://excel-attachment">
+                                    <layoutData>
+                                        <OverflowToolbarLayoutData priority="Low"/>
+                                    </layoutData>
+
+                                    <menu>
+                                        <Menu itemSelected=".onExportMenuAction">
+                                            <items>
+                                                <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view">
+                                                    <customData>
+                                                        <core:CustomData key="entity" value="screen"/>
+                                                    </customData>
+                                                </MenuItem>
+                                                <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2">
+                                                    <customData>
+                                                        <core:CustomData key="entity" value="barrier"/>
+                                                    </customData>
+                                                </MenuItem>
+                                                <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection">
+                                                    <customData>
+                                                        <core:CustomData key="entity" value="check"/>
+                                                    </customData>
+                                                </MenuItem>
+                                            </items>
+                                        </Menu>
+                                    </menu>
+                                </MenuButton>
+
+                            </OverflowToolbar>
+                        </smartTable:customToolbar>
+
+                    </smartTable:SmartTable>
 
                 </VBox>
-                <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsDialog" type="XML"/>
-            </VBox>
 
+                <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsDialog" type="XML"/>
+
+            </VBox>
         </content>
     </Page>
 </mvc:View>
