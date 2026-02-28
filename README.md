@@ -53,6 +53,7 @@ Backend URL: `http://localhost:8000`
 - `LockStatusSet`
 - `AttachmentFolderSet`
 - `AttachmentSet`
+- `RuntimeSettingsSet`
 
 ### Function imports
 
@@ -79,12 +80,10 @@ Backend URL: `http://localhost:8000`
 BASE='http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV'
 ```
 
-### 1) Search paging/filter by DateCheck
+### 1) Search filter by DateCheck + ProfessionText + LocationKey
 
 ```bash
-curl -s "$BASE/ChecklistSearchSet?\
-$filter=DateCheck%20ge%20datetime'2025-01-01T00:00:00'&\
-$top=20&$skip=0&$orderby=ChangedOn%20desc&$inlinecount=allpages"
+curl -s "$BASE/ChecklistSearchSet?$filter=substringof('Operator',ProfessionText)%20and%20LocationKey%20eq%20'LOC-1'%20and%20DateCheck%20eq%20datetime'2025-01-10T00:00:00'&$top=20&$skip=0&$inlinecount=allpages"
 ```
 
 ### 2) Read LastChangeSet
@@ -94,13 +93,19 @@ ROOT='0123456789abcdef0123456789abcdef'
 curl -s "$BASE/LastChangeSet('$ROOT')"
 ```
 
-### 3) LockStatusSet
+### 3) Read RuntimeSettingsSet
+
+```bash
+curl -s "$BASE/RuntimeSettingsSet('GLOBAL')"
+```
+
+### 4) LockStatusSet poll
 
 ```bash
 curl -s "$BASE/LockStatusSet('$ROOT')?SessionGuid=sess-123"
 ```
 
-### 4) LockControl acquire / heartbeat / release
+### 5) LockControl acquire / heartbeat / release
 
 ```bash
 # Fetch CSRF
@@ -124,7 +129,7 @@ curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/j
   "$BASE/LockControl"
 ```
 
-### 5) AutoSave (unified delta `Changes[]`)
+### 6) AutoSave (unified delta `Changes[]`)
 
 ```bash
 curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' \
@@ -139,7 +144,7 @@ curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/j
   "$BASE/AutoSave"
 ```
 
-### 6) SaveChanges (full payload)
+### 7) SaveChanges (full payload)
 
 ```bash
 curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' \
@@ -147,7 +152,7 @@ curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/j
     "RootKey":"'$ROOT'",
     "ClientAggChangedOn":"/Date(1735689600000)/",
     "FullPayload":{
-      "root":{"Status":"02"},
+      "root":{"Status":"SUBMITTED"},
       "basic":{"LocationKey":"LOC-1","LocationName":"Area A","EquipName":"Boiler-9"},
       "checks":[{"ChecksNum":1,"Comment":"ok","Result":true}],
       "barriers":[{"BarriersNum":1,"Comment":"barrier ok","Result":true}]
@@ -156,21 +161,21 @@ curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/j
   "$BASE/SaveChanges"
 ```
 
-### 7) SetChecklistStatus
+### 8) SetChecklistStatus
 
 ```bash
 curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"RootKey":"'$ROOT'","NewStatus":"03","ClientAggChangedOn":"/Date(1735689600000)/"}' \
+  -d '{"RootKey":"'$ROOT'","NewStatus":"DONE","ClientAggChangedOn":"/Date(1735689600000)/"}' \
   "$BASE/SetChecklistStatus"
 ```
 
-### 8) GetHierarchy
+### 9) GetHierarchy
 
 ```bash
-curl -s "$BASE/GetHierarchy?DateCheck=datetime'2025-01-10T00:00:00'&Method=LOCATION"
+curl -s "$BASE/GetHierarchy?DateCheck=datetime'2025-01-10T00:00:00'&Method=location_tree"
 ```
 
-### 9) ReportExport (keys ordered)
+### 10) ReportExport (keys ordered)
 
 ```bash
 curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' \

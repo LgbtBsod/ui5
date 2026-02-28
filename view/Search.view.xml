@@ -69,6 +69,9 @@
                         <smartFilterBar:controlConfiguration>
                             <smartFilterBar:ControlConfiguration key="Id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
                             <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="LpcText" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="ProfessionText" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="LocationKey" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="Status" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="DateCheck" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="EquipName" visibleInAdvancedArea="true"/>
@@ -112,9 +115,9 @@
     enableAutoBinding="false"
     beforeRebindTable=".onBeforeSmartTableRebind"
     initialise=".onSmartTableInitialise"
-    initiallyVisibleFields="Id,Lpc,Profession,Status,DateCheck,EquipName,ChangedOn"
+    initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,DateCheck,EquipName,ChangedOn"
     useExportToExcel="false" 
-    requestAtLeastFields="Key,Id,Status,Lpc,DateCheck,EquipName,ChangedOn"
+    requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,DateCheck,EquipName,ChangedOn"
     class="searchSmartTableControl">
 
     <smartTable:customToolbar>
