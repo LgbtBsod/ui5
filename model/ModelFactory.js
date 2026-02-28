@@ -14,7 +14,6 @@ sap.ui.define([
             networkGraceMs: 60000,
             cacheFreshMs: 30000,
             cacheStaleOkMs: 90000,
-            analyticsRefreshMs: 900000
             analyticsRefreshMs: 900000,
             cacheToleranceMs: 15000
         };
