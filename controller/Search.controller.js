@@ -566,11 +566,20 @@ sap.ui.define([
         },
 
         _buildSearchTriggerArgs: function (bUseSmartControls) {
+            var fnMarkSearchedAndRebind = function () {
+                SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
+            }.bind(this);
+
             return {
                 useSmartControls: !!bUseSmartControls,
                 syncStateFilters: this._syncStateFiltersFromSmartFilter.bind(this),
-                markSearchedAndRebind: function () {
-                    SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
+                markSearchedAndRebind: fnMarkSearchedAndRebind,
+                runFallbackSearchLifecycle: function () {
+                    return SearchLifecycleSyncUseCase.runFallbackSearchLifecycle({
+                        markSearchedAndRebind: fnMarkSearchedAndRebind,
+                        syncFilterHint: this._updateFilterState.bind(this),
+                        refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
+                    });
                 }.bind(this),
                 runTriggerPolicy: SearchTriggerPolicyUseCase.runTriggerPolicy,
                 syncFilterHint: this._updateFilterState.bind(this),
@@ -579,21 +588,13 @@ sap.ui.define([
         },
 
         onSmartSearch: function () {
-            if (!this._isSmartControlsEnabled()) {
-                MessageToast.show(this.getResourceBundle().getText("smartControlsUnavailable"));
-                return { ok: false, reason: "smart_controls_disabled" };
-            }
-            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true));
+            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(this._isSmartControlsEnabled()));
         },
 
         onSearch: function () {
-            if (!this._isSmartControlsEnabled()) {
-                MessageToast.show(this.getResourceBundle().getText("smartControlsUnavailable"));
-                return Promise.resolve({ ok: false, reason: "smart_controls_disabled" });
-            }
             var oStateModel = this.getModel("state");
             var oSample = UxTelemetry.begin("search.execute", { source: "search_button" });
-            return Promise.resolve(SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true)))
+            return Promise.resolve(SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(this._isSmartControlsEnabled())))
                 .then(function (oResult) {
                     UxTelemetry.end(oSample, "success", oStateModel);
                     return oResult;
