@@ -133,19 +133,16 @@ html.theme-switching body::after {
   }
 }
 
-/* ===== Floating horizontal control bar over ObjectPage ===== */
+/* ===== Detail control block inside checklist card bounds ===== */
 .detailContent .detailControlBlockHost {
-  position: fixed;
-  top: 1.25rem;                 /* подстрой: чтобы не конфликтовало с hero */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
-
-  /* ширина как у hero: почти на весь экран, с отступами */
-  width: calc(100% - 3rem);
-  max-width: 1100px;
-
-  pointer-events: none;
+  position: sticky;
+  top: 0.9rem;
+  z-index: 8;
+  width: min(100%, 44rem);
+  margin: 0.9rem auto 0;
+  left: auto;
+  transform: none;
+  pointer-events: auto;
 }
 
 .detailContent .detailControlStickyBlock,
@@ -153,32 +150,33 @@ html.theme-switching body::after {
   pointer-events: auto;
 }
 
-/* rail внутри — горизонтально и аккуратно */
 .detailControlInlineCard {
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto;
   padding: 0.75rem 1rem;
 }
 
-/* чип-вид для ObjectStatus (чтобы был в стиле твоих пилюль) */
 .detailRailStatusChip {
   border-radius: 999px;
   padding: 0.25rem 0.6rem;
 }
 
-/* тулбар без лишней высоты */
 .detailControlToolbar {
   background: transparent;
   padding: 0;
 }
 
-/* мобилка: лучше сделать статичным, чтобы не мешал */
 @media (max-width: 900px) {
   .detailContent .detailControlBlockHost {
     position: static;
-    left: auto;
-    transform: none;
-    width: auto;
-    max-width: none;
-    pointer-events: auto;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0.65rem;
+  }
+
+  .detailControlInlineCard {
+    max-width: 100%;
   }
 }
 

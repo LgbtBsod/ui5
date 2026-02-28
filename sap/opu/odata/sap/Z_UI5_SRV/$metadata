@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+ <edmx:DataServices m:DataServiceVersion="2.0" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+  <Schema Namespace="Z_UI5_SRV" xmlns="http://schemas.microsoft.com/ado/2008/09/edm" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+   <EntityType Name="ChecklistFlat"><Key><PropertyRef Name="Uuid"/></Key>
+    <Property Name="Uuid" Type="Edm.String" Nullable="false" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="ChecklistId" Type="Edm.String" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="Lpc" Type="Edm.String" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="Status" Type="Edm.String" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="Date" Type="Edm.String" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="Equipment" Type="Edm.String" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="ObserverFullname" Type="Edm.String" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="ChangedOn" Type="Edm.DateTime" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="ChangedBy" Type="Edm.String" sap:filterable="true" sap:sortable="true"/>
+    <Property Name="VersionNumber" Type="Edm.Int32" sap:filterable="true" sap:sortable="true"/>
+   </EntityType>
+   <EntityContainer Name="Z_UI5_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="json">
+    <EntitySet Name="ChecklistFlatSet" EntityType="Z_UI5_SRV.ChecklistFlat" sap:creatable="false" sap:updatable="false" sap:deletable="false"/>
+   </EntityContainer>
+  </Schema>
+ </edmx:DataServices>
+</edmx:Edmx>

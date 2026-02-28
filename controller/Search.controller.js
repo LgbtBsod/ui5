@@ -231,7 +231,6 @@ sap.ui.define([
                 sourceType: sSourceType,
                 event: oEvent,
                 extractIdFromSmartEvent: SearchSmartControlCoordinator.extractChecklistIdFromSelectionEvent,
-                extractIdFromFallbackEvent: SearchUiFlowUseCase.extractIdFromListSelectionEvent,
                 selectedModel: this.getModel("selected"),
                 viewModel: this._getViewModel(),
                 loadChecklistById: SearchApplicationService.getChecklistById,
@@ -472,14 +471,6 @@ sap.ui.define([
             });
         },
 
-        onFallbackSelectionChange: function (oEvent) {
-            return this._runSelectionInteraction("selectionChange", "fallback", oEvent);
-        },
-
-        onFallbackItemPress: function (oEvent) {
-            return this._runSelectionInteraction("itemPress", "fallback", oEvent);
-        },
-
 
 
         _confirmNavigationFromDirty: function () {
@@ -575,7 +566,6 @@ sap.ui.define([
                     SearchIntentUseCase.markSearchedAndRebind(this._getViewModel(), this._rebindSmartTable.bind(this));
                 }.bind(this),
                 runTriggerPolicy: SearchTriggerPolicyUseCase.runTriggerPolicy,
-                runFallbackSearchLifecycle: SearchLifecycleSyncUseCase.runFallbackSearchLifecycle,
                 syncFilterHint: this._updateFilterState.bind(this),
                 refreshInlineAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this)
             };
