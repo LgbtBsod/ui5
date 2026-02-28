@@ -403,7 +403,7 @@ def checklist_root_set(filter: str | None = Query(None, alias="$filter"), orderb
     return odata_payload([_apply_select(_to_root(r), select) for r in rows], total if inlinecount == "allpages" else None)
 
 
-@router.get(f"{SERVICE_ROOT}/ChecklistRootSet('{{entity_key}}')")
+@router.get(f"{SERVICE_ROOT}/ChecklistRootSet({{entity_key}})")
 def checklist_root_entity(entity_key: str, response: Response, db: Session = Depends(get_db)):
     root, err = _load_root_or_error(db, entity_key)
     if err:
@@ -419,7 +419,7 @@ def checklist_basic_info_set(filter: str | None = Query(None, alias="$filter"), 
     return odata_payload([_to_basic(r) for r in rows], total if inlinecount == "allpages" else None)
 
 
-@router.get(f"{SERVICE_ROOT}/ChecklistBasicInfoSet('{{entity_key}}')")
+@router.get(f"{SERVICE_ROOT}/ChecklistBasicInfoSet({{entity_key}})")
 def checklist_basic_info_entity(entity_key: str, db: Session = Depends(get_db)):
     root, err = _load_root_or_error(db, entity_key)
     if err:
@@ -451,7 +451,7 @@ def dictionary_item_set(filter: str | None = Query(None, alias="$filter"), top: 
     return odata_payload([{"Domain": r.domain, "Key": r.key, "Text": r.text} for r in rows], total if inlinecount == "allpages" else None)
 
 
-@router.get(f"{SERVICE_ROOT}/LastChangeSet('{{entity_key}}')")
+@router.get(f"{SERVICE_ROOT}/LastChangeSet({{entity_key}})")
 def last_change_entity(entity_key: str, response: Response, db: Session = Depends(get_db)):
     root, err = _load_root_or_error(db, entity_key)
     if err:
@@ -508,7 +508,7 @@ def lock_status_set(
     return odata_payload(payload, total if inlinecount == "allpages" else None)
 
 
-@router.get(f"{SERVICE_ROOT}/LockStatusSet('{{entity_key}}')")
+@router.get(f"{SERVICE_ROOT}/LockStatusSet({{entity_key}})")
 def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="SessionGuid"), db: Session = Depends(get_db)):
     return {"d": _build_lock_status_row(db, _entity_key(entity_key), session_guid=session_guid)}
 
@@ -845,7 +845,7 @@ def attachment_set(filter: str | None = Query(None, alias="$filter"), expand: st
     return odata_payload(rows)
 
 
-@router.put(f"{SERVICE_ROOT}/AttachmentSet('{{entity_key}}')/$value")
+@router.put(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})/$value")
 async def attachment_value_put(entity_key: str, request: Request, db: Session = Depends(get_db)):
     key = _entity_key(entity_key)
     payload = await request.body()
@@ -876,7 +876,7 @@ async def attachment_value_put(entity_key: str, request: Request, db: Session = 
     return Response(status_code=204)
 
 
-@router.get(f"{SERVICE_ROOT}/AttachmentSet('{{entity_key}}')/$value")
+@router.get(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})/$value")
 def attachment_value_get(entity_key: str):
     key = _entity_key(entity_key)
     meta = _ATTACHMENTS.get(key)
@@ -888,7 +888,7 @@ def attachment_value_get(entity_key: str):
     return Response(content=path.read_bytes(), media_type=meta.get("mime") or "application/octet-stream")
 
 
-@router.delete(f"{SERVICE_ROOT}/AttachmentSet('{{entity_key}}')")
+@router.delete(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})")
 def attachment_delete(entity_key: str, db: Session = Depends(get_db)):
     key = _entity_key(entity_key)
     meta = _ATTACHMENTS.pop(key, None)

@@ -306,12 +306,21 @@ function testDeltaPayloadBuilder() {
 
   const delta = mod.buildDeltaPayload(current, base);
   assert(delta !== null, 'buildDeltaPayload should produce delta for changed data');
-  assert(delta.root.status === 'REGISTERED', 'buildDeltaPayload should include changed root fields');
-  assert(!('version_number' in delta.root), 'buildDeltaPayload should exclude technical fields from root delta');
-  assert(delta.basic.OBSERVER_FULLNAME === 'A2', 'buildDeltaPayload should include basic field diff');
-  assert(delta.checks.some((r) => r.id === 'c1' && r.edit_mode === 'U'), 'buildDeltaPayload should mark updated rows');
-  assert(delta.checks.some((r) => r.id === 'c2' && r.edit_mode === 'C'), 'buildDeltaPayload should mark created rows');
-  assert(delta.barriers.some((r) => r.id === 'b1' && r.edit_mode === 'D'), 'buildDeltaPayload should mark deleted rows');
+  assert(delta.RootKey === '1', 'buildDeltaPayload should carry root key');
+  assert(/^\/Date\(\d+\)\/$/.test(delta.ClientAggChangedOn), 'buildDeltaPayload should provide OData datetime for optimistic lock');
+  assert(Array.isArray(delta.Changes) && delta.Changes.length > 0, 'buildDeltaPayload should produce canonical Changes array');
+
+  var rootUpdate = delta.Changes.find((c) => c.Entity === 'ROOT' && c.EditMode === 'U');
+  assert(!!rootUpdate, 'buildDeltaPayload should include ROOT update');
+  assert(rootUpdate.Fields.status === 'REGISTERED', 'buildDeltaPayload should include changed ROOT fields only');
+  assert(!('version_number' in rootUpdate.Fields), 'buildDeltaPayload should exclude technical ROOT fields');
+
+  var checkUpdate = delta.Changes.find((c) => c.Entity === 'CHECK' && c.EditMode === 'U' && c.Key === 'c1');
+  var checkCreate = delta.Changes.find((c) => c.Entity === 'CHECK' && c.EditMode === 'C');
+  var barrierDelete = delta.Changes.find((c) => c.Entity === 'BARRIER' && c.EditMode === 'D' && c.Key === 'b1');
+  assert(!!checkUpdate, 'buildDeltaPayload should mark updated check rows');
+  assert(!!checkCreate, 'buildDeltaPayload should mark created check rows');
+  assert(!!barrierDelete, 'buildDeltaPayload should mark deleted barrier rows');
 }
 
 

@@ -264,7 +264,7 @@ sap.ui.define([], function () {
     }
 
     function _pickClientAgg(oPayload) {
-        var v = (((oPayload || {}).meta || {}).aggChangedOn) || (((oPayload || {}).root || {}).changed_on) || (((oPayload || {}).root || {}).server_changed_on) || "";
+        var v = (oPayload && oPayload.ClientAggChangedOn) || (((oPayload || {}).meta || {}).aggChangedOn) || (((oPayload || {}).root || {}).changed_on) || (((oPayload || {}).root || {}).server_changed_on) || "";
         if (!v) { return null; }
         if (typeof v === "string" && /^\/Date\(\d+\)\/$/.test(v)) { return v; }
         var oDate = new Date(v);
@@ -753,9 +753,9 @@ createCheckList: function (oData) {
                     return _request("/AutoSave", {
                         method: "POST",
                         body: {
-                            RootKey: sId,
+                            RootKey: (oDeltaPayload && oDeltaPayload.RootKey) || sId,
                             ClientAggChangedOn: _pickClientAgg(oDeltaPayload) || _pickClientAgg(oFullPayload),
-                            Changes: _legacyToCanonicalChanges(oDeltaPayload, sId)
+                            Changes: (oDeltaPayload && oDeltaPayload.Changes) || _legacyToCanonicalChanges(oDeltaPayload, sId)
                         }
                     }).catch(function () {
                         return _request("/actions/AutoSaveChecklist", {
