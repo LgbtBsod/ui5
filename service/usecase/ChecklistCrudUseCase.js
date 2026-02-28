@@ -8,6 +8,10 @@ sap.ui.define([
             return BackendAdapter.getChecklistRoot(sId);
         },
 
+        getLastChangeSet: function (sId) {
+            return BackendAdapter.getLastChangeSet(sId);
+        },
+
         getChecklistRows: function (sId, sSection, mPaging) {
             if (sSection === "barriers") {
                 return BackendAdapter.getChecklistBarriers(sId, mPaging);

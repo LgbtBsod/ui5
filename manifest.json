@@ -113,12 +113,13 @@
     },
     "routing": {
       "config": {
-        "routerClass": "sap.f.routing.Router",
+        "routerClass": "sap_ui5.util.FlexibleRouter",
         "viewType": "XML",
         "viewPath": "sap_ui5.view",
         "controlId": "fcl",
         "controlAggregation": "beginColumnPages",
-        "async": true
+        "async": true,
+        "fclControlId": "fcl"
       },
       "routes": [
         {
@@ -127,7 +128,8 @@
           "target": [
             "search"
           ],
-          "layout": "OneColumn"
+          "layout": "OneColumn",
+          "targetColumn": "begin"
         },
         {
           "pattern": "detail/{id}",
@@ -136,7 +138,8 @@
             "search",
             "detail"
           ],
-          "layout": "TwoColumnsMidExpanded"
+          "layout": "TwoColumnsMidExpanded",
+          "targetColumn": "mid"
         },
         {
           "pattern": "detail/{id}/{layout}",
@@ -150,12 +153,17 @@
       "targets": {
         "search": {
           "viewName": "Search",
-          "viewLevel": 1
+          "viewLevel": 1,
+          "controlAggregation": "beginColumnPages",
+          "targetColumn": "begin",
+          "layout": "OneColumn"
         },
         "detail": {
           "viewName": "Detail",
           "viewLevel": 2,
-          "controlAggregation": "midColumnPages"
+          "controlAggregation": "midColumnPages",
+          "targetColumn": "mid",
+          "layout": "TwoColumnsMidExpanded"
         }
       }
     },

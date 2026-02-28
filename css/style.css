@@ -180,3 +180,26 @@ html.theme-switching body::after {
   }
 }
 
+
+/* FCL custom resize handles (legacy UI5 fallback when sap.f router/features are limited) */
+.fclCustomResizable {
+    position: relative;
+}
+
+.fclResizeHandle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 25;
+    background: rgba(90, 110, 140, 0.14);
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    border-right: 1px solid rgba(255, 255, 255, 0.25);
+    transition: background-color 0.15s ease;
+}
+
+.fclResizeHandle:hover,
+.fclResizeHandle:active {
+    background: rgba(31, 111, 235, 0.32);
+}

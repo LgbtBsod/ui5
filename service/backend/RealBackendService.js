@@ -4,6 +4,7 @@ sap.ui.define([], function () {
     var _baseUrl = "/sap/opu/odata/sap/Z_UI5_SRV";
     var _userId = "demoUser";
     var _sessionGuid = "sess-" + Date.now();
+    var _csrfToken = "";
     var _referenceBundleCache = null;
     var _referenceBundleLoadedAt = 0;
 
@@ -32,9 +33,26 @@ sap.ui.define([], function () {
         var fn = sPhase === "error" ? console.warn : console.info;
         fn.call(console, "[backend:" + sPhase + "]", Object.assign({ path: sPath }, mDetails || {}));
     }
+    function _fetchCsrfToken() {
+        return fetch(_joinUrl(_baseUrl, "/"), {
+            method: "GET",
+            credentials: "same-origin",
+            headers: {
+                "X-CSRF-Token": "Fetch"
+            }
+        }).then(function (oResponse) {
+            if (!oResponse.ok) {
+                throw new Error("Failed to fetch CSRF token");
+            }
+            _csrfToken = oResponse.headers.get("X-CSRF-Token") || "";
+            return _csrfToken;
+        });
+    }
+
     function _request(sPath, mOptions) {
         var mOpts = mOptions || {};
         var sMethod = mOpts.method || "GET";
+        var bWrite = ["POST", "PUT", "PATCH", "DELETE", "MERGE"].indexOf(String(sMethod).toUpperCase()) >= 0;
         var sUrl = _joinUrl(_baseUrl, sPath);
 
         if (mOpts.params) {
@@ -48,12 +66,26 @@ sap.ui.define([], function () {
             hasBody: !!mOpts.body
         });
 
-        return fetch(sUrl, {
+        function doFetch() {
+            var mHeaders = Object.assign({ "Content-Type": "application/json" }, mOpts.headers || {});
+            if (bWrite && _csrfToken) {
+                mHeaders["X-CSRF-Token"] = _csrfToken;
+            }
+            return fetch(sUrl, {
             method: sMethod,
-            headers: Object.assign({ "Content-Type": "application/json" }, mOpts.headers || {}),
+            credentials: "same-origin",
+            headers: mHeaders,
             body: mOpts.body ? JSON.stringify(mOpts.body) : undefined
-        }).then(function (oResponse) {
+            });
+        }
+
+        function handleResponse(oResponse) {
             if (!oResponse.ok) {
+                if (bWrite && oResponse.status === 403) {
+                    return _fetchCsrfToken().then(function () {
+                        return doFetch().then(handleResponse);
+                    });
+                }
                 return oResponse.text().then(function (sText) {
                     _logRequestPhase("error", sPath, {
                         method: sMethod,
@@ -77,7 +109,12 @@ sap.ui.define([], function () {
                 });
                 return oJson;
             });
-        });
+        }
+
+        if (bWrite && !_csrfToken) {
+            return _fetchCsrfToken().then(doFetch).then(handleResponse);
+        }
+        return doFetch().then(handleResponse);
     }
 
     function _mapStatusToUi(sStatus) {
@@ -147,21 +184,21 @@ sap.ui.define([], function () {
     function _mapSearchRow(oRow) {
         return {
             root: {
-                id: oRow.db_key || oRow.id,
-                db_key: oRow.db_key || oRow.id,
+                id: oRow.Key || oRow.db_key || oRow.id,
+                db_key: oRow.Key || oRow.db_key || oRow.id,
                 integrationFlag: true,
                 this_is_integration_data: true,
                 successRateChecks: 0,
                 successRateBarriers: 0,
-                status: _mapStatusToUi(oRow.status)
+                status: _mapStatusToUi(oRow.Status || oRow.status)
             },
             basic: {
-                date: oRow.date || "",
+                date: oRow.DateCheck || oRow.date || "",
                 time: "",
                 timezone: "Europe/Amsterdam",
-                equipment: oRow.equipment || "",
-                LPC_KEY: oRow.lpc || "",
-                checklist_id: oRow.checklist_id || ""
+                equipment: oRow.EquipName || oRow.equipment || "",
+                LPC_KEY: oRow.Lpc || oRow.lpc || "",
+                checklist_id: oRow.Id || oRow.checklist_id || ""
             },
             checks: [],
             barriers: []
@@ -169,17 +206,116 @@ sap.ui.define([], function () {
     }
 
     function _acquireLock(sId, sStealFrom) {
-        return _request("/lock/acquire", {
-            method: "POST",
-            params: {
-                object_uuid: sId,
-                session_guid: _sessionGuid,
-                uname: _userId,
-                iv_steal_from: sStealFrom || ""
-            }
+        return _lockControl("ACQUIRE", sId, {
+            sessionGuid: _sessionGuid,
+            userId: _userId,
+            stealFrom: sStealFrom || ""
+        }).catch(function () {
+            return _request("/lock/acquire", {
+                method: "POST",
+                params: {
+                    object_uuid: sId,
+                    session_guid: _sessionGuid,
+                    uname: _userId,
+                    iv_steal_from: sStealFrom || ""
+                }
+            });
         });
     }
 
+
+    
+
+    function _normalizeLockResponse(oRaw) {
+        var o = oRaw || {};
+        var bOk = (typeof o.Ok === "boolean") ? o.Ok : (typeof o.success === "boolean" ? o.success : true);
+        var sReason = o.ReasonCode || o.reason_code || "";
+        var bKilled = (typeof o.IsKilled === "boolean") ? o.IsKilled : !!o.is_killed;
+        if (!bKilled && (sReason === "KILLED" || sReason === "LOCKED_BY_OTHER" || sReason === "EXPIRED")) {
+            bKilled = true;
+        }
+        return {
+            success: bOk,
+            Ok: bOk,
+            is_killed: bKilled,
+            IsKilled: bKilled,
+            reason_code: sReason,
+            ReasonCode: sReason,
+            lock_expires: o.ExpiresOn || o.lock_expires || null,
+            lock_expires_on: o.ExpiresOn || o.lock_expires || null,
+            owner: o.Owner || o.owner || ""
+        };
+    }
+
+    function _lockControl(sAction, sObjectId, mExtra) {
+        mExtra = mExtra || {};
+        return _request("/LockControl", {
+            method: "POST",
+            body: {
+                Action: sAction,
+                RootKey: sObjectId,
+                SessionGuid: mExtra.sessionGuid || _sessionGuid,
+                Uname: mExtra.userId || _userId,
+                StealFrom: mExtra.stealFrom || ""
+            }
+        }).then(function (oData) {
+            return _normalizeLockResponse((oData && oData.d) || oData || { Ok: false });
+        });
+    }
+
+    function _pickClientAgg(oPayload) {
+        var v = (((oPayload || {}).meta || {}).aggChangedOn) || (((oPayload || {}).root || {}).changed_on) || (((oPayload || {}).root || {}).server_changed_on) || "";
+        if (!v) { return null; }
+        if (typeof v === "string" && /^\/Date\(\d+\)\/$/.test(v)) { return v; }
+        var oDate = new Date(v);
+        if (Number.isNaN(oDate.getTime())) { return null; }
+        return "/Date(" + oDate.getTime() + ")/";
+    }
+
+    function _legacyToCanonicalChanges(oDeltaPayload, sRootId) {
+        var aChanges = [];
+        var oBasic = (oDeltaPayload && oDeltaPayload.basic) || {};
+        if (Object.keys(oBasic).length) {
+            aChanges.push({
+                Entity: "BASIC",
+                Key: sRootId,
+                ParentKey: sRootId,
+                EditMode: "U",
+                Fields: {
+                    LocationKey: oBasic.LOCATION_KEY,
+                    LocationName: oBasic.LOCATION_NAME,
+                    EquipName: oBasic.equipment || oBasic.EquipName || ""
+                }
+            });
+        }
+        ((oDeltaPayload && oDeltaPayload.checks) || []).forEach(function (oItem) {
+            aChanges.push({
+                Entity: "CHECK",
+                Key: oItem.id || "",
+                ParentKey: sRootId,
+                EditMode: "U",
+                Fields: {
+                    ChecksNum: oItem.id || 0,
+                    Comment: oItem.comment || "",
+                    Result: !!oItem.result
+                }
+            });
+        });
+        ((oDeltaPayload && oDeltaPayload.barriers) || []).forEach(function (oItem) {
+            aChanges.push({
+                Entity: "BARRIER",
+                Key: oItem.id || "",
+                ParentKey: sRootId,
+                EditMode: "U",
+                Fields: {
+                    BarriersNum: oItem.id || 0,
+                    Comment: oItem.comment || "",
+                    Result: !!oItem.result
+                }
+            });
+        });
+        return aChanges;
+    }
 
     function _buildRequestGuid(sPrefix, sObjectId, oPayload) {
         var sRaw = sPrefix + "|" + String(sObjectId || "") + "|" + String(_sessionGuid || "") + "|" + JSON.stringify(oPayload || {});
@@ -249,7 +385,7 @@ sap.ui.define([], function () {
         },
 
         getCheckLists: function () {
-            return _request("/SearchRows", {
+            return _request("/ChecklistSearchSet", {
                 params: {
                     "$top": 200,
                     "$skip": 0,
@@ -286,14 +422,14 @@ sap.ui.define([], function () {
 
             if (sIdContains) {
                 var sEscapedId = sIdContains.replace(/'/g, "''");
-                aFilterParts.push("contains(db_key,'" + sEscapedId + "') or contains(checklist_id,'" + sEscapedId + "')");
+                aFilterParts.push("contains(Key,'" + sEscapedId + "') or contains(Id,'" + sEscapedId + "')");
             }
             if (sLpcKey) {
                 var sEscapedLpc = sLpcKey.replace(/'/g, "''");
-                aFilterParts.push("lpc eq '" + sEscapedLpc + "'");
+                aFilterParts.push("Lpc eq '" + sEscapedLpc + "'");
             }
 
-            return _request("/SearchRows", {
+            return _request("/ChecklistSearchSet", {
                 params: {
                     "$top": iTop,
                     "$skip": 0,
@@ -319,56 +455,152 @@ sap.ui.define([], function () {
         },
 
 
+        getLastChangeSet: function (sId) {
+            var sKey = String(sId || "").replace(/-/g, "");
+            return _request("/LastChangeSet('" + encodeURIComponent(sKey) + "')").then(function (oData) {
+                var o = (oData && oData.d) || {};
+                return {
+                    RootKey: o.RootKey || sKey,
+                    AggChangedOn: o.AggChangedOn || ""
+                };
+            });
+        },
+
         getChecklistRoot: function (sId) {
-            return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } }).then(function (oRoot) {
+            var sKey = String(sId || "").replace(/-/g, "");
+            return Promise.all([
+                _request("/ChecklistRootSet('" + encodeURIComponent(sKey) + "')"),
+                _request("/ChecklistBasicInfoSet('" + encodeURIComponent(sKey) + "')"),
+                _request("/LastChangeSet('" + encodeURIComponent(sKey) + "')"),
+                _request("/ChecklistCheckSet", { params: { "$filter": "RootKey eq '" + sKey + "'", "$top": 20, "$skip": 0, "$inlinecount": "allpages" } }),
+                _request("/ChecklistBarrierSet", { params: { "$filter": "RootKey eq '" + sKey + "'", "$top": 20, "$skip": 0, "$inlinecount": "allpages" } })
+            ]).then(function (aData) {
+                var oRoot = (aData[0] && aData[0].d) || {};
+                var oBasic = (aData[1] && aData[1].d) || {};
+                var oLastChange = (aData[2] && aData[2].d) || {};
+                var aChecks = (((aData[3] || {}).d || {}).results || []).map(function (oCheck, iIndex) {
+                    return {
+                        id: oCheck.Key || (iIndex + 1),
+                        text: oCheck.Comment || "",
+                        comment: oCheck.Comment || "",
+                        result: !!oCheck.Result
+                    };
+                });
+                var aBarriers = (((aData[4] || {}).d || {}).results || []).map(function (oBarrier, iIndex) {
+                    return {
+                        id: oBarrier.Key || (iIndex + 1),
+                        text: oBarrier.Comment || "",
+                        comment: oBarrier.Comment || "",
+                        result: !!oBarrier.Result
+                    };
+                });
                 return {
                     root: {
-                        id: oRoot.id,
-                        integrationFlag: (typeof oRoot.this_is_integration_data === "boolean" ? oRoot.this_is_integration_data : true),
-                        this_is_integration_data: (typeof oRoot.this_is_integration_data === "boolean" ? oRoot.this_is_integration_data : true),
-                        successRateChecks: 0,
-                        successRateBarriers: 0,
-                        status: _mapStatusToUi(oRoot.status)
+                        id: oRoot.Key || sKey,
+                        integrationFlag: true,
+                        this_is_integration_data: true,
+                        successRateChecks: Number(oRoot.SuccessChecksRate || 0),
+                        successRateBarriers: Number(oRoot.SuccessBarriersRate || 0),
+                        status: _mapStatusToUi(oRoot.Status || "")
                     },
                     basic: {
-                        date: oRoot.date || "",
-                        time: "",
-                        timezone: "Europe/Amsterdam",
-                        equipment: oRoot.equipment || "",
-                        LPC_KEY: oRoot.lpc || "",
-                        LPC_TEXT: oRoot.lpc_text || "",
-                        checklist_id: oRoot.checklist_id || "",
-                        OBSERVER_FULLNAME: oRoot.observer_fullname || "",
-                        OBSERVER_PERNER: oRoot.observer_perner || "",
-                        OBSERVER_POSITION: oRoot.observer_position || "",
-                        OBSERVER_ORGUNIT: oRoot.observer_orgunit || "",
-                        OBSERVER_INTEGRATION_NAME: oRoot.observer_integration_name || "",
-                        OBSERVED_FULLNAME: oRoot.observed_fullname || "",
-                        OBSERVED_PERNER: oRoot.observed_perner || "",
-                        OBSERVED_POSITION: oRoot.observed_position || "",
-                        OBSERVED_ORGUNIT: oRoot.observed_orgunit || "",
-                        OBSERVED_INTEGRATION_NAME: oRoot.observed_integration_name || "",
-                        LOCATION_KEY: oRoot.location_key || "",
-                        LOCATION_NAME: oRoot.location_name || "",
-                        LOCATION_TEXT: oRoot.location_text || ""
+                        date: oBasic.DateCheck || "",
+                        time: oBasic.TimeCheck || "",
+                        timezone: oBasic.TimeZone || "UTC",
+                        equipment: oBasic.EquipName || "",
+                        LPC_KEY: oBasic.Lpc || "",
+                        LPC_TEXT: oBasic.Lpc || "",
+                        checklist_id: oRoot.Id || "",
+                        OBSERVER_FULLNAME: oBasic.ObserverFullname || "",
+                        OBSERVER_PERNER: oBasic.ObserverPernr || "",
+                        OBSERVER_POSITION: oBasic.ObserverPosition || "",
+                        OBSERVER_ORGUNIT: oBasic.ObserverOrgUnit || "",
+                        OBSERVER_INTEGRATION_NAME: "",
+                        OBSERVED_FULLNAME: oBasic.ObservedFullname || "",
+                        OBSERVED_PERNER: oBasic.ObservedPernr || "",
+                        OBSERVED_POSITION: oBasic.ObservedPosition || "",
+                        OBSERVED_ORGUNIT: oBasic.ObservedOrgUnit || "",
+                        OBSERVED_INTEGRATION_NAME: "",
+                        LOCATION_KEY: oBasic.LocationKey || "",
+                        LOCATION_NAME: oBasic.LocationName || "",
+                        LOCATION_TEXT: oBasic.LocationName || ""
                     },
-                    checks: [],
-                    barriers: []
+                    checks: aChecks,
+                    barriers: aBarriers,
+                    meta: {
+                        aggChangedOn: oLastChange.AggChangedOn || oRoot.ChangedOn || ""
+                    }
                 };
+            }).catch(function () {
+                return _request("/checklist/" + encodeURIComponent(sId), { params: { "$expand": false } }).then(function (oRootLegacy) {
+                    return {
+                        root: {
+                            id: oRootLegacy.id,
+                            integrationFlag: (typeof oRootLegacy.this_is_integration_data === "boolean" ? oRootLegacy.this_is_integration_data : true),
+                            this_is_integration_data: (typeof oRootLegacy.this_is_integration_data === "boolean" ? oRootLegacy.this_is_integration_data : true),
+                            successRateChecks: 0,
+                            successRateBarriers: 0,
+                            status: _mapStatusToUi(oRootLegacy.status)
+                        },
+                        basic: {
+                            date: oRootLegacy.date || "",
+                            time: "",
+                            timezone: "Europe/Amsterdam",
+                            equipment: oRootLegacy.equipment || "",
+                            LPC_KEY: oRootLegacy.lpc || "",
+                            LPC_TEXT: oRootLegacy.lpc_text || "",
+                            checklist_id: oRootLegacy.checklist_id || "",
+                            OBSERVER_FULLNAME: oRootLegacy.observer_fullname || "",
+                            OBSERVER_PERNER: oRootLegacy.observer_perner || "",
+                            OBSERVER_POSITION: oRootLegacy.observer_position || "",
+                            OBSERVER_ORGUNIT: oRootLegacy.observer_orgunit || "",
+                            OBSERVER_INTEGRATION_NAME: oRootLegacy.observer_integration_name || "",
+                            OBSERVED_FULLNAME: oRootLegacy.observed_fullname || "",
+                            OBSERVED_PERNER: oRootLegacy.observed_perner || "",
+                            OBSERVED_POSITION: oRootLegacy.observed_position || "",
+                            OBSERVED_ORGUNIT: oRootLegacy.observed_orgunit || "",
+                            OBSERVED_INTEGRATION_NAME: oRootLegacy.observed_integration_name || "",
+                            LOCATION_KEY: oRootLegacy.location_key || "",
+                            LOCATION_NAME: oRootLegacy.location_name || "",
+                            LOCATION_TEXT: oRootLegacy.location_text || ""
+                        },
+                        checks: [],
+                        barriers: []
+                    };
+                });
             });
         },
 
         getChecklistChecks: function (sId, mPaging) {
             var iTop = Number((mPaging && mPaging.top) || 20);
             var iSkip = Number((mPaging && mPaging.skip) || 0);
-            return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oData) {
-                return ((oData && oData.value) || []).map(function (oCheck, iIndex) {
+            var sKey = String(sId || "").replace(/-/g, "");
+            return _request("/ChecklistCheckSet", {
+                params: {
+                    "$filter": "RootKey eq '" + sKey + "'",
+                    "$top": iTop,
+                    "$skip": iSkip,
+                    "$inlinecount": "allpages"
+                }
+            }).then(function (oData) {
+                return (((oData || {}).d || {}).results || []).map(function (oCheck, iIndex) {
                     return {
-                        id: oCheck.id || (iIndex + 1),
-                        text: oCheck.text || "",
-                        comment: "",
-                        result: oCheck.status === "DONE"
+                        id: oCheck.Key || (iIndex + 1),
+                        text: oCheck.Comment || "",
+                        comment: oCheck.Comment || "",
+                        result: !!oCheck.Result
                     };
+                });
+            }).catch(function () {
+                return _request("/checklist/" + encodeURIComponent(sId) + "/checks", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oDataLegacy) {
+                    return ((oDataLegacy && oDataLegacy.value) || []).map(function (oCheckLegacy, iIndex) {
+                        return {
+                            id: oCheckLegacy.id || (iIndex + 1),
+                            text: oCheckLegacy.text || "",
+                            comment: "",
+                            result: oCheckLegacy.status === "DONE"
+                        };
+                    });
                 });
             });
         },
@@ -376,14 +608,33 @@ sap.ui.define([], function () {
         getChecklistBarriers: function (sId, mPaging) {
             var iTop = Number((mPaging && mPaging.top) || 20);
             var iSkip = Number((mPaging && mPaging.skip) || 0);
-            return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oData) {
-                return ((oData && oData.value) || []).map(function (oBarrier, iIndex) {
+            var sKey = String(sId || "").replace(/-/g, "");
+            return _request("/ChecklistBarrierSet", {
+                params: {
+                    "$filter": "RootKey eq '" + sKey + "'",
+                    "$top": iTop,
+                    "$skip": iSkip,
+                    "$inlinecount": "allpages"
+                }
+            }).then(function (oData) {
+                return (((oData || {}).d || {}).results || []).map(function (oBarrier, iIndex) {
                     return {
-                        id: oBarrier.id || (iIndex + 1),
-                        text: oBarrier.description || "",
-                        comment: "",
-                        result: !!oBarrier.is_active
+                        id: oBarrier.Key || (iIndex + 1),
+                        text: oBarrier.Comment || "",
+                        comment: oBarrier.Comment || "",
+                        result: !!oBarrier.Result
                     };
+                });
+            }).catch(function () {
+                return _request("/checklist/" + encodeURIComponent(sId) + "/barriers", { params: { "$top": iTop, "$skip": iSkip } }).then(function (oDataLegacy) {
+                    return ((oDataLegacy && oDataLegacy.value) || []).map(function (oBarrierLegacy, iIndex) {
+                        return {
+                            id: oBarrierLegacy.id || (iIndex + 1),
+                            text: oBarrierLegacy.description || "",
+                            comment: "",
+                            result: !!oBarrierLegacy.is_active
+                        };
+                    });
                 });
             });
         },
@@ -446,25 +697,50 @@ createCheckList: function (oData) {
 
             return _acquireLock(sId)
                 .then(function () {
-                    return _request("/actions/SaveChecklist", {
+                    return _request("/SaveChanges", {
                         method: "POST",
-                        params: {
-                            root_id: sId,
-                            user_id: _userId,
-                            force: !!mOptions.force,
-                            request_guid: _buildRequestGuid("SAVE", sId, oData)
-                        },
                         body: {
-                            lpc: oBasic.LPC_KEY || "L2",
-                            basic: oBasic,
-                            checks: aChecks,
-                            barriers: aBarriers
+                            RootKey: sId,
+                            ClientAggChangedOn: _pickClientAgg(oData),
+                            FullPayload: {
+                                root: { Status: ((oData || {}).root || {}).status || "01" },
+                                basic: {
+                                    LocationKey: oBasic.LOCATION_KEY || "",
+                                    LocationName: oBasic.LOCATION_NAME || "",
+                                    EquipName: oBasic.equipment || ""
+                                },
+                                checks: aChecks.map(function (x, i) { return { ChecksNum: x.id || i + 1, Comment: x.comment || "", Result: !!x.result }; }),
+                                barriers: aBarriers.map(function (x, i) { return { BarriersNum: x.id || i + 1, Comment: x.comment || "", Result: !!x.result }; })
+                            }
                         }
+                    }).catch(function () {
+                        return _request("/actions/SaveChecklist", {
+                            method: "POST",
+                            params: {
+                                root_id: sId,
+                                user_id: _userId,
+                                force: !!mOptions.force,
+                                request_guid: _buildRequestGuid("SAVE", sId, oData)
+                            },
+                            body: {
+                                lpc: oBasic.LPC_KEY || "L2",
+                                basic: oBasic,
+                                checks: aChecks,
+                                barriers: aBarriers
+                            }
+                        });
                     });
                 })
-                .then(function (oSaved) {
-                    var oRoot = (oSaved && oSaved.d) || { id: sId };
-                    return _mapChecklist(oRoot, { checks: aChecks, barriers: aBarriers });
+                .then(function () {
+                    var oRoot = ((oData || {}).root || {});
+                    return _mapChecklist({
+                        id: sId,
+                        checklist_id: ((oBasic && oBasic.checklist_id) || ""),
+                        lpc: oBasic.LPC_KEY || "",
+                        status: oRoot.status || "01",
+                        date: oBasic.date || "",
+                        equipment: oBasic.equipment || ""
+                    }, { checks: aChecks, barriers: aBarriers });
                 });
         },
 
@@ -474,29 +750,68 @@ createCheckList: function (oData) {
 
             return _acquireLock(sId)
                 .then(function () {
-                    return _request("/actions/AutoSaveChecklist", {
+                    return _request("/AutoSave", {
                         method: "POST",
-                        params: {
-                            root_id: sId,
-                            user_id: _userId,
-                            force: !!mOptions.force,
-                            request_guid: _buildRequestGuid("AUTOSAVE", sId, oDeltaPayload)
-                        },
                         body: {
-                            lpc: oBasic.LPC_KEY,
-                            basic: oBasic,
-                            checks: (oDeltaPayload && oDeltaPayload.checks) || [],
-                            barriers: (oDeltaPayload && oDeltaPayload.barriers) || []
+                            RootKey: sId,
+                            ClientAggChangedOn: _pickClientAgg(oDeltaPayload) || _pickClientAgg(oFullPayload),
+                            Changes: _legacyToCanonicalChanges(oDeltaPayload, sId)
                         }
+                    }).catch(function () {
+                        return _request("/actions/AutoSaveChecklist", {
+                            method: "POST",
+                            params: {
+                                root_id: sId,
+                                user_id: _userId,
+                                force: !!mOptions.force,
+                                request_guid: _buildRequestGuid("AUTOSAVE", sId, oDeltaPayload)
+                            },
+                            body: {
+                                lpc: oBasic.LPC_KEY,
+                                basic: oBasic,
+                                checks: (oDeltaPayload && oDeltaPayload.checks) || [],
+                                barriers: (oDeltaPayload && oDeltaPayload.barriers) || []
+                            }
+                        });
                     });
                 })
-                .then(function (oSaved) {
-                    var oRoot = (oSaved && oSaved.d) || { id: sId };
-                    return _mapChecklist(oRoot, {
+                .then(function () {
+                    return _mapChecklist({
+                        id: sId,
+                        checklist_id: ((oBasic && oBasic.checklist_id) || ""),
+                        lpc: oBasic.LPC_KEY || "",
+                        status: (((oFullPayload || {}).root || {}).status || "01"),
+                        date: oBasic.date || "",
+                        equipment: oBasic.equipment || ""
+                    }, {
                         checks: (oFullPayload && oFullPayload.checks) || [],
                         barriers: (oFullPayload && oFullPayload.barriers) || []
                     });
                 });
+        },
+
+        setChecklistStatus: function (sId, sNewStatus, oPayload) {
+            return _request("/SetChecklistStatus", {
+                method: "POST",
+                body: {
+                    RootKey: sId,
+                    NewStatus: sNewStatus,
+                    ClientAggChangedOn: _pickClientAgg(oPayload)
+                }
+            }).then(function (oData) {
+                return (oData && oData.d) || oData || {};
+            }).catch(function () {
+                return _request("/actions/SetChecklistStatus", {
+                    method: "POST",
+                    body: {
+                        RootKey: sId,
+                        NewStatus: sNewStatus,
+                        ClientAggChangedOn: _pickClientAgg(oPayload)
+                    }
+                }).then(function (oData) {
+                    return (oData && oData.d) || oData || {};
+                });
+            });
         },
 
         deleteCheckList: function (sId) {
@@ -521,58 +836,57 @@ createCheckList: function (oData) {
         lockAcquire: function (sObjectId, sSessionId, sUser, sStealFrom) {
             if (sSessionId) { _sessionGuid = sSessionId; }
             if (sUser) { _userId = sUser; }
-            return _request("/actions/LockAcquire", {
-                method: "POST",
-                params: {
-                    root_id: sObjectId,
-                    user_id: _userId,
-                    session_guid: _sessionGuid,
-                    iv_steal_from: sStealFrom || ""
-                }
-            }).then(function (oData) {
-                return (oData && oData.d) || oData || { success: false };
+            return _lockControl("ACQUIRE", sObjectId, {
+                sessionGuid: _sessionGuid,
+                userId: _userId,
+                stealFrom: sStealFrom || ""
             }).catch(function () {
-                return _acquireLock(sObjectId, sStealFrom);
+                return _request("/actions/LockAcquire", {
+                    method: "POST",
+                    params: {
+                        root_id: sObjectId,
+                        user_id: _userId,
+                        session_guid: _sessionGuid,
+                        iv_steal_from: sStealFrom || ""
+                    }
+                }).then(function (oData) {
+                    return _normalizeLockResponse((oData && oData.d) || oData || { success: false });
+                });
             });
         },
 
         lockHeartbeat: function (sObjectId, sSessionId) {
             if (!sObjectId) {
-                return Promise.resolve({ success: true, is_killed: false });
+                return Promise.resolve({ Ok: true, IsKilled: false });
             }
             if (sSessionId) { _sessionGuid = sSessionId; }
-            return _request("/actions/LockHeartbeat", {
-                method: "POST",
-                params: {
-                    root_id: sObjectId,
-                    session_guid: _sessionGuid
-                }
-            }).then(function (oData) {
-                return (oData && oData.d) || oData || { success: false };
+            return _lockControl("HEARTBEAT", sObjectId, {
+                sessionGuid: _sessionGuid
             }).catch(function () {
-                return _request("/lock/heartbeat", {
+                return _request("/actions/LockHeartbeat", {
                     method: "POST",
                     params: {
-                        object_uuid: sObjectId,
+                        root_id: sObjectId,
                         session_guid: _sessionGuid
                     }
+                }).then(function (oData) {
+                    return _normalizeLockResponse((oData && oData.d) || oData || { success: false });
                 });
             });
         },
 
         lockStatus: function (sObjectId, sSessionId) {
             if (!sObjectId) {
-                return Promise.resolve({ success: true, is_killed: false });
+                return Promise.resolve({ Ok: true, ReasonCode: "FREE", IsKilled: false });
             }
             if (sSessionId) { _sessionGuid = sSessionId; }
-            return _request("/LockStatusSet", {
+            return _request("/LockStatusSet('" + encodeURIComponent(sObjectId) + "')", {
                 params: {
-                    object_uuid: sObjectId,
-                    session_guid: _sessionGuid
+                    SessionGuid: _sessionGuid,
+                    Uname: _userId
                 }
             }).then(function (oData) {
-                var aRows = oData && oData.d && oData.d.results;
-                return (aRows && aRows[0]) || { success: true, is_killed: false };
+                return _normalizeLockResponse((oData && oData.d) || { Ok: true, ReasonCode: "FREE", IsKilled: false });
             }).catch(function () {
                 return _request("/actions/LockStatus", {
                     method: "POST",
@@ -581,44 +895,30 @@ createCheckList: function (oData) {
                         session_guid: _sessionGuid
                     }
                 }).then(function (oData) {
-                    return (oData && oData.d) || oData || { success: false };
-                }).catch(function () {
-                    return _request("/lock/status", {
-                        method: "POST",
-                        params: {
-                            object_uuid: sObjectId,
-                            session_guid: _sessionGuid
-                        }
-                    });
+                    return _normalizeLockResponse((oData && oData.d) || oData || { success: false });
                 });
             });
         },
 
         lockRelease: function (sObjectId, sSessionId, mOptions) {
             if (!sObjectId) {
-                return Promise.resolve({ released: true, save_status: "N" });
+                return Promise.resolve({ Ok: true, ReasonCode: "FREE", IsKilled: false });
             }
             if (sSessionId) { _sessionGuid = sSessionId; }
             mOptions = mOptions || {};
-            return _request("/actions/LockRelease", {
-                method: "POST",
-                params: {
-                    root_id: sObjectId,
-                    session_guid: _sessionGuid,
-                    iv_try_save: !!mOptions.trySave
-                },
-                body: mOptions.payload || {}
-            }).then(function (oData) {
-                return (oData && oData.d) || oData || { released: false };
+            return _lockControl("RELEASE", sObjectId, {
+                sessionGuid: _sessionGuid
             }).catch(function () {
-                return _request("/lock/release", {
+                return _request("/actions/LockRelease", {
                     method: "POST",
                     params: {
-                        object_uuid: sObjectId,
+                        root_id: sObjectId,
                         session_guid: _sessionGuid,
                         iv_try_save: !!mOptions.trySave
                     },
                     body: mOptions.payload || {}
+                }).then(function (oData) {
+                    return _normalizeLockResponse((oData && oData.d) || oData || { released: false });
                 });
             });
         },
@@ -629,14 +929,17 @@ createCheckList: function (oData) {
             }
             if (sSessionId) { _sessionGuid = sSessionId; }
             mOptions = mOptions || {};
-            var oParams = new URLSearchParams({
-                object_uuid: sObjectId,
-                session_guid: _sessionGuid,
-                iv_try_save: !!mOptions.trySave
-            });
             return {
-                url: _joinUrl(_baseUrl, "/lock/release") + "?" + oParams.toString(),
-                body: mOptions.payload || {}
+                url: _joinUrl(_baseUrl, "/LockControl"),
+                body: {
+                    Action: "RELEASE",
+                    RootKey: sObjectId,
+                    SessionGuid: _sessionGuid,
+                    Uname: _userId,
+                    StealFrom: "",
+                    TrySave: !!mOptions.trySave,
+                    Payload: mOptions.payload || {}
+                }
             };
         },
 
@@ -651,7 +954,7 @@ createCheckList: function (oData) {
             return _request("/config/frontend").catch(function () {
                 return {
                     search: { defaultMaxResults: 100, growingThreshold: 10 },
-                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 600000 },
+                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 600000, cacheToleranceMs: 15000 },
                 source: "fallback_defaults",
                     variables: { validationSource: "real_frontend_fallback" },
                     requiredFields: [
@@ -685,20 +988,35 @@ createCheckList: function (oData) {
         },
 
         getDictionary: function (sDomain) {
-            return _getReferenceBundle().then(function (oBundle) {
-                var mDict = oBundle.dictionaries || {};
-                return mDict[sDomain] || [];
+            return _request("/DictionaryItemSet", {
+                params: {
+                    "$filter": "Domain eq '" + String(sDomain || "").replace(/'/g, "''") + "'"
+                }
+            }).then(function (oData) {
+                var aRows = (oData && oData.d && oData.d.results) || [];
+                return aRows.map(function (oRow) {
+                    return { key: oRow.Key, text: oRow.Text, domain: oRow.Domain };
+                });
             }).catch(function () {
-                return _request("/dict", { params: { domain: sDomain } }).then(function (oData) {
-                    return oData && oData.value ? oData.value : [];
+                return _getReferenceBundle().then(function (oBundle) {
+                    var mDict = oBundle.dictionaries || {};
+                    return mDict[sDomain] || [];
+                }).catch(function () {
+                    return _request("/dict", { params: { domain: sDomain } }).then(function (oData) {
+                        return oData && oData.value ? oData.value : [];
+                    });
                 });
             });
         },
 
         getLocations: function () {
             var sToday = new Date().toISOString().slice(0, 10);
-            return _request("/actions/GetMplHierarchy", { method: "POST", params: { date: sToday } }).then(function (oData) {
+            return _request("/GetHierarchy", { params: { DateCheck: sToday, Method: "MPL" } }).then(function (oData) {
                 return (oData && oData.d && oData.d.results) || [];
+            }).catch(function () {
+                return _request("/actions/GetMplHierarchy", { method: "POST", params: { date: sToday } }).then(function (oData) {
+                    return (oData && oData.d && oData.d.results) || [];
+                });
             }).catch(function () {
                 return _getReferenceBundle().then(function (oBundle) {
                     return oBundle.locations || [];
@@ -742,13 +1060,20 @@ createCheckList: function (oData) {
         },
 
         exportReport: function (sEntity, mPayload) {
-            return _request("/actions/export", {
+            return _request("/ReportExport", {
                 method: "POST",
                 body: {
-                    entity: sEntity || "checklist",
-                    filters: (mPayload && mPayload.filters) || {},
-                    search_mode: (mPayload && mPayload.searchMode) || "EXACT"
+                    RootKeys: (mPayload && mPayload.keys) || []
                 }
+            }).catch(function () {
+                return _request("/actions/export", {
+                    method: "POST",
+                    body: {
+                        entity: sEntity || "checklist",
+                        filters: (mPayload && mPayload.filters) || {},
+                        search_mode: (mPayload && mPayload.searchMode) || "EXACT"
+                    }
+                });
             });
         },
 
