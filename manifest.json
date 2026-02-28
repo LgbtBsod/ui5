@@ -10,7 +10,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "localhost:5000",
+       "uri": "/sap/opu/odata/sap/Z_UI5_SRV/",
         "type": "OData",
         "settings": {
           "odataVersion": "2.0"
