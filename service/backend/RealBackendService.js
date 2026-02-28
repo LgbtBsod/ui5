@@ -54,6 +54,7 @@ sap.ui.define([], function () {
         var sMethod = mOpts.method || "GET";
         var bWrite = ["POST", "PUT", "PATCH", "DELETE", "MERGE"].indexOf(String(sMethod).toUpperCase()) >= 0;
         var sUrl = _joinUrl(_baseUrl, sPath);
+        var bCsrfRetryAttempted = false;
 
         if (mOpts.params) {
             var oParams = new URLSearchParams(mOpts.params);
@@ -81,7 +82,8 @@ sap.ui.define([], function () {
 
         function handleResponse(oResponse) {
             if (!oResponse.ok) {
-                if (bWrite && oResponse.status === 403) {
+                if (bWrite && oResponse.status === 403 && !bCsrfRetryAttempted) {
+                    bCsrfRetryAttempted = true;
                     return _fetchCsrfToken().then(function () {
                         return doFetch().then(handleResponse);
                     });
@@ -92,7 +94,11 @@ sap.ui.define([], function () {
                         status: oResponse.status,
                         responseText: sText || ""
                     });
-                    throw new Error(("HTTP " + oResponse.status + " for " + sPath + (sText ? ": " + sText : "")));
+                    var oError = new Error("HTTP " + oResponse.status + " for " + sPath + (sText ? ": " + sText : ""));
+                    oError.status = oResponse.status;
+                    oError.path = sPath;
+                    oError.responseText = sText || "";
+                    throw oError;
                 });
             }
 
@@ -122,6 +128,11 @@ sap.ui.define([], function () {
             return "SUCCESS";
         }
         return "WARNING";
+    }
+
+    function _isFallbackEligibleError(oError) {
+        var iStatus = oError && oError.status;
+        return iStatus === 404 || iStatus === 405 || iStatus === 501;
     }
 
     function _mapChecklist(oRoot, oDetails) {
@@ -713,7 +724,10 @@ createCheckList: function (oData) {
                                 barriers: aBarriers.map(function (x, i) { return { BarriersNum: x.id || i + 1, Comment: x.comment || "", Result: !!x.result }; })
                             }
                         }
-                    }).catch(function () {
+                    }).catch(function (oError) {
+                        if (!_isFallbackEligibleError(oError)) {
+                            throw oError;
+                        }
                         return _request("/actions/SaveChecklist", {
                             method: "POST",
                             params: {
@@ -1060,20 +1074,40 @@ createCheckList: function (oData) {
         },
 
         exportReport: function (sEntity, mPayload) {
-            return _request("/ReportExport", {
-                method: "POST",
-                body: {
-                    RootKeys: (mPayload && mPayload.keys) || []
-                }
-            }).catch(function () {
+            var aRootKeys = (mPayload && mPayload.keys) || [];
+            var mFilters = (mPayload && mPayload.filters) || {};
+            var sSearchMode = (mPayload && mPayload.searchMode) || "EXACT";
+
+            function exportViaLegacy() {
                 return _request("/actions/export", {
                     method: "POST",
                     body: {
                         entity: sEntity || "checklist",
-                        filters: (mPayload && mPayload.filters) || {},
-                        search_mode: (mPayload && mPayload.searchMode) || "EXACT"
+                        filters: mFilters,
+                        search_mode: sSearchMode
                     }
                 });
+            }
+
+            if (!aRootKeys.length) {
+                return exportViaLegacy();
+            }
+
+            return _request("/ReportExport", {
+                method: "POST",
+                body: {
+                    RootKeys: aRootKeys,
+                    Filters: mFilters,
+                    SearchMode: sSearchMode
+                }
+            }).then(function (oData) {
+                var aRows = (((oData || {}).d || {}).results) || [];
+                if (!aRows.length && Object.keys(mFilters).length > 0) {
+                    return exportViaLegacy();
+                }
+                return oData;
+            }).catch(function () {
+                return exportViaLegacy();
             });
         },
 
