@@ -12,6 +12,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 UI5 (из корня проекта) ожидает backend по `http://localhost:8000`.
 Канонические URL использовать только под `/sap/opu/odata/sap/Z_UI5_SRV/`.
 Legacy alias'ы оставлены: `/ChecklistRoots`, `/SearchRows`, `/actions/*`, `/lock/*`.
+- ChecklistSearchSet — канонический источник поиска; `SearchRows`/`ChecklistRoots` только migration alias.
+- `$expand` в канонических collection endpoints отклоняется (VALIDATION_ERROR/EXPAND_NOT_ALLOWED).
 
 ## CSRF fetch
 ```bash

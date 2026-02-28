@@ -7,6 +7,9 @@
 
 Deprecated aliases are kept for migration (`/ChecklistRoots`, `/SearchRows`, `/actions/*`, `/lock/*`).
 
+- ChecklistSearchSet is the canonical search entity set; `SearchRows`/`ChecklistRoots` are migration aliases only.
+- `$expand` is rejected for search/checks/barriers/attachments collections in canonical routes.
+
 ## Run backend
 ```bash
 cd mock_gate_way

@@ -185,6 +185,13 @@ def _agg_changed_on(root: ChecklistRoot):
     return max(points) if points else now_utc()
 
 
+def _is_expired_lock(expires_on: datetime | None) -> bool:
+    if not expires_on:
+        return False
+    dt = expires_on if expires_on.tzinfo else expires_on.replace(tzinfo=timezone.utc)
+    return dt < now_utc()
+
+
 def _parse_odata_datetime(value: str | None) -> datetime:
     if not value:
         return now_utc()
@@ -254,19 +261,25 @@ def _apply_change(db: Session, root: ChecklistRoot, change: dict):
     mode = str(change.get("EditMode") or "U").upper()
     fields = change.get("Fields") or {}
     key = _entity_key(str(change.get("Key") or ""))
+    updated_mapping = None
+    row_changed_on = now_utc()
 
     if entity == "ROOT" and mode == "U":
         for k, v in fields.items():
             attr = ROOT_MAP.get(k)
             if attr and hasattr(root, attr):
                 setattr(root, attr, v)
+        root.changed_on = row_changed_on
     elif entity == "BASIC" and mode == "U":
         root.location_key = fields.get("LocationKey", root.location_key)
         root.location_name = fields.get("LocationName", root.location_name)
         root.equipment = fields.get("EquipName", root.equipment)
+        root.changed_on = row_changed_on
     elif entity == "CHECK":
         if mode == "C":
-            db.add(ChecklistCheck(id=str(uuid.uuid4()), root_id=root.id, text=fields.get("Comment", ""), status="PASS" if fields.get("Result", True) else "FAIL", position=int(fields.get("ChecksNum", 0))))
+            created = ChecklistCheck(id=str(uuid.uuid4()), root_id=root.id, text=fields.get("Comment", ""), status="PASS" if fields.get("Result", True) else "FAIL", position=int(fields.get("ChecksNum", 0)), changed_on=row_changed_on)
+            db.add(created)
+            updated_mapping = {"Entity": "CHECK", "ClientKey": change.get("Key") or "", "ServerKey": _hex(created.id)}
         elif mode == "U":
             row = db.query(ChecklistCheck).filter(ChecklistCheck.id == key).first()
             if row:
@@ -274,11 +287,14 @@ def _apply_change(db: Session, root: ChecklistRoot, change: dict):
                     row.text = fields["Comment"]
                 if "Result" in fields:
                     row.status = "PASS" if fields["Result"] else "FAIL"
+                row.changed_on = row_changed_on
         elif mode == "D":
             db.query(ChecklistCheck).filter(ChecklistCheck.id == key).delete()
     elif entity == "BARRIER":
         if mode == "C":
-            db.add(ChecklistBarrier(id=str(uuid.uuid4()), root_id=root.id, description=fields.get("Comment", ""), is_active=bool(fields.get("Result", True)), position=int(fields.get("BarriersNum", 0))))
+            created = ChecklistBarrier(id=str(uuid.uuid4()), root_id=root.id, description=fields.get("Comment", ""), is_active=bool(fields.get("Result", True)), position=int(fields.get("BarriersNum", 0)), changed_on=row_changed_on)
+            db.add(created)
+            updated_mapping = {"Entity": "BARRIER", "ClientKey": change.get("Key") or "", "ServerKey": _hex(created.id)}
         elif mode == "U":
             row = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).first()
             if row:
@@ -286,8 +302,11 @@ def _apply_change(db: Session, root: ChecklistRoot, change: dict):
                     row.description = fields["Comment"]
                 if "Result" in fields:
                     row.is_active = bool(fields["Result"])
+                row.changed_on = row_changed_on
         elif mode == "D":
             db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).delete()
+
+    return updated_mapping
 
 
 def _validate_status_change(root: ChecklistRoot, new_status: str):
@@ -313,6 +332,8 @@ def metadata():
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistSearchSet")
+@router.get(f"{SERVICE_ROOT}/ChecklistRoots")
+@router.get(f"{SERVICE_ROOT}/SearchRows")
 @router.get("/ChecklistRoots")
 @router.get("/SearchRows")
 def checklist_search_set(
@@ -361,13 +382,17 @@ def checklist_basic_info_entity(entity_key: str, db: Session = Depends(get_db)):
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistCheckSet")
-def checklist_check_set(filter: str | None = Query(None, alias="$filter"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+    if (err := _reject_expand(expand)):
+        return err
     rows, total = _apply_order_filter(db.query(ChecklistCheck), ChecklistCheck, CHECK_MAP, filter, None, top, skip)
     return odata_payload([_to_check(c) for c in rows], total if inlinecount == "allpages" else None)
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistBarrierSet")
-def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+    if (err := _reject_expand(expand)):
+        return err
     rows, total = _apply_order_filter(db.query(ChecklistBarrier), ChecklistBarrier, BARRIER_MAP, filter, None, top, skip)
     return odata_payload([_to_barrier(c) for c in rows], total if inlinecount == "allpages" else None)
 
@@ -394,9 +419,18 @@ def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="Ses
     active = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.is_killed.is_(False)).first()
     if not active:
         own = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.session_guid == session_guid).order_by(LockEntry.last_heartbeat.desc()).first() if session_guid else None
-        if own and own.is_killed:
-            return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "KILLED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}}
+        if own:
+            if own.is_killed:
+                return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "KILLED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}}
+            if _is_expired_lock(own.expires_at):
+                own.is_killed = True
+                db.commit()
+                return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "EXPIRED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}}
         return {"d": {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "FREE", "Owner": "", "ExpiresOn": None}}
+    if _is_expired_lock(active.expires_at):
+        active.is_killed = True
+        db.commit()
+        return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "EXPIRED", "Owner": active.user_id or "", "ExpiresOn": format_datetime(active.expires_at)}}
     if active.session_guid == session_guid and session_guid:
         return {"d": {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "OWNED_BY_YOU", "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}}
     return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "LOCKED_BY_OTHER", "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}}
@@ -444,12 +478,15 @@ def auto_save(payload: dict, if_match: str | None = Header(None, alias="If-Match
             return _err(400, "VALIDATION_ERROR", "ClientAggChangedOn is required")
         return _err(409, "CONFLICT", "AggChangedOn mismatch")
 
+    mappings = []
     for change in payload.get("Changes") or []:
-        _apply_change(db, root, change)
+        mapped = _apply_change(db, root, change)
+        if mapped:
+            mappings.append(mapped)
     root.changed_on = now_utc()
     db.commit()
     agg = _agg_changed_on(root)
-    return {"d": {"RootKey": _hex(root.id), "AggChangedOn": format_datetime(agg), "UpdatedKeysMapping": []}}
+    return {"d": {"RootKey": _hex(root.id), "AggChangedOn": format_datetime(agg), "UpdatedKeysMapping": mappings}}
 
 
 @router.post(f"{SERVICE_ROOT}/SaveChanges")
@@ -584,7 +621,9 @@ def attachment_folder_set(filter: str | None = Query(None, alias="$filter")):
 
 
 @router.get(f"{SERVICE_ROOT}/AttachmentSet")
-def attachment_set(filter: str | None = Query(None, alias="$filter")):
+def attachment_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand")):
+    if (err := _reject_expand(expand)):
+        return err
     rows = []
     for key, meta in _ATTACHMENTS.items():
         if meta.get("is_folder"):

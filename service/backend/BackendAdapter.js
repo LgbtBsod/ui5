@@ -384,7 +384,7 @@ sap.ui.define([
             if (_backendService.getFrontendConfig) {
                 return _backendService.getFrontendConfig();
             }
-            return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 }, timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000, cacheToleranceMs: 8000 }, source: "adapter_defaults", variables: { validationSource: "adapter_defaults" } });
+            return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 }, timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000, cacheToleranceMs: 15000 }, source: "adapter_defaults", variables: { validationSource: "adapter_defaults" } });
         },
 
 
