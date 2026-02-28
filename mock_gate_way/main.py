@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
@@ -219,6 +219,34 @@ async def request_response_logging(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+async def odata_error_envelope_middleware(request: Request, call_next):
+    path = request.url.path
+    is_odata = path.startswith(SERVICE_ROOT)
+    if not is_odata:
+        return await call_next(request)
+    try:
+        return await call_next(request)
+    except HTTPException as exc:
+        code = "SYSTEM_ERROR"
+        if exc.status_code == 404:
+            code = "NOT_FOUND"
+        elif exc.status_code == 400:
+            code = "VALIDATION_ERROR"
+        elif exc.status_code == 403:
+            code = "CSRF_TOKEN_MISSING"
+        elif exc.status_code == 409:
+            code = "CONFLICT"
+        elif exc.status_code == 410:
+            code = "LOCK_EXPIRED"
+        elif exc.status_code == 412:
+            code = "PRECONDITION_FAILED"
+        return odata_error_response(exc.status_code, code, str(exc.detail or code))
+    except Exception:
+        logger.exception("Unhandled OData exception")
+        return odata_error_response(500, "SYSTEM_ERROR", "Internal server error")
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOWED_ORIGINS,
@@ -281,21 +309,24 @@ def frontend_config(db = SessionLocal()):
             db.add(row)
             db.commit()
             db.refresh(row)
+        m_timers = {
+            "heartbeatMs": int(row.heartbeat_ms or 240000),
+            "lockStatusMs": int(row.lock_status_ms or 60000),
+            "gcdMs": int(row.gcd_ms or 300000),
+            "idleMs": int(row.idle_ms or 600000),
+            "autoSaveIntervalMs": int(row.autosave_interval_ms or 60000),
+            "autoSaveDebounceMs": int(row.autosave_debounce_ms or 30000),
+            "networkGraceMs": int(row.network_grace_ms or 60000),
+            "cacheFreshMs": int(row.cache_fresh_ms or 30000),
+            "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
+            "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
+            "cacheToleranceMs": 8000,
+        }
         return {
             "environment": row.environment,
             "search": {"defaultMaxResults": 100, "growingThreshold": 10},
-            "timers": {
-                "heartbeatMs": int(row.heartbeat_ms or 240000),
-                "lockStatusMs": int(row.lock_status_ms or 60000),
-                "gcdMs": int(row.gcd_ms or 300000),
-                "idleMs": int(row.idle_ms or 600000),
-                "autoSaveIntervalMs": int(row.autosave_interval_ms or 60000),
-                "autoSaveDebounceMs": int(row.autosave_debounce_ms or 30000),
-                "networkGraceMs": int(row.network_grace_ms or 60000),
-                "cacheFreshMs": int(row.cache_fresh_ms or 30000),
-                "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
-                "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
-            }
+            "timers": m_timers,
+            "variables": dict(m_timers, validationSource="config_frontend"),
         }
     finally:
         db.close()

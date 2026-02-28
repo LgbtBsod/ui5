@@ -16,6 +16,18 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ## UI proxy (UI5 tooling)
 Proxy `/sap` to backend `http://localhost:8000` so UI can call relative OData URLs.
 
+UI5 proxy example (`ui5.yaml` customMiddleware):
+```yaml
+server:
+  customMiddleware:
+    - name: ui5-middleware-simpleproxy
+      mountPath: /sap
+      configuration:
+        baseUri: http://localhost:8000/sap
+```
+
+Runtime timers are read from `/sap/opu/odata/sap/Z_UI5_SRV/config/frontend`; backend now mirrors them in both `timers` and `variables` (including `cacheToleranceMs`) for migration-safe clients.
+
 ## CSRF
 - Fetch token:
 ```bash
@@ -31,6 +43,7 @@ curl -G 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet' \
   --data-urlencode "$top=20" \
   --data-urlencode "$skip=0" \
   --data-urlencode "$inlinecount=allpages" \
+  --data-urlencode "$select=Key,Id,DateCheck,Lpc,Profession,Status" \
   --data-urlencode "$filter=DateCheck ge datetime'2025-01-01T00:00:00'"
 ```
 
@@ -38,10 +51,25 @@ curl -G 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet' \
 ```bash
 curl 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/LastChangeSet('<ROOTKEY_HEX32>')'
 ```
+UI cache reuse threshold is `15s` (`timers.cacheToleranceMs`).
+
+### LastChangeSet collection
+```bash
+curl -G "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/LastChangeSet" \
+  --data-urlencode "$top=20" \
+  --data-urlencode "$skip=0" \
+  --data-urlencode "$inlinecount=allpages"
+```
 
 ### LockStatusSet
 ```bash
 curl "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/LockStatusSet('<ROOTKEY_HEX32>')?SessionGuid=sess-1&Uname=DEMO"
+```
+
+### LockStatusSet collection
+```bash
+curl -G "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/LockStatusSet" \
+  --data-urlencode "$filter=RootKey eq '<ROOTKEY_HEX32>'"
 ```
 
 ### LockControl acquire / heartbeat / release
@@ -101,6 +129,10 @@ curl -X POST 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/SetChecklistStat
 curl -G 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/GetHierarchy' \
   --data-urlencode 'DateCheck=2025-01-01' \
   --data-urlencode 'Method=LOCATION'
+
+curl -X POST 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/GetHierarchy' \
+  -H 'Content-Type: application/json' \
+  -d '{"DateCheck":"/Date(1735689600000)/","Method":"MPL"}'
 ```
 
 ### ReportExport
