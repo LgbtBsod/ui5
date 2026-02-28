@@ -1,10 +1,12 @@
 import json
+import os
 import uuid
-from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
 
+from config import DATABASE_URL
 from utils.odata_batch import (
     BatchOperation,
     encode_top_level,
@@ -27,10 +29,41 @@ def _sanitize_operation_path(path: str) -> str:
     return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, query, parsed.fragment))
 
 
+def _sqlite_db_path() -> str | None:
+    if not DATABASE_URL.startswith("sqlite:///"):
+        return None
+    return DATABASE_URL.replace("sqlite:///", "", 1)
+
+
+def _snapshot_db() -> bytes | None:
+    db_path = _sqlite_db_path()
+    if not db_path:
+        return None
+    try:
+        with open(db_path, "rb") as fh:
+            return fh.read()
+    except FileNotFoundError:
+        return None
+
+
+def _restore_db(snapshot: bytes | None) -> None:
+    db_path = _sqlite_db_path()
+    if not db_path or snapshot is None:
+        return
+    with open(db_path, "wb") as fh:
+        fh.write(snapshot)
+    wal_path = f"{db_path}-wal"
+    shm_path = f"{db_path}-shm"
+    for sidecar in (wal_path, shm_path):
+        if os.path.exists(sidecar):
+            os.remove(sidecar)
+
+
 async def _execute_operation(request: Request, op: BatchOperation) -> httpx.Response:
     if op.path.endswith("/$batch") or op.path == "/$batch":
         raise HTTPException(status_code=400, detail="NESTED_BATCH_NOT_SUPPORTED")
 
+    method = "PATCH" if op.method == "MERGE" else op.method
     headers = {k: v for k, v in op.headers.items() if k.lower() not in {"host", "content-length"}}
     if "X-CSRF-Token" not in headers and request.headers.get("X-CSRF-Token"):
         headers["X-CSRF-Token"] = request.headers.get("X-CSRF-Token")
@@ -39,7 +72,7 @@ async def _execute_operation(request: Request, op: BatchOperation) -> httpx.Resp
     content = op.body.encode("utf-8") if op.body else None
     transport = httpx.ASGITransport(app=request.app)
     async with httpx.AsyncClient(transport=transport, base_url="http://batch.local") as client:
-        return await client.request(op.method, _sanitize_operation_path(op.path), headers=headers, content=content)
+        return await client.request(method, _sanitize_operation_path(op.path), headers=headers, content=content)
 
 
 @router.post("/$batch")
@@ -52,17 +85,40 @@ async def batch(request: Request):
         if isinstance(item, list):
             changeset_boundary = f"changesetresponse_{uuid.uuid4().hex}"
             chunks: list[str] = []
+            db_snapshot = _snapshot_db()
+            had_error = False
             for i, op in enumerate(item, start=1):
                 op_response = await _execute_operation(request, op)
-                if op_response.status_code >= 400:
-                    raise HTTPException(status_code=op_response.status_code, detail=op_response.text)
                 cid = op.headers.get("Content-ID") or str(i)
-                chunks.append(f"--{changeset_boundary}\r\n" + format_http_response(op_response.status_code, op_response.reason_phrase or "", op_response.headers.get("content-type") or "application/json", op_response.text or "", cid) + "\r\n")
+                chunks.append(
+                    f"--{changeset_boundary}\r\n"
+                    + format_http_response(
+                        op_response.status_code,
+                        op_response.reason_phrase or "",
+                        op_response.headers.get("content-type") or "application/json",
+                        op_response.text or "",
+                        cid,
+                    )
+                    + "\r\n"
+                )
+                if op_response.status_code >= 400:
+                    had_error = True
+                    _restore_db(db_snapshot)
+                    break
             chunks.append(f"--{changeset_boundary}--\r\n")
             response_parts.append("\r\n".join([f"Content-Type: multipart/mixed; boundary={changeset_boundary}", "", "".join(chunks)]).rstrip())
+            if had_error:
+                continue
         else:
             op_response = await _execute_operation(request, item)
-            response_parts.append(format_http_response(op_response.status_code, op_response.reason_phrase or "", op_response.headers.get("content-type") or "application/json", op_response.text or ""))
+            response_parts.append(
+                format_http_response(
+                    op_response.status_code,
+                    op_response.reason_phrase or "",
+                    op_response.headers.get("content-type") or "application/json",
+                    op_response.text or "",
+                )
+            )
 
     payload, resp_boundary = encode_top_level(response_parts)
     return Response(content=payload, media_type=f"multipart/mixed; boundary={resp_boundary}", headers={"DataServiceVersion": "2.0"})

@@ -11,7 +11,6 @@
     "dataSources": {
       "mainService": {
         "uri": "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/",
-       "uri": "http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/",
         "type": "OData",
         "settings": {
           "odataVersion": "2.0",
@@ -90,7 +89,9 @@
               "groupId": "locks",
               "single": true
             }
-          }
+          },
+          "tokenHandling": true,
+          "updateMethod": "MERGE"
         }
       },
       "i18n": {
