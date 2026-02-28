@@ -321,7 +321,7 @@ def frontend_config(db = SessionLocal()):
             "cacheFreshMs": int(row.cache_fresh_ms or 30000),
             "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
             "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
-            "cacheToleranceMs": 15000,
+            "cacheToleranceMs": 8000,
         }
         return {
             "environment": row.environment,

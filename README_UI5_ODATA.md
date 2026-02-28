@@ -67,7 +67,7 @@ curl -G 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet' \
 ```bash
 curl 'http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/LastChangeSet('<ROOTKEY_HEX32>')'
 ```
-UI cache reuse threshold is `15s` (`timers.cacheToleranceMs`).
+UI cache reuse threshold is `8s` (`timers.cacheToleranceMs`).
 
 ### LastChangeSet collection
 ```bash
