@@ -1,4 +1,5 @@
 import uuid
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -192,6 +193,30 @@ def _is_expired_lock(expires_on: datetime | None) -> bool:
     return dt < now_utc()
 
 
+def _build_lock_status_row(db: Session, root_uuid: str, session_guid: str = "") -> dict:
+    active = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.is_killed.is_(False)).first()
+    if not active:
+        own = db.query(LockEntry).filter(
+            LockEntry.pcct_uuid == root_uuid,
+            LockEntry.session_guid == session_guid,
+        ).order_by(LockEntry.last_heartbeat.desc()).first() if session_guid else None
+        if own:
+            if own.is_killed:
+                return {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "KILLED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}
+            if _is_expired_lock(own.expires_at):
+                own.is_killed = True
+                db.commit()
+                return {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "EXPIRED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}
+        return {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "FREE", "Owner": "", "ExpiresOn": None}
+    if _is_expired_lock(active.expires_at):
+        active.is_killed = True
+        db.commit()
+        return {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "EXPIRED", "Owner": active.user_id or "", "ExpiresOn": format_datetime(active.expires_at)}
+    if active.session_guid == session_guid and session_guid:
+        return {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "OWNED_BY_YOU", "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}
+    return {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "LOCKED_BY_OTHER", "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}
+
+
 def _parse_odata_datetime(value: str | None) -> datetime:
     if not value:
         return now_utc()
@@ -228,6 +253,24 @@ def _apply_order_filter(query, model, fmap, filter_expr, orderby, top, skip):
                 query = query.order_by(desc(col) if direction.lower() == "desc" else asc(col))
     total = query.count()
     return query.offset(skip).limit(top).all(), total
+
+
+def _normalize_filter_hex_keys(filter_expr: str | None, fields: tuple[str, ...] = ("Key", "RootKey")) -> str | None:
+    if not filter_expr:
+        return filter_expr
+
+    out = str(filter_expr)
+    for field in fields:
+        rx = re.compile(rf"\b{re.escape(field)}\b\s+(eq|ne)\s+'([0-9a-fA-F\-]{{32,36}})'", re.IGNORECASE)
+
+        def _replace(match):
+            op = match.group(1)
+            raw = match.group(2)
+            normalized = _entity_key(raw)
+            return f"{field} {op} '{normalized}'"
+
+        out = rx.sub(_replace, out)
+    return out
 
 
 def _if_match_check(if_match: str | None, agg: datetime):
@@ -348,12 +391,14 @@ def checklist_search_set(
 ):
     if (err := _reject_expand(expand)):
         return err
+    filter = _normalize_filter_hex_keys(filter, fields=("Key",))
     rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, SEARCH_MAP, filter, orderby, top, skip)
     return odata_payload([_apply_select(_to_search(r), select) for r in rows], total if inlinecount == "allpages" else None)
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistRootSet")
 def checklist_root_set(filter: str | None = Query(None, alias="$filter"), orderby: str | None = Query(None, alias="$orderby"), top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), select: str | None = Query(None, alias="$select"), db: Session = Depends(get_db)):
+    filter = _normalize_filter_hex_keys(filter, fields=("Key",))
     rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, ROOT_MAP, filter, orderby, top, skip)
     return odata_payload([_apply_select(_to_root(r), select) for r in rows], total if inlinecount == "allpages" else None)
 
@@ -369,6 +414,7 @@ def checklist_root_entity(entity_key: str, response: Response, db: Session = Dep
 
 @router.get(f"{SERVICE_ROOT}/ChecklistBasicInfoSet")
 def checklist_basic_info_set(filter: str | None = Query(None, alias="$filter"), top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+    filter = _normalize_filter_hex_keys(filter, fields=("RootKey",))
     rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, {"RootKey": "id"}, filter, None, top, skip)
     return odata_payload([_to_basic(r) for r in rows], total if inlinecount == "allpages" else None)
 
@@ -385,6 +431,7 @@ def checklist_basic_info_entity(entity_key: str, db: Session = Depends(get_db)):
 def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
     if (err := _reject_expand(expand)):
         return err
+    filter = _normalize_filter_hex_keys(filter, fields=("RootKey", "Key"))
     rows, total = _apply_order_filter(db.query(ChecklistCheck), ChecklistCheck, CHECK_MAP, filter, None, top, skip)
     return odata_payload([_to_check(c) for c in rows], total if inlinecount == "allpages" else None)
 
@@ -393,6 +440,7 @@ def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expan
 def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
     if (err := _reject_expand(expand)):
         return err
+    filter = _normalize_filter_hex_keys(filter, fields=("RootKey", "Key"))
     rows, total = _apply_order_filter(db.query(ChecklistBarrier), ChecklistBarrier, BARRIER_MAP, filter, None, top, skip)
     return odata_payload([_to_barrier(c) for c in rows], total if inlinecount == "allpages" else None)
 
@@ -413,27 +461,56 @@ def last_change_entity(entity_key: str, response: Response, db: Session = Depend
     return {"d": {"RootKey": _hex(root.id), "AggChangedOn": format_datetime(agg)}}
 
 
+@router.get(f"{SERVICE_ROOT}/LastChangeSet")
+def last_change_set(
+    filter: str | None = Query(None, alias="$filter"),
+    orderby: str | None = Query(None, alias="$orderby"),
+    top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"),
+    skip: int = Query(0, alias="$skip"),
+    inlinecount: str | None = Query(None, alias="$inlinecount"),
+    db: Session = Depends(get_db),
+):
+    filter = _normalize_filter_hex_keys(filter, fields=("RootKey",))
+    rows, total = _apply_order_filter(
+        db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)),
+        ChecklistRoot,
+        {"RootKey": "id"},
+        filter,
+        orderby,
+        top,
+        skip,
+    )
+    payload = [{"RootKey": _hex(r.id), "AggChangedOn": format_datetime(_agg_changed_on(r))} for r in rows]
+    return odata_payload(payload, total if inlinecount == "allpages" else None)
+
+
+@router.get(f"{SERVICE_ROOT}/LockStatusSet")
+def lock_status_set(
+    filter: str | None = Query(None, alias="$filter"),
+    orderby: str | None = Query(None, alias="$orderby"),
+    top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"),
+    skip: int = Query(0, alias="$skip"),
+    inlinecount: str | None = Query(None, alias="$inlinecount"),
+    session_guid: str = Query("", alias="SessionGuid"),
+    db: Session = Depends(get_db),
+):
+    filter = _normalize_filter_hex_keys(filter, fields=("RootKey",))
+    rows, total = _apply_order_filter(
+        db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)),
+        ChecklistRoot,
+        {"RootKey": "id"},
+        filter,
+        orderby,
+        top,
+        skip,
+    )
+    payload = [_build_lock_status_row(db, r.id, session_guid=session_guid) for r in rows]
+    return odata_payload(payload, total if inlinecount == "allpages" else None)
+
+
 @router.get(f"{SERVICE_ROOT}/LockStatusSet('{{entity_key}}')")
 def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="SessionGuid"), db: Session = Depends(get_db)):
-    root_uuid = _entity_key(entity_key)
-    active = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.is_killed.is_(False)).first()
-    if not active:
-        own = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.session_guid == session_guid).order_by(LockEntry.last_heartbeat.desc()).first() if session_guid else None
-        if own:
-            if own.is_killed:
-                return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "KILLED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}}
-            if _is_expired_lock(own.expires_at):
-                own.is_killed = True
-                db.commit()
-                return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "EXPIRED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}}
-        return {"d": {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "FREE", "Owner": "", "ExpiresOn": None}}
-    if _is_expired_lock(active.expires_at):
-        active.is_killed = True
-        db.commit()
-        return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "EXPIRED", "Owner": active.user_id or "", "ExpiresOn": format_datetime(active.expires_at)}}
-    if active.session_guid == session_guid and session_guid:
-        return {"d": {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "OWNED_BY_YOU", "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}}
-    return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "LOCKED_BY_OTHER", "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}}
+    return {"d": _build_lock_status_row(db, _entity_key(entity_key), session_guid=session_guid)}
 
 
 @router.post(f"{SERVICE_ROOT}/LockControl")
@@ -459,6 +536,130 @@ def lock_control(payload: dict, db: Session = Depends(get_db)):
         r = LockService.release(db, root_uuid, session)
         return {"d": {"Ok": bool(r.get("released")), "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False}}
     return _err(400, "VALIDATION_ERROR", "Unsupported Action")
+
+
+@router.post("/actions/LockAcquire")
+def lock_acquire_action_alias(
+    root_id: str | None = Query(None),
+    session_guid: str | None = Query(None),
+    user_id: str | None = Query(None),
+    iv_steal_from: str | None = Query(None),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
+    body = payload or {}
+    req = {
+        "Action": "ACQUIRE",
+        "RootKey": body.get("RootKey") or body.get("root_id") or root_id,
+        "SessionGuid": body.get("SessionGuid") or body.get("session_guid") or session_guid,
+        "Uname": body.get("Uname") or body.get("uname") or body.get("user_id") or user_id or "ANON",
+        "StealFrom": body.get("StealFrom") or body.get("iv_steal_from") or iv_steal_from,
+    }
+    return lock_control(req, db)
+
+
+@router.post("/actions/LockHeartbeat")
+def lock_heartbeat_action_alias(
+    root_id: str | None = Query(None),
+    session_guid: str | None = Query(None),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
+    body = payload or {}
+    req = {
+        "Action": "HEARTBEAT",
+        "RootKey": body.get("RootKey") or body.get("root_id") or root_id,
+        "SessionGuid": body.get("SessionGuid") or body.get("session_guid") or session_guid,
+        "Uname": body.get("Uname") or body.get("uname") or body.get("user_id") or "ANON",
+    }
+    return lock_control(req, db)
+
+
+@router.post("/actions/LockRelease")
+def lock_release_action_alias(
+    root_id: str | None = Query(None),
+    session_guid: str | None = Query(None),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
+    body = payload or {}
+    req = {
+        "Action": "RELEASE",
+        "RootKey": body.get("RootKey") or body.get("root_id") or root_id,
+        "SessionGuid": body.get("SessionGuid") or body.get("session_guid") or session_guid,
+        "Uname": body.get("Uname") or body.get("uname") or body.get("user_id") or "ANON",
+    }
+    return lock_control(req, db)
+
+
+@router.post("/actions/LockStatus")
+def lock_status_action_alias(
+    root_id: str | None = Query(None),
+    session_guid: str | None = Query(None),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
+    body = payload or {}
+    root = body.get("RootKey") or body.get("root_id") or root_id
+    sess = body.get("SessionGuid") or body.get("session_guid") or session_guid or ""
+    if not root:
+        return _err(400, "VALIDATION_ERROR", "RootKey is required")
+    return {"d": _build_lock_status_row(db, _entity_key(str(root)), session_guid=str(sess))}
+
+
+# Legacy /lock/* aliases routed to canonical lock semantics for migration-safe behavior.
+@router.post("/lock/acquire")
+@router.post(f"{SERVICE_ROOT}/lock/acquire")
+def lock_acquire_alias(payload: dict | None = None, db: Session = Depends(get_db), object_uuid: str | None = Query(None), session_guid: str | None = Query(None), uname: str | None = Query(None), iv_steal_from: str | None = Query(None)):
+    body = payload or {}
+    req = {
+        "Action": "ACQUIRE",
+        "RootKey": body.get("RootKey") or body.get("root_id") or body.get("object_uuid") or object_uuid,
+        "SessionGuid": body.get("SessionGuid") or body.get("session_guid") or session_guid,
+        "Uname": body.get("Uname") or body.get("uname") or uname or "ANON",
+        "StealFrom": body.get("StealFrom") or body.get("iv_steal_from") or iv_steal_from,
+    }
+    return lock_control(req, db)
+
+
+@router.post("/lock/heartbeat")
+@router.post(f"{SERVICE_ROOT}/lock/heartbeat")
+def lock_heartbeat_alias(payload: dict | None = None, db: Session = Depends(get_db), object_uuid: str | None = Query(None), session_guid: str | None = Query(None), uname: str | None = Query(None)):
+    body = payload or {}
+    req = {
+        "Action": "HEARTBEAT",
+        "RootKey": body.get("RootKey") or body.get("root_id") or body.get("object_uuid") or object_uuid,
+        "SessionGuid": body.get("SessionGuid") or body.get("session_guid") or session_guid,
+        "Uname": body.get("Uname") or body.get("uname") or uname or "ANON",
+    }
+    return lock_control(req, db)
+
+
+@router.post("/lock/release")
+@router.post(f"{SERVICE_ROOT}/lock/release")
+def lock_release_alias(payload: dict | None = None, db: Session = Depends(get_db), object_uuid: str | None = Query(None), session_guid: str | None = Query(None), uname: str | None = Query(None)):
+    body = payload or {}
+    req = {
+        "Action": "RELEASE",
+        "RootKey": body.get("RootKey") or body.get("root_id") or body.get("object_uuid") or object_uuid,
+        "SessionGuid": body.get("SessionGuid") or body.get("session_guid") or session_guid,
+        "Uname": body.get("Uname") or body.get("uname") or uname or "ANON",
+    }
+    return lock_control(req, db)
+
+
+@router.get("/lock/status")
+@router.get(f"{SERVICE_ROOT}/lock/status")
+def lock_status_alias(object_uuid: str = Query(...), session_guid: str = Query(""), db: Session = Depends(get_db)):
+    row = _build_lock_status_row(db, _entity_key(object_uuid), session_guid=session_guid)
+    return {
+        "success": bool(row.get("Ok")),
+        "is_killed": str(row.get("ReasonCode") or "") == "KILLED",
+        "lock_expires": row.get("ExpiresOn"),
+        "reason_code": row.get("ReasonCode"),
+        "owner": row.get("Owner") or "",
+        "d": row,
+    }
 
 
 @router.post(f"{SERVICE_ROOT}/AutoSave")

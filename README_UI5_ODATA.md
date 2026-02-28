@@ -10,6 +10,19 @@ Deprecated aliases are kept for migration (`/ChecklistRoots`, `/SearchRows`, `/a
 - ChecklistSearchSet is the canonical search entity set; `SearchRows`/`ChecklistRoots` are migration aliases only.
 - `$expand` is rejected for search/checks/barriers/attachments collections in canonical routes.
 
+### Legacy lock aliases (migration-safe)
+Legacy clients may still use `/lock/*`; backend now forwards these aliases to canonical lock semantics:
+- `POST /lock/acquire` -> `LockControl(Action=ACQUIRE)`
+- `POST /lock/heartbeat` -> `LockControl(Action=HEARTBEAT)`
+- `POST /lock/release` -> `LockControl(Action=RELEASE)`
+- `GET /lock/status?object_uuid=<RootKey>&session_guid=<SessionGuid>` -> canonical lock status mapping
+
+Service-root alias variants are also available for proxy-only landscapes:
+- `/sap/opu/odata/sap/Z_UI5_SRV/lock/acquire`
+- `/sap/opu/odata/sap/Z_UI5_SRV/lock/heartbeat`
+- `/sap/opu/odata/sap/Z_UI5_SRV/lock/release`
+- `/sap/opu/odata/sap/Z_UI5_SRV/lock/status`
+
 ## Run backend
 ```bash
 cd mock_gate_way

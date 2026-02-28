@@ -120,7 +120,19 @@ sap.ui.define([
                 var bKilled = !!(oPayload && oPayload.is_killed);
                 oStateModel.setProperty("/isKilled", bKilled);
                 oStateModel.setProperty("/lockExpires", (oPayload && oPayload.lock_expires) || null);
+                oUiStateModel.setProperty("/lock", {
+                    ok: !bKilled,
+                    reason: (oPayload && (oPayload.reason_code || oPayload.ReasonCode)) || (bKilled ? "KILLED" : "OWNED_BY_YOU"),
+                    isKilled: bKilled
+                });
                 return bKilled;
+            };
+
+            var fnSyncUiStateMode = function () {
+                oUiStateModel.setProperty("/mode", oStateModel.getProperty("/mode") || "READ");
+                oUiStateModel.setProperty("/busy", !!(oStateModel.getProperty("/isBusy") || oStateModel.getProperty("/isLoading")));
+                oUiStateModel.setProperty("/currentRootKey", oStateModel.getProperty("/activeObjectId") || "");
+                oUiStateModel.setProperty("/sessionGuid", oStateModel.getProperty("/sessionId") || "");
             };
 
             this._oSmartCache = new SmartCacheManager({ freshMs: mTimerDefaults.cacheFreshMs, staleOkMs: mTimerDefaults.cacheStaleOkMs });
@@ -214,8 +226,11 @@ sap.ui.define([
                 oStateModel.setProperty("/lockExpires", (oPayload && oPayload.lock_expires) || null);
                 oStateModel.setProperty("/mode", "READ");
                 oStateModel.setProperty("/isLocked", false);
+                oStateModel.setProperty("/isDirty", false);
+                fnSyncUiStateMode();
                 this._oHeartbeat.stop();
                 this._oLockStatus.stop();
+                this._oAutoSave.stop();
                 this._oGcd.destroyManager();
                 MessageBox.warning(this.getModel("i18n").getResourceBundle().getText("lockKilledMessage"));
                 FlowCoordinator.releaseWithTrySave({ getModel: this.getModel.bind(this), getResourceBundle: function(){ return this.getModel("i18n").getResourceBundle();}.bind(this) });
@@ -271,7 +286,29 @@ sap.ui.define([
             this._oActivity.attachEvent("idleTimeout", function () {
                 oStateModel.setProperty("/idleExpires", new Date().toISOString());
                 oStateModel.setProperty("/mode", "READ");
+                oStateModel.setProperty("/isLocked", false);
+                oStateModel.setProperty("/isDirty", false);
+                this._oAutoSave.stop();
+                this._oHeartbeat.stop();
+                this._oLockStatus.stop();
+                fnSyncUiStateMode();
+                MessageBox.information(this.getModel("i18n").getResourceBundle().getText("idleReadOnlyMessage"));
+            }.bind(this));
+
+            this._oActivity.attachEvent("activity", function (oEvent) {
+                var sAt = ((oEvent && oEvent.getParameters && oEvent.getParameters()) || {}).at || new Date().toISOString();
+                oUiStateModel.setProperty("/activity/lastActiveAt", sAt);
+                oUiStateModel.setProperty("/activity/idleUntil", new Date(Date.parse(sAt) + (Number(oStateModel.getProperty("/timers/idleMs")) || 600000)).toISOString());
             });
+
+            oStateModel.attachPropertyChange(function (oEvent) {
+                var sPath = oEvent.getParameter("path") || "";
+                if (["/mode", "/isBusy", "/isLoading", "/activeObjectId", "/sessionId"].indexOf(sPath) >= 0) {
+                    fnSyncUiStateMode();
+                }
+            });
+
+            fnSyncUiStateMode();
 
 
             // Full save resets GCD by architecture rule; autosave should not.

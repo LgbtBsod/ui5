@@ -1009,12 +1009,14 @@ createCheckList: function (oData) {
             });
         },
 
-        getLocations: function () {
+        getLocations: function (sDateCheck, sMethod) {
             var sToday = new Date().toISOString().slice(0, 10);
-            return _request("/GetHierarchy", { params: { DateCheck: sToday, Method: "MPL" } }).then(function (oData) {
+            var sDate = String(sDateCheck || sToday);
+            var sMode = String(sMethod || "MPL").toUpperCase();
+            return _request("/GetHierarchy", { params: { DateCheck: sDate, Method: sMode } }).then(function (oData) {
                 return (oData && oData.d && oData.d.results) || [];
             }).catch(function () {
-                return _request("/actions/GetMplHierarchy", { method: "POST", params: { date: sToday } }).then(function (oData) {
+                return _request("/actions/GetMplHierarchy", { method: "POST", params: { date: sDate } }).then(function (oData) {
                     return (oData && oData.d && oData.d.results) || [];
                 });
             }).catch(function () {
@@ -1022,8 +1024,8 @@ createCheckList: function (oData) {
                     return oBundle.locations || [];
                 });
             }).catch(function () {
-                return _request("/location", { params: { date: sToday } }).catch(function () {
-                    return _request("/hierarchy", { params: { date: sToday } });
+                return _request("/location", { params: { date: sDate } }).catch(function () {
+                    return _request("/hierarchy", { params: { date: sDate } });
                 }).then(function (oData) {
                     return oData && oData.value ? oData.value : [];
                 });
