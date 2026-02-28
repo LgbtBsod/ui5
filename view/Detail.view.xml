@@ -10,22 +10,6 @@
 
     <Page showHeader="false" enableScrolling="false" class="pageTransparent" busy="{state>/isLoading}">
 
-        <!-- Floating control bar (same visual language as hero, stays above blocks while scrolling) -->
-        <VBox class="detailControlBlockHost" renderType="Bare">
-            <VBox class="glassCard detailHeroCard detailControlInlineCard detailControlStickyBlock"
-                  renderType="Bare"
-                  visible="{= !${view>/detailControlCollapsed} }">
-                <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
-            </VBox>
-
-            <Button
-                icon="{= ${view>/detailControlCollapsed} ? 'sap-icon://open-command-field' : 'sap-icon://collapse-group' }"
-                type="Transparent"
-                press=".onToggleDetailControlRail"
-                class="detailControlPeekButton"
-                tooltip="{= ${view>/detailControlCollapsed} ? ${i18n>expandControls} : ${i18n>collapseControls} }"/>
-        </VBox>
-
         <VBox class="appContent detailContent" renderType="Bare">
 
             <uxap:ObjectPageLayout
@@ -34,6 +18,17 @@
                 enableLazyLoading="true"
                 alwaysShowContentHeader="true"
                 showTitleInHeaderContent="true">
+
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <Title text="{i18n>detailPageTitle}" visible="false"/>
+                        </uxap:expandedHeading>
+                        <uxap:snappedHeading>
+                            <Title text="{i18n>detailPageTitle}" visible="false"/>
+                        </uxap:snappedHeading>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
 
                 <uxap:headerContent>
                     <core:Fragment fragmentName="sap_ui5.view.fragment.LockKilledBanner" type="XML"/>
@@ -103,10 +98,11 @@
                             <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                         </ObjectStatus>
                         <ToolbarSpacer/>
-                        <Button text="{i18n>objectSave}" type="Emphasized" press=".onSaveDetail" visible="{= ${state>/mode} === 'EDIT' }" busy="{state>/isSaving}" enabled="{= !${state>/isSaving} }" class="brandActionBtn brandActionPrimary detailInlineSaveButton">
-                            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
-                        </Button>
                     </OverflowToolbar>
+
+                    <VBox class="glassCard detailControlInlineCard detailControlHostInline" renderType="Bare">
+                        <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
+                    </VBox>
 
                 </uxap:headerContent>
 
@@ -180,9 +176,6 @@
                                                             <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVER_PERNER} || '-') }" state="Information"/>
                                                             <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVER_POSITION} || '-') }" state="Information"/>
                                                             <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVER_ORGUNIT} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>dateLabel} + ': ' + (${selected>/basic/date} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>timeLabel} + ': ' + (${selected>/basic/time} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>timezoneLabel} + ': ' + (${selected>/basic/timezone} || '-') }" state="Information"/>
                                                         </VBox>
 
                                                         <VBox visible="{= ${view>key} === 'observed' }" renderType="Bare" class="detailSemanticMetaBlock">
@@ -203,9 +196,6 @@
                                                             <ObjectStatus text="{= ${i18n>personPernerLabel} + ': ' + (${selected>/basic/OBSERVED_PERNER} || '-') }" state="Information"/>
                                                             <ObjectStatus text="{= ${i18n>personPositionLabel} + ': ' + (${selected>/basic/OBSERVED_POSITION} || '-') }" state="Information"/>
                                                             <ObjectStatus text="{= ${i18n>personOrgUnitLabel} + ': ' + (${selected>/basic/OBSERVED_ORGUNIT} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>dateLabel} + ': ' + (${selected>/basic/date} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>timeLabel} + ': ' + (${selected>/basic/time} || '-') }" state="Information"/>
-                                                            <ObjectStatus text="{= ${i18n>timezoneLabel} + ': ' + (${selected>/basic/timezone} || '-') }" state="Information"/>
                                                         </VBox>
 
                                                         <VBox visible="{= ${state>/mode} === 'EDIT' &amp;&amp; ${view>key} === 'location' }" renderType="Bare">
@@ -338,6 +328,7 @@
                 </uxap:sections>
 
             </uxap:ObjectPageLayout>
+
 
             <core:Fragment fragmentName="sap_ui5.view.fragment.LocationValueHelpDialog" type="XML"/>
 

@@ -34,6 +34,7 @@ sap.ui.define([
 
         onAfterRendering: function () {
             this._scheduleFlexibleColumnSplitApply();
+            this._bindSplitDrag();
         },
 
         _scheduleFlexibleColumnSplitApply: function () {
@@ -76,6 +77,7 @@ sap.ui.define([
             if (!bTwoColumns || iViewportWidth <= 1100) {
                 oFcl.removeStyleClass("fclCustomSplitActive");
                 this._sAppliedSplitSignature = "";
+                this._unbindSplitDrag();
                 return;
             }
 
@@ -92,6 +94,100 @@ sap.ui.define([
             oDomRef.style.setProperty("--fcl-begin-col", iBegin + "%");
             oDomRef.style.setProperty("--fcl-mid-col", iMid + "%");
             this._sAppliedSplitSignature = sSignature;
+            this._bindSplitDrag();
+        },
+
+        _bindSplitDrag: function () {
+            var oFcl = this.byId("fcl");
+            if (!oFcl || !oFcl.getDomRef()) {
+                return;
+            }
+
+            var oState = this.getModel("state");
+            if (!oState || !this._isTwoColumnLayout(oState.getProperty("/layout"))) {
+                return;
+            }
+
+            var oSeparator = oFcl.getDomRef().querySelector(".sapFFCLSeparator");
+            if (!oSeparator || this._oSplitSeparator === oSeparator) {
+                return;
+            }
+
+            this._unbindSplitDrag();
+            this._oSplitSeparator = oSeparator;
+            this._fnSplitPointerDown = function (oEvent) {
+                if (oEvent.button !== 0) {
+                    return;
+                }
+                var oDomRef = oFcl.getDomRef();
+                if (!oDomRef) {
+                    return;
+                }
+                var oBegin = oDomRef.querySelector(".sapFFCLColumnBegin");
+                if (!oBegin) {
+                    return;
+                }
+
+                oEvent.preventDefault();
+                var fnMove = function (oMoveEvent) {
+                    var oRect = oDomRef.getBoundingClientRect();
+                    var iPercent = Math.round(((oMoveEvent.clientX - oRect.left) / oRect.width) * 100);
+                    iPercent = Math.max(20, Math.min(80, iPercent));
+                    oState.setProperty("/columnSplitPercent", iPercent);
+                };
+
+                var fnUp = function () {
+                    window.removeEventListener("pointermove", fnMove);
+                    window.removeEventListener("pointerup", fnUp);
+                    if (oSeparator && oSeparator.classList) {
+                        oSeparator.classList.remove("isDragging");
+                    }
+                };
+
+                if (oSeparator && oSeparator.classList) {
+                    oSeparator.classList.add("isDragging");
+                }
+                window.addEventListener("pointermove", fnMove);
+                window.addEventListener("pointerup", fnUp);
+            };
+
+            oSeparator.addEventListener("pointerdown", this._fnSplitPointerDown);
+        },
+
+        _unbindSplitDrag: function () {
+            if (this._oSplitSeparator && this._fnSplitPointerDown) {
+                this._oSplitSeparator.removeEventListener("pointerdown", this._fnSplitPointerDown);
+            }
+            this._oSplitSeparator = null;
+            this._fnSplitPointerDown = null;
+        },
+
+
+        onFclStateChange: function (oEvent) {
+            var oState = this.getModel("state");
+            if (!oState) {
+                return;
+            }
+
+            var sLayout = oEvent.getParameter("layout") || "OneColumn";
+            oState.setProperty("/layout", sLayout);
+            if (this._isTwoColumnLayout(sLayout)) {
+                oState.setProperty("/preferredDetailLayout", sLayout);
+            }
+
+            var sHash = this.getRouter().getHashChanger().getHash() || "";
+            if (sHash.indexOf("detail/") !== 0) {
+                return;
+            }
+
+            var aParts = sHash.split("/");
+            var sId = aParts[1] || "";
+            var sCurrentLayout = aParts[2] || "";
+            if (!sId || sCurrentLayout === sLayout) {
+                return;
+            }
+
+            this.navTo("detailLayout", { id: sId, layout: sLayout }, true);
         },
 
         onToggleTheme: function () {
@@ -158,6 +254,8 @@ sap.ui.define([
                 window.removeEventListener("resize", this._fnOnWindowResize);
                 this._fnOnWindowResize = null;
             }
+
+            this._unbindSplitDrag();
 
             if (this._oRequiresLoginBinding) {
                 this._oRequiresLoginBinding.detachChange(this._syncTestUserDialogState, this);

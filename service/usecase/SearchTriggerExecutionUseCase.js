@@ -12,24 +12,12 @@ sap.ui.define([], function () {
         return { ok: true, mode: "smart" };
     }
 
-    function runFallbackSearch(mArgs) {
-        return mArgs.runFallbackSearchLifecycle({
-            markSearchedAndRebind: mArgs.markSearchedAndRebind,
-            syncFilterHint: mArgs.syncFilterHint,
-            refreshInlineAnalytics: mArgs.refreshInlineAnalytics
-        });
-    }
-
     function runSearchTrigger(mArgs) {
-        if (mArgs.useSmartControls) {
-            return runSmartSearch(mArgs);
-        }
-        return runFallbackSearch(mArgs);
+        return runSmartSearch(mArgs);
     }
 
     return {
         runSmartSearch: runSmartSearch,
-        runFallbackSearch: runFallbackSearch,
         runSearchTrigger: runSearchTrigger
     };
 });

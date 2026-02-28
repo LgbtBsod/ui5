@@ -61,7 +61,6 @@
                         entitySet="ChecklistFlatSet"
                         persistencyKey="pcctSmartFilter"
                         useToolbar="true"
-                        visible="{view>/useSmartControls}"
                         showGoOnFB="true"
                         showClearOnFB="true"
                         liveMode="false"
@@ -79,38 +78,6 @@
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
 
-                    <OverflowToolbar class="toolbarTransparent quickFiltersRow sapUiTinyMarginTop" visible="false">
-                        <Label text="{i18n>filterChecklistIdLabel}" class="sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
-                        </Label>
-                        <Input value="{state>/filterId}" placeholder="{i18n>checklistIdPlaceholder}" width="12rem" class="sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
-                        </Input>
-                        <Label text="{i18n>filterLpcLabel}" class="sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
-                        </Label>
-                        <Select selectedKey="{state>/filterLpc}" width="9rem" class="sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
-                            <items>
-                                <core:Item key="" text="{i18n>allLpc}"/>
-                                <core:Item key="L1" text="{i18n>lpcLow}"/>
-                                <core:Item key="L2" text="{i18n>lpcMedium}"/>
-                                <core:Item key="L3" text="{i18n>lpcHigh}"/>
-                            </items>
-                        </Select>
-                        <ToolbarSpacer/>
-                        <Button text="{i18n>workflowActionRefresh}" icon="sap-icon://refresh" type="Transparent" press=".onRetryLoad" enabled="{view>/canRetryLoad}" class="brandActionBtn brandActionGhost searchRetryLoadActionBtn sapUiTinyMarginEnd">
-                            <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
-                        </Button>
-                        <Button text="{i18n>resetButton}" icon="sap-icon://undo" type="Transparent" press=".onResetFilters" class="brandActionBtn brandActionGhost">
-                            <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
-                        </Button>
-                    </OverflowToolbar>
-
-                    <OverflowToolbar class="toolbarTransparent searchCriteriaActions sapUiTinyMarginTop">
-                        <Button text="{i18n>searchButton}" icon="sap-icon://search" type="Emphasized" press=".onSearch" class="brandActionBtn brandActionPrimary searchPinnedActionBtn sapUiTinyMarginEnd" visible="false"/>
-
-                    </OverflowToolbar>
                 </VBox>
 
                 <VBox class="glassCard smartTableGlass searchResultsTable mergeBlock mergeBlockBottom">
@@ -145,7 +112,6 @@
     header="{i18n>resultsLabel}"
     persistencyKey="pcctSmartTable"
     enableAutoBinding="false"
-    visible="{view>/useSmartControls}"
     beforeRebindTable=".onBeforeSmartTableRebind"
     initialise=".onSmartTableInitialise"
     initiallyVisibleFields="Uuid,ChecklistId,Status,Lpc,Date,Equipment,ChangedOn,ChangedBy"
@@ -210,24 +176,6 @@
     </smartTable:customToolbar>
 </smartTable:SmartTable>
 
-                    <Table id="searchFallbackTable" visible="false" items="{data>/visibleCheckLists}" noDataText="{view>/noDataText}" class="glassTable searchResultsTable searchFallbackTableWrap" mode="SingleSelectMaster" itemPress=".onFallbackItemPress" selectionChange=".onFallbackSelectionChange" growing="true" growingThreshold="100" growingScrollToLoad="false">
-                        <columns>
-                            <Column><Text text="{i18n>columnId}"/></Column>
-                            <Column><Text text="{i18n>columnStatus}"/></Column>
-                            <Column><Text text="{i18n>headerLpcLabel}"/></Column>
-                            <Column><Text text="{i18n>columnObserver}"/></Column>
-                        </columns>
-                        <items>
-                            <ColumnListItem>
-                                <cells>
-                                    <ObjectIdentifier title="{data>root/id}" text="{= ${data>basic/CHECKLIST_ID} || ${data>basic/checklist_id} || ${data>root/id} }"/>
-                                    <ObjectStatus text="{data>root/status}" state="{path:'data>root/status', formatter:'.formatStatus'}"/>
-                                    <Text text="{data>basic/LPC_TEXT}"/>
-                                    <Text text="{data>basic/OBSERVER_FULLNAME}"/>
-                                </cells>
-                            </ColumnListItem>
-                        </items>
-                    </Table>
                 </VBox>
                 <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsDialog" type="XML"/>
             </VBox>

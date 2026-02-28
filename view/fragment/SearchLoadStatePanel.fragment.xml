@@ -7,7 +7,7 @@
                 <Text id="busyPanelTitleText" text="{i18n>busyPanelTitle}" class="searchCustomBusyTitle"/>
                 <Text id="busyPanelSubtitleText" text="{i18n>busyPanelSubtitle}" class="searchCustomBusySubtitle"/>
             </HBox>
-            <HBox class="searchCustomBusyPictogramRow" alignItems="Center" justifyContent="Center" renderType="Bare" ariaLabelledBy="busyPanelTitleText busyPanelSubtitleText">
+            <HBox class="searchCustomBusyPictogramRow" alignItems="Center" justifyContent="Center" renderType="Bare">
                 <Image src="themes/base/illustrations/sapIllus-Dot-SimpleReload.svg" decorative="true" densityAware="false" class="searchBusyPictogram searchBusyPictogramOne"/>
                 <Image src="themes/base/illustrations/sapIllus-Dot-SearchEarth.svg" decorative="true" densityAware="false" class="searchBusyPictogram searchBusyPictogramTwo"/>
                 <Image src="themes/base/illustrations/sapIllus-Dot-SimpleConnection.svg" decorative="true" densityAware="false" class="searchBusyPictogram searchBusyPictogramThree"/>
