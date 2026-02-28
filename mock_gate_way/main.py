@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
@@ -216,6 +216,25 @@ app.include_router(settings_router)
 app.include_router(batch_router)
 app.include_router(capabilities_router)
 
+# SAP Gateway-style alias paths under service root used by the UI runtime.
+app.include_router(lock_router, prefix=SERVICE_ROOT)
+app.include_router(lock_entity_router, prefix=SERVICE_ROOT)
+app.include_router(lock_history_router, prefix=SERVICE_ROOT)
+app.include_router(checklist_router, prefix=SERVICE_ROOT)
+app.include_router(search_router, prefix=SERVICE_ROOT)
+app.include_router(dictionary_router, prefix=SERVICE_ROOT)
+app.include_router(dictionary_legacy_router, prefix=SERVICE_ROOT)
+app.include_router(location_router, prefix=SERVICE_ROOT)
+app.include_router(person_router, prefix=SERVICE_ROOT)
+app.include_router(reference_router, prefix=SERVICE_ROOT)
+app.include_router(hierarchy_router, prefix=SERVICE_ROOT)
+app.include_router(actions_router, prefix=SERVICE_ROOT)
+app.include_router(metadata_router, prefix=SERVICE_ROOT)
+app.include_router(analytics_router, prefix=SERVICE_ROOT)
+app.include_router(settings_router, prefix=SERVICE_ROOT)
+app.include_router(batch_router, prefix=SERVICE_ROOT)
+app.include_router(capabilities_router, prefix=SERVICE_ROOT)
+
 
 @app.get("/")
 def health():
@@ -249,6 +268,21 @@ def frontend_config(db = SessionLocal()):
         }
     finally:
         db.close()
+
+
+@app.get(f"{SERVICE_ROOT}/config/frontend")
+def frontend_config_odata_alias(db=SessionLocal()):
+    return frontend_config(db)
+
+
+@app.get("/sap/bc/lrep/flex/data/sap_ui5.Component")
+def ui5_flex_stub(appVersion: str | None = None):
+    return {"changes": [], "comp": {"name": "sap_ui5.Component", "appVersion": appVersion or "1.0.0"}}
+
+
+@app.get("/sap_ui5/Component-preload.js")
+def component_preload_stub():
+    return Response(content="/* preload not bundled in mock mode */", media_type="application/javascript")
 
 
 @app.exception_handler(Exception)

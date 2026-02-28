@@ -152,7 +152,7 @@ def checklist_flat(
     return odata_payload([flat_to_odata(x, selected) for x in rows], total if inlinecount == "allpages" else None)
 
 
-@router.get(f"{SERVICE_ROOT}/ChecklistSet({entity_key})")
+@router.get(f"{SERVICE_ROOT}/ChecklistSet({{entity_key}})")
 def checklist_root(entity_key: str, expand: str | None = Query(None, alias="$expand"), response: Response = None, db: Session = Depends(get_db)):
     if (err := _reject_expand(expand)):
         return err
@@ -166,7 +166,7 @@ def checklist_root(entity_key: str, expand: str | None = Query(None, alias="$exp
     return {"d": root_to_odata(row)}
 
 
-@router.api_route(f"{SERVICE_ROOT}/ChecklistSet({entity_key})", methods=["MERGE", "PATCH", "DELETE"])
+@router.api_route(f"{SERVICE_ROOT}/ChecklistSet({{entity_key}})", methods=["MERGE", "PATCH", "DELETE"])
 async def checklist_modify(entity_key: str, request: Request, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
     root_id = entity_key.strip("'")
     row = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.isnot(True)).first()

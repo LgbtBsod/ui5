@@ -77,7 +77,18 @@ sap.ui.define([
             ComponentStartupDiagnosticsOrchestrationUseCase.wireMetadataEvents({
                 mainServiceModel: oMainServiceModel,
                 stateModel: oStateModel,
-                syncCapability: fnSyncCapabilityDiagnostics
+                syncCapability: fnSyncCapabilityDiagnostics,
+                onMetadataFailed: function () {
+                    if (BackendAdapter.getMode() === "real") {
+                        BackendAdapter.configure({
+                            mode: "fake",
+                            uiContractVersion: sUiContractVersion,
+                            model: oMainServiceModel
+                        });
+                        oStateModel.setProperty("/backendMode", "fake");
+                        oStateModel.setProperty("/metadataFallbackMode", true);
+                    }
+                }
             });
 
             var oLayoutModel = ModelFactory.createLayoutModel();
