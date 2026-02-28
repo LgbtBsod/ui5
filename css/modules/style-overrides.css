@@ -670,3 +670,444 @@ body::after {
     padding: .75rem .7rem !important;
   }
 }
+
+/* Section: search-custom-busy-pictograms */
+.searchCustomBusyPanel {
+  border: 1px solid color-mix(in srgb, var(--glass-border) 70%, rgba(var(--accent-rgb), 0.35));
+  border-radius: var(--radius-lg, 16px);
+  padding: .65rem .85rem;
+  background: linear-gradient(135deg, rgba(255,255,255,.7), rgba(225,236,253,.55));
+  box-shadow: 0 8px 24px rgba(31, 74, 135, 0.12);
+  contain: layout paint;
+}
+
+.searchCustomBusyHeader {
+  gap: .5rem;
+  margin-bottom: .4rem;
+}
+
+.searchCustomBusyTitle {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.searchCustomBusySubtitle {
+  font-size: .72rem;
+  opacity: .72;
+}
+
+.searchCustomBusyPictogramRow {
+  position: relative;
+  gap: .85rem;
+  min-height: 2.75rem;
+}
+
+.searchCustomBusyPictogramRow::before {
+  content: "";
+  position: absolute;
+  inset: .7rem .35rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, rgba(var(--accent-rgb), 0.2) 68%, transparent) 48%,
+    transparent 100%);
+  background-size: 220% 100%;
+  opacity: .62;
+  filter: blur(8px);
+  animation: busyBeamSweep 1.9s ease-in-out infinite;
+}
+
+.searchBusyPictogram {
+  position: relative;
+  z-index: 1;
+  width: 2rem;
+  height: 2rem;
+  opacity: .92;
+  will-change: transform, opacity, filter;
+  transform: translateZ(0);
+  filter: drop-shadow(0 4px 10px rgba(44, 111, 198, 0.22));
+  animation: searchBusyFloat 1.15s cubic-bezier(.32,.72,.2,1) infinite,
+             searchBusyGlow 1.15s ease-in-out infinite;
+}
+
+.searchBusyPictogramOne { animation-delay: 0s, 0s; }
+.searchBusyPictogramTwo { animation-delay: .14s, .14s; }
+.searchBusyPictogramThree { animation-delay: .28s, .28s; }
+.searchBusyPictogramFour { animation-delay: .42s, .42s; }
+
+@keyframes searchBusyFloat {
+  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); opacity: .68; }
+  36% { transform: translateY(-9px) scale(1.14) rotate(-2deg); opacity: 1; }
+  68% { transform: translateY(-3px) scale(1.06) rotate(1deg); opacity: .93; }
+}
+
+@keyframes searchBusyGlow {
+  0%, 100% { filter: drop-shadow(0 4px 10px rgba(44, 111, 198, 0.22)); }
+  40% { filter: drop-shadow(0 8px 16px rgba(62, 148, 255, 0.34)); }
+}
+
+@keyframes busyBeamSweep {
+  0% { background-position: 130% 0; opacity: .46; }
+  50% { opacity: .68; }
+  100% { background-position: -130% 0; opacity: .46; }
+}
+
+@media (max-width: 560px) {
+  .searchCustomBusyHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .searchCustomBusyPictogramRow {
+    gap: .55rem;
+  }
+
+  .searchBusyPictogram {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+}
+
+/* Section: ux-gradient-depth-and-explicit-motion */
+:root {
+  --ui-bg-aurora-opacity: 0.48;
+  --ui-bg-aurora-blur: 54px;
+  --ui-bg-aurora-speed: 40s;
+  --ui-bg-aurora-shift-speed: 22s;
+  --ui-bg-aurora-accent-a: color-mix(in srgb, var(--sapAccentColor7, #8e76ff) 36%, transparent);
+  --ui-bg-aurora-accent-b: color-mix(in srgb, var(--sapAccentColor6, #6ac7ff) 34%, transparent);
+  --ui-bg-aurora-accent-c: color-mix(in srgb, var(--sapAccentColor8, #7bb35a) 18%, transparent);
+}
+
+:root.light-mode {
+  --ui-bg-aurora-opacity: 0.56;
+  --ui-bg-aurora-blur: 48px;
+  --ui-bg-aurora-accent-a: color-mix(in srgb, var(--sapAccentColor7, #7c9bff) 34%, transparent);
+  --ui-bg-aurora-accent-b: color-mix(in srgb, var(--sapAccentColor6, #75d2ff) 36%, transparent);
+  --ui-bg-aurora-accent-c: color-mix(in srgb, var(--sapAccentColor8, #86be74) 14%, transparent);
+}
+
+body::before {
+  background:
+    radial-gradient(46% 44% at 12% 14%, var(--ui-bg-aurora-accent-a), transparent 72%),
+    radial-gradient(40% 42% at 84% 80%, var(--ui-bg-aurora-accent-b), transparent 74%),
+    radial-gradient(30% 32% at 52% 22%, var(--ui-bg-aurora-accent-c), transparent 78%),
+    linear-gradient(118deg,
+      color-mix(in srgb, var(--ui-bg-aurora-accent-a) 62%, transparent) 0%,
+      color-mix(in srgb, var(--ui-bg-aurora-accent-b) 56%, transparent) 52%,
+      transparent 100%) !important;
+  background-size: 108% 108%, 104% 104%, 112% 112%, 106% 106%;
+  background-position: 0% 0%, 100% 100%, 50% 20%, 0% 0%;
+  opacity: var(--ui-bg-aurora-opacity);
+  filter: blur(var(--ui-bg-aurora-blur)) saturate(132%);
+  animation: philosophyGradientDrift var(--ui-bg-aurora-speed) ease-in-out infinite alternate,
+             uiAuroraBreath 14s ease-in-out infinite,
+             uiAuroraShift var(--ui-bg-aurora-shift-speed) ease-in-out infinite alternate;
+}
+
+@keyframes uiAuroraBreath {
+  0%, 100% { opacity: calc(var(--ui-bg-aurora-opacity) - 0.06); }
+  50% { opacity: calc(var(--ui-bg-aurora-opacity) + 0.04); }
+}
+
+@keyframes uiAuroraShift {
+  0% { background-position: 0% 0%, 100% 100%, 50% 20%, 0% 0%; }
+  100% { background-position: 8% 6%, 92% 96%, 46% 26%, 100% 0%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searchBusyPictogram,
+  .searchCustomBusyPictogramRow::before,
+  body::before {
+    animation: none !important;
+  }
+
+  .searchBusyPictogram {
+    transform: none !important;
+    opacity: .95;
+  }
+}
+
+/* Section: final-pass-transparency-and-aurora-balance */
+:root {
+  --card-glass-dark: color-mix(in srgb, var(--glass-bg) 62%, rgba(255, 255, 255, 0.04));
+  --card-glass-light: color-mix(in srgb, var(--glass-bg) 70%, rgba(255, 255, 255, 0.22));
+  --card-highlight-dark: rgba(201, 224, 255, 0.10);
+  --card-highlight-light: rgba(255, 255, 255, 0.62);
+}
+
+body.appDark .glassCard,
+body.appDark .filterCard,
+body.appDark .smartTableGlass,
+body.appDark .workflowStageCard,
+body.appDark .kpiCard,
+:root:not(.light-mode) .glassCard,
+:root:not(.light-mode) .filterCard,
+:root:not(.light-mode) .smartTableGlass,
+:root:not(.light-mode) .workflowStageCard,
+:root:not(.light-mode) .kpiCard {
+  background: var(--card-glass-dark) !important;
+  background-image: linear-gradient(168deg,
+    color-mix(in srgb, var(--card-glass-dark) 88%, rgba(var(--accent-rgb), 0.08)) 0%,
+    color-mix(in srgb, var(--surface2) 80%, rgba(var(--accent-rgb), 0.14)) 100%) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 76%, rgba(172, 198, 255, 0.22)) !important;
+  box-shadow: 0 18px 38px rgba(6, 16, 30, 0.20), inset 0 1px 0 var(--card-highlight-dark) !important;
+  backdrop-filter: blur(18px) saturate(128%);
+  -webkit-backdrop-filter: blur(18px) saturate(128%);
+}
+
+body.appLight .glassCard,
+body.appLight .filterCard,
+body.appLight .smartTableGlass,
+body.appLight .workflowStageCard,
+body.appLight .kpiCard,
+:root.light-mode .glassCard,
+:root.light-mode .filterCard,
+:root.light-mode .smartTableGlass,
+:root.light-mode .workflowStageCard,
+:root.light-mode .kpiCard {
+  background: var(--card-glass-light) !important;
+  background-image: linear-gradient(166deg,
+    color-mix(in srgb, var(--card-glass-light) 86%, rgba(255, 255, 255, 0.30)) 0%,
+    color-mix(in srgb, var(--surface2) 82%, rgba(var(--accent-rgb), 0.12)) 100%) !important;
+  border-color: color-mix(in srgb, var(--glass-border) 74%, rgba(104, 158, 235, 0.22)) !important;
+  box-shadow: 0 16px 34px rgba(72, 102, 142, 0.12), inset 0 1px 0 var(--card-highlight-light) !important;
+  backdrop-filter: blur(15px) saturate(124%);
+  -webkit-backdrop-filter: blur(15px) saturate(124%);
+}
+
+body::before {
+  background-size: 114% 114%, 112% 112%, 120% 120%, 110% 110% !important;
+  filter: blur(calc(var(--ui-bg-aurora-blur) + 2px)) saturate(136%) !important;
+}
+
+.searchCustomBusyPictogramRow::before {
+  opacity: .72;
+  animation-duration: 1.55s;
+}
+
+.searchBusyPictogram {
+  animation-duration: 1.02s, 1.02s;
+}
+
+/* Section: ultra-transparency-and-clear-motion-pass */
+:root {
+  --card-glass-dark: color-mix(in srgb, var(--glass-bg) 52%, rgba(255, 255, 255, 0.03));
+  --card-glass-light: color-mix(in srgb, var(--glass-bg) 62%, rgba(255, 255, 255, 0.16));
+  --ui-bg-aurora-opacity: 0.52;
+}
+
+:root.light-mode {
+  --ui-bg-aurora-opacity: 0.60;
+}
+
+body.appDark .glassCard,
+body.appDark .filterCard,
+body.appDark .smartTableGlass,
+body.appDark .workflowStageCard,
+body.appDark .kpiCard,
+:root:not(.light-mode) .glassCard,
+:root:not(.light-mode) .filterCard,
+:root:not(.light-mode) .smartTableGlass,
+:root:not(.light-mode) .workflowStageCard,
+:root:not(.light-mode) .kpiCard,
+body.appLight .glassCard,
+body.appLight .filterCard,
+body.appLight .smartTableGlass,
+body.appLight .workflowStageCard,
+body.appLight .kpiCard,
+:root.light-mode .glassCard,
+:root.light-mode .filterCard,
+:root.light-mode .smartTableGlass,
+:root.light-mode .workflowStageCard,
+:root.light-mode .kpiCard {
+  position: relative;
+  overflow: hidden;
+}
+
+body.appDark .glassCard,
+body.appDark .filterCard,
+body.appDark .smartTableGlass,
+body.appDark .workflowStageCard,
+body.appDark .kpiCard,
+:root:not(.light-mode) .glassCard,
+:root:not(.light-mode) .filterCard,
+:root:not(.light-mode) .smartTableGlass,
+:root:not(.light-mode) .workflowStageCard,
+:root:not(.light-mode) .kpiCard {
+  box-shadow: 0 16px 34px rgba(6, 16, 30, 0.17), inset 0 1px 0 rgba(201, 224, 255, 0.09) !important;
+}
+
+body.appLight .glassCard,
+body.appLight .filterCard,
+body.appLight .smartTableGlass,
+body.appLight .workflowStageCard,
+body.appLight .kpiCard,
+:root.light-mode .glassCard,
+:root.light-mode .filterCard,
+:root.light-mode .smartTableGlass,
+:root.light-mode .workflowStageCard,
+:root.light-mode .kpiCard {
+  box-shadow: 0 14px 30px rgba(72, 102, 142, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+}
+
+.searchCustomBusyPanel {
+  animation: busyPanelHalo 1.6s ease-in-out infinite;
+}
+
+@keyframes busyPanelHalo {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(31, 74, 135, 0.12), 0 0 0 0 rgba(var(--accent-rgb), 0.0);
+  }
+  50% {
+    box-shadow: 0 10px 28px rgba(31, 74, 135, 0.18), 0 0 0 6px rgba(var(--accent-rgb), 0.08);
+  }
+}
+
+body::before {
+  background-size: 118% 118%, 116% 116%, 124% 124%, 114% 114% !important;
+  animation-duration: calc(var(--ui-bg-aurora-speed) - 4s), 12s, calc(var(--ui-bg-aurora-shift-speed) - 2s) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searchCustomBusyPanel {
+    animation: none !important;
+  }
+}
+
+/* Section: pass5-stronger-gradient-through-transparency */
+:root {
+  --card-glass-dark: color-mix(in srgb, var(--glass-bg) 44%, rgba(255, 255, 255, 0.02));
+  --card-glass-light: color-mix(in srgb, var(--glass-bg) 54%, rgba(255, 255, 255, 0.12));
+  --ui-bg-aurora-opacity: 0.56;
+}
+
+:root.light-mode {
+  --ui-bg-aurora-opacity: 0.64;
+}
+
+body.appDark .glassCard,
+body.appDark .filterCard,
+body.appDark .smartTableGlass,
+body.appDark .workflowStageCard,
+body.appDark .kpiCard,
+:root:not(.light-mode) .glassCard,
+:root:not(.light-mode) .filterCard,
+:root:not(.light-mode) .smartTableGlass,
+:root:not(.light-mode) .workflowStageCard,
+:root:not(.light-mode) .kpiCard {
+  backdrop-filter: blur(20px) saturate(132%);
+  -webkit-backdrop-filter: blur(20px) saturate(132%);
+}
+
+body.appLight .glassCard,
+body.appLight .filterCard,
+body.appLight .smartTableGlass,
+body.appLight .workflowStageCard,
+body.appLight .kpiCard,
+:root.light-mode .glassCard,
+:root.light-mode .filterCard,
+:root.light-mode .smartTableGlass,
+:root.light-mode .workflowStageCard,
+:root.light-mode .kpiCard {
+  backdrop-filter: blur(16px) saturate(128%);
+  -webkit-backdrop-filter: blur(16px) saturate(128%);
+}
+
+body::before {
+  background:
+    radial-gradient(50% 48% at 8% 10%, color-mix(in srgb, var(--ui-bg-aurora-accent-a) 112%, transparent), transparent 73%),
+    radial-gradient(46% 44% at 88% 84%, color-mix(in srgb, var(--ui-bg-aurora-accent-b) 112%, transparent), transparent 76%),
+    radial-gradient(34% 30% at 54% 18%, color-mix(in srgb, var(--ui-bg-aurora-accent-c) 118%, transparent), transparent 80%),
+    linear-gradient(122deg,
+      color-mix(in srgb, var(--ui-bg-aurora-accent-a) 66%, transparent) 0%,
+      color-mix(in srgb, var(--ui-bg-aurora-accent-b) 62%, transparent) 48%,
+      transparent 100%) !important;
+  background-size: 122% 122%, 120% 120%, 126% 126%, 116% 116% !important;
+}
+
+.searchCustomBusyPanel {
+  animation: busyPanelHalo 1.2s ease-in-out infinite;
+}
+
+@keyframes busyPanelHalo {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(31, 74, 135, 0.12), 0 0 0 0 rgba(var(--accent-rgb), 0.0);
+  }
+  50% {
+    box-shadow: 0 12px 32px rgba(31, 74, 135, 0.22), 0 0 0 8px rgba(var(--accent-rgb), 0.10);
+  }
+}
+
+/* Section: pass6-pronounced-transparency-and-balanced-aurora */
+:root {
+  --card-glass-dark: color-mix(in srgb, var(--glass-bg) 38%, rgba(255, 255, 255, 0.02));
+  --card-glass-light: color-mix(in srgb, var(--glass-bg) 48%, rgba(255, 255, 255, 0.10));
+  --ui-bg-aurora-opacity: 0.60;
+}
+
+:root.light-mode {
+  --ui-bg-aurora-opacity: 0.68;
+}
+
+.glassCard,
+.filterCard,
+.smartTableGlass,
+.workflowStageCard,
+.kpiCard {
+  background-color: transparent !important;
+  background-image: linear-gradient(165deg,
+    color-mix(in srgb, var(--card-glass-dark) 86%, rgba(var(--accent-rgb), 0.08)) 0%,
+    color-mix(in srgb, var(--surface2) 72%, rgba(var(--accent-rgb), 0.16)) 100%) !important;
+}
+
+:root.light-mode .glassCard,
+:root.light-mode .filterCard,
+:root.light-mode .smartTableGlass,
+:root.light-mode .workflowStageCard,
+:root.light-mode .kpiCard,
+body.appLight .glassCard,
+body.appLight .filterCard,
+body.appLight .smartTableGlass,
+body.appLight .workflowStageCard,
+body.appLight .kpiCard {
+  background-image: linear-gradient(165deg,
+    color-mix(in srgb, var(--card-glass-light) 84%, rgba(255, 255, 255, 0.24)) 0%,
+    color-mix(in srgb, var(--surface2) 74%, rgba(var(--accent-rgb), 0.14)) 100%) !important;
+}
+
+.glassCard::before,
+.filterCard::before,
+.smartTableGlass::before,
+.workflowStageCard::before,
+.kpiCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(255,255,255,0.18), transparent 42%);
+  opacity: .35;
+}
+
+body::before {
+  background:
+    radial-gradient(54% 50% at 10% 10%, color-mix(in srgb, var(--ui-bg-aurora-accent-a) 124%, transparent), transparent 74%),
+    radial-gradient(48% 46% at 90% 82%, color-mix(in srgb, var(--ui-bg-aurora-accent-b) 122%, transparent), transparent 77%),
+    radial-gradient(36% 32% at 54% 18%, color-mix(in srgb, var(--ui-bg-aurora-accent-c) 126%, transparent), transparent 82%),
+    linear-gradient(124deg,
+      color-mix(in srgb, var(--ui-bg-aurora-accent-a) 70%, transparent) 0%,
+      color-mix(in srgb, var(--ui-bg-aurora-accent-b) 66%, transparent) 46%,
+      transparent 100%) !important;
+  opacity: var(--ui-bg-aurora-opacity) !important;
+  background-size: 126% 126%, 124% 124%, 130% 130%, 120% 120% !important;
+}
+
+.searchCustomBusyPictogramRow::before {
+  animation-duration: 1.35s;
+  opacity: .78;
+}
+
+.searchBusyPictogram {
+  animation-duration: .94s, .94s;
+}

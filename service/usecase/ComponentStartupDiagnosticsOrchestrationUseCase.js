@@ -26,6 +26,7 @@ sap.ui.define([
         var oMainServiceModel = mDeps && mDeps.mainServiceModel;
         var oStateModel = mDeps && mDeps.stateModel;
         var fnSync = mDeps && mDeps.syncCapability;
+        var fnOnMetadataFailed = mDeps && mDeps.onMetadataFailed;
 
         if (!oMainServiceModel || !oStateModel || typeof fnSync !== "function") {
             return { ok: false, reason: "missing_dependency" };
@@ -47,6 +48,9 @@ sap.ui.define([
             oStateModel.setProperty("/mainServiceMetadataOk", false);
             oStateModel.setProperty("/mainServiceMetadataError", sReason);
             fnSync();
+            if (typeof fnOnMetadataFailed === "function") {
+                fnOnMetadataFailed(sReason);
+            }
         });
 
         return { ok: true };

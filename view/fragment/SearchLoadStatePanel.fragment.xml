@@ -2,6 +2,19 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
     <VBox class="searchStatusStripStack sapUiTinyMarginBottom mergeBlock mergeBlockMiddle">
+        <VBox visible="{= ${state>/isLoading} &amp;&amp; !${state>/loadError} }" class="searchCustomBusyPanel sapUiTinyMarginBottom">
+            <HBox class="searchCustomBusyHeader" alignItems="Center" justifyContent="SpaceBetween" renderType="Bare">
+                <Text id="busyPanelTitleText" text="{i18n>busyPanelTitle}" class="searchCustomBusyTitle"/>
+                <Text id="busyPanelSubtitleText" text="{i18n>busyPanelSubtitle}" class="searchCustomBusySubtitle"/>
+            </HBox>
+            <HBox class="searchCustomBusyPictogramRow" alignItems="Center" justifyContent="Center" renderType="Bare" ariaLabelledBy="busyPanelTitleText busyPanelSubtitleText">
+                <Image src="themes/base/illustrations/sapIllus-Dot-SimpleReload.svg" decorative="true" densityAware="false" class="searchBusyPictogram searchBusyPictogramOne"/>
+                <Image src="themes/base/illustrations/sapIllus-Dot-SearchEarth.svg" decorative="true" densityAware="false" class="searchBusyPictogram searchBusyPictogramTwo"/>
+                <Image src="themes/base/illustrations/sapIllus-Dot-SimpleConnection.svg" decorative="true" densityAware="false" class="searchBusyPictogram searchBusyPictogramThree"/>
+                <Image src="themes/base/illustrations/sapIllus-Dot-FilterTable.svg" decorative="true" densityAware="false" class="searchBusyPictogram searchBusyPictogramFour"/>
+            </HBox>
+        </VBox>
+
         <MessageStrip
             text="{view>/filterHintText}"
             type="{view>/filterHintType}"
