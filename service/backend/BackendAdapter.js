@@ -282,6 +282,13 @@ sap.ui.define([
             });
         },
 
+        getLastChangeSet: function (sId) {
+            if (_backendService.getLastChangeSet) {
+                return _backendService.getLastChangeSet(sId);
+            }
+            return Promise.resolve({ RootKey: sId, AggChangedOn: "" });
+        },
+
         getChecklistChecks: function (sId, mPaging) {
             if (_backendService.getChecklistChecks) {
                 return _backendService.getChecklistChecks(sId, mPaging);
