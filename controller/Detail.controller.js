@@ -479,12 +479,20 @@ sap.ui.define([
       }) || null;
 
       if (oLocalMatch) {
-        oDataModel.setProperty("/selectedChecklist", oLocalMatch);
-        this._applyChecklistLazily(oLocalMatch);
-        return;
+        return ChecklistCrudUseCase.getLastChangeSet(sId).then(function (oLastChange) {
+          if (this._canReuseCachedChecklist(oLocalMatch, oLastChange)) {
+            oDataModel.setProperty("/selectedChecklist", oLocalMatch);
+            this._applyChecklistLazily(oLocalMatch);
+            return;
+          }
+          return this._reloadChecklistFromBackend(sId);
+        }.bind(this)).catch(function () {
+          oDataModel.setProperty("/selectedChecklist", oLocalMatch);
+          this._applyChecklistLazily(oLocalMatch);
+        }.bind(this));
       }
 
-      this._reloadChecklistFromBackend(sId);
+      return this._reloadChecklistFromBackend(sId);
 
     },
 
