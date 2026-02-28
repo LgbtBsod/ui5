@@ -411,6 +411,31 @@ sap.ui.define([
       return !!(oComp && oComp._oSmartCache && oComp._oSmartCache.isCacheStrictFresh && oComp._oSmartCache.isCacheStrictFresh("checkLists"));
     },
 
+    _parseODataDateMillis: function (vDate) {
+      if (!vDate) {
+        return NaN;
+      }
+      if (typeof vDate === "string") {
+        var m = vDate.match(/^\/Date\((-?\d+)(?:[+-]\d+)?\)\/$/);
+        if (m) {
+          return Number(m[1]);
+        }
+      }
+      var n = new Date(vDate).getTime();
+      return Number.isNaN(n) ? NaN : n;
+    },
+
+    _canReuseCachedChecklist: function (oChecklist, oLastChange) {
+      var sLocal = (((oChecklist || {}).meta || {}).aggChangedOn) || ((((oChecklist || {}).root || {}).server_changed_on) || "");
+      var sServer = (oLastChange && oLastChange.AggChangedOn) || "";
+      var nLocal = this._parseODataDateMillis(sLocal);
+      var nServer = this._parseODataDateMillis(sServer);
+      if (Number.isNaN(nLocal) || Number.isNaN(nServer)) {
+        return false;
+      }
+      return Math.abs(nServer - nLocal) <= 15000;
+    },
+
     _reloadChecklistFromBackend: function (sId) {
       var oDataModel = this.getModel("data");
       return this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
@@ -427,11 +452,22 @@ sap.ui.define([
         return Promise.resolve(null);
       }
 
-      if (this._isChecklistCacheStrictFresh()) {
-        return Promise.resolve(this.getModel("data").getProperty("/selectedChecklist") || null);
+      var oCached = this.getModel("data").getProperty("/selectedChecklist") || null;
+      if (!oCached) {
+        return this._reloadChecklistFromBackend(sId);
       }
 
-      return this._reloadChecklistFromBackend(sId);
+      return ChecklistCrudUseCase.getLastChangeSet(sId).then(function (oLastChange) {
+        if (this._canReuseCachedChecklist(oCached, oLastChange)) {
+          return oCached;
+        }
+        return this._reloadChecklistFromBackend(sId);
+      }.bind(this)).catch(function () {
+        if (this._isChecklistCacheStrictFresh()) {
+          return oCached;
+        }
+        return this._reloadChecklistFromBackend(sId);
+      }.bind(this));
     },
 
     _bindChecklistById: function (sId) {
