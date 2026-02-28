@@ -119,6 +119,12 @@ sap.ui.define([
                 if (oEvent.button !== 0) {
                     return;
                 }
+
+                var oTarget = oEvent.target;
+                if (oTarget && oTarget.closest && oTarget.closest(".sapFFCLArrow")) {
+                    return;
+                }
+
                 var oDomRef = oFcl.getDomRef();
                 if (!oDomRef) {
                     return;
