@@ -21,6 +21,7 @@ sap.ui.define([
         },
 
         _reset: function () {
+            this.fireEvent("activity", { at: new Date().toISOString() });
             if (this._iTimer) {
                 clearTimeout(this._iTimer);
             }

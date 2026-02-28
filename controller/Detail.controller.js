@@ -80,7 +80,8 @@ sap.ui.define([
 
     onInit: function () {
       var oBundle = this.getResourceBundle();
-      var oViewModel = new JSONModel({
+      var oViewModel = this.getModel("view") || new JSONModel({});
+      oViewModel.setData(Object.assign({}, oViewModel.getData() || {}, {
         hasSelectedChecks: false,
         hasSelectedBarriers: false,
         observerSuggestions: [],
@@ -97,7 +98,7 @@ sap.ui.define([
         locationVhSelectedNode: null,
         locationVhHasSelection: false,
         detailControlCollapsed: false
-      });
+      }), true);
 
       this.getView().setModel(oViewModel, "view");
       this.attachRouteMatched("detail", this._onMatched);
@@ -336,8 +337,18 @@ sap.ui.define([
 
     _ensureMplLocationsLoaded: function () {
       var oMplModel = this.getModel("mpl");
+      var oHierarchyModel = this.getModel("hierarchy");
       var oState = this.getModel("state");
       var aExisting = oMplModel.getProperty("/locations") || [];
+      var sDateCheck = (((this.getModel("selected").getData() || {}).basic || {}).date) || new Date().toISOString().slice(0, 10);
+      var sDateKey = this._toHierarchyDateKey(sDateCheck);
+      var oCachedNode = oHierarchyModel && oHierarchyModel.getProperty("/byDate/" + sDateKey);
+
+      if (oCachedNode && Array.isArray(oCachedNode.nodes) && oCachedNode.nodes.length) {
+        oMplModel.setProperty("/locations", oCachedNode.nodes);
+        this._prepareLocationTree();
+        return Promise.resolve(oCachedNode.nodes);
+      }
 
       if (Array.isArray(aExisting) && aExisting.length) {
         this._prepareLocationTree();
@@ -345,10 +356,17 @@ sap.ui.define([
       }
 
       oState.setProperty("/locationsLoading", true);
-      return BackendAdapter.getLocations().then(function (aRemote) {
+      return BackendAdapter.getLocations(sDateCheck, "MPL").then(function (aRemote) {
         var aLocations = Array.isArray(aRemote) ? aRemote : [];
         if (aLocations.length) {
           oMplModel.setProperty("/locations", aLocations);
+          if (oHierarchyModel) {
+            oHierarchyModel.setProperty("/byDate/" + sDateKey, {
+              nodes: aLocations,
+              indexById: this._buildHierarchyIndexById(aLocations),
+              loadedAt: new Date().toISOString()
+            });
+          }
           this._prepareLocationTree();
         }
         return aLocations;
@@ -357,6 +375,31 @@ sap.ui.define([
       }).finally(function () {
         oState.setProperty("/locationsLoading", false);
       });
+    },
+
+    _toHierarchyDateKey: function (sDateCheck) {
+      var sRaw = String(sDateCheck || "");
+      var m = sRaw.match(/^\/Date\((-?\d+)(?:[+-]\d+)?\)\/$/);
+      if (m) {
+        var n = Number(m[1]);
+        if (!Number.isNaN(n)) {
+          return new Date(n).toISOString().slice(0, 10);
+        }
+      }
+      var oDate = new Date(sRaw);
+      if (Number.isNaN(oDate.getTime())) {
+        return new Date().toISOString().slice(0, 10);
+      }
+      return oDate.toISOString().slice(0, 10);
+    },
+
+    _buildHierarchyIndexById: function (aNodes) {
+      return (aNodes || []).reduce(function (mAcc, oNode) {
+        if (oNode && oNode.node_id) {
+          mAcc[oNode.node_id] = oNode;
+        }
+        return mAcc;
+      }, {});
     },
 
     _prepareLocationTree: function () {
@@ -442,11 +485,55 @@ sap.ui.define([
       return Math.abs(nServer - nLocal) <= iToleranceMs;
     },
 
+    _normalizeRootKey: function (sId) {
+      return String(sId || "").replace(/-/g, "").toLowerCase();
+    },
+
+    _cacheSnapshotPut: function (oChecklist) {
+      var sRootKey = this._normalizeRootKey((((oChecklist || {}).root || {}).id) || "");
+      if (!sRootKey) {
+        return;
+      }
+      var oCacheModel = this.getModel("cache");
+      var oByRoot = oCacheModel.getProperty("/byRootKey") || {};
+      oByRoot[sRootKey] = {
+        snapshot: ChecklistDraftHelper.clone(oChecklist || {}),
+        aggChangedOn: (((oChecklist || {}).meta || {}).aggChangedOn) || "",
+        savedAt: new Date().toISOString(),
+        dirtyIndex: 0
+      };
+      oCacheModel.setProperty("/byRootKey", oByRoot);
+    },
+
+    _cacheSnapshotGet: function (sId) {
+      var sRootKey = this._normalizeRootKey(sId);
+      var oNode = this.getModel("cache").getProperty("/byRootKey/" + sRootKey);
+      return (oNode && oNode.snapshot) ? ChecklistDraftHelper.clone(oNode.snapshot) : null;
+    },
+
+    _applyCanonicalViewModel: function (oChecklist) {
+      var oViewModel = this.getModel("view");
+      if (!oViewModel) {
+        return;
+      }
+      var oData = oChecklist || {};
+      oViewModel.setProperty("/root", ChecklistDraftHelper.clone(oData.root || {}));
+      oViewModel.setProperty("/basicInfo", ChecklistDraftHelper.clone(oData.basic || {}));
+      oViewModel.setProperty("/checks/items", ChecklistDraftHelper.clone(oData.checks || []));
+      oViewModel.setProperty("/barriers/items", ChecklistDraftHelper.clone(oData.barriers || []));
+      oViewModel.setProperty("/attachments/items", ChecklistDraftHelper.clone(oData.attachments || []));
+      oViewModel.setProperty("/meta", Object.assign({}, oViewModel.getProperty("/meta") || {}, {
+        aggChangedOn: (((oData || {}).meta || {}).aggChangedOn) || ((((oData || {}).root || {}).server_changed_on) || "")
+      }));
+    },
+
     _reloadChecklistFromBackend: function (sId) {
       var oDataModel = this.getModel("data");
       return this.runWithStateFlag(this.getModel("state"), "/isLoading", function () {
         return ChecklistCrudUseCase.getChecklistRoot(sId).then((oRootOnly) => {
           oDataModel.setProperty("/selectedChecklist", oRootOnly || null);
+          this._cacheSnapshotPut(oRootOnly || {});
+          this._applyCanonicalViewModel(oRootOnly || {});
           this._applyChecklistLazily(oRootOnly || {});
           return oRootOnly;
         });
@@ -458,13 +545,15 @@ sap.ui.define([
         return Promise.resolve(null);
       }
 
-      var oCached = this.getModel("data").getProperty("/selectedChecklist") || null;
+      var oCached = this._cacheSnapshotGet(sId) || this.getModel("data").getProperty("/selectedChecklist") || null;
       if (!oCached) {
         return this._reloadChecklistFromBackend(sId);
       }
 
       return ChecklistCrudUseCase.getLastChangeSet(sId).then(function (oLastChange) {
         if (this._canReuseCachedChecklist(oCached, oLastChange)) {
+          this.getModel("data").setProperty("/selectedChecklist", oCached);
+          this._applyCanonicalViewModel(oCached);
           return oCached;
         }
         return this._reloadChecklistFromBackend(sId);
@@ -485,6 +574,8 @@ sap.ui.define([
         return ChecklistCrudUseCase.getLastChangeSet(sId).then(function (oLastChange) {
           if (this._canReuseCachedChecklist(oLocalMatch, oLastChange)) {
             oDataModel.setProperty("/selectedChecklist", oLocalMatch);
+            this._cacheSnapshotPut(oLocalMatch);
+            this._applyCanonicalViewModel(oLocalMatch);
             this._applyChecklistLazily(oLocalMatch);
             return;
           }
