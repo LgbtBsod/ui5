@@ -223,6 +223,47 @@ def _apply_order_filter(query, model, fmap, filter_expr, orderby, top, skip):
     return query.offset(skip).limit(top).all(), total
 
 
+def _apply_attachment_filter(rows: list[dict], filter_expr: str | None) -> list[dict]:
+    if not filter_expr:
+        return rows
+
+    key_fields = {"AttachmentKey", "RootKey", "FolderKey"}
+    clauses = [x.strip() for x in str(filter_expr).split(" and ") if x.strip()]
+    filtered = rows
+
+    for clause in clauses:
+        field, sep, raw_value = clause.partition(" eq ")
+        if not sep:
+            return []
+
+        field = field.strip()
+        value = raw_value.strip()
+        if value.lower().startswith("guid'") and value.endswith("'"):
+            value = value[5:-1]
+        elif value.startswith("'") and value.endswith("'"):
+            value = value[1:-1].replace("''", "'")
+
+        if field not in {"AttachmentKey", "RootKey", "FolderKey", "CategoryKey", "FileName", "MimeType", "FileSize"}:
+            return []
+
+        if field == "FileSize":
+            try:
+                expected_size = int(value)
+            except ValueError:
+                return []
+            filtered = [row for row in filtered if int(row.get("FileSize") or 0) == expected_size]
+            continue
+
+        if field in key_fields:
+            normalized = _hex(value)
+            filtered = [row for row in filtered if _hex(str(row.get(field) or "")) == normalized]
+            continue
+
+        filtered = [row for row in filtered if str(row.get(field) or "") == value]
+
+    return filtered
+
+
 def _if_match_check(if_match: str | None, agg: datetime):
     if not if_match or if_match == "*":
         return
@@ -391,7 +432,7 @@ def last_change_entity(entity_key: str, response: Response, db: Session = Depend
 @router.get(f"{SERVICE_ROOT}/LockStatusSet('{{entity_key}}')")
 def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="SessionGuid"), db: Session = Depends(get_db)):
     root_uuid = _entity_key(entity_key)
-    active = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.is_killed.is_(False)).first()
+    active = LockService._active_lock(db, root_uuid)
     if not active:
         own = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.session_guid == session_guid).order_by(LockEntry.last_heartbeat.desc()).first() if session_guid else None
         if own and own.is_killed:
@@ -602,7 +643,7 @@ def attachment_set(filter: str | None = Query(None, alias="$filter")):
             "CreatedOn": format_datetime(meta.get("created_on")),
             "ChangedOn": format_datetime(meta.get("changed_on")),
         })
-    return odata_payload(rows)
+    return odata_payload(_apply_attachment_filter(rows, filter))
 
 
 @router.put(f"{SERVICE_ROOT}/AttachmentSet('{{entity_key}}')/$value")
