@@ -576,56 +576,9 @@ sap.ui.define([], function () {
             });
         },
 
-createCheckList: function (oData) {
-
-    var sChecklistId = (oData && oData.root && oData.root.id) || ("CL-" + Date.now());
-    var sLpc = (oData && oData.basic && oData.basic.LPC_KEY) || "L2";
-    var aChecks = (oData && oData.checks) || [];
-    var aBarriers = (oData && oData.barriers) || [];
-
-    return _request("/checklist/", {
-        method: "POST",
-        params: {
-            checklist_id: sChecklistId,
-            lpc: sLpc,
-            user_id: _userId
-        }
-    }).then(function (oCreated) {
-
-        var sNewId = (oCreated && oCreated.id) || sChecklistId;
-
-        return _acquireLock(sNewId)
-            .then(function () {
-                return _request("/checklist/" + encodeURIComponent(sNewId) + "/checks", {
-                    method: "PUT",
-                    params: { user_id: _userId },
-                    body: { rows: aChecks }
-                });
-            })
-            .then(function () {
-                return _request("/checklist/" + encodeURIComponent(sNewId) + "/barriers", {
-                    method: "PUT",
-                    params: { user_id: _userId },
-                    body: { rows: aBarriers }
-                }).catch(function () {
-                    return null;
-                });
-            })
-            .then(function () {
-                return _request("/checklist/" + encodeURIComponent(sNewId), {
-                    params: { expand: false }
-                });
-            })
-            .then(function (oRoot) {
-                return _mapChecklist(oRoot || oCreated || {
-                    id: sNewId,
-                    checklist_id: sChecklistId,
-                    lpc: sLpc,
-                    status: "01"
-                }, { checks: aChecks, barriers: aBarriers });
-            });
-    });
-},
+createCheckList: function () {
+            return Promise.reject(new Error("CREATE_CHECKLIST_NOT_SUPPORTED_VIA_LEGACY_REST"));
+        },
         updateCheckList: function (sId, oData, mOptions) {
             mOptions = mOptions || {};
             var oBasic = (oData && oData.basic) || {};
@@ -756,19 +709,30 @@ createCheckList: function (oData) {
 
         deleteCheckList: function (sId) {
             return _acquireLock(sId).then(function () {
-                return _request("/checklist/" + encodeURIComponent(sId), {
-                    method: "DELETE",
-                    params: { user_id: _userId }
+                return _request("/ChecklistSet(\'" + encodeURIComponent(sId) + "\')", {
+                    method: "DELETE"
                 });
             });
         },
 
         upsertRows: function (sId, sSection, aRows) {
             return _acquireLock(sId).then(function () {
-                return _request("/checklist/" + encodeURIComponent(sId) + "/" + encodeURIComponent(sSection), {
-                    method: "PUT",
-                    params: { user_id: _userId },
-                    body: { rows: aRows || [] }
+                var oPayload = {
+                    RootKey: sId,
+                    FullPayload: {}
+                };
+                if (String(sSection || "").toLowerCase() === "checks") {
+                    oPayload.FullPayload.checks = (aRows || []).map(function (x, i) {
+                        return { ChecksNum: x.id || i + 1, Comment: x.comment || "", Result: !!x.result };
+                    });
+                } else if (String(sSection || "").toLowerCase() === "barriers") {
+                    oPayload.FullPayload.barriers = (aRows || []).map(function (x, i) {
+                        return { BarriersNum: x.id || i + 1, Comment: x.comment || "", Result: !!x.result };
+                    });
+                }
+                return _request("/SaveChanges", {
+                    method: "POST",
+                    body: oPayload
                 });
             });
         },

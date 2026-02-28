@@ -1745,3 +1745,53 @@ body.appDark .searchResultsTable .sapMListTblRow .sapMListTblCell,
 .detailContent .flatEditorTable .sapMListTblEmptyCell .sapMText {
   color: var(--text-main) !important;
 }
+
+/* Section: dialog-contour-gap-and-segment-reset-hardening */
+/* Keep only the outer dialog shell rounded, force inner blocks to stay rectangular. */
+.sapMDialog.sapMViewSettingsDialog .sapMDialogSection,
+.sapMDialog.sapMViewSettingsDialog .sapMDialogScroll,
+.sapMDialog.sapMViewSettingsDialog .sapMDialogScrollCont,
+.sapMDialog.sapMViewSettingsDialog .sapMList,
+.sapMDialog.sapMViewSettingsDialog .sapMListTbl,
+.sapMDialog.sapMViewSettingsDialog .sapMListTblRow,
+.sapMDialog.sapMViewSettingsDialog .sapMListTblCell,
+.sapMDialog.sapMViewSettingsDialog .sapMLIB,
+.sapMDialog.sapMP13nDialog .sapMDialogSection,
+.sapMDialog.sapMP13nDialog .sapMDialogScroll,
+.sapMDialog.sapMP13nDialog .sapMDialogScrollCont,
+.sapMDialog.sapMP13nDialog .sapMList,
+.sapMDialog.sapMP13nDialog .sapMListTbl,
+.sapMDialog.sapMP13nDialog .sapMListTblRow,
+.sapMDialog.sapMP13nDialog .sapMListTblCell,
+.sapMDialog.sapMP13nDialog .sapMLIB {
+  border-radius: 0 !important;
+}
+
+/* Brutal segmented-button reset for filter dialogs: remove inherited pill/glass styles. */
+.sapMP13nDialog .sapMSegB,
+.sapMViewSettingsDialog .sapMSegB,
+.sapMP13nDialog .sapMSegBBtn,
+.sapMViewSettingsDialog .sapMSegBBtn,
+.sapMP13nDialog .sapMSegBBtn .sapMBtnInner,
+.sapMViewSettingsDialog .sapMSegBBtn .sapMBtnInner {
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.sapMP13nDialog .sapMSegBBtn:first-child,
+.sapMP13nDialog .sapMSegBBtn:first-child .sapMBtnInner,
+.sapMViewSettingsDialog .sapMSegBBtn:first-child,
+.sapMViewSettingsDialog .sapMSegBBtn:first-child .sapMBtnInner {
+  border-top-left-radius: var(--radius-sm, 8px) !important;
+  border-bottom-left-radius: var(--radius-sm, 8px) !important;
+}
+
+.sapMP13nDialog .sapMSegBBtn:last-child,
+.sapMP13nDialog .sapMSegBBtn:last-child .sapMBtnInner,
+.sapMViewSettingsDialog .sapMSegBBtn:last-child,
+.sapMViewSettingsDialog .sapMSegBBtn:last-child .sapMBtnInner {
+  border-top-right-radius: var(--radius-sm, 8px) !important;
+  border-bottom-right-radius: var(--radius-sm, 8px) !important;
+}
