@@ -1,15 +1,15 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox class="detailControlBar" renderType="Bare">
+    <VBox class="detailControlBar" renderType="Bare" width="100%">
 
-        <HBox alignItems="Center" justifyContent="SpaceBetween" class="detailRailHeader" renderType="Bare">
+        <HBox alignItems="Center" justifyContent="SpaceBetween" class="detailRailHeader" renderType="Bare" width="100%">
             <VBox renderType="Bare">
                 <Title text="{i18n>detailControlTitle}" level="H6"/>
                 <Text text="{path:'state>/autosaveAt', formatter:'.formatAutosaveAt'}" class="detailRailHint"/>
             </VBox>
         </HBox>
 
-        <VBox class="detailControlToolbar detailControlToolbarStack" renderType="Bare">
-            <HBox class="detailControlRow detailControlRowTop" renderType="Bare" wrap="Wrap" alignItems="Center">
+        <VBox class="detailControlToolbar detailControlToolbarStack" renderType="Bare" width="100%">
+            <HBox class="detailControlRow detailControlRowTop" renderType="Bare" wrap="Wrap" alignItems="Center" width="100%">
                 <ObjectStatus icon="sap-icon://edit"
                               text="{= ${state>/isDirty} ? ${i18n>dirtyStateDirty} : ${i18n>dirtyStateSynced} }"
                               state="{= ${state>/isDirty} ? 'Warning' : 'Success' }"
@@ -28,7 +28,7 @@
                 <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
             </HBox>
 
-            <HBox class="detailControlRow detailControlRowActions" renderType="Bare" wrap="Wrap" alignItems="Center">
+            <HBox class="detailControlRow detailControlRowActions" renderType="Bare" wrap="Wrap" alignItems="Center" width="100%">
                 <Button icon="sap-icon://save" type="Emphasized"
                         visible="{= ${state>/mode} === 'EDIT' }"
                         press=".onSaveDetail"

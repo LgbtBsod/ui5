@@ -6,6 +6,75 @@
   animation: none !important;
 }
 
+/* ===============================
+   FIX 1 — убираем "чёрные плитки"
+   =============================== */
+
+.glassCard {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+
+/* ===============================
+   FIX 2 — Checklist Control full width
+   =============================== */
+
+.detailControlInlineCard,
+.detailControlHostInline,
+.checklistControlCard {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.detailControlBar {
+  width: 100% !important;
+}
+
+
+/* ===============================
+   FIX 3 — header area shrink
+   =============================== */
+
+.sapUxAPObjectPageHeaderContent {
+  padding-bottom: 0.5rem !important;
+}
+
+.sapUxAPObjectPageHeaderDetails {
+  min-height: auto !important;
+}
+
+.sapUxAPObjectPageHeader {
+  min-height: auto !important;
+}
+
+
+/* ===============================
+   FIX 4 — убираем пустую область под таблицами
+   =============================== */
+
+.flatEditorTable {
+  height: auto !important;
+}
+
+.sapMListTbl {
+  height: auto !important;
+}
+
+
+/* ===============================
+   FIX 5 — ObjectPage background
+   =============================== */
+
+.sapUxAPObjectPageContainer {
+  background: transparent !important;
+}
+
+.sapUxAPObjectPageSectionContainer {
+  padding-bottom: 1rem !important;
+}
+
 .detailControlBlockHost {
   position: sticky;
   top: 0.9rem;
