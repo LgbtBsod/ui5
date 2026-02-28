@@ -40,8 +40,8 @@ sap.ui.define([], function () {
         }
 
         return {
-            filterId: pickFirstNonEmptyValue([oData.checklist_id, oData.CHECKLIST_ID, oData.id, oData.ID]),
-            filterLpc: pickFirstNonEmptyValue([oData.lpc, oData.LPC_KEY, oData.LPC])
+            filterId: pickFirstNonEmptyValue([oData.ChecklistId, oData.checklist_id, oData.CHECKLIST_ID, oData.Uuid, oData.id, oData.ID]),
+            filterLpc: pickFirstNonEmptyValue([oData.Lpc, oData.lpc, oData.LPC_KEY, oData.LPC])
         };
     }
 

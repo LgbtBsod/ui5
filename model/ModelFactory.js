@@ -64,11 +64,11 @@ sap.ui.define([
                 requestGroups: {
                     save: "saveFlow",
                     autosave: "autosave",
-                    lock: "$direct",
-                    unlock: "$direct",
-                    lockHeartbeat: "$direct",
-                    lockStatus: "$direct",
-                    functionImport: "$direct"
+                    lock: "locks",
+                    unlock: "locks",
+                    lockHeartbeat: "locks",
+                    lockStatus: "locks",
+                    functionImport: "locks"
                 },
                 timers: {
                     heartbeatMs: 240000,

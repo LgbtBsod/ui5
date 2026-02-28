@@ -43,9 +43,8 @@ sap.ui.define([
             return BackendAdapter.queryCheckLists({
                 idContains: mSafePayload.filterId,
                 lpcKey: mSafePayload.filterLpc,
-                maxResults: mSafePayload.maxResults
-            }).then(function (aPrefiltered) {
-                return SmartSearchAdapter.filterData(aPrefiltered, mSafePayload, sSearchMode || "EXACT");
+                maxResults: mSafePayload.maxResults,
+                searchMode: sSearchMode || "EXACT"
             }).catch(function () {
                 return SmartSearchAdapter.filterData(aFallbackCollection || [], mSafePayload, sSearchMode || "EXACT");
             });

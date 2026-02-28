@@ -58,7 +58,7 @@
 
                     <smartFilterBar:SmartFilterBar
                         id="searchSmartFilterBar"
-                        entitySet="ChecklistRoots"
+                        entitySet="ChecklistFlatSet"
                         persistencyKey="pcctSmartFilter"
                         useToolbar="true"
                         visible="{view>/useSmartControls}"
@@ -70,12 +70,12 @@
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged">
                         <smartFilterBar:controlConfiguration>
-                            <smartFilterBar:ControlConfiguration key="checklist_id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
-                            <smartFilterBar:ControlConfiguration key="lpc" visibleInAdvancedArea="true"/>
-                            <smartFilterBar:ControlConfiguration key="status" visibleInAdvancedArea="true"/>
-                            <smartFilterBar:ControlConfiguration key="date" visibleInAdvancedArea="true"/>
-                            <smartFilterBar:ControlConfiguration key="equipment" visibleInAdvancedArea="true"/>
-                            <smartFilterBar:ControlConfiguration key="changed_on" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="ChecklistId" visibleInAdvancedArea="true" hasTypeAhead="true"/>
+                            <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="Status" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="Date" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="Equipment" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="ChangedOn" visibleInAdvancedArea="true"/>
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
 
@@ -134,7 +134,7 @@
 
                     <smartTable:SmartTable
     id="searchSmartTable"
-    entitySet="ChecklistRoots"
+    entitySet="ChecklistFlatSet"
     smartFilterId="searchSmartFilterBar"
     tableType="ResponsiveTable"
     useVariantManagement="true"
@@ -148,9 +148,9 @@
     visible="{view>/useSmartControls}"
     beforeRebindTable=".onBeforeSmartTableRebind"
     initialise=".onSmartTableInitialise"
-    initiallyVisibleFields="id,checklist_id,status,lpc,date,equipment,observer_fullname,changed_on,changed_by,created_on"
+    initiallyVisibleFields="Uuid,ChecklistId,Status,Lpc,Date,Equipment,ChangedOn,ChangedBy"
     useExportToExcel="false" 
-    requestAtLeastFields="id,checklist_id,status,lpc,changed_on"
+    requestAtLeastFields="Uuid,ChecklistId,Status,Lpc,ChangedOn"
     class="searchSmartTableControl">
 
     <smartTable:customToolbar>
