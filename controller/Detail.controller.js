@@ -35,7 +35,6 @@ sap.ui.define([
   "sap_ui5/util/UxTelemetry"
 ], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailDialogLifecycleUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, OperationalKpiInstrumentationUseCase, DetailCloseFlowOrchestrationUseCase, DetailToggleEditOrchestrationUseCase, DetailSaveFlowOrchestrationUseCase, DetailSelectionMetaSyncUseCase, UxTelemetry) {
   "use strict";
-
   return BaseController.extend("sap_ui5.controller.Detail", {
 
     _getCurrentUser: function () {
@@ -1028,7 +1027,6 @@ sap.ui.define([
                 this.navTo("detailLayout", { id: sSavedId, layout: sLayout }, true);
               }.bind(this)
             });
-
             var sSavedId = String(((((oResult || {}).savedChecklist || {}).root || {}).id) || "").trim();
             this._syncCreateCopyKeyMappingAfterSave(sSavedId, bCreateMode);
             OperationalKpiInstrumentationUseCase.markSaveSuccess(oStateModel);
@@ -1162,6 +1160,5 @@ sap.ui.define([
     resultState: function (bResult) {
       return bResult ? "Success" : "Error";
     }
-
   });
 });
