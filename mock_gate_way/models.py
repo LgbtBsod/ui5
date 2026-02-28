@@ -196,7 +196,7 @@ class FrontendRuntimeSettings(Base):
     gcd_ms = Column(INTEGER, default=300000)
     idle_ms = Column(INTEGER, default=600000)
     autosave_interval_ms = Column(INTEGER, default=60000)
-    autosave_debounce_ms = Column(INTEGER, default=30000)
+    autosave_debounce_ms = Column(INTEGER, default=1200)
     network_grace_ms = Column(INTEGER, default=60000)
     cache_fresh_ms = Column(INTEGER, default=30000)
     cache_stale_ok_ms = Column(INTEGER, default=90000)

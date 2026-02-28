@@ -965,23 +965,48 @@ createCheckList: function (oData) {
         },
 
         getFrontendConfig: function () {
-            return _request("/config/frontend").catch(function () {
+            return _request("/RuntimeSettingsSet('GLOBAL')").then(function (oData) {
+                var o = (oData && oData.d) || {};
+                var aRequired = [];
+                try { aRequired = JSON.parse(o.RequiredFieldsJson || "[]"); } catch (e) { aRequired = []; }
                 return {
                     search: { defaultMaxResults: 100, growingThreshold: 10 },
-                    timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 600000, cacheToleranceMs: 8000 },
-                source: "fallback_defaults",
-                    variables: { validationSource: "real_frontend_fallback" },
-                    requiredFields: [
-                        "/basic/date",
-                        "/basic/time",
-                        "/basic/timezone",
-                        "/basic/OBSERVER_FULLNAME",
-                        "/basic/OBSERVED_FULLNAME",
-                        "/basic/LOCATION_KEY",
-                        "/basic/LPC_KEY",
-                        "/basic/PROF_KEY"
-                    ]
+                    timers: {
+                        heartbeatMs: Number(o.HeartbeatIntervalSec || 240) * 1000,
+                        lockStatusMs: Number(o.StatusPollIntervalSec || 60) * 1000,
+                        gcdMs: Number(o.LockTtlSec || 300) * 1000,
+                        idleMs: Number(o.IdleTimeoutSec || 600) * 1000,
+                        autoSaveIntervalMs: 60000,
+                        autoSaveDebounceMs: Number(o.AutoSaveDebounceMs || 1200),
+                        networkGraceMs: 60000,
+                        cacheFreshMs: 30000,
+                        cacheStaleOkMs: 90000,
+                        analyticsRefreshMs: 600000,
+                        cacheToleranceMs: Number(o.CacheToleranceMs || 5500)
+                    },
+                    source: "runtime_settings",
+                    variables: { validationSource: "runtime_settings" },
+                    requiredFields: aRequired
                 };
+            }).catch(function () {
+                return _request("/config/frontend").catch(function () {
+                    return {
+                        search: { defaultMaxResults: 100, growingThreshold: 10 },
+                        timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 1200, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 600000, cacheToleranceMs: 5500 },
+                        source: "fallback_defaults",
+                        variables: { validationSource: "real_frontend_fallback" },
+                        requiredFields: [
+                            "/basic/date",
+                            "/basic/time",
+                            "/basic/timezone",
+                            "/basic/OBSERVER_FULLNAME",
+                            "/basic/OBSERVED_FULLNAME",
+                            "/basic/LOCATION_KEY",
+                            "/basic/LPC_KEY",
+                            "/basic/PROF_KEY"
+                        ]
+                    };
+                });
             });
         },
 

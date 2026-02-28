@@ -10,12 +10,12 @@ sap.ui.define([
             gcdMs: 300000,
             idleMs: 600000,
             autoSaveIntervalMs: 60000,
-            autoSaveDebounceMs: 30000,
+            autoSaveDebounceMs: 1200,
             networkGraceMs: 60000,
             cacheFreshMs: 30000,
             cacheStaleOkMs: 90000,
             analyticsRefreshMs: 900000,
-            cacheToleranceMs: 8000
+            cacheToleranceMs: 5500
         };
     }
 

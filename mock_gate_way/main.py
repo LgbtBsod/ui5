@@ -73,7 +73,7 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
         return 0
 
     lpc_pool = ["LPC-01", "LPC-02", "LPC-03", "LPC-04", "LPC-05"]
-    status_pool = ["01", "02", "03"]
+    status_pool = ["DRAFT", "SUBMITTED", "DONE", "REJECTED"]
     equipment_pool = ["Pump", "Compressor", "Conveyor", "Boiler", "Generator"]
     observer_pool = [
         "Ivan Ivanov",
@@ -116,7 +116,7 @@ def _seed_static_domains(db) -> None:
     import uuid
 
     defaults = {
-        "STATUS": [("01", "Draft"), ("02", "In Progress"), ("03", "Completed")],
+        "STATUS": [("DRAFT", "Draft"), ("SUBMITTED", "Submitted"), ("DONE", "Done"), ("REJECTED", "Rejected")],
         "PROFESSION": [("OP", "Operator"), ("SUP", "Supervisor")],
         "LPC": [("LPC-01", "LPC 01"), ("LPC-02", "LPC 02")],
         "ATF_CAT": [("GEN", "General"), ("PHOTO", "Photo"), ("DOC", "Document")],
@@ -165,7 +165,7 @@ async def lifespan(_: FastAPI):
         _seed_checklist_roots_if_needed(db, minimum_rows=100)
         oSettings = db.query(FrontendRuntimeSettings).first()
         if not oSettings:
-            db.add(FrontendRuntimeSettings(environment="default"))
+            db.add(FrontendRuntimeSettings(environment="default", autosave_debounce_ms=1200))
             db.commit()
     finally:
         db.close()
@@ -306,7 +306,7 @@ def frontend_config(db = SessionLocal()):
     try:
         row = db.query(FrontendRuntimeSettings).order_by(FrontendRuntimeSettings.changed_on.desc()).first()
         if not row:
-            row = FrontendRuntimeSettings(environment="default")
+            row = FrontendRuntimeSettings(environment="default", autosave_debounce_ms=1200)
             db.add(row)
             db.commit()
             db.refresh(row)
@@ -316,12 +316,12 @@ def frontend_config(db = SessionLocal()):
             "gcdMs": int(row.gcd_ms or 300000),
             "idleMs": int(row.idle_ms or 600000),
             "autoSaveIntervalMs": int(row.autosave_interval_ms or 60000),
-            "autoSaveDebounceMs": int(row.autosave_debounce_ms or 30000),
+            "autoSaveDebounceMs": int(row.autosave_debounce_ms or 1200),
             "networkGraceMs": int(row.network_grace_ms or 60000),
             "cacheFreshMs": int(row.cache_fresh_ms or 30000),
             "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
             "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
-            "cacheToleranceMs": 8000,
+            "cacheToleranceMs": 5500,
         }
         return {
             "environment": row.environment,

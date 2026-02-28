@@ -1,5 +1,6 @@
 import uuid
 import re
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -9,11 +10,10 @@ from sqlalchemy.orm import Session
 
 from config import DEFAULT_PAGE_SIZE
 from database import get_db
-from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem, LockEntry
+from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem, FrontendRuntimeSettings, LockEntry
 from services.hierarchy_service import HierarchyService
 from services.lock_service import LockService
 from services.metadata_builder import build_metadata
-from utils.filter_parser import FilterParser
 from utils.odata import SERVICE_ROOT, format_datetime, format_entity_etag, odata_error_response, odata_payload
 from utils.time import now_utc
 
@@ -35,9 +35,14 @@ ROOT_MAP = {
 SEARCH_MAP = {
     "Key": "id",
     "Id": "checklist_id",
-    "DateCheck": "changed_on",
+    "DateCheck": "date",
+    "TimeCheck": "date",
+    "TimeZone": "date",
+    "LocationKey": "location_key",
     "Lpc": "lpc",
+    "LpcText": "lpc_text",
     "Profession": "observed_position",
+    "ProfessionText": "observed_position",
     "Status": "status",
     "ChangedOn": "changed_on",
     "EquipName": "equipment",
@@ -46,12 +51,10 @@ CHECK_MAP = {"RootKey": "root_id", "ChecksNum": "position", "ChangedOn": "change
 BARRIER_MAP = {"RootKey": "root_id", "BarriersNum": "position", "ChangedOn": "changed_on"}
 
 _STATUS_TRANSITIONS = {
-    "01": {"02", "03"},
-    "02": {"03", "01"},
-    "03": set(),
-    "SUCCESS": {"WARNING", "CRITICAL"},
-    "WARNING": {"SUCCESS", "CRITICAL"},
-    "CRITICAL": {"WARNING", "SUCCESS"},
+    "DRAFT": {"SUBMITTED"},
+    "SUBMITTED": {"DONE", "REJECTED"},
+    "REJECTED": {"DRAFT"},
+    "DONE": set(),
 }
 
 
@@ -66,7 +69,7 @@ def _reject_expand(expand: str | None):
 
 
 def _hex(raw: str) -> str:
-    return str(raw or "").replace("-", "").lower()
+    return str(raw or "").replace("-", "").upper()
 
 
 def _uuid_from_hex(value: str) -> str:
@@ -87,6 +90,202 @@ def _entity_key(key_expr: str) -> str:
     return _uuid_from_hex(cleaned)
 
 
+def _datecheck_datetime(root: ChecklistRoot) -> datetime:
+    raw = (root.date or "").strip()
+    if raw:
+        try:
+            date_part = datetime.strptime(raw[:10], "%Y-%m-%d").date()
+            return datetime(date_part.year, date_part.month, date_part.day, tzinfo=timezone.utc)
+        except ValueError:
+            pass
+    changed = root.changed_on if root.changed_on else now_utc()
+    changed = changed if changed.tzinfo else changed.replace(tzinfo=timezone.utc)
+    return datetime(changed.year, changed.month, changed.day, tzinfo=timezone.utc)
+
+
+def _dict_text(db: Session, domain: str, key: str) -> str:
+    row = db.query(DictionaryItem).filter(DictionaryItem.domain == domain, DictionaryItem.key == str(key or "")).first()
+    return row.text if row else ""
+
+
+
+
+def _status_external(status: str | None) -> str:
+    raw = str(status or "").upper()
+    legacy = {"01": "DRAFT", "02": "SUBMITTED", "03": "DONE"}
+    return legacy.get(raw, raw or "DRAFT")
+
+
+def _normalize_status_input(status: str | None) -> str:
+    return _status_external(status)
+
+
+def _date_ymd_from_any(value) -> str:
+    if value is None:
+        return ""
+    raw = str(value)
+    if raw.startswith("/Date(") and raw.endswith(")/"):
+        try:
+            ms = int(raw[6:-2].split("+")[0].split("-")[0])
+            dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc)
+            return dt.strftime("%Y-%m-%d")
+        except ValueError:
+            return ""
+    if raw.lower().startswith("datetime'") and raw.endswith("'"):
+        raw = raw[9:-1]
+    if "T" in raw:
+        raw = raw.split("T", 1)[0]
+    return raw[:10]
+
+
+
+
+def _date_ms_from_any(value) -> int:
+    if value is None:
+        return 0
+    raw = str(value)
+    if raw.startswith('/Date(') and raw.endswith(')/'):
+        body = raw[6:-2]
+        sign_pos = max(body.find('+', 1), body.find('-', 1))
+        ms_part = body if sign_pos < 0 else body[:sign_pos]
+        try:
+            return int(ms_part)
+        except ValueError:
+            return 0
+    if raw.lower().startswith("datetime'") and raw.endswith("'"):
+        raw = raw[9:-1]
+    try:
+        dt = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+        dt = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        return int(dt.astimezone(timezone.utc).timestamp() * 1000)
+    except Exception:
+        return 0
+
+
+def _build_search_predicate(filter_expr: str | None):
+    expr = str(filter_expr or "").strip()
+    if not expr:
+        return lambda _row: True
+
+    tokens = re.findall(r"substringof\(|contains\(|\(|\)|,|'[^']*'|datetime'[^']*'|/Date\([^)]*\)/|\b(?:and|or|eq|ne|true|false)\b|[A-Za-z_][A-Za-z0-9_]*", expr, flags=re.IGNORECASE)
+    idx = 0
+
+    def lit(tok: str):
+        low = tok.lower()
+        if tok.startswith("'") and tok.endswith("'"):
+            return tok[1:-1]
+        if low.startswith("datetime'") and tok.endswith("'"):
+            return tok
+        if tok.startswith("/Date("):
+            return tok
+        if low in {"true", "false"}:
+            return low == "true"
+        return tok
+
+    def cmp(field, op, value):
+        def _fn(row):
+            left = row.get(field)
+            right = value
+            if field == "DateCheck":
+                left = _date_ymd_from_any(left)
+                right = _date_ymd_from_any(right)
+            elif field == "Status":
+                left = str(left or "").upper()
+                right = str(right or "").upper()
+            else:
+                left = str(left or "")
+                right = str(right or "")
+            return left == right if op == "eq" else left != right
+        return _fn
+
+    def parse_expr():
+        nonlocal idx
+        node = parse_term()
+        while idx < len(tokens) and tokens[idx].lower() == "or":
+            idx += 1
+            rhs = parse_term()
+            prev = node
+            node = lambda row, a=prev, b=rhs: bool(a(row) or b(row))
+        return node
+
+    def parse_term():
+        nonlocal idx
+        node = parse_factor()
+        while idx < len(tokens) and tokens[idx].lower() == "and":
+            idx += 1
+            rhs = parse_factor()
+            prev = node
+            node = lambda row, a=prev, b=rhs: bool(a(row) and b(row))
+        return node
+
+    def parse_factor():
+        nonlocal idx
+        if idx < len(tokens) and tokens[idx] == "(":
+            idx += 1
+            node = parse_expr()
+            if idx < len(tokens) and tokens[idx] == ")":
+                idx += 1
+            return node
+        return parse_predicate()
+
+    def parse_predicate():
+        nonlocal idx
+        tok = tokens[idx]
+        low = tok.lower()
+        if low in {"substringof(", "contains("}:
+            idx += 1
+            first = lit(tokens[idx]); idx += 1
+            if idx < len(tokens) and tokens[idx] == ",":
+                idx += 1
+            second = lit(tokens[idx]); idx += 1
+            if idx < len(tokens) and tokens[idx] == ")":
+                idx += 1
+            field = second if low == "contains(" else second
+            needle = first if low == "contains(" else first
+            fn = lambda row, f=field, n=str(needle or "").lower(): n in str(row.get(f) or "").lower()
+            if idx + 1 < len(tokens) and tokens[idx].lower() == "eq":
+                idx += 1
+                bool_val = bool(lit(tokens[idx])); idx += 1
+                return (lambda row, pred=fn, b=bool_val: pred(row) if b else (not pred(row)))
+            return fn
+
+        field = tok
+        idx += 1
+        if idx >= len(tokens):
+            return lambda _row: True
+        op = tokens[idx].lower(); idx += 1
+        if idx >= len(tokens):
+            return lambda _row: True
+        value = lit(tokens[idx]); idx += 1
+        if op not in {"eq", "ne"}:
+            return lambda _row: True
+        return cmp(field, op, value)
+
+    try:
+        return parse_expr()
+    except Exception:
+        return lambda _row: True
+
+
+def _apply_orderby_rows(rows: list[dict], orderby: str | None) -> list[dict]:
+    if not orderby:
+        return rows
+    clauses = [x.strip() for x in str(orderby).split(",") if x.strip()]
+    sorted_rows = list(rows)
+    for clause in reversed(clauses):
+        field, _, direction = clause.partition(" ")
+        reverse = direction.strip().lower() == "desc"
+
+        def key_fn(item, f=field):
+            value = item.get(f)
+            if f in {"DateCheck", "ChangedOn", "CreatedOn"}:
+                return _date_ms_from_any(value)
+            if isinstance(value, str):
+                return value.lower()
+            return value
+
+        sorted_rows.sort(key=key_fn, reverse=reverse)
+    return sorted_rows
 def _rate(items, pred) -> float:
     if not items:
         return 1.0
@@ -94,15 +293,24 @@ def _rate(items, pred) -> float:
     return round(ok / len(items), 4)
 
 
-def _to_search(root: ChecklistRoot) -> dict:
+def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
+    profession = root.observed_position or ""
+    lpc = root.lpc or ""
+    profession_text = _dict_text(db, "PROFESSION", profession) if db else ""
+    lpc_text = _dict_text(db, "LPC", lpc) if db else ""
     return {
         "Key": _hex(root.id),
         "Id": root.checklist_id or "",
-        "DateCheck": format_datetime(root.changed_on),
-        "Lpc": root.lpc or "",
-        "Profession": root.observed_position or "",
+        "DateCheck": format_datetime(_datecheck_datetime(root)),
+        "TimeCheck": "12:00:00",
+        "TimeZone": "UTC",
+        "LocationKey": root.location_key or "",
+        "Lpc": lpc,
+        "LpcText": lpc_text or lpc,
+        "Profession": profession,
+        "ProfessionText": profession_text or profession,
         "EquipName": root.equipment or "",
-        "Status": root.status or "",
+        "Status": _status_external(root.status),
         "ChangedOn": format_datetime(root.changed_on),
         "CreatedOn": format_datetime(root.created_on),
         "RequestId": root.checklist_id or "",
@@ -113,8 +321,8 @@ def _to_search(root: ChecklistRoot) -> dict:
     }
 
 
-def _to_root(root: ChecklistRoot) -> dict:
-    s = _to_search(root)
+def _to_root(root: ChecklistRoot, db: Session | None = None) -> dict:
+    s = _to_search(root, db=db)
     return {
         "Key": s["Key"],
         "RequestId": s["RequestId"],
@@ -144,7 +352,7 @@ def _to_basic(root: ChecklistRoot) -> dict:
         "ObservedOrgUnit": root.observed_orgunit or "",
         "Lpc": root.lpc or "",
         "Profession": root.observed_position or "",
-        "DateCheck": format_datetime(root.changed_on),
+        "DateCheck": format_datetime(_datecheck_datetime(root)),
         "TimeCheck": "12:00:00",
         "TimeZone": "UTC",
         "EquipName": root.equipment or "",
@@ -317,6 +525,11 @@ def _apply_change(db: Session, root: ChecklistRoot, change: dict):
         root.location_key = fields.get("LocationKey", root.location_key)
         root.location_name = fields.get("LocationName", root.location_name)
         root.equipment = fields.get("EquipName", root.equipment)
+        root.lpc = fields.get("Lpc", root.lpc)
+        root.observed_position = fields.get("Profession", root.observed_position)
+        if fields.get("DateCheck"):
+            dt = _parse_odata_datetime(fields.get("DateCheck"))
+            root.date = dt.date().isoformat()
         root.changed_on = row_changed_on
     elif entity == "CHECK":
         if mode == "C":
@@ -353,7 +566,7 @@ def _apply_change(db: Session, root: ChecklistRoot, change: dict):
 
 
 def _validate_status_change(root: ChecklistRoot, new_status: str):
-    old_status = str(root.status or "")
+    old_status = _status_external(root.status)
     if old_status == new_status:
         return
     allowed = _STATUS_TRANSITIONS.get(old_status)
@@ -365,7 +578,7 @@ def _validate_status_change(root: ChecklistRoot, new_status: str):
 def service_document():
     return {"d": {"EntitySets": [
         "ChecklistSearchSet", "ChecklistRootSet", "ChecklistBasicInfoSet", "ChecklistCheckSet", "ChecklistBarrierSet",
-        "DictionaryItemSet", "LastChangeSet", "LockStatusSet", "AttachmentFolderSet", "AttachmentSet",
+        "DictionaryItemSet", "LastChangeSet", "LockStatusSet", "AttachmentFolderSet", "AttachmentSet", "RuntimeSettingsSet",
     ]}}
 
 
@@ -391,16 +604,21 @@ def checklist_search_set(
 ):
     if (err := _reject_expand(expand)):
         return err
-    filter = _normalize_filter_hex_keys(filter, fields=("Key",))
-    rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, SEARCH_MAP, filter, orderby, top, skip)
-    return odata_payload([_apply_select(_to_search(r), select) for r in rows], total if inlinecount == "allpages" else None)
+    roots = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)).all()
+    mapped = [_to_search(r, db=db) for r in roots]
+    pred = _build_search_predicate(filter)
+    mapped = [row for row in mapped if pred(row)]
+    mapped = _apply_orderby_rows(mapped, orderby)
+    total = len(mapped)
+    paged = mapped[skip: skip + top]
+    return odata_payload([_apply_select(r, select) for r in paged], total if inlinecount == "allpages" else None)
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistRootSet")
 def checklist_root_set(filter: str | None = Query(None, alias="$filter"), orderby: str | None = Query(None, alias="$orderby"), top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), select: str | None = Query(None, alias="$select"), db: Session = Depends(get_db)):
     filter = _normalize_filter_hex_keys(filter, fields=("Key",))
     rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, ROOT_MAP, filter, orderby, top, skip)
-    return odata_payload([_apply_select(_to_root(r), select) for r in rows], total if inlinecount == "allpages" else None)
+    return odata_payload([_apply_select(_to_root(r, db=db), select) for r in rows], total if inlinecount == "allpages" else None)
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistRootSet({{entity_key}})")
@@ -409,7 +627,7 @@ def checklist_root_entity(entity_key: str, response: Response, db: Session = Dep
     if err:
         return err
     response.headers["ETag"] = format_entity_etag(_agg_changed_on(root))
-    return {"d": _to_root(root)}
+    return {"d": _to_root(root, db=db)}
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistBasicInfoSet")
@@ -449,6 +667,49 @@ def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), exp
 def dictionary_item_set(filter: str | None = Query(None, alias="$filter"), top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
     rows, total = _apply_order_filter(db.query(DictionaryItem), DictionaryItem, {"Domain": "domain", "Key": "key", "Text": "text"}, filter, None, top, skip)
     return odata_payload([{"Domain": r.domain, "Key": r.key, "Text": r.text} for r in rows], total if inlinecount == "allpages" else None)
+
+
+@router.get(f"{SERVICE_ROOT}/RuntimeSettingsSet")
+def runtime_settings_set(db: Session = Depends(get_db)):
+    row = db.query(FrontendRuntimeSettings).order_by(FrontendRuntimeSettings.changed_on.desc()).first()
+    if not row:
+        row = FrontendRuntimeSettings(environment="default")
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+    item = {
+        "Key": "GLOBAL",
+        "CacheToleranceMs": 5500,
+        "HeartbeatIntervalSec": max(1, int((row.heartbeat_ms or 240000) / 1000)),
+        "StatusPollIntervalSec": max(1, int((row.lock_status_ms or 60000) / 1000)),
+        "LockTtlSec": 300,
+        "IdleTimeoutSec": max(1, int((row.idle_ms or 600000) / 1000)),
+        "AutoSaveDebounceMs": 1200 if not row.autosave_debounce_ms or int(row.autosave_debounce_ms) > 5000 else int(row.autosave_debounce_ms),
+        "RequiredFieldsJson": json.dumps([
+            "/basic/date",
+            "/basic/time",
+            "/basic/timezone",
+            "/basic/OBSERVER_FULLNAME",
+            "/basic/OBSERVED_FULLNAME",
+            "/basic/LOCATION_KEY",
+            "/basic/LPC_KEY",
+            "/basic/PROF_KEY",
+        ]),
+        "UploadPolicyJson": json.dumps({"maxSizeMb": 15, "allowedMime": ["image/jpeg", "image/png", "application/pdf"]}),
+    }
+    return odata_payload([item])
+
+
+@router.get(f"{SERVICE_ROOT}/RuntimeSettingsSet({{entity_key}})")
+def runtime_settings_entity(entity_key: str, db: Session = Depends(get_db)):
+    cleaned = str(entity_key or "").strip()
+    if cleaned.startswith("Key="):
+        cleaned = cleaned.split("=", 1)[1]
+    cleaned = cleaned.strip("\'\"")
+    if cleaned and cleaned.upper() != "GLOBAL":
+        return _err(404, "NOT_FOUND", "Runtime settings not found")
+    rows = runtime_settings_set(db)
+    return {"d": (rows.get("d", {}).get("results") or [])[0]}
 
 
 @router.get(f"{SERVICE_ROOT}/LastChangeSet({{entity_key}})")
@@ -523,18 +784,27 @@ def lock_control(payload: dict, db: Session = Depends(get_db)):
     if not root_key:
         return _err(400, "VALIDATION_ERROR", "RootKey is required")
     root_uuid = _entity_key(root_key)
+    root_exists = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid, ChecklistRoot.is_deleted.isnot(True)).first()
+    if not root_exists:
+        return _err(404, "NOT_FOUND", "Checklist not found")
     if action == "ACQUIRE":
         r = LockService.acquire(db, root_uuid, session, uname, payload.get("StealFrom"))
-        return {"d": {"Ok": bool(r.get("success")), "ReasonCode": None if r.get("success") else "LOCKED_BY_OTHER", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed_flag"))}}
+        ok = bool(r.get("success"))
+        return {"d": {"Ok": ok, "ReasonCode": "OWNED_BY_YOU" if ok else "LOCKED_BY_OTHER", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed_flag"))}}
     if action == "HEARTBEAT":
         try:
             r = LockService.heartbeat(db, root_uuid, session)
-            return {"d": {"Ok": bool(r.get("success")), "ReasonCode": "OWNED_BY_YOU" if r.get("success") else "KILLED", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed"))}}
-        except ValueError:
+            ok = bool(r.get("success"))
+            return {"d": {"Ok": ok, "ReasonCode": "OWNED_BY_YOU" if ok else "KILLED", "ExpiresOn": format_datetime(r.get("lock_expires")), "IsKilled": bool(r.get("is_killed"))}}
+        except ValueError as exc:
+            code = str(exc)
+            if code == "NO_LOCK":
+                return {"d": {"Ok": False, "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False}}
             return _err(410, "LOCK_EXPIRED", "Lock expired")
     if action == "RELEASE":
         r = LockService.release(db, root_uuid, session)
-        return {"d": {"Ok": bool(r.get("released")), "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False}}
+        released = bool(r.get("released"))
+        return {"d": {"Ok": released, "ReasonCode": "FREE", "ExpiresOn": None, "IsKilled": False}}
     return _err(400, "VALIDATION_ERROR", "Unsupported Action")
 
 
@@ -716,6 +986,11 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
     root.location_key = basic.get("LocationKey", root.location_key)
     root.location_name = basic.get("LocationName", root.location_name)
     root.equipment = basic.get("EquipName", root.equipment)
+    root.lpc = basic.get("Lpc", root.lpc)
+    root.observed_position = basic.get("Profession", root.observed_position)
+    if basic.get("DateCheck"):
+        dt = _parse_odata_datetime(basic.get("DateCheck"))
+        root.date = dt.date().isoformat()
 
     db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root.id).delete()
     db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root.id).delete()
@@ -727,7 +1002,7 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
     root.changed_on = now_utc()
     db.commit()
     db.refresh(root)
-    out = _to_root(root)
+    out = _to_root(root, db=db)
     out["RootKey"] = out["Key"]
     out["AggChangedOn"] = format_datetime(_agg_changed_on(root))
     return {"d": out}
@@ -749,8 +1024,8 @@ def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Matc
             return _err(400, "VALIDATION_ERROR", "ClientAggChangedOn is required")
         return _err(409, "CONFLICT", "AggChangedOn mismatch")
 
-    new_status = str(payload.get("NewStatus") or payload.get("new_status") or "")
-    if new_status not in {"01", "02", "03", "SUCCESS", "WARNING", "CRITICAL"}:
+    new_status = _normalize_status_input(payload.get("NewStatus") or payload.get("new_status") or "")
+    if new_status not in {"DRAFT", "SUBMITTED", "DONE", "REJECTED"}:
         return _err(400, "VALIDATION_ERROR", "Unsupported status")
     try:
         _validate_status_change(root, new_status)
@@ -765,7 +1040,7 @@ def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Matc
 @router.get(f"{SERVICE_ROOT}/GetHierarchy")
 @router.post(f"{SERVICE_ROOT}/GetHierarchy")
 @router.post("/actions/GetMplHierarchy")
-async def get_hierarchy(request: Request, date_check: str | None = Query(None, alias="DateCheck"), method: str = Query("MPL", alias="Method"), db: Session = Depends(get_db)):
+async def get_hierarchy(request: Request, date_check: str | None = Query(None, alias="DateCheck"), method: str = Query("location_tree", alias="Method"), db: Session = Depends(get_db)):
     payload = {}
     if request.method == "POST":
         try:
@@ -773,13 +1048,15 @@ async def get_hierarchy(request: Request, date_check: str | None = Query(None, a
         except Exception:
             payload = {}
     date_value = payload.get("DateCheck") or payload.get("date") or date_check
-    method_value = str(payload.get("Method") or payload.get("method") or method or "MPL").upper()
+    method_value = str(payload.get("Method") or payload.get("method") or method or "location_tree").lower()
+    if method_value != "location_tree":
+        return _err(400, "VALIDATION_ERROR", "Unsupported hierarchy method")
     try:
         dt = _parse_odata_datetime(date_value)
     except Exception:
         dt = now_utc()
     nodes = HierarchyService.get_tree(db, dt.date())
-    return {"d": {"Method": method_value, "DateCheck": format_datetime(dt), "results": nodes}}
+    return {"d": {"Method": "location_tree", "DateCheck": format_datetime(datetime(dt.year, dt.month, dt.day, tzinfo=timezone.utc)), "results": nodes}}
 
 
 @router.post(f"{SERVICE_ROOT}/ReportExport")
@@ -791,7 +1068,7 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
         root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(key))).first()
         if not root:
             continue
-        base = _to_search(root)
+        base = _to_search(root, db=db)
         checks = [_to_check(c) for c in root.checks]
         barriers = [_to_barrier(b) for b in root.barriers]
         if not checks and not barriers:
