@@ -433,7 +433,7 @@ sap.ui.define([
       if (Number.isNaN(nLocal) || Number.isNaN(nServer)) {
         return false;
       }
-      return Math.abs(nServer - nLocal) <= 15000;
+      return Math.abs(nServer - nLocal) <= 8000;
     },
 
     _reloadChecklistFromBackend: function (sId) {
