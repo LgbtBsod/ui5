@@ -779,6 +779,30 @@ createCheckList: function (oData) {
                 });
         },
 
+        setChecklistStatus: function (sId, sNewStatus, oPayload) {
+            return _request("/SetChecklistStatus", {
+                method: "POST",
+                body: {
+                    RootKey: sId,
+                    NewStatus: sNewStatus,
+                    ClientAggChangedOn: _pickClientAgg(oPayload)
+                }
+            }).then(function (oData) {
+                return (oData && oData.d) || oData || {};
+            }).catch(function () {
+                return _request("/actions/SetChecklistStatus", {
+                    method: "POST",
+                    body: {
+                        RootKey: sId,
+                        NewStatus: sNewStatus,
+                        ClientAggChangedOn: _pickClientAgg(oPayload)
+                    }
+                }).then(function (oData) {
+                    return (oData && oData.d) || oData || {};
+                });
+            });
+        },
+
         deleteCheckList: function (sId) {
             return _acquireLock(sId).then(function () {
                 return _request("/checklist/" + encodeURIComponent(sId), {

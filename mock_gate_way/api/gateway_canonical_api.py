@@ -75,6 +75,8 @@ def _validate_status_change(root: ChecklistRoot, new_status: str):
     ]
     if any(not str(v or "").strip() for v in required):
         raise ValueError("VALIDATION_ERROR")
+
+
 def _err(status: int, code: str, message: str):
     return odata_error_response(status, code, message)
 
@@ -205,6 +207,16 @@ def _agg_changed_on(root: ChecklistRoot):
     if not points:
         return now_utc()
     return max(points)
+
+
+def _is_valid_attachment_category(db: Session, category_key: str) -> bool:
+    if not category_key:
+        return False
+    exists = db.query(DictionaryItem).filter(
+        DictionaryItem.domain == "ATF_CAT",
+        DictionaryItem.key == category_key,
+    ).first()
+    return bool(exists)
 
 
 def _apply_order_filter(query, model, fmap, filter_expr, orderby, top, skip):
@@ -392,6 +404,7 @@ async def legacy_lock_alias(request: Request, db: Session = Depends(get_db)):
     return await lock_actions_alias(request, db)
 
 
+@router.post("/actions/AutoSave")
 @router.post("/actions/AutoSaveChecklist")
 async def autosave_alias(request: Request, db: Session = Depends(get_db)):
     raw_payload = await request.json()
@@ -405,6 +418,7 @@ async def autosave_alias(request: Request, db: Session = Depends(get_db)):
     return auto_save(adapted, None, db)
 
 
+@router.post("/actions/SaveChanges")
 @router.post("/actions/SaveChecklist")
 async def save_alias(request: Request, db: Session = Depends(get_db)):
     raw_payload = await request.json()
@@ -576,6 +590,7 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
     return {"d": d}
 
 
+@router.post("/actions/SetChecklistStatus")
 @router.post(f"{SERVICE_ROOT}/SetChecklistStatus")
 def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(payload.get("RootKey") or "")), ChecklistRoot.is_deleted.isnot(True)).first()
@@ -663,7 +678,7 @@ def attachment_set(filter: str | None = Query(None, alias="$filter"), expand: st
         items = [x for x in items if x["root_key"] == key]
     return odata_payload([{
         "AttachmentKey": x["attachment_key"], "RootKey": x["root_key"], "FolderKey": x["folder_key"], "CategoryKey": x.get("category_key", "GEN"),
-        "FileName": x["filename"], "MimeType": x["mime"], "FileSize": x["size"], "ScanStatus": "OK",
+        "FileName": x["filename"], "MimeType": x["mime"], "FileSize": x["size"], "ScanStatus": "OK", "ScannedOn": format_datetime(x.get("scanned_on") or x["changed_on"]),
         "CreatedOn": format_datetime(x["created_on"]), "ChangedOn": format_datetime(x["changed_on"])
     } for x in items])
 
@@ -679,6 +694,9 @@ async def attachment_upload(entity_key: str, request: Request, content_type: str
     file_path = _UPLOAD_DIR / f"{attachment_key}.bin"
     file_path.write_bytes(data)
     now = now_utc()
+    category_key = request.query_params.get("CategoryKey") or "GEN"
+    if not _is_valid_attachment_category(db, category_key):
+        return _err(400, "VALIDATION_ERROR", "Unsupported attachment category")
     _ATTACHMENTS[attachment_key] = {
         "attachment_key": attachment_key,
         "root_key": _hex(root_uuid),
@@ -687,9 +705,10 @@ async def attachment_upload(entity_key: str, request: Request, content_type: str
         "filename": request.query_params.get("FileName") or f"{attachment_key}.bin",
         "mime": content_type or "application/octet-stream",
         "size": len(data),
-        "category_key": request.query_params.get("CategoryKey") or "GEN",
+        "category_key": category_key,
         "created_on": now,
         "changed_on": now,
+        "scanned_on": now,
         "path": str(file_path),
     }
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid).first()

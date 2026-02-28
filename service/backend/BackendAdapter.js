@@ -317,6 +317,13 @@ sap.ui.define([
             return _backendService.updateCheckList(sId, oFullPayload || {}, mOptions || {});
         },
 
+        setChecklistStatus: function (sId, sNewStatus, oPayload) {
+            if (_backendService.setChecklistStatus) {
+                return _backendService.setChecklistStatus(sId, sNewStatus, oPayload || {});
+            }
+            return Promise.resolve({ RootKey: sId, Status: sNewStatus });
+        },
+
         deleteCheckList: function (sId) {
             return _backendService.deleteCheckList(sId);
         },
