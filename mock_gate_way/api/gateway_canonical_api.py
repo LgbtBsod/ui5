@@ -294,6 +294,7 @@ def checklist_search_set(
     if (err := _reject_expand(expand)):
         return err
     rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, SEARCH_MAP, filter, orderby, top, skip)
+    return odata_payload([_to_search(r) for r in rows], total if inlinecount == "allpages" else None)
     return odata_payload([_apply_select(_to_search(r), select) for r in rows], total if inlinecount == "allpages" else None)
 
 
@@ -369,6 +370,23 @@ def checklist_basic_info_entity(entity_key: str, expand: str | None = Query(None
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistCheckSet")
+def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+    if (err := _reject_expand(expand)):
+        return err
+    rows, total = _apply_order_filter(db.query(ChecklistCheck), ChecklistCheck, CHECK_MAP, filter, None, top, skip)
+    return odata_payload([_to_check(c) for c in rows], total if inlinecount == "allpages" else None)
+
+
+@router.get(f"{SERVICE_ROOT}/ChecklistBarrierSet")
+def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+    if (err := _reject_expand(expand)):
+        return err
+    rows, total = _apply_order_filter(db.query(ChecklistBarrier), ChecklistBarrier, BARRIER_MAP, filter, None, top, skip)
+    return odata_payload([_to_barrier(c) for c in rows], total if inlinecount == "allpages" else None)
+
+
+@router.get(f"{SERVICE_ROOT}/DictionaryItemSet")
+def dictionary_items(filter: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)):
 def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), select: str | None = Query(None, alias="$select"), db: Session = Depends(get_db)):
     if (err := _reject_expand(expand)):
         return err
@@ -390,6 +408,7 @@ def dictionary_items(filter: str | None = Query(None, alias="$filter"), select: 
     expr = FilterParser.parse(DictionaryItem, filter, field_map={"Domain": "domain", "Key": "key", "Text": "text"})
     if expr is not None:
         query = query.filter(expr)
+    return odata_payload([{"Domain": x.domain, "Key": x.key, "Text": x.text} for x in query.all()])
     return odata_payload([_apply_select({"Domain": x.domain, "Key": x.key, "Text": x.text}, select) for x in query.all()])
 
 
@@ -483,6 +502,22 @@ def last_change_entity(entity_key: str, response: Response, db: Session = Depend
 @router.get(f"{SERVICE_ROOT}/LockStatusSet('{{entity_key}}')")
 def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="SessionGuid"), uname: str = Query("", alias="Uname"), db: Session = Depends(get_db)):
     root_uuid = _entity_key(entity_key)
+    active = LockService._active_lock(db, root_uuid)
+    if not active:
+        if session_guid:
+            own = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.session_guid == session_guid).order_by(LockEntry.last_heartbeat.desc()).first()
+            if own:
+                if own.is_killed:
+                    return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "KILLED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}}
+                if own.expires_at and own.expires_at < now_utc():
+                    return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": "EXPIRED", "Owner": own.user_id or "", "ExpiresOn": format_datetime(own.expires_at)}}
+        return {"d": {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "FREE", "Owner": "", "ExpiresOn": None}}
+    if active.session_guid == session_guid and session_guid:
+        return {"d": {"RootKey": _hex(root_uuid), "Ok": True, "ReasonCode": "OWNED_BY_YOU", "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}}
+    reason = "LOCKED_BY_OTHER"
+    if active.is_killed:
+        reason = "KILLED"
+    return {"d": {"RootKey": _hex(root_uuid), "Ok": False, "ReasonCode": reason, "Owner": active.user_id, "ExpiresOn": format_datetime(active.expires_at)}}
     return {"d": _compose_lock_status_payload(db, root_uuid, session_guid)}
 
 
@@ -515,6 +550,8 @@ def lock_control(payload: dict, db: Session = Depends(get_db)):
 @router.post("/actions/LockHeartbeat")
 @router.post("/actions/LockRelease")
 async def lock_actions_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
     payload = await _read_merged_payload(request)
     path = request.url.path
     action = "ACQUIRE" if path.endswith("LockAcquire") else "HEARTBEAT" if path.endswith("LockHeartbeat") else "RELEASE"
@@ -531,6 +568,8 @@ async def lock_actions_alias(request: Request, db: Session = Depends(get_db)):
 @router.post("/actions/LockStatus")
 @router.post("/lock/status")
 async def lock_status_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
     payload = await _read_merged_payload(request)
     return lock_status_entity(
         entity_key=str(payload.get("root_id") or payload.get("object_uuid") or payload.get("RootKey") or ""),
@@ -550,6 +589,9 @@ async def legacy_lock_alias(request: Request, db: Session = Depends(get_db)):
 @router.post("/actions/AutoSave")
 @router.post("/actions/AutoSaveChecklist")
 async def autosave_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
+    body = payload.get("payload") or payload.get("Payload") or {}
     payload = await _read_merged_payload(request)
     body = _extract_legacy_body(payload)
     adapted = {
@@ -563,6 +605,9 @@ async def autosave_alias(request: Request, db: Session = Depends(get_db)):
 @router.post("/actions/SaveChanges")
 @router.post("/actions/SaveChecklist")
 async def save_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
+    body = payload.get("payload") or payload.get("Payload") or {}
     payload = await _read_merged_payload(request)
     body = _extract_legacy_body(payload)
     adapted = {
@@ -575,6 +620,12 @@ async def save_alias(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/actions/GetMplHierarchy")
 async def hierarchy_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
+    return get_hierarchy(
+        date_check=payload.get("date") or payload.get("DateCheck"),
+        method=payload.get("method") or payload.get("Method") or "MPL",
+        payload=None,
     payload = await _read_merged_payload(request)
     return await get_hierarchy(
         request,
@@ -586,6 +637,8 @@ async def hierarchy_alias(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/actions/export")
 async def export_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
     payload = await _read_merged_payload(request)
     adapted = {"RootKeys": payload.get("RootKeys") or payload.get("ids") or payload.get("keys") or []}
     return report_export(adapted, db)
@@ -643,6 +696,11 @@ def _if_match_check(if_match: str | None, agg: datetime):
         raise ValueError("PRECONDITION_FAILED")
 
 
+@router.post(f"{SERVICE_ROOT}/AutoSave")
+def auto_save(payload: dict, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(payload.get("RootKey") or "")), ChecklistRoot.is_deleted.isnot(True)).first()
+    if not root:
+        return _err(404, "NOT_FOUND", "Checklist not found")
 def _load_root_or_error(db: Session, root_key: str):
     root = db.query(ChecklistRoot).filter(
         ChecklistRoot.id == _entity_key(str(root_key or "")),
@@ -658,6 +716,53 @@ def _validate_write_preconditions(payload: dict, if_match: str | None, root: Che
     try:
         _if_match_check(if_match, agg_before)
     except ValueError:
+        return _err(412, "PRECONDITION_FAILED", "ETag mismatch")
+    try:
+        _require_client_agg(payload)
+    except ValueError:
+        return _err(400, "VALIDATION_ERROR", "ClientAggChangedOn is required")
+    try:
+        _optimistic_check(payload, root)
+    except ValueError:
+        return _err(409, "CONFLICT", "AggChangedOn mismatch")
+    for change in payload.get("Changes") or []:
+        entity = str(change.get("Entity") or "").upper()
+        mode = str(change.get("EditMode") or "U").upper()
+        fields = change.get("Fields") or {}
+        key = _entity_key(str(change.get("Key") or ""))
+        if entity == "ROOT" and mode == "U":
+            for k, v in fields.items():
+                attr = ROOT_MAP.get(k) or ROOT_MAP.get(k[:1].upper() + k[1:])
+                if attr and hasattr(root, attr):
+                    setattr(root, attr, v)
+        if entity == "BASIC" and mode == "U":
+            root.location_key = fields.get("LocationKey", root.location_key)
+            root.location_name = fields.get("LocationName", root.location_name)
+            root.equipment = fields.get("EquipName", root.equipment)
+        if entity == "CHECK":
+            if mode == "C":
+                db.add(ChecklistCheck(id=str(uuid.uuid4()), root_id=root.id, text=fields.get("Comment", ""), status="PASS" if fields.get("Result", True) else "FAIL", position=int(fields.get("ChecksNum", 0))))
+            elif mode == "U":
+                row = db.query(ChecklistCheck).filter(ChecklistCheck.id == key).first()
+                if row:
+                    if "Comment" in fields:
+                        row.text = fields["Comment"]
+                    if "Result" in fields:
+                        row.status = "PASS" if fields["Result"] else "FAIL"
+            elif mode == "D":
+                db.query(ChecklistCheck).filter(ChecklistCheck.id == key).delete()
+        if entity == "BARRIER":
+            if mode == "C":
+                db.add(ChecklistBarrier(id=str(uuid.uuid4()), root_id=root.id, description=fields.get("Comment", ""), is_active=bool(fields.get("Result", True)), position=int(fields.get("BarriersNum", 0))))
+            elif mode == "U":
+                row = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).first()
+                if row:
+                    if "Comment" in fields:
+                        row.description = fields["Comment"]
+                    if "Result" in fields:
+                        row.is_active = bool(fields["Result"])
+            elif mode == "D":
+                db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).delete()
         return None, _err(412, "PRECONDITION_FAILED", "ETag mismatch")
     try:
         _require_client_agg(payload)
@@ -779,6 +884,22 @@ def auto_save(payload: dict, if_match: str | None = Header(None, alias="If-Match
 
 @router.post(f"{SERVICE_ROOT}/SaveChanges")
 def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(payload.get("RootKey") or "")), ChecklistRoot.is_deleted.isnot(True)).first()
+    if not root:
+        return _err(404, "NOT_FOUND", "Checklist not found")
+    agg_before = _agg_changed_on(root)
+    try:
+        _if_match_check(if_match, agg_before)
+    except ValueError:
+        return _err(412, "PRECONDITION_FAILED", "ETag mismatch")
+    try:
+        _require_client_agg(payload)
+    except ValueError:
+        return _err(400, "VALIDATION_ERROR", "ClientAggChangedOn is required")
+    try:
+        _optimistic_check(payload, root)
+    except ValueError:
+        return _err(409, "CONFLICT", "AggChangedOn mismatch")
     root, err = _load_root_or_error(db, str(payload.get("RootKey") or ""))
     if err:
         return err
@@ -791,6 +912,16 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
         attr = ROOT_MAP.get(k)
         if attr and hasattr(root, attr):
             setattr(root, attr, v)
+    basic = full.get("basic") or {}
+    root.location_key = basic.get("LocationKey", root.location_key)
+    root.location_name = basic.get("LocationName", root.location_name)
+    root.equipment = basic.get("EquipName", root.equipment)
+    db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root.id).delete()
+    db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root.id).delete()
+    for c in full.get("checks") or []:
+        db.add(ChecklistCheck(id=str(uuid.uuid4()), root_id=root.id, text=c.get("Comment", ""), status="PASS" if c.get("Result", True) else "FAIL", position=int(c.get("ChecksNum", 0))))
+    for b in full.get("barriers") or []:
+        db.add(ChecklistBarrier(id=str(uuid.uuid4()), root_id=root.id, description=b.get("Comment", ""), is_active=bool(b.get("Result", True)), position=int(b.get("BarriersNum", 0))))
 
     _apply_basic_fields_update(root, full.get("basic") or {})
     _replace_child_collections(db, root, full)
@@ -806,6 +937,8 @@ def save_changes(payload: dict, if_match: str | None = Header(None, alias="If-Ma
 
 @router.post("/actions/SetChecklistStatus")
 async def set_status_alias(request: Request, db: Session = Depends(get_db)):
+    raw_payload = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+    payload = _payload_with_query(raw_payload, request)
     payload = await _read_merged_payload(request)
     adapted = {
         "RootKey": payload.get("RootKey") or payload.get("root_id") or ((payload.get("payload") or {}).get("Uuid")),
@@ -817,6 +950,22 @@ async def set_status_alias(request: Request, db: Session = Depends(get_db)):
 
 @router.post(f"{SERVICE_ROOT}/SetChecklistStatus")
 def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(payload.get("RootKey") or "")), ChecklistRoot.is_deleted.isnot(True)).first()
+    if not root:
+        return _err(404, "NOT_FOUND", "Checklist not found")
+    agg_before = _agg_changed_on(root)
+    try:
+        _if_match_check(if_match, agg_before)
+    except ValueError:
+        return _err(412, "PRECONDITION_FAILED", "ETag mismatch")
+    try:
+        _require_client_agg(payload)
+    except ValueError:
+        return _err(400, "VALIDATION_ERROR", "ClientAggChangedOn is required")
+    try:
+        _optimistic_check(payload, root)
+    except ValueError:
+        return _err(409, "CONFLICT", "AggChangedOn mismatch")
     root, err = _load_root_or_error(db, str(payload.get("RootKey") or ""))
     if err:
         return err
@@ -838,6 +987,7 @@ def set_status(payload: dict, if_match: str | None = Header(None, alias="If-Matc
 
 
 @router.api_route(f"{SERVICE_ROOT}/GetHierarchy", methods=["GET", "POST"])
+def get_hierarchy(date_check: str | None = Query(None, alias="DateCheck"), method: str | None = Query("LOCATION", alias="Method"), payload: dict | None = None, db: Session = Depends(get_db)):
 async def get_hierarchy(request: Request, date_check: str | None = Query(None, alias="DateCheck"), method: str | None = Query("LOCATION", alias="Method"), db: Session = Depends(get_db)):
     payload = {}
     if request.method == "POST":
