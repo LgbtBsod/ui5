@@ -268,8 +268,9 @@ app.include_router(reference_router)
 app.include_router(hierarchy_router)
 app.include_router(actions_router)
 app.include_router(metadata_router)
-app.include_router(odata_compat_router)
+# Register canonical Gateway routes before compat shim routes so canonical service-root paths win.
 app.include_router(gateway_canonical_router)
+app.include_router(odata_compat_router)
 app.include_router(analytics_router)
 app.include_router(settings_router)
 app.include_router(batch_router)
@@ -320,7 +321,7 @@ def frontend_config(db = SessionLocal()):
             "cacheFreshMs": int(row.cache_fresh_ms or 30000),
             "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
             "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
-            "cacheToleranceMs": 8000,
+            "cacheToleranceMs": 15000,
         }
         return {
             "environment": row.environment,

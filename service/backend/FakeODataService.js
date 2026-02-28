@@ -5,7 +5,9 @@ sap.ui.define([
 
     var SERVICE_ROOT = "/sap/opu/odata/sap/Z_UI5_SRV";
     var SUPPORTED_ENTITY_SETS = {
+        ChecklistSearchSet: true,
         SearchRows: true,
+        ChecklistRoots: true,
         CheckLists: true
     };
     var SUPPORTED_FUNCTION_IMPORTS = {
@@ -218,14 +220,14 @@ sap.ui.define([
             _sapGatewayCompatibilityScore: 0.99,
             _sapGatewayCompatibilityNotes: [
                 "OData V2 envelope (d/results/__count/__next)",
-                "$top/$skip/$filter/$orderby/$select support (SearchRows/CheckLists)",
+                "$top/$skip/$filter/$orderby/$select support (ChecklistSearchSet/SearchRows/CheckLists)",
                 "entity __metadata + etag projection",
                 "Gateway-like deterministic error and function-import semantics"
             ]
         };
     }
 
-    function _readSearchRows(mQuery) {
+    function _readChecklistSearchSet(mQuery) {
         var mSafe = mQuery || {};
         var aRows = InMemoryDB.getCheckLists().map(_buildEntityProjection);
 
@@ -246,10 +248,10 @@ sap.ui.define([
 
         aRows = aRows
             .map(function (oRow) { return _applySelect(oRow, mSafe.$select || mSafe.select); })
-            .map(function (oRow) { return _attachMetadata("SearchRows", oRow); });
+            .map(function (oRow) { return _attachMetadata("ChecklistSearchSet", oRow); });
 
-        return _odataV2Envelope("SearchRows", aRows, iTotalAfterFilter, {
-            next: _buildNextLink("SearchRows", mSafe, iSkip, iTop, iTotalAfterFilter)
+        return _odataV2Envelope("ChecklistSearchSet", aRows, iTotalAfterFilter, {
+            next: _buildNextLink("ChecklistSearchSet", mSafe, iSkip, iTop, iTotalAfterFilter)
         });
     }
 
@@ -332,8 +334,8 @@ sap.ui.define([
                     return _rejectNotFound("ENTITY_SET_NOT_FOUND", "Unknown entity set: " + sEntitySet);
                 }
 
-                if (sEntitySet === "SearchRows") {
-                    return Promise.resolve(_readSearchRows(mQuery));
+                if (sEntitySet === "ChecklistSearchSet" || sEntitySet === "SearchRows" || sEntitySet === "ChecklistRoots") {
+                    return Promise.resolve(_readChecklistSearchSet(mQuery));
                 }
 
                 return Promise.resolve(_readCheckLists(mQuery));

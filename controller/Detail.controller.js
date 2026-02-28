@@ -433,8 +433,7 @@ sap.ui.define([
       if (Number.isNaN(nLocal) || Number.isNaN(nServer)) {
         return false;
       }
-      return Math.abs(nServer - nLocal) <= 8000;
-            var oMasterDataModel = this.getModel("masterData");
+      var oMasterDataModel = this.getModel("masterData");
       var iToleranceMs = Number(
         (oMasterDataModel && oMasterDataModel.getProperty("/runtime/timers/cacheToleranceMs"))
         || (this.getModel("state").getProperty("/timers/cacheToleranceMs"))
