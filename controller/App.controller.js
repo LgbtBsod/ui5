@@ -115,13 +115,21 @@ sap.ui.define([
 
             this._unbindSplitDrag();
             this._oSplitSeparator = oSeparator;
+            var fnIsInteractiveTarget = function (oTarget) {
+                if (!oTarget || !oTarget.closest) {
+                    return false;
+                }
+
+                return !!oTarget.closest(".sapFFCLArrow, .sapMBtn, button, [role='button'], a, input, select, textarea");
+            };
+
             this._fnSplitPointerDown = function (oEvent) {
                 if (oEvent.button !== 0) {
                     return;
                 }
 
                 var oTarget = oEvent.target;
-                if (oTarget && oTarget.closest && oTarget.closest(".sapFFCLArrow")) {
+                if (fnIsInteractiveTarget(oTarget)) {
                     return;
                 }
 
