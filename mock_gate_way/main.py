@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
@@ -19,6 +19,7 @@ from api.checklist_api import router as checklist_router
 from api.dictionary_api import legacy_router as dictionary_legacy_router
 from api.dictionary_api import router as dictionary_router
 from api.hierarchy_api import router as hierarchy_router
+from api.gateway_canonical_api import router as gateway_canonical_router
 from api.location_api import router as location_router
 from api.lock_api import router as lock_router
 from api.lock_entity_api import router as lock_entity_router
@@ -33,7 +34,7 @@ from config import CORS_ALLOWED_ORIGINS, LOCK_CLEANUP_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.dict_loader import load_dictionary
 from services.lock_service import LockService
-from models import ChecklistRoot, FrontendRuntimeSettings
+from models import ChecklistRoot, FrontendRuntimeSettings, DictionaryItem
 from utils.odata import SERVICE_ROOT, odata_error_response
 
 logging.basicConfig(level=logging.INFO)
@@ -110,6 +111,34 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
     return to_create
 
 
+def _seed_static_domains(db) -> None:
+    from datetime import date
+    import uuid
+
+    defaults = {
+        "STATUS": [("01", "Draft"), ("02", "In Progress"), ("03", "Completed")],
+        "PROFESSION": [("OP", "Operator"), ("SUP", "Supervisor")],
+        "LPC": [("LPC-01", "LPC 01"), ("LPC-02", "LPC 02")],
+        "ATF_CAT": [("GEN", "General"), ("PHOTO", "Photo"), ("DOC", "Document")],
+        "TIME_ZONE": [("UTC", "UTC"), ("Europe/Amsterdam", "Europe/Amsterdam")],
+    }
+
+    for domain, entries in defaults.items():
+        for key, text in entries:
+            exists = db.query(DictionaryItem).filter(DictionaryItem.domain == domain, DictionaryItem.key == key).first()
+            if exists:
+                continue
+            db.add(DictionaryItem(
+                id=str(uuid.uuid4()),
+                domain=domain,
+                key=key,
+                text=text,
+                begda=date(2000, 1, 1),
+                endda=None,
+            ))
+    db.commit()
+
+
 async def lock_cleanup_job() -> None:
     while True:
         db = SessionLocal()
@@ -132,6 +161,7 @@ async def lifespan(_: FastAPI):
         data_dir = Path(__file__).resolve().parent / "data"
         load_dictionary(db, str(data_dir / "lpc.json"), "LPC")
         load_dictionary(db, str(data_dir / "professions.json"), "PROFESSION")
+        _seed_static_domains(db)
         _seed_checklist_roots_if_needed(db, minimum_rows=100)
         oSettings = db.query(FrontendRuntimeSettings).first()
         if not oSettings:
@@ -189,6 +219,34 @@ async def request_response_logging(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+async def odata_error_envelope_middleware(request: Request, call_next):
+    path = request.url.path
+    is_odata = path.startswith(SERVICE_ROOT)
+    if not is_odata:
+        return await call_next(request)
+    try:
+        return await call_next(request)
+    except HTTPException as exc:
+        code = "SYSTEM_ERROR"
+        if exc.status_code == 404:
+            code = "NOT_FOUND"
+        elif exc.status_code == 400:
+            code = "VALIDATION_ERROR"
+        elif exc.status_code == 403:
+            code = "CSRF_TOKEN_MISSING"
+        elif exc.status_code == 409:
+            code = "CONFLICT"
+        elif exc.status_code == 410:
+            code = "LOCK_EXPIRED"
+        elif exc.status_code == 412:
+            code = "PRECONDITION_FAILED"
+        return odata_error_response(exc.status_code, code, str(exc.detail or code))
+    except Exception:
+        logger.exception("Unhandled OData exception")
+        return odata_error_response(500, "SYSTEM_ERROR", "Internal server error")
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOWED_ORIGINS,
@@ -211,6 +269,7 @@ app.include_router(hierarchy_router)
 app.include_router(actions_router)
 app.include_router(metadata_router)
 app.include_router(odata_compat_router)
+app.include_router(gateway_canonical_router)
 app.include_router(analytics_router)
 app.include_router(settings_router)
 app.include_router(batch_router)
@@ -250,21 +309,24 @@ def frontend_config(db = SessionLocal()):
             db.add(row)
             db.commit()
             db.refresh(row)
+        m_timers = {
+            "heartbeatMs": int(row.heartbeat_ms or 240000),
+            "lockStatusMs": int(row.lock_status_ms or 60000),
+            "gcdMs": int(row.gcd_ms or 300000),
+            "idleMs": int(row.idle_ms or 600000),
+            "autoSaveIntervalMs": int(row.autosave_interval_ms or 60000),
+            "autoSaveDebounceMs": int(row.autosave_debounce_ms or 30000),
+            "networkGraceMs": int(row.network_grace_ms or 60000),
+            "cacheFreshMs": int(row.cache_fresh_ms or 30000),
+            "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
+            "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
+            "cacheToleranceMs": 8000,
+        }
         return {
             "environment": row.environment,
             "search": {"defaultMaxResults": 100, "growingThreshold": 10},
-            "timers": {
-                "heartbeatMs": int(row.heartbeat_ms or 240000),
-                "lockStatusMs": int(row.lock_status_ms or 60000),
-                "gcdMs": int(row.gcd_ms or 300000),
-                "idleMs": int(row.idle_ms or 600000),
-                "autoSaveIntervalMs": int(row.autosave_interval_ms or 60000),
-                "autoSaveDebounceMs": int(row.autosave_debounce_ms or 30000),
-                "networkGraceMs": int(row.network_grace_ms or 60000),
-                "cacheFreshMs": int(row.cache_fresh_ms or 30000),
-                "cacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
-                "analyticsRefreshMs": int(row.analytics_refresh_ms or 900000),
-            }
+            "timers": m_timers,
+            "variables": dict(m_timers, validationSource="config_frontend"),
         }
     finally:
         db.close()
@@ -288,5 +350,5 @@ def component_preload_stub():
 @app.exception_handler(Exception)
 async def odata_exception_handler(request: Request, exc: Exception):
     if request.url.path.startswith(SERVICE_ROOT):
-        return odata_error_response(500, "INTERNAL_ERROR", str(exc))
+        return odata_error_response(500, "SYSTEM_ERROR", str(exc))
     return JSONResponse(status_code=500, content={"detail": str(exc)})

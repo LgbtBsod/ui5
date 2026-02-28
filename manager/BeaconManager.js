@@ -9,7 +9,10 @@ sap.ui.define([], function () {
             if (oPayload && oPayload.url) {
                 var sBody = JSON.stringify(oPayload.body || {});
                 if (navigator.sendBeacon) {
-                    navigator.sendBeacon(oPayload.url, new Blob([sBody], { type: "application/json" }));
+                    var bSent = navigator.sendBeacon(oPayload.url, new Blob([sBody], { type: "application/json" }));
+                    if (window.console && window.console.info) {
+                        window.console.info("[beacon] release sent", { transport: "beacon", sent: !!bSent, url: oPayload.url });
+                    }
                     return;
                 }
 
@@ -17,10 +20,15 @@ sap.ui.define([], function () {
                 xhr.open("POST", oPayload.url, false);
                 xhr.setRequestHeader("Content-Type", "application/json");
                 xhr.send(sBody);
+                if (window.console && window.console.info) {
+                    window.console.info("[beacon] release sent", { transport: "xhr-sync", url: oPayload.url });
+                }
                 return;
             }
         } catch (e) {
-            // best effort fallback
+            if (window.console && window.console.warn) {
+                window.console.warn("[beacon] release failed", e);
+            }
         }
     }
 
@@ -36,11 +44,17 @@ sap.ui.define([], function () {
                 }
             }
 
+            function onPageHide() {
+                onLeave();
+            }
+
             window.addEventListener("beforeunload", onLeave);
+            window.addEventListener("pagehide", onPageHide);
             document.addEventListener("visibilitychange", onVisibility);
 
             return function unregister() {
                 window.removeEventListener("beforeunload", onLeave);
+                window.removeEventListener("pagehide", onPageHide);
                 document.removeEventListener("visibilitychange", onVisibility);
             };
         }

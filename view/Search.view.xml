@@ -54,7 +54,7 @@
                 <VBox class="glassCard filterCard smartFilterGlass sapUiSmallMarginBottom searchFilterCardDense">
                     <smartFilterBar:SmartFilterBar
                         id="searchSmartFilterBar"
-                        entitySet="ChecklistFlatSet"
+                        entitySet="ChecklistSearchSet"
                         persistencyKey="pcctSmartFilter"
                         useToolbar="true"
                         showGoOnFB="true"
@@ -67,11 +67,11 @@
                         search=".onSmartSearch"
                         filterChange=".onSmartFilterChanged">
                         <smartFilterBar:controlConfiguration>
-                            <smartFilterBar:ControlConfiguration key="ChecklistId" visibleInAdvancedArea="true" hasTypeAhead="true"/>
+                            <smartFilterBar:ControlConfiguration key="Id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
                             <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="Status" visibleInAdvancedArea="true"/>
-                            <smartFilterBar:ControlConfiguration key="Date" visibleInAdvancedArea="true"/>
-                            <smartFilterBar:ControlConfiguration key="Equipment" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="DateCheck" visibleInAdvancedArea="true"/>
+                            <smartFilterBar:ControlConfiguration key="EquipName" visibleInAdvancedArea="true"/>
                             <smartFilterBar:ControlConfiguration key="ChangedOn" visibleInAdvancedArea="true"/>
                         </smartFilterBar:controlConfiguration>
                     </smartFilterBar:SmartFilterBar>
@@ -99,7 +99,7 @@
 
                     <smartTable:SmartTable
     id="searchSmartTable"
-    entitySet="ChecklistFlatSet"
+    entitySet="ChecklistSearchSet"
     smartFilterId="searchSmartFilterBar"
     tableType="ResponsiveTable"
     useVariantManagement="true"
@@ -112,9 +112,9 @@
     enableAutoBinding="false"
     beforeRebindTable=".onBeforeSmartTableRebind"
     initialise=".onSmartTableInitialise"
-    initiallyVisibleFields="Uuid,ChecklistId,Status,Lpc,Date,Equipment,ChangedOn,ChangedBy"
+    initiallyVisibleFields="Id,Lpc,Profession,Status,DateCheck,EquipName,ChangedOn"
     useExportToExcel="false" 
-    requestAtLeastFields="Uuid,ChecklistId,Status,Lpc,ChangedOn"
+    requestAtLeastFields="Key,Id,Status,Lpc,DateCheck,EquipName,ChangedOn"
     class="searchSmartTableControl">
 
     <smartTable:customToolbar>

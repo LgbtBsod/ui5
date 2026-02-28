@@ -282,6 +282,13 @@ sap.ui.define([
             });
         },
 
+        getLastChangeSet: function (sId) {
+            if (_backendService.getLastChangeSet) {
+                return _backendService.getLastChangeSet(sId);
+            }
+            return Promise.resolve({ RootKey: sId, AggChangedOn: "" });
+        },
+
         getChecklistChecks: function (sId, mPaging) {
             if (_backendService.getChecklistChecks) {
                 return _backendService.getChecklistChecks(sId, mPaging);
@@ -315,6 +322,13 @@ sap.ui.define([
                 return _backendService.autoSaveCheckList(sId, oDeltaPayload || {}, oFullPayload || {}, mOptions || {});
             }
             return _backendService.updateCheckList(sId, oFullPayload || {}, mOptions || {});
+        },
+
+        setChecklistStatus: function (sId, sNewStatus, oPayload) {
+            if (_backendService.setChecklistStatus) {
+                return _backendService.setChecklistStatus(sId, sNewStatus, oPayload || {});
+            }
+            return Promise.resolve({ RootKey: sId, Status: sNewStatus });
         },
 
         deleteCheckList: function (sId) {
@@ -370,7 +384,7 @@ sap.ui.define([
             if (_backendService.getFrontendConfig) {
                 return _backendService.getFrontendConfig();
             }
-            return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 }, timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000 }, source: "adapter_defaults", variables: { validationSource: "adapter_defaults" } });
+            return Promise.resolve({ search: { defaultMaxResults: 100, growingThreshold: 10 }, timers: { heartbeatMs: 240000, lockStatusMs: 60000, gcdMs: 300000, idleMs: 600000, autoSaveIntervalMs: 60000, autoSaveDebounceMs: 30000, networkGraceMs: 60000, cacheFreshMs: 30000, cacheStaleOkMs: 90000, analyticsRefreshMs: 900000, cacheToleranceMs: 8000 }, source: "adapter_defaults", variables: { validationSource: "adapter_defaults" } });
         },
 
 

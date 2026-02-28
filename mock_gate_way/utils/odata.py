@@ -18,12 +18,12 @@ def format_datetime(value: datetime | None) -> str | None:
     return f"/Date({millis})/"
 
 
-def format_entity_etag(version_number: int | None, changed_on: datetime | None) -> str | None:
+def format_entity_etag(changed_on: datetime | None, version_number: int | None = None) -> str | None:
     if changed_on is None:
         return None
     dt = changed_on if changed_on.tzinfo else changed_on.replace(tzinfo=timezone.utc)
     ms = int(dt.astimezone(timezone.utc).timestamp() * 1000)
-    return f'W/"{int(version_number or 0)}-{ms}"'
+    return f'W/"{ms}"'
 
 
 def odata_payload(results: list[dict[str, Any]], inlinecount: int | None = None) -> dict[str, Any]:

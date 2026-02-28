@@ -2,8 +2,9 @@ sap.ui.define([
     "sap_ui5/controller/Base.controller",
     "sap/ui/model/json/JSONModel",
     "sap/ui/core/Fragment",
-    "sap_ui5/controller/TestUserDialog.controller"
-], function (BaseController, JSONModel, Fragment, TestUserDialogController) {
+    "sap_ui5/controller/TestUserDialog.controller",
+    "sap_ui5/util/FclResizer"
+], function (BaseController, JSONModel, Fragment, TestUserDialogController, FclResizer) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.App", {
@@ -25,6 +26,9 @@ sap.ui.define([
                 this._oSplitBinding = oState.bindProperty("/columnSplitPercent");
                 this._oSplitBinding.attachChange(this._scheduleFlexibleColumnSplitApply, this);
             }
+            var sAppId = (this.getOwnerComponent() && this.getOwnerComponent().getManifestEntry("/sap.app/id")) || "sap_ui5";
+            this._oFclResizer = new FclResizer(this.byId("fcl"), { appId: sAppId });
+
             this._syncTestUserDialogState();
             this._fnOnWindowResize = this._scheduleFlexibleColumnSplitApply.bind(this);
             window.addEventListener("resize", this._fnOnWindowResize);
@@ -34,7 +38,27 @@ sap.ui.define([
 
         onAfterRendering: function () {
             this._scheduleFlexibleColumnSplitApply();
-            this._bindSplitDrag();
+            this._ensureFclResizerAttached();
+        },
+
+        _ensureFclResizerAttached: function () {
+            if (this._oFclResizer) {
+                this._oFclResizer.attach();
+            }
+        },
+
+        _detachFclResizer: function () {
+            if (this._oFclResizer) {
+                this._oFclResizer.detach();
+            }
+        },
+
+        _destroyFclResizer: function () {
+            if (!this._oFclResizer) {
+                return;
+            }
+            this._oFclResizer.detach();
+            this._oFclResizer = null;
         },
 
         _scheduleFlexibleColumnSplitApply: function () {
@@ -77,7 +101,7 @@ sap.ui.define([
             if (!bTwoColumns || iViewportWidth <= 1100) {
                 oFcl.removeStyleClass("fclCustomSplitActive");
                 this._sAppliedSplitSignature = "";
-                this._unbindSplitDrag();
+                this._detachFclResizer();
                 return;
             }
 
@@ -94,72 +118,17 @@ sap.ui.define([
             oDomRef.style.setProperty("--fcl-begin-col", iBegin + "%");
             oDomRef.style.setProperty("--fcl-mid-col", iMid + "%");
             this._sAppliedSplitSignature = sSignature;
-            this._bindSplitDrag();
+            this._ensureFclResizerAttached();
         },
 
         _bindSplitDrag: function () {
-            var oFcl = this.byId("fcl");
-            if (!oFcl || !oFcl.getDomRef()) {
-                return;
-            }
-
-            var oState = this.getModel("state");
-            if (!oState || !this._isTwoColumnLayout(oState.getProperty("/layout"))) {
-                return;
-            }
-
-            var oSeparator = oFcl.getDomRef().querySelector(".sapFFCLSeparator");
-            if (!oSeparator || this._oSplitSeparator === oSeparator) {
-                return;
-            }
-
-            this._unbindSplitDrag();
-            this._oSplitSeparator = oSeparator;
-            this._fnSplitPointerDown = function (oEvent) {
-                if (oEvent.button !== 0) {
-                    return;
-                }
-                var oDomRef = oFcl.getDomRef();
-                if (!oDomRef) {
-                    return;
-                }
-                var oBegin = oDomRef.querySelector(".sapFFCLColumnBegin");
-                if (!oBegin) {
-                    return;
-                }
-
-                oEvent.preventDefault();
-                var fnMove = function (oMoveEvent) {
-                    var oRect = oDomRef.getBoundingClientRect();
-                    var iPercent = Math.round(((oMoveEvent.clientX - oRect.left) / oRect.width) * 100);
-                    iPercent = Math.max(20, Math.min(80, iPercent));
-                    oState.setProperty("/columnSplitPercent", iPercent);
-                };
-
-                var fnUp = function () {
-                    window.removeEventListener("pointermove", fnMove);
-                    window.removeEventListener("pointerup", fnUp);
-                    if (oSeparator && oSeparator.classList) {
-                        oSeparator.classList.remove("isDragging");
-                    }
-                };
-
-                if (oSeparator && oSeparator.classList) {
-                    oSeparator.classList.add("isDragging");
-                }
-                window.addEventListener("pointermove", fnMove);
-                window.addEventListener("pointerup", fnUp);
-            };
-
-            oSeparator.addEventListener("pointerdown", this._fnSplitPointerDown);
+            // WHY: legacy public method kept for compatibility with existing calls.
+            this._ensureFclResizerAttached();
         },
 
         _unbindSplitDrag: function () {
-            if (this._oSplitSeparator && this._fnSplitPointerDown) {
-                this._oSplitSeparator.removeEventListener("pointerdown", this._fnSplitPointerDown);
-            }
-            this._oSplitSeparator = null;
-            this._fnSplitPointerDown = null;
+            // WHY: legacy public method kept for compatibility with existing calls.
+            this._detachFclResizer();
         },
 
 
@@ -255,7 +224,7 @@ sap.ui.define([
                 this._fnOnWindowResize = null;
             }
 
-            this._unbindSplitDrag();
+            this._destroyFclResizer();
 
             if (this._oRequiresLoginBinding) {
                 this._oRequiresLoginBinding.detachChange(this._syncTestUserDialogState, this);

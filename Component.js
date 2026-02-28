@@ -50,6 +50,9 @@ sap.ui.define([
             var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
             var oDataModel = ModelFactory.createDataModel();
             var oStateModel = ModelFactory.createStateModel();
+            var oUiStateModel = ModelFactory.createUiStateModel();
+            var oViewModel = ModelFactory.createViewModel();
+            var oHierarchyModel = ModelFactory.createHierarchyModel();
             var fnSyncCapabilityDiagnostics = ComponentStartupDiagnosticsOrchestrationUseCase.createCapabilitySync({
                 stateModel: oStateModel,
                 getBackendMode: BackendAdapter.getMode
@@ -280,6 +283,9 @@ sap.ui.define([
             this.setModel(new JSONModel({}), "selected");
             this.setModel(oDataModel, "data");
             this.setModel(oStateModel, "state");
+            this.setModel(oUiStateModel, "uiState");
+            this.setModel(oViewModel, "view");
+            this.setModel(oHierarchyModel, "hierarchy");
 
             this.setModel(oLayoutModel, "layout");
             this.setModel(oCacheModel, "cache");
@@ -333,7 +339,12 @@ sap.ui.define([
                 MessageBox.warning(this.getModel("i18n").getResourceBundle().getText("networkGraceExpired"));
             }.bind(this));
 
-            this.getRouter().attachBeforeRouteMatched(function (oEvent) {
+            var oRouter = this.getRouter();
+            if (oRouter && oRouter.setFclControlId) {
+                oRouter.setFclControlId(this.getManifestEntry("/sap.ui5/routing/config/fclControlId") || "fcl");
+            }
+
+            oRouter.attachBeforeRouteMatched(function (oEvent) {
                 if (oStateModel.getProperty("/navGuardBypass")) {
                     oStateModel.setProperty("/navGuardBypass", false);
                     return;
@@ -356,11 +367,11 @@ sap.ui.define([
             }.bind(this));
 
             if (/detail\/__create(?:$|[?&])/.test(window.location.hash || "")) {
-                this.getRouter().getHashChanger().replaceHash("");
+                oRouter.getHashChanger().replaceHash("");
                 oStateModel.setProperty("/objectAction", "");
             }
 
-            this.getRouter().initialize();
+            oRouter.initialize();
 
             oStateModel.setProperty("/isLoading", true);
             oStateModel.setProperty("/masterDataLoading", true);
@@ -387,7 +398,7 @@ sap.ui.define([
                     oStateModel.setProperty("/searchMaxResults", String(oFrontendConfig.search.defaultMaxResults));
                 }
                 this._applyFrontendValidationAndVariables(oFrontendConfig || {}, oStateModel, oEnvModel);
-                this._applyFrontendRuntimeConfig(oFrontendConfig || {}, oStateModel, oEnvModel);
+                this._applyFrontendRuntimeConfig(oFrontendConfig || {}, oStateModel, oEnvModel, oMasterDataModel);
 
                 this._loadMasterDataAsync(oMasterDataModel, oStateModel, oEnvModel);
 
@@ -419,41 +430,31 @@ sap.ui.define([
                 oStateModel.setProperty("/loadErrorMessage", "Ошибка при загрузке данных: " + oError.message);
             }).finally(function () {
                 oStateModel.setProperty("/isLoading", false);
-                this._oHeartbeat.start();
-                this._oActivity.start();
-                this._oAutoSave.start();
-                this._oConnectivity.start();
-                this._oLockStatus.start();
+                this._startCoreManagers();
                 this._syncLockScopedManagers(oStateModel);
             }.bind(this));
         },
 
 
-        _isLockRuntimeActive: function (oStateModel) {
-            return oStateModel.getProperty("/mode") === "EDIT" && !!oStateModel.getProperty("/isLocked");
+        _startCoreManagers: function () {
+            if (this._oHeartbeat) {
+                this._oHeartbeat.start();
+            }
+            if (this._oActivity) {
+                this._oActivity.start();
+            }
+            if (this._oAutoSave) {
+                this._oAutoSave.start();
+            }
+            if (this._oConnectivity) {
+                this._oConnectivity.start();
+            }
+            if (this._oLockStatus) {
+                this._oLockStatus.start();
+            }
         },
 
-        _syncLockScopedManagers: function (oStateModel) {
-            var bActive = this._isLockRuntimeActive(oStateModel);
-            if (bActive) {
-                if (this._oHeartbeat && !this._oHeartbeat.isRunning()) {
-                    this._oHeartbeat.start();
-                }
-                if (this._oAutoSave) {
-                    this._oAutoSave.start();
-                }
-                if (this._oLockStatus) {
-                    this._oLockStatus.start();
-                }
-                if (this._oGcd) {
-                    this._oGcd.resetOnFullSave();
-                }
-                if (this._oActivity) {
-                    this._oActivity.start();
-                }
-                return;
-            }
-
+        _stopLockScopedManagers: function () {
             if (this._oHeartbeat) {
                 this._oHeartbeat.stop();
             }
@@ -471,11 +472,53 @@ sap.ui.define([
             }
         },
 
-        _sanitizeTimers: function (mIncoming, mFallback) {
+        _startLockScopedManagers: function () {
+            if (this._oHeartbeat && !this._oHeartbeat.isRunning()) {
+                this._oHeartbeat.start();
+            }
+            if (this._oAutoSave) {
+                this._oAutoSave.start();
+            }
+            if (this._oLockStatus) {
+                this._oLockStatus.start();
+            }
+            if (this._oGcd) {
+                this._oGcd.resetOnFullSave();
+            }
+            if (this._oActivity) {
+                this._oActivity.start();
+            }
+        },
+
+        _stopAllManagers: function () {
+            this._stopLockScopedManagers();
+            if (this._oConnectivity) {
+                this._oConnectivity.stop();
+            }
+        },
+
+        _isLockRuntimeActive: function (oStateModel) {
+            return oStateModel.getProperty("/mode") === "EDIT" && !!oStateModel.getProperty("/isLocked");
+        },
+
+        _syncLockScopedManagers: function (oStateModel) {
+            var bActive = this._isLockRuntimeActive(oStateModel);
+            if (bActive) {
+                this._startLockScopedManagers();
+                return;
+            }
+            this._stopLockScopedManagers();
+        },
+
+        _sanitizeTimers: function (mIncoming, mFallback, mVariables) {
             var mBase = mFallback || {};
             var mRaw = mIncoming || {};
+            var mVars = mVariables || {};
             function pick(sKey, iDefault) {
                 var iVal = Number(mRaw[sKey]);
+                if (!(Number.isFinite(iVal) && iVal >= 1000)) {
+                    iVal = Number(mVars[sKey]);
+                }
                 return Number.isFinite(iVal) && iVal >= 1000 ? iVal : iDefault;
             }
             return {
@@ -488,7 +531,8 @@ sap.ui.define([
                 networkGraceMs: pick("networkGraceMs", Number(mBase.networkGraceMs) || 60000),
                 cacheFreshMs: pick("cacheFreshMs", Number(mBase.cacheFreshMs) || 30000),
                 cacheStaleOkMs: pick("cacheStaleOkMs", Number(mBase.cacheStaleOkMs) || 90000),
-                analyticsRefreshMs: pick("analyticsRefreshMs", Number(mBase.analyticsRefreshMs) || 900000)
+                analyticsRefreshMs: pick("analyticsRefreshMs", Number(mBase.analyticsRefreshMs) || 900000),
+                cacheToleranceMs: pick("cacheToleranceMs", Number(mBase.cacheToleranceMs) || 15000)
             };
         },
 
@@ -500,12 +544,16 @@ sap.ui.define([
             return Math.max(20, Math.min(80, Math.round(iParsed)));
         },
 
-        _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvModel) {
-            var mTimers = this._sanitizeTimers((oFrontendConfig && oFrontendConfig.timers) || {}, oStateModel.getProperty("/timers") || {});
+        _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel) {
+            var mVars = (oFrontendConfig && oFrontendConfig.variables && typeof oFrontendConfig.variables === "object") ? oFrontendConfig.variables : {};
+            var mTimers = this._sanitizeTimers((oFrontendConfig && oFrontendConfig.timers) || {}, oStateModel.getProperty("/timers") || {}, mVars);
             oStateModel.setProperty("/timers", mTimers);
             oEnvModel.setProperty("/source", (oFrontendConfig && oFrontendConfig.source) || "config_frontend");
             oEnvModel.setProperty("/loadedAt", new Date().toISOString());
-            oEnvModel.setProperty("/timers", mTimers);
+                        oEnvModel.setProperty("/timers", mTimers);
+            if (oMasterDataModel && oMasterDataModel.setProperty) {
+                oMasterDataModel.setProperty("/runtime/timers", mTimers);
+            }
 
             var iCurrentSplit = Number(oStateModel.getProperty("/columnSplitPercent"));
             var iSafeDefaultSplit = Number.isFinite(iCurrentSplit) ? iCurrentSplit : 38;
@@ -591,24 +639,7 @@ sap.ui.define([
 
 
         exit: function () {
-            if (this._oHeartbeat) {
-                this._oHeartbeat.stop();
-            }
-            if (this._oGcd) {
-                this._oGcd.destroyManager();
-            }
-            if (this._oActivity) {
-                this._oActivity.stop();
-            }
-            if (this._oAutoSave) {
-                this._oAutoSave.stop();
-            }
-            if (this._oConnectivity) {
-                this._oConnectivity.stop();
-            }
-            if (this._oLockStatus) {
-                this._oLockStatus.stop();
-            }
+            this._stopAllManagers();
             if (this._fnUnregisterBeacon) {
                 this._fnUnregisterBeacon();
             }

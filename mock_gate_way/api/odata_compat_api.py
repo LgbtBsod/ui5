@@ -102,7 +102,7 @@ def _rows(query, model, field_map, filter_expr, orderby, top, skip):
 
 
 def _etag(root: ChecklistRoot) -> str | None:
-    return format_entity_etag(root.version_number, root.changed_on)
+    return format_entity_etag(root.changed_on, root.version_number)
 
 
 def _increment_version(root: ChecklistRoot):
