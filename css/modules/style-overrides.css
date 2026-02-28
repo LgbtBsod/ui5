@@ -1642,16 +1642,12 @@ body.appDark .detailContent .flatEditorTable .sapMListTblEmptyCell,
 
 
 
-/* Section: dark-search-footer-and-hidden-dialog-surface-fixes */
+/* Section: dark-search-footer-surface-fixes */
 body.appDark .searchResultsTable .sapMListTblEmptyRow,
 body.appDark .searchResultsTable .sapMListTblEmptyCell,
 :root:not(.light-mode) .searchResultsTable .sapMListTblEmptyRow,
 :root:not(.light-mode) .searchResultsTable .sapMListTblEmptyCell {
   background: color-mix(in srgb, var(--glass-bg) 86%, rgba(var(--accent-rgb), 0.08)) !important;
-}
-
-.sapMDialog:not(.sapMDialogOpen) {
-  display: none !important;
 }
 
 
