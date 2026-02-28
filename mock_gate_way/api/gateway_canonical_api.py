@@ -224,8 +224,11 @@ def _parse_odata_datetime(value: str | None) -> datetime:
         return now_utc()
     raw = str(value).strip()
     if raw.startswith("/Date(") and raw.endswith(")/"):
+        body = raw[6:-2]
+        sign_pos = max(body.find("+", 1), body.find("-", 1))
+        millis_part = body if sign_pos < 0 else body[:sign_pos]
         try:
-            millis = int(raw[6:-2])
+            millis = int(millis_part)
             from datetime import timezone
             return datetime.fromtimestamp(millis / 1000, tz=timezone.utc)
         except ValueError:
