@@ -36,6 +36,7 @@ from services.dict_loader import load_dictionary
 from services.lock_service import LockService
 from models import ChecklistRoot, FrontendRuntimeSettings, DictionaryItem
 from utils.odata import SERVICE_ROOT, odata_error_response
+from utils.odata_csrf import CsrfStore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
@@ -179,7 +180,7 @@ app = FastAPI(title="SAP Gateway Simulator", version="1.0.0", lifespan=lifespan)
 
 
 
-app.state.csrf_tokens = {}
+app.state.csrf_store = CsrfStore()
 
 
 @app.middleware("http")
@@ -194,8 +195,7 @@ async def odata_csrf_middleware(request: Request, call_next):
     is_fetch = str(token).lower() == "fetch"
 
     if request.method in {"POST", "PUT", "PATCH", "MERGE", "DELETE"} and not is_fetch:
-        expected = app.state.csrf_tokens.get(session_id) if session_id else None
-        if not expected or token != expected:
+        if not app.state.csrf_store.validate(session_id, token):
             return odata_error_response(403, "CSRF_TOKEN_MISSING", "CSRF token validation failed")
 
     response = await call_next(request)
@@ -203,9 +203,7 @@ async def odata_csrf_middleware(request: Request, call_next):
     if is_fetch:
         import uuid
 
-        sid = session_id or uuid.uuid4().hex
-        new_token = uuid.uuid4().hex
-        app.state.csrf_tokens[sid] = new_token
+        sid, new_token = app.state.csrf_store.issue(session_id)
         response.headers["X-CSRF-Token"] = new_token
         response.set_cookie("SAP_SESSIONID", sid, httponly=False, samesite="lax")
     return response
@@ -228,6 +226,9 @@ async def odata_error_envelope_middleware(request: Request, call_next):
     try:
         return await call_next(request)
     except HTTPException as exc:
+        if isinstance(exc.detail, dict) and exc.detail.get("error"):
+            return JSONResponse(status_code=exc.status_code, content=exc.detail)
+
         code = "SYSTEM_ERROR"
         if exc.status_code == 404:
             code = "NOT_FOUND"

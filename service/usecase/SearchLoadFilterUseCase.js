@@ -7,6 +7,7 @@ sap.ui.define([], function () {
         oStateModel.setProperty("/filterFailedChecks", "ALL");
         oStateModel.setProperty("/filterFailedBarriers", "ALL");
         oStateModel.setProperty("/search/failSegment", "ALL");
+        oStateModel.setProperty("/search/barrierFailSegment", "ALL");
         oViewModel.setProperty("/hasSearched", true);
     }
 

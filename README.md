@@ -192,3 +192,12 @@ curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/j
 - `/actions/*` -> function imports
 - `/lock/*` -> lock control/status
 
+
+
+## Regression pack
+
+```bash
+./scripts/curl-regression-pack.sh
+```
+
+Скрипт проверяет service document, $metadata, csrf, $batch(read), search/$count, RuntimeSettings, LastChange, LockControl/LockStatus, GetHierarchy, ReportExport.

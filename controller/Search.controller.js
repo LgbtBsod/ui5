@@ -54,8 +54,10 @@ sap.ui.define([
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/SearchWorkflowOrchestrator",
     "sap_ui5/util/SearchSmartControlCoordinator",
-    "sap_ui5/util/UxTelemetry"
-], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchWorkflowAnalyticsLoadOrchestrationUseCase, SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchInlineAnalyticsRailUseCase, SearchInlineAnalyticsAutoRefreshUseCase, SearchFilterLifecycleUseCase, SearchFilterInteractionOrchestrationUseCase, SearchRetryLifecycleUseCase, SearchRetryLoadOrchestrationUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchTriggerExecutionUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator, UxTelemetry) {
+    "sap_ui5/util/UxTelemetry",
+    "sap_ui5/service/search/SearchFacade",
+    "sap_ui5/model/search/SearchState"
+], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchWorkflowAnalyticsLoadOrchestrationUseCase, SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchInlineAnalyticsRailUseCase, SearchInlineAnalyticsAutoRefreshUseCase, SearchFilterLifecycleUseCase, SearchFilterInteractionOrchestrationUseCase, SearchRetryLifecycleUseCase, SearchRetryLoadOrchestrationUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchTriggerExecutionUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator, UxTelemetry, SearchFacade, SearchState) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -144,12 +146,10 @@ sap.ui.define([
             ["/filterId", "/filterLpc", "/filterFailedChecks", "/filterFailedBarriers"].forEach(function (sPath) {
                 oStateModel.bindProperty(sPath).attachChange(this._onFilterChanged, this);
             }.bind(this));
-            if (!oStateModel.getProperty("/search") || typeof oStateModel.getProperty("/search") !== "object") {
-                oStateModel.setProperty("/search", { failSegment: "ALL" });
-            } else if (!oStateModel.getProperty("/search/failSegment")) {
-                oStateModel.setProperty("/search/failSegment", "ALL");
-            }
+            SearchState.applyDefaults(oStateModel);
+            SearchFacade.init(this.getView(), { state: oStateModel, view: oViewModel }, null);
             oStateModel.bindProperty("/search/failSegment").attachChange(this._onFilterChanged, this);
+            oStateModel.bindProperty("/search/barrierFailSegment").attachChange(this._onFilterChanged, this);
             ["/mainServiceMetadataOk", "/mainServiceMetadataError"].forEach(function (sPath) {
                 oStateModel.bindProperty(sPath).attachChange(this._syncSmartControlAvailability, this);
             }.bind(this));
@@ -306,15 +306,28 @@ sap.ui.define([
                 return;
             }
 
+            var oBindingParams = oEvent.getParameter("bindingParams") || {};
+            var oMergedFilter = SearchFacade.buildMergedFilter(oBindingParams.filters || [], this.getModel("state").getProperty("/searchMode") || "EXACT", this.getModel("state").getProperty("/search/failSegment") || "ALL", this.getModel("state").getProperty("/search/barrierFailSegment") || "ALL");
+            if (oMergedFilter) {
+                oBindingParams.filters = [oMergedFilter];
+            }
+
             SearchRebindLifecycleUseCase.runRebindLifecycle({
-                bindingParams: oEvent.getParameter("bindingParams") || {},
+                bindingParams: oBindingParams,
+                beforeFinalize: function (oBindingParams) {
+                    var oMerged = SearchFacade.buildMergedFilter((oBindingParams && oBindingParams.filters) || [], this.getModel("state").getProperty("/searchMode") || "EXACT", this.getModel("state").getProperty("/search/failSegment") || "ALL", this.getModel("state").getProperty("/search/barrierFailSegment") || "ALL");
+                    if (oMerged && oBindingParams) {
+                        oBindingParams.filters = [oMerged];
+                    }
+                }.bind(this),
                 state: {
                     filterId: this.getModel("state").getProperty("/filterId"),
                     filterLpc: this.getModel("state").getProperty("/filterLpc"),
                     filterFailedChecks: this.getModel("state").getProperty("/filterFailedChecks"),
                     filterFailedBarriers: this.getModel("state").getProperty("/filterFailedBarriers"),
                     search: {
-                        failSegment: this.getModel("state").getProperty("/search/failSegment") || "ALL"
+                        failSegment: this.getModel("state").getProperty("/search/failSegment") || "ALL",
+                        barrierFailSegment: this.getModel("state").getProperty("/search/barrierFailSegment") || "ALL"
                     },
                     searchMaxResults: this.getModel("state").getProperty("/searchMaxResults"),
                     searchMode: this.getModel("state").getProperty("/searchMode") || "EXACT"
@@ -592,6 +605,7 @@ sap.ui.define([
                 MessageToast.show(this.getResourceBundle().getText("smartControlsUnavailable"));
                 return { ok: false, reason: "smart_controls_disabled" };
             }
+            SearchFacade.applySearch();
             return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true));
         },
 
@@ -907,7 +921,13 @@ sap.ui.define([
 
         onFailSegmentSelectionChange: function (oEvent) {
             var sKey = ((oEvent.getParameter("item") || {}).getKey && oEvent.getParameter("item").getKey()) || oEvent.getParameter("key") || "ALL";
-            this.getModel("state").setProperty("/search/failSegment", String(sKey || "ALL").toUpperCase());
+            SearchFacade.onFailSegmentChanged(sKey);
+            return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true));
+        },
+
+        onBarrierFailSegmentSelectionChange: function (oEvent) {
+            var sKey = ((oEvent.getParameter("item") || {}).getKey && oEvent.getParameter("item").getKey()) || oEvent.getParameter("key") || "ALL";
+            SearchFacade.onBarrierFailSegmentChanged(sKey);
             return SearchTriggerExecutionUseCase.runSearchTrigger(this._buildSearchTriggerArgs(true));
         },
 

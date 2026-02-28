@@ -32,8 +32,9 @@ sap.ui.define([
   "sap_ui5/service/usecase/DetailToggleEditOrchestrationUseCase",
   "sap_ui5/service/usecase/DetailSaveFlowOrchestrationUseCase",
   "sap_ui5/service/usecase/DetailSelectionMetaSyncUseCase",
-  "sap_ui5/util/UxTelemetry"
-], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailDialogLifecycleUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, OperationalKpiInstrumentationUseCase, DetailCloseFlowOrchestrationUseCase, DetailToggleEditOrchestrationUseCase, DetailSaveFlowOrchestrationUseCase, DetailSelectionMetaSyncUseCase, UxTelemetry) {
+  "sap_ui5/util/UxTelemetry",
+  "sap_ui5/service/detail/DetailFacade"
+], function (BaseController, BackendAdapter, MessageToast, MessageBox, JSONModel, RowListHelper, ChecklistDraftHelper, FlowCoordinator, ChecklistValidationService, ChecklistUiState, DetailCardSchema, DetailFormatters, ChecklistCrudUseCase, DetailLifecycleUseCase, DetailStatusRowUseCase, DetailStatusCommandUseCase, DetailExpandedRowsFlowUseCase, DetailDialogLifecycleUseCase, DetailLockReleaseUseCase, DetailSaveSuccessFlowUseCase, DetailToolbarValidationUseCase, DetailSaveErrorPresentationUseCase, DetailSaveErrorOutcomePresentationUseCase, DetailLocationValueHelpUseCase, DetailPersonSuggestionUseCase, DetailDictionarySelectionUseCase, DetailLpcBarrierWarningFlowUseCase, DetailIntegrationEditWarningUseCase, OperationalKpiInstrumentationUseCase, DetailCloseFlowOrchestrationUseCase, DetailToggleEditOrchestrationUseCase, DetailSaveFlowOrchestrationUseCase, DetailSelectionMetaSyncUseCase, UxTelemetry, DetailFacade) {
   "use strict";
   return BaseController.extend("sap_ui5.controller.Detail", {
 
@@ -101,6 +102,7 @@ sap.ui.define([
       }), true);
 
       this.getView().setModel(oViewModel, "view");
+      DetailFacade.init(this.getView(), { state: this.getModel("state"), view: oViewModel }, null, {});
       this.attachRouteMatched("detail", this._onMatched);
       this.attachRouteMatched("detailLayout", this._onMatched);
       this.getModel("selected").attachPropertyChange(this._onSelectedChanged, this);

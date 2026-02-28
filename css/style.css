@@ -203,3 +203,77 @@ html.theme-switching body::after {
 .fclResizeHandle:active {
     background: rgba(31, 111, 235, 0.32);
 }
+
+/* Search SmartFilter segmented controls (checks/barriers): rounded edges + semantic UI colors */
+:root {
+  --resultSegmentBorder: #8396A8;        /* B2 default border */
+  --resultSegmentBg: #FFFFFF;            /* S1 primary */
+  --resultSegmentText: #475E75;          /* T2 support */
+  --resultSegmentAllBg: #0070F2;         /* S2 secondary / CTA */
+  --resultSegmentFailedBg: #D20A0A;      /* Negative label */
+  --resultSegmentSuccessBg: #188918;     /* Positive label */
+  --resultSegmentSelectedText: #FFFFFF;  /* T5 main on secondary */
+}
+
+:root:not(.light-mode),
+body.appDark {
+  --resultSegmentBorder: #8396A8;        /* B2 default border (dark) */
+  --resultSegmentBg: #7198BF;            /* S1 primary (dark) */
+  --resultSegmentText: #D5DADD;          /* T2 support (dark) */
+  --resultSegmentAllBg: #4DB1FF;         /* S2 secondary (dark) */
+  --resultSegmentFailedBg: #FF5C77;      /* Negative label (dark) */
+  --resultSegmentSuccessBg: #5DC122;     /* Positive label (dark) */
+  --resultSegmentSelectedText: #12171C;  /* T5 main on secondary (dark) */
+}
+
+.resultSegmentControl.sapMSegB {
+  border-radius: 0.6rem;
+  overflow: hidden;
+  border: 1px solid var(--resultSegmentBorder);
+  background: var(--resultSegmentBg);
+}
+
+.resultSegmentControl .sapMSegBBtn {
+  border: 0 !important;
+  border-radius: 0 !important;
+  min-width: 5.1rem;
+}
+
+.resultSegmentControl .sapMSegBBtn .sapMBtnContent {
+  color: var(--resultSegmentText);
+}
+
+.resultSegmentControl .sapMBtnInner {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.resultSegmentControl .sapMSegBBtn:first-child,
+.resultSegmentControl .sapMSegBBtn:first-child .sapMBtnInner {
+  border-top-left-radius: 0.6rem !important;
+  border-bottom-left-radius: 0.6rem !important;
+}
+
+.resultSegmentControl .sapMSegBBtn:last-child,
+.resultSegmentControl .sapMSegBBtn:last-child .sapMBtnInner {
+  border-top-right-radius: 0.6rem !important;
+  border-bottom-right-radius: 0.6rem !important;
+}
+
+.resultSegmentControl .sapMSegBBtn.sapMSegBBtnSel .sapMBtnContent {
+  color: var(--resultSegmentSelectedText) !important;
+  font-weight: 600;
+}
+
+.resultSegmentControl .sapMSegBBtn.sapMSegBBtnSel:nth-child(1) .sapMBtnInner {
+  background: var(--resultSegmentAllBg) !important;
+}
+
+.resultSegmentControl .sapMSegBBtn.sapMSegBBtnSel:nth-child(2) .sapMBtnInner {
+  background: var(--resultSegmentFailedBg) !important;
+}
+
+.resultSegmentControl .sapMSegBBtn.sapMSegBBtnSel:nth-child(3) .sapMBtnInner {
+  background: var(--resultSegmentSuccessBg) !important;
+}

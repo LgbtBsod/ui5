@@ -15,7 +15,9 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap_ui5/util/FlowCoordinator",
     "sap_ui5/util/DeltaPayloadBuilder",
-    "sap_ui5/service/usecase/ComponentStartupDiagnosticsOrchestrationUseCase"
+    "sap_ui5/service/usecase/ComponentStartupDiagnosticsOrchestrationUseCase",
+    "sap_ui5/service/backend/GatewayClient",
+    "sap_ui5/manager/SettingsManager"
 ], function (
     UIComponent,
     ModelFactory,
@@ -33,7 +35,9 @@ sap.ui.define([
     MessageBox,
     FlowCoordinator,
     DeltaPayloadBuilder,
-    ComponentStartupDiagnosticsOrchestrationUseCase
+    ComponentStartupDiagnosticsOrchestrationUseCase,
+    GatewayClient,
+    SettingsManager
 ) {
     "use strict";
 
@@ -73,6 +77,7 @@ sap.ui.define([
                 }
             });
             this.setModel(oMainServiceModel, "mainService");
+            GatewayClient.setModel(oMainServiceModel);
             BackendAdapter.configure({
                 mode: sConfiguredMode,
                 uiContractVersion: sUiContractVersion,
@@ -437,6 +442,19 @@ sap.ui.define([
                 }
                 this._applyFrontendValidationAndVariables(oFrontendConfig || {}, oStateModel, oEnvModel);
                 this._applyFrontendRuntimeConfig(oFrontendConfig || {}, oStateModel, oEnvModel, oMasterDataModel);
+                SettingsManager.load(GatewayClient, oMasterDataModel).then(function (oRuntime) {
+                    var mRuntimeTimers = {
+                        heartbeatMs: Number(oRuntime.HeartbeatIntervalSec || 240) * 1000,
+                        lockStatusMs: Number(oRuntime.StatusPollIntervalSec || 60) * 1000,
+                        idleMs: Number(oRuntime.IdleTimeoutSec || 600) * 1000,
+                        autoSaveDebounceMs: Number(oRuntime.AutoSaveDebounceMs || 1200),
+                        cacheToleranceMs: Number(oRuntime.CacheToleranceMs || 5500)
+                    };
+                    oStateModel.setProperty("/timers", Object.assign({}, oStateModel.getProperty("/timers") || {}, mRuntimeTimers));
+                    this._applyFrontendRuntimeConfig({ timers: mRuntimeTimers }, oStateModel, oEnvModel, oMasterDataModel);
+                }.bind(this)).catch(function () {
+                    return null;
+                });
 
                 this._loadMasterDataAsync(oMasterDataModel, oStateModel, oEnvModel);
 
@@ -570,7 +588,7 @@ sap.ui.define([
                 cacheFreshMs: pick("cacheFreshMs", Number(mBase.cacheFreshMs) || 30000),
                 cacheStaleOkMs: pick("cacheStaleOkMs", Number(mBase.cacheStaleOkMs) || 90000),
                 analyticsRefreshMs: pick("analyticsRefreshMs", Number(mBase.analyticsRefreshMs) || 900000),
-                cacheToleranceMs: pick("cacheToleranceMs", Number(mBase.cacheToleranceMs) || 8000)
+                cacheToleranceMs: pick("cacheToleranceMs", Number(mBase.cacheToleranceMs) || 5500)
             };
         },
 

@@ -7,4 +7,4 @@ router = APIRouter(tags=["Metadata"])
 
 @router.get("/$metadata")
 def metadata():
-    return Response(content=build_metadata(), media_type="application/xml")
+    return Response(content=build_metadata(), media_type="application/xml; charset=utf-8")

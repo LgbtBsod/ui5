@@ -219,6 +219,17 @@ sap.ui.define([
         return null;
     }
 
+    function buildBarrierFailSegmentFilter(sSegment) {
+        var sKey = String(sSegment || "ALL").toUpperCase();
+        if (sKey === "FAILED") {
+            return new Filter("HasFailedBarriers", FilterOperator.EQ, true);
+        }
+        if (sKey === "SUCCESS") {
+            return new Filter("HasFailedBarriers", FilterOperator.EQ, false);
+        }
+        return null;
+    }
+
     function applyRebindParams(mArgs) {
         var oBindingParams = mArgs.bindingParams || {};
         var mState = mArgs.state || {};
@@ -261,6 +272,7 @@ sap.ui.define([
         var sChecks = mState.filterFailedChecks || "ALL";
         var sBarriers = mState.filterFailedBarriers || "ALL";
         var sFailSegment = ((mState.search || {}).failSegment) || mState.failSegment || "ALL";
+        var sBarrierFailSegment = ((mState.search || {}).barrierFailSegment) || mState.barrierFailSegment || "ALL";
         var aStatusFilters = [];
         if (sChecks !== "ALL") {
             aStatusFilters.push(new Filter("Status", FilterOperator.NE, sChecks === "TRUE" ? "03" : "ZZZ"));
@@ -269,6 +281,7 @@ sap.ui.define([
             aStatusFilters.push(new Filter("Status", FilterOperator.NE, sBarriers === "TRUE" ? "03" : "ZZZ"));
         }
         var oFailSegmentFilter = buildFailSegmentFilter(sFailSegment);
+        var oBarrierFailSegmentFilter = buildBarrierFailSegmentFilter(sBarrierFailSegment);
 
         if (sStatus) {
             aFilters.push(new Filter("Status", FilterOperator.Contains, sStatus));
@@ -295,6 +308,9 @@ sap.ui.define([
             if (oFailSegmentFilter) {
                 aLooseParts.push(oFailSegmentFilter);
             }
+            if (oBarrierFailSegmentFilter) {
+                aLooseParts.push(oBarrierFailSegmentFilter);
+            }
             if (aLooseParts.length) {
                 aFilters.push(new Filter({
                     filters: aLooseParts,
@@ -311,6 +327,9 @@ sap.ui.define([
             Array.prototype.push.apply(aFilters, aStatusFilters);
             if (oFailSegmentFilter) {
                 aFilters.push(oFailSegmentFilter);
+            }
+            if (oBarrierFailSegmentFilter) {
+                aFilters.push(oBarrierFailSegmentFilter);
             }
         }
 
@@ -369,6 +388,7 @@ sap.ui.define([
         extractChecklistId: extractChecklistId,
         extractChecklistIdFromSelectionEvent: extractChecklistIdFromSelectionEvent,
         buildFailSegmentFilter: buildFailSegmentFilter,
+        buildBarrierFailSegmentFilter: buildBarrierFailSegmentFilter,
         applyRebindParams: applyRebindParams,
         rebindOrFallback: rebindOrFallback
     };
