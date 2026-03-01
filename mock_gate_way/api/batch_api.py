@@ -18,6 +18,21 @@ from utils.odata_batch import (
 router = APIRouter(tags=["Batch"])
 
 
+_WRITE_METHODS = {"POST", "PUT", "PATCH", "MERGE", "DELETE"}
+
+
+def _has_write_operations(operations: list[BatchOperation | list[BatchOperation]]) -> bool:
+    for item in operations:
+        if isinstance(item, list):
+            for op in item:
+                if str(op.method or "").upper() in _WRITE_METHODS:
+                    return True
+            continue
+        if str(item.method or "").upper() in _WRITE_METHODS:
+            return True
+    return False
+
+
 def _sanitize_operation_path(path: str) -> str:
     if not path:
         return path
@@ -79,6 +94,13 @@ async def _execute_operation(request: Request, op: BatchOperation) -> httpx.Resp
 async def batch(request: Request):
     boundary = extract_boundary(request.headers.get("content-type"))
     operations = parse_batch_request((await request.body()).decode("utf-8"), boundary)
+
+    if _has_write_operations(operations):
+        csrf_store = getattr(request.app.state, "csrf_store", None)
+        session_id = request.cookies.get("SAP_SESSIONID")
+        token = request.headers.get("X-CSRF-Token")
+        if not csrf_store or not csrf_store.validate(session_id, token):
+            raise HTTPException(status_code=403, detail="CSRF_TOKEN_MISSING")
 
     response_parts: list[str] = []
     for item in operations:

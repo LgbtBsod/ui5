@@ -194,7 +194,8 @@ async def odata_csrf_middleware(request: Request, call_next):
     token = request.headers.get("X-CSRF-Token")
     is_fetch = str(token).lower() == "fetch"
 
-    if request.method in {"POST", "PUT", "PATCH", "MERGE", "DELETE"} and not is_fetch:
+    b_is_batch = path.endswith("/$batch")
+    if request.method in {"POST", "PUT", "PATCH", "MERGE", "DELETE"} and not is_fetch and not b_is_batch:
         if not app.state.csrf_store.validate(session_id, token):
             return odata_error_response(403, "CSRF_TOKEN_MISSING", "CSRF token validation failed")
 

@@ -201,3 +201,14 @@ curl -s -b cookies.txt -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/j
 ```
 
 Скрипт проверяет service document, $metadata, csrf, $batch(read), search/$count, RuntimeSettings, LastChange, LockControl/LockStatus, GetHierarchy, ReportExport.
+
+## Интеграционный smoke test (SmartFilterBar + SmartTable через OData)
+
+1. Запустите backend и убедитесь, что доступен сервис-документ:
+   - `GET http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV/`
+2. Откройте UI и перейдите на экран Search.
+3. Убедитесь в Network:
+   - есть `POST /sap/opu/odata/sap/Z_UI5_SRV/$batch` со статусом 200;
+   - нет запросов к `/checklist` и `/api/*` для списка поиска.
+4. Примените фильтр в SmartFilterBar (например `Status` или `LocationKey`) и нажмите Go.
+5. Убедитесь, что backend получает запрос c OData-параметрами `$filter`, `$top`, `$skip`, `$inlinecount` и SmartTable показывает отфильтрованные строки.
