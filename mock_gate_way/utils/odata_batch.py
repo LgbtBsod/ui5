@@ -89,7 +89,7 @@ def format_http_response(status_code: int, reason: str, content_type: str, body:
 
 
 def encode_top_level(parts: list[str]) -> tuple[str, str]:
-    boundary = f"batchresponse_{uuid.uuid4().hex}"
+    boundary = f"batch_{uuid.uuid4().hex}"
     chunks = [f"--{boundary}\r\n{part}\r\n" for part in parts]
     chunks.append(f"--{boundary}--\r\n")
     return "".join(chunks), boundary

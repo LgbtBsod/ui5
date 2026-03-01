@@ -366,11 +366,15 @@ body.appDark .brandActionBtn.brandActionPrimary .sapMBtnInner,
   margin-bottom: 0;
 }
 
-.themeDockButton {
+.themeDockButton,
+.themeDockSwitch {
   position: fixed;
   top: .75rem;
   left: .75rem;
   z-index: 50;
+}
+
+.themeDockButton {
   width: auto !important;
   display: inline-block !important;
   border-radius: 999px !important;
@@ -386,6 +390,108 @@ body.appDark .brandActionBtn.brandActionPrimary .sapMBtnInner,
 
 .themeDockButton .sapUiIcon {
   font-size: 1.05rem;
+}
+
+.themeDockSwitch {
+  --themeSwitchWidth: 3rem;
+  --themeSwitchHeight: 1.65rem;
+  --themeSwitchInset: 2px;
+  --themeSwitchTravel: 1.35rem;
+  --themeSwitchThumbShift: 0;
+  --themeSwitchSunOpacity: .35;
+  --themeSwitchMoonOpacity: .95;
+  width: var(--themeSwitchWidth);
+  height: var(--themeSwitchHeight);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--sapContent_ForegroundColor);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.themeDockSwitch.isDark {
+  --themeSwitchThumbShift: var(--themeSwitchTravel);
+  --themeSwitchSunOpacity: .95;
+  --themeSwitchMoonOpacity: .35;
+}
+
+.themeDockSwitch:focus-visible {
+  outline: 2px solid var(--sapContent_FocusColor);
+  outline-offset: 2px;
+}
+
+.themeDockSwitchTrack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--sapContent_ForegroundBorderColor) 72%, transparent);
+  background: color-mix(in srgb, var(--sapField_Background) 88%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.themeDockSwitchThumb {
+  position: absolute;
+  top: var(--themeSwitchInset);
+  left: var(--themeSwitchInset);
+  width: calc(var(--themeSwitchHeight) - (var(--themeSwitchInset) * 2));
+  height: calc(var(--themeSwitchHeight) - (var(--themeSwitchInset) * 2));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sapButton_Background) 90%, #fff 10%);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transform: translateX(var(--themeSwitchThumbShift));
+  transition: transform .22s cubic-bezier(.2, .75, .3, 1);
+}
+
+.themeDockSwitchIcon {
+  position: absolute;
+  top: 50%;
+  font-family: "SAP-icons";
+  font-size: .9rem;
+  line-height: 1;
+  transform: translateY(-50%) scale(.92);
+  transition: opacity .22s ease, transform .22s ease;
+}
+
+.themeDockSwitchIconSun {
+  left: .36rem;
+  opacity: var(--themeSwitchSunOpacity);
+}
+
+.themeDockSwitchIconMoon {
+  right: .36rem;
+  opacity: var(--themeSwitchMoonOpacity);
+}
+
+.themeDockSwitchIconSun,
+.themeDockSwitchIconMoon {
+  transform: translateY(-50%) scale(.92);
+}
+
+.themeDockSwitch:not(.isDark) .themeDockSwitchIconMoon,
+.themeDockSwitch.isDark .themeDockSwitchIconSun {
+  transform: translateY(-50%) scale(1);
+}
+
+.themeDockSwitch:hover .themeDockSwitchTrack {
+  border-color: color-mix(in srgb, var(--sapContent_ForegroundBorderColor) 88%, transparent);
+}
+
+.themeDockSwitch:active {
+  --themeSwitchThumbScale: .97;
+}
+
+.themeDockSwitch:active .themeDockSwitchThumb {
+  transform: translateX(var(--themeSwitchThumbShift)) scale(var(--themeSwitchThumbScale, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .themeDockSwitchThumb,
+  .themeDockSwitchIcon {
+    transition: none;
+  }
 }
 
 /* keep page background uniform without footer-like color seam */

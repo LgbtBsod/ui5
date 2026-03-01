@@ -4,16 +4,15 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:f="sap.f"
     xmlns="sap.m"
-    xmlns:html="http://www.w3.org/1999/xhtml">
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns:cc="sap_ui5.control">
 
     <html:div class="bg-blobs"></html:div>
 
-    <Button
-    icon="{= ${appView>/isDark} ? 'sap-icon://weather-sunny' : 'sap-icon://clear-night' }"
+    <cc:ThemeToggle
+    dark="{appView>/isDark}"
     tooltip="{= ${appView>/isDark} ? ${i18n>themeSwitchToLight} : ${i18n>themeSwitchToDark} }"
-    press=".onToggleTheme"
-    type="Transparent"
-    class="themeDockButton"/>
+    press=".onToggleTheme"/>
 
 
     <Toolbar class="toolbarTransparent sapUiTinyMarginBegin sapUiTinyMarginTop">

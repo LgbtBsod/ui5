@@ -4,14 +4,14 @@ sap.ui.define([
 ], function (FakeBackendService, RealBackendService) {
     "use strict";
 
-    var _backendService = FakeBackendService;
+    var _backendService = RealBackendService;
     var _CAPABILITY_CONTRACT_VERSION = "1.0.0";
     var _UI_CONTRACT_VERSION = "1.0.0";
 
     function _defaultCapabilities(sMode) {
         return {
             contractVersion: _CAPABILITY_CONTRACT_VERSION,
-            backendMode: sMode || "fake",
+            backendMode: sMode || "real",
             features: {
                 lockStatus: true,
                 lockHeartbeat: true,

@@ -77,6 +77,7 @@ sap.ui.define([
                 }
             });
             this.setModel(oMainServiceModel, "mainService");
+            this.setModel(oMainServiceModel);
             GatewayClient.setModel(oMainServiceModel);
             BackendAdapter.configure({
                 mode: sConfiguredMode,
@@ -88,15 +89,8 @@ sap.ui.define([
                 stateModel: oStateModel,
                 syncCapability: fnSyncCapabilityDiagnostics,
                 onMetadataFailed: function () {
-                    if (BackendAdapter.getMode() === "real") {
-                        BackendAdapter.configure({
-                            mode: "fake",
-                            uiContractVersion: sUiContractVersion,
-                            model: oMainServiceModel
-                        });
-                        oStateModel.setProperty("/backendMode", "fake");
-                        oStateModel.setProperty("/metadataFallbackMode", true);
-                    }
+                    oStateModel.setProperty("/backendMode", "real");
+                    oStateModel.setProperty("/metadataFallbackMode", false);
                 }
             });
 

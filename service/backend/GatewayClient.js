@@ -66,8 +66,35 @@ sap.ui.define([], function () {
             });
         },
 
-        batch: function () { return Promise.resolve([]); },
-        fetchCsrfToken: function () { return Promise.resolve(true); },
+        batch: function (groupId) {
+            var oModel = _ensureModel();
+            return _toPromise(function (resolve, reject) {
+                oModel.submitChanges({
+                    groupId: groupId || undefined,
+                    success: function (oData) {
+                        resolve((oData && (oData.__batchResponses || oData.__changeResponses)) || []);
+                    },
+                    error: function (e) { reject(_normalizeODataError(e)); }
+                });
+            });
+        },
+
+        fetchCsrfToken: function () {
+            var oModel = _ensureModel();
+            return _toPromise(function (resolve, reject) {
+                oModel.refreshSecurityToken(function () {
+                    resolve(true);
+                }, function (e) {
+                    reject(_normalizeODataError(e));
+                }, true);
+            });
+        },
+
+        refreshSecurityToken: function () {
+            return this.fetchCsrfToken();
+        },
+
+        normalizeError: _normalizeODataError,
         normalizeODataError: _normalizeODataError
     };
 });
