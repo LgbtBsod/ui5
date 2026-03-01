@@ -1,7 +1,6 @@
 sap.ui.define([
-    "sap_ui5/service/backend/FakeBackendService",
     "sap_ui5/service/backend/RealBackendService"
-], function (FakeBackendService, RealBackendService) {
+], function (RealBackendService) {
     "use strict";
 
     var _backendService = RealBackendService;
@@ -175,18 +174,8 @@ sap.ui.define([
         };
     }
 
-    function _readUrlMode() {
-        try {
-            var oUrl = new URL(window.location.href);
-            return oUrl.searchParams.get("backend");
-        } catch (e) {
-            return null;
-        }
-    }
-
     function _selectBackend(mConfig) {
-        var sMode = (mConfig && mConfig.mode) || _readUrlMode() || "fake";
-        _backendService = (sMode === "real") ? RealBackendService : FakeBackendService;
+        _backendService = RealBackendService;
 
         if (_backendService.configure) {
             _backendService.configure(mConfig || {});
@@ -201,7 +190,7 @@ sap.ui.define([
         },
 
         getMode: function () {
-            return _backendService === RealBackendService ? "real" : "fake";
+            return "real";
         },
 
         getCapabilities: function () {
