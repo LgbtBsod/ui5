@@ -2892,20 +2892,25 @@ function testDetailSaveOrchestrationIdempotencyAndConflictMatrix() {
 }
 
 function testSearchApplicationServiceTimeoutFallback() {
-  const BackendAdapter = {
-    queryCheckLists: () => Promise.reject(new Error('timeout'))
-  };
-  const SmartSearchAdapter = {
-    filterData: (rows) => rows
+  const BackendAdapter = {};
+  let captured = null;
+  const GatewayClient = {
+    readSet: (setName, query) => {
+      captured = { setName, query };
+      return Promise.resolve([{ Key: '1' }]);
+    }
   };
   const mod = loadSapModule('service/usecase/SearchApplicationService.js', {
     'sap_ui5/service/backend/BackendAdapter': BackendAdapter,
-    'sap_ui5/service/SmartSearchAdapter': SmartSearchAdapter
+    'sap_ui5/service/backend/GatewayClient': GatewayClient
   });
 
-  const fallback = [{ root: { id: 'F-1' } }];
-  return mod.runSearch({ filterId: 'F' }, 'EXACT', fallback).then((rows) => {
-    assert(Array.isArray(rows) && rows.length === 1, 'runSearch should fallback to local collection on backend timeout');
+  return mod.runSearch({ filterId: 'F' }, 'EXACT', []).then((rows) => {
+    assert(Array.isArray(rows) && rows.length === 1, 'runSearch should return GatewayClient rows');
+    assert(captured && captured.setName === 'ChecklistSearchSet', 'runSearch should query ChecklistSearchSet');
+    assert(captured.query.$top >= 1 && captured.query.$inlinecount === 'allpages', 'runSearch should request server-side paging and count');
+    assert(String(captured.query.$filter || '').indexOf("substringof('F',Id)") >= 0,
+      'runSearch should translate payload to OData $filter');
   });
 }
 
@@ -2925,19 +2930,17 @@ function testDetailSaveOrchestrationUseCaseErrorBranch() {
 
 
 function testSearchApplicationServiceConflictFallback() {
-  const BackendAdapter = {
-    queryCheckLists: () => Promise.reject(new Error('conflict'))
-  };
-  const SmartSearchAdapter = {
-    filterData: (rows) => rows.filter((r) => !!r)
+  const BackendAdapter = {};
+  const GatewayClient = {
+    readSet: () => Promise.resolve([{ Key: 'C-1' }])
   };
   const mod = loadSapModule('service/usecase/SearchApplicationService.js', {
     'sap_ui5/service/backend/BackendAdapter': BackendAdapter,
-    'sap_ui5/service/SmartSearchAdapter': SmartSearchAdapter
+    'sap_ui5/service/backend/GatewayClient': GatewayClient
   });
 
   return mod.runSearch({ filterId: '' }, 'LOOSE', [{ root: { id: 'C-1' } }]).then((rows) => {
-    assert(rows.length === 1, 'runSearch should fallback for backend conflict errors as well as timeouts');
+    assert(rows.length === 1, 'runSearch should resolve with backend rows for OData flow');
   });
 }
 
@@ -2956,19 +2959,20 @@ function testDetailSaveOrchestrationUseCaseConflictBranch() {
 
 
 function testSearchApplicationServiceNetworkFallback() {
-  const BackendAdapter = {
-    queryCheckLists: () => Promise.reject(new Error('network unreachable'))
-  };
-  const SmartSearchAdapter = {
-    filterData: (rows) => rows
+  const BackendAdapter = {};
+  const GatewayClient = {
+    readSet: () => Promise.reject(new Error('network unreachable'))
   };
   const mod = loadSapModule('service/usecase/SearchApplicationService.js', {
     'sap_ui5/service/backend/BackendAdapter': BackendAdapter,
-    'sap_ui5/service/SmartSearchAdapter': SmartSearchAdapter
+    'sap_ui5/service/backend/GatewayClient': GatewayClient
   });
 
-  return mod.runSearch({ filterId: '' }, 'EXACT', [{ root: { id: 'N-1' } }]).then((rows) => {
-    assert(rows.length === 1 && rows[0].root.id === 'N-1', 'runSearch should fallback to local collection on network errors');
+  return mod.runSearch({ filterId: '' }, 'EXACT', [{ root: { id: 'N-1' } }]).then(() => {
+    throw new Error('runSearch should reject on network errors in OData mode');
+  }).catch((e) => {
+    assert(String((e && e.message) || e).indexOf('network unreachable') >= 0,
+      'runSearch should bubble backend/network errors');
   });
 }
 

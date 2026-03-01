@@ -145,7 +145,7 @@ sap.ui.define([
             }
 
             var sHash = this.getRouter().getHashChanger().getHash() || "";
-            if (sHash.indexOf("detail/") !== 0) {
+            if (sHash.indexOf("checklist/") !== 0) {
                 return;
             }
 

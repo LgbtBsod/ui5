@@ -63,9 +63,11 @@ sap.ui.define([
                 getBackendMode: BackendAdapter.getMode
             });
             var oMainServiceModel = this.getModel("mainService") || new sap.ui.model.odata.v2.ODataModel({
-                serviceUrl: this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_UI5_SRV/",
+                serviceUrl: "/sap/opu/odata/sap/Z_UI5_SRV/",
                 useBatch: true,
+                defaultBindingMode: "TwoWay",
                 defaultCountMode: "Inline",
+                tokenHandling: true,
                 refreshAfterChange: false
             });
             oMainServiceModel.setDeferredGroups(["changes", "autosave", "saveFlow"]);
@@ -403,7 +405,7 @@ sap.ui.define([
                 }.bind(this));
             }.bind(this));
 
-            if (/detail\/__create(?:$|[?&])/.test(window.location.hash || "")) {
+            if (/checklist\/__create(?:$|[?&])/.test(window.location.hash || "")) {
                 oRouter.getHashChanger().replaceHash("");
                 oStateModel.setProperty("/objectAction", "");
             }
@@ -452,18 +454,11 @@ sap.ui.define([
 
                 this._loadMasterDataAsync(oMasterDataModel, oStateModel, oEnvModel);
 
-                return this._oSmartCache.getWithFallback("checkLists").then(function (aCached) {
-                    if (Array.isArray(aCached) && aCached.length) {
-                        oDataModel.setProperty("/checkLists", aCached);
-                        oDataModel.setProperty("/visibleCheckLists", aCached);
-                    }
+                return this._oSmartCache.getWithFallback("checkLists").then(function () {
+                    // Search list is driven by SmartTable OData binding; no local list hydration here.
                     return BackendAdapter.getCheckLists();
                 }).then(function (aCheckLists) {
-                    // OData/backend is used only as transport layer; UI bindings always target JSON models.
-                    oDataModel.setProperty("/checkLists", aCheckLists);
-                    oDataModel.setProperty("/visibleCheckLists", aCheckLists);
-
-                    // Cache snapshot is the local source for diff/dirty calculations.
+                    // Cache snapshot remains available for detail-diff flows.
                     oCacheModel.setProperty("/pristineSnapshot", JSON.parse(JSON.stringify(aCheckLists)));
                     var sCacheAtRaw = (oServerState && (oServerState.checkedAt || oServerState.fetchedAt)) || new Date();
                     var sCacheAt = fnFormatHumanDateTime(sCacheAtRaw);

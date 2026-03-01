@@ -1,0 +1,2693 @@
+{
+  "counts": {
+    "js": 157,
+    "views": 3,
+    "fragments": 9
+  },
+  "missingDeps": [],
+  "xmlMissingMethods": [],
+  "xmlEventBindings": [
+    [
+      "view/App.view.xml",
+      "sap_ui5.controller.App",
+      "press",
+      "onToggleTheme"
+    ],
+    [
+      "view/App.view.xml",
+      "sap_ui5.controller.App",
+      "stateChange",
+      "onFclStateChange"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "change",
+      "onLpcChange"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "change",
+      "onProfessionChange"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "press",
+      "onExpandChecks"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "press",
+      "onAddCheckRow"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "select",
+      "onSelectionToggle"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "press",
+      "onDeleteCheckRow"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "press",
+      "onExpandBarriers"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "press",
+      "onAddBarrierRow"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "select",
+      "onSelectionToggle"
+    ],
+    [
+      "view/Detail.view.xml",
+      "sap_ui5.controller.Detail",
+      "press",
+      "onDeleteBarrierRow"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "press",
+      "onOpenWorkflowAnalytics"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "initialise",
+      "onSmartFilterInitialise"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "search",
+      "onSmartSearch"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "filterChange",
+      "onSmartFilterChanged"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "selectionChange",
+      "onFailSegmentSelectionChange"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "selectionChange",
+      "onBarrierFailSegmentSelectionChange"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "press",
+      "onCreate"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "press",
+      "onCopy"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "press",
+      "onDelete"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "beforeRebindTable",
+      "onBeforeSmartTableRebind"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "initialise",
+      "onSmartTableInitialise"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "change",
+      "onMaxRowsChange"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "change",
+      "onSearchModeToggle"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "defaultAction",
+      "onExportMenuDefault"
+    ],
+    [
+      "view/Search.view.xml",
+      "sap_ui5.controller.Search",
+      "itemSelected",
+      "onExportMenuAction"
+    ],
+    [
+      "view/fragment/ChecksExpandedDialog.fragment.xml",
+      null,
+      "select",
+      "onSelectionToggle"
+    ],
+    [
+      "view/fragment/ChecksExpandedDialog.fragment.xml",
+      null,
+      "press",
+      "onDeleteCheckRow"
+    ],
+    [
+      "view/fragment/ChecksExpandedDialog.fragment.xml",
+      null,
+      "press",
+      "onCloseChecksExpanded"
+    ],
+    [
+      "view/fragment/BarriersExpandedDialog.fragment.xml",
+      null,
+      "select",
+      "onSelectionToggle"
+    ],
+    [
+      "view/fragment/BarriersExpandedDialog.fragment.xml",
+      null,
+      "press",
+      "onDeleteBarrierRow"
+    ],
+    [
+      "view/fragment/BarriersExpandedDialog.fragment.xml",
+      null,
+      "press",
+      "onCloseBarriersExpanded"
+    ],
+    [
+      "view/fragment/WorkflowAnalyticsDialog.fragment.xml",
+      null,
+      "press",
+      "onCloseWorkflowAnalytics"
+    ],
+    [
+      "view/fragment/LocationValueHelpDialog.fragment.xml",
+      null,
+      "liveChange",
+      "onLocationValueHelpSearch"
+    ],
+    [
+      "view/fragment/LocationValueHelpDialog.fragment.xml",
+      null,
+      "press",
+      "onConfirmLocationValueHelp"
+    ],
+    [
+      "view/fragment/LocationValueHelpDialog.fragment.xml",
+      null,
+      "press",
+      "onCloseLocationValueHelp"
+    ],
+    [
+      "view/fragment/TestUserDialog.fragment.xml",
+      null,
+      "press",
+      "onConfirmTestUser"
+    ],
+    [
+      "view/fragment/LockSwitchStatus.fragment.xml",
+      null,
+      "change",
+      "onToggleEdit"
+    ],
+    [
+      "view/fragment/DetailControlRail.fragment.xml",
+      null,
+      "press",
+      "onSaveDetail"
+    ],
+    [
+      "view/fragment/DetailControlRail.fragment.xml",
+      null,
+      "press",
+      "onValidateChecklist"
+    ],
+    [
+      "view/fragment/DetailControlRail.fragment.xml",
+      null,
+      "press",
+      "onChangeChecklistStatus"
+    ],
+    [
+      "view/fragment/DetailControlRail.fragment.xml",
+      null,
+      "press",
+      "onChangeChecklistStatus"
+    ],
+    [
+      "view/fragment/DetailControlRail.fragment.xml",
+      null,
+      "press",
+      "onChangeChecklistStatus"
+    ],
+    [
+      "view/fragment/DetailControlRail.fragment.xml",
+      null,
+      "press",
+      "onCancelEditFromDetail"
+    ],
+    [
+      "view/fragment/DetailControlRail.fragment.xml",
+      null,
+      "press",
+      "onCloseDetail"
+    ]
+  ],
+  "formatters": [],
+  "routes": [
+    {
+      "pattern": "",
+      "name": "search",
+      "target": [
+        "search"
+      ],
+      "layout": "OneColumn",
+      "targetColumn": "begin"
+    },
+    {
+      "pattern": "checklist/{id}",
+      "name": "detail",
+      "target": [
+        "search",
+        "detail"
+      ],
+      "layout": "TwoColumnsMidExpanded",
+      "targetColumn": "mid"
+    },
+    {
+      "pattern": "checklist/{id}/{layout}",
+      "name": "detailLayout",
+      "target": [
+        "search",
+        "detail"
+      ]
+    }
+  ],
+  "targets": {
+    "search": {
+      "viewName": "Search",
+      "viewLevel": 1,
+      "controlAggregation": "beginColumnPages",
+      "targetColumn": "begin",
+      "layout": "OneColumn"
+    },
+    "detail": {
+      "viewName": "Detail",
+      "viewLevel": 2,
+      "controlAggregation": "midColumnPages",
+      "targetColumn": "mid",
+      "layout": "TwoColumnsMidExpanded"
+    }
+  },
+  "missingTargets": [],
+  "missingTargetViews": [],
+  "modules": {
+    "Component.js": {
+      "deps": [
+        "sap/ui/core/UIComponent",
+        "sap_ui5/model/ModelFactory",
+        "sap_ui5/service/backend/BackendAdapter",
+        "sap_ui5/service/SmartSearchAdapter",
+        "sap_ui5/manager/SmartCacheManager",
+        "sap_ui5/manager/HeartbeatManager",
+        "sap_ui5/manager/GCDManager",
+        "sap_ui5/manager/ActivityMonitor",
+        "sap_ui5/manager/BeaconManager",
+        "sap_ui5/manager/AutoSaveCoordinator",
+        "sap_ui5/manager/ConnectivityCoordinator",
+        "sap_ui5/manager/LockStatusMonitor",
+        "sap/ui/model/json/JSONModel",
+        "sap/m/MessageBox",
+        "sap_ui5/util/FlowCoordinator",
+        "sap_ui5/util/DeltaPayloadBuilder",
+        "sap_ui5/service/usecase/ComponentStartupDiagnosticsOrchestrationUseCase",
+        "sap_ui5/service/backend/GatewayClient",
+        "sap_ui5/manager/SettingsManager"
+      ],
+      "params": [
+        "UIComponent",
+        "ModelFactory",
+        "BackendAdapter",
+        "SmartSearchAdapter",
+        "SmartCacheManager",
+        "HeartbeatManager",
+        "GCDManager",
+        "ActivityMonitor",
+        "BeaconManager",
+        "AutoSaveCoordinator",
+        "ConnectivityCoordinator",
+        "LockStatusMonitor",
+        "JSONModel",
+        "MessageBox",
+        "FlowCoordinator",
+        "DeltaPayloadBuilder",
+        "ComponentStartupDiagnosticsOrchestrationUseCase",
+        "GatewayClient",
+        "SettingsManager"
+      ],
+      "export": "bKilled",
+      "class": "sap_ui5.Component",
+      "methods": [
+        "init",
+        "onMetadataFailed",
+        "heartbeatFn",
+        "shouldSave",
+        "buildPayload",
+        "saveFn",
+        "checkFn",
+        "getResourceBundle",
+        "_startCoreManagers",
+        "_stopLockScopedManagers",
+        "_startLockScopedManagers",
+        "_stopAllManagers",
+        "_isLockRuntimeActive",
+        "_syncLockScopedManagers",
+        "_sanitizeTimers",
+        "_sanitizeColumnSplitPercent",
+        "_applyFrontendRuntimeConfig",
+        "_applyFrontendValidationAndVariables",
+        "_loadMasterDataAsync",
+        "exit"
+      ],
+      "consts": []
+    },
+    "model/ModelFactory.js": {
+      "deps": [
+        "sap/ui/model/json/JSONModel"
+      ],
+      "params": [
+        "JSONModel"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "createDataModel",
+        "createUiStateModel",
+        "createViewModel",
+        "createCacheModel",
+        "createMasterDataModel",
+        "createHierarchyModel",
+        "createStateModel",
+        "createLayoutModel",
+        "createMplModel",
+        "createEnvModel"
+      ],
+      "consts": []
+    },
+    "model/search/SearchState.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "applyDefaults"
+      ],
+      "consts": []
+    },
+    "manager/BeaconManager.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "register"
+      ],
+      "consts": []
+    },
+    "manager/HeartbeatManager.js": {
+      "deps": [
+        "sap/ui/base/EventProvider"
+      ],
+      "params": [
+        "EventProvider"
+      ],
+      "export": "this._bRunning",
+      "class": "sap_ui5.manager.HeartbeatManager",
+      "methods": [
+        "constructor",
+        "start",
+        "stop",
+        "setIntervalMs",
+        "isRunning"
+      ],
+      "consts": []
+    },
+    "manager/ConnectivityCoordinator.js": {
+      "deps": [
+        "sap/ui/base/EventProvider"
+      ],
+      "params": [
+        "EventProvider"
+      ],
+      "export": null,
+      "class": "sap_ui5.manager.ConnectivityCoordinator",
+      "methods": [
+        "constructor",
+        "start",
+        "stop",
+        "setGraceMs",
+        "_onOffline",
+        "_onOnline"
+      ],
+      "consts": []
+    },
+    "manager/ActivityMonitor.js": {
+      "deps": [
+        "sap/ui/base/EventProvider"
+      ],
+      "params": [
+        "EventProvider"
+      ],
+      "export": null,
+      "class": "sap_ui5.manager.ActivityMonitor",
+      "methods": [
+        "constructor",
+        "start",
+        "_reset",
+        "setIdleMs",
+        "stop"
+      ],
+      "consts": []
+    },
+    "manager/SmartCacheManager.js": {
+      "deps": [
+        "sap/ui/base/EventProvider"
+      ],
+      "params": [
+        "EventProvider"
+      ],
+      "export": "mAcc",
+      "class": "sap_ui5.manager.SmartCacheManager",
+      "methods": [
+        "constructor",
+        "_isKeyAllowed",
+        "setKeyMapping",
+        "getRealKey",
+        "put",
+        "get",
+        "getWithFallback",
+        "getFreshnessState",
+        "isCacheValid",
+        "isCacheStrictFresh",
+        "configureFreshness",
+        "snapshot"
+      ],
+      "consts": [
+        "DEFAULT_FRESH_MS",
+        "DEFAULT_STALE_OK_MS",
+        "DB_NAME",
+        "STORE_NAME",
+        "DEFAULT_ALLOWED_KEYS"
+      ]
+    },
+    "manager/AutoSaveCoordinator.js": {
+      "deps": [
+        "sap/ui/base/EventProvider"
+      ],
+      "params": [
+        "EventProvider"
+      ],
+      "export": "false",
+      "class": "sap_ui5.manager.AutoSaveCoordinator",
+      "methods": [
+        "constructor",
+        "start",
+        "stop",
+        "setIntervals",
+        "touch",
+        "_runIfNeeded"
+      ],
+      "consts": []
+    },
+    "manager/GCDManager.js": {
+      "deps": [
+        "sap/ui/base/EventProvider"
+      ],
+      "params": [
+        "EventProvider"
+      ],
+      "export": null,
+      "class": "sap_ui5.manager.GCDManager",
+      "methods": [
+        "constructor",
+        "resetOnFullSave",
+        "setIntervalMs",
+        "destroyManager"
+      ],
+      "consts": []
+    },
+    "manager/LockStatusMonitor.js": {
+      "deps": [
+        "sap/ui/base/EventProvider"
+      ],
+      "params": [
+        "EventProvider"
+      ],
+      "export": null,
+      "class": "sap_ui5.manager.LockStatusMonitor",
+      "methods": [
+        "constructor",
+        "start",
+        "setIntervalMs",
+        "stop"
+      ],
+      "consts": []
+    },
+    "manager/SettingsManager.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "subscribe",
+        "load"
+      ],
+      "consts": []
+    },
+    "manager/interval/BaseIntervalManager.js": {
+      "deps": [],
+      "params": [],
+      "export": "BaseIntervalManager",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "domain/ChecklistEngine.js": {
+      "deps": [],
+      "params": [],
+      "export": "false",
+      "class": null,
+      "methods": [
+        "recalculate"
+      ],
+      "consts": []
+    },
+    "util/DeltaPayloadBuilder.js": {
+      "deps": [],
+      "params": [],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "util/FlowCoordinator.js": {
+      "deps": [
+        "sap/m/MessageBox",
+        "sap_ui5/service/backend/BackendAdapter"
+      ],
+      "params": [
+        "MessageBox",
+        "BackendAdapter"
+      ],
+      "export": "null",
+      "class": null,
+      "methods": [
+        "onClose",
+        "confirmStealOwnLock",
+        "onClose",
+        "showLockKilledNotice",
+        "releaseWithTrySave",
+        "confirmUnsavedAndHandle",
+        "onClose",
+        "handleBackendError"
+      ],
+      "consts": []
+    },
+    "util/FlexibleRouter.js": {
+      "deps": [
+        "sap/ui/core/routing/Router",
+        "sap/ui/core/routing/HashChanger"
+      ],
+      "params": [
+        "Router",
+        "HashChanger"
+      ],
+      "export": "null",
+      "class": "sap_ui5.util.FlexibleRouter",
+      "methods": [
+        "constructor",
+        "destroy",
+        "setFclControlId",
+        "navTo",
+        "_readPolicyFromManifestRoutes",
+        "_getPolicyForRoute",
+        "_getFclControl",
+        "_applyLayoutToFcl",
+        "_applyTargetColumnOverride",
+        "_writeLayoutToHashQuery",
+        "_onRouteMatched",
+        "_onHashChanged",
+        "_pushLayoutHistory",
+        "_hydrateLayoutStack"
+      ],
+      "consts": []
+    },
+    "util/ChecklistDraftHelper.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "util/UxTelemetry.js": {
+      "deps": [],
+      "params": [],
+      "export": "evt",
+      "class": null,
+      "methods": [],
+      "consts": [
+        "STORE_KEY"
+      ]
+    },
+    "util/ExcelExport.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "download"
+      ],
+      "consts": []
+    },
+    "util/ChecklistValidationService.js": {
+      "deps": [],
+      "params": [],
+      "export": "undefined",
+      "class": null,
+      "methods": [
+        "validateForStatusChange",
+        "isBarrierSectionAllowed",
+        "buildOverallResult"
+      ],
+      "consts": [
+        "DEFAULT_REQUIRED_FIELDS"
+      ]
+    },
+    "util/DetailFormatters.js": {
+      "deps": [],
+      "params": [],
+      "export": "sOperationText",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "util/RowListHelper.js": {
+      "deps": [],
+      "params": [],
+      "export": "oItem",
+      "class": null,
+      "methods": [
+        "addRow",
+        "removeSelectedRows",
+        "removeRowByIndex"
+      ],
+      "consts": []
+    },
+    "util/SearchSmartControlCoordinator.js": {
+      "deps": [
+        "sap/ui/model/Filter",
+        "sap/ui/model/FilterOperator"
+      ],
+      "params": [
+        "Filter",
+        "FilterOperator"
+      ],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "util/DetailCardSchema.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "createInfoCards",
+        "createStatusActions"
+      ],
+      "consts": []
+    },
+    "util/ChecklistUiState.js": {
+      "deps": [],
+      "params": [],
+      "export": "mAcc",
+      "class": null,
+      "methods": [
+        "isSameStatus"
+      ],
+      "consts": []
+    },
+    "util/ThemePhilosophy.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": [
+        "THEMES"
+      ]
+    },
+    "util/SearchWorkflowOrchestrator.js": {
+      "deps": [],
+      "params": [],
+      "export": "oData",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "util/FclResizer.js": {
+      "deps": [],
+      "params": [],
+      "export": "true",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "util/search/TableOrderExtractor.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "getDisplayedRootKeysInOrder"
+      ],
+      "consts": []
+    },
+    "util/search/SearchFilterBuilder.js": {
+      "deps": [
+        "sap/ui/model/Filter",
+        "sap/ui/model/FilterOperator"
+      ],
+      "params": [
+        "Filter",
+        "FilterOperator"
+      ],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/theme-parity-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/report-ui-entity-inventory.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/css-duplicate-selector-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/full-style-migration-report.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/backend-contract-drift-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": "exported",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/ux-slo-report.js": {
+      "deps": [],
+      "params": [],
+      "export": "0",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/semantic-contrast-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/report-ui5-api-usage.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/wave-d-regression-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/report-ui5-full-audit-catalog.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/theme-preferences-contract-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/ux-state-coverage-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/finalize-style-migration.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/pair-snapshots-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/unit-smoke.js": {
+      "deps": [],
+      "params": [],
+      "export": "exported",
+      "class": null,
+      "methods": [
+        "setProperty",
+        "getProperty"
+      ],
+      "consts": []
+    },
+    "scripts/wave-c-regression-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/backend-semver-policy-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": "exported",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/message-taxonomy-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/control-token-mapping-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/wave-e-release-governance-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/css-accent-governance-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/enterprise-readiness-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/ci-smoke-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/a11y-gate.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "scripts/report-architecture-metrics.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "controller/App.controller.js": {
+      "deps": [
+        "sap_ui5/controller/Base.controller",
+        "sap/ui/model/json/JSONModel",
+        "sap/ui/core/Fragment",
+        "sap_ui5/controller/TestUserDialog.controller",
+        "sap_ui5/util/FclResizer"
+      ],
+      "params": [
+        "BaseController",
+        "JSONModel",
+        "Fragment",
+        "TestUserDialogController",
+        "FclResizer"
+      ],
+      "export": null,
+      "class": "sap_ui5.controller.App",
+      "methods": [
+        "onInit",
+        "onAfterRendering",
+        "_ensureFclResizerAttached",
+        "_detachFclResizer",
+        "_destroyFclResizer",
+        "_scheduleFlexibleColumnSplitApply",
+        "_isTwoColumnLayout",
+        "_resolveSplitPercent",
+        "_applyFlexibleColumnSplit",
+        "_bindSplitDrag",
+        "_unbindSplitDrag",
+        "onFclStateChange",
+        "onToggleTheme",
+        "_syncTestUserDialogState",
+        "_openTestUserDialog",
+        "onConfirmTestUser",
+        "onDialogClosed",
+        "onExit"
+      ],
+      "consts": []
+    },
+    "controller/TestUserDialog.controller.js": {
+      "deps": [
+        "sap/m/MessageToast",
+        "sap_ui5/service/backend/BackendAdapter"
+      ],
+      "params": [
+        "MessageToast",
+        "BackendAdapter"
+      ],
+      "export": "true",
+      "class": null,
+      "methods": [
+        "confirm"
+      ],
+      "consts": []
+    },
+    "controller/Search.controller.js": {
+      "deps": [
+        "sap_ui5/controller/Base.controller",
+        "sap/ui/model/json/JSONModel",
+        "sap/m/MessageToast",
+        "sap_ui5/service/SmartSearchAdapter",
+        "sap_ui5/service/usecase/SearchApplicationService",
+        "sap_ui5/service/usecase/WorkflowAnalyticsUseCase",
+        "sap_ui5/service/usecase/SearchActionUseCase",
+        "sap_ui5/service/usecase/SearchUiFlowUseCase",
+        "sap_ui5/service/usecase/SearchIntentUseCase",
+        "sap_ui5/service/usecase/SearchLoadFilterUseCase",
+        "sap_ui5/service/usecase/SearchRetryLoadPresentationUseCase",
+        "sap_ui5/service/usecase/SearchAnalyticsExportUseCase",
+        "sap_ui5/service/usecase/SearchAnalyticsDialogExportFlowUseCase",
+        "sap_ui5/service/usecase/SearchPresentationUseCase",
+        "sap_ui5/service/usecase/SearchSelectionNavigationUseCase",
+        "sap_ui5/service/usecase/SearchSmartFilterFlowUseCase",
+        "sap_ui5/service/usecase/SearchWorkflowAnalyticsDialogUseCase",
+        "sap_ui5/service/usecase/SearchWorkflowAnalyticsLoadOrchestrationUseCase",
+        "sap_ui5/service/usecase/SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase",
+        "sap_ui5/service/usecase/SearchExportOrchestrationUseCase",
+        "sap_ui5/service/usecase/SearchNavigationIntentUseCase",
+        "sap_ui5/service/usecase/SearchStateSyncUseCase",
+        "sap_ui5/service/usecase/SearchExecuteFlowUseCase",
+        "sap_ui5/service/usecase/SearchCreateCopyFlowUseCase",
+        "sap_ui5/service/usecase/SearchDeleteOrchestrationUseCase",
+        "sap_ui5/service/usecase/SearchActionMessagePresentationUseCase",
+        "sap_ui5/service/usecase/SearchExportIntentGuardUseCase",
+        "sap_ui5/service/usecase/SearchRetryMessagePresentationUseCase",
+        "sap_ui5/service/usecase/SearchSummaryPresentationUseCase",
+        "sap_ui5/service/usecase/SearchEmptyStatePresentationUseCase",
+        "sap_ui5/service/usecase/SearchFilterHintPresentationUseCase",
+        "sap_ui5/service/usecase/SearchInlineAnalyticsPresentationUseCase",
+        "sap_ui5/service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase",
+        "sap_ui5/service/usecase/SearchInlineAnalyticsRailUseCase",
+        "sap_ui5/service/usecase/SearchInlineAnalyticsAutoRefreshUseCase",
+        "sap_ui5/service/usecase/SearchFilterLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchFilterInteractionOrchestrationUseCase",
+        "sap_ui5/service/usecase/SearchRetryLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchRetryLoadOrchestrationUseCase",
+        "sap_ui5/service/usecase/SearchLifecycleSyncUseCase",
+        "sap_ui5/service/usecase/SearchToolbarLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchWorkflowAnalyticsLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchStatusFilterLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchTriggerPolicyUseCase",
+        "sap_ui5/service/usecase/SearchTriggerExecutionUseCase",
+        "sap_ui5/service/usecase/SearchRouteLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchRebindLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchResultConvergenceLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchExportLifecycleUseCase",
+        "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase",
+        "sap_ui5/service/usecase/SearchSelectionOpenFlowUseCase",
+        "sap_ui5/util/ExcelExport",
+        "sap_ui5/util/FlowCoordinator",
+        "sap_ui5/util/SearchWorkflowOrchestrator",
+        "sap_ui5/util/SearchSmartControlCoordinator",
+        "sap_ui5/util/UxTelemetry",
+        "sap_ui5/service/search/SearchFacade",
+        "sap_ui5/model/search/SearchState"
+      ],
+      "params": [
+        "BaseController",
+        "JSONModel",
+        "MessageToast",
+        "SmartSearchAdapter",
+        "SearchApplicationService",
+        "WorkflowAnalyticsUseCase",
+        "SearchActionUseCase",
+        "SearchUiFlowUseCase",
+        "SearchIntentUseCase",
+        "SearchLoadFilterUseCase",
+        "SearchRetryLoadPresentationUseCase",
+        "SearchAnalyticsExportUseCase",
+        "SearchAnalyticsDialogExportFlowUseCase",
+        "SearchPresentationUseCase",
+        "SearchSelectionNavigationUseCase",
+        "SearchSmartFilterFlowUseCase",
+        "SearchWorkflowAnalyticsDialogUseCase",
+        "SearchWorkflowAnalyticsLoadOrchestrationUseCase",
+        "SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase",
+        "SearchExportOrchestrationUseCase",
+        "SearchNavigationIntentUseCase",
+        "SearchStateSyncUseCase",
+        "SearchExecuteFlowUseCase",
+        "SearchCreateCopyFlowUseCase",
+        "SearchDeleteOrchestrationUseCase",
+        "SearchActionMessagePresentationUseCase",
+        "SearchExportIntentGuardUseCase",
+        "SearchRetryMessagePresentationUseCase",
+        "SearchSummaryPresentationUseCase",
+        "SearchEmptyStatePresentationUseCase",
+        "SearchFilterHintPresentationUseCase",
+        "SearchInlineAnalyticsPresentationUseCase",
+        "SearchInlineAnalyticsRefreshOrchestrationUseCase",
+        "SearchInlineAnalyticsRailUseCase",
+        "SearchInlineAnalyticsAutoRefreshUseCase",
+        "SearchFilterLifecycleUseCase",
+        "SearchFilterInteractionOrchestrationUseCase",
+        "SearchRetryLifecycleUseCase",
+        "SearchRetryLoadOrchestrationUseCase",
+        "SearchLifecycleSyncUseCase",
+        "SearchToolbarLifecycleUseCase",
+        "SearchWorkflowAnalyticsLifecycleUseCase",
+        "SearchStatusFilterLifecycleUseCase",
+        "SearchTriggerPolicyUseCase",
+        "SearchTriggerExecutionUseCase",
+        "SearchRouteLifecycleUseCase",
+        "SearchRebindLifecycleUseCase",
+        "SearchResultConvergenceLifecycleUseCase",
+        "SearchExportLifecycleUseCase",
+        "OperationalKpiInstrumentationUseCase",
+        "SearchSelectionOpenFlowUseCase",
+        "ExcelExport",
+        "FlowCoordinator",
+        "SearchWorkflowOrchestrator",
+        "SearchSmartControlCoordinator",
+        "UxTelemetry",
+        "SearchFacade",
+        "SearchState"
+      ],
+      "export": "false",
+      "class": "sap_ui5.controller.Search",
+      "methods": [
+        "onInit",
+        "_getViewModel",
+        "_armSmartRebindWatchdog",
+        "_clearSmartRebindWatchdog",
+        "_syncSmartControlAvailability",
+        "_isSmartControlsEnabled",
+        "_setSmartControlsEnabled",
+        "_onSmartTableReady",
+        "_extractChecklistIdFromObject",
+        "_runSelectionInteraction",
+        "_onSmartTableSelectionChange",
+        "_onSmartTableItemPress",
+        "onSmartTableInitialise",
+        "onSmartFilterInitialise",
+        "_isSmartFilterReady",
+        "_syncStateFiltersFromSmartFilter",
+        "onSmartFilterChanged",
+        "onBeforeSmartTableRebind",
+        "beforeFinalize",
+        "prepareRebind",
+        "onDataReceived",
+        "syncLifecycle",
+        "_rebindSmartTable",
+        "onSkipped",
+        "_onSearchMatched",
+        "applyDefaults",
+        "_applySearchMetrics",
+        "_updateSmartTableAnalytics",
+        "_onFilterChanged",
+        "_scheduleSearch",
+        "_buildFilterPayload",
+        "_hasSmartFilters",
+        "_updateFilterState",
+        "_updateResultSummary",
+        "_applyEmptyStatePresentation",
+        "_executeSearch",
+        "runWithLoading",
+        "runSearch",
+        "applyRows",
+        "_confirmNavigationFromDirty",
+        "_syncSearchSelectionState",
+        "onCreate",
+        "runCreateFlow",
+        "onCopy",
+        "runCopyFlow",
+        "onDelete",
+        "runDeleteFlow",
+        "resolveSelectedId",
+        "runWithLoading",
+        "applyRows",
+        "applySelectedChecklist",
+        "presentDeleteOutcome",
+        "_buildSearchTriggerArgs",
+        "markSearchedAndRebind",
+        "onSmartSearch",
+        "onSearch",
+        "onStatusFilterPress",
+        "getSource",
+        "readData",
+        "applyStatusFilter",
+        "afterApply",
+        "_buildAnalyticsPayload",
+        "_loadWorkflowAnalytics",
+        "loadAnalytics",
+        "applyLoadError",
+        "_buildInlineAnalyticsRailArgs",
+        "loadSimpleAnalytics",
+        "applyPresentation",
+        "_refreshInlineAnalyticsByTrigger",
+        "_refreshSimpleAnalyticsRail",
+        "_startSimpleAnalyticsAutoRefresh",
+        "_buildWorkflowAnalyticsDialogArgs",
+        "applyAnalyticsError",
+        "onOpenWorkflowAnalytics",
+        "onCloseWorkflowAnalytics",
+        "_collectScreenRowsForExport",
+        "_runExport",
+        "runWithLoading",
+        "buildExportPromise",
+        "_presentExportIntentResult",
+        "present",
+        "onUnexpected",
+        "_buildExportIntentArgs",
+        "isEnabled",
+        "onExportMenuDefault",
+        "onExportMenuAction",
+        "onExportReport",
+        "onRetryLoad",
+        "runWithLoading",
+        "onAfterApply",
+        "presentRetryOutcome",
+        "markRetryFailure",
+        "finishLatency",
+        "onResetFilters",
+        "resetFilters",
+        "clearSmartFilters",
+        "onMaxRowsChange",
+        "onSearchModeToggle",
+        "applySearchMode",
+        "onFailSegmentSelectionChange",
+        "onBarrierFailSegmentSelectionChange",
+        "onExit",
+        "formatOverallResultText",
+        "formatOverallResultState",
+        "formatStatus"
+      ],
+      "consts": []
+    },
+    "controller/Base.controller.js": {
+      "deps": [
+        "sap/ui/core/mvc/Controller",
+        "sap_ui5/service/backend/BackendAdapter",
+        "sap_ui5/util/ThemePhilosophy",
+        "sap/m/MessageToast",
+        "sap/m/MessageBox"
+      ],
+      "params": [
+        "Controller",
+        "BackendAdapter",
+        "ThemePhilosophy",
+        "MessageToast",
+        "MessageBox"
+      ],
+      "export": "LIGHT_THEME",
+      "class": "sap_ui5.controller.Base",
+      "methods": [
+        "getRouter",
+        "getModel",
+        "setModel",
+        "getResourceBundle",
+        "navTo",
+        "attachRouteMatched",
+        "getCurrentTheme",
+        "isDarkThemeEnabled",
+        "applyStoredTheme",
+        "toggleTheme",
+        "base64ToHex",
+        "releaseLock",
+        "setLockUiState",
+        "setLockPending",
+        "deleteRowFromEvent",
+        "showI18nToast",
+        "showI18nError",
+        "runWithStateFlag",
+        "_ensureThemeSyncListener",
+        "_applyTheme",
+        "_markThemeSwitching"
+      ],
+      "consts": [
+        "THEME_STORAGE_KEY",
+        "LIGHT_THEME",
+        "DARK_THEME",
+        "THEME_SWITCH_CLASS",
+        "THEME_SWITCH_DURATION_MS"
+      ]
+    },
+    "controller/Detail.controller.js": {
+      "deps": [
+        "sap_ui5/controller/Base.controller",
+        "sap_ui5/service/backend/BackendAdapter",
+        "sap/m/MessageToast",
+        "sap/m/MessageBox",
+        "sap/ui/model/json/JSONModel",
+        "sap_ui5/util/RowListHelper",
+        "sap_ui5/util/ChecklistDraftHelper",
+        "sap_ui5/util/FlowCoordinator",
+        "sap_ui5/util/ChecklistValidationService",
+        "sap_ui5/util/ChecklistUiState",
+        "sap_ui5/util/DetailCardSchema",
+        "sap_ui5/util/DetailFormatters",
+        "sap_ui5/service/usecase/ChecklistCrudUseCase",
+        "sap_ui5/service/usecase/DetailLifecycleUseCase",
+        "sap_ui5/service/usecase/DetailStatusRowUseCase",
+        "sap_ui5/service/usecase/DetailStatusCommandUseCase",
+        "sap_ui5/service/usecase/DetailExpandedRowsFlowUseCase",
+        "sap_ui5/service/usecase/DetailDialogLifecycleUseCase",
+        "sap_ui5/service/usecase/DetailLockReleaseUseCase",
+        "sap_ui5/service/usecase/DetailSaveSuccessFlowUseCase",
+        "sap_ui5/service/usecase/DetailToolbarValidationUseCase",
+        "sap_ui5/service/usecase/DetailSaveErrorPresentationUseCase",
+        "sap_ui5/service/usecase/DetailSaveErrorOutcomePresentationUseCase",
+        "sap_ui5/service/usecase/DetailLocationValueHelpUseCase",
+        "sap_ui5/service/usecase/DetailPersonSuggestionUseCase",
+        "sap_ui5/service/usecase/DetailDictionarySelectionUseCase",
+        "sap_ui5/service/usecase/DetailLpcBarrierWarningFlowUseCase",
+        "sap_ui5/service/usecase/DetailIntegrationEditWarningUseCase",
+        "sap_ui5/service/usecase/OperationalKpiInstrumentationUseCase",
+        "sap_ui5/service/usecase/DetailCloseFlowOrchestrationUseCase",
+        "sap_ui5/service/usecase/DetailToggleEditOrchestrationUseCase",
+        "sap_ui5/service/usecase/DetailSaveFlowOrchestrationUseCase",
+        "sap_ui5/service/usecase/DetailSelectionMetaSyncUseCase",
+        "sap_ui5/util/UxTelemetry",
+        "sap_ui5/service/detail/DetailFacade"
+      ],
+      "params": [
+        "BaseController",
+        "BackendAdapter",
+        "MessageToast",
+        "MessageBox",
+        "JSONModel",
+        "RowListHelper",
+        "ChecklistDraftHelper",
+        "FlowCoordinator",
+        "ChecklistValidationService",
+        "ChecklistUiState",
+        "DetailCardSchema",
+        "DetailFormatters",
+        "ChecklistCrudUseCase",
+        "DetailLifecycleUseCase",
+        "DetailStatusRowUseCase",
+        "DetailStatusCommandUseCase",
+        "DetailExpandedRowsFlowUseCase",
+        "DetailDialogLifecycleUseCase",
+        "DetailLockReleaseUseCase",
+        "DetailSaveSuccessFlowUseCase",
+        "DetailToolbarValidationUseCase",
+        "DetailSaveErrorPresentationUseCase",
+        "DetailSaveErrorOutcomePresentationUseCase",
+        "DetailLocationValueHelpUseCase",
+        "DetailPersonSuggestionUseCase",
+        "DetailDictionarySelectionUseCase",
+        "DetailLpcBarrierWarningFlowUseCase",
+        "DetailIntegrationEditWarningUseCase",
+        "OperationalKpiInstrumentationUseCase",
+        "DetailCloseFlowOrchestrationUseCase",
+        "DetailToggleEditOrchestrationUseCase",
+        "DetailSaveFlowOrchestrationUseCase",
+        "DetailSelectionMetaSyncUseCase",
+        "UxTelemetry",
+        "DetailFacade"
+      ],
+      "export": "null",
+      "class": "sap_ui5.controller.Detail",
+      "methods": [
+        "_getCurrentUser",
+        "_tryStealOwnLock",
+        "onInit",
+        "_onMplChanged",
+        "_onSelectedChanged",
+        "_syncDirtyFlag",
+        "_syncSelectionMeta",
+        "_releaseEditLock",
+        "releaseLock",
+        "setLockUiIdle",
+        "_mutateRows",
+        "_refreshValidationHighlights",
+        "formatValidationState",
+        "formatValidationText",
+        "_getValidationRules",
+        "_isBarrierAllowedByLpc",
+        "formatBooleanResultText",
+        "formatBooleanResultState",
+        "formatLifecycleStatusText",
+        "formatDraftStateText",
+        "formatDraftStateState",
+        "formatLockOperationText",
+        "formatLockOperationState",
+        "formatLifecycleStatusState",
+        "formatPassedTotal",
+        "formatHeaderDate",
+        "hasRows",
+        "isBarriersRatioVisible",
+        "isBarriersVisibleByLpc",
+        "_updateDerivedRootResult",
+        "_runChecklistValidation",
+        "_buildFrontendNowPayload",
+        "_applyFrontendNowDefaults",
+        "_onMatched",
+        "_ensureMplLocationsLoaded",
+        "_toHierarchyDateKey",
+        "_buildHierarchyIndexById",
+        "_prepareLocationTree",
+        "_buildLocationTree",
+        "_isChecklistCacheValid",
+        "_isChecklistCacheStrictFresh",
+        "_parseODataDateMillis",
+        "_canReuseCachedChecklist",
+        "_normalizeRootKey",
+        "_cacheSnapshotPut",
+        "_cacheSnapshotGet",
+        "_applyCanonicalViewModel",
+        "_reloadChecklistFromBackend",
+        "_ensureChecklistFreshBeforeEdit",
+        "_bindChecklistById",
+        "_buildSkeletonRows",
+        "_loadSectionPaged",
+        "_applyChecklistLazily",
+        "onPersonSuggest",
+        "_setPersonSuggestions",
+        "_normalizeText",
+        "formatPersonSuggestion",
+        "onPersonSuggestionSelected",
+        "formatHeartbeatText",
+        "formatAutosaveAt",
+        "formatAutosaveText",
+        "onToggleDetailControlRail",
+        "onLocationSelectionChange",
+        "onOpenLocationValueHelp",
+        "onCloseLocationValueHelp",
+        "onLocationValueHelpSearch",
+        "_applyLocationSelection",
+        "onLocationTreeSelectionChange",
+        "onConfirmLocationValueHelp",
+        "onLocationComboChange",
+        "onLpcChange",
+        "onProfessionChange",
+        "_confirmIntegrationEdit",
+        "onCloseDetail",
+        "navigateToSearch",
+        "onToggleEdit",
+        "onToggleEditFromDetail",
+        "setLockUiState",
+        "runWithStateFlag",
+        "ensureFreshBeforeEdit",
+        "acquireLock",
+        "tryRecoverFromAcquireError",
+        "onAcquireFailed",
+        "onCancelEditFromDetail",
+        "_updateSelectionState",
+        "onDeleteSelectedChecks",
+        "onDeleteSelectedBarriers",
+        "onSelectionToggle",
+        "formatInfoCardValue",
+        "onValidateChecklist",
+        "_applyStatusAndSave",
+        "onChangeChecklistStatus",
+        "getSelectedRoot",
+        "onInfoCardsDrop",
+        "_syncCreateCopyKeyMappingAfterSave",
+        "onSaveDetail",
+        "runWithLoading",
+        "saveChecklist",
+        "applySaveResult",
+        "dispatchFullSave",
+        "showSavedToast",
+        "navigateToSaved",
+        "handleSaveError",
+        "onReload",
+        "onOverwrite",
+        "markSaveFailed",
+        "markConflict",
+        "finishLatency",
+        "_openExpandedDialog",
+        "_openExpandedDialogByType",
+        "onExpandChecks",
+        "onExpandBarriers",
+        "onCloseChecksExpanded",
+        "onCloseBarriersExpanded",
+        "_addRowByType",
+        "onAddCheckRow",
+        "onAddBarrierRow",
+        "_deleteRowByType",
+        "onDeleteCheckRow",
+        "onDeleteBarrierRow",
+        "onExit",
+        "resultText",
+        "resultState"
+      ],
+      "consts": []
+    },
+    "service/SmartSearchAdapter.js": {
+      "deps": [],
+      "params": [],
+      "export": "undefined",
+      "class": null,
+      "methods": [
+        "getSmartFilterConfig",
+        "getSmartTableConfig",
+        "filterData"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchSelectionNavigationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "oChecklist",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailDictionarySelectionUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "false",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchFilterLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailCloseNavigationFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "true",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchTriggerExecutionUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchRetryLoadOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "runRetryFlow"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchRouteLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchRetryLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchLifecycleSyncUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchAnalyticsExportUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchAnalyticsDialogExportFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailEditOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailSaveFlowOrchestrationUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailSaveOrchestrationUseCase"
+      ],
+      "params": [
+        "DetailSaveOrchestrationUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailLockEditFlowUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailEditOrchestrationUseCase",
+        "sap_ui5/service/usecase/DetailCommandFlowUseCase"
+      ],
+      "params": [
+        "DetailEditOrchestrationUseCase",
+        "DetailCommandFlowUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchStateSyncUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/SearchSelectionNavigationUseCase",
+        "sap_ui5/service/usecase/SearchToolbarActionStateUseCase"
+      ],
+      "params": [
+        "SearchSelectionNavigationUseCase",
+        "SearchToolbarActionStateUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchExportLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "runIntent",
+        "runLifecycle",
+        "onEmpty",
+        "onSuccess",
+        "onError"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchRetryLoadPresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "false",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchFilterHintPresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailExpandedRowsFlowUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailStatusRowUseCase",
+        "sap_ui5/service/usecase/DetailDialogLifecycleUseCase",
+        "sap_ui5/service/usecase/DetailRowDialogCommandUseCase",
+        "sap_ui5/service/usecase/DetailStatusCommandUseCase",
+        "sap_ui5/util/RowListHelper"
+      ],
+      "params": [
+        "DetailStatusRowUseCase",
+        "DetailDialogLifecycleUseCase",
+        "DetailRowDialogCommandUseCase",
+        "DetailStatusCommandUseCase",
+        "RowListHelper"
+      ],
+      "export": "oResult",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchSelectionOpenFlowUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/SearchSelectionHydrationUseCase",
+        "sap_ui5/service/usecase/SearchOpenDetailGuardUseCase",
+        "sap_ui5/service/usecase/SearchSelectionLifecycleUseCase",
+        "sap_ui5/service/usecase/SearchNavigationIntentUseCase",
+        "sap_ui5/service/usecase/SearchActionMessagePresentationUseCase"
+      ],
+      "params": [
+        "SearchSelectionHydrationUseCase",
+        "SearchOpenDetailGuardUseCase",
+        "SearchSelectionLifecycleUseCase",
+        "SearchNavigationIntentUseCase",
+        "SearchActionMessagePresentationUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "buildIntent",
+        "applyIntent",
+        "hydrateSelection",
+        "hydrateSelection",
+        "openDetail"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchOpenDetailGuardUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchActionMessagePresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "false",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailSaveErrorPresentationUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailSaveConflictFlowUseCase"
+      ],
+      "params": [
+        "DetailSaveConflictFlowUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchSummaryPresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "0",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchFilterInteractionOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "refreshInlineAnalytics",
+        "refreshInlineAnalytics"
+      ],
+      "consts": []
+    },
+    "service/usecase/DetailCloseFlowOrchestrationUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailCloseNavigationFlowUseCase",
+        "sap_ui5/service/usecase/DetailCloseFlowUseCase",
+        "sap_ui5/service/usecase/DetailCommandFlowUseCase",
+        "sap_ui5/service/usecase/DetailUnsavedDecisionFlowUseCase",
+        "sap_ui5/service/usecase/DetailLifecycleUseCase",
+        "sap_ui5/util/FlowCoordinator"
+      ],
+      "params": [
+        "DetailCloseNavigationFlowUseCase",
+        "DetailCloseFlowUseCase",
+        "DetailCommandFlowUseCase",
+        "DetailUnsavedDecisionFlowUseCase",
+        "DetailLifecycleUseCase",
+        "FlowCoordinator"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "proceed"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchDeleteOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "false",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchInlineAnalyticsPresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "0",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailToolbarValidationUseCase.js": {
+      "deps": [
+        "sap_ui5/util/ChecklistUiState"
+      ],
+      "params": [
+        "ChecklistUiState"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailDialogLifecycleUseCase.js": {
+      "deps": [
+        "sap/ui/core/Fragment"
+      ],
+      "params": [
+        "Fragment"
+      ],
+      "export": "oDialog",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailPersonSuggestionUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "true",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchTriggerPolicyUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": [
+        "TRIGGERS"
+      ]
+    },
+    "service/usecase/SearchWorkflowAnalyticsDialogUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "oValue",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailSaveSuccessFlowUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailLifecycleUseCase"
+      ],
+      "params": [
+        "DetailLifecycleUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchRetryMessagePresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "sFallback",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchToolbarActionStateUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/SearchActionUseCase"
+      ],
+      "params": [
+        "SearchActionUseCase"
+      ],
+      "export": "false",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchNavigationIntentUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/SearchActionUseCase"
+      ],
+      "params": [
+        "SearchActionUseCase"
+      ],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchApplicationService.js": {
+      "deps": [
+        "sap_ui5/service/backend/BackendAdapter",
+        "sap_ui5/service/backend/GatewayClient"
+      ],
+      "params": [
+        "BackendAdapter",
+        "GatewayClient"
+      ],
+      "export": "oChecklist",
+      "class": null,
+      "methods": [
+        "getCheckLists",
+        "getChecklistById",
+        "deleteChecklistAndReload",
+        "runSearch",
+        "exportRows"
+      ],
+      "consts": []
+    },
+    "service/usecase/DetailCloseFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "true",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailLocationValueHelpUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "false",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchSelectionHydrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "vChecklist",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailSaveConflictUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchUiFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/WorkflowAnalyticsUseCase.js": {
+      "deps": [
+        "sap_ui5/service/backend/BackendAdapter",
+        "sap_ui5/service/SmartSearchAdapter"
+      ],
+      "params": [
+        "BackendAdapter",
+        "SmartSearchAdapter"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "loadProcessAnalytics",
+        "loadSimpleAnalytics"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "applyDegradedState",
+        "openDialog",
+        "closeDialog"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchWorkflowAnalyticsLoadOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "runLoadFlow"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchExportOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "sDefaultEntity",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailSelectionMetaSyncUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchToolbarLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchRebindLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "onDataReceived"
+      ],
+      "consts": []
+    },
+    "service/usecase/DetailSaveErrorOutcomePresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchInlineAnalyticsAutoRefreshUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailStatusCommandUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchActionUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailStatusRowUseCase.js": {
+      "deps": [
+        "sap_ui5/util/ChecklistUiState"
+      ],
+      "params": [
+        "ChecklistUiState"
+      ],
+      "export": "sDate",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailRowDialogCommandUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchExportIntentGuardUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "sFallback",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/KpiSnapshotExportUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/StartupCapabilityDiagnosticsUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "oValue",
+      "class": null,
+      "methods": [],
+      "consts": [
+        "TRIGGERS"
+      ]
+    },
+    "service/usecase/SearchStatusFilterLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailIntegrationEditWarningUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "onClose"
+      ],
+      "consts": []
+    },
+    "service/usecase/DetailToggleEditOrchestrationUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailLockEditFlowUseCase",
+        "sap_ui5/service/usecase/DetailUnsavedDecisionFlowUseCase",
+        "sap_ui5/service/usecase/DetailLifecycleUseCase",
+        "sap_ui5/util/FlowCoordinator"
+      ],
+      "params": [
+        "DetailLockEditFlowUseCase",
+        "DetailUnsavedDecisionFlowUseCase",
+        "DetailLifecycleUseCase",
+        "FlowCoordinator"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "runPendingRelease",
+        "runPendingToggle",
+        "onStayReadOnly",
+        "onLockAcquired",
+        "onAcquireFailed"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchInlineAnalyticsRailUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/SearchInlineAnalyticsRefreshOrchestrationUseCase"
+      ],
+      "params": [
+        "SearchInlineAnalyticsRefreshOrchestrationUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/OperationalKpiInstrumentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "null",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/ComponentStartupDiagnosticsOrchestrationUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/StartupCapabilityDiagnosticsUseCase"
+      ],
+      "params": [
+        "StartupCapabilityDiagnosticsUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailUnsavedDecisionFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchEmptyStatePresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailSaveConflictFlowUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailSaveConflictUseCase"
+      ],
+      "params": [
+        "DetailSaveConflictUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailCommandFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchResultConvergenceLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchCreateCopyNavigationGuardUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchExecuteFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailSaveOrchestrationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "oResult",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchIntentUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "false",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/DetailLockReleaseUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailLifecycleUseCase"
+      ],
+      "params": [
+        "DetailLifecycleUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchPresentationUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/ChecklistCrudUseCase.js": {
+      "deps": [
+        "sap_ui5/service/backend/BackendAdapter"
+      ],
+      "params": [
+        "BackendAdapter"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "getChecklistRoot",
+        "getLastChangeSet",
+        "getChecklistRows",
+        "saveChecklist",
+        "forceUpdateChecklist",
+        "getChecklistCollection"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchCreateCopyFlowUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/SearchCreateCopyNavigationGuardUseCase",
+        "sap_ui5/service/usecase/SearchNavigationIntentUseCase",
+        "sap_ui5/service/usecase/SearchActionMessagePresentationUseCase"
+      ],
+      "params": [
+        "SearchCreateCopyNavigationGuardUseCase",
+        "SearchNavigationIntentUseCase",
+        "SearchActionMessagePresentationUseCase"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "buildCreateIntent",
+        "applyIntent",
+        "resolveSelectedId",
+        "buildCopyIntent",
+        "applyIntent"
+      ],
+      "consts": []
+    },
+    "service/usecase/DetailLpcBarrierWarningFlowUseCase.js": {
+      "deps": [
+        "sap_ui5/service/usecase/DetailDictionarySelectionUseCase"
+      ],
+      "params": [
+        "DetailDictionarySelectionUseCase"
+      ],
+      "export": "false",
+      "class": null,
+      "methods": [
+        "onClose"
+      ],
+      "consts": []
+    },
+    "service/usecase/SearchLoadFilterUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchSmartFilterFlowUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "vValue",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchSelectionLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": "oSelectionResult",
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/usecase/SearchWorkflowAnalyticsLifecycleUseCase.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [],
+      "consts": []
+    },
+    "service/autosave/DeltaBuilder.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "diff"
+      ],
+      "consts": []
+    },
+    "service/cache/CacheService.js": {
+      "deps": [],
+      "params": [],
+      "export": "oFresh",
+      "class": null,
+      "methods": [
+        "checkCacheOrReload",
+        "applySnapshotToViewModel",
+        "overwriteCache",
+        "updateCacheAfterAutosave",
+        "updateCacheAfterSave"
+      ],
+      "consts": []
+    },
+    "service/detail/ObjectLoader.js": {
+      "deps": [],
+      "params": [],
+      "export": null,
+      "class": null,
+      "methods": [
+        "init",
+        "loadRoot",
+        "loadBasic",
+        "loadChecks",
+        "loadBarriers",
+        "loadAttachments",
+        "openChecklist"
+      ],
+      "consts": []
+    },
+    "service/detail/DetailFacade.js": {
+      "deps": [
+        "sap_ui5/service/detail/ObjectLoader",
+        "sap_ui5/service/cache/CacheService"
+      ],
+      "params": [
+        "ObjectLoader",
+        "CacheService"
+      ],
+      "export": "snapshot",
+      "class": null,
+      "methods": [
+        "init",
+        "openChecklist",
+        "enterEdit",
+        "exitEdit",
+        "setStatus",
+        "refreshChildrenPaging"
+      ],
+      "consts": []
+    },
+    "service/backend/ODataGatewayAdapter.js": {
+      "deps": [
+        "sap_ui5/service/backend/GatewayClient"
+      ],
+      "params": [
+        "GatewayClient"
+      ],
+      "export": "s",
+      "class": null,
+      "methods": [
+        "callFI",
+        "readSet",
+        "readEntity"
+      ],
+      "consts": []
+    },
+    "service/backend/GatewayClient.js": {
+      "deps": [],
+      "params": [],
+      "export": "_oModel",
+      "class": null,
+      "methods": [
+        "setModel",
+        "readEntity",
+        "success",
+        "error",
+        "readSet",
+        "success",
+        "error",
+        "callFunctionImport",
+        "success",
+        "error",
+        "batch",
+        "success",
+        "error",
+        "fetchCsrfToken",
+        "refreshSecurityToken"
+      ],
+      "consts": []
+    },
+    "service/backend/BackendAdapter.js": {
+      "deps": [
+        "sap_ui5/service/backend/RealBackendService"
+      ],
+      "params": [
+        "RealBackendService"
+      ],
+      "export": "null",
+      "class": null,
+      "methods": [
+        "configure",
+        "getMode",
+        "getCapabilities",
+        "negotiateCapabilities",
+        "ensureContractCompatibility",
+        "enforceContractCompatibility",
+        "login",
+        "init",
+        "getCheckLists",
+        "queryCheckLists",
+        "getChecklistRoot",
+        "getLastChangeSet",
+        "getChecklistChecks",
+        "getChecklistBarriers",
+        "createCheckList",
+        "updateCheckList",
+        "autoSaveCheckList",
+        "setChecklistStatus",
+        "deleteCheckList",
+        "upsertRows",
+        "lockAcquire",
+        "lockHeartbeat",
+        "lockStatus",
+        "lockRelease",
+        "buildReleaseBeaconPayload",
+        "getServerState",
+        "executeBatch",
+        "getFrontendConfig",
+        "getReferenceBundle",
+        "getPersons",
+        "getDictionary",
+        "suggestPersons",
+        "getLocations",
+        "getProcessAnalytics",
+        "getSimpleAnalytics",
+        "exportReport",
+        "createObject",
+        "readObject",
+        "updateObject",
+        "getAllObjects"
+      ],
+      "consts": []
+    },
+    "service/backend/RealBackendService.js": {
+      "deps": [],
+      "params": [],
+      "export": "_csrfToken",
+      "class": null,
+      "methods": [
+        "configure",
+        "login",
+        "init",
+        "getCapabilities",
+        "getCheckLists",
+        "queryCheckLists",
+        "getLastChangeSet",
+        "getChecklistRoot",
+        "getChecklistChecks",
+        "getChecklistBarriers",
+        "createCheckList",
+        "updateCheckList",
+        "autoSaveCheckList",
+        "setChecklistStatus",
+        "deleteCheckList",
+        "upsertRows",
+        "lockAcquire",
+        "lockHeartbeat",
+        "lockStatus",
+        "lockRelease",
+        "buildReleaseBeaconPayload",
+        "getServerState",
+        "getFrontendConfig",
+        "getPersons",
+        "suggestPersons",
+        "getDictionary",
+        "getLocations",
+        "getProcessAnalytics",
+        "getSimpleAnalytics",
+        "exportReport",
+        "create",
+        "read",
+        "update",
+        "getAll"
+      ],
+      "consts": []
+    },
+    "service/search/SearchFacade.js": {
+      "deps": [
+        "sap_ui5/util/search/SearchFilterBuilder",
+        "sap_ui5/util/search/TableOrderExtractor"
+      ],
+      "params": [
+        "SearchFilterBuilder",
+        "TableOrderExtractor"
+      ],
+      "export": null,
+      "class": null,
+      "methods": [
+        "init",
+        "applySearch",
+        "onFailSegmentChanged",
+        "onBarrierFailSegmentChanged",
+        "getDisplayedRootKeysInOrder",
+        "buildMergedFilter"
+      ],
+      "consts": []
+    },
+    "control/ThemeToggle.js": {
+      "deps": [
+        "sap/ui/core/Control",
+        "sap/ui/core/IconPool"
+      ],
+      "params": [
+        "Control",
+        "IconPool"
+      ],
+      "export": null,
+      "class": "sap_ui5.control.ThemeToggle",
+      "methods": [
+        "onclick",
+        "onkeydown",
+        "render"
+      ],
+      "consts": []
+    }
+  }
+}

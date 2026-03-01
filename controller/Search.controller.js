@@ -21,7 +21,6 @@ sap.ui.define([
     "sap_ui5/service/usecase/SearchExportOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchNavigationIntentUseCase",
     "sap_ui5/service/usecase/SearchStateSyncUseCase",
-    "sap_ui5/service/usecase/SearchExecuteFlowUseCase",
     "sap_ui5/service/usecase/SearchCreateCopyFlowUseCase",
     "sap_ui5/service/usecase/SearchDeleteOrchestrationUseCase",
     "sap_ui5/service/usecase/SearchActionMessagePresentationUseCase",
@@ -57,7 +56,7 @@ sap.ui.define([
     "sap_ui5/util/UxTelemetry",
     "sap_ui5/service/search/SearchFacade",
     "sap_ui5/model/search/SearchState"
-], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchWorkflowAnalyticsLoadOrchestrationUseCase, SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase, SearchExecuteFlowUseCase, SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchInlineAnalyticsRailUseCase, SearchInlineAnalyticsAutoRefreshUseCase, SearchFilterLifecycleUseCase, SearchFilterInteractionOrchestrationUseCase, SearchRetryLifecycleUseCase, SearchRetryLoadOrchestrationUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchTriggerExecutionUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator, UxTelemetry, SearchFacade, SearchState) {
+], function (BaseController, JSONModel, MessageToast, SmartSearchAdapter, SearchApplicationService, WorkflowAnalyticsUseCase, SearchActionUseCase, SearchUiFlowUseCase, SearchIntentUseCase, SearchLoadFilterUseCase, SearchRetryLoadPresentationUseCase, SearchAnalyticsExportUseCase, SearchAnalyticsDialogExportFlowUseCase, SearchPresentationUseCase, SearchSelectionNavigationUseCase, SearchSmartFilterFlowUseCase, SearchWorkflowAnalyticsDialogUseCase, SearchWorkflowAnalyticsLoadOrchestrationUseCase, SearchWorkflowAnalyticsDialogLifecycleOrchestrationUseCase, SearchExportOrchestrationUseCase, SearchNavigationIntentUseCase, SearchStateSyncUseCase,  SearchCreateCopyFlowUseCase, SearchDeleteOrchestrationUseCase, SearchActionMessagePresentationUseCase, SearchExportIntentGuardUseCase, SearchRetryMessagePresentationUseCase, SearchSummaryPresentationUseCase, SearchEmptyStatePresentationUseCase, SearchFilterHintPresentationUseCase, SearchInlineAnalyticsPresentationUseCase, SearchInlineAnalyticsRefreshOrchestrationUseCase, SearchInlineAnalyticsRailUseCase, SearchInlineAnalyticsAutoRefreshUseCase, SearchFilterLifecycleUseCase, SearchFilterInteractionOrchestrationUseCase, SearchRetryLifecycleUseCase, SearchRetryLoadOrchestrationUseCase, SearchLifecycleSyncUseCase, SearchToolbarLifecycleUseCase, SearchWorkflowAnalyticsLifecycleUseCase, SearchStatusFilterLifecycleUseCase, SearchTriggerPolicyUseCase, SearchTriggerExecutionUseCase, SearchRouteLifecycleUseCase, SearchRebindLifecycleUseCase, SearchResultConvergenceLifecycleUseCase, SearchExportLifecycleUseCase, OperationalKpiInstrumentationUseCase, SearchSelectionOpenFlowUseCase, ExcelExport, FlowCoordinator, SearchWorkflowOrchestrator, SearchSmartControlCoordinator, UxTelemetry, SearchFacade, SearchState) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.Search", {
@@ -161,10 +160,6 @@ sap.ui.define([
             this._updateResultSummary();
             this._startSimpleAnalyticsAutoRefresh();
 
-            var oDataModel = this.getModel("data");
-            ["/visibleCheckLists", "/checkLists"].forEach(function (sPath) {
-                oDataModel.bindProperty(sPath).attachChange(this._updateResultSummary, this);
-            }.bind(this));
         },
 
 
@@ -386,7 +381,13 @@ sap.ui.define([
                 updateSummary: this._updateResultSummary.bind(this),
                 refreshAnalytics: this._refreshInlineAnalyticsByTrigger.bind(this),
                 applyEmptyState: this._applyEmptyStatePresentation.bind(this)
-            });
+            }).then(function (oResult) {
+                if (!this._getViewModel().getProperty("/hasSearched")) {
+                    this._getViewModel().setProperty("/hasSearched", true);
+                    this._rebindSmartTable();
+                }
+                return oResult;
+            }.bind(this));
         },
 
         _applySearchMetrics: function (aRows, iTotalOverride) {
@@ -412,18 +413,6 @@ sap.ui.define([
 
             // By product decision search starts only on explicit Search button.
         },
-
-        _scheduleSearch: function () {
-            if (this._iSearchTimer) {
-                clearTimeout(this._iSearchTimer);
-            }
-
-            this._iSearchTimer = setTimeout(function () {
-                this._executeSearch();
-                this._iSearchTimer = null;
-            }.bind(this), this._iSearchDebounceMs);
-        },
-
         _buildFilterPayload: function () {
             var oStateModel = this.getModel("state");
             var sRawMax = String(oStateModel.getProperty("/searchMaxResults") || "").trim();
@@ -480,27 +469,20 @@ sap.ui.define([
             });
         },
 
-        _executeSearch: function () {
-            var oDataModel = this.getModel("data");
-            var oStateModel = this.getModel("state");
-            var mPayload = this._buildFilterPayload();
-            var sSearchMode = oStateModel.getProperty("/searchMode") || "EXACT";
 
-            return SearchExecuteFlowUseCase.runExecuteSearchFlow({
-                runWithLoading: function (fnTask) {
-                    return this.runWithStateFlag(oStateModel, "/isLoading", fnTask);
-                }.bind(this),
-                runSearch: function () {
-                    return SearchApplicationService.runSearch(mPayload, sSearchMode, oDataModel.getProperty("/checkLists") || []);
-                },
-                applyRows: function (aFiltered) {
-                    oDataModel.setProperty("/visibleCheckLists", aFiltered || []);
-                },
-                afterApply: this._updateResultSummary.bind(this)
-            });
+        _collectSmartTableRows: function () {
+            var oTable = this._oSmartInnerTable;
+            if (!oTable) {
+                return [];
+            }
+            var oBinding = (oTable.getBinding && (oTable.getBinding("items") || oTable.getBinding("rows"))) || null;
+            if (!oBinding || !oBinding.getCurrentContexts) {
+                return [];
+            }
+            return (oBinding.getCurrentContexts() || []).map(function (oCtx) {
+                return oCtx && oCtx.getObject ? oCtx.getObject() : null;
+            }).filter(Boolean);
         },
-
-
 
         _confirmNavigationFromDirty: function () {
             return FlowCoordinator.confirmUnsavedAndHandle(this, function () {
@@ -561,9 +543,7 @@ sap.ui.define([
                             return this.runWithStateFlag(this.getModel("state"), "/isLoading", fnTask);
                         }.bind(this),
                         deleteAndReload: SearchApplicationService.deleteChecklistAndReload,
-                        applyRows: function (aUpdated) {
-                            this.getModel("data").setProperty("/checkLists", aUpdated);
-                        }.bind(this),
+                        applyRows: function () {},
                         rebind: this._rebindSmartTable.bind(this),
                         applySelectedChecklist: function (oChecklist) {
                             SearchSelectionNavigationUseCase.applySelectedChecklist({
@@ -661,14 +641,14 @@ sap.ui.define([
         _loadWorkflowAnalytics: function () {
             var mPayload = this._buildAnalyticsPayload();
             var sSearchMode = this.getModel("state").getProperty("/searchMode") || "EXACT";
-            var aFallback = this.getModel("data").getProperty("/checkLists") || [];
+            var aRows = this._collectSmartTableRows();
 
             return SearchWorkflowAnalyticsLoadOrchestrationUseCase.runLoad({
                 runLifecycle: SearchWorkflowAnalyticsLifecycleUseCase.runLoadLifecycle,
                 runDialogLoad: SearchWorkflowAnalyticsDialogUseCase.runAnalyticsLoadFlow,
                 viewModel: this._getViewModel(),
                 loadAnalytics: function () {
-                    return WorkflowAnalyticsUseCase.loadProcessAnalytics(mPayload, sSearchMode, aFallback);
+                    return WorkflowAnalyticsUseCase.loadProcessAnalytics(mPayload, sSearchMode, aRows);
                 },
                 applyLoadError: function (sErrorText) {
                     this._getViewModel().setProperty("/analyticsError", sErrorText || "");
@@ -683,7 +663,7 @@ sap.ui.define([
                 viewModel: oViewModel,
                 loadAnalytics: this._loadWorkflowAnalytics.bind(this),
                 loadSimpleAnalytics: function () {
-                    return WorkflowAnalyticsUseCase.loadSimpleAnalytics(this.getModel("data").getProperty("/checkLists") || []);
+                    return WorkflowAnalyticsUseCase.loadSimpleAnalytics(this._collectSmartTableRows());
                 }.bind(this),
                 applyPresentation: function (oAnalytics) {
                     SearchInlineAnalyticsPresentationUseCase.applyInlineAnalyticsPresentation({
@@ -754,7 +734,7 @@ sap.ui.define([
         },
 
         _collectScreenRowsForExport: function () {
-            var aRows = this.getModel("data").getProperty("/visibleCheckLists") || [];
+            var aRows = this._collectSmartTableRows();
             return SearchActionUseCase.buildExportRowsFromVisible(aRows);
         },
 
