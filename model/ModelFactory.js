@@ -96,6 +96,17 @@ sap.ui.define([
                 layout: "OneColumn",
                 preferredDetailLayout: "TwoColumnsMidExpanded",
                 columnSplitPercent: 38,
+                splitLayoutMode: "single",
+                selectedId: null,
+                splitSizes: {
+                    leftPct: 40,
+                    rightPct: 60,
+                    lastLeftPct: 40,
+                    lastRightPct: 60,
+                    collapsedSide: null
+                },
+                splitterLeftSize: "100%",
+                splitterRightSize: "0%",
                 isLoading: false,
                 loadError: false,
                 loadErrorMessage: "",

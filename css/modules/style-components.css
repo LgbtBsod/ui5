@@ -532,3 +532,61 @@ body::before {
   opacity: .34;
   filter: blur(9px);
 }
+
+/* Section: app-splitter-classic-behavior */
+.appRootSplitter {
+  position: relative;
+}
+
+.appRootSplitter.appSplitModeSingle .sapUiLoSplitterBar,
+.appRootSplitter.appSplitModeDetailOnly .sapUiLoSplitterBar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.appRootSplitter.appSplitModeSplit .sapUiLoSplitterBar {
+  width: 0.75rem !important;
+  background: transparent;
+  border: 0;
+}
+
+.appRootSplitter.appSplitModeSplit .sapUiLoSplitterBar::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  width: 0.24rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sapContent_ForegroundBorderColor) 65%, transparent);
+  transition: background-color .18s ease, box-shadow .18s ease;
+}
+
+.appRootSplitter.appSplitModeSplit .sapUiLoSplitterBar:hover::before {
+  background: color-mix(in srgb, var(--sapButton_Emphasized_Background) 65%, transparent);
+}
+
+.appRootSplitter.appSplitModeSplit .sapUiLoSplitterBar:active::before {
+  background: var(--sapButton_Emphasized_Background);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--sapButton_Emphasized_Background) 26%, transparent);
+}
+
+.searchPaneCenterShell {
+  max-width: 86rem;
+  margin: 0 auto;
+}
+
+.appRootSplitter.appSplitModeSingle .searchPaneCenterShell {
+  max-width: 78rem;
+}
+
+.appRootSplitter.appSplitModeSingle #detailPaneHost,
+.appRootSplitter.appSplitModeSingle [id$="-detailPaneHost"] {
+  overflow: hidden;
+}
+
+body.appSplitterDragging,
+body.appSplitterDragging * {
+  user-select: none !important;
+}

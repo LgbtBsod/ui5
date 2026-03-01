@@ -5,8 +5,7 @@
     xmlns="sap.m"
     xmlns:html="http://www.w3.org/1999/xhtml"
     xmlns:cc="sap_ui5.control"
-    xmlns:layout="sap.ui.layout"
-    xmlns:f="sap.f">
+    xmlns:layout="sap.ui.layout">
 
     <html:div class="bg-blobs"></html:div>
 
@@ -20,19 +19,28 @@
         <ObjectStatus text="{= ${state>/testUser} ? ${state>/testUser} : 'demoUser' }" state="Information"/>
     </Toolbar>
 
-    <layout:Splitter id="mainSplitter" width="100%" height="calc(100% - 3rem)" class="appRootSplitter">
-        <mvc:XMLView id="searchPaneView" viewName="sap_ui5.view.Search">
-            <layoutData>
-                <layout:SplitterLayoutData size="{state>/splitterLeftSize}" minSize="320" resizable="true"/>
-            </layoutData>
-        </mvc:XMLView>
-        <mvc:XMLView id="detailPaneView" viewName="sap_ui5.view.Detail">
-            <layoutData>
-                <layout:SplitterLayoutData size="{state>/splitterRightSize}" minSize="420" resizable="true"/>
-            </layoutData>
-        </mvc:XMLView>
+    <layout:Splitter id="mainSplitter" width="100%" height="calc(100% - 3rem)" class="appRootSplitter appSplitModeSingle">
+        <layout:contentAreas>
+            <layout:SplitterContent id="searchPaneHost">
+                <layout:layoutData>
+                    <layout:SplitterLayoutData size="{state>/splitterLeftSize}" minSize="320" resizable="false"/>
+                </layout:layoutData>
+                <layout:content>
+                    <layout:VerticalLayout width="100%" class="searchPaneCenterShell">
+                        <mvc:XMLView id="searchPaneView" viewName="sap_ui5.view.Search"/>
+                    </layout:VerticalLayout>
+                </layout:content>
+            </layout:SplitterContent>
+
+            <layout:SplitterContent id="detailPaneHost">
+                <layout:layoutData>
+                    <layout:SplitterLayoutData size="{state>/splitterRightSize}" minSize="420" resizable="false"/>
+                </layout:layoutData>
+                <layout:content>
+                    <mvc:XMLView id="detailPaneView" viewName="sap_ui5.view.Detail"/>
+                </layout:content>
+            </layout:SplitterContent>
+        </layout:contentAreas>
     </layout:Splitter>
 
-    <!-- Hidden compatibility host for existing router targets still configured for FCL. -->
-    <f:FlexibleColumnLayout id="fcl" visible="false" width="0px" height="0px"/>
 </mvc:View>
