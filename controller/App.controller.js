@@ -12,8 +12,9 @@ sap.ui.define([
         onInit: function () {
             var oApplied = this.applyStoredTheme();
             this.setModel(new JSONModel({
-                isDark: !!oApplied.isDark
+                isDark: false
             }), "appView");
+            this._syncThemeState("init", oApplied);
 
             var oState = this.getModel("state");
             if (oState) {
@@ -161,8 +162,23 @@ sap.ui.define([
 
         onToggleTheme: function () {
             var oResult = this.toggleTheme();
+            this._syncThemeState("toggle", oResult);
+        },
+
+        _syncThemeState: function (sSource, oThemeResult) {
             var oAppView = this.getView().getModel("appView");
-            oAppView.setProperty("/isDark", !!oResult.isDark);
+            var sStoredTheme = this.getCurrentTheme();
+            var bIsDark = sStoredTheme === "sap_horizon_dark";
+            if (oAppView) {
+                oAppView.setProperty("/isDark", bIsDark);
+            }
+            console.info("[theme] sync", {
+                source: sSource || "unknown",
+                storedTheme: sStoredTheme,
+                appliedTheme: oThemeResult && oThemeResult.theme,
+                isDark: bIsDark,
+                expectedIcon: bIsDark ? "weather-sunny" : "clear-night"
+            });
         },
 
         _syncTestUserDialogState: function () {

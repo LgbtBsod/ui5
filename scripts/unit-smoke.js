@@ -176,36 +176,23 @@ function testSearchSmartControlCoordinator() {
   mod.applyRebindParams({
     bindingParams,
     state: {
-      filterId: '77',
-      filterLpc: 'LPC1',
-      filterFailedChecks: 'TRUE',
-      filterFailedBarriers: 'FALSE',
       searchMaxResults: '150'
     },
     onDataReceived: () => { dataReceivedCalled += 1; }
   });
 
-  assert(bindingParams.filters.length >= 4, 'applyRebindParams should append expected filters');
-  const hasLpcGatewayLikeFilter = bindingParams.filters.some((f) => Array.isArray(f.filters)
-    && f.filters.some((inner) => inner.path === 'lpc')
-    && f.filters.some((inner) => inner.path === 'LPC_KEY'));
-  assert(hasLpcGatewayLikeFilter === true,
-    'applyRebindParams should compose LPC filter for both gateway-like and legacy field names');
+  assert(bindingParams.filters.length === 0, 'applyRebindParams should preserve SmartFilterBar filters without adding fallback filters');
   const looseBinding = { filters: [], parameters: {}, events: {} };
   mod.applyRebindParams({
     bindingParams: looseBinding,
     state: {
-      filterId: 'A',
-      filterLpc: 'L1',
-      filterFailedChecks: 'ALL',
-      filterFailedBarriers: 'ALL',
       searchMaxResults: '10',
       searchMode: 'LOOSE'
     },
     onDataReceived: () => {}
   });
-  assert(looseBinding.filters.length === 1 && looseBinding.filters[0].and === false,
-    'applyRebindParams should compose a single OR filter group for LOOSE search mode');
+  assert(looseBinding.filters.length === 0,
+    'applyRebindParams should not synthesize additional OR groups in LOOSE mode');
   assert(bindingParams.parameters.top === 150, 'applyRebindParams should set top parameter');
   bindingParams.events.dataReceived({});
   assert(dataReceivedCalled === 1, 'applyRebindParams should chain dataReceived callback');
@@ -2518,8 +2505,8 @@ function testSearchSmartFilterFlowUseCase() {
     applyRebindParams: coordinator.applyRebindParams
   });
 
-  assert(bindingParams.filters.length >= 2,
-    'prepareRebindParams should delegate filter composition through applyRebindParams policy');
+  assert(bindingParams.filters.length === 0,
+    'prepareRebindParams should preserve SmartFilterBar-provided filters without synthetic fallbacks');
   assert(!Object.prototype.hasOwnProperty.call(bindingParams.parameters, 'top'),
     'prepareRebindParams should preserve max-results policy and clear top when searchMaxResults is empty');
 }

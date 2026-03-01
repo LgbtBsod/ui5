@@ -70,7 +70,8 @@
           "defaultOperationMode": "Server",
           "deferredGroups": [
             "changes",
-            "autosave"
+            "autosave",
+            "saveFlow"
           ],
           "changeGroups": {
             "*": {
@@ -162,7 +163,9 @@
           "target": [
             "search",
             "detail"
-          ]
+          ],
+          "layout": "TwoColumnsMidExpanded",
+          "targetColumn": "mid"
         }
       ],
       "targets": {
