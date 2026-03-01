@@ -234,104 +234,8 @@ sap.ui.define([
         var oBindingParams = mArgs.bindingParams || {};
         var mState = mArgs.state || {};
         var fnDataReceived = mArgs.onDataReceived;
-        var aFilters = sanitizeFilters(oBindingParams.filters || []);
 
-        var sFilterId = String(mState.filterId || "").trim();
-        var sFilterLpc = mState.filterLpc || "";
-        var sSearchMode = mState.searchMode || "EXACT";
-
-        var oIdFilter = null;
-        if (sFilterId) {
-            oIdFilter = new Filter({
-                filters: [
-                    new Filter("Uuid", FilterOperator.Contains, sFilterId),
-                    new Filter("ChecklistId", FilterOperator.Contains, sFilterId)
-                ],
-                and: false
-            });
-        }
-
-        var oLpcFilter = null;
-        if (sFilterLpc) {
-            oLpcFilter = new Filter({
-                filters: [
-                    new Filter("Lpc", FilterOperator.EQ, sFilterLpc),
-                    new Filter("lpc", FilterOperator.EQ, sFilterLpc),
-                    new Filter("LPC_KEY", FilterOperator.EQ, sFilterLpc)
-                ],
-                and: false
-            });
-        }
-
-        var mSmartFilterData = mArgs.smartFilterData || {};
-        var sStatus = pickFilterValue(mSmartFilterData.Status || mSmartFilterData.status || mSmartFilterData.STATUS || "").trim();
-        var sEquipment = pickFilterValue(mSmartFilterData.Equipment || mSmartFilterData.equipment || mSmartFilterData.EQUIPMENT || "").trim();
-        var sObserver = pickFilterValue(mSmartFilterData.ObserverFullname || mSmartFilterData.observer_fullname || mSmartFilterData.OBSERVER_FULLNAME || "").trim();
-        var sDate = pickFilterValue(mSmartFilterData.Date || mSmartFilterData.date || mSmartFilterData.DATE || "").trim();
-
-        var sChecks = mState.filterFailedChecks || "ALL";
-        var sBarriers = mState.filterFailedBarriers || "ALL";
-        var sFailSegment = ((mState.search || {}).failSegment) || mState.failSegment || "ALL";
-        var sBarrierFailSegment = ((mState.search || {}).barrierFailSegment) || mState.barrierFailSegment || "ALL";
-        var aStatusFilters = [];
-        if (sChecks !== "ALL") {
-            aStatusFilters.push(new Filter("Status", FilterOperator.NE, sChecks === "TRUE" ? "03" : "ZZZ"));
-        }
-        if (sBarriers !== "ALL") {
-            aStatusFilters.push(new Filter("Status", FilterOperator.NE, sBarriers === "TRUE" ? "03" : "ZZZ"));
-        }
-        var oFailSegmentFilter = buildFailSegmentFilter(sFailSegment);
-        var oBarrierFailSegmentFilter = buildBarrierFailSegmentFilter(sBarrierFailSegment);
-
-        if (sStatus) {
-            aFilters.push(new Filter("Status", FilterOperator.Contains, sStatus));
-        }
-        if (sEquipment) {
-            aFilters.push(new Filter("Equipment", FilterOperator.Contains, sEquipment));
-        }
-        if (sObserver) {
-            aFilters.push(new Filter("ObserverFullname", FilterOperator.Contains, sObserver));
-        }
-        if (sDate) {
-            aFilters.push(new Filter("Date", FilterOperator.Contains, sDate));
-        }
-
-        if (sSearchMode === "LOOSE") {
-            var aLooseParts = [];
-            if (oIdFilter) {
-                aLooseParts.push(oIdFilter);
-            }
-            if (oLpcFilter) {
-                aLooseParts.push(oLpcFilter);
-            }
-            Array.prototype.push.apply(aLooseParts, aStatusFilters);
-            if (oFailSegmentFilter) {
-                aLooseParts.push(oFailSegmentFilter);
-            }
-            if (oBarrierFailSegmentFilter) {
-                aLooseParts.push(oBarrierFailSegmentFilter);
-            }
-            if (aLooseParts.length) {
-                aFilters.push(new Filter({
-                    filters: aLooseParts,
-                    and: false
-                }));
-            }
-        } else {
-            if (oIdFilter) {
-                aFilters.push(oIdFilter);
-            }
-            if (oLpcFilter) {
-                aFilters.push(oLpcFilter);
-            }
-            Array.prototype.push.apply(aFilters, aStatusFilters);
-            if (oFailSegmentFilter) {
-                aFilters.push(oFailSegmentFilter);
-            }
-            if (oBarrierFailSegmentFilter) {
-                aFilters.push(oBarrierFailSegmentFilter);
-            }
-        }
+        oBindingParams.filters = sanitizeFilters(oBindingParams.filters || []);
 
         var sMax = String(mState.searchMaxResults || "").trim();
         var iMax = sMax ? Math.max(1, Math.min(9999, Number(sMax) || 0)) : 0;
@@ -341,8 +245,6 @@ sap.ui.define([
         } else if (Object.prototype.hasOwnProperty.call(oBindingParams.parameters, "top")) {
             delete oBindingParams.parameters.top;
         }
-
-        oBindingParams.filters = aFilters;
 
         var fnPrevDataReceived = (oBindingParams.events || {}).dataReceived;
         oBindingParams.events = oBindingParams.events || {};

@@ -445,6 +445,15 @@ body.appDark .brandActionBtn.brandActionPrimary .sapMBtnInner,
   transition: transform .22s cubic-bezier(.2, .75, .3, 1);
 }
 
+
+.themeDockSwitch.isDark .themeDockSwitchThumb {
+  background: color-mix(in srgb, #ffffff 92%, var(--sapButton_Background) 8%);
+}
+
+.themeDockSwitch:not(.isDark) .themeDockSwitchThumb {
+  background: color-mix(in srgb, #18212b 78%, var(--sapButton_Background) 22%);
+}
+
 .themeDockSwitchIcon {
   position: absolute;
   top: 50%;

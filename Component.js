@@ -62,12 +62,11 @@ sap.ui.define([
                 stateModel: oStateModel,
                 getBackendMode: BackendAdapter.getMode
             });
-            var oMainServiceModel = this.getModel("mainService") || new sap.ui.model.odata.v2.ODataModel({
-                serviceUrl: "/sap/opu/odata/sap/Z_UI5_SRV/",
+            var oMainServiceModel = new sap.ui.model.odata.v2.ODataModel("/sap/opu/odata/sap/Z_UI5_SRV/", {
                 useBatch: true,
+                tokenHandling: true,
                 defaultBindingMode: "TwoWay",
                 defaultCountMode: "Inline",
-                tokenHandling: true,
                 refreshAfterChange: false
             });
             oMainServiceModel.setDeferredGroups(["changes", "autosave", "saveFlow"]);
