@@ -2,8 +2,10 @@ sap.ui.define([
     "sap_ui5/controller/Base.controller",
     "sap/ui/model/json/JSONModel",
     "sap/ui/core/Fragment",
-    "sap_ui5/controller/TestUserDialog.controller"
-], function (BaseController, JSONModel, Fragment, TestUserDialogController) {
+    "sap_ui5/controller/TestUserDialog.controller",
+    "sap_ui5/infra/navigation/RouteModeCoordinator",
+    "sap_ui5/infra/ui/SplitterDragGuard"
+], function (BaseController, JSONModel, Fragment, TestUserDialogController, RouteModeCoordinator, SplitterDragGuard) {
     "use strict";
 
     return BaseController.extend("sap_ui5.controller.App", {
@@ -17,16 +19,27 @@ sap.ui.define([
 
             var oState = this.getModel("state");
             if (oState) {
+                if (!oState.getProperty("/splitLayoutMode")) {
+                    oState.setProperty("/splitLayoutMode", "single");
+                }
+                if (!oState.getProperty("/selectedId")) {
+                    oState.setProperty("/selectedId", null);
+                }
                 this._oRequiresLoginBinding = oState.bindProperty("/requiresUserLogin");
                 this._oRequiresLoginBinding.attachChange(this._syncTestUserDialogState, this);
-
-                if (!oState.getProperty("/splitterLeftSize")) {
-                    oState.setProperty("/splitterLeftSize", "40%");
-                }
-                if (!oState.getProperty("/splitterRightSize")) {
-                    oState.setProperty("/splitterRightSize", "60%");
-                }
             }
+
+            this._oRouteModeCoordinator = new RouteModeCoordinator({
+                router: this.getRouter(),
+                stateModel: oState,
+                splitter: this.byId("mainSplitter"),
+                searchPaneHost: this.byId("searchPaneHost"),
+                detailPaneHost: this.byId("detailPaneHost")
+            });
+            this._oRouteModeCoordinator.start();
+
+            this._oSplitterDragGuard = new SplitterDragGuard(this.byId("mainSplitter"));
+            this._oSplitterDragGuard.start();
 
             this._syncTestUserDialogState();
         },
@@ -102,6 +115,16 @@ sap.ui.define([
         },
 
         onExit: function () {
+            if (this._oRouteModeCoordinator) {
+                this._oRouteModeCoordinator.stop();
+                this._oRouteModeCoordinator = null;
+            }
+
+            if (this._oSplitterDragGuard) {
+                this._oSplitterDragGuard.stop();
+                this._oSplitterDragGuard = null;
+            }
+
             if (this._oRequiresLoginBinding) {
                 this._oRequiresLoginBinding.detachChange(this._syncTestUserDialogState, this);
                 this._oRequiresLoginBinding.destroy();

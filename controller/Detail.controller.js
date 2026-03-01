@@ -307,6 +307,9 @@ sap.ui.define([
       this._prepareLocationTree();
 
       if (bCreate) {
+        if (window.__DEBUG_UI5__ === true && window.console && window.console.info) {
+          window.console.info("[Detail] create-mode matched (__create), skipping OData key read", { id: sId, action: sAction });
+        }
         // Single-card flow: create is handled on detail card directly.
         var oDraft = ChecklistDraftHelper.buildDefaultChecklist("");
         this._applyFrontendNowDefaults(oDraft, true);

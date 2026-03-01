@@ -311,6 +311,14 @@ sap.ui.define([
                 oBindingParams.filters.push(oSegmentFilter);
             }
 
+            if (window.__DEBUG_UI5__ === true && window.console && window.console.info) {
+                window.console.info("[Search] onBeforeSmartTableRebind", {
+                    filterCount: oBindingParams.filters.length,
+                    hasParameters: !!oBindingParams.parameters,
+                    hasSorter: Array.isArray(oBindingParams.sorter) && oBindingParams.sorter.length > 0
+                });
+            }
+
             SearchRebindLifecycleUseCase.runRebindLifecycle({
                 bindingParams: oBindingParams,
                 beforeFinalize: function () {},
