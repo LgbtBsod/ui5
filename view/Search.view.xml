@@ -137,7 +137,7 @@
                         <Button
                             text="{i18n>createButton}"
                             icon="sap-icon://add"
-                            press=".onCreate"
+                            press="onCreate"
                             class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="High"/>

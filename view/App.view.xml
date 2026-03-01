@@ -2,23 +2,37 @@
     controllerName="sap_ui5.controller.App"
     displayBlock="true"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:f="sap.f"
     xmlns="sap.m"
     xmlns:html="http://www.w3.org/1999/xhtml"
-    xmlns:cc="sap_ui5.control">
+    xmlns:cc="sap_ui5.control"
+    xmlns:layout="sap.ui.layout"
+    xmlns:f="sap.f">
 
     <html:div class="bg-blobs"></html:div>
 
     <cc:ThemeToggle
-    dark="{appView>/isDark}"
-    tooltip="{= ${appView>/isDark} ? ${i18n>themeSwitchToLight} : ${i18n>themeSwitchToDark} }"
-    press=".onToggleTheme"/>
-
+        dark="{appView>/isDark}"
+        tooltip="{= ${appView>/isDark} ? ${i18n>themeSwitchToLight} : ${i18n>themeSwitchToDark} }"
+        press=".onToggleTheme"/>
 
     <Toolbar class="toolbarTransparent sapUiTinyMarginBegin sapUiTinyMarginTop">
         <ToolbarSpacer/>
         <ObjectStatus text="{= ${state>/testUser} ? ${state>/testUser} : 'demoUser' }" state="Information"/>
     </Toolbar>
 
-    <f:FlexibleColumnLayout id="fcl" layout="{state>/layout}" class="fclCustomResizable" stateChange=".onFclStateChange" />
+    <layout:Splitter id="mainSplitter" width="100%" height="calc(100% - 3rem)" class="appRootSplitter">
+        <mvc:XMLView id="searchPaneView" viewName="sap_ui5.view.Search">
+            <layoutData>
+                <layout:SplitterLayoutData size="{state>/splitterLeftSize}" minSize="320" resizable="true"/>
+            </layoutData>
+        </mvc:XMLView>
+        <mvc:XMLView id="detailPaneView" viewName="sap_ui5.view.Detail">
+            <layoutData>
+                <layout:SplitterLayoutData size="{state>/splitterRightSize}" minSize="420" resizable="true"/>
+            </layoutData>
+        </mvc:XMLView>
+    </layout:Splitter>
+
+    <!-- Hidden compatibility host for existing router targets still configured for FCL. -->
+    <f:FlexibleColumnLayout id="fcl" visible="false" width="0px" height="0px"/>
 </mvc:View>

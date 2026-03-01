@@ -302,6 +302,7 @@ sap.ui.define([
       oStateModel.setProperty("/activeObjectId", bCreate ? null : (sId || null));
       oStateModel.setProperty("/objectAction", "");
       oStateModel.setProperty("/copySourceId", bCopy ? (sId || null) : null);
+      oStateModel.setProperty("/isCreateMode", !!bCreate);
 
       this._prepareLocationTree();
 
@@ -312,6 +313,9 @@ sap.ui.define([
         oDataModel.setProperty("/selectedChecklist", oDraft);
         this.getModel("selected").setData(ChecklistDraftHelper.clone(oDraft));
         oStateModel.setProperty("/mode", "EDIT");
+        oStateModel.setProperty("/isLocked", false);
+        oStateModel.setProperty("/lockOperationPending", false);
+        this.setLockUiState(oStateModel, "IDLE", "");
         DetailLifecycleUseCase.resetDirty(oStateModel);
         this._syncSelectionMeta();
         return;
@@ -333,6 +337,7 @@ sap.ui.define([
       }
 
       oStateModel.setProperty("/mode", "READ");
+      oStateModel.setProperty("/isCreateMode", false);
       this._bindChecklistById(sId);
       oStateModel.setProperty("/isDirty", false);
     },
@@ -910,6 +915,14 @@ sap.ui.define([
       var sSessionId = oStateModel.getProperty("/sessionId");
       var fnDisableEditAndRelease = () => this._releaseEditLock(sObjectId, sSessionId, oStateModel);
       var oBundle = this.getResourceBundle();
+
+      if (!sObjectId) {
+        oStateModel.setProperty("/mode", bEditMode ? "EDIT" : "READ");
+        oStateModel.setProperty("/isLocked", false);
+        oStateModel.setProperty("/isCreateMode", true);
+        this.setLockUiState(oStateModel, "IDLE", "");
+        return Promise.resolve({ ok: true, reason: "create_mode_toggle_without_lock" });
+      }
 
       return DetailToggleEditOrchestrationUseCase.runToggleFlow({
         host: this,
