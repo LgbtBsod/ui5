@@ -1,0 +1,3 @@
+layer:
+  forbid_controller_to_adapter_import: true
+  forbid_domain_to_ui_infra_import: true

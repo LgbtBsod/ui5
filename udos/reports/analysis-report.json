@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-03-03T05:16:22.333Z",
+  "mode": "report",
+  "decision": "CLEAR",
+  "decisionReasons": [],
+  "budget": {
+    "violated": false,
+    "reasons": []
+  },
+  "scores": {
+    "ArchitectureScore": 96,
+    "AIL": 90,
+    "PMI": 90,
+    "ADT": 90,
+    "DomainCompleteness": 90
+  },
+  "queueSize": 12,
+  "openMissions": 4,
+  "lastIntake": {
+    "files": [
+      "docs/architecture-context.json",
+      "docs/architecture-health.md",
+      "docs/architecture-map.md",
+      "docs/dependency-graph.json",
+      "docs/domain-boundaries.md",
+      "docs/duplicate-logic.md",
+      "docs/feature-map.md",
+      "docs/feature-registry.json",
+      "docs/large-functions.md",
+      "docs/legacy-surface-map.md",
+      "docs/qa-history-latest.json",
+      "docs/qa-report-latest.json",
+      "docs/qa-report-latest.md",
+      "docs/refactor-history.md",
+      "docs/repository-map.md",
+      "docs/repository-memory.json",
+      "docs/workflow-map.md",
+      "docs/workflow-registry.json",
+      "scripts/architecture-governor.js"
+    ],
+    "changeType": "infra",
+    "impactedWorkflows": [],
+    "risk": "LOW"
+  },
+  "verification": {
+    "required": [
+      {
+        "cmd": "npm run qa",
+        "ok": true,
+        "out": "\n> qa\n> node scripts/qa-all.js\n\n====================================\nUI5 ENTERPRISE QA PIPELINE\n====================================\n\n[1/36] forbidden-patterns\nPASS\n\n[2/36] gateway-parity-validator\nPASS\n\n[3/36] architecture-gate\nPASS\n\n[4/36] final-architecture-freeze-gate\nPASS\n\n[5/36] legacy-ban-gate\nPASS\n\n[6/36] shadow-duplicate-gate\nPASS\n\n[7/36] controller-purity-gate\nPASS\n\n[8/36] runtime-settings-gate\nPASS\n\n[9/36] function-length-gate\nPASS\n\n[10/36] js-line-limit-gate\nPASS\n\n[11/36] layer-map\nPASS\n\n[12/36] usecase-no-ui5-import-gate\nPASS\n\n[13/36] usecase-contract-gate\nPASS\n\n[14/36] effects-whitelist-gate\nPASS\n\n[15/36] network-signature-fixture\nPASS\n\n[16/36] suggest-on-interaction-only-gate\nPASS\n\n[17/36] network-contract-verifier\nPASS\n\n[18/36] backend-service-dedup-gate\nPASS\n\n[19/36] dedup-fingerprint-gate\nPASS\n\n[20/36] feedback-unification-gate\nPASS\n\n[21/36] model-path-contract-gate\nPASS\n\n[22/36] listener-registration-gate\nPASS\n\n[23/36] uiState-workflow-mirror-gate\nPASS\n\n[24/36] compat-entity-access-gate\nPASS\n\n[25/36] controller-import-whitelist-gate\nPASS\n\n[26/36] manager-purity-gate\nPASS\n\n[27/36] style-purity-gate\nPASS\n\n[28/36] design-language-gate\nPASS\n\n[29/36] final-static-qa\nPASS\n\n[30/36] enterprise-readiness-gate\nPASS\n\n[31/36] smarttable-beforeRebind-noRebind-gate\nPASS\n\n[32/36] statepaths-schema-consistency-gate\nPASS\n\n[33/36] edit-requires-lock-gate\nPASS\n\n[34/36] autosave-input-contract-gate\nPASS\n\n[35/36] dead-code-gate\nPASS\n\n[36/36] dependency-drift-gate\nPASS\n\n------------------------------------\nALL ARCHITECTURE CHECKS PASSED\n------------------------------------\n"
+      },
+      {
+        "cmd": "npm run architect:audit",
+        "ok": true,
+        "out": "\n> architect:audit\n> python scripts/qa-runner.py --report docs/qa-report-latest.md --json-file docs/qa-report-latest.json && node scripts/style-system-audit.js && node scripts/ci/final-architecture-freeze-gate.js && node scripts/architect-audit.js\n\nPASS qa-runner.py\r\nStyle system audit generated: docs/artifacts/style-system-audit.json and docs/artifacts/style-system-audit.md (score=100)\nPASS final-architecture-freeze-gate\nArchitect audit generated: docs\\artifacts\\architect-audit-report.json and docs\\artifacts\\architect-audit-report.md (readiness=99)\n"
+      },
+      {
+        "cmd": "npm run domain-model:verify",
+        "ok": true,
+        "out": "\n> domain-model:verify\n> node scripts/domain-model-verify.js\n\nPASS domain-model-verify\n"
+      },
+      {
+        "cmd": "npm run digital-twin:preflight",
+        "ok": true,
+        "out": "\n> digital-twin:preflight\n> node architecture/digital-twin/preflight.js\n\ndigital-twin preflight: risk=LOW layerViolations=0 invariantRisk=0\nPASS digital-twin:preflight\n"
+      },
+      {
+        "cmd": "npm run air-traffic-control",
+        "ok": true,
+        "out": "\n> air-traffic-control\n> node architecture/air-traffic/traffic-dashboard.js\n\nPASS air-traffic-control\n"
+      }
+    ],
+    "optional": [
+      {
+        "cmd": "npm run architecture-intel",
+        "ok": false,
+        "optional": true,
+        "skipped": true,
+        "out": "optional script missing: architecture-intel"
+      }
+    ]
+  },
+  "simulation": {
+    "ok": true,
+    "proofRequired": false,
+    "proofPresent": false
+  },
+  "adaptive": {
+    "riskyModules": [],
+    "requireProofMode": false,
+    "requireExclusiveWindow": false,
+    "requireSmallerBatches": false,
+    "explanation": "Static policy fallback"
+  },
+  "memory": {
+    "recordedEvents": 1,
+    "topRiskModules": [
+      {
+        "module": "digital-twin",
+        "riskScore": 0.68
+      },
+      {
+        "module": "package.json",
+        "riskScore": 0.68
+      },
+      {
+        "module": "history",
+        "riskScore": 0.68
+      },
+      {
+        "module": "kernel",
+        "riskScore": 0.68
+      }
+    ],
+    "policyProposals": [
+      {
+        "id": "PP-relax-low-risk",
+        "suggestedChange": "Slightly relax review overhead for LOW-risk non-runtime-only patches."
+      }
+    ]
+  }
+}

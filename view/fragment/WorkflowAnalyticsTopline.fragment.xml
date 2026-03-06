@@ -1,0 +1,56 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <HBox class="kpiGrid searchAnalyticsDialogGrid analyticsToplineGrid" renderType="Bare" wrap="Wrap">
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://task" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{view>/analytics/total}" level="H3"/>
+        </VBox>
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://inspection" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{view>/analytics/failedChecks}" level="H3"/>
+        </VBox>
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://alert" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>kpiFailedBarriers}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{view>/analytics/failedBarriers}" level="H3"/>
+        </VBox>
+    </HBox>
+
+    <HBox class="kpiGrid sapUiSmallMarginTop searchAnalyticsDialogGrid analyticsToplineGrid analyticsToplineGridSecondary" renderType="Bare" wrap="Wrap">
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://status-positive" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>analyticsClosedCount}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{view>/analytics/closedCount}" level="H4"/>
+        </VBox>
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://status-critical" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>analyticsRegisteredCount}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{view>/analytics/registeredCount}" level="H4"/>
+        </VBox>
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://chain-link" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>analyticsSource}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{= ${view>/analytics/source} === 'backend' ? ${i18n>analyticsSourceBackend} : (${view>/analytics/source} || ${i18n>analyticsSourceGateway}) }" level="H5"/>
+        </VBox>
+    </HBox>
+
+    <VBox class="analyticsBarsWrap sapUiSmallMarginTop searchAnalyticsDialogBars analyticsNarrativeBlock">
+        <Text text="{i18n>workflowAnalyticsBars}" class="kpiLabel sapUiTinyMarginBottom"/>
+        <ProgressIndicator percentValue="{view>/analytics/avgChecksRate}" displayValue="{= ${i18n>analyticsAvgChecksRate} + ': ' + ${view>/analytics/avgChecksRate} + '%' }" state="Success" class="sapUiTinyMarginBottom"/>
+        <ProgressIndicator percentValue="{view>/analytics/avgBarriersRate}" displayValue="{= ${i18n>analyticsAvgBarriersRate} + ': ' + ${view>/analytics/avgBarriersRate} + '%' }" state="Warning" class="sapUiTinyMarginBottom"/>
+        <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analytics/refreshedAt} || '-') }" class="kpiLabel"/>
+    </VBox>
+</core:FragmentDefinition>

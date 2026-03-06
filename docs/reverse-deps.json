@@ -1,0 +1,737 @@
+{
+  "controller/App.controller.js": [],
+  "controller/Base.controller.js": [
+    "controller/App.controller.js",
+    "controller/Detail.controller.js",
+    "controller/Search.controller.js"
+  ],
+  "controller/Detail.controller.js": [],
+  "controller/Search.controller.js": [],
+  "controller/TestUserDialog.controller.js": [
+    "controller/support/AppControllerActions.js"
+  ],
+  "controller/base/EffectMixin.js": [
+    "controller/Base.controller.js"
+  ],
+  "controller/base/ModelAccessMixin.js": [
+    "controller/Base.controller.js"
+  ],
+  "controller/base/RouterMixin.js": [
+    "controller/Base.controller.js"
+  ],
+  "controller/base/ThemeMixin.js": [
+    "controller/Base.controller.js"
+  ],
+  "controller/support/AppControllerActions.js": [
+    "controller/App.controller.js"
+  ],
+  "controller/support/AttachmentDropZoneRuntime.js": [
+    "controller/support/AttachmentUploadSupport.js"
+  ],
+  "controller/support/AttachmentUploadCore.js": [
+    "controller/support/AttachmentDropZoneRuntime.js",
+    "controller/support/AttachmentUploadSupport.js"
+  ],
+  "controller/support/AttachmentUploadSupport.js": [
+    "controller/Detail.controller.js",
+    "controller/support/DetailControllerActions.js",
+    "controller/support/DetailControllerLifecycle.js"
+  ],
+  "controller/support/ControllerResourceCleanup.js": [
+    "controller/support/AppControllerActions.js",
+    "controller/support/DetailControllerLifecycle.js",
+    "controller/support/SearchControllerActions.js"
+  ],
+  "controller/support/DetailAccessViewState.js": [
+    "controller/support/DetailControllerActions.js",
+    "controller/support/DetailControllerLifecycle.js"
+  ],
+  "controller/support/DetailControllerActions.js": [
+    "controller/Detail.controller.js"
+  ],
+  "controller/support/DetailControllerLifecycle.js": [
+    "controller/Detail.controller.js"
+  ],
+  "controller/support/DetailDialogSupport.js": [
+    "controller/support/DetailControllerActions.js"
+  ],
+  "controller/support/DetailFormatters.js": [
+    "controller/Detail.controller.js"
+  ],
+  "controller/support/DetailPersonInputSupport.js": [
+    "controller/support/DetailControllerActions.js",
+    "controller/support/DetailValidationSummarySupport.js"
+  ],
+  "controller/support/DetailSelectionSync.js": [
+    "controller/support/DetailValidationSummarySupport.js"
+  ],
+  "controller/support/DetailValidationSummarySupport.js": [
+    "controller/support/DetailControllerActions.js"
+  ],
+  "controller/support/DetailViewSupport.js": [
+    "controller/support/DetailControllerActions.js"
+  ],
+  "controller/support/SearchControllerActions.js": [
+    "controller/Search.controller.js"
+  ],
+  "controller/support/SearchControllerSupport.js": [
+    "controller/Search.controller.js",
+    "controller/support/SearchControllerActions.js",
+    "controller/support/SearchViewSupport.js"
+  ],
+  "controller/support/SearchRateProgress.js": [
+    "controller/Search.controller.js",
+    "controller/support/SearchControllerActions.js",
+    "controller/support/SearchViewSupport.js"
+  ],
+  "controller/support/SearchViewSupport.js": [
+    "controller/support/SearchControllerActions.js"
+  ],
+  "controller/support/SplitLayoutVisualSync.js": [
+    "controller/support/AppControllerActions.js",
+    "controller/support/DetailViewSupport.js"
+  ],
+  "infra/adapters/BrowserCacheAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/ClockAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/DictAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/LastChangeSetAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/LocationLookupAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/LockAdapter.js": [
+    "service/framework/CtxFactory.js",
+    "util/FlowCoordinator.js"
+  ],
+  "infra/adapters/ODataChecklistRepoAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/PersonSuggestAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/SmartControlsAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/TelemetryAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/Ui5StateAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/Ui5StyleAdapter.js": [
+    "service/framework/ControlStyleRuntime.js",
+    "service/framework/EffectApplier.js"
+  ],
+  "infra/adapters/WorkflowAnalyticsAdapter.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "infra/adapters/shared/AttachmentRepoSupport.js": [
+    "infra/adapters/ODataChecklistRepoAdapter.js"
+  ],
+  "infra/adapters/shared/ChecklistSnapshotMapper.js": [
+    "infra/adapters/ODataChecklistRepoAdapter.js",
+    "infra/adapters/shared/AttachmentRepoSupport.js"
+  ],
+  "infra/adapters/shared/GatewayAdapterSupport.js": [
+    "infra/adapters/DictAdapter.js",
+    "infra/adapters/LocationLookupAdapter.js",
+    "infra/adapters/LockAdapter.js",
+    "infra/adapters/ODataChecklistRepoAdapter.js",
+    "infra/adapters/PersonSuggestAdapter.js",
+    "infra/adapters/WorkflowAnalyticsAdapter.js",
+    "infra/adapters/shared/AttachmentRepoSupport.js"
+  ],
+  "infra/adapters/shared/GatewayIdentitySupport.js": [
+    "infra/adapters/LockAdapter.js",
+    "infra/adapters/ODataChecklistRepoAdapter.js"
+  ],
+  "infra/adapters/shared/ODataAdapterUtils.js": [
+    "infra/adapters/shared/GatewayAdapterSupport.js"
+  ],
+  "infra/navigation/RouteModeCoordinator.js": [
+    "service/framework/AppShellCoordinator.js"
+  ],
+  "infra/navigation/RouteModeRules.js": [
+    "infra/navigation/RouteModeCoordinator.js"
+  ],
+  "infra/navigation/RouteSync.js": [
+    "infra/navigation/RouteModeCoordinator.js"
+  ],
+  "infra/navigation/SplitterModeApplier.js": [
+    "infra/navigation/RouteModeCoordinator.js",
+    "service/framework/AppShellCoordinator.js",
+    "service/framework/SplitterModeApplier.js"
+  ],
+  "infra/odata/GatewayODataClient.js": [
+    "infra/adapters/LastChangeSetAdapter.js",
+    "infra/adapters/shared/GatewayAdapterSupport.js"
+  ],
+  "infra/ui/SplitterDragGuard.js": [
+    "service/framework/AppShellCoordinator.js"
+  ],
+  "manager/ActivityMonitor.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/AutoSaveCoordinator.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/ConnectivityCoordinator.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/GCDManager.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/HeartbeatManager.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/LockStatusMonitor.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/ManagerFacade.js": [
+    "Component.js"
+  ],
+  "manager/SettingsManager.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/SmartCacheManager.js": [
+    "manager/ManagerFacade.js"
+  ],
+  "manager/shared/ManagerRuntime.js": [
+    "manager/GCDManager.js",
+    "manager/HeartbeatManager.js",
+    "manager/LockStatusMonitor.js"
+  ],
+  "manager/shared/TimerRuntime.js": [
+    "manager/GCDManager.js",
+    "manager/HeartbeatManager.js",
+    "manager/LockStatusMonitor.js"
+  ],
+  "service/SmartSearchAdapter.js": [
+    "Component.js"
+  ],
+  "service/backend/GatewayBackendService.js": [
+    "Component.js",
+    "service/domain/shared/usecases/BootstrapAppUseCase.js",
+    "service/framework/ComponentLockReleaseSupport.js"
+  ],
+  "service/backend/GatewayClient.js": [
+    "infra/adapters/ODataChecklistRepoAdapter.js",
+    "infra/adapters/shared/AttachmentRepoSupport.js",
+    "infra/odata/GatewayODataClient.js",
+    "service/backend/GatewayBackendService.js"
+  ],
+  "service/backend/GatewayErrorNormalizer.js": [
+    "service/backend/GatewayClient.js"
+  ],
+  "service/backend/GatewayODataTransport.js": [
+    "service/backend/GatewayClient.js"
+  ],
+  "service/domain/cache/ports/BrowserCachePort.js": [
+    "service/domain/cache/usecases/CacheReadUseCase.js",
+    "service/domain/cache/usecases/CacheValidationUseCase.js",
+    "service/domain/cache/usecases/CacheWriteUseCase.js"
+  ],
+  "service/domain/cache/ports/LastChangeSetPort.js": [
+    "service/domain/cache/usecases/CacheValidationUseCase.js"
+  ],
+  "service/domain/cache/usecases/CacheReadUseCase.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "service/domain/cache/usecases/CacheValidationUseCase.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "service/domain/cache/usecases/CacheWriteUseCase.js": [
+    "service/framework/CtxFactory.js"
+  ],
+  "service/domain/detail/AttachmentEffectSupport.js": [
+    "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
+    "service/domain/detail/usecases/AttachmentUploadUseCase.js"
+  ],
+  "service/domain/detail/DetailAuthorizationSupport.js": [
+    "service/domain/detail/usecases/DeleteChecklistUseCase.js",
+    "service/domain/detail/usecases/EnterEditUseCase.js",
+    "service/domain/detail/usecases/OpenDetailUseCase.js"
+  ],
+  "service/domain/detail/DetailFacade.js": [
+    "Component.js",
+    "controller/support/DetailControllerLifecycle.js"
+  ],
+  "service/domain/detail/DetailStateAccess.js": [
+    "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
+    "service/domain/detail/usecases/AttachmentUploadUseCase.js",
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/PersonSuggestUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js",
+    "service/domain/detail/usecases/ValidateChecklistUseCase.js",
+    "service/domain/detail/usecases/ValueHelpLocationUseCase.js"
+  ],
+  "service/domain/detail/DetailValidationSupport.js": [
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/ValidateChecklistUseCase.js"
+  ],
+  "service/domain/detail/usecases/AttachmentDeleteUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/AttachmentUploadUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/AutosaveDetailUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/ChangeStatusUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/CloseDetailUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/DeleteChecklistUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/EnterEditUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/ForceReadOnlyUseCase.js": [
+    "service/domain/detail/DetailFacade.js",
+    "service/domain/detail/usecases/LockLostUseCase.js"
+  ],
+  "service/domain/detail/usecases/LockLostUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/OpenDetailUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/PersonSuggestUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/ResolveConflictUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/RowOpsUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/SaveDetailUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/ValidateChecklistUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/detail/usecases/ValueHelpLocationUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/lock/usecases/TakeoverLockUseCase.js": [
+    "service/domain/detail/DetailFacade.js"
+  ],
+  "service/domain/search/ExportFacade.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/SearchFacade.js": [
+    "controller/support/SearchControllerActions.js"
+  ],
+  "service/domain/search/SearchSelectionEffects.js": [
+    "service/domain/search/usecases/ExecuteSearchUseCase.js",
+    "service/domain/search/usecases/RebindSearchUseCase.js",
+    "service/domain/search/usecases/SelectRowUseCase.js"
+  ],
+  "service/domain/search/usecases/AnalyticsUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/usecases/ApplyRebindPolicyUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/usecases/BootstrapSearchUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/usecases/BuildSearchFilterUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/usecases/ExecuteSearchUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/usecases/ExportSearchUseCase.js": [
+    "service/domain/search/ExportFacade.js"
+  ],
+  "service/domain/search/usecases/RebindSearchUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/usecases/SelectRowUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/search/usecases/SelectionChangedUseCase.js": [
+    "service/domain/search/SearchFacade.js"
+  ],
+  "service/domain/shared/StatePaths.js": [
+    "service/domain/detail/DetailAuthorizationSupport.js",
+    "service/domain/detail/usecases/AutosaveDetailUseCase.js",
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/CloseDetailUseCase.js",
+    "service/domain/detail/usecases/DeleteChecklistUseCase.js",
+    "service/domain/detail/usecases/EnterEditUseCase.js",
+    "service/domain/detail/usecases/ForceReadOnlyUseCase.js",
+    "service/domain/detail/usecases/OpenDetailUseCase.js",
+    "service/domain/detail/usecases/ResolveConflictUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js",
+    "service/domain/lock/usecases/TakeoverLockUseCase.js",
+    "service/domain/search/SearchSelectionEffects.js",
+    "service/domain/search/usecases/BootstrapSearchUseCase.js",
+    "service/domain/search/usecases/BuildSearchFilterUseCase.js",
+    "service/domain/search/usecases/ExecuteSearchUseCase.js",
+    "service/domain/search/usecases/RebindSearchUseCase.js",
+    "service/domain/search/usecases/SelectRowUseCase.js"
+  ],
+  "service/domain/shared/UseCaseInputUtils.js": [
+    "service/domain/detail/usecases/AutosaveDetailUseCase.js",
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/EnterEditUseCase.js",
+    "service/domain/detail/usecases/OpenDetailUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js"
+  ],
+  "service/domain/shared/UseCaseResultUtils.js": [
+    "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
+    "service/domain/detail/usecases/AttachmentUploadUseCase.js",
+    "service/domain/detail/usecases/PersonSuggestUseCase.js",
+    "service/domain/detail/usecases/ValueHelpLocationUseCase.js"
+  ],
+  "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js": [
+    "Component.js"
+  ],
+  "service/domain/shared/usecases/BootstrapAppUseCase.js": [
+    "Component.js"
+  ],
+  "service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase.js": [
+    "service/domain/shared/usecases/DiagnosticsUseCase.js"
+  ],
+  "service/domain/shared/usecases/DiagnosticsUseCase.js": [
+    "Component.js"
+  ],
+  "service/domain/shared/usecases/EnsureDictLoadedUseCase.js": [
+    "Component.js"
+  ],
+  "service/domain/shared/usecases/StartManagersUseCase.js": [
+    "Component.js"
+  ],
+  "service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase.js": [
+    "service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase.js"
+  ],
+  "service/framework/ActionDispatcher.js": [
+    "Component.js"
+  ],
+  "service/framework/AppShellCoordinator.js": [
+    "controller/support/AppControllerActions.js"
+  ],
+  "service/framework/AppShellStateSync.js": [
+    "service/framework/AppShellCoordinator.js"
+  ],
+  "service/framework/ComponentInitBootSupport.js": [
+    "Component.js"
+  ],
+  "service/framework/ComponentInitFeedbackSupport.js": [
+    "Component.js"
+  ],
+  "service/framework/ComponentInitListenersSupport.js": [
+    "Component.js"
+  ],
+  "service/framework/ComponentInitLockRuntimeSupport.js": [
+    "Component.js"
+  ],
+  "service/framework/ComponentInitRuntime.js": [
+    "Component.js"
+  ],
+  "service/framework/ComponentInitSaveGuardSupport.js": [
+    "Component.js"
+  ],
+  "service/framework/ComponentLockReleaseSupport.js": [
+    "Component.js"
+  ],
+  "service/framework/ComponentRuntimeSupport.js": [
+    "Component.js",
+    "service/domain/search/usecases/AnalyticsUseCase.js"
+  ],
+  "service/framework/ControlStyleRuntime.js": [
+    "controller/support/DetailViewSupport.js",
+    "controller/support/SearchViewSupport.js"
+  ],
+  "service/framework/CtxFactory.js": [
+    "Component.js",
+    "controller/support/DetailControllerLifecycle.js",
+    "controller/support/SearchControllerActions.js"
+  ],
+  "service/framework/DraftChecklistFactory.js": [
+    "controller/support/DetailDialogSupport.js"
+  ],
+  "service/framework/EffectApplier.js": [
+    "Component.js",
+    "controller/base/EffectMixin.js",
+    "controller/support/DetailControllerActions.js",
+    "util/FlowCoordinator.js"
+  ],
+  "service/framework/EffectModelOps.js": [
+    "service/framework/EffectApplier.js"
+  ],
+  "service/framework/EffectTextResolver.js": [
+    "service/framework/EffectApplier.js"
+  ],
+  "service/framework/Effects.js": [
+    "service/domain/detail/AttachmentEffectSupport.js",
+    "service/domain/detail/DetailAuthorizationSupport.js",
+    "service/domain/detail/DetailFacade.js",
+    "service/domain/detail/usecases/AutosaveDetailUseCase.js",
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/CloseDetailUseCase.js",
+    "service/domain/detail/usecases/DeleteChecklistUseCase.js",
+    "service/domain/detail/usecases/EnterEditUseCase.js",
+    "service/domain/detail/usecases/ForceReadOnlyUseCase.js",
+    "service/domain/detail/usecases/OpenDetailUseCase.js",
+    "service/domain/detail/usecases/PersonSuggestUseCase.js",
+    "service/domain/detail/usecases/ResolveConflictUseCase.js",
+    "service/domain/detail/usecases/RowOpsUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js",
+    "service/domain/detail/usecases/ValidateChecklistUseCase.js",
+    "service/domain/detail/usecases/ValueHelpLocationUseCase.js",
+    "service/domain/lock/usecases/TakeoverLockUseCase.js",
+    "service/domain/search/SearchSelectionEffects.js",
+    "service/domain/search/usecases/AnalyticsUseCase.js",
+    "service/domain/search/usecases/BootstrapSearchUseCase.js",
+    "service/domain/search/usecases/BuildSearchFilterUseCase.js",
+    "service/domain/search/usecases/ExecuteSearchUseCase.js",
+    "service/domain/search/usecases/ExportSearchUseCase.js",
+    "service/domain/search/usecases/RebindSearchUseCase.js",
+    "service/domain/search/usecases/SelectRowUseCase.js",
+    "service/domain/search/usecases/SelectionChangedUseCase.js",
+    "service/framework/FeedbackPolicy.js"
+  ],
+  "service/framework/FeedbackPolicy.js": [
+    "Component.js",
+    "service/framework/Result.js"
+  ],
+  "service/framework/NormalizedError.js": [
+    "service/framework/FeedbackPolicy.js"
+  ],
+  "service/framework/Result.js": [
+    "service/domain/cache/usecases/CacheReadUseCase.js",
+    "service/domain/cache/usecases/CacheValidationUseCase.js",
+    "service/domain/cache/usecases/CacheWriteUseCase.js",
+    "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
+    "service/domain/detail/usecases/AttachmentUploadUseCase.js",
+    "service/domain/detail/usecases/AutosaveDetailUseCase.js",
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/CloseDetailUseCase.js",
+    "service/domain/detail/usecases/DeleteChecklistUseCase.js",
+    "service/domain/detail/usecases/EnterEditUseCase.js",
+    "service/domain/detail/usecases/ForceReadOnlyUseCase.js",
+    "service/domain/detail/usecases/LockLostUseCase.js",
+    "service/domain/detail/usecases/OpenDetailUseCase.js",
+    "service/domain/detail/usecases/PersonSuggestUseCase.js",
+    "service/domain/detail/usecases/ResolveConflictUseCase.js",
+    "service/domain/detail/usecases/RowOpsUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js",
+    "service/domain/detail/usecases/ValidateChecklistUseCase.js",
+    "service/domain/detail/usecases/ValueHelpLocationUseCase.js",
+    "service/domain/lock/usecases/TakeoverLockUseCase.js",
+    "service/domain/search/usecases/AnalyticsUseCase.js",
+    "service/domain/search/usecases/ApplyRebindPolicyUseCase.js",
+    "service/domain/search/usecases/BootstrapSearchUseCase.js",
+    "service/domain/search/usecases/BuildSearchFilterUseCase.js",
+    "service/domain/search/usecases/ExecuteSearchUseCase.js",
+    "service/domain/search/usecases/ExportSearchUseCase.js",
+    "service/domain/search/usecases/RebindSearchUseCase.js",
+    "service/domain/search/usecases/SelectRowUseCase.js",
+    "service/domain/search/usecases/SelectionChangedUseCase.js",
+    "service/domain/shared/UseCaseResultUtils.js",
+    "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js",
+    "service/domain/shared/usecases/BootstrapAppUseCase.js",
+    "service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase.js",
+    "service/domain/shared/usecases/DiagnosticsUseCase.js",
+    "service/domain/shared/usecases/EnsureDictLoadedUseCase.js",
+    "service/domain/shared/usecases/StartManagersUseCase.js",
+    "service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase.js"
+  ],
+  "service/framework/SplitterModeApplier.js": [
+    "controller/support/AppControllerActions.js"
+  ],
+  "service/framework/ThemeRuntime.js": [
+    "controller/base/ThemeMixin.js"
+  ],
+  "service/framework/UseCase.js": [
+    "service/domain/cache/usecases/CacheReadUseCase.js",
+    "service/domain/cache/usecases/CacheValidationUseCase.js",
+    "service/domain/cache/usecases/CacheWriteUseCase.js",
+    "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
+    "service/domain/detail/usecases/AttachmentUploadUseCase.js",
+    "service/domain/detail/usecases/AutosaveDetailUseCase.js",
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/CloseDetailUseCase.js",
+    "service/domain/detail/usecases/DeleteChecklistUseCase.js",
+    "service/domain/detail/usecases/EnterEditUseCase.js",
+    "service/domain/detail/usecases/ForceReadOnlyUseCase.js",
+    "service/domain/detail/usecases/LockLostUseCase.js",
+    "service/domain/detail/usecases/OpenDetailUseCase.js",
+    "service/domain/detail/usecases/PersonSuggestUseCase.js",
+    "service/domain/detail/usecases/ResolveConflictUseCase.js",
+    "service/domain/detail/usecases/RowOpsUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js",
+    "service/domain/detail/usecases/ValidateChecklistUseCase.js",
+    "service/domain/detail/usecases/ValueHelpLocationUseCase.js",
+    "service/domain/lock/usecases/TakeoverLockUseCase.js",
+    "service/domain/search/usecases/AnalyticsUseCase.js",
+    "service/domain/search/usecases/ApplyRebindPolicyUseCase.js",
+    "service/domain/search/usecases/BootstrapSearchUseCase.js",
+    "service/domain/search/usecases/BuildSearchFilterUseCase.js",
+    "service/domain/search/usecases/ExecuteSearchUseCase.js",
+    "service/domain/search/usecases/ExportSearchUseCase.js",
+    "service/domain/search/usecases/RebindSearchUseCase.js",
+    "service/domain/search/usecases/SelectRowUseCase.js",
+    "service/domain/search/usecases/SelectionChangedUseCase.js"
+  ],
+  "service/ui/StyleTokens.js": [
+    "service/framework/EffectApplier.js"
+  ],
+  "util/AttachmentUploadPolicy.js": [
+    "controller/support/AttachmentUploadCore.js",
+    "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js"
+  ],
+  "util/ChecklistValidationService.js": [
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/ValidateChecklistUseCase.js"
+  ],
+  "util/ClientKeyGenerator.js": [
+    "service/domain/detail/usecases/RowOpsUseCase.js",
+    "util/DraftChecklistFactory.js"
+  ],
+  "util/CreateSentinel.js": [
+    "Component.js",
+    "controller/support/AppControllerActions.js",
+    "controller/support/AttachmentUploadCore.js",
+    "controller/support/DetailControllerActions.js",
+    "controller/support/DetailFormatters.js",
+    "infra/adapters/ODataChecklistRepoAdapter.js",
+    "service/domain/detail/DetailAuthorizationSupport.js",
+    "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
+    "service/domain/detail/usecases/AttachmentUploadUseCase.js",
+    "service/domain/detail/usecases/CloseDetailUseCase.js",
+    "service/domain/detail/usecases/DeleteChecklistUseCase.js",
+    "service/domain/detail/usecases/EnterEditUseCase.js",
+    "service/domain/detail/usecases/OpenDetailUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js",
+    "service/domain/search/usecases/SelectRowUseCase.js",
+    "service/framework/ComponentLockReleaseSupport.js",
+    "service/framework/ComponentRuntimeSupport.js"
+  ],
+  "util/DebugLogger.js": [
+    "Component.js",
+    "infra/navigation/RouteModeCoordinator.js",
+    "infra/ui/SplitterDragGuard.js",
+    "manager/SettingsManager.js",
+    "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js",
+    "service/framework/AppShellCoordinator.js",
+    "service/framework/EffectApplier.js",
+    "util/SplitterSizeService.js",
+    "util/WorkflowTelemetry.js",
+    "util/runtime/TimerSanitizer.js"
+  ],
+  "util/DeltaPayloadBuilder.js": [
+    "Component.js",
+    "service/domain/detail/usecases/AutosaveDetailUseCase.js",
+    "service/domain/detail/usecases/ChangeStatusUseCase.js",
+    "service/domain/detail/usecases/SaveDetailUseCase.js"
+  ],
+  "util/DraftChecklistFactory.js": [
+    "service/domain/detail/usecases/AttachmentUploadUseCase.js",
+    "service/framework/DraftChecklistFactory.js"
+  ],
+  "util/ExcelExport.js": [
+    "service/domain/search/usecases/ExportSearchUseCase.js"
+  ],
+  "util/FlowCoordinator.js": [
+    "Component.js"
+  ],
+  "util/InteractionFX.js": [
+    "Component.js"
+  ],
+  "util/RuntimeTimerSanitizer.js": [
+    "Component.js",
+    "util/TimeConfigService.js"
+  ],
+  "util/SearchSmartControlCoordinator.js": [
+    "infra/adapters/SmartControlsAdapter.js",
+    "service/domain/search/usecases/SelectionChangedUseCase.js"
+  ],
+  "util/SmartCacheStore.js": [
+    "manager/SmartCacheManager.js"
+  ],
+  "util/SmartCacheUtils.js": [
+    "manager/SmartCacheManager.js"
+  ],
+  "util/SplitterSizeService.js": [
+    "infra/navigation/RouteModeCoordinator.js",
+    "infra/navigation/RouteSync.js"
+  ],
+  "util/ThemePhilosophy.js": [
+    "util/ThemeService.js"
+  ],
+  "util/ThemeService.js": [
+    "Component.js",
+    "service/framework/ThemeRuntime.js"
+  ],
+  "util/TimeConfigService.js": [
+    "Component.js",
+    "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js",
+    "service/framework/AppShellCoordinator.js"
+  ],
+  "util/UxTelemetry.js": [
+    "infra/adapters/TelemetryAdapter.js"
+  ],
+  "util/ValidationPathMap.js": [
+    "controller/support/DetailSelectionSync.js",
+    "service/domain/detail/DetailValidationSupport.js"
+  ],
+  "util/WorkflowTelemetry.js": [
+    "Component.js",
+    "service/domain/cache/usecases/CacheValidationUseCase.js"
+  ],
+  "util/delta/DeltaChildChanges.js": [
+    "util/DeltaPayloadBuilder.js"
+  ],
+  "util/delta/DeltaCore.js": [
+    "util/DeltaPayloadBuilder.js",
+    "util/delta/DeltaChildChanges.js"
+  ],
+  "util/delta/DeltaDateCodec.js": [
+    "util/DeltaPayloadBuilder.js",
+    "util/delta/DeltaFieldMappers.js"
+  ],
+  "util/delta/DeltaFieldMappers.js": [
+    "util/DeltaPayloadBuilder.js"
+  ],
+  "util/layout/SplitterDefaults.js": [
+    "util/SplitterSizeService.js"
+  ],
+  "util/runtime/TimerDefaults.js": [
+    "service/framework/AppShellCoordinator.js",
+    "util/RuntimeTimerSanitizer.js",
+    "util/TimeConfigService.js"
+  ],
+  "util/runtime/TimerSanitizer.js": [
+    "util/RuntimeTimerSanitizer.js"
+  ],
+  "util/search/RebindDebouncePolicy.js": [
+    "util/SearchSmartControlCoordinator.js"
+  ],
+  "util/search/SearchBindingPolicy.js": [
+    "service/domain/search/usecases/ApplyRebindPolicyUseCase.js",
+    "util/SearchSmartControlCoordinator.js"
+  ],
+  "util/search/SearchFilterBuilder.js": [
+    "service/domain/search/usecases/BuildSearchFilterUseCase.js"
+  ],
+  "util/search/SearchMaxResults.js": [
+    "controller/support/SearchControllerSupport.js",
+    "util/search/SearchBindingPolicy.js"
+  ]
+}

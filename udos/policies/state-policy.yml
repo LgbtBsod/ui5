@@ -1,0 +1,5 @@
+state:
+  forbidden_literals:
+    - /mode
+    - /lockOperationState
+  prefer_statepaths_constants: true

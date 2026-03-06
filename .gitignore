@@ -1,0 +1,37 @@
+# Python caches and local environments
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+ENV/
+mock_gate_way/.venv/
+
+# Python runtime outputs
+mock_gate_way/uploads/
+mock_gate_way/gateway.db
+mock_gate_way/gateway.db-shm
+mock_gate_way/gateway.db-wal
+
+# Logs
+*.log
+docs/runtime/
+artifacts/*.log
+mock_gate_way/tmp_mock*.log
+
+# Visual review artifacts and temporary captures
+artifacts/tmp_zip_compare/
+artifacts/ux/review/
+tmp_video_frames/
+
+# Generated docs and scan dumps
+docs/artifacts/
+
+# Local media dumps
+*.mp4
+*.zip

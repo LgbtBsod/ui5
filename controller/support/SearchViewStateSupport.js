@@ -1,0 +1,174 @@
+sap.ui.define([
+    "sap/ui/model/json/JSONModel",
+    "sap_ui5/util/search/SearchMaxResults"
+], function (JSONModel, SearchMaxResults) {
+    "use strict";
+
+    function createViewModel(sScope) {
+        return new JSONModel({
+            busy: false,
+            searchActionBusy: false,
+            createActionBusy: false,
+            hasSearched: false,
+            hasRows: false,
+            canExport: false,
+            smartFilterReady: false,
+            smartTableReady: false,
+            smartFilterPersistencyKey: "pcctSmartFilterSession_" + String(sScope || "volatile"),
+            smartTablePersistencyKey: "pcctSmartTableSession_" + String(sScope || "volatile"),
+            filterHintVisible: false,
+            filterHintType: "Information",
+            filterHintText: "",
+            workflowStage: "DISCOVER",
+            lastUpdatedAt: "-",
+            bootstrapBusy: false,
+            analyticsBusy: false,
+            analyticsError: "",
+            tableBusy: false,
+            exportBusy: false,
+            hasSelection: false,
+            selectionCount: 0,
+            selectedRowIds: [],
+            canCopy: false,
+            canDelete: false,
+            selectedRowId: "",
+            scrollNavVisible: false,
+            resultsToolbarNavVisible: false,
+            analyticsRailBusy: false,
+            analyticsRail: { total: 0, monthly: 0, failedChecks: 0, failedBarriers: 0, avgChecksRate: 0, avgBarriersRate: 0, refreshedAtText: "-", sourceText: "-" },
+            analytics: {
+                total: 0,
+                failedChecks: 0,
+                failedBarriers: 0,
+                closedCount: 0,
+                registeredCount: 0,
+                source: "backend_aggregate",
+                avgChecksRate: 0,
+                avgBarriersRate: 0,
+                refreshedAt: "-",
+                charts: {
+                    failedChecksByProfession: [],
+                    failedBarriersByProfession: [],
+                    failedChecksByLpc: [],
+                    failedBarriersByLpc: []
+                },
+                hasCharts: {
+                    failedChecksByProfession: false,
+                    failedBarriersByProfession: false,
+                    failedChecksByLpc: false,
+                    failedBarriersByLpc: false
+                }
+            }
+        });
+    }
+
+    function resolveSearchUiSessionKey() {
+        var sKey = "";
+        try {
+            sKey = window.sessionStorage.getItem("pcct_search_ui_session") || "";
+            if (!sKey) {
+                sKey = "S" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+                window.sessionStorage.setItem("pcct_search_ui_session", sKey);
+            }
+        } catch (e) {
+            sKey = "volatile";
+        }
+        return sKey;
+    }
+
+    function isSmartControlsReady(oController) {
+        var oViewModel = oController.getModel("view");
+        var oSmartFilterBar = oController.byId("searchSmartFilterBar");
+        var bSmartFilterReady = !!(oViewModel && oViewModel.getProperty("/smartFilterReady"));
+        var bSmartTableReady = !!(oViewModel && oViewModel.getProperty("/smartTableReady"));
+
+        if (!bSmartFilterReady || !bSmartTableReady) {
+            return false;
+        }
+        if (oSmartFilterBar && typeof oSmartFilterBar.isInitialised === "function") {
+            return !!oSmartFilterBar.isInitialised();
+        }
+        return true;
+    }
+
+    function syncSearchTableRequestWindow(oController) {
+        var oSmartTable = oController.byId("searchSmartTable");
+        var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
+        var oStateModel = oController.getModel("state");
+        var oStateData = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
+        var iVisibleCap = SearchMaxResults.resolveMaxResults(oStateData) || 100;
+        var iBackendTop = SearchMaxResults.resolveBackendTop(oStateData);
+        var iThreshold = iVisibleCap;
+        var bGrowing = true;
+
+        if (!oInnerTable) {
+            return;
+        }
+        if (iBackendTop > 0 && iBackendTop < iThreshold) {
+            iThreshold = iBackendTop;
+            bGrowing = false;
+        }
+        if (typeof oInnerTable.setGrowing === "function") {
+            oInnerTable.setGrowing(bGrowing);
+        }
+        if (typeof oInnerTable.setGrowingScrollToLoad === "function") {
+            oInnerTable.setGrowingScrollToLoad(false);
+        }
+        if (typeof oInnerTable.setGrowingThreshold === "function") {
+            oInnerTable.setGrowingThreshold(iThreshold);
+        }
+    }
+
+    function formatWorkflowStageText(oBundle, sStage) {
+        var mFallbackText = {
+            ANALYZE: "Analyze",
+            REVIEW: "Review",
+            DISCOVER: "Discover"
+        };
+        var mStageKey = {
+            ANALYZE: "workflowStageAnalyze",
+            REVIEW: "workflowStageReview"
+        };
+        var sStageNorm = String(sStage || "").toUpperCase() || "DISCOVER";
+        var sKey = mStageKey[sStageNorm] || "workflowStageDiscover";
+        if (oBundle && oBundle.hasText && oBundle.hasText(sKey)) {
+            return oBundle.getText(sKey);
+        }
+        return mFallbackText[sStageNorm] || mFallbackText.DISCOVER;
+    }
+
+    function formatWorkflowStageState(sStage) {
+        var sNorm = String(sStage || "").toUpperCase();
+        if (sNorm === "ANALYZE") {
+            return "Success";
+        }
+        if (sNorm === "REVIEW") {
+            return "Warning";
+        }
+        return "Information";
+    }
+
+    function formatHumanDateTime(vDate) {
+        var oDate = vDate instanceof Date ? vDate : new Date(vDate || Date.now());
+        if (Number.isNaN(oDate.getTime())) {
+            oDate = new Date();
+        }
+        return oDate.toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    return {
+        createViewModel: createViewModel,
+        resolveSearchUiSessionKey: resolveSearchUiSessionKey,
+        isSmartControlsReady: isSmartControlsReady,
+        syncSearchTableRequestWindow: syncSearchTableRequestWindow,
+        formatHumanDateTime: formatHumanDateTime,
+        formatWorkflowStageText: formatWorkflowStageText,
+        formatWorkflowStageState: formatWorkflowStageState
+    };
+});

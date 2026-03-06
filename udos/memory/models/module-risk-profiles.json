@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-03-02T09:29:04.568Z",
+  "profiles": [
+    {
+      "module": "digital-twin",
+      "riskScore": 0.68,
+      "topRiskyFiles": [
+        "architecture/digital-twin/twin-snapshots/twin-2026-03-02.json",
+        "architecture/digital-twin/twin-store.json",
+        "docs/digital-twin/impact-report.md",
+        "docs/digital-twin/risk-report.md",
+        "docs/digital-twin/twin-summary.md"
+      ],
+      "topRiskyPatterns": []
+    },
+    {
+      "module": "package.json",
+      "riskScore": 0.68,
+      "topRiskyFiles": [
+        "package.json"
+      ],
+      "topRiskyPatterns": []
+    },
+    {
+      "module": "history",
+      "riskScore": 0.68,
+      "topRiskyFiles": [
+        "udos/history/events.log",
+        "udos/history/udos-state.json"
+      ],
+      "topRiskyPatterns": []
+    },
+    {
+      "module": "kernel",
+      "riskScore": 0.68,
+      "topRiskyFiles": [
+        "udos/kernel/udos.js"
+      ],
+      "topRiskyPatterns": []
+    }
+  ]
+}

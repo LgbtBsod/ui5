@@ -1,0 +1,67 @@
+sap.ui.define([], function () {
+    "use strict";
+
+    function clearPinnedClasses(oController) {
+        var oStickyHost = oController.byId && oController.byId("detailControlStickyHost");
+        var oHostDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
+        var oCardDom = oHostDom && oHostDom.querySelector ? oHostDom.querySelector(".detailControlExperienceCard") : null;
+        if (!oHostDom) {
+            return;
+        }
+        oHostDom.classList.remove("isViewportPinned");
+        oHostDom.style.removeProperty("height");
+        oHostDom.style.removeProperty("--detail-rail-height");
+        if (oCardDom) {
+            oCardDom.classList.remove("detailControlCardDocked");
+        }
+    }
+
+    return {
+        _clearViewportPinnedControlRailRetry: function () {},
+
+        _scheduleViewportPinnedControlRailBind: function () {
+            clearPinnedClasses(this);
+        },
+
+        _bindDetailEditSwitchKeyboardFallback: function () {
+            var oSwitch = this.byId("detailEditSwitch");
+            if (!oSwitch || !oSwitch.addEventDelegate) {
+                return;
+            }
+            if (!this._oDetailEditSwitchDelegate) {
+                this._oDetailEditSwitchDelegate = {
+                    onsapenter: this._onDetailEditSwitchKeyboardActivate.bind(this),
+                    onsapspace: this._onDetailEditSwitchKeyboardActivate.bind(this)
+                };
+            }
+            oSwitch.removeEventDelegate(this._oDetailEditSwitchDelegate);
+            oSwitch.addEventDelegate(this._oDetailEditSwitchDelegate, this);
+        },
+
+        _unbindViewportPinnedControlRail: function () {
+            clearPinnedClasses(this);
+        },
+
+        _bindViewportPinnedControlRail: function () {
+            clearPinnedClasses(this);
+        },
+
+        _syncViewportPinnedControlRail: function () {
+            clearPinnedClasses(this);
+        },
+
+        _onDetailEditSwitchKeyboardActivate: function (oEvent) {
+            var oSwitch = this.byId("detailEditSwitch");
+            if (!oSwitch || !oSwitch.getEnabled || !oSwitch.getEnabled()) {
+                return;
+            }
+            if (oEvent && oEvent.preventDefault) {
+                oEvent.preventDefault();
+            }
+            if (oEvent && oEvent.stopPropagation) {
+                oEvent.stopPropagation();
+            }
+            oSwitch.fireChange({ state: !oSwitch.getState() });
+        }
+    };
+});

@@ -1,0 +1,8 @@
+{
+  "emptyHandlers": [
+    "controller/Detail.controller.js:onCloseWorkflowAnalytics"
+  ],
+  "todoTriggers": [],
+  "unreachableDialogs": [],
+  "unreachableRoutes": []
+}

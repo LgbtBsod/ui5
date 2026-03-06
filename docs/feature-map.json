@@ -1,0 +1,704 @@
+{
+  "controller/App.controller.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/Base.controller.js": {
+    "feature": "shared",
+    "confidence": 0.5,
+    "note": "shared-candidate"
+  },
+  "controller/Detail.controller.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "controller/Search.controller.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "controller/TestUserDialog.controller.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/base/EffectMixin.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/base/ModelAccessMixin.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/base/RouterMixin.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/base/ThemeMixin.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/AppControllerActions.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/AttachmentDropZoneRuntime.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/AttachmentUploadCore.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/AttachmentUploadSupport.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "controller/support/ControllerResourceCleanup.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/DetailAccessViewState.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/DetailControllerActions.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "controller/support/DetailControllerLifecycle.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "controller/support/DetailDialogSupport.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/DetailFormatters.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "controller/support/DetailPersonInputSupport.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/DetailSelectionSync.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/DetailValidationSummarySupport.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/DetailViewSupport.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/SearchControllerActions.js": {
+    "feature": "search",
+    "confidence": 0.7
+  },
+  "controller/support/SearchControllerSupport.js": {
+    "feature": "search",
+    "confidence": 0.7
+  },
+  "controller/support/SearchRateProgress.js": {
+    "feature": "search",
+    "confidence": 0.7
+  },
+  "controller/support/SearchViewSupport.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "controller/support/SplitLayoutVisualSync.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "infra/adapters/BrowserCacheAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/ClockAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/DictAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/LastChangeSetAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/LocationLookupAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/LockAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/ODataChecklistRepoAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/PersonSuggestAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/SmartControlsAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/TelemetryAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/Ui5StateAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/Ui5StyleAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/WorkflowAnalyticsAdapter.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/shared/AttachmentRepoSupport.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/shared/ChecklistSnapshotMapper.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/shared/GatewayAdapterSupport.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/shared/GatewayIdentitySupport.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/adapters/shared/ODataAdapterUtils.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/navigation/RouteModeCoordinator.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/navigation/RouteModeRules.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/navigation/RouteSync.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/navigation/SplitterModeApplier.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/odata/GatewayODataClient.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "infra/ui/SplitterDragGuard.js": {
+    "feature": "infra",
+    "confidence": 1
+  },
+  "manager/ActivityMonitor.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/AutoSaveCoordinator.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/ConnectivityCoordinator.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/GCDManager.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/HeartbeatManager.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/LockStatusMonitor.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/ManagerFacade.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/SettingsManager.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/SmartCacheManager.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/shared/ManagerRuntime.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "manager/shared/TimerRuntime.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "service/SmartSearchAdapter.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "service/backend/GatewayBackendService.js": {
+    "feature": "backend",
+    "confidence": 1
+  },
+  "service/backend/GatewayClient.js": {
+    "feature": "backend",
+    "confidence": 1
+  },
+  "service/backend/GatewayErrorNormalizer.js": {
+    "feature": "backend",
+    "confidence": 1
+  },
+  "service/backend/GatewayODataTransport.js": {
+    "feature": "backend",
+    "confidence": 1
+  },
+  "service/domain/cache/ports/BrowserCachePort.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "service/domain/cache/ports/LastChangeSetPort.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "service/domain/cache/usecases/CacheReadUseCase.js": {
+    "feature": "framework",
+    "confidence": 0.7
+  },
+  "service/domain/cache/usecases/CacheValidationUseCase.js": {
+    "feature": "framework",
+    "confidence": 0.7
+  },
+  "service/domain/cache/usecases/CacheWriteUseCase.js": {
+    "feature": "framework",
+    "confidence": 0.7
+  },
+  "service/domain/detail/AttachmentEffectSupport.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/DetailAuthorizationSupport.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/DetailFacade.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/DetailStateAccess.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/DetailValidationSupport.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/AttachmentDeleteUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/AttachmentUploadUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/AutosaveDetailUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/ChangeStatusUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/CloseDetailUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/DeleteChecklistUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/EnterEditUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/ForceReadOnlyUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/LockLostUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/OpenDetailUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/PersonSuggestUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/ResolveConflictUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/RowOpsUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/SaveDetailUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/ValidateChecklistUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/detail/usecases/ValueHelpLocationUseCase.js": {
+    "feature": "detail",
+    "confidence": 1
+  },
+  "service/domain/lock/usecases/TakeoverLockUseCase.js": {
+    "feature": "lock",
+    "confidence": 1
+  },
+  "service/domain/search/ExportFacade.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/SearchFacade.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/SearchSelectionEffects.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/AnalyticsUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/ApplyRebindPolicyUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/BootstrapSearchUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/BuildSearchFilterUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/ExecuteSearchUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/ExportSearchUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/RebindSearchUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/SelectRowUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/search/usecases/SelectionChangedUseCase.js": {
+    "feature": "search",
+    "confidence": 1
+  },
+  "service/domain/shared/StatePaths.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/UseCaseInputUtils.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/UseCaseResultUtils.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/usecases/BootstrapAppUseCase.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/usecases/DiagnosticsUseCase.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/usecases/EnsureDictLoadedUseCase.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/usecases/StartManagersUseCase.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase.js": {
+    "feature": "shared",
+    "confidence": 1
+  },
+  "service/framework/ActionDispatcher.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/AppShellCoordinator.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/AppShellStateSync.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentInitBootSupport.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentInitFeedbackSupport.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentInitListenersSupport.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentInitLockRuntimeSupport.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentInitRuntime.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentInitSaveGuardSupport.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentLockReleaseSupport.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ComponentRuntimeSupport.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ControlStyleRuntime.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/CtxFactory.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/DraftChecklistFactory.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/EffectApplier.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/EffectModelOps.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/EffectTextResolver.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/Effects.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/FeedbackPolicy.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/NormalizedError.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/Result.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/SplitterModeApplier.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/ThemeRuntime.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/framework/UseCase.js": {
+    "feature": "framework",
+    "confidence": 1
+  },
+  "service/ui/StyleTokens.js": {
+    "feature": "framework",
+    "confidence": 0.7
+  },
+  "util/AttachmentUploadPolicy.js": {
+    "feature": "shared",
+    "confidence": 0.7
+  },
+  "util/ChecklistValidationService.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "util/ClientKeyGenerator.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "util/CreateSentinel.js": {
+    "feature": "shared",
+    "confidence": 0.5,
+    "note": "shared-candidate"
+  },
+  "util/DebugLogger.js": {
+    "feature": "shared",
+    "confidence": 0.5,
+    "note": "shared-candidate"
+  },
+  "util/DeltaPayloadBuilder.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "util/DraftChecklistFactory.js": {
+    "feature": "shared",
+    "confidence": 0.5,
+    "note": "shared-candidate"
+  },
+  "util/ExcelExport.js": {
+    "feature": "search",
+    "confidence": 0.7
+  },
+  "util/FlowCoordinator.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/InteractionFX.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/RuntimeTimerSanitizer.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/SearchSmartControlCoordinator.js": {
+    "feature": "shared",
+    "confidence": 0.5,
+    "note": "shared-candidate"
+  },
+  "util/SmartCacheStore.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/SmartCacheUtils.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/SplitterSizeService.js": {
+    "feature": "infra",
+    "confidence": 0.7
+  },
+  "util/ThemePhilosophy.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/ThemeService.js": {
+    "feature": "framework",
+    "confidence": 0.7
+  },
+  "util/TimeConfigService.js": {
+    "feature": "shared",
+    "confidence": 0.5,
+    "note": "shared-candidate"
+  },
+  "util/UxTelemetry.js": {
+    "feature": "infra",
+    "confidence": 0.7
+  },
+  "util/ValidationPathMap.js": {
+    "feature": "detail",
+    "confidence": 0.7
+  },
+  "util/WorkflowTelemetry.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/delta/DeltaChildChanges.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/delta/DeltaCore.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/delta/DeltaDateCodec.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/delta/DeltaFieldMappers.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/layout/SplitterDefaults.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/runtime/TimerDefaults.js": {
+    "feature": "framework",
+    "confidence": 0.7
+  },
+  "util/runtime/TimerSanitizer.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/search/RebindDebouncePolicy.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  },
+  "util/search/SearchBindingPolicy.js": {
+    "feature": "search",
+    "confidence": 0.7
+  },
+  "util/search/SearchFilterBuilder.js": {
+    "feature": "search",
+    "confidence": 0.7
+  },
+  "util/search/SearchMaxResults.js": {
+    "feature": "unknown",
+    "confidence": 0.2
+  }
+}

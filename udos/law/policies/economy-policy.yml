@@ -1,0 +1,3 @@
+economy:
+  min_balance: 0
+  emergency_override_env: UDOS_EMERGENCY_OVERRIDE_TOKEN

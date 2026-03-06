@@ -1,0 +1,695 @@
+.glassDialog,
+.expandedDialogContent {
+  color: var(--text-main);
+}
+
+.glassDialog .rnvStack,
+.expandedDialogContent {
+  gap: 0.75rem;
+}
+
+.rnvApp .dialogContentShell {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.92rem 0.96rem 1rem;
+}
+
+.rnvApp .compactDialogBody {
+  gap: 0.7rem;
+}
+
+.rnvApp .tableDialogBody,
+.rnvApp .valueHelpDialogBody {
+  min-height: 100%;
+  align-content: start;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(160, 184, 220, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(244, 248, 255, 0.08)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 16px 36px rgba(33, 56, 91, 0.08);
+  overflow: hidden;
+}
+
+.rnvApp .dialogSearchField,
+.rnvApp .dialogInlineHint {
+  width: 100%;
+}
+
+.rnvApp .valueHelpDialogBody.sapMFlexBox {
+  min-height: 100%;
+  height: 100%;
+}
+
+.rnvApp .valueHelpDialogBody > .sapMFlexItem {
+  min-width: 0;
+}
+
+.rnvApp .valueHelpDialogBody > .sapMFlexItem:last-child {
+  min-height: 0;
+}
+
+.rnvApp .valueHelpTreeTableHost.sapMFlexBox {
+  min-height: 0;
+  height: 100%;
+}
+
+.rnvApp .dialogInlineHint {
+  color: var(--text-subtle);
+}
+
+.rnvApp .dialogSearchField .sapMSFF,
+.rnvApp .dialogSearchField .sapMSFI {
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--text-main);
+}
+
+.rnvApp .dialogSearchField .sapMSFF {
+  border-radius: 999px;
+  border: 1px solid rgba(133, 166, 222, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 10px 22px rgba(71, 103, 148, 0.08);
+}
+
+.rnvApp .dialogSearchField .sapMSFI {
+  border-radius: 999px 0 0 999px;
+}
+
+.rnvApp .dialogSearchField .sapMSF,
+.rnvApp .dialogSearchField .sapMSFR {
+  border-radius: 999px;
+}
+
+.rnvApp .dialogDataTable,
+.rnvApp .dialogDataTable .sapUiTableCnt,
+.rnvApp .dialogDataTable .sapUiTableCtrlScr,
+.rnvApp .dialogDataTable .sapUiTableColHdrCnt,
+.rnvApp .dialogDataTable .sapMListTbl,
+.rnvApp .dialogDataTable .sapMListTblCnt {
+  background: transparent;
+}
+
+.rnvApp .dialogDataTable {
+  border-radius: calc(var(--radius-md) - 0.1rem);
+  overflow: hidden;
+  border: 1px solid rgba(160, 184, 220, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.rnvApp .dialogDataTable .sapUiTableCtrl,
+.rnvApp .dialogDataTable .sapUiTableRowHdrScr,
+.rnvApp .dialogDataTable .sapUiTableRowHdr,
+.rnvApp .dialogDataTable .sapUiTableCCnt,
+.rnvApp .dialogDataTable .sapUiTableCtrlCnt,
+.rnvApp .dialogDataTable .sapMListTbl,
+.rnvApp .dialogDataTable .sapMListItems {
+  background: transparent;
+}
+
+.rnvApp .dialogDataTable .sapUiTableCtrl {
+  border-collapse: separate;
+  border-spacing: 0 0.62rem;
+}
+
+.rnvApp .valueHelpTreeTable {
+  width: 100%;
+  min-height: 14rem;
+}
+
+.rnvApp .valueHelpTreeTable .sapUiTableCnt,
+.rnvApp .valueHelpTreeTable .sapUiTableCtrlScr,
+.rnvApp .valueHelpTreeTable .sapUiTableColHdrCnt,
+.rnvApp .valueHelpTreeTable .sapUiTableCCnt,
+.rnvApp .valueHelpTreeTable .sapUiTableCtrlCnt {
+  background: transparent;
+}
+
+.rnvApp .dialogDataTable .sapUiTableColCell,
+.rnvApp .dialogDataTable .sapUiTableCell,
+.rnvApp .dialogDataTable .sapMListTblHeaderCell,
+.rnvApp .dialogDataTable .sapMListTblCell {
+  background: var(--theme-table-cell-bg);
+  border-inline-color: transparent;
+  border-color: rgba(160, 184, 220, 0.16);
+}
+
+.rnvApp .dialogDataTable .sapUiTableColCell,
+.rnvApp .dialogDataTable .sapMListTblHeaderCell {
+  background: var(--theme-table-header-bg);
+  color: var(--text-muted);
+  font-size: var(--theme-table-header-size);
+  font-weight: 800;
+  line-height: var(--theme-table-header-line-height);
+  letter-spacing: 0.06em;
+  padding:
+    calc(var(--theme-table-cell-padding-block) - 0.08rem)
+    var(--theme-table-cell-padding-inline);
+  text-transform: uppercase;
+}
+
+.rnvApp .dialogDataTable .sapUiTableCell,
+.rnvApp .dialogDataTable .sapMListTblCell {
+  color: var(--text-main);
+  padding:
+    var(--theme-table-cell-padding-block)
+    var(--theme-table-cell-padding-inline);
+  font-size: var(--theme-table-body-size);
+  line-height: var(--theme-table-body-line-height);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(249, 252, 255, 0.08)),
+    var(--theme-rail-bg);
+  border-top-color: rgba(var(--accent-rgb), 0.12);
+  border-bottom-color: rgba(var(--accent-rgb), 0.12);
+}
+
+.rnvApp .dialogDataTable .sapMListTbl {
+  border-collapse: separate;
+  border-spacing: 0 0.62rem;
+}
+
+.rnvApp .dialogDataTable .sapUiTableTr:hover .sapUiTableCell,
+.rnvApp .dialogDataTable .sapMListTblRow:hover .sapMListTblCell {
+  background: var(--theme-table-cell-hover-bg);
+}
+
+.rnvApp .dialogDataTable .sapUiTableCell:first-child,
+.rnvApp .dialogDataTable .sapMListTblCell:first-child {
+  border-top-left-radius: var(--theme-table-row-radius);
+  border-bottom-left-radius: var(--theme-table-row-radius);
+}
+
+.rnvApp .dialogDataTable .sapUiTableCell:last-child,
+.rnvApp .dialogDataTable .sapMListTblCell:last-child {
+  border-top-right-radius: var(--theme-table-row-radius);
+  border-bottom-right-radius: var(--theme-table-row-radius);
+}
+
+.rnvApp .dialogDataTable .sapMInputBaseContentWrapper,
+.rnvApp .dialogDataTable .sapMSwt,
+.rnvApp .dialogDataTable .sapMBtn .sapMBtnInner {
+  border-radius: calc(var(--radius-sm) - 0.08rem);
+}
+
+.rnvApp .glassDialog .sapMDialogTitle,
+.rnvApp .glassDialog .sapMBar,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapUiCompValueHelpDialog .sapMDialogTitle {
+  padding-inline: 1.15rem;
+  min-height: 3.4rem;
+}
+
+.rnvApp .glassDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog.sapUiCompValueHelpDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMPopoverCont,
+.rnvApp .rnvSkin .sapMResponsivePopover .sapMPopoverCont {
+  padding: 0;
+}
+
+.rnvApp .glassDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapUiCompValueHelpDialog .sapMDialogFooter {
+  padding: 0.35rem 0.7rem;
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog,
+.rnvApp .rnvSkin .sapMDialog.sapUiCompValueHelpDialog,
+.rnvApp .rnvSkin .sapMPopover,
+.rnvApp .rnvSkin .sapMResponsivePopover {
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 24px 60px rgba(15, 28, 52, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMList,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMList,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMList,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMList,
+.rnvApp .rnvSkin .sapMDialog.sapUiCompValueHelpDialog .sapMList,
+.rnvApp .rnvSkin .sapMPopover .sapMList,
+.rnvApp .rnvSkin .sapMResponsivePopover .sapMList {
+  background: transparent;
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMLIB,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMBtn,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMBtnInner,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMLIB,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMLIB,
+.rnvApp .rnvSkin .sapMDialog.sapUiCompValueHelpDialog .sapMLIB,
+.rnvApp .rnvSkin .sapMPopover .sapMLIB,
+.rnvApp .rnvSkin .sapMResponsivePopover .sapMLIB {
+  border-radius: calc(var(--radius-md) - 0.1rem);
+  margin: 0.16rem 0.35rem;
+  background: var(--theme-table-cell-bg);
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMLIB:hover,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMBtnInner:hover,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMLIB:hover,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMLIB:hover,
+.rnvApp .rnvSkin .sapMDialog.sapUiCompValueHelpDialog .sapMLIB:hover,
+.rnvApp .rnvSkin .sapMPopover .sapMLIB:hover,
+.rnvApp .rnvSkin .sapMResponsivePopover .sapMLIB:hover {
+  background: var(--theme-table-cell-hover-bg);
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMSegB,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMSegB {
+  background: var(--theme-rail-bg);
+  border: 1px solid var(--theme-rail-border);
+  box-shadow: var(--theme-rail-shadow);
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMSegBBtnInner,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMSegBBtnInner {
+  border-radius: calc(var(--radius-sm) - 0.12rem);
+}
+
+.rnvApp .rnvSkin .sapMDialog.glassDialog,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog,
+.rnvApp .rnvSkin .sapMPopover,
+.rnvApp .rnvSkin .sapMResponsivePopover,
+.rnvApp .rnvSkin .sapMDialog.sapMMessageDialog {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(160, 184, 220, 0.18);
+  backdrop-filter: blur(var(--glass-blur)) saturate(132%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(132%);
+  box-shadow:
+    0 24px 60px rgba(15, 28, 52, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .glassDialog .sapMDialogTitle,
+.rnvApp .glassDialog .sapMDialogSection,
+.rnvApp .glassDialog .sapMDialogScroll,
+.rnvApp .glassDialog .sapMDialogFooter,
+.rnvApp .glassDialog .sapMBar,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogScroll,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogScroll,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogScroll,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMPopoverCont,
+.rnvApp .rnvSkin .sapMResponsivePopover .sapMPopoverCont {
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03) 42%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  color: var(--text-main);
+}
+
+.rnvApp .glassDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogTitle,
+.rnvApp .glassDialog .sapMBar {
+  border-bottom: 1px solid rgba(160, 184, 220, 0.18);
+}
+
+.rnvApp .glassDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogFooter {
+  border-top: 1px solid rgba(160, 184, 220, 0.18);
+}
+
+.rnvApp .glassDialog .sapMDialogTitle .sapMTitle,
+.rnvApp .glassDialog .sapMText,
+.rnvApp .glassDialog .sapMLabel,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMText,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMLabel,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMText,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMTitle,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMLabel,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMText,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMTitle,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMLabel,
+.rnvApp .rnvSkin .sapMPopover .sapMText,
+.rnvApp .rnvSkin .sapMPopover .sapMTitle,
+.rnvApp .rnvSkin .sapMPopover .sapMLabel {
+  color: var(--text-main);
+}
+
+.rnvApp .glassDialog .sapMDialogTitle .sapMTitle {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.rnvApp .glassDialog .sapMBtn .sapMBtnInner,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMBtn .sapMBtnInner,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMBtn .sapMBtnInner,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMBtn .sapMBtnInner,
+.rnvApp .rnvSkin .sapMPopover .sapMBtn .sapMBtnInner {
+  border-radius: 999px;
+}
+
+.rnvApp .glassDialog .sapMDialogFooter .sapMBtn .sapMBtnInner {
+  min-width: 7rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .glassDialog .sapMDialogScrollCont,
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogScrollCont,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogScrollCont,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogScrollCont,
+.rnvApp .rnvSkin .sapMPopoverCont {
+  padding: 0;
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMBarMiddle,
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMBarMiddle,
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMBarMiddle {
+  padding-block: 0.15rem;
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMListUl,
+.rnvApp .rnvSkin .sapMDialog.sapMP13nDialog .sapMListUl,
+.rnvApp .rnvSkin .sapMDialog.sapMViewSettingsDialog .sapMListUl,
+.rnvApp .rnvSkin .sapMPopover .sapMListUl,
+.rnvApp .rnvSkin .sapMResponsivePopover .sapMListUl {
+  padding: 0.25rem 0.2rem 0.35rem;
+}
+
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogSection {
+  padding: 0.65rem 0.6rem 0.7rem;
+}
+
+.rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMBtn {
+  margin: 0.12rem 0;
+}
+
+.rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMBusyDialogLabel {
+  padding: 0.3rem 1rem 0.5rem;
+  text-align: center;
+}
+
+/* Fallback skin for runtime dialogs without explicit glass classes. */
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogSection,
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogScroll,
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogFooter,
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMBar {
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03) 42%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  color: var(--text-main);
+}
+
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogTitle,
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMBar {
+  border-bottom: 1px solid rgba(160, 184, 220, 0.18);
+}
+
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogFooter {
+  border-top: 1px solid rgba(160, 184, 220, 0.18);
+}
+
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMText,
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMLabel,
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMTitle {
+  color: var(--text-main);
+}
+
+.rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMBtn .sapMBtnInner {
+  border-radius: 999px;
+}
+
+body.rnvAppRoot.appDark .rnvApp .glassDialog .sapMDialogTitle,
+body.rnvAppRoot.appDark .rnvApp .glassDialog .sapMDialogSection,
+body.rnvAppRoot.appDark .rnvApp .glassDialog .sapMDialogScroll,
+body.rnvAppRoot.appDark .rnvApp .glassDialog .sapMDialogFooter,
+body.rnvAppRoot.appDark .rnvApp .glassDialog .sapMBar,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogTitle,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogSection,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogScroll,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMSelectDialog .sapMDialogFooter,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogTitle,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogSection,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogScroll,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMActionSheetDialog.sapMDialog .sapMDialogFooter,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogTitle,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogSection,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogScroll,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog.sapMBusyDialog .sapMDialogFooter,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMPopoverCont,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMResponsivePopover .sapMPopoverCont {
+  background:
+    linear-gradient(165deg, rgba(155, 187, 255, 0.08), rgba(255, 255, 255, 0.01) 42%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+}
+
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogTitle,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogSection,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogScroll,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMDialogFooter,
+body.rnvAppRoot.appDark .rnvApp .rnvSkin .sapMDialog:not(.glassDialog) .sapMBar {
+  background:
+    linear-gradient(165deg, rgba(155, 187, 255, 0.08), rgba(255, 255, 255, 0.01) 42%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+}
+
+body.rnvAppRoot.appDark .rnvApp .tableDialogBody,
+body.rnvAppRoot.appDark .rnvApp .valueHelpDialogBody {
+  border-color: rgba(126, 156, 208, 0.2);
+  background:
+    linear-gradient(180deg, rgba(155, 187, 255, 0.06), rgba(11, 20, 36, 0.08)),
+    linear-gradient(180deg, rgba(8, 20, 38, 0.9), rgba(12, 25, 44, 0.8));
+  box-shadow:
+    inset 0 1px 0 rgba(216, 231, 255, 0.08),
+    0 18px 40px rgba(1, 6, 16, 0.28);
+}
+
+body.rnvAppRoot.appDark .rnvApp .dialogSearchField .sapMSFF,
+body.rnvAppRoot.appDark .rnvApp .dialogSearchField .sapMSFI {
+  background: rgba(15, 28, 48, 0.88);
+  color: var(--text-main);
+}
+
+body.rnvAppRoot.appDark .rnvApp .dialogSearchField .sapMSFF {
+  border-color: rgba(126, 156, 208, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(203, 226, 255, 0.08),
+    0 12px 26px rgba(1, 6, 16, 0.24);
+}
+
+body.rnvAppRoot.appDark .rnvApp .dialogDataTable {
+  border-color: rgba(126, 156, 208, 0.2);
+  background: linear-gradient(180deg, rgba(16, 30, 50, 0.72), rgba(11, 20, 36, 0.8));
+  box-shadow: inset 0 1px 0 rgba(203, 226, 255, 0.08);
+}
+
+.rnvApp .shellPopoverBody {
+  display: grid;
+  gap: 0.78rem;
+  padding: 0.92rem 0.96rem 0.98rem;
+}
+
+.rnvApp .shellPopoverIntro {
+  color: var(--text-subtle);
+  line-height: 1.4;
+}
+
+.rnvApp .shellPopoverList,
+.rnvApp .shellPopoverList .sapMListUl {
+  background: transparent;
+}
+
+.rnvApp .shellNotificationItem,
+.rnvApp .shellHelpItem,
+.rnvApp .shellUserCard,
+.rnvApp .shellSettingRow,
+.rnvApp .shellThemeMeta {
+  padding: 0.78rem 0.88rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--theme-rail-border);
+  background: var(--theme-rail-bg);
+  box-shadow: var(--theme-rail-shadow);
+}
+
+.rnvApp .shellSettingRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 0.8rem;
+  align-items: center;
+}
+
+.rnvApp .shellNotificationItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.72rem;
+}
+
+.rnvApp .shellNotificationItem,
+.rnvApp .shellThemeMeta {
+  gap: 0.75rem;
+}
+
+.rnvApp .shellNotificationText,
+.rnvApp .shellSettingCopy {
+  gap: 0.18rem;
+}
+
+.rnvApp .shellSettingCopy {
+  min-width: 0;
+}
+
+.rnvApp .shellSettingRow .sapMSwt,
+.rnvApp .shellSettingRow .sapMFlexItem:last-child {
+  flex: 0 0 auto;
+  min-width: 3rem;
+  justify-self: end;
+}
+
+.rnvApp .shellItemHeader,
+.rnvApp .shellThemeMetaInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+}
+
+.rnvApp .shellItemIcon,
+.rnvApp .shellNotificationIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  min-width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--theme-chip-border);
+  background: var(--theme-chip-bg);
+  color: var(--accent);
+  font-size: 0.82rem;
+}
+
+.rnvApp .shellThemeMetaIcon {
+  width: 1.5rem;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.76rem;
+}
+
+.rnvApp .shellNotificationTitle,
+.rnvApp .shellUserLabel,
+.rnvApp .shellThemeMetaLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.rnvApp .shellNotificationValue,
+.rnvApp .shellHelpText {
+  color: var(--text-subtle);
+  line-height: 1.4;
+}
+
+.rnvApp .shellSettingsBody,
+.rnvApp .shellHelpBody,
+.rnvApp .shellUserBody {
+  min-width: min(100%, 22rem);
+  gap: 0.72rem;
+}
+
+.rnvApp .shellUserContextCard,
+.rnvApp .shellUserContextChips,
+.rnvApp .shellUserPassiveCard {
+  gap: 0.55rem;
+}
+
+.rnvApp .shellUserSessionStatus {
+  margin-top: 0.4rem;
+}
+
+.rnvApp .shellUserActionBtn .sapMBtnInner {
+  min-width: 100%;
+  border-radius: 999px;
+}
+
+.rnvApp .analyticsNarrativeBlock,
+.rnvApp .analyticsBreakdownSection {
+  padding: 0.8rem 0.88rem;
+  border-radius: calc(var(--radius-lg) - 0.18rem);
+  border: 1px solid var(--theme-rail-border);
+  background: var(--theme-rail-bg);
+  box-shadow: var(--theme-rail-shadow);
+}
+
+.rnvApp .searchAnalyticsDialogInfo,
+.rnvApp .searchAnalyticsDialogError {
+  margin-bottom: 0;
+}
+
+.rnvApp .analyticsToplineGrid {
+  gap: 0.78rem;
+}
+
+body.rnvAppRoot.appDark .rnvApp .shellNotificationValue,
+body.rnvAppRoot.appDark .rnvApp .shellHelpText {
+  color: rgba(237, 244, 255, 0.88);
+}
+
+body.rnvAppRoot.appDark .rnvApp .shellNotificationItem,
+body.rnvAppRoot.appDark .rnvApp .shellHelpItem,
+body.rnvAppRoot.appDark .rnvApp .shellUserCard,
+body.rnvAppRoot.appDark .rnvApp .shellSettingRow,
+body.rnvAppRoot.appDark .rnvApp .shellThemeMeta {
+  background:
+    linear-gradient(180deg, rgba(82, 101, 135, 0.2), rgba(18, 29, 47, 0.28));
+}
+
+body.rnvAppRoot .sapMMessageToast.glassToast {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(160, 184, 220, 0.22);
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 42%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  box-shadow:
+    0 20px 44px rgba(15, 28, 52, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: var(--text-main);
+  backdrop-filter: blur(var(--glass-blur)) saturate(132%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(132%);
+}
+
+body.rnvAppRoot.appDark .sapMMessageToast.glassToast {
+  border-color: rgba(126, 156, 208, 0.2);
+  background:
+    linear-gradient(165deg, rgba(155, 187, 255, 0.08), rgba(255, 255, 255, 0.01) 42%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  box-shadow:
+    0 22px 48px rgba(1, 6, 16, 0.28),
+    inset 0 1px 0 rgba(203, 226, 255, 0.08);
+}

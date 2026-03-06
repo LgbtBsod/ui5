@@ -1,0 +1,35 @@
+[
+  {
+    "flightPlanId": "FP-2026-03-02-001",
+    "prNumber": 201,
+    "title": "UI i18n cleanup",
+    "risk": "LOW",
+    "files": ["i18n/i18n.properties", "docs/run-checklist.md"],
+    "statePaths": [],
+    "workflows": ["searchWorkflow"],
+    "hasPreflight": true,
+    "openedAt": "2026-03-02T08:00:00Z"
+  },
+  {
+    "flightPlanId": "FP-2026-03-02-002",
+    "prNumber": 202,
+    "title": "Autosave debounce tuning",
+    "risk": "HIGH",
+    "files": ["service/domain/detail/usecases/AutosaveDetailUseCase.js", "manager/AutoSaveCoordinator.js"],
+    "statePaths": ["/mode", "/lockOperationState"],
+    "workflows": ["autosaveWorkflow", "lockWorkflow"],
+    "hasPreflight": true,
+    "openedAt": "2026-03-02T08:20:00Z"
+  },
+  {
+    "flightPlanId": "FP-2026-03-02-003",
+    "prNumber": 203,
+    "title": "Search toolbar visual update",
+    "risk": "MED",
+    "files": ["view/Search.view.xml", "controller/Search.controller.js"],
+    "statePaths": ["/searchMode"],
+    "workflows": ["searchWorkflow"],
+    "hasPreflight": true,
+    "openedAt": "2026-03-02T08:10:00Z"
+  }
+]

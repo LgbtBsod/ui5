@@ -1,0 +1,9 @@
+case_id: CASE-2026-03-02-01
+rule: controller-size-policy
+violation: controller LOC = 210
+decision: allowed
+reason: temporary migration of legacy logic
+conditions:
+  - refactor mission must be scheduled
+  - controller must drop below 150 LOC within 2 sprints
+expires_at: 2026-04-01

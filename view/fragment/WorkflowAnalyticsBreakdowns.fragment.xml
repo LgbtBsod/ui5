@@ -1,0 +1,70 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox class="sapUiSmallMarginTop searchAnalyticsDialogBreakdowns analyticsBreakdownSection" renderType="Bare">
+        <Text text="{i18n>workflowAnalyticsBreakdowns}" class="kpiLabel sapUiTinyMarginBottom"/>
+        <HBox class="searchAnalyticsBreakdownGrid" wrap="Wrap" renderType="Bare">
+            <VBox class="analyticsChartCard">
+                <Text text="{i18n>analyticsFailedChecksByProfession}" class="kpiLabel"/>
+                <HBox class="analyticsColumnChart" items="{view>/analytics/charts/failedChecksByProfession}" renderType="Bare">
+                    <items>
+                        <VBox class="analyticsColumnItem" renderType="Bare">
+                            <Text text="{view>value}" class="analyticsColumnValue"/>
+                            <VBox class="analyticsColumnMeter analyticsColumnMeterChecks" justifyContent="End" renderType="Bare">
+                                <VBox class="analyticsColumnBar analyticsColumnBarChecks" height="{view>barHeight}" renderType="Bare"/>
+                            </VBox>
+                            <Text text="{view>labelShort}" tooltip="{view>label}" class="analyticsColumnLabel"/>
+                        </VBox>
+                    </items>
+                </HBox>
+                <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByProfession} }" class="analyticsChartEmpty"/>
+            </VBox>
+
+            <VBox class="analyticsChartCard">
+                <Text text="{i18n>analyticsFailedBarriersByProfession}" class="kpiLabel"/>
+                <HBox class="analyticsColumnChart" items="{view>/analytics/charts/failedBarriersByProfession}" renderType="Bare">
+                    <items>
+                        <VBox class="analyticsColumnItem" renderType="Bare">
+                            <Text text="{view>value}" class="analyticsColumnValue"/>
+                            <VBox class="analyticsColumnMeter analyticsColumnMeterBarriers" justifyContent="End" renderType="Bare">
+                                <VBox class="analyticsColumnBar analyticsColumnBarBarriers" height="{view>barHeight}" renderType="Bare"/>
+                            </VBox>
+                            <Text text="{view>labelShort}" tooltip="{view>label}" class="analyticsColumnLabel"/>
+                        </VBox>
+                    </items>
+                </HBox>
+                <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedBarriersByProfession} }" class="analyticsChartEmpty"/>
+            </VBox>
+
+            <VBox class="analyticsChartCard">
+                <Text text="{i18n>analyticsFailedChecksByLpc}" class="kpiLabel"/>
+                <HBox class="analyticsColumnChart" items="{view>/analytics/charts/failedChecksByLpc}" renderType="Bare">
+                    <items>
+                        <VBox class="analyticsColumnItem" renderType="Bare">
+                            <Text text="{view>value}" class="analyticsColumnValue"/>
+                            <VBox class="analyticsColumnMeter analyticsColumnMeterChecks" justifyContent="End" renderType="Bare">
+                                <VBox class="analyticsColumnBar analyticsColumnBarChecks" height="{view>barHeight}" renderType="Bare"/>
+                            </VBox>
+                            <Text text="{view>labelShort}" tooltip="{view>label}" class="analyticsColumnLabel"/>
+                        </VBox>
+                    </items>
+                </HBox>
+                <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByLpc} }" class="analyticsChartEmpty"/>
+            </VBox>
+
+            <VBox class="analyticsChartCard">
+                <Text text="{i18n>analyticsFailedBarriersByLpc}" class="kpiLabel"/>
+                <HBox class="analyticsColumnChart" items="{view>/analytics/charts/failedBarriersByLpc}" renderType="Bare">
+                    <items>
+                        <VBox class="analyticsColumnItem" renderType="Bare">
+                            <Text text="{view>value}" class="analyticsColumnValue"/>
+                            <VBox class="analyticsColumnMeter analyticsColumnMeterBarriers" justifyContent="End" renderType="Bare">
+                                <VBox class="analyticsColumnBar analyticsColumnBarBarriers" height="{view>barHeight}" renderType="Bare"/>
+                            </VBox>
+                            <Text text="{view>labelShort}" tooltip="{view>label}" class="analyticsColumnLabel"/>
+                        </VBox>
+                    </items>
+                </HBox>
+                <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedBarriersByLpc} }" class="analyticsChartEmpty"/>
+            </VBox>
+        </HBox>
+    </VBox>
+</core:FragmentDefinition>

@@ -1,0 +1,23 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <VBox class="appSkeletonFormSection" renderType="Bare">
+        <HBox class="appSkeletonMushroomGrid" renderType="Bare" wrap="Wrap">
+            <VBox class="appSkeletonMushroomCard" renderType="Bare">
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineLong" renderType="Bare"/>
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
+            </VBox>
+            <VBox class="appSkeletonMushroomCard" renderType="Bare">
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineLong" renderType="Bare"/>
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
+            </VBox>
+            <VBox class="appSkeletonMushroomCard" renderType="Bare">
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineLong" renderType="Bare"/>
+                <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
+            </VBox>
+        </HBox>
+    </VBox>
+</core:FragmentDefinition>

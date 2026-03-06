@@ -1,0 +1,2102 @@
+.rnvApp .detailHeroCard,
+.rnvApp .detailWorkflowRail,
+.rnvApp .detailControlBar,
+.rnvApp .detailAttachmentsCard {
+  width: 100%;
+}
+
+.rnvApp .detailContent,
+.rnvApp .detailContent .sapUxAPObjectPageLayout,
+.rnvApp .detailContent .sapUxAPObjectPageWrapper,
+.rnvApp .detailContent .sapUxAPObjectPageContainer,
+.rnvApp .detailContent .sapUxAPObjectPageScroll,
+.rnvApp .detailContent .sapFDynamicPage,
+.rnvApp .detailContent .sapFDynamicPageContent,
+.rnvApp .detailContent .sapFDynamicPageContentFitContainer,
+.rnvApp .detailContent .sapFDynamicPageContentWrapper,
+.rnvApp .detailContent .sapFDynamicPageHeader,
+.rnvApp .detailContent .sapFDynamicPageHeaderWithContent,
+.rnvApp .detailContent .sapFDynamicPageHeaderContent,
+.rnvApp .detailContent .sapFDynamicPageHeaderContentWrapper,
+.rnvApp .detailContent .sapUxAPObjectPageHeader,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderContent,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderContentFlexBox,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderContentItem,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderContentItemWrapper,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderIdentifier,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderIdentifierContainer,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderDetailsContainer,
+.rnvApp .detailContent .sapUxAPObjectPageSection,
+.rnvApp .detailContent .sapUxAPObjectPageSectionContainer,
+.rnvApp .detailContent .sapUxAPObjectPageSubSection,
+.rnvApp .detailContent .sapUxAPObjectPageSubSectionFitContainer,
+.rnvApp .detailContent .sapUxAPObjectPageSubSectionHeader,
+.rnvApp .detailContent .sapUxAPBlockContainer,
+.rnvApp .detailContent .sapUxAPAnchorBar,
+.rnvApp .detailContent .sapUxAPAnchorBarScrollContainer {
+  background: transparent;
+}
+
+.rnvApp .detailContent .sapUxAPObjectPageLayout,
+.rnvApp .detailContent .sapUxAPObjectPageWrapper,
+.rnvApp .detailContent .sapUxAPObjectPageContainer,
+.rnvApp .detailContent .sapUxAPObjectPageScroll,
+.rnvApp .detailContent .sapFDynamicPage,
+.rnvApp .detailContent .sapFDynamicPageContent,
+.rnvApp .detailContent .sapFDynamicPageContentFitContainer,
+.rnvApp .detailContent .sapFDynamicPageContentWrapper,
+.rnvApp .detailContent .sapUxAPObjectPageSection,
+.rnvApp .detailContent .sapUxAPObjectPageSectionContainer,
+.rnvApp .detailContent .sapUxAPObjectPageSubSection,
+.rnvApp .detailContent .sapUxAPObjectPageSubSectionFitContainer,
+.rnvApp .detailContent .sapUxAPBlockContainer,
+.rnvApp .detailContent .sapUiRespGrid,
+.rnvApp .detailContent [class*="sapUiRespGridSpan"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+.rnvApp .detailContent,
+.rnvApp .detailContent .sapUxAPObjectPageLayout,
+.rnvApp .detailContent .sapUxAPObjectPageWrapper,
+.rnvApp .detailContent .sapUxAPObjectPageContainer,
+.rnvApp .detailContent .sapUxAPObjectPageScroll {
+  overflow-x: clip;
+}
+
+.rnvApp .detailContent {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.rnvApp .detailContent .sapMFlexItem {
+  min-height: 0;
+}
+
+.rnvApp .detailContent [id$="detailObjectPage"] {
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+}
+
+.rnvApp .detailContent .sapUxAPObjectPageWrapper {
+  height: 100%;
+  min-height: 0;
+}
+
+.rnvApp [id$="detailPaneHost"],
+.rnvApp [id$="detailPaneHost"] .sapUiView,
+.rnvApp [id$="detailPaneHost"] .detailContent {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.rnvApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderTitle {
+  display: none;
+}
+
+.rnvApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContent {
+  padding-bottom: 0.35rem;
+}
+
+.rnvApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContentFlexBox {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+  overflow: visible;
+}
+
+.rnvApp .detailContent .sapUxAPObjectPageHeaderDetails,
+.rnvApp .detailContent .sapUxAPObjectPageHeaderDetailsDesign-Light {
+  padding: 0.45rem 0.55rem 0.7rem;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.08), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(248, 251, 255, 0.04));
+  border: 1px solid rgba(160, 184, 220, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  overflow: visible;
+}
+
+.rnvApp .detailContent .sapUxAPObjectPageHeaderDetails .sapUxAPObjectPageHeaderContentItem {
+  margin-bottom: 0.7rem;
+}
+
+.rnvApp .detailHeroCard,
+.rnvApp .detailControlInlineCard,
+.rnvApp .detailSectionCard {
+  position: relative;
+  padding: 1rem;
+  overflow: hidden;
+  box-shadow:
+    0 22px 48px rgba(18, 36, 64, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .detailHeroCard {
+  padding-block: 1.1rem;
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.16), transparent 38%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.16), transparent 42%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.03) 44%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  transition: transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.rnvApp .detailHeroSurface::before,
+.rnvApp .detailAttachmentsCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 0.22rem;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.18), rgba(var(--accent-rgb), 0.04));
+  pointer-events: none;
+}
+
+.rnvApp .detailHeroHeader,
+.rnvApp .detailControlToolbarStack,
+.rnvApp .detailControlRow,
+.rnvApp .detailControlRowTop,
+.rnvApp .detailControlRowActions,
+.rnvApp .detailControlSkeletonRow,
+.rnvApp .detailControlSkeletonButtons {
+  gap: 0.75rem;
+}
+
+.rnvApp .detailWorkflowRail.sapMOTB {
+  background: transparent;
+  border: 0;
+  padding-inline: 0;
+}
+
+.rnvApp .detailWorkflowChip,
+.rnvApp .uxStatChip,
+.rnvApp .detailRailStatusChip {
+  border-radius: 999px;
+  transition: transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease, background 220ms ease;
+}
+
+.rnvApp .detailWorkflowChip,
+.rnvApp .detailRailStatusChip {
+  --status-chip-bg: var(--feedback-info-bg);
+  --status-chip-border: var(--feedback-info-border);
+  --status-chip-glow: var(--feedback-info-glow);
+}
+
+.rnvApp .detailWorkflowChip,
+.rnvApp .uxStatChip {
+  padding: 0.28rem 0.78rem;
+  border: 1px solid var(--status-chip-border, var(--theme-chip-border));
+  background: var(--status-chip-bg, var(--theme-chip-bg));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 8px 18px var(--status-chip-glow, rgba(var(--accent-rgb), 0.08));
+}
+
+.rnvApp .uxStatChip {
+  gap: 0.3rem;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.32rem 0.82rem;
+}
+
+.rnvApp .uxStatChip .sapMText {
+  line-height: 1.15;
+}
+
+.rnvApp .detailControlHostInline {
+  margin-top: 0.32rem;
+  margin-bottom: 0.62rem;
+}
+
+.rnvApp .detailMainExperienceStack,
+.rnvApp .detailContent .sapUxAPBlockContainer,
+.rnvApp .detailContent .sapUxAPObjectPageSubSectionFitContainer {
+  overflow: visible;
+}
+
+.rnvApp .detailMainExperienceStack {
+  gap: 0.92rem;
+}
+
+.rnvApp .detailControlInlineCard {
+  width: 100%;
+  min-width: 0;
+  padding: 0.8rem 0.85rem 0.72rem;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 46%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+}
+
+.rnvApp .detailControlStickyBlock .detailControlInlineCard,
+.rnvApp .detailControlStickyBlock.detailControlInlineCard {
+  box-shadow:
+    0 26px 54px rgba(18, 36, 64, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .detailRailHint {
+  color: var(--text-subtle);
+  font-size: 0.74rem;
+}
+
+.rnvApp .detailControlRow .sapMBtn .sapMBtnInner {
+  border-radius: 999px;
+}
+
+.rnvApp .detailControlRowActions .sapMBtn .sapMBtnInner,
+.rnvApp .detailWorkflowRail .sapMBtn .sapMBtnInner {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+  min-height: 2.25rem;
+}
+
+.rnvApp .detailControlRowTop .sapMSwt,
+.rnvApp .detailControlRowTop .sapMObjStatus,
+.rnvApp .detailControlRowTop .sapMBusyIndicator,
+.rnvApp .detailControlRowActions .sapMBtn {
+  margin-top: 0.08rem;
+  margin-bottom: 0.08rem;
+}
+
+.rnvApp .detailControlRowTop .sapMSwt {
+  min-width: 3rem;
+}
+
+.rnvApp .detailRailStatusChip {
+  --status-chip-bg: var(--feedback-info-bg);
+  --status-chip-border: var(--feedback-info-border);
+  --status-chip-glow: var(--feedback-info-glow);
+  padding: 0.18rem 0.45rem;
+  border: 1px solid var(--status-chip-border);
+  background: var(--status-chip-bg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 8px 18px var(--status-chip-glow);
+}
+
+.rnvApp .detailWorkflowChip .sapMObjStatusText,
+.rnvApp .uxStatChip .sapMText,
+.rnvApp .detailRailStatusChip .sapMObjStatusText,
+.rnvApp .detailRailStatusChip .sapUiIcon {
+  color: var(--text-main);
+}
+
+.rnvApp .detailWorkflowChip.sapMObjStatusSuccess,
+.rnvApp .detailRailStatusChip.sapMObjStatusSuccess {
+  --status-chip-bg: var(--feedback-success-bg);
+  --status-chip-border: var(--feedback-success-border);
+  --status-chip-glow: var(--feedback-success-glow);
+}
+
+.rnvApp .detailWorkflowChip.sapMObjStatusWarning,
+.rnvApp .detailRailStatusChip.sapMObjStatusWarning {
+  --status-chip-bg: var(--feedback-warning-bg);
+  --status-chip-border: var(--feedback-warning-border);
+  --status-chip-glow: var(--feedback-warning-glow);
+}
+
+.rnvApp .detailWorkflowChip.sapMObjStatusError,
+.rnvApp .detailRailStatusChip.sapMObjStatusError {
+  --status-chip-bg: var(--feedback-error-bg);
+  --status-chip-border: var(--feedback-error-border);
+  --status-chip-glow: var(--feedback-error-glow);
+}
+
+.rnvApp .detailWorkflowChip.sapMObjStatusInformation,
+.rnvApp .detailRailStatusChip.sapMObjStatusInformation {
+  --status-chip-bg: var(--feedback-info-bg);
+  --status-chip-border: var(--feedback-info-border);
+  --status-chip-glow: var(--feedback-info-glow);
+}
+
+.rnvApp .detailWorkflowChip:hover,
+.rnvApp .uxStatChip:hover,
+.rnvApp .detailRailStatusChip:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 26px rgba(18, 36, 64, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardGrid {
+  margin-top: 0.35rem;
+  gap: 1rem;
+  align-items: start;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI {
+  min-width: 0;
+  margin: 0;
+  grid-column: span 1;
+  height: auto;
+  background: transparent;
+  box-shadow: none;
+  cursor: grab;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI:active {
+  cursor: grabbing;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI:focus .infoCardTile,
+.rnvApp .detailContent .infoCardGrid .sapFGLI:focus-within .infoCardTile {
+  border-color: color-mix(in srgb, var(--accent) 44%, transparent);
+  box-shadow:
+    0 0 0 0.14rem color-mix(in srgb, rgba(var(--accent-rgb), 0.16) 80%, transparent),
+    0 14px 30px rgba(18, 36, 64, 0.1);
+}
+
+.rnvApp .detailContent .infoCardGrid .infoCardTile:hover {
+  transform: translateY(-2px);
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardHeaderRow {
+  gap: 0.4rem;
+  margin-bottom: 0.18rem;
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardHeaderRow .infoCardTitle {
+  margin-bottom: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardPinBtn {
+  flex: 0 0 auto;
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardPinBtn .sapMBtnInner {
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 999px;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--theme-rail-bg) 82%, transparent);
+  box-shadow: none;
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardPinBtn:hover .sapMBtnInner {
+  transform: none;
+  border-color: color-mix(in srgb, var(--border-strong) 60%, transparent);
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardTile {
+  border-color: transparent;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] .infoCardTile {
+  min-height: 8.6rem;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observer"] .infoCardTile,
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observed"] .infoCardTile {
+  min-height: 8.8rem;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="equipment"] .infoCardTile,
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="lpc"] .infoCardTile,
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="profession"] .infoCardTile {
+  min-height: 6.8rem;
+}
+
+.rnvApp .detailDateTimeGrid .sapMSlt {
+  grid-column: 1 / -1;
+}
+
+.rnvApp .detailDateTimeGrid .sapMInputBase,
+.rnvApp .detailDateTimeGrid .sapMSlt,
+.rnvApp .detailDateTimeGrid .sapMTimePicker,
+.rnvApp .detailDateTimeGrid .sapMDatePicker,
+.rnvApp .detailDateTimeGrid .sapMSltLabel {
+  min-width: 0;
+  width: 100%;
+}
+
+.rnvApp .detailSemanticMetaBlock .sapMObjStatus {
+  border-radius: 10px;
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.rnvApp .detailSemanticMetaBlock .sapMObjStatusText,
+.rnvApp .detailSectionCard .sapMTitle,
+.rnvApp .detailSectionCard .sapMText,
+.rnvApp .detailSectionCard .sapMLabel,
+.rnvApp .detailSectionCard .sapMObjectStatusText {
+  color: var(--text-main);
+}
+
+.rnvApp .detailSectionCard .sapMTitle {
+  line-height: 1.16;
+}
+
+.rnvApp .detailSectionCard .sapMText,
+.rnvApp .detailSectionCard .sapMLabel,
+.rnvApp .detailSectionCard .sapMObjectStatusText {
+  line-height: 1.42;
+}
+
+.rnvApp .detailHeroCard .sapMText,
+.rnvApp .detailHeroCard .sapMTitle,
+.rnvApp .detailWorkflowRail .sapMObjStatusText,
+.rnvApp .detailControlInlineCard .sapMText,
+.rnvApp .detailControlInlineCard .sapMTitle {
+  color: var(--text-main);
+}
+
+.rnvApp .detailSectionCard > .sapMTB,
+.rnvApp .detailSectionCard > .sapMOTB {
+  padding-inline: 0;
+  background: transparent;
+  border: 0;
+  margin-bottom: 0.4rem;
+  border-bottom: 0;
+}
+
+.rnvApp .detailSectionCard .sapMListTblRow:hover .sapMListTblCell {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.rnvApp .detailHeroCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 46px rgba(16, 32, 58, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.rnvApp .detailGridTable,
+.rnvApp .flatEditorTable {
+  width: 100%;
+}
+
+.rnvApp .detailGridTable {
+  min-height: 18rem;
+}
+
+.rnvApp .detailGridTable .sapUiTableCnt,
+.rnvApp .detailGridTable .sapUiTableCtrlScr,
+.rnvApp .detailGridTable .sapUiTableCtrl,
+.rnvApp .detailGridTable .sapUiTableColHdrCnt,
+.rnvApp .flatEditorTable,
+.rnvApp .flatEditorTable .sapMListTbl,
+.rnvApp .flatEditorTable .sapMListTblCnt {
+  background: transparent;
+}
+
+.rnvApp .detailGridTable .sapUiTableCtrl {
+  border-collapse: separate;
+  border-spacing: 0 0.74rem;
+}
+
+.rnvApp .detailGridTable .sapUiTableCell,
+.rnvApp .detailGridTable .sapUiTableColCell,
+.rnvApp .flatEditorTable .sapMListTblCell,
+.rnvApp .flatEditorTable .sapMListTblHeaderCell {
+  vertical-align: top;
+  border-inline-color: transparent;
+  border-bottom-color: rgba(160, 184, 220, 0.18);
+}
+
+.rnvApp .detailGridTable .sapUiTableColCell,
+.rnvApp .flatEditorTable .sapMListTblHeaderCell {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: var(--theme-table-header-size);
+  font-weight: 800;
+  line-height: var(--theme-table-header-line-height);
+  color: var(--text-muted);
+  padding:
+    calc(var(--theme-table-cell-padding-block) - 0.08rem)
+    var(--theme-table-cell-padding-inline);
+  background: var(--theme-table-header-bg);
+}
+
+.rnvApp .detailGridTable .sapUiTableCell,
+.rnvApp .flatEditorTable .sapMListTblCell {
+  padding:
+    var(--theme-table-cell-padding-block)
+    var(--theme-table-cell-padding-inline);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(249, 252, 255, 0.08)),
+    var(--theme-rail-bg);
+  border-top-color: rgba(var(--accent-rgb), 0.12);
+  border-bottom-color: rgba(var(--accent-rgb), 0.12);
+  font-size: var(--theme-table-body-size);
+  line-height: var(--theme-table-body-line-height);
+}
+
+.rnvApp .detailGridTable .sapUiTableCtrl tr {
+  height: var(--theme-table-row-height);
+}
+
+.rnvApp .detailGridTable .sapUiTableCell:first-child {
+  border-top-left-radius: var(--theme-table-row-radius);
+  border-bottom-left-radius: var(--theme-table-row-radius);
+}
+
+.rnvApp .detailGridTable .sapUiTableCell:last-child {
+  border-top-right-radius: var(--theme-table-row-radius);
+  border-bottom-right-radius: var(--theme-table-row-radius);
+}
+
+.rnvApp .flatEditorTable .sapMListTblCell:first-child,
+.rnvApp .flatEditorTable .sapMListTblHeaderCell:first-child {
+  border-top-left-radius: var(--theme-table-row-radius);
+  border-bottom-left-radius: var(--theme-table-row-radius);
+}
+
+.rnvApp .flatEditorTable .sapMListTblCell:last-child,
+.rnvApp .flatEditorTable .sapMListTblHeaderCell:last-child {
+  border-top-right-radius: var(--theme-table-row-radius);
+  border-bottom-right-radius: var(--theme-table-row-radius);
+}
+
+.rnvApp .flatEditorTable .sapMInputBase,
+.rnvApp .detailGridTable .sapMInputBase {
+  width: 100%;
+  min-width: 0;
+}
+
+.rnvApp .flatEditorTable .sapMListTbl,
+.rnvApp .detailAttachmentTable .sapMListTbl {
+  border-collapse: separate;
+  border-spacing: 0 0.74rem;
+}
+
+.rnvApp .flatEditorTable .sapMSwt,
+.rnvApp .detailGridTable .sapMSwt {
+  min-width: 2.5rem;
+}
+
+.rnvApp .flatEditorTable .sapMText,
+.rnvApp .flatEditorTable .sapMLabel,
+.rnvApp .detailGridTable .sapMText,
+.rnvApp .detailGridTable .sapMLabel,
+.rnvApp .detailGridTable .sapMObjectIdentifierText,
+.rnvApp .detailGridTable .sapMObjectNumberText,
+.rnvApp .detailAttachmentTable .sapMText,
+.rnvApp .detailAttachmentTable .sapMLnk {
+  font-size: var(--theme-table-body-size);
+  line-height: var(--theme-table-body-line-height);
+  white-space: normal;
+  word-break: break-word;
+}
+
+.rnvApp .rnvSkin .detailContent .sapUxAPObjectPageHeaderTitle,
+.rnvApp .rnvSkin .detailContent .sapUxAPObjectPageHeaderContent,
+.rnvApp .rnvSkin .detailContent .sapUxAPObjectPageSectionContainer,
+.rnvApp .rnvSkin .detailContent .sapUxAPBlockContainer,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableCnt,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableCtrlScr,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableColHdrCnt,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableRowHdrScr,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableVSb,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableHSb,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableCell,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableColCell,
+.rnvApp .rnvSkin .detailGridTable .sapUiTableRowHdr,
+.rnvApp .rnvSkin .detailSectionCard .sapMListTbl,
+.rnvApp .rnvSkin .detailSectionCard .sapMListTblCell,
+.rnvApp .rnvSkin .detailSectionCard .sapMListTblHeaderCell {
+  background: transparent;
+  border-color: rgba(160, 184, 220, 0.18);
+}
+
+.rnvApp .rnvSkin .detailGridTable .sapUiTableColCell,
+.rnvApp .rnvSkin .flatEditorTable .sapMListTblHeaderCell,
+.rnvApp .rnvSkin .detailAttachmentTable .sapMListTblHeaderCell {
+  background: var(--theme-table-header-bg);
+}
+
+.rnvApp .rnvSkin .detailGridTable .sapUiTableCell,
+.rnvApp .rnvSkin .flatEditorTable .sapMListTblCell,
+.rnvApp .rnvSkin .detailAttachmentTable .sapMListTblCell {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(249, 252, 255, 0.08)),
+    var(--theme-rail-bg);
+}
+
+.rnvApp .detailAttachmentDropZoneTop {
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.rnvApp .detailAttachmentDropZoneIcon {
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+.rnvApp .detailAttachmentDropZoneMeta {
+  color: var(--text-subtle);
+  align-self: center;
+}
+
+.rnvApp .detailAttachmentActions {
+  gap: 0.25rem;
+}
+
+.rnvApp .detailAttachmentTable .sapMListTblCell {
+  padding:
+    var(--theme-table-cell-padding-block)
+    var(--theme-table-cell-padding-inline);
+  background: var(--theme-table-cell-bg);
+}
+
+.rnvApp .detailCreateModeBanner {
+  gap: 0.7rem;
+  padding: 1rem 1.05rem;
+  border-radius: calc(var(--radius-lg) - 0.2rem);
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.16), transparent 38%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.1) 46%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(242, 247, 255, 0.2));
+  box-shadow:
+    0 18px 40px rgba(30, 58, 96, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.rnvApp .detailCreateModeBannerTop {
+  gap: 0.55rem;
+  justify-content: space-between;
+}
+
+.rnvApp .detailCreateModeIcon {
+  color: var(--accent);
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.rnvApp .detailCreateModeTitle {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.rnvApp .detailCreateModeStatus {
+  padding: 0.16rem 0.1rem;
+  border-radius: 999px;
+}
+
+.rnvApp .detailCreateModeStatus .sapMObjStatusText,
+.rnvApp .detailCreateModeStatus .sapUiIcon {
+  color: var(--text-main);
+}
+
+.rnvApp .detailCreateModeText {
+  color: var(--text-subtle);
+  line-height: 1.45;
+}
+
+.rnvApp .detailEmptyStateCard {
+  display: grid;
+  align-items: start;
+  align-content: start;
+  justify-items: start;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 1.05rem 1.1rem;
+  margin-top: 0.45rem;
+  border-radius: calc(var(--radius-lg) - 0.2rem);
+  border: 1px dashed rgba(var(--accent-rgb), 0.2);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.11), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(249, 252, 255, 0.08)),
+    var(--theme-rail-bg);
+  box-shadow:
+    var(--theme-rail-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.rnvApp .detailEmptyStateCard.sapMFlexItem,
+.rnvApp .detailEmptyStateCard.sapMFlexBox,
+.rnvApp .detailEmptyStateCard.sapMHBox,
+.rnvApp .detailEmptyStateCard.sapMVBox {
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+
+.rnvApp .detailEmptyStateIcon {
+  color: var(--accent);
+  font-size: 1.1rem;
+  padding: 0.55rem;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
+.rnvApp .detailEmptyStateTitle {
+  margin: 0;
+  line-height: 1.18;
+}
+
+.rnvApp .detailEmptyStateText {
+  max-width: min(100%, 48rem);
+  color: var(--text-subtle);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.rnvApp .detailEmptyStateAction .sapMBtnInner {
+  border-radius: 999px;
+  border-color: rgba(var(--accent-rgb), 0.18);
+  background: rgba(var(--accent-rgb), 0.08);
+  color: var(--text-main);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.rnvApp .detailEmptyStateAction:hover .sapMBtnInner {
+  background: rgba(var(--accent-rgb), 0.14);
+  transform: translateY(-1px);
+}
+
+.rnvApp .detailSectionCard .toolbarTransparent {
+  padding: 0.28rem 0.35rem 0.5rem;
+  border-radius: calc(var(--radius-lg) - 0.25rem);
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--theme-rail-bg) 84%, transparent);
+  box-shadow: none;
+}
+
+.rnvApp .detailSectionCard {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 46%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+}
+
+.rnvApp .detailSectionCard > .sapMFlexItem,
+.rnvApp .detailSectionCard > .sapMVBox,
+.rnvApp .detailSectionCard > .sapMHBox,
+.rnvApp .detailSectionCard > .appSkeletonReveal.sapMFlexItem {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.rnvApp .detailContent .sapUxAPAnchorBar .sapMITBFilter,
+.rnvApp .detailContent .sapUxAPAnchorBar .sapMITBTextOnly .sapMITBText {
+  color: var(--text-subtle);
+}
+
+.rnvApp .detailContent .sapUxAPAnchorBar .sapMITBSelected .sapMITBText {
+  color: var(--text-main);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailHeroCard,
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip,
+body.rnvAppRoot.appDark .rnvApp .uxStatChip {
+  background:
+    linear-gradient(180deg, rgba(16, 31, 53, 0.96), rgba(8, 20, 38, 0.94));
+  border-color: rgba(101, 133, 189, 0.24);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailControlInlineCard,
+body.rnvAppRoot.appDark .rnvApp .detailSectionCard,
+body.rnvAppRoot.appDark .rnvApp .detailContent .infoCardGrid .infoCardTile {
+  background:
+    linear-gradient(180deg, rgba(16, 31, 53, 0.96), rgba(8, 20, 38, 0.94));
+  border-color: rgba(101, 133, 189, 0.24);
+  box-shadow:
+    0 16px 32px rgba(2, 8, 18, 0.28);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailCreateModeBanner {
+  border-color: rgba(101, 133, 189, 0.24);
+  background:
+    linear-gradient(180deg, rgba(16, 31, 53, 0.96), rgba(8, 20, 38, 0.94));
+  box-shadow:
+    0 16px 32px rgba(2, 8, 18, 0.28);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailCreateModeIcon {
+  background: rgba(118, 170, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(216, 231, 255, 0.1);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailEmptyStateCard {
+  border-color: rgba(101, 133, 189, 0.24);
+  background:
+    linear-gradient(180deg, rgba(16, 31, 53, 0.96), rgba(8, 20, 38, 0.94));
+  box-shadow:
+    0 16px 32px rgba(2, 8, 18, 0.26);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailContent .sapUxAPObjectPageHeaderDetails,
+body.rnvAppRoot.appDark .rnvApp .detailContent .sapUxAPObjectPageHeaderDetailsDesign-Light {
+  background:
+    linear-gradient(180deg, rgba(14, 28, 48, 0.9), rgba(8, 20, 38, 0.82));
+  border-color: rgba(95, 127, 182, 0.2);
+  box-shadow: 0 12px 24px rgba(2, 8, 18, 0.2);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailEmptyStateIcon {
+  background: rgba(118, 170, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(216, 231, 255, 0.1);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailEmptyStateAction .sapMBtnInner {
+  border-color: rgba(118, 170, 255, 0.24);
+  background: rgba(118, 170, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(216, 231, 255, 0.08);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip,
+body.rnvAppRoot.appDark .rnvApp .uxStatChip,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip {
+  box-shadow:
+    inset 0 1px 0 rgba(203, 226, 255, 0.1),
+    0 10px 20px rgba(2, 8, 18, 0.2);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailControlStickyBlock .detailControlInlineCard,
+body.rnvAppRoot.appDark .rnvApp .detailControlStickyBlock.detailControlInlineCard {
+  box-shadow: 0 16px 32px rgba(2, 8, 18, 0.28);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailHeroSurface::before,
+body.rnvAppRoot.appDark .rnvApp .detailAttachmentsCard::before {
+  opacity: 0;
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip .sapMObjStatusText,
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip .sapUiIcon,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip .sapMObjStatusText,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip .sapUiIcon,
+body.rnvAppRoot.appDark .rnvApp .uxStatChip .sapMText {
+  color: rgba(237, 244, 255, 0.96);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip.sapMObjStatusSuccess,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip.sapMObjStatusSuccess {
+  --status-chip-bg: var(--feedback-success-bg);
+  --status-chip-border: var(--feedback-success-border);
+  --status-chip-glow: var(--feedback-success-glow);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip.sapMObjStatusWarning,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip.sapMObjStatusWarning {
+  --status-chip-bg: var(--feedback-warning-bg);
+  --status-chip-border: var(--feedback-warning-border);
+  --status-chip-glow: var(--feedback-warning-glow);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip.sapMObjStatusError,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip.sapMObjStatusError {
+  --status-chip-bg: var(--feedback-error-bg);
+  --status-chip-border: var(--feedback-error-border);
+  --status-chip-glow: var(--feedback-error-glow);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip.sapMObjStatusInformation,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip.sapMObjStatusInformation {
+  --status-chip-bg: var(--feedback-info-bg);
+  --status-chip-border: var(--feedback-info-border);
+  --status-chip-glow: var(--feedback-info-glow);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailHeroCard:hover,
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowChip:hover,
+body.rnvAppRoot.appDark .rnvApp .uxStatChip:hover,
+body.rnvAppRoot.appDark .rnvApp .detailRailStatusChip:hover {
+  transform: none;
+  box-shadow: 0 16px 32px rgba(2, 8, 18, 0.28);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailSectionCard > .sapMTB,
+body.rnvAppRoot.appDark .rnvApp .detailSectionCard > .sapMOTB {
+  border-bottom-color: rgba(95, 127, 182, 0.18);
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailGridTable .sapUiTableCell,
+body.rnvAppRoot.appDark .rnvApp .flatEditorTable .sapMListTblCell {
+  background: var(--theme-table-cell-bg);
+}
+
+body.rnvAppRoot.appLight .rnvApp .detailHeroCard,
+body.rnvAppRoot.appLight .rnvApp .detailControlInlineCard,
+body.rnvAppRoot.appLight .rnvApp .detailSectionCard,
+body.rnvAppRoot.appLight .rnvApp .detailContent .infoCardGrid .infoCardTile {
+  background:
+    radial-gradient(circle at top right, rgba(111, 182, 255, 0.12), transparent 34%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08) 46%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+}
+
+body.rnvAppRoot.appLight .rnvApp .detailWorkflowChip,
+body.rnvAppRoot.appLight .rnvApp .uxStatChip,
+body.rnvAppRoot.appLight .rnvApp .detailRailStatusChip {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 8px 18px rgba(83, 118, 165, 0.08);
+}
+
+body.rnvAppRoot.appLight .rnvApp .uxStatChip {
+  border-color: rgba(143, 178, 231, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 8px 18px rgba(83, 118, 165, 0.06);
+}
+
+body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
+  color: rgba(52, 81, 123, 0.88);
+}
+
+.rnvApp .detailHeroExperienceCard {
+  padding:
+    calc(1.06rem * var(--theme-density-scale))
+    calc(1.12rem * var(--theme-density-scale));
+  border-radius: var(--radius-xl);
+}
+
+.rnvApp .detailHeroHeader {
+  display: grid;
+  grid-template-columns: minmax(13.5rem, 0.7fr) minmax(0, 1.45fr);
+  gap: 0.82rem 1rem;
+  align-items: start;
+}
+
+.rnvApp .detailHeroIntro.sapMFlexBox {
+  gap: 0.22rem;
+  max-width: 15rem;
+  min-width: 0;
+  padding-inline-end: 0.25rem;
+}
+
+.rnvApp .detailHeroTitle {
+  font-size: var(--theme-stage-title-size);
+  font-weight: var(--theme-stage-title-weight);
+  letter-spacing: var(--theme-stage-title-letter-spacing);
+  line-height: 1.02;
+  margin-bottom: 0.16rem;
+}
+
+.rnvApp .detailHeroSubtitle {
+  max-width: 28rem;
+  line-height: 1.4;
+  color: var(--text-subtle);
+}
+
+.rnvApp .detailHeroStatBoard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.8rem, 1fr));
+  gap: 0.55rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.rnvApp .uxStatChip.sapMFlexBox {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--theme-detail-stat-min-height);
+  padding: var(--theme-detail-stat-padding-block) var(--theme-detail-stat-padding-inline);
+  border-radius: var(--radius-md);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.rnvApp .uxStatChip .sapMObjectStatus,
+.rnvApp .uxStatChip .sapMObjStatus {
+  align-self: stretch;
+}
+
+.rnvApp .uxStatChip .sapMText:first-child {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.69rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-muted);
+}
+
+.rnvApp .uxStatChip .sapMText:last-child,
+.rnvApp .uxStatChip .sapMObjStatusText {
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.rnvApp .detailWorkflowStoryRail {
+  padding: 0.48rem 0.56rem;
+  border-radius: calc(var(--radius-lg) - 0.12rem);
+  border: 1px solid var(--theme-rail-border);
+  background: var(--theme-rail-bg);
+  box-shadow: var(--theme-rail-shadow);
+}
+
+.rnvApp .detailControlStickyBlock {
+  position: sticky;
+  top: calc(var(--app-shell-offset, 0px) + 0.35rem);
+  z-index: 16;
+}
+
+.rnvApp .detailControlStickyBlock.isViewportPinned {
+  min-height: var(--detail-rail-height, 0);
+  transform: translateY(var(--detail-rail-shift, 0px));
+}
+
+.rnvApp .detailControlExperienceCard.detailControlCardViewportPinned {
+  position: fixed;
+  top: var(--detail-rail-top, calc(var(--app-shell-offset, 0px) + 0.35rem));
+  left: var(--detail-rail-left, 0px);
+  width: var(--detail-rail-width, 100%);
+  max-width: calc(100vw - 1rem);
+  z-index: 34;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.rnvApp .detailControlExperienceCard {
+  padding:
+    calc(0.96rem * var(--theme-density-scale))
+    calc(1rem * var(--theme-density-scale));
+  border-radius: var(--radius-xl);
+}
+
+.rnvApp .detailControlBar {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.rnvApp .detailControlBar > .sapMFlexItem,
+.rnvApp .detailControlToolbarStack.sapMFlexBox,
+.rnvApp .detailRailHeader.sapMFlexBox,
+.rnvApp .detailRailHint {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.rnvApp .detailRailHeader {
+  margin-bottom: 0.1rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid rgba(160, 184, 220, 0.18);
+  flex-wrap: wrap;
+  row-gap: 0.45rem;
+}
+
+.rnvApp .detailSectionAnchorRail,
+.rnvApp .detailControlRowTop,
+.rnvApp .detailControlRowActions {
+  padding: var(--theme-detail-rail-padding-block) var(--theme-detail-rail-padding-inline);
+  border-radius: calc(var(--radius-lg) - 0.18rem);
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--theme-rail-bg) 84%, transparent);
+  box-shadow: none;
+}
+
+.rnvApp .detailSectionAnchorRail {
+  row-gap: 0.45rem;
+  column-gap: 0.4rem;
+  margin-bottom: 0.28rem;
+  padding: 0.18rem;
+}
+
+.rnvApp .detailControlRowTop,
+.rnvApp .detailControlRowActions {
+  width: 100%;
+  max-width: 100%;
+  row-gap: 0.45rem;
+  column-gap: 0.5rem;
+  overflow: visible;
+  padding: 0.18rem 0.3rem;
+}
+
+.rnvApp .detailControlRowTop.sapMTBNewFlex,
+.rnvApp .detailControlRowActions.sapMTBNewFlex {
+  flex-wrap: nowrap;
+  align-content: center;
+  overflow: visible;
+}
+
+.rnvApp .detailControlRowTop .sapMBarChild,
+.rnvApp .detailControlRowActions .sapMBarChild {
+  min-width: 0;
+}
+
+.rnvApp .detailControlRowTop .sapMOTBOverflowButton,
+.rnvApp .detailControlRowActions .sapMOTBOverflowButton,
+.rnvApp .detailAttachmentToolbar .sapMOTBOverflowButton {
+  flex: 0 0 auto;
+}
+
+.rnvApp .detailControlRowTop .sapMTBSpacer,
+.rnvApp .detailControlRowActions .sapMTBSpacer {
+  flex: 999 1 0%;
+  min-width: 0.5rem;
+}
+
+.rnvApp .detailSectionAnchorBtn .sapMBtnInner,
+.rnvApp .detailControlRow .sapMBtn .sapMBtnInner {
+  min-height: calc(var(--theme-workbench-control-height) - 0.1rem);
+}
+
+.rnvApp .detailSectionAnchorBtn .sapMBtnInner {
+  padding-inline: 0.88rem;
+}
+
+.rnvApp .detailControlRowActions .sapMBtnInner,
+.rnvApp .detailControlRowTop .sapMBtnInner {
+  min-width: 0;
+  padding-inline: 0.85rem;
+}
+
+.rnvApp .detailControlRowActions .sapMBtn {
+  min-width: 0;
+}
+
+.rnvApp .detailSectionAnchorRail .sapMBtn,
+.rnvApp .detailControlRowTop .sapMBtn,
+.rnvApp .detailControlRowActions .sapMBtn {
+  flex: 0 1 auto;
+}
+
+.rnvApp .detailControlRowActions .sapMBtnContent {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rnvApp .detailInfoExperienceCard {
+  padding:
+    calc(0.94rem * var(--theme-density-scale))
+    calc(1rem * var(--theme-density-scale));
+  border-radius: var(--radius-xl);
+  overflow: visible;
+}
+
+.rnvApp .detailFieldStack {
+  display: grid;
+  gap: 0.26rem;
+  width: 100%;
+}
+
+.rnvApp .detailFieldValidationText {
+  min-height: 0.9rem;
+  padding-inline: 0.1rem;
+  color: var(--semantic-danger);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGridListDefault,
+.rnvApp .detailContent .infoCardGrid .sapFGridList {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 0.8rem;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observer"],
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observed"],
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="lpc"],
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="profession"] {
+  grid-column: span 1;
+}
+
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"],
+.rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="location"] {
+  grid-column: span 2;
+}
+
+.rnvApp .detailContent .infoCardGrid .infoCardTile {
+  min-height: 100%;
+  border-radius: var(--radius-md);
+  padding: 1rem 1rem 0.95rem;
+}
+
+.rnvApp .detailContent .infoCardGrid .infoCardTile,
+.rnvApp .detailContent .infoCardGrid .infoCardValue,
+.rnvApp .detailContent .infoCardGrid .sapMText,
+.rnvApp .detailContent .infoCardGrid .sapMObjectStatusText,
+.rnvApp .detailContent .infoCardGrid .sapMObjStatusText {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.rnvApp .detailSemanticMetaBlock {
+  gap: 0.45rem;
+}
+
+.rnvApp .detailDateTimeGrid {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) minmax(6.5rem, 0.8fr);
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.rnvApp .detailSectionToolbar {
+  padding: 0.38rem 0.44rem 0.5rem;
+}
+
+.rnvApp .detailSectionToolbar.sapMTBNewFlex,
+.rnvApp .detailAttachmentToolbar.sapMTBNewFlex {
+  flex-wrap: nowrap;
+  align-content: stretch;
+  overflow: hidden;
+}
+
+.rnvApp .detailSectionToolbar .sapMBarChild,
+.rnvApp .detailAttachmentToolbar .sapMBarChild {
+  min-width: 0;
+}
+
+.rnvApp .detailSectionToolbar .sapMTBSpacer,
+.rnvApp .detailAttachmentToolbar .sapMTBSpacer {
+  flex: 999 1 0%;
+  min-width: 0.5rem;
+}
+
+.rnvApp .detailSectionToolbar .sapMTitle {
+  letter-spacing: 0.01em;
+}
+
+.rnvApp .detailTableExperienceCard {
+  padding:
+    calc(0.9rem * var(--theme-density-scale))
+    calc(0.96rem * var(--theme-density-scale))
+    calc(0.94rem * var(--theme-density-scale));
+  border-radius: var(--radius-xl);
+}
+
+.rnvApp .detailAttachmentToolbar {
+  row-gap: 0.38rem;
+}
+
+.rnvApp .detailSectionBody,
+.rnvApp .detailAttachmentsBody {
+  display: grid;
+  gap: 0.72rem;
+  align-content: start;
+  min-height: 0;
+  min-width: 0;
+  height: auto;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.rnvApp .detailSectionBody > *,
+.rnvApp .detailAttachmentsBody > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.rnvApp .detailAttachmentsBody.isAttachmentDropPrimed {
+  outline: 1px dashed rgba(var(--accent-rgb), 0.34);
+  outline-offset: 0.32rem;
+  border-radius: calc(var(--radius-lg) - 0.1rem);
+}
+
+.rnvApp .detailAttachmentsBody.isAttachmentDropActive {
+  outline-style: solid;
+}
+
+.rnvApp .detailAttachmentsCard,
+.rnvApp .detailAttachmentsCard > .sapMFlexItem,
+.rnvApp .detailAttachmentsCard .sapMFlexItem,
+.rnvApp .detailAttachmentsBody,
+.rnvApp .detailAttachmentsBody > .sapMFlexItem,
+.rnvApp .detailHeroExperienceCard,
+.rnvApp .detailHeroExperienceCard > .sapMFlexItem {
+  min-height: 0;
+  height: auto;
+}
+
+.rnvApp .detailAttachmentDropZone {
+  display: grid;
+  grid-template-columns: minmax(18rem, 1fr) minmax(14rem, 0.9fr);
+  gap: 0.78rem 0.92rem;
+  align-items: center;
+  margin-top: 0.1rem;
+  margin-bottom: 1rem;
+  min-height: 7.75rem;
+  padding: 1rem 1.05rem;
+  border-radius: calc(var(--radius-lg) - 0.16rem);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(247, 250, 255, 0.08)),
+    var(--theme-rail-bg);
+  box-shadow: var(--theme-rail-shadow);
+  transition: min-height 200ms ease, transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  border: 1px solid rgba(var(--accent-rgb), 0.16);
+}
+
+.rnvApp .detailAttachmentDropZone.isAttachmentDropPrimed {
+  min-height: 10.25rem;
+  border-color: rgba(var(--accent-rgb), 0.28);
+}
+
+.rnvApp .detailAttachmentDropZone.isAttachmentDropActive {
+  min-height: 13rem;
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb), 0.36);
+  box-shadow:
+    0 22px 48px rgba(var(--accent-rgb), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.rnvApp .detailAttachmentsCard,
+.rnvApp .detailHeroExperienceCard {
+  height: auto;
+  min-height: 0;
+  align-self: start;
+}
+
+.rnvApp .detailAttachmentsEmptyState {
+  margin-top: 0;
+}
+
+.rnvApp .detailAttachmentActions .sapMBtnInner {
+  border-radius: 999px;
+}
+
+.rnvApp .detailAttachmentTable,
+.rnvApp .detailAttachmentTable .sapMListTbl,
+.rnvApp .detailAttachmentTable .sapMListTblCnt,
+.rnvApp .detailAttachmentTable .sapMListItems {
+  background: transparent;
+}
+
+.rnvApp .detailAttachmentTable .sapMListTblRow .sapMListTblCell {
+  padding-top: 0.72rem;
+  padding-bottom: 0.72rem;
+  border-inline-color: transparent;
+}
+
+.rnvApp .detailGridTable .sapUiTableColCell,
+.rnvApp .flatEditorTable .sapMListTblHeaderCell,
+.rnvApp .detailAttachmentTable .sapMListTblHeaderCell {
+  border-bottom-color: transparent;
+}
+
+.rnvApp .detailGridTable .sapUiTableCell,
+.rnvApp .flatEditorTable .sapMListTblCell,
+.rnvApp .detailAttachmentTable .sapMListTblCell {
+  border-top: 1px solid rgba(var(--accent-rgb), 0.12);
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.14);
+}
+
+.rnvApp .detailGridTable .sapUiTableCell:first-child,
+.rnvApp .flatEditorTable .sapMListTblCell:first-child,
+.rnvApp .detailAttachmentTable .sapMListTblCell:first-child {
+  border-left: 1px solid rgba(var(--accent-rgb), 0.12);
+}
+
+.rnvApp .detailGridTable .sapUiTableCell:last-child,
+.rnvApp .flatEditorTable .sapMListTblCell:last-child,
+.rnvApp .detailAttachmentTable .sapMListTblCell:last-child {
+  border-right: 1px solid rgba(var(--accent-rgb), 0.12);
+}
+
+.rnvApp .detailGridTable .sapUiTableCtrl tr:hover .sapUiTableCell,
+.rnvApp .flatEditorTable .sapMListTblRow:hover .sapMListTblCell,
+.rnvApp .detailAttachmentTable .sapMListTblRow:hover .sapMListTblCell {
+  border-color: rgba(var(--accent-rgb), 0.22);
+}
+
+.rnvApp .detailGridTable .tableRowActionBtn,
+.rnvApp .flatEditorTable .tableRowActionBtn,
+.rnvApp .detailAttachmentActions .tableRowActionBtn {
+  width: auto;
+  max-width: 100%;
+}
+
+.rnvApp .detailGridTable .tableRowActionBtn .sapMBtnInner,
+.rnvApp .flatEditorTable .tableRowActionBtn .sapMBtnInner,
+.rnvApp .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
+  min-height: 2.12rem;
+  padding-inline: 0.62rem;
+}
+
+.rnvApp .detailGridTable .tableRowActionBtnDanger .sapMBtnInner,
+.rnvApp .flatEditorTable .tableRowActionBtnDanger .sapMBtnInner {
+  background:
+    linear-gradient(180deg, rgba(var(--semantic-danger-rgb), 0.12), rgba(var(--semantic-danger-rgb), 0.06)),
+    var(--theme-rail-bg);
+}
+
+.rnvApp .detailViewportNarrow .detailSectionToolbar.sapMTBNewFlex,
+.rnvApp .detailViewportNarrow .detailAttachmentToolbar.sapMTBNewFlex,
+.rnvApp .detailViewportNarrow .detailControlRowTop.sapMTBNewFlex,
+.rnvApp .detailViewportNarrow .detailControlRowActions.sapMTBNewFlex {
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.rnvApp .detailViewportNarrow .detailSectionToolbar .sapMTBSpacer,
+.rnvApp .detailViewportNarrow .detailAttachmentToolbar .sapMTBSpacer,
+.rnvApp .detailViewportNarrow .detailControlRowTop .sapMTBSpacer,
+.rnvApp .detailViewportNarrow .detailControlRowActions .sapMTBSpacer {
+  display: block;
+}
+
+.rnvApp .detailViewportNarrow .detailAttachmentDropZone {
+  grid-template-columns: 1fr;
+  min-height: 0;
+}
+
+.rnvApp .detailViewportNarrow .detailAttachmentTable .sapMListTbl {
+  min-width: 36rem;
+}
+
+.rnvApp .detailViewportNarrow .detailAttachmentActions {
+  width: 100%;
+}
+
+.rnvApp .detailViewportNarrow .detailAttachmentActions .tableRowActionBtn,
+.rnvApp .detailViewportNarrow .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
+  width: 100%;
+}
+
+@media (max-width: 1366px) {
+  .rnvApp .detailControlRowTop.sapMTBNewFlex,
+  .rnvApp .detailControlRowActions.sapMTBNewFlex,
+  .rnvApp .detailSectionToolbar.sapMTBNewFlex,
+  .rnvApp .detailAttachmentToolbar.sapMTBNewFlex {
+    flex-wrap: nowrap;
+    overflow: visible;
+    row-gap: 0;
+  }
+
+  .rnvApp .detailControlRowTop .sapMTBSpacer,
+  .rnvApp .detailControlRowActions .sapMTBSpacer,
+  .rnvApp .detailSectionToolbar .sapMTBSpacer,
+  .rnvApp .detailAttachmentToolbar .sapMTBSpacer {
+    display: block;
+  }
+
+  .rnvApp .detailSectionBody,
+  .rnvApp .detailAttachmentsBody {
+    overflow-x: auto;
+  }
+
+  .rnvApp .detailGridTable,
+  .rnvApp .flatEditorTable,
+  .rnvApp .detailAttachmentTable {
+    min-width: 48rem;
+  }
+
+  .rnvApp .appLayoutSplit #detailPaneHost .detailGridTable,
+  .rnvApp .appLayoutSplit #detailPaneHost .flatEditorTable,
+  .rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
+  .rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailGridTable,
+  .rnvApp .appLayoutSplit [id$="-detailPaneHost"] .flatEditorTable,
+  .rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .rnvApp .detailTableExperienceCard {
+    padding:
+      calc(0.76rem * var(--theme-density-scale))
+      calc(0.82rem * var(--theme-density-scale))
+      calc(0.82rem * var(--theme-density-scale));
+  }
+
+  .rnvApp .detailSectionToolbar {
+    padding: 0.3rem 0.34rem 0.4rem;
+  }
+
+  .rnvApp .detailSectionBody,
+  .rnvApp .detailAttachmentsBody {
+    gap: 0.56rem;
+  }
+
+  .rnvApp .detailEmptyStateCard {
+    gap: 0.42rem;
+    padding: 0.88rem 0.92rem;
+    margin-top: 0.32rem;
+  }
+
+  .rnvApp .detailAttachmentDropZone {
+    gap: 0.62rem 0.74rem;
+    padding: 0.82rem 0.88rem;
+  }
+
+  .rnvApp .detailGridTable,
+  .rnvApp .flatEditorTable,
+  .rnvApp .detailAttachmentTable {
+    min-width: 42rem;
+  }
+
+  .rnvApp .appLayoutSplit #detailPaneHost .detailGridTable,
+  .rnvApp .appLayoutSplit #detailPaneHost .flatEditorTable,
+  .rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
+  .rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailGridTable,
+  .rnvApp .appLayoutSplit [id$="-detailPaneHost"] .flatEditorTable,
+  .rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .rnvApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContent {
+    padding-bottom: 0.22rem;
+  }
+
+  .rnvApp .detailMainExperienceStack {
+    gap: 0.72rem;
+  }
+
+  .rnvApp .detailTableExperienceCard,
+  .rnvApp .detailInfoExperienceCard {
+    padding:
+      calc(0.7rem * var(--theme-density-scale))
+      calc(0.74rem * var(--theme-density-scale))
+      calc(0.76rem * var(--theme-density-scale));
+  }
+
+  .rnvApp .detailSectionToolbar,
+  .rnvApp .detailAttachmentToolbar {
+    padding: 0.22rem 0.24rem 0.3rem;
+    row-gap: 0.3rem;
+    column-gap: 0.26rem;
+  }
+
+  .rnvApp .detailSectionToolbar.sapMTBNewFlex,
+  .rnvApp .detailAttachmentToolbar.sapMTBNewFlex,
+  .rnvApp .detailControlRowTop.sapMTBNewFlex,
+  .rnvApp .detailControlRowActions.sapMTBNewFlex {
+    min-height: 0;
+    height: auto;
+    align-items: stretch;
+    align-content: flex-start;
+  }
+
+  .rnvApp .detailSectionToolbar .sapMTitle,
+  .rnvApp .detailAttachmentToolbar .sapMTitle {
+    flex: 1 1 100%;
+  }
+
+  .rnvApp .detailSectionToolbar .sapMBtn,
+  .rnvApp .detailAttachmentToolbar .sapMBtn,
+  .rnvApp .detailAttachmentToolbar .sapMSlt,
+  .rnvApp .detailAttachmentToolbar .sapMLabel,
+  .rnvApp .detailAttachmentToolbar .sapUiFup {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .rnvApp .detailSectionToolbar .sapMBtn .sapMBtnInner,
+  .rnvApp .detailAttachmentToolbar .sapMBtn .sapMBtnInner,
+  .rnvApp .detailAttachmentToolbar .sapUiFup .sapMBtnInner {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .rnvApp .detailSectionBody,
+  .rnvApp .detailAttachmentsBody {
+    gap: 0.48rem;
+  }
+
+  .rnvApp .detailEmptyStateCard {
+    justify-items: center;
+    text-align: center;
+    gap: 0.38rem;
+    padding: 0.82rem 0.8rem;
+  }
+
+  .rnvApp .detailEmptyStateText {
+    max-width: 32rem;
+  }
+
+  .rnvApp .detailEmptyStateAction,
+  .rnvApp .detailEmptyStateAction .sapMBtnInner {
+    width: 100%;
+  }
+
+  .rnvApp .detailControlRowTop,
+  .rnvApp .detailControlRowActions {
+    row-gap: 0.28rem;
+    column-gap: 0.28rem;
+  }
+
+  .rnvApp .detailControlRowTop .detailRailStatusChip,
+  .rnvApp .detailControlRowActions .sapMBtn,
+  .rnvApp .detailControlRowActions .sapMSwt,
+  .rnvApp .detailControlRowActions .sapMBusyIndicator {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .rnvApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+    justify-content: flex-start;
+    width: auto;
+  }
+
+  .rnvApp .detailControlRowActions .sapMBtnContent,
+  .rnvApp .detailControlRowTop .sapMObjStatusText {
+    white-space: normal;
+  }
+
+  .rnvApp .detailAttachmentDropZone {
+    gap: 0.52rem;
+    padding: 0.72rem 0.76rem;
+  }
+
+  .rnvApp .detailAttachmentActions {
+    width: 100%;
+    gap: 0.3rem;
+  }
+
+  .rnvApp .detailAttachmentActions .tableRowActionBtn,
+  .rnvApp .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
+    width: 100%;
+  }
+
+  .rnvApp .detailGridTable,
+  .rnvApp .flatEditorTable,
+  .rnvApp .detailAttachmentTable {
+    min-width: 36rem;
+  }
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailWorkflowStoryRail,
+body.rnvAppRoot.appDark .rnvApp .detailSectionAnchorRail,
+body.rnvAppRoot.appDark .rnvApp .detailControlRowTop,
+body.rnvAppRoot.appDark .rnvApp .detailControlRowActions {
+  background:
+    linear-gradient(180deg, rgba(26, 43, 69, 0.7), rgba(14, 28, 48, 0.62));
+  border-color: transparent;
+  box-shadow: none;
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailAttachmentDropZone {
+  background:
+    linear-gradient(180deg, rgba(16, 31, 53, 0.96), rgba(8, 20, 38, 0.94));
+  border-color: rgba(101, 133, 189, 0.24);
+  box-shadow: 0 16px 32px rgba(2, 8, 18, 0.28);
+}
+
+body.rnvAppRoot.appLight .rnvApp .detailWorkflowStoryRail,
+body.rnvAppRoot.appLight .rnvApp .detailSectionAnchorRail,
+body.rnvAppRoot.appLight .rnvApp .detailControlRowTop,
+body.rnvAppRoot.appLight .rnvApp .detailControlRowActions,
+body.rnvAppRoot.appLight .rnvApp .detailAttachmentDropZone {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(242, 247, 255, 0.18));
+}
+
+@media (max-width: 68.75rem) {
+  .rnvApp .detailHeroHeader {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 75rem) {
+  .rnvApp .detailContent .infoCardGrid .sapFGridListDefault,
+  .rnvApp .detailContent .infoCardGrid .sapFGridList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"],
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observer"],
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observed"] {
+    grid-column: span 2;
+  }
+
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="equipment"],
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="location"],
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="lpc"],
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="profession"] {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 53.75rem) {
+  .rnvApp .detailControlStickyBlock {
+    position: relative;
+    top: auto;
+  }
+
+  .rnvApp .detailControlStickyBlock.isViewportPinned {
+    min-height: 0;
+    transform: none;
+  }
+
+  .rnvApp .detailControlStickyBlock.isViewportPinned > .detailControlExperienceCard {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .rnvApp .detailContent .infoCardGrid .sapFGridListDefault,
+  .rnvApp .detailContent .infoCardGrid .sapFGridList {
+    grid-template-columns: 1fr;
+  }
+
+  .rnvApp .detailContent .infoCardGrid .sapFGLI {
+    grid-column: span 1;
+  }
+
+  .rnvApp .detailAttachmentDropZone {
+    grid-template-columns: 1fr;
+  }
+
+  .rnvApp .detailSectionAnchorRail,
+  .rnvApp .detailControlRowTop,
+  .rnvApp .detailControlRowActions {
+    padding-inline: clamp(0.55rem, 2.4vw, 0.78rem);
+  }
+
+  .rnvApp .detailControlRowTop .detailRailStatusChip {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .rnvApp .detailControlRowTop .detailRailStatusChip .sapMObjStatusText {
+    white-space: normal;
+  }
+
+  .rnvApp .detailControlRowTop .sapMTBSpacer {
+    display: none;
+  }
+
+  .rnvApp .detailSectionAnchorRail .sapMBtn {
+    flex: 1 1 100%;
+  }
+
+  .rnvApp .detailSectionAnchorBtn .sapMBtnInner {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .rnvApp .detailControlRowActions .sapMTBSpacer {
+    display: block;
+  }
+}
+
+.rnvApp .detailAccessDeniedScene {
+  display: grid;
+  grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: center;
+  min-height: min(78vh, 52rem);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-radius: 2rem;
+}
+
+.rnvApp .detailAccessDeniedSceneVisual,
+.rnvApp .detailAccessDeniedSceneCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.rnvApp .detailAccessDeniedIllustration {
+  width: min(100%, 18rem);
+  margin-inline: auto;
+  filter: drop-shadow(0 1.25rem 2.5rem rgba(18, 40, 73, 0.16));
+}
+
+.rnvApp .detailAccessDeniedTitle {
+  margin-bottom: 0.75rem;
+}
+
+.rnvApp .detailAccessDeniedText {
+  max-width: 34rem;
+  line-height: 1.6;
+}
+
+.rnvApp .detailAccessDeniedReason {
+  margin-top: 1rem;
+}
+
+.rnvApp .detailAccessDeniedAction {
+  margin-top: 1.25rem;
+  align-self: flex-start;
+}
+
+body.rnvAppRoot.appDark .rnvApp .detailAccessDeniedScene {
+  background:
+    radial-gradient(circle at top left, rgba(130, 161, 208, 0.16), transparent 48%),
+    linear-gradient(180deg, rgba(18, 32, 52, 0.92), rgba(8, 16, 29, 0.94));
+}
+
+body.rnvAppRoot.appLight .rnvApp .detailAccessDeniedScene {
+  background:
+    radial-gradient(circle at top left, rgba(126, 167, 219, 0.18), transparent 48%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(242, 247, 255, 0.82));
+}
+
+@media (max-width: 53.75rem) {
+  .rnvApp .detailAccessDeniedScene {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .rnvApp .detailAccessDeniedAction {
+    align-self: center;
+  }
+}
+
+/* Stabilize checklist data cards so they never overflow the detail viewport. */
+.rnvApp .detailInfoExperienceCard,
+.rnvApp .detailInfoExperienceCard .infoCardGrid,
+.rnvApp .detailInfoExperienceCard .sapFGridList,
+.rnvApp .detailInfoExperienceCard .sapFGridListDefault,
+.rnvApp .detailInfoExperienceCard .sapFGLI,
+.rnvApp .detailInfoExperienceCard .infoCardTile {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGridList {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI,
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI[data-cardkey="datetime"],
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI[data-cardkey="equipment"],
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI[data-cardkey="location"],
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI[data-cardkey="observer"],
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI[data-cardkey="observed"],
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI[data-cardkey="lpc"],
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGLI[data-cardkey="profession"] {
+  grid-column: span 1;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailHeroCard,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroCard {
+  padding-block: 0.92rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailHeroHeader,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroHeader {
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailHeroIntro.sapMFlexBox,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroIntro.sapMFlexBox {
+  max-width: none;
+  gap: 0.16rem;
+  padding-inline-end: 0;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailHeroStatBoard,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroStatBoard {
+  grid-template-columns: repeat(auto-fit, minmax(9.2rem, 1fr));
+  gap: 0.48rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailControlInlineCard,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailControlInlineCard {
+  padding: 0.68rem 0.72rem 0.64rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailControlBar,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailControlBar {
+  gap: 0.42rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailRailHeader,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailRailHeader {
+  margin-bottom: 0;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailSectionAnchorRail,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionAnchorRail {
+  padding: 0.22rem;
+  column-gap: 0.32rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailSectionAnchorRail .sapMBtn,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionAnchorRail .sapMBtn {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailSectionAnchorBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionAnchorBtn .sapMBtnInner {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailControlRowTop,
+.rnvApp .appLayoutSplit #detailPaneHost .detailControlRowActions,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailControlRowTop,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailControlRowActions {
+  padding: 0.22rem 0.34rem;
+  row-gap: 0.34rem;
+  column-gap: 0.36rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailControlRowActions .sapMTBSpacer,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailControlRowActions .sapMTBSpacer {
+  display: block;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailControlRowActions .sapMBtn,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailControlRowActions .sapMBtn {
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailRailHint,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailRailHint {
+  line-height: 1.3;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailSectionBody,
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentsBody,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionBody,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentsBody {
+  overflow-x: visible;
+  gap: 0.58rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailTableExperienceCard,
+.rnvApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard,
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentsCard,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailTableExperienceCard,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentsCard {
+  min-width: 0;
+  padding:
+    calc(0.72rem * var(--theme-density-scale))
+    calc(0.76rem * var(--theme-density-scale))
+    calc(0.76rem * var(--theme-density-scale));
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .infoCardGrid,
+.rnvApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .sapFGridList,
+.rnvApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .sapFGridListDefault,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .infoCardGrid,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .sapFGridList,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .sapFGridListDefault {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.72rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .sapFGLI,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .sapFGLI {
+  grid-column: span 1;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailGridTable,
+.rnvApp .appLayoutSplit #detailPaneHost .flatEditorTable,
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailGridTable,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .flatEditorTable,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMListTbl,
+.rnvApp .appLayoutSplit #detailPaneHost .flatEditorTable .sapMListTbl,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMListTbl,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .flatEditorTable .sapMListTbl {
+  width: 100%;
+  table-layout: fixed;
+  border-spacing: 0 0.46rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMListTblHeaderCell,
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMListTblCell,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMListTblHeaderCell,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMListTblCell {
+  min-width: 0;
+  max-width: 100%;
+  padding-inline: 0.52rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMText,
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMObjectIdentifierText,
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMLnk,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMText,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMObjectIdentifierText,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMLnk {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentActions,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentActions {
+  width: 100%;
+  justify-content: stretch;
+  gap: 0.3rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentActions .tableRowActionBtn,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentActions .tableRowActionBtn {
+  flex: 1 1 calc(50% - 0.15rem);
+  min-width: 0;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentActions .tableRowActionBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
+  width: 100%;
+  justify-content: center;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailAttachmentDropZone,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentDropZone {
+  grid-template-columns: 1fr;
+  min-height: 0;
+  gap: 0.62rem;
+  padding: 0.82rem 0.88rem;
+}
+
+.rnvApp .appLayoutSplit #detailPaneHost .detailEmptyStateCard,
+.rnvApp .appLayoutSplit [id$="-detailPaneHost"] .detailEmptyStateCard {
+  gap: 0.42rem;
+  padding: 0.84rem 0.88rem;
+  min-width: 0;
+}
+
+@media (min-width: 96rem) {
+  .rnvApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 1440px) {
+  .rnvApp .detailHeroHeader {
+    grid-template-columns: minmax(13.5rem, 1fr) minmax(0, 1.8fr);
+  }
+
+  .rnvApp .detailHeroStatBoard {
+    grid-template-columns: repeat(auto-fit, minmax(8.6rem, 1fr));
+  }
+
+  .rnvApp .detailControlRow {
+    gap: 0.55rem;
+  }
+}
+
+@media (max-width: 1280px) {
+  .rnvApp .detailHeroHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .rnvApp .detailHeroStatBoard {
+    grid-template-columns: repeat(auto-fit, minmax(8.2rem, 1fr));
+  }
+
+  .rnvApp .detailControlInlineCard {
+    padding: 0.72rem 0.75rem 0.68rem;
+  }
+}

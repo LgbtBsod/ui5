@@ -1,0 +1,6 @@
+appeal_id: APPEAL-2026-03-02
+rule: duplication-policy
+reason: migration requires temporary duplication
+proposed_conditions:
+  - mission scheduled
+  - duplication removed within 1 sprint

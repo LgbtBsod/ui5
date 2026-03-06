@@ -1,0 +1,99 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
+    <Dialog
+        class="glassDialog"
+        id="barriersExpandedDialog"
+        title="{i18n>barriersExpandedTitle}"
+        contentWidth="72rem"
+        contentHeight="30rem"
+        draggable="true"
+        resizable="true"
+        stretchOnPhone="true"
+        busy="{view>/barriersExpandedBusy}"
+        busyIndicatorDelay="0"
+        initialFocus="barriersExpandedCloseButton">
+        <content>
+            <VBox class="expandedDialogContent dialogContentShell tableDialogBody" renderType="Bare">
+                <t:Table
+                    class="dialogDataTable detailGridTable"
+                    visible="{= !${appView>/isPhoneViewport} }"
+                    rows="{selected>/barriers}"
+                    selectionMode="None"
+                    visibleRowCountMode="Auto"
+                    minAutoRowCount="6"
+                    rowHeight="48">
+                    <t:columns>
+                        <t:Column width="3rem">
+                            <Label text=""/>
+                            <t:template>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column>
+                            <Label text="{i18n>barrierLabel}"/>
+                            <t:template>
+                                <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="8rem">
+                            <Label text="{i18n>statusLabel}"/>
+                            <t:template>
+                                <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column>
+                            <Label text="{i18n>commentLabel}"/>
+                            <t:template>
+                                <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                            <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                            <t:template>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>rowActionDelete}"
+                                    width="100%"
+                                    type="Transparent"
+                                    press=".onDeleteBarrierRow"
+                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </t:template>
+                        </t:Column>
+                    </t:columns>
+                </t:Table>
+
+                <Table items="{selected>/barriers}" class="flatEditorTable dialogDataTable" growing="true" growingThreshold="20" visible="{appView>/isPhoneViewport}">
+                    <columns>
+                        <Column width="3rem"><Text text=""/></Column>
+                        <Column><Text text="{i18n>barrierLabel}"/></Column>
+                        <Column><Text text="{i18n>statusLabel}"/></Column>
+                        <Column><Text text="{i18n>commentLabel}"/></Column>
+                        <Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                            <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
+                                <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>rowActionDelete}"
+                                    width="100%"
+                                    type="Transparent"
+                                    press=".onDeleteBarrierRow"
+                                    visible="{= ${state>/mode} !== 'READ' }"
+                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button id="barriersExpandedCloseButton" text="{i18n>closeButton}" icon="sap-icon://nav-back" press=".onCloseBarriersExpanded"/>
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

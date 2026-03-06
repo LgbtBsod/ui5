@@ -1,0 +1,6 @@
+workflow_risk:
+  proof_required_for:
+    - lock
+    - autosave
+    - cache
+  exclusive_window_required_for_high_risk: true

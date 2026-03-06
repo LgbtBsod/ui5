@@ -1,0 +1,3 @@
+duplication:
+  groups_max: 30
+  temporary_override_allowed: true

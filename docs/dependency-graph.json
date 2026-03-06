@@ -1,0 +1,1703 @@
+{
+  "architecture/air-traffic/conflict-detector.js": [],
+  "architecture/air-traffic/deadlock-detector.js": [],
+  "architecture/air-traffic/merge-coordinator.js": [
+    "child_process"
+  ],
+  "architecture/air-traffic/queue-manager.js": [
+    "fs",
+    "path"
+  ],
+  "architecture/air-traffic/scheduler.js": [],
+  "architecture/air-traffic/traffic-dashboard.js": [
+    "fs",
+    "path",
+    "./queue-manager",
+    "./conflict-detector",
+    "./scheduler",
+    "./merge-coordinator",
+    "./deadlock-detector"
+  ],
+  "architecture/digital-twin/impact-simulator.js": [],
+  "architecture/digital-twin/patch-sandbox.js": [
+    "fs",
+    "child_process",
+    "../../scripts/lib/git-changes"
+  ],
+  "architecture/digital-twin/preflight.js": [
+    "fs",
+    "path",
+    "./twin-builder",
+    "./patch-sandbox",
+    "./impact-simulator",
+    "./risk-predictor",
+    "./safe-split-suggester",
+    "./report-generator"
+  ],
+  "architecture/digital-twin/report-generator.js": [
+    "fs",
+    "path"
+  ],
+  "architecture/digital-twin/risk-predictor.js": [],
+  "architecture/digital-twin/safe-split-suggester.js": [],
+  "architecture/digital-twin/twin-builder.js": [
+    "fs",
+    "path",
+    "../../scripts/lib/auditInput"
+  ],
+  "control/AppShellHeader.js": [
+    "sap/ui/core/Control",
+    "sap/m/OverflowToolbar",
+    "sap/m/OverflowToolbarLayoutData",
+    "sap/m/VBox",
+    "sap/m/HBox",
+    "sap/m/Text",
+    "sap/m/Title",
+    "sap/m/ObjectStatus",
+    "sap/m/ToolbarSpacer",
+    "sap/m/Button",
+    "sap_ui5/control/ThemeToggle"
+  ],
+  "control/ThemeToggle.js": [
+    "sap/ui/core/Control"
+  ],
+  "controller/App.controller.js": [
+    "sap_ui5/controller/Base.controller",
+    "sap_ui5/controller/support/AppControllerActions"
+  ],
+  "controller/Base.controller.js": [
+    "sap/ui/core/mvc/Controller",
+    "sap_ui5/controller/base/RouterMixin",
+    "sap_ui5/controller/base/ModelAccessMixin",
+    "sap_ui5/controller/base/EffectMixin",
+    "sap_ui5/controller/base/ThemeMixin"
+  ],
+  "controller/Detail.controller.js": [
+    "sap_ui5/controller/Base.controller",
+    "sap_ui5/controller/support/DetailControllerLifecycle",
+    "sap_ui5/controller/support/DetailFormatters",
+    "sap_ui5/controller/support/AttachmentUploadSupport",
+    "sap_ui5/controller/support/DetailControllerActions"
+  ],
+  "controller/Search.controller.js": [
+    "sap_ui5/controller/Base.controller",
+    "sap_ui5/controller/support/SearchControllerActions",
+    "sap_ui5/controller/support/SearchControllerSupport",
+    "sap_ui5/controller/support/SearchRateProgress"
+  ],
+  "controller/TestUserDialog.controller.js": [
+    "sap_ui5/facades/AppFacade"
+  ],
+  "controller/base/ControllerTextRuntime.js": [],
+  "controller/base/EffectMixin.js": [
+    "sap_ui5/service/framework/EffectApplier",
+    "sap_ui5/service/framework/EffectUiHandlers",
+    "sap_ui5/service/framework/FeedbackBannerRuntime",
+    "sap_ui5/controller/base/ControllerTextRuntime"
+  ],
+  "controller/base/ModelAccessMixin.js": [
+    "sap_ui5/facades/LockFacade"
+  ],
+  "controller/base/RouterMixin.js": [],
+  "controller/base/ThemeMixin.js": [
+    "sap_ui5/service/framework/ThemeRuntime"
+  ],
+  "controller/support/AppControllerActions.js": [
+    "sap_ui5/controller/support/AppControllerLifecycleActions",
+    "sap_ui5/controller/support/AppControllerOverlayActions",
+    "sap_ui5/controller/support/AppControllerShellActions",
+    "sap_ui5/controller/support/AppControllerStateActions",
+    "sap_ui5/controller/support/AppControllerDomActions"
+  ],
+  "controller/support/AppControllerDomActions.js": [],
+  "controller/support/AppControllerLifecycleActions.js": [
+    "sap_ui5/controller/support/ControllerResourceCleanup",
+    "sap_ui5/controller/support/SplitLayoutVisualSync",
+    "sap_ui5/controller/support/ControllerModelWriteSupport",
+    "sap_ui5/service/framework/AppShellCoordinator",
+    "sap_ui5/service/framework/SplitterModeApplier",
+    "sap/ui/core/mvc/XMLView",
+    "sap/ui/layout/SplitterLayoutData",
+    "sap/ui/Device"
+  ],
+  "controller/support/AppControllerOverlayActions.js": [
+    "sap_ui5/service/framework/FocusRuntime",
+    "sap_ui5/service/framework/LazyDialogRuntime",
+    "sap_ui5/controller/support/ControllerReturnFocusRuntime"
+  ],
+  "controller/support/AppControllerShellActions.js": [
+    "sap_ui5/controller/TestUserDialog.controller",
+    "sap_ui5/controller/support/AppShellTextSupport",
+    "sap_ui5/controller/support/AppRetryActionPolicy",
+    "sap_ui5/controller/support/AppShellUserActionPolicy",
+    "sap_ui5/service/framework/ClipboardRuntime",
+    "sap_ui5/service/framework/FocusRuntime",
+    "sap_ui5/service/framework/FeedbackBannerState",
+    "sap_ui5/service/framework/FeedbackBannerRuntime",
+    "sap_ui5/service/framework/SecurityTokenRefresh",
+    "sap_ui5/service/framework/AppShellCoordinator",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/AppControllerStateActions.js": [
+    "sap_ui5/controller/support/AppShellTextSupport",
+    "sap_ui5/service/framework/ActionContract",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/AppRetryActionPolicy.js": [
+    "sap_ui5/service/framework/ActionContract",
+    "sap_ui5/service/framework/SecurityTokenRefresh",
+    "sap_ui5/service/framework/EffectActionRouting"
+  ],
+  "controller/support/AppShellTextSupport.js": [
+    "sap_ui5/controller/base/ControllerTextRuntime"
+  ],
+  "controller/support/AppShellUserActionPolicy.js": [
+    "sap_ui5/service/framework/ActionContract"
+  ],
+  "controller/support/AttachmentDropZoneRuntime.js": [
+    "sap_ui5/controller/support/AttachmentUploadCore"
+  ],
+  "controller/support/AttachmentUploadCore.js": [
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/util/AttachmentUploadPolicy",
+    "sap_ui5/controller/support/DetailCommandPolicy",
+    "sap_ui5/controller/base/ControllerTextRuntime",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/AttachmentUploadSupport.js": [
+    "sap_ui5/controller/support/AttachmentUploadCore",
+    "sap_ui5/controller/support/AttachmentDropZoneRuntime"
+  ],
+  "controller/support/ControllerModelWriteSupport.js": [],
+  "controller/support/ControllerResourceCleanup.js": [],
+  "controller/support/ControllerReturnFocusRuntime.js": [
+    "sap_ui5/service/framework/FocusRuntime"
+  ],
+  "controller/support/DetailAccessViewState.js": [],
+  "controller/support/DetailActionConstants.js": [],
+  "controller/support/DetailActionDialogSupport.js": [
+    "sap_ui5/controller/support/ControllerReturnFocusRuntime",
+    "sap_ui5/controller/support/ControllerModelWriteSupport",
+    "sap_ui5/service/framework/FocusRuntime"
+  ],
+  "controller/support/DetailActionPinnedRailSupport.js": [
+    "sap_ui5/controller/support/DetailActionConstants"
+  ],
+  "controller/support/DetailActionViewportSupport.js": [
+    "sap_ui5/controller/support/AttachmentUploadSupport",
+    "sap_ui5/controller/support/DetailActionConstants",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/DetailAttachmentLocationActions.js": [
+    "sap_ui5/controller/support/AttachmentUploadSupport",
+    "sap_ui5/controller/support/DetailCommandPolicy",
+    "sap_ui5/controller/support/DetailPersonInputSupport",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/DetailChecklistCoreSupport.js": [
+    "sap_ui5/controller/support/DetailDialogSupport",
+    "sap_ui5/controller/support/DetailViewSupport",
+    "sap_ui5/controller/support/DetailAccessViewState",
+    "sap_ui5/controller/support/DetailActionConstants",
+    "sap_ui5/controller/support/DetailCommandPolicy",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/DetailChecklistRowActions.js": [
+    "sap_ui5/controller/support/DetailCommandPolicy"
+  ],
+  "controller/support/DetailChecklistStateActions.js": [
+    "sap_ui5/service/framework/EffectApplier",
+    "sap_ui5/controller/support/DetailActionConstants",
+    "sap_ui5/controller/support/DetailCommandPolicy",
+    "sap_ui5/service/framework/ClipboardRuntime",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/DetailCommandPolicy.js": [],
+  "controller/support/DetailControllerActions.js": [
+    "sap_ui5/controller/support/DetailValidationSummarySupport",
+    "sap_ui5/controller/support/DetailActionConstants",
+    "sap_ui5/service/framework/FacadeCommandContract",
+    "sap_ui5/controller/support/DetailActionViewportSupport",
+    "sap_ui5/controller/support/DetailActionPinnedRailSupport",
+    "sap_ui5/controller/support/DetailActionDialogSupport",
+    "sap_ui5/controller/support/DetailChecklistCoreSupport",
+    "sap_ui5/controller/support/DetailChecklistStateActions",
+    "sap_ui5/controller/support/DetailChecklistRowActions",
+    "sap_ui5/controller/support/DetailAttachmentLocationActions"
+  ],
+  "controller/support/DetailControllerLifecycle.js": [
+    "sap/ui/model/json/JSONModel",
+    "sap_ui5/controller/support/ControllerResourceCleanup",
+    "sap_ui5/service/domain/detail/DetailFacade",
+    "sap_ui5/service/framework/CtxFactory",
+    "sap_ui5/service/framework/FacadeCommandContract",
+    "sap_ui5/controller/base/ControllerTextRuntime",
+    "sap_ui5/controller/support/ControllerModelWriteSupport",
+    "sap_ui5/controller/support/AttachmentUploadSupport",
+    "sap_ui5/controller/support/DetailAccessViewState"
+  ],
+  "controller/support/DetailDialogSupport.js": [
+    "sap_ui5/service/framework/DraftChecklistFactory",
+    "sap_ui5/service/framework/LazyDialogRuntime"
+  ],
+  "controller/support/DetailFormatters.js": [
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/controller/base/ControllerTextRuntime"
+  ],
+  "controller/support/DetailPersonInputSupport.js": [
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/DetailSelectionSync.js": [
+    "sap_ui5/util/ValidationPathMap"
+  ],
+  "controller/support/DetailValidationSummarySupport.js": [
+    "sap_ui5/controller/support/DetailSelectionSync",
+    "sap_ui5/controller/support/DetailPersonInputSupport",
+    "sap_ui5/service/framework/FocusRuntime",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/DetailViewSupport.js": [
+    "sap/f/GridListItem",
+    "sap/m/VBox",
+    "sap/m/Text",
+    "sap/m/Input",
+    "sap/m/DatePicker",
+    "sap/m/TimePicker",
+    "sap/m/Select",
+    "sap/m/ObjectStatus",
+    "sap/ui/core/Item",
+    "sap/ui/core/CustomData",
+    "sap_ui5/service/framework/ControlStyleRuntime",
+    "sap_ui5/controller/base/ControllerTextRuntime",
+    "sap_ui5/controller/support/SplitLayoutVisualSync",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/SearchCommandPolicy.js": [],
+  "controller/support/SearchControllerActions.js": [
+    "sap_ui5/controller/support/ControllerResourceCleanup",
+    "sap_ui5/service/domain/search/SearchFacade",
+    "sap_ui5/service/framework/CtxFactory",
+    "sap_ui5/service/framework/FacadeCommandContract",
+    "sap_ui5/service/framework/FocusRuntime",
+    "sap_ui5/controller/support/ControllerModelWriteSupport",
+    "sap_ui5/controller/support/SearchCommandPolicy",
+    "sap_ui5/controller/support/SearchControllerSupport",
+    "sap_ui5/controller/support/SearchLoadRuntimeSupport",
+    "sap_ui5/controller/support/SearchRateProgress",
+    "sap_ui5/controller/support/SearchViewSupport"
+  ],
+  "controller/support/SearchControllerSupport.js": [
+    "sap/ui/model/json/JSONModel",
+    "sap_ui5/util/search/SearchMaxResults"
+  ],
+  "controller/support/SearchLoadRuntimeSupport.js": [
+    "sap_ui5/controller/support/SearchControllerSupport",
+    "sap_ui5/controller/support/ControllerModelWriteSupport"
+  ],
+  "controller/support/SearchRateProgress.js": [],
+  "controller/support/SearchViewSupport.js": [
+    "sap_ui5/controller/support/SearchControllerSupport",
+    "sap_ui5/controller/support/ControllerModelWriteSupport",
+    "sap_ui5/controller/support/SearchLoadRuntimeSupport",
+    "sap_ui5/controller/support/SearchRateProgress",
+    "sap_ui5/controller/support/SearchCommandPolicy",
+    "sap_ui5/service/framework/FocusRuntime",
+    "sap_ui5/service/framework/ControlStyleRuntime",
+    "sap_ui5/service/framework/LazyDialogRuntime",
+    "sap_ui5/controller/base/ControllerTextRuntime"
+  ],
+  "controller/support/SplitLayoutVisualSync.js": [],
+  "facades/AppFacade.js": [
+    "sap_ui5/model/StatePaths"
+  ],
+  "facades/LockFacade.js": [
+    "sap_ui5/infra/adapters/LockAdapter"
+  ],
+  "infra/adapters/BrowserCacheAdapter.js": [],
+  "infra/adapters/ClockAdapter.js": [],
+  "infra/adapters/DictAdapter.js": [
+    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
+    "sap_ui5/util/ValueTokenParser"
+  ],
+  "infra/adapters/LastChangeSetAdapter.js": [
+    "sap_ui5/infra/odata/GatewayODataClient"
+  ],
+  "infra/adapters/LocationLookupAdapter.js": [
+    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport"
+  ],
+  "infra/adapters/LockAdapter.js": [
+    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
+    "sap_ui5/infra/adapters/shared/GatewayIdentitySupport"
+  ],
+  "infra/adapters/ODataChecklistRepoAdapter.js": [
+    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
+    "sap_ui5/infra/adapters/shared/ChecklistSnapshotMapper",
+    "sap_ui5/infra/adapters/shared/AttachmentRepoSupport",
+    "sap_ui5/infra/adapters/shared/GatewayIdentitySupport",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/service/backend/GatewayClient"
+  ],
+  "infra/adapters/PersonSuggestAdapter.js": [
+    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport"
+  ],
+  "infra/adapters/SmartControlsAdapter.js": [
+    "sap_ui5/util/SearchSmartControlCoordinator"
+  ],
+  "infra/adapters/TelemetryAdapter.js": [
+    "sap_ui5/util/UxTelemetry"
+  ],
+  "infra/adapters/Ui5StateAdapter.js": [],
+  "infra/adapters/Ui5StyleAdapter.js": [],
+  "infra/adapters/WorkflowAnalyticsAdapter.js": [
+    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport"
+  ],
+  "infra/adapters/shared/AttachmentRepoSupport.js": [
+    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
+    "sap_ui5/infra/adapters/shared/ChecklistSnapshotMapper",
+    "sap_ui5/service/backend/GatewayClient"
+  ],
+  "infra/adapters/shared/ChecklistSnapshotMapper.js": [],
+  "infra/adapters/shared/GatewayAdapterSupport.js": [
+    "sap_ui5/infra/odata/GatewayODataClient",
+    "sap_ui5/infra/adapters/shared/ODataAdapterUtils"
+  ],
+  "infra/adapters/shared/GatewayIdentitySupport.js": [],
+  "infra/adapters/shared/ODataAdapterUtils.js": [],
+  "infra/navigation/RouteModeCoordinator.js": [
+    "sap_ui5/util/SplitterSizeService",
+    "sap_ui5/util/DebugLogger",
+    "sap_ui5/infra/navigation/RouteModeRules",
+    "sap_ui5/infra/navigation/SplitterModeApplier",
+    "sap_ui5/infra/navigation/RouteSync"
+  ],
+  "infra/navigation/RouteModeRules.js": [],
+  "infra/navigation/RouteSync.js": [
+    "sap_ui5/util/SplitterSizeService"
+  ],
+  "infra/navigation/SplitterModeApplier.js": [],
+  "infra/odata/GatewayODataClient.js": [
+    "sap_ui5/service/backend/GatewayClient"
+  ],
+  "infra/ui/SplitterDragGuard.js": [
+    "sap_ui5/util/DebugLogger"
+  ],
+  "manager/ActivityMonitor.js": [
+    "sap/ui/base/EventProvider"
+  ],
+  "manager/AutoSaveCoordinator.js": [
+    "sap/ui/base/EventProvider"
+  ],
+  "manager/ConnectivityCoordinator.js": [
+    "sap/ui/base/EventProvider"
+  ],
+  "manager/GCDManager.js": [
+    "sap/ui/base/EventProvider",
+    "sap_ui5/manager/shared/ManagerRuntime",
+    "sap_ui5/manager/shared/TimerRuntime"
+  ],
+  "manager/HeartbeatManager.js": [
+    "sap/ui/base/EventProvider",
+    "sap_ui5/manager/shared/ManagerRuntime",
+    "sap_ui5/manager/shared/TimerRuntime"
+  ],
+  "manager/LockStatusMonitor.js": [
+    "sap/ui/base/EventProvider",
+    "sap_ui5/manager/shared/ManagerRuntime",
+    "sap_ui5/manager/shared/TimerRuntime"
+  ],
+  "manager/ManagerFacade.js": [
+    "sap_ui5/manager/SmartCacheManager",
+    "sap_ui5/manager/HeartbeatManager",
+    "sap_ui5/manager/GCDManager",
+    "sap_ui5/manager/ActivityMonitor",
+    "sap_ui5/manager/AutoSaveCoordinator",
+    "sap_ui5/manager/ConnectivityCoordinator",
+    "sap_ui5/manager/LockStatusMonitor",
+    "sap_ui5/manager/SettingsManager"
+  ],
+  "manager/SettingsManager.js": [
+    "sap_ui5/util/DebugLogger"
+  ],
+  "manager/SmartCacheManager.js": [
+    "sap/ui/base/EventProvider",
+    "sap_ui5/util/SmartCacheStore",
+    "sap_ui5/util/SmartCacheUtils"
+  ],
+  "manager/shared/ManagerRuntime.js": [],
+  "manager/shared/TimerRuntime.js": [],
+  "model/ModelFactory.js": [
+    "sap/ui/model/json/JSONModel",
+    "sap_ui5/model/StateSchema",
+    "sap_ui5/util/AttachmentUploadPolicy"
+  ],
+  "model/StatePaths.js": [
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "model/StateSchema.js": [
+    "sap_ui5/model/schema/uiSchema",
+    "sap_ui5/model/schema/workflowSchema",
+    "sap_ui5/model/schema/navigationSchema"
+  ],
+  "model/schema/navigationSchema.js": [],
+  "model/schema/uiSchema.js": [],
+  "model/schema/workflowSchema.js": [],
+  "model/search/SearchState.js": [],
+  "ports/ChecklistRepoPort.js": [],
+  "ports/ClockPort.js": [],
+  "ports/DictPort.js": [],
+  "ports/LocationLookupPort.js": [],
+  "ports/LockPort.js": [],
+  "ports/NavigationPort.js": [],
+  "ports/PersonSuggestPort.js": [],
+  "ports/SmartControlsPort.js": [],
+  "ports/TelemetryPort.js": [],
+  "ports/UiStatePort.js": [],
+  "sap_ui5/Component-preload.js": [],
+  "scripts/a11y-gate.js": [
+    "./lib/gateFs"
+  ],
+  "scripts/action-dispatcher-contract-gate.js": [
+    "./lib/gateRunner",
+    "./lib/patternScan"
+  ],
+  "scripts/architect-audit.js": [
+    "path",
+    "./lib/auditRunner",
+    "./lib/markdownAudit",
+    "./lib/auditInput"
+  ],
+  "scripts/architecture-gate.js": [
+    "./internal/architecture-gate-core"
+  ],
+  "scripts/architecture-governor.js": [
+    "fs",
+    "path",
+    "./lib/auditInput",
+    "./lib/reportFiles",
+    "./lib/domainFeatureRegistry",
+    "./lib/architectureArtifactsShared"
+  ],
+  "scripts/autofix/rules/feedback-import-rule.js": [
+    "./shared"
+  ],
+  "scripts/autofix/rules/manager-purity-rule.js": [
+    "./shared"
+  ],
+  "scripts/autofix/rules/scripts-helper-extract-rule.js": [],
+  "scripts/autofix/rules/shared.js": [
+    "../../lib/fileWalker",
+    "../../lib/textRead"
+  ],
+  "scripts/autofix/rules/style-purity-rule.js": [
+    "./shared"
+  ],
+  "scripts/autofix/run.js": [
+    "fs",
+    "path",
+    "./rules/feedback-import-rule",
+    "./rules/style-purity-rule",
+    "./rules/manager-purity-rule",
+    "./rules/scripts-helper-extract-rule"
+  ],
+  "scripts/backend-service-dedup-gate.js": [
+    "path",
+    "./lib/fileWalker",
+    "./lib/textRead",
+    "./lib/hashUtils"
+  ],
+  "scripts/banner-path-contract-gate.js": [
+    "./lib/gateRunner",
+    "./lib/patternScan"
+  ],
+  "scripts/ci-smoke-gate.js": [
+    "child_process",
+    "fs"
+  ],
+  "scripts/ci/autosave-input-contract-gate.js": [
+    "fs"
+  ],
+  "scripts/ci/backend-call-dedup-gate.js": [
+    "../backend-service-dedup-gate"
+  ],
+  "scripts/ci/controller-only-facade-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/ci/dead-code-gate.js": [
+    "fs",
+    "path",
+    "../lib/js-deps-scanner",
+    "../lib/fileWalker",
+    "../lib/gate-result"
+  ],
+  "scripts/ci/dependency-drift-gate.js": [
+    "fs",
+    "path",
+    "../lib/js-deps-scanner",
+    "../lib/fileWalker",
+    "../lib/gate-result"
+  ],
+  "scripts/ci/duplication-fingerprint-gate.js": [
+    "../dedup-fingerprint-gate"
+  ],
+  "scripts/ci/edit-requires-lock-gate.js": [
+    "fs"
+  ],
+  "scripts/ci/file-size-limit-gate.js": [
+    "../js-line-limit-gate"
+  ],
+  "scripts/ci/final-architecture-freeze-gate.js": [
+    "path",
+    "../lib/finalArchitectureFreezeCore",
+    "../lib/reportFiles"
+  ],
+  "scripts/ci/function-size-limit-gate.js": [
+    "../function-length-gate"
+  ],
+  "scripts/ci/gateway-live-env.js": [
+    "fs",
+    "http",
+    "https",
+    "path",
+    "child_process"
+  ],
+  "scripts/ci/layer-dependency-gate.js": [
+    "../architecture-gate"
+  ],
+  "scripts/ci/legacy-ban-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/ci/listener-registration-gate.js": [
+    "fs",
+    "path",
+    "../qa-shared"
+  ],
+  "scripts/ci/manager-no-jsonmodel-write-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/ci/no-legacy-imports-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/ci/shadow-duplicate-gate.js": [
+    "fs",
+    "path",
+    "../lib/fileWalker"
+  ],
+  "scripts/ci/smarttable-beforeRebind-noRebind-gate.js": [
+    "fs"
+  ],
+  "scripts/ci/statepaths-schema-consistency-gate.js": [
+    "fs"
+  ],
+  "scripts/ci/uiState-workflow-mirror-gate.js": [
+    "fs",
+    "path",
+    "../qa-shared"
+  ],
+  "scripts/ci/usecase-no-ui5-import-gate.js": [
+    "../usecase-no-ui5-import-gate"
+  ],
+  "scripts/compat-entity-access-gate.js": [
+    "fs",
+    "path",
+    "./qa-shared"
+  ],
+  "scripts/control-token-mapping-gate.js": [
+    "./lib/gateFs"
+  ],
+  "scripts/controller-import-whitelist-gate.js": [
+    "fs",
+    "path",
+    "./gate-assert",
+    "\\n"
+  ],
+  "scripts/controller-purity-gate.js": [
+    "./qa-shared"
+  ],
+  "scripts/css-accent-governance-gate.js": [
+    "fs"
+  ],
+  "scripts/css-duplicate-selector-gate.js": [
+    "fs",
+    "path",
+    "stylelint"
+  ],
+  "scripts/dedup-fingerprint-gate.js": [
+    "path",
+    "./lib/fileWalker",
+    "./lib/textRead",
+    "./lib/hashUtils",
+    "./lib/functionExtract",
+    "./lib/fingerprint"
+  ],
+  "scripts/design-language-gate.js": [
+    "fs"
+  ],
+  "scripts/domain-model-verify.js": [
+    "path",
+    "./lib/auditInput"
+  ],
+  "scripts/duplicate-governance-gate.js": [
+    "fs",
+    "path",
+    "./lib/auditInput"
+  ],
+  "scripts/effect-action-contract-gate.js": [
+    "./lib/gateRunner",
+    "./lib/patternScan"
+  ],
+  "scripts/effects-whitelist-gate.js": [
+    "./qa-shared"
+  ],
+  "scripts/enterprise-readiness-gate.js": [
+    "fs",
+    "./qa-shared",
+    "./lib/auditInput"
+  ],
+  "scripts/feature-scan.js": [
+    "fs",
+    "path",
+    "./lib/fileWalker"
+  ],
+  "scripts/feedback-unification-gate.js": [
+    "./lib/gateRunner",
+    "./lib/patternScan"
+  ],
+  "scripts/final-static-qa.js": [
+    "./qa-shared"
+  ],
+  "scripts/finalize-style-migration.js": [
+    "child_process",
+    "fs"
+  ],
+  "scripts/forbidden-patterns.js": [
+    "fs",
+    "path",
+    "./qa-shared"
+  ],
+  "scripts/full-style-migration-report.js": [
+    "fs"
+  ],
+  "scripts/function-length-gate.js": [
+    "./lib/gateRunner",
+    "./lib/functionExtract"
+  ],
+  "scripts/gate-assert.js": [],
+  "scripts/gates/autosave-lock-guard-gate.js": [
+    "fs"
+  ],
+  "scripts/gates/edit-mode-invariant-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/gates/file-size-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/gates/function-size-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/gates/layer-violation-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/gates/lock-state-enum-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/gates/no-islocked-writes-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/gates/sessionid-writes-gate.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/gateway-live-smoke-runner.js": [
+    "path",
+    "child_process"
+  ],
+  "scripts/gateway-only-smoke-gate.js": [
+    "./lib/reportGateRuntime"
+  ],
+  "scripts/gateway-parity-validator.js": [
+    "./internal/gateway-parity-validator-core"
+  ],
+  "scripts/gateway-smoke-invariant-gate.js": [
+    "./lib/reportGateRuntime"
+  ],
+  "scripts/generate-architecture-artifacts.js": [
+    "path",
+    "./lib/architectureArtifactsShared"
+  ],
+  "scripts/generate-architecture-audit.js": [
+    "fs",
+    "path",
+    "./lib/js-deps-scanner",
+    "./lib/fileWalker"
+  ],
+  "scripts/generate-component-preload.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/internal/architecture-gate-core.js": [
+    "path",
+    "../qa-shared",
+    " });\r\n    return true;\r\n  }\r\n  if (targetLayer === ",
+    " });\r\n    return true;\r\n  }\r\n  if (![",
+    " });\r\n    return true;\r\n  }\r\n  return false;\r\n}\r\n\r\nfunction pushLayerViolations(violations, sourceLayer, targetLayer, file, item, line, modulePath) {\r\n  if (sourceLayer === ",
+    " });\r\n  }\r\n  if (sourceLayer === ",
+    " });\r\n  }\r\n  if (sourceLayer === ",
+    " });\r\n  }\r\n  if (sourceLayer === ",
+    " });\r\n  }\r\n}\r\n\r\nfunction scanFileForViolations(file, fileSet, adjacency, violations) {\r\n  const source = readText(ROOT, file);\r\n  const sourceLayer = layerOf(file);\r\n  const deps = extractUi5Dependencies(source);\r\n  adjacency.set(file, adjacency.get(file) || []);\r\n\r\n  for (const item of deps) {\r\n    const resolved = resolveImport(file, item.dep);\r\n    const targetLayer = resolved.kind === "
+  ],
+  "scripts/internal/gateway-parity-validator-core.js": [
+    "../qa-shared",
+    "../lib/git-changes"
+  ],
+  "scripts/internal/layer-map-core.js": [
+    "fs",
+    "path",
+    "../qa-shared"
+  ],
+  "scripts/js-line-limit-gate.js": [
+    "./lib/gateRunner"
+  ],
+  "scripts/layer-map.js": [
+    "./internal/layer-map-core"
+  ],
+  "scripts/lib/architectureArtifactsShared.js": [
+    "fs",
+    "path",
+    "./fileWalker",
+    "./js-import-parser",
+    "./reportFiles"
+  ],
+  "scripts/lib/auditInput.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/lib/auditRunner.js": [
+    "path",
+    "./reportFiles"
+  ],
+  "scripts/lib/cssFiles.js": [
+    "path",
+    "./fileWalker"
+  ],
+  "scripts/lib/domainFeatureRegistry.js": [],
+  "scripts/lib/fileWalker.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/lib/finalArchitectureFreezeCore.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/lib/fingerprint.js": [
+    "./hashUtils"
+  ],
+  "scripts/lib/functionExtract.js": [],
+  "scripts/lib/gate-result.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/lib/gateFs.js": [
+    "fs"
+  ],
+  "scripts/lib/gateRunner.js": [
+    "path",
+    "./fileWalker",
+    "./textRead",
+    "./report"
+  ],
+  "scripts/lib/git-changes.js": [
+    "child_process",
+    "fs",
+    "path",
+    "crypto"
+  ],
+  "scripts/lib/hashUtils.js": [
+    "crypto"
+  ],
+  "scripts/lib/importGraph.js": [
+    "path",
+    "./js-import-parser"
+  ],
+  "scripts/lib/js-deps-scanner.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/lib/js-import-parser.js": [],
+  "scripts/lib/markdownAudit.js": [],
+  "scripts/lib/networkContractVerifierCore.js": [
+    "fs",
+    "path",
+    "../qa-shared",
+    "../sap-module-loader",
+    "./networkTraceUtils"
+  ],
+  "scripts/lib/networkTraceUtils.js": [
+    "fs",
+    "path",
+    "../test-pack/network-signature"
+  ],
+  "scripts/lib/patternScan.js": [],
+  "scripts/lib/qa-pipeline-config.js": [],
+  "scripts/lib/report.js": [],
+  "scripts/lib/reportFiles.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/lib/reportGateRuntime.js": [
+    "fs",
+    "./auditInput"
+  ],
+  "scripts/lib/textRead.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/manager-purity-gate.js": [
+    "./lib/gateRunner",
+    "./lib/patternScan"
+  ],
+  "scripts/message-taxonomy-gate.js": [
+    "fs"
+  ],
+  "scripts/metrics-runner.js": [
+    "path",
+    "./lib/fileWalker",
+    "./lib/textRead",
+    "./lib/functionExtract",
+    "./lib/importGraph",
+    "./lib/hashUtils",
+    "./lib/fingerprint",
+    "./lib/report"
+  ],
+  "scripts/model-path-contract-gate.js": [
+    "fs",
+    "path",
+    "./gate-assert"
+  ],
+  "scripts/network-contract-verifier.js": [
+    "./lib/networkContractVerifierCore"
+  ],
+  "scripts/pair-snapshots-gate.js": [
+    "fs"
+  ],
+  "scripts/qa-all.js": [
+    "path",
+    "fs",
+    "./qa-shared",
+    "./lib/qa-pipeline-config"
+  ],
+  "scripts/qa-runner.js": [
+    "fs",
+    "path",
+    "./qa-shared",
+    "./lib/git-changes",
+    "./lib/js-deps-scanner"
+  ],
+  "scripts/qa-shared.js": [
+    "fs",
+    "path",
+    "child_process"
+  ],
+  "scripts/report-architecture-metrics.js": [
+    "fs",
+    "path",
+    "./qa-shared"
+  ],
+  "scripts/report-ui-entity-inventory.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/report-ui5-api-usage.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/report-ui5-full-audit-catalog.js": [
+    "fs",
+    "path"
+  ],
+  "scripts/runtime-duplication-gate.js": [
+    "fs",
+    "path",
+    "./lib/fileWalker",
+    "./lib/textRead",
+    "./lib/functionExtract",
+    "./lib/fingerprint"
+  ],
+  "scripts/runtime-settings-gate.js": [
+    "./qa-shared",
+    ");\n      }\n    });\n  });\n}\n\nfunction detectLiteralIntervals(files, violations) {\n  const pattern = /(setInterval|setTimeout)\\s*\\([\\s\\S]*?,\\s*(\\d+)\\s*\\)/g;\n  files.forEach((file) => {\n    const source = readText(ROOT, file);\n    let match = pattern.exec(source);\n    while (match) {\n      const api = match[1];\n      const delay = Number(match[2]);\n      const line = lineFromIndex(source, match.index);\n      const context = source.slice(Math.max(0, match.index - 120), Math.min(source.length, match.index + 180));\n      const intervalSensitive = /poll|heartbeat|autosave|retry|refresh|idle|lock|gcd/i.test(context);\n      const uiMicrodelay = api === "
+  ],
+  "scripts/sap-gateway-only-gate.js": [
+    "./qa-shared",
+    ");\n      }\n      if (sDep === ",
+    ");\n      }\n      if (sDep === "
+  ],
+  "scripts/sap-module-loader.js": [
+    "fs",
+    "vm"
+  ],
+  "scripts/semantic-contrast-gate.js": [
+    "./lib/gateFs"
+  ],
+  "scripts/smart-odata-contract-gate.js": [
+    "./qa-shared",
+    "path",
+    "fs"
+  ],
+  "scripts/style-purity-gate.js": [
+    "./lib/gateRunner",
+    "./lib/patternScan"
+  ],
+  "scripts/style-scan.js": [
+    "fs",
+    "path",
+    "child_process",
+    "./lib/fileWalker"
+  ],
+  "scripts/style-system-audit.js": [
+    "path",
+    "./lib/auditRunner",
+    "./lib/cssFiles",
+    "./lib/markdownAudit",
+    "./lib/auditInput"
+  ],
+  "scripts/style-token-duplication-gate.js": [
+    "fs",
+    "path",
+    "./lib/cssFiles"
+  ],
+  "scripts/suggest-on-interaction-only-gate.js": [
+    "./qa-shared"
+  ],
+  "scripts/test-pack/network-signature-fixture.js": [
+    "./network-signature"
+  ],
+  "scripts/test-pack/network-signature.js": [
+    "url"
+  ],
+  "scripts/test-pack/smoke-delta.js": [
+    "fs"
+  ],
+  "scripts/test-pack/smoke-feedback.js": [
+    "fs"
+  ],
+  "scripts/test-pack/smoke-lock.js": [
+    "fs"
+  ],
+  "scripts/test-pack/smoke-navigation.js": [
+    "fs"
+  ],
+  "scripts/test-pack/smoke-network.js": [
+    "fs"
+  ],
+  "scripts/test-pack/smoke-runner.js": [
+    "./smoke-network",
+    "./smoke-delta",
+    "./smoke-lock",
+    "./smoke-navigation",
+    "./smoke-feedback"
+  ],
+  "scripts/theme-parity-gate.js": [
+    "./lib/reportGateRuntime"
+  ],
+  "scripts/theme-preferences-contract-gate.js": [
+    "fs"
+  ],
+  "scripts/unit-smoke.js": [
+    "./test-pack/smoke-runner"
+  ],
+  "scripts/usecase-contract-gate.js": [
+    "./qa-shared"
+  ],
+  "scripts/usecase-no-ui5-import-gate.js": [
+    "./lib/gateRunner",
+    "./lib/patternScan"
+  ],
+  "scripts/ux-slo-report.js": [
+    "fs"
+  ],
+  "scripts/ux-state-coverage-gate.js": [
+    "./lib/gateFs"
+  ],
+  "scripts/wave-c-regression-gate.js": [
+    "./wave-regression-shared"
+  ],
+  "scripts/wave-d-regression-gate.js": [
+    "./wave-regression-shared"
+  ],
+  "scripts/wave-e-release-governance-gate.js": [
+    "fs"
+  ],
+  "scripts/wave-regression-shared.js": [
+    "fs"
+  ],
+  "service/SmartSearchAdapter.js": [],
+  "service/backend/GatewayBackendService.js": [
+    "sap_ui5/service/backend/GatewayClient"
+  ],
+  "service/backend/GatewayClient.js": [
+    "sap_ui5/service/backend/GatewayErrorNormalizer",
+    ");\n        }\n        if (FORBIDDEN_PATH_PATTERNS.some(function (oPattern) { return oPattern.test("
+  ],
+  "service/backend/GatewayErrorNormalizer.js": [],
+  "service/domain/cache/ports/BrowserCachePort.js": [],
+  "service/domain/cache/ports/LastChangeSetPort.js": [],
+  "service/domain/cache/usecases/CacheReadUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/domain/cache/ports/BrowserCachePort"
+  ],
+  "service/domain/cache/usecases/CacheValidationUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/domain/cache/ports/BrowserCachePort",
+    "sap_ui5/service/domain/cache/ports/LastChangeSetPort",
+    "sap_ui5/util/WorkflowTelemetry"
+  ],
+  "service/domain/cache/usecases/CacheWriteUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/domain/cache/ports/BrowserCachePort"
+  ],
+  "service/domain/detail/AttachmentEffectSupport.js": [
+    "sap_ui5/service/framework/Effects"
+  ],
+  "service/domain/detail/DetailAuthorizationSupport.js": [
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/domain/detail/DetailFacade.js": [
+    "sap_ui5/service/domain/detail/usecases/OpenDetailUseCase",
+    "sap_ui5/service/domain/detail/usecases/EnterEditUseCase",
+    "sap_ui5/service/domain/detail/usecases/SaveDetailUseCase",
+    "sap_ui5/service/domain/detail/usecases/ValidateChecklistUseCase",
+    "sap_ui5/service/domain/detail/usecases/AutosaveDetailUseCase",
+    "sap_ui5/service/domain/detail/usecases/CloseDetailUseCase",
+    "sap_ui5/service/domain/detail/usecases/DeleteChecklistUseCase",
+    "sap_ui5/service/domain/detail/usecases/ChangeStatusUseCase",
+    "sap_ui5/service/domain/detail/usecases/ResolveConflictUseCase",
+    "sap_ui5/service/domain/detail/usecases/AttachmentUploadUseCase",
+    "sap_ui5/service/domain/detail/usecases/AttachmentDeleteUseCase",
+    "sap_ui5/service/domain/detail/usecases/RowOpsUseCase",
+    "sap_ui5/service/domain/detail/usecases/ValueHelpLocationUseCase",
+    "sap_ui5/service/domain/detail/usecases/PersonSuggestUseCase",
+    "sap_ui5/service/domain/detail/usecases/LockLostUseCase",
+    "sap_ui5/service/domain/detail/usecases/ForceReadOnlyUseCase",
+    "sap_ui5/service/domain/lock/usecases/TakeoverLockUseCase",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/framework/ActionContract",
+    "sap_ui5/model/StatePaths"
+  ],
+  "service/domain/detail/DetailSaveRuntimeSupport.js": [],
+  "service/domain/detail/DetailStateAccess.js": [],
+  "service/domain/detail/DetailValidationSupport.js": [
+    "sap_ui5/util/ValidationPathMap"
+  ],
+  "service/domain/detail/usecases/AttachmentDeleteUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/domain/shared/UseCaseResultUtils",
+    "sap_ui5/service/domain/detail/AttachmentEffectSupport",
+    "sap_ui5/service/domain/detail/DetailStateAccess",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/domain/detail/usecases/AttachmentUploadUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/domain/shared/UseCaseResultUtils",
+    "sap_ui5/service/domain/detail/AttachmentEffectSupport",
+    "sap_ui5/service/domain/detail/DetailStateAccess",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/util/DraftChecklistFactory"
+  ],
+  "service/domain/detail/usecases/AutosaveDetailUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailSaveRuntimeSupport",
+    "sap_ui5/service/domain/shared/UseCaseInputUtils",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/DeltaPayloadBuilder"
+  ],
+  "service/domain/detail/usecases/ChangeStatusUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/UseCaseInputUtils",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/service/domain/detail/DetailStateAccess",
+    "sap_ui5/service/domain/detail/DetailValidationSupport",
+    "sap_ui5/util/ChecklistValidationService",
+    "sap_ui5/util/DeltaPayloadBuilder"
+  ],
+  "service/domain/detail/usecases/CloseDetailUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/domain/detail/usecases/DeleteChecklistUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/domain/detail/usecases/EnterEditUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
+    "sap_ui5/service/domain/shared/UseCaseInputUtils",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/domain/detail/usecases/ForceReadOnlyUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/detail/usecases/LockLostUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/domain/detail/usecases/ForceReadOnlyUseCase"
+  ],
+  "service/domain/detail/usecases/OpenDetailUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
+    "sap_ui5/service/domain/shared/UseCaseInputUtils",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/domain/detail/usecases/PersonSuggestUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailStateAccess",
+    "sap_ui5/service/domain/shared/UseCaseResultUtils"
+  ],
+  "service/domain/detail/usecases/ResolveConflictUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/detail/usecases/RowOpsUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/util/ClientKeyGenerator"
+  ],
+  "service/domain/detail/usecases/SaveDetailUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailSaveRuntimeSupport",
+    "sap_ui5/service/domain/shared/UseCaseInputUtils",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/DeltaPayloadBuilder",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/domain/detail/usecases/ValidateChecklistUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailStateAccess",
+    "sap_ui5/service/domain/detail/DetailValidationSupport",
+    "sap_ui5/util/ChecklistValidationService"
+  ],
+  "service/domain/detail/usecases/ValueHelpLocationUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/detail/DetailStateAccess",
+    "sap_ui5/service/domain/shared/UseCaseResultUtils"
+  ],
+  "service/domain/lock/usecases/TakeoverLockUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/search/ExportFacade.js": [
+    "sap_ui5/service/domain/search/usecases/ExportSearchUseCase"
+  ],
+  "service/domain/search/SearchFacade.js": [
+    "sap_ui5/service/domain/search/usecases/BootstrapSearchUseCase",
+    "sap_ui5/service/domain/search/usecases/BuildSearchFilterUseCase",
+    "sap_ui5/service/domain/search/usecases/ExecuteSearchUseCase",
+    "sap_ui5/service/domain/search/usecases/RebindSearchUseCase",
+    "sap_ui5/service/domain/search/usecases/SelectRowUseCase",
+    "sap_ui5/service/domain/search/usecases/SelectionChangedUseCase",
+    "sap_ui5/service/domain/search/ExportFacade",
+    "sap_ui5/service/domain/search/usecases/AnalyticsUseCase",
+    "sap_ui5/service/domain/search/usecases/ApplyRebindPolicyUseCase"
+  ],
+  "service/domain/search/SearchSelectionEffects.js": [
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/search/usecases/AnalyticsUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/framework/ComponentRuntimeSupport"
+  ],
+  "service/domain/search/usecases/ApplyRebindPolicyUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/util/search/SearchBindingPolicy"
+  ],
+  "service/domain/search/usecases/BootstrapSearchUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/search/usecases/BuildSearchFilterUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/shared/StatePaths",
+    "sap_ui5/util/search/SearchFilterBuilder"
+  ],
+  "service/domain/search/usecases/ExecuteSearchUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/search/SearchSelectionEffects",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/search/usecases/ExportSearchUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/util/ExcelExport"
+  ],
+  "service/domain/search/usecases/RebindSearchUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/search/SearchSelectionEffects",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/search/usecases/SelectRowUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/domain/search/SearchSelectionEffects",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/service/domain/shared/StatePaths"
+  ],
+  "service/domain/search/usecases/SelectionChangedUseCase.js": [
+    "sap_ui5/service/framework/UseCase",
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/util/SearchSmartControlCoordinator"
+  ],
+  "service/domain/shared/StatePaths.js": [],
+  "service/domain/shared/UseCaseInputUtils.js": [],
+  "service/domain/shared/UseCaseResultUtils.js": [
+    "sap_ui5/service/framework/Result"
+  ],
+  "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js": [
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/util/TimeConfigService",
+    "sap_ui5/util/DebugLogger",
+    "sap_ui5/util/AttachmentUploadPolicy"
+  ],
+  "service/domain/shared/usecases/BootstrapAppUseCase.js": [
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/backend/GatewayBackendService"
+  ],
+  "service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase.js": [
+    "sap_ui5/service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase",
+    "sap_ui5/service/framework/Result"
+  ],
+  "service/domain/shared/usecases/DiagnosticsUseCase.js": [
+    "sap_ui5/service/framework/Result",
+    "sap_ui5/service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase"
+  ],
+  "service/domain/shared/usecases/EnsureDictLoadedUseCase.js": [
+    "sap_ui5/service/framework/Result"
+  ],
+  "service/domain/shared/usecases/StartManagersUseCase.js": [
+    "sap_ui5/service/framework/Result"
+  ],
+  "service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase.js": [
+    "sap_ui5/service/framework/Result"
+  ],
+  "service/framework/ActionContract.js": [
+    "sap_ui5/service/framework/RuntimeInput"
+  ],
+  "service/framework/ActionDispatcher.js": [
+    "sap_ui5/service/framework/RuntimeInput"
+  ],
+  "service/framework/AppShellCoordinator.js": [
+    "sap/ui/model/json/JSONModel",
+    "sap_ui5/infra/navigation/RouteModeCoordinator",
+    "sap_ui5/infra/navigation/SplitterModeApplier",
+    "sap_ui5/infra/ui/SplitterDragGuard",
+    "sap_ui5/util/DebugLogger",
+    "sap_ui5/service/framework/AppShellStateSync",
+    "sap_ui5/util/TimeConfigService",
+    "sap_ui5/util/runtime/TimerDefaults"
+  ],
+  "service/framework/AppShellStateSync.js": [
+    "sap_ui5/service/framework/LazyDialogRuntime"
+  ],
+  "service/framework/ClipboardRuntime.js": [],
+  "service/framework/ComponentInitActionRoutingSupport.js": [],
+  "service/framework/ComponentInitBootSupport.js": [],
+  "service/framework/ComponentInitCrossTabSupport.js": [],
+  "service/framework/ComponentInitFeedbackSupport.js": [
+    "sap_ui5/service/framework/FeedbackBannerRuntime"
+  ],
+  "service/framework/ComponentInitListenersSupport.js": [
+    "sap_ui5/service/framework/ActionContract",
+    "sap_ui5/service/framework/FeedbackBannerRuntime"
+  ],
+  "service/framework/ComponentInitLockRuntimeSupport.js": [],
+  "service/framework/ComponentInitManagerRuntimeSupport.js": [],
+  "service/framework/ComponentInitRuntime.js": [],
+  "service/framework/ComponentInitRuntimeSupport.js": [],
+  "service/framework/ComponentInitSaveGuardSupport.js": [
+    "sap_ui5/service/framework/ActionContract",
+    "sap_ui5/service/framework/SecurityTokenRefresh"
+  ],
+  "service/framework/ComponentLockReleaseSupport.js": [
+    "sap_ui5/model/StatePaths",
+    "sap_ui5/util/CreateSentinel",
+    "sap_ui5/service/backend/GatewayBackendService"
+  ],
+  "service/framework/ComponentRuntimeSupport.js": [
+    "sap_ui5/model/StatePaths",
+    "sap_ui5/util/CreateSentinel"
+  ],
+  "service/framework/ControlStyleRuntime.js": [
+    "sap_ui5/infra/adapters/Ui5StyleAdapter"
+  ],
+  "service/framework/CtxFactory.js": [
+    "sap_ui5/infra/adapters/ODataChecklistRepoAdapter",
+    "sap_ui5/infra/adapters/LockAdapter",
+    "sap_ui5/infra/adapters/DictAdapter",
+    "sap_ui5/infra/adapters/WorkflowAnalyticsAdapter",
+    "sap_ui5/infra/adapters/PersonSuggestAdapter",
+    "sap_ui5/infra/adapters/LocationLookupAdapter",
+    "sap_ui5/infra/adapters/Ui5StateAdapter",
+    "sap_ui5/infra/adapters/TelemetryAdapter",
+    "sap_ui5/infra/adapters/ClockAdapter",
+    "sap_ui5/infra/adapters/SmartControlsAdapter",
+    "sap_ui5/infra/adapters/BrowserCacheAdapter",
+    "sap_ui5/infra/adapters/LastChangeSetAdapter",
+    "sap_ui5/service/domain/cache/usecases/CacheValidationUseCase",
+    "sap_ui5/service/domain/cache/usecases/CacheReadUseCase",
+    "sap_ui5/service/domain/cache/usecases/CacheWriteUseCase"
+  ],
+  "service/framework/DraftChecklistFactory.js": [
+    "sap_ui5/util/DraftChecklistFactory"
+  ],
+  "service/framework/EffectActionRouting.js": [
+    "sap_ui5/service/framework/RuntimeInput"
+  ],
+  "service/framework/EffectApplier.js": [
+    "sap/m/MessageToast",
+    "sap/m/MessageBox",
+    "sap_ui5/util/DebugLogger",
+    "sap_ui5/infra/adapters/Ui5StyleAdapter",
+    "sap_ui5/service/ui/StyleTokens",
+    "sap_ui5/service/framework/EffectTextResolver",
+    "sap_ui5/service/framework/EffectModelOps",
+    "sap_ui5/service/framework/EffectBannerRouter",
+    "sap_ui5/service/framework/EffectActionRouting",
+    "sap_ui5/service/framework/EffectDialogRuntime"
+  ],
+  "service/framework/EffectBannerRouter.js": [
+    "sap_ui5/service/framework/FeedbackBannerRuntime",
+    "sap_ui5/service/framework/EffectActionRouting"
+  ],
+  "service/framework/EffectDialogRuntime.js": [
+    "sap_ui5/service/framework/LazyDialogRuntime",
+    "sap_ui5/service/framework/EffectActionRouting"
+  ],
+  "service/framework/EffectModelOps.js": [],
+  "service/framework/EffectTextResolver.js": [],
+  "service/framework/EffectUiHandlers.js": [
+    "sap_ui5/service/framework/EffectBannerRouter",
+    "sap_ui5/service/framework/EffectDialogRuntime"
+  ],
+  "service/framework/Effects.js": [
+    "sap_ui5/service/framework/RuntimeInput"
+  ],
+  "service/framework/FacadeCommandContract.js": [
+    "sap_ui5/service/framework/RuntimeInput"
+  ],
+  "service/framework/FeedbackBannerRuntime.js": [
+    "sap_ui5/service/framework/FeedbackBannerState"
+  ],
+  "service/framework/FeedbackBannerState.js": [
+    "sap_ui5/service/framework/RuntimeInput"
+  ],
+  "service/framework/FeedbackPolicy.js": [
+    "sap_ui5/service/framework/Effects",
+    "sap_ui5/service/framework/NormalizedError"
+  ],
+  "service/framework/FocusRuntime.js": [],
+  "service/framework/LazyDialogRuntime.js": [
+    "sap/ui/core/Fragment"
+  ],
+  "service/framework/NormalizedError.js": [],
+  "service/framework/Result.js": [
+    "sap_ui5/service/framework/FeedbackPolicy"
+  ],
+  "service/framework/RuntimeInput.js": [],
+  "service/framework/SecurityTokenRefresh.js": [],
+  "service/framework/SplitterModeApplier.js": [
+    "sap_ui5/infra/navigation/SplitterModeApplier"
+  ],
+  "service/framework/ThemeRuntime.js": [
+    "sap_ui5/util/ThemeService"
+  ],
+  "service/framework/UseCase.js": [],
+  "service/ui/StyleTokens.js": [],
+  "udos/court/appeal-engine.js": [
+    "fs",
+    "path"
+  ],
+  "udos/court/case-law-checker.js": [
+    "fs",
+    "path"
+  ],
+  "udos/court/constitution-checker.js": [
+    "child_process"
+  ],
+  "udos/court/court-engine.js": [
+    "fs",
+    "path",
+    "./constitution-checker",
+    "./policy-checker",
+    "./case-law-checker",
+    "./appeal-engine",
+    "./verdict-engine"
+  ],
+  "udos/court/policy-checker.js": [
+    "path",
+    "../../scripts/lib/auditInput"
+  ],
+  "udos/court/verdict-engine.js": [],
+  "udos/economy/engine/credit-engine.js": [
+    "fs",
+    "path"
+  ],
+  "udos/economy/engine/economy-engine.js": [
+    "fs",
+    "path",
+    "./settlement"
+  ],
+  "udos/economy/engine/pricing-engine.js": [
+    "fs",
+    "path"
+  ],
+  "udos/economy/engine/settlement.js": [
+    "fs",
+    "path",
+    "./pricing-engine",
+    "./tax-engine",
+    "./credit-engine"
+  ],
+  "udos/economy/engine/tax-engine.js": [
+    "fs",
+    "path"
+  ],
+  "udos/evolution/engine/drift-detector.js": [
+    "fs",
+    "path",
+    "../../../scripts/lib/auditInput"
+  ],
+  "udos/evolution/engine/evolution-engine.js": [
+    "fs",
+    "path",
+    "./pattern-analyzer",
+    "./drift-detector",
+    "./rfc-generator",
+    "../../../scripts/lib/auditInput"
+  ],
+  "udos/evolution/engine/pattern-analyzer.js": [
+    "fs",
+    "path"
+  ],
+  "udos/evolution/engine/rfc-generator.js": [
+    "fs",
+    "path"
+  ],
+  "udos/kernel/config.js": [
+    "path"
+  ],
+  "udos/kernel/dashboard-writer.js": [
+    "fs",
+    "path"
+  ],
+  "udos/kernel/event-bus.js": [
+    "fs",
+    "path",
+    "./config"
+  ],
+  "udos/kernel/logger.js": [],
+  "udos/kernel/scheduler.js": [],
+  "udos/kernel/score-policy-runtime.js": [
+    "fs",
+    "path",
+    "../../scripts/lib/auditInput"
+  ],
+  "udos/kernel/state-store.js": [
+    "fs",
+    "path",
+    "./config"
+  ],
+  "udos/kernel/udos.js": [
+    "fs",
+    "path",
+    "child_process",
+    "../../scripts/lib/git-changes",
+    "./config",
+    "./logger",
+    "./event-bus",
+    "./state-store",
+    "./scheduler",
+    "./dashboard-writer",
+    "./score-policy-runtime"
+  ],
+  "udos/memory/events/consolidate-events.js": [
+    "fs",
+    "path",
+    "../../../scripts/lib/auditInput"
+  ],
+  "udos/memory/features/feature-extractor.js": [
+    "fs",
+    "path"
+  ],
+  "udos/memory/models/module-risk-profiles.js": [
+    "fs",
+    "path",
+    "./risk-learning"
+  ],
+  "udos/memory/models/risk-learning.js": [
+    "fs",
+    "path"
+  ],
+  "udos/memory/policy-proposals/policy-proposer.js": [
+    "fs",
+    "path"
+  ],
+  "udos/subsystems/air-traffic/index.js": [],
+  "udos/subsystems/autopilot/index.js": [],
+  "udos/subsystems/command-center/index.js": [],
+  "udos/subsystems/control-tower/index.js": [],
+  "udos/subsystems/digital-twin/index.js": [],
+  "udos/subsystems/domain-model/index.js": [],
+  "udos/subsystems/flight-control/index.js": [],
+  "udos/subsystems/intelligence/index.js": [],
+  "udos/subsystems/qa/index.js": [],
+  "util/AttachmentUploadPolicy.js": [],
+  "util/ChecklistValidationService.js": [],
+  "util/ClientKeyGenerator.js": [],
+  "util/CreateSentinel.js": [],
+  "util/DebugLogger.js": [
+    "sap/base/Log"
+  ],
+  "util/DeltaPayloadBuilder.js": [
+    "sap_ui5/util/delta/DeltaCore",
+    "sap_ui5/util/delta/DeltaDateCodec",
+    "sap_ui5/util/delta/DeltaFieldMappers",
+    "sap_ui5/util/delta/DeltaChildChanges"
+  ],
+  "util/DraftChecklistFactory.js": [
+    "sap_ui5/util/ClientKeyGenerator"
+  ],
+  "util/ExcelExport.js": [],
+  "util/FlowCoordinator.js": [
+    "sap_ui5/infra/adapters/LockAdapter",
+    "sap_ui5/service/framework/EffectApplier",
+    "sap_ui5/model/StatePaths"
+  ],
+  "util/InteractionFX.js": [],
+  "util/RuntimeTimerSanitizer.js": [
+    "sap_ui5/util/runtime/TimerDefaults",
+    "sap_ui5/util/runtime/TimerSanitizer"
+  ],
+  "util/SearchSmartControlCoordinator.js": [
+    "sap_ui5/util/search/SearchBindingPolicy",
+    "sap_ui5/util/search/RebindDebouncePolicy"
+  ],
+  "util/SmartCacheStore.js": [],
+  "util/SmartCacheUtils.js": [],
+  "util/SplitterSizeService.js": [
+    "sap_ui5/util/DebugLogger",
+    "sap_ui5/util/layout/SplitterDefaults"
+  ],
+  "util/ThemeDomRuntime.js": [],
+  "util/ThemePhilosophy.js": [],
+  "util/ThemeService.js": [
+    "sap/ui/core/Core",
+    "sap/ui/core/theming/Parameters",
+    "sap_ui5/util/ThemePhilosophy",
+    "sap_ui5/util/ValueTokenParser",
+    "sap_ui5/util/ThemeDomRuntime",
+    "sap_ui5/util/ThemeTokenRuntime"
+  ],
+  "util/ThemeTokenRuntime.js": [],
+  "util/TimeConfigService.js": [
+    "sap_ui5/util/RuntimeTimerSanitizer",
+    "sap_ui5/util/runtime/TimerDefaults"
+  ],
+  "util/UxTelemetry.js": [],
+  "util/ValidationPathMap.js": [],
+  "util/ValueTokenParser.js": [],
+  "util/WorkflowTelemetry.js": [
+    "sap_ui5/util/DebugLogger"
+  ],
+  "util/delta/DeltaChildChanges.js": [
+    "sap_ui5/util/delta/DeltaCore"
+  ],
+  "util/delta/DeltaCore.js": [],
+  "util/delta/DeltaDateCodec.js": [],
+  "util/delta/DeltaFieldMappers.js": [
+    "sap_ui5/util/delta/DeltaDateCodec"
+  ],
+  "util/layout/SplitterDefaults.js": [],
+  "util/runtime/TimerDefaults.js": [],
+  "util/runtime/TimerSanitizer.js": [
+    "sap_ui5/util/DebugLogger"
+  ],
+  "util/search/RebindDebouncePolicy.js": [],
+  "util/search/SearchBindingPolicy.js": [
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap_ui5/util/search/SearchFilterBuilder",
+    "sap_ui5/util/search/SearchMaxResults"
+  ],
+  "util/search/SearchFilterBuilder.js": [
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+  ],
+  "util/search/SearchMaxResults.js": []
+}

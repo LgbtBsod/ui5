@@ -1,0 +1,55 @@
+{
+  "generatedAt": "2026-03-03T03:10:00.382Z",
+  "sources": {
+    "flightLogs": 3,
+    "economyLedgerRows": 2,
+    "telemetryRows": 1,
+    "riskProfiles": 4,
+    "duplicationReports": 1,
+    "courtDecision": "CLEAR"
+  },
+  "snapshots": [
+    {
+      "timestamp": "2026-03-02T08:00:00Z",
+      "architectureScore": 94,
+      "duplicationGroups": 14,
+      "layerViolations": 0,
+      "controllerComplexity": 100,
+      "modulesTouched": [
+        "i18n.properties",
+        "run-checklist.md"
+      ],
+      "missionsExecuted": [
+        "MISSION-DEDUPE-01"
+      ]
+    },
+    {
+      "timestamp": "2026-03-02T08:20:00Z",
+      "architectureScore": 93,
+      "duplicationGroups": 15,
+      "layerViolations": 0,
+      "controllerComplexity": 107,
+      "modulesTouched": [
+        "domain",
+        "AutoSaveCoordinator.js"
+      ],
+      "missionsExecuted": [
+        "MISSION-DEDUPE-01"
+      ]
+    },
+    {
+      "timestamp": "2026-03-02T08:10:00Z",
+      "architectureScore": 93,
+      "duplicationGroups": 16,
+      "layerViolations": 0,
+      "controllerComplexity": 114,
+      "modulesTouched": [
+        "Search.view.xml",
+        "Search.controller.js"
+      ],
+      "missionsExecuted": [
+        "MISSION-DEDUPE-01"
+      ]
+    }
+  ]
+}

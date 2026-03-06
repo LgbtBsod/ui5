@@ -1,0 +1,7 @@
+{
+  "duplicationReducedPerGroup": 4,
+  "controllerLocReducedPer10": 2,
+  "layerViolationFixed": 30,
+  "invariantScenariosPer5": 10,
+  "adtScorePer1": 2
+}

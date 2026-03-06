@@ -1,0 +1,4 @@
+lock:
+  proof_mode_required: true
+  exclusive_window_required: true
+  flight_plan_required: true

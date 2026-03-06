@@ -1,0 +1,11 @@
+{
+  "tokenFiles": [
+    "css/modules/00_tokens.css",
+    "css/modules/01_theme-modes.css"
+  ],
+  "allowedCrossFileTokens": [
+    "--status-chip-bg",
+    "--status-chip-border",
+    "--status-chip-glow"
+  ]
+}

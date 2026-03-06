@@ -1,0 +1,15 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="workflowAnalyticsDialog" class="glassDialog searchAnalyticsDialog analyticsExperienceDialog" title="{i18n>workflowAnalyticsTitle}" contentWidth="58rem" contentHeight="36rem" draggable="true" resizable="true" busy="{view>/analyticsBusy}" busyIndicatorDelay="0" initialFocus="workflowAnalyticsCloseButton">
+        <content>
+            <VBox class="sapUiMediumMargin dialogContentShell searchAnalyticsDialogBody analyticsExperienceBody rnvStack" renderType="Bare">
+                <MessageStrip text="{i18n>workflowAnalyticsBackendNote}" type="Information" showIcon="true" class="sapUiTinyMarginBottom searchAnalyticsDialogInfo rnvFeedbackStrip"/>
+                <MessageStrip text="{view>/analyticsError}" type="Warning" showIcon="true" class="sapUiTinyMarginBottom searchAnalyticsDialogError rnvFeedbackStrip rnvFeedbackWarning" visible="{= !!${view>/analyticsError} }"/>
+                <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsTopline" type="XML"/>
+                <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
+            </VBox>
+        </content>
+        <endButton>
+            <Button id="workflowAnalyticsCloseButton" text="{i18n>closeButton}" press=".onCloseWorkflowAnalytics"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

@@ -1,0 +1,9 @@
+--- a/control/AppShellHeader.js
++++ b/control/AppShellHeader.js
+@@
++// TODO(autofix): route style change via styleToken effects in Ui5StyleAdapter
+
+--- a/controller/support/SearchViewSupport.js
++++ b/controller/support/SearchViewSupport.js
+@@
++// TODO(autofix): route style change via styleToken effects in Ui5StyleAdapter

@@ -1,0 +1,11 @@
+@import "modules/00_tokens.css";
+@import "modules/01_theme-modes.css";
+@import "modules/02_background.css";
+@import "modules/10_base.css";
+@import "modules/20_surface.css";
+@import "modules/21_controls.css";
+@import "modules/22_skeleton.css";
+@import "modules/23_dialogs.css";
+@import "modules/40_page_search.css";
+@import "modules/41_page_detail.css";
+@import "modules/90_ui5_patches.css";

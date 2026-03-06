@@ -1,0 +1,147 @@
+{
+  "check_lists": [
+    {
+      "root": {
+        "id": "CL-1001",
+        "integrationFlag": true,
+        "successRateChecks": 100,
+        "successRateBarriers": 100,
+        "status": "SUCCESS"
+      },
+      "basic": {
+        "date": "2026-02-20",
+        "time": "10:30",
+        "timezone": "Europe/Amsterdam",
+        "equipment": "Pump Station A1",
+
+        "LOCATION_KEY": "LOC-001-01-01",
+        "LOCATION_NAME": "Plant 1 / Unit A / Area 1",
+        "LOCATION_TEXT": "Area 1 - Main Assembly",
+
+        "OBSERVER_PERNER": "100001",
+        "OBSERVER_FULLNAME": "John Smith",
+        "OBSERVER_POSITION": "Safety Engineer",
+        "OBSERVER_ORGUNIT": "EHS",
+        "OBSERVER_INTEGRATION_NAME": "INT-JSMITH",
+
+        "OBSERVED_PERNER": "200001",
+        "OBSERVED_FULLNAME": "Michael Brown",
+        "OBSERVED_POSITION": "Operator",
+        "OBSERVED_ORGUNIT": "Production",
+        "OBSERVED_INTEGRATION_NAME": "INT-MBROWN",
+
+        "LPC_KEY": "L2",
+        "LPC_TEXT": "Medium",
+
+        "PROF_KEY": "PR1",
+        "PROF_TEXT": "Operator"
+      },
+      "checks": [
+        { "id": 1, "text": "PPE used correctly", "comment": "", "result": true },
+        { "id": 2, "text": "Work permit valid", "comment": "", "result": true },
+        { "id": 3, "text": "Area clean", "comment": "", "result": true }
+      ],
+      "barriers": [
+        { "id": 1, "text": "Access control active", "comment": "", "result": true },
+        { "id": 2, "text": "Fire equipment available", "comment": "", "result": true },
+        { "id": 3, "text": "Emergency exit clear", "comment": "", "result": true }
+      ]
+    },
+
+    {
+      "root": {
+        "id": "CL-1002",
+        "integrationFlag": false,
+        "successRateChecks": 66,
+        "successRateBarriers": 100,
+        "status": "WARNING"
+      },
+      "basic": {
+        "date": "2026-02-21",
+        "time": "14:15",
+        "timezone": "Europe/Amsterdam",
+        "equipment": "Boiler Room B2",
+
+        "LOCATION_KEY": "LOC-001-01-02",
+        "LOCATION_NAME": "Plant 1 / Unit A / Area 2",
+        "LOCATION_TEXT": "Area 2 - Maintenance",
+
+        "OBSERVER_PERNER": "100002",
+        "OBSERVER_FULLNAME": "Anna Müller",
+        "OBSERVER_POSITION": "Supervisor",
+        "OBSERVER_ORGUNIT": "Maintenance",
+        "OBSERVER_INTEGRATION_NAME": "INT-AMULLER",
+
+        "OBSERVED_PERNER": "200002",
+        "OBSERVED_FULLNAME": "Tom Wilson",
+        "OBSERVED_POSITION": "Technician",
+        "OBSERVED_ORGUNIT": "Maintenance",
+        "OBSERVED_INTEGRATION_NAME": "INT-TWILSON",
+
+        "LPC_KEY": "L3",
+        "LPC_TEXT": "High",
+
+        "PROF_KEY": "PR2",
+        "PROF_TEXT": "Technician"
+      },
+      "checks": [
+        { "id": 1, "text": "PPE used correctly", "comment": "No gloves", "result": false },
+        { "id": 2, "text": "Work permit valid", "comment": "", "result": true },
+        { "id": 3, "text": "Area clean", "comment": "", "result": true }
+      ],
+      "barriers": [
+        { "id": 1, "text": "Access control active", "comment": "", "result": true },
+        { "id": 2, "text": "Fire equipment available", "comment": "", "result": true },
+        { "id": 3, "text": "Emergency exit clear", "comment": "", "result": true }
+      ]
+    },
+
+    {
+      "root": {
+        "id": "CL-1003",
+        "integrationFlag": true,
+        "successRateChecks": 100,
+        "successRateBarriers": 66,
+        "status": "CRITICAL"
+      },
+      "basic": {
+        "date": "2026-02-22",
+        "time": "09:00",
+        "timezone": "Europe/Amsterdam",
+        "equipment": "Assembly Line C3",
+
+        "LOCATION_KEY": "LOC-002-01-01",
+        "LOCATION_NAME": "Plant 2 / Unit C / Area 1",
+        "LOCATION_TEXT": "Area 1 - Final Assembly",
+
+        "OBSERVER_PERNER": "100003",
+        "OBSERVER_FULLNAME": "David Lee",
+        "OBSERVER_POSITION": "Quality Lead",
+        "OBSERVER_ORGUNIT": "QA",
+        "OBSERVER_INTEGRATION_NAME": "INT-DLEE",
+
+        "OBSERVED_PERNER": "200003",
+        "OBSERVED_FULLNAME": "Carlos Diaz",
+        "OBSERVED_POSITION": "Assembler",
+        "OBSERVED_ORGUNIT": "Production",
+        "OBSERVED_INTEGRATION_NAME": "INT-CDIAZ",
+
+        "LPC_KEY": "L1",
+        "LPC_TEXT": "Low",
+
+        "PROF_KEY": "PR1",
+        "PROF_TEXT": "Operator"
+      },
+      "checks": [
+        { "id": 1, "text": "PPE used correctly", "comment": "", "result": true },
+        { "id": 2, "text": "Work permit valid", "comment": "", "result": true },
+        { "id": 3, "text": "Area clean", "comment": "", "result": true }
+      ],
+      "barriers": [
+        { "id": 1, "text": "Access control active", "comment": "Door unlocked", "result": false },
+        { "id": 2, "text": "Fire equipment available", "comment": "", "result": true },
+        { "id": 3, "text": "Emergency exit clear", "comment": "", "result": true }
+      ]
+    }
+  ]
+}

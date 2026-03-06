@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture Digital Twin Schema",
+  "type": "object",
+  "required": [
+    "generatedAt",
+    "baselineRef",
+    "layers",
+    "modules",
+    "files",
+    "dependencyEdges",
+    "stateOwnership",
+    "workflowGraph",
+    "invariants",
+    "portsAdaptersMap",
+    "metrics"
+  ],
+  "properties": {
+    "generatedAt": { "type": "string" },
+    "baselineRef": { "type": "string" },
+    "layers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "layer", "file"],
+        "properties": {
+          "id": { "type": "string" },
+          "layer": { "type": "string" },
+          "file": { "type": "string" },
+          "imports": { "type": "array", "items": { "type": "string" } },
+          "exports": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "files": { "type": "array", "items": { "type": "string" } },
+    "dependencyEdges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "kind": { "type": "string", "default": "import" }
+        }
+      }
+    },
+    "stateOwnership": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "model", "path"],
+        "properties": {
+          "file": { "type": "string" },
+          "model": { "type": "string" },
+          "path": { "type": "string" },
+          "mode": { "type": "string", "enum": ["read", "write", "both"] }
+        }
+      }
+    },
+    "workflowGraph": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["workflow", "steps"],
+        "properties": {
+          "workflow": { "type": "string" },
+          "steps": { "type": "array", "items": { "type": "string" } },
+          "touches": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "rule"],
+        "properties": {
+          "id": { "type": "string" },
+          "rule": { "type": "string" },
+          "criticalPaths": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "portsAdaptersMap": {
+      "type": "object",
+      "properties": {
+        "ports": { "type": "array", "items": { "type": "string" } },
+        "adapters": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["moduleCount", "edgeCount", "duplicationClusters", "ADT_SCORE"],
+      "properties": {
+        "moduleCount": { "type": "number" },
+        "edgeCount": { "type": "number" },
+        "duplicationClusters": { "type": "number" },
+        "ArchitectureScore": { "type": "number" },
+        "AIL_Score": { "type": "number" },
+        "PMI": { "type": "number" },
+        "DomainCompletenessScore": { "type": "number" },
+        "ADT_SCORE": { "type": "number" }
+      }
+    }
+  }
+}

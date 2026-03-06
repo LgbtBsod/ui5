@@ -1,0 +1,537 @@
+<mvc:View
+    controllerName="sap_ui5.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:dnd="sap.ui.core.dnd"
+    xmlns:t="sap.ui.table"
+    xmlns:uxap="sap.uxap"
+    xmlns:core="sap.ui.core"
+    xmlns:unified="sap.ui.unified">
+
+    <Page showHeader="false" enableScrolling="false" class="pageTransparent">
+
+        <VBox class="appContent detailContent detailExperienceCanvas" renderType="Bare" fitContainer="true" width="100%">
+
+            <FlexBox
+                class="glassCard detailAccessDeniedScene"
+                renderType="Bare"
+                width="100%"
+                visible="{view>/accessState/denied}">
+                <FlexBox class="detailAccessDeniedSceneVisual" renderType="Bare">
+                    <Image
+                        src="{view>/accessState/illustrationSrc}"
+                        decorative="true"
+                        densityAware="false"
+                        class="detailAccessDeniedIllustration"/>
+                </FlexBox>
+                <FlexBox class="detailAccessDeniedSceneCopy" renderType="Bare">
+                    <Title text="{path:'view>/accessState/titleKey', formatter:'.formatI18nByKey'}" class="detailAccessDeniedTitle"/>
+                    <Text text="{path:'view>/accessState/messageKey', formatter:'.formatI18nByKey'}" class="detailAccessDeniedText"/>
+                    <ObjectStatus
+                        text="{view>/accessState/reasonCode}"
+                        state="Error"
+                        visible="{= !!${view>/accessState/reasonCode} }"
+                        class="detailAccessDeniedReason"/>
+                    <Button
+                        icon="sap-icon://nav-back"
+                        text="{i18n>closeButton}"
+                        type="Emphasized"
+                        press=".onCloseDetail"
+                        class="detailAccessDeniedAction"/>
+                </FlexBox>
+            </FlexBox>
+
+            <VBox
+                id="detailControlPinnedDock"
+                class="detailControlPinnedDock"
+                renderType="Bare"
+                width="100%"
+                visible="{= !${view>/accessState/denied} &amp;&amp; !${view>/detailSkeletonBusy} }">
+                <FlexBox class="glassCard detailControlInlineCard detailControlExperienceCard" renderType="Bare" width="100%">
+                    <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
+                </FlexBox>
+            </VBox>
+
+            <VBox
+                class="glassCard detailControlInlineCard detailControlSkeletonCard sapUiTinyMarginBottom"
+                width="100%"
+                visible="{= !${view>/accessState/denied} &amp;&amp; ${view>/detailSkeletonBusy} }">
+                <HBox class="detailControlSkeletonRow" renderType="Bare" alignItems="Center" wrap="Wrap">
+                    <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine appSkeletonLineLong" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                </HBox>
+                <HBox class="detailControlSkeletonButtons" renderType="Bare" alignItems="Center" wrap="Wrap">
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                </HBox>
+            </VBox>
+
+            <uxap:ObjectPageLayout
+                id="detailObjectPage"
+                visible="{= !${view>/accessState/denied} }"
+                useIconTabBar="false"
+                showAnchorBar="false"
+                upperCaseAnchorBar="false"
+                enableLazyLoading="true"
+                alwaysShowContentHeader="false"
+                showTitleInHeaderContent="true"
+                showHeaderContent="false">
+                <uxap:layoutData>
+                    <FlexItemData growFactor="1" shrinkFactor="1" baseSize="0%"/>
+                </uxap:layoutData>
+
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <Title text="{i18n>detailPageTitle}" visible="false"/>
+                        </uxap:expandedHeading>
+                        <uxap:snappedHeading>
+                            <Title text="{i18n>detailPageTitle}" visible="false"/>
+                        </uxap:snappedHeading>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+
+                <uxap:sections>
+
+                    <uxap:ObjectPageSection id="secMain" title="">
+
+                        <uxap:subSections>
+
+                            <!-- Participants -->
+                            <uxap:ObjectPageSubSection id="ssParticipants" title="">
+                                <uxap:blocks>
+                                    <VBox renderType="Bare" width="100%" class="detailMainExperienceStack">
+                                        <core:Fragment fragmentName="sap_ui5.view.fragment.LockKilledBanner" type="XML"/>
+                                        <VBox
+                                            class="detailCreateModeBanner searchFilterHintBanner sapUiTinyMarginBottom appSkeletonReveal"
+                                            renderType="Bare"
+                                            visible="{= !${view>/detailSkeletonBusy} &amp;&amp; ${selected>/root/id} === '__CREATE' }">
+                                            <HBox class="detailCreateModeBannerTop" renderType="Bare" alignItems="Center" wrap="Wrap">
+                                                <core:Icon src="sap-icon://create-entry-time" class="detailCreateModeIcon"/>
+                                                <Title text="{i18n>detailCreateDraftTitle}" level="H6" class="detailCreateModeTitle"/>
+                                                <ObjectStatus
+                                                    class="detailCreateModeStatus"
+                                                    text="{path:'state>/isDirty', formatter:'.formatDraftStateText'}"
+                                                    state="{path:'state>/isDirty', formatter:'.formatDraftStateState'}"/>
+                                            </HBox>
+                                            <Text text="{i18n>detailCreateDraftText}" class="detailCreateModeText"/>
+                                        </VBox>
+                                        <VBox class="glassCard detailSectionCard detailInfoExperienceCard" width="100%">
+                                            <VBox visible="{view>/detailSkeletonBusy}" renderType="Bare">
+                                                <core:Fragment fragmentName="sap_ui5.view.fragment.SkeletonFormSection" type="XML"/>
+                                            </VBox>
+                                            <VBox visible="{= !${view>/detailSkeletonBusy} }" renderType="Bare" class="appSkeletonReveal">
+                                            <f:GridList id="infoCardGrid" items="{path:'view>/infoCards', factory: '.infoCardFactory'}" class="infoCardGrid">
+                                            <f:dragDropConfig>
+                                                <dnd:DragInfo sourceAggregation="items" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} !== 'READ' }" drop=".onInfoCardsDrop"/>
+                                            </f:dragDropConfig>
+                                            </f:GridList>
+                                            </VBox>
+                                        </VBox>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <!-- Checks -->
+                            <uxap:ObjectPageSubSection id="ssChecks" title="{i18n>checksTitle}">
+                                <uxap:blocks>
+                                    <VBox class="glassCard detailSectionCard detailTableExperienceCard" width="100%">
+                                        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
+                                            <core:Fragment fragmentName="sap_ui5.view.fragment.SkeletonTableSection" type="XML"/>
+                                        </VBox>
+                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody">
+                                        <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
+                                            <Title text="{i18n>checksTitle}"/>
+                                            <ToolbarSpacer/>
+
+                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecks" class="sapUiTinyMarginEnd">
+                                                <layoutData>
+                                                    <OverflowToolbarLayoutData priority="Low"/>
+                                                </layoutData>
+                                            </Button>
+
+                                            <Button
+                                                text="{i18n>addRow}"
+                                        icon="sap-icon://task"
+                                                press=".onAddCheckRow"
+                                                visible="{= ${state>/mode} !== 'READ' }">
+                                                <layoutData>
+                                                    <OverflowToolbarLayoutData priority="High"/>
+                                                </layoutData>
+                                            </Button>
+                                        </OverflowToolbar>
+
+                                        <VBox
+                                            class="detailEmptyStateCard detailChecksEmptyState"
+                                            renderType="Bare"
+                                            visible="{path:'selected>/checks', formatter:'.isEmptyRows'}">
+                                            <core:Icon src="sap-icon://complete" class="detailEmptyStateIcon"/>
+                                            <Title text="{i18n>detailEmptyChecksTitle}" level="H6" class="detailEmptyStateTitle"/>
+                                            <Text text="{i18n>detailEmptyChecksText}" class="detailEmptyStateText"/>
+                                            <Button
+                                                text="{i18n>addRow}"
+                                        icon="sap-icon://task"
+                                                type="Transparent"
+                                                press=".onAddCheckRow"
+                                                visible="{= ${state>/mode} !== 'READ' }"
+                                                class="detailEmptyStateAction"/>
+                                        </VBox>
+
+                                        <t:Table
+                                            visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/checks'}], formatter:'.isDesktopTableVisible'}"
+                                            rows="{selected>/checks}"
+                                            selectionMode="None"
+                                            visibleRowCountMode="Auto"
+                                            minAutoRowCount="6"
+                                            rowHeight="48"
+                                            busy="{view>/checksBusy}"
+                                            busyIndicatorDelay="0"
+                                            class="flatEditorGridTable detailGridTable">
+                                            <t:columns>
+                                                <t:Column width="3rem">
+                                                    <Label text=""/>
+                                                    <t:template>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column>
+                                                    <Label text="{i18n>checkLabel}"/>
+                                                    <t:template>
+                                                        <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column width="8rem">
+                                                    <Label text="{i18n>statusLabel}"/>
+                                                    <t:template>
+                                                        <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column>
+                                                    <Label text="{i18n>commentLabel}"/>
+                                                    <t:template>
+                                                        <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                                                    <t:template>
+                                                        <Button
+                                                            icon="sap-icon://delete"
+                                                            text="{i18n>rowActionDelete}"
+                                                            type="Transparent"
+                                                            press=".onDeleteCheckRow"
+                                                            class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                                    </t:template>
+                                                </t:Column>
+                                            </t:columns>
+                                        </t:Table>
+
+                                        <Table
+                                            items="{selected>/checks}"
+                                            class="flatEditorTable"
+                                            growing="true"
+                                            growingThreshold="50"
+                                            growingScrollToLoad="true"
+                                            busy="{view>/checksBusy}"
+                                            busyIndicatorDelay="0"
+                                            visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/checks'}], formatter:'.isPhoneTableVisible'}"
+                                            noDataText="{i18n>noChecksData}">
+                                            <columns>
+                                                <Column width="3rem"><Text text=""/></Column>
+                                                <Column><Text text="{i18n>checkLabel}"/></Column>
+                                                <Column><Text text="{i18n>statusLabel}"/></Column>
+                                                <Column><Text text="{i18n>commentLabel}"/></Column>
+                                                <Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                                                </Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem>
+                                                    <cells>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                                                        <Button
+                                                            icon="sap-icon://delete"
+                                                            text="{i18n>rowActionDelete}"
+                                                            type="Transparent"
+                                                            press=".onDeleteCheckRow"
+                                                            visible="{= ${state>/mode} !== 'READ' }"
+                                                            class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
+                                        </VBox>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <!-- Barriers -->
+                            <uxap:ObjectPageSubSection id="ssBarriers" title="{i18n>barriersTitle}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
+                                <uxap:blocks>
+                                    <VBox class="glassCard detailSectionCard detailTableExperienceCard" width="100%" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
+                                        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
+                                            <core:Fragment fragmentName="sap_ui5.view.fragment.SkeletonTableSection" type="XML"/>
+                                        </VBox>
+                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody">
+                                        <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
+                                            <Title text="{i18n>barriersTitle}"/>
+                                            <ToolbarSpacer/>
+
+                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd">
+                                                <layoutData>
+                                                    <OverflowToolbarLayoutData priority="Low"/>
+                                                </layoutData>
+                                            </Button>
+
+                                            <Button
+                                                text="{i18n>addRow}"
+                                                icon="sap-icon://quality-issue"
+                                                press=".onAddBarrierRow"
+                                                visible="{= ${state>/mode} !== 'READ' }">
+                                                <layoutData>
+                                                    <OverflowToolbarLayoutData priority="High"/>
+                                                </layoutData>
+                                            </Button>
+                                        </OverflowToolbar>
+
+                                        <VBox
+                                            class="detailEmptyStateCard detailBarriersEmptyState"
+                                            renderType="Bare"
+                                            visible="{path:'selected>/barriers', formatter:'.isEmptyRows'}">
+                                            <core:Icon src="sap-icon://alert" class="detailEmptyStateIcon"/>
+                                            <Title text="{i18n>detailEmptyBarriersTitle}" level="H6" class="detailEmptyStateTitle"/>
+                                            <Text text="{i18n>detailEmptyBarriersText}" class="detailEmptyStateText"/>
+                                            <Button
+                                                text="{i18n>addRow}"
+                                                icon="sap-icon://quality-issue"
+                                                type="Transparent"
+                                                press=".onAddBarrierRow"
+                                                visible="{= ${state>/mode} !== 'READ' }"
+                                                class="detailEmptyStateAction"/>
+                                        </VBox>
+
+                                        <t:Table
+                                            visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/barriers'}], formatter:'.isDesktopTableVisible'}"
+                                            rows="{selected>/barriers}"
+                                            selectionMode="None"
+                                            visibleRowCountMode="Auto"
+                                            minAutoRowCount="6"
+                                            rowHeight="48"
+                                            busy="{view>/barriersBusy}"
+                                            busyIndicatorDelay="0"
+                                            class="flatEditorGridTable detailGridTable">
+                                            <t:columns>
+                                                <t:Column width="3rem">
+                                                    <Label text=""/>
+                                                    <t:template>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column>
+                                                    <Label text="{i18n>barrierLabel}"/>
+                                                    <t:template>
+                                                        <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column width="8rem">
+                                                    <Label text="{i18n>statusLabel}"/>
+                                                    <t:template>
+                                                        <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column>
+                                                    <Label text="{i18n>commentLabel}"/>
+                                                    <t:template>
+                                                        <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                                                    <t:template>
+                                                        <Button
+                                                            icon="sap-icon://delete"
+                                                            text="{i18n>rowActionDelete}"
+                                                            type="Transparent"
+                                                            press=".onDeleteBarrierRow"
+                                                            class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                                    </t:template>
+                                                </t:Column>
+                                            </t:columns>
+                                        </t:Table>
+
+                                        <Table
+                                            items="{selected>/barriers}"
+                                            class="flatEditorTable"
+                                            growing="true"
+                                            growingThreshold="50"
+                                            growingScrollToLoad="true"
+                                            busy="{view>/barriersBusy}"
+                                            busyIndicatorDelay="0"
+                                            visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/barriers'}], formatter:'.isPhoneTableVisible'}"
+                                            noDataText="{i18n>noBarriersData}">
+                                            <columns>
+                                                <Column width="3rem"><Text text=""/></Column>
+                                                <Column><Text text="{i18n>barrierLabel}"/></Column>
+                                                <Column><Text text="{i18n>statusLabel}"/></Column>
+                                                <Column><Text text="{i18n>commentLabel}"/></Column>
+                                                <Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                                                </Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem>
+                                                    <cells>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                                                        <Button
+                                                            icon="sap-icon://delete"
+                                                            text="{i18n>rowActionDelete}"
+                                                            type="Transparent"
+                                                            press=".onDeleteBarrierRow"
+                                                            visible="{= ${state>/mode} !== 'READ' }"
+                                                            class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
+                                        </VBox>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <uxap:ObjectPageSubSection id="ssAttachments" title="{i18n>attachmentsTitle}">
+                                <uxap:blocks>
+                                    <VBox class="glassCard detailSectionCard detailTableExperienceCard detailAttachmentsCard" width="100%">
+                                        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
+                                            <core:Fragment fragmentName="sap_ui5.view.fragment.SkeletonTableSection" type="XML"/>
+                                        </VBox>
+                                        <VBox id="attachmentDropScope" renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody">
+                                            <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar">
+                                                <Title text="{i18n>attachmentsTitle}"/>
+                                                <ToolbarSpacer/>
+                                                <Text text="{i18n>saveChecklistBeforeAttachment}" visible="{= ${state>/mode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText">
+                                                    <layoutData>
+                                                        <OverflowToolbarLayoutData priority="Disappear"/>
+                                                    </layoutData>
+                                                </Text>
+                                                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${state>/mode} !== 'READ' }">
+                                                    <layoutData>
+                                                        <OverflowToolbarLayoutData priority="Disappear"/>
+                                                    </layoutData>
+                                                </Label>
+                                                <Select
+                                                    id="attachmentCategorySelect"
+                                                    width="12rem"
+                                                    selectedKey="{view>/attachmentCategoryKey}"
+                                                    visible="{= ${state>/mode} !== 'READ' }"
+                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    items="{ path: 'masterData>/attachmentTypes', templateShareable: true }">
+                                                    <layoutData>
+                                                        <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="10rem"/>
+                                                    </layoutData>
+                                                    <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                                                </Select>
+                                                <unified:FileUploader
+                                                    id="attachmentUploader"
+                                                    buttonOnly="true"
+                                                    sameFilenameAllowed="true"
+                                                    useMultipart="false"
+                                                    buttonText="{i18n>uploadAttachment}"
+                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    change=".onAttachmentUploadChange"/>
+                                            </OverflowToolbar>
+                                            <VBox
+                                                id="attachmentDropZone"
+                                                visible="{= ${state>/mode} !== 'READ' }"
+                                                class="detailAttachmentDropZone">
+                                                <HBox alignItems="Center" class="detailAttachmentDropZoneTop">
+                                                    <core:Icon src="sap-icon://upload" class="detailAttachmentDropZoneIcon"/>
+                                                    <VBox class="sapUiTinyMarginBegin">
+                                                        <Title level="H6" text="{i18n>attachmentDropZoneTitle}"/>
+                                                        <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText"/>
+                                                    </VBox>
+                                                </HBox>
+                                                <Text
+                                                    text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}"
+                                                    class="modeHintText detailAttachmentDropZoneMeta"/>
+                                            </VBox>
+
+                                            <HBox
+                                                class="detailEmptyStateCard detailAttachmentsEmptyState"
+                                                renderType="Bare"
+                                                visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
+                                                <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon"/>
+                                                <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle"/>
+                                                <Text
+                                                    text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>saveChecklistBeforeAttachment} : ${i18n>detailEmptyAttachmentsText} }"
+                                                    class="detailEmptyStateText"/>
+                                            </HBox>
+
+                                            <Table
+                                                items="{selected>/attachments}"
+                                                class="flatEditorTable detailAttachmentTable"
+                                                busy="{view>/attachmentBusy}"
+                                                busyIndicatorDelay="0"
+                                                visible="{path:'selected>/attachments', formatter:'.hasRows'}"
+                                                noDataText="{i18n>noAttachmentsData}">
+                                                <columns>
+                                                    <Column><Text text="{i18n>attachmentFileName}"/></Column>
+                                                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentCategoryLabel}"/></Column>
+                                                    <Column width="7rem" hAlign="End"><Text text="{i18n>attachmentSize}"/></Column>
+                                                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentChangedOn}"/></Column>
+                                                    <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                                                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                                                    </Column>
+                                                </columns>
+                                                <items>
+                                                    <ColumnListItem>
+                                                        <cells>
+                                                            <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}"/>
+                                                            <Text text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
+                                                            <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
+                                                            <Text text="{selected>ChangedOn}"/>
+                                                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                                                <Button
+                                                                    icon="sap-icon://download"
+                                                                    text="{i18n>rowActionDownload}"
+                                                                    type="Transparent"
+                                                                    press=".onOpenAttachment"
+                                                                    class="tableRowActionBtn"/>
+                                                                <Button
+                                                                    icon="sap-icon://delete"
+                                                                    text="{i18n>rowActionDelete}"
+                                                                    type="Transparent"
+                                                                    press=".onDeleteAttachment"
+                                                                    visible="{= ${state>/mode} !== 'READ' }"
+                                                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                                            </HBox>
+                                                        </cells>
+                                                    </ColumnListItem>
+                                                </items>
+                                            </Table>
+                                        </VBox>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+
+                </uxap:sections>
+
+            </uxap:ObjectPageLayout>
+
+        </VBox>
+
+    </Page>
+</mvc:View>

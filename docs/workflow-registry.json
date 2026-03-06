@@ -1,0 +1,70 @@
+{
+  "searchWorkflow": {
+    "steps": [
+      "init search facade",
+      "execute search usecase",
+      "bind search results",
+      "select row state transition"
+    ],
+    "expectedStateTransitions": [
+      "results:IDLE->LOADED",
+      "selection:NONE->ACTIVE"
+    ]
+  },
+  "detailOpenWorkflow": {
+    "steps": [
+      "select search row",
+      "fetch detail via facade",
+      "validate cache LastChangeSet",
+      "hydrate detail model"
+    ],
+    "expectedStateTransitions": [
+      "detail:CLOSED->OPEN",
+      "detailHydration:PENDING->READY"
+    ]
+  },
+  "editWorkflow": {
+    "steps": [
+      "enter edit intent",
+      "tryAcquireLock",
+      "set editMode=EDIT on success",
+      "activate autosave when dirty"
+    ],
+    "expectedStateTransitions": [
+      "editMode:READ->EDIT",
+      "lockState:IDLE->LOCKED"
+    ]
+  },
+  "lockWorkflow": {
+    "steps": [
+      "acquire lock",
+      "monitor lock heartbeat",
+      "handle killed/lockLost to READ"
+    ],
+    "expectedStateTransitions": [
+      "lockState:IDLE->LOCKED",
+      "lockLost:LOCKED->FAILED"
+    ]
+  },
+  "autosaveWorkflow": {
+    "steps": [
+      "dirty=true in EDIT",
+      "autosave ACTIVE when LOCKED",
+      "stop autosave on lock lost"
+    ],
+    "expectedStateTransitions": [
+      "autosave:IDLE->ACTIVE",
+      "lockLost:ACTIVE->IDLE"
+    ]
+  },
+  "cacheValidationWorkflow": {
+    "steps": [
+      "read IndexedDB cache",
+      "compare AggChangedOn with server stamp",
+      "accept if abs(diff)<=5500ms"
+    ],
+    "expectedStateTransitions": [
+      "cacheValidation:PENDING->VALID|INVALID"
+    ]
+  }
+}

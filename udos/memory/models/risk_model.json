@@ -1,0 +1,17 @@
+{
+  "trainedAt": "2026-03-02T09:29:04.488Z",
+  "method": "weighted-heuristics-auto-tuned",
+  "thresholdDenyRisk": 1.7,
+  "weights": {
+    "files_touched": 0.04,
+    "modules_touched": 0.08,
+    "new_dependency_edges": 0.15,
+    "critical_workflow": 0.9,
+    "mode_path": 0.7,
+    "lock_path": 1,
+    "duplication_growth": 0.2,
+    "hist_failure": 1.2,
+    "hist_deny": 1.3,
+    "hist_invariant": 1.4
+  }
+}
