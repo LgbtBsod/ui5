@@ -1,17 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <VBox class="detailControlBar" renderType="Bare" width="100%">
 
-        <HBox alignItems="Center" justifyContent="SpaceBetween" class="detailRailHeader" renderType="Bare" width="100%">
-            <VBox renderType="Bare">
-                <Title text="{i18n>detailPageTitle}" level="H6"/>
-                <Text text="{i18n>detailHeroSubtitle}" class="detailHeroSubtitle"/>
-                <Text
-                    text="{path:'state>/autosaveAt', formatter:'.formatAutosaveAt'}"
-                    visible="{= !!${state>/autosaveAt} }"
-                    class="detailRailHint"/>
-            </VBox>
-        </HBox>
-
         <HBox class="uxStatRow detailHeroStatBoard" wrap="Wrap" renderType="Bare">
             <HBox class="uxStatChip" renderType="Bare">
                 <Text text="{i18n>checklistLabel}" class="sapUiTinyMarginEnd"/>

@@ -206,18 +206,25 @@
         return oController.byId && oController.byId("searchWorkbenchDock");
     }
 
+    function resolveResultsTableToolbarHeight(oController) {
+        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
+        return resolveDescendantHeight(oResultsShell, ".sapUiCompSmartTableToolbar");
+    }
+
     function syncSearchStickyOffsets(oController) {
         var oScrollHost = resolveSearchScrollHost(oController);
         var oWorkbenchDock = resolveSearchWorkbenchDock(oController);
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
         var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
+        var iResultsToolbarHeight = resolveResultsTableToolbarHeight(oController);
         var iFilterHeight = resolveOuterHeight(oFilterCard);
         var iActionHeight = resolveOuterHeight(oActionRail);
         var iToolbarHeight = resolveOuterHeight(oToolbarRail);
         var iDockHeight = resolveOuterHeight(oWorkbenchDock);
         var iTopBase = resolveShellHeaderOffset(oController, oScrollHost);
         var iStackGap = 6;
+        var iResultsToolbarGap = iResultsToolbarHeight ? 8 : 0;
         if (!iDockHeight) {
             iDockHeight = iFilterHeight + iActionHeight + iToolbarHeight;
             if (iFilterHeight && iActionHeight) {
@@ -227,7 +234,8 @@
                 iDockHeight += iStackGap;
             }
         }
-        var iHeaderTop = iTopBase + iDockHeight + 10;
+        var iTableToolbarTop = iTopBase + iDockHeight + 8;
+        var iHeaderTop = iTableToolbarTop + iResultsToolbarHeight + iResultsToolbarGap;
         setSearchViewportCssVar(oController, "--search-sticky-dock-top", iTopBase + "px");
         setSearchViewportCssVar(
             oController,
@@ -237,6 +245,8 @@
         setSearchViewportCssVar(oController, "--search-sticky-filter-top", iTopBase + "px");
         setSearchViewportCssVar(oController, "--search-sticky-action-top", iTopBase + "px");
         setSearchViewportCssVar(oController, "--search-sticky-toolbar-top", iTopBase + "px");
+        setSearchViewportCssVar(oController, "--search-sticky-table-toolbar-top", iTableToolbarTop + "px");
+        setSearchViewportCssVar(oController, "--search-smarttable-toolbar-height", iResultsToolbarHeight + "px");
         setSearchViewportCssVar(oController, "--search-sticky-header-top", iHeaderTop + "px");
     }
 
@@ -520,25 +530,56 @@
         return String(sHeaderText || "");
     }
 
-    function isCompactSearchViewport() {
+    function isCompactSearchViewport(oController) {
         var iRootSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize || "16");
-        var iViewportRem = window.innerWidth / (Number.isFinite(iRootSize) && iRootSize > 0 ? iRootSize : 16);
+        var iViewportRem = resolveSearchViewportWidth(oController) / (Number.isFinite(iRootSize) && iRootSize > 0 ? iRootSize : 16);
         return iViewportRem <= 45;
     }
 
-    function applySearchColumnRule(oColumn, mRule, sColumnKey) {
-        var bCompactViewport = isCompactSearchViewport();
+    function resolveSearchViewportWidth(oController) {
+        var oSearchHost = oController && oController.byId && oController.byId("searchPaneHost");
+        var oSearchHostDom = oSearchHost && oSearchHost.getDomRef && oSearchHost.getDomRef();
+        var oResultsShell = oController && oController.byId && oController.byId("searchResultsShell");
+        var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
+        var iWidth = 0;
+        if (oResultsShellDom && oResultsShellDom.getBoundingClientRect) {
+            iWidth = Math.floor(oResultsShellDom.getBoundingClientRect().width || 0);
+        }
+        if (!iWidth && oSearchHostDom && oSearchHostDom.getBoundingClientRect) {
+            iWidth = Math.floor(oSearchHostDom.getBoundingClientRect().width || 0);
+        }
+        if (!iWidth && typeof window !== "undefined") {
+            iWidth = Math.floor(window.innerWidth || 0);
+        }
+        return iWidth || 0;
+    }
+
+    function applySearchColumnRule(oController, oColumn, mRule, sColumnKey) {
+        var bCompactViewport = isCompactSearchViewport(oController);
+        var iViewportWidth = resolveSearchViewportWidth(oController);
+        var bNarrowSearchPane = iViewportWidth > 0 && iViewportWidth <= 900;
+        var bMediumSearchPane = iViewportWidth > 900 && iViewportWidth <= 1120;
+        var bHideInNarrowPane = bNarrowSearchPane && mRule && mRule.importance !== "High";
+        var bHideInMediumPane = bMediumSearchPane && mRule && mRule.importance === "Low";
+        var bHideForViewport = !!(bHideInNarrowPane || bHideInMediumPane);
+        var bBaseVisible;
         if (!oColumn || !mRule) {
             return;
         }
+        if (typeof oColumn.data === "function" && typeof oColumn.data("rnvBaseVisible") !== "boolean") {
+            oColumn.data("rnvBaseVisible", !(typeof oColumn.getVisible === "function") || oColumn.getVisible());
+        }
+        bBaseVisible = typeof oColumn.data === "function" && typeof oColumn.data("rnvBaseVisible") === "boolean"
+            ? oColumn.data("rnvBaseVisible")
+            : true;
         if (typeof oColumn.setWidth === "function") {
             oColumn.setWidth(bCompactViewport ? "auto" : (mRule.width || "auto"));
         }
         if (typeof oColumn.setMinScreenWidth === "function") {
-            oColumn.setMinScreenWidth(mRule.minScreenWidth || "");
+            oColumn.setMinScreenWidth("");
         }
         if (typeof oColumn.setDemandPopin === "function") {
-            oColumn.setDemandPopin(!!mRule.demandPopin);
+            oColumn.setDemandPopin(false);
         }
         if (typeof oColumn.setImportance === "function" && mRule.importance) {
             oColumn.setImportance(mRule.importance);
@@ -546,25 +587,30 @@
         if (typeof oColumn.setPopinDisplay === "function") {
             oColumn.setPopinDisplay("Inline");
         }
+        if (typeof oColumn.setVisible === "function") {
+            oColumn.setVisible(!!bBaseVisible && !bHideForViewport);
+        }
         if (typeof oColumn.setHAlign === "function" && (sColumnKey === "SuccessChecksRate" || sColumnKey === "SuccessBarriersRate")) {
             oColumn.setHAlign("Center");
         }
         if (typeof oColumn.toggleStyleClass === "function") {
             oColumn.toggleStyleClass("searchColumnCritical", mRule.importance === "High");
             oColumn.toggleStyleClass("searchColumnSecondary", mRule.importance === "Low");
+            oColumn.toggleStyleClass("searchColumnHiddenNarrow", bHideForViewport);
         }
     }
 
     function configureSearchResultTable(oController, oInnerTable, bForce) {
         var aColumns;
-        var bCompactViewport = isCompactSearchViewport();
+        var bCompactViewport = isCompactSearchViewport(oController);
+        var iViewportWidth = resolveSearchViewportWidth(oController);
         var sTableId;
         var sLayoutKey;
         if (!oInnerTable) {
             return;
         }
         sTableId = oInnerTable && oInnerTable.getId ? oInnerTable.getId() : "searchInnerTable";
-        sLayoutKey = [sTableId, bCompactViewport ? "compact" : "regular"].join("::");
+        sLayoutKey = [sTableId, bCompactViewport ? "compact" : "regular", iViewportWidth].join("::");
         if (!bForce && oController._sSearchTableLayoutKey === sLayoutKey) {
             return;
         }
@@ -572,12 +618,12 @@
             oInnerTable.setFixedLayout(bCompactViewport);
         }
         if (typeof oInnerTable.setAutoPopinMode === "function") {
-            oInnerTable.setAutoPopinMode(true);
+            oInnerTable.setAutoPopinMode(false);
         }
         aColumns = oInnerTable.getColumns ? (oInnerTable.getColumns() || []) : [];
         aColumns.forEach(function (oColumn) {
             var sColumnKey = resolveSearchColumnKey(oColumn);
-            applySearchColumnRule(oColumn, SEARCH_COLUMN_RULES[sColumnKey], sColumnKey);
+            applySearchColumnRule(oController, oColumn, SEARCH_COLUMN_RULES[sColumnKey], sColumnKey);
         });
         oController._sSearchTableLayoutKey = sLayoutKey;
     }

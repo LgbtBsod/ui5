@@ -62,7 +62,11 @@ def wait_for_detail_ready(page: Page, delay: int = 1500) -> None:
     page.wait_for_function(
         """
         () => !!document.querySelector('#sap_ui5_comp---app--detailPaneHost')
-          && !!document.querySelector('.detailControlStickyBlock')
+          && (
+            !!document.querySelector('.detailControlPinnedDock')
+            || !!document.querySelector('.detailControlInlineCard')
+            || !!document.querySelector('.detailControlStickyBlock')
+          )
         """,
         timeout=20000,
     )
