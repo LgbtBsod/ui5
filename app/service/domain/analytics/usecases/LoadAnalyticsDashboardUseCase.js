@@ -13,10 +13,13 @@ sap.ui.define([
     LoadAnalyticsDashboardUseCase.prototype = Object.create(UseCase.prototype);
     LoadAnalyticsDashboardUseCase.prototype.constructor = LoadAnalyticsDashboardUseCase;
 
-    LoadAnalyticsDashboardUseCase.prototype.execute = function (_mInput, mCtx) {
+    LoadAnalyticsDashboardUseCase.prototype.execute = function (mInput, mCtx) {
         var oAnalytics = mCtx && mCtx.analytics;
+        var mRequest = {
+            selectedYear: Number(mInput && mInput.selectedYear) || 0
+        };
         var pDetailed = (oAnalytics && typeof oAnalytics.fetchDetailed === "function")
-            ? oAnalytics.fetchDetailed()
+            ? oAnalytics.fetchDetailed(mRequest)
             : Promise.resolve(AnalyticsPayloadNormalizer.createEmptyDashboard());
 
         return Promise.resolve(pDetailed).then(function (oSummary) {

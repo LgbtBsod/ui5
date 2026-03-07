@@ -26,6 +26,20 @@
     <HBox class="kpiGrid sapUiSmallMarginTop searchAnalyticsDialogGrid analyticsToplineGrid analyticsToplineGridSecondary" renderType="Bare" wrap="Wrap">
         <VBox class="kpiCard">
             <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://calendar" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>analyticsSelectedYear}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{view>/analytics/selectedYear}" level="H4"/>
+        </VBox>
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                <core:Icon src="sap-icon://history" class="kpiLabelIcon" decorative="true"/>
+                <Text text="{i18n>analyticsPreviousYear}" class="kpiLabel"/>
+            </HBox>
+            <Title text="{view>/analytics/previousYear}" level="H4"/>
+        </VBox>
+        <VBox class="kpiCard">
+            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
                 <core:Icon src="sap-icon://status-positive" class="kpiLabelIcon" decorative="true"/>
                 <Text text="{i18n>analyticsClosedCount}" class="kpiLabel"/>
             </HBox>

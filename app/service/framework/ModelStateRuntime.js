@@ -16,16 +16,20 @@ sap.ui.define([
     }
 
     function setManyOnModel(oModel, mValues) {
-        return Object.keys(mValues || {}).some(function (sPath) {
-            return writeOnModel(oModel, sPath, mValues[sPath]);
+        var bWritten = false;
+        Object.keys(mValues || {}).forEach(function (sPath) {
+            bWritten = writeOnModel(oModel, sPath, mValues[sPath]) || bWritten;
         });
+        return bWritten;
     }
 
     function readOnModel(oModel, sPath, vFallback) {
+        var vValue;
         if (!oModel || typeof oModel.getProperty !== "function") {
             return vFallback;
         }
-        return oModel.getProperty(sPath);
+        vValue = oModel.getProperty(sPath);
+        return typeof vValue === "undefined" ? vFallback : vValue;
     }
 
     function read(oController, sModelName, sPath, vFallback) {
@@ -49,9 +53,11 @@ sap.ui.define([
     }
 
     function setMany(oController, sModelName, mValues) {
-        return Object.keys(mValues || {}).some(function (sPath) {
-            return write(oController, sModelName, sPath, mValues[sPath]);
+        var bWritten = false;
+        Object.keys(mValues || {}).forEach(function (sPath) {
+            bWritten = write(oController, sModelName, sPath, mValues[sPath]) || bWritten;
         });
+        return bWritten;
     }
 
     function replaceData(oController, sModelName, vData) {

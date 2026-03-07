@@ -3,9 +3,10 @@ sap.ui.define([
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/support/DetailPersonInputSupport",
     "checklist/app/service/framework/AttachmentFlowService",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/SchedulingRuntime"
-], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, NavigationIntentService, SchedulingRuntime) {
+], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, ControllerViewStateRuntime, NavigationIntentService, SchedulingRuntime) {
     "use strict";
 
     return {
@@ -56,7 +57,7 @@ sap.ui.define([
         onCloseLocationValueHelp: function () {
             this._clearLocationValueHelpSearchTimer();
             return DetailCommandPolicy.valueHelpLocation(this, { intent: "close" }).finally(function () {
-                this._setViewFlag("/locationVhBusy", false);
+                ControllerViewStateRuntime.setFlag(this, "/locationVhBusy", false);
             }.bind(this));
         },
 

@@ -7,8 +7,10 @@ sap.ui.define([
 
     var _iResizeRafId = 0;
     var _iResizeEndTimer = 0;
+    var _iResizeSafetyTimer = 0;
     var _iShellRefreshRafId = 0;
     var _RESIZE_END_DELAY_MS = 120;
+    var _RESIZE_SAFETY_DELAY_MS = 480;
     var _RESIZE_CLASS = "chkResizing";
 
     function _scheduleInvalidate(oLayout) {
@@ -24,17 +26,25 @@ sap.ui.define([
         var oDoc = document && document.documentElement;
         ThemeDomRuntime.addClass([oDoc], _RESIZE_CLASS);
         _iResizeEndTimer = SchedulingRuntime.clearTimer(_iResizeEndTimer);
+        _iResizeSafetyTimer = SchedulingRuntime.restartTimer(_iResizeSafetyTimer, function () {
+            _settleResizing();
+        }, _RESIZE_SAFETY_DELAY_MS);
+    }
+
+    function _settleResizing() {
+        var oDoc = document && document.documentElement;
+
+        _iResizeEndTimer = SchedulingRuntime.clearTimer(_iResizeEndTimer);
+        _iResizeSafetyTimer = SchedulingRuntime.clearTimer(_iResizeSafetyTimer);
+        ThemeDomRuntime.removeClass([oDoc], _RESIZE_CLASS);
+        if (window.Ui5Bg && typeof window.Ui5Bg.onResizeEnd === "function") {
+            window.Ui5Bg.onResizeEnd();
+        }
     }
 
     function _scheduleResizeEnd() {
         _iResizeEndTimer = SchedulingRuntime.restartTimer(_iResizeEndTimer, function () {
-            var oDoc = document && document.documentElement;
-
-            _iResizeEndTimer = 0;
-            ThemeDomRuntime.removeClass([oDoc], _RESIZE_CLASS);
-            if (window.Ui5Bg && typeof window.Ui5Bg.onResizeEnd === "function") {
-                window.Ui5Bg.onResizeEnd();
-            }
+            _settleResizing();
         }, _RESIZE_END_DELAY_MS);
     }
 

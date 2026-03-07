@@ -9,6 +9,16 @@ sap.ui.define([
 ], function (UseCase, Result, Effects, DetailAuthorizationSupport, UseCaseInputUtils, StatePaths, CreateSentinel) {
     "use strict";
 
+    function resolveLoadedAttachments(oUiState, sRootId) {
+        var sSelectedRootId = String((oUiState && oUiState.get("selected", "/root/id")) || "").trim();
+        var bAttachmentsLoaded = !!(oUiState && oUiState.get("view", "/attachmentsLoaded"));
+        var aAttachments = (oUiState && oUiState.get("selected", "/attachments")) || [];
+        if (!sRootId || sSelectedRootId !== sRootId || !bAttachmentsLoaded || !Array.isArray(aAttachments)) {
+            return [];
+        }
+        return aAttachments;
+    }
+
     function OpenDetailUseCase() {
         UseCase.call(this, "OpenDetailUseCase");
     }
@@ -95,6 +105,7 @@ sap.ui.define([
             }
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
+            var aLoadedAttachments = resolveLoadedAttachments(oUiState, sRootId);
             return Result.ok({ snapshot: oSnapshot || {} }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat([
                 Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
@@ -102,7 +113,7 @@ sap.ui.define([
                 Effects.modelPatch("uiState", "/_detailSnapshot", oSnapshot || {}),
                 Effects.modelPatch("uiState", "/_detailCurrent", oSnapshot || {}),
                 Effects.modelPatch("selected", "/", oSnapshot || {}),
-                Effects.modelPatch("selected", "/attachments", []),
+                Effects.modelPatch("selected", "/attachments", aLoadedAttachments),
                 Effects.modelPatch("view", "/detailSkeletonBusy", false)
             ]));
         }).catch(function (oError) {

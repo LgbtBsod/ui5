@@ -217,6 +217,29 @@ def set_detail_edit_mode(page, state: bool) -> Any:
     )
 
 
+def enter_edit_or_report(page) -> tuple[bool, dict[str, Any]]:
+    result = set_detail_edit_mode(page, True)
+    try:
+        page.wait_for_function(
+            """
+            () => {
+              const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+              const state = view && view.getModel && view.getModel('state');
+              return !!(state && state.getProperty && state.getProperty('/mode') === 'EDIT');
+            }
+            """,
+            timeout=20000,
+        )
+        page.wait_for_timeout(1600)
+        return True, {"toggleResult": result, "state": detail_state(page)}
+    except Exception as exc:  # noqa: BLE001
+        return False, {
+            "toggleResult": result,
+            "state": detail_state(page),
+            "error": str(exc),
+        }
+
+
 
 def ensure_attachments_expanded(page) -> None:
     page.evaluate(
@@ -311,25 +334,23 @@ def main() -> int:
                 failures.append("detail.route.opened")
 
             before_lock = len(matching_requests(network, "LockAcquire"))
-            set_detail_edit_mode(page, True)
-            page.wait_for_function(
-                """
-                () => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
-                  const state = view && view.getModel && view.getModel('state');
-                  return !!(state && state.getProperty && state.getProperty('/mode') === 'EDIT');
-                }
-                """,
-                timeout=20000,
-            )
-            page.wait_for_timeout(1600)
+            edit_ok, edit_detail = enter_edit_or_report(page)
             after_lock = len(matching_requests(network, "LockAcquire"))
-            edit_state = detail_state(page)
+            edit_state = edit_detail.get("state") or detail_state(page)
             last_state = edit_state
-            ok_lock = after_lock > before_lock and edit_state.get("mode") == "EDIT"
-            ensure(checks, "detail.lock.acquire", ok_lock, {"before": before_lock, "after": after_lock, "state": edit_state, "transport": transport_snapshot(network, "LockAcquire")})
+            ok_lock = edit_ok and after_lock > before_lock and edit_state.get("mode") == "EDIT"
+            ensure(checks, "detail.lock.acquire", ok_lock, {
+                "before": before_lock,
+                "after": after_lock,
+                "state": edit_state,
+                "toggleResult": edit_detail.get("toggleResult"),
+                "transport": transport_snapshot(network, "LockAcquire"),
+                "error": edit_detail.get("error", ""),
+            })
             if not ok_lock:
                 failures.append("detail.lock.acquire")
+                browser.close()
+                return flush_report(build_report(checks, failures, network, {"lastState": last_state}))
 
             save_before = detail_state(page)
             save_request_count_before = len(matching_requests(network, "SaveChanges"))

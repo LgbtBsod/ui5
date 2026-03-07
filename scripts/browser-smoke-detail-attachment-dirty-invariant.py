@@ -141,6 +141,29 @@ def set_detail_edit_mode(page, state: bool) -> Any:
     )
 
 
+def enter_edit_or_report(page) -> tuple[bool, dict[str, Any]]:
+    result = set_detail_edit_mode(page, True)
+    try:
+        page.wait_for_function(
+            """
+            () => {
+              const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+              const state = view && view.getModel && view.getModel('state');
+              return !!(state && state.getProperty && state.getProperty('/mode') === 'EDIT');
+            }
+            """,
+            timeout=20000,
+        )
+        page.wait_for_timeout(1600)
+        return True, {"toggleResult": result, "state": detail_state(page)}
+    except Exception as exc:  # noqa: BLE001
+        return False, {
+            "toggleResult": result,
+            "state": detail_state(page),
+            "error": str(exc),
+        }
+
+
 def invoke_delete(page, attachment_key: str) -> None:
     page.evaluate(
         """
@@ -239,25 +262,31 @@ def main() -> int:
             wait_for_detail_ready(page, ROOT_ID)
 
             before_lock = len(matching_requests(network, "LockAcquire"))
-            set_detail_edit_mode(page, True)
-            page.wait_for_function(
-                """
-                () => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
-                  const state = view && view.getModel && view.getModel('state');
-                  return !!(state && state.getProperty && state.getProperty('/mode') === 'EDIT');
-                }
-                """,
-                timeout=20000,
-            )
-            page.wait_for_timeout(1600)
+            edit_ok, edit_detail = enter_edit_or_report(page)
             after_lock = len(matching_requests(network, "LockAcquire"))
-            edit_state = detail_state(page)
+            edit_state = edit_detail.get("state") or detail_state(page)
             last_state = edit_state
-            ok_lock = after_lock > before_lock and edit_state.get("mode") == "EDIT" and edit_state.get("isDirty") is False
-            ensure(checks, "detail.attachment_dirty.lock_acquired_clean", ok_lock, {"before": before_lock, "after": after_lock, "state": edit_state})
+            ok_lock = edit_ok and after_lock > before_lock and edit_state.get("mode") == "EDIT" and edit_state.get("isDirty") is False
+            ensure(checks, "detail.attachment_dirty.lock_acquired_clean", ok_lock, {
+                "before": before_lock,
+                "after": after_lock,
+                "state": edit_state,
+                "toggleResult": edit_detail.get("toggleResult"),
+                "error": edit_detail.get("error", ""),
+            })
             if not ok_lock:
                 failures.append("detail.attachment_dirty.lock_acquired_clean")
+                browser.close()
+                return flush_report(report={
+                    "generatedAt": int(time.time()),
+                    "uiUrl": UI_URL,
+                    "rootId": ROOT_ID,
+                    "ok": False,
+                    "checks": checks,
+                    "failures": failures,
+                    "networkSample": network[-25:],
+                    "lastState": last_state,
+                })
 
             ensure_attachments_expanded(page)
             upload_before = detail_state(page)

@@ -10,9 +10,12 @@ sap.ui.define([
     "use strict";
 
     function buildInitialViewState() {
+        var iCurrentYear = new Date().getFullYear();
         return {
             busy: false,
             error: "",
+            selectedYear: String(iCurrentYear),
+            availableYears: [{ key: String(iCurrentYear), text: String(iCurrentYear) }],
             analytics: AnalyticsPayloadNormalizer.createEmptyDashboard()
         };
     }
@@ -32,6 +35,7 @@ sap.ui.define([
         },
 
         _loadAnalytics: function (sReason) {
+            var sSelectedYear = String(ControllerViewStateRuntime.get(this, "/selectedYear", "") || "").trim();
             ControllerViewStateRuntime.setMany(this, {
                 "/busy": true,
                 "/error": ""
@@ -40,9 +44,21 @@ sap.ui.define([
                 this,
                 this._facade,
                 "load",
-                { reason: sReason || "manual" },
+                {
+                    reason: sReason || "manual",
+                    selectedYear: Number(sSelectedYear) || 0
+                },
                 ControllerCtxRuntime.buildDefault(this)
-            );
+            ).then(function (oResult) {
+                var oAnalytics = ControllerViewStateRuntime.get(this, "/analytics", {}) || {};
+                if (Array.isArray(oAnalytics.availableYears) && oAnalytics.availableYears.length) {
+                    ControllerViewStateRuntime.set(this, "/availableYears", oAnalytics.availableYears);
+                }
+                if (oAnalytics.selectedYear) {
+                    ControllerViewStateRuntime.set(this, "/selectedYear", String(oAnalytics.selectedYear));
+                }
+                return oResult;
+            }.bind(this));
         },
 
         _onAnalyticsMatched: function () {
@@ -51,6 +67,15 @@ sap.ui.define([
 
         onRefreshAnalytics: function () {
             return this._loadAnalytics("manualRefresh");
+        },
+
+        onSelectAnalyticsYear: function (oEvent) {
+            var sYear = String(oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem") && oEvent.getParameter("selectedItem").getKey() || oEvent && oEvent.getParameter && oEvent.getParameter("selectedKey") || "").trim();
+            if (!sYear) {
+                return Promise.resolve();
+            }
+            ControllerViewStateRuntime.set(this, "/selectedYear", sYear);
+            return this._loadAnalytics("yearChanged");
         },
 
         onCloseAnalytics: function () {

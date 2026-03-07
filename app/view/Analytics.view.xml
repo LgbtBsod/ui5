@@ -47,6 +47,17 @@
                         showIcon="true"
                         visible="{= !!${view>/error} }"
                         class="chkFeedbackStrip chkFeedbackWarning"/>
+                    <HBox class="analyticsHeroActions sapUiSmallMarginBottom" renderType="Bare" wrap="Wrap" alignItems="Center">
+                        <Label text="{i18n>analyticsYearLabel}" labelFor="analyticsYearSelect" class="sapUiTinyMarginEnd"/>
+                        <Select
+                            id="analyticsYearSelect"
+                            width="10rem"
+                            selectedKey="{view>/selectedYear}"
+                            change=".onSelectAnalyticsYear"
+                            items="{view>/availableYears}">
+                            <core:Item key="{view>key}" text="{view>text}"/>
+                        </Select>
+                    </HBox>
                     <core:Fragment fragmentName="checklist.app.view.fragment.WorkflowAnalyticsTopline" type="XML"/>
                     <core:Fragment fragmentName="checklist.app.view.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
                 </VBox>
