@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "checklist/app/service/framework/CtxFactory",
-    "checklist/app/service/domain/detail/DetailAuthorizationSupport"
-], function (JSONModel, CtxFactory, DetailAuthorizationSupport) {
+    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
+    "checklist/app/service/framework/ControllerRouteRuntime"
+], function (JSONModel, CtxFactory, DetailAuthorizationSupport, ControllerRouteRuntime) {
     "use strict";
 
     function buildInitialViewState(sRootId) {
@@ -51,13 +52,13 @@ sap.ui.define([
     return {
         onInit: function () {
             this.setModel(new JSONModel(buildInitialViewState("")), "view");
-            this.attachRouteMatched("accessDenied", this._onAccessDeniedMatched);
+            ControllerRouteRuntime.attachMatched(this, [
+                { name: "accessDenied", handler: this._onAccessDeniedMatched }
+            ]);
         },
 
         onExit: function () {
-            if (this.detachAllRouteMatched) {
-                this.detachAllRouteMatched();
-            }
+            ControllerRouteRuntime.detachAllMatched(this);
         },
 
         _ctx: function () {

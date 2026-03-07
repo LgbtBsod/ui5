@@ -1,40 +1,61 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/service/framework/FacadeCommandRuntime"
+], function (CtxFactory, FacadeCommandContract, FacadeCommandRuntime) {
     "use strict";
 
+    function execute(oController, sMethod, mInput) {
+        return FacadeCommandRuntime.executeWithContract(
+            oController,
+            oController && oController._facade,
+            sMethod,
+            mInput || {},
+            CtxFactory.buildCtx(oController, {
+                smartFilterBar: oController.byId && oController.byId("searchSmartFilterBar"),
+                smartTable: oController.byId && oController.byId("searchSmartTable")
+            }),
+            {
+                normalizeMethod: FacadeCommandContract.normalizeSearchMethod,
+                normalizePayload: FacadeCommandContract.normalizeSearchPayload
+            }
+        );
+    }
+
     function buildFilter(oController, mInput) {
-        return oController._execute("buildFilter", mInput || {});
+        return execute(oController, "buildFilter", mInput);
     }
 
     function executeSearch(oController, mInput) {
-        return oController._execute("executeSearch", mInput || {});
+        return execute(oController, "executeSearch", mInput);
     }
 
     function rebind(oController, mInput) {
-        return oController._execute("rebind", mInput || {});
+        return execute(oController, "rebind", mInput);
     }
 
     function selectRow(oController, mInput) {
-        return oController._execute("selectRow", mInput || {});
+        return execute(oController, "selectRow", mInput);
     }
 
     function selectionChanged(oController, mInput) {
-        return oController._execute("selectionChanged", mInput || {});
+        return execute(oController, "selectionChanged", mInput);
     }
 
     function bootstrap(oController, mInput) {
-        return oController._execute("bootstrap", mInput || {});
+        return execute(oController, "bootstrap", mInput);
     }
 
     function analytics(oController, mInput) {
-        return oController._execute("analytics", mInput || {});
+        return execute(oController, "analytics", mInput);
     }
 
     function applyRebindPolicy(oController, mInput) {
-        return oController._execute("applyRebindPolicy", mInput || {});
+        return execute(oController, "applyRebindPolicy", mInput);
     }
 
     function exportFlow(oController, mInput) {
-        return oController._execute("exportFlow", mInput || {});
+        return execute(oController, "exportFlow", mInput);
     }
 
     return {

@@ -1,11 +1,13 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "checklist/app/service/framework/CtxFactory",
     "checklist/app/service/domain/analytics/AnalyticsFacade",
     "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer",
     "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (JSONModel, CtxFactory, AnalyticsFacade, AnalyticsPayloadNormalizer, NavigationIntentService, ControllerModelWriteSupport) {
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/FacadeCommandRuntime",
+    "checklist/app/service/framework/ControllerRouteRuntime"
+], function (JSONModel, AnalyticsFacade, AnalyticsPayloadNormalizer, NavigationIntentService, ControllerModelWriteSupport, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime) {
     "use strict";
 
     function buildInitialViewState() {
@@ -20,22 +22,14 @@ sap.ui.define([
         onInit: function () {
             this._facade = new AnalyticsFacade();
             this.setModel(new JSONModel(buildInitialViewState()), "view");
-            this.attachRouteMatched("analytics", this._onAnalyticsMatched);
+            ControllerRouteRuntime.attachMatched(this, [
+                { name: "analytics", handler: this._onAnalyticsMatched }
+            ]);
         },
 
         onExit: function () {
-            if (this.detachAllRouteMatched) {
-                this.detachAllRouteMatched();
-            }
+            ControllerRouteRuntime.detachAllMatched(this);
             this._facade = null;
-        },
-
-        _ctx: function () {
-            return CtxFactory.buildCtx(this, {});
-        },
-
-        _run: function (sMethod, mInput) {
-            return this.executeFacadeMethod(this._facade, sMethod, mInput, this._ctx());
         },
 
         _loadAnalytics: function (sReason) {
@@ -43,7 +37,13 @@ sap.ui.define([
                 "/busy": true,
                 "/error": ""
             });
-            return this._run("load", { reason: sReason || "manual" });
+            return FacadeCommandRuntime.executeRaw(
+                this,
+                this._facade,
+                "load",
+                { reason: sReason || "manual" },
+                CtxFactory.buildCtx(this, {})
+            );
         },
 
         _onAnalyticsMatched: function () {

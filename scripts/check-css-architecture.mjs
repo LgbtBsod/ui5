@@ -20,7 +20,9 @@ const expectedImports = [
   '@import "modules/40_page_search.css";',
   '@import "modules/41_page_detail.css";',
   '@import "modules/42_page_analytics.css";',
-  '@import "modules/90_ui5_patches.css";'
+  '@import "modules/90_ui5_patches.css";',
+  '@import "modules/91_ui5_layout_patches.css";',
+  '@import "modules/92_ui5_surface_tuning.css";'
 ];
 const modules = [
   path.join(runtimeRoot, "css/modules/00_tokens.css").replace(/\\/g, "/"),
@@ -34,9 +36,15 @@ const modules = [
   path.join(runtimeRoot, "css/modules/40_page_search.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "css/modules/41_page_detail.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "css/modules/42_page_analytics.css").replace(/\\/g, "/"),
-  path.join(runtimeRoot, "css/modules/90_ui5_patches.css").replace(/\\/g, "/")
+  path.join(runtimeRoot, "css/modules/90_ui5_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/91_ui5_layout_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/92_ui5_surface_tuning.css").replace(/\\/g, "/")
 ];
-const patchFile = path.join(runtimeRoot, "css/modules/90_ui5_patches.css").replace(/\\/g, "/");
+const patchFiles = new Set([
+  path.join(runtimeRoot, "css/modules/90_ui5_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/91_ui5_layout_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/92_ui5_surface_tuning.css").replace(/\\/g, "/")
+]);
 
 function fail(message) {
   console.error(`CSS architecture check failed: ${message}`);
@@ -77,12 +85,12 @@ for (const legacyFile of forbiddenLegacyFiles) {
 
 for (const file of modules) {
   const css = fs.readFileSync(file, "utf8");
-  if (file === patchFile) {
+  if (patchFiles.has(file)) {
     assertPatchDiscipline(file, css);
   } else if (css.includes("!important")) {
     fail(`${file} contains !important outside 90_ui5_patches.css.`);
   }
-  if (/outline\s*:\s*none/i.test(css) && file !== patchFile) {
+  if (/outline\s*:\s*none/i.test(css) && !patchFiles.has(file)) {
     fail(`${file} contains outline:none outside patches.`);
   }
   if (css.includes("__view")) {

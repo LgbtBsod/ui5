@@ -44,13 +44,16 @@ Generated from runtime root: `app`.
   - `sap/ui/model/json/JSONModel` -> `sap/ui/model/json/JSONModel` [UI5]
   - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
   - `checklist/app/service/domain/detail/DetailAuthorizationSupport` -> `service/domain/detail/DetailAuthorizationSupport` [Usecases]
+  - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
 - `controller/support/AnalyticsControllerActions.js`
   - `sap/ui/model/json/JSONModel` -> `sap/ui/model/json/JSONModel` [UI5]
-  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
   - `checklist/app/service/domain/analytics/AnalyticsFacade` -> `service/domain/analytics/AnalyticsFacade` [Usecases]
   - `checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer` -> `service/domain/analytics/AnalyticsPayloadNormalizer` [Usecases]
   - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
+  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
+  - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
+  - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
 - `controller/support/AppControllerActions.js`
   - `checklist/app/controller/support/AppControllerLifecycleActions` -> `controller/support/AppControllerLifecycleActions` [Controllers]
   - `checklist/app/controller/support/AppControllerOverlayActions` -> `controller/support/AppControllerOverlayActions` [Controllers]
@@ -159,11 +162,12 @@ Generated from runtime root: `app`.
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailCommandPolicy.js`
-  - imports: (none)
+  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
+  - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
+  - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
 - `controller/support/DetailControllerActions.js`
   - `checklist/app/controller/support/DetailValidationSummarySupport` -> `controller/support/DetailValidationSummarySupport` [Controllers]
   - `checklist/app/controller/support/DetailActionConstants` -> `controller/support/DetailActionConstants` [Controllers]
-  - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
   - `checklist/app/controller/support/DetailActionViewportSupport` -> `controller/support/DetailActionViewportSupport` [Controllers]
   - `checklist/app/controller/support/DetailActionPinnedRailSupport` -> `controller/support/DetailActionPinnedRailSupport` [Controllers]
   - `checklist/app/controller/support/DetailActionDialogSupport` -> `controller/support/DetailActionDialogSupport` [Controllers]
@@ -175,8 +179,7 @@ Generated from runtime root: `app`.
   - `sap/ui/model/json/JSONModel` -> `sap/ui/model/json/JSONModel` [UI5]
   - `checklist/app/controller/support/ControllerResourceCleanup` -> `controller/support/ControllerResourceCleanup` [Controllers]
   - `checklist/app/service/domain/detail/DetailFacade` -> `service/domain/detail/DetailFacade` [Usecases]
-  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
-  - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
+  - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
   - `checklist/app/controller/support/AttachmentUploadSupport` -> `controller/support/AttachmentUploadSupport` [Controllers]
@@ -222,13 +225,14 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/SearchCommandPolicy.js`
-  - imports: (none)
+  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
+  - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
+  - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
 - `controller/support/SearchControllerActions.js`
   - `checklist/app/controller/support/ControllerResourceCleanup` -> `controller/support/ControllerResourceCleanup` [Controllers]
   - `checklist/app/service/domain/search/SearchFacade` -> `service/domain/search/SearchFacade` [Usecases]
-  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
-  - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
   - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
+  - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
   - `checklist/app/controller/support/SearchCommandPolicy` -> `controller/support/SearchCommandPolicy` [Controllers]
   - `checklist/app/controller/support/SearchControllerSupport` -> `controller/support/SearchControllerSupport` [Controllers]

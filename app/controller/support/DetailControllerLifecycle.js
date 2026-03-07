@@ -2,8 +2,7 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "checklist/app/controller/support/ControllerResourceCleanup",
     "checklist/app/service/domain/detail/DetailFacade",
-    "checklist/app/service/framework/CtxFactory",
-    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/controller/support/ControllerModelWriteSupport",
     "checklist/app/controller/support/AttachmentUploadSupport",
@@ -13,8 +12,7 @@ sap.ui.define([
     JSONModel,
     ControllerResourceCleanup,
     DetailFacade,
-    CtxFactory,
-    FacadeCommandContract,
+    ControllerRouteRuntime,
     ControllerTextRuntime,
     ControllerModelWriteSupport,
     AttachmentUploadSupport,
@@ -114,8 +112,10 @@ sap.ui.define([
             this._fnDetailResizeSync = null;
             this._oAdaptiveViewportResizeObserver = null;
             this._fnAdaptiveViewportSync = null;
-            this.attachRouteMatched("detail", this._onDetailMatched);
-            this.attachRouteMatched("detailLayout", this._onDetailMatched);
+            ControllerRouteRuntime.attachMatched(this, [
+                { name: "detail", handler: this._onDetailMatched },
+                { name: "detailLayout", handler: this._onDetailMatched }
+            ]);
 
             this.setModel(new JSONModel(buildInitialViewState(this)), "view");
 
@@ -141,9 +141,7 @@ sap.ui.define([
             if (this._oStateValidationModel && this._fnStateValidationChange && this._oStateValidationModel.detachPropertyChange) {
                 this._oStateValidationModel.detachPropertyChange(this._fnStateValidationChange, this);
             }
-            if (this.detachAllRouteMatched) {
-                this.detachAllRouteMatched();
-            }
+            ControllerRouteRuntime.detachAllMatched(this);
             if (this._iAttachmentDropZoneBindTimer) {
                 clearTimeout(this._iAttachmentDropZoneBindTimer);
                 this._iAttachmentDropZoneBindTimer = null;
@@ -163,16 +161,6 @@ sap.ui.define([
             this._fnAdaptiveViewportSync = null;
             this._oStateValidationModel = null;
             this._fnStateValidationChange = null;
-        },
-
-        _ctx: function () {
-            return CtxFactory.buildCtx(this, {});
-        },
-
-        _run: function (sMethod, mInput) {
-            var sCommand = FacadeCommandContract.normalizeDetailMethod(sMethod);
-            var oPayload = FacadeCommandContract.normalizeDetailPayload(sCommand, mInput);
-            return this.executeFacadeMethod(this._facade, sCommand, oPayload, this._ctx());
         },
 
         _replayInitialDetailRouteIfNeeded: function () {

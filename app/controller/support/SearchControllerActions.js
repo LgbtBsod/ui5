@@ -1,16 +1,15 @@
 sap.ui.define([
     "checklist/app/controller/support/ControllerResourceCleanup",
     "checklist/app/service/domain/search/SearchFacade",
-    "checklist/app/service/framework/CtxFactory",
-    "checklist/app/service/framework/FacadeCommandContract",
     "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/controller/support/ControllerModelWriteSupport",
     "checklist/app/controller/support/SearchCommandPolicy",
     "checklist/app/controller/support/SearchControllerSupport",
     "checklist/app/controller/support/SearchLoadRuntimeSupport",
     "checklist/app/controller/support/SearchRateProgress",
     "checklist/app/controller/support/SearchViewSupport"
-], function (ControllerResourceCleanup, SearchFacade, CtxFactory, FacadeCommandContract, FocusRuntime, ControllerModelWriteSupport, SearchCommandPolicy, SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport) {
+], function (ControllerResourceCleanup, SearchFacade, FocusRuntime, ControllerRouteRuntime, ControllerModelWriteSupport, SearchCommandPolicy, SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -35,9 +34,11 @@ sap.ui.define([
             this._searchRateProgress = SearchRateProgress;
             this._sSearchUiSessionKey = SearchControllerSupport.resolveSearchUiSessionKey();
             this.setModel(SearchControllerSupport.createViewModel(this._sSearchUiSessionKey), "view");
-            this.attachRouteMatched("search", this._onSearchMatched);
-            this.attachRouteMatched("detail", this._onDetailSearchContextMatched);
-            this.attachRouteMatched("detailLayout", this._onDetailSearchContextMatched);
+            ControllerRouteRuntime.attachMatched(this, [
+                { name: "search", handler: this._onSearchMatched },
+                { name: "detail", handler: this._onDetailSearchContextMatched },
+                { name: "detailLayout", handler: this._onDetailSearchContextMatched }
+            ]);
             SearchViewSupport.bindAnalyticsRefreshTimer(this);
             SearchViewSupport.syncSmartControlAvailability(this);
             SearchViewSupport.bindPowerUserShortcuts(this);
@@ -45,9 +46,7 @@ sap.ui.define([
         },
 
         onExit: function () {
-            if (this.detachAllRouteMatched) {
-                this.detachAllRouteMatched();
-            }
+            ControllerRouteRuntime.detachAllMatched(this);
             SearchViewSupport.unbindPowerUserShortcuts(this);
             SearchViewSupport.unbindSearchViewportRuntime(this);
             SearchViewSupport.clearAnalyticsRefreshTimer(this);
@@ -98,19 +97,6 @@ sap.ui.define([
 
         _tryInitialSmartRebind: function () {
             return false;
-        },
-
-        _ctx: function () {
-            return CtxFactory.buildCtx(this, {
-                smartFilterBar: this.byId("searchSmartFilterBar"),
-                smartTable: this.byId("searchSmartTable")
-            });
-        },
-
-        _execute: function (sMethod, mInput) {
-            var sCommand = FacadeCommandContract.normalizeSearchMethod(sMethod);
-            var oPayload = FacadeCommandContract.normalizeSearchPayload(sCommand, mInput);
-            return this.executeFacadeMethod(this._facade, sCommand, oPayload, this._ctx());
         },
 
         ensureEffectDialog: function (sId) {

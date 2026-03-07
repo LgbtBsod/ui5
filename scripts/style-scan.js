@@ -8,8 +8,8 @@ const ROOT = process.cwd();
 const NPM_COMMAND = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const NODE_COMMAND = process.execPath;
 const TOKEN_FILES_ALLOWLIST = new Set([
-    path.normalize(path.join(ROOT, "css/modules/00_tokens.css")),
-    path.normalize(path.join(ROOT, "css/modules/01_theme-modes.css"))
+    path.normalize(path.join(ROOT, "app/css/modules/00_tokens.css")),
+    path.normalize(path.join(ROOT, "app/css/modules/01_theme-modes.css"))
 ]);
 
 function runStep(name, command, args) {
@@ -95,7 +95,7 @@ function runLintWithBaseline() {
 
 function findRawHexViolations() {
     const files = listFiles(ROOT, {
-        include: ["css/**/*.css"]
+        include: ["app/css/**/*.css"]
     }).map((file) => path.normalize(path.join(ROOT, file)));
     const violations = [];
     files.forEach((file) => {

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 const { runTextContractGate } = require('./lib/artifactContractGate');
+const { detectRuntimeRoot } = require('./qa-shared');
 
 const requiredVars = ['--sapPositive', '--sapNegative', '--sapCritical', '--sapInformation'];
+const runtimeRoot = detectRuntimeRoot(process.cwd());
 
 function validateSemanticContrast(css) {
   const issues = [];
@@ -17,8 +19,8 @@ function validateSemanticContrast(css) {
 }
 
 const contract = {
-  dataPath: 'css/style.css',
-  missingMessage: 'Semantic contrast gate failed: css/style.css not found.',
+  dataPath: `${runtimeRoot ? `${runtimeRoot}/` : ''}css/style.css`,
+  missingMessage: `Semantic contrast gate failed: ${runtimeRoot ? `${runtimeRoot}/` : ''}css/style.css not found.`,
   passMessage: 'Semantic contrast gate passed: semantic variables and dual theme scopes detected.',
   validate: validateSemanticContrast
 };

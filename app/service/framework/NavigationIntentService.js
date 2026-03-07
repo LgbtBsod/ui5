@@ -1,38 +1,73 @@
 sap.ui.define([
-    "checklist/app/infra/navigation/WorkspaceRouteNavigation"
-], function (WorkspaceRouteNavigation) {
+    "checklist/app/service/framework/behavior/BehaviorResolver",
+    "checklist/app/service/framework/behavior/NavigationDefaultHandlers",
+    "checklist/app/service/framework/behavior/NavigationOverrideHandlers"
+], function (BehaviorResolver, NavigationDefaultHandlers, NavigationOverrideHandlers) {
     "use strict";
 
+    function runOperation(sOperation, mContext) {
+        NavigationDefaultHandlers.ensureRegistered();
+        NavigationOverrideHandlers.ensureRegistered();
+        return BehaviorResolver.executeSync("navigation", sOperation, mContext || {}, NavigationDefaultHandlers.handlers);
+    }
+
+    function buildCurrentIntent(oStateModel) {
+        return runOperation("buildCurrentIntent", {
+            stateModel: oStateModel
+        });
+    }
+
+    function setAnalyticsReturnIntent(oController) {
+        return runOperation("setAnalyticsReturnIntent", {
+            controller: oController
+        });
+    }
+
+    function navigateToAnalytics(oController) {
+        return runOperation("navigateToAnalytics", {
+            controller: oController
+        });
+    }
+
+    function navigateBackFromAnalytics(oController) {
+        return runOperation("navigateBackFromAnalytics", {
+            controller: oController
+        });
+    }
+
     function queuePendingIntent(oStateModel, StatePaths, oRouteEvent) {
-        oStateModel.setProperty(StatePaths.PENDING_NAVIGATION_INTENT, {
-            routeName: oRouteEvent && oRouteEvent.getParameter && oRouteEvent.getParameter("name"),
-            routeArgs: (oRouteEvent && oRouteEvent.getParameter && oRouteEvent.getParameter("arguments")) || {},
-            queuedAt: new Date().toISOString()
+        return runOperation("queuePendingIntent", {
+            stateModel: oStateModel,
+            statePaths: StatePaths,
+            routeEvent: oRouteEvent
         });
     }
 
     function clearPendingIntent(oStateModel, StatePaths) {
-        oStateModel.setProperty(StatePaths.PENDING_NAVIGATION_INTENT, null);
+        return runOperation("clearPendingIntent", {
+            stateModel: oStateModel,
+            statePaths: StatePaths
+        });
     }
 
     function resumePendingIntent(oComponent, oStateModel, StatePaths) {
-        var oIntent = oStateModel.getProperty(StatePaths.PENDING_NAVIGATION_INTENT);
-        if (!oIntent || !oIntent.routeName) {
-            return false;
-        }
-        clearPendingIntent(oStateModel, StatePaths);
-        oStateModel.setProperty("/navGuardBypass", true);
-        oComponent.getRouter().navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
-        return true;
+        return runOperation("resumePendingIntent", {
+            component: oComponent,
+            stateModel: oStateModel,
+            statePaths: StatePaths
+        });
     }
 
     return {
-        buildCurrentIntent: WorkspaceRouteNavigation.buildCurrentIntent,
-        setAnalyticsReturnIntent: WorkspaceRouteNavigation.setAnalyticsReturnIntent,
-        navigateToAnalytics: WorkspaceRouteNavigation.navigateToAnalytics,
-        navigateBackFromAnalytics: WorkspaceRouteNavigation.navigateBackFromAnalytics,
+        buildCurrentIntent: buildCurrentIntent,
+        setAnalyticsReturnIntent: setAnalyticsReturnIntent,
+        navigateToAnalytics: navigateToAnalytics,
+        navigateBackFromAnalytics: navigateBackFromAnalytics,
         queuePendingIntent: queuePendingIntent,
         clearPendingIntent: clearPendingIntent,
-        resumePendingIntent: resumePendingIntent
+        resumePendingIntent: resumePendingIntent,
+        registerBehaviorOverride: NavigationOverrideHandlers.register,
+        unregisterBehaviorOverride: NavigationOverrideHandlers.unregister,
+        clearBehaviorOverrides: NavigationOverrideHandlers.clear
     };
 });

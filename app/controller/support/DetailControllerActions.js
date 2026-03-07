@@ -1,7 +1,6 @@
 sap.ui.define([
     "checklist/app/controller/support/DetailValidationSummarySupport",
     "checklist/app/controller/support/DetailActionConstants",
-    "checklist/app/service/framework/FacadeCommandContract",
     "checklist/app/controller/support/DetailActionViewportSupport",
     "checklist/app/controller/support/DetailActionPinnedRailSupport",
     "checklist/app/controller/support/DetailActionDialogSupport",
@@ -48,12 +47,6 @@ sap.ui.define([
 
             _onSelectedChecklistChanged: function (oEvent) {
                 DetailValidationSummarySupport.onSelectedChecklistChanged(this, oEvent, STATE_PATHS);
-            },
-
-            _run: function (sMethod, mInput) {
-                var sCommand = FacadeCommandContract.normalizeDetailMethod(sMethod);
-                var oPayload = FacadeCommandContract.normalizeDetailPayload(sCommand, mInput);
-                return this.executeFacadeMethod(this._facade, sCommand, oPayload, this._ctx());
             }
         }
     );

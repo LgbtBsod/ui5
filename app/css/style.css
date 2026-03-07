@@ -10,3 +10,5 @@
 @import "modules/41_page_detail.css";
 @import "modules/42_page_analytics.css";
 @import "modules/90_ui5_patches.css";
+@import "modules/91_ui5_layout_patches.css";
+@import "modules/92_ui5_surface_tuning.css";

@@ -1,57 +1,55 @@
 sap.ui.define([
-    "checklist/app/service/framework/EffectApplier",
-    "checklist/app/service/framework/EffectUiHandlers",
-    "checklist/app/service/framework/FeedbackBannerRuntime"
-], function (EffectApplier, EffectUiHandlers, FeedbackBannerRuntime) {
+    "checklist/app/service/framework/behavior/BehaviorResolver",
+    "checklist/app/service/framework/behavior/FeedbackDefaultHandlers",
+    "checklist/app/service/framework/behavior/FeedbackOverrideHandlers"
+], function (BehaviorResolver, FeedbackDefaultHandlers, FeedbackOverrideHandlers) {
     "use strict";
 
-    function resolveBundle(oController) {
-        var oI18n = oController && oController.getModel && oController.getModel("i18n");
-        return oI18n && oI18n.getResourceBundle ? oI18n.getResourceBundle() : null;
+    function runOperation(sOperation, mContext) {
+        FeedbackDefaultHandlers.ensureRegistered();
+        FeedbackOverrideHandlers.ensureRegistered();
+        return BehaviorResolver.execute("feedback", sOperation, mContext || {}, FeedbackDefaultHandlers.handlers);
+    }
+
+    function runSyncOperation(sOperation, mContext) {
+        FeedbackDefaultHandlers.ensureRegistered();
+        FeedbackOverrideHandlers.ensureRegistered();
+        return BehaviorResolver.executeSync("feedback", sOperation, mContext || {}, FeedbackDefaultHandlers.handlers);
     }
 
     function resolveText(oController, sKey, aArgs, sFallback) {
-        var oBundle = resolveBundle(oController);
-        if (oBundle && oBundle.hasText && oBundle.hasText(sKey)) {
-            return oBundle.getText(sKey, aArgs || []);
-        }
-        return sFallback || sKey || "";
+        return runSyncOperation("resolveText", {
+            controller: oController,
+            textKey: sKey,
+            args: aArgs || [],
+            fallback: sFallback
+        });
     }
 
     function applyUseCaseResult(oController, oResult, mOptions) {
-        var oUiHandlers = EffectUiHandlers.create({
-            resolveTextKey: function (sKey, oCtrl) {
-                return resolveText(oCtrl || oController, sKey, [], sKey);
-            }
-        });
-        return EffectApplier.applyEffects(oController, oResult && oResult.effects, {
-            resolveTextKey: function (sKey) {
-                return resolveText(oController, sKey, [], sKey);
-            },
-            handlers: oUiHandlers,
-            actionDispatcher: mOptions && mOptions.actionDispatcher
-        }).then(function () {
-            return oResult;
+        return runOperation("applyUseCaseResult", {
+            controller: oController,
+            result: oResult || null,
+            options: mOptions || {}
         });
     }
 
     function showGlobalMessage(oController, sSeverity, sTextKey, aArgs, sFallback) {
-        var oState = oController && oController.getModel && oController.getModel("state");
-        var sText = resolveText(oController, sTextKey, aArgs || [], sFallback || sTextKey);
-        FeedbackBannerRuntime.setGlobalMessage(oState, sSeverity, sText);
-        return sText;
+        return runSyncOperation("showGlobalMessage", {
+            controller: oController,
+            severity: sSeverity,
+            textKey: sTextKey,
+            args: aArgs || [],
+            fallback: sFallback || sTextKey
+        });
     }
 
     function showToast(oController, sTextKey, aArgs, sLevel) {
-        return EffectApplier.applyEffects(oController, [{
-            type: "toast",
+        return runOperation("showToast", {
+            controller: oController,
             textKey: sTextKey,
-            textArgs: aArgs || [],
+            args: aArgs || [],
             level: sLevel || "info"
-        }], {
-            resolveTextKey: function (sKey) {
-                return resolveText(oController, sKey, aArgs || [], sKey);
-            }
         });
     }
 
@@ -59,6 +57,9 @@ sap.ui.define([
         resolveText: resolveText,
         applyUseCaseResult: applyUseCaseResult,
         showGlobalMessage: showGlobalMessage,
-        showToast: showToast
+        showToast: showToast,
+        registerBehaviorOverride: FeedbackOverrideHandlers.register,
+        unregisterBehaviorOverride: FeedbackOverrideHandlers.unregister,
+        clearBehaviorOverrides: FeedbackOverrideHandlers.clear
     };
 });
