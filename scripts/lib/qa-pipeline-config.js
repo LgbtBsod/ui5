@@ -21,7 +21,7 @@ const validators = [
   { name: 'action-dispatcher-contract-gate', file: 'action-dispatcher-contract-gate.js' },
   { name: 'effect-action-contract-gate', file: 'effect-action-contract-gate.js' },
   { name: 'banner-path-contract-gate', file: 'banner-path-contract-gate.js' },
-  { name: 'network-signature-fixture', file: 'test-pack/network-signature-fixture.js' },
+  { name: 'network-signature-fixture', file: 'testing/network-signature-fixture.js' },
   { name: 'suggest-on-interaction-only-gate', file: 'suggest-on-interaction-only-gate.js' },
   { name: 'network-contract-verifier', file: 'network-contract-verifier.js' },
   { name: 'backend-service-dedup-gate', file: 'backend-service-dedup-gate.js' },

@@ -3,7 +3,7 @@ const { createTodoRule } = require('./shared');
 const managerPurityRule = createTodoRule({
   id: 'manager-purity-rule',
   description: 'Suggest moving manager model writes into usecase effects',
-  include: ['manager/**/*.js'],
+  include: ['service/runtime/**/*.js'],
   predicate: function (_file, text) {
     return /setProperty\(|setData\(/.test(text);
   },

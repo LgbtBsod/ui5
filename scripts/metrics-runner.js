@@ -10,7 +10,7 @@ const { fingerprint } = require('./lib/fingerprint');
 const { emitJson } = require('./lib/report');
 
 const root = path.resolve(__dirname, '..');
-const files = listFiles(root, { include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js', 'manager/**/*.js', 'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js', 'Component.js'] });
+const files = listFiles(root, { include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js', 'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js', 'Component.js'] });
 const records = [];
 const fileMap = {};
 const fnDup = new Map();
@@ -43,7 +43,7 @@ const hotspot = records.map((r) => {
 const compliance = {
   feedback: files.filter((f) => /MessageBox|MessageToast/.test(fileMap[f] || '') && f !== 'service/framework/EffectApplier.js').length,
   style: files.filter((f) => /addStyleClass\(|removeStyleClass\(/.test(fileMap[f] || '') && f !== 'infra/adapters/Ui5StyleAdapter.js').length,
-  manager: files.filter((f) => f.startsWith('manager/') && /setProperty\(|setData\(/.test(fileMap[f] || '')).length,
+  manager: files.filter((f) => f.startsWith('service/runtime/') && /setProperty\(|setData\(/.test(fileMap[f] || '')).length,
   usecaseUi5: files.filter((f) => f.includes('/usecases/') && f.startsWith('service/domain/') && /['"]sap\//.test(fileMap[f] || '')).length
 };
 

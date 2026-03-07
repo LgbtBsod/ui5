@@ -4,4 +4,4 @@ const { runPatternGate } = require('./lib/patternGateRuntime');
 
 runPatternGate('manager-purity-gate', [
   { id: 'manager-model-write', regex: /\.setProperty\(|setData\(/, message: 'manager must not write model directly' }
-], { include: ['manager/**/*.js'] });
+], { include: ['service/runtime/**/*.js'] });

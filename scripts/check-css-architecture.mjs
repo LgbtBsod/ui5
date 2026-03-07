@@ -36,6 +36,7 @@ const modules = [
   path.join(runtimeRoot, "css/modules/42_page_analytics.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "css/modules/90_ui5_patches.css").replace(/\\/g, "/")
 ];
+const patchFile = path.join(runtimeRoot, "css/modules/90_ui5_patches.css").replace(/\\/g, "/");
 
 function fail(message) {
   console.error(`CSS architecture check failed: ${message}`);
@@ -76,12 +77,12 @@ for (const legacyFile of forbiddenLegacyFiles) {
 
 for (const file of modules) {
   const css = fs.readFileSync(file, "utf8");
-  if (file === "css/modules/90_ui5_patches.css") {
+  if (file === patchFile) {
     assertPatchDiscipline(file, css);
   } else if (css.includes("!important")) {
     fail(`${file} contains !important outside 90_ui5_patches.css.`);
   }
-  if (/outline\s*:\s*none/i.test(css) && file !== "css/modules/90_ui5_patches.css") {
+  if (/outline\s*:\s*none/i.test(css) && file !== patchFile) {
     fail(`${file} contains outline:none outside patches.`);
   }
   if (css.includes("__view")) {

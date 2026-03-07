@@ -17,7 +17,7 @@ runGate({
   advisory: true,
   include: [
     'controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js',
-    'manager/**/*.js', 'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js'
+    'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js'
   ],
   check: ({ file, text }) => extractFunctions(text)
     .filter((fn) => !isModuleWrapper(fn, text))

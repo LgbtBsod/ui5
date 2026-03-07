@@ -3,7 +3,7 @@ const { createFileExistenceSmoke } = require('./smoke-file-check');
 async function runLockSmoke() {
   return createFileExistenceSmoke(
     'lock',
-    ['ports/LockPort.js', 'manager/LockStatusMonitor.js'],
+    ['ports/LockPort.js', 'service/runtime/LockStatusMonitor.js'],
     'lock lifecycle contract file exists'
   );
 }

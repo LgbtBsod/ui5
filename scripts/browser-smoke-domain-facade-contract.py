@@ -37,9 +37,8 @@ def main() -> int:
                         'checklist/app/service/domain/detail/DetailFacade',
                         'checklist/app/service/domain/search/SearchFacade',
                         'checklist/app/service/domain/search/ExportFacade',
-                        'checklist/app/facades/AppFacade',
-                        'checklist/app/facades/LockFacade'
-                    ], function (DetailFacade, SearchFacade, ExportFacade, AppFacade, LockFacade) {
+                        'checklist/app/service/domain/shared/LockFacade'
+                    ], function (DetailFacade, SearchFacade, ExportFacade, LockFacade) {
                         var detail = new DetailFacade();
                         var search = new SearchFacade();
                         var exp = new ExportFacade();
@@ -57,7 +56,6 @@ def main() -> int:
                                 'analytics', 'applyRebindPolicy'
                             ],
                             exportMethods: ['exportFlow', 'exportEntity'],
-                            appMethods: ['confirmTestUser'],
                             lockMethods: ['release']
                         };
 
@@ -69,12 +67,10 @@ def main() -> int:
                             detailOk: hasMethods(detail, out.detailMethods),
                             searchOk: hasMethods(search, out.searchMethods),
                             exportOk: hasMethods(exp, out.exportMethods),
-                            appOk: hasMethods(AppFacade, out.appMethods),
                             lockOk: hasMethods(LockFacade, out.lockMethods),
                             ok: hasMethods(detail, out.detailMethods)
                                 && hasMethods(search, out.searchMethods)
                                 && hasMethods(exp, out.exportMethods)
-                                && hasMethods(AppFacade, out.appMethods)
                                 && hasMethods(LockFacade, out.lockMethods),
                             matrix: out
                         });
@@ -89,13 +85,11 @@ def main() -> int:
             detail_ok = bool(result.get("detailOk"))
             search_ok = bool(result.get("searchOk"))
             export_ok = bool(result.get("exportOk"))
-            app_ok = bool(result.get("appOk"))
             lock_ok = bool(result.get("lockOk"))
 
             ensure(checks, "facade.detail.contract", detail_ok, {"methods": matrix.get("detailMethods", [])})
             ensure(checks, "facade.search.contract", search_ok, {"methods": matrix.get("searchMethods", [])})
             ensure(checks, "facade.export.contract", export_ok, {"methods": matrix.get("exportMethods", [])})
-            ensure(checks, "facade.app.contract", app_ok, {"methods": matrix.get("appMethods", [])})
             ensure(checks, "facade.lock.contract", lock_ok, {"methods": matrix.get("lockMethods", [])})
 
             if not result.get("ok"):

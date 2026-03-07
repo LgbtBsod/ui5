@@ -51,7 +51,7 @@ function main() {
   const usecases = files.filter((f) => f.includes('/usecases/'));
   const ports = files.filter((f) => f.includes('/ports/'));
   const adapters = files.filter((f) => f.includes('/adapters/') || f.includes('service/backend/'));
-  const managers = files.filter((f) => f.startsWith('manager/'));
+  const managers = files.filter((f) => f.startsWith('service/runtime/'));
   const utilities = files.filter((f) => f.includes('/util/') || f.includes('service/framework/'));
 
   const importGraph = {};

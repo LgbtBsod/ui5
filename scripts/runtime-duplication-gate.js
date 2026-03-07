@@ -10,7 +10,7 @@ const { fingerprint } = require('./lib/fingerprint');
 
 const ROOT = path.resolve(__dirname, '..');
 const ALLOWLIST_PATH = path.join(ROOT, 'scripts', 'runtime-duplicate-allowlist.json');
-const INCLUDE = ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js', 'manager/**/*.js', 'model/**/*.js', 'util/**/*.js'];
+const INCLUDE = ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js', 'model/**/*.js', 'util/**/*.js'];
 
 function readAllowlist() {
   if (!fs.existsSync(ALLOWLIST_PATH)) {

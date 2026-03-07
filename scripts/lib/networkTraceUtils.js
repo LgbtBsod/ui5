@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { signature, isBusinessRequest } = require('../test-pack/network-signature');
+const { signature, isBusinessRequest } = require('../testing/network-signature');
 const { readJsonSafe } = require('./auditInput');
 
 const RUNTIME_TRACE_FILE_NAMES = [

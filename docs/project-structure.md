@@ -2,6 +2,8 @@
 
 - `app/`
   UI5 runtime root. Contains `index.html`, `Component.js`, `manifest.json`, preload, controllers, views, services, styles, i18n, and all app-facing modules.
+  `app/service/runtime/` is the single home for runtime coordinators/managers.
+  `app/service/domain/shared/` contains shared domain-level helpers such as `LockFacade`.
 
 - `backend/`
   Backend-side assets and mock infrastructure.
@@ -10,6 +12,7 @@
 
 - `scripts/`
   Build, smoke, audit, and local environment tooling.
+  `scripts/testing/` is the consolidated home for smoke-pack and test helper scripts.
 
 - `docs/`
   Architecture notes, runtime logs, QA evidence, and captured artifacts.

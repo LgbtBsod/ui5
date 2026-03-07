@@ -9,7 +9,7 @@ const { exitWithMappedIssues } = require('./lib/gate-result');
 const { listRuntimeJsFiles, pushPipeViolation, mapPipeIssue } = require('./lib/runtimeGateRuntime');
 
 const ROOT = process.cwd();
-const RUNTIME_DIRS = ['Component.js', 'controller', 'manager', 'service', 'util', 'model', 'infra'];
+const RUNTIME_DIRS = ['Component.js', 'controller', 'service', 'util', 'model', 'infra'];
 
 function detectForbiddenApis(files, violations) {
   const pattern = /\b(fetch\s*\(|new\s+XMLHttpRequest\s*\(|axios\b)/g;
@@ -87,9 +87,9 @@ function detectLiteralIntervals(files, violations) {
 }
 
 function detectRuntimeSettingsLoad(violations) {
-  const settingsSource = readText(ROOT, 'manager/SettingsManager.js');
+  const settingsSource = readText(ROOT, 'service/runtime/SettingsManager.js');
   if (!/readEntity\(\s*["']RuntimeSettingsSet["']\s*,\s*["']Key='GLOBAL'["']/.test(settingsSource)) {
-    pushPipeViolation(violations, 'manager/SettingsManager.js', null, "RuntimeSettingsSet('GLOBAL') load not detected");
+    pushPipeViolation(violations, 'service/runtime/SettingsManager.js', null, "RuntimeSettingsSet('GLOBAL') load not detected");
   }
 
   const componentSource = [

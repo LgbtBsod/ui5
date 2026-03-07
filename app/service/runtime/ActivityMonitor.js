@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (EventProvider) {
     "use strict";
 
-    return EventProvider.extend("checklist.app.manager.ActivityMonitor", {
+    return EventProvider.extend("checklist.app.service.runtime.ActivityMonitor", {
         constructor: function (mOptions) {
             EventProvider.apply(this, arguments);
             this._iIdleMs = Number(mOptions && mOptions.idleMs);

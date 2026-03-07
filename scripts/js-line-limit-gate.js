@@ -25,7 +25,7 @@ runGate({
   advisory: true,
   include: [
     'controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js',
-    'manager/**/*.js', 'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js', 'Component.js'
+    'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js', 'Component.js'
   ],
   exclude: ['scripts/internal/**'],
   check: ({ file, lines }) => {

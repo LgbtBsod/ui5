@@ -9,7 +9,7 @@ const { exitWithGateResult } = require('../lib/gate-result');
 const ROOT = path.resolve(__dirname, '../..');
 const ALLOWLIST_PATH = path.join(__dirname, 'shadow-duplicate-allowlist.json');
 
-const INCLUDE = ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js', 'manager/**/*.js'];
+const INCLUDE = ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js'];
 const EXCLUDE = ['scripts/**', 'docs/**', 'mock_gate_way/**', 'sap_backend/**', 'node_modules/**', 'dist/**'];
 
 const CRITICAL_SUFFIX_RE = /(Facade|UseCase|Usecase|Adapter|Manager|Coordinator|Loader|Policy|Builder|Mapper)\.js$/i;
@@ -38,7 +38,7 @@ function featureLocation(file) {
   if (p[0] === 'util' && p[1]) return `util/${p[1]}`;
   if (p[0] === 'infra' && p[1]) return `infra/${p[1]}`;
   if (p[0] === 'controller' && p[1]) return `controller/${p[1]}`;
-  if (p[0] === 'manager' && p[1]) return `manager/${p[1]}`;
+  if (p[0] === 'service' && p[1] === 'runtime' && p[2]) return `service/runtime/${p[2]}`;
   return p[0] || 'root';
 }
 

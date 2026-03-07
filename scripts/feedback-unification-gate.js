@@ -15,7 +15,7 @@ const POLICY_ALLOW = new Set([
 
 runGate({
   name: 'feedback-unification-gate',
-  include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'manager/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js'],
+  include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js'],
   check: ({ file, text }) => {
     const violations = [];
     if (!EFFECT_ALLOW.has(file)) {

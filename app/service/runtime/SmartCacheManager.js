@@ -9,7 +9,7 @@ sap.ui.define([
     var DEFAULT_STALE_OK_MS = 90 * 1000;
     var DEFAULT_ALLOWED_KEYS = ["checkLists"];
 
-    return EventProvider.extend("checklist.app.manager.SmartCacheManager", {
+    return EventProvider.extend("checklist.app.service.runtime.SmartCacheManager", {
         constructor: function (mOptions) {
             EventProvider.apply(this, arguments);
             this._iFreshMs = Number((mOptions && mOptions.freshMs) || DEFAULT_FRESH_MS);

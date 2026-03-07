@@ -211,10 +211,10 @@ body.chkAppRoot,
 
 .chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid,
 .chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd {
-  width: 0 !important;
-  max-width: 0 !important;
-  min-width: 0 !important;
-  flex: 0 0 0 !important;
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  flex: 0 0 0;
   opacity: 0;
   pointer-events: none;
   overflow: hidden;
@@ -223,9 +223,9 @@ body.chkAppRoot,
 
 .chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent,
 .chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd .sapFFCLColumnContent {
-  width: 0 !important;
-  max-width: 0 !important;
-  min-width: 0 !important;
+  width: 0;
+  max-width: 0;
+  min-width: 0;
   overflow: hidden;
 }
 

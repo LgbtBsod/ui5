@@ -38,7 +38,26 @@ tmp_video_frames/
 
 # Generated docs and scan dumps
 docs/artifacts/
+docs/qa-report-latest.md
+docs/qa-report-latest.json
+docs/architecture-map.md
+docs/runtime/*.pid
+docs/runtime/*.log
+docs/runtime/*.txt
 
 # Local media dumps
 *.mp4
 *.zip
+
+# Generated UI5 preload namespace proxies
+app/checklist/
+app/sap_ui5/
+
+# Python / Playwright scratch
+.playwright/
+playwright-report/
+test-results/
+
+# Script-generated patches and temporary evidence
+scripts/autofix/out/
+tmp_video_frames/

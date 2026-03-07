@@ -54,7 +54,7 @@ function main() {
         }
       }
     }
-    if (f.startsWith('manager/') && text.includes('.setProperty(')) {
+    if (f.startsWith('service/runtime/') && text.includes('.setProperty(')) {
       violations.push({ file: f, rule: 'manager-jsonmodel-write', import: '.setProperty(' });
     }
 

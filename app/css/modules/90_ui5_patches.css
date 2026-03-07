@@ -87,6 +87,23 @@ html.chkResizing #ui5-bg #bgDark {
   transition: none !important;
 }
 
+/* UI5 1.71 FCL patch: hidden mid/end columns keep framework inline sizes in OneColumn unless clamped here. */
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd {
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  flex: 0 0 0 !important;
+}
+
+/* UI5 1.71 FCL patch: hidden column content still contributes scroll width without explicit zero sizing. */
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd .sapFFCLColumnContent {
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+}
+
 .chkApp .appRootFcl .sapFFCLColumn {
   contain: layout paint style;
 }

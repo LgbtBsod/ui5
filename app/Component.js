@@ -2,7 +2,7 @@
     "sap/ui/core/UIComponent",
     "checklist/app/model/ModelFactory",
     "checklist/app/service/SmartSearchAdapter",
-    "checklist/app/manager/ManagerFacade",
+    "checklist/app/service/runtime/ManagerFacade",
     "sap/ui/model/json/JSONModel",
     "checklist/app/util/FlowCoordinator",
     "checklist/app/util/DeltaPayloadBuilder",

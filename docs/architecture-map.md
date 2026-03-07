@@ -27,7 +27,7 @@ Generated from runtime root: `app`.
   - `checklist/app/service/framework/FeedbackBannerRuntime` -> `service/framework/FeedbackBannerRuntime` [Util]
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
 - `controller/base/ModelAccessMixin.js`
-  - `checklist/app/facades/LockFacade` -> `facades/LockFacade` [Facades]
+  - `checklist/app/service/domain/shared/LockFacade` -> `service/domain/shared/LockFacade` [Usecases]
 - `controller/base/RouterMixin.js`
   - imports: (none)
 - `controller/base/ThemeMixin.js`
@@ -265,8 +265,7 @@ Generated from runtime root: `app`.
 
 ## Facades -> (imported modules)
 
-- `facades/LockFacade.js`
-  - `checklist/app/infra/adapters/LockAdapter` -> `infra/adapters/LockAdapter` [Infra]
+- (no files)
 
 ## Usecases -> (imported modules)
 
@@ -518,6 +517,8 @@ Generated from runtime root: `app`.
   - `checklist/app/service/domain/search/SearchSelectionEffects` -> `service/domain/search/SearchSelectionEffects` [Usecases]
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/service/domain/shared/StatePaths` -> `service/domain/shared/StatePaths` [Usecases]
+- `service/domain/shared/LockFacade.js`
+  - `checklist/app/infra/adapters/LockAdapter` -> `infra/adapters/LockAdapter` [Infra]
 - `service/domain/shared/StatePaths.js`
   - imports: (none)
 - `service/domain/shared/UseCaseInputUtils.js`

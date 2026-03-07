@@ -6,7 +6,7 @@ module.exports = createRule({
   detect: function (root) {
     return scanMatches(
       root,
-      ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'manager/**/*.js', 'util/**/*.js'],
+      ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js'],
       function (file, text) {
         return file !== 'service/framework/EffectApplier.js' && /MessageBox|MessageToast/.test(text);
       }

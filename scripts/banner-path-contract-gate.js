@@ -9,7 +9,7 @@ const ALLOW = new Set([
 
 runGate({
   name: 'banner-path-contract-gate',
-  include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'manager/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js', 'facades/**/*.js'],
+  include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js'],
   check: ({ file, text }) => {
     if (ALLOW.has(file)) {
       return [];

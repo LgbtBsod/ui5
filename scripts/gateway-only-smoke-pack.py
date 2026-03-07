@@ -15,7 +15,7 @@ from typing import Any
 
 
 UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
-SERVICE_ROOT = sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8000/sap/opu/odata/sap/Z_UI5_SRV"
+SERVICE_ROOT = (sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8000/sap/opu/odata/sap/Z_UI5_SRV").rstrip("/")
 REPORT_PATH = Path("docs/artifacts/gateway-only-smoke-report.json")
 ROOT_DELETE_WARNING = "cleanup.delete.failed"
 

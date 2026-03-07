@@ -1,11 +1,11 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "checklist/app/manager/shared/ManagerRuntime",
-    "checklist/app/manager/shared/TimerRuntime"
+    "checklist/app/service/runtime/shared/ManagerRuntime",
+    "checklist/app/service/runtime/shared/TimerRuntime"
 ], function (EventProvider, ManagerRuntime, TimerRuntime) {
     "use strict";
 
-    return EventProvider.extend("checklist.app.manager.LockStatusMonitor", {
+    return EventProvider.extend("checklist.app.service.runtime.LockStatusMonitor", {
         constructor: function (mOptions) {
             ManagerRuntime.initEventProvider(EventProvider, this, arguments);
             this._iIntervalMs = ManagerRuntime.readNumberOption(mOptions, "intervalMs");

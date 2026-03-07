@@ -8,7 +8,7 @@ const { extractFunctions } = require('./lib/functionExtract');
 const { fingerprint } = require('./lib/fingerprint');
 
 const root = path.resolve(__dirname, '..');
-const files = listFiles(root, { include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js', 'manager/**/*.js', 'model/**/*.js', 'util/**/*.js'] });
+const files = listFiles(root, { include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js', 'model/**/*.js', 'util/**/*.js'] });
 const fileHashes = new Map();
 const fnHashes = new Map();
 

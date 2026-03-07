@@ -1,7 +1,7 @@
 const { runGate } = require('./gateRunner');
 const { scanPatterns } = require('./patternScan');
 
-const DEFAULT_INCLUDE = ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'manager/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js'];
+const DEFAULT_INCLUDE = ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js'];
 
 function runPatternGate(name, patterns, opts) {
   const options = opts || {};

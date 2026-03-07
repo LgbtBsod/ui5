@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { runSmokePacks } = require('./test-pack/smoke-runner');
+const { runSmokePacks } = require('./testing/smoke-runner');
 
 (async () => {
   const results = await runSmokePacks();

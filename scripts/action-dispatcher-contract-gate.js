@@ -5,7 +5,7 @@ const { scanPatterns } = require('./lib/patternScan');
 
 runGate({
   name: 'action-dispatcher-contract-gate',
-  include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'manager/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js', 'facades/**/*.js'],
+  include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js'],
   check: ({ file, text }) => {
     return scanPatterns(file, text, [
       { id: 'register-map-call', regex: /\.registerMap\s*\(/g, message: 'ActionDispatcher.registerMap is deprecated. Use register(action, handler).' },
