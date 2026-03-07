@@ -1,47 +1,60 @@
 # Production cleanup audit
 
-## 1) Candidate files/folders for removal (before execution)
+## Clean runtime state
 
-### A. Views/Controllers not registered in routing
-- **Result:** no extra top-level views/controllers detected for deletion.
-- Routing uses `search`, `detail`, `detailLayout`; active view/controller set is:
-  - `view/App.view.xml` + `controller/App.controller.js`
-  - `view/Search.view.xml` + `controller/Search.controller.js`
-  - `view/Detail.view.xml` + `controller/Detail.controller.js`
-- Fragment files are referenced from Search/Detail controllers and views.
+- Runtime CSS entrypoint is now `css/style.css` via `manifest.json`.
+- `style-reset-minimal.css` is no longer the intended runtime layer.
+- The old bridge layer is already gone.
+- `css/archive/snapshot-2026-03-06` is legacy backup only, not runtime code.
 
-### B. Tests (`webapp/test`)
-- `webapp/test` directory is absent in this repository, so there is nothing to clean there.
+## What was actually broken
 
-### C. Runtime/temp artifacts (recommended for removal)
-- `tmp_ui5.log`
-- `tmp_ui5.err.log`
-- `tmp_ui_attachment.txt`
-- `docs/runtime/tmp_ui_attachment.txt`
-- `tmp_frames/sap_ui5_startup_001.png` … `tmp_frames/sap_ui5_startup_006.png`
-- `gateway.db`
+- The project drifted into a dual-style runtime:
+  - `style.css` existed as the nominal modular stack.
+  - `style-reset-minimal.css` became a second live stack with copied rules.
+- `style-reset-minimal.css` also imported archived dialog CSS, which made the runtime depend on a backup snapshot instead of the active module tree.
+- Detail top-zone rendering had conflicting repeated overrides in `41_page_detail.css`, causing the checklist control rail to collapse and paint phantom stripes over the first info-card row.
+- Search results table used sticky header-cell behavior that produced overlap/visual corruption around the no-data state.
 
-> These look like generated runtime artifacts and local state, not source-of-truth project code.
+## What was repaired
 
-## 2) package.json dependencies audit
-- `dependencies`: empty.
-- `devDependencies`: build/qa tooling (`husky`, `lint-staged`, `stylelint`, `stylelint-config-standard`) already correctly placed.
-- No dependency migration required.
+- Switched runtime back to the normal modular entrypoint: `css/style.css`.
+- Verified the switch with live browser crawl:
+  - `docs/artifacts/stylecss-clean-switch-r1`
+  - `docs/artifacts/stylecss-clean-switch-r7`
+- Removed the search header-cell sticky conflict by simplifying table header behavior in `css/modules/40_page_search.css`.
+- Normalized the detail control rail geometry in `css/modules/41_page_detail.css` so internal containers no longer collapse to zero-height.
 
-## 3) manifest.json audit
-- `sap.ui5/dependencies/libs`: all declared libs are used in XML views/fragments (`sap.m`, `sap.ui.core`, `sap.ui.unified`, `sap.f`, `sap.ui.layout`, `sap.ui.comp`, `sap.ui.table`, `sap.uxap`).
-- Removed unused models from manifest:
-  - `data`
-  - `mpl`
+## Legacy and cleanup targets
 
-## 4) JS cleanup
-- Replaced garbled hardcoded error message in `Component.js` with readable Russian text.
-- Removed dead model wiring in `Component.js` for unused models (`data`, `hierarchy`, `mpl`).
-- Replaced console fallback logger in `util/DebugLogger.js` with `sap/base/Log`.
+Safe to remove from the repository:
 
-## 5) Git ignore policy
-- Updated `.gitignore` for production hygiene to exclude:
-  - `dist/`
-  - `node_modules/`
-  - `.vscode/`
-  - local logs (`*.log`, temp log patterns) and temp frame folder.
+- `css/style-reset-minimal.css`
+- `css/archive/snapshot-2026-03-06/`
+- generated visual runs under `docs/artifacts/`
+- runtime logs/pids under `docs/runtime/`
+
+These are not source-of-truth implementation anymore.
+
+## Remaining residual UI issue
+
+- The detail top control rail still reserves layout imperfectly in the desktop detail screen.
+- This is no longer a runtime-stack problem; it is a local detail-layout issue inside `css/modules/41_page_detail.css` and the `DetailControlRail` view structure.
+
+## Target architecture
+
+The clean target remains:
+
+- `css/style.css` as the only runtime CSS entrypoint
+- modular CSS only:
+  - `10_base.css`
+  - `20_surface.css`
+  - `21_controls.css`
+  - `22_skeleton.css`
+  - `23_dialogs.css`
+  - `40_page_search.css`
+  - `41_page_detail.css`
+  - `90_ui5_patches.css`
+- no archive imports
+- no recovery bridge
+- no parallel minimal runtime stack

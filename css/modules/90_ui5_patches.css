@@ -95,3 +95,54 @@ html.rnvResizing #ui5-bg {
 #ui5-bg #bgDark {
   will-change: opacity;
 }
+
+.rnvApp .searchFilterCardDense .sapMInputBaseContentWrapper,
+.rnvApp .searchFilterCardDense .sapMSlt,
+.rnvApp .searchFilterCardDense .sapMSegB,
+.rnvApp .searchResultsTable .sapMInputBaseContentWrapper,
+.rnvApp .searchResultsTable .sapMSlt,
+.rnvApp .searchResultsTable .sapMSwt,
+.rnvApp .detailControlInlineCard .sapMInputBaseContentWrapper,
+.rnvApp .detailSectionCard .sapMInputBaseContentWrapper,
+.rnvApp .detailSectionCard .sapMSlt,
+.rnvApp .detailSectionCard .sapMTimePicker,
+.rnvApp .detailSectionCard .sapMDatePicker {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(242, 247, 255, 0.22));
+  border-color: rgba(128, 162, 220, 0.34);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+body.rnvAppRoot.appDark .rnvApp .searchFilterCardDense .sapMInputBaseContentWrapper,
+body.rnvAppRoot.appDark .rnvApp .searchFilterCardDense .sapMSlt,
+body.rnvAppRoot.appDark .rnvApp .searchFilterCardDense .sapMSegB,
+body.rnvAppRoot.appDark .rnvApp .searchResultsTable .sapMInputBaseContentWrapper,
+body.rnvAppRoot.appDark .rnvApp .searchResultsTable .sapMSlt,
+body.rnvAppRoot.appDark .rnvApp .detailControlInlineCard .sapMInputBaseContentWrapper,
+body.rnvAppRoot.appDark .rnvApp .detailSectionCard .sapMInputBaseContentWrapper,
+body.rnvAppRoot.appDark .rnvApp .detailSectionCard .sapMSlt,
+body.rnvAppRoot.appDark .rnvApp .detailSectionCard .sapMTimePicker,
+body.rnvAppRoot.appDark .rnvApp .detailSectionCard .sapMDatePicker {
+  background:
+    linear-gradient(180deg, rgba(42, 60, 89, 0.28), rgba(17, 27, 45, 0.16)),
+    color-mix(in srgb, rgba(18, 31, 50, 0.9) 92%, transparent);
+  box-shadow: inset 0 1px 0 rgba(199, 221, 255, 0.05);
+}
+
+.rnvApp .detailControlRow .sapMOTBOverflowButton .sapMBtnContent,
+.rnvApp .detailWorkflowRail .sapMOTBOverflowButton .sapMBtnContent,
+.rnvApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
+.rnvApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent,
+.rnvApp .detailSectionToolbar .sapMOTBOverflowButton .sapMBtnContent {
+  font-size: 0;
+}
+
+.rnvApp .detailControlRow .sapMOTBOverflowButton .sapMBtnContent::after,
+.rnvApp .detailWorkflowRail .sapMOTBOverflowButton .sapMBtnContent::after,
+.rnvApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
+.rnvApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after,
+.rnvApp .detailSectionToolbar .sapMOTBOverflowButton .sapMBtnContent::after {
+  content: "...";
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}

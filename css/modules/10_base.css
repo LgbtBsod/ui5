@@ -61,6 +61,14 @@ body.rnvAppRoot,
   min-width: 0;
 }
 
+.rnvApp .appRootFcl .sapFFCLColumnContent > .sapMNav,
+.rnvApp .appRootFcl .sapFFCLColumnContent > .sapMNav > .sapMNavItem,
+.rnvApp .appRootFcl .sapFFCLColumnContent .sapUiView {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
 .rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow,
 .rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium,
 .rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide,

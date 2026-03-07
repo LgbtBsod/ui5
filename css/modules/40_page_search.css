@@ -1,4 +1,9 @@
 .rnvApp .searchFilterCardDense,
+.rnvApp .searchWorkbenchDock,
+.rnvApp .searchFilterCardDense,
+.rnvApp .searchResultsActionRail,
+.rnvApp .searchSmartToolbarRail,
+.rnvApp .searchResultsExperienceShell,
 .rnvApp .searchResultsTable,
 .rnvApp .searchStatusStripStack,
 .rnvApp .searchAnalyticsDialogBody {
@@ -11,6 +16,22 @@
 .rnvApp .searchFilterCardDense,
 .rnvApp .searchResultsTable {
   overflow: visible;
+}
+
+.rnvApp .searchFilterCardDense::after,
+.rnvApp .searchResultsTable::after {
+  display: none;
+}
+
+.rnvApp .searchStatusStripStack {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 0;
+  background: color-mix(in srgb, var(--surface-1) 62%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.52)) saturate(108%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.52)) saturate(108%);
 }
 
 .rnvApp .searchHeaderKpiRail {
@@ -310,10 +331,20 @@
   box-shadow: none;
 }
 
+.rnvApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner {
+  border-radius: 999px;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
 .rnvApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
 .rnvApp .searchActionToolbarDensity .sapMSwt,
 .rnvApp .searchActionToolbarDensity .sapMInputBaseContentWrapper {
   box-shadow: var(--theme-workbench-control-shadow);
+}
+
+.rnvApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(18, 36, 64, 0.14);
 }
 
 .rnvApp .searchSelectionStatusChip {
@@ -483,6 +514,16 @@
   margin: 0;
 }
 
+.rnvApp .searchLoadStateBanner {
+  border-radius: calc(var(--radius-lg) - 0.22rem);
+  border: 1px solid rgba(var(--accent-rgb), 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.12), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(248, 252, 255, 0.08)),
+    var(--theme-rail-bg);
+  box-shadow: var(--theme-rail-shadow);
+}
+
 .rnvApp .searchStatusStripStack .rnvFeedbackStrip {
   width: 100%;
 }
@@ -522,12 +563,14 @@
   padding:
     calc(var(--theme-table-cell-padding-block) - 0.04rem)
     var(--theme-table-cell-padding-inline);
-  background: var(--theme-table-header-bg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(245, 247, 252, 0.96)),
+    var(--theme-table-header-bg);
   border-bottom-color: transparent;
   border-inline-color: transparent;
-  position: sticky;
-  top: var(--search-sticky-header-top, calc(var(--app-shell-offset) + 18rem));
-  z-index: 11;
+  position: static;
+  top: auto;
+  z-index: auto;
 }
 
 .rnvApp .searchResultsTable .sapMListTblHeaderCell .sapMText {
@@ -648,8 +691,12 @@ html.rnvAppRoot.theme-switching .rnvApp .appSkeletonReveal {
 }
 
 .rnvApp .searchResultsTable .sapMListTblEmptyCell {
-  padding-top: 0.9rem;
-  padding-bottom: 1.2rem;
+  padding: 1.1rem 1rem 1.35rem;
+  vertical-align: top;
+}
+
+.rnvApp .searchResultsTable .sapMListTblEmptyRow {
+  height: 5.5rem;
 }
 
 .rnvApp .searchResultsTable .sapMListNoDataText {
@@ -731,6 +778,12 @@ body.rnvAppRoot.appDark .rnvApp .searchFilterCardDense,
 body.rnvAppRoot.appDark .rnvApp .searchResultsTable {
   box-shadow:
     0 16px 32px rgba(2, 8, 18, 0.28);
+}
+
+body.rnvAppRoot.appDark .rnvApp .searchStatusStripStack {
+  background: color-mix(in srgb, rgba(14, 24, 39, 0.82) 74%, transparent);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 body.rnvAppRoot.appDark .rnvApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
@@ -1072,6 +1125,19 @@ body.rnvAppRoot.appLight .rnvApp .searchActionToolbarDensity {
   border-radius: 999px;
 }
 
+.rnvApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
+.rnvApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent {
+  font-size: 0;
+}
+
+.rnvApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
+.rnvApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after {
+  content: "...";
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .rnvApp .searchAnalyticsActionBtn .sapMBtnInner {
   min-width: 0;
   padding-inline: 0.9rem;
@@ -1107,6 +1173,136 @@ body.rnvAppRoot.appLight .rnvApp .searchActionToolbarDensity {
   border-color: var(--theme-workbench-rail-border);
   background: var(--theme-workbench-rail-bg);
   box-shadow: var(--theme-workbench-rail-shadow);
+}
+
+/* Structural search dock and table shell */
+.rnvApp .searchFilterExperienceShell,
+.rnvApp .searchFilterCardDense,
+.rnvApp .searchResultsTable {
+  overflow: visible;
+}
+
+.rnvApp .searchWorkbenchDock {
+  position: sticky;
+  top: var(--search-sticky-dock-top, var(--app-shell-offset));
+  z-index: 18;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.42rem;
+}
+
+.rnvApp .searchFilterCardDense {
+  padding: 1rem 1.1rem 0.94rem;
+  border-radius: calc(var(--radius-lg) - 0.1rem);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.05) 40%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  box-shadow:
+    0 18px 40px rgba(20, 42, 73, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.rnvApp .searchWorkbenchDock > .searchFilterCardDense,
+.rnvApp .searchWorkbenchDock > .sapMTB {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  align-self: stretch;
+  box-sizing: border-box;
+}
+
+.rnvApp .searchWorkbenchDock > .searchFilterCardDense {
+  margin: 0;
+  max-height: calc(
+    100vh - var(--app-shell-offset, 0px) -
+    var(--search-workbench-toolbar-stack-height, 5.75rem) - 4.35rem
+  );
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.rnvApp .searchFilterCardDense,
+.rnvApp .searchResultsActionRail,
+.rnvApp .searchSmartToolbarRail {
+  position: static;
+  top: auto;
+}
+
+.rnvApp .searchResultsTable {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  padding: 0.82rem 0.84rem 0.9rem;
+  border-radius: calc(var(--radius-lg) - 0.1rem);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.04) 44%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  box-shadow:
+    0 22px 48px rgba(20, 42, 73, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .searchResultsTable .sapUiCompSmartTable,
+.rnvApp .searchResultsTable .sapUiCompSmartTableToolbar,
+.rnvApp .searchResultsTable .sapUiCompSmartTableTable {
+  background: transparent;
+}
+
+.rnvApp .searchResultsTable .sapUiCompSmartTable,
+.rnvApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  flex: 1 1 100%;
+  align-self: stretch;
+  box-sizing: border-box;
+}
+
+.rnvApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.rnvApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
+.rnvApp .searchResultsTable .toolbarTransparent {
+  padding: 0.22rem 0.26rem;
+  border-radius: calc(var(--radius-lg) - 0.25rem);
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--theme-rail-bg) 84%, transparent);
+  box-shadow: none;
+}
+
+.rnvApp .searchFilterCardDense .sapUiCompFilterBarToolbar {
+  margin-bottom: 0.4rem;
+}
+
+.rnvApp .searchResultsTable .toolbarTransparent {
+  margin-bottom: 0.36rem;
+}
+
+.rnvApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  margin-bottom: 0.55rem;
+  padding: 0.2rem 0.2rem 0.38rem;
+  position: sticky;
+  top: var(--search-sticky-table-toolbar-top, calc(var(--app-shell-offset) + 0.5rem));
+  z-index: 13;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-1) 96%, rgba(255, 255, 255, 0.82)), color-mix(in srgb, var(--surface-1) 92%, rgba(255, 255, 255, 0.74)));
+  box-shadow:
+    inset 0 -1px 0 color-mix(in srgb, var(--border-soft) 72%, transparent),
+    0 8px 18px rgba(18, 36, 64, 0.06);
+  backdrop-filter: blur(10px) saturate(108%);
+  -webkit-backdrop-filter: blur(10px) saturate(108%);
+}
+
+.rnvApp .searchActionToolbarDensity {
+  row-gap: 0.38rem;
+  column-gap: 0.3rem;
+  align-items: center;
+  min-height: 2.72rem;
+  padding: 0.22rem 0.26rem 0.28rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--theme-rail-bg) 84%, transparent);
+  box-shadow: none;
 }
 
 .rnvApp .searchResultsTable .maxRowsInput .sapMInputBaseContentWrapper,
@@ -1792,6 +1988,81 @@ body.rnvAppRoot.appLight .rnvApp .searchToolbarMetaRail {
   }
 }
 
+/* Narrow shell/search KPI top spacing */
+@media (max-width: 32rem) {
+  .rnvApp .searchHeaderKpiRail {
+    gap: 0.42rem;
+    margin-top: 0.14rem;
+    margin-bottom: 0.42rem;
+    padding-bottom: 0;
+  }
+
+  .rnvApp .searchAnalyticsRailGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.42rem;
+  }
+
+  .rnvApp .kpiCard,
+  .rnvApp .searchAnalyticsCard {
+    padding: 0.72rem 0.78rem 0.74rem;
+    border-radius: calc(var(--radius-lg) - 0.18rem);
+  }
+
+  .rnvApp .kpiLabelRow {
+    gap: 0.34rem;
+  }
+
+  .rnvApp .kpiLabelIcon {
+    width: 1.08rem;
+    min-width: 1.08rem;
+    height: 1.08rem;
+    font-size: 0.66rem;
+  }
+
+  .rnvApp .kpiLabel {
+    font-size: 0.64rem;
+  }
+
+  .rnvApp .searchAnalyticsMeta {
+    margin-top: 0.18rem;
+    font-size: 0.68rem;
+    line-height: 1.28;
+  }
+}
+
+/* Tablet/narrow results rail behavior */
+@media (max-width: 64rem) {
+  .rnvApp .searchResultsTable {
+    padding: 0.76rem 0.78rem 0.84rem;
+  }
+
+  .rnvApp .searchResultsTable .sapUiCompSmartTableToolbar {
+    position: static;
+    margin-top: 0.36rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .rnvApp .searchSmartToolbarRail .backendTopInput,
+  .rnvApp .searchSmartToolbarRail .maxRowsInput {
+    min-width: 7rem;
+  }
+
+  .rnvApp .searchResultsActionRail .searchSelectionStatusChip,
+  .rnvApp .searchResultsActionRail .searchSelectionPrimaryId {
+    display: none;
+  }
+
+  .rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMBtn .sapMBtnInner,
+  .rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMBtn .sapMBtnInner {
+    padding-inline: 0.4rem;
+  }
+
+  .rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMBtn .sapMBtnContent,
+  .rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMBtn .sapMBtnContent {
+    font-size: 0.72rem;
+  }
+}
+
 @media (max-width: 48rem) {
   .rnvApp .searchResultsActionRail.sapMTBNewFlex,
   .rnvApp .searchSmartToolbarRail.sapMTBNewFlex {
@@ -1813,6 +2084,11 @@ body.rnvAppRoot.appLight .rnvApp .searchToolbarMetaRail {
   .rnvApp .searchCreateActionBtn.sapMBtnBusy .sapMBtnInner::after {
     animation: none;
   }
+}
+
+.appDensityCompact .rnvApp .searchFilterCardDense,
+.appDensityCompact .rnvApp .searchResultsTable {
+  padding: 0.85rem;
 }
 
 @keyframes searchBusyFloat {
@@ -1854,5 +2130,191 @@ body.rnvAppRoot.appLight .rnvApp .searchToolbarMetaRail {
 
   100% {
     transform: translateX(390%);
+  }
+}
+
+.rnvApp .searchToolbarNavBtn .sapMBtnInner {
+  min-width: 0;
+  border-radius: 999px;
+}
+
+.rnvApp .searchToolbarNavBtnUp .sapMBtnInner {
+  box-shadow: var(--control-primary-shadow);
+}
+
+.rnvApp .searchToolbarNavBtnFilters .sapMBtnInner {
+  box-shadow: none;
+}
+
+.rnvApp .searchToolbarNavBtnFilters {
+  margin-inline: 0 0.14rem;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB {
+  padding-inline: 0.12rem;
+  column-gap: 0.12rem;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMBtn .sapMBtnInner {
+  min-height: 2.05rem;
+  padding-inline: 0.34rem;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMBtn .sapMBtnContent,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMBtn .sapMBtnContent,
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapUiCompVarMngmt,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapUiCompVarMngmt {
+  font-size: 0.7rem;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense {
+  padding: 0.82rem 0.78rem 0.88rem;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMLabel,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMLabel {
+  font-size: 0.68rem;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMInputBase,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMInputBase,
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMSlt,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMSlt {
+  min-width: 0;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMSegB,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMSegB {
+  width: 100%;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapMSegB .sapMSegBBtn,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapMSegB .sapMSegBBtn {
+  min-width: 0;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchResultsActionRail .sapMBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail .sapMBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail .sapMBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail .sapMBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail .sapMMenuBtn .sapMBtnInner,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail .sapMMenuBtn .sapMBtnInner {
+  min-height: 2.02rem;
+  padding-inline: 0.42rem;
+}
+
+.rnvApp .appLayoutSplit #searchPaneHost .searchResultsActionRail .sapMBtn .sapMBtnContent,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail .sapMBtn .sapMBtnContent,
+.rnvApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail .sapMBtn .sapMBtnContent,
+.rnvApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail .sapMBtn .sapMBtnContent {
+  font-size: 0.72rem;
+}
+
+@media (max-width: 45rem) {
+  .rnvApp .searchWorkbenchDock {
+    gap: 0.32rem;
+  }
+
+  .rnvApp .searchAnalyticsRailGrid {
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.65rem;
+  }
+
+  .rnvApp .searchFilterCardDense .sapUiCompFilterBarToolbar.sapMTBNewFlex,
+  .rnvApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB.sapMTBNewFlex,
+  .rnvApp .searchResultsActionRail.sapMTBNewFlex,
+  .rnvApp .searchSmartToolbarRail.sapMTBNewFlex {
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+    column-gap: 0.28rem;
+    align-items: stretch;
+  }
+
+  .rnvApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMTBSpacer,
+  .rnvApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTBSpacer,
+  .rnvApp .searchResultsActionRail .sapMTBSpacer,
+  .rnvApp .searchSmartToolbarRail .sapMTBSpacer {
+    display: none;
+  }
+
+  .rnvApp .searchFilterCardDense .sapUiCompVarMngmt {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .rnvApp .searchFilterCardDense {
+    padding: 0.92rem;
+  }
+
+  .rnvApp .searchWorkbenchDock > .searchFilterCardDense {
+    max-height: calc(
+      100vh - var(--app-shell-offset, 0px) -
+      var(--search-workbench-toolbar-stack-height, 5.75rem) - 14.5rem
+    );
+  }
+
+  .rnvApp .searchResultsTable {
+    padding: 0.72rem 0.72rem 0.8rem;
+  }
+
+  .rnvApp .searchResultsTable .sapUiCompSmartTableToolbar {
+    position: static;
+    margin-top: 0.42rem;
+    padding-bottom: 0.28rem;
+  }
+
+  .rnvApp .searchToolbarNavBtn .sapMBtnInner {
+    min-height: 2.15rem;
+    padding-inline: 0.58rem;
+  }
+
+  .rnvApp .searchToolbarNavBtn .sapMBtnContent {
+    font-size: 0.76rem;
+  }
+
+  .rnvApp .searchResultsActionRail,
+  .rnvApp .searchSmartToolbarRail {
+    padding-inline: 0.2rem;
+  }
+
+  .rnvApp .searchResultsActionRail {
+    row-gap: 0.24rem;
+    column-gap: 0.22rem;
+  }
+
+  .rnvApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
+  .rnvApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner,
+  .rnvApp .searchSmartToolbarRail .sapMMenuBtn .sapMBtnInner {
+    padding-inline: 0.5rem;
+  }
+
+  .rnvApp .searchResultsActionRail .sapMBtn,
+  .rnvApp .searchResultsActionRail .sapMOTBOverflowButton,
+  .rnvApp .searchSmartToolbarRail .sapMBtn,
+  .rnvApp .searchSmartToolbarRail .sapMMenuBtn,
+  .rnvApp .searchSelectionStatusChip,
+  .rnvApp .searchSelectionPrimaryId {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .rnvApp .searchSmartToolbarRail .backendTopInput,
+  .rnvApp .searchSmartToolbarRail .maxRowsInput {
+    flex: 1 1 calc(50% - 0.22rem);
+    min-width: calc(50% - 0.22rem);
+  }
+
+  .rnvApp .searchSelectionStatusChip {
+    margin-inline: 0;
+  }
+
+  .rnvApp .searchResultsTable .sapMListTblHeaderCell {
+    position: static;
+    top: auto;
   }
 }

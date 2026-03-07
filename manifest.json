@@ -32,7 +32,7 @@
     "resources": {
       "css": [
         {
-          "uri": "css/style-reset-minimal.css"
+          "uri": "css/style.css"
         }
       ]
     },

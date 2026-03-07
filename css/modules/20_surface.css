@@ -73,18 +73,18 @@ body.rnvAppRoot.platformCupertinoGlass .infoCardTile {
 .infoCardTitle {
   display: block;
   margin-bottom: 0.54rem;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  line-height: 1.18;
-  letter-spacing: 0.075em;
+  line-height: 1.14;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
 .infoCardValue {
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.46;
   white-space: pre-line;
   color: var(--text-main);
 }
@@ -293,6 +293,44 @@ body.rnvAppRoot.appDark .rnvApp .shellContextSubtitle {
   }
 }
 
+/* Narrow shell/header baseline */
+@media (max-width: 32rem) {
+  .rnvApp .appShellHeader {
+    column-gap: 0.55rem;
+    row-gap: 0.38rem;
+    margin-top: 0.58rem;
+    margin-inline: 0.72rem;
+    padding:
+      calc(var(--theme-shell-padding-block-start) * 0.82)
+      clamp(0.72rem, 3.5vw, 0.92rem)
+      calc(var(--theme-shell-padding-block-end) * 0.82);
+    border-radius: calc(var(--radius-xl) - 0.2rem);
+  }
+
+  .rnvApp .shellBrandCluster {
+    gap: 0.08rem;
+  }
+
+  .rnvApp .shellProductTitle {
+    font-size: clamp(1.02rem, 4.8vw, 1.22rem);
+    line-height: 1.08;
+  }
+
+  .rnvApp .shellContextSubtitle {
+    line-height: 1.28;
+  }
+
+  .rnvApp .shellContextRail {
+    flex: 1 1 100%;
+    margin-left: 0;
+    gap: 0.32rem;
+  }
+
+  .rnvApp .shellContextChip {
+    padding: 0.16rem 0.58rem;
+  }
+}
+
 @media (max-width: 75rem) {
   .rnvApp .appShellHeader .sapMTBSpacer {
     display: none;
@@ -315,5 +353,16 @@ body.rnvAppRoot.appDark .rnvApp .shellContextSubtitle {
     flex: 1 1 100%;
     width: 100%;
     margin-left: 0;
+  }
+}
+
+@media (max-width: 45rem) {
+  .rnvApp .infoCardTitle {
+    font-size: 0.74rem;
+  }
+
+  .rnvApp .infoCardValue {
+    font-size: 0.94rem;
+    line-height: 1.4;
   }
 }
