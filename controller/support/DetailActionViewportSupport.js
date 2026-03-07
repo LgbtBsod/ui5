@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "sap_ui5/controller/support/AttachmentUploadSupport",
     "sap_ui5/controller/support/DetailActionConstants",
     "sap_ui5/controller/support/ControllerModelWriteSupport"

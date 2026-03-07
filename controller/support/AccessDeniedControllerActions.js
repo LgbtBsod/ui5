@@ -25,6 +25,29 @@ sap.ui.define([
         };
     }
 
+    function clearDetailRuntimeState(oController) {
+        var oStateModel = oController.getModel("state");
+        var oSelectedModel = oController.getModel("selected");
+        var oUiStateModel = oController.getModel("uiState");
+
+        if (oStateModel && typeof oStateModel.setProperty === "function") {
+            oStateModel.setProperty("/mode", "READ");
+            oStateModel.setProperty("/lockOperationState", "IDLE");
+            oStateModel.setProperty("/autosaveState", "IDLE");
+            oStateModel.setProperty("/autosaveAt", null);
+            oStateModel.setProperty("/autosaveEnabled", false);
+            oStateModel.setProperty("/isDirty", false);
+            oStateModel.setProperty("/activeObjectId", "");
+        }
+        if (oSelectedModel && typeof oSelectedModel.setData === "function") {
+            oSelectedModel.setData({});
+        }
+        if (oUiStateModel && typeof oUiStateModel.setProperty === "function") {
+            oUiStateModel.setProperty("/_detailSnapshot", {});
+            oUiStateModel.setProperty("/_detailCurrent", {});
+        }
+    }
+
     return {
         onInit: function () {
             this.setModel(new JSONModel(buildInitialViewState("")), "view");
@@ -59,6 +82,7 @@ sap.ui.define([
         _refreshAccessState: function (sRootId) {
             var oStateModel = this.getModel("state");
 
+            clearDetailRuntimeState(this);
             this.getModel("view").setData({
                 busy: true,
                 rootId: String(sRootId || "").trim(),
@@ -99,6 +123,7 @@ sap.ui.define([
             var sRootId = String(mArgs.id || "").trim();
             var oCachedGuard = this._readCachedGuard(sRootId);
 
+            clearDetailRuntimeState(this);
             if (oCachedGuard) {
                 this._renderGuardState(oCachedGuard, sRootId);
                 return Promise.resolve();

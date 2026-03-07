@@ -30,6 +30,7 @@ sap.ui.define([
             canEdit: !!oResolved.canEdit,
             canDelete: !!oResolved.canDelete,
             reasonCode: oResolved.reasonCode,
+            message: oResolved.message,
             titleKey: bDenied ? "detailAccessDeniedTitle" : "",
             messageKey: bDenied ? "detailAccessDeniedText" : "",
             illustrationSrc: DENIED_ILLUSTRATION

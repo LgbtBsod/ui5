@@ -1,6 +1,18 @@
 sap.ui.define([], function () {
     "use strict";
 
+    function reuseJsonModel(oExistingModel, fnCreateModel) {
+        var oModel = oExistingModel || fnCreateModel();
+        var oSeedModel;
+
+        if (oExistingModel && typeof oExistingModel.setData === "function") {
+            oSeedModel = fnCreateModel();
+            oExistingModel.setData(oSeedModel && oSeedModel.getData ? oSeedModel.getData() : {}, false);
+        }
+
+        return oModel;
+    }
+
     function runInit(aInitArgs, mDeps) {
         var UIComponent = mDeps.UIComponent;
         var ModelFactory = mDeps.ModelFactory;
@@ -59,13 +71,13 @@ sap.ui.define([], function () {
             var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "real";
             var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
             var sMainServiceUri = this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_UI5_SRV/";
-            var oDataModel = this.getModel("data") || ModelFactory.createDataModel();
-            var oMplModel = this.getModel("mpl") || ModelFactory.createMplModel();
-            var oStateModel = ModelFactory.createStateModel();
-            var oUiStateModel = ModelFactory.createUiStateModel();
-            var oViewModel = ModelFactory.createViewModel();
-            var oSelectedModel = new JSONModel({});
-            var oMasterDataModel = ModelFactory.createMasterDataModel();
+            var oDataModel = reuseJsonModel(this.getModel("data"), ModelFactory.createDataModel);
+            var oMplModel = reuseJsonModel(this.getModel("mpl"), ModelFactory.createMplModel);
+            var oStateModel = reuseJsonModel(this.getModel("state"), ModelFactory.createStateModel);
+            var oUiStateModel = reuseJsonModel(this.getModel("uiState"), ModelFactory.createUiStateModel);
+            var oViewModel = reuseJsonModel(this.getModel("view"), ModelFactory.createViewModel);
+            var oSelectedModel = reuseJsonModel(this.getModel("selected"), function () { return new JSONModel({}); });
+            var oMasterDataModel = reuseJsonModel(this.getModel("masterData"), ModelFactory.createMasterDataModel);
             var oDeviceModel = new JSONModel(Device);
             var oMainServiceModel = this.getModel("mainService") || new ODataModel(sMainServiceUri, {
                 useBatch: true,
@@ -120,8 +132,8 @@ sap.ui.define([], function () {
             this._detailFacade = new DetailFacade();
             this._actionDispatcher = new ActionDispatcher();
             this._actionDispatcher.setValidators(ComponentInitActionRoutingSupport.buildActionValidators(ActionContract));
-            var oLayoutModel = ModelFactory.createLayoutModel();
-            var oCacheModel = ModelFactory.createCacheModel();
+            var oLayoutModel = reuseJsonModel(this.getModel("layout"), ModelFactory.createLayoutModel);
+            var oCacheModel = reuseJsonModel(this.getModel("cache"), ModelFactory.createCacheModel);
             var oEnvModel = ModelFactory.createEnvModel();
             var mTimerDefaults = TimeConfigService.buildDefaultTimerMap();
             oStateModel.setProperty("/timers", mTimerDefaults);

@@ -59,16 +59,16 @@ sap.ui.define([], function () {
         sNextSelectedId = resolveSelectedId(sLayout, sRouteName, mArgs, oStateModel);
         sNextRouteName = String(sRouteName || "search").trim() || "search";
 
-        if (sPrevLayout !== sLayout) {
-            oStateModel.setProperty("/layout", sLayout);
+        if (sPrevRouteName !== sNextRouteName) {
+            oStateModel.setProperty("/currentRouteName", sNextRouteName);
             bChanged = true;
         }
         if (sPrevSelectedId !== sNextSelectedId) {
             oStateModel.setProperty("/selectedId", sNextSelectedId);
             bChanged = true;
         }
-        if (sPrevRouteName !== sNextRouteName) {
-            oStateModel.setProperty("/currentRouteName", sNextRouteName);
+        if (sPrevLayout !== sLayout) {
+            oStateModel.setProperty("/layout", sLayout);
             bChanged = true;
         }
         return bChanged ? {

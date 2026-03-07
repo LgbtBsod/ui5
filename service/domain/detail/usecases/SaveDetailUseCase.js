@@ -168,7 +168,7 @@ sap.ui.define([
                     aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
                 }
             }
-            return Result.ok({ serverSnapshot: oSavedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
+            return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
             });
         }).catch(function (oError) {
             return Result.fail(oError, [

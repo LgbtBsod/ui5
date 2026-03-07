@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap_ui5/controller/support/ControllerResourceCleanup",
     "sap_ui5/service/domain/detail/DetailFacade",
@@ -22,6 +22,23 @@
     DetailInfoCardLayoutSupport
 ) {
     "use strict";
+
+    function parseInitialDetailHash() {
+        var sHash = String((typeof window !== "undefined" && window.location && window.location.hash) || "").trim();
+        var oMatch;
+        if (!sHash) {
+            return null;
+        }
+        sHash = sHash.replace(/^#\/?/, "");
+        oMatch = /^checklist\/([^\/?#]+)(?:\/([^\/?#]+))?$/i.exec(sHash);
+        if (!oMatch) {
+            return null;
+        }
+        return {
+            id: decodeURIComponent(oMatch[1] || ""),
+            layout: decodeURIComponent(oMatch[2] || "")
+        };
+    }
 
     function buildInitialViewState(oController) {
         var fnText = function (sKey, sFallback) {
@@ -112,6 +129,7 @@
             this._bindDetailEditSwitchKeyboardFallback();
             this._bindAdaptiveDetailViewport();
             this._bindViewportPinnedControlRail();
+            this._replayInitialDetailRouteIfNeeded();
         },
 
         onExit: function () {
@@ -153,6 +171,32 @@
             var sCommand = FacadeCommandContract.normalizeDetailMethod(sMethod);
             var oPayload = FacadeCommandContract.normalizeDetailPayload(sCommand, mInput);
             return this.executeFacadeMethod(this._facade, sCommand, oPayload, this._ctx());
+        },
+
+        _replayInitialDetailRouteIfNeeded: function () {
+            var oStateModel = this.getModel("state");
+            var oSelectedModel = this.getModel("selected");
+            var oParsedRoute = parseInitialDetailHash();
+            var sCurrentRouteName = String((oStateModel && oStateModel.getProperty && oStateModel.getProperty("/currentRouteName")) || "search").trim() || "search";
+            var sLoadedRootId = String((oSelectedModel && oSelectedModel.getProperty && oSelectedModel.getProperty("/root/id")) || "").trim();
+
+            if (!oParsedRoute || !oParsedRoute.id || sLoadedRootId || sCurrentRouteName !== "search") {
+                return;
+            }
+            this._onDetailMatched({
+                getParameter: function (sName) {
+                    if (sName === "arguments") {
+                        return {
+                            id: oParsedRoute.id,
+                            layout: oParsedRoute.layout
+                        };
+                    }
+                    if (sName === "name") {
+                        return oParsedRoute.layout ? "detailLayout" : "detail";
+                    }
+                    return null;
+                }
+            });
         }
     };
 });

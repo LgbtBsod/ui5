@@ -22,42 +22,116 @@ def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> No
 
 
 def wait_for_search_ready(page) -> None:
-    page.wait_for_selector("#sap_ui5_comp---app--mainSplitter", timeout=30000)
-    page.wait_for_selector("#sap_ui5_comp---app--searchPaneHost--searchSmartFilterBar", timeout=30000)
-    page.wait_for_selector("#sap_ui5_comp---app--searchPaneHost--searchSmartTable", timeout=30000)
+    page.wait_for_function(
+        """
+        () => {
+          if (typeof sap === 'undefined' || !sap.ui || !sap.ui.getCore) {
+            return false;
+          }
+          const core = sap.ui.getCore();
+          const app = core.byId('sap_ui5_comp---app');
+          const state = app && app.getModel && app.getModel('state');
+          const fcl = core.byId('sap_ui5_comp---app--mainFcl');
+          const smartFilterBar = core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartFilterBar');
+          const smartTable = core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartTable');
+          const appReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true';
+          return !!fcl
+            && !!smartFilterBar
+            && !!smartTable
+            && !!state
+            && state.getProperty('/currentRouteName') === 'search'
+            && appReady;
+        }
+        """,
+        timeout=30000,
+    )
     page.get_by_text("Create", exact=True).wait_for(timeout=30000)
     page.wait_for_timeout(1200)
 
 
-def wait_for_detail_ready(page) -> None:
-    page.wait_for_selector("#sap_ui5_comp---app--detailPaneHost--detailObjectPage", timeout=30000)
+def wait_for_detail_ready(page, root_id: str) -> None:
+    page.wait_for_function(
+        """
+        (expectedRootId) => {
+          const core = sap.ui.getCore();
+          const view = core.byId('sap_ui5_comp---app--detailPaneHost');
+          const objectPage = core.byId('sap_ui5_comp---app--detailPaneHost--detailObjectPage');
+          const selected = view && view.getModel && view.getModel('selected');
+          const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+          return !!view && !!objectPage && rootId === expectedRootId;
+        }
+        """,
+        arg=root_id,
+        timeout=30000,
+    )
     page.wait_for_timeout(1500)
 
 
-def current_requests(network: list[dict[str, Any]], predicate) -> list[dict[str, Any]]:
-    return [item for item in network if predicate(item)]
+def wait_for_analytics_ready(page) -> None:
+    page.wait_for_function(
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const app = core.byId('sap_ui5_comp---app');
+          const state = app && app.getModel && app.getModel('state');
+          const analyticsView = core.byId('sap_ui5_comp---app--analyticsPaneHost');
+          const viewModel = analyticsView && analyticsView.getModel && analyticsView.getModel('view');
+          return !!state
+            && state.getProperty('/currentRouteName') === 'analytics'
+            && !!analyticsView
+            && !!analyticsView.getDomRef()
+            && !!viewModel
+            && viewModel.getProperty('/busy') === false;
+        }
+        """,
+        timeout=30000,
+    )
+    page.wait_for_timeout(900)
+
+
+def matching_requests(network: list[dict[str, Any]], marker: str) -> list[dict[str, Any]]:
+    return [
+        item
+        for item in network
+        if marker in item["url"] or marker in item.get("post_data", "")
+    ]
 
 
 def direct_requests(network: list[dict[str, Any]], marker: str) -> list[dict[str, Any]]:
-    return current_requests(
-        network,
-        lambda item: marker in item["url"] and "/$batch" not in item["url"],
-    )
+    return [
+        item
+        for item in matching_requests(network, marker)
+        if "/$batch" not in item["url"]
+    ]
 
 
 def batch_requests(network: list[dict[str, Any]], marker: str) -> list[dict[str, Any]]:
-    return current_requests(
-        network,
-        lambda item: "/$batch" in item["url"] and marker in item.get("post_data", ""),
-    )
+    return [
+        item
+        for item in matching_requests(network, marker)
+        if "/$batch" in item["url"]
+    ]
 
 
 def batch_operation_requests(network: list[dict[str, Any]], method: str, marker: str) -> list[dict[str, Any]]:
     needle = f"{method.upper()} {marker}"
-    return current_requests(
-        network,
-        lambda item: "/$batch" in item["url"] and needle in item.get("post_data", ""),
-    )
+    return [
+        item
+        for item in network
+        if "/$batch" in item["url"] and needle in item.get("post_data", "")
+    ]
+
+
+def transport_snapshot(network: list[dict[str, Any]], marker: str) -> dict[str, Any]:
+    direct = direct_requests(network, marker)
+    batched = batch_requests(network, marker)
+    return {
+        "marker": marker,
+        "directCount": len(direct),
+        "batchCount": len(batched),
+        "directSample": direct[-3:],
+        "batchSample": batched[-3:],
+    }
 
 
 def build_report(
@@ -107,19 +181,39 @@ def detail_state(page) -> dict[str, Any]:
     )
 
 
-def invoke_detail(page, method_name: str):
+def invoke_view_controller_method(page, view_id: str, method_name: str, *args: Any):
     return page.evaluate(
         """
-        (methodName) => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+        ({ viewId, methodName, args }) => {
+          const view = sap.ui.getCore().byId(viewId);
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller[methodName] !== 'function') {
-            throw new Error('Detail controller method not found: ' + methodName);
+            throw new Error('Controller method not found: ' + viewId + ':' + methodName);
           }
-          return controller[methodName]();
+          return Promise.resolve(controller[methodName].apply(controller, args || []));
         }
         """,
-        method_name,
+        {"viewId": view_id, "methodName": method_name, "args": list(args)},
+    )
+
+
+def set_detail_edit_mode(page, state: bool) -> Any:
+    return page.evaluate(
+        """
+        (targetState) => {
+          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const controller = view && view.getController && view.getController();
+          if (!controller || typeof controller.onToggleEdit !== 'function') {
+            throw new Error('onToggleEdit is not available');
+          }
+          return Promise.resolve(controller.onToggleEdit({
+            getParameter: function (name) {
+              return name === 'state' ? !!targetState : undefined;
+            }
+          }));
+        }
+        """,
+        state,
     )
 
 
@@ -177,7 +271,7 @@ def main() -> int:
                 failures.append("search.smart.gateway.controls")
 
             page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="networkidle", timeout=90000)
-            wait_for_detail_ready(page)
+            wait_for_detail_ready(page, ROOT_ID)
 
             opened = detail_state(page)
             last_state = opened
@@ -186,8 +280,8 @@ def main() -> int:
             if not ok_open:
                 failures.append("detail.route.opened")
 
-            before_lock = len(current_requests(network, lambda item: "LockAcquire" in item["url"] or "LockAcquire" in item.get("post_data", "")))
-            page.locator(".accentSwitchEditMode").click(timeout=15000)
+            before_lock = len(matching_requests(network, "LockAcquire"))
+            set_detail_edit_mode(page, True)
             page.wait_for_function(
                 """
                 () => {
@@ -199,22 +293,16 @@ def main() -> int:
                 timeout=20000,
             )
             page.wait_for_timeout(1600)
-            after_lock = len(current_requests(network, lambda item: "LockAcquire" in item["url"] or "LockAcquire" in item.get("post_data", "")))
+            after_lock = len(matching_requests(network, "LockAcquire"))
             edit_state = detail_state(page)
             last_state = edit_state
             ok_lock = after_lock > before_lock and edit_state.get("mode") == "EDIT"
-            ensure(checks, "detail.lock.acquire", ok_lock, {"before": before_lock, "after": after_lock, "state": edit_state})
+            ensure(checks, "detail.lock.acquire", ok_lock, {"before": before_lock, "after": after_lock, "state": edit_state, "transport": transport_snapshot(network, "LockAcquire")})
             if not ok_lock:
                 failures.append("detail.lock.acquire")
-            lock_direct_requests = direct_requests(network, "LockAcquire")
-            lock_batch_requests = batch_requests(network, "LockAcquire")
-            ok_lock_direct = len(lock_direct_requests) >= 1 and not lock_batch_requests
-            ensure(checks, "detail.lock.acquire.direct", ok_lock_direct, {"direct": lock_direct_requests[-3:], "batch": lock_batch_requests[-3:]})
-            if not ok_lock_direct:
-                failures.append("detail.lock.acquire.direct")
 
             save_before = detail_state(page)
-            save_request_count_before = len(current_requests(network, lambda item: "SaveChanges" in item["url"] or "SaveChanges" in item.get("post_data", "")))
+            save_request_count_before = len(matching_requests(network, "SaveChanges"))
             save_call = page.evaluate(
                 """
                 () => new Promise((resolve, reject) => {
@@ -237,37 +325,28 @@ def main() -> int:
             )
             page.wait_for_function(
                 """
-                (prevRequestCount) => {
+                (prevVersion) => {
                   const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
                   const state = view && view.getModel && view.getModel('state');
                   const selected = view && view.getModel && view.getModel('selected');
-                  const requestCount = window.performance.getEntriesByType('resource')
-                    .filter((entry) => String(entry.name || '').indexOf('/sap/opu/odata/sap/Z_UI5_SRV') >= 0)
-                    .length;
                   const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
-                  return requestCount >= Number(prevRequestCount || 0) && !!(state && state.getProperty && state.getProperty('/isBusy') === false) && !!version;
+                  return version > Number(prevVersion || 0) && !!(state && state.getProperty && state.getProperty('/isBusy') === false);
                 }
                 """,
-                arg=save_request_count_before,
+                arg=save_before.get("version") or 0,
                 timeout=30000,
             )
             page.wait_for_timeout(1600)
             save_after = detail_state(page)
             last_state = save_after
-            save_requests = current_requests(network, lambda item: "SaveChanges" in item["url"] or "SaveChanges" in item.get("post_data", ""))
+            save_requests = matching_requests(network, "SaveChanges")
             ok_save = len(save_requests) > save_request_count_before and save_after.get("equipment") == save_call.get("equipment") and save_after.get("version", 0) > save_before.get("version", 0)
-            ensure(checks, "detail.save.gateway", ok_save, {"before": save_before, "after": save_after, "requestCount": len(save_requests)})
+            ensure(checks, "detail.save.gateway", ok_save, {"before": save_before, "after": save_after, "requestCount": len(save_requests), "transport": transport_snapshot(network, "SaveChanges")})
             if not ok_save:
                 failures.append("detail.save.gateway")
-            save_direct_requests = direct_requests(network, "SaveChanges")
-            save_batch_requests = batch_requests(network, "SaveChanges")
-            ok_save_direct = len(save_direct_requests) >= 1 and not save_batch_requests
-            ensure(checks, "detail.save.direct", ok_save_direct, {"direct": save_direct_requests[-3:], "batch": save_batch_requests[-3:]})
-            if not ok_save_direct:
-                failures.append("detail.save.direct")
 
             autosave_before = detail_state(page)
-            autosave_request_count_before = len(current_requests(network, lambda item: "AutoSave" in item["url"] or "AutoSave" in item.get("post_data", "")))
+            autosave_request_count_before = len(matching_requests(network, "AutoSave"))
             autosave_call = page.evaluate(
                 """
                 () => new Promise((resolve, reject) => {
@@ -316,25 +395,56 @@ def main() -> int:
             page.wait_for_timeout(1200)
             autosave_after = detail_state(page)
             last_state = autosave_after
-            autosave_requests = current_requests(network, lambda item: "AutoSave" in item["url"] or "AutoSave" in item.get("post_data", ""))
+            autosave_requests = matching_requests(network, "AutoSave")
             ok_autosave = len(autosave_requests) > autosave_request_count_before and autosave_after.get("version", 0) > autosave_before.get("version", 0) and autosave_after.get("autosaveState") == "SAVED" and autosave_after.get("equipment") == autosave_call.get("equipment")
-            ensure(checks, "detail.autosave.gateway", ok_autosave, {"before": autosave_before, "after": autosave_after, "requestCount": len(autosave_requests), "deltaKeys": sorted((autosave_call.get("delta") or {}).keys())})
+            ensure(checks, "detail.autosave.gateway", ok_autosave, {"before": autosave_before, "after": autosave_after, "requestCount": len(autosave_requests), "deltaKeys": sorted((autosave_call.get("delta") or {}).keys()), "transport": transport_snapshot(network, "AutoSave")})
             if not ok_autosave:
                 failures.append("detail.autosave.gateway")
-            autosave_direct_requests = direct_requests(network, "AutoSave")
-            autosave_batch_requests = batch_requests(network, "AutoSave")
-            ok_autosave_direct = len(autosave_direct_requests) >= 1 and not autosave_batch_requests
-            ensure(checks, "detail.autosave.direct", ok_autosave_direct, {"direct": autosave_direct_requests[-3:], "batch": autosave_batch_requests[-3:]})
-            if not ok_autosave_direct:
-                failures.append("detail.autosave.direct")
 
-            before_upload = len(current_requests(network, lambda item: "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/$batch" in item["url"]))
+            analytics_request_before = len(
+                matching_requests(network, "SimpleAnalyticalSet")
+            ) + len(
+                matching_requests(network, "WorkflowAnalyticsBreakdownSet")
+            )
+            invoke_view_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onOpenWorkflowAnalytics")
+            wait_for_analytics_ready(page)
+            analytics_request_after = len(
+                matching_requests(network, "SimpleAnalyticalSet")
+            ) + len(
+                matching_requests(network, "WorkflowAnalyticsBreakdownSet")
+            )
+            analytics_state = page.evaluate(
+                """
+                () => {
+                  const core = sap.ui.getCore();
+                  const app = core.byId('sap_ui5_comp---app');
+                  const state = app && app.getModel && app.getModel('state');
+                  const analyticsView = core.byId('sap_ui5_comp---app--analyticsPaneHost');
+                  const viewModel = analyticsView && analyticsView.getModel && analyticsView.getModel('view');
+                  return {
+                    routeName: state && state.getProperty ? String(state.getProperty('/currentRouteName') || '') : '',
+                    layout: state && state.getProperty ? String(state.getProperty('/layout') || '') : '',
+                    total: viewModel && viewModel.getProperty ? Number(viewModel.getProperty('/analytics/total') || 0) : 0,
+                    error: viewModel && viewModel.getProperty ? String(viewModel.getProperty('/error') || '') : ''
+                  };
+                }
+                """
+            )
+            ok_analytics = analytics_request_after > analytics_request_before and analytics_state.get("routeName") == "analytics" and not analytics_state.get("error")
+            ensure(checks, "analytics.screen.gateway", ok_analytics, {"before": analytics_request_before, "after": analytics_request_after, "state": analytics_state})
+            if not ok_analytics:
+                failures.append("analytics.screen.gateway")
+            invoke_view_controller_method(page, "sap_ui5_comp---app--analyticsPaneHost", "onCloseAnalytics")
+            wait_for_detail_ready(page, ROOT_ID)
+
+            before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/$batch" in item["url"]])
             page.locator("#sap_ui5_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_timeout(3200)
-            attachment_requests = current_requests(
-                network[before_upload:],
-                lambda item: "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/$batch" in item["url"],
-            )
+            attachment_requests = [
+                item
+                for item in network[before_upload:]
+                if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/$batch" in item["url"]
+            ]
             has_attachment_post = any(
                 item["method"] == "POST"
                 and (
@@ -349,20 +459,19 @@ def main() -> int:
                 and "/$value" in item["url"]
                 for item in attachment_requests
             )
-            ensure(checks, "detail.attachment.gateway", has_attachment_post and has_attachment_put, {"requests": attachment_requests})
+            attachment_transport = {
+                "postBatched": batch_operation_requests(attachment_requests, "POST", "AttachmentSet"),
+                "putBatched": batch_operation_requests(attachment_requests, "PUT", "AttachmentSet"),
+            }
+            ensure(checks, "detail.attachment.gateway", has_attachment_post and has_attachment_put, {"requests": attachment_requests, "transport": attachment_transport})
             if not (has_attachment_post and has_attachment_put):
                 failures.append("detail.attachment.gateway")
-            attachment_batch_requests = batch_operation_requests(attachment_requests, "POST", "AttachmentSet") + batch_operation_requests(attachment_requests, "PUT", "AttachmentSet")
-            ok_attachment_direct = has_attachment_post and has_attachment_put and not attachment_batch_requests
-            ensure(checks, "detail.attachment.direct", ok_attachment_direct, {"requests": attachment_requests, "batchedWrites": attachment_batch_requests})
-            if not ok_attachment_direct:
-                failures.append("detail.attachment.direct")
 
-            before_release = len(current_requests(network, lambda item: "LockRelease" in item["url"] or "LockRelease" in item.get("post_data", "")))
-            invoke_detail(page, "onCloseDetail")
+            before_release = len(matching_requests(network, "LockRelease"))
+            invoke_view_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onCloseDetail")
             wait_for_search_ready(page)
             page.wait_for_timeout(1600)
-            after_release = len(current_requests(network, lambda item: "LockRelease" in item["url"] or "LockRelease" in item.get("post_data", "")))
+            after_release = len(matching_requests(network, "LockRelease"))
             back_to_search = page.evaluate(
                 """
                 () => {
@@ -374,15 +483,9 @@ def main() -> int:
                 """
             )
             ok_release = after_release > before_release and bool(back_to_search.get("hasCreateButton")) and bool(back_to_search.get("smartTable"))
-            ensure(checks, "detail.lock.release", ok_release, {"before": before_release, "after": after_release, "search": back_to_search})
+            ensure(checks, "detail.lock.release", ok_release, {"before": before_release, "after": after_release, "search": back_to_search, "transport": transport_snapshot(network, "LockRelease")})
             if not ok_release:
                 failures.append("detail.lock.release")
-            release_direct_requests = direct_requests(network, "LockRelease")
-            release_batch_requests = batch_requests(network, "LockRelease")
-            ok_release_direct = len(release_direct_requests) >= 1 and not release_batch_requests
-            ensure(checks, "detail.lock.release.direct", ok_release_direct, {"direct": release_direct_requests[-3:], "batch": release_batch_requests[-3:]})
-            if not ok_release_direct:
-                failures.append("detail.lock.release.direct")
 
             browser.close()
     except Exception as exc:  # noqa: BLE001

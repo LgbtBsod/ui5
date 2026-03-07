@@ -155,17 +155,62 @@ sap.ui.define([
     function withDirectPut(sPath, vPayload, mOptions) {
         var oOptions = mOptions || {};
         return toPromise(function (resolve, reject) {
-            ensureModel().update(sPath, vPayload, {
-                merge: false,
-                contentType: oOptions.contentType || "application/octet-stream",
-                headers: Object.assign({
-                    "Accept": "application/json",
-                    "DataServiceVersion": "2.0",
-                    "MaxDataServiceVersion": "2.0"
-                }, oOptions.headers || {}),
-                success: function (oData) { resolve(oData || {}); },
-                error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
+            var oModel = ensureModel();
+            var xhr = new XMLHttpRequest();
+            var sBaseUrl = serviceUrl();
+            var sResolvedUrl = sBaseUrl + sPath;
+            var mModelHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
+            var sCsrfToken = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
+            var mHeaders;
+
+            delete mModelHeaders["content-type"];
+            delete mModelHeaders["Content-Type"];
+            mHeaders = Object.assign({
+                "Accept": "application/json",
+                "DataServiceVersion": "2.0",
+                "MaxDataServiceVersion": "2.0",
+                "Content-Type": oOptions.contentType || "application/octet-stream"
+            }, mModelHeaders, oOptions.headers || {});
+            if (sCsrfToken) {
+                mHeaders["X-CSRF-Token"] = sCsrfToken;
+            }
+
+            if (typeof window !== "undefined" && /^\/(?!\/)/.test(sResolvedUrl)) {
+                sResolvedUrl = window.location.origin + sResolvedUrl;
+            }
+
+            xhr.open("PUT", sResolvedUrl, true);
+            xhr.withCredentials = true;
+            Object.keys(mHeaders).forEach(function (sName) {
+                var vValue = mHeaders[sName];
+                if (vValue === undefined || vValue === null || vValue === "") {
+                    return;
+                }
+                xhr.setRequestHeader(sName, String(vValue));
             });
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve({});
+                    return;
+                }
+                reject(GatewayErrorNormalizer.normalizeError({
+                    status: xhr.status,
+                    statusCode: xhr.status,
+                    message: xhr.statusText || "Gateway stream upload failed",
+                    responseText: xhr.responseText || "",
+                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
+                }));
+            };
+            xhr.onerror = function () {
+                reject(GatewayErrorNormalizer.normalizeError({
+                    status: xhr.status || 0,
+                    statusCode: xhr.status || 0,
+                    message: xhr.statusText || "Gateway stream upload failed",
+                    responseText: xhr.responseText || "",
+                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
+                }));
+            };
+            xhr.send(vPayload || null);
         });
     }
     return {

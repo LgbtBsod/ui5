@@ -45,13 +45,15 @@ sap.ui.define([
 
         _onDetailMatched: function (oEvent) {
             var mArgs = oEvent.getParameter("arguments") || {};
+            var sRouteName = String((oEvent.getParameter("name") || (mArgs.layout ? "detailLayout" : "detail")) || "detail").trim() || "detail";
             var sId = mArgs.id;
             var sLayoutArg = String(mArgs.layout || "").toLowerCase();
             var bCreate = CreateSentinel.isCreateId(sId);
             var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? "MidColumnFullScreen" : "TwoColumnsMidExpanded";
             var mStatePatch = {
                 "/activeObjectId": bCreate ? CreateSentinel.VALUE : sId,
-                "/selectedId": bCreate ? CreateSentinel.VALUE : sId
+                "/selectedId": bCreate ? CreateSentinel.VALUE : sId,
+                "/currentRouteName": sRouteName
             };
             var mViewPatch = {
                 "/detailSkeletonBusy": !bCreate,
@@ -101,7 +103,25 @@ sap.ui.define([
                 return;
             }
             ControllerModelWriteSupport.set(this, "state", "/activeObjectId", sId);
-            DetailCommandPolicy.open(this, { id: sId, rootId: sId });
+            DetailCommandPolicy.open(this, { id: sId, rootId: sId }).then(function (oResult) {
+                var oAccessState;
+                if (!oResult || oResult.ok !== false || !oResult.error || oResult.error.code !== "NO_VIEW_PERMISSION") {
+                    return oResult;
+                }
+                oAccessState = ControllerModelWriteSupport.get(this, "view", "/accessState", {}) || {};
+                ControllerModelWriteSupport.set(this, "state", "/detailAccessGuard", {
+                    rootId: String(oAccessState.rootId || sId || "").trim(),
+                    userId: String(oAccessState.userId || "").trim(),
+                    canView: false,
+                    canEdit: !!oAccessState.canEdit,
+                    canDelete: !!oAccessState.canDelete,
+                    reasonCode: String(oAccessState.reasonCode || "NO_VIEW_PERMISSION").trim(),
+                    message: String(oAccessState.message || "").trim(),
+                    checkedAt: new Date().toISOString()
+                });
+                this.getRouter().navTo("accessDenied", { id: sId }, false);
+                return oResult;
+            }.bind(this));
         },
 
         _currentRootId: function () {

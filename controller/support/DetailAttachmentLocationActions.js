@@ -28,6 +28,24 @@ sap.ui.define([
             }.bind(this));
         },
 
+        onToggleAttachmentsSection: function () {
+            var bExpanded = !!ControllerModelWriteSupport.get(this, "view", "/attachmentsExpanded", false);
+            var bLoaded = !!ControllerModelWriteSupport.get(this, "view", "/attachmentsLoaded", false);
+            if (bExpanded) {
+                ControllerModelWriteSupport.set(this, "view", "/attachmentsExpanded", false);
+                AttachmentUploadSupport.unbindDropZone(this);
+                return Promise.resolve({ collapsed: true });
+            }
+            ControllerModelWriteSupport.set(this, "view", "/attachmentsExpanded", true);
+            this._scheduleAttachmentDropZoneBind();
+            if (bLoaded) {
+                return Promise.resolve({ expanded: true, loaded: true });
+            }
+            ControllerModelWriteSupport.set(this, "view", "/attachmentBusy", true);
+            return DetailCommandPolicy.attachmentLoad(this, {
+                rootId: this._currentRootId()
+            });
+        },
         onOpenWorkflowAnalytics: function () {
             WorkspaceRouteNavigation.navigateToAnalytics(this);
             return Promise.resolve();

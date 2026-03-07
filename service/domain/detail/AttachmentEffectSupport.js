@@ -7,19 +7,25 @@ sap.ui.define([
         return [Effects.modelPatch("view", "/attachmentBusy", false)];
     }
 
-    function buildAttachmentSyncEffects(aAttachments, sToastKey, sToastLevel) {
+    function buildAttachmentLoadEffects(aAttachments, sToastKey, sToastLevel) {
         var aSafeAttachments = Array.isArray(aAttachments) ? aAttachments : [];
-        return [
+        var aEffects = [
             Effects.modelPatch("selected", "/attachments", aSafeAttachments),
-            Effects.modelPatch("uiState", "/_detailCurrent/attachments", aSafeAttachments),
-            Effects.modelPatch("uiState", "/_detailSnapshot/attachments", aSafeAttachments)
-        ].concat(buildAttachmentBusyResetEffects(), [
-            Effects.toast(sToastKey || "attachmentUpdated", sToastLevel || "info")
-        ]);
+            Effects.modelPatch("view", "/attachmentsLoaded", true)
+        ].concat(buildAttachmentBusyResetEffects());
+        if (sToastKey) {
+            aEffects.push(Effects.toast(sToastKey, sToastLevel || "info"));
+        }
+        return aEffects;
+    }
+
+    function buildAttachmentSyncEffects(aAttachments, sToastKey, sToastLevel) {
+        return buildAttachmentLoadEffects(aAttachments, sToastKey, sToastLevel);
     }
 
     return {
         buildAttachmentBusyResetEffects: buildAttachmentBusyResetEffects,
+        buildAttachmentLoadEffects: buildAttachmentLoadEffects,
         buildAttachmentSyncEffects: buildAttachmentSyncEffects
     };
 });

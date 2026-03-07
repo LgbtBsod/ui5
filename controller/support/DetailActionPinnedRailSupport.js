@@ -1,8 +1,12 @@
 sap.ui.define([], function () {
     "use strict";
 
+    function resolveStickyHost(oController) {
+        return (oController.byId && (oController.byId("detailControlPinnedDock") || oController.byId("detailControlStickyHost"))) || null;
+    }
+
     function clearPinnedClasses(oController) {
-        var oStickyHost = oController.byId && oController.byId("detailControlStickyHost");
+        var oStickyHost = resolveStickyHost(oController);
         var oHostDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
         var oCardDom = oHostDom && oHostDom.querySelector ? oHostDom.querySelector(".detailControlExperienceCard") : null;
         if (!oHostDom) {

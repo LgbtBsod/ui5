@@ -44,7 +44,7 @@
 
             <VBox
                 id="detailControlPinnedDock"
-                class="detailControlPinnedDock"
+                class="detailControlPinnedDock detailControlStickyBlock"
                 renderType="Bare"
                 width="100%"
                 visible="{= !${view>/accessState/denied} &amp;&amp; !${view>/detailSkeletonBusy} }">
