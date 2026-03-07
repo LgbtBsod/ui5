@@ -54,7 +54,10 @@ sap.ui.define([
             mToastTimeline[sToastKey] = iNow;
         }
         if (sText) {
-            MessageToast.show(String(sText), { className: TOAST_CLASS });
+            MessageToast.show(String(sText), {
+                className: TOAST_CLASS,
+                duration: 3000
+            });
         }
     }
     function banner(oController, oEffect, oOptions) {

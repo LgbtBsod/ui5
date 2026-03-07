@@ -221,6 +221,8 @@ sap.ui.define([
             "themeLifestyleClarity",
             "themeLifestyleNightOps",
             "platformCupertinoGlass",
+            "platformPrecisionEnterprise",
+            "platformCalmModern",
             "themeHorizonMorning",
             "themeHorizonNight"
         );

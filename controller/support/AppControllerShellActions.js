@@ -80,6 +80,9 @@ sap.ui.define([
             var oSearchView = this.byId("searchPaneHost");
             var oSearchController = oSearchView && oSearchView.getController && oSearchView.getController();
             if (!oSearchController || typeof oSearchController.onOpenWorkflowAnalytics !== "function") {
+                if (typeof this.showI18nToast === "function") {
+                    this.showI18nToast("analyticsUnavailableToast");
+                }
                 return Promise.resolve();
             }
             return oSearchController.onOpenWorkflowAnalytics(oEvent);

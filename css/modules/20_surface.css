@@ -15,11 +15,19 @@
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.52)) saturate(108%);
 }
 
-body.rnvAppRoot.platformCupertinoGlass .glassCard,
-body.rnvAppRoot.platformCupertinoGlass .detailSectionCard,
-body.rnvAppRoot.platformCupertinoGlass .detailControlInlineCard,
-body.rnvAppRoot.platformCupertinoGlass .infoCardTile {
+body.rnvAppRoot.platformPrecisionEnterprise .glassCard,
+body.rnvAppRoot.platformPrecisionEnterprise .detailSectionCard,
+body.rnvAppRoot.platformPrecisionEnterprise .detailControlInlineCard,
+body.rnvAppRoot.platformPrecisionEnterprise .infoCardTile {
   box-shadow: none;
+}
+
+body.rnvAppRoot.platformCalmModern .glassCard,
+body.rnvAppRoot.platformCalmModern .detailSectionCard,
+body.rnvAppRoot.platformCalmModern .detailControlInlineCard,
+body.rnvAppRoot.platformCalmModern .infoCardTile,
+body.rnvAppRoot.platformCalmModern .rnvStack {
+  box-shadow: var(--shadow-soft);
 }
 
 .glassCard::before,

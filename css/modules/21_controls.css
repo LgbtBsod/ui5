@@ -82,6 +82,39 @@
   opacity: 0.5;
 }
 
+.rnvApp .themeDockSwitchIconSun::before {
+  content: "";
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentcolor;
+  box-shadow:
+    0 -0.35rem 0 0.1rem currentcolor,
+    0 0.35rem 0 0.1rem currentcolor,
+    -0.35rem 0 0 0.1rem currentcolor,
+    0.35rem 0 0 0.1rem currentcolor,
+    -0.25rem -0.25rem 0 0.1rem currentcolor,
+    0.25rem -0.25rem 0 0.1rem currentcolor,
+    -0.25rem 0.25rem 0 0.1rem currentcolor,
+    0.25rem 0.25rem 0 0.1rem currentcolor;
+  opacity: 0.72;
+  transform: scale(0.55);
+  transform-origin: center;
+}
+
+.rnvApp .themeDockSwitchIconMoon::before {
+  content: "";
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset -0.15rem -0.05rem 0 0 currentcolor;
+  opacity: 0.72;
+  transform: rotate(-30deg);
+}
+
 .rnvApp .themeDockSwitch.isDark .themeDockSwitchTrack {
   background: var(--theme-toggle-track-bg);
 }
@@ -109,6 +142,19 @@
 }
 
 .rnvApp .themeDockSwitch.isDark .themeDockSwitchIconMoon {
+  opacity: 1;
+}
+
+.rnvApp .themeDockSwitch:not(.isDark) .themeDockSwitchIconSun::before {
+  opacity: 1;
+}
+
+.rnvApp .themeDockSwitch:not(.isDark) .themeDockSwitchIconMoon::before,
+.rnvApp .themeDockSwitch.isDark .themeDockSwitchIconSun::before {
+  opacity: 0.3;
+}
+
+.rnvApp .themeDockSwitch.isDark .themeDockSwitchIconMoon::before {
   opacity: 1;
 }
 

@@ -54,7 +54,7 @@ function renderStyleSystemAuditMarkdown(report) {
           ['Horizon Morning default', report.contracts.horizonMorningDefault],
           ['Horizon Night supported', report.contracts.horizonNightSupported],
           ['Morning/Night CSS modes', report.contracts.morningNightModes],
-          ['Cupertino bridge present', report.contracts.cupertinoBridge],
+          ['Platform philosophy bridge present', report.contracts.platformPhilosophyBridge],
           ['Glass surface language present', report.contracts.glassSurfaceLanguage]
         ])
       },

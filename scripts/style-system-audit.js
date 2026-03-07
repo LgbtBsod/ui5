@@ -47,7 +47,7 @@ function analyze() {
       coverage[key] += countMatches(text, controlSelectors[key]);
     });
     backdropUsage += countMatches(text, /backdrop-filter\s*:/g);
-    glassUsage += countMatches(text, /glass(Card|Dialog|Table|Filter)|platformCupertinoGlass/g);
+    glassUsage += countMatches(text, /glass(Card|Dialog|Table|Filter)|platformPrecisionEnterprise|platformCalmModern/g);
   });
 
   const duplicates = [...variableMap.entries()]
@@ -65,7 +65,10 @@ function analyze() {
     horizonMorningDefault: /data-sap-ui-theme="sap_horizon"/.test(indexHtml),
     horizonNightSupported: (/sap_horizon_dark/.test(themeMixin) || /sap_horizon_dark/.test(themeService)) && /sap_horizon_dark/.test(themePhilosophy),
     morningNightModes: /:root\.light-mode/.test(styleCss) && /body\.appDark/.test(styleCss),
-    cupertinoBridge: /platformCupertinoGlass/.test(styleCss) && /platformCupertinoGlass/.test(themePhilosophy),
+    platformPhilosophyBridge: /platformPrecisionEnterprise/.test(styleCss) &&
+      /platformCalmModern/.test(styleCss) &&
+      /platformPrecisionEnterprise/.test(themePhilosophy) &&
+      /platformCalmModern/.test(themePhilosophy),
     glassSurfaceLanguage: backdropUsage > 0 && glassUsage > 0
   };
 
@@ -76,7 +79,7 @@ function analyze() {
       - (contracts.horizonMorningDefault ? 0 : 20)
       - (contracts.horizonNightSupported ? 0 : 20)
       - (contracts.morningNightModes ? 0 : 15)
-      - (contracts.cupertinoBridge ? 0 : 12)
+      - (contracts.platformPhilosophyBridge ? 0 : 12)
       - (contracts.glassSurfaceLanguage ? 0 : 10)
   );
 

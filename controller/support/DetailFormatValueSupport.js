@@ -48,6 +48,30 @@ sap.ui.define([
         return aParts.join("\n");
     }
 
+    function formatAutosaveTime(vValue) {
+        var oDate = parseDateLike(vValue);
+        var sLanguageTag = "";
+        if (!oDate) {
+            return vValue || "-";
+        }
+        try {
+            sLanguageTag = sap.ui.getCore().getConfiguration().getLanguageTag().toString();
+        } catch (oError) {
+            sLanguageTag = "";
+        }
+        try {
+            return oDate.toLocaleTimeString(sLanguageTag || undefined, {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        } catch (oLocaleError) {
+            return oDate.toLocaleTimeString(undefined, {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+    }
+
     return {
         formatPassedTotal: function (aRows) {
             if (!Array.isArray(aRows) || !aRows.length) {
@@ -101,7 +125,7 @@ sap.ui.define([
         },
 
         formatAutosaveAt: function (sAutosaveAt) {
-            return sAutosaveAt || "-";
+            return formatAutosaveTime(sAutosaveAt);
         },
 
         formatCopyLinkVisible: function (sActiveObjectId) {

@@ -3,8 +3,8 @@ sap.ui.define([
 ], function (Control) {
     "use strict";
 
-    var sSunContent = "\u2600";
-    var sMoonContent = "\u263D";
+    var sSunContent = "";
+    var sMoonContent = "";
 
     return Control.extend("sap_ui5.control.ThemeToggle", {
         metadata: {

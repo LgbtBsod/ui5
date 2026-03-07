@@ -31,8 +31,8 @@ if (!/sap_horizon_dark/.test(themeService) || !/sap_horizon_dark/.test(themePhil
 if (!/:root\.light-mode/.test(styleCss) || !/body\.appDark/.test(styleCss)) {
   fail('css/style.css must expose both Morning/Night token modes.');
 }
-if (!/platformCupertinoGlass/.test(styleCss) || !/platformCupertinoGlass/.test(themePhilosophy)) {
-  fail('Cupertino/macOS bridge contract is missing.');
+if (!/platformPrecisionEnterprise/.test(styleCss) || !/platformCalmModern/.test(styleCss) || !/platformPrecisionEnterprise/.test(themePhilosophy) || !/platformCalmModern/.test(themePhilosophy)) {
+  fail('Theme philosophy bridge is missing distinct platform contracts.');
 }
 if (!/\.sapMSwt\b/.test(styleCss) || !/\.sapMInputBaseContentWrapper\b/.test(styleCss) || !/\.sapMDialog\b/.test(styleCss)) {
   fail('Core control styling coverage missing for switch/input/dialog.');

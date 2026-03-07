@@ -8,7 +8,7 @@
     xmlns:cc="sap_ui5.control"
     xmlns:f="sap.f">
 
-    <html:div class="bg-blobs"></html:div>
+    <html:div class="bg-blobs" aria-hidden="true"></html:div>
     <html:div id="detailRailViewportLayer" class="detailRailViewportLayer" aria-hidden="true"></html:div>
 
     <VBox class="rnvSkin appShell appLayoutSingle" fitContainer="true" width="100%">

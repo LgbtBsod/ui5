@@ -1,28 +1,29 @@
 sap.ui.define([], function () {
   "use strict";
 
+  // Each runtime theme maps to an explicit platform philosophy class.
   var THEMES = {
     sap_fiori_3: {
       lifestyleClass: "themeLifestyleClarity",
-      platformClass: "platformCupertinoGlass",
+      platformClass: "platformPrecisionEnterprise",
       horizonClass: "themeHorizonMorning",
       designLanguage: "sap-fiori-3"
     },
     sap_fiori_3_dark: {
       lifestyleClass: "themeLifestyleNightOps",
-      platformClass: "platformCupertinoGlass",
+      platformClass: "platformCalmModern",
       horizonClass: "themeHorizonNight",
       designLanguage: "sap-fiori-3-dark"
     },
     sap_horizon: {
       lifestyleClass: "themeLifestyleClarity",
-      platformClass: "platformCupertinoGlass",
+      platformClass: "platformPrecisionEnterprise",
       horizonClass: "themeHorizonMorning",
       designLanguage: "sap-horizon-morning"
     },
     sap_horizon_dark: {
       lifestyleClass: "themeLifestyleNightOps",
-      platformClass: "platformCupertinoGlass",
+      platformClass: "platformCalmModern",
       horizonClass: "themeHorizonNight",
       designLanguage: "sap-horizon-night"
     }
