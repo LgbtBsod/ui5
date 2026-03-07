@@ -5,9 +5,10 @@ sap.ui.define([
     "checklist/app/controller/support/DetailActionConstants",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/support/DetailInfoCardLayoutSupport",
+    "checklist/app/service/framework/FeedbackCoordinator",
     "checklist/app/util/CreateSentinel",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, CreateSentinel, ControllerModelWriteSupport) {
+], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -30,13 +31,7 @@ sap.ui.define([
         },
 
         _showToast: function (sTextKey) {
-            return this.applyUseCaseEffects({
-                effects: [{
-                    type: "toast",
-                    textKey: sTextKey,
-                    level: "info"
-                }]
-            });
+            return FeedbackCoordinator.showToast(this, sTextKey, [], "info");
         },
 
         _applyLayoutState: function (sLayout, mOptions) {

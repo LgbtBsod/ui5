@@ -2,87 +2,39 @@ sap.ui.define([
     "checklist/app/controller/support/AttachmentUploadSupport",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/support/DetailPersonInputSupport",
-    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, WorkspaceRouteNavigation, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/AttachmentFlowService",
+    "checklist/app/service/framework/NavigationIntentService"
+], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, NavigationIntentService) {
     "use strict";
 
     return {
         onAttachmentUploadChange: function (oEvent) {
-            AttachmentUploadSupport.onUploaderChange(this, oEvent);
+            return AttachmentFlowService.onUploaderChange(this, oEvent, {
+                onUploaderChange: AttachmentUploadSupport.onUploaderChange
+            });
         },
 
         onDeleteAttachment: function (oEvent) {
-            var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext("selected");
-            var oRow = oCtx && oCtx.getObject && oCtx.getObject();
-            var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
-            if (!sAttachmentId) {
-                return;
-            }
-            return ControllerModelWriteSupport.withFlag(this, "view", "/attachmentBusy", function () {
-                return DetailCommandPolicy.attachmentDelete(this, {
-                    rootId: this._currentRootId(),
-                    attachmentId: sAttachmentId,
-                    attachment: oRow || null
-                });
-            }.bind(this));
+            return AttachmentFlowService.deleteAttachment(this, oEvent);
         },
 
         onToggleAttachmentsSection: function () {
-            var bExpanded = !!ControllerModelWriteSupport.get(this, "view", "/attachmentsExpanded", false);
-            var bLoaded = !!ControllerModelWriteSupport.get(this, "view", "/attachmentsLoaded", false);
-            if (bExpanded) {
-                ControllerModelWriteSupport.set(this, "view", "/attachmentsExpanded", false);
-                AttachmentUploadSupport.unbindDropZone(this);
-                return Promise.resolve({ collapsed: true });
-            }
-            ControllerModelWriteSupport.set(this, "view", "/attachmentsExpanded", true);
-            this._scheduleAttachmentDropZoneBind();
-            if (bLoaded) {
-                return Promise.resolve({ expanded: true, loaded: true });
-            }
-            ControllerModelWriteSupport.set(this, "view", "/attachmentBusy", true);
-            return DetailCommandPolicy.attachmentLoad(this, {
-                rootId: this._currentRootId()
+            return AttachmentFlowService.toggleHistory(this, {
+                bindDropZone: function (oController) {
+                    if (oController && typeof oController._scheduleAttachmentDropZoneBind === "function") {
+                        oController._scheduleAttachmentDropZoneBind();
+                    }
+                },
+                unbindDropZone: AttachmentUploadSupport.unbindDropZone
             });
         },
         onOpenWorkflowAnalytics: function () {
-            WorkspaceRouteNavigation.navigateToAnalytics(this);
+            NavigationIntentService.navigateToAnalytics(this);
             return Promise.resolve();
         },
 
         onOpenAttachment: function (oEvent) {
-            var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext("selected");
-            var oRow = oCtx && oCtx.getObject && oCtx.getObject();
-            var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
-            var sLocalObjectUrl = String((oRow && oRow.localObjectUrl) || "").trim();
-            var oMainService = this.getModel("mainService");
-            var sBaseUrl = String((oMainService && oMainService.sServiceUrl) || "").replace(/\/+$/, "");
-            var sFileName = String((oRow && oRow.FileName) || "attachment").trim() || "attachment";
-            var oLink;
-            var sHref;
-            function triggerDownload(sUrl) {
-                if (!sUrl) {
-                    return;
-                }
-                oLink = document.createElement("a");
-                oLink.href = sUrl;
-                oLink.download = sFileName;
-                oLink.rel = "noopener";
-                oLink.style.display = "none";
-                document.body.appendChild(oLink);
-                oLink.click();
-                document.body.removeChild(oLink);
-            }
-            if (sLocalObjectUrl) {
-                triggerDownload(sLocalObjectUrl);
-                return;
-            }
-            if (!sAttachmentId || !sBaseUrl) {
-                return;
-            }
-            sHref = sBaseUrl + "/AttachmentSet(Key='" + sAttachmentId + "')/$value";
-            triggerDownload(sHref);
+            return AttachmentFlowService.openAttachment(this, oEvent);
         },
 
         onOpenLocationValueHelp: function (oEvent) {

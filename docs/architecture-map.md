@@ -22,10 +22,7 @@ Generated from runtime root: `app`.
 - `controller/base/ControllerTextRuntime.js`
   - imports: (none)
 - `controller/base/EffectMixin.js`
-  - `checklist/app/service/framework/EffectApplier` -> `service/framework/EffectApplier` [Util]
-  - `checklist/app/service/framework/EffectUiHandlers` -> `service/framework/EffectUiHandlers` [Util]
-  - `checklist/app/service/framework/FeedbackBannerRuntime` -> `service/framework/FeedbackBannerRuntime` [Util]
-  - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
+  - `checklist/app/service/framework/FeedbackCoordinator` -> `service/framework/FeedbackCoordinator` [Util]
 - `controller/base/ModelAccessMixin.js`
   - `checklist/app/service/domain/shared/LockFacade` -> `service/domain/shared/LockFacade` [Usecases]
 - `controller/base/RouterMixin.js`
@@ -52,7 +49,7 @@ Generated from runtime root: `app`.
   - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
   - `checklist/app/service/domain/analytics/AnalyticsFacade` -> `service/domain/analytics/AnalyticsFacade` [Usecases]
   - `checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer` -> `service/domain/analytics/AnalyticsPayloadNormalizer` [Usecases]
-  - `checklist/app/infra/navigation/WorkspaceRouteNavigation` -> `infra/navigation/WorkspaceRouteNavigation` [Infra]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/AppControllerActions.js`
   - `checklist/app/controller/support/AppControllerLifecycleActions` -> `controller/support/AppControllerLifecycleActions` [Controllers]
@@ -82,7 +79,7 @@ Generated from runtime root: `app`.
   - `checklist/app/service/framework/SecurityTokenRefresh` -> `service/framework/SecurityTokenRefresh` [Util]
   - `checklist/app/service/framework/AppShellCoordinator` -> `service/framework/AppShellCoordinator` [Util]
   - `checklist/app/controller/support/AppShellUserRefreshSupport` -> `controller/support/AppShellUserRefreshSupport` [Controllers]
-  - `checklist/app/infra/navigation/WorkspaceRouteNavigation` -> `infra/navigation/WorkspaceRouteNavigation` [Infra]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/AppControllerStateActions.js`
@@ -138,8 +135,8 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/AttachmentUploadSupport` -> `controller/support/AttachmentUploadSupport` [Controllers]
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
   - `checklist/app/controller/support/DetailPersonInputSupport` -> `controller/support/DetailPersonInputSupport` [Controllers]
-  - `checklist/app/infra/navigation/WorkspaceRouteNavigation` -> `infra/navigation/WorkspaceRouteNavigation` [Infra]
-  - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
+  - `checklist/app/service/framework/AttachmentFlowService` -> `service/framework/AttachmentFlowService` [Util]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
 - `controller/support/DetailChecklistCoreSupport.js`
   - `checklist/app/controller/support/DetailDialogSupport` -> `controller/support/DetailDialogSupport` [Controllers]
   - `checklist/app/controller/support/DetailViewSupport` -> `controller/support/DetailViewSupport` [Controllers]
@@ -147,6 +144,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailActionConstants` -> `controller/support/DetailActionConstants` [Controllers]
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
   - `checklist/app/controller/support/DetailInfoCardLayoutSupport` -> `controller/support/DetailInfoCardLayoutSupport` [Controllers]
+  - `checklist/app/service/framework/FeedbackCoordinator` -> `service/framework/FeedbackCoordinator` [Util]
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailChecklistRowActions.js`
@@ -154,7 +152,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
   - `checklist/app/controller/support/DetailInfoCardLayoutSupport` -> `controller/support/DetailInfoCardLayoutSupport` [Controllers]
 - `controller/support/DetailChecklistStateActions.js`
-  - `checklist/app/service/framework/EffectApplier` -> `service/framework/EffectApplier` [Util]
+  - `checklist/app/service/framework/LockSaveFlowOrchestrator` -> `service/framework/LockSaveFlowOrchestrator` [Util]
   - `checklist/app/controller/support/DetailActionConstants` -> `controller/support/DetailActionConstants` [Controllers]
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
   - `checklist/app/service/framework/ClipboardRuntime` -> `service/framework/ClipboardRuntime` [Util]
@@ -186,7 +184,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailInfoCardLayoutSupport` -> `controller/support/DetailInfoCardLayoutSupport` [Controllers]
 - `controller/support/DetailDialogSupport.js`
   - `checklist/app/service/framework/DraftChecklistFactory` -> `service/framework/DraftChecklistFactory` [Util]
-  - `checklist/app/service/framework/LazyDialogRuntime` -> `service/framework/LazyDialogRuntime` [Util]
+  - `checklist/app/service/framework/DialogOrchestrator` -> `service/framework/DialogOrchestrator` [Util]
 - `controller/support/DetailFormatters.js`
   - `checklist/app/controller/support/DetailFormatTextSupport` -> `controller/support/DetailFormatTextSupport` [Controllers]
   - `checklist/app/controller/support/DetailFormatValueSupport` -> `controller/support/DetailFormatValueSupport` [Controllers]
@@ -259,8 +257,8 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/SearchCommandPolicy` -> `controller/support/SearchCommandPolicy` [Controllers]
   - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
   - `checklist/app/service/framework/ControlStyleRuntime` -> `service/framework/ControlStyleRuntime` [Util]
-  - `checklist/app/service/framework/LazyDialogRuntime` -> `service/framework/LazyDialogRuntime` [Util]
-  - `checklist/app/infra/navigation/WorkspaceRouteNavigation` -> `infra/navigation/WorkspaceRouteNavigation` [Infra]
+  - `checklist/app/service/framework/DialogOrchestrator` -> `service/framework/DialogOrchestrator` [Util]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
 
 ## Facades -> (imported modules)

@@ -9,10 +9,10 @@ sap.ui.define([
     "checklist/app/service/framework/SecurityTokenRefresh",
     "checklist/app/service/framework/AppShellCoordinator",
     "checklist/app/controller/support/AppShellUserRefreshSupport",
-    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
+    "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/util/CreateSentinel",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, WorkspaceRouteNavigation, CreateSentinel, ControllerModelWriteSupport) {
+], function (AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, NavigationIntentService, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var getText = AppShellTextSupport.getText;
@@ -68,7 +68,7 @@ sap.ui.define([
         },
 
         onOpenShellAnalytics: function (oEvent) {
-            WorkspaceRouteNavigation.navigateToAnalytics(this);
+            NavigationIntentService.navigateToAnalytics(this);
             return Promise.resolve();
         },
 

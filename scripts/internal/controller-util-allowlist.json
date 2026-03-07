@@ -18,9 +18,12 @@
   "service/framework/CtxFactory",
   "service/framework/DraftChecklistFactory",
   "service/framework/ActionContract",
+  "service/framework/AttachmentFlowService",
   "service/framework/FacadeCommandContract",
   "service/framework/EffectApplier",
   "service/framework/EffectActionRouting",
+  "service/framework/DialogOrchestrator",
+  "service/framework/FeedbackCoordinator",
   "service/framework/EffectUiHandlers",
   "service/framework/EffectDialogRuntime",
   "service/framework/FeedbackBannerRuntime",
@@ -28,6 +31,8 @@
   "service/framework/FocusRuntime",
   "service/framework/LayoutPersonalizationRuntime",
   "service/framework/LazyDialogRuntime",
+  "service/framework/LockSaveFlowOrchestrator",
+  "service/framework/NavigationIntentService",
   "service/framework/SecurityTokenRefresh",
   "service/framework/ThemeRuntime"
 ]

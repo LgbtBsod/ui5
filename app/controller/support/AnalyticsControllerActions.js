@@ -3,9 +3,9 @@ sap.ui.define([
     "checklist/app/service/framework/CtxFactory",
     "checklist/app/service/domain/analytics/AnalyticsFacade",
     "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer",
-    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
+    "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (JSONModel, CtxFactory, AnalyticsFacade, AnalyticsPayloadNormalizer, WorkspaceRouteNavigation, ControllerModelWriteSupport) {
+], function (JSONModel, CtxFactory, AnalyticsFacade, AnalyticsPayloadNormalizer, NavigationIntentService, ControllerModelWriteSupport) {
     "use strict";
 
     function buildInitialViewState() {
@@ -55,7 +55,7 @@ sap.ui.define([
         },
 
         onCloseAnalytics: function () {
-            WorkspaceRouteNavigation.navigateBackFromAnalytics(this);
+            NavigationIntentService.navigateBackFromAnalytics(this);
         }
     };
 });

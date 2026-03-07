@@ -1,7 +1,7 @@
 sap.ui.define([
     "checklist/app/service/framework/DraftChecklistFactory",
-    "checklist/app/service/framework/LazyDialogRuntime"
-], function (DraftChecklistFactory, LazyDialogRuntime) {
+    "checklist/app/service/framework/DialogOrchestrator"
+], function (DraftChecklistFactory, DialogOrchestrator) {
     "use strict";
 
     var EFFECT_DIALOG_FRAGMENTS = {
@@ -11,7 +11,7 @@ sap.ui.define([
     };
 
     function loadDialog(oController, sKey, sName) {
-        return LazyDialogRuntime.ensureDialog(oController, sKey, {
+        return DialogOrchestrator.ensure(oController, sKey, {
             fragmentName: sName,
             afterClose: function (_oDialog, oCtrl, sDialogKey) {
                 if (oCtrl && typeof oCtrl._restoreDialogFocus === "function") {

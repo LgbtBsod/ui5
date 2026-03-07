@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/NavigationIntentService"
+], function (NavigationIntentService) {
     "use strict";
 
     function createBundleText(component) {
@@ -29,26 +31,15 @@ sap.ui.define([], function () {
     }
 
     function queuePendingNavigationIntent(oStateModel, StatePaths, oRouteEvent) {
-        oStateModel.setProperty(StatePaths.PENDING_NAVIGATION_INTENT, {
-            routeName: oRouteEvent && oRouteEvent.getParameter && oRouteEvent.getParameter("name"),
-            routeArgs: (oRouteEvent && oRouteEvent.getParameter && oRouteEvent.getParameter("arguments")) || {},
-            queuedAt: new Date().toISOString()
-        });
+        NavigationIntentService.queuePendingIntent(oStateModel, StatePaths, oRouteEvent);
     }
 
     function clearPendingNavigationIntent(oStateModel, StatePaths) {
-        oStateModel.setProperty(StatePaths.PENDING_NAVIGATION_INTENT, null);
+        NavigationIntentService.clearPendingIntent(oStateModel, StatePaths);
     }
 
     function resumePendingNavigationIntent(component, oStateModel, StatePaths) {
-        var oIntent = oStateModel.getProperty(StatePaths.PENDING_NAVIGATION_INTENT);
-        if (!oIntent || !oIntent.routeName) {
-            return false;
-        }
-        clearPendingNavigationIntent(oStateModel, StatePaths);
-        oStateModel.setProperty("/navGuardBypass", true);
-        component.getRouter().navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
-        return true;
+        return NavigationIntentService.resumePendingIntent(component, oStateModel, StatePaths);
     }
 
     return {

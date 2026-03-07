@@ -6,10 +6,10 @@
     "checklist/app/controller/support/SearchCommandPolicy",
     "checklist/app/service/framework/FocusRuntime",
     "checklist/app/service/framework/ControlStyleRuntime",
-    "checklist/app/service/framework/LazyDialogRuntime",
-    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
+    "checklist/app/service/framework/DialogOrchestrator",
+    "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/controller/base/ControllerTextRuntime"
-], function (SearchControllerSupport, ControllerModelWriteSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, LazyDialogRuntime, WorkspaceRouteNavigation, ControllerTextRuntime) {
+], function (SearchControllerSupport, ControllerModelWriteSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, DialogOrchestrator, NavigationIntentService, ControllerTextRuntime) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = {
@@ -625,7 +625,7 @@
     }
 
     function getWorkflowAnalyticsDialog(oController) {
-        return LazyDialogRuntime.ensureDialog(oController, "workflowAnalytics", {
+        return DialogOrchestrator.ensure(oController, "workflowAnalytics", {
             fragmentName: "checklist.app.view.fragment.WorkflowAnalyticsDialog",
             afterOpen: function (oDialog, oCtrl) {
                 if (oDialog && oDialog.data && !oDialog.data("workflowAnalyticsFocusBound")) {
@@ -1235,13 +1235,13 @@
 
     function openWorkflowAnalytics(oController) {
         oController._bWorkflowAnalyticsOpenRequested = false;
-        WorkspaceRouteNavigation.navigateToAnalytics(oController);
+        NavigationIntentService.navigateToAnalytics(oController);
         return Promise.resolve();
     }
 
     function closeWorkflowAnalytics(oController) {
         oController._bWorkflowAnalyticsOpenRequested = false;
-        WorkspaceRouteNavigation.navigateBackFromAnalytics(oController);
+        NavigationIntentService.navigateBackFromAnalytics(oController);
     }
 
     function runExport(oController, sEntity) {

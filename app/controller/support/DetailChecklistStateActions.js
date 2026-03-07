@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/service/framework/EffectApplier",
+    "checklist/app/service/framework/LockSaveFlowOrchestrator",
     "checklist/app/controller/support/DetailActionConstants",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/service/framework/ClipboardRuntime",
     "checklist/app/util/CreateSentinel",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (EffectApplier, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, CreateSentinel, ControllerModelWriteSupport) {
+], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -27,68 +27,25 @@ sap.ui.define([
 
     return {
         onToggleEdit: function (oEvent) {
-            return DetailCommandPolicy.enterEdit(this, { state: !!oEvent.getParameter("state"), rootId: this._currentRootId() }).finally(function () {
-                this._scheduleAttachmentDropZoneBind();
-            }.bind(this));
+            return LockSaveFlowOrchestrator.toggleEdit(this, oEvent);
         },
 
         onSaveDetail: function () {
-            var mBusyStart = {};
-            if (ControllerModelWriteSupport.get(this, "state", "/isBusy") ||
-                ControllerModelWriteSupport.get(this, "state", STATE_PATHS.SAVE_IN_FLIGHT)) {
-                return Promise.resolve(false);
-            }
-            mBusyStart[STATE_PATHS.SAVE_IN_FLIGHT] = true;
-            mBusyStart["/isBusy"] = true;
-            ControllerModelWriteSupport.setMany(this, "state", mBusyStart);
-            return DetailCommandPolicy.save(this, { rootId: this._currentRootId() }).finally(function () {
-                ControllerModelWriteSupport.set(this, "state", STATE_PATHS.SAVE_IN_FLIGHT, false);
-                if (ControllerModelWriteSupport.get(this, "state", "/isBusy")) {
-                    ControllerModelWriteSupport.set(this, "state", "/isBusy", false);
-                }
-            }.bind(this));
+            return LockSaveFlowOrchestrator.save(this, {
+                saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
+            });
         },
 
         onCloseDetail: function () {
-            this._setDeleteChecklistConfirmArmed(false);
-            DetailCommandPolicy.close(this, { rootId: this._currentRootId() });
+            return LockSaveFlowOrchestrator.close(this);
         },
 
         onArmDeleteChecklist: function () {
-            var bCurrent;
-            if (ControllerModelWriteSupport.get(this, "state", "/isBusy") ||
-                ControllerModelWriteSupport.get(this, "state", "/lockOperationPending")) {
-                return Promise.resolve(false);
-            }
-            bCurrent = !!ControllerModelWriteSupport.get(this, "view", "/deleteChecklistConfirmArmed");
-            if (!ControllerModelWriteSupport.set(this, "view", "/deleteChecklistConfirmArmed", !bCurrent)) {
-                return Promise.resolve(false);
-            }
-            return Promise.resolve(true);
+            return LockSaveFlowOrchestrator.armDelete(this);
         },
 
         onConfirmDeleteChecklist: function () {
-            var bArmed = !!ControllerModelWriteSupport.get(this, "view", "/deleteChecklistConfirmArmed");
-            if (!bArmed || ControllerModelWriteSupport.get(this, "state", "/isBusy") ||
-                ControllerModelWriteSupport.get(this, "state", "/lockOperationPending")) {
-                return Promise.resolve(false);
-            }
-            return EffectApplier.promptWarning(
-                this.getResourceBundle().getText("deleteChecklistConfirmText"),
-                [EffectApplier.actions.DELETE, EffectApplier.actions.CANCEL],
-                EffectApplier.actions.CANCEL
-            ).then(function (sAction) {
-                if (sAction !== EffectApplier.actions.DELETE) {
-                    this._setDeleteChecklistConfirmArmed(false);
-                    return false;
-                }
-                this._setDeleteChecklistConfirmArmed(false);
-                return ControllerModelWriteSupport.withFlag(this, "state", "/isBusy", function () {
-                    return DetailCommandPolicy.deleteChecklist(this, { rootId: this._currentRootId() });
-                }.bind(this)).finally(function () {
-                    this._setDeleteChecklistConfirmArmed(false);
-                }.bind(this));
-            }.bind(this));
+            return LockSaveFlowOrchestrator.confirmDelete(this);
         },
 
         onDeleteChecklist: function () {
