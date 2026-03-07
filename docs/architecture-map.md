@@ -46,6 +46,7 @@ Generated from runtime root: `app`.
   - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
   - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
   - `checklist/app/service/framework/ModelStateRuntime` -> `service/framework/ModelStateRuntime` [Util]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
 - `controller/support/AnalyticsControllerActions.js`
   - `checklist/app/service/domain/analytics/AnalyticsFacade` -> `service/domain/analytics/AnalyticsFacade` [Usecases]
   - `checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer` -> `service/domain/analytics/AnalyticsPayloadNormalizer` [Usecases]
@@ -66,6 +67,8 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/ControllerResourceCleanup` -> `controller/support/ControllerResourceCleanup` [Controllers]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
   - `checklist/app/service/framework/AppShellCoordinator` -> `service/framework/AppShellCoordinator` [Util]
+  - `checklist/app/service/framework/LayoutStateRuntime` -> `service/framework/LayoutStateRuntime` [Util]
+  - `checklist/app/service/framework/RootIdRuntime` -> `service/framework/RootIdRuntime` [Util]
   - `sap/ui/Device` -> `sap/ui/Device` [UI5]
 - `controller/support/AppControllerOverlayActions.js`
   - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
@@ -89,6 +92,8 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/AppShellTextSupport` -> `controller/support/AppShellTextSupport` [Controllers]
   - `checklist/app/controller/support/AppShellPermissionPresentation` -> `controller/support/AppShellPermissionPresentation` [Controllers]
   - `checklist/app/service/framework/ActionContract` -> `service/framework/ActionContract` [Util]
+  - `checklist/app/service/framework/LayoutStateRuntime` -> `service/framework/LayoutStateRuntime` [Util]
+  - `checklist/app/service/framework/RootIdRuntime` -> `service/framework/RootIdRuntime` [Util]
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/AppRetryActionPolicy.js`
@@ -110,6 +115,7 @@ Generated from runtime root: `app`.
   - `checklist/app/util/AttachmentUploadPolicy` -> `util/AttachmentUploadPolicy` [Util]
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
+  - `checklist/app/service/framework/LayoutStateRuntime` -> `service/framework/LayoutStateRuntime` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/AttachmentUploadSupport.js`
   - `checklist/app/controller/support/AttachmentUploadCore` -> `controller/support/AttachmentUploadCore` [Controllers]
@@ -149,6 +155,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailInfoCardLayoutSupport` -> `controller/support/DetailInfoCardLayoutSupport` [Controllers]
   - `checklist/app/service/framework/FeedbackCoordinator` -> `service/framework/FeedbackCoordinator` [Util]
   - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailChecklistRowActions.js`
@@ -160,11 +167,12 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailActionConstants` -> `controller/support/DetailActionConstants` [Controllers]
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
   - `checklist/app/service/framework/ClipboardRuntime` -> `service/framework/ClipboardRuntime` [Util]
+  - `checklist/app/service/framework/LayoutStateRuntime` -> `service/framework/LayoutStateRuntime` [Util]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
+  - `checklist/app/service/framework/RootIdRuntime` -> `service/framework/RootIdRuntime` [Util]
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailCommandPolicy.js`
-  - `checklist/app/service/framework/ControllerCtxRuntime` -> `service/framework/ControllerCtxRuntime` [Util]
-  - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
   - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
 - `controller/support/DetailControllerActions.js`
   - `checklist/app/controller/support/DetailValidationSummarySupport` -> `controller/support/DetailValidationSummarySupport` [Controllers]
@@ -208,6 +216,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailSelectionSync` -> `controller/support/DetailSelectionSync` [Controllers]
   - `checklist/app/controller/support/DetailPersonInputSupport` -> `controller/support/DetailPersonInputSupport` [Controllers]
   - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
+  - `checklist/app/service/framework/LayoutStateRuntime` -> `service/framework/LayoutStateRuntime` [Util]
   - `checklist/app/service/framework/ModelStateRuntime` -> `service/framework/ModelStateRuntime` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailViewSupport.js`
@@ -224,11 +233,12 @@ Generated from runtime root: `app`.
   - `sap/ui/core/Item` -> `sap/ui/core/Item` [UI5]
   - `sap/ui/core/CustomData` -> `sap/ui/core/CustomData` [UI5]
   - `checklist/app/service/framework/ControlStyleRuntime` -> `service/framework/ControlStyleRuntime` [Util]
+  - `checklist/app/service/framework/LayoutStateRuntime` -> `service/framework/LayoutStateRuntime` [Util]
+  - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
+  - `checklist/app/service/framework/RootIdRuntime` -> `service/framework/RootIdRuntime` [Util]
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/SearchCommandPolicy.js`
-  - `checklist/app/service/framework/ControllerCtxRuntime` -> `service/framework/ControllerCtxRuntime` [Util]
-  - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
   - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
 - `controller/support/SearchControllerActions.js`
   - `checklist/app/controller/support/ControllerResourceCleanup` -> `controller/support/ControllerResourceCleanup` [Controllers]

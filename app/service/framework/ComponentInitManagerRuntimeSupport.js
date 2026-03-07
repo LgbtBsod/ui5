@@ -1,4 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/TelemetryRuntime"
+], function (FeedbackBannerRuntime, TelemetryRuntime) {
     "use strict";
 
     function attach(mOptions) {
@@ -89,34 +92,35 @@ sap.ui.define([], function () {
             oStateModel.setProperty("/autosaveState", "SAVING");
             oStateModel.setProperty(StatePaths.SAVE_IN_FLIGHT, true);
             if (oStateModel.getProperty("/networkOnline") === false) {
-                fnSetGlobalBanner({
-                    severity: "warning",
-                    textKey: "networkUnavailable",
-                    retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                    retryTextKey: "retryNowButton"
-                });
+                fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
+                    ActionContract.RETRY_ACTIONS.SAVE,
+                    "retryNowButton"
+                ));
             }
-            DebugLogger.info("Component", "autosave start", { objectId: oStateModel.getProperty("/activeObjectId") || null });
-            fnEmitTelemetry("autosave.triggered", {
-                objectId: oStateModel.getProperty("/activeObjectId") || null
-            });
+            DebugLogger.info("Component", "autosave start", TelemetryRuntime.objectRef(oStateModel.getProperty("/activeObjectId")));
+            fnEmitTelemetry("autosave.triggered", TelemetryRuntime.objectRef(oStateModel.getProperty("/activeObjectId")));
         });
         oComponent._oAutoSave.attachEvent("autosaveDone", function () {
             oStateModel.setProperty("/autosaveState", "SAVED");
             oStateModel.setProperty("/autosaveAt", new Date().toISOString());
             oStateModel.setProperty(StatePaths.SAVE_IN_FLIGHT, false);
-            DebugLogger.info("Component", "autosave done", { objectId: oStateModel.getProperty("/activeObjectId") || null });
+            DebugLogger.info("Component", "autosave done", TelemetryRuntime.objectRef(oStateModel.getProperty("/activeObjectId")));
         });
         oComponent._oAutoSave.attachEvent("autosaveError", function (oEvent) {
             oStateModel.setProperty("/autosaveState", "ERROR");
             oStateModel.setProperty(StatePaths.SAVE_IN_FLIGHT, false);
-            fnSetGlobalBanner({
-                severity: oStateModel.getProperty("/networkOnline") === false ? "warning" : "error",
-                textKey: oStateModel.getProperty("/networkOnline") === false ? "networkUnavailable" : "objectSaveFailed",
-                textArgs: oStateModel.getProperty("/networkOnline") === false ? [] : [fnBundleText("autosaveError")],
-                retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                retryTextKey: "retryNowButton"
-            });
+            fnSetGlobalBanner(
+                oStateModel.getProperty("/networkOnline") === false
+                    ? FeedbackBannerRuntime.createNetworkRetryBannerInput(
+                        ActionContract.RETRY_ACTIONS.SAVE,
+                        "retryNowButton"
+                    )
+                    : FeedbackBannerRuntime.createRetryBannerInput("error", "objectSaveFailed", {
+                        textArgs: [fnBundleText("autosaveError")],
+                        retryAction: ActionContract.RETRY_ACTIONS.SAVE,
+                        retryTextKey: "retryNowButton"
+                    })
+            );
             DebugLogger.info("Component", "autosave error", oEvent && oEvent.getParameters ? oEvent.getParameters() : {});
             fnEmitTelemetry("autosave.failed", mOptions.componentRuntimeSupport.eventPayload(oEvent));
         });

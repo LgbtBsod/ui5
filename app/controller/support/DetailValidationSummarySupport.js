@@ -2,9 +2,10 @@ sap.ui.define([
     "checklist/app/controller/support/DetailSelectionSync",
     "checklist/app/controller/support/DetailPersonInputSupport",
     "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, ModelStateRuntime, ControllerModelWriteSupport) {
+], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, LayoutStateRuntime, ModelStateRuntime, ControllerModelWriteSupport) {
     "use strict";
 
     function validationSummaryPath(mStatePaths) {
@@ -155,12 +156,7 @@ sap.ui.define([
 
         if (oUiStateModel) {
             if (sPath === "/") {
-                ControllerModelWriteSupport.set(
-                    oController,
-                    "uiState",
-                    "/_detailCurrent",
-                    ModelStateRuntime.clone(oSelectedModel.getProperty("/") || {}, {})
-                );
+                ModelStateRuntime.syncDetailCurrent(oController, oSelectedModel.getProperty("/") || {});
             } else {
                 ControllerModelWriteSupport.set(
                     oController,
@@ -171,7 +167,7 @@ sap.ui.define([
             }
         }
 
-        sMode = String(ControllerModelWriteSupport.get(oController, "state", "/mode", "") || "").toUpperCase();
+        sMode = LayoutStateRuntime.normalizeMode(ControllerModelWriteSupport.get(oController, "state", "/mode", ""), "");
         if (DetailSelectionSync.shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {
             ControllerModelWriteSupport.set(oController, "state", "/isDirty", true);
         }

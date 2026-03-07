@@ -7,10 +7,9 @@ sap.ui.define([
     "use strict";
 
     function toggleEdit(oController, oEvent) {
-        return Promise.resolve(DetailCommandPolicy.enterEdit(oController, {
-            state: !!(oEvent && oEvent.getParameter && oEvent.getParameter("state")),
-            rootId: RootIdRuntime.resolveCurrentRootId(oController)
-        })).finally(function () {
+        return Promise.resolve(DetailCommandPolicy.enterEdit(oController, RootIdRuntime.withCurrentRootId(oController, {
+            state: !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"))
+        }))).finally(function () {
             if (oController && typeof oController._scheduleAttachmentDropZoneBind === "function") {
                 oController._scheduleAttachmentDropZoneBind();
             }
@@ -19,16 +18,11 @@ sap.ui.define([
 
     function save(oController, mOptions) {
         var sSaveInFlightPath = (mOptions && mOptions.saveInFlightPath) || "/saveInFlight";
-        if (ModelStateRuntime.read(oController, "state", "/isBusy") || ModelStateRuntime.read(oController, "state", sSaveInFlightPath)) {
+        if (ModelStateRuntime.any(oController, "state", ["/isBusy", sSaveInFlightPath])) {
             return Promise.resolve(false);
         }
-        ModelStateRuntime.write(oController, "state", sSaveInFlightPath, true);
-        ModelStateRuntime.write(oController, "state", "/isBusy", true);
-        return Promise.resolve(DetailCommandPolicy.save(oController, { rootId: RootIdRuntime.resolveCurrentRootId(oController) })).finally(function () {
-            ModelStateRuntime.write(oController, "state", sSaveInFlightPath, false);
-            if (ModelStateRuntime.read(oController, "state", "/isBusy")) {
-                ModelStateRuntime.write(oController, "state", "/isBusy", false);
-            }
+        return ModelStateRuntime.withFlags(oController, "state", [sSaveInFlightPath, "/isBusy"], function () {
+            return DetailCommandPolicy.save(oController, RootIdRuntime.withCurrentRootId(oController));
         });
     }
 
@@ -36,12 +30,12 @@ sap.ui.define([
         if (oController && typeof oController._setDeleteChecklistConfirmArmed === "function") {
             oController._setDeleteChecklistConfirmArmed(false);
         }
-        return DetailCommandPolicy.close(oController, { rootId: RootIdRuntime.resolveCurrentRootId(oController) });
+        return DetailCommandPolicy.close(oController, RootIdRuntime.withCurrentRootId(oController));
     }
 
     function armDelete(oController) {
         var bCurrent;
-        if (ModelStateRuntime.read(oController, "state", "/isBusy") || ModelStateRuntime.read(oController, "state", "/lockOperationPending")) {
+        if (ModelStateRuntime.any(oController, "state", ["/isBusy", "/lockOperationPending"])) {
             return Promise.resolve(false);
         }
         bCurrent = !!ModelStateRuntime.read(oController, "view", "/deleteChecklistConfirmArmed", false);
@@ -53,7 +47,7 @@ sap.ui.define([
         var bArmed = !!ModelStateRuntime.read(oController, "view", "/deleteChecklistConfirmArmed", false);
         var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
         var sText = oBundle && oBundle.getText ? oBundle.getText("deleteChecklistConfirmText") : "deleteChecklistConfirmText";
-        if (!bArmed || ModelStateRuntime.read(oController, "state", "/isBusy") || ModelStateRuntime.read(oController, "state", "/lockOperationPending")) {
+        if (!bArmed || ModelStateRuntime.any(oController, "state", ["/isBusy", "/lockOperationPending"])) {
             return Promise.resolve(false);
         }
         return DialogOrchestrator.promptWarning(
@@ -75,7 +69,7 @@ sap.ui.define([
                 ModelStateRuntime.write(oController, "view", "/deleteChecklistConfirmArmed", false);
             }
             return ModelStateRuntime.withFlag(oController, "state", "/isBusy", function () {
-                return DetailCommandPolicy.deleteChecklist(oController, { rootId: RootIdRuntime.resolveCurrentRootId(oController) });
+                return DetailCommandPolicy.deleteChecklist(oController, RootIdRuntime.withCurrentRootId(oController));
             }, true, false);
         });
     }

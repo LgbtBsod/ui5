@@ -1,12 +1,12 @@
 :root {
-  --ui-t5-main-on-secondary: #fff;
-  --ui-t6-main-on-tertiary: #4db1ff;
-  --ui-t7-selected-text: #0057d2;
-  --ui-t8-main-on-header: #223548;
-  --ui-t9-secondary-on-header: #475e75;
-  --ui-t10-tertiary-on-header: #5b738b;
-  --ui-t11-cta-on-header: #0070f2;
-  --ui-b4-light-selected-border: #0070f2;
+  --ui-t5-main-on-secondary: rgb(255, 255, 255);
+  --ui-t6-main-on-tertiary: rgb(77, 177, 255);
+  --ui-t7-selected-text: rgb(0, 87, 210);
+  --ui-t8-main-on-header: rgb(34, 53, 72);
+  --ui-t9-secondary-on-header: rgb(71, 94, 117);
+  --ui-t10-tertiary-on-header: rgb(91, 115, 139);
+  --ui-t11-cta-on-header: rgb(0, 112, 242);
+  --ui-b4-light-selected-border: rgb(0, 112, 242);
   --chk-brand: var(--ui-t4-cta-on-primary);
   --semantic-success: var(--ui-sem-positive-label);
   --semantic-danger: var(--ui-sem-negative-label);
@@ -14,9 +14,9 @@
   --feedback-success-text: var(--text-main);
   --feedback-warning-text: var(--text-main);
   --feedback-error-text: var(--text-main);
-  --control-primary-text: #f7fbff;
-  --control-danger-text: #fff7f7;
-  --control-success-text: #f5fff8;
+  --control-primary-text: rgb(247, 251, 255);
+  --control-danger-text: rgb(255, 247, 247);
+  --control-success-text: rgb(245, 255, 248);
   --radius-xs: 0.65rem;
   --radius-sm: 0.9rem;
   --radius-xl: 1.9rem;

@@ -1,4 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/TelemetryRuntime"
+], function (FeedbackBannerRuntime, TelemetryRuntime) {
     "use strict";
 
     function attach(mOptions) {
@@ -25,11 +28,11 @@ sap.ui.define([], function () {
             oComponent._oAutoSave.stop();
             oComponent._oGcd.destroyManager();
             if (bHadUnsavedChanges) {
-                fnSetGlobalBanner({
+                fnSetGlobalBanner(FeedbackBannerRuntime.createBannerInput({
                     severity: "warning",
                     textKey: "lockLostMessage",
                     details: fnBundleText("tabConflictCopyHint")
-                });
+                }));
             }
             return oComponent._detailFacade.onLockLost({
                 rootId: oStateModel.getProperty("/activeObjectId"),
@@ -38,10 +41,10 @@ sap.ui.define([], function () {
             }, oComponent._ctx).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
-                fnEmitTelemetry("lock.lost.detected", {
-                    reason: (oPayload && (oPayload.code || oPayload.reason_code)) || "KILLED",
-                    source: "lock_probe"
-                });
+                fnEmitTelemetry("lock.lost.detected", TelemetryRuntime.lockLost(
+                    (oPayload && (oPayload.code || oPayload.reason_code)) || "KILLED",
+                    "lock_probe"
+                ));
                 return oResult;
             });
         };

@@ -1,7 +1,9 @@
 sap.ui.define([
     "checklist/app/service/framework/ActionContract",
-    "checklist/app/service/framework/FeedbackBannerRuntime"
-], function (ActionContract, FeedbackBannerRuntime) {
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/TelemetryRuntime"
+], function (ActionContract, FeedbackBannerRuntime, LayoutStateRuntime, TelemetryRuntime) {
     "use strict";
     function attach(mOptions) {
         var oComponent = mOptions.component;
@@ -49,10 +51,10 @@ sap.ui.define([
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
             }
             if (sPath === "/mode") {
-                fnEmitTelemetry("workflow.mode.changed", { value: oEvent.getParameter("value") });
+                fnEmitTelemetry("workflow.mode.changed", TelemetryRuntime.stateValue(oEvent.getParameter("value")));
             }
             if (sPath === "/lockOperationState") {
-                fnEmitTelemetry("lock.state.changed", { value: oEvent.getParameter("value") });
+                fnEmitTelemetry("lock.state.changed", TelemetryRuntime.stateValue(oEvent.getParameter("value")));
             }
             if ([StatePaths.SAVE_IN_FLIGHT, StatePaths.WORKFLOW_DIRTY].indexOf(sPath) >= 0
                 && !oStateModel.getProperty(StatePaths.SAVE_IN_FLIGHT)
@@ -62,8 +64,8 @@ sap.ui.define([
             }
             if (["/mode", "/lockOperationState", "/activeObjectId"].indexOf(sPath) >= 0) {
                 var sCurrentRootId = String(oStateModel.getProperty("/activeObjectId") || "").trim();
-                var sCurrentMode = String(oStateModel.getProperty("/mode") || "").toUpperCase();
-                var sCurrentLockState = String(oStateModel.getProperty("/lockOperationState") || "").toUpperCase();
+                var sCurrentMode = LayoutStateRuntime.readMode(oStateModel, "");
+                var sCurrentLockState = LayoutStateRuntime.readLockState(oStateModel, "");
                 if (sCurrentRootId && sCurrentMode === "EDIT" && sCurrentLockState === "LOCKED") {
                     oStateModel.setProperty(StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
                     fnPublishTabSignal("LOCK_OWNED", { rootId: sCurrentRootId });
@@ -135,13 +137,11 @@ sap.ui.define([
             oStateModel.setProperty("/networkGraceMode", !!m.isGrace);
             oStateModel.setProperty("/networkGraceExpiresAt", m.graceExpiresAt || null);
             if (!m.online) {
-                fnSetGlobalBanner({
-                    severity: "warning",
-                    textKey: "networkUnavailable",
-                    details: fnBundleText("retryLaterHint"),
-                    retryAction: ActionContract.RETRY_ACTIONS.SEARCH,
-                    retryTextKey: "searchRetryAction"
-                });
+                fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
+                    ActionContract.RETRY_ACTIONS.SEARCH,
+                    "searchRetryAction",
+                    fnBundleText("retryLaterHint")
+                ));
                 return;
             }
             var oBanner = FeedbackBannerRuntime.getBanner(oStateModel, "global");

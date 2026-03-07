@@ -1,21 +1,14 @@
 sap.ui.define([
-    "checklist/app/service/framework/ControllerCtxRuntime",
-    "checklist/app/service/framework/FacadeCommandContract",
     "checklist/app/service/framework/FacadeCommandRuntime"
-], function (ControllerCtxRuntime, FacadeCommandContract, FacadeCommandRuntime) {
+], function (FacadeCommandRuntime) {
     "use strict";
 
     function execute(oController, sMethod, mInput) {
-        return FacadeCommandRuntime.executeWithContract(
+        return FacadeCommandRuntime.executeSearch(
             oController,
             oController && oController._facade,
             sMethod,
-            mInput || {},
-            ControllerCtxRuntime.buildSearch(oController),
-            {
-                normalizeMethod: FacadeCommandContract.normalizeSearchMethod,
-                normalizePayload: FacadeCommandContract.normalizeSearchPayload
-            }
+            mInput || {}
         );
     }
 

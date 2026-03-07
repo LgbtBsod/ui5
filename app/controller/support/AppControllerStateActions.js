@@ -2,9 +2,11 @@ sap.ui.define([
     "checklist/app/controller/support/AppShellTextSupport",
     "checklist/app/controller/support/AppShellPermissionPresentation",
     "checklist/app/service/framework/ActionContract",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/util/CreateSentinel",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (AppShellTextSupport, AppShellPermissionPresentation, ActionContract, CreateSentinel, ControllerModelWriteSupport) {
+], function (AppShellTextSupport, AppShellPermissionPresentation, ActionContract, LayoutStateRuntime, RootIdRuntime, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
     var getText = AppShellTextSupport.getText;
     var SHELL_MODE_STATE_MAP = {
@@ -36,28 +38,6 @@ sap.ui.define([
 
     function setAppViewPatch(oController, mPatch) {
         return ControllerModelWriteSupport.setMany(oController, "appView", mPatch);
-    }
-
-    function normalizeLayout(vLayout) {
-        var sLayout = String(vLayout || "").trim();
-        if (sLayout === "MidColumnFullScreen") {
-            return "MidColumnFullScreen";
-        }
-        if (sLayout === "TwoColumnsMidExpanded" || sLayout === "TwoColumnsBeginExpanded") {
-            return "TwoColumnsMidExpanded";
-        }
-        return "OneColumn";
-    }
-
-    function toLayoutKind(vLayout) {
-        var sLayout = normalizeLayout(vLayout);
-        if (sLayout === "MidColumnFullScreen") {
-            return "detailOnly";
-        }
-        if (sLayout === "OneColumn") {
-            return "single";
-        }
-        return "split";
     }
 
     return {
@@ -108,12 +88,12 @@ sap.ui.define([
                 return;
             }
             this._ensureAppViewDefaults();
-            sSelectedId = String(oState.getProperty("/selectedId") || oState.getProperty("/activeObjectId") || "").trim();
+            sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
             sCurrentRouteName = String(oState.getProperty("/currentRouteName") || "search").trim() || "search";
-            sLayoutKind = toLayoutKind(oState.getProperty("/layout"));
-            sMode = String(oState.getProperty("/mode") || "READ").toUpperCase();
-            sLockState = String(oState.getProperty("/lockOperationState") || "IDLE").toUpperCase();
-            sAutosaveState = String(oState.getProperty("/autosaveState") || "IDLE").toUpperCase();
+            sLayoutKind = LayoutStateRuntime.toLayoutKind(oState.getProperty("/layout"));
+            sMode = LayoutStateRuntime.readMode(oState, "READ");
+            sLockState = LayoutStateRuntime.readLockState(oState, "IDLE");
+            sAutosaveState = LayoutStateRuntime.readAutosaveState(oState, "IDLE");
             oCurrentUser = oState.getProperty("/currentUser") || {};
             sUser = String(oCurrentUser.uname || "").trim();
             sFullName = String(oCurrentUser.fullName || sUser || getText(this, "shellUserMissing", null, "User login required"));

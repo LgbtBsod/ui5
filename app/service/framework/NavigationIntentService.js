@@ -23,6 +23,34 @@ sap.ui.define([
         });
     }
 
+    function navigateToSearch(oController) {
+        return runOperation("navigateToSearch", {
+            controller: oController
+        });
+    }
+
+    function navigateToDetail(oController, sRootId, sLayout) {
+        return runOperation("navigateToDetail", {
+            controller: oController,
+            rootId: sRootId,
+            layout: sLayout
+        });
+    }
+
+    function navigateToAccessDenied(oController, sRootId) {
+        return runOperation("navigateToAccessDenied", {
+            controller: oController,
+            rootId: sRootId
+        });
+    }
+
+    function buildDetailHash(oController, sRootId) {
+        return runOperation("buildDetailHash", {
+            controller: oController,
+            rootId: sRootId
+        });
+    }
+
     function navigateToAnalytics(oController) {
         return runOperation("navigateToAnalytics", {
             controller: oController
@@ -60,9 +88,13 @@ sap.ui.define([
 
     return {
         buildCurrentIntent: buildCurrentIntent,
+        buildDetailHash: buildDetailHash,
         setAnalyticsReturnIntent: setAnalyticsReturnIntent,
+        navigateToAccessDenied: navigateToAccessDenied,
         navigateToAnalytics: navigateToAnalytics,
         navigateBackFromAnalytics: navigateBackFromAnalytics,
+        navigateToDetail: navigateToDetail,
+        navigateToSearch: navigateToSearch,
         queuePendingIntent: queuePendingIntent,
         clearPendingIntent: clearPendingIntent,
         resumePendingIntent: resumePendingIntent,

@@ -1,7 +1,8 @@
 sap.ui.define([
     "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel"
-], function (StatePaths, CreateSentinel) {
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (StatePaths, CreateSentinel, ModelStateRuntime) {
     "use strict";
 
     function resolveBootDetailId(sHash) {
@@ -69,14 +70,14 @@ sap.ui.define([
 
     function syncDetailCurrentFromSelected(oSelectedModel, oUiStateModel) {
         var oSelected = oSelectedModel.getData() || {};
-        oUiStateModel.setProperty("/_detailCurrent", JSON.parse(JSON.stringify(oSelected)));
+        oUiStateModel.setProperty("/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
     }
 
     function resolveDetailCurrent(oSelectedModel, oUiStateModel) {
         var oSelected = oSelectedModel.getData() || {};
         var oCurrent = oUiStateModel.getProperty("/_detailCurrent") || {};
         if (oSelected && oSelected.root) {
-            oUiStateModel.setProperty("/_detailCurrent", JSON.parse(JSON.stringify(oSelected)));
+            oUiStateModel.setProperty("/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
             return oUiStateModel.getProperty("/_detailCurrent") || {};
         }
         if (oCurrent && oCurrent.root) {

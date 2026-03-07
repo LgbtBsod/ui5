@@ -12,13 +12,11 @@ sap.ui.define([
         if (!sAttachmentId) {
             return Promise.resolve(false);
         }
-        ModelStateRuntime.write(oController, "view", "/attachmentBusy", true);
-        return Promise.resolve(DetailCommandPolicy.attachmentDelete(oController, {
-            rootId: RootIdRuntime.resolveCurrentRootId(oController),
-            attachmentId: sAttachmentId,
-            attachment: oRow || null
-        })).finally(function () {
-            ModelStateRuntime.write(oController, "view", "/attachmentBusy", false);
+        return ModelStateRuntime.withFlag(oController, "view", "/attachmentBusy", function () {
+            return DetailCommandPolicy.attachmentDelete(oController, RootIdRuntime.withCurrentRootId(oController, {
+                attachmentId: sAttachmentId,
+                attachment: oRow || null
+            }));
         });
     }
 
@@ -41,11 +39,8 @@ sap.ui.define([
         if (bLoaded) {
             return Promise.resolve({ expanded: true, loaded: true });
         }
-        ModelStateRuntime.write(oController, "view", "/attachmentBusy", true);
-        return Promise.resolve(DetailCommandPolicy.attachmentLoad(oController, {
-            rootId: RootIdRuntime.resolveCurrentRootId(oController)
-        })).finally(function () {
-            ModelStateRuntime.write(oController, "view", "/attachmentBusy", false);
+        return ModelStateRuntime.withFlag(oController, "view", "/attachmentBusy", function () {
+            return DetailCommandPolicy.attachmentLoad(oController, RootIdRuntime.withCurrentRootId(oController));
         });
     }
 

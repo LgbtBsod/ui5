@@ -12,9 +12,12 @@
     "sap/ui/core/Item",
     "sap/ui/core/CustomData",
     "checklist/app/service/framework/ControlStyleRuntime",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/NavigationIntentService",
+    "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, ControlStyleRuntime, ControllerTextRuntime, ControllerModelWriteSupport) {
+], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ControllerModelWriteSupport) {
     "use strict";
 
     var CARD_REQUIRED_KEYS = {
@@ -440,17 +443,6 @@
         return oItem;
     }
 
-    function normalizeLayout(vLayout) {
-        var sLayout = String(vLayout || "").trim();
-        if (sLayout === "MidColumnFullScreen") {
-            return "MidColumnFullScreen";
-        }
-        if (sLayout === "TwoColumnsMidExpanded" || sLayout === "TwoColumnsBeginExpanded") {
-            return "TwoColumnsMidExpanded";
-        }
-        return "OneColumn";
-    }
-
     function applyLayoutState(oController, vLayout, mOptions) {
         var oRouter = oController.getRouter && oController.getRouter();
         var bSyncRoute = !mOptions || mOptions.syncRoute !== false;
@@ -459,12 +451,8 @@
         if (!oController.getModel("state")) {
             return;
         }
-        sRootId = String(
-            ControllerModelWriteSupport.get(oController, "state", "/activeObjectId") ||
-            ControllerModelWriteSupport.get(oController, "state", "/selectedId") ||
-            ""
-        ).trim();
-        sLayout = normalizeLayout(vLayout);
+        sRootId = RootIdRuntime.resolveFromController(oController);
+        sLayout = LayoutStateRuntime.normalizeLayout(vLayout);
         ControllerModelWriteSupport.setMany(oController, "state", {
             "/layout": sLayout
         });
@@ -472,19 +460,13 @@
             return;
         }
         if (sLayout === "OneColumn") {
-            oRouter.navTo("search", {}, false);
+            NavigationIntentService.navigateToSearch(oController);
             return;
         }
         if (!sRootId) {
             return;
         }
-        if (sLayout === "MidColumnFullScreen") {
-            oRouter.navTo("detailLayout", { id: sRootId, layout: "MidColumnFullScreen" }, false);
-            return;
-        }
-        if (sLayout === "TwoColumnsMidExpanded") {
-            oRouter.navTo("detail", { id: sRootId }, false);
-        }
+        NavigationIntentService.navigateToDetail(oController, sRootId, sLayout);
     }
 
     return {

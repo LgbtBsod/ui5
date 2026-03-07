@@ -39,10 +39,40 @@ sap.ui.define([], function () {
         }
     }
 
+    function syncDetailCurrent(oController, vData) {
+        return write(oController, "uiState", "/_detailCurrent", clone(vData || {}, {}));
+    }
+
+    function resetDetailRuntimeData(oController) {
+        replaceData(oController, "selected", {});
+        write(oController, "uiState", "/_detailSnapshot", {});
+        write(oController, "uiState", "/_detailCurrent", {});
+    }
+
     function withFlag(oController, sModelName, sPath, fnWork, vStart, vEnd) {
         write(oController, sModelName, sPath, typeof vStart === "undefined" ? true : vStart);
         return Promise.resolve().then(fnWork).finally(function () {
             write(oController, sModelName, sPath, typeof vEnd === "undefined" ? false : vEnd);
+        });
+    }
+
+    function any(oController, sModelName, aPaths) {
+        return (aPaths || []).some(function (sPath) {
+            return !!read(oController, sModelName, sPath, false);
+        });
+    }
+
+    function withFlags(oController, sModelName, aPaths, fnWork, vStart, vEnd) {
+        var aFlagPaths = Array.isArray(aPaths) ? aPaths.slice() : [];
+        var vStartValue = typeof vStart === "undefined" ? true : vStart;
+        var vEndValue = typeof vEnd === "undefined" ? false : vEnd;
+        aFlagPaths.forEach(function (sPath) {
+            write(oController, sModelName, sPath, vStartValue);
+        });
+        return Promise.resolve().then(fnWork).finally(function () {
+            aFlagPaths.forEach(function (sPath) {
+                write(oController, sModelName, sPath, vEndValue);
+            });
         });
     }
 
@@ -52,6 +82,10 @@ sap.ui.define([], function () {
         write: write,
         replaceData: replaceData,
         clone: clone,
-        withFlag: withFlag
+        syncDetailCurrent: syncDetailCurrent,
+        resetDetailRuntimeData: resetDetailRuntimeData,
+        withFlag: withFlag,
+        any: any,
+        withFlags: withFlags
     };
 });

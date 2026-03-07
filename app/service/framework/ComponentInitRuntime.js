@@ -50,6 +50,7 @@ sap.ui.define([], function () {
         var ComponentInitManagerRuntimeSupport = mDeps.ComponentInitManagerRuntimeSupport;
         var ComponentInitRuntimeSupport = mDeps.ComponentInitRuntimeSupport;
         var ComponentRuntimeSupport = mDeps.ComponentRuntimeSupport;
+        var TelemetryRuntime = mDeps.TelemetryRuntime;
         var StatePaths = mDeps.StatePaths;
         var DetailFacade = mDeps.DetailFacade;
         var ActionDispatcher = mDeps.ActionDispatcher;
@@ -173,10 +174,10 @@ sap.ui.define([], function () {
                 return this._detailFacade.forceReadOnly(mForceInput, this._ctx).then(function (oResult) {
                     fnApplyFacadeResult(oResult);
                     ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
-                    fnEmitTelemetry("lock.lost.detected", {
-                        reason: String((mForceInput && mForceInput.reason) || ""),
-                        source: String((mForceInput && mForceInput.source) || "")
-                    });
+                    fnEmitTelemetry("lock.lost.detected", TelemetryRuntime.lockLost(
+                        mForceInput && mForceInput.reason,
+                        mForceInput && mForceInput.source
+                    ));
                     return oResult;
                 });
             }.bind(this);
@@ -187,17 +188,15 @@ sap.ui.define([], function () {
                         runtimeSettingsPayload: oRuntime || {}
                     }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
                         oStateModel.setProperty("/frontendConfigSource", "gateway_runtime");
-                        fnEmitTelemetry("runtime.config.loaded", {
-                            source: "RuntimeSettingsSet(GLOBAL)"
-                        });
+                        fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
                         return oRuntime || {};
                     });
                 }.bind(this)).catch(function (oError) {
                     oStateModel.setProperty("/frontendConfigSource", "gateway_runtime_error");
-                    fnEmitTelemetry("runtime.config.load_failed", {
-                        source: "RuntimeSettingsSet(GLOBAL)",
-                        error: String((oError && oError.message) || oError || "runtime_settings_load_failed")
-                    });
+                    fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
+                        "RuntimeSettingsSet(GLOBAL)",
+                        (oError && oError.message) || oError || "runtime_settings_load_failed"
+                    ));
                     return Promise.reject(oError);
                 }.bind(this));
             }.bind(this);

@@ -101,10 +101,55 @@ sap.ui.define([], function () {
         }
     }
 
+    function navigateToSearch(oController) {
+        var oRouter = oController && oController.getRouter && oController.getRouter();
+        if (oRouter && typeof oRouter.navTo === "function") {
+            oRouter.navTo("search", {}, false);
+        }
+    }
+
+    function navigateToDetail(oController, sRootId, sLayout) {
+        var oRouter = oController && oController.getRouter && oController.getRouter();
+        var sId = String(sRootId || "").trim();
+        var sResolvedLayout = normalizeLayout(sLayout);
+
+        if (!oRouter || typeof oRouter.navTo !== "function" || !sId) {
+            return;
+        }
+        if (sResolvedLayout === "MidColumnFullScreen") {
+            oRouter.navTo("detailLayout", { id: sId, layout: "MidColumnFullScreen" }, false);
+            return;
+        }
+        oRouter.navTo("detail", { id: sId }, false);
+    }
+
+    function navigateToAccessDenied(oController, sRootId) {
+        var oRouter = oController && oController.getRouter && oController.getRouter();
+        var sId = String(sRootId || "").trim();
+
+        if (oRouter && typeof oRouter.navTo === "function" && sId) {
+            oRouter.navTo("accessDenied", { id: sId }, false);
+        }
+    }
+
+    function buildDetailHash(oController, sRootId) {
+        var oRouter = oController && oController.getRouter && oController.getRouter();
+        var sId = String(sRootId || "").trim();
+
+        if (!oRouter || typeof oRouter.getURL !== "function" || !sId) {
+            return "";
+        }
+        return String(oRouter.getURL("detail", { id: sId }) || "");
+    }
+
     return {
         buildCurrentIntent: buildCurrentIntent,
+        buildDetailHash: buildDetailHash,
         navigateBackFromAnalytics: navigateBackFromAnalytics,
+        navigateToAccessDenied: navigateToAccessDenied,
         navigateToAnalytics: navigateToAnalytics,
+        navigateToDetail: navigateToDetail,
+        navigateToSearch: navigateToSearch,
         setAnalyticsReturnIntent: setAnalyticsReturnIntent
     };
 });

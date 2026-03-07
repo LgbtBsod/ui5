@@ -27,6 +27,33 @@ sap.ui.define([
         return oBanner ? oBanner[sProperty] : undefined;
     }
 
+    function createBannerInput(mInput) {
+        return Object.assign({
+            severity: "info",
+            textKey: "",
+            textArgs: [],
+            details: "",
+            correlationId: "",
+            retryAction: "",
+            retryTextKey: ""
+        }, mInput || {});
+    }
+
+    function createRetryBannerInput(sSeverity, sTextKey, mOptions) {
+        return createBannerInput(Object.assign({
+            severity: sSeverity,
+            textKey: sTextKey
+        }, mOptions || {}));
+    }
+
+    function createNetworkRetryBannerInput(sRetryAction, sRetryTextKey, sDetails) {
+        return createRetryBannerInput("warning", "networkUnavailable", {
+            details: String(sDetails || ""),
+            retryAction: String(sRetryAction || ""),
+            retryTextKey: String(sRetryTextKey || "")
+        });
+    }
+
     function setGlobalMessage(oStateModel, sSeverity, sText) {
         return setBanner(oStateModel, "global", {
             visible: true,
@@ -72,6 +99,9 @@ sap.ui.define([
         setBanner: setBanner,
         getBanner: getBanner,
         getBannerProperty: getBannerProperty,
+        createBannerInput: createBannerInput,
+        createRetryBannerInput: createRetryBannerInput,
+        createNetworkRetryBannerInput: createNetworkRetryBannerInput,
         setGlobalMessage: setGlobalMessage,
         resolveBannerId: resolveBannerId,
         fromEffect: fromEffect,

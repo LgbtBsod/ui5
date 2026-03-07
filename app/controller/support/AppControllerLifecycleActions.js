@@ -2,23 +2,14 @@ sap.ui.define([
     "checklist/app/controller/support/ControllerResourceCleanup",
     "checklist/app/controller/support/ControllerModelWriteSupport",
     "checklist/app/service/framework/AppShellCoordinator",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/RootIdRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, ControllerModelWriteSupport, AppShellCoordinator, Device) {
+], function (ControllerResourceCleanup, ControllerModelWriteSupport, AppShellCoordinator, LayoutStateRuntime, RootIdRuntime, Device) {
     "use strict";
 
     var PHONE_MAX_WIDTH = 720;
     var TABLET_MAX_WIDTH = 1080;
-
-    function normalizeLayout(vLayout) {
-        var sLayout = String(vLayout || "").trim();
-        if (sLayout === "MidColumnFullScreen") {
-            return "MidColumnFullScreen";
-        }
-        if (sLayout === "TwoColumnsMidExpanded" || sLayout === "TwoColumnsBeginExpanded") {
-            return "TwoColumnsMidExpanded";
-        }
-        return "OneColumn";
-    }
 
     function resolveMidColumnPageId(sRouteName) {
         if (sRouteName === "analytics") {
@@ -135,9 +126,9 @@ sap.ui.define([
         _syncLayoutState: function () {
             var oState = this._getStateModel();
             var sLayoutRaw = oState && oState.getProperty ? oState.getProperty("/layout") : "OneColumn";
-            var sLayout = normalizeLayout(sLayoutRaw);
+            var sLayout = LayoutStateRuntime.normalizeLayout(sLayoutRaw);
             var sRouteName = String(oState && oState.getProperty ? (oState.getProperty("/currentRouteName") || "search") : "search").trim() || "search";
-            var sSelectedId = String(oState && oState.getProperty ? (oState.getProperty("/selectedId") || oState.getProperty("/activeObjectId") || "") : "").trim();
+            var sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
             var bSingle = sLayout === "OneColumn";
             var bDetailOnly = sLayout === "MidColumnFullScreen";
             var oRoot = this.getView && this.getView().getDomRef && this.getView().getDomRef();

@@ -1,4 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ControllerCtxRuntime",
+    "checklist/app/service/framework/FacadeCommandContract"
+], function (ControllerCtxRuntime, FacadeCommandContract) {
     "use strict";
 
     function executeRaw(oController, oFacade, sMethod, mInput, mCtx) {
@@ -19,8 +22,45 @@ sap.ui.define([], function () {
         return executeRaw(oController, oFacade, sCommand, oPayload, mCtx);
     }
 
+    function executeNamed(oController, oFacade, sMethod, mInput, mProfile) {
+        var oProfile = mProfile || {};
+        var fnBuildCtx = typeof oProfile.buildCtx === "function"
+            ? oProfile.buildCtx
+            : ControllerCtxRuntime.buildDefault;
+        return executeWithContract(
+            oController,
+            oFacade,
+            sMethod,
+            mInput || {},
+            fnBuildCtx(oController),
+            {
+                normalizeMethod: oProfile.normalizeMethod,
+                normalizePayload: oProfile.normalizePayload
+            }
+        );
+    }
+
+    function executeDetail(oController, oFacade, sMethod, mInput) {
+        return executeNamed(oController, oFacade, sMethod, mInput, {
+            buildCtx: ControllerCtxRuntime.buildDefault,
+            normalizeMethod: FacadeCommandContract.normalizeDetailMethod,
+            normalizePayload: FacadeCommandContract.normalizeDetailPayload
+        });
+    }
+
+    function executeSearch(oController, oFacade, sMethod, mInput) {
+        return executeNamed(oController, oFacade, sMethod, mInput, {
+            buildCtx: ControllerCtxRuntime.buildSearch,
+            normalizeMethod: FacadeCommandContract.normalizeSearchMethod,
+            normalizePayload: FacadeCommandContract.normalizeSearchPayload
+        });
+    }
+
     return {
         executeRaw: executeRaw,
-        executeWithContract: executeWithContract
+        executeWithContract: executeWithContract,
+        executeNamed: executeNamed,
+        executeDetail: executeDetail,
+        executeSearch: executeSearch
     };
 });

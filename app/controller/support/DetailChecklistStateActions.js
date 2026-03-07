@@ -3,9 +3,12 @@ sap.ui.define([
     "checklist/app/controller/support/DetailActionConstants",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/service/framework/ClipboardRuntime",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/NavigationIntentService",
+    "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/util/CreateSentinel",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, CreateSentinel, ControllerModelWriteSupport) {
+], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -54,11 +57,11 @@ sap.ui.define([
 
         onCopyDetailLink: function () {
             var oState = this.getModel("state");
-            var sId = oState && oState.getProperty("/activeObjectId");
+            var sId = RootIdRuntime.resolveActiveFromStateModel(oState);
             if (!sId || CreateSentinel.isCreateId(sId)) {
                 return;
             }
-            var sHash = this.getRouter().getURL("detail", { id: sId });
+            var sHash = NavigationIntentService.buildDetailHash(this, sId);
             var sUrl = window.location.origin + window.location.pathname + "#" + sHash;
             ClipboardRuntime.writeText(sUrl).then(function (bCopied) {
                 this._showToast(bCopied ? "detailLinkCopied" : "detailLinkCopyFailed");
@@ -70,7 +73,7 @@ sap.ui.define([
             if (!oState || !oState.getProperty || !oState.setProperty) {
                 return;
             }
-            var sLayout = String(oState.getProperty("/layout") || "TwoColumnsMidExpanded");
+            var sLayout = LayoutStateRuntime.readLayout(oState, "TwoColumnsMidExpanded");
             var sNextLayout = sLayout === "MidColumnFullScreen" ? "TwoColumnsMidExpanded" : "MidColumnFullScreen";
             this._applyLayoutState(sNextLayout);
         },
@@ -132,12 +135,12 @@ sap.ui.define([
         },
 
         onCancelEditFromDetail: function () {
-            DetailCommandPolicy.discardChanges(this, { rootId: this._currentRootId() });
+            DetailCommandPolicy.discardChanges(this, RootIdRuntime.withCurrentRootId(this));
         },
 
         onValidateChecklist: function () {
             this._recomputeValidationSummary("manualValidate", true);
-            return DetailCommandPolicy.validate(this, { rootId: this._currentRootId() }).then(function (oResult) {
+            return DetailCommandPolicy.validate(this, RootIdRuntime.withCurrentRootId(this)).then(function (oResult) {
                 this._recomputeValidationSummary("validateResult", true);
                 if (this.getModel("state").getProperty(STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors")) {
                     this._focusFirstInvalidField();
@@ -153,10 +156,9 @@ sap.ui.define([
 
         onChangeChecklistStatus: function (oEvent) {
             var oSrc = oEvent && oEvent.getSource && oEvent.getSource();
-            DetailCommandPolicy.changeStatus(this, {
-                rootId: this._currentRootId(),
+            DetailCommandPolicy.changeStatus(this, RootIdRuntime.withCurrentRootId(this, {
                 status: (oSrc && (oSrc.data("status") || oSrc.data("targetStatus"))) || ""
-            });
+            }));
         }
     };
 });

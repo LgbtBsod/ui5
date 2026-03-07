@@ -1,8 +1,10 @@
 sap.ui.define([
     "checklist/app/model/StatePaths",
     "checklist/app/util/CreateSentinel",
-    "checklist/app/service/backend/GatewayBackendService"
-], function (StatePaths, CreateSentinel, GatewayBackendService) {
+    "checklist/app/service/backend/GatewayBackendService",
+    "checklist/app/service/framework/RootIdRuntime",
+    "checklist/app/service/framework/LayoutStateRuntime"
+], function (StatePaths, CreateSentinel, GatewayBackendService, RootIdRuntime, LayoutStateRuntime) {
     "use strict";
 
     function encodeUrlParameters(mParameters) {
@@ -17,10 +19,10 @@ sap.ui.define([
     }
 
     function readActiveLockPayload(oStateModel) {
-        var sRootId = String(oStateModel && oStateModel.getProperty ? oStateModel.getProperty("/activeObjectId") || "" : "").trim();
+        var sRootId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
         var sSessionGuid = String(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.SESSION_ID) || "" : "").trim();
-        var sMode = String(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) || "" : "").toUpperCase();
-        var sLockState = String(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) || "" : "").toUpperCase();
+        var sMode = LayoutStateRuntime.normalizeMode(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) : "", "");
+        var sLockState = LayoutStateRuntime.normalizeState(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) : "", "");
         var oCurrentUser = oStateModel && oStateModel.getProperty ? (oStateModel.getProperty("/currentUser") || {}) : {};
         var sUser = String(oCurrentUser.uname || "").trim();
         if (!sRootId || !sSessionGuid || CreateSentinel.isCreateId(sRootId)) {

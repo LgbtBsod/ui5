@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/FeedbackBannerRuntime"
+], function (FeedbackBannerRuntime) {
     "use strict";
 
     var STORAGE_KEY = "pcct_lock_signal";
@@ -63,11 +65,11 @@ sap.ui.define([], function () {
                 source: "cross_tab",
                 at: new Date().toISOString()
             });
-            fnSetGlobalBanner({
+            fnSetGlobalBanner(FeedbackBannerRuntime.createBannerInput({
                 severity: "warning",
                 textKey: "tabConflictBanner",
                 details: fnBundleText("tabConflictCopyHint")
-            });
+            }));
             fnHandleForceReadOnly({
                 reason: "TAB_CONFLICT",
                 messageKey: "tabConflictBanner",

@@ -3,8 +3,9 @@
     "checklist/app/util/AttachmentUploadPolicy",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, ControllerModelWriteSupport) {
+], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, LayoutStateRuntime, ControllerModelWriteSupport) {
     "use strict";
 
     var ATTACHMENT_EXTENSION_TO_MIME = {
@@ -51,7 +52,7 @@
 
     function canUploadAttachments(oController) {
         var sRootId = oController._currentRootId && oController._currentRootId();
-        var sMode = String(ControllerModelWriteSupport.get(oController, "state", "/mode", "READ") || "READ").toUpperCase();
+        var sMode = LayoutStateRuntime.normalizeMode(ControllerModelWriteSupport.get(oController, "state", "/mode", "READ"), "READ");
         return !!sRootId && sMode !== "READ";
     }
 

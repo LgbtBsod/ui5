@@ -37,6 +37,18 @@ sap.ui.define([
         setAnalyticsReturnIntent: function (mContext) {
             return WorkspaceRouteNavigation.setAnalyticsReturnIntent(mContext.controller);
         },
+        navigateToSearch: function (mContext) {
+            return WorkspaceRouteNavigation.navigateToSearch(mContext.controller);
+        },
+        navigateToDetail: function (mContext) {
+            return WorkspaceRouteNavigation.navigateToDetail(mContext.controller, mContext.rootId, mContext.layout);
+        },
+        navigateToAccessDenied: function (mContext) {
+            return WorkspaceRouteNavigation.navigateToAccessDenied(mContext.controller, mContext.rootId);
+        },
+        buildDetailHash: function (mContext) {
+            return WorkspaceRouteNavigation.buildDetailHash(mContext.controller, mContext.rootId);
+        },
         navigateToAnalytics: function (mContext) {
             return WorkspaceRouteNavigation.navigateToAnalytics(mContext.controller);
         },

@@ -1,22 +1,29 @@
 sap.ui.define([
     "checklist/app/service/framework/ActionContract",
-    "checklist/app/service/framework/SecurityTokenRefresh"
-], function (ActionContract, SecurityTokenRefresh) {
+    "checklist/app/service/framework/SecurityTokenRefresh",
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/RootIdRuntime",
+    "checklist/app/service/framework/TelemetryRuntime"
+], function (ActionContract, SecurityTokenRefresh, FeedbackBannerRuntime, RootIdRuntime, TelemetryRuntime) {
     "use strict";
+
+    var SAVE_WORKING_BANNER_DELAY_MS = 2000;
 
     function buildSaveBannerPayload(oStateModel, mOptions) {
         var bSessionExpired = !!mOptions.sessionExpired;
         var bOffline = oStateModel.getProperty("/networkOnline") === false;
         var sDetail = String(mOptions.detail || "save_failed");
-        return {
-            severity: bSessionExpired ? "error" : (bOffline ? "warning" : "error"),
-            textKey: bSessionExpired ? "sessionExpiredBanner" : (bOffline ? "networkUnavailable" : "objectSaveFailed"),
-            textArgs: bSessionExpired ? [] : [sDetail],
-            details: sDetail,
-            correlationId: String(mOptions.correlationId || ""),
-            retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-            retryTextKey: "retryNowButton"
-        };
+        return FeedbackBannerRuntime.createRetryBannerInput(
+            bSessionExpired ? "error" : (bOffline ? "warning" : "error"),
+            bSessionExpired ? "sessionExpiredBanner" : (bOffline ? "networkUnavailable" : "objectSaveFailed"),
+            {
+                textArgs: bSessionExpired ? [] : [sDetail],
+                details: sDetail,
+                correlationId: String(mOptions.correlationId || ""),
+                retryAction: ActionContract.RETRY_ACTIONS.SAVE,
+                retryTextKey: "retryNowButton"
+            }
+        );
     }
 
     function createRunGuardedSave(mOptions) {
@@ -39,7 +46,7 @@ sap.ui.define([
             if (oStateModel.getProperty(oStatePaths.SAVE_IN_FLIGHT)) {
                 return oComponent._pGuardedSavePromise || Promise.resolve(false);
             }
-            sRootId = String(oStateModel.getProperty("/activeObjectId") || oStateModel.getProperty("/selectedId") || "").trim();
+            sRootId = RootIdRuntime.resolveFromStateModel(oStateModel);
             if (!sRootId) {
                 return Promise.resolve(false);
             }
@@ -53,14 +60,12 @@ sap.ui.define([
             }
             oComponent._iSaveWorkingTimer = setTimeout(function () {
                 if (oStateModel.getProperty(oStatePaths.SAVE_IN_FLIGHT)) {
-                    fnSetGlobalBanner({
-                        severity: "info",
-                        textKey: "workingMessageLong",
+                    fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("info", "workingMessageLong", {
                         retryAction: ActionContract.RETRY_ACTIONS.SAVE,
                         retryTextKey: "retryNowButton"
-                    });
+                    }));
                 }
-            }, 2000);
+            }, SAVE_WORKING_BANNER_DELAY_MS);
             oComponent._pGuardedSavePromise = oDetailFacade.save({ rootId: sRootId }, fnBuildLatestCtx()).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 if (!oResult || oResult.ok === false) {
@@ -92,12 +97,7 @@ sap.ui.define([
                     detail: sDetail,
                     correlationId: sCorrelationId
                 }));
-                fnEmitTelemetry("detail.save.guarded.failed", {
-                    rootId: sRootId,
-                    code: String((oError && oError.code) || ""),
-                    statusCode: Number((oError && oError.statusCode) || 0) || 0,
-                    correlationId: sCorrelationId
-                });
+                fnEmitTelemetry("detail.save.guarded.failed", TelemetryRuntime.saveFailure(sRootId, oError, sCorrelationId));
                 return false;
             }).finally(function () {
                 if (oComponent._iSaveWorkingTimer) {

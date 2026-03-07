@@ -7,9 +7,10 @@ sap.ui.define([
     "checklist/app/controller/support/DetailInfoCardLayoutSupport",
     "checklist/app/service/framework/FeedbackCoordinator",
     "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/util/CreateSentinel",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, CreateSentinel, ControllerModelWriteSupport) {
+], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, NavigationIntentService, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -119,7 +120,7 @@ sap.ui.define([
                     message: String(oAccessState.message || "").trim(),
                     checkedAt: new Date().toISOString()
                 });
-                this.getRouter().navTo("accessDenied", { id: sId }, false);
+                NavigationIntentService.navigateToAccessDenied(this, sId);
                 return oResult;
             }.bind(this));
         },

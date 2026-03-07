@@ -3,8 +3,9 @@ sap.ui.define([
     "checklist/app/service/domain/detail/DetailAuthorizationSupport",
     "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime"
-], function (ControllerCtxRuntime, DetailAuthorizationSupport, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime) {
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/NavigationIntentService"
+], function (ControllerCtxRuntime, DetailAuthorizationSupport, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService) {
     "use strict";
 
     function buildInitialViewState(sRootId) {
@@ -29,8 +30,6 @@ sap.ui.define([
 
     function clearDetailRuntimeState(oController) {
         var oStateModel = ModelStateRuntime.model(oController, "state");
-        var oSelectedModel = ModelStateRuntime.model(oController, "selected");
-        var oUiStateModel = ModelStateRuntime.model(oController, "uiState");
 
         if (oStateModel && typeof oStateModel.setProperty === "function") {
             oStateModel.setProperty("/mode", "READ");
@@ -41,13 +40,7 @@ sap.ui.define([
             oStateModel.setProperty("/isDirty", false);
             oStateModel.setProperty("/activeObjectId", "");
         }
-        if (oSelectedModel && typeof oSelectedModel.setData === "function") {
-            oSelectedModel.setData({});
-        }
-        if (oUiStateModel && typeof oUiStateModel.setProperty === "function") {
-            oUiStateModel.setProperty("/_detailSnapshot", {});
-            oUiStateModel.setProperty("/_detailCurrent", {});
-        }
+        ModelStateRuntime.resetDetailRuntimeData(oController);
     }
 
     return {
@@ -100,7 +93,7 @@ sap.ui.define([
 
             return DetailAuthorizationSupport.fetchPermission(this._ctx(), sRootId).then(function (oPermission) {
                 if (oPermission && oPermission.canView) {
-                    this.getRouter().navTo("detail", { id: sRootId }, false);
+                    NavigationIntentService.navigateToDetail(this, sRootId);
                     return;
                 }
                 if (oStateModel && typeof oStateModel.setProperty === "function") {
@@ -143,7 +136,7 @@ sap.ui.define([
         },
 
         onBackToSearch: function () {
-            this.getRouter().navTo("search", {}, false);
+            NavigationIntentService.navigateToSearch(this);
         },
 
         onRetryAccessCheck: function () {
