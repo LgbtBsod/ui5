@@ -1,15 +1,15 @@
 sap.ui.define([
-    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/service/framework/ComponentRuntimeSupport",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime"
-], function (SearchControllerSupport, ControllerViewStateRuntime, ModelStateRuntime) {
+], function (ComponentRuntimeSupport, ControllerViewStateRuntime, ModelStateRuntime) {
     "use strict";
 
     function formatSearchDateTime(vDate) {
         if (vDate === null || vDate === undefined || vDate === "") {
             return "-";
         }
-        return SearchControllerSupport.formatHumanDateTime(vDate);
+        return ComponentRuntimeSupport.formatHumanDateTime(vDate);
     }
 
     function setSettledViewState(oController, bCanExport, sWorkflowStage) {

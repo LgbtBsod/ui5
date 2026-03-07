@@ -45,9 +45,8 @@
     }
 
     function getUploadPolicy(oController) {
-        var oMasterDataModel = oController.getModel("masterData");
         return AttachmentUploadPolicy.normalizeUploadPolicy(
-            (oMasterDataModel && oMasterDataModel.getProperty && oMasterDataModel.getProperty("/runtime/uploadPolicy")) || {}
+            ModelStateRuntime.read(oController, "masterData", "/runtime/uploadPolicy", {}) || {}
         );
     }
 

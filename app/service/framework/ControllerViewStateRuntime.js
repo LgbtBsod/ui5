@@ -1,7 +1,7 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (JSONModel, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (JSONModel, ModelStateRuntime) {
     "use strict";
 
     function initModel(oController, vState) {
@@ -11,15 +11,15 @@ sap.ui.define([
     }
 
     function get(oController, sPath, vFallback) {
-        return ControllerModelWriteSupport.get(oController, "view", sPath, vFallback);
+        return ModelStateRuntime.read(oController, "view", sPath, vFallback);
     }
 
     function set(oController, sPath, vValue) {
-        return ControllerModelWriteSupport.set(oController, "view", sPath, vValue);
+        return ModelStateRuntime.write(oController, "view", sPath, vValue);
     }
 
     function setMany(oController, mValues) {
-        return ControllerModelWriteSupport.setMany(oController, "view", mValues);
+        return ModelStateRuntime.setMany(oController, "view", mValues);
     }
 
     function replace(oController, vState) {
@@ -39,7 +39,7 @@ sap.ui.define([
     }
 
     function withFlag(oController, sPath, fnWork, vBegin, vEnd) {
-        return ControllerModelWriteSupport.withFlag(oController, "view", sPath, fnWork, vBegin, vEnd);
+        return ModelStateRuntime.withFlag(oController, "view", sPath, fnWork, vBegin, vEnd);
     }
 
     return {

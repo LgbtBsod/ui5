@@ -4,10 +4,11 @@ sap.ui.define([
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/service/framework/ClipboardRuntime",
     "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/util/CreateSentinel"
-], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, CreateSentinel) {
+], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, CreateSentinel) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -141,7 +142,7 @@ sap.ui.define([
             this._recomputeValidationSummary("manualValidate", true);
             return DetailCommandPolicy.validate(this, RootIdRuntime.withCurrentRootId(this)).then(function (oResult) {
                 this._recomputeValidationSummary("validateResult", true);
-                if (this.getModel("state").getProperty(STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors")) {
+                if (ModelStateRuntime.read(this, "state", STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors", false)) {
                     this._focusFirstInvalidField();
                 }
                 return oResult;

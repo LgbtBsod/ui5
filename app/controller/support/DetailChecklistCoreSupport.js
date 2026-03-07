@@ -1,5 +1,6 @@
 sap.ui.define([
-    "checklist/app/controller/support/DetailDialogSupport",
+    "checklist/app/service/framework/DialogOrchestrator",
+    "checklist/app/service/framework/DraftChecklistFactory",
     "checklist/app/controller/support/DetailViewSupport",
     "checklist/app/controller/support/DetailAccessViewState",
     "checklist/app/controller/support/DetailActionConstants",
@@ -10,14 +11,35 @@ sap.ui.define([
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/util/CreateSentinel"
-], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
+], function (DialogOrchestrator, DraftChecklistFactory, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
     "use strict";
 
+    var EFFECT_DIALOG_FRAGMENTS = {
+        locationValueHelp: "checklist.app.view.fragment.LocationValueHelpDialog",
+        checksExpanded: "checklist.app.view.fragment.ChecksExpandedDialog",
+        barriersExpanded: "checklist.app.view.fragment.BarriersExpandedDialog"
+    };
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
 
     return {
         ensureEffectDialog: function (sId) {
-            return DetailDialogSupport.ensureEffectDialog(this, sId);
+            var sFragment = EFFECT_DIALOG_FRAGMENTS[sId];
+            if (!sFragment) {
+                return Promise.resolve(null);
+            }
+            return DialogOrchestrator.ensure(this, sId, {
+                fragmentName: sFragment,
+                afterClose: function (_oDialog, oCtrl, sDialogKey) {
+                    if (oCtrl && typeof oCtrl._restoreDialogFocus === "function") {
+                        oCtrl._restoreDialogFocus(sDialogKey);
+                    }
+                },
+                afterOpen: function (_oDialog, oCtrl, sDialogKey) {
+                    if (oCtrl && typeof oCtrl._onDialogAfterOpen === "function") {
+                        oCtrl._onDialogAfterOpen(sDialogKey);
+                    }
+                }
+            });
         },
 
         infoCardFactory: function (sId, oContext) {
@@ -92,8 +114,8 @@ sap.ui.define([
 
             if (bCreate) {
                 if (oSelected && oSelected.setData) {
-                    oSelected.setData(DetailDialogSupport.createEmptyDraft());
-                    oSelected.setProperty("/attachments", []);
+                    oSelected.setData(DraftChecklistFactory.createEmptyDraft());
+                    ModelStateRuntime.writeOnModel(oSelected, "/attachments", []);
                 }
                 DetailCommandPolicy.open(this, { id: CreateSentinel.VALUE, rootId: CreateSentinel.VALUE });
                 return;

@@ -1,21 +1,21 @@
 sap.ui.define([
-    "checklist/app/controller/support/AppShellTextSupport",
-    "checklist/app/controller/support/AppRetryActionPolicy",
-    "checklist/app/controller/support/AppShellUserActionPolicy",
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/service/domain/shared/usecases/LoadCurrentUserUseCase",
+    "checklist/app/service/framework/ActionContract",
     "checklist/app/service/framework/ClipboardRuntime",
+    "checklist/app/service/framework/EffectActionRouting",
     "checklist/app/service/framework/FocusRuntime",
     "checklist/app/service/framework/FeedbackBannerState",
     "checklist/app/service/framework/FeedbackBannerRuntime",
     "checklist/app/service/framework/SecurityTokenRefresh",
     "checklist/app/service/framework/AppShellCoordinator",
-    "checklist/app/controller/support/AppShellUserRefreshSupport",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/util/CreateSentinel",
     "checklist/app/service/framework/ModelStateRuntime"
-], function (AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, NavigationIntentService, CreateSentinel, ModelStateRuntime) {
+], function (ControllerTextRuntime, LoadCurrentUserUseCase, ActionContract, ClipboardRuntime, EffectActionRouting, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, NavigationIntentService, CreateSentinel, ModelStateRuntime) {
     "use strict";
 
-    var getText = AppShellTextSupport.getText;
+    var getText = ControllerTextRuntime.getText;
     var SHELL_OVERLAY_FRAGMENTS = {
         notifications: "checklist.app.view.fragment.ShellNotificationsPopover",
         help: "checklist.app.view.fragment.ShellHelpPopover",
@@ -29,6 +29,75 @@ sap.ui.define([
             return Promise.resolve();
         }
         return oController._openShellOverlay(oEvent, sKey, sFragment);
+    }
+
+    function refreshCurrentUser(oController) {
+        var oState = oController && oController._getStateModel && oController._getStateModel();
+        var oAppView = oController && oController._getAppViewModel && oController._getAppViewModel();
+        if (!oState) {
+            return Promise.resolve(false);
+        }
+        if (oAppView) {
+            ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", true);
+        }
+        return LoadCurrentUserUseCase.refresh({
+            stateModel: oState
+        }).then(function (oResult) {
+            oController._syncShellState();
+            oController._syncShellMetrics();
+            if (typeof oController._scheduleShellLayoutRefresh === "function") {
+                oController._scheduleShellLayoutRefresh();
+            }
+            if (typeof oController.showI18nToast === "function" && oResult && oResult.ok) {
+                oController.showI18nToast("shellContextRefreshed");
+            }
+            return !!(oResult && oResult.ok);
+        }).catch(function (oError) {
+            if (typeof oController.showI18nToast === "function") {
+                oController.showI18nToast("shellUserRefreshFailed", [oError && oError.message || "Unknown error"]);
+            }
+            return false;
+        }).finally(function () {
+            if (oAppView) {
+                ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", false);
+            }
+        });
+    }
+
+    function runSaveRetry(oController) {
+        return EffectActionRouting.dispatchByName(
+            oController,
+            null,
+            ActionContract.ACTIONS.DETAIL_RETRY_GUARDED_SAVE,
+            {}
+        );
+    }
+
+    function runSearchRetry(oController) {
+        var oSearchView = oController.byId && oController.byId("searchPaneHost");
+        var oSearchController = oSearchView && oSearchView.getController && oSearchView.getController();
+        if (oSearchController && typeof oSearchController.onRetrySearchLoad === "function") {
+            return oSearchController.onRetrySearchLoad();
+        }
+        return Promise.resolve();
+    }
+
+    function runSessionRetry(oController) {
+        var oOwner = oController.getOwnerComponent && oController.getOwnerComponent();
+        var oModel = oOwner && oOwner.getModel && oOwner.getModel();
+        return SecurityTokenRefresh.refresh(oModel);
+    }
+
+    function runRetry(oController, vRetryAction) {
+        var sAction = ActionContract.normalizeRetryAction(vRetryAction);
+        var mRetryHandlers = {};
+        mRetryHandlers[ActionContract.RETRY_ACTIONS.SAVE] = runSaveRetry;
+        mRetryHandlers[ActionContract.RETRY_ACTIONS.SEARCH] = runSearchRetry;
+        mRetryHandlers[ActionContract.RETRY_ACTIONS.SESSION] = runSessionRetry;
+        if (typeof mRetryHandlers[sAction] !== "function") {
+            return Promise.resolve();
+        }
+        return mRetryHandlers[sAction](oController);
     }
 
     return {
@@ -70,7 +139,7 @@ sap.ui.define([
         onGlobalBannerRetry: function () {
             var oState = this._getStateModel();
             var sAction = String(FeedbackBannerRuntime.getBannerProperty(oState, "global", "retryAction") || "").trim();
-            return AppRetryActionPolicy.runRetry(this, sAction);
+            return runRetry(this, sAction);
         },
 
         onCopyFeedbackCorrelationId: function () {
@@ -131,11 +200,14 @@ sap.ui.define([
 
         onShellUserPrimaryAction: function (oEvent) {
             var sActionKind = String(ModelStateRuntime.read(this, "appView", "/shell/userActionKind", "") || "").trim();
-            return AppShellUserActionPolicy.runPrimaryAction(this, sActionKind, oEvent);
+            if (ActionContract.normalizeShellUserAction(sActionKind) === ActionContract.SHELL_USER_ACTIONS.REFRESH_CONTEXT) {
+                return Promise.resolve(this._refreshShellUserContext());
+            }
+            return Promise.resolve();
         },
 
         onRefreshShellUser: function () {
-            return AppShellUserRefreshSupport.refreshCurrentUser(this);
+            return refreshCurrentUser(this);
         },
 
         _refreshShellUserContext: function () {

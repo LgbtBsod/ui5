@@ -43,11 +43,32 @@ sap.ui.define([], function () {
         oBody.setAttribute(sName, String(sValue));
     }
 
+    function setStyleProperty(aNodes, sName, sValue) {
+        var bChanged = false;
+        (Array.isArray(aNodes) ? aNodes : []).forEach(function (oNode) {
+            if (oNode && oNode.style && typeof oNode.style.setProperty === "function") {
+                oNode.style.setProperty(sName, String(sValue));
+                bChanged = true;
+            }
+        });
+        return bChanged;
+    }
+
+    function setStyleProperties(aNodes, mValues) {
+        var bChanged = false;
+        Object.keys(mValues || {}).forEach(function (sName) {
+            bChanged = setStyleProperty(aNodes, sName, mValues[sName]) || bChanged;
+        });
+        return bChanged;
+    }
+
     return {
         addClass: addClass,
         getNodes: getNodes,
         removeClass: removeClass,
         setBodyAttribute: setBodyAttribute,
+        setStyleProperty: setStyleProperty,
+        setStyleProperties: setStyleProperties,
         toggleClass: toggleClass
     };
 });

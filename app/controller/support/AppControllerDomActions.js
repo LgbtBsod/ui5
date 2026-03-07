@@ -92,8 +92,10 @@ sap.ui.define([
             }
             oRect = oShellHeader.getBoundingClientRect();
             iBottom = Math.max(88, Math.round(oRect.bottom + 14));
-            oDoc.style.setProperty("--app-shell-height", Math.round(oRect.height) + "px");
-            oDoc.style.setProperty("--app-shell-offset", iBottom + "px");
+            ThemeDomRuntime.setStyleProperties([oDoc], {
+                "--app-shell-height": Math.round(oRect.height) + "px",
+                "--app-shell-offset": iBottom + "px"
+            });
         },
 
         _scheduleShellLayoutRefresh: function () {

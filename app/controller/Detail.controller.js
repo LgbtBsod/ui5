@@ -1,19 +1,63 @@
 sap.ui.define([
     "checklist/app/controller/Base.controller",
     "checklist/app/controller/support/DetailControllerLifecycle",
+    "checklist/app/controller/support/DetailValidationSummarySupport",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/controller/support/DetailActionViewportSupport",
+    "checklist/app/controller/support/DetailActionPinnedRailSupport",
+    "checklist/app/controller/support/DetailActionDialogSupport",
+    "checklist/app/controller/support/DetailChecklistCoreSupport",
+    "checklist/app/controller/support/DetailChecklistStateActions",
+    "checklist/app/controller/support/DetailChecklistRowActions",
+    "checklist/app/controller/support/DetailAttachmentLocationActions",
     "checklist/app/controller/support/DetailFormatters",
-    "checklist/app/controller/support/AttachmentUploadSupport",
-    "checklist/app/controller/support/DetailControllerActions"
+    "checklist/app/controller/support/AttachmentUploadCore"
 ], function (
     BaseController,
     DetailControllerLifecycle,
+    DetailValidationSummarySupport,
+    DetailActionConstants,
+    DetailActionViewportSupport,
+    DetailActionPinnedRailSupport,
+    DetailActionDialogSupport,
+    DetailChecklistCoreSupport,
+    DetailChecklistStateActions,
+    DetailChecklistRowActions,
+    DetailAttachmentLocationActions,
     DetailFormatters,
-    AttachmentUploadSupport,
-    DetailControllerActions
+    AttachmentUploadCore
 ) {
     "use strict";
+    var STATE_PATHS = DetailActionConstants.STATE_PATHS;
 
-    var mControllerDefinition = Object.assign({}, DetailControllerLifecycle, DetailControllerActions, {
+    var mControllerDefinition = Object.assign(
+        {},
+        DetailControllerLifecycle,
+        DetailActionViewportSupport,
+        DetailActionPinnedRailSupport,
+        DetailActionDialogSupport,
+        DetailChecklistCoreSupport,
+        DetailChecklistStateActions,
+        DetailChecklistRowActions,
+        DetailAttachmentLocationActions,
+        {
+            _computeValidationSummary: function () {
+                return DetailValidationSummarySupport.compute(this);
+            },
+
+            _recomputeValidationSummary: function (sSource, bShowValidation) {
+                return DetailValidationSummarySupport.recompute(this, sSource, bShowValidation, STATE_PATHS);
+            },
+
+            _focusFirstInvalidField: function () {
+                return DetailValidationSummarySupport.focusFirstInvalidField(this, STATE_PATHS);
+            },
+
+            _onSelectedChecklistChanged: function (oEvent) {
+                DetailValidationSummarySupport.onSelectedChecklistChanged(this, oEvent, STATE_PATHS);
+            }
+        },
+        {
         formatValidationState: DetailFormatters.formatValidationState,
         formatValidationText: DetailFormatters.formatValidationText,
         formatValidationSummaryText: DetailFormatters.formatValidationSummaryText,
@@ -39,7 +83,7 @@ sap.ui.define([
         formatPersonSuggestion: DetailFormatters.formatPersonSuggestion,
         formatAttachmentSize: DetailFormatters.formatAttachmentSize,
         formatAttachmentUploadHint: function (aExtensions, iMaxSizeMb) {
-            return AttachmentUploadSupport.formatUploadHint(this, aExtensions, iMaxSizeMb);
+            return AttachmentUploadCore.formatUploadHint(this, aExtensions, iMaxSizeMb);
         },
         formatI18nByKey: DetailFormatters.formatI18nByKey,
         formatHeartbeatText: DetailFormatters.formatHeartbeatText,

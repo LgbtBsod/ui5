@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (ModelStateRuntime) {
     "use strict";
 
     function normalizeLayout(vLayout) {
@@ -33,27 +35,27 @@ sap.ui.define([], function () {
 
     function readLayout(oStateModel, sFallback) {
         return normalizeLayout(
-            oStateModel && oStateModel.getProperty ? oStateModel.getProperty("/layout") : (sFallback || "OneColumn")
+            ModelStateRuntime.readOnModel(oStateModel, "/layout", sFallback || "OneColumn")
         );
     }
 
     function readMode(oStateModel, sFallback) {
         return normalizeMode(
-            oStateModel && oStateModel.getProperty ? oStateModel.getProperty("/mode") : "",
+            ModelStateRuntime.readOnModel(oStateModel, "/mode", ""),
             sFallback || "READ"
         );
     }
 
     function readLockState(oStateModel, sFallback) {
         return normalizeState(
-            oStateModel && oStateModel.getProperty ? oStateModel.getProperty("/lockOperationState") : "",
+            ModelStateRuntime.readOnModel(oStateModel, "/lockOperationState", ""),
             sFallback || "IDLE"
         );
     }
 
     function readAutosaveState(oStateModel, sFallback) {
         return normalizeState(
-            oStateModel && oStateModel.getProperty ? oStateModel.getProperty("/autosaveState") : "",
+            ModelStateRuntime.readOnModel(oStateModel, "/autosaveState", ""),
             sFallback || "IDLE"
         );
     }

@@ -1,7 +1,8 @@
 sap.ui.define([
     "checklist/app/util/RuntimeTimerSanitizer",
-    "checklist/app/util/runtime/TimerDefaults"
-], function (RuntimeTimerSanitizer, TimerDefaults) {
+    "checklist/app/util/runtime/TimerDefaults",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (RuntimeTimerSanitizer, TimerDefaults, ModelStateRuntime) {
     "use strict";
 
     function buildDefaultTimerMap() {
@@ -24,7 +25,7 @@ sap.ui.define([
         if (!oStateModel || !sTimerKey) {
             return undefined;
         }
-        return oStateModel.getProperty("/timers/" + sTimerKey);
+        return ModelStateRuntime.readOnModel(oStateModel, "/timers/" + sTimerKey, undefined);
     }
 
     return {

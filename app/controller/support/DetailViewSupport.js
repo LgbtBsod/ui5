@@ -11,13 +11,14 @@
     "sap/m/Button",
     "sap/ui/core/Item",
     "sap/ui/core/CustomData",
+    "checklist/app/controller/support/BindingContextReadSupport",
     "checklist/app/service/framework/ControlStyleRuntime",
     "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/service/framework/ModelStateRuntime"
-], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ModelStateRuntime) {
+], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ModelStateRuntime) {
     "use strict";
 
     var CARD_REQUIRED_KEYS = {
@@ -373,7 +374,7 @@
     }
 
     function buildInfoCard(oController, sId, oContext) {
-        var sKey = String(oContext && oContext.getProperty && oContext.getProperty("key") || "");
+        var sKey = String(BindingContextReadSupport.read(oContext, "key", "") || "");
         var oItem = createInfoCardWrapper(sId, oContext);
         var oShell = withStyleClasses(new VBox({ renderType: "Bare" }), "infoCardTile mushroomCard");
         var oTitle = withStyleClasses(new Text(), "infoCardTitle");

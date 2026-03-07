@@ -21,7 +21,7 @@ sap.ui.define([
     }
 
     function resumePendingIntent(mContext) {
-        var oIntent = mContext.stateModel.getProperty(mContext.statePaths.PENDING_NAVIGATION_INTENT);
+        var oIntent = ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null);
         if (!oIntent || !oIntent.routeName) {
             return false;
         }

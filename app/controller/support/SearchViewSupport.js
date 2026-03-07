@@ -1,5 +1,5 @@
 ﻿sap.ui.define([
-    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/SearchSelectionSupport",
     "checklist/app/controller/support/SearchLoadRuntimeSupport",
     "checklist/app/controller/support/SearchRateProgress",
     "checklist/app/controller/support/SearchCommandPolicy",
@@ -11,8 +11,10 @@
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/SchedulingRuntime",
-    "checklist/app/util/TimeConfigService"
-], function (SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, DialogOrchestrator, NavigationIntentService, ControllerTextRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, TimeConfigService) {
+    "checklist/app/util/TimeConfigService",
+    "checklist/app/util/ThemeDomRuntime",
+    "checklist/app/controller/support/SearchViewStateSupport"
+], function (SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, DialogOrchestrator, NavigationIntentService, ControllerTextRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, TimeConfigService, ThemeDomRuntime, SearchViewStateSupport) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = {
@@ -115,9 +117,7 @@
 
     function setSearchViewportCssVar(oController, sName, sValue) {
         var oViewDom = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
-        if (oViewDom && oViewDom.style) {
-            oViewDom.style.setProperty(sName, sValue);
-        }
+        ThemeDomRuntime.setStyleProperty([oViewDom], sName, sValue);
     }
 
     function resolveSearchScrollHost(oController) {
@@ -686,7 +686,7 @@
     function extractChecklistIdFromListItem(oListItem) {
         var oCtx = oListItem && oListItem.getBindingContext && oListItem.getBindingContext();
         var oObject = oCtx && oCtx.getObject && oCtx.getObject();
-        return SearchControllerSupport.extractChecklistIdFromObject(oObject);
+        return SearchSelectionSupport.extractChecklistIdFromObject(oObject);
     }
 
     function resolveSelectedRowIdsFromInnerTable(oInnerTable) {
@@ -1158,7 +1158,7 @@
         if (oInnerTable.attachItemPress) {
             oInnerTable.attachItemPress(oController.onSearchTableItemPress, oController);
         }
-        SearchControllerSupport.syncSearchTableRequestWindow(oController);
+        SearchViewStateSupport.syncSearchTableRequestWindow(oController);
         SearchRateProgress.wireTable(oController, oInnerTable);
         bindSearchViewportRuntime(oController);
         scheduleSearchViewportSync(oController, true);
@@ -1171,7 +1171,7 @@
         var oSmartTable = oController.byId("searchSmartTable");
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
         configureSearchResultTable(oController, oInnerTable, true);
-        SearchControllerSupport.syncSearchTableRequestWindow(oController);
+        SearchViewStateSupport.syncSearchTableRequestWindow(oController);
         ControllerViewStateRuntime.set(oController, "/tableBusy", true);
         scheduleSearchWorkingHint(oController);
         scheduleSearchViewportSync(oController, false);

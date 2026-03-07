@@ -1,9 +1,10 @@
 sap.ui.define([
-    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/AttachmentUploadCore",
+    "checklist/app/controller/support/AttachmentDropZoneRuntime",
     "checklist/app/controller/support/DetailActionConstants",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/SchedulingRuntime"
-], function (AttachmentUploadSupport, DetailActionConstants, ControllerViewStateRuntime, SchedulingRuntime) {
+], function (AttachmentUploadCore, AttachmentDropZoneRuntime, DetailActionConstants, ControllerViewStateRuntime, SchedulingRuntime) {
     "use strict";
 
     function remToPx(fRem) {
@@ -11,20 +12,100 @@ sap.ui.define([
         return Math.round(Number(fRem || 0) * (Number.isFinite(iRootSize) && iRootSize > 0 ? iRootSize : 16));
     }
 
+    function ensureDropZoneDelegate(oController, oDropZone) {
+        if (!oDropZone || !oDropZone.addEventDelegate || oController._attachmentDropZoneDelegate) {
+            return;
+        }
+        oController._attachmentDropZoneDelegate = {
+            onAfterRendering: function () {
+                oController._bindAttachmentDropZone();
+            }
+        };
+        oDropZone.addEventDelegate(oController._attachmentDropZoneDelegate);
+    }
+
+    function clearDropZoneDelegate(oController, oDropZone) {
+        if (oDropZone && oController._attachmentDropZoneDelegate && oDropZone.removeEventDelegate) {
+            oDropZone.removeEventDelegate(oController._attachmentDropZoneDelegate);
+            oController._attachmentDropZoneDelegate = null;
+        }
+    }
+
+    function ensureHandlers(oController, aSpecs) {
+        aSpecs.forEach(function (oSpec) {
+            oController[oSpec.field] = oController[oSpec.field] || oSpec.handler.bind(null, oController);
+        });
+    }
+
+    function toggleListeners(oTarget, aSpecs, oController, bAttach) {
+        if (!oTarget) {
+            return;
+        }
+        aSpecs.forEach(function (oSpec) {
+            if (bAttach) {
+                oTarget.addEventListener(oSpec.event, oController[oSpec.field], true);
+                return;
+            }
+            oTarget.removeEventListener(oSpec.event, oController[oSpec.field], true);
+        });
+    }
+
     return {
+        _bindAttachmentDropZone: function () {
+            var oDropZone = this.byId("attachmentDropZone");
+            var oDomRef = oDropZone && oDropZone.getDomRef && oDropZone.getDomRef();
+
+            AttachmentUploadCore.syncUploaderPolicy(this);
+            ensureDropZoneDelegate(this, oDropZone);
+            if (!oDomRef) {
+                this._unbindAttachmentDropZone();
+                return;
+            }
+            if (this._attachmentDropZoneDom === oDomRef) {
+                return;
+            }
+
+            this._unbindAttachmentDropZone();
+            this._attachmentDragDepth = 0;
+            ensureHandlers(this, AttachmentDropZoneRuntime.dropScopeSpecs);
+            ensureHandlers(this, AttachmentDropZoneRuntime.globalSpecs);
+            toggleListeners(oDomRef, AttachmentDropZoneRuntime.dropScopeSpecs, this, true);
+            toggleListeners(document, AttachmentDropZoneRuntime.globalSpecs, this, true);
+            this._attachmentDropZoneDom = oDomRef;
+            this._attachmentDropScopeDom = oDomRef;
+        },
+
+        _unbindAttachmentDropZone: function () {
+            var oDropZone = this.byId && this.byId("attachmentDropZone");
+            if (!this._attachmentDropZoneDom) {
+                clearDropZoneDelegate(this, oDropZone);
+                return;
+            }
+            if (this._attachmentDropScopeDom) {
+                toggleListeners(this._attachmentDropScopeDom, AttachmentDropZoneRuntime.dropScopeSpecs, this, false);
+            }
+            toggleListeners(document, AttachmentDropZoneRuntime.globalSpecs, this, false);
+            this._attachmentDropZoneDom = null;
+            this._attachmentDropScopeDom = null;
+            this._attachmentDragDepth = 0;
+            this._attachmentGlobalDragDepth = 0;
+            AttachmentDropZoneRuntime.resetVisual(this);
+            clearDropZoneDelegate(this, oDropZone);
+        },
+
         _scheduleAttachmentDropZoneBind: function (iAttempt) {
             var iNextAttempt = Number(iAttempt || 0);
             var oDropZone;
             this._iAttachmentDropZoneBindTimer = SchedulingRuntime.restartTimer(this._iAttachmentDropZoneBindTimer, function () {
                 var oDropZoneDom;
                 this._iAttachmentDropZoneBindTimer = null;
-                AttachmentUploadSupport.syncUploaderPolicy(this);
+                AttachmentUploadCore.syncUploaderPolicy(this);
                 oDropZone = this.byId("attachmentDropZone");
                 oDropZoneDom = oDropZone && oDropZone.getDomRef && oDropZone.getDomRef();
                 if (!oDropZoneDom) {
-                    AttachmentUploadSupport.unbindDropZone(this);
+                    this._unbindAttachmentDropZone();
                 } else {
-                    AttachmentUploadSupport.bindDropZone(this);
+                    this._bindAttachmentDropZone();
                 }
                 if (!oDropZoneDom && iNextAttempt < 8) {
                     this._scheduleAttachmentDropZoneBind(iNextAttempt + 1);

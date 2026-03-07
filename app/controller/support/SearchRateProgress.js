@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/controller/support/BindingContextReadSupport"
+], function (BindingContextReadSupport) {
     "use strict";
 
     function getProgressIndicatorCtor() { return sap.ui.requireSync("sap/m/ProgressIndicator"); }
@@ -30,16 +32,6 @@ sap.ui.define([], function () {
         var n = parseFloat(String(vRate == null ? "0" : vRate).replace("%", "").replace(",", "."));
         if (!isFinite(n)) { return 0; }
         return Math.max(0, Math.min(100, n));
-    }
-
-    function readAnyProperty(oCtx, aNames, vFallback) {
-        var i, vValue;
-        if (!oCtx || !aNames || !aNames.length || typeof oCtx.getProperty !== "function") { return vFallback; }
-        for (i = 0; i < aNames.length; i += 1) {
-            vValue = oCtx.getProperty(aNames[i]);
-            if (vValue !== undefined && vValue !== null && vValue !== "") { return vValue; }
-        }
-        return vFallback;
     }
 
     function applyRateColumnVisibility(oTable, mIndexes, bHasChecks, bHasBarriers) {
@@ -129,10 +121,10 @@ sap.ui.define([], function () {
             var nChecks, nBarriers, vChecksTotal, vBarriersTotal, nChecksTotal, nBarriersTotal, bShowChecks, bShowBarriers;
             if (oItem && typeof oItem.setType === "function" && oItem.getType && oItem.getType() !== "Active") { oItem.setType("Active"); }
             if (!oCtx || !aCells.length) { return; }
-            nChecks = toRatePercent(readAnyProperty(oCtx, ["success_checks_rate", "SuccessChecksRate"], 0));
-            nBarriers = toRatePercent(readAnyProperty(oCtx, ["success_barriers_rate", "barriers_rate", "SuccessBarriersRate"], 0));
-            vChecksTotal = readAnyProperty(oCtx, ["checks_total", "ChecksTotal"], null);
-            vBarriersTotal = readAnyProperty(oCtx, ["barriers_total", "BarriersTotal"], null);
+            nChecks = toRatePercent(BindingContextReadSupport.readAny(oCtx, ["success_checks_rate", "SuccessChecksRate"], 0));
+            nBarriers = toRatePercent(BindingContextReadSupport.readAny(oCtx, ["success_barriers_rate", "barriers_rate", "SuccessBarriersRate"], 0));
+            vChecksTotal = BindingContextReadSupport.readAny(oCtx, ["checks_total", "ChecksTotal"], null);
+            vBarriersTotal = BindingContextReadSupport.readAny(oCtx, ["barriers_total", "BarriersTotal"], null);
             nChecksTotal = vChecksTotal == null ? NaN : Number(vChecksTotal);
             nBarriersTotal = vBarriersTotal == null ? NaN : Number(vBarriersTotal);
             if (isFinite(nChecksTotal)) { bChecksTotalKnown = true; if (nChecksTotal > 0) { bHasChecks = true; } }

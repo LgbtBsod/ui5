@@ -5,8 +5,9 @@ sap.ui.define([
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/SchedulingRuntime",
+    "checklist/app/util/ThemeDomRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, Device) {
+], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device) {
     "use strict";
 
     var PHONE_MAX_WIDTH = 720;
@@ -141,9 +142,9 @@ sap.ui.define([
                 bDetailOnly = false;
             }
             if (oClassHost && oClassHost.classList) {
-                oClassHost.classList.toggle("appLayoutSingle", bSingle);
-                oClassHost.classList.toggle("appLayoutSplit", !bSingle && !bDetailOnly);
-                oClassHost.classList.toggle("appLayoutDetailOnly", bDetailOnly);
+                ThemeDomRuntime.toggleClass([oClassHost], "appLayoutSingle", bSingle);
+                ThemeDomRuntime.toggleClass([oClassHost], "appLayoutSplit", !bSingle && !bDetailOnly);
+                ThemeDomRuntime.toggleClass([oClassHost], "appLayoutDetailOnly", bDetailOnly);
             }
             if (oLayout && typeof oLayout.getLayout === "function" && typeof oLayout.setLayout === "function" && oLayout.getLayout() !== sLayout) {
                 oLayout.setLayout(sLayout);

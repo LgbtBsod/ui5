@@ -3,8 +3,9 @@ sap.ui.define([
     "checklist/app/util/CreateSentinel",
     "checklist/app/service/backend/GatewayBackendService",
     "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/LayoutStateRuntime"
-], function (StatePaths, CreateSentinel, GatewayBackendService, RootIdRuntime, LayoutStateRuntime) {
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (StatePaths, CreateSentinel, GatewayBackendService, RootIdRuntime, LayoutStateRuntime, ModelStateRuntime) {
     "use strict";
 
     function encodeUrlParameters(mParameters) {
@@ -20,10 +21,10 @@ sap.ui.define([
 
     function readActiveLockPayload(oStateModel) {
         var sRootId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
-        var sSessionGuid = String(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.SESSION_ID) || "" : "").trim();
-        var sMode = LayoutStateRuntime.normalizeMode(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) : "", "");
-        var sLockState = LayoutStateRuntime.normalizeState(oStateModel && oStateModel.getProperty ? oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) : "", "");
-        var oCurrentUser = oStateModel && oStateModel.getProperty ? (oStateModel.getProperty("/currentUser") || {}) : {};
+        var sSessionGuid = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || "").trim();
+        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, ""), "");
+        var sLockState = LayoutStateRuntime.normalizeState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, ""), "");
+        var oCurrentUser = ModelStateRuntime.readOnModel(oStateModel, "/currentUser", {}) || {};
         var sUser = String(oCurrentUser.uname || "").trim();
         if (!sRootId || !sSessionGuid || CreateSentinel.isCreateId(sRootId)) {
             return null;
@@ -39,7 +40,7 @@ sap.ui.define([
     }
 
     function buildLockReleaseUrl(oStateModel) {
-        var sServiceUrl = String(oStateModel && oStateModel.getProperty ? oStateModel.getProperty("/backendServiceUrl") || "" : "").trim() || GatewayBackendService.serviceUrl();
+        var sServiceUrl = String(ModelStateRuntime.readOnModel(oStateModel, "/backendServiceUrl", "") || "").trim() || GatewayBackendService.serviceUrl();
         if (!sServiceUrl) {
             return "";
         }

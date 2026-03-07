@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/util/ThemeDomRuntime"
+], function (ThemeDomRuntime) {
     "use strict";
 
     function asRgbTriplet(sColor) {
@@ -66,18 +68,20 @@ sap.ui.define([], function () {
             fnSyncDocumentRootClasses();
         }
         if (sBrand && bHorizonThemeActive) {
-            oRoot.style.setProperty("--chk-brand", sBrand);
-            oRoot.style.setProperty("--accent", sBrand);
-            oRoot.style.setProperty("--accent-rgb", asRgbTriplet(sBrand) || "84, 149, 255");
+            ThemeDomRuntime.setStyleProperties([oRoot], {
+                "--chk-brand": sBrand,
+                "--accent": sBrand,
+                "--accent-rgb": asRgbTriplet(sBrand) || "84, 149, 255"
+            });
         }
         if (sBase) {
-            oRoot.style.setProperty("--chk-ui5-bg", sBase);
+            ThemeDomRuntime.setStyleProperty([oRoot], "--chk-ui5-bg", sBase);
         }
         if (sShell) {
-            oRoot.style.setProperty("--chk-ui5-shell", sShell);
+            ThemeDomRuntime.setStyleProperty([oRoot], "--chk-ui5-shell", sShell);
         }
         if (sText) {
-            oRoot.style.setProperty("--chk-ui5-text", sText);
+            ThemeDomRuntime.setStyleProperty([oRoot], "--chk-ui5-text", sText);
         }
         if (bHorizonThemeActive) {
             sInfoRgb = asRgbTriplet(sInfo);
@@ -85,22 +89,22 @@ sap.ui.define([], function () {
             sSuccessRgb = asRgbTriplet(sSuccess);
             sDangerRgb = asRgbTriplet(sDanger);
             if (sInfoRgb) {
-                oRoot.style.setProperty("--semantic-info-rgb", sInfoRgb);
+                ThemeDomRuntime.setStyleProperty([oRoot], "--semantic-info-rgb", sInfoRgb);
             }
             if (sWarningRgb) {
-                oRoot.style.setProperty("--semantic-warning-rgb", sWarningRgb);
+                ThemeDomRuntime.setStyleProperty([oRoot], "--semantic-warning-rgb", sWarningRgb);
             }
             if (sSuccess) {
-                oRoot.style.setProperty("--semantic-success", sSuccess);
+                ThemeDomRuntime.setStyleProperty([oRoot], "--semantic-success", sSuccess);
             }
             if (sSuccessRgb) {
-                oRoot.style.setProperty("--semantic-success-rgb", sSuccessRgb);
+                ThemeDomRuntime.setStyleProperty([oRoot], "--semantic-success-rgb", sSuccessRgb);
             }
             if (sDanger) {
-                oRoot.style.setProperty("--semantic-danger", sDanger);
+                ThemeDomRuntime.setStyleProperty([oRoot], "--semantic-danger", sDanger);
             }
             if (sDangerRgb) {
-                oRoot.style.setProperty("--semantic-danger-rgb", sDangerRgb);
+                ThemeDomRuntime.setStyleProperty([oRoot], "--semantic-danger-rgb", sDangerRgb);
             }
         }
     }

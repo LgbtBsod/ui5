@@ -1,8 +1,9 @@
 sap.ui.define([
+    "checklist/app/controller/support/BindingContextReadSupport",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/controller/support/DetailInfoCardLayoutSupport"
-], function (DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutSupport) {
+], function (BindingContextReadSupport, DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutSupport) {
     "use strict";
 
     var ROW_ENTITY_CONFIG = {
@@ -81,12 +82,12 @@ sap.ui.define([
             if (!oDraggedContext || !oDroppedContext || !aCards.length) {
                 return;
             }
-            sDraggedKey = oDraggedContext.getProperty("key");
+            sDraggedKey = BindingContextReadSupport.read(oDraggedContext, "key", "");
             iDraggedIndex = aCards.findIndex(function (oCard) {
                 return oCard.key === sDraggedKey;
             });
             iDroppedIndex = aCards.findIndex(function (oCard) {
-                return oCard.key === oDroppedContext.getProperty("key");
+                return oCard.key === BindingContextReadSupport.read(oDroppedContext, "key", "");
             });
             if (iDraggedIndex < 0 || iDroppedIndex < 0 || iDraggedIndex === iDroppedIndex) {
                 return;
@@ -106,7 +107,7 @@ sap.ui.define([
             if (!oContext) {
                 return;
             }
-            DetailInfoCardLayoutSupport.togglePin(this, oContext.getProperty("key"));
+            DetailInfoCardLayoutSupport.togglePin(this, BindingContextReadSupport.read(oContext, "key", ""));
         },
 
         onInfoCardKeyDown: function (oEvent, sCardKey) {

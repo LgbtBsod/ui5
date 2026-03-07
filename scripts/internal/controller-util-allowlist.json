@@ -32,6 +32,7 @@
   "service/framework/FacadeCommandRuntime",
   "service/framework/EffectApplier",
   "service/framework/EffectActionRouting",
+  "service/framework/EffectTextResolver",
   "service/framework/DialogOrchestrator",
   "service/framework/FeedbackCoordinator",
   "service/framework/EffectUiHandlers",

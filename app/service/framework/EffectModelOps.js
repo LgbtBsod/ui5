@@ -12,19 +12,19 @@ sap.ui.define([
     function busy(oController, oEffect) {
         var oModel = getModel(oController, oEffect.modelName);
         var sPath = oEffect.path || (oEffect.scope ? "/busy/" + oEffect.scope : "/busy");
-        if (oModel && oModel.setProperty) { ModelStateRuntime.writeOnModel(oModel, sPath, !!oEffect.value); }
+        ModelStateRuntime.writeOnModel(oModel, sPath, !!oEffect.value);
     }
 
     function patch(oController, oEffect) {
         var oModel = getModel(oController, oEffect.modelName);
-        if (oModel && oModel.setProperty) { ModelStateRuntime.writeOnModel(oModel, oEffect.path, CloneUtil.clone(oEffect.value)); }
+        ModelStateRuntime.writeOnModel(oModel, oEffect.path, CloneUtil.clone(oEffect.value));
     }
 
     function merge(oController, oEffect) {
         var oModel = getModel(oController, oEffect.modelName);
         var oCurrent;
         if (!oModel || !oModel.getProperty || !oModel.setProperty) { return; }
-        oCurrent = oModel.getProperty(oEffect.path) || {};
+        oCurrent = ModelStateRuntime.readOnModel(oModel, oEffect.path, {}) || {};
         ModelStateRuntime.writeOnModel(
             oModel,
             oEffect.path,

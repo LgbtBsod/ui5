@@ -37,12 +37,10 @@ sap.ui.define([
             store.events = store.events.slice(store.events.length - 250);
         }
 
-        if (stateModel && typeof stateModel.setProperty === "function") {
-            ModelStateRuntime.setManyOnModel(stateModel, {
-                "/uxTelemetry/events": store.events,
-                "/uxTelemetry/lastEvent": evt
-            });
-        }
+        ModelStateRuntime.setManyOnModel(stateModel, {
+            "/uxTelemetry/events": store.events,
+            "/uxTelemetry/lastEvent": evt
+        });
 
         return evt;
     }

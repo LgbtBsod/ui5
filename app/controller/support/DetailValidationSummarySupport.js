@@ -1,16 +1,40 @@
 sap.ui.define([
-    "checklist/app/controller/support/DetailSelectionSync",
     "checklist/app/controller/support/DetailPersonInputSupport",
     "checklist/app/service/framework/FocusRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/SchedulingRuntime"
-], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime) {
+    "checklist/app/service/framework/SchedulingRuntime",
+    "checklist/app/util/ValidationPathMap"
+], function (DetailPersonInputSupport, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap) {
     "use strict";
 
     function validationSummaryPath(mStatePaths) {
         return (mStatePaths && mStatePaths.VALIDATION_SUMMARY) || "/validationSummary";
+    }
+
+    function isFilledValidationValue(vValue) {
+        if (Array.isArray(vValue)) {
+            return vValue.length > 0;
+        }
+        if (typeof vValue === "boolean") {
+            return true;
+        }
+        return String(vValue == null ? "" : vValue).trim().length > 0;
+    }
+
+    function shouldTrackSelectedDirtyPath(sModelPath) {
+        var sPath = "/" + String(sModelPath || "").replace(/^\//, "");
+        if (sPath === "/") {
+            return false;
+        }
+        if (/^\/attachments(?:\/|$)/.test(sPath)) {
+            return false;
+        }
+        if (/^\/(?:root|meta)(?:\/|$)/.test(sPath)) {
+            return false;
+        }
+        return /^\/(?:basic|checks|barriers)(?:\/|$)/.test(sPath);
     }
 
     function resolveFocusDomRef(oControl) {
@@ -53,9 +77,9 @@ sap.ui.define([
 
         (Array.isArray(aRequired) ? aRequired : []).forEach(function (sRequiredPath) {
             var sPath = "/" + String(sRequiredPath || "").replace(/^\//, "");
-            var sKey = DetailSelectionSync.toValidationKey(sPath);
-            var vCurrent = oSelectedModel && oSelectedModel.getProperty ? oSelectedModel.getProperty(sPath) : undefined;
-            var bMissing = !DetailSelectionSync.isFilledValidationValue(vCurrent);
+            var sKey = ValidationPathMap.toValidationKey(sPath);
+            var vCurrent = oSelectedModel ? ModelStateRuntime.read(oController, "selected", sPath, undefined) : undefined;
+            var bMissing = !isFilledValidationValue(vCurrent);
             mMissing[sKey] = bMissing;
             if (bMissing) {
                 aMissingPaths.push(sPath);
@@ -157,14 +181,19 @@ sap.ui.define([
 
         if (oUiStateModel) {
             if (sPath === "/") {
-                ModelStateRuntime.syncDetailCurrent(oController, oSelectedModel.getProperty("/") || {});
+                ModelStateRuntime.syncDetailCurrent(oController, ModelStateRuntime.read(oController, "selected", "/", {}) || {});
             } else {
-                ModelStateRuntime.write(oController, "uiState", "/_detailCurrent" + sModelPath, oSelectedModel.getProperty(sModelPath));
+                ModelStateRuntime.write(
+                    oController,
+                    "uiState",
+                    "/_detailCurrent" + sModelPath,
+                    ModelStateRuntime.read(oController, "selected", sModelPath, undefined)
+                );
             }
         }
 
         sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", "/mode", ""), "");
-        if (DetailSelectionSync.shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {
+        if (shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {
             ModelStateRuntime.write(oController, "state", "/isDirty", true);
         }
 
@@ -174,9 +203,9 @@ sap.ui.define([
             return;
         }
 
-        sValidationKey = DetailSelectionSync.toValidationKey(sRequiredPath);
-        vCurrent = oSelectedModel.getProperty(sRequiredPath);
-        ControllerViewStateRuntime.set(oController, "/validationMissing/" + sValidationKey, !DetailSelectionSync.isFilledValidationValue(vCurrent));
+        sValidationKey = ValidationPathMap.toValidationKey(sRequiredPath);
+        vCurrent = ModelStateRuntime.read(oController, "selected", sRequiredPath, undefined);
+        ControllerViewStateRuntime.set(oController, "/validationMissing/" + sValidationKey, !isFilledValidationValue(vCurrent));
         recompute(oController, "fieldChange", false, mStatePaths);
     }
 

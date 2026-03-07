@@ -58,8 +58,7 @@ sap.ui.define([
         },
 
         _readCachedGuard: function (sRootId) {
-            var oStateModel = ModelStateRuntime.model(this, "state");
-            var oGuard = (oStateModel && oStateModel.getProperty && oStateModel.getProperty("/detailAccessGuard")) || {};
+            var oGuard = ModelStateRuntime.read(this, "state", "/detailAccessGuard", {}) || {};
             var sGuardRootId = String(oGuard.rootId || "").trim();
 
             if (sGuardRootId && sGuardRootId === String(sRootId || "").trim()) {
@@ -86,18 +85,16 @@ sap.ui.define([
                     NavigationIntentService.navigateToDetail(this, sRootId);
                     return;
                 }
-                if (oStateModel && typeof oStateModel.setProperty === "function") {
-                    ModelStateRuntime.writeOnModel(oStateModel, "/detailAccessGuard", {
-                        rootId: String((oPermission && oPermission.rootId) || sRootId || "").trim(),
-                        userId: String((oPermission && oPermission.userId) || "").trim(),
-                        canView: false,
-                        canEdit: !!(oPermission && oPermission.canEdit),
-                        canDelete: !!(oPermission && oPermission.canDelete),
-                        reasonCode: String((oPermission && oPermission.reasonCode) || "NO_VIEW_PERMISSION").trim(),
-                        message: String((oPermission && oPermission.message) || "").trim(),
-                        checkedAt: new Date().toISOString()
-                    });
-                }
+                ModelStateRuntime.writeOnModel(oStateModel, "/detailAccessGuard", {
+                    rootId: String((oPermission && oPermission.rootId) || sRootId || "").trim(),
+                    userId: String((oPermission && oPermission.userId) || "").trim(),
+                    canView: false,
+                    canEdit: !!(oPermission && oPermission.canEdit),
+                    canDelete: !!(oPermission && oPermission.canDelete),
+                    reasonCode: String((oPermission && oPermission.reasonCode) || "NO_VIEW_PERMISSION").trim(),
+                    message: String((oPermission && oPermission.message) || "").trim(),
+                    checkedAt: new Date().toISOString()
+                });
                 this._renderGuardState(oPermission, sRootId);
             }.bind(this)).catch(function () {
                 ControllerViewStateRuntime.replace(this, function () {

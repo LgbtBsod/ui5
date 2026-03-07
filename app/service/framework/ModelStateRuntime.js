@@ -21,12 +21,16 @@ sap.ui.define([
         });
     }
 
-    function read(oController, sModelName, sPath, vFallback) {
-        var oModel = model(oController, sModelName);
+    function readOnModel(oModel, sPath, vFallback) {
         if (!oModel || typeof oModel.getProperty !== "function") {
             return vFallback;
         }
         return oModel.getProperty(sPath);
+    }
+
+    function read(oController, sModelName, sPath, vFallback) {
+        var oModel = model(oController, sModelName);
+        return readOnModel(oModel, sPath, vFallback);
     }
 
     function write(oController, sModelName, sPath, vValue) {
@@ -116,6 +120,7 @@ sap.ui.define([
         model: model,
         writeOnModel: writeOnModel,
         setManyOnModel: setManyOnModel,
+        readOnModel: readOnModel,
         read: read,
         write: write,
         writeBoolean: writeBoolean,

@@ -1,6 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/SchedulingRuntime"
-], function (SchedulingRuntime) {
+    "checklist/app/service/framework/SchedulingRuntime",
+    "checklist/app/util/ThemeDomRuntime"
+], function (SchedulingRuntime, ThemeDomRuntime) {
     "use strict";
 
     var RIPPLE_CLASS = "is-rippling";
@@ -16,8 +17,10 @@ sap.ui.define([
             return;
         }
         oRect = oElement.getBoundingClientRect();
-        oElement.style.setProperty("--mx", (oEvent.clientX - oRect.left) + "px");
-        oElement.style.setProperty("--my", (oEvent.clientY - oRect.top) + "px");
+        ThemeDomRuntime.setStyleProperties([oElement], {
+            "--mx": (oEvent.clientX - oRect.left) + "px",
+            "--my": (oEvent.clientY - oRect.top) + "px"
+        });
     }
 
     function attach(oRootDomRef) {
@@ -35,8 +38,10 @@ sap.ui.define([
                 updatePointerVars(oTarget, oEvent);
             }
             if (oRoot) {
-                oRoot.style.setProperty("--app-mx", oEvent.clientX + "px");
-                oRoot.style.setProperty("--app-my", oEvent.clientY + "px");
+                ThemeDomRuntime.setStyleProperties([oRoot], {
+                    "--app-mx": oEvent.clientX + "px",
+                    "--app-my": oEvent.clientY + "px"
+                });
             }
         }
 
@@ -50,11 +55,11 @@ sap.ui.define([
                 return;
             }
             iRippleTimer = SchedulingRuntime.clearTimer(iRippleTimer);
-            oTarget.classList.remove(RIPPLE_CLASS);
+            ThemeDomRuntime.removeClass([oTarget], RIPPLE_CLASS);
             void oTarget.offsetWidth;
-            oTarget.classList.add(RIPPLE_CLASS);
+            ThemeDomRuntime.addClass([oTarget], RIPPLE_CLASS);
             iRippleTimer = SchedulingRuntime.restartTimer(0, function () {
-                oTarget.classList.remove(RIPPLE_CLASS);
+                ThemeDomRuntime.removeClass([oTarget], RIPPLE_CLASS);
                 iRippleTimer = 0;
             }, RIPPLE_DURATION_MS);
         }

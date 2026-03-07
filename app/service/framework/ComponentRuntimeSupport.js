@@ -16,7 +16,7 @@ sap.ui.define([
     }
 
     function ensureSessionId(oStateModel) {
-        var sCurrent = oStateModel.getProperty(StatePaths.SESSION_ID);
+        var sCurrent = ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "");
         var sStored = window.sessionStorage.getItem("pcct_session_id") || "";
         if (sCurrent) {
             return sCurrent;
@@ -52,7 +52,7 @@ sap.ui.define([
     function applyLockProbeState(oPayload, oStateModel) {
         var bKilled = !!(oPayload && (oPayload.killed || oPayload.is_killed));
         var bOk = !!(oPayload && (oPayload.ok || oPayload.lockOk || oPayload.success || oPayload.Ok));
-        var bLost = !bKilled && !bOk && oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) === "EDIT";
+        var bLost = !bKilled && !bOk && ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") === "EDIT";
         return {
             killed: bKilled,
             lost: bLost,
@@ -63,10 +63,10 @@ sap.ui.define([
 
     function syncUiStateMode(oStateModel, oUiStateModel) {
         ModelStateRuntime.setManyOnModel(oUiStateModel, {
-            "/mode": oStateModel.getProperty("/mode") || "READ",
-            "/busy": !!(oStateModel.getProperty("/isBusy") || oStateModel.getProperty("/isLoading")),
-            "/currentRootKey": oStateModel.getProperty("/activeObjectId") || "",
-            "/sessionGuid": oStateModel.getProperty(StatePaths.SESSION_ID) || ""
+            "/mode": ModelStateRuntime.readOnModel(oStateModel, "/mode", "READ") || "READ",
+            "/busy": !!(ModelStateRuntime.readOnModel(oStateModel, "/isBusy", false) || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)),
+            "/currentRootKey": ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "",
+            "/sessionGuid": ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || ""
         });
     }
 
@@ -77,16 +77,16 @@ sap.ui.define([
 
     function resolveDetailCurrent(oSelectedModel, oUiStateModel) {
         var oSelected = oSelectedModel.getData() || {};
-        var oCurrent = oUiStateModel.getProperty("/_detailCurrent") || {};
+        var oCurrent = ModelStateRuntime.readOnModel(oUiStateModel, "/_detailCurrent", {}) || {};
         if (oSelected && oSelected.root) {
             ModelStateRuntime.writeOnModel(oUiStateModel, "/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
-            return oUiStateModel.getProperty("/_detailCurrent") || {};
+            return ModelStateRuntime.readOnModel(oUiStateModel, "/_detailCurrent", {}) || {};
         }
         if (oCurrent && oCurrent.root) {
             return oCurrent;
         }
         syncDetailCurrentFromSelected(oSelectedModel, oUiStateModel);
-        return oUiStateModel.getProperty("/_detailCurrent") || {};
+        return ModelStateRuntime.readOnModel(oUiStateModel, "/_detailCurrent", {}) || {};
     }
 
     return {

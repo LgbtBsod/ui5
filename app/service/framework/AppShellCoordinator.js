@@ -2,13 +2,23 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "checklist/app/infra/navigation/RouteModeCoordinator",
     "checklist/app/util/DebugLogger",
-    "checklist/app/service/framework/AppShellStateSync",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/util/TimeConfigService",
     "checklist/app/util/runtime/TimerDefaults",
     "checklist/app/service/framework/SchedulingRuntime"
-], function (JSONModel, RouteModeCoordinator, DebugLogger, AppShellStateSync, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime) {
+], function (JSONModel, RouteModeCoordinator, DebugLogger, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime) {
     "use strict";
+
+    function resolveStateModel(oController) {
+        return oController.getModel("state") ||
+            (oController.getOwnerComponent && oController.getOwnerComponent() && oController.getOwnerComponent().getModel("state"));
+    }
+
+    function ensureControllerStateModel(oController, oStateModel) {
+        if (oStateModel && !oController.getModel("state")) {
+            oController.getView().setModel(oStateModel, "state");
+        }
+    }
 
     function syncThemeState(oController, sSource, oThemeResult) {
         var oAppView = oController.getView().getModel("appView");
@@ -39,7 +49,7 @@ sap.ui.define([
         if (oController._oRouteModeCoordinator) {
             return;
         }
-        var oResolvedState = oStateModel || AppShellStateSync.resolveStateModel(oController);
+        var oResolvedState = oStateModel || resolveStateModel(oController);
         if (!oResolvedState) {
             SchedulingRuntime.restartTimer(0, function () {
                 initStateBoundUi(oController);
@@ -47,7 +57,7 @@ sap.ui.define([
             return;
         }
         var iBootstrapRetryMs = Number(TimeConfigService.read(oResolvedState, "bootstrapRetryMs") || (TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50);
-        AppShellStateSync.ensureControllerStateModel(oController, oResolvedState);
+        ensureControllerStateModel(oController, oResolvedState);
         oController._oRouteModeCoordinator = new RouteModeCoordinator({
             router: oController.getRouter(),
             stateModel: oResolvedState,
@@ -67,12 +77,12 @@ sap.ui.define([
                 backgroundInteractive: !oApplied || oApplied.backgroundInteractive !== false
             }), "appView");
             syncThemeState(oController, "init", oApplied);
-            var oState = AppShellStateSync.resolveStateModel(oController);
-            AppShellStateSync.ensureControllerStateModel(oController, oState);
+            var oState = resolveStateModel(oController);
+            ensureControllerStateModel(oController, oState);
             if (oState) {
                 ModelStateRuntime.setManyOnModel(oState, {
-                    "/layout": oState.getProperty("/layout") || "OneColumn",
-                    "/selectedId": typeof oState.getProperty("/selectedId") === "undefined" ? null : oState.getProperty("/selectedId")
+                    "/layout": ModelStateRuntime.readOnModel(oState, "/layout", "OneColumn") || "OneColumn",
+                    "/selectedId": typeof ModelStateRuntime.readOnModel(oState, "/selectedId", undefined) === "undefined" ? null : ModelStateRuntime.readOnModel(oState, "/selectedId", null)
                 });
             }
             initStateBoundUi(oController, oState);

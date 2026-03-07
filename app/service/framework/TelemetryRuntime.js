@@ -1,12 +1,11 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (ModelStateRuntime) {
     "use strict";
 
     function stateRead(oStateModel, sPath, vFallback) {
         var vValue;
-        if (!oStateModel || typeof oStateModel.getProperty !== "function") {
-            return vFallback;
-        }
-        vValue = oStateModel.getProperty(sPath);
+        vValue = ModelStateRuntime.readOnModel(oStateModel, sPath, vFallback);
         return typeof vValue === "undefined" ? vFallback : vValue;
     }
 

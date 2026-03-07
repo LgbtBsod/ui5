@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/util/ThemeDomRuntime"
+], function (ThemeDomRuntime) {
     "use strict";
 
     function resolveStickyHost(oController) {
@@ -12,11 +14,11 @@ sap.ui.define([], function () {
         if (!oHostDom) {
             return;
         }
-        oHostDom.classList.remove("isViewportPinned");
+        ThemeDomRuntime.removeClass([oHostDom], "isViewportPinned");
         oHostDom.style.removeProperty("height");
         oHostDom.style.removeProperty("--detail-rail-height");
         if (oCardDom) {
-            oCardDom.classList.remove("detailControlCardDocked");
+            ThemeDomRuntime.removeClass([oCardDom], "detailControlCardDocked");
         }
     }
 

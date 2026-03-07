@@ -1,25 +1,22 @@
 sap.ui.define([
     "checklist/app/service/framework/EffectApplier",
+    "checklist/app/service/framework/EffectTextResolver",
     "checklist/app/service/framework/EffectUiHandlers",
     "checklist/app/service/framework/FeedbackBannerRuntime",
     "checklist/app/service/framework/behavior/BehaviorRegistry"
-], function (EffectApplier, EffectUiHandlers, FeedbackBannerRuntime, BehaviorRegistry) {
+], function (EffectApplier, EffectTextResolver, EffectUiHandlers, FeedbackBannerRuntime, BehaviorRegistry) {
     "use strict";
 
     var FEEDBACK_SCOPE = "feedback";
     var bDefaultsRegistered = false;
 
-    function resolveBundle(oController) {
-        var oI18n = oController && oController.getModel && oController.getModel("i18n");
-        return oI18n && oI18n.getResourceBundle ? oI18n.getResourceBundle() : null;
-    }
-
     function resolveText(mContext) {
-        var oBundle = resolveBundle(mContext.controller);
-        if (oBundle && oBundle.hasText && oBundle.hasText(mContext.textKey)) {
-            return oBundle.getText(mContext.textKey, mContext.args || []);
-        }
-        return mContext.fallback || mContext.textKey || "";
+        return EffectTextResolver.getText(
+            mContext.controller,
+            mContext.textKey,
+            mContext.args || [],
+            mContext.fallback || mContext.textKey || ""
+        );
     }
 
     function applyUseCaseResult(mContext) {

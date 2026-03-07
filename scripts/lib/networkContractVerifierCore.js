@@ -109,7 +109,7 @@ function collectIntents(rootDir) {
   const component = readText(rootDir, 'Component.js');
   const manifest = JSON.parse(readText(rootDir, 'manifest.json'));
   const searchView = readText(rootDir, 'view/Search.view.xml');
-  const searchController = readText(rootDir, 'controller/Search.controller.js');
+  const searchControllerActions = readText(rootDir, 'controller/support/SearchControllerActions.js');
 
   const odataRoot = '/sap/opu/odata/sap/Z_UI5_SRV/';
   const useBatch = /new\s+sap\.ui\.model\.odata\.v2\.ODataModel\([^\)]*useBatch\s*:\s*true/s.test(component)
@@ -117,7 +117,7 @@ function collectIntents(rootDir) {
 
   const hasSmartTable = /smartTable:SmartTable[\s\S]*entitySet="ChecklistSearchSet"/.test(searchView);
   const hasSfb = /smartFilterBar:SmartFilterBar/.test(searchView);
-  const hasBeforeRebind = /onBeforeSmartTableRebind/.test(searchController);
+  const hasBeforeRebind = /onBeforeSmartTableRebind\s*:\s*function\s*\(/.test(searchControllerActions);
   const forbiddenHits = scanForbiddenPatterns(rootDir);
 
   const { Filter, FilterOperator } = buildFilterStubs();

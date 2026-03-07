@@ -1,9 +1,10 @@
 sap.ui.define([
     "checklist/app/service/framework/DialogOrchestrator",
     "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/service/framework/EffectTextResolver",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/RootIdRuntime"
-], function (DialogOrchestrator, DetailCommandPolicy, ModelStateRuntime, RootIdRuntime) {
+], function (DialogOrchestrator, DetailCommandPolicy, EffectTextResolver, ModelStateRuntime, RootIdRuntime) {
     "use strict";
 
     function resetDeleteChecklistConfirmArmed(oController) {
@@ -47,8 +48,7 @@ sap.ui.define([
 
     function confirmDelete(oController) {
         var bArmed = !!ModelStateRuntime.read(oController, "view", "/deleteChecklistConfirmArmed", false);
-        var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
-        var sText = oBundle && oBundle.getText ? oBundle.getText("deleteChecklistConfirmText") : "deleteChecklistConfirmText";
+        var sText = EffectTextResolver.getText(oController, "deleteChecklistConfirmText", [], "deleteChecklistConfirmText");
         if (!bArmed || ModelStateRuntime.any(oController, "state", ["/isBusy", "/lockOperationPending"])) {
             return Promise.resolve(false);
         }

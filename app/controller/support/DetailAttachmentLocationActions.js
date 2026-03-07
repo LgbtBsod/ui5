@@ -1,17 +1,17 @@
 sap.ui.define([
-    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/AttachmentUploadCore",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/support/DetailPersonInputSupport",
     "checklist/app/service/framework/AttachmentFlowService",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/SchedulingRuntime"
-], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, NavigationIntentService, SchedulingRuntime) {
+], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, NavigationIntentService, SchedulingRuntime) {
     "use strict";
 
     return {
         onAttachmentUploadChange: function (oEvent) {
             return AttachmentFlowService.onUploaderChange(this, oEvent, {
-                onUploaderChange: AttachmentUploadSupport.onUploaderChange
+                onUploaderChange: AttachmentUploadCore.onUploaderChange
             });
         },
 
@@ -26,7 +26,11 @@ sap.ui.define([
                         oController._scheduleAttachmentDropZoneBind();
                     }
                 },
-                unbindDropZone: AttachmentUploadSupport.unbindDropZone
+                unbindDropZone: function (oController) {
+                    if (oController && typeof oController._unbindAttachmentDropZone === "function") {
+                        oController._unbindAttachmentDropZone();
+                    }
+                }
             });
         },
         onOpenWorkflowAnalytics: function () {

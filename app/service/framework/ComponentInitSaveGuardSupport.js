@@ -13,7 +13,7 @@ sap.ui.define([
 
     function buildSaveBannerPayload(oStateModel, mOptions) {
         var bSessionExpired = !!mOptions.sessionExpired;
-        var bOffline = oStateModel.getProperty("/networkOnline") === false;
+        var bOffline = ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false;
         var sDetail = String(mOptions.detail || "save_failed");
         return FeedbackBannerRuntime.createRetryBannerInput(
             bSessionExpired ? "error" : (bOffline ? "warning" : "error"),
@@ -45,7 +45,7 @@ sap.ui.define([
 
         return function () {
             var sRootId;
-            if (oStateModel.getProperty(oStatePaths.SAVE_IN_FLIGHT)) {
+            if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
                 return oComponent._pGuardedSavePromise || Promise.resolve(false);
             }
             sRootId = RootIdRuntime.resolveFromStateModel(oStateModel);
@@ -59,7 +59,7 @@ sap.ui.define([
                 "/autosaveState": "SAVING"
             });
             oComponent._iSaveWorkingTimer = SchedulingRuntime.restartTimer(oComponent._iSaveWorkingTimer, function () {
-                if (oStateModel.getProperty(oStatePaths.SAVE_IN_FLIGHT)) {
+                if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
                     fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("info", "workingMessageLong", {
                         retryAction: ActionContract.RETRY_ACTIONS.SAVE,
                         retryTextKey: "retryNowButton"

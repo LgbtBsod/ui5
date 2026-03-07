@@ -1,6 +1,7 @@
 sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime"
-], function (ControllerViewStateRuntime) {
+], function (ModelStateRuntime, ControllerViewStateRuntime) {
     "use strict";
 
     function syncDrafts(oController, oSelectedModel, sModelPath) {
@@ -9,7 +10,7 @@ sap.ui.define([
             return;
         }
         if (sModelPath === "/") {
-            oBasic = oSelectedModel.getProperty("/basic") || {};
+            oBasic = ModelStateRuntime.read(oController, "selected", "/basic", {}) || {};
             ControllerViewStateRuntime.set(oController, "/observerInputValue", String(oBasic.OBSERVER_FULLNAME || ""));
             ControllerViewStateRuntime.set(oController, "/observedInputValue", String(oBasic.OBSERVED_FULLNAME || ""));
             return;
@@ -18,7 +19,7 @@ sap.ui.define([
             ControllerViewStateRuntime.set(
                 oController,
                 "/observerInputValue",
-                String(oSelectedModel.getProperty("/basic/OBSERVER_FULLNAME") || "")
+                String(ModelStateRuntime.read(oController, "selected", "/basic/OBSERVER_FULLNAME", "") || "")
             );
             return;
         }
@@ -26,7 +27,7 @@ sap.ui.define([
             ControllerViewStateRuntime.set(
                 oController,
                 "/observedInputValue",
-                String(oSelectedModel.getProperty("/basic/OBSERVED_FULLNAME") || "")
+                String(ModelStateRuntime.read(oController, "selected", "/basic/OBSERVED_FULLNAME", "") || "")
             );
         }
     }

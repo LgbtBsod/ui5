@@ -1,21 +1,12 @@
 sap.ui.define([
-    "checklist/app/util/CloneUtil"
-], function (CloneUtil) {
+    "checklist/app/util/CloneUtil",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime) {
     "use strict";
 
     function cloneArgs(oArgs) {
         return CloneUtil.clone(oArgs, {});
-    }
-
-    function normalizeLayout(vLayout) {
-        var sLayout = String(vLayout || "").trim();
-        if (sLayout === "MidColumnFullScreen") {
-            return "MidColumnFullScreen";
-        }
-        if (sLayout === "TwoColumnsMidExpanded" || sLayout === "TwoColumnsBeginExpanded") {
-            return "TwoColumnsMidExpanded";
-        }
-        return "OneColumn";
     }
 
     function readStateModel(oController) {
@@ -24,7 +15,10 @@ sap.ui.define([
 
     function readSelectedId(oStateModel) {
         return String(
-            (oStateModel && oStateModel.getProperty && (oStateModel.getProperty("/selectedId") || oStateModel.getProperty("/activeObjectId"))) || ""
+            (
+                ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "") ||
+                ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
+            ) || ""
         ).trim();
     }
 
@@ -36,12 +30,12 @@ sap.ui.define([
     }
 
     function buildCurrentIntent(oStateModel) {
-        var sRouteName = String((oStateModel && oStateModel.getProperty && oStateModel.getProperty("/currentRouteName")) || "search").trim() || "search";
+        var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "search") || "search").trim() || "search";
         var sSelectedId = readSelectedId(oStateModel);
-        var sLayout = normalizeLayout(oStateModel && oStateModel.getProperty && oStateModel.getProperty("/layout"));
+        var sLayout = LayoutStateRuntime.readLayout(oStateModel, "OneColumn");
 
         if (sRouteName === "analytics") {
-            return cloneArgs((oStateModel && oStateModel.getProperty && oStateModel.getProperty("/analyticsNavReturn")) || buildFallbackIntent());
+            return cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
         }
         if (sRouteName === "accessDenied" && sSelectedId) {
             return {
@@ -71,12 +65,10 @@ sap.ui.define([
         var oStateModel = readStateModel(oController);
         var oIntent = buildCurrentIntent(oStateModel);
 
-        if (oStateModel && typeof oStateModel.setProperty === "function") {
-            oStateModel.setProperty("/analyticsNavReturn", {
-                routeName: String(oIntent.routeName || "search"),
-                routeArgs: cloneArgs(oIntent.routeArgs)
-            });
-        }
+        ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
+            routeName: String(oIntent.routeName || "search"),
+            routeArgs: cloneArgs(oIntent.routeArgs)
+        });
 
         return oIntent;
     }
@@ -92,7 +84,7 @@ sap.ui.define([
 
     function navigateBackFromAnalytics(oController) {
         var oStateModel = readStateModel(oController);
-        var oIntent = cloneArgs((oStateModel && oStateModel.getProperty && oStateModel.getProperty("/analyticsNavReturn")) || buildFallbackIntent());
+        var oIntent = cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
         var oRouter = oController && oController.getRouter && oController.getRouter();
 
         if (!oIntent.routeName) {
@@ -113,7 +105,7 @@ sap.ui.define([
     function navigateToDetail(oController, sRootId, sLayout) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var sId = String(sRootId || "").trim();
-        var sResolvedLayout = normalizeLayout(sLayout);
+        var sResolvedLayout = LayoutStateRuntime.normalizeLayout(sLayout);
 
         if (!oRouter || typeof oRouter.navTo !== "function" || !sId) {
             return;

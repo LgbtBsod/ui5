@@ -6,12 +6,14 @@ sap.ui.define([
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/controller/support/SearchCommandPolicy",
-    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/SearchSelectionSupport",
     "checklist/app/controller/support/SearchLoadRuntimeSupport",
     "checklist/app/controller/support/SearchRateProgress",
     "checklist/app/controller/support/SearchViewSupport",
-    "checklist/app/service/framework/SchedulingRuntime"
-], function (ControllerResourceCleanup, SearchFacade, FocusRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SchedulingRuntime) {
+    "checklist/app/service/framework/SchedulingRuntime",
+    "checklist/app/util/search/SearchMaxResults",
+    "checklist/app/controller/support/SearchViewStateSupport"
+], function (ControllerResourceCleanup, SearchFacade, FocusRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SchedulingRuntime, SearchMaxResults, SearchViewStateSupport) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -34,8 +36,8 @@ sap.ui.define([
             this._bWorkflowAnalyticsOpenRequested = false;
             this._oWorkflowAnalyticsReturnFocus = null;
             this._searchRateProgress = SearchRateProgress;
-            this._sSearchUiSessionKey = SearchControllerSupport.resolveSearchUiSessionKey();
-            this.setModel(SearchControllerSupport.createViewModel(this._sSearchUiSessionKey), "view");
+            this._sSearchUiSessionKey = SearchViewStateSupport.resolveSearchUiSessionKey();
+            this.setModel(SearchViewStateSupport.createViewModel(this._sSearchUiSessionKey), "view");
             ControllerRouteRuntime.attachMatched(this, [
                 { name: "search", handler: this._onSearchMatched },
                 { name: "detail", handler: this._onDetailSearchContextMatched },
@@ -136,7 +138,7 @@ sap.ui.define([
         },
 
         onSmartSearch: function () {
-            if (!SearchControllerSupport.isSmartControlsReady(this)) {
+            if (!SearchViewStateSupport.isSmartControlsReady(this)) {
                 return Promise.resolve();
             }
             this._syncToolbarRequestInputs();
@@ -150,8 +152,7 @@ sap.ui.define([
         },
 
         onRetrySearchLoad: function () {
-            var oStateModel = this.getModel("state");
-            if (oStateModel && oStateModel.getProperty && oStateModel.getProperty("/networkOnline") === false) {
+            if (ModelStateRuntime.read(this, "state", "/networkOnline", true) === false) {
                 this.showI18nError("searchOfflineMessage");
                 return Promise.resolve(false);
             }
@@ -224,25 +225,25 @@ sap.ui.define([
         },
 
         onMaxRowsChange: function (oEvent) {
-            var sValue = SearchControllerSupport.normalizeSearchMaxResultsValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
+            var sValue = SearchMaxResults.normalizeSearchMaxResultsValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
             sValue = normalizeRequestValue(sValue, ModelStateRuntime.read(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
             ModelStateRuntime.write(this, "state", "/searchMaxResults", sValue);
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
-            SearchControllerSupport.syncSearchTableRequestWindow(this);
+            SearchViewStateSupport.syncSearchTableRequestWindow(this);
         },
 
         onBackendTopChange: function (oEvent) {
-            var sValue = SearchControllerSupport.normalizeSearchBackendTopValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
+            var sValue = SearchMaxResults.normalizeSearchBackendTopValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
             sValue = normalizeRequestValue(sValue, ModelStateRuntime.read(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
             ModelStateRuntime.write(this, "state", "/searchBackendTop", sValue);
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
-            SearchControllerSupport.syncSearchTableRequestWindow(this);
+            SearchViewStateSupport.syncSearchTableRequestWindow(this);
             if (ControllerViewStateRuntime.get(this, "/hasSearched") &&
                 ControllerViewStateRuntime.get(this, "/smartTableReady")) {
                 SearchCommandPolicy.rebind(this, { source: "backendTopChange" });
@@ -252,8 +253,8 @@ sap.ui.define([
         _syncToolbarRequestInputs: function () {
             var oBackendTopInput = this.byId("backendTopInput");
             var oMaxRowsInput = this.byId("maxRowsInput");
-            var sBackendTop = SearchControllerSupport.normalizeSearchBackendTopValue(oBackendTopInput && oBackendTopInput.getValue && oBackendTopInput.getValue());
-            var sMaxRows = SearchControllerSupport.normalizeSearchMaxResultsValue(oMaxRowsInput && oMaxRowsInput.getValue && oMaxRowsInput.getValue());
+            var sBackendTop = SearchMaxResults.normalizeSearchBackendTopValue(oBackendTopInput && oBackendTopInput.getValue && oBackendTopInput.getValue());
+            var sMaxRows = SearchMaxResults.normalizeSearchMaxResultsValue(oMaxRowsInput && oMaxRowsInput.getValue && oMaxRowsInput.getValue());
             sBackendTop = normalizeRequestValue(sBackendTop, ModelStateRuntime.read(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
             sMaxRows = normalizeRequestValue(sMaxRows, ModelStateRuntime.read(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
             ModelStateRuntime.write(this, "state", "/searchBackendTop", sBackendTop);
@@ -264,7 +265,7 @@ sap.ui.define([
             if (oMaxRowsInput && typeof oMaxRowsInput.setValue === "function") {
                 oMaxRowsInput.setValue(sMaxRows);
             }
-            SearchControllerSupport.syncSearchTableRequestWindow(this);
+            SearchViewStateSupport.syncSearchTableRequestWindow(this);
         },
 
         onSearchModeToggle: function (oEvent) {
@@ -295,17 +296,17 @@ sap.ui.define([
         },
 
         formatWorkflowStageText: function (sStage) {
-            return SearchControllerSupport.formatWorkflowStageText(this.getResourceBundle && this.getResourceBundle(), sStage);
+            return SearchViewStateSupport.formatWorkflowStageText(this.getResourceBundle && this.getResourceBundle(), sStage);
         },
 
         formatWorkflowStageState: function (sStage) {
-            return SearchControllerSupport.formatWorkflowStageState(sStage);
+            return SearchViewStateSupport.formatWorkflowStageState(sStage);
         },
 
         onSearchTableSelectionChange: function (oEvent) {
             var oSmartTable = this.byId("searchSmartTable");
             var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
-            var aSelectedRowIds = SearchControllerSupport.extractSelectedRowIds(oEvent, oInnerTable);
+            var aSelectedRowIds = SearchSelectionSupport.extractSelectedRowIds(oEvent, oInnerTable);
             var sSelectedRowId = aSelectedRowIds[0] || "";
             SearchCommandPolicy.selectionChanged(this, {
                 event: oEvent,
@@ -316,7 +317,7 @@ sap.ui.define([
         },
 
         onSearchTableItemPress: function (oEvent) {
-            var sSelectedRowId = SearchControllerSupport.extractSelectedRowId(oEvent);
+            var sSelectedRowId = SearchSelectionSupport.extractSelectedRowId(oEvent);
             if (!sSelectedRowId) {
                 return;
             }

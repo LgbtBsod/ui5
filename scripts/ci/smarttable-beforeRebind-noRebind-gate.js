@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const { resolveFromRoot } = require('../qa-shared');
-const src = fs.readFileSync(resolveFromRoot(process.cwd(), 'controller/Search.controller.js'), 'utf8');
+const src = fs.readFileSync(resolveFromRoot(process.cwd(), 'controller/support/SearchControllerActions.js'), 'utf8');
 const m = src.match(/onBeforeSmartTableRebind\s*:\s*function\s*\([^)]*\)\s*\{([\s\S]*?)\n\s*\},/);
 if (!m) { console.error('FAIL: onBeforeSmartTableRebind not found'); process.exit(1); }
 if (/rebindTable\s*\(|_execute\s*\(\s*["']rebind["']|\brebind\b/i.test(m[1])) {

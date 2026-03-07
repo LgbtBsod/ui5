@@ -3,20 +3,20 @@ sap.ui.define([
     "checklist/app/service/domain/detail/DetailFacade",
     "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/controller/support/AttachmentUploadSupport",
     "checklist/app/controller/support/DetailAccessViewState",
     "checklist/app/controller/support/DetailInfoCardLayoutSupport",
     "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/SchedulingRuntime"
 ], function (
     ControllerResourceCleanup,
     DetailFacade,
     ControllerRouteRuntime,
     ControllerTextRuntime,
-    AttachmentUploadSupport,
     DetailAccessViewState,
     DetailInfoCardLayoutSupport,
     ControllerViewStateRuntime,
+    ModelStateRuntime,
     SchedulingRuntime
 ) {
     "use strict";
@@ -146,7 +146,7 @@ sap.ui.define([
             this._clearLocationValueHelpSearchTimer();
             this._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(this._iLocationVhTableSyncTimer);
             this._unbindViewportPinnedControlRail();
-            AttachmentUploadSupport.unbindDropZone(this);
+            this._unbindAttachmentDropZone();
             ControllerResourceCleanup.destroyMapEntries(this._mLazyDialogs);
             this._oSelectedModel = null;
             this._mLazyDialogs = null;
@@ -158,11 +158,9 @@ sap.ui.define([
         },
 
         _replayInitialDetailRouteIfNeeded: function () {
-            var oStateModel = this.getModel("state");
-            var oSelectedModel = this.getModel("selected");
             var oParsedRoute = parseInitialDetailHash();
-            var sCurrentRouteName = String((oStateModel && oStateModel.getProperty && oStateModel.getProperty("/currentRouteName")) || "search").trim() || "search";
-            var sLoadedRootId = String((oSelectedModel && oSelectedModel.getProperty && oSelectedModel.getProperty("/root/id")) || "").trim();
+            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
+            var sLoadedRootId = String(ModelStateRuntime.read(this, "selected", "/root/id", "") || "").trim();
 
             if (!oParsedRoute || !oParsedRoute.id || sLoadedRootId || sCurrentRouteName !== "search") {
                 return;

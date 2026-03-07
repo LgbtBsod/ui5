@@ -26,14 +26,15 @@ sap.ui.define([
         oComponent._oHeartbeat = new mManagers.HeartbeatManager({
             intervalMs: Number(mTimerDefaults.heartbeatMs),
             heartbeatFn: function () {
-                if (oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) !== "EDIT" || oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) !== "LOCKED") {
+                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") !== "EDIT"
+                    || ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") !== "LOCKED") {
                     return Promise.resolve({ success: true, is_killed: false, skipped: true });
                 }
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.heartbeat !== "function") {
                     return Promise.resolve({ success: false, is_killed: false, skipped: true, missing: "ctx.lock.heartbeat" });
                 }
-                var sRootId = oStateModel.getProperty("/activeObjectId");
-                var sSessionGuid = oStateModel.getProperty(StatePaths.SESSION_ID);
+                var sRootId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
+                var sSessionGuid = ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "");
                 return oComponent._ctx.lock.heartbeat({
                     rootId: sRootId,
                     sessionGuid: sSessionGuid
@@ -48,25 +49,25 @@ sap.ui.define([
             intervalMs: Number(mTimerDefaults.autoSaveIntervalMs),
             debounceMs: Number(mTimerDefaults.autoSaveDebounceMs),
             lockGuardFn: function () {
-                return oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) === "LOCKED";
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") === "LOCKED";
             },
             guardFn: function () {
-                return oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) === "EDIT"
-                    && oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) === "LOCKED"
-                    && !!oStateModel.getProperty(StatePaths.WORKFLOW_DIRTY);
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") === "EDIT"
+                    && ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") === "LOCKED"
+                    && !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
             },
             shouldSave: function () {
-                var bIsLocked = oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) === "LOCKED";
-                return oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) === "EDIT"
+                var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") === "LOCKED";
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") === "EDIT"
                     && bIsLocked
-                    && !!oStateModel.getProperty(StatePaths.WORKFLOW_DIRTY)
-                    && !!oStateModel.getProperty("/activeObjectId")
-                    && oStateModel.getProperty("/networkOnline") !== false;
+                    && !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false)
+                    && !!ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
+                    && ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) !== false;
             },
             buildPayload: function () {
-                var sId = oStateModel.getProperty("/activeObjectId");
+                var sId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
                 var oCurrent = fnResolveDetailCurrent();
-                var oBase = oUiStateModel.getProperty("/_detailSnapshot") || {};
+                var oBase = ModelStateRuntime.readOnModel(oUiStateModel, "/_detailSnapshot", {}) || {};
                 if (!sId || !oCurrent || !oCurrent.root || oCurrent.root.id !== sId) {
                     return null;
                 }
@@ -85,7 +86,7 @@ sap.ui.define([
                     if (!oResult || oResult.ok === false) {
                         return Promise.reject((oResult && oResult.error) || new Error("Autosave usecase failed"));
                     }
-                    oStateModel.setProperty(StatePaths.WORKFLOW_DIRTY, false);
+                    ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
                     return oResult.data || {};
                 });
             }
@@ -95,7 +96,7 @@ sap.ui.define([
                 "/autosaveState": "SAVING",
                 [StatePaths.SAVE_IN_FLIGHT]: true
             });
-            if (oStateModel.getProperty("/networkOnline") === false) {
+            if (ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
                     ActionContract.RETRY_ACTIONS.SAVE,
                     "retryNowButton"
@@ -118,7 +119,7 @@ sap.ui.define([
                 [StatePaths.SAVE_IN_FLIGHT]: false
             });
             fnSetGlobalBanner(
-                oStateModel.getProperty("/networkOnline") === false
+                ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false
                     ? FeedbackBannerRuntime.createNetworkRetryBannerInput(
                         ActionContract.RETRY_ACTIONS.SAVE,
                         "retryNowButton"
@@ -137,14 +138,15 @@ sap.ui.define([
         oComponent._oLockStatus = new mManagers.LockStatusMonitor({
             intervalMs: Number(mTimerDefaults.lockStatusMs),
             checkFn: function () {
-                if (oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) !== "EDIT" || oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) !== "LOCKED") {
+                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") !== "EDIT"
+                    || ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") !== "LOCKED") {
                     return Promise.resolve({ success: true, is_killed: false, skipped: true });
                 }
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.status !== "function") {
                     return Promise.resolve({ success: false, is_killed: false, skipped: true, missing: "ctx.lock.status" });
                 }
-                var sRootId = oStateModel.getProperty("/activeObjectId");
-                var sSessionGuid = oStateModel.getProperty(StatePaths.SESSION_ID);
+                var sRootId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
+                var sSessionGuid = ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "");
                 return oComponent._ctx.lock.status({
                     rootId: sRootId,
                     sessionGuid: sSessionGuid

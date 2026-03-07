@@ -1,19 +1,8 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (LayoutStateRuntime, ModelStateRuntime) {
     "use strict";
-
-    function normalizeLayout(sLayout) {
-        var sValue = String(sLayout || "").trim();
-        if (sValue === "MidColumnFullScreen") {
-            return "MidColumnFullScreen";
-        }
-        if (sValue === "TwoColumnsMidExpanded" || sValue === "TwoColumnsBeginExpanded") {
-            return "TwoColumnsMidExpanded";
-        }
-        if (sValue === "OneColumn") {
-            return "OneColumn";
-        }
-        return null;
-    }
 
     function normalizeId(vId) {
         var sId = String(vId || "").trim();
@@ -27,7 +16,10 @@ sap.ui.define([], function () {
             return null;
         }
         if (sRoute === "analytics") {
-            return normalizeId(oStateModel.getProperty("/selectedId") || oStateModel.getProperty("/activeObjectId"));
+            return normalizeId(
+                ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "") ||
+                ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
+            );
         }
         if (sRoute === "accessDenied" && sArgId) {
             return sArgId;
@@ -35,7 +27,7 @@ sap.ui.define([], function () {
         if ((sRoute === "detail" || sRoute === "detailLayout") && sArgId) {
             return sArgId;
         }
-        return normalizeId(oStateModel.getProperty("/selectedId"));
+        return normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
     }
 
     function syncRouteState(oStateModel, sNextLayout, sRouteName, mArgs) {
@@ -49,26 +41,26 @@ sap.ui.define([], function () {
         if (!oStateModel || typeof oStateModel.getProperty !== "function" || typeof oStateModel.setProperty !== "function") {
             return null;
         }
-        sLayout = normalizeLayout(sNextLayout);
+        sLayout = LayoutStateRuntime.normalizeLayout(sNextLayout);
         if (!sLayout) {
             return null;
         }
-        sPrevLayout = normalizeLayout(oStateModel.getProperty("/layout")) || "OneColumn";
-        sPrevSelectedId = normalizeId(oStateModel.getProperty("/selectedId"));
-        sPrevRouteName = String(oStateModel.getProperty("/currentRouteName") || "search").trim() || "search";
+        sPrevLayout = LayoutStateRuntime.readLayout(oStateModel, "OneColumn");
+        sPrevSelectedId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
+        sPrevRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "search") || "search").trim() || "search";
         sNextSelectedId = resolveSelectedId(sLayout, sRouteName, mArgs, oStateModel);
         sNextRouteName = String(sRouteName || "search").trim() || "search";
 
         if (sPrevRouteName !== sNextRouteName) {
-            oStateModel.setProperty("/currentRouteName", sNextRouteName);
+            ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", sNextRouteName);
             bChanged = true;
         }
         if (sPrevSelectedId !== sNextSelectedId) {
-            oStateModel.setProperty("/selectedId", sNextSelectedId);
+            ModelStateRuntime.writeOnModel(oStateModel, "/selectedId", sNextSelectedId);
             bChanged = true;
         }
         if (sPrevLayout !== sLayout) {
-            oStateModel.setProperty("/layout", sLayout);
+            ModelStateRuntime.writeOnModel(oStateModel, "/layout", sLayout);
             bChanged = true;
         }
         return bChanged ? {

@@ -1,18 +1,18 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (ModelStateRuntime) {
     "use strict";
 
     function resolveFromStateModel(oStateModel) {
         return String(
-            (oStateModel && oStateModel.getProperty && (
-                oStateModel.getProperty("/activeObjectId") ||
-                oStateModel.getProperty("/selectedId")
-            )) || ""
+            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") ||
+            ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "")
         ).trim();
     }
 
     function resolveActiveFromStateModel(oStateModel) {
         return String(
-            (oStateModel && oStateModel.getProperty && oStateModel.getProperty("/activeObjectId")) || ""
+            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
         ).trim();
     }
 

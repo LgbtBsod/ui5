@@ -9,18 +9,15 @@ sap.ui.define([
     }
 
     function setBanner(oStateModel, sId, mInput, mOptions) {
-        if (!oStateModel || typeof oStateModel.setProperty !== "function") {
-            return false;
-        }
-        ModelStateRuntime.writeOnModel(oStateModel, bannerPath(sId), FeedbackBannerState.create(mInput || {}, mOptions || {}));
-        return true;
+        return ModelStateRuntime.writeOnModel(
+            oStateModel,
+            bannerPath(sId),
+            FeedbackBannerState.create(mInput || {}, mOptions || {})
+        );
     }
 
     function getBanner(oStateModel, sId) {
-        if (!oStateModel || typeof oStateModel.getProperty !== "function") {
-            return {};
-        }
-        return oStateModel.getProperty(bannerPath(sId)) || {};
+        return ModelStateRuntime.readOnModel(oStateModel, bannerPath(sId), {}) || {};
     }
 
     function getBannerProperty(oStateModel, sId, sProperty) {
@@ -88,11 +85,7 @@ sap.ui.define([
     }
 
     function clearBanner(oStateModel, sId) {
-        if (!oStateModel || typeof oStateModel.setProperty !== "function") {
-            return false;
-        }
-        ModelStateRuntime.writeOnModel(oStateModel, bannerPath(sId), FeedbackBannerState.empty());
-        return true;
+        return ModelStateRuntime.writeOnModel(oStateModel, bannerPath(sId), FeedbackBannerState.empty());
     }
 
     return {

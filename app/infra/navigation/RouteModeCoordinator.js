@@ -1,8 +1,10 @@
 sap.ui.define([
     "checklist/app/util/DebugLogger",
     "checklist/app/infra/navigation/RouteModeRules",
-    "checklist/app/infra/navigation/RouteSync"
-], function (DebugLogger, RouteModeRules, RouteSync) {
+    "checklist/app/infra/navigation/RouteSync",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (DebugLogger, RouteModeRules, RouteSync, LayoutStateRuntime, ModelStateRuntime) {
     "use strict";
 
     function debugLog(sEvent, oPayload) {
@@ -17,7 +19,7 @@ sap.ui.define([
     }
 
     RouteModeCoordinator.prototype._applyLayoutFromState = function () {
-        var sLayout = String((this._oStateModel && this._oStateModel.getProperty && this._oStateModel.getProperty("/layout")) || "OneColumn");
+        var sLayout = LayoutStateRuntime.readLayout(this._oStateModel, "OneColumn");
         if (this._oFcl && typeof this._oFcl.getLayout === "function" && typeof this._oFcl.setLayout === "function" && this._oFcl.getLayout() !== sLayout) {
             this._oFcl.setLayout(sLayout);
         }
@@ -30,7 +32,7 @@ sap.ui.define([
         this._oRouter.attachRoutePatternMatched(this._fnRouteMatched);
         this._applyLayoutFromState();
         debugLog("start", {
-            layout: this._oStateModel.getProperty("/layout") || "OneColumn"
+            layout: LayoutStateRuntime.readLayout(this._oStateModel, "OneColumn")
         });
     };
 
@@ -50,8 +52,8 @@ sap.ui.define([
             this._applyLayoutFromState();
             debugLog("routeMatched", {
                 route: sRouteName,
-                layout: this._oStateModel.getProperty("/layout"),
-                selectedId: this._oStateModel.getProperty("/selectedId")
+                layout: LayoutStateRuntime.readLayout(this._oStateModel, "OneColumn"),
+                selectedId: ModelStateRuntime.readOnModel(this._oStateModel, "/selectedId", null)
             });
         }
     };

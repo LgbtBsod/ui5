@@ -201,9 +201,11 @@ sap.ui.define([
             iX = window.innerWidth;
             iY = 0;
         }
-        oRoot.style.setProperty("--theme-flood-x", iX + "px");
-        oRoot.style.setProperty("--theme-flood-y", iY + "px");
-        oRoot.style.setProperty("--theme-flood-origin", iX + "px " + iY + "px");
+        ThemeDomRuntime.setStyleProperties([oRoot], {
+            "--theme-flood-x": iX + "px",
+            "--theme-flood-y": iY + "px",
+            "--theme-flood-origin": iX + "px " + iY + "px"
+        });
     }
 
     function applyBodyClasses(sTheme) {
