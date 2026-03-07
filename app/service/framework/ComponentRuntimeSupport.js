@@ -22,11 +22,11 @@ sap.ui.define([
             return sCurrent;
         }
         if (sStored) {
-            oStateModel.setProperty(StatePaths.SESSION_ID, sStored);
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.SESSION_ID, sStored);
             return sStored;
         }
         var sNext = "S" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-        oStateModel.setProperty(StatePaths.SESSION_ID, sNext);
+        ModelStateRuntime.writeOnModel(oStateModel, StatePaths.SESSION_ID, sNext);
         window.sessionStorage.setItem("pcct_session_id", sNext);
         return sNext;
     }
@@ -62,22 +62,24 @@ sap.ui.define([
     }
 
     function syncUiStateMode(oStateModel, oUiStateModel) {
-        oUiStateModel.setProperty("/mode", oStateModel.getProperty("/mode") || "READ");
-        oUiStateModel.setProperty("/busy", !!(oStateModel.getProperty("/isBusy") || oStateModel.getProperty("/isLoading")));
-        oUiStateModel.setProperty("/currentRootKey", oStateModel.getProperty("/activeObjectId") || "");
-        oUiStateModel.setProperty("/sessionGuid", oStateModel.getProperty(StatePaths.SESSION_ID) || "");
+        ModelStateRuntime.setManyOnModel(oUiStateModel, {
+            "/mode": oStateModel.getProperty("/mode") || "READ",
+            "/busy": !!(oStateModel.getProperty("/isBusy") || oStateModel.getProperty("/isLoading")),
+            "/currentRootKey": oStateModel.getProperty("/activeObjectId") || "",
+            "/sessionGuid": oStateModel.getProperty(StatePaths.SESSION_ID) || ""
+        });
     }
 
     function syncDetailCurrentFromSelected(oSelectedModel, oUiStateModel) {
         var oSelected = oSelectedModel.getData() || {};
-        oUiStateModel.setProperty("/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
+        ModelStateRuntime.writeOnModel(oUiStateModel, "/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
     }
 
     function resolveDetailCurrent(oSelectedModel, oUiStateModel) {
         var oSelected = oSelectedModel.getData() || {};
         var oCurrent = oUiStateModel.getProperty("/_detailCurrent") || {};
         if (oSelected && oSelected.root) {
-            oUiStateModel.setProperty("/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
+            ModelStateRuntime.writeOnModel(oUiStateModel, "/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
             return oUiStateModel.getProperty("/_detailCurrent") || {};
         }
         if (oCurrent && oCurrent.root) {

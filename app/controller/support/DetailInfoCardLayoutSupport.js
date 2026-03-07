@@ -1,8 +1,9 @@
 sap.ui.define([
-    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/FocusRuntime",
     "checklist/app/service/framework/LayoutPersonalizationRuntime"
-], function (ControllerModelWriteSupport, FocusRuntime, LayoutPersonalizationRuntime) {
+], function (ControllerViewStateRuntime, ModelStateRuntime, FocusRuntime, LayoutPersonalizationRuntime) {
     "use strict";
 
     function cloneCards(aCards) {
@@ -27,7 +28,7 @@ sap.ui.define([
         var aLayout = normalizeCards(aCards).map(function (oCard, iIndex) {
             return { key: oCard.key, pinned: !!oCard.pinned, order: iIndex };
         });
-        ControllerModelWriteSupport.set(oController, "layout", "/personalization/infoCardLayout", aLayout);
+        ModelStateRuntime.write(oController, "layout", "/personalization/infoCardLayout", aLayout);
         LayoutPersonalizationRuntime.writeInfoCardLayout(aLayout);
         return aLayout;
     }
@@ -49,7 +50,7 @@ sap.ui.define([
 
     function writeCards(oController, aCards, sFocusKey) {
         var aNormalized = normalizeCards(aCards);
-        ControllerModelWriteSupport.set(oController, "view", "/infoCards", aNormalized);
+        ControllerViewStateRuntime.set(oController, "/infoCards", aNormalized);
         persistLayout(oController, aNormalized);
         if (sFocusKey) {
             focusCardByKey(oController, sFocusKey);
@@ -57,7 +58,7 @@ sap.ui.define([
     }
 
     function resolveCards(oController, aBaseCards) {
-        var aLayout = ControllerModelWriteSupport.get(oController, "layout", "/personalization/infoCardLayout", []);
+        var aLayout = ModelStateRuntime.read(oController, "layout", "/personalization/infoCardLayout", []);
         var mLayoutByKey = {};
         var aOrderedKeys = [];
         cloneCards(aLayout).forEach(function (oEntry, iIndex) {
@@ -79,7 +80,7 @@ sap.ui.define([
     }
 
     function moveCard(oController, sKey, iDelta) {
-        var aCards = cloneCards(ControllerModelWriteSupport.get(oController, "view", "/infoCards", []));
+        var aCards = cloneCards(ControllerViewStateRuntime.get(oController, "/infoCards", []));
         var iFrom = findCardIndex(aCards, sKey);
         var iTo;
         var oCard;
@@ -98,7 +99,7 @@ sap.ui.define([
     }
 
     function togglePin(oController, sKey) {
-        var aCards = cloneCards(ControllerModelWriteSupport.get(oController, "view", "/infoCards", []));
+        var aCards = cloneCards(ControllerViewStateRuntime.get(oController, "/infoCards", []));
         var iIndex = findCardIndex(aCards, sKey);
         var oCard;
         var iTarget;

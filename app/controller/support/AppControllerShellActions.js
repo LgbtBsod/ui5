@@ -11,8 +11,8 @@ sap.ui.define([
     "checklist/app/controller/support/AppShellUserRefreshSupport",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/util/CreateSentinel",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, NavigationIntentService, CreateSentinel, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, NavigationIntentService, CreateSentinel, ModelStateRuntime) {
     "use strict";
 
     var getText = AppShellTextSupport.getText;
@@ -29,15 +29,6 @@ sap.ui.define([
             return Promise.resolve();
         }
         return oController._openShellOverlay(oEvent, sKey, sFragment);
-    }
-
-    function readSwitchState(oEvent) {
-        return !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"));
-    }
-
-    function setAppViewBoolean(oController, sPath, bValue) {
-        ControllerModelWriteSupport.set(oController, "appView", sPath, !!bValue);
-        return !!bValue;
     }
 
     return {
@@ -96,25 +87,40 @@ sap.ui.define([
         },
 
         onToggleShellHints: function (oEvent) {
-            var bState = readSwitchState(oEvent);
-            ControllerModelWriteSupport.set(this, "layout", "/personalization/showHints", bState);
+            var bState = !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"));
+            ModelStateRuntime.write(this, "layout", "/personalization/showHints", bState);
             this._syncShellState();
         },
 
         onToggleCompactDensity: function (oEvent) {
-            var bState = setAppViewBoolean(this, "/compactDensity", readSwitchState(oEvent));
+            var bState = ModelStateRuntime.writeBoolean(
+                this,
+                "appView",
+                "/compactDensity",
+                oEvent && oEvent.getParameter && oEvent.getParameter("state")
+            );
             this._applyCompactDensityClass();
             return bState;
         },
 
         onToggleThemeAnimation: function (oEvent) {
-            var bState = setAppViewBoolean(this, "/animationEnabled", readSwitchState(oEvent));
+            var bState = ModelStateRuntime.writeBoolean(
+                this,
+                "appView",
+                "/animationEnabled",
+                oEvent && oEvent.getParameter && oEvent.getParameter("state")
+            );
             AppShellCoordinator.onToggleThemeAnimation(this, bState);
             return bState;
         },
 
         onToggleBackgroundInteraction: function (oEvent) {
-            var bState = setAppViewBoolean(this, "/backgroundInteractive", readSwitchState(oEvent));
+            var bState = ModelStateRuntime.writeBoolean(
+                this,
+                "appView",
+                "/backgroundInteractive",
+                oEvent && oEvent.getParameter && oEvent.getParameter("state")
+            );
             AppShellCoordinator.onToggleBackgroundInteractive(this, bState);
             return bState;
         },
@@ -124,8 +130,7 @@ sap.ui.define([
         },
 
         onShellUserPrimaryAction: function (oEvent) {
-            var oAppView = this._getAppViewModel();
-            var sActionKind = String(oAppView && oAppView.getProperty ? oAppView.getProperty("/shell/userActionKind") || "" : "").trim();
+            var sActionKind = String(ModelStateRuntime.read(this, "appView", "/shell/userActionKind", "") || "").trim();
             return AppShellUserActionPolicy.runPrimaryAction(this, sActionKind, oEvent);
         },
 

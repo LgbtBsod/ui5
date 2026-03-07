@@ -1,6 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/FeedbackBannerState"
-], function (FeedbackBannerState) {
+    "checklist/app/service/framework/FeedbackBannerState",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (FeedbackBannerState, ModelStateRuntime) {
     "use strict";
 
     function bannerPath(sId) {
@@ -11,7 +12,7 @@ sap.ui.define([
         if (!oStateModel || typeof oStateModel.setProperty !== "function") {
             return false;
         }
-        oStateModel.setProperty(bannerPath(sId), FeedbackBannerState.create(mInput || {}, mOptions || {}));
+        ModelStateRuntime.writeOnModel(oStateModel, bannerPath(sId), FeedbackBannerState.create(mInput || {}, mOptions || {}));
         return true;
     }
 
@@ -90,7 +91,7 @@ sap.ui.define([
         if (!oStateModel || typeof oStateModel.setProperty !== "function") {
             return false;
         }
-        oStateModel.setProperty(bannerPath(sId), FeedbackBannerState.empty());
+        ModelStateRuntime.writeOnModel(oStateModel, bannerPath(sId), FeedbackBannerState.empty());
         return true;
     }
 

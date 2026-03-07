@@ -2,9 +2,11 @@ sap.ui.define([
     "checklist/app/service/framework/ActionContract",
     "checklist/app/service/framework/SecurityTokenRefresh",
     "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/TelemetryRuntime"
-], function (ActionContract, SecurityTokenRefresh, FeedbackBannerRuntime, RootIdRuntime, TelemetryRuntime) {
+    "checklist/app/service/framework/TelemetryRuntime",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (ActionContract, SecurityTokenRefresh, FeedbackBannerRuntime, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime) {
     "use strict";
 
     var SAVE_WORKING_BANNER_DELAY_MS = 2000;
@@ -50,15 +52,13 @@ sap.ui.define([
             if (!sRootId) {
                 return Promise.resolve(false);
             }
-            oStateModel.setProperty(oStatePaths.SAVE_IN_FLIGHT, true);
-            oStateModel.setProperty(oStatePaths.UI_BUSY_DETAIL, true);
-            oStateModel.setProperty(oStatePaths.UI_BUSY_GLOBAL, true);
-            oStateModel.setProperty("/autosaveState", "SAVING");
-            if (oComponent._iSaveWorkingTimer) {
-                clearTimeout(oComponent._iSaveWorkingTimer);
-                oComponent._iSaveWorkingTimer = null;
-            }
-            oComponent._iSaveWorkingTimer = setTimeout(function () {
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                [oStatePaths.SAVE_IN_FLIGHT]: true,
+                [oStatePaths.UI_BUSY_DETAIL]: true,
+                [oStatePaths.UI_BUSY_GLOBAL]: true,
+                "/autosaveState": "SAVING"
+            });
+            oComponent._iSaveWorkingTimer = SchedulingRuntime.restartTimer(oComponent._iSaveWorkingTimer, function () {
                 if (oStateModel.getProperty(oStatePaths.SAVE_IN_FLIGHT)) {
                     fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("info", "workingMessageLong", {
                         retryAction: ActionContract.RETRY_ACTIONS.SAVE,
@@ -80,7 +80,7 @@ sap.ui.define([
                 var sCorrelationId = fnResolveCorrelationId(oError);
                 var bSessionExpired = fnIsSessionExpiredError(oError);
                 if (bSessionExpired) {
-                    oStateModel.setProperty("/requiresUserLogin", true);
+                    ModelStateRuntime.writeOnModel(oStateModel, "/requiresUserLogin", true);
                     if (!oComponent._bSessionRefreshInFlight) {
                         oComponent._bSessionRefreshInFlight = true;
                         if (!oMainServiceModel) {
@@ -100,13 +100,12 @@ sap.ui.define([
                 fnEmitTelemetry("detail.save.guarded.failed", TelemetryRuntime.saveFailure(sRootId, oError, sCorrelationId));
                 return false;
             }).finally(function () {
-                if (oComponent._iSaveWorkingTimer) {
-                    clearTimeout(oComponent._iSaveWorkingTimer);
-                    oComponent._iSaveWorkingTimer = null;
-                }
-                oStateModel.setProperty(oStatePaths.SAVE_IN_FLIGHT, false);
-                oStateModel.setProperty(oStatePaths.UI_BUSY_DETAIL, false);
-                oStateModel.setProperty(oStatePaths.UI_BUSY_GLOBAL, false);
+                oComponent._iSaveWorkingTimer = SchedulingRuntime.clearTimer(oComponent._iSaveWorkingTimer);
+                ModelStateRuntime.setManyOnModel(oStateModel, {
+                    [oStatePaths.SAVE_IN_FLIGHT]: false,
+                    [oStatePaths.UI_BUSY_DETAIL]: false,
+                    [oStatePaths.UI_BUSY_GLOBAL]: false
+                });
                 oComponent._pGuardedSavePromise = null;
             });
             return oComponent._pGuardedSavePromise;

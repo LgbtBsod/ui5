@@ -3,9 +3,11 @@ sap.ui.define([
     "checklist/app/infra/navigation/RouteModeCoordinator",
     "checklist/app/util/DebugLogger",
     "checklist/app/service/framework/AppShellStateSync",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/util/TimeConfigService",
-    "checklist/app/util/runtime/TimerDefaults"
-], function (JSONModel, RouteModeCoordinator, DebugLogger, AppShellStateSync, TimeConfigService, TimerDefaults) {
+    "checklist/app/util/runtime/TimerDefaults",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (JSONModel, RouteModeCoordinator, DebugLogger, AppShellStateSync, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime) {
     "use strict";
 
     function syncThemeState(oController, sSource, oThemeResult) {
@@ -15,10 +17,12 @@ sap.ui.define([
         var bAnimationEnabled = !oThemeResult || oThemeResult.animationEnabled !== false;
         var bBackgroundInteractive = !oThemeResult || oThemeResult.backgroundInteractive !== false;
         if (oAppView) {
-            oAppView.setProperty("/isDark", bIsDark);
-            oAppView.setProperty("/themeMode", bIsDark ? "night" : "morning");
-            oAppView.setProperty("/animationEnabled", bAnimationEnabled);
-            oAppView.setProperty("/backgroundInteractive", bBackgroundInteractive);
+            ModelStateRuntime.setManyOnModel(oAppView, {
+                "/isDark": bIsDark,
+                "/themeMode": bIsDark ? "night" : "morning",
+                "/animationEnabled": bAnimationEnabled,
+                "/backgroundInteractive": bBackgroundInteractive
+            });
         }
         DebugLogger.info("theme", "sync", {
             source: sSource || "unknown",
@@ -37,7 +41,7 @@ sap.ui.define([
         }
         var oResolvedState = oStateModel || AppShellStateSync.resolveStateModel(oController);
         if (!oResolvedState) {
-            setTimeout(function () {
+            SchedulingRuntime.restartTimer(0, function () {
                 initStateBoundUi(oController);
             }, Number((TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50));
             return;
@@ -66,12 +70,10 @@ sap.ui.define([
             var oState = AppShellStateSync.resolveStateModel(oController);
             AppShellStateSync.ensureControllerStateModel(oController, oState);
             if (oState) {
-                if (!oState.getProperty("/layout")) {
-                    oState.setProperty("/layout", "OneColumn");
-                }
-                if (typeof oState.getProperty("/selectedId") === "undefined") {
-                    oState.setProperty("/selectedId", null);
-                }
+                ModelStateRuntime.setManyOnModel(oState, {
+                    "/layout": oState.getProperty("/layout") || "OneColumn",
+                    "/selectedId": typeof oState.getProperty("/selectedId") === "undefined" ? null : oState.getProperty("/selectedId")
+                });
             }
             initStateBoundUi(oController, oState);
         },

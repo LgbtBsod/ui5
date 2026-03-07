@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (ModelStateRuntime) {
     "use strict";
 
     var STORE_KEY = "__pcctUxTelemetry";
@@ -36,8 +38,10 @@ sap.ui.define([], function () {
         }
 
         if (stateModel && typeof stateModel.setProperty === "function") {
-            stateModel.setProperty("/uxTelemetry/events", store.events);
-            stateModel.setProperty("/uxTelemetry/lastEvent", evt);
+            ModelStateRuntime.setManyOnModel(stateModel, {
+                "/uxTelemetry/events": store.events,
+                "/uxTelemetry/lastEvent": evt
+            });
         }
 
         return evt;

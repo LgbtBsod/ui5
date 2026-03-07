@@ -3,13 +3,15 @@ sap.ui.define([
     "checklist/app/service/domain/search/SearchFacade",
     "checklist/app/service/framework/FocusRuntime",
     "checklist/app/service/framework/ControllerRouteRuntime",
-    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/controller/support/SearchCommandPolicy",
     "checklist/app/controller/support/SearchControllerSupport",
     "checklist/app/controller/support/SearchLoadRuntimeSupport",
     "checklist/app/controller/support/SearchRateProgress",
-    "checklist/app/controller/support/SearchViewSupport"
-], function (ControllerResourceCleanup, SearchFacade, FocusRuntime, ControllerRouteRuntime, ControllerModelWriteSupport, SearchCommandPolicy, SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport) {
+    "checklist/app/controller/support/SearchViewSupport",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (ControllerResourceCleanup, SearchFacade, FocusRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SchedulingRuntime) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -50,18 +52,9 @@ sap.ui.define([
             SearchViewSupport.unbindPowerUserShortcuts(this);
             SearchViewSupport.unbindSearchViewportRuntime(this);
             SearchViewSupport.clearAnalyticsRefreshTimer(this);
-            if (this._iAnalyticsRailPulseTimer) {
-                clearTimeout(this._iAnalyticsRailPulseTimer);
-                this._iAnalyticsRailPulseTimer = null;
-            }
-            if (this._iSearchWorkingHintTimer) {
-                clearTimeout(this._iSearchWorkingHintTimer);
-                this._iSearchWorkingHintTimer = null;
-            }
-            if (this._iInitialAnalyticsTimer) {
-                clearTimeout(this._iInitialAnalyticsTimer);
-                this._iInitialAnalyticsTimer = null;
-            }
+            this._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(this._iAnalyticsRailPulseTimer);
+            this._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(this._iSearchWorkingHintTimer);
+            this._iInitialAnalyticsTimer = SchedulingRuntime.clearTimer(this._iInitialAnalyticsTimer);
             if (this._iInitialAnalyticsIdleId && window.cancelIdleCallback) {
                 window.cancelIdleCallback(this._iInitialAnalyticsIdleId);
                 this._iInitialAnalyticsIdleId = null;
@@ -79,7 +72,7 @@ sap.ui.define([
             if (typeof fnSyncControlBusy === "function") {
                 fnSyncControlBusy(true);
             }
-            return ControllerModelWriteSupport.withFlag(this, "view", sViewBusyPath, function () {
+            return ControllerViewStateRuntime.withFlag(this, sViewBusyPath, function () {
                 if (typeof fnAction === "function") {
                     return fnAction();
                 }
@@ -121,7 +114,7 @@ sap.ui.define([
         },
 
         onSmartFilterInitialise: function () {
-            ControllerModelWriteSupport.set(this, "view", "/smartFilterReady", true);
+            ControllerViewStateRuntime.set(this, "/smartFilterReady", true);
             SearchCommandPolicy.buildFilter(this, { source: "smartFilterInit" });
         },
 
@@ -180,8 +173,8 @@ sap.ui.define([
         },
 
         onOpenSelected: function () {
-            var iSelectionCount = Number(ControllerModelWriteSupport.get(this, "view", "/selectionCount", 0));
-            var sSelectedRowId = String(ControllerModelWriteSupport.get(this, "view", "/selectedRowId", "") || "").trim();
+            var iSelectionCount = Number(ControllerViewStateRuntime.get(this, "/selectionCount", 0));
+            var sSelectedRowId = String(ControllerViewStateRuntime.get(this, "/selectedRowId", "") || "").trim();
             if (!sSelectedRowId) {
                 this.showI18nError("nothingToOpen");
                 SearchViewSupport.focusSearchResults(this);
@@ -195,7 +188,7 @@ sap.ui.define([
         },
 
         onCopy: function () {
-            var iSelectionCount = Number(ControllerModelWriteSupport.get(this, "view", "/selectionCount", 0));
+            var iSelectionCount = Number(ControllerViewStateRuntime.get(this, "/selectionCount", 0));
             if (iSelectionCount > 1) {
                 this.showI18nError("searchCopySingleSelectionHint");
                 SearchViewSupport.focusSearchToolbar(this);
@@ -233,8 +226,8 @@ sap.ui.define([
         onMaxRowsChange: function (oEvent) {
             var sValue = SearchControllerSupport.normalizeSearchMaxResultsValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-            sValue = normalizeRequestValue(sValue, ControllerModelWriteSupport.get(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
-            ControllerModelWriteSupport.set(this, "state", "/searchMaxResults", sValue);
+            sValue = normalizeRequestValue(sValue, ModelStateRuntime.read(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
+            ModelStateRuntime.write(this, "state", "/searchMaxResults", sValue);
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
@@ -244,14 +237,14 @@ sap.ui.define([
         onBackendTopChange: function (oEvent) {
             var sValue = SearchControllerSupport.normalizeSearchBackendTopValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-            sValue = normalizeRequestValue(sValue, ControllerModelWriteSupport.get(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
-            ControllerModelWriteSupport.set(this, "state", "/searchBackendTop", sValue);
+            sValue = normalizeRequestValue(sValue, ModelStateRuntime.read(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
+            ModelStateRuntime.write(this, "state", "/searchBackendTop", sValue);
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
             SearchControllerSupport.syncSearchTableRequestWindow(this);
-            if (ControllerModelWriteSupport.get(this, "view", "/hasSearched") &&
-                ControllerModelWriteSupport.get(this, "view", "/smartTableReady")) {
+            if (ControllerViewStateRuntime.get(this, "/hasSearched") &&
+                ControllerViewStateRuntime.get(this, "/smartTableReady")) {
                 SearchCommandPolicy.rebind(this, { source: "backendTopChange" });
             }
         },
@@ -261,10 +254,10 @@ sap.ui.define([
             var oMaxRowsInput = this.byId("maxRowsInput");
             var sBackendTop = SearchControllerSupport.normalizeSearchBackendTopValue(oBackendTopInput && oBackendTopInput.getValue && oBackendTopInput.getValue());
             var sMaxRows = SearchControllerSupport.normalizeSearchMaxResultsValue(oMaxRowsInput && oMaxRowsInput.getValue && oMaxRowsInput.getValue());
-            sBackendTop = normalizeRequestValue(sBackendTop, ControllerModelWriteSupport.get(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
-            sMaxRows = normalizeRequestValue(sMaxRows, ControllerModelWriteSupport.get(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
-            ControllerModelWriteSupport.set(this, "state", "/searchBackendTop", sBackendTop);
-            ControllerModelWriteSupport.set(this, "state", "/searchMaxResults", sMaxRows);
+            sBackendTop = normalizeRequestValue(sBackendTop, ModelStateRuntime.read(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
+            sMaxRows = normalizeRequestValue(sMaxRows, ModelStateRuntime.read(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
+            ModelStateRuntime.write(this, "state", "/searchBackendTop", sBackendTop);
+            ModelStateRuntime.write(this, "state", "/searchMaxResults", sMaxRows);
             if (oBackendTopInput && typeof oBackendTopInput.setValue === "function") {
                 oBackendTopInput.setValue(sBackendTop);
             }
@@ -276,7 +269,7 @@ sap.ui.define([
 
         onSearchModeToggle: function (oEvent) {
             var bLoose = !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"));
-            ControllerModelWriteSupport.set(this, "state", "/searchMode", bLoose ? "LOOSE" : "EXACT");
+            ModelStateRuntime.write(this, "state", "/searchMode", bLoose ? "LOOSE" : "EXACT");
             SearchCommandPolicy.executeSearch(this, { intent: "searchModeToggle", state: bLoose });
         },
 

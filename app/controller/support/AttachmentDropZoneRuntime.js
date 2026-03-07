@@ -1,26 +1,24 @@
 sap.ui.define([
-    "checklist/app/controller/support/AttachmentUploadCore"
-], function (AttachmentUploadCore) {
+    "checklist/app/controller/support/AttachmentUploadCore",
+    "checklist/app/service/framework/ControlStyleRuntime"
+], function (AttachmentUploadCore, ControlStyleRuntime) {
     "use strict";
 
     function setDropZoneClass(oController, sClassName, bActive) {
         var oDropZone = oController && oController.byId && oController.byId("attachmentDropZone");
-        if (oDropZone && oDropZone.toggleStyleClass) {
-            oDropZone.toggleStyleClass(sClassName, !!bActive);
+        if (!oDropZone) {
+            return;
         }
-    }
-
-    function setDropZoneState(oController, bActive) {
-        setDropZoneClass(oController, "isAttachmentDropActive", bActive);
-    }
-
-    function setDropZonePrimedState(oController, bPrimed) {
-        setDropZoneClass(oController, "isAttachmentDropPrimed", bPrimed);
+        if (bActive) {
+            ControlStyleRuntime.enable(oDropZone, sClassName);
+            return;
+        }
+        ControlStyleRuntime.disable(oDropZone, sClassName);
     }
 
     function resetVisual(oController) {
-        setDropZoneState(oController, false);
-        setDropZonePrimedState(oController, false);
+        setDropZoneClass(oController, "isAttachmentDropActive", false);
+        setDropZoneClass(oController, "isAttachmentDropPrimed", false);
     }
 
     function hasFiles(oEvent) {
@@ -64,8 +62,8 @@ sap.ui.define([
         oEvent.preventDefault();
         oEvent.stopPropagation();
         oEvent.dataTransfer.dropEffect = bAllowed ? "copy" : "none";
-        setDropZonePrimedState(oController, bAllowed);
-        setDropZoneState(oController, bAllowed);
+        setDropZoneClass(oController, "isAttachmentDropPrimed", bAllowed);
+        setDropZoneClass(oController, "isAttachmentDropActive", bAllowed);
     }
 
     function onAttachmentGlobalDragLeave(oController, oEvent) {
@@ -74,7 +72,7 @@ sap.ui.define([
         }
         oController._attachmentGlobalDragDepth = Math.max(0, (oController._attachmentGlobalDragDepth || 1) - 1);
         if (oController._attachmentGlobalDragDepth === 0) {
-            setDropZonePrimedState(oController, false);
+            setDropZoneClass(oController, "isAttachmentDropPrimed", false);
         }
     }
 
@@ -99,8 +97,8 @@ sap.ui.define([
             return;
         }
         oController._attachmentDragDepth = (oController._attachmentDragDepth || 0) + 1;
-        setDropZonePrimedState(oController, true);
-        setDropZoneState(oController, true);
+        setDropZoneClass(oController, "isAttachmentDropPrimed", true);
+        setDropZoneClass(oController, "isAttachmentDropActive", true);
     }
 
     function onAttachmentDragOver(oController, oEvent) {
@@ -110,8 +108,8 @@ sap.ui.define([
             oEvent.dataTransfer.dropEffect = AttachmentUploadCore.canUploadAttachments(oController) ? "copy" : "none";
         }
         if (AttachmentUploadCore.canUploadAttachments(oController)) {
-            setDropZoneState(oController, true);
-            setDropZonePrimedState(oController, true);
+            setDropZoneClass(oController, "isAttachmentDropActive", true);
+            setDropZoneClass(oController, "isAttachmentDropPrimed", true);
         }
     }
 

@@ -1,6 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/FeedbackBannerRuntime"
-], function (FeedbackBannerRuntime) {
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (FeedbackBannerRuntime, ModelStateRuntime) {
     "use strict";
 
     var STORAGE_KEY = "pcct_lock_signal";
@@ -60,7 +61,7 @@ sap.ui.define([
             if (sSignalType !== "LOCK_OWNED" || sMode !== "EDIT" || sLockState !== "LOCKED") {
                 return;
             }
-            oStateModel.setProperty(oStatePaths.TAB_CONFLICT_STATE, {
+            ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.TAB_CONFLICT_STATE, {
                 active: true,
                 source: "cross_tab",
                 at: new Date().toISOString()

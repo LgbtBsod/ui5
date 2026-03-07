@@ -16,8 +16,8 @@
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ModelStateRuntime) {
     "use strict";
 
     var CARD_REQUIRED_KEYS = {
@@ -453,9 +453,7 @@
         }
         sRootId = RootIdRuntime.resolveFromController(oController);
         sLayout = LayoutStateRuntime.normalizeLayout(vLayout);
-        ControllerModelWriteSupport.setMany(oController, "state", {
-            "/layout": sLayout
-        });
+        ModelStateRuntime.write(oController, "state", "/layout", sLayout);
         if (!bSyncRoute || !oRouter) {
             return;
         }

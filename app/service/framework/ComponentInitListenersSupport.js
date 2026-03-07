@@ -2,8 +2,9 @@ sap.ui.define([
     "checklist/app/service/framework/ActionContract",
     "checklist/app/service/framework/FeedbackBannerRuntime",
     "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/TelemetryRuntime"
-], function (ActionContract, FeedbackBannerRuntime, LayoutStateRuntime, TelemetryRuntime) {
+], function (ActionContract, FeedbackBannerRuntime, LayoutStateRuntime, ModelStateRuntime, TelemetryRuntime) {
     "use strict";
     function attach(mOptions) {
         var oComponent = mOptions.component;
@@ -31,7 +32,7 @@ sap.ui.define([
         var fnPublishTabSignal = mOptions.publishTabSignal;
 
         function resetDetailAccessGuard() {
-            oStateModel.setProperty("/detailAccessGuard", {
+            ModelStateRuntime.writeOnModel(oStateModel, "/detailAccessGuard", {
                 rootId: "",
                 userId: "",
                 canView: true,
@@ -111,9 +112,11 @@ sap.ui.define([
             return sMsg;
         };
         window.addEventListener("beforeunload", oComponent._fnBeforeUnload);
-        oLayoutModel.setProperty("/smartFilter/fields", SmartSearchAdapter.getSmartFilterConfig().fields);
-        oLayoutModel.setProperty("/smartTable/columns", SmartSearchAdapter.getSmartTableConfig().columns);
-        oLayoutModel.setProperty("/smartTable/selectionMode", SmartSearchAdapter.getSmartTableConfig().selectionMode);
+        ModelStateRuntime.setManyOnModel(oLayoutModel, {
+            "/smartFilter/fields": SmartSearchAdapter.getSmartFilterConfig().fields,
+            "/smartTable/columns": SmartSearchAdapter.getSmartTableConfig().columns,
+            "/smartTable/selectionMode": SmartSearchAdapter.getSmartTableConfig().selectionMode
+        });
         oComponent._oDirtyStateBinding = oStateModel.bindProperty("/isDirty");
         oComponent._fnDirtyStateBindingChange = function () {
             oComponent._oAutoSave.touch();
@@ -133,9 +136,11 @@ sap.ui.define([
 
         oComponent._oConnectivity.attachEvent("state", function (oEvent) {
             var m = oEvent.getParameters() || {};
-            oStateModel.setProperty("/networkOnline", !!m.online);
-            oStateModel.setProperty("/networkGraceMode", !!m.isGrace);
-            oStateModel.setProperty("/networkGraceExpiresAt", m.graceExpiresAt || null);
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                "/networkOnline": !!m.online,
+                "/networkGraceMode": !!m.isGrace,
+                "/networkGraceExpiresAt": m.graceExpiresAt || null
+            });
             if (!m.online) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
                     ActionContract.RETRY_ACTIONS.SEARCH,

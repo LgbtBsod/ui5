@@ -1,8 +1,10 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/util/CloneUtil"
+], function (CloneUtil) {
     "use strict";
 
     function cloneArgs(oArgs) {
-        return JSON.parse(JSON.stringify(oArgs || {}));
+        return CloneUtil.clone(oArgs, {});
     }
 
     function normalizeLayout(vLayout) {

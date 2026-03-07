@@ -1,6 +1,15 @@
 sap.ui.define([], function () {
     "use strict";
 
+    function stateRead(oStateModel, sPath, vFallback) {
+        var vValue;
+        if (!oStateModel || typeof oStateModel.getProperty !== "function") {
+            return vFallback;
+        }
+        vValue = oStateModel.getProperty(sPath);
+        return typeof vValue === "undefined" ? vFallback : vValue;
+    }
+
     function stateValue(vValue) {
         return {
             value: vValue
@@ -11,6 +20,10 @@ sap.ui.define([], function () {
         return {
             objectId: vObjectId || null
         };
+    }
+
+    function objectRefFromStateModel(oStateModel) {
+        return objectRef(stateRead(oStateModel, "/activeObjectId", ""));
     }
 
     function lockLost(vReason, vSource) {
@@ -39,11 +52,23 @@ sap.ui.define([], function () {
         return mPayload;
     }
 
+    function workflowContextFromStateModel(oStateModel) {
+        return {
+            sessionId: String(stateRead(oStateModel, "/sessionId", "")),
+            activeObjectId: String(stateRead(oStateModel, "/activeObjectId", "")),
+            mode: String(stateRead(oStateModel, "/mode", "READ")),
+            lockOperationState: String(stateRead(oStateModel, "/lockOperationState", "IDLE"))
+        };
+    }
+
     return {
+        stateRead: stateRead,
         stateValue: stateValue,
         objectRef: objectRef,
+        objectRefFromStateModel: objectRefFromStateModel,
         lockLost: lockLost,
         saveFailure: saveFailure,
-        runtimeConfig: runtimeConfig
+        runtimeConfig: runtimeConfig,
+        workflowContextFromStateModel: workflowContextFromStateModel
     };
 });

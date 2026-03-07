@@ -2,10 +2,11 @@ sap.ui.define([
     "checklist/app/controller/support/DetailSelectionSync",
     "checklist/app/controller/support/DetailPersonInputSupport",
     "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, LayoutStateRuntime, ModelStateRuntime, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime) {
     "use strict";
 
     function validationSummaryPath(mStatePaths) {
@@ -45,7 +46,7 @@ sap.ui.define([
 
     function compute(oController) {
         var oSelectedModel = ModelStateRuntime.model(oController, "selected");
-        var aRequired = ControllerModelWriteSupport.get(oController, "state", "/requiredFields", []) || [];
+        var aRequired = ModelStateRuntime.read(oController, "state", "/requiredFields", []) || [];
         var mMissing = {};
         var aMissingPaths = [];
         var aMissingKeys = [];
@@ -79,11 +80,11 @@ sap.ui.define([
             return { hasErrors: false, missingPaths: [], missingKeys: [], firstMissingPath: "", firstMissingKey: "" };
         }
         oSummary = compute(oController);
-        ControllerModelWriteSupport.set(oController, "view", "/validationMissing", oSummary.missingMap || {});
-        if (bShowValidation || ControllerModelWriteSupport.get(oController, "view", "/validationShown")) {
-            ControllerModelWriteSupport.set(oController, "view", "/validationShown", true);
+        ControllerViewStateRuntime.set(oController, "/validationMissing", oSummary.missingMap || {});
+        if (bShowValidation || ControllerViewStateRuntime.get(oController, "/validationShown")) {
+            ControllerViewStateRuntime.set(oController, "/validationShown", true);
         }
-        ControllerModelWriteSupport.set(oController, "state", validationSummaryPath(mStatePaths), {
+        ModelStateRuntime.write(oController, "state", validationSummaryPath(mStatePaths), {
             hasErrors: !!oSummary.hasErrors,
             missingPaths: oSummary.missingPaths || [],
             missingKeys: oSummary.missingKeys || [],
@@ -127,7 +128,7 @@ sap.ui.define([
         if (!oDomRef || typeof oDomRef.focus !== "function") {
             return false;
         }
-        setTimeout(function () {
+        SchedulingRuntime.restartTimer(0, function () {
             oDomRef.focus();
         }, 0);
         return true;
@@ -137,7 +138,7 @@ sap.ui.define([
         var oSelectedModel = ModelStateRuntime.model(oController, "selected");
         var oUiStateModel = ModelStateRuntime.model(oController, "uiState");
         var sPath = oEvent && oEvent.getParameter && oEvent.getParameter("path");
-        var aRequired = ControllerModelWriteSupport.get(oController, "state", "/requiredFields", []) || [];
+        var aRequired = ModelStateRuntime.read(oController, "state", "/requiredFields", []) || [];
         var sValidationKey;
         var sRequiredPath;
         var sModelPath;
@@ -150,7 +151,7 @@ sap.ui.define([
 
         sModelPath = "/" + String(sPath || "").replace(/^\//, "");
         if (sPath === "/") {
-            ControllerModelWriteSupport.set(oController, "view", "/deleteChecklistConfirmArmed", false);
+            ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
         }
         DetailPersonInputSupport.syncDrafts(oController, oSelectedModel, sModelPath);
 
@@ -158,18 +159,13 @@ sap.ui.define([
             if (sPath === "/") {
                 ModelStateRuntime.syncDetailCurrent(oController, oSelectedModel.getProperty("/") || {});
             } else {
-                ControllerModelWriteSupport.set(
-                    oController,
-                    "uiState",
-                    "/_detailCurrent" + sModelPath,
-                    oSelectedModel.getProperty(sModelPath)
-                );
+                ModelStateRuntime.write(oController, "uiState", "/_detailCurrent" + sModelPath, oSelectedModel.getProperty(sModelPath));
             }
         }
 
-        sMode = LayoutStateRuntime.normalizeMode(ControllerModelWriteSupport.get(oController, "state", "/mode", ""), "");
+        sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", "/mode", ""), "");
         if (DetailSelectionSync.shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {
-            ControllerModelWriteSupport.set(oController, "state", "/isDirty", true);
+            ModelStateRuntime.write(oController, "state", "/isDirty", true);
         }
 
         sRequiredPath = sModelPath;
@@ -180,7 +176,7 @@ sap.ui.define([
 
         sValidationKey = DetailSelectionSync.toValidationKey(sRequiredPath);
         vCurrent = oSelectedModel.getProperty(sRequiredPath);
-        ControllerModelWriteSupport.set(oController, "view", "/validationMissing/" + sValidationKey, !DetailSelectionSync.isFilledValidationValue(vCurrent));
+        ControllerViewStateRuntime.set(oController, "/validationMissing/" + sValidationKey, !DetailSelectionSync.isFilledValidationValue(vCurrent));
         recompute(oController, "fieldChange", false, mStatePaths);
     }
 

@@ -2,12 +2,13 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "checklist/app/model/StateSchema",
     "checklist/app/util/AttachmentUploadPolicy",
+    "checklist/app/util/CloneUtil",
     "checklist/app/service/framework/LayoutPersonalizationRuntime"
-], function (JSONModel, StateSchema, AttachmentUploadPolicy, LayoutPersonalizationRuntime) {
+], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime) {
     "use strict";
 
     function clone(v) {
-        return JSON.parse(JSON.stringify(v));
+        return CloneUtil.clone(v, {});
     }
 
     function createModel(vData) {

@@ -1,26 +1,19 @@
 sap.ui.define([
-    "checklist/app/util/DebugLogger"
-], function (DebugLogger) {
+    "checklist/app/util/DebugLogger",
+    "checklist/app/service/framework/TelemetryRuntime"
+], function (DebugLogger, TelemetryRuntime) {
     "use strict";
-
-    function read(oStateModel, sPath, vFallback) {
-        if (!oStateModel || !oStateModel.getProperty) {
-            return vFallback;
-        }
-        var vValue = oStateModel.getProperty(sPath);
-        return vValue === undefined ? vFallback : vValue;
-    }
 
     function emit(sEventName, mOptions) {
         var oOptions = mOptions || {};
         var oStateModel = oOptions.stateModel;
         var oPayload = Object.assign({
-            sessionId: read(oStateModel, "/sessionId", ""),
-            activeObjectId: read(oStateModel, "/activeObjectId", ""),
-            mode: read(oStateModel, "/mode", "READ"),
-            lockOperationState: read(oStateModel, "/lockOperationState", "IDLE"),
+            sessionId: "",
+            activeObjectId: "",
+            mode: "READ",
+            lockOperationState: "IDLE",
             timestamp: new Date().toISOString()
-        }, oOptions.payload || {});
+        }, TelemetryRuntime.workflowContextFromStateModel(oStateModel), oOptions.payload || {});
 
         DebugLogger.info("telemetry", sEventName, oPayload);
         return oPayload;

@@ -29,17 +29,7 @@ sap.ui.define([
     }
 
     function clearDetailRuntimeState(oController) {
-        var oStateModel = ModelStateRuntime.model(oController, "state");
-
-        if (oStateModel && typeof oStateModel.setProperty === "function") {
-            oStateModel.setProperty("/mode", "READ");
-            oStateModel.setProperty("/lockOperationState", "IDLE");
-            oStateModel.setProperty("/autosaveState", "IDLE");
-            oStateModel.setProperty("/autosaveAt", null);
-            oStateModel.setProperty("/autosaveEnabled", false);
-            oStateModel.setProperty("/isDirty", false);
-            oStateModel.setProperty("/activeObjectId", "");
-        }
+        ModelStateRuntime.resetDetailWorkflowState(oController);
         ModelStateRuntime.resetDetailRuntimeData(oController);
     }
 
@@ -97,7 +87,7 @@ sap.ui.define([
                     return;
                 }
                 if (oStateModel && typeof oStateModel.setProperty === "function") {
-                    oStateModel.setProperty("/detailAccessGuard", {
+                    ModelStateRuntime.writeOnModel(oStateModel, "/detailAccessGuard", {
                         rootId: String((oPermission && oPermission.rootId) || sRootId || "").trim(),
                         userId: String((oPermission && oPermission.userId) || "").trim(),
                         canView: false,

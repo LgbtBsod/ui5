@@ -1,6 +1,5 @@
 ﻿sap.ui.define([
     "checklist/app/controller/support/SearchControllerSupport",
-    "checklist/app/controller/support/ControllerModelWriteSupport",
     "checklist/app/controller/support/SearchLoadRuntimeSupport",
     "checklist/app/controller/support/SearchRateProgress",
     "checklist/app/controller/support/SearchCommandPolicy",
@@ -8,8 +7,12 @@
     "checklist/app/service/framework/ControlStyleRuntime",
     "checklist/app/service/framework/DialogOrchestrator",
     "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/controller/base/ControllerTextRuntime"
-], function (SearchControllerSupport, ControllerModelWriteSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, DialogOrchestrator, NavigationIntentService, ControllerTextRuntime) {
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/SchedulingRuntime",
+    "checklist/app/util/TimeConfigService"
+], function (SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, DialogOrchestrator, NavigationIntentService, ControllerTextRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, TimeConfigService) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = {
@@ -30,10 +33,6 @@
     var EFFECT_DIALOGS = {
         workflowAnalytics: "checklist.app.view.fragment.WorkflowAnalyticsDialog"
     };
-
-    function setViewProperty(oController, sPath, vValue) {
-        ControllerModelWriteSupport.set(oController, "view", sPath, vValue);
-    }
 
     function resolveStartupPerf(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
@@ -77,39 +76,32 @@
     }
 
     function clearSearchWorkingHintTimer(oController) {
-        if (oController._iSearchWorkingHintTimer) {
-            clearTimeout(oController._iSearchWorkingHintTimer);
-            oController._iSearchWorkingHintTimer = null;
-        }
+        oController._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(oController._iSearchWorkingHintTimer);
     }
 
     function hideSearchWorkingHint(oController) {
         clearSearchWorkingHintTimer(oController);
-        setViewProperty(oController, "/filterHintVisible", false);
-        setViewProperty(oController, "/filterHintText", "");
+        ControllerViewStateRuntime.set(oController, "/filterHintVisible", false);
+        ControllerViewStateRuntime.set(oController, "/filterHintText", "");
     }
 
     function isSearchLoading(oController) {
-        var oViewModel = oController && oController.getModel && oController.getModel("view");
-        var oStateModel = oController && oController.getModel && oController.getModel("state");
         return !!(
-            (oViewModel && (
-                oViewModel.getProperty("/tableBusy")
-                || oViewModel.getProperty("/searchActionBusy")
-            ))
-            || (oStateModel && oStateModel.getProperty("/isLoading"))
+            ControllerViewStateRuntime.get(oController, "/tableBusy", false)
+            || ControllerViewStateRuntime.get(oController, "/searchActionBusy", false)
+            || ModelStateRuntime.read(oController, "state", "/isLoading", false)
         );
     }
 
     function scheduleSearchWorkingHint(oController) {
         clearSearchWorkingHintTimer(oController);
-        oController._iSearchWorkingHintTimer = setTimeout(function () {
+        oController._iSearchWorkingHintTimer = SchedulingRuntime.restartTimer(0, function () {
             if (!isSearchLoading(oController)) {
                 return;
             }
-            setViewProperty(oController, "/filterHintVisible", true);
-            setViewProperty(oController, "/filterHintType", "Information");
-            setViewProperty(
+            ControllerViewStateRuntime.set(oController, "/filterHintVisible", true);
+            ControllerViewStateRuntime.set(oController, "/filterHintType", "Information");
+            ControllerViewStateRuntime.set(
                 oController,
                 "/filterHintText",
                 ControllerTextRuntime.getText(oController, "workingMessageLong", [], "Working...")
@@ -186,17 +178,11 @@
     }
 
     function clearSearchViewportSyncTimer(oController) {
-        if (oController._iSearchViewportSyncTimer) {
-            clearTimeout(oController._iSearchViewportSyncTimer);
-            oController._iSearchViewportSyncTimer = 0;
-        }
+        oController._iSearchViewportSyncTimer = SchedulingRuntime.clearTimer(oController._iSearchViewportSyncTimer);
     }
 
     function flushSearchViewportSync(oController) {
-        if (oController._iSearchViewportSyncRaf) {
-            return;
-        }
-        oController._iSearchViewportSyncRaf = window.requestAnimationFrame(function () {
+        oController._iSearchViewportSyncRaf = SchedulingRuntime.requestFrameOnce(oController._iSearchViewportSyncRaf, function () {
             oController._iSearchViewportSyncRaf = 0;
             syncSearchViewportLayout(oController);
             syncSearchScrollAffordances(oController);
@@ -257,7 +243,7 @@
             flushSearchViewportSync(oController);
             return;
         }
-        oController._iSearchViewportSyncTimer = window.setTimeout(function () {
+        oController._iSearchViewportSyncTimer = SchedulingRuntime.restartTimer(0, function () {
             oController._iSearchViewportSyncTimer = 0;
             flushSearchViewportSync(oController);
         }, SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS);
@@ -279,13 +265,13 @@
         var oHostRect;
         var oToolbarRect;
         var iToolbarTop = 0;
-        setViewProperty(oController, "/scrollNavVisible", iTop > 220);
+        ControllerViewStateRuntime.set(oController, "/scrollNavVisible", iTop > 220);
         if (oScrollHost && oResultsToolbarDom && oScrollHost.getBoundingClientRect && oResultsToolbarDom.getBoundingClientRect) {
             oHostRect = oScrollHost.getBoundingClientRect();
             oToolbarRect = oResultsToolbarDom.getBoundingClientRect();
             iToolbarTop = iTop + (oToolbarRect.top - oHostRect.top);
         }
-        setViewProperty(oController, "/resultsToolbarNavVisible", !!oResultsToolbarDom && iTop > (iToolbarTop + 120));
+        ControllerViewStateRuntime.set(oController, "/resultsToolbarNavVisible", !!oResultsToolbarDom && iTop > (iToolbarTop + 120));
     }
 
     function resolveSearchViewportObserverTargets(oController, oScrollHost) {
@@ -398,9 +384,7 @@
         }
         unbindSearchViewportObservers(oController);
         clearSearchViewportSyncTimer(oController);
-        if (oController._iSearchViewportSyncRaf) {
-            window.cancelAnimationFrame(oController._iSearchViewportSyncRaf);
-        }
+        oController._iSearchViewportSyncRaf = SchedulingRuntime.clearFrame(oController._iSearchViewportSyncRaf);
         oController._oSearchViewportDelegate = null;
         oController._oSearchScrollHost = null;
         oController._fnSearchScrollSync = null;
@@ -415,30 +399,28 @@
         if (!oController.getModel("state")) {
             return;
         }
-        ControllerModelWriteSupport.set(oController, "state", "/searchScrollState", {
+        ModelStateRuntime.write(oController, "state", "/searchScrollState", {
             hostTop: oScrollHost ? oScrollHost.scrollTop : 0
         });
     }
 
     function restoreSearchScrollPosition(oController) {
-        var oScrollState = ControllerModelWriteSupport.get(oController, "state", "/searchScrollState");
+        var oScrollState = ModelStateRuntime.read(oController, "state", "/searchScrollState");
         var iTargetTop = Number(oScrollState && oScrollState.hostTop);
         if (!oScrollState) {
             return;
         }
-        window.requestAnimationFrame(function () {
-            window.requestAnimationFrame(function () {
-                var oScrollHost = resolveSearchScrollHost(oController);
-                var iMaxTop;
-                if (!oScrollHost || !Number.isFinite(iTargetTop)) {
-                    return;
-                }
-                iMaxTop = Math.max(0, oScrollHost.scrollHeight - oScrollHost.clientHeight);
-                oScrollHost.scrollTop = Math.max(0, Math.min(iTargetTop, iMaxTop));
-                ControllerModelWriteSupport.set(oController, "state", "/searchScrollState", null);
-                syncSearchViewportLayout(oController);
-                syncSearchScrollAffordances(oController);
-            });
+        SchedulingRuntime.nextDoubleFrame(function () {
+            var oScrollHost = resolveSearchScrollHost(oController);
+            var iMaxTop;
+            if (!oScrollHost || !Number.isFinite(iTargetTop)) {
+                return;
+            }
+            iMaxTop = Math.max(0, oScrollHost.scrollHeight - oScrollHost.clientHeight);
+            oScrollHost.scrollTop = Math.max(0, Math.min(iTargetTop, iMaxTop));
+            ModelStateRuntime.write(oController, "state", "/searchScrollState", null);
+            syncSearchViewportLayout(oController);
+            syncSearchScrollAffordances(oController);
         });
     }
 
@@ -732,7 +714,7 @@
         } catch (_e) {
             // Ignore readonly attribute nodes.
         }
-        setTimeout(function () {
+        SchedulingRuntime.restartTimer(0, function () {
             oNode.focus();
         }, 0);
         return true;
@@ -1034,17 +1016,11 @@
     }
 
     function clearAnalyticsRefreshTimer(oController) {
-        if (oController._iAnalyticsRefreshTimer) {
-            clearTimeout(oController._iAnalyticsRefreshTimer);
-            oController._iAnalyticsRefreshTimer = null;
-        }
+        oController._iAnalyticsRefreshTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRefreshTimer);
     }
 
     function clearInitialAnalyticsSchedule(oController) {
-        if (oController._iInitialAnalyticsTimer) {
-            clearTimeout(oController._iInitialAnalyticsTimer);
-            oController._iInitialAnalyticsTimer = null;
-        }
+        oController._iInitialAnalyticsTimer = SchedulingRuntime.clearTimer(oController._iInitialAnalyticsTimer);
         if (oController._iInitialAnalyticsIdleId && window.cancelIdleCallback) {
             window.cancelIdleCallback(oController._iInitialAnalyticsIdleId);
             oController._iInitialAnalyticsIdleId = null;
@@ -1053,7 +1029,7 @@
 
     function resolveAnalyticsRefreshMs(oController) {
         var oStateModel = oController.getModel("state");
-        var iMs = Number(oStateModel && oStateModel.getProperty && oStateModel.getProperty("/timers/analyticsRefreshMs"));
+        var iMs = Number(TimeConfigService.read(oStateModel, "analyticsRefreshMs"));
         return Number.isFinite(iMs) && iMs >= 1000 ? iMs : 300000;
     }
 
@@ -1062,12 +1038,9 @@
         if (!oRail) {
             return;
         }
-        if (oController._iAnalyticsRailPulseTimer) {
-            clearTimeout(oController._iAnalyticsRailPulseTimer);
-            oController._iAnalyticsRailPulseTimer = null;
-        }
+        oController._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRailPulseTimer);
         ControlStyleRuntime.restart(oRail, "searchAnalyticsRailPulse");
-        oController._iAnalyticsRailPulseTimer = setTimeout(function () {
+        oController._iAnalyticsRailPulseTimer = SchedulingRuntime.restartTimer(0, function () {
             ControlStyleRuntime.disable(oRail, "searchAnalyticsRailPulse");
             oController._iAnalyticsRailPulseTimer = null;
         }, 520);
@@ -1076,8 +1049,8 @@
     function refreshAnalyticsRail(oController, mOptions) {
         var bSilent = !!(mOptions && mOptions.silent);
         if (!bSilent) {
-            setViewProperty(oController, "/analyticsRailBusy", true);
-            setViewProperty(oController, "/analyticsError", "");
+            ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);
+            ControllerViewStateRuntime.set(oController, "/analyticsError", "");
         }
         return SearchCommandPolicy.analytics(oController, { intent: "refreshRail", silent: bSilent }).then(function (vResult) {
             if (bSilent) {
@@ -1089,7 +1062,7 @@
 
     function scheduleAnalyticsRefresh(oController) {
         clearAnalyticsRefreshTimer(oController);
-        oController._iAnalyticsRefreshTimer = setTimeout(function () {
+        oController._iAnalyticsRefreshTimer = SchedulingRuntime.restartTimer(0, function () {
             refreshAnalyticsRail(oController, { silent: true });
             scheduleAnalyticsRefresh(oController);
         }, resolveAnalyticsRefreshMs(oController));
@@ -1110,23 +1083,20 @@
     }
 
     function syncSmartControlAvailability(oController) {
-        setViewProperty(oController, "/tableBusy", false);
+        ControllerViewStateRuntime.set(oController, "/tableBusy", false);
     }
 
     function shouldRefreshSearchOnReturn(oController) {
-        var oStateModel = oController.getModel("state");
-        var oViewModel = oController.getModel("view");
-        return !!(oStateModel && oStateModel.getProperty && oStateModel.getProperty("/searchForceRefreshOnReturn")) &&
-            !!(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/hasSearched"));
+        return !!ModelStateRuntime.read(oController, "state", "/searchForceRefreshOnReturn", false) &&
+            !!ControllerViewStateRuntime.get(oController, "/hasSearched", false);
     }
 
     function clearSearchRefreshFlag(oController) {
-        ControllerModelWriteSupport.set(oController, "state", "/searchForceRefreshOnReturn", false);
+        ModelStateRuntime.write(oController, "state", "/searchForceRefreshOnReturn", false);
     }
 
     function refreshSearchTableIfNeeded(oController, sSource) {
-        var oViewModel = oController.getModel("view");
-        if (!shouldRefreshSearchOnReturn(oController) || !oViewModel || !oViewModel.getProperty("/smartTableReady")) {
+        if (!shouldRefreshSearchOnReturn(oController) || !ControllerViewStateRuntime.get(oController, "/smartTableReady", false)) {
             return;
         }
         clearSearchRefreshFlag(oController);
@@ -1138,10 +1108,10 @@
         syncSmartControlAvailability(oController);
         bindSearchViewportRuntime(oController);
         logStartupMetric(oController, "firstRouteReady");
-        setViewProperty(oController, "/bootstrapBusy", true);
-        setViewProperty(oController, "/analyticsBusy", false);
-        setViewProperty(oController, "/analyticsRailBusy", true);
-        setViewProperty(oController, "/analyticsError", "");
+        ControllerViewStateRuntime.set(oController, "/bootstrapBusy", true);
+        ControllerViewStateRuntime.set(oController, "/analyticsBusy", false);
+        ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);
+        ControllerViewStateRuntime.set(oController, "/analyticsError", "");
         clearInitialAnalyticsSchedule(oController);
         Promise.resolve(SearchCommandPolicy.bootstrap(oController, { reason: "routeMatched" }))
             .catch(function () {
@@ -1159,7 +1129,7 @@
                     oController._iInitialAnalyticsIdleId = window.requestIdleCallback(fnStartAnalytics, { timeout: 800 });
                     return;
                 }
-                oController._iInitialAnalyticsTimer = window.setTimeout(fnStartAnalytics, SEARCH_INITIAL_ANALYTICS_DELAY_MS);
+                oController._iInitialAnalyticsTimer = SchedulingRuntime.restartTimer(0, fnStartAnalytics, SEARCH_INITIAL_ANALYTICS_DELAY_MS);
             });
         restoreSearchScrollPosition(oController);
         refreshSearchTableIfNeeded(oController, "routeMatchedReturn");
@@ -1168,7 +1138,7 @@
     function onSmartTableInitialise(oController) {
         var oSmartTable = oController.byId("searchSmartTable");
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
-        setViewProperty(oController, "/smartTableReady", true);
+        ControllerViewStateRuntime.set(oController, "/smartTableReady", true);
         if (!oInnerTable) {
             return;
         }
@@ -1202,7 +1172,7 @@
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
         configureSearchResultTable(oController, oInnerTable, true);
         SearchControllerSupport.syncSearchTableRequestWindow(oController);
-        setViewProperty(oController, "/tableBusy", true);
+        ControllerViewStateRuntime.set(oController, "/tableBusy", true);
         scheduleSearchWorkingHint(oController);
         scheduleSearchViewportSync(oController, false);
         SearchCommandPolicy.applyRebindPolicy(oController, {
@@ -1245,15 +1215,15 @@
     }
 
     function runExport(oController, sEntity) {
-        var aSelectedRowIds = ControllerModelWriteSupport.get(oController, "view", "/selectedRowIds", []) || [];
-        var iBackendTop = Number(ControllerModelWriteSupport.get(oController, "state", "/searchBackendTop", 0)) || 0;
-        setViewProperty(oController, "/exportBusy", true);
+        var aSelectedRowIds = ControllerViewStateRuntime.get(oController, "/selectedRowIds", []) || [];
+        var iBackendTop = Number(ModelStateRuntime.read(oController, "state", "/searchBackendTop", 0)) || 0;
+        ControllerViewStateRuntime.set(oController, "/exportBusy", true);
         return SearchCommandPolicy.exportFlow(oController, {
             entity: sEntity || "screen",
             selectedRowIds: Array.isArray(aSelectedRowIds) ? aSelectedRowIds.slice(0) : [],
             backendTop: iBackendTop
         }).finally(function () {
-            setViewProperty(oController, "/exportBusy", false);
+            ControllerViewStateRuntime.set(oController, "/exportBusy", false);
         });
     }
 

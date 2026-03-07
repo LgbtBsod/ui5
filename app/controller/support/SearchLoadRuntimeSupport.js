@@ -1,16 +1,9 @@
 sap.ui.define([
     "checklist/app/controller/support/SearchControllerSupport",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (SearchControllerSupport, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (SearchControllerSupport, ControllerViewStateRuntime, ModelStateRuntime) {
     "use strict";
-
-    function setViewProperty(oController, sPath, vValue) {
-        ControllerModelWriteSupport.set(oController, "view", sPath, vValue);
-    }
-
-    function setStateProperty(oController, sPath, vValue) {
-        ControllerModelWriteSupport.set(oController, "state", sPath, vValue);
-    }
 
     function formatSearchDateTime(vDate) {
         if (vDate === null || vDate === undefined || vDate === "") {
@@ -20,28 +13,28 @@ sap.ui.define([
     }
 
     function setSettledViewState(oController, bCanExport, sWorkflowStage) {
-        setViewProperty(oController, "/busy", false);
-        setViewProperty(oController, "/tableBusy", false);
-        setViewProperty(oController, "/canExport", !!bCanExport);
-        setViewProperty(oController, "/hasRows", !!bCanExport);
-        setViewProperty(oController, "/workflowStage", String(sWorkflowStage || "DISCOVER"));
-        setViewProperty(oController, "/lastUpdatedAt", formatSearchDateTime(new Date()));
+        ControllerViewStateRuntime.setMany(oController, {
+            "/busy": false,
+            "/tableBusy": false,
+            "/canExport": !!bCanExport,
+            "/hasRows": !!bCanExport,
+            "/workflowStage": String(sWorkflowStage || "DISCOVER"),
+            "/lastUpdatedAt": formatSearchDateTime(new Date())
+        });
     }
 
     function setLoadStatus(oController, mStatus) {
         var oStatus = mStatus || {};
-        setStateProperty(oController, "/isLoading", !!oStatus.isLoading);
-        setStateProperty(oController, "/isBusy", !!oStatus.isBusy);
-        setStateProperty(oController, "/loadError", !!oStatus.loadError);
-        setStateProperty(
-            oController,
-            "/loadErrorMessage",
-            oStatus.loadError ? String(oStatus.loadErrorMessage || "Search request failed") : ""
-        );
+        ModelStateRuntime.setMany(oController, "state", {
+            "/isLoading": !!oStatus.isLoading,
+            "/isBusy": !!oStatus.isBusy,
+            "/loadError": !!oStatus.loadError,
+            "/loadErrorMessage": oStatus.loadError ? String(oStatus.loadErrorMessage || "Search request failed") : ""
+        });
     }
 
     function markLoading(oController) {
-        setViewProperty(oController, "/tableBusy", true);
+        ControllerViewStateRuntime.set(oController, "/tableBusy", true);
         setLoadStatus(oController, {
             isLoading: true,
             isBusy: true,
@@ -74,7 +67,6 @@ sap.ui.define([
         applyLoadSuccess: applyLoadSuccess,
         markLoading: markLoading,
         setLoadStatus: setLoadStatus,
-        setSettledViewState: setSettledViewState,
-        setViewProperty: setViewProperty
+        setSettledViewState: setSettledViewState
     };
 });

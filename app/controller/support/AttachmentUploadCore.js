@@ -4,8 +4,9 @@
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, LayoutStateRuntime, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime) {
     "use strict";
 
     var ATTACHMENT_EXTENSION_TO_MIME = {
@@ -52,12 +53,8 @@
 
     function canUploadAttachments(oController) {
         var sRootId = oController._currentRootId && oController._currentRootId();
-        var sMode = LayoutStateRuntime.normalizeMode(ControllerModelWriteSupport.get(oController, "state", "/mode", "READ"), "READ");
+        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", "/mode", "READ"), "READ");
         return !!sRootId && sMode !== "READ";
-    }
-
-    function setAttachmentBusy(oController, bBusy) {
-        ControllerModelWriteSupport.set(oController, "view", "/attachmentBusy", !!bBusy);
     }
 
     function clearAttachmentUploader(oUploader) {
@@ -95,7 +92,7 @@
             fileName: oFile.name || "",
             mimeType: sMimeType || resolveMimeType(oFile),
             fileSize: Number(oFile.size || 0) || 0,
-            categoryKey: String(ControllerModelWriteSupport.get(oController, "view", "/attachmentCategoryKey", "GEN") || "GEN").trim() || "GEN"
+            categoryKey: String(ControllerViewStateRuntime.get(oController, "/attachmentCategoryKey", "GEN") || "GEN").trim() || "GEN"
         };
     }
 
@@ -128,7 +125,7 @@
             return Promise.resolve();
         }
 
-        setAttachmentBusy(oController, true);
+        ControllerViewStateRuntime.setFlag(oController, "/attachmentBusy", true);
         oSequence = aUploadFiles.reduce(function (oPromise, oFile) {
             return oPromise.then(function () {
                 var oValidation = validateAttachmentFile(oController, oFile);
@@ -146,7 +143,7 @@
 
         return oSequence.finally(function () {
             clearAttachmentUploader(oUploader);
-            setAttachmentBusy(oController, false);
+            ControllerViewStateRuntime.setFlag(oController, "/attachmentBusy", false);
         });
     }
 

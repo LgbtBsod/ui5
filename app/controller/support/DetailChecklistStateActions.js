@@ -6,9 +6,8 @@ sap.ui.define([
     "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/util/CreateSentinel",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, CreateSentinel, ControllerModelWriteSupport) {
+    "checklist/app/util/CreateSentinel"
+], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, CreateSentinel) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;

@@ -3,8 +3,9 @@ sap.ui.define([
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/support/DetailPersonInputSupport",
     "checklist/app/service/framework/AttachmentFlowService",
-    "checklist/app/service/framework/NavigationIntentService"
-], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, NavigationIntentService) {
+    "checklist/app/service/framework/NavigationIntentService",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, NavigationIntentService, SchedulingRuntime) {
     "use strict";
 
     return {
@@ -107,7 +108,7 @@ sap.ui.define([
         onLocationValueHelpSearch: function (oEvent) {
             var sValue = oEvent.getParameter("newValue");
             this._clearLocationValueHelpSearchTimer();
-            this._iLocationVhSearchTimer = setTimeout(function () {
+            this._iLocationVhSearchTimer = SchedulingRuntime.restartTimer(0, function () {
                 this._iLocationVhSearchTimer = null;
                 this._withViewFlag("/locationVhBusy", function () {
                     return DetailCommandPolicy.valueHelpLocation(this, { intent: "search", value: sValue });

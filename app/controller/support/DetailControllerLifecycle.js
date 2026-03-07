@@ -3,21 +3,21 @@ sap.ui.define([
     "checklist/app/service/domain/detail/DetailFacade",
     "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/controller/support/ControllerModelWriteSupport",
     "checklist/app/controller/support/AttachmentUploadSupport",
     "checklist/app/controller/support/DetailAccessViewState",
     "checklist/app/controller/support/DetailInfoCardLayoutSupport",
-    "checklist/app/service/framework/ControllerViewStateRuntime"
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/SchedulingRuntime"
 ], function (
     ControllerResourceCleanup,
     DetailFacade,
     ControllerRouteRuntime,
     ControllerTextRuntime,
-    ControllerModelWriteSupport,
     AttachmentUploadSupport,
     DetailAccessViewState,
     DetailInfoCardLayoutSupport,
-    ControllerViewStateRuntime
+    ControllerViewStateRuntime,
+    SchedulingRuntime
 ) {
     "use strict";
 
@@ -93,7 +93,7 @@ sap.ui.define([
             }
             oViewModel = oController.getModel("view");
             if (oViewModel) {
-                ControllerModelWriteSupport.set(oController, "view", "/deleteChecklistConfirmArmed", false);
+                ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
             }
         };
         oController._oStateValidationModel.attachPropertyChange(oController._fnStateValidationChange, oController);
@@ -142,15 +142,9 @@ sap.ui.define([
                 this._oStateValidationModel.detachPropertyChange(this._fnStateValidationChange, this);
             }
             ControllerRouteRuntime.detachAllMatched(this);
-            if (this._iAttachmentDropZoneBindTimer) {
-                clearTimeout(this._iAttachmentDropZoneBindTimer);
-                this._iAttachmentDropZoneBindTimer = null;
-            }
+            this._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(this._iAttachmentDropZoneBindTimer);
             this._clearLocationValueHelpSearchTimer();
-            if (this._iLocationVhTableSyncTimer) {
-                clearTimeout(this._iLocationVhTableSyncTimer);
-                this._iLocationVhTableSyncTimer = null;
-            }
+            this._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(this._iLocationVhTableSyncTimer);
             this._unbindViewportPinnedControlRail();
             AttachmentUploadSupport.unbindDropZone(this);
             ControllerResourceCleanup.destroyMapEntries(this._mLazyDialogs);

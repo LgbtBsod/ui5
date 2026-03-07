@@ -1,8 +1,9 @@
 sap.ui.define([
     "checklist/app/controller/support/AttachmentUploadSupport",
     "checklist/app/controller/support/DetailActionConstants",
-    "checklist/app/service/framework/ControllerViewStateRuntime"
-], function (AttachmentUploadSupport, DetailActionConstants, ControllerViewStateRuntime) {
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (AttachmentUploadSupport, DetailActionConstants, ControllerViewStateRuntime, SchedulingRuntime) {
     "use strict";
 
     function remToPx(fRem) {
@@ -14,11 +15,7 @@ sap.ui.define([
         _scheduleAttachmentDropZoneBind: function (iAttempt) {
             var iNextAttempt = Number(iAttempt || 0);
             var oDropZone;
-            if (this._iAttachmentDropZoneBindTimer) {
-                clearTimeout(this._iAttachmentDropZoneBindTimer);
-                this._iAttachmentDropZoneBindTimer = null;
-            }
-            this._iAttachmentDropZoneBindTimer = setTimeout(function () {
+            this._iAttachmentDropZoneBindTimer = SchedulingRuntime.restartTimer(this._iAttachmentDropZoneBindTimer, function () {
                 var oDropZoneDom;
                 this._iAttachmentDropZoneBindTimer = null;
                 AttachmentUploadSupport.syncUploaderPolicy(this);
@@ -33,14 +30,6 @@ sap.ui.define([
                     this._scheduleAttachmentDropZoneBind(iNextAttempt + 1);
                 }
             }.bind(this), iNextAttempt === 0 ? 0 : 180);
-        },
-
-        _setViewFlag: function (sPath, vValue) {
-            return ControllerViewStateRuntime.setFlag(this, sPath, vValue);
-        },
-
-        _setDeleteChecklistConfirmArmed: function (bArmed) {
-            this._setViewFlag("/deleteChecklistConfirmArmed", !!bArmed);
         },
 
         _bindAdaptiveDetailViewport: function () {
@@ -82,7 +71,7 @@ sap.ui.define([
             }
             iWidth = Math.round((oDom.getBoundingClientRect && oDom.getBoundingClientRect().width) || 0);
             bNarrow = iWidth > 0 && iWidth <= remToPx(DetailActionConstants.DETAIL_NARROW_VIEWPORT_REM);
-            this._setViewFlag("/narrowDetailViewport", bNarrow);
+            ControllerViewStateRuntime.setFlag(this, "/narrowDetailViewport", bNarrow);
             if (oView && typeof oView.toggleStyleClass === "function") {
                 oView.toggleStyleClass("detailViewportNarrow", bNarrow);
             }

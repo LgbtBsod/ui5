@@ -1,7 +1,8 @@
 sap.ui.define([
     "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/TelemetryRuntime"
-], function (FeedbackBannerRuntime, TelemetryRuntime) {
+], function (FeedbackBannerRuntime, ModelStateRuntime, TelemetryRuntime) {
     "use strict";
 
     function attach(mOptions) {
@@ -53,10 +54,10 @@ sap.ui.define([
         oComponent._fnUnregisterBeacon = oComponent._registerLockReleaseBeacon(oStateModel, oMainServiceModel);
 
         function applyOwnedLockState(oLockState, bResetConflict) {
-            oStateModel.setProperty("/lockExpires", oLockState.lockExpires);
-            oUiStateModel.setProperty("/lock", { ok: true, reason: "OWNED_BY_YOU", isKilled: false });
+            ModelStateRuntime.writeOnModel(oStateModel, "/lockExpires", oLockState.lockExpires);
+            ModelStateRuntime.writeOnModel(oUiStateModel, "/lock", { ok: true, reason: "OWNED_BY_YOU", isKilled: false });
             if (bResetConflict) {
-                oStateModel.setProperty("/hasConflict", false);
+                ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", false);
             }
         }
 
@@ -79,14 +80,14 @@ sap.ui.define([
                 serverChangedOn: oPayload.server_changed_on || null,
                 checkedAt: sCheckedAt
             });
-            oStateModel.setProperty("/cacheValidationAt", sCheckedAt);
+            ModelStateRuntime.writeOnModel(oStateModel, "/cacheValidationAt", sCheckedAt);
         });
         oComponent._oHeartbeat.attachEvent("heartbeatError", function (oEvent) {
-            oStateModel.setProperty("/hasConflict", true);
+            ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", true);
             DebugLogger.info("Component", "lock heartbeat error", ComponentRuntimeSupport.eventPayload(oEvent));
         });
         oComponent._oGcd.attachEvent("gcdExpired", function () {
-            oStateModel.setProperty("/hasConflict", true);
+            ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", true);
         });
         oComponent._oLockStatus.attachEvent("status", function (oEvent) {
             var oPayload = ComponentRuntimeSupport.eventPayload(oEvent);
@@ -95,11 +96,11 @@ sap.ui.define([
 
         oComponent._oLockStatus.attachEvent("statusError", function () {
             // status probe is best-effort; heartbeat remains the source of truth.
-            oStateModel.setProperty("/hasConflict", true);
+            ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", true);
         });
 
         oComponent._oActivity.attachEvent("idleTimeout", function () {
-            oStateModel.setProperty("/idleExpires", new Date().toISOString());
+            ModelStateRuntime.writeOnModel(oStateModel, "/idleExpires", new Date().toISOString());
             fnHandleForceReadOnly({
                 reason: "IDLE_TIMEOUT",
                 messageKey: "idleReadOnlyMessage",
@@ -109,8 +110,10 @@ sap.ui.define([
 
         oComponent._oActivity.attachEvent("activity", function (oEvent) {
             var sAt = (ComponentRuntimeSupport.eventPayload(oEvent) || {}).at || new Date().toISOString();
-            oUiStateModel.setProperty("/activity/lastActiveAt", sAt);
-            oUiStateModel.setProperty("/activity/idleUntil", new Date(Date.parse(sAt) + Number(TimeConfigService.read(oStateModel, "idleMs"))).toISOString());
+            ModelStateRuntime.setManyOnModel(oUiStateModel, {
+                "/activity/lastActiveAt": sAt,
+                "/activity/idleUntil": new Date(Date.parse(sAt) + Number(TimeConfigService.read(oStateModel, "idleMs"))).toISOString()
+            });
         });
     }
 

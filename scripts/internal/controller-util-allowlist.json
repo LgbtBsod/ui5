@@ -5,6 +5,8 @@
   "util/ExcelExport",
   "util/FlowCoordinator",
   "util/SearchSmartControlCoordinator",
+  "util/TimeConfigService",
+  "util/ThemeDomRuntime",
   "util/ThemePhilosophy",
   "util/UxTelemetry",
   "util/ValidationPathMap",
@@ -17,6 +19,7 @@
   "service/framework/ControllerRouteRuntime",
   "service/framework/ControllerCtxRuntime",
   "service/framework/ControllerViewStateRuntime",
+  "service/framework/ComponentRuntimeSupport",
   "service/framework/LayoutStateRuntime",
   "service/framework/ModelStateRuntime",
   "service/framework/RootIdRuntime",
@@ -41,5 +44,6 @@
   "service/framework/LockSaveFlowOrchestrator",
   "service/framework/NavigationIntentService",
   "service/framework/SecurityTokenRefresh",
+  "service/framework/SchedulingRuntime",
   "service/framework/ThemeRuntime"
 ]

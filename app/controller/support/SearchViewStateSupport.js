@@ -1,7 +1,9 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
+    "checklist/app/service/framework/ComponentRuntimeSupport",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/util/search/SearchMaxResults"
-], function (JSONModel, SearchMaxResults) {
+], function (JSONModel, ComponentRuntimeSupport, ControllerViewStateRuntime, SearchMaxResults) {
     "use strict";
 
     function createViewModel(sScope) {
@@ -77,10 +79,9 @@ sap.ui.define([
     }
 
     function isSmartControlsReady(oController) {
-        var oViewModel = oController.getModel("view");
         var oSmartFilterBar = oController.byId("searchSmartFilterBar");
-        var bSmartFilterReady = !!(oViewModel && oViewModel.getProperty("/smartFilterReady"));
-        var bSmartTableReady = !!(oViewModel && oViewModel.getProperty("/smartTableReady"));
+        var bSmartFilterReady = !!ControllerViewStateRuntime.get(oController, "/smartFilterReady", false);
+        var bSmartTableReady = !!ControllerViewStateRuntime.get(oController, "/smartTableReady", false);
 
         if (!bSmartFilterReady || !bSmartTableReady) {
             return false;
@@ -148,26 +149,12 @@ sap.ui.define([
         return "Information";
     }
 
-    function formatHumanDateTime(vDate) {
-        var oDate = vDate instanceof Date ? vDate : new Date(vDate || Date.now());
-        if (Number.isNaN(oDate.getTime())) {
-            oDate = new Date();
-        }
-        return oDate.toLocaleString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-    }
-
     return {
         createViewModel: createViewModel,
         resolveSearchUiSessionKey: resolveSearchUiSessionKey,
         isSmartControlsReady: isSmartControlsReady,
         syncSearchTableRequestWindow: syncSearchTableRequestWindow,
-        formatHumanDateTime: formatHumanDateTime,
+        formatHumanDateTime: ComponentRuntimeSupport.formatHumanDateTime,
         formatWorkflowStageText: formatWorkflowStageText,
         formatWorkflowStageState: formatWorkflowStageState
     };

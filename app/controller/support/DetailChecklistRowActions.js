@@ -1,8 +1,8 @@
 sap.ui.define([
     "checklist/app/controller/support/DetailCommandPolicy",
-    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/controller/support/DetailInfoCardLayoutSupport"
-], function (DetailCommandPolicy, ControllerModelWriteSupport, DetailInfoCardLayoutSupport) {
+], function (DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutSupport) {
     "use strict";
 
     var ROW_ENTITY_CONFIG = {
@@ -71,7 +71,7 @@ sap.ui.define([
             var oDropped = oEvent && oEvent.getParameter && oEvent.getParameter("droppedControl");
             var oDraggedContext = oDragged && oDragged.getBindingContext && oDragged.getBindingContext("view");
             var oDroppedContext = oDropped && oDropped.getBindingContext && oDropped.getBindingContext("view");
-            var aCards = (ControllerModelWriteSupport.get(this, "view", "/infoCards") || []).map(function (oCard) {
+            var aCards = (ControllerViewStateRuntime.get(this, "/infoCards") || []).map(function (oCard) {
                 return Object.assign({}, oCard);
             });
             var iDraggedIndex;

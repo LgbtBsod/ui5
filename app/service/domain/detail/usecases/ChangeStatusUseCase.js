@@ -7,8 +7,9 @@ sap.ui.define([
     "checklist/app/service/domain/detail/DetailStateAccess",
     "checklist/app/service/domain/detail/DetailValidationSupport",
     "checklist/app/util/ChecklistValidationService",
-    "checklist/app/util/DeltaPayloadBuilder"
-], function (UseCase, Result, Effects, UseCaseInputUtils, StatePaths, DetailStateAccess, DetailValidationSupport, ChecklistValidationService, DeltaPayloadBuilder) {
+    "checklist/app/util/DeltaPayloadBuilder",
+    "checklist/app/util/CloneUtil"
+], function (UseCase, Result, Effects, UseCaseInputUtils, StatePaths, DetailStateAccess, DetailValidationSupport, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
     "use strict";
 
     function ChangeStatusUseCase() {
@@ -19,7 +20,7 @@ sap.ui.define([
     ChangeStatusUseCase.prototype.constructor = ChangeStatusUseCase;
 
     function clone(vValue) {
-        return JSON.parse(JSON.stringify(vValue || {}));
+        return CloneUtil.clone(vValue, {});
     }
 
     function readSessionGuid(mCtx) {

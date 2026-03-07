@@ -7,10 +7,10 @@ sap.ui.define([
     "checklist/app/controller/support/DetailInfoCardLayoutSupport",
     "checklist/app/service/framework/FeedbackCoordinator",
     "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/util/CreateSentinel",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, NavigationIntentService, CreateSentinel, ControllerModelWriteSupport) {
+    "checklist/app/util/CreateSentinel"
+], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -29,7 +29,7 @@ sap.ui.define([
         },
 
         _isEditMode: function () {
-            return ControllerModelWriteSupport.get(this, "state", "/mode") === "EDIT";
+            return ModelStateRuntime.read(this, "state", "/mode") === "EDIT";
         },
 
         _showToast: function (sTextKey) {
@@ -65,7 +65,7 @@ sap.ui.define([
                 "/personSuggestHint": "",
                 "/accessState": DetailAccessViewState.createDefaultState(sId)
             };
-            var sPostOpenHydratedRootId = String(ControllerModelWriteSupport.get(this, "state", "/postOpenHydratedRootId") || "").trim();
+            var sPostOpenHydratedRootId = String(ModelStateRuntime.read(this, "state", "/postOpenHydratedRootId", "") || "").trim();
             var oSelected = this.getModel("selected");
             var oSelectedData = (oSelected && oSelected.getData && oSelected.getData()) || {};
             var sSelectedRootId = String((oSelectedData && oSelectedData.root && oSelectedData.root.id) || "").trim();
@@ -76,11 +76,11 @@ sap.ui.define([
                 mStatePatch["/autosaveEnabled"] = false;
                 mStatePatch["/isDirty"] = false;
             }
-            ControllerModelWriteSupport.setMany(this, "state", mStatePatch);
+            ModelStateRuntime.setMany(this, "state", mStatePatch);
             this._applyLayoutState(sRouteLayout, { syncRoute: false });
             ControllerViewStateRuntime.setMany(this, mViewPatch);
             DetailInfoCardLayoutSupport.writeCards(this, ControllerViewStateRuntime.get(this, "/infoCards", []));
-            ControllerModelWriteSupport.set(this, "state", STATE_PATHS.VALIDATION_SUMMARY, {
+            ModelStateRuntime.write(this, "state", STATE_PATHS.VALIDATION_SUMMARY, {
                 hasErrors: false,
                 missingPaths: [],
                 missingKeys: [],
@@ -99,18 +99,18 @@ sap.ui.define([
                 return;
             }
             if (sPostOpenHydratedRootId && sPostOpenHydratedRootId === sId && sSelectedRootId === sId) {
-                ControllerModelWriteSupport.set(this, "state", "/postOpenHydratedRootId", "");
+                ModelStateRuntime.write(this, "state", "/postOpenHydratedRootId", "");
                 ControllerViewStateRuntime.set(this, "/detailSkeletonBusy", false);
                 return;
             }
-            ControllerModelWriteSupport.set(this, "state", "/activeObjectId", sId);
+            ModelStateRuntime.write(this, "state", "/activeObjectId", sId);
             DetailCommandPolicy.open(this, { id: sId, rootId: sId }).then(function (oResult) {
                 var oAccessState;
                 if (!oResult || oResult.ok !== false || !oResult.error || oResult.error.code !== "NO_VIEW_PERMISSION") {
                     return oResult;
                 }
                 oAccessState = ControllerViewStateRuntime.get(this, "/accessState", {}) || {};
-                ControllerModelWriteSupport.set(this, "state", "/detailAccessGuard", {
+                ModelStateRuntime.write(this, "state", "/detailAccessGuard", {
                     rootId: String(oAccessState.rootId || sId || "").trim(),
                     userId: String(oAccessState.userId || "").trim(),
                     canView: false,
@@ -126,8 +126,8 @@ sap.ui.define([
         },
 
         _currentRootId: function () {
-            return ControllerModelWriteSupport.get(this, "state", "/activeObjectId")
-                || ControllerModelWriteSupport.get(this, "state", "/selectedId")
+            return ModelStateRuntime.read(this, "state", "/activeObjectId", "")
+                || ModelStateRuntime.read(this, "state", "/selectedId", "")
                 || "";
         },
 

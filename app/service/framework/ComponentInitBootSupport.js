@@ -1,4 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/util/CloneUtil"
+], function (ModelStateRuntime, CloneUtil) {
     "use strict";
 
     function run(mOptions) {
@@ -13,14 +16,16 @@ sap.ui.define([], function () {
         var fnLoadCurrentUser = mOptions.loadCurrentUser;
         var fnBundleText = mOptions.bundleText;
 
-        oStateModel.setProperty("/isLoading", true);
-        oStateModel.setProperty("/masterDataLoading", true);
-        oStateModel.setProperty("/locationsLoading", false);
+        ModelStateRuntime.setManyOnModel(oStateModel, {
+            "/isLoading": true,
+            "/masterDataLoading": true,
+            "/locationsLoading": false
+        });
 
         return BootstrapAppUseCase.execute({}, { stateModel: oStateModel }).then(function () {
             var oServerState = null;
             ComponentRuntimeSupport.ensureSessionId(oStateModel);
-            oStateModel.setProperty("/currentUser", {
+            ModelStateRuntime.writeOnModel(oStateModel, "/currentUser", {
                 uname: "",
                 fullName: "",
                 permissions: [],
@@ -33,10 +38,12 @@ sap.ui.define([], function () {
             });
             var aRequired = [];
             var mVars = {};
-            oStateModel.setProperty("/requiredFields", aRequired);
-            oStateModel.setProperty("/frontendVariables", mVars);
-            oStateModel.setProperty("/frontendConfigSource", "gateway");
-            oEnvModel.setProperty("/variables", mVars);
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                "/requiredFields": aRequired,
+                "/frontendVariables": mVars,
+                "/frontendConfigSource": "gateway"
+            });
+            ModelStateRuntime.writeOnModel(oEnvModel, "/variables", mVars);
             Promise.resolve().then(function () {
                 return Promise.allSettled([
                     Promise.resolve(typeof fnLoadCurrentUser === "function" ? fnLoadCurrentUser() : null),
@@ -51,24 +58,30 @@ sap.ui.define([], function () {
                 var aCheckLists = (oCacheResult && oCacheResult.status === "fulfilled" && oCacheResult.value) || [];
                 aCheckLists = Array.isArray(aCheckLists) ? aCheckLists : [];
                 // Cache snapshot remains available for detail-diff flows.
-                oCacheModel.setProperty("/pristineSnapshot", JSON.parse(JSON.stringify(aCheckLists)));
+                ModelStateRuntime.writeOnModel(oCacheModel, "/pristineSnapshot", CloneUtil.clone(aCheckLists, []));
                 var sCacheAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
-                oCacheModel.setProperty("/lastServerState", oServerState || {
-                    fetchedAt: sCacheAt,
-                    count: aCheckLists.length
+                ModelStateRuntime.setManyOnModel(oCacheModel, {
+                    "/lastServerState": oServerState || {
+                        fetchedAt: sCacheAt,
+                        count: aCheckLists.length
+                    },
+                    "/keyMapping": oComponent._oSmartCache.snapshot().keyMapping
                 });
-                oStateModel.setProperty("/cacheValidationAt", sCacheAt);
-                oCacheModel.setProperty("/keyMapping", oComponent._oSmartCache.snapshot().keyMapping);
+                ModelStateRuntime.writeOnModel(oStateModel, "/cacheValidationAt", sCacheAt);
                 oComponent._oSmartCache.put("checkLists", aCheckLists);
             }).catch(function (oError) {
-                oStateModel.setProperty("/loadError", true);
-                oStateModel.setProperty("/loadErrorMessage", fnBundleText("loadErrorMessage") + ": " + oError.message);
+                ModelStateRuntime.setManyOnModel(oStateModel, {
+                    "/loadError": true,
+                    "/loadErrorMessage": fnBundleText("loadErrorMessage") + ": " + oError.message
+                });
             });
         }).catch(function (oError) {
-            oStateModel.setProperty("/loadError", true);
-            oStateModel.setProperty("/loadErrorMessage", fnBundleText("loadErrorMessage") + ": " + oError.message);
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                "/loadError": true,
+                "/loadErrorMessage": fnBundleText("loadErrorMessage") + ": " + oError.message
+            });
         }).finally(function () {
-            oStateModel.setProperty("/isLoading", false);
+            ModelStateRuntime.writeOnModel(oStateModel, "/isLoading", false);
             oComponent._startCoreManagers();
             oComponent._syncLockScopedManagers(oStateModel);
         });

@@ -1,6 +1,7 @@
 sap.ui.define([
-  "sap/ui/base/EventProvider"
-], function (EventProvider) {
+  "sap/ui/base/EventProvider",
+  "checklist/app/service/runtime/shared/TimerRuntime"
+], function (EventProvider, TimerRuntime) {
   "use strict";
 
   return EventProvider.extend("checklist.app.service.runtime.ConnectivityCoordinator", {
@@ -21,10 +22,7 @@ sap.ui.define([
     stop: function () {
       window.removeEventListener("online", this._fnOnline);
       window.removeEventListener("offline", this._fnOffline);
-      if (this._iGraceTimer) {
-        clearTimeout(this._iGraceTimer);
-        this._iGraceTimer = null;
-      }
+      this._iGraceTimer = TimerRuntime.clearTimer(this._iGraceTimer, clearTimeout);
     },
 
 
@@ -42,19 +40,13 @@ sap.ui.define([
       }
       var sGraceUntil = new Date(Date.now() + this._iGraceMs).toISOString();
       this.fireEvent("state", { online: false, isGrace: true, graceExpiresAt: sGraceUntil });
-      if (this._iGraceTimer) {
-        clearTimeout(this._iGraceTimer);
-      }
-      this._iGraceTimer = setTimeout(function () {
+      this._iGraceTimer = TimerRuntime.restartTimeout(this._iGraceTimer, function () {
         this.fireEvent("graceExpired", { online: false });
       }.bind(this), this._iGraceMs);
     },
 
     _onOnline: function () {
-      if (this._iGraceTimer) {
-        clearTimeout(this._iGraceTimer);
-        this._iGraceTimer = null;
-      }
+      this._iGraceTimer = TimerRuntime.clearTimer(this._iGraceTimer, clearTimeout);
       this.fireEvent("state", { online: true, isGrace: false, graceExpiresAt: null });
     }
   });

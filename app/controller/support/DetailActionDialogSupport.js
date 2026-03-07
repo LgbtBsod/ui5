@@ -1,8 +1,9 @@
 sap.ui.define([
     "checklist/app/controller/support/ControllerReturnFocusRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/FocusRuntime"
-], function (ControllerReturnFocusRuntime, ControllerViewStateRuntime, FocusRuntime) {
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (ControllerReturnFocusRuntime, ControllerViewStateRuntime, FocusRuntime, SchedulingRuntime) {
     "use strict";
 
     return {
@@ -11,17 +12,11 @@ sap.ui.define([
         },
 
         _clearLocationValueHelpSearchTimer: function () {
-            if (this._iLocationVhSearchTimer) {
-                clearTimeout(this._iLocationVhSearchTimer);
-                this._iLocationVhSearchTimer = null;
-            }
+            this._iLocationVhSearchTimer = SchedulingRuntime.clearTimer(this._iLocationVhSearchTimer);
         },
 
         _scheduleLocationValueHelpTableSync: function () {
-            if (this._iLocationVhTableSyncTimer) {
-                clearTimeout(this._iLocationVhTableSyncTimer);
-            }
-            this._iLocationVhTableSyncTimer = setTimeout(function () {
+            this._iLocationVhTableSyncTimer = SchedulingRuntime.restartTimer(this._iLocationVhTableSyncTimer, function () {
                 var oTreeTable = this.byId("locationValueHelpTreeTable");
                 this._iLocationVhTableSyncTimer = null;
                 if (!oTreeTable) {
@@ -80,7 +75,7 @@ sap.ui.define([
                 return;
             }
             oSearchField = this.byId("locationValueHelpSearchField");
-            setTimeout(function () {
+            SchedulingRuntime.restartTimer(0, function () {
                 oFocusTarget = oSearchField && oSearchField.getFocusDomRef ? oSearchField.getFocusDomRef() : null;
                 if (oFocusTarget && typeof oFocusTarget.focus === "function") {
                     oFocusTarget.focus();

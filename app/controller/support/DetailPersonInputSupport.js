@@ -1,11 +1,7 @@
 sap.ui.define([
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ControllerViewStateRuntime"
+], function (ControllerViewStateRuntime) {
     "use strict";
-
-    function setPersonDraft(oController, sPath, sValue) {
-        ControllerModelWriteSupport.set(oController, "view", sPath, String(sValue || ""));
-    }
 
     function syncDrafts(oController, oSelectedModel, sModelPath) {
         var oBasic;
@@ -14,16 +10,24 @@ sap.ui.define([
         }
         if (sModelPath === "/") {
             oBasic = oSelectedModel.getProperty("/basic") || {};
-            setPersonDraft(oController, "/observerInputValue", oBasic.OBSERVER_FULLNAME);
-            setPersonDraft(oController, "/observedInputValue", oBasic.OBSERVED_FULLNAME);
+            ControllerViewStateRuntime.set(oController, "/observerInputValue", String(oBasic.OBSERVER_FULLNAME || ""));
+            ControllerViewStateRuntime.set(oController, "/observedInputValue", String(oBasic.OBSERVED_FULLNAME || ""));
             return;
         }
         if (sModelPath === "/basic/OBSERVER_FULLNAME") {
-            setPersonDraft(oController, "/observerInputValue", oSelectedModel.getProperty("/basic/OBSERVER_FULLNAME"));
+            ControllerViewStateRuntime.set(
+                oController,
+                "/observerInputValue",
+                String(oSelectedModel.getProperty("/basic/OBSERVER_FULLNAME") || "")
+            );
             return;
         }
         if (sModelPath === "/basic/OBSERVED_FULLNAME") {
-            setPersonDraft(oController, "/observedInputValue", oSelectedModel.getProperty("/basic/OBSERVED_FULLNAME"));
+            ControllerViewStateRuntime.set(
+                oController,
+                "/observedInputValue",
+                String(oSelectedModel.getProperty("/basic/OBSERVED_FULLNAME") || "")
+            );
         }
     }
 

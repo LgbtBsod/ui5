@@ -1,4 +1,8 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/util/ThemeDomRuntime",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (ModelStateRuntime, ThemeDomRuntime, SchedulingRuntime) {
     "use strict";
 
     var _iResizeRafId = 0;
@@ -8,10 +12,7 @@ sap.ui.define([], function () {
     var _RESIZE_CLASS = "chkResizing";
 
     function _scheduleInvalidate(oLayout) {
-        if (_iResizeRafId) {
-            return;
-        }
-        _iResizeRafId = window.requestAnimationFrame(function () {
+        _iResizeRafId = SchedulingRuntime.requestFrameOnce(_iResizeRafId, function () {
             _iResizeRafId = 0;
             if (oLayout && typeof oLayout.invalidate === "function") {
                 oLayout.invalidate();
@@ -21,26 +22,16 @@ sap.ui.define([], function () {
 
     function _beginResizing() {
         var oDoc = document && document.documentElement;
-        if (oDoc && oDoc.classList) {
-            oDoc.classList.add(_RESIZE_CLASS);
-        }
-        if (_iResizeEndTimer) {
-            window.clearTimeout(_iResizeEndTimer);
-            _iResizeEndTimer = 0;
-        }
+        ThemeDomRuntime.addClass([oDoc], _RESIZE_CLASS);
+        _iResizeEndTimer = SchedulingRuntime.clearTimer(_iResizeEndTimer);
     }
 
     function _scheduleResizeEnd() {
-        if (_iResizeEndTimer) {
-            window.clearTimeout(_iResizeEndTimer);
-        }
-        _iResizeEndTimer = window.setTimeout(function () {
+        _iResizeEndTimer = SchedulingRuntime.restartTimer(_iResizeEndTimer, function () {
             var oDoc = document && document.documentElement;
 
             _iResizeEndTimer = 0;
-            if (oDoc && oDoc.classList) {
-                oDoc.classList.remove(_RESIZE_CLASS);
-            }
+            ThemeDomRuntime.removeClass([oDoc], _RESIZE_CLASS);
             if (window.Ui5Bg && typeof window.Ui5Bg.onResizeEnd === "function") {
                 window.Ui5Bg.onResizeEnd();
             }
@@ -74,25 +65,20 @@ sap.ui.define([], function () {
         _syncStaticAreaScope: function () {
             var oCore = sap.ui.getCore && sap.ui.getCore();
             var oStaticArea = oCore && oCore.getStaticAreaRef && oCore.getStaticAreaRef();
-            if (!oStaticArea || !oStaticArea.classList) {
+            if (!oStaticArea) {
                 return;
             }
-            oStaticArea.classList.add("chkApp");
-            oStaticArea.classList.add("chkSkin");
+            ThemeDomRuntime.addClass([oStaticArea], "chkApp");
+            ThemeDomRuntime.addClass([oStaticArea], "chkSkin");
         },
 
         _applyCompactDensityClass: function () {
-            var oAppView = this._getAppViewModel();
-            var bCompact = !!(oAppView && oAppView.getProperty && oAppView.getProperty("/compactDensity"));
+            var bCompact = !!ModelStateRuntime.read(this, "appView", "/compactDensity", false);
             var oRoot = document && document.documentElement;
             var oBody = document && document.body;
             var oContainer = document && document.getElementById && document.getElementById("ui5_container");
             var oAppDom = this.getView && this.getView().getDomRef && this.getView().getDomRef();
-            [oRoot, oBody, oContainer, oAppDom].forEach(function (oNode) {
-                if (oNode && oNode.classList) {
-                    oNode.classList.toggle("appDensityCompact", bCompact);
-                }
-            });
+            ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appDensityCompact", bCompact);
         },
 
         _syncShellMetrics: function () {
@@ -112,12 +98,9 @@ sap.ui.define([], function () {
 
         _scheduleShellLayoutRefresh: function () {
             var that = this;
-            if (_iShellRefreshRafId) {
-                window.cancelAnimationFrame(_iShellRefreshRafId);
-            }
-            _iShellRefreshRafId = window.requestAnimationFrame(function () {
+            _iShellRefreshRafId = SchedulingRuntime.restartFrame(_iShellRefreshRafId, function () {
                 _iShellRefreshRafId = 0;
-                window.requestAnimationFrame(function () {
+                SchedulingRuntime.nextFrame(function () {
                     that._syncShellFlexAllocation();
                     that._syncShellMetrics();
                     that._syncLayoutViewportGeometry();

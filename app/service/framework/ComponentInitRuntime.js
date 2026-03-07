@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (ModelStateRuntime) {
     "use strict";
 
     function reuseJsonModel(oExistingModel, fnCreateModel) {
@@ -114,7 +116,7 @@ sap.ui.define([], function () {
                 stateModel: oStateModel,
                 getBackendMode: function () { return "real"; },
                 onMetadataFailed: function () {
-                    oStateModel.setProperty("/backendMode", "real");
+                    ModelStateRuntime.writeOnModel(oStateModel, "/backendMode", "real");
                 }
             });
 
@@ -137,10 +139,12 @@ sap.ui.define([], function () {
             var oCacheModel = reuseJsonModel(this.getModel("cache"), ModelFactory.createCacheModel);
             var oEnvModel = ModelFactory.createEnvModel();
             var mTimerDefaults = TimeConfigService.buildDefaultTimerMap();
-            oStateModel.setProperty("/timers", mTimerDefaults);
-            oStateModel.setProperty(StatePaths.SAVE_IN_FLIGHT, false);
-            oStateModel.setProperty(StatePaths.PENDING_NAVIGATION_INTENT, null);
-            oStateModel.setProperty(StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                "/timers": mTimerDefaults,
+                [StatePaths.SAVE_IN_FLIGHT]: false,
+                [StatePaths.PENDING_NAVIGATION_INTENT]: null,
+                [StatePaths.TAB_CONFLICT_STATE]: { active: false, source: "", at: "" }
+            });
             var fnEmitTelemetry = function (sEventName, oPayload) {
                 return WorkflowTelemetry.emit(sEventName, {
                     stateModel: oStateModel,
@@ -187,12 +191,12 @@ sap.ui.define([], function () {
                         source: "RuntimeSettingsSet(GLOBAL)",
                         runtimeSettingsPayload: oRuntime || {}
                     }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
-                        oStateModel.setProperty("/frontendConfigSource", "gateway_runtime");
+                        ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
                         fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
                         return oRuntime || {};
                     });
                 }.bind(this)).catch(function (oError) {
-                    oStateModel.setProperty("/frontendConfigSource", "gateway_runtime_error");
+                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
                     fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
                         "RuntimeSettingsSet(GLOBAL)",
                         (oError && oError.message) || oError || "runtime_settings_load_failed"

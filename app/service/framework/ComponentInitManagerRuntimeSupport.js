@@ -1,7 +1,9 @@
 sap.ui.define([
     "checklist/app/service/framework/FeedbackBannerRuntime",
-    "checklist/app/service/framework/TelemetryRuntime"
-], function (FeedbackBannerRuntime, TelemetryRuntime) {
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/TelemetryRuntime",
+    "checklist/app/util/CloneUtil"
+], function (FeedbackBannerRuntime, ModelStateRuntime, TelemetryRuntime, CloneUtil) {
     "use strict";
 
     function attach(mOptions) {
@@ -72,7 +74,7 @@ sap.ui.define([
                 if (!oDelta) {
                     return null;
                 }
-                return { id: sId, payload: oDelta, fullPayload: JSON.parse(JSON.stringify(oCurrent)) };
+                return { id: sId, payload: oDelta, fullPayload: CloneUtil.clone(oCurrent, {}) };
             },
             saveFn: function (oPayload) {
                 if (!oComponent._detailFacade || !oComponent._ctx) {
@@ -89,26 +91,32 @@ sap.ui.define([
             }
         });
         oComponent._oAutoSave.attachEvent("autosaveStart", function () {
-            oStateModel.setProperty("/autosaveState", "SAVING");
-            oStateModel.setProperty(StatePaths.SAVE_IN_FLIGHT, true);
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                "/autosaveState": "SAVING",
+                [StatePaths.SAVE_IN_FLIGHT]: true
+            });
             if (oStateModel.getProperty("/networkOnline") === false) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
                     ActionContract.RETRY_ACTIONS.SAVE,
                     "retryNowButton"
                 ));
             }
-            DebugLogger.info("Component", "autosave start", TelemetryRuntime.objectRef(oStateModel.getProperty("/activeObjectId")));
-            fnEmitTelemetry("autosave.triggered", TelemetryRuntime.objectRef(oStateModel.getProperty("/activeObjectId")));
+            DebugLogger.info("Component", "autosave start", TelemetryRuntime.objectRefFromStateModel(oStateModel));
+            fnEmitTelemetry("autosave.triggered", TelemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveDone", function () {
-            oStateModel.setProperty("/autosaveState", "SAVED");
-            oStateModel.setProperty("/autosaveAt", new Date().toISOString());
-            oStateModel.setProperty(StatePaths.SAVE_IN_FLIGHT, false);
-            DebugLogger.info("Component", "autosave done", TelemetryRuntime.objectRef(oStateModel.getProperty("/activeObjectId")));
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                "/autosaveState": "SAVED",
+                "/autosaveAt": new Date().toISOString(),
+                [StatePaths.SAVE_IN_FLIGHT]: false
+            });
+            DebugLogger.info("Component", "autosave done", TelemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveError", function (oEvent) {
-            oStateModel.setProperty("/autosaveState", "ERROR");
-            oStateModel.setProperty(StatePaths.SAVE_IN_FLIGHT, false);
+            ModelStateRuntime.setManyOnModel(oStateModel, {
+                "/autosaveState": "ERROR",
+                [StatePaths.SAVE_IN_FLIGHT]: false
+            });
             fnSetGlobalBanner(
                 oStateModel.getProperty("/networkOnline") === false
                     ? FeedbackBannerRuntime.createNetworkRetryBannerInput(

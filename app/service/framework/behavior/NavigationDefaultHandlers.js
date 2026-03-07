@@ -1,14 +1,15 @@
 sap.ui.define([
     "checklist/app/infra/navigation/WorkspaceRouteNavigation",
-    "checklist/app/service/framework/behavior/BehaviorRegistry"
-], function (WorkspaceRouteNavigation, BehaviorRegistry) {
+    "checklist/app/service/framework/behavior/BehaviorRegistry",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (WorkspaceRouteNavigation, BehaviorRegistry, ModelStateRuntime) {
     "use strict";
 
     var NAVIGATION_SCOPE = "navigation";
     var bDefaultsRegistered = false;
 
     function queuePendingIntent(mContext) {
-        mContext.stateModel.setProperty(mContext.statePaths.PENDING_NAVIGATION_INTENT, {
+        ModelStateRuntime.writeOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, {
             routeName: mContext.routeEvent && mContext.routeEvent.getParameter && mContext.routeEvent.getParameter("name"),
             routeArgs: (mContext.routeEvent && mContext.routeEvent.getParameter && mContext.routeEvent.getParameter("arguments")) || {},
             queuedAt: new Date().toISOString()
@@ -16,7 +17,7 @@ sap.ui.define([
     }
 
     function clearPendingIntent(mContext) {
-        mContext.stateModel.setProperty(mContext.statePaths.PENDING_NAVIGATION_INTENT, null);
+        ModelStateRuntime.writeOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null);
     }
 
     function resumePendingIntent(mContext) {
@@ -25,7 +26,7 @@ sap.ui.define([
             return false;
         }
         clearPendingIntent(mContext);
-        mContext.stateModel.setProperty("/navGuardBypass", true);
+        ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
         mContext.component.getRouter().navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
         return true;
     }

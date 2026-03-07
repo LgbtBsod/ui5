@@ -1,6 +1,7 @@
 sap.ui.define([
-    "sap/ui/base/EventProvider"
-], function (EventProvider) {
+    "sap/ui/base/EventProvider",
+    "checklist/app/service/runtime/shared/TimerRuntime"
+], function (EventProvider, TimerRuntime) {
     "use strict";
 
     return EventProvider.extend("checklist.app.service.runtime.ActivityMonitor", {
@@ -25,10 +26,7 @@ sap.ui.define([
 
         _reset: function () {
             this.fireEvent("activity", { at: new Date().toISOString() });
-            if (this._iTimer) {
-                clearTimeout(this._iTimer);
-            }
-            this._iTimer = setTimeout(function () {
+            this._iTimer = TimerRuntime.restartTimeout(this._iTimer, function () {
                 this.fireEvent("idleTimeout");
             }.bind(this), this._iIdleMs);
         },
@@ -45,10 +43,7 @@ sap.ui.define([
             }
         },
         stop: function () {
-            if (this._iTimer) {
-                clearTimeout(this._iTimer);
-                this._iTimer = null;
-            }
+            this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearTimeout);
 
             this._aEvents.forEach(function (sEvt) {
                 window.removeEventListener(sEvt, this._fnActivityHandler);

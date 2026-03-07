@@ -1,8 +1,24 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/util/CloneUtil"
+], function (CloneUtil) {
     "use strict";
 
     function model(oController, sModelName) {
         return oController && oController.getModel ? oController.getModel(sModelName) : null;
+    }
+
+    function writeOnModel(oModel, sPath, vValue) {
+        if (!oModel || typeof oModel.setProperty !== "function") {
+            return false;
+        }
+        oModel.setProperty(sPath, vValue);
+        return true;
+    }
+
+    function setManyOnModel(oModel, mValues) {
+        return Object.keys(mValues || {}).some(function (sPath) {
+            return writeOnModel(oModel, sPath, mValues[sPath]);
+        });
     }
 
     function read(oController, sModelName, sPath, vFallback) {
@@ -22,6 +38,18 @@ sap.ui.define([], function () {
         return true;
     }
 
+    function writeBoolean(oController, sModelName, sPath, bValue) {
+        var bNormalized = !!bValue;
+        write(oController, sModelName, sPath, bNormalized);
+        return bNormalized;
+    }
+
+    function setMany(oController, sModelName, mValues) {
+        return Object.keys(mValues || {}).some(function (sPath) {
+            return write(oController, sModelName, sPath, mValues[sPath]);
+        });
+    }
+
     function replaceData(oController, sModelName, vData) {
         var oModel = model(oController, sModelName);
         if (!oModel || typeof oModel.setData !== "function") {
@@ -32,15 +60,23 @@ sap.ui.define([], function () {
     }
 
     function clone(vValue, vFallback) {
-        try {
-            return JSON.parse(JSON.stringify(typeof vValue === "undefined" ? vFallback : vValue));
-        } catch (_e) {
-            return typeof vFallback === "undefined" ? null : vFallback;
-        }
+        return CloneUtil.clone(vValue, vFallback);
     }
 
     function syncDetailCurrent(oController, vData) {
         return write(oController, "uiState", "/_detailCurrent", clone(vData || {}, {}));
+    }
+
+    function resetDetailWorkflowState(oController, mPatch) {
+        return setMany(oController, "state", Object.assign({
+            "/mode": "READ",
+            "/lockOperationState": "IDLE",
+            "/autosaveState": "IDLE",
+            "/autosaveAt": null,
+            "/autosaveEnabled": false,
+            "/isDirty": false,
+            "/activeObjectId": ""
+        }, mPatch || {}));
     }
 
     function resetDetailRuntimeData(oController) {
@@ -78,11 +114,16 @@ sap.ui.define([], function () {
 
     return {
         model: model,
+        writeOnModel: writeOnModel,
+        setManyOnModel: setManyOnModel,
         read: read,
         write: write,
+        writeBoolean: writeBoolean,
+        setMany: setMany,
         replaceData: replaceData,
         clone: clone,
         syncDetailCurrent: syncDetailCurrent,
+        resetDetailWorkflowState: resetDetailWorkflowState,
         resetDetailRuntimeData: resetDetailRuntimeData,
         withFlag: withFlag,
         any: any,

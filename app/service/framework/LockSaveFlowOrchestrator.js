@@ -6,6 +6,10 @@ sap.ui.define([
 ], function (DialogOrchestrator, DetailCommandPolicy, ModelStateRuntime, RootIdRuntime) {
     "use strict";
 
+    function resetDeleteChecklistConfirmArmed(oController) {
+        ModelStateRuntime.write(oController, "view", "/deleteChecklistConfirmArmed", false);
+    }
+
     function toggleEdit(oController, oEvent) {
         return Promise.resolve(DetailCommandPolicy.enterEdit(oController, RootIdRuntime.withCurrentRootId(oController, {
             state: !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"))
@@ -27,9 +31,7 @@ sap.ui.define([
     }
 
     function close(oController) {
-        if (oController && typeof oController._setDeleteChecklistConfirmArmed === "function") {
-            oController._setDeleteChecklistConfirmArmed(false);
-        }
+        resetDeleteChecklistConfirmArmed(oController);
         return DetailCommandPolicy.close(oController, RootIdRuntime.withCurrentRootId(oController));
     }
 
@@ -56,18 +58,10 @@ sap.ui.define([
             DialogOrchestrator.actions.CANCEL
         ).then(function (sAction) {
             if (sAction !== DialogOrchestrator.actions.DELETE) {
-                if (oController && typeof oController._setDeleteChecklistConfirmArmed === "function") {
-                    oController._setDeleteChecklistConfirmArmed(false);
-                } else {
-                    ModelStateRuntime.write(oController, "view", "/deleteChecklistConfirmArmed", false);
-                }
+                resetDeleteChecklistConfirmArmed(oController);
                 return false;
             }
-            if (oController && typeof oController._setDeleteChecklistConfirmArmed === "function") {
-                oController._setDeleteChecklistConfirmArmed(false);
-            } else {
-                ModelStateRuntime.write(oController, "view", "/deleteChecklistConfirmArmed", false);
-            }
+            resetDeleteChecklistConfirmArmed(oController);
             return ModelStateRuntime.withFlag(oController, "state", "/isBusy", function () {
                 return DetailCommandPolicy.deleteChecklist(oController, RootIdRuntime.withCurrentRootId(oController));
             }, true, false);

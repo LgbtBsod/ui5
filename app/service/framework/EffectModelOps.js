@@ -1,33 +1,8 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/util/CloneUtil"
+], function (ModelStateRuntime, CloneUtil) {
     "use strict";
-
-    function isDate(vValue) {
-        return Object.prototype.toString.call(vValue) === "[object Date]";
-    }
-
-    function isPlainObject(vValue) {
-        return !!vValue && Object.prototype.toString.call(vValue) === "[object Object]";
-    }
-
-    function cloneValue(vValue) {
-        var oResult;
-
-        if (Array.isArray(vValue)) {
-            return vValue.map(cloneValue);
-        }
-        if (isDate(vValue)) {
-            return new Date(vValue.getTime());
-        }
-        if (!isPlainObject(vValue)) {
-            return vValue;
-        }
-
-        oResult = {};
-        Object.keys(vValue).forEach(function (sKey) {
-            oResult[sKey] = cloneValue(vValue[sKey]);
-        });
-        return oResult;
-    }
 
     function getModel(oController, sModelName) {
         if (!oController || !oController.getModel) { return null; }
@@ -37,12 +12,12 @@ sap.ui.define([], function () {
     function busy(oController, oEffect) {
         var oModel = getModel(oController, oEffect.modelName);
         var sPath = oEffect.path || (oEffect.scope ? "/busy/" + oEffect.scope : "/busy");
-        if (oModel && oModel.setProperty) { oModel.setProperty(sPath, !!oEffect.value); }
+        if (oModel && oModel.setProperty) { ModelStateRuntime.writeOnModel(oModel, sPath, !!oEffect.value); }
     }
 
     function patch(oController, oEffect) {
         var oModel = getModel(oController, oEffect.modelName);
-        if (oModel && oModel.setProperty) { oModel.setProperty(oEffect.path, cloneValue(oEffect.value)); }
+        if (oModel && oModel.setProperty) { ModelStateRuntime.writeOnModel(oModel, oEffect.path, CloneUtil.clone(oEffect.value)); }
     }
 
     function merge(oController, oEffect) {
@@ -50,7 +25,11 @@ sap.ui.define([], function () {
         var oCurrent;
         if (!oModel || !oModel.getProperty || !oModel.setProperty) { return; }
         oCurrent = oModel.getProperty(oEffect.path) || {};
-        oModel.setProperty(oEffect.path, Object.assign({}, cloneValue(oCurrent), cloneValue(oEffect.partialObject || {})));
+        ModelStateRuntime.writeOnModel(
+            oModel,
+            oEffect.path,
+            Object.assign({}, CloneUtil.clone(oCurrent), CloneUtil.clone(oEffect.partialObject || {}))
+        );
     }
 
     return { busy: busy, patch: patch, merge: merge };

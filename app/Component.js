@@ -41,7 +41,8 @@
     "checklist/app/util/CreateSentinel",
     "sap/ui/Device",
     "checklist/app/util/InteractionFX",
-    "checklist/app/util/ThemeService"
+    "checklist/app/util/ThemeService",
+    "checklist/app/service/framework/SchedulingRuntime"
 ], function (
     UIComponent,
     ModelFactory,
@@ -85,7 +86,8 @@
     CreateSentinel,
     Device,
     InteractionFX,
-    ThemeService
+    ThemeService,
+    SchedulingRuntime
 ) {
     "use strict";
 
@@ -286,10 +288,7 @@
             if (this._fnOnFullSave) {
                 window.removeEventListener("pcct:fullSave", this._fnOnFullSave);
             }
-            if (this._iSaveWorkingTimer) {
-                clearTimeout(this._iSaveWorkingTimer);
-                this._iSaveWorkingTimer = null;
-            }
+            this._iSaveWorkingTimer = SchedulingRuntime.clearTimer(this._iSaveWorkingTimer);
             this._fnCrossTabStorage = null;
             this._oCrossTabChannel = null;
             this._oLifecycleRouter = null;

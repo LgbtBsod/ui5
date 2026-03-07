@@ -1,11 +1,12 @@
 sap.ui.define([
     "checklist/app/controller/support/ControllerResourceCleanup",
-    "checklist/app/controller/support/ControllerModelWriteSupport",
     "checklist/app/service/framework/AppShellCoordinator",
     "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/service/framework/RootIdRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/SchedulingRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, ControllerModelWriteSupport, AppShellCoordinator, LayoutStateRuntime, RootIdRuntime, Device) {
+], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, Device) {
     "use strict";
 
     var PHONE_MAX_WIDTH = 720;
@@ -125,9 +126,9 @@ sap.ui.define([
 
         _syncLayoutState: function () {
             var oState = this._getStateModel();
-            var sLayoutRaw = oState && oState.getProperty ? oState.getProperty("/layout") : "OneColumn";
+            var sLayoutRaw = ModelStateRuntime.read(this, "state", "/layout", "OneColumn");
             var sLayout = LayoutStateRuntime.normalizeLayout(sLayoutRaw);
-            var sRouteName = String(oState && oState.getProperty ? (oState.getProperty("/currentRouteName") || "search") : "search").trim() || "search";
+            var sRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
             var sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
             var bSingle = sLayout === "OneColumn";
             var bDetailOnly = sLayout === "MidColumnFullScreen";
@@ -149,7 +150,7 @@ sap.ui.define([
             }
             syncMidColumnPage(this, sRouteName);
             if (oState && oState.setProperty && sLayoutRaw !== sLayout) {
-                oState.setProperty("/layout", sLayout);
+                ModelStateRuntime.writeOnModel(oState, "/layout", sLayout);
             }
         },
 
@@ -159,7 +160,7 @@ sap.ui.define([
             }
             this._bStartupReadyMarked = true;
             if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
-                window.requestAnimationFrame(markStartupReady);
+                SchedulingRuntime.nextFrame(markStartupReady);
                 return;
             }
             markStartupReady();
@@ -205,11 +206,9 @@ sap.ui.define([
             var iWidth = Math.max(window.innerWidth || 0, document.documentElement && document.documentElement.clientWidth || 0, 0);
             var bPhone = iWidth > 0 && iWidth <= PHONE_MAX_WIDTH;
             var bTablet = iWidth > PHONE_MAX_WIDTH && iWidth <= TABLET_MAX_WIDTH;
-            ControllerModelWriteSupport.setMany(this, "appView", {
-                "/isPhoneViewport": bPhone,
-                "/isTabletViewport": bTablet,
-                "/viewportWidth": iWidth
-            });
+            ModelStateRuntime.write(this, "appView", "/isPhoneViewport", bPhone);
+            ModelStateRuntime.write(this, "appView", "/isTabletViewport", bTablet);
+            ModelStateRuntime.write(this, "appView", "/viewportWidth", iWidth);
             this._syncShellMetrics();
             this._syncLayoutViewportGeometry();
         }

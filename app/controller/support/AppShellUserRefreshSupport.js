@@ -1,6 +1,7 @@
 sap.ui.define([
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/domain/shared/usecases/LoadCurrentUserUseCase"
-], function (LoadCurrentUserUseCase) {
+], function (ModelStateRuntime, LoadCurrentUserUseCase) {
     "use strict";
 
     function refreshCurrentUser(oController) {
@@ -10,7 +11,7 @@ sap.ui.define([
             return Promise.resolve(false);
         }
         if (oAppView) {
-            oAppView.setProperty("/shell/userRefreshBusy", true);
+            ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", true);
         }
         return LoadCurrentUserUseCase.refresh({
             stateModel: oState
@@ -31,7 +32,7 @@ sap.ui.define([
             return false;
         }).finally(function () {
             if (oAppView) {
-                oAppView.setProperty("/shell/userRefreshBusy", false);
+                ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", false);
             }
         });
     }

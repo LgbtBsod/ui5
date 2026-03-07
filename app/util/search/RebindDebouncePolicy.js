@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (SchedulingRuntime) {
     "use strict";
 
     function rebindOrFallback(mArgs) {
@@ -15,8 +17,9 @@ sap.ui.define([], function () {
         var iTimer = null;
         return function () {
             var aArgs = arguments;
-            clearTimeout(iTimer);
-            iTimer = setTimeout(function () { fnRebind.apply(null, aArgs); }, Math.max(0, Number(iDelayMs) || 0));
+            iTimer = SchedulingRuntime.restartTimer(iTimer, function () {
+                fnRebind.apply(null, aArgs);
+            }, Math.max(0, Number(iDelayMs) || 0));
         };
     }
 

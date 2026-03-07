@@ -1,8 +1,10 @@
-sap.ui.define([], function () {
+sap.ui.define([
+  "checklist/app/util/CloneUtil"
+], function (CloneUtil) {
   "use strict";
 
   function eq(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
-  function clone(v) { return JSON.parse(JSON.stringify(v)); }
+  function clone(v) { return CloneUtil.clone(v, null); }
 
   function isTechField(sKey) {
     return ["changed_on", "server_changed_on", "version_number", "_cacheTimestamp"].indexOf(sKey) >= 0;

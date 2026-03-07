@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (SchedulingRuntime) {
     "use strict";
 
     var RIPPLE_CLASS = "is-rippling";
@@ -47,13 +49,11 @@ sap.ui.define([], function () {
             if (prefersReducedMotion()) {
                 return;
             }
-            if (iRippleTimer) {
-                window.clearTimeout(iRippleTimer);
-            }
+            iRippleTimer = SchedulingRuntime.clearTimer(iRippleTimer);
             oTarget.classList.remove(RIPPLE_CLASS);
             void oTarget.offsetWidth;
             oTarget.classList.add(RIPPLE_CLASS);
-            iRippleTimer = window.setTimeout(function () {
+            iRippleTimer = SchedulingRuntime.restartTimer(0, function () {
                 oTarget.classList.remove(RIPPLE_CLASS);
                 iRippleTimer = 0;
             }, RIPPLE_DURATION_MS);
@@ -70,10 +70,7 @@ sap.ui.define([], function () {
 
         return {
             destroy: function () {
-                if (iRippleTimer) {
-                    window.clearTimeout(iRippleTimer);
-                    iRippleTimer = 0;
-                }
+                iRippleTimer = SchedulingRuntime.clearTimer(iRippleTimer);
                 oRoot.removeEventListener("pointermove", onPointerMove, { passive: true });
                 oRoot.removeEventListener("pointerdown", onPointerDown, { passive: true });
             }

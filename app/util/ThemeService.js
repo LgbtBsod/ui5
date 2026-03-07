@@ -4,8 +4,9 @@ sap.ui.define([
     "checklist/app/util/ThemePhilosophy",
     "checklist/app/util/ValueTokenParser",
     "checklist/app/util/ThemeDomRuntime",
-    "checklist/app/util/ThemeTokenRuntime"
-], function (Core, Parameters, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime) {
+    "checklist/app/util/ThemeTokenRuntime",
+    "checklist/app/service/framework/SchedulingRuntime"
+], function (Core, Parameters, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime) {
     "use strict";
 
     var SWITCH_CLASS = "theme-switching";
@@ -211,15 +212,17 @@ sap.ui.define([
         var oBody = document && document.body;
         var oRoot = document && document.documentElement;
         var oMeta = ThemePhilosophy.getMeta(sTheme);
+        var aBodyNodes;
         if (!oBody || !oRoot) {
             return;
         }
         syncDocumentRootClasses();
-        oBody.classList.toggle("appLight", !bNight);
-        oBody.classList.toggle("appDark", bNight);
-        oBody.classList.toggle("lightMode", !bNight);
-        oRoot.classList.toggle("light-mode", !bNight);
-        oBody.classList.remove(
+        aBodyNodes = [oBody];
+        ThemeDomRuntime.toggleClass(aBodyNodes, "appLight", !bNight);
+        ThemeDomRuntime.toggleClass(aBodyNodes, "appDark", bNight);
+        ThemeDomRuntime.toggleClass(aBodyNodes, "lightMode", !bNight);
+        ThemeDomRuntime.toggleClass([oRoot], "light-mode", !bNight);
+        [
             "themeLifestyleClarity",
             "themeLifestyleNightOps",
             "platformCupertinoGlass",
@@ -227,24 +230,23 @@ sap.ui.define([
             "platformCalmModern",
             "themeHorizonMorning",
             "themeHorizonNight"
-        );
+        ].forEach(function (sClassName) {
+            ThemeDomRuntime.removeClass(aBodyNodes, sClassName);
+        });
         if (oMeta.lifestyleClass) {
-            oBody.classList.add(oMeta.lifestyleClass);
+            ThemeDomRuntime.addClass(aBodyNodes, oMeta.lifestyleClass);
         }
         if (oMeta.platformClass) {
-            oBody.classList.add(oMeta.platformClass);
+            ThemeDomRuntime.addClass(aBodyNodes, oMeta.platformClass);
         }
         if (oMeta.horizonClass) {
-            oBody.classList.add(oMeta.horizonClass);
+            ThemeDomRuntime.addClass(aBodyNodes, oMeta.horizonClass);
         }
     }
 
     function clearSwitching() {
         var oNodes = ThemeDomRuntime.getNodes();
-        if (iSwitchTimer) {
-            window.clearTimeout(iSwitchTimer);
-            iSwitchTimer = 0;
-        }
+        iSwitchTimer = SchedulingRuntime.clearTimer(iSwitchTimer);
         if (fnThemeChangedCleanup) {
             sap.ui.getCore().detachThemeChanged(fnThemeChangedCleanup);
             fnThemeChangedCleanup = null;
@@ -268,13 +270,13 @@ sap.ui.define([
         if (bAwaitThemeChanged) {
             fnThemeChangedCleanup = function () {
                 syncTokensFromUI5();
-                window.requestAnimationFrame(function () {
+                SchedulingRuntime.nextFrame(function () {
                     clearSwitching();
                 });
             };
             sap.ui.getCore().attachThemeChanged(fnThemeChangedCleanup);
         }
-        iSwitchTimer = window.setTimeout(function () {
+        iSwitchTimer = SchedulingRuntime.restartTimer(iSwitchTimer, function () {
             clearSwitching();
         }, bAwaitThemeChanged ? Math.max(SWITCH_DURATION_MS, 1400) : SWITCH_DURATION_MS);
     }
@@ -310,7 +312,7 @@ sap.ui.define([
         syncTokensFromUI5();
         if (!bAlreadyApplied) {
             sPendingMode = sResolvedMode;
-            window.requestAnimationFrame(function () {
+            SchedulingRuntime.nextFrame(function () {
                 Core.applyTheme(sTheme);
             });
         }

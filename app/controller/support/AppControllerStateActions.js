@@ -5,8 +5,8 @@ sap.ui.define([
     "checklist/app/service/framework/LayoutStateRuntime",
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/util/CreateSentinel",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (AppShellTextSupport, AppShellPermissionPresentation, ActionContract, LayoutStateRuntime, RootIdRuntime, CreateSentinel, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (AppShellTextSupport, AppShellPermissionPresentation, ActionContract, LayoutStateRuntime, RootIdRuntime, CreateSentinel, ModelStateRuntime) {
     "use strict";
     var getText = AppShellTextSupport.getText;
     var SHELL_MODE_STATE_MAP = {
@@ -36,22 +36,18 @@ sap.ui.define([
         return AUTOSAVE_STATE_MAP[sAutosaveState] || AUTOSAVE_STATE_MAP.IDLE;
     }
 
-    function setAppViewPatch(oController, mPatch) {
-        return ControllerModelWriteSupport.setMany(oController, "appView", mPatch);
-    }
-
     return {
         _ensureAppViewDefaults: function () {
             var mPatch = {};
             if (!this._getAppViewModel()) {
                 return;
             }
-            mPatch["/compactDensity"] = !!ControllerModelWriteSupport.get(this, "appView", "/compactDensity");
-            mPatch["/animationEnabled"] = ControllerModelWriteSupport.get(this, "appView", "/animationEnabled") !== false;
-            mPatch["/backgroundInteractive"] = ControllerModelWriteSupport.get(this, "appView", "/backgroundInteractive") !== false;
-            mPatch["/isPhoneViewport"] = !!ControllerModelWriteSupport.get(this, "appView", "/isPhoneViewport");
-            mPatch["/isTabletViewport"] = !!ControllerModelWriteSupport.get(this, "appView", "/isTabletViewport");
-            if (!ControllerModelWriteSupport.get(this, "appView", "/shell")) {
+            mPatch["/compactDensity"] = !!ModelStateRuntime.read(this, "appView", "/compactDensity", false);
+            mPatch["/animationEnabled"] = ModelStateRuntime.read(this, "appView", "/animationEnabled", true) !== false;
+            mPatch["/backgroundInteractive"] = ModelStateRuntime.read(this, "appView", "/backgroundInteractive", true) !== false;
+            mPatch["/isPhoneViewport"] = !!ModelStateRuntime.read(this, "appView", "/isPhoneViewport", false);
+            mPatch["/isTabletViewport"] = !!ModelStateRuntime.read(this, "appView", "/isTabletViewport", false);
+            if (!ModelStateRuntime.read(this, "appView", "/shell", null)) {
                 mPatch["/shell"] = {
                     routeLabel: "", layoutLabel: "", layoutState: "Information", modeLabel: "", modeState: "Information",
                     contextSubtitle: "", userLabel: "", userMeta: "", userSessionLabel: "", userSessionState: "Information",
@@ -61,7 +57,7 @@ sap.ui.define([
                     userLoginLabel: "", userEnvironmentLabel: "", userRefreshBusy: false, notifications: []
                 };
             }
-            setAppViewPatch(this, mPatch);
+            ModelStateRuntime.setMany(this, "appView", mPatch);
         },
 
         _syncShellState: function () {
@@ -89,18 +85,22 @@ sap.ui.define([
             }
             this._ensureAppViewDefaults();
             sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
-            sCurrentRouteName = String(oState.getProperty("/currentRouteName") || "search").trim() || "search";
-            sLayoutKind = LayoutStateRuntime.toLayoutKind(oState.getProperty("/layout"));
+            sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
+            sLayoutKind = LayoutStateRuntime.toLayoutKind(ModelStateRuntime.read(this, "state", "/layout", "OneColumn"));
             sMode = LayoutStateRuntime.readMode(oState, "READ");
             sLockState = LayoutStateRuntime.readLockState(oState, "IDLE");
             sAutosaveState = LayoutStateRuntime.readAutosaveState(oState, "IDLE");
-            oCurrentUser = oState.getProperty("/currentUser") || {};
+            oCurrentUser = ModelStateRuntime.read(this, "state", "/currentUser", {}) || {};
             sUser = String(oCurrentUser.uname || "").trim();
             sFullName = String(oCurrentUser.fullName || sUser || getText(this, "shellUserMissing", null, "User login required"));
             aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
             aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
-            bShowHints = !!(oLayout && oLayout.getProperty && oLayout.getProperty("/personalization/showHints"));
-            sFrontendSource = String(oState.getProperty("/frontendConfigSource") || oState.getProperty("/backendMode") || "gateway_runtime");
+            bShowHints = !!ModelStateRuntime.read(this, "layout", "/personalization/showHints", false);
+            sFrontendSource = String(
+                ModelStateRuntime.read(this, "state", "/frontendConfigSource", "")
+                || ModelStateRuntime.read(this, "state", "/backendMode", "")
+                || "gateway_runtime"
+            );
             bRuntimeManagedUser = true;
             bSearchWorkspace = !sSelectedId;
             bEditWorkspace = !bSearchWorkspace && sMode === "EDIT";
@@ -154,11 +154,11 @@ sap.ui.define([
             mShellPatch["/shell/userIcon"] = "sap-icon://employee";
             mShellPatch["/shell/showHints"] = bShowHints;
             mShellPatch["/shell/notifications"] = this._buildShellNotifications(oState, sMode, sLockState, sAutosaveState);
-            setAppViewPatch(this, mShellPatch);
+            ModelStateRuntime.setMany(this, "appView", mShellPatch);
         },
         _buildShellNotifications: function (oState, sMode, sLockState, sAutosaveState) {
-            var bOnline = oState.getProperty("/networkOnline") !== false;
-            var bGrace = !!oState.getProperty("/networkGraceMode");
+            var bOnline = ModelStateRuntime.read(this, "state", "/networkOnline", true) !== false;
+            var bGrace = !!ModelStateRuntime.read(this, "state", "/networkGraceMode", false);
             var sConnectionText = bOnline ? (bGrace ? getText(this, "shellConnectionGrace", null, "Connection unstable") : getText(this, "shellConnectionOnline", null, "Online")) : getText(this, "shellConnectionOffline", null, "Offline");
             var sLockText = sMode === "EDIT" && sLockState === "LOCKED" ? getText(this, "shellLockLocked", null, "Lock owned by you")
                 : (sLockState === "PENDING" ? getText(this, "shellLockPending", null, "Lock request in progress")
