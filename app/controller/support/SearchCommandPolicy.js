@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/ControllerCtxRuntime",
     "checklist/app/service/framework/FacadeCommandContract",
     "checklist/app/service/framework/FacadeCommandRuntime"
-], function (CtxFactory, FacadeCommandContract, FacadeCommandRuntime) {
+], function (ControllerCtxRuntime, FacadeCommandContract, FacadeCommandRuntime) {
     "use strict";
 
     function execute(oController, sMethod, mInput) {
@@ -11,10 +11,7 @@ sap.ui.define([
             oController && oController._facade,
             sMethod,
             mInput || {},
-            CtxFactory.buildCtx(oController, {
-                smartFilterBar: oController.byId && oController.byId("searchSmartFilterBar"),
-                smartTable: oController.byId && oController.byId("searchSmartTable")
-            }),
+            ControllerCtxRuntime.buildSearch(oController),
             {
                 normalizeMethod: FacadeCommandContract.normalizeSearchMethod,
                 normalizePayload: FacadeCommandContract.normalizeSearchPayload

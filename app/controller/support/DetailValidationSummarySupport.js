@@ -2,8 +2,9 @@ sap.ui.define([
     "checklist/app/controller/support/DetailSelectionSync",
     "checklist/app/controller/support/DetailPersonInputSupport",
     "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, ControllerModelWriteSupport) {
+], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, ModelStateRuntime, ControllerModelWriteSupport) {
     "use strict";
 
     function validationSummaryPath(mStatePaths) {
@@ -42,7 +43,7 @@ sap.ui.define([
     }
 
     function compute(oController) {
-        var oSelectedModel = oController.getModel("selected");
+        var oSelectedModel = ModelStateRuntime.model(oController, "selected");
         var aRequired = ControllerModelWriteSupport.get(oController, "state", "/requiredFields", []) || [];
         var mMissing = {};
         var aMissingPaths = [];
@@ -73,7 +74,7 @@ sap.ui.define([
 
     function recompute(oController, sSource, bShowValidation, mStatePaths) {
         var oSummary;
-        if (!oController.getModel("state") || !oController.getModel("view")) {
+        if (!ModelStateRuntime.model(oController, "state") || !ModelStateRuntime.model(oController, "view")) {
             return { hasErrors: false, missingPaths: [], missingKeys: [], firstMissingPath: "", firstMissingKey: "" };
         }
         oSummary = compute(oController);
@@ -95,9 +96,7 @@ sap.ui.define([
 
     function focusFirstInvalidField(oController, mStatePaths) {
         var sSummaryPath = validationSummaryPath(mStatePaths);
-        var oSummary = oController.getModel("state") && oController.getModel("state").getProperty
-            ? oController.getModel("state").getProperty(sSummaryPath) || {}
-            : {};
+        var oSummary = ModelStateRuntime.read(oController, "state", sSummaryPath, {}) || {};
         var aMissingKeys = (oSummary && oSummary.missingKeys) || [];
         var oView = oController.getView && oController.getView();
         var aControls;
@@ -134,8 +133,8 @@ sap.ui.define([
     }
 
     function onSelectedChecklistChanged(oController, oEvent, mStatePaths) {
-        var oSelectedModel = oController.getModel("selected");
-        var oUiStateModel = oController.getModel("uiState");
+        var oSelectedModel = ModelStateRuntime.model(oController, "selected");
+        var oUiStateModel = ModelStateRuntime.model(oController, "uiState");
         var sPath = oEvent && oEvent.getParameter && oEvent.getParameter("path");
         var aRequired = ControllerModelWriteSupport.get(oController, "state", "/requiredFields", []) || [];
         var sValidationKey;
@@ -144,7 +143,7 @@ sap.ui.define([
         var sMode;
         var vCurrent;
 
-        if (!oController.getModel("view") || !oSelectedModel || !sPath) {
+        if (!ModelStateRuntime.model(oController, "view") || !oSelectedModel || !sPath) {
             return;
         }
 
@@ -160,7 +159,7 @@ sap.ui.define([
                     oController,
                     "uiState",
                     "/_detailCurrent",
-                    JSON.parse(JSON.stringify(oSelectedModel.getProperty("/") || {}))
+                    ModelStateRuntime.clone(oSelectedModel.getProperty("/") || {}, {})
                 );
             } else {
                 ControllerModelWriteSupport.set(

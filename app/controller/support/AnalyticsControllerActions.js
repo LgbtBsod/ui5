@@ -1,13 +1,12 @@
 sap.ui.define([
-    "sap/ui/model/json/JSONModel",
     "checklist/app/service/domain/analytics/AnalyticsFacade",
     "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer",
     "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/controller/support/ControllerModelWriteSupport",
-    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/ControllerCtxRuntime",
     "checklist/app/service/framework/FacadeCommandRuntime",
-    "checklist/app/service/framework/ControllerRouteRuntime"
-], function (JSONModel, AnalyticsFacade, AnalyticsPayloadNormalizer, NavigationIntentService, ControllerModelWriteSupport, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime) {
+    "checklist/app/service/framework/ControllerRouteRuntime",
+    "checklist/app/service/framework/ControllerViewStateRuntime"
+], function (AnalyticsFacade, AnalyticsPayloadNormalizer, NavigationIntentService, ControllerCtxRuntime, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime) {
     "use strict";
 
     function buildInitialViewState() {
@@ -21,7 +20,7 @@ sap.ui.define([
     return {
         onInit: function () {
             this._facade = new AnalyticsFacade();
-            this.setModel(new JSONModel(buildInitialViewState()), "view");
+            ControllerViewStateRuntime.initModel(this, buildInitialViewState);
             ControllerRouteRuntime.attachMatched(this, [
                 { name: "analytics", handler: this._onAnalyticsMatched }
             ]);
@@ -33,7 +32,7 @@ sap.ui.define([
         },
 
         _loadAnalytics: function (sReason) {
-            ControllerModelWriteSupport.setMany(this, "view", {
+            ControllerViewStateRuntime.setMany(this, {
                 "/busy": true,
                 "/error": ""
             });
@@ -42,7 +41,7 @@ sap.ui.define([
                 this._facade,
                 "load",
                 { reason: sReason || "manual" },
-                CtxFactory.buildCtx(this, {})
+                ControllerCtxRuntime.buildDefault(this)
             );
         },
 

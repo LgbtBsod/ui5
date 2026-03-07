@@ -1,13 +1,13 @@
 sap.ui.define([
     "checklist/app/controller/support/ControllerReturnFocusRuntime",
-    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/FocusRuntime"
-], function (ControllerReturnFocusRuntime, ControllerModelWriteSupport, FocusRuntime) {
+], function (ControllerReturnFocusRuntime, ControllerViewStateRuntime, FocusRuntime) {
     "use strict";
 
     return {
         _withViewFlag: function (sPath, fnWork) {
-            return ControllerModelWriteSupport.withFlag(this, "view", sPath, fnWork, true, false);
+            return ControllerViewStateRuntime.withFlag(this, sPath, fnWork, true, false);
         },
 
         _clearLocationValueHelpSearchTimer: function () {

@@ -1,5 +1,4 @@
 sap.ui.define([
-    "sap/ui/model/json/JSONModel",
     "checklist/app/controller/support/ControllerResourceCleanup",
     "checklist/app/service/domain/detail/DetailFacade",
     "checklist/app/service/framework/ControllerRouteRuntime",
@@ -7,9 +6,9 @@ sap.ui.define([
     "checklist/app/controller/support/ControllerModelWriteSupport",
     "checklist/app/controller/support/AttachmentUploadSupport",
     "checklist/app/controller/support/DetailAccessViewState",
-    "checklist/app/controller/support/DetailInfoCardLayoutSupport"
+    "checklist/app/controller/support/DetailInfoCardLayoutSupport",
+    "checklist/app/service/framework/ControllerViewStateRuntime"
 ], function (
-    JSONModel,
     ControllerResourceCleanup,
     DetailFacade,
     ControllerRouteRuntime,
@@ -17,7 +16,8 @@ sap.ui.define([
     ControllerModelWriteSupport,
     AttachmentUploadSupport,
     DetailAccessViewState,
-    DetailInfoCardLayoutSupport
+    DetailInfoCardLayoutSupport,
+    ControllerViewStateRuntime
 ) {
     "use strict";
 
@@ -117,7 +117,7 @@ sap.ui.define([
                 { name: "detailLayout", handler: this._onDetailMatched }
             ]);
 
-            this.setModel(new JSONModel(buildInitialViewState(this)), "view");
+            ControllerViewStateRuntime.initModel(this, buildInitialViewState.bind(null, this));
 
             this._oSelectedModel = this.getModel("selected") || null;
             if (this._oSelectedModel && this._oSelectedModel.attachPropertyChange) {

@@ -41,19 +41,19 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/SearchControllerSupport` -> `controller/support/SearchControllerSupport` [Controllers]
   - `checklist/app/controller/support/SearchRateProgress` -> `controller/support/SearchRateProgress` [Controllers]
 - `controller/support/AccessDeniedControllerActions.js`
-  - `sap/ui/model/json/JSONModel` -> `sap/ui/model/json/JSONModel` [UI5]
-  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
+  - `checklist/app/service/framework/ControllerCtxRuntime` -> `service/framework/ControllerCtxRuntime` [Util]
   - `checklist/app/service/domain/detail/DetailAuthorizationSupport` -> `service/domain/detail/DetailAuthorizationSupport` [Usecases]
   - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
+  - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
+  - `checklist/app/service/framework/ModelStateRuntime` -> `service/framework/ModelStateRuntime` [Util]
 - `controller/support/AnalyticsControllerActions.js`
-  - `sap/ui/model/json/JSONModel` -> `sap/ui/model/json/JSONModel` [UI5]
   - `checklist/app/service/domain/analytics/AnalyticsFacade` -> `service/domain/analytics/AnalyticsFacade` [Usecases]
   - `checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer` -> `service/domain/analytics/AnalyticsPayloadNormalizer` [Usecases]
   - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
-  - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
-  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
+  - `checklist/app/service/framework/ControllerCtxRuntime` -> `service/framework/ControllerCtxRuntime` [Util]
   - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
   - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
+  - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
 - `controller/support/AppControllerActions.js`
   - `checklist/app/controller/support/AppControllerLifecycleActions` -> `controller/support/AppControllerLifecycleActions` [Controllers]
   - `checklist/app/controller/support/AppControllerOverlayActions` -> `controller/support/AppControllerOverlayActions` [Controllers]
@@ -126,14 +126,14 @@ Generated from runtime root: `app`.
   - imports: (none)
 - `controller/support/DetailActionDialogSupport.js`
   - `checklist/app/controller/support/ControllerReturnFocusRuntime` -> `controller/support/ControllerReturnFocusRuntime` [Controllers]
-  - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
+  - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
   - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
 - `controller/support/DetailActionPinnedRailSupport.js`
   - imports: (none)
 - `controller/support/DetailActionViewportSupport.js`
   - `checklist/app/controller/support/AttachmentUploadSupport` -> `controller/support/AttachmentUploadSupport` [Controllers]
   - `checklist/app/controller/support/DetailActionConstants` -> `controller/support/DetailActionConstants` [Controllers]
-  - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
+  - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
 - `controller/support/DetailAttachmentLocationActions.js`
   - `checklist/app/controller/support/AttachmentUploadSupport` -> `controller/support/AttachmentUploadSupport` [Controllers]
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
@@ -148,6 +148,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
   - `checklist/app/controller/support/DetailInfoCardLayoutSupport` -> `controller/support/DetailInfoCardLayoutSupport` [Controllers]
   - `checklist/app/service/framework/FeedbackCoordinator` -> `service/framework/FeedbackCoordinator` [Util]
+  - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailChecklistRowActions.js`
@@ -162,7 +163,7 @@ Generated from runtime root: `app`.
   - `checklist/app/util/CreateSentinel` -> `util/CreateSentinel` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailCommandPolicy.js`
-  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
+  - `checklist/app/service/framework/ControllerCtxRuntime` -> `service/framework/ControllerCtxRuntime` [Util]
   - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
   - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
 - `controller/support/DetailControllerActions.js`
@@ -176,7 +177,6 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailChecklistRowActions` -> `controller/support/DetailChecklistRowActions` [Controllers]
   - `checklist/app/controller/support/DetailAttachmentLocationActions` -> `controller/support/DetailAttachmentLocationActions` [Controllers]
 - `controller/support/DetailControllerLifecycle.js`
-  - `sap/ui/model/json/JSONModel` -> `sap/ui/model/json/JSONModel` [UI5]
   - `checklist/app/controller/support/ControllerResourceCleanup` -> `controller/support/ControllerResourceCleanup` [Controllers]
   - `checklist/app/service/domain/detail/DetailFacade` -> `service/domain/detail/DetailFacade` [Usecases]
   - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
@@ -185,6 +185,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/AttachmentUploadSupport` -> `controller/support/AttachmentUploadSupport` [Controllers]
   - `checklist/app/controller/support/DetailAccessViewState` -> `controller/support/DetailAccessViewState` [Controllers]
   - `checklist/app/controller/support/DetailInfoCardLayoutSupport` -> `controller/support/DetailInfoCardLayoutSupport` [Controllers]
+  - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
 - `controller/support/DetailDialogSupport.js`
   - `checklist/app/service/framework/DraftChecklistFactory` -> `service/framework/DraftChecklistFactory` [Util]
   - `checklist/app/service/framework/DialogOrchestrator` -> `service/framework/DialogOrchestrator` [Util]
@@ -207,6 +208,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailSelectionSync` -> `controller/support/DetailSelectionSync` [Controllers]
   - `checklist/app/controller/support/DetailPersonInputSupport` -> `controller/support/DetailPersonInputSupport` [Controllers]
   - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
+  - `checklist/app/service/framework/ModelStateRuntime` -> `service/framework/ModelStateRuntime` [Util]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/DetailViewSupport.js`
   - `sap/f/GridListItem` -> `sap/f/GridListItem` [UI5]
@@ -225,7 +227,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
   - `checklist/app/controller/support/ControllerModelWriteSupport` -> `controller/support/ControllerModelWriteSupport` [Controllers]
 - `controller/support/SearchCommandPolicy.js`
-  - `checklist/app/service/framework/CtxFactory` -> `service/framework/CtxFactory` [Util]
+  - `checklist/app/service/framework/ControllerCtxRuntime` -> `service/framework/ControllerCtxRuntime` [Util]
   - `checklist/app/service/framework/FacadeCommandContract` -> `service/framework/FacadeCommandContract` [Util]
   - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
 - `controller/support/SearchControllerActions.js`

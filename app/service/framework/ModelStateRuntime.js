@@ -1,8 +1,12 @@
 sap.ui.define([], function () {
     "use strict";
 
+    function model(oController, sModelName) {
+        return oController && oController.getModel ? oController.getModel(sModelName) : null;
+    }
+
     function read(oController, sModelName, sPath, vFallback) {
-        var oModel = oController && oController.getModel && oController.getModel(sModelName);
+        var oModel = model(oController, sModelName);
         if (!oModel || typeof oModel.getProperty !== "function") {
             return vFallback;
         }
@@ -10,12 +14,29 @@ sap.ui.define([], function () {
     }
 
     function write(oController, sModelName, sPath, vValue) {
-        var oModel = oController && oController.getModel && oController.getModel(sModelName);
+        var oModel = model(oController, sModelName);
         if (!oModel || typeof oModel.setProperty !== "function") {
             return false;
         }
         oModel.setProperty(sPath, vValue);
         return true;
+    }
+
+    function replaceData(oController, sModelName, vData) {
+        var oModel = model(oController, sModelName);
+        if (!oModel || typeof oModel.setData !== "function") {
+            return false;
+        }
+        oModel.setData(vData || {});
+        return true;
+    }
+
+    function clone(vValue, vFallback) {
+        try {
+            return JSON.parse(JSON.stringify(typeof vValue === "undefined" ? vFallback : vValue));
+        } catch (_e) {
+            return typeof vFallback === "undefined" ? null : vFallback;
+        }
     }
 
     function withFlag(oController, sModelName, sPath, fnWork, vStart, vEnd) {
@@ -26,8 +47,11 @@ sap.ui.define([], function () {
     }
 
     return {
+        model: model,
         read: read,
         write: write,
+        replaceData: replaceData,
+        clone: clone,
         withFlag: withFlag
     };
 });

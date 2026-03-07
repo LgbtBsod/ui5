@@ -1,8 +1,8 @@
 sap.ui.define([
     "checklist/app/controller/support/AttachmentUploadSupport",
     "checklist/app/controller/support/DetailActionConstants",
-    "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (AttachmentUploadSupport, DetailActionConstants, ControllerModelWriteSupport) {
+    "checklist/app/service/framework/ControllerViewStateRuntime"
+], function (AttachmentUploadSupport, DetailActionConstants, ControllerViewStateRuntime) {
     "use strict";
 
     function remToPx(fRem) {
@@ -36,7 +36,7 @@ sap.ui.define([
         },
 
         _setViewFlag: function (sPath, vValue) {
-            ControllerModelWriteSupport.set(this, "view", sPath, vValue);
+            return ControllerViewStateRuntime.setFlag(this, sPath, vValue);
         },
 
         _setDeleteChecklistConfirmArmed: function (bArmed) {

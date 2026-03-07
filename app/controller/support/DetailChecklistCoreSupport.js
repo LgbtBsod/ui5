@@ -6,9 +6,10 @@ sap.ui.define([
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/support/DetailInfoCardLayoutSupport",
     "checklist/app/service/framework/FeedbackCoordinator",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/util/CreateSentinel",
     "checklist/app/controller/support/ControllerModelWriteSupport"
-], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, CreateSentinel, ControllerModelWriteSupport) {
+], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -76,8 +77,8 @@ sap.ui.define([
             }
             ControllerModelWriteSupport.setMany(this, "state", mStatePatch);
             this._applyLayoutState(sRouteLayout, { syncRoute: false });
-            ControllerModelWriteSupport.setMany(this, "view", mViewPatch);
-            DetailInfoCardLayoutSupport.writeCards(this, ControllerModelWriteSupport.get(this, "view", "/infoCards", []));
+            ControllerViewStateRuntime.setMany(this, mViewPatch);
+            DetailInfoCardLayoutSupport.writeCards(this, ControllerViewStateRuntime.get(this, "/infoCards", []));
             ControllerModelWriteSupport.set(this, "state", STATE_PATHS.VALIDATION_SUMMARY, {
                 hasErrors: false,
                 missingPaths: [],
@@ -98,7 +99,7 @@ sap.ui.define([
             }
             if (sPostOpenHydratedRootId && sPostOpenHydratedRootId === sId && sSelectedRootId === sId) {
                 ControllerModelWriteSupport.set(this, "state", "/postOpenHydratedRootId", "");
-                ControllerModelWriteSupport.set(this, "view", "/detailSkeletonBusy", false);
+                ControllerViewStateRuntime.set(this, "/detailSkeletonBusy", false);
                 return;
             }
             ControllerModelWriteSupport.set(this, "state", "/activeObjectId", sId);
@@ -107,7 +108,7 @@ sap.ui.define([
                 if (!oResult || oResult.ok !== false || !oResult.error || oResult.error.code !== "NO_VIEW_PERMISSION") {
                     return oResult;
                 }
-                oAccessState = ControllerModelWriteSupport.get(this, "view", "/accessState", {}) || {};
+                oAccessState = ControllerViewStateRuntime.get(this, "/accessState", {}) || {};
                 ControllerModelWriteSupport.set(this, "state", "/detailAccessGuard", {
                     rootId: String(oAccessState.rootId || sId || "").trim(),
                     userId: String(oAccessState.userId || "").trim(),

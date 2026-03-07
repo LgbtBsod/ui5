@@ -1,9 +1,10 @@
 sap.ui.define([
-    "sap/ui/model/json/JSONModel",
-    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/ControllerCtxRuntime",
     "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-    "checklist/app/service/framework/ControllerRouteRuntime"
-], function (JSONModel, CtxFactory, DetailAuthorizationSupport, ControllerRouteRuntime) {
+    "checklist/app/service/framework/ControllerRouteRuntime",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime"
+], function (ControllerCtxRuntime, DetailAuthorizationSupport, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime) {
     "use strict";
 
     function buildInitialViewState(sRootId) {
@@ -27,9 +28,9 @@ sap.ui.define([
     }
 
     function clearDetailRuntimeState(oController) {
-        var oStateModel = oController.getModel("state");
-        var oSelectedModel = oController.getModel("selected");
-        var oUiStateModel = oController.getModel("uiState");
+        var oStateModel = ModelStateRuntime.model(oController, "state");
+        var oSelectedModel = ModelStateRuntime.model(oController, "selected");
+        var oUiStateModel = ModelStateRuntime.model(oController, "uiState");
 
         if (oStateModel && typeof oStateModel.setProperty === "function") {
             oStateModel.setProperty("/mode", "READ");
@@ -51,7 +52,9 @@ sap.ui.define([
 
     return {
         onInit: function () {
-            this.setModel(new JSONModel(buildInitialViewState("")), "view");
+            ControllerViewStateRuntime.initModel(this, function () {
+                return buildInitialViewState("");
+            });
             ControllerRouteRuntime.attachMatched(this, [
                 { name: "accessDenied", handler: this._onAccessDeniedMatched }
             ]);
@@ -62,15 +65,17 @@ sap.ui.define([
         },
 
         _ctx: function () {
-            return CtxFactory.buildCtx(this, {});
+            return ControllerCtxRuntime.buildDefault(this);
         },
 
         _renderGuardState: function (oGuard, sRootId) {
-            this.getModel("view").setData(normalizeGuard(oGuard, sRootId));
+            ControllerViewStateRuntime.replace(this, function () {
+                return normalizeGuard(oGuard, sRootId);
+            });
         },
 
         _readCachedGuard: function (sRootId) {
-            var oStateModel = this.getModel("state");
+            var oStateModel = ModelStateRuntime.model(this, "state");
             var oGuard = (oStateModel && oStateModel.getProperty && oStateModel.getProperty("/detailAccessGuard")) || {};
             var sGuardRootId = String(oGuard.rootId || "").trim();
 
@@ -81,14 +86,16 @@ sap.ui.define([
         },
 
         _refreshAccessState: function (sRootId) {
-            var oStateModel = this.getModel("state");
+            var oStateModel = ModelStateRuntime.model(this, "state");
 
             clearDetailRuntimeState(this);
-            this.getModel("view").setData({
-                busy: true,
-                rootId: String(sRootId || "").trim(),
-                reasonCode: "",
-                message: ""
+            ControllerViewStateRuntime.replace(this, function () {
+                return {
+                    busy: true,
+                    rootId: String(sRootId || "").trim(),
+                    reasonCode: "",
+                    message: ""
+                };
             });
 
             return DetailAuthorizationSupport.fetchPermission(this._ctx(), sRootId).then(function (oPermission) {
@@ -110,11 +117,13 @@ sap.ui.define([
                 }
                 this._renderGuardState(oPermission, sRootId);
             }.bind(this)).catch(function () {
-                this.getModel("view").setData({
-                    busy: false,
-                    rootId: String(sRootId || "").trim(),
-                    reasonCode: "NO_VIEW_PERMISSION",
-                    message: ""
+                ControllerViewStateRuntime.replace(this, function () {
+                    return {
+                        busy: false,
+                        rootId: String(sRootId || "").trim(),
+                        reasonCode: "NO_VIEW_PERMISSION",
+                        message: ""
+                    };
                 });
             }.bind(this));
         },
@@ -138,7 +147,7 @@ sap.ui.define([
         },
 
         onRetryAccessCheck: function () {
-            var sRootId = String(this.getModel("view").getProperty("/rootId") || "").trim();
+            var sRootId = String(ControllerViewStateRuntime.get(this, "/rootId", "") || "").trim();
             if (!sRootId) {
                 return Promise.resolve();
             }

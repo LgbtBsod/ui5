@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/ControllerCtxRuntime",
     "checklist/app/service/framework/FacadeCommandContract",
     "checklist/app/service/framework/FacadeCommandRuntime"
-], function (CtxFactory, FacadeCommandContract, FacadeCommandRuntime) {
+], function (ControllerCtxRuntime, FacadeCommandContract, FacadeCommandRuntime) {
     "use strict";
 
     function execute(oController, sMethod, mInput) {
@@ -11,7 +11,7 @@ sap.ui.define([
             oController && oController._facade,
             sMethod,
             mInput || {},
-            CtxFactory.buildCtx(oController, {}),
+            ControllerCtxRuntime.buildDefault(oController),
             {
                 normalizeMethod: FacadeCommandContract.normalizeDetailMethod,
                 normalizePayload: FacadeCommandContract.normalizeDetailPayload
