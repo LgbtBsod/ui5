@@ -48,9 +48,12 @@
                 renderType="Bare"
                 width="100%"
                 visible="{= !${view>/accessState/denied} &amp;&amp; !${view>/detailSkeletonBusy} }">
-                <FlexBox class="glassCard detailControlInlineCard detailControlExperienceCard" renderType="Bare" width="100%">
+                <VBox
+                    class="glassCard detailControlInlineCard detailControlExperienceCard"
+                    renderType="Bare"
+                    width="100%">
                     <core:Fragment fragmentName="sap_ui5.view.fragment.DetailControlRail" type="XML"/>
-                </FlexBox>
+                </VBox>
             </VBox>
 
             <VBox

@@ -1479,11 +1479,14 @@ body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
 
 .rnvApp .detailControlPinnedDock {
   min-width: 0;
+  width: 100%;
+  flex: 0 0 auto;
+  align-self: stretch;
   position: relative;
   top: auto;
   z-index: auto;
   height: auto;
-  min-height: 14.5rem;
+  min-height: 0;
   margin-bottom: 0.62rem;
 }
 
@@ -1505,6 +1508,8 @@ body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
 }
 
 .rnvApp .detailControlExperienceCard {
+  flex: 0 0 auto;
+  align-self: stretch;
   padding:
     calc(0.96rem * var(--theme-density-scale))
     calc(1rem * var(--theme-density-scale));
@@ -1513,11 +1518,13 @@ body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
 
 .rnvApp .detailControlBar {
   width: 100%;
+  flex: 0 0 auto;
+  align-self: stretch;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  height: max-content;
-  min-height: max-content;
+  height: auto;
+  min-height: 0;
   gap: 0.55rem;
 }
 
@@ -1532,16 +1539,21 @@ body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
 }
 
 .rnvApp .detailControlToolbarStack {
+  flex: 0 0 auto;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
-  height: max-content;
-  min-height: max-content;
+  height: auto;
+  min-height: 0;
 }
 
 .rnvApp .detailHeroStatBoard,
 .rnvApp .detailSectionAnchorRail,
+.rnvApp .detailControlRowTop,
+.rnvApp .detailControlRowActions,
 .rnvApp .detailRailHint {
-  height: max-content;
+  flex: 0 0 auto;
+  align-self: stretch;
 }
 
 .rnvApp .detailRailHeader {
@@ -1910,10 +1922,15 @@ body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
 
 .rnvApp .detailViewportNarrow .detailSectionToolbar.sapMTBNewFlex,
 .rnvApp .detailViewportNarrow .detailAttachmentToolbar.sapMTBNewFlex,
-.rnvApp .detailViewportNarrow .detailControlRowTop.sapMTBNewFlex,
 .rnvApp .detailViewportNarrow .detailControlRowActions.sapMTBNewFlex {
   flex-wrap: nowrap;
   overflow: visible;
+}
+
+.rnvApp .detailViewportNarrow .detailControlRowTop.sapMTBNewFlex {
+  flex-wrap: wrap;
+  overflow: visible;
+  row-gap: 0.3rem;
 }
 
 .rnvApp .detailViewportNarrow .detailSectionToolbar .sapMTBSpacer,
@@ -1942,13 +1959,18 @@ body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
 }
 
 @media (max-width: 1366px) {
-  .rnvApp .detailControlRowTop.sapMTBNewFlex,
   .rnvApp .detailControlRowActions.sapMTBNewFlex,
   .rnvApp .detailSectionToolbar.sapMTBNewFlex,
   .rnvApp .detailAttachmentToolbar.sapMTBNewFlex {
     flex-wrap: nowrap;
     overflow: visible;
     row-gap: 0;
+  }
+
+  .rnvApp .detailControlRowTop.sapMTBNewFlex {
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: 0.3rem;
   }
 
   .rnvApp .detailControlRowTop .sapMTBSpacer,
@@ -2049,12 +2071,20 @@ body.rnvAppRoot.appLight .rnvApp .uxStatChip .sapMText:first-child {
 
   .rnvApp .detailSectionToolbar.sapMTBNewFlex,
   .rnvApp .detailAttachmentToolbar.sapMTBNewFlex,
-  .rnvApp .detailControlRowTop.sapMTBNewFlex,
   .rnvApp .detailControlRowActions.sapMTBNewFlex {
     min-height: 0;
     height: auto;
     align-items: stretch;
     align-content: flex-start;
+  }
+
+  .rnvApp .detailControlRowTop.sapMTBNewFlex {
+    min-height: 0;
+    height: auto;
+    align-items: stretch;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    row-gap: 0.3rem;
   }
 
   .rnvApp .detailSectionToolbar .sapMTitle,
@@ -2693,7 +2723,7 @@ body.rnvAppRoot.appLight .rnvApp .detailAccessDeniedScene {
   width: 100%;
   min-width: 0;
   height: auto;
-  min-height: 13.5rem;
+  min-height: 0;
   padding: 0.8rem 0.85rem 0.72rem;
   overflow: visible;
   background:
