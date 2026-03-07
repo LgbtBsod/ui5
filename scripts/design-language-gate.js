@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const path = require('path');
+const { detectRuntimeRoot } = require('./qa-shared');
 const { exitWithMappedIssues } = require('./lib/gate-result');
+const runtimeRoot = detectRuntimeRoot(process.cwd());
 
 function read(file) {
-  return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+  const resolved = path.join(process.cwd(), runtimeRoot, file);
+  return fs.existsSync(resolved) ? fs.readFileSync(resolved, 'utf8') : '';
 }
 
 const styleCss = [

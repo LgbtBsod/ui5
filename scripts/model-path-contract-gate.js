@@ -3,8 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 const { assert } = require('./gate-assert');
+const { detectRuntimeRoot } = require('./qa-shared');
 
 const root = path.resolve(__dirname, '..');
+const runtimeRoot = detectRuntimeRoot(root);
 const requiredPaths = [
   '/ui/busy/global',
   '/ui/busy/searchTable',
@@ -29,7 +31,7 @@ function collectDomainFiles(dir) {
 }
 
 (function main() {
-  const files = collectDomainFiles(path.join(root, 'service/domain'));
+  const files = collectDomainFiles(path.join(root, runtimeRoot, 'service/domain'));
   const text = files.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 
   requiredPaths.forEach((contractPath) => {

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const src = fs.readFileSync('service/domain/detail/usecases/EnterEditUseCase.js','utf8');
+const { resolveFromRoot } = require('../qa-shared');
+const src = fs.readFileSync(resolveFromRoot(process.cwd(), 'service/domain/detail/usecases/EnterEditUseCase.js'),'utf8');
 if (/lockOk\)\s*\?\s*["']LOCKED/.test(src) && /WORKFLOW_DETAIL_EDIT_MODE[\s\S]*true/.test(src)) {
   console.error('FAIL: edit mode can be enabled without explicit lock guard');
   process.exit(1);

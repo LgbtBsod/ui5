@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const src = fs.readFileSync('service/domain/detail/usecases/AutosaveDetailUseCase.js','utf8');
+const { resolveFromRoot } = require('../qa-shared');
+const src = fs.readFileSync(resolveFromRoot(process.cwd(), 'service/domain/detail/usecases/AutosaveDetailUseCase.js'),'utf8');
 if (!/buildDeltaPayload/.test(src)) {
   console.error('FAIL: autosave must build delta payload when delta missing');
   process.exit(1);

@@ -12,7 +12,8 @@ sap.ui.define([
     var MOTION_DISABLED_CLASS = "theme-motion-disabled";
     var MOTION_ENABLED_CLASS = "theme-motion-enabled";
     var THEME_PROFILE_STORAGE_KEY = "checklist_app_theme_profile";
-    var LEGACY_THEME_STORAGE_KEY = "checklist_app_theme";
+    var LEGACY_THEME_PROFILE_STORAGE_KEY = "sap_ui5_theme_profile";
+    var LEGACY_THEME_STORAGE_KEY = "sap_ui5_theme";
     var THEME_PROFILE_RECOVERY_KEY = "checklist_app_theme_profile_recovery_20260305";
     var DEFAULT_MODE = "morning";
     var DEFAULT_ANIMATION_ENABLED = true;
@@ -94,7 +95,8 @@ sap.ui.define([
         var oParsedProfile;
         var sLegacyMode;
         try {
-            sRawProfile = window.localStorage.getItem(THEME_PROFILE_STORAGE_KEY);
+            sRawProfile = window.localStorage.getItem(THEME_PROFILE_STORAGE_KEY)
+                || window.localStorage.getItem(LEGACY_THEME_PROFILE_STORAGE_KEY);
             if (sRawProfile) {
                 oParsedProfile = JSON.parse(sRawProfile);
                 return recoverLegacyProfileDefaults(oParsedProfile);
@@ -114,7 +116,7 @@ sap.ui.define([
         var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled, oProfile && oProfile.backgroundInteractive);
         try {
             window.localStorage.setItem(THEME_PROFILE_STORAGE_KEY, JSON.stringify(oNormalized));
-            window.localStorage.setItem(LEGACY_THEME_STORAGE_KEY, oNormalized.mode);
+            window.localStorage.setItem("checklist_app_theme", oNormalized.mode);
         } catch (e) {
             // Best-effort persistence.
         }

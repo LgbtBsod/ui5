@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { collectFilesByExtensions, normalizePath } = require('../qa-shared');
+const { collectFilesByExtensions, normalizePath, resolveFromRoot } = require('../qa-shared');
 const { createGateResult, finalizeAndExit } = require('../lib/gate-result');
 
 const root = path.resolve(__dirname, '..', '..');
@@ -66,7 +66,7 @@ function checkPropertyHookTeardown(file, text) {
 }
 
 files.forEach((file) => {
-  const abs = path.join(root, file);
+  const abs = resolveFromRoot(root, file);
   const text = fs.readFileSync(abs, 'utf8');
 
   if (countMatches(text, /\bgetRouter\s*\(\)\.initialize\s*\(/g) + countMatches(text, /\boRouter\.initialize\s*\(/g) > 1) {

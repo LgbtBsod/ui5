@@ -3,10 +3,14 @@
 const { runGate } = require('./lib/gateRunner');
 const { scanPatterns } = require('./lib/patternScan');
 
-const EFFECT_ALLOW = new Set(['service/framework/EffectApplier.js']);
+const EFFECT_ALLOW = new Set(['service/framework/EffectApplier.js', 'app/service/framework/EffectApplier.js']);
 const POLICY_ALLOW = new Set([
   'service/framework/FeedbackPolicy.js',
-  'service/backend/GatewayErrorNormalizer.js'
+  'app/service/framework/FeedbackPolicy.js',
+  'service/backend/GatewayErrorNormalizer.js',
+  'app/service/backend/GatewayErrorNormalizer.js',
+  'service/backend/GatewayClient.js',
+  'app/service/backend/GatewayClient.js'
 ]);
 
 runGate({

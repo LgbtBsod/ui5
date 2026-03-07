@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { collectFilesByExtensions } = require('../qa-shared');
+const { collectFilesByExtensions, resolveFromRoot } = require('../qa-shared');
 const { exitWithColonIssues } = require('../lib/issueGateRuntime');
 const { readJsonSafe } = require('../lib/auditInput');
 
@@ -29,7 +29,7 @@ files.forEach((file) => {
   if (allowFiles.has(file)) {
     return;
   }
-  const abs = path.join(root, file);
+  const abs = resolveFromRoot(root, file);
   const text = fs.readFileSync(abs, 'utf8');
   if (!/\buiState\b/.test(text) && !/["']uiState["']/.test(text)) {
     return;

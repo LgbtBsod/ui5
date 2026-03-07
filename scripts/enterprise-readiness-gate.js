@@ -1,21 +1,25 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const { countFileLines } = require('./qa-shared');
+const path = require('path');
+const { countFileLines, detectRuntimeRoot } = require('./qa-shared');
 const { requireJsonReport } = require('./lib/reportGateRuntime');
 const { exitWithMappedIssues } = require('./lib/gate-result');
 
 const thresholdsPath = process.argv[2] || 'scripts/enterprise-readiness-thresholds.json';
+const runtimeRoot = detectRuntimeRoot(process.cwd());
 
 function collectMetrics() {
   const controllerPaths = [
     'controller/Search.controller.js',
     'controller/Detail.controller.js'
   ];
+  const domainDir = path.join(process.cwd(), runtimeRoot, 'service/domain');
+  const utilDir = path.join(process.cwd(), runtimeRoot, 'util');
 
   return {
     controllers: controllerPaths.map((path) => ({ path, lines: countFileLines(process.cwd(), path) })),
-    usecaseCount: fs.existsSync('service/domain') ? fs.readdirSync('service/domain', { withFileTypes: true }).filter((f) => f.isDirectory()).length : 0,
-    utilCount: fs.readdirSync('util').filter((f) => f.endsWith('.js')).length
+    usecaseCount: fs.existsSync(domainDir) ? fs.readdirSync(domainDir, { withFileTypes: true }).filter((f) => f.isDirectory()).length : 0,
+    utilCount: fs.existsSync(utilDir) ? fs.readdirSync(utilDir).filter((f) => f.endsWith('.js')).length : 0
   };
 }
 

@@ -709,7 +709,4 @@ Generated from runtime root: `app`.
 
 ## Violations
 
-- controller imports infra: controller/support/AnalyticsControllerActions.js -> infra/navigation/WorkspaceRouteNavigation
-- controller imports infra: controller/support/AppControllerShellActions.js -> infra/navigation/WorkspaceRouteNavigation
-- controller imports infra: controller/support/DetailAttachmentLocationActions.js -> infra/navigation/WorkspaceRouteNavigation
-- controller imports infra: controller/support/SearchViewSupport.js -> infra/navigation/WorkspaceRouteNavigation
+- none

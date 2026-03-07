@@ -13,11 +13,15 @@
             var sStoredMode = "morning";
             var bAnimationEnabled = true;
             var bBackgroundInteractive = true;
+            var sThemeProfileKey = "checklist_app_theme_profile";
+            var sLegacyThemeProfileKey = "sap_ui5_theme_profile";
+            var sThemeModeKey = "checklist_app_theme";
+            var sLegacyThemeModeKey = "sap_ui5_theme";
             var sRawProfile;
             var oProfile;
             var oRoot = document.documentElement;
             try {
-                sRawProfile = window.localStorage.getItem("checklist_app_theme_profile");
+                sRawProfile = window.localStorage.getItem(sThemeProfileKey) || window.localStorage.getItem(sLegacyThemeProfileKey);
                 if (sRawProfile) {
                     oProfile = JSON.parse(sRawProfile);
                     sStoredMode = oProfile && oProfile.mode ? oProfile.mode : "morning";
@@ -28,7 +32,7 @@
                         bBackgroundInteractive = oProfile.backgroundInteractive;
                     }
                 } else {
-                    sStoredMode = window.localStorage.getItem("checklist_app_theme") || "morning";
+                    sStoredMode = window.localStorage.getItem(sThemeModeKey) || window.localStorage.getItem(sLegacyThemeModeKey) || "morning";
                 }
             } catch (e) {}
             sStoredMode = String(sStoredMode || "").toLowerCase() === "night" ? "night" : "morning";

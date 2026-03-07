@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const statePathsSrc = fs.readFileSync('service/domain/shared/StatePaths.js', 'utf8');
+const { resolveFromRoot } = require('../qa-shared');
+const statePathsSrc = fs.readFileSync(resolveFromRoot(process.cwd(), 'service/domain/shared/StatePaths.js'), 'utf8');
 const keys = [...statePathsSrc.matchAll(/:\s*["']([^"']+)["']/g)].map((m) => m[1]);
 const root = {
-  ...eval('(' + fs.readFileSync('model/schema/uiSchema.js','utf8').match(/return\s+(\{[\s\S]*?\});/)[1] + ')'),
-  ...eval('(' + fs.readFileSync('model/schema/workflowSchema.js','utf8').match(/return\s+(\{[\s\S]*?\});/)[1] + ')'),
-  ...eval('(' + fs.readFileSync('model/schema/navigationSchema.js','utf8').match(/return\s+(\{[\s\S]*?\});/)[1] + ')')
+  ...eval('(' + fs.readFileSync(resolveFromRoot(process.cwd(), 'model/schema/uiSchema.js'),'utf8').match(/return\s+(\{[\s\S]*?\});/)[1] + ')'),
+  ...eval('(' + fs.readFileSync(resolveFromRoot(process.cwd(), 'model/schema/workflowSchema.js'),'utf8').match(/return\s+(\{[\s\S]*?\});/)[1] + ')'),
+  ...eval('(' + fs.readFileSync(resolveFromRoot(process.cwd(), 'model/schema/navigationSchema.js'),'utf8').match(/return\s+(\{[\s\S]*?\});/)[1] + ')')
 };
 const runtimeOnly = new Set(['/inlineErrors','/conflictDialog']);
 function existsPath(path) {
