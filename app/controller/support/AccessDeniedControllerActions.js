@@ -1,7 +1,7 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/service/framework/CtxFactory",
-    "sap_ui5/service/domain/detail/DetailAuthorizationSupport"
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/domain/detail/DetailAuthorizationSupport"
 ], function (JSONModel, CtxFactory, DetailAuthorizationSupport) {
     "use strict";
 

@@ -1,4 +1,4 @@
-sap.ui.define(["sap_ui5/service/framework/ThemeRuntime"], function (ThemeService) {
+sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeService) {
     "use strict";
 
     var DEFAULT_MODE = ThemeService.DEFAULT_MODE;

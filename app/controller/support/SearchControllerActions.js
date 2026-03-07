@@ -1,15 +1,15 @@
 sap.ui.define([
-    "sap_ui5/controller/support/ControllerResourceCleanup",
-    "sap_ui5/service/domain/search/SearchFacade",
-    "sap_ui5/service/framework/CtxFactory",
-    "sap_ui5/service/framework/FacadeCommandContract",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/controller/support/SearchCommandPolicy",
-    "sap_ui5/controller/support/SearchControllerSupport",
-    "sap_ui5/controller/support/SearchLoadRuntimeSupport",
-    "sap_ui5/controller/support/SearchRateProgress",
-    "sap_ui5/controller/support/SearchViewSupport"
+    "checklist/app/controller/support/ControllerResourceCleanup",
+    "checklist/app/service/domain/search/SearchFacade",
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/controller/support/SearchCommandPolicy",
+    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/SearchLoadRuntimeSupport",
+    "checklist/app/controller/support/SearchRateProgress",
+    "checklist/app/controller/support/SearchViewSupport"
 ], function (ControllerResourceCleanup, SearchFacade, CtxFactory, FacadeCommandContract, FocusRuntime, ControllerModelWriteSupport, SearchCommandPolicy, SearchControllerSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport) {
     "use strict";
 

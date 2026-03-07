@@ -66,18 +66,18 @@ sap.ui.define([], function () {
             fnSyncDocumentRootClasses();
         }
         if (sBrand && bHorizonThemeActive) {
-            oRoot.style.setProperty("--rnv-brand", sBrand);
+            oRoot.style.setProperty("--chk-brand", sBrand);
             oRoot.style.setProperty("--accent", sBrand);
             oRoot.style.setProperty("--accent-rgb", asRgbTriplet(sBrand) || "84, 149, 255");
         }
         if (sBase) {
-            oRoot.style.setProperty("--rnv-ui5-bg", sBase);
+            oRoot.style.setProperty("--chk-ui5-bg", sBase);
         }
         if (sShell) {
-            oRoot.style.setProperty("--rnv-ui5-shell", sShell);
+            oRoot.style.setProperty("--chk-ui5-shell", sShell);
         }
         if (sText) {
-            oRoot.style.setProperty("--rnv-ui5-text", sText);
+            oRoot.style.setProperty("--chk-ui5-text", sText);
         }
         if (bHorizonThemeActive) {
             sInfoRgb = asRgbTriplet(sInfo);

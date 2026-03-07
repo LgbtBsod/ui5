@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/util/ClientKeyGenerator"
+    "checklist/app/util/ClientKeyGenerator"
 ], function (ClientKeyGenerator) {
     "use strict";
 

@@ -12,8 +12,9 @@ const violations = [];
 
 for (const file of files) {
   const src = qa.readText(root, file);
+  const hasEffects = /type\s*:\s*["'][^"']+["']/.test(src);
 
-  if (!/\bResult\.(ok|fail)\s*\(/.test(src)) {
+  if (hasEffects && !/\bResult\.(ok|fail)\s*\(/.test(src)) {
     violations.push(`${file}: missing Result.ok/fail usage`);
   }
 

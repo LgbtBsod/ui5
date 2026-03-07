@@ -1,10 +1,10 @@
 sap.ui.define([
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
-    "sap_ui5/infra/adapters/shared/ChecklistSnapshotMapper",
-    "sap_ui5/infra/adapters/shared/AttachmentRepoSupport",
-    "sap_ui5/infra/adapters/shared/GatewayIdentitySupport",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/service/backend/GatewayClient"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
+    "checklist/app/infra/adapters/shared/ChecklistSnapshotMapper",
+    "checklist/app/infra/adapters/shared/AttachmentRepoSupport",
+    "checklist/app/infra/adapters/shared/GatewayIdentitySupport",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/service/backend/GatewayClient"
 ], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, GatewayIdentitySupport, CreateSentinel, GatewayClient) {
     "use strict";
     function rootId(mArgs) { return String((mArgs && mArgs.rootId) || "").trim(); }

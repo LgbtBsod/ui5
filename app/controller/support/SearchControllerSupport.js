@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/util/search/SearchMaxResults",
-    "sap_ui5/controller/support/SearchSelectionSupport",
-    "sap_ui5/controller/support/SearchViewStateSupport"
+    "checklist/app/util/search/SearchMaxResults",
+    "checklist/app/controller/support/SearchSelectionSupport",
+    "checklist/app/controller/support/SearchViewStateSupport"
 ], function (SearchMaxResults, SearchSelectionSupport, SearchViewStateSupport) {
     "use strict";
 

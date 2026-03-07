@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/controller/support/DetailInfoCardLayoutSupport"
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/controller/support/DetailInfoCardLayoutSupport"
 ], function (DetailCommandPolicy, ControllerModelWriteSupport, DetailInfoCardLayoutSupport) {
     "use strict";
 

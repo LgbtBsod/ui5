@@ -1,10 +1,10 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/service/domain/detail/DetailValidationSupport",
-    "sap_ui5/util/ChecklistValidationService"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/service/domain/detail/DetailValidationSupport",
+    "checklist/app/util/ChecklistValidationService"
 ], function (UseCase, Result, Effects, DetailStateAccess, DetailValidationSupport, ChecklistValidationService) {
     "use strict";
 

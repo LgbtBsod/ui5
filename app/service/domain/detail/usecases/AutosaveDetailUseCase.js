@@ -1,11 +1,11 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailSaveRuntimeSupport",
-    "sap_ui5/service/domain/shared/UseCaseInputUtils",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/DeltaPayloadBuilder"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailSaveRuntimeSupport",
+    "checklist/app/service/domain/shared/UseCaseInputUtils",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/DeltaPayloadBuilder"
 ], function (UseCase, Result, Effects, DetailSaveRuntimeSupport, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder) {
     "use strict";
 

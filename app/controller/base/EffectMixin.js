@@ -1,8 +1,8 @@
 ﻿sap.ui.define([
-    "sap_ui5/service/framework/EffectApplier",
-    "sap_ui5/service/framework/EffectUiHandlers",
-    "sap_ui5/service/framework/FeedbackBannerRuntime",
-    "sap_ui5/controller/base/ControllerTextRuntime"
+    "checklist/app/service/framework/EffectApplier",
+    "checklist/app/service/framework/EffectUiHandlers",
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/controller/base/ControllerTextRuntime"
 ], function (EffectApplier, EffectUiHandlers, FeedbackBannerRuntime, ControllerTextRuntime) {
     "use strict";
 

@@ -1,8 +1,8 @@
 sap.ui.define([
-    "sap_ui5/controller/support/DetailSelectionSync",
-    "sap_ui5/controller/support/DetailPersonInputSupport",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/DetailSelectionSync",
+    "checklist/app/controller/support/DetailPersonInputSupport",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (DetailSelectionSync, DetailPersonInputSupport, FocusRuntime, ControllerModelWriteSupport) {
     "use strict";
 

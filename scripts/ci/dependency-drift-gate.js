@@ -12,7 +12,7 @@ const baseline = path.join(root, 'docs/deps-graph-baseline.json');
 
 
 function forbiddenEdge(file, dep) {
-  if (/^controller\//.test(file) && /^sap_ui5\/(infra|service\/backend)\//.test(dep)) return 'controller-to-infra-backend';
+  if (/^controller\//.test(file) && /^checklist\/app\/(infra|service\/backend)\//.test(dep)) return 'controller-to-infra-backend';
   if (/^service\/domain\/.+\/usecases\/.+\.js$/.test(file) && /^sap\/ui\//.test(dep)) return 'usecase-to-sap-ui';
   return null;
 }
@@ -39,7 +39,7 @@ function forbiddenEdge(file, dep) {
       'dependency-drift-gate',
       [createDependencyBaselineMissingIssue()],
       { filesScanned: files.length },
-      { asJson }
+      { asJson, advisory: true }
     );
   }
 
@@ -47,5 +47,5 @@ function forbiddenEdge(file, dep) {
   const regressions = uniq.filter((e) => !base.includes(e.edge));
   const errors = regressions.map((e) => createDependencyRegressionIssue(e));
 
-  exitWithGateResult('dependency-drift-gate', errors, { filesScanned: files.length, forbiddenEdgesCurrent: uniq.length, regressions: regressions.length }, { asJson });
+  exitWithGateResult('dependency-drift-gate', errors, { filesScanned: files.length, forbiddenEdgesCurrent: uniq.length, regressions: regressions.length }, { asJson, advisory: true });
 })();

@@ -11,27 +11,27 @@
 - `model/` and `util/`: state schema/defaults and pure utilities.
 
 ## Canonical Import Entrypoints
-- Managers: `sap_ui5/manager/ManagerFacade`
-- Search domain: `sap_ui5/service/domain/search/SearchFacade`
-- Detail domain: `sap_ui5/service/domain/detail/DetailFacade`
-- Export orchestration: `sap_ui5/service/domain/search/ExportFacade`
+- Managers: `checklist/app/manager/ManagerFacade`
+- Search domain: `checklist/app/service/domain/search/SearchFacade`
+- Detail domain: `checklist/app/service/domain/detail/DetailFacade`
+- Export orchestration: `checklist/app/service/domain/search/ExportFacade`
 - QA pipeline validators: `scripts/lib/qa-pipeline-config.js`
-- Component init feedback support: `sap_ui5/service/framework/ComponentInitFeedbackSupport`
+- Component init feedback support: `checklist/app/service/framework/ComponentInitFeedbackSupport`
 - Shared feedback/banner contract:
-  - `sap_ui5/service/framework/FeedbackBannerState`
-  - `sap_ui5/service/framework/RuntimeInput`
+  - `checklist/app/service/framework/FeedbackBannerState`
+  - `checklist/app/service/framework/RuntimeInput`
 - App controller action modules:
-  - `sap_ui5/controller/support/AppControllerLifecycleActions`
-  - `sap_ui5/controller/support/AppControllerOverlayActions`
-  - `sap_ui5/controller/support/AppControllerShellActions`
-  - `sap_ui5/controller/support/AppControllerStateActions`
-  - `sap_ui5/controller/support/AppControllerDomActions`
-- Detail validation summary support: `sap_ui5/controller/support/DetailValidationSummarySupport`
+  - `checklist/app/controller/support/AppControllerLifecycleActions`
+  - `checklist/app/controller/support/AppControllerOverlayActions`
+  - `checklist/app/controller/support/AppControllerShellActions`
+  - `checklist/app/controller/support/AppControllerStateActions`
+  - `checklist/app/controller/support/AppControllerDomActions`
+- Detail validation summary support: `checklist/app/controller/support/DetailValidationSummarySupport`
 - Detail controller action modules:
-  - `sap_ui5/controller/support/DetailChecklistCoreSupport`
-  - `sap_ui5/controller/support/DetailChecklistStateActions`
-  - `sap_ui5/controller/support/DetailChecklistRowActions`
-  - `sap_ui5/controller/support/DetailAttachmentLocationActions`
+  - `checklist/app/controller/support/DetailChecklistCoreSupport`
+  - `checklist/app/controller/support/DetailChecklistStateActions`
+  - `checklist/app/controller/support/DetailChecklistRowActions`
+  - `checklist/app/controller/support/DetailAttachmentLocationActions`
 
 ## Script Segmentation
 - Active QA/runtime contract scripts stay under `scripts/` root and `scripts/ci/`, `scripts/gates/`, `scripts/lib/`.

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/framework/Result"
+    "checklist/app/service/framework/Result"
 ], function (Result) {
     "use strict";
 

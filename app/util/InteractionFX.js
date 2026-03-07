@@ -24,7 +24,7 @@ sap.ui.define([], function () {
 
         function resolveTarget(oEvent) {
             var oTarget = oEvent && oEvent.target;
-            return oTarget && oTarget.closest ? oTarget.closest(".rnvRipple") : null;
+            return oTarget && oTarget.closest ? oTarget.closest(".chkRipple") : null;
         }
 
         function onPointerMove(oEvent) {

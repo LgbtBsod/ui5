@@ -1,9 +1,9 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/cache/ports/BrowserCachePort",
-    "sap_ui5/service/domain/cache/ports/LastChangeSetPort",
-    "sap_ui5/util/WorkflowTelemetry"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/cache/ports/BrowserCachePort",
+    "checklist/app/service/domain/cache/ports/LastChangeSetPort",
+    "checklist/app/util/WorkflowTelemetry"
 ], function (UseCase, Result, BrowserCachePort, LastChangeSetPort, WorkflowTelemetry) {
     "use strict";
 

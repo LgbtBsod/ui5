@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="sap_ui5.controller.Search"
+    controllerName="checklist.app.controller.Search"
     xmlns="sap.m"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
@@ -82,7 +82,7 @@
                     </HBox>
                 </HBox>
 
-                <core:Fragment fragmentName="sap_ui5.view.fragment.SearchLoadStatePanel" type="XML"/>
+                <core:Fragment fragmentName="checklist.app.view.fragment.SearchLoadStatePanel" type="XML"/>
 
                 <VBox id="searchWorkbenchDock" class="searchWorkbenchDock" renderType="Bare">
                     <VBox
@@ -93,7 +93,7 @@
                             class="searchFilterSkeletonShell"
                             renderType="Bare">
                             <core:Fragment
-                                fragmentName="sap_ui5.view.fragment.SkeletonFormSection"
+                                fragmentName="checklist.app.view.fragment.SkeletonFormSection"
                                 type="XML"/>
                         </VBox>
                         <smartFilterBar:SmartFilterBar
@@ -377,7 +377,7 @@
                     class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
                     <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
                         <core:Fragment
-                            fragmentName="sap_ui5.view.fragment.SkeletonList"
+                            fragmentName="checklist.app.view.fragment.SkeletonList"
                             type="XML"/>
                     </VBox>
 

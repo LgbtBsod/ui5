@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/util/ValidationPathMap"
+    "checklist/app/util/ValidationPathMap"
 ], function (ValidationPathMap) {
     "use strict";
 

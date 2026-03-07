@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/detail/usecases/ForceReadOnlyUseCase"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/detail/usecases/ForceReadOnlyUseCase"
 ], function (UseCase, Result, ForceReadOnlyUseCase) {
     "use strict";
 

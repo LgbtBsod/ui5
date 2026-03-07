@@ -10,12 +10,12 @@ const targets = [
 ];
 
 const allowed = [
-  /^sap_ui5\/controller\/Base\.controller$/,
-  /^sap_ui5\/controller\/support\/.+$/,
-  /^sap_ui5\/service\/domain\/.+\/[^/]+Facade$/,
-  /^sap_ui5\/service\/framework\/EffectApplier$/,
-  /^sap_ui5\/service\/framework\/CtxFactory$/,
-  /^sap_ui5\/util\/CreateSentinel$/,
+  /^checklist\/app\/controller\/Base\.controller$/,
+  /^checklist\/app\/controller\/support\/.+$/,
+  /^checklist\/app\/service\/domain\/.+\/[^/]+Facade$/,
+  /^checklist\/app\/service\/framework\/EffectApplier$/,
+  /^checklist\/app\/service\/framework\/CtxFactory$/,
+  /^checklist\/app\/util\/CreateSentinel$/,
   /^sap\/ui\/model\/json\/JSONModel$/
 ];
 

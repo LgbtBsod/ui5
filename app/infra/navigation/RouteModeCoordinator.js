@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/util/DebugLogger",
-    "sap_ui5/infra/navigation/RouteModeRules",
-    "sap_ui5/infra/navigation/RouteSync"
+    "checklist/app/util/DebugLogger",
+    "checklist/app/infra/navigation/RouteModeRules",
+    "checklist/app/infra/navigation/RouteSync"
 ], function (DebugLogger, RouteModeRules, RouteSync) {
     "use strict";
 

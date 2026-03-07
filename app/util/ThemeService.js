@@ -1,19 +1,19 @@
 sap.ui.define([
     "sap/ui/core/Core",
     "sap/ui/core/theming/Parameters",
-    "sap_ui5/util/ThemePhilosophy",
-    "sap_ui5/util/ValueTokenParser",
-    "sap_ui5/util/ThemeDomRuntime",
-    "sap_ui5/util/ThemeTokenRuntime"
+    "checklist/app/util/ThemePhilosophy",
+    "checklist/app/util/ValueTokenParser",
+    "checklist/app/util/ThemeDomRuntime",
+    "checklist/app/util/ThemeTokenRuntime"
 ], function (Core, Parameters, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime) {
     "use strict";
 
     var SWITCH_CLASS = "theme-switching";
     var MOTION_DISABLED_CLASS = "theme-motion-disabled";
     var MOTION_ENABLED_CLASS = "theme-motion-enabled";
-    var THEME_PROFILE_STORAGE_KEY = "sap_ui5_theme_profile";
-    var LEGACY_THEME_STORAGE_KEY = "sap_ui5_theme";
-    var THEME_PROFILE_RECOVERY_KEY = "sap_ui5_theme_profile_recovery_20260305";
+    var THEME_PROFILE_STORAGE_KEY = "checklist_app_theme_profile";
+    var LEGACY_THEME_STORAGE_KEY = "checklist_app_theme";
+    var THEME_PROFILE_RECOVERY_KEY = "checklist_app_theme_profile_recovery_20260305";
     var DEFAULT_MODE = "morning";
     var DEFAULT_ANIMATION_ENABLED = true;
     var DEFAULT_BACKGROUND_INTERACTIVE = true;
@@ -174,7 +174,7 @@ sap.ui.define([
 
     function syncDocumentRootClasses() {
         var oNodes = ThemeDomRuntime.getNodes();
-        ThemeDomRuntime.addClass([oNodes.root, oNodes.body, oNodes.container], "rnvAppRoot");
+        ThemeDomRuntime.addClass([oNodes.root, oNodes.body, oNodes.container], "chkAppRoot");
     }
 
     function syncAnimationClass(bAnimationEnabled) {

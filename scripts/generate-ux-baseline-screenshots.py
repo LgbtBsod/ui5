@@ -65,7 +65,7 @@ def wait_for_app_ready(page: Page, delay: int = 1200) -> None:
             return false;
           }
           var core = sap.ui.getCore();
-          return !!core.byId('sap_ui5_comp---app--searchPaneHost') && !!core.byId('sap_ui5_comp---app--detailPaneHost');
+          return !!core.byId('checklist_app_comp---app--searchPaneHost') && !!core.byId('checklist_app_comp---app--detailPaneHost');
         }
         """,
         timeout=90000,
@@ -167,28 +167,28 @@ def action_detail(page: Page) -> None:
 def action_analytics_dialog(page: Page) -> None:
     page.goto(URL, wait_until="networkidle", timeout=90000)
     wait_for_app_ready(page, 1200)
-    call_controller(page, "sap_ui5_comp---app--searchPaneHost", "onOpenWorkflowAnalytics")
+    call_controller(page, "checklist_app_comp---app--searchPaneHost", "onOpenWorkflowAnalytics")
     page.wait_for_selector(".sapMDialog", timeout=10000)
     wait_ui(page, 1200)
 
 
 def action_checks_dialog(page: Page) -> None:
     open_detail(page)
-    call_controller(page, "sap_ui5_comp---app--detailPaneHost", "onExpandChecks")
+    call_controller(page, "checklist_app_comp---app--detailPaneHost", "onExpandChecks")
     page.wait_for_selector(".sapMDialog", timeout=10000)
     wait_ui(page, 1200)
 
 
 def action_barriers_dialog(page: Page) -> None:
     open_detail(page)
-    call_controller(page, "sap_ui5_comp---app--detailPaneHost", "onExpandBarriers")
+    call_controller(page, "checklist_app_comp---app--detailPaneHost", "onExpandBarriers")
     page.wait_for_selector(".sapMDialog", timeout=10000)
     wait_ui(page, 1200)
 
 
 def action_location_dialog(page: Page) -> None:
     open_detail(page)
-    call_controller(page, "sap_ui5_comp---app--detailPaneHost", "onOpenLocationValueHelp")
+    call_controller(page, "checklist_app_comp---app--detailPaneHost", "onOpenLocationValueHelp")
     page.wait_for_selector(".sapMDialog", timeout=10000)
     wait_ui(page, 1200)
 
@@ -219,12 +219,12 @@ def main() -> int:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     states = {
-        "search": (action_search, "#sap_ui5_comp---app--searchPaneHost"),
-        "detail": (action_detail, "#sap_ui5_comp---app--detailPaneHost"),
-        "analytics-dialog": (action_analytics_dialog, "#sap_ui5_comp---app--searchPaneHost--workflowAnalyticsDialog"),
-        "checks-dialog": (action_checks_dialog, "#sap_ui5_comp---app--detailPaneHost--checksExpandedDialog"),
-        "barriers-dialog": (action_barriers_dialog, "#sap_ui5_comp---app--detailPaneHost--barriersExpandedDialog"),
-        "location-dialog": (action_location_dialog, "#sap_ui5_comp---app--detailPaneHost--locationValueHelpDialog"),
+        "search": (action_search, "#checklist_app_comp---app--searchPaneHost"),
+        "detail": (action_detail, "#checklist_app_comp---app--detailPaneHost"),
+        "analytics-dialog": (action_analytics_dialog, "#checklist_app_comp---app--searchPaneHost--workflowAnalyticsDialog"),
+        "checks-dialog": (action_checks_dialog, "#checklist_app_comp---app--detailPaneHost--checksExpandedDialog"),
+        "barriers-dialog": (action_barriers_dialog, "#checklist_app_comp---app--detailPaneHost--barriersExpandedDialog"),
+        "location-dialog": (action_location_dialog, "#checklist_app_comp---app--detailPaneHost--locationValueHelpDialog"),
     }
     captured: dict[str, dict[str, pathlib.Path]] = {"morning": {}, "night": {}}
 

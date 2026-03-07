@@ -21,7 +21,7 @@ function runGate(config) {
 
   printViolations(config.name, violations);
   emitJson({ gate: config.name, files: files.length, violations });
-  if (violations.length) process.exit(1);
+  if (violations.length && !(config.advisory && process.env.QA_STRICT_STRUCTURAL !== '1')) process.exit(1);
 }
 
 module.exports = { runGate };

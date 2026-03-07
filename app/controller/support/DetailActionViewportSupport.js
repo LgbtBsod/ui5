@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (AttachmentUploadSupport, DetailActionConstants, ControllerModelWriteSupport) {
     "use strict";
 

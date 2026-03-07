@@ -43,8 +43,8 @@ function parseDeps(source) {
 
 function resolveDep(file, dep, rootDir) {
   const dir = path.dirname(path.resolve(rootDir, file));
-  if (dep.startsWith('sap_ui5/')) {
-    const mapped = dep.replace(/^sap_ui5\//, '');
+  if (dep.startsWith('checklist/app/')) {
+    const mapped = dep.replace(/^checklist\/app\//, '');
     return toPosix(mapped.endsWith('.js') ? mapped : `${mapped}.js`);
   }
   if (dep.startsWith('.')) {

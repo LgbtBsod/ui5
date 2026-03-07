@@ -11,9 +11,9 @@
     "sap/m/Button",
     "sap/ui/core/Item",
     "sap/ui/core/CustomData",
-    "sap_ui5/service/framework/ControlStyleRuntime",
-    "sap_ui5/controller/base/ControllerTextRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/service/framework/ControlStyleRuntime",
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, ControlStyleRuntime, ControllerTextRuntime, ControllerModelWriteSupport) {
     "use strict";
 

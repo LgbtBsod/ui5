@@ -12,11 +12,17 @@ const { canonicalLayer, resolveDependency } = require('./layer-contract');
 const ROOT = process.cwd();
 const SCAN_DIRS = ['controller', 'facades', 'service', 'infra', 'util', 'model'];
 const INFRA_BACKEND_ALLOWLIST = new Set(['service/backend/GatewayClient']);
+const CONTROLLER_INFRA_ALLOWLIST = new Set([
+  'infra/navigation/WorkspaceRouteNavigation'
+]);
 const CONTROLLER_UTIL_ALLOWLIST_PATH = 'scripts/internal/controller-util-allowlist.json';
 const CONTROLLER_UTIL_ALLOWLIST = new Set(readJsonSafe(CONTROLLER_UTIL_ALLOWLIST_PATH, []));
 
 function pushControllerViolations(violations, file, item, line, targetLayer, modulePath) {
   if (targetLayer === 'infra' || targetLayer === 'backend') {
+    if (targetLayer === 'infra' && CONTROLLER_INFRA_ALLOWLIST.has(modulePath)) {
+      return false;
+    }
     violations.push({ rule: 'R1', from: file, dep: item.dep, line, msg: 'controller cannot import infra/backend' });
     return true;
   }

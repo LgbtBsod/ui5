@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths"
 ], function (Effects, StatePaths) {
     "use strict";
 

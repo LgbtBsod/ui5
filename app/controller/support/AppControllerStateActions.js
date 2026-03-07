@@ -1,9 +1,9 @@
 sap.ui.define([
-    "sap_ui5/controller/support/AppShellTextSupport",
-    "sap_ui5/controller/support/AppShellPermissionPresentation",
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/AppShellTextSupport",
+    "checklist/app/controller/support/AppShellPermissionPresentation",
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (AppShellTextSupport, AppShellPermissionPresentation, ActionContract, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
     var getText = AppShellTextSupport.getText;
@@ -114,8 +114,8 @@ sap.ui.define([
             sMode = String(oState.getProperty("/mode") || "READ").toUpperCase();
             sLockState = String(oState.getProperty("/lockOperationState") || "IDLE").toUpperCase();
             sAutosaveState = String(oState.getProperty("/autosaveState") || "IDLE").toUpperCase();
-            sUser = String(oState.getProperty("/testUser") || "").trim();
             oCurrentUser = oState.getProperty("/currentUser") || {};
+            sUser = String(oCurrentUser.uname || "").trim();
             sFullName = String(oCurrentUser.fullName || sUser || getText(this, "shellUserMissing", null, "User login required"));
             aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
             aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];

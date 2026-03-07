@@ -1,6 +1,6 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/util/search/SearchMaxResults"
+    "checklist/app/util/search/SearchMaxResults"
 ], function (JSONModel, SearchMaxResults) {
     "use strict";
 

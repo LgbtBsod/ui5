@@ -2,96 +2,96 @@
 @import "modules/01_theme-modes.css";
 @import "modules/02_background.css";
 
-.rnvApp,
-.rnvApp .rnvSkin,
-.rnvApp .appShell {
+.chkApp,
+.chkApp .chkSkin,
+.chkApp .appShell {
   min-height: 100%;
   height: 100%;
   color: var(--text-main);
 }
 
-html.rnvAppRoot,
-body.rnvAppRoot,
-.rnvAppRoot.sapUiBody,
-#ui5_container.rnvAppRoot {
+html.chkAppRoot,
+body.chkAppRoot,
+.chkAppRoot.sapUiBody,
+#ui5_container.chkAppRoot {
   height: 100%;
   overflow: hidden;
 }
 
-.rnvApp .appShell {
+.chkApp .appShell {
   position: relative;
   z-index: 1;
 }
 
-.rnvApp .appShell > .sapMFlexItem:first-child {
+.chkApp .appShell > .sapMFlexItem:first-child {
   flex: 0 0 auto;
   height: auto;
 }
 
-.rnvApp .appShell > .sapMFlexItem:last-child {
+.chkApp .appShell > .sapMFlexItem:last-child {
   flex: 1 1 auto;
   min-height: 0;
   height: auto;
 }
 
-.rnvApp .appShell > .sapMFlexItem {
+.chkApp .appShell > .sapMFlexItem {
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.rnvApp .appRootFcl,
-.rnvApp #searchPaneHost,
-.rnvApp #detailPaneHost,
-.rnvApp [id$="-searchPaneHost"],
-.rnvApp [id$="-detailPaneHost"] {
+.chkApp .appRootFcl,
+.chkApp #searchPaneHost,
+.chkApp #detailPaneHost,
+.chkApp [id$="-searchPaneHost"],
+.chkApp [id$="-detailPaneHost"] {
   height: 100%;
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.rnvApp .appRootFcl,
-.rnvApp .appRootFcl .sapFFCLColumn,
-.rnvApp .appRootFcl .sapFFCLColumnContent,
-.rnvApp .appRootFcl .sapFFCLColumnContent > .sapMNav,
-.rnvApp .appRootFcl .sapFFCLColumnContent > .sapMNav > .sapMNavItem,
-.rnvApp .appRootFcl .sapFFCLColumnContent .sapUiView {
+.chkApp .appRootFcl,
+.chkApp .appRootFcl .sapFFCLColumn,
+.chkApp .appRootFcl .sapFFCLColumnContent,
+.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav > .sapMNavItem,
+.chkApp .appRootFcl .sapFFCLColumnContent .sapUiView {
   height: 100%;
   min-height: 0;
   max-width: 100%;
   min-width: 0;
 }
 
-.rnvApp .appRootFcl .sapFFCLColumn {
+.chkApp .appRootFcl .sapFFCLColumn {
   overflow: hidden;
   background: transparent;
 }
 
-.rnvApp .pageTransparent,
-.rnvApp .pageTransparent > section,
-.rnvApp .pageTransparent .sapMPageEnableScrolling,
-.rnvApp .pageTransparent .sapMPageScroll,
-.rnvApp .pageTransparent .sapMPageScroll > .sapMPageScrollContainer {
+.chkApp .pageTransparent,
+.chkApp .pageTransparent > section,
+.chkApp .pageTransparent .sapMPageEnableScrolling,
+.chkApp .pageTransparent .sapMPageScroll,
+.chkApp .pageTransparent .sapMPageScroll > .sapMPageScrollContainer {
   background: transparent;
   min-height: 0;
 }
 
-.rnvApp .appContent {
+.chkApp .appContent {
   padding: 1rem;
   min-width: 0;
 }
 
-.rnvApp .searchExperienceStack,
-.rnvApp .detailExperienceCanvas {
+.chkApp .searchExperienceStack,
+.chkApp .detailExperienceCanvas {
   gap: 1rem;
 }
 
-.rnvApp .searchFilterCardDense,
-.rnvApp .searchResultsTable,
-.rnvApp .detailHeroCard,
-.rnvApp .detailSectionCard,
-.rnvApp .detailControlInlineCard,
-.rnvApp .glassCard {
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsTable,
+.chkApp .detailHeroCard,
+.chkApp .detailSectionCard,
+.chkApp .detailControlInlineCard,
+.chkApp .glassCard {
   min-width: 0;
 }

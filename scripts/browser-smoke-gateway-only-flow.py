@@ -29,11 +29,11 @@ def wait_for_search_ready(page) -> None:
             return false;
           }
           const core = sap.ui.getCore();
-          const app = core.byId('sap_ui5_comp---app');
+          const app = core.byId('checklist_app_comp---app');
           const state = app && app.getModel && app.getModel('state');
-          const fcl = core.byId('sap_ui5_comp---app--mainFcl');
-          const smartFilterBar = core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartFilterBar');
-          const smartTable = core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartTable');
+          const fcl = core.byId('checklist_app_comp---app--mainFcl');
+          const smartFilterBar = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartFilterBar');
+          const smartTable = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable');
           const appReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true';
           return !!fcl
             && !!smartFilterBar
@@ -54,8 +54,8 @@ def wait_for_detail_ready(page, root_id: str) -> None:
         """
         (expectedRootId) => {
           const core = sap.ui.getCore();
-          const view = core.byId('sap_ui5_comp---app--detailPaneHost');
-          const objectPage = core.byId('sap_ui5_comp---app--detailPaneHost--detailObjectPage');
+          const view = core.byId('checklist_app_comp---app--detailPaneHost');
+          const objectPage = core.byId('checklist_app_comp---app--detailPaneHost--detailObjectPage');
           const selected = view && view.getModel && view.getModel('selected');
           const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
           return !!view && !!objectPage && rootId === expectedRootId;
@@ -72,9 +72,9 @@ def wait_for_analytics_ready(page) -> None:
         """
         () => {
           const core = sap.ui.getCore();
-          const app = core.byId('sap_ui5_comp---app');
+          const app = core.byId('checklist_app_comp---app');
           const state = app && app.getModel && app.getModel('state');
-          const analyticsView = core.byId('sap_ui5_comp---app--analyticsPaneHost');
+          const analyticsView = core.byId('checklist_app_comp---app--analyticsPaneHost');
           const viewModel = analyticsView && analyticsView.getModel && analyticsView.getModel('view');
           return !!state
             && state.getProperty('/currentRouteName') === 'analytics'
@@ -165,7 +165,7 @@ def detail_state(page) -> dict[str, Any]:
     return page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const selected = view && view.getModel && view.getModel('selected');
           const state = view && view.getModel && view.getModel('state');
           return {
@@ -201,7 +201,7 @@ def set_detail_edit_mode(page, state: bool) -> Any:
     return page.evaluate(
         """
         (targetState) => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller.onToggleEdit !== 'function') {
             throw new Error('onToggleEdit is not available');
@@ -222,7 +222,7 @@ def ensure_attachments_expanded(page) -> None:
     page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const controller = view && view.getController && view.getController();
           const viewModel = view && view.getModel && view.getModel('view');
           if (!controller || typeof controller.onToggleAttachmentsSection !== 'function') {
@@ -238,7 +238,7 @@ def ensure_attachments_expanded(page) -> None:
     page.wait_for_function(
         """
         () => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const viewModel = view && view.getModel && view.getModel('view');
           return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'))
             && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
@@ -286,10 +286,10 @@ def main() -> int:
                 """
                 () => {
                   const core = sap.ui.getCore();
-                  const searchView = core.byId('sap_ui5_comp---app--searchPaneHost');
+                  const searchView = core.byId('checklist_app_comp---app--searchPaneHost');
                   return {
-                    hasSmartFilterBar: !!core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartFilterBar'),
-                    hasSmartTable: !!core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartTable'),
+                    hasSmartFilterBar: !!core.byId('checklist_app_comp---app--searchPaneHost--searchSmartFilterBar'),
+                    hasSmartTable: !!core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable'),
                     searchVisible: !!(searchView && searchView.getDomRef && searchView.getDomRef())
                   };
                 }
@@ -315,7 +315,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 () => {
-                  const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const state = view && view.getModel && view.getModel('state');
                   return !!(state && state.getProperty && state.getProperty('/mode') === 'EDIT');
                 }
@@ -336,7 +336,7 @@ def main() -> int:
             save_call = page.evaluate(
                 """
                 () => new Promise((resolve, reject) => {
-                  const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const controller = view && view.getController && view.getController();
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
@@ -356,7 +356,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 (prevVersion) => {
-                  const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const state = view && view.getModel && view.getModel('state');
                   const selected = view && view.getModel && view.getModel('selected');
                   const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
@@ -380,8 +380,8 @@ def main() -> int:
             autosave_call = page.evaluate(
                 """
                 () => new Promise((resolve, reject) => {
-                  sap.ui.require(['sap_ui5/util/DeltaPayloadBuilder'], function (DeltaPayloadBuilder) {
-                    const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  sap.ui.require(['checklist/app/util/DeltaPayloadBuilder'], function (DeltaPayloadBuilder) {
+                    const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                     const controller = view && view.getController && view.getController();
                     const selected = view && view.getModel && view.getModel('selected');
                     const uiState = view && view.getModel && view.getModel('uiState');
@@ -411,7 +411,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 (prevVersion) => {
-                  const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
                   const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
@@ -436,7 +436,7 @@ def main() -> int:
             ) + len(
                 matching_requests(network, "WorkflowAnalyticsBreakdownSet")
             )
-            invoke_view_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onOpenWorkflowAnalytics")
+            invoke_view_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onOpenWorkflowAnalytics")
             wait_for_analytics_ready(page)
             analytics_request_after = len(
                 matching_requests(network, "SimpleAnalyticalSet")
@@ -447,9 +447,9 @@ def main() -> int:
                 """
                 () => {
                   const core = sap.ui.getCore();
-                  const app = core.byId('sap_ui5_comp---app');
+                  const app = core.byId('checklist_app_comp---app');
                   const state = app && app.getModel && app.getModel('state');
-                  const analyticsView = core.byId('sap_ui5_comp---app--analyticsPaneHost');
+                  const analyticsView = core.byId('checklist_app_comp---app--analyticsPaneHost');
                   const viewModel = analyticsView && analyticsView.getModel && analyticsView.getModel('view');
                   return {
                     routeName: state && state.getProperty ? String(state.getProperty('/currentRouteName') || '') : '',
@@ -464,12 +464,12 @@ def main() -> int:
             ensure(checks, "analytics.screen.gateway", ok_analytics, {"before": analytics_request_before, "after": analytics_request_after, "state": analytics_state})
             if not ok_analytics:
                 failures.append("analytics.screen.gateway")
-            invoke_view_controller_method(page, "sap_ui5_comp---app--analyticsPaneHost", "onCloseAnalytics")
+            invoke_view_controller_method(page, "checklist_app_comp---app--analyticsPaneHost", "onCloseAnalytics")
             wait_for_detail_ready(page, ROOT_ID)
 
             ensure_attachments_expanded(page)
             before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/" in item["url"]])
-            page.locator("#sap_ui5_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
+            page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_timeout(3200)
             attachment_requests = [
                 item
@@ -499,7 +499,7 @@ def main() -> int:
                 failures.append("detail.attachment.gateway")
 
             before_release = len(matching_requests(network, "LockRelease"))
-            invoke_view_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onCloseDetail")
+            invoke_view_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseDetail")
             wait_for_search_ready(page)
             page.wait_for_timeout(1600)
             after_release = len(matching_requests(network, "LockRelease"))
@@ -508,7 +508,7 @@ def main() -> int:
                 () => {
                   return {
                     hasCreateButton: document.body && document.body.innerText.includes('Create'),
-                    smartTable: !!sap.ui.getCore().byId('sap_ui5_comp---app--searchPaneHost--searchSmartTable')
+                    smartTable: !!sap.ui.getCore().byId('checklist_app_comp---app--searchPaneHost--searchSmartTable')
                   };
                 }
                 """

@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
-    "sap_ui5/infra/adapters/shared/GatewayIdentitySupport"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
+    "checklist/app/infra/adapters/shared/GatewayIdentitySupport"
 ], function (GatewayAdapterSupport, GatewayIdentitySupport) {
     "use strict";
 

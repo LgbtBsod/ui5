@@ -1,10 +1,10 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/infra/navigation/RouteModeCoordinator",
-    "sap_ui5/util/DebugLogger",
-    "sap_ui5/service/framework/AppShellStateSync",
-    "sap_ui5/util/TimeConfigService",
-    "sap_ui5/util/runtime/TimerDefaults"
+    "checklist/app/infra/navigation/RouteModeCoordinator",
+    "checklist/app/util/DebugLogger",
+    "checklist/app/service/framework/AppShellStateSync",
+    "checklist/app/util/TimeConfigService",
+    "checklist/app/util/runtime/TimerDefaults"
 ], function (JSONModel, RouteModeCoordinator, DebugLogger, AppShellStateSync, TimeConfigService, TimerDefaults) {
     "use strict";
 
@@ -44,22 +44,12 @@ sap.ui.define([
         }
         var iBootstrapRetryMs = Number(TimeConfigService.read(oResolvedState, "bootstrapRetryMs") || (TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50);
         AppShellStateSync.ensureControllerStateModel(oController, oResolvedState);
-        if (!oController._syncTestUserDialogStateBound) {
-            oController._syncTestUserDialogStateBound = function () {
-                AppShellStateSync.syncTestUserDialogState(oController);
-            };
-        }
-        if (!oController._oRequiresLoginBinding) {
-            oController._oRequiresLoginBinding = oResolvedState.bindProperty("/requiresUserLogin");
-            oController._oRequiresLoginBinding.attachChange(oController._syncTestUserDialogStateBound);
-        }
         oController._oRouteModeCoordinator = new RouteModeCoordinator({
             router: oController.getRouter(),
             stateModel: oResolvedState,
             fcl: oController.byId("mainFcl")
         });
         oController._oRouteModeCoordinator.start();
-        AppShellStateSync.syncTestUserDialogState(oController);
         oController._iBootstrapRetryMs = iBootstrapRetryMs;
     }
 
@@ -97,34 +87,11 @@ sap.ui.define([
         onToggleBackgroundInteractive: function (oController, bEnabled) {
             syncThemeState(oController, "background-interactive", oController.setThemeBackgroundInteractive(!!bEnabled));
         },
-        requestTestUserDialog: function (oController) {
-            var oState = oController && oController.getModel && oController.getModel("state");
-            if (oState && typeof oState.setProperty === "function") {
-                oState.setProperty("/requiresUserLogin", true);
-            }
-            AppShellStateSync.syncTestUserDialogState(oController);
-        },
-        onConfirmTestUser: function (oController, fnConfirm) {
-            return fnConfirm(oController).then(function (bSuccess) {
-                if (bSuccess) {
-                    AppShellStateSync.closeTestUserDialog(oController);
-                }
-            });
-        },
-        onDialogClosed: function (oController) {
-            AppShellStateSync.syncTestUserDialogState(oController);
-        },
         onExit: function (oController) {
             if (oController._oRouteModeCoordinator) {
                 oController._oRouteModeCoordinator.stop();
                 oController._oRouteModeCoordinator = null;
             }
-            if (oController._oRequiresLoginBinding) {
-                oController._oRequiresLoginBinding.detachChange(oController._syncTestUserDialogStateBound);
-                oController._oRequiresLoginBinding.destroy();
-                oController._oRequiresLoginBinding = null;
-            }
-            oController._syncTestUserDialogStateBound = null;
         }
     };
 });

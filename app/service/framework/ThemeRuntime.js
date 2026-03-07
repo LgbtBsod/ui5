@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/util/ThemeService"
+    "checklist/app/util/ThemeService"
 ], function (ThemeService) {
     "use strict";
 

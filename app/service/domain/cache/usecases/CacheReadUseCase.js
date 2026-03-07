@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/cache/ports/BrowserCachePort"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/cache/ports/BrowserCachePort"
 ], function (UseCase, Result, BrowserCachePort) {
     "use strict";
 

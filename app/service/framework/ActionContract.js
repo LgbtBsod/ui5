@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
 ], function (RuntimeInput) {
     "use strict";
 
@@ -16,11 +16,10 @@ sap.ui.define([
     };
 
     var SHELL_USER_ACTIONS = {
-        TEST_USER: "testUser",
         REFRESH_CONTEXT: "refreshContext"
     };
     var RETRY_ACTION_VALUES = [RETRY_ACTIONS.SAVE, RETRY_ACTIONS.SEARCH, RETRY_ACTIONS.SESSION];
-    var SHELL_USER_ACTION_VALUES = [SHELL_USER_ACTIONS.TEST_USER, SHELL_USER_ACTIONS.REFRESH_CONTEXT];
+    var SHELL_USER_ACTION_VALUES = [SHELL_USER_ACTIONS.REFRESH_CONTEXT];
 
     function normalizeRetryAction(vAction) {
         var sAction = RuntimeInput.asString(vAction).trim().toLowerCase();

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/framework/FocusRuntime"
+    "checklist/app/service/framework/FocusRuntime"
 ], function (FocusRuntime) {
     "use strict";
 

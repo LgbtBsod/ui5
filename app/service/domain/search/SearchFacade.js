@@ -1,13 +1,13 @@
 sap.ui.define([
-    "sap_ui5/service/domain/search/usecases/BootstrapSearchUseCase",
-    "sap_ui5/service/domain/search/usecases/BuildSearchFilterUseCase",
-    "sap_ui5/service/domain/search/usecases/ExecuteSearchUseCase",
-    "sap_ui5/service/domain/search/usecases/RebindSearchUseCase",
-    "sap_ui5/service/domain/search/usecases/SelectRowUseCase",
-    "sap_ui5/service/domain/search/usecases/SelectionChangedUseCase",
-    "sap_ui5/service/domain/search/ExportFacade",
-    "sap_ui5/service/domain/search/usecases/AnalyticsUseCase",
-    "sap_ui5/service/domain/search/usecases/ApplyRebindPolicyUseCase"
+    "checklist/app/service/domain/search/usecases/BootstrapSearchUseCase",
+    "checklist/app/service/domain/search/usecases/BuildSearchFilterUseCase",
+    "checklist/app/service/domain/search/usecases/ExecuteSearchUseCase",
+    "checklist/app/service/domain/search/usecases/RebindSearchUseCase",
+    "checklist/app/service/domain/search/usecases/SelectRowUseCase",
+    "checklist/app/service/domain/search/usecases/SelectionChangedUseCase",
+    "checklist/app/service/domain/search/ExportFacade",
+    "checklist/app/service/domain/search/usecases/AnalyticsUseCase",
+    "checklist/app/service/domain/search/usecases/ApplyRebindPolicyUseCase"
 ], function (
     BootstrapSearchUseCase,
     BuildSearchFilterUseCase,

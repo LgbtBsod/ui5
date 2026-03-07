@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/framework/FeedbackBannerState"
+    "checklist/app/service/framework/FeedbackBannerState"
 ], function (FeedbackBannerState) {
     "use strict";
 

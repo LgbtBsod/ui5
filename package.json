@@ -1,5 +1,5 @@
 {
-  "name": "ui5-architecture-qa",
+  "name": "checklist-ui5-app",
   "private": true,
   "scripts": {
     "prepare": "husky",

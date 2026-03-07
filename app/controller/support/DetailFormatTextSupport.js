@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/controller/base/ControllerTextRuntime"
+    "checklist/app/controller/base/ControllerTextRuntime"
 ], function (ControllerTextRuntime) {
     "use strict";
 

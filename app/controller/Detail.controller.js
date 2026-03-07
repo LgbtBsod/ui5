@@ -1,9 +1,9 @@
 sap.ui.define([
-    "sap_ui5/controller/Base.controller",
-    "sap_ui5/controller/support/DetailControllerLifecycle",
-    "sap_ui5/controller/support/DetailFormatters",
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailControllerActions"
+    "checklist/app/controller/Base.controller",
+    "checklist/app/controller/support/DetailControllerLifecycle",
+    "checklist/app/controller/support/DetailFormatters",
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailControllerActions"
 ], function (
     BaseController,
     DetailControllerLifecycle,
@@ -49,5 +49,5 @@ sap.ui.define([
         formatAutosaveText: DetailFormatters.formatAutosaveText
     });
 
-    return BaseController.extend("sap_ui5.controller.Detail", mControllerDefinition);
+    return BaseController.extend("checklist.app.controller.Detail", mControllerDefinition);
 });

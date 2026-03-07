@@ -1,8 +1,8 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/util/SearchSmartControlCoordinator"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/util/SearchSmartControlCoordinator"
 ], function (UseCase, Result, Effects, SearchSmartControlCoordinator) {
     "use strict";
 

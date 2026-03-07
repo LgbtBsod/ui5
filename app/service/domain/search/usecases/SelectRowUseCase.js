@@ -1,10 +1,10 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/search/SearchSelectionEffects",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/search/SearchSelectionEffects",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/service/domain/shared/StatePaths"
 ], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths) {
     "use strict";
 

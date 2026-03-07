@@ -1,7 +1,8 @@
 sap.ui.define([], function () {
     "use strict";
 
-    var STORAGE_KEY = "sap_ui5_layout_personalization";
+    var STORAGE_KEY = "checklist_app_layout_personalization";
+    var LEGACY_STORAGE_KEY = "sap_ui5_layout_personalization";
 
     function normalizeInfoCardLayout(aLayout) {
         return (Array.isArray(aLayout) ? aLayout : []).reduce(function (aResult, oEntry, iIndex) {
@@ -26,7 +27,7 @@ sap.ui.define([], function () {
     function readAll() {
         var sRaw = "";
         try {
-            sRaw = window.localStorage.getItem(STORAGE_KEY) || "";
+            sRaw = window.localStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(LEGACY_STORAGE_KEY) || "";
             return normalize(sRaw ? JSON.parse(sRaw) : {});
         } catch (oError) {
             return normalize({});

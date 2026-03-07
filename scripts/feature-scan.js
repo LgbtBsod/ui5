@@ -72,7 +72,7 @@ function resolveControllerPathFromView(xmlText) {
     if (!match) {
         return "";
     }
-    return path.join(ROOT, match[1].replace(/^sap_ui5\./, "").replace(/\./g, "/") + ".controller.js");
+    return path.join(ROOT, match[1].replace(/^checklist\.app\./, "").replace(/\./g, "/") + ".controller.js");
 }
 
 function extractEventHandlers(xmlText) {

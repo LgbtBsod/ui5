@@ -31,10 +31,10 @@ def wait_for_app_ready(page, delay: int = 1200) -> None:
             return false;
           }
           const core = sap.ui.getCore();
-          const fcl = core.byId('sap_ui5_comp---app--mainFcl');
-          const search = core.byId('sap_ui5_comp---app--searchPaneHost');
-          const smartFilterBar = core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartFilterBar');
-          const smartTable = core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartTable');
+          const fcl = core.byId('checklist_app_comp---app--mainFcl');
+          const search = core.byId('checklist_app_comp---app--searchPaneHost');
+          const smartFilterBar = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartFilterBar');
+          const smartTable = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable');
           const appReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true'
             && document.body.getAttribute('data-ui5-app-ready') === 'true';
           return !!fcl && !!search && !!smartFilterBar && !!smartTable && appReady;
@@ -51,8 +51,8 @@ def wait_for_detail_ready(page, root_id: str = DETAIL_ROOT, delay: int = 1400) -
         """
         (expectedRootId) => {
           const core = sap.ui.getCore();
-          const view = core.byId('sap_ui5_comp---app--detailPaneHost');
-          const objectPage = core.byId('sap_ui5_comp---app--detailPaneHost--detailObjectPage');
+          const view = core.byId('checklist_app_comp---app--detailPaneHost');
+          const objectPage = core.byId('checklist_app_comp---app--detailPaneHost--detailObjectPage');
           const selected = view && view.getModel && view.getModel('selected');
           const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
           return !!view && !!objectPage && (!expectedRootId || rootId === expectedRootId);
@@ -70,8 +70,8 @@ def wait_for_analytics_ready(page, delay: int = 1200) -> None:
         """
         () => {
           const core = sap.ui.getCore();
-          const app = core.byId('sap_ui5_comp---app');
-          const analyticsView = core.byId('sap_ui5_comp---app--analyticsPaneHost');
+          const app = core.byId('checklist_app_comp---app');
+          const analyticsView = core.byId('checklist_app_comp---app--analyticsPaneHost');
           const state = app && app.getModel && app.getModel('state');
           const viewModel = analyticsView && analyticsView.getModel && analyticsView.getModel('view');
           return !!analyticsView
@@ -92,7 +92,7 @@ def wait_for_search_route(page, delay: int = 900) -> None:
         """
         () => {
           const core = sap.ui.getCore();
-          const app = core.byId('sap_ui5_comp---app');
+          const app = core.byId('checklist_app_comp---app');
           const state = app && app.getModel && app.getModel('state');
           return !!state
             && state.getProperty('/currentRouteName') === 'search'
@@ -109,8 +109,8 @@ def route_state(page) -> dict[str, Any]:
         """
         () => {
           const core = sap.ui.getCore();
-          const app = core.byId('sap_ui5_comp---app');
-          const fcl = core.byId('sap_ui5_comp---app--mainFcl');
+          const app = core.byId('checklist_app_comp---app');
+          const fcl = core.byId('checklist_app_comp---app--mainFcl');
           const state = app && app.getModel && app.getModel('state');
           const currentMid = fcl && fcl.getCurrentMidColumnPage && fcl.getCurrentMidColumnPage();
           return {
@@ -156,7 +156,7 @@ def set_theme_mode(page, mode: str) -> dict[str, Any]:
     result = page.evaluate(
         """
         (targetMode) => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller.onSelectThemeMode !== 'function') {
             throw new Error('onSelectThemeMode is not available');
@@ -176,7 +176,7 @@ def set_theme_mode(page, mode: str) -> dict[str, Any]:
         """
         ({ expectedTheme, expectedClass, expectedMode }) => {
           const bgState = window.Ui5Bg && typeof window.Ui5Bg.getState === 'function' ? window.Ui5Bg.getState() : null;
-          const app = sap.ui.getCore().byId('sap_ui5_comp---app');
+          const app = sap.ui.getCore().byId('checklist_app_comp---app');
           const appView = app && app.getModel && app.getModel('appView');
           return !!bgState
             && bgState.theme === expectedTheme
@@ -202,7 +202,7 @@ def capture_resize_runtime(page) -> dict[str, Any]:
           const bgState = window.Ui5Bg && typeof window.Ui5Bg.getState === 'function' ? window.Ui5Bg.getState() : null;
           return {
             appReady: document.documentElement.getAttribute('data-ui5-app-ready') === 'true',
-            resizing: document.documentElement.classList.contains('rnvResizing'),
+            resizing: document.documentElement.classList.contains('chkResizing'),
             bgOpacity: bgStyle ? Number(bgStyle.opacity || 0) : -1,
             bgVisibility: bgStyle ? String(bgStyle.visibility || '') : '',
             containerVisibility: containerStyle ? String(containerStyle.visibility || '') : '',
@@ -231,7 +231,7 @@ def run_resize_trace(page, theme_mode: str) -> dict[str, Any]:
         """
         () => {
           const bgState = window.Ui5Bg && typeof window.Ui5Bg.getState === 'function' ? window.Ui5Bg.getState() : null;
-          return !document.documentElement.classList.contains('rnvResizing')
+          return !document.documentElement.classList.contains('chkResizing')
             && !!bgState
             && bgState.resizing === false;
         }
@@ -270,22 +270,22 @@ def main() -> int:
         report["resizeNight"] = run_resize_trace(page, "night")
         set_theme_mode(page, "morning")
 
-        invoke_controller_method(page, "sap_ui5_comp---app", "onOpenShellAnalytics")
+        invoke_controller_method(page, "checklist_app_comp---app", "onOpenShellAnalytics")
         wait_for_analytics_ready(page)
         shell_analytics_state = route_state(page)
         ensure(shell_analytics_state["routeName"] == "analytics", "shell analytics did not navigate to analytics route")
         ensure(shell_analytics_state["midPageId"].endswith("analyticsPaneHost"), "shell analytics did not activate analytics mid page")
-        invoke_controller_method(page, "sap_ui5_comp---app--analyticsPaneHost", "onCloseAnalytics")
+        invoke_controller_method(page, "checklist_app_comp---app--analyticsPaneHost", "onCloseAnalytics")
         wait_for_search_route(page)
         report["shellAnalytics"] = shell_analytics_state
 
         page.goto(f"{URL}#/checklist/{DETAIL_ROOT}", wait_until="networkidle", timeout=90000)
         wait_for_detail_ready(page, DETAIL_ROOT, 1600)
-        invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onOpenWorkflowAnalytics")
+        invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onOpenWorkflowAnalytics")
         wait_for_analytics_ready(page)
         detail_analytics_state = route_state(page)
         ensure(detail_analytics_state["routeName"] == "analytics", "detail analytics did not navigate to analytics route")
-        invoke_controller_method(page, "sap_ui5_comp---app--analyticsPaneHost", "onCloseAnalytics")
+        invoke_controller_method(page, "checklist_app_comp---app--analyticsPaneHost", "onCloseAnalytics")
         wait_for_detail_ready(page, DETAIL_ROOT, 1200)
         detail_return_state = route_state(page)
         ensure(detail_return_state["routeName"] in ("detail", "detailLayout"), "analytics close did not return to detail route")
@@ -364,7 +364,7 @@ def main() -> int:
             "stickyHeight": round(sticky_after["height"], 2),
         }
 
-        invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onExpandChecks")
+        invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onExpandChecks")
         checks_dialog = wait_for_dialog(page, "checksExpandedDialog")
         checks_contract = page.evaluate(
             """
@@ -378,11 +378,11 @@ def main() -> int:
             """
         )
         ensure(checks_contract["hasGridTable"], "checks expanded dialog is missing desktop grid table")
-        invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onCloseChecksExpanded")
+        invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseChecksExpanded")
         page.wait_for_timeout(350)
         report["checksExpandedDialog"] = {**checks_dialog, **checks_contract}
 
-        invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onExpandBarriers")
+        invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onExpandBarriers")
         barriers_dialog = wait_for_dialog(page, "barriersExpandedDialog")
         barriers_contract = page.evaluate(
             """
@@ -396,21 +396,21 @@ def main() -> int:
             """
         )
         ensure(barriers_contract["hasGridTable"], "barriers expanded dialog is missing desktop grid table")
-        invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onCloseBarriersExpanded")
+        invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseBarriersExpanded")
         page.wait_for_timeout(350)
         report["barriersExpandedDialog"] = {**barriers_dialog, **barriers_contract}
 
-        invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onOpenLocationValueHelp")
+        invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onOpenLocationValueHelp")
         value_help_box = wait_for_dialog(page, "locationValueHelpDialog")
         ensure(value_help_box["height"] > 300, "location value help did not open correctly")
-        invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onCloseLocationValueHelp")
+        invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseLocationValueHelp")
         page.wait_for_timeout(350)
         report["locationDialog"] = value_help_box
 
         phone_page = browser.new_page(viewport={"width": 390, "height": 844})
         phone_page.goto(f"{URL}#/checklist/{DETAIL_ROOT}", wait_until="networkidle", timeout=90000)
         wait_for_detail_ready(phone_page, DETAIL_ROOT, 1800)
-        invoke_controller_method(phone_page, "sap_ui5_comp---app--detailPaneHost", "onExpandChecks")
+        invoke_controller_method(phone_page, "checklist_app_comp---app--detailPaneHost", "onExpandChecks")
         phone_checks_dialog = wait_for_dialog(phone_page, "checksExpandedDialog")
         phone_contract = phone_page.evaluate(
             """

@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/controller/support/AttachmentUploadCore",
-    "sap_ui5/controller/support/AttachmentDropZoneRuntime"
+    "checklist/app/controller/support/AttachmentUploadCore",
+    "checklist/app/controller/support/AttachmentDropZoneRuntime"
 ], function (AttachmentUploadCore, AttachmentDropZoneRuntime) {
     "use strict";
 

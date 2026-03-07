@@ -29,7 +29,7 @@ function predictLayerViolations(virtualGraph) {
   for (const e of virtualGraph.dependencyEdges || []) {
     const isCandidate = e.kind === "virtual-import" || touchedSet.has(e.from);
     if (!isCandidate) continue;
-    if (!String(e.to).startsWith("sap_ui5/") && !String(e.to).startsWith("infra/") && !String(e.to).startsWith("service/") && !String(e.to).startsWith("controller/") && !String(e.to).startsWith("util/") && !String(e.to).startsWith("ports/") && !String(e.to).startsWith("manager/")) {
+    if (!String(e.to).startsWith("checklist/app/") && !String(e.to).startsWith("infra/") && !String(e.to).startsWith("service/") && !String(e.to).startsWith("controller/") && !String(e.to).startsWith("util/") && !String(e.to).startsWith("ports/") && !String(e.to).startsWith("manager/")) {
       continue;
     }
     if (!isAllowedEdge(e.from, e.to)) {

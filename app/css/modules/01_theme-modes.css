@@ -1,7 +1,7 @@
 .light-mode,
 :root.light-mode,
-.rnvAppRoot.appLight,
-:root.rnvAppRoot.light-mode {
+.chkAppRoot.appLight,
+:root.chkAppRoot.light-mode {
   --ui-s0-background: #fff;
   --ui-s1-primary: #fff;
   --ui-s2-secondary: #0070f2;
@@ -149,8 +149,8 @@
 }
 
 body.appDark,
-.rnvAppRoot.appDark,
-:root.rnvAppRoot:not(.light-mode) {
+.chkAppRoot.appDark,
+:root.chkAppRoot:not(.light-mode) {
   --ui-s0-background: #14171a;
   --ui-s1-primary: #7198bf;
   --ui-s2-secondary: #4db1ff;
@@ -316,9 +316,9 @@ body.appDark,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rnvApp *,
-  .rnvApp *::before,
-  .rnvApp *::after {
+  .chkApp *,
+  .chkApp *::before,
+  .chkApp *::after {
     animation-duration: 1ms;
     animation-iteration-count: 1;
     transition-duration: 1ms;

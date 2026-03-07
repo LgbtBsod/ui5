@@ -1,4 +1,4 @@
-sap.ui.define(["sap_ui5/util/delta/DeltaDateCodec"], function (DeltaDateCodec) {
+sap.ui.define(["checklist/app/util/delta/DeltaDateCodec"], function (DeltaDateCodec) {
   "use strict";
 
   function assignIfPresent(oTarget, sKey, vValue) {

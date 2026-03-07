@@ -1,101 +1,101 @@
-.rnvApp,
-.rnvApp .rnvSkin,
-.rnvApp .appShell {
+.chkApp,
+.chkApp .chkSkin,
+.chkApp .appShell {
   min-height: 100%;
   height: 100%;
   color: var(--text-main);
 }
 
-html.rnvAppRoot,
-body.rnvAppRoot,
-.rnvAppRoot.sapUiBody,
-#ui5_container.rnvAppRoot {
+html.chkAppRoot,
+body.chkAppRoot,
+.chkAppRoot.sapUiBody,
+#ui5_container.chkAppRoot {
   height: 100%;
   overflow: hidden;
 }
 
-.rnvApp .appShell {
+.chkApp .appShell {
   position: relative;
   z-index: 1;
 }
 
-.rnvApp .detailRailViewportLayer {
+.chkApp .detailRailViewportLayer {
   position: fixed;
   inset: 0;
   z-index: 30;
   pointer-events: none;
 }
 
-.rnvApp .appShell > .sapMFlexItem:first-child {
+.chkApp .appShell > .sapMFlexItem:first-child {
   flex: 0 0 auto;
   height: auto;
 }
 
-.rnvApp .appShell > .sapMFlexItem:last-child {
+.chkApp .appShell > .sapMFlexItem:last-child {
   flex: 1 1 auto;
   min-height: 0;
   height: auto;
 }
 
-.rnvApp .appShell > .sapMFlexItem {
+.chkApp .appShell > .sapMFlexItem {
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.rnvApp .appRootFcl,
-.rnvApp #searchPaneHost,
-.rnvApp #detailPaneHost,
-.rnvApp [id$="-searchPaneHost"],
-.rnvApp [id$="-detailPaneHost"] {
+.chkApp .appRootFcl,
+.chkApp #searchPaneHost,
+.chkApp #detailPaneHost,
+.chkApp [id$="-searchPaneHost"],
+.chkApp [id$="-detailPaneHost"] {
   height: 100%;
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.rnvApp .appRootFcl .sapFFCLColumn,
-.rnvApp .appRootFcl .sapFFCLColumnContent {
+.chkApp .appRootFcl .sapFFCLColumn,
+.chkApp .appRootFcl .sapFFCLColumnContent {
   height: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.rnvApp .appRootFcl .sapFFCLColumnContent > .sapMNav,
-.rnvApp .appRootFcl .sapFFCLColumnContent > .sapMNav > .sapMNavItem,
-.rnvApp .appRootFcl .sapFFCLColumnContent .sapUiView {
+.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav > .sapMNavItem,
+.chkApp .appRootFcl .sapFFCLColumnContent .sapUiView {
   height: 100%;
   min-height: 0;
   min-width: 0;
 }
 
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapMNav,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapMNav,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapMNav,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapMNav,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapUiView,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapUiView,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapUiView,
-.rnvApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapUiView {
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapUiView,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapUiView,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapUiView,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapUiView {
   width: 100%;
   max-width: none;
 }
 
-.rnvApp .appRootFcl .sapFFCLColumn {
+.chkApp .appRootFcl .sapFFCLColumn {
   overflow: hidden;
 }
 
-.rnvApp .appRootFcl,
-.rnvApp .appRootFcl .sapFFCLColumn,
-.rnvApp .appRootFcl .sapFFCLColumnContent {
+.chkApp .appRootFcl,
+.chkApp .appRootFcl .sapFFCLColumn,
+.chkApp .appRootFcl .sapFFCLColumnContent {
   background: transparent;
 }
 
-.rnvApp .appRootFcl .sapFFCLArrow {
+.chkApp .appRootFcl .sapFFCLArrow {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,7 +103,7 @@ body.rnvAppRoot,
   background: transparent;
 }
 
-.rnvApp .appRootFcl .sapFFCLArrow::after {
+.chkApp .appRootFcl .sapFFCLArrow::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -117,13 +117,13 @@ body.rnvAppRoot,
   pointer-events: none;
 }
 
-.rnvApp .appRootFcl .sapFFCLNavigationButton {
+.chkApp .appRootFcl .sapFFCLNavigationButton {
   position: relative;
   z-index: 1;
   margin: 0 auto;
 }
 
-.rnvApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
+.chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
   min-width: 1.55rem;
   width: 1.55rem;
   height: 2.25rem;
@@ -138,79 +138,79 @@ body.rnvAppRoot,
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
-.rnvApp .appRootFcl .sapFFCLNavigationButton .sapMBtnIcon {
+.chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnIcon {
   color: var(--accent);
   font-size: 0.72rem;
 }
 
-.rnvApp .appRootFcl .sapFFCLNavigationButton:hover .sapMBtnInner,
-.rnvApp .appRootFcl .sapFFCLNavigationButton:focus .sapMBtnInner {
+.chkApp .appRootFcl .sapFFCLNavigationButton:hover .sapMBtnInner,
+.chkApp .appRootFcl .sapFFCLNavigationButton:focus .sapMBtnInner {
   border-color: rgba(var(--accent-rgb), 0.32);
   box-shadow:
     0 8px 20px rgba(58, 92, 138, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.52);
 }
 
-.rnvApp .appLayoutSplit .appRootFcl .sapFFCLArrow,
-.rnvApp .appLayoutSplit .appRootFcl .sapFFCLNavigationButton,
-.rnvApp .appLayoutDetailOnly .appRootFcl .sapFFCLNavigationButton,
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLNavigationButton {
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLArrow,
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLNavigationButton,
+.chkApp .appLayoutDetailOnly .appRootFcl .sapFFCLNavigationButton,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLNavigationButton {
   opacity: 0;
   pointer-events: none;
 }
 
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLArrow,
-.rnvApp .appLayoutDetailOnly .appRootFcl .sapFFCLArrow {
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLArrow,
+.chkApp .appLayoutDetailOnly .appRootFcl .sapFFCLArrow {
   opacity: 0;
   pointer-events: none;
 }
 
-.rnvApp .searchPaneCenterShell {
+.chkApp .searchPaneCenterShell {
   width: 100%;
   max-width: none;
   min-width: 0;
   margin: 0;
 }
 
-.rnvApp .pageTransparent {
+.chkApp .pageTransparent {
   background: transparent;
 }
 
-.rnvApp .appContent {
+.chkApp .appContent {
   padding: clamp(1rem, 2vw, 1.75rem);
 }
 
-.rnvApp .toolbarTransparent,
-.rnvApp .toolbarTransparent.sapMTB {
+.chkApp .toolbarTransparent,
+.chkApp .toolbarTransparent.sapMTB {
   background: transparent;
   border: 0;
   box-shadow: none;
 }
 
-.rnvApp .rnvSkin:not(.appLayoutSplit, .appLayoutDetailOnly) #searchPaneHost,
-.rnvApp .rnvSkin:not(.appLayoutSplit, .appLayoutDetailOnly) [id$="-searchPaneHost"] {
+.chkApp .chkSkin:not(.appLayoutSplit, .appLayoutDetailOnly) #searchPaneHost,
+.chkApp .chkSkin:not(.appLayoutSplit, .appLayoutDetailOnly) [id$="-searchPaneHost"] {
   width: min(100%, 82rem);
   max-width: 82rem;
   margin-inline: auto;
 }
 
-.rnvApp .appLayoutSingle #searchPaneHost,
-.rnvApp .appLayoutSingle [id$="-searchPaneHost"] {
+.chkApp .appLayoutSingle #searchPaneHost,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] {
   width: 100%;
   max-width: 100%;
   min-width: 0;
   margin-inline: auto;
 }
 
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin,
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
   width: 100%;
   max-width: 100%;
   flex: 1 1 100%;
 }
 
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid,
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd {
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd {
   width: 0 !important;
   max-width: 0 !important;
   min-width: 0 !important;
@@ -221,80 +221,80 @@ body.rnvAppRoot,
   border: 0;
 }
 
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent,
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd .sapFFCLColumnContent {
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd .sapFFCLColumnContent {
   width: 0 !important;
   max-width: 0 !important;
   min-width: 0 !important;
   overflow: hidden;
 }
 
-.rnvApp .appLayoutSingle #searchPaneHost .appContent,
-.rnvApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
-.rnvApp .appLayoutSingle #detailPaneHost .appContent,
-.rnvApp .appLayoutSingle [id$="-detailPaneHost"] .appContent {
+.chkApp .appLayoutSingle #searchPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.chkApp .appLayoutSingle #detailPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent {
   width: min(100%, 84rem);
   max-width: 84rem;
   margin-inline: auto;
 }
 
-.rnvApp .appLayoutSingle .appShellHeader {
+.chkApp .appLayoutSingle .appShellHeader {
   width: min(calc(100% - (2 * clamp(0.85rem, 2vw, 1.5rem))), 84rem);
   max-width: 84rem;
   margin-inline: auto;
 }
 
-.rnvApp .appLayoutSplit #searchPaneHost,
-.rnvApp .appLayoutSplit [id$="-searchPaneHost"],
-.rnvApp .appLayoutDetailOnly #searchPaneHost,
-.rnvApp .appLayoutDetailOnly [id$="-searchPaneHost"] {
+.chkApp .appLayoutSplit #searchPaneHost,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"],
+.chkApp .appLayoutDetailOnly #searchPaneHost,
+.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] {
   width: 100%;
   max-width: none;
   margin-inline: 0;
 }
 
-.rnvApp #searchPaneHost,
-.rnvApp #detailPaneHost,
-.rnvApp [id$="-searchPaneHost"],
-.rnvApp [id$="-detailPaneHost"],
-.rnvApp #searchPaneHost > .sapUiXMLView,
-.rnvApp #detailPaneHost > .sapUiXMLView,
-.rnvApp [id$="-searchPaneHost"] > .sapUiXMLView,
-.rnvApp [id$="-detailPaneHost"] > .sapUiXMLView {
+.chkApp #searchPaneHost,
+.chkApp #detailPaneHost,
+.chkApp [id$="-searchPaneHost"],
+.chkApp [id$="-detailPaneHost"],
+.chkApp #searchPaneHost > .sapUiXMLView,
+.chkApp #detailPaneHost > .sapUiXMLView,
+.chkApp [id$="-searchPaneHost"] > .sapUiXMLView,
+.chkApp [id$="-detailPaneHost"] > .sapUiXMLView {
   overflow: hidden;
 }
 
-.rnvApp .pageTransparent,
-.rnvApp .pageTransparent > section,
-.rnvApp .pageTransparent .sapMPageEnableScrolling,
-.rnvApp .pageTransparent .sapMPageScroll {
+.chkApp .pageTransparent,
+.chkApp .pageTransparent > section,
+.chkApp .pageTransparent .sapMPageEnableScrolling,
+.chkApp .pageTransparent .sapMPageScroll {
   min-height: 0;
 }
 
-.rnvApp .sapMScrollCont,
-.rnvApp .sapMDialogScrollCont,
-.rnvApp .sapMDialogScroll,
-.rnvApp .sapUiTableCtrlScr,
-.rnvApp .sapUiTableVSb,
-.rnvApp .sapUiTableHSb,
-.rnvApp .sapMListTblCnt,
-.rnvApp .tableScrollWrap {
+.chkApp .sapMScrollCont,
+.chkApp .sapMDialogScrollCont,
+.chkApp .sapMDialogScroll,
+.chkApp .sapUiTableCtrlScr,
+.chkApp .sapUiTableVSb,
+.chkApp .sapUiTableHSb,
+.chkApp .sapMListTblCnt,
+.chkApp .tableScrollWrap {
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--accent-rgb), 0.34) rgba(160, 184, 220, 0.12);
 }
 
-.rnvApp *::-webkit-scrollbar {
+.chkApp *::-webkit-scrollbar {
   width: 0.72rem;
   height: 0.72rem;
 }
 
-.rnvApp *::-webkit-scrollbar-track {
+.chkApp *::-webkit-scrollbar-track {
   border-radius: 999px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(160, 184, 220, 0.05));
 }
 
-.rnvApp *::-webkit-scrollbar-thumb {
+.chkApp *::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 999px;
   background:
@@ -304,23 +304,23 @@ body.rnvAppRoot,
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-.rnvApp *::-webkit-scrollbar-thumb:hover {
+.chkApp *::-webkit-scrollbar-thumb:hover {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.1)),
     linear-gradient(180deg, rgba(var(--accent-rgb), 0.66), rgba(var(--accent-rgb), 0.34));
   background-clip: padding-box;
 }
 
-.rnvApp *::-webkit-scrollbar-corner {
+.chkApp *::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-body.rnvAppRoot.appDark .rnvApp *::-webkit-scrollbar-track {
+body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-track {
   background:
     linear-gradient(180deg, rgba(126, 156, 208, 0.08), rgba(16, 28, 47, 0.12));
 }
 
-body.rnvAppRoot.appDark .rnvApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
+body.chkAppRoot.appDark .chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
   border-color: rgba(118, 170, 255, 0.26);
   background:
     linear-gradient(180deg, rgba(29, 50, 82, 0.96), rgba(12, 26, 44, 0.94));
@@ -329,36 +329,36 @@ body.rnvAppRoot.appDark .rnvApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInn
     inset 0 1px 0 rgba(216, 231, 255, 0.12);
 }
 
-body.rnvAppRoot.appDark .rnvApp .appRootFcl .sapFFCLArrow::after {
+body.chkAppRoot.appDark .chkApp .appRootFcl .sapFFCLArrow::after {
   background: linear-gradient(180deg, transparent, rgba(118, 170, 255, 0.2) 14%, rgba(118, 170, 255, 0.2) 86%, transparent);
 }
 
-body.rnvAppRoot.appDark .rnvApp *::-webkit-scrollbar-thumb {
+body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   background:
     linear-gradient(180deg, rgba(212, 228, 255, 0.16), rgba(212, 228, 255, 0.02)),
     linear-gradient(180deg, rgba(155, 187, 255, 0.46), rgba(91, 132, 214, 0.26));
   background-clip: padding-box;
 }
 
-.rnvApp .detailExperienceCanvas,
-.rnvApp .detailMainExperienceStack,
-.rnvApp .searchPaneCenterShell {
+.chkApp .detailExperienceCanvas,
+.chkApp .detailMainExperienceStack,
+.chkApp .searchPaneCenterShell {
   gap: 1rem;
 }
 
-.rnvApp .appLayoutSingle #searchPaneHost .appContent,
-.rnvApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
-.rnvApp .appLayoutSingle #detailPaneHost .appContent,
-.rnvApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
-.rnvApp .appLayoutSingle .analyticsScreenContent,
-.rnvApp .appLayoutSingle .accessDeniedScreenContent {
+.chkApp .appLayoutSingle #searchPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.chkApp .appLayoutSingle #detailPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+.chkApp .appLayoutSingle .analyticsScreenContent,
+.chkApp .appLayoutSingle .accessDeniedScreenContent {
   width: 90%;
   max-width: none;
   margin-inline: 5%;
   box-sizing: border-box;
 }
 
-.rnvApp .appLayoutSingle .appShellHeader {
+.chkApp .appLayoutSingle .appShellHeader {
   width: 90%;
   max-width: none;
   margin: 0.78rem 5% 0;
@@ -366,17 +366,17 @@ body.rnvAppRoot.appDark .rnvApp *::-webkit-scrollbar-thumb {
 }
 
 @media (max-width: 61.25rem) {
-  .rnvApp .appLayoutSingle #searchPaneHost .appContent,
-  .rnvApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
-  .rnvApp .appLayoutSingle #detailPaneHost .appContent,
-  .rnvApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
-  .rnvApp .appLayoutSingle .analyticsScreenContent,
-  .rnvApp .appLayoutSingle .accessDeniedScreenContent {
+  .chkApp .appLayoutSingle #searchPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+  .chkApp .appLayoutSingle #detailPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+  .chkApp .appLayoutSingle .analyticsScreenContent,
+  .chkApp .appLayoutSingle .accessDeniedScreenContent {
     width: calc(100% - 1.5rem);
     margin-inline: 0.75rem;
   }
 
-  .rnvApp .appLayoutSingle .appShellHeader {
+  .chkApp .appLayoutSingle .appShellHeader {
     width: calc(100% - 1.5rem);
     margin-inline: 0.75rem;
   }

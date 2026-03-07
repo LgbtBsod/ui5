@@ -1,14 +1,14 @@
 sap.ui.define([
-    "sap_ui5/controller/support/DetailValidationSummarySupport",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/service/framework/FacadeCommandContract",
-    "sap_ui5/controller/support/DetailActionViewportSupport",
-    "sap_ui5/controller/support/DetailActionPinnedRailSupport",
-    "sap_ui5/controller/support/DetailActionDialogSupport",
-    "sap_ui5/controller/support/DetailChecklistCoreSupport",
-    "sap_ui5/controller/support/DetailChecklistStateActions",
-    "sap_ui5/controller/support/DetailChecklistRowActions",
-    "sap_ui5/controller/support/DetailAttachmentLocationActions"
+    "checklist/app/controller/support/DetailValidationSummarySupport",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/controller/support/DetailActionViewportSupport",
+    "checklist/app/controller/support/DetailActionPinnedRailSupport",
+    "checklist/app/controller/support/DetailActionDialogSupport",
+    "checklist/app/controller/support/DetailChecklistCoreSupport",
+    "checklist/app/controller/support/DetailChecklistStateActions",
+    "checklist/app/controller/support/DetailChecklistRowActions",
+    "checklist/app/controller/support/DetailAttachmentLocationActions"
 ], function (
     DetailValidationSummarySupport,
     DetailActionConstants,

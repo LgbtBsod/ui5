@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/backend/GatewayBackendService",
-    "sap_ui5/util/GatewayTextNormalizer"
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/backend/GatewayBackendService",
+    "checklist/app/util/GatewayTextNormalizer"
 ], function (Result, GatewayBackendService, GatewayTextNormalizer) {
     "use strict";
 
@@ -48,9 +48,6 @@ sap.ui.define([
         if (!oStateModel) {
             return oProfile;
         }
-        oStateModel.setProperty("/testUser", oProfile.uname || sLogin || "");
-        oStateModel.setProperty("/testUserLogin", oProfile.uname || sLogin || "");
-        oStateModel.setProperty("/requiresUserLogin", false);
         oStateModel.setProperty("/currentUser", {
             uname: oProfile.uname || "",
             fullName: oProfile.fullName || "",
@@ -99,8 +96,7 @@ sap.ui.define([
         },
         refresh: function (mDeps) {
             var oStateModel = mDeps && mDeps.stateModel;
-            var sLogin = String(oStateModel && (oStateModel.getProperty("/testUserLogin") || oStateModel.getProperty("/testUser")) || "").trim();
-            return this.execute({ login: sLogin }, mDeps);
+            return this.execute({ login: "" }, mDeps);
         }
     };
 });

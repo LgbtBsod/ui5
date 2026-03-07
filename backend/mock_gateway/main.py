@@ -377,9 +377,9 @@ app.include_router(batch_router, prefix=SERVICE_ROOT)
 def health():
     return {"status": "Gateway Simulator Running"}
 
-@app.get("/sap/bc/lrep/flex/data/sap_ui5.Component")
+@app.get("/sap/bc/lrep/flex/data/checklist.app.Component")
 def ui5_flex_stub(appVersion: str | None = None):
-    return {"changes": [], "comp": {"name": "sap_ui5.Component", "appVersion": appVersion or "1.0.0"}}
+    return {"changes": [], "comp": {"name": "checklist.app.Component", "appVersion": appVersion or "1.0.0"}}
 
 
 @app.get("/sap/bc/lrep/flex/settings")
@@ -392,7 +392,7 @@ def ui5_flex_settings_stub():
     }
 
 
-@app.get("/sap_ui5/Component-preload.js")
+@app.get("/checklist/app/Component-preload.js")
 def component_preload_stub():
     return Response(content="/* preload not bundled in mock mode */", media_type="application/javascript")
 

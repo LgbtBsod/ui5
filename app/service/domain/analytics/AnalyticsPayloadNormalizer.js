@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/framework/ComponentRuntimeSupport"
+    "checklist/app/service/framework/ComponentRuntimeSupport"
 ], function (ComponentRuntimeSupport) {
     "use strict";
 

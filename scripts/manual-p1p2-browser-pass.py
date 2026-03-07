@@ -91,7 +91,7 @@ STATIC_CHECKS: dict[str, list[tuple[str, str]]] = {
         ("view/App.view.xml", "onCopyFeedbackCorrelationId"),
     ],
     "L1": [
-        ("manifest.json", "\"bundleName\": \"sap_ui5.i18n.i18n\""),
+        ("manifest.json", "\"bundleName\": \"checklist.app.i18n.i18n\""),
         ("view/Search.view.xml", "{i18n>"),
         ("view/Detail.view.xml", "{i18n>"),
     ],
@@ -183,10 +183,10 @@ def wait_for_app_ready(page, delay_ms: int = 1200) -> None:
             return false;
           }
           const core = sap.ui.getCore();
-          const app = core.byId("sap_ui5_comp---app");
-          const search = core.byId("sap_ui5_comp---app--searchPaneHost");
-          const detail = core.byId("sap_ui5_comp---app--detailPaneHost");
-          return !!app && !!search && !!detail && document.body.classList.contains("rnvAppRoot");
+          const app = core.byId("checklist_app_comp---app");
+          const search = core.byId("checklist_app_comp---app--searchPaneHost");
+          const detail = core.byId("checklist_app_comp---app--detailPaneHost");
+          return !!app && !!search && !!detail && document.body.classList.contains("chkAppRoot");
         }
         """,
         timeout=90000,
@@ -199,7 +199,7 @@ def set_theme_mode(page, mode: str) -> dict[str, Any]:
         """
         (mode) => new Promise((resolve) => {
           const core = sap.ui.getCore();
-          const appView = core && core.byId && core.byId("sap_ui5_comp---app");
+          const appView = core && core.byId && core.byId("checklist_app_comp---app");
           const controller = appView && appView.getController && appView.getController();
           if (!controller || typeof controller.setThemeMode !== "function") {
             resolve({ ok: false, reason: "controller unavailable" });
@@ -332,7 +332,7 @@ def trigger_create_from_controller(page) -> dict[str, Any]:
         """
         () => {
           const core = sap.ui.getCore();
-          const search = core && core.byId && core.byId("sap_ui5_comp---app--searchPaneHost");
+          const search = core && core.byId && core.byId("checklist_app_comp---app--searchPaneHost");
           const controller = search && search.getController && search.getController();
           if (!controller || typeof controller.onCreate !== "function") {
             return { ok: false, reason: "search-controller-create-unavailable" };
@@ -345,7 +345,7 @@ def trigger_create_from_controller(page) -> dict[str, Any]:
 
 
 def trigger_search_go(page, timeout: int = 12000) -> dict[str, Any]:
-    selector = "#sap_ui5_comp---app--searchPaneHost--searchSmartFilterBar-btnGo"
+    selector = "#checklist_app_comp---app--searchPaneHost--searchSmartFilterBar-btnGo"
     try:
         page.locator(selector).first.click(timeout=timeout)
         return {"ok": True, "mode": "dom-click"}
@@ -354,7 +354,7 @@ def trigger_search_go(page, timeout: int = 12000) -> dict[str, Any]:
             """
             () => {
               const core = sap.ui.getCore();
-              const button = core && core.byId && core.byId("sap_ui5_comp---app--searchPaneHost--searchSmartFilterBar-btnGo");
+              const button = core && core.byId && core.byId("checklist_app_comp---app--searchPaneHost--searchSmartFilterBar-btnGo");
               if (!button || typeof button.firePress !== "function") {
                 return { ok: false, reason: "search-go-unavailable" };
               }
@@ -373,7 +373,7 @@ def invoke_detail_action(page, action: str) -> dict[str, Any]:
         """
         (action) => {
           const core = sap.ui.getCore();
-          const detail = core && core.byId && core.byId("sap_ui5_comp---app--detailPaneHost");
+          const detail = core && core.byId && core.byId("checklist_app_comp---app--detailPaneHost");
           const controller = detail && detail.getController && detail.getController();
           if (!controller || typeof controller[action] !== "function") {
             return { ok: false, reason: "action unavailable", action };
@@ -434,7 +434,7 @@ def resolve_existing_root(page) -> str:
         """
         () => {
           const core = sap.ui.getCore();
-          const smartTable = core.byId("sap_ui5_comp---app--searchPaneHost--searchSmartTable");
+          const smartTable = core.byId("checklist_app_comp---app--searchPaneHost--searchSmartTable");
           const table = smartTable && smartTable.getTable && smartTable.getTable();
           const items = table && table.getItems ? table.getItems() : [];
           if (!Array.isArray(items) || !items.length) {
@@ -589,7 +589,7 @@ def run_shell_overlay_crawl(
                 close_result = page.evaluate(
                     """
                     (key) => {
-                      const app = sap.ui.getCore().byId("sap_ui5_comp---app");
+                      const app = sap.ui.getCore().byId("checklist_app_comp---app");
                       const controller = app && app.getController && app.getController();
                       if (!controller || typeof controller._closeShellOverlay !== "function") {
                         return { ok: false, reason: "controller close unavailable", key };
@@ -916,7 +916,7 @@ def run_slow_network_check(browser, tracker: ScenarioTracker, artifact_rows: lis
     mid = page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId("sap_ui5_comp---app--searchPaneHost").getModel("view");
+          const view = sap.ui.getCore().byId("checklist_app_comp---app--searchPaneHost").getModel("view");
           const root = document.querySelector(".searchExperienceStack");
           const shell = document.querySelector(".appRootSplitter");
           return {
@@ -933,7 +933,7 @@ def run_slow_network_check(browser, tracker: ScenarioTracker, artifact_rows: lis
     end = page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId("sap_ui5_comp---app--searchPaneHost").getModel("view");
+          const view = sap.ui.getCore().byId("checklist_app_comp---app--searchPaneHost").getModel("view");
           const root = document.querySelector(".searchExperienceStack");
           const shell = document.querySelector(".appRootSplitter");
           return {
@@ -984,7 +984,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
         """
         () => {
           const core = sap.ui.getCore();
-          const detail = core.byId("sap_ui5_comp---app--detailPaneHost");
+          const detail = core.byId("checklist_app_comp---app--detailPaneHost");
           const state = detail.getModel("state");
           const view = detail.getModel("view");
           const controls = detail.findAggregatedObjects(true, (c) => !!(c && c.data && c.data("validationKey")));
@@ -999,7 +999,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     blur_state = page.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost");
           const controls = detail.findAggregatedObjects(true, (c) => !!(c && c.data && c.data("validationKey")));
           const first = controls[0];
           if (!first || typeof first.getFocusDomRef !== "function") {
@@ -1020,7 +1020,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     d1_post = page.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost");
           const state = detail.getModel("state");
           const view = detail.getModel("view");
           const visibleMessages = Array.from(document.querySelectorAll(".detailFieldValidationText"))
@@ -1050,10 +1050,10 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     d2_state = page.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost");
           const state = detail.getModel("state");
           const view = detail.getModel("view");
-          const strip = document.querySelector(".rnvFeedbackStrip.rnvFeedbackError");
+          const strip = document.querySelector(".chkFeedbackStrip.chkFeedbackError");
           const stripVisible = !!strip && window.getComputedStyle(strip).display !== "none";
           return {
             validateResult: !!(state.getProperty("/validationSummary/hasErrors")),
@@ -1083,7 +1083,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     d4_state = page.evaluate(
         """
         () => {
-          const selected = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost").getModel("selected");
+          const selected = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("selected");
           const longText = "LONG_".repeat(80);
           selected.setProperty("/basic/equipment", longText);
           selected.setProperty("/basic/LOCATION_NAME", longText);
@@ -1117,7 +1117,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     unicode_state = page.evaluate(
         """
         () => {
-          const selected = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost").getModel("selected");
+          const selected = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("selected");
           const values = {
             equipment: "Nasos 🚀 漢字 Пример",
             observer: "Иван Иванов 😀",
@@ -1254,8 +1254,8 @@ def run_feedback_toast_check(browser, tracker: ScenarioTracker) -> None:
     result = page.evaluate(
         """
         () => new Promise((resolve) => {
-          sap.ui.require(["sap_ui5/service/framework/EffectApplier", "sap/m/MessageToast"], function (EffectApplier, MessageToast) {
-            const detail = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost");
+          sap.ui.require(["checklist/app/service/framework/EffectApplier", "sap/m/MessageToast"], function (EffectApplier, MessageToast) {
+            const detail = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost");
             const controller = detail && detail.getController && detail.getController();
             if (!controller) {
               resolve({ ok: false, reason: "detail controller missing" });
@@ -1295,11 +1295,11 @@ def run_contract_module_checks(browser, tracker: ScenarioTracker) -> None:
         """
         () => new Promise((resolve) => {
           sap.ui.require([
-            "sap_ui5/service/framework/FeedbackPolicy",
-            "sap_ui5/service/domain/detail/DetailFacade",
-            "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
-            "sap_ui5/util/search/SearchMaxResults",
-            "sap_ui5/controller/support/SearchControllerSupport"
+            "checklist/app/service/framework/FeedbackPolicy",
+            "checklist/app/service/domain/detail/DetailFacade",
+            "checklist/app/service/domain/detail/DetailAuthorizationSupport",
+            "checklist/app/util/search/SearchMaxResults",
+            "checklist/app/controller/support/SearchControllerSupport"
           ], function (FeedbackPolicy, DetailFacade, DetailAuthorizationSupport, SearchMaxResults, SearchControllerSupport) {
             const result = {};
             const authNorm = FeedbackPolicy.normalize({
@@ -1468,7 +1468,7 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
     page_two.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost");
           const state = detail && detail.getModel && detail.getModel("state");
           if (state && state.setProperty) {
             state.setProperty("/mode", "EDIT");
@@ -1481,7 +1481,7 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
     before = page_two.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
             mode: state.getProperty("/mode"),
             lock: state.getProperty("/lockOperationState"),
@@ -1511,7 +1511,7 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
     after = page_two.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
             mode: state.getProperty("/mode"),
             lock: state.getProperty("/lockOperationState"),
@@ -1544,7 +1544,7 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
     pre = page.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
             mode: state.getProperty("/mode"),
             lock: state.getProperty("/lockOperationState"),
@@ -1561,7 +1561,7 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
     before_reload = page.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
             mode: state.getProperty("/mode"),
             lock: state.getProperty("/lockOperationState")
@@ -1574,7 +1574,7 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
     after_reload = page.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("sap_ui5_comp---app--detailPaneHost").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
             mode: state.getProperty("/mode"),
             lock: state.getProperty("/lockOperationState"),
@@ -1597,7 +1597,7 @@ def run_reduced_motion_check(browser, tracker: ScenarioTracker, artifact_rows: l
     reduced = page.evaluate(
         """
         () => {
-          const app = sap.ui.getCore().byId("sap_ui5_comp---app");
+          const app = sap.ui.getCore().byId("checklist_app_comp---app");
           const ctrl = app && app.getController && app.getController();
           if (ctrl && typeof ctrl.setThemeAnimationEnabled === "function") {
             ctrl.setThemeAnimationEnabled(false);
@@ -1661,7 +1661,7 @@ def run_contrast_and_performance_checks(browser, tracker: ScenarioTracker) -> No
             const probes = [
               document.querySelector(".shellProductTitle"),
               document.querySelector(".searchCreateActionBtn button"),
-              document.querySelector(".rnvFeedbackStrip"),
+              document.querySelector(".chkFeedbackStrip"),
             ].filter(Boolean);
             const values = probes.map((probe) => {
               const style = window.getComputedStyle(probe);
@@ -1683,7 +1683,7 @@ def run_contrast_and_performance_checks(browser, tracker: ScenarioTracker) -> No
             };
           };
           return new Promise((resolve) => {
-            const app = sap.ui.getCore().byId("sap_ui5_comp---app");
+            const app = sap.ui.getCore().byId("checklist_app_comp---app");
             const ctrl = app && app.getController && app.getController();
             if (!ctrl || typeof ctrl.setThemeMode !== "function") {
               resolve({ ok: false, reason: "theme controller missing" });
@@ -1757,7 +1757,7 @@ def run_startup_check(browser, tracker: ScenarioTracker) -> None:
           if (typeof sap === "undefined" || !sap.ui || !sap.ui.getCore) {
             return false;
           }
-          const search = sap.ui.getCore().byId("sap_ui5_comp---app--searchPaneHost");
+          const search = sap.ui.getCore().byId("checklist_app_comp---app--searchPaneHost");
           const view = search && search.getModel && search.getModel("view");
           return !!search && !!view && !!view.getProperty("/smartTableReady");
         }

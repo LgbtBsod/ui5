@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/util/search/SearchBindingPolicy"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/util/search/SearchBindingPolicy"
 ], function (UseCase, Result, SearchBindingPolicy) {
     "use strict";
 

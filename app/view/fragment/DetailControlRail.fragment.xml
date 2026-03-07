@@ -37,7 +37,7 @@
             text="{path:'state>/validationSummary', formatter:'.formatValidationSummaryText'}"
             type="Error"
             showIcon="true"
-            class="sapUiTinyMarginTop sapUiTinyMarginBottom rnvFeedbackStrip rnvFeedbackError"
+            class="sapUiTinyMarginTop sapUiTinyMarginBottom chkFeedbackStrip chkFeedbackError"
             visible="{= ${view>/validationShown} &amp;&amp; ${state>/validationSummary/hasErrors} }">
             <link>
                 <Link
@@ -52,21 +52,21 @@
                 <Button text="{i18n>detailAnchorOverview}"
                         icon="sap-icon://overview-chart"
                         type="Transparent"
-                        class="detailSectionAnchorBtn rnvRipple"
+                        class="detailSectionAnchorBtn chkRipple"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssParticipants"/></customData>
                 </Button>
                 <Button text="{i18n>detailAnchorChecks}"
                         icon="sap-icon://inspection"
                         type="Transparent"
-                        class="detailSectionAnchorBtn rnvRipple"
+                        class="detailSectionAnchorBtn chkRipple"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssChecks"/></customData>
                 </Button>
                 <Button text="{i18n>detailAnchorBarriers}"
                         icon="sap-icon://warning2"
                         type="Transparent"
-                        class="detailSectionAnchorBtn rnvRipple"
+                        class="detailSectionAnchorBtn chkRipple"
                         visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssBarriers"/></customData>
@@ -74,7 +74,7 @@
                 <Button text="{i18n>detailAnchorAttachments}"
                         icon="sap-icon://attachment"
                         type="Transparent"
-                        class="detailSectionAnchorBtn rnvRipple"
+                        class="detailSectionAnchorBtn chkRipple"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssAttachments"/></customData>
                 </Button>
@@ -120,7 +120,7 @@
                         enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onCancelEditFromDetail"
                         tooltip="{i18n>objectCancel}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
                 </Button>
 
@@ -133,11 +133,11 @@
                         enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onCloseDetail"
                         tooltip="{i18n>closeDetails}"
-                        class="detailRailCloseAction rnvRipple">
+                        class="detailRailCloseAction chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
                 </Button>
 
-                <core:Fragment fragmentName="sap_ui5.view.fragment.LockSwitchStatus" type="XML"/>
+                <core:Fragment fragmentName="checklist.app.view.fragment.LockSwitchStatus" type="XML"/>
 
                 <Button icon="sap-icon://save" type="Emphasized"
                         text="{i18n>objectSave}"
@@ -145,7 +145,7 @@
                         enabled="{= !${state>/isBusy} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onSaveDetail"
                         tooltip="{i18n>objectSave}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
                 </Button>
 
@@ -156,7 +156,7 @@
                         enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onArmDeleteChecklist"
                         tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                 </Button>
 
@@ -167,7 +167,7 @@
                         enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onConfirmDeleteChecklist"
                         tooltip="{i18n>deleteConfirmButton}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                 </Button>
 
@@ -176,7 +176,7 @@
                         press=".onCopyDetailLink"
                         tooltip="{i18n>detailCopyLinkTooltip}"
                         enabled="{= !${state>/isBusy} }"
-                        class="rnvRipple"
+                        class="chkRipple"
                         visible="{path:'selected>/root/id', formatter:'.formatCopyLinkVisible'}">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </Button>
@@ -185,7 +185,7 @@
                         type="Transparent"
                         press=".onToggleDetailFullscreen"
                         tooltip="{i18n>detailFullscreenTooltip}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </Button>
 
@@ -195,7 +195,7 @@
                         enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onValidateChecklist"
                         tooltip="{i18n>validateButton}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                 </Button>
 
@@ -204,7 +204,7 @@
                         visible="{= ${state>/mode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
                         tooltip="{i18n>statusDraft}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                     <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
                 </Button>
@@ -214,7 +214,7 @@
                         visible="{= ${state>/mode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
                         tooltip="{i18n>statusRegistered}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                     <customData><core:CustomData key="targetStatus" value="REGISTERED"/></customData>
                 </Button>
@@ -224,7 +224,7 @@
                         visible="{= ${state>/mode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
                         tooltip="{i18n>statusClosed}"
-                        class="rnvRipple">
+                        class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                     <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>
                 </Button>

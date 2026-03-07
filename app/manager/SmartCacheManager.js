@@ -1,7 +1,7 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "sap_ui5/util/SmartCacheStore",
-    "sap_ui5/util/SmartCacheUtils"
+    "checklist/app/util/SmartCacheStore",
+    "checklist/app/util/SmartCacheUtils"
 ], function (EventProvider, SmartCacheStore, SmartCacheUtils) {
     "use strict";
 
@@ -9,7 +9,7 @@ sap.ui.define([
     var DEFAULT_STALE_OK_MS = 90 * 1000;
     var DEFAULT_ALLOWED_KEYS = ["checkLists"];
 
-    return EventProvider.extend("sap_ui5.manager.SmartCacheManager", {
+    return EventProvider.extend("checklist.app.manager.SmartCacheManager", {
         constructor: function (mOptions) {
             EventProvider.apply(this, arguments);
             this._iFreshMs = Number((mOptions && mOptions.freshMs) || DEFAULT_FRESH_MS);

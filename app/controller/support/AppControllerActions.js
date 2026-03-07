@@ -1,9 +1,9 @@
 ﻿sap.ui.define([
-    "sap_ui5/controller/support/AppControllerLifecycleActions",
-    "sap_ui5/controller/support/AppControllerOverlayActions",
-    "sap_ui5/controller/support/AppControllerShellActions",
-    "sap_ui5/controller/support/AppControllerStateActions",
-    "sap_ui5/controller/support/AppControllerDomActions"
+    "checklist/app/controller/support/AppControllerLifecycleActions",
+    "checklist/app/controller/support/AppControllerOverlayActions",
+    "checklist/app/controller/support/AppControllerShellActions",
+    "checklist/app/controller/support/AppControllerStateActions",
+    "checklist/app/controller/support/AppControllerDomActions"
 ], function (
     AppControllerLifecycleActions,
     AppControllerOverlayActions,

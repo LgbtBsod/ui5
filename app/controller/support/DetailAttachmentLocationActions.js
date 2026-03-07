@@ -1,9 +1,9 @@
 sap.ui.define([
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/controller/support/DetailPersonInputSupport",
-    "sap_ui5/infra/navigation/WorkspaceRouteNavigation",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/controller/support/DetailPersonInputSupport",
+    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, WorkspaceRouteNavigation, ControllerModelWriteSupport) {
     "use strict";
 

@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
+    "checklist/app/util/CreateSentinel"
 ], function (UseCase, DetailAuthorizationSupport, CreateSentinel) {
     "use strict";
 

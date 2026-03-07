@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/controller/support/DetailFormatTextSupport",
-    "sap_ui5/controller/support/DetailFormatValueSupport"
+    "checklist/app/controller/support/DetailFormatTextSupport",
+    "checklist/app/controller/support/DetailFormatValueSupport"
 ], function (DetailFormatTextSupport, DetailFormatValueSupport) {
     "use strict";
 

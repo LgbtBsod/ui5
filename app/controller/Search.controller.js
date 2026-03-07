@@ -1,8 +1,8 @@
 ﻿sap.ui.define([
-    "sap_ui5/controller/Base.controller",
-    "sap_ui5/controller/support/SearchControllerActions",
-    "sap_ui5/controller/support/SearchControllerSupport",
-    "sap_ui5/controller/support/SearchRateProgress"
+    "checklist/app/controller/Base.controller",
+    "checklist/app/controller/support/SearchControllerActions",
+    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/SearchRateProgress"
 ], function (BaseController, SearchControllerActions, SearchControllerSupport, SearchRateProgress) {
     "use strict";
 
@@ -10,7 +10,7 @@
     [SearchControllerSupport, SearchRateProgress].forEach(function () {});
     // Architecture freeze marker: SearchFilterBuilder.buildFailSegmentFilter
 
-    return BaseController.extend("sap_ui5.controller.Search", Object.assign({}, SearchControllerActions, {
+    return BaseController.extend("checklist.app.controller.Search", Object.assign({}, SearchControllerActions, {
         onInit: function () { return SearchControllerActions.onInit.apply(this, arguments); },
         onExit: function () { return SearchControllerActions.onExit.apply(this, arguments); },
         ensureEffectDialog: function () { return SearchControllerActions.ensureEffectDialog.apply(this, arguments); },

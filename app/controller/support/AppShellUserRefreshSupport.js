@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/domain/shared/usecases/LoadCurrentUserUseCase"
+    "checklist/app/service/domain/shared/usecases/LoadCurrentUserUseCase"
 ], function (LoadCurrentUserUseCase) {
     "use strict";
 
@@ -17,13 +17,16 @@ sap.ui.define([
         }).then(function (oResult) {
             oController._syncShellState();
             oController._syncShellMetrics();
+            if (typeof oController._scheduleShellLayoutRefresh === "function") {
+                oController._scheduleShellLayoutRefresh();
+            }
             if (typeof oController.showI18nToast === "function" && oResult && oResult.ok) {
                 oController.showI18nToast("shellContextRefreshed");
             }
             return !!(oResult && oResult.ok);
         }).catch(function (oError) {
             if (typeof oController.showI18nToast === "function") {
-                oController.showI18nToast("testUserApplyFailed", [oError && oError.message || "Unknown error"]);
+                oController.showI18nToast("shellUserRefreshFailed", [oError && oError.message || "Unknown error"]);
             }
             return false;
         }).finally(function () {

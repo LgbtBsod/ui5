@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
-    "sap_ui5/infra/adapters/shared/ChecklistSnapshotMapper",
-    "sap_ui5/service/backend/GatewayClient"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
+    "checklist/app/infra/adapters/shared/ChecklistSnapshotMapper",
+    "checklist/app/service/backend/GatewayClient"
 ], function (GatewayAdapterSupport, ChecklistSnapshotMapper, GatewayClient) {
     "use strict";
 

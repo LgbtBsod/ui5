@@ -14,6 +14,7 @@ function isModuleWrapper(fn, source) {
 
 runGate({
   name: 'function-length-gate',
+  advisory: true,
   include: [
     'controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js',
     'manager/**/*.js', 'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js'

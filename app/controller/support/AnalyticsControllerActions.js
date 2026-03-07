@@ -1,10 +1,10 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/service/framework/CtxFactory",
-    "sap_ui5/service/domain/analytics/AnalyticsFacade",
-    "sap_ui5/service/domain/analytics/AnalyticsPayloadNormalizer",
-    "sap_ui5/infra/navigation/WorkspaceRouteNavigation",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/domain/analytics/AnalyticsFacade",
+    "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer",
+    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (JSONModel, CtxFactory, AnalyticsFacade, AnalyticsPayloadNormalizer, WorkspaceRouteNavigation, ControllerModelWriteSupport) {
     "use strict";
 

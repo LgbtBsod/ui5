@@ -1,27 +1,26 @@
 sap.ui.define([
-    "sap_ui5/controller/TestUserDialog.controller",
-    "sap_ui5/controller/support/AppShellTextSupport",
-    "sap_ui5/controller/support/AppRetryActionPolicy",
-    "sap_ui5/controller/support/AppShellUserActionPolicy",
-    "sap_ui5/service/framework/ClipboardRuntime",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/service/framework/FeedbackBannerState",
-    "sap_ui5/service/framework/FeedbackBannerRuntime",
-    "sap_ui5/service/framework/SecurityTokenRefresh",
-    "sap_ui5/service/framework/AppShellCoordinator",
-    "sap_ui5/controller/support/AppShellUserRefreshSupport",
-    "sap_ui5/infra/navigation/WorkspaceRouteNavigation",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
-], function (TestUserDialogController, AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, WorkspaceRouteNavigation, CreateSentinel, ControllerModelWriteSupport) {
+    "checklist/app/controller/support/AppShellTextSupport",
+    "checklist/app/controller/support/AppRetryActionPolicy",
+    "checklist/app/controller/support/AppShellUserActionPolicy",
+    "checklist/app/service/framework/ClipboardRuntime",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/FeedbackBannerState",
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/SecurityTokenRefresh",
+    "checklist/app/service/framework/AppShellCoordinator",
+    "checklist/app/controller/support/AppShellUserRefreshSupport",
+    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
+], function (AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, WorkspaceRouteNavigation, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var getText = AppShellTextSupport.getText;
     var SHELL_OVERLAY_FRAGMENTS = {
-        notifications: "sap_ui5.view.fragment.ShellNotificationsPopover",
-        help: "sap_ui5.view.fragment.ShellHelpPopover",
-        settings: "sap_ui5.view.fragment.ShellSettingsPopover",
-        user: "sap_ui5.view.fragment.ShellUserPopover"
+        notifications: "checklist.app.view.fragment.ShellNotificationsPopover",
+        help: "checklist.app.view.fragment.ShellHelpPopover",
+        settings: "checklist.app.view.fragment.ShellSettingsPopover",
+        user: "checklist.app.view.fragment.ShellUserPopover"
     };
 
     function openShellOverlayByKey(oController, oEvent, sKey) {
@@ -54,15 +53,6 @@ sap.ui.define([
             }
             AppShellCoordinator.onSetThemeMode(this, sMode);
             this._syncShellState();
-        },
-
-        onConfirmTestUser: function () {
-            return AppShellCoordinator.onConfirmTestUser(this, TestUserDialogController.confirm);
-        },
-
-        onDialogClosed: function () {
-            AppShellCoordinator.onDialogClosed(this);
-            this._restoreTestUserDialogFocus();
         },
 
         onOpenShellNotifications: function (oEvent) {
@@ -133,13 +123,6 @@ sap.ui.define([
             return FeedbackBannerState.toUi5MessageType(sSeverity);
         },
 
-        onOpenTestUserDialog: function (oEvent) {
-            var oSource = (oEvent && oEvent.getSource && oEvent.getSource()) || null;
-            this._oTestUserDialogReturnFocus = (this._mShellOverlayTriggers && this._mShellOverlayTriggers.user) || oSource || this._oTestUserDialogReturnFocus || null;
-            this._closeShellOverlay("user", true);
-            AppShellCoordinator.requestTestUserDialog(this);
-        },
-
         onShellUserPrimaryAction: function (oEvent) {
             var oAppView = this._getAppViewModel();
             var sActionKind = String(oAppView && oAppView.getProperty ? oAppView.getProperty("/shell/userActionKind") || "" : "").trim();
@@ -166,12 +149,7 @@ sap.ui.define([
         },
 
         _restoreTestUserDialogFocus: function () {
-            var oState = this._getStateModel();
-            var oTarget;
-            if (oState && oState.getProperty && oState.getProperty("/requiresUserLogin")) {
-                return;
-            }
-            oTarget = this._oTestUserDialogReturnFocus || (this._mShellOverlayTriggers && this._mShellOverlayTriggers.user);
+            var oTarget = this._oTestUserDialogReturnFocus || (this._mShellOverlayTriggers && this._mShellOverlayTriggers.user);
             FocusRuntime.focusSoon(oTarget);
             this._oTestUserDialogReturnFocus = null;
         }

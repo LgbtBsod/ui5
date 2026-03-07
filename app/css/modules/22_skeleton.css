@@ -4,8 +4,8 @@
   --appSkeletonBorder: rgba(180, 198, 224, 0.36);
 }
 
-body.rnvAppRoot.appDark,
-:root.rnvAppRoot:not(.light-mode) {
+body.chkAppRoot.appDark,
+:root.chkAppRoot:not(.light-mode) {
   --appSkeletonBase: rgba(71, 92, 122, 0.58);
   --appSkeletonHighlight: rgba(183, 205, 239, 0.22);
   --appSkeletonBorder: rgba(120, 149, 196, 0.22);
@@ -40,33 +40,33 @@ body.rnvAppRoot.appDark,
   will-change: opacity, transform, filter;
 }
 
-.rnvApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(1),
-.rnvApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(1) {
+.chkApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(1),
+.chkApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(1) {
   animation-delay: 0ms;
 }
 
-.rnvApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(2),
-.rnvApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(2) {
+.chkApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(2),
+.chkApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(2) {
   animation-delay: 30ms;
 }
 
-.rnvApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(3),
-.rnvApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(3) {
+.chkApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(3),
+.chkApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(3) {
   animation-delay: 60ms;
 }
 
-.rnvApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(4),
-.rnvApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(4) {
+.chkApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(4),
+.chkApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(4) {
   animation-delay: 90ms;
 }
 
-.rnvApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(5),
-.rnvApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(5) {
+.chkApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(5),
+.chkApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(5) {
   animation-delay: 120ms;
 }
 
-.rnvApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(6),
-.rnvApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(6) {
+.chkApp .searchAnalyticsRailGrid .appSkeletonReveal:nth-child(6),
+.chkApp .searchAnalyticsBreakdownGrid .appSkeletonReveal:nth-child(6) {
   animation-delay: 150ms;
 }
 

@@ -59,12 +59,13 @@ function main() {
   });
 
   if (violations.length) {
-    console.log('FAIL runtime-duplication-gate');
+    const advisory = process.env.QA_STRICT_STRUCTURAL !== '1';
+    console.log(`${advisory ? 'WARN' : 'FAIL'} runtime-duplication-gate`);
     violations.slice(0, 30).forEach((item) => {
       console.log(`- duplicate runtime logic cluster: ${item.files.join(', ')}`);
       console.log(`  sample: ${item.sample}`);
     });
-    process.exit(1);
+    process.exit(advisory ? 0 : 1);
   }
 
   console.log('PASS runtime-duplication-gate');

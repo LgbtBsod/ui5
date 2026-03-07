@@ -1,11 +1,11 @@
-.rnvApp .analyticsScreenContent,
-.rnvApp .accessDeniedScreenContent {
+.chkApp .analyticsScreenContent,
+.chkApp .accessDeniedScreenContent {
   width: 100%;
   min-width: 0;
 }
 
-.rnvApp .analyticsHeroCard,
-.rnvApp .accessDeniedHeroCard {
+.chkApp .analyticsHeroCard,
+.chkApp .accessDeniedHeroCard {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -23,8 +23,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
-.rnvApp .analyticsHeroCopy,
-.rnvApp .accessDeniedHeroCopy {
+.chkApp .analyticsHeroCopy,
+.chkApp .accessDeniedHeroCopy {
   display: flex;
   flex-direction: column;
   gap: 0.38rem;
@@ -32,8 +32,8 @@
   flex: 1 1 18rem;
 }
 
-.rnvApp .analyticsHeroActions,
-.rnvApp .accessDeniedHeroActions {
+.chkApp .analyticsHeroActions,
+.chkApp .accessDeniedHeroActions {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 0.65rem;
@@ -41,34 +41,34 @@
   justify-content: flex-end;
 }
 
-.rnvApp .analyticsScreenSubtitle,
-.rnvApp .accessDeniedSubtitle,
-.rnvApp .accessDeniedMetaText {
+.chkApp .analyticsScreenSubtitle,
+.chkApp .accessDeniedSubtitle,
+.chkApp .accessDeniedMetaText {
   color: var(--text-subtle);
 }
 
-.rnvApp .analyticsScreenTitle,
-.rnvApp .accessDeniedTitle {
+.chkApp .analyticsScreenTitle,
+.chkApp .accessDeniedTitle {
   line-height: 1.05;
 }
 
-.rnvApp .analyticsScreenBody {
+.chkApp .analyticsScreenBody {
   gap: 0.9rem;
 }
 
-.rnvApp .analyticsScreenBody .searchAnalyticsDialogBreakdowns,
-.rnvApp .analyticsScreenBody .analyticsNarrativeBlock,
-.rnvApp .analyticsScreenBody .analyticsBreakdownSection {
+.chkApp .analyticsScreenBody .searchAnalyticsDialogBreakdowns,
+.chkApp .analyticsScreenBody .analyticsNarrativeBlock,
+.chkApp .analyticsScreenBody .analyticsBreakdownSection {
   width: 100%;
 }
 
-.rnvApp .accessDeniedHeroCard {
+.chkApp .accessDeniedHeroCard {
   min-height: calc(100vh - var(--app-shell-offset) - 4.5rem);
   align-items: center;
   justify-content: center;
 }
 
-.rnvApp .accessDeniedVisual {
+.chkApp .accessDeniedVisual {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -84,12 +84,12 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
-.rnvApp .accessDeniedIcon {
+.chkApp .accessDeniedIcon {
   font-size: clamp(2.75rem, 7vw, 4.6rem);
   color: var(--accent);
 }
 
-.rnvApp .accessDeniedMetaRow {
+.chkApp .accessDeniedMetaRow {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 0.65rem;
@@ -97,30 +97,30 @@
   margin-top: 0.32rem;
 }
 
-.rnvApp .accessDeniedMetaTag {
+.chkApp .accessDeniedMetaTag {
   padding: 0.3rem 0.82rem;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
 }
 
-.rnvApp .accessDeniedBackendMessage {
+.chkApp .accessDeniedBackendMessage {
   margin-top: 0.38rem;
 }
 
 @media (max-width: 960px) {
-  .rnvApp .analyticsHeroCard,
-  .rnvApp .accessDeniedHeroCard {
+  .chkApp .analyticsHeroCard,
+  .chkApp .accessDeniedHeroCard {
     padding: 1rem;
   }
 
-  .rnvApp .analyticsHeroActions,
-  .rnvApp .accessDeniedHeroActions {
+  .chkApp .analyticsHeroActions,
+  .chkApp .accessDeniedHeroActions {
     width: 100%;
     justify-content: flex-start;
   }
 
-  .rnvApp .accessDeniedHeroCard {
+  .chkApp .accessDeniedHeroCard {
     min-height: calc(100vh - var(--app-shell-offset) - 2.5rem);
   }
 }

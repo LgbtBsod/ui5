@@ -1,4 +1,4 @@
-sap.ui.define(["sap_ui5/infra/adapters/LockAdapter"], function (LockAdapter) {
+sap.ui.define(["checklist/app/infra/adapters/LockAdapter"], function (LockAdapter) {
     "use strict";
 
     var oLockPort = LockAdapter.create();

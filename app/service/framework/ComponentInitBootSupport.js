@@ -20,8 +20,6 @@ sap.ui.define([], function () {
         return BootstrapAppUseCase.execute({}, { stateModel: oStateModel }).then(function () {
             var oServerState = null;
             ComponentRuntimeSupport.ensureSessionId(oStateModel);
-            oStateModel.setProperty("/testUser", "");
-            oStateModel.setProperty("/testUserLogin", "");
             oStateModel.setProperty("/currentUser", {
                 uname: "",
                 fullName: "",
@@ -33,7 +31,6 @@ sap.ui.define([], function () {
                 summaryText: "",
                 fetchedAt: ""
             });
-            oStateModel.setProperty("/requiresUserLogin", false);
             var aRequired = [];
             var mVars = {};
             oStateModel.setProperty("/requiredFields", aRequired);

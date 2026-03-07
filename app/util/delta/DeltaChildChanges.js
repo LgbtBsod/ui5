@@ -1,4 +1,4 @@
-sap.ui.define(["sap_ui5/util/delta/DeltaCore"], function (DeltaCore) {
+sap.ui.define(["checklist/app/util/delta/DeltaCore"], function (DeltaCore) {
   "use strict";
 
   function appendChildChanges(aOut, sEntity, sRootKey, aCurrent, aBase, fnFieldsBuilder) {

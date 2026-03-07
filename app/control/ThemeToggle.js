@@ -6,7 +6,7 @@ sap.ui.define([
     var sSunContent = "";
     var sMoonContent = "";
 
-    return Control.extend("sap_ui5.control.ThemeToggle", {
+    return Control.extend("checklist.app.control.ThemeToggle", {
         metadata: {
             properties: {
                 dark: { type: "boolean", defaultValue: false },

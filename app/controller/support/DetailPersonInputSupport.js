@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (ControllerModelWriteSupport) {
     "use strict";
 

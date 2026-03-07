@@ -1,8 +1,8 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/model/StateSchema",
-    "sap_ui5/util/AttachmentUploadPolicy",
-    "sap_ui5/service/framework/LayoutPersonalizationRuntime"
+    "checklist/app/model/StateSchema",
+    "checklist/app/util/AttachmentUploadPolicy",
+    "checklist/app/service/framework/LayoutPersonalizationRuntime"
 ], function (JSONModel, StateSchema, AttachmentUploadPolicy, LayoutPersonalizationRuntime) {
     "use strict";
 

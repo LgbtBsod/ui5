@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/model/schema/uiSchema",
-    "sap_ui5/model/schema/workflowSchema",
-    "sap_ui5/model/schema/navigationSchema"
+    "checklist/app/model/schema/uiSchema",
+    "checklist/app/model/schema/workflowSchema",
+    "checklist/app/model/schema/navigationSchema"
 ], function (uiSchema, workflowSchema, navigationSchema) {
     "use strict";
 

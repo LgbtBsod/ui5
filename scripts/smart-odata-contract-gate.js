@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { readText, extractUi5Dependencies } = require('./qa-shared');
+const { readText, extractUi5Dependencies, fileExists } = require('./qa-shared');
 const { exitWithMappedIssues } = require('./lib/gate-result');
 
 const ROOT = process.cwd();
@@ -24,14 +24,13 @@ function collectControllerMethodSet() {
   while (queue.length) {
     const file = queue.shift();
     if (!file || visited.has(file)) continue;
-    const abs = require('path').join(ROOT, file);
-    if (!require('fs').existsSync(abs)) continue;
+    if (!fileExists(ROOT, file)) continue;
     visited.add(file);
     const src = readText(ROOT, file);
     [...src.matchAll(/([A-Za-z0-9_]+)\s*:\s*function\s*\(/g)].forEach((m) => methods.add(m[1]));
     extractUi5Dependencies(src).forEach(({ dep }) => {
-      if (!dep.startsWith('sap_ui5/controller/support/')) return;
-      const depFile = dep.replace(/^sap_ui5\//, '') + '.js';
+      if (!dep.startsWith('checklist/app/controller/support/')) return;
+      const depFile = dep.replace(/^checklist\/app\//, '') + '.js';
       if (!visited.has(depFile)) queue.push(depFile);
     });
   }

@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="sap_ui5.controller.Analytics"
+    controllerName="checklist.app.controller.Analytics"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
@@ -40,15 +40,15 @@
                         text="{i18n>workflowAnalyticsBackendNote}"
                         type="Information"
                         showIcon="true"
-                        class="rnvFeedbackStrip"/>
+                        class="chkFeedbackStrip"/>
                     <MessageStrip
                         text="{view>/error}"
                         type="Warning"
                         showIcon="true"
                         visible="{= !!${view>/error} }"
-                        class="rnvFeedbackStrip rnvFeedbackWarning"/>
-                    <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsTopline" type="XML"/>
-                    <core:Fragment fragmentName="sap_ui5.view.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
+                        class="chkFeedbackStrip chkFeedbackWarning"/>
+                    <core:Fragment fragmentName="checklist.app.view.fragment.WorkflowAnalyticsTopline" type="XML"/>
+                    <core:Fragment fragmentName="checklist.app.view.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
                 </VBox>
             </VBox>
         </content>

@@ -1,4 +1,4 @@
-sap.ui.define(["sap_ui5/service/framework/Result"], function (Result) {
+sap.ui.define(["checklist/app/service/framework/Result"], function (Result) {
     "use strict";
 
     function buildDiagnostics(mInput) {

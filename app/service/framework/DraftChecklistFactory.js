@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/util/DraftChecklistFactory"
+    "checklist/app/util/DraftChecklistFactory"
 ], function (DraftChecklistFactory) {
     "use strict";
 

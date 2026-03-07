@@ -53,7 +53,7 @@
   --ui-accent-bg-7: #c2fcee;
   --ui-accent-bg-8: #ebf5cb;
   --ui-accent-bg-9: #eaecee;
-  --rnv-brand: var(--ui-t4-cta-on-primary);
+  --chk-brand: var(--ui-t4-cta-on-primary);
   --accent: var(--ui-t4-cta-on-primary);
   --accent-rgb: 0, 112, 242;
   --semantic-info-rgb: 0, 112, 242;
@@ -119,7 +119,7 @@
   --feedback-enter-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --feedback-pulse-duration: 1360ms;
   --feedback-attention-duration: 1600ms;
-  --rnv-stack-gap: 1px;
+  --chk-stack-gap: 1px;
   --shell-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(239, 246, 255, 0.72));
   --shell-border: rgba(150, 180, 226, 0.28);
   --shell-shadow: 0 22px 48px rgba(18, 36, 64, 0.14);

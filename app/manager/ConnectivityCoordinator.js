@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (EventProvider) {
   "use strict";
 
-  return EventProvider.extend("sap_ui5.manager.ConnectivityCoordinator", {
+  return EventProvider.extend("checklist.app.manager.ConnectivityCoordinator", {
     constructor: function (mOptions) {
       EventProvider.apply(this, arguments);
       this._iGraceMs = Number(mOptions && mOptions.graceMs);

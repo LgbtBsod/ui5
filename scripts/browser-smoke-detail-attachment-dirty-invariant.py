@@ -50,8 +50,8 @@ def wait_for_detail_ready(page, root_id: str) -> None:
         """
         (expectedRootId) => {
           const core = sap.ui.getCore();
-          const view = core.byId('sap_ui5_comp---app--detailPaneHost');
-          const objectPage = core.byId('sap_ui5_comp---app--detailPaneHost--detailObjectPage');
+          const view = core.byId('checklist_app_comp---app--detailPaneHost');
+          const objectPage = core.byId('checklist_app_comp---app--detailPaneHost--detailObjectPage');
           const selected = view && view.getModel && view.getModel('selected');
           const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
           return !!view && !!objectPage && rootId === expectedRootId;
@@ -68,11 +68,11 @@ def wait_for_search_ready(page) -> None:
         """
         () => {
           const core = typeof sap !== 'undefined' && sap.ui && sap.ui.getCore && sap.ui.getCore();
-          const app = core && core.byId('sap_ui5_comp---app');
+          const app = core && core.byId('checklist_app_comp---app');
           const state = app && app.getModel && app.getModel('state');
           return !!core
-            && !!core.byId('sap_ui5_comp---app--mainFcl')
-            && !!core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartTable')
+            && !!core.byId('checklist_app_comp---app--mainFcl')
+            && !!core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable')
             && !!state
             && state.getProperty('/currentRouteName') === 'search';
         }
@@ -86,7 +86,7 @@ def detail_state(page) -> dict[str, Any]:
     return page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const selected = view && view.getModel && view.getModel('selected');
           const state = view && view.getModel && view.getModel('state');
           const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
@@ -125,7 +125,7 @@ def set_detail_edit_mode(page, state: bool) -> Any:
     return page.evaluate(
         """
         (targetState) => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller.onToggleEdit !== 'function') {
             throw new Error('onToggleEdit is not available');
@@ -145,7 +145,7 @@ def invoke_delete(page, attachment_key: str) -> None:
     page.evaluate(
         """
         (attachmentKey) => new Promise((resolve, reject) => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const controller = view && view.getController && view.getController();
           const selected = view && view.getModel && view.getModel('selected');
           const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
@@ -175,7 +175,7 @@ def ensure_attachments_expanded(page) -> None:
     page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const controller = view && view.getController && view.getController();
           const viewModel = view && view.getModel && view.getModel('view');
           if (!controller || typeof controller.onToggleAttachmentsSection !== 'function') {
@@ -191,7 +191,7 @@ def ensure_attachments_expanded(page) -> None:
     page.wait_for_function(
         """
         () => {
-          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const selected = view && view.getModel && view.getModel('selected');
           const viewModel = view && view.getModel && view.getModel('view');
           const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
@@ -243,7 +243,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 () => {
-                  const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const state = view && view.getModel && view.getModel('state');
                   return !!(state && state.getProperty && state.getProperty('/mode') === 'EDIT');
                 }
@@ -262,11 +262,11 @@ def main() -> int:
             ensure_attachments_expanded(page)
             upload_before = detail_state(page)
             upload_request_index = len(network)
-            page.locator("#sap_ui5_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
+            page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_function(
                 """
                 (prevCount) => {
-                  const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
@@ -333,7 +333,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 (payload) => {
-                  const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
@@ -378,7 +378,7 @@ def main() -> int:
                 failures.append("detail.attachment_delete_keeps_clean_state")
 
             before_release = len(matching_requests(network, "LockRelease"))
-            invoke_controller_method(page, "sap_ui5_comp---app--detailPaneHost", "onCloseDetail")
+            invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseDetail")
             wait_for_search_ready(page)
             page.wait_for_timeout(1200)
             after_release = len(matching_requests(network, "LockRelease"))

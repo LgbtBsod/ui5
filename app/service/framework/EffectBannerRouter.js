@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/service/framework/FeedbackBannerRuntime",
-    "sap_ui5/service/framework/EffectActionRouting"
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/EffectActionRouting"
 ], function (FeedbackBannerRuntime, EffectActionRouting) {
     "use strict";
 

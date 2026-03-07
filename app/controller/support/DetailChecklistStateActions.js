@@ -1,10 +1,10 @@
 sap.ui.define([
-    "sap_ui5/service/framework/EffectApplier",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/service/framework/ClipboardRuntime",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/service/framework/EffectApplier",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/service/framework/ClipboardRuntime",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (EffectApplier, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 

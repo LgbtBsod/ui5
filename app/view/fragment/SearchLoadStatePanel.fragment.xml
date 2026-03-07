@@ -1,7 +1,7 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <VBox class="searchStatusStripStack sapUiTinyMarginBottom rnvStack">
+    <VBox class="searchStatusStripStack sapUiTinyMarginBottom chkStack">
         <VBox visible="{= ${state>/isLoading} &amp;&amp; !${state>/loadError} }" class="searchCustomBusyPanel sapUiTinyMarginBottom">
             <HBox class="searchCustomBusyHeader" alignItems="Center" justifyContent="SpaceBetween" renderType="Bare">
                 <Text id="busyPanelTitleText" text="{i18n>busyPanelTitle}" class="searchCustomBusyTitle"/>
@@ -20,14 +20,14 @@
             type="{view>/filterHintType}"
             visible="{view>/filterHintVisible}"
             showIcon="true"
-            class="searchFilterHintBanner rnvFeedbackStrip"/>
+            class="searchFilterHintBanner chkFeedbackStrip"/>
 
         <MessageStrip
             text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
             type="Error"
             visible="{state>/loadError}"
             showIcon="true"
-            class="searchLoadStateBanner searchLoadErrorBanner rnvFeedbackStrip"/>
+            class="searchLoadStateBanner searchLoadErrorBanner chkFeedbackStrip"/>
 
         <HBox
             class="searchLoadRetryRow sapUiTinyMarginTop"

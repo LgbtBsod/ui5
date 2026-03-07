@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
 ], function (RuntimeInput) {
     "use strict";
 

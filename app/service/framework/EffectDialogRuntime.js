@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/service/framework/LazyDialogRuntime",
-    "sap_ui5/service/framework/EffectActionRouting"
+    "checklist/app/service/framework/LazyDialogRuntime",
+    "checklist/app/service/framework/EffectActionRouting"
 ], function (LazyDialogRuntime, EffectActionRouting) {
     "use strict";
 

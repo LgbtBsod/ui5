@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (EventProvider) {
   "use strict";
 
-  return EventProvider.extend("sap_ui5.manager.AutoSaveCoordinator", {
+  return EventProvider.extend("checklist.app.manager.AutoSaveCoordinator", {
     constructor: function (mOptions) {
       EventProvider.apply(this, arguments);
       this._iDebounceMs = Number(mOptions && mOptions.debounceMs);

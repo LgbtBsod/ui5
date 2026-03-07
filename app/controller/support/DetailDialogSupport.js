@@ -1,13 +1,13 @@
 sap.ui.define([
-    "sap_ui5/service/framework/DraftChecklistFactory",
-    "sap_ui5/service/framework/LazyDialogRuntime"
+    "checklist/app/service/framework/DraftChecklistFactory",
+    "checklist/app/service/framework/LazyDialogRuntime"
 ], function (DraftChecklistFactory, LazyDialogRuntime) {
     "use strict";
 
     var EFFECT_DIALOG_FRAGMENTS = {
-        locationValueHelp: "sap_ui5.view.fragment.LocationValueHelpDialog",
-        checksExpanded: "sap_ui5.view.fragment.ChecksExpandedDialog",
-        barriersExpanded: "sap_ui5.view.fragment.BarriersExpandedDialog"
+        locationValueHelp: "checklist.app.view.fragment.LocationValueHelpDialog",
+        checksExpanded: "checklist.app.view.fragment.ChecksExpandedDialog",
+        barriersExpanded: "checklist.app.view.fragment.BarriersExpandedDialog"
     };
 
     function loadDialog(oController, sKey, sName) {

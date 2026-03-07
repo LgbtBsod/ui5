@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/controller/support/ControllerResourceCleanup",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/service/framework/AppShellCoordinator",
+    "checklist/app/controller/support/ControllerResourceCleanup",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/AppShellCoordinator",
     "sap/ui/Device"
 ], function (ControllerResourceCleanup, ControllerModelWriteSupport, AppShellCoordinator, Device) {
     "use strict";
@@ -141,7 +141,7 @@ sap.ui.define([
             var bSingle = sLayout === "OneColumn";
             var bDetailOnly = sLayout === "MidColumnFullScreen";
             var oRoot = this.getView && this.getView().getDomRef && this.getView().getDomRef();
-            var oClassHost = (oRoot && oRoot.querySelector && oRoot.querySelector(".rnvSkin")) || oRoot;
+            var oClassHost = (oRoot && oRoot.querySelector && oRoot.querySelector(".chkSkin")) || oRoot;
             var oLayout = this.byId && this.byId("mainFcl");
             if (!sSelectedId && sLayout !== "OneColumn" && sRouteName !== "analytics") {
                 sLayout = "OneColumn";

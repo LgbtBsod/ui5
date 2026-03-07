@@ -17,7 +17,7 @@
             var oProfile;
             var oRoot = document.documentElement;
             try {
-                sRawProfile = window.localStorage.getItem("sap_ui5_theme_profile");
+                sRawProfile = window.localStorage.getItem("checklist_app_theme_profile");
                 if (sRawProfile) {
                     oProfile = JSON.parse(sRawProfile);
                     sStoredMode = oProfile && oProfile.mode ? oProfile.mode : "morning";
@@ -28,7 +28,7 @@
                         bBackgroundInteractive = oProfile.backgroundInteractive;
                     }
                 } else {
-                    sStoredMode = window.localStorage.getItem("sap_ui5_theme") || "morning";
+                    sStoredMode = window.localStorage.getItem("checklist_app_theme") || "morning";
                 }
             } catch (e) {}
             sStoredMode = String(sStoredMode || "").toLowerCase() === "night" ? "night" : "morning";
@@ -37,7 +37,7 @@
             } else {
                 oRoot.classList.remove("light-mode");
             }
-            oRoot.classList.add("rnvAppRoot");
+            oRoot.classList.add("chkAppRoot");
             oRoot.classList.toggle("theme-motion-disabled", !bAnimationEnabled);
             oRoot.classList.toggle("theme-motion-enabled", !!bAnimationEnabled);
             oRoot.setAttribute("data-startup-theme-mode", sStoredMode);
@@ -236,7 +236,7 @@
                 oScript.crossOrigin = "anonymous";
                 oScript.setAttribute("data-sap-ui-theme", "sap_horizon");
                 oScript.setAttribute("data-sap-ui-libs", "sap.m,sap.f,sap.ui.layout,sap.ui.comp,sap.uxap");
-                oScript.setAttribute("data-sap-ui-resourceroots", '{"sap_ui5":"./"}');
+                oScript.setAttribute("data-sap-ui-resourceroots", '{"checklist.app":"./"}');
                 oScript.setAttribute("data-sap-ui-compatVersion", "edge");
                 oScript.setAttribute("data-sap-ui-async", "true");
                 oScript.setAttribute("data-sap-ui-preload", "async");
@@ -265,7 +265,7 @@
             window.__ui5PreloadQueue = [];
             sap.ui.require([
                 "sap/ui/core/ComponentContainer",
-                "sap_ui5/infra/adapters/Ui5StyleAdapter"
+                "checklist/app/infra/adapters/Ui5StyleAdapter"
             ], function (ComponentContainer, Ui5StyleAdapter) {
                 function splitClassNames(sClassNames) {
                     return String(sClassNames || "").split(/\s+/).map(function (sName) {
@@ -308,9 +308,9 @@
                 }
 
                 new ComponentContainer({
-                    name: "sap_ui5",
+                    name: "checklist.app",
                     manifest: true,
-                    settings: { id: "sap_ui5_comp" },
+                    settings: { id: "checklist_app_comp" },
                     async: true,
                     height: "100%"
                 }).placeAt("ui5_container");
@@ -335,7 +335,7 @@
             var sMode = document.documentElement.getAttribute("data-startup-theme-mode") || "morning";
             var bAnimationEnabled = document.documentElement.getAttribute("data-startup-animation-enabled") !== "false";
             var bBackgroundInteractive = document.documentElement.getAttribute("data-startup-background-interactive") !== "false";
-            document.body.classList.add("rnvAppRoot");
+            document.body.classList.add("chkAppRoot");
             document.body.classList.add(sMode === "night" ? "appDark" : "appLight");
             document.body.classList.add(sMode === "night" ? "nightMode" : "lightMode");
             document.body.classList.toggle("theme-motion-disabled", !bAnimationEnabled);
@@ -604,7 +604,7 @@
         </div>
     </div>
     <script src="./ui5-background-runtime.js"></script>
-    <div id="ui5_container" class="rnvAppRoot"></div>
+    <div id="ui5_container" class="chkAppRoot"></div>
 </body>
 </html>
 

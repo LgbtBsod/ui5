@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/service/framework/FeedbackBannerRuntime"
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/service/framework/FeedbackBannerRuntime"
 ], function (ActionContract, FeedbackBannerRuntime) {
     "use strict";
     function attach(mOptions) {
@@ -98,9 +98,6 @@ sap.ui.define([
         oComponent.setModel(oCacheModel, "cache");
         oComponent.setModel(oMasterDataModel, "masterData");
         oComponent.setModel(oEnvModel, "env");
-        oStateModel.setProperty("/testUser", "");
-        oStateModel.setProperty("/testUserLogin", "");
-        oStateModel.setProperty("/requiresUserLogin", false);
         oComponent._fnBeforeUnload = function (oEvent) {
             var bHasUnsaved = oStateModel.getProperty("/mode") === "EDIT" && oStateModel.getProperty("/isDirty");
             if (!bHasUnsaved) {

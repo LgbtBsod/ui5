@@ -3,7 +3,7 @@ const { parseImports } = require('./js-import-parser');
 
 function resolveLocal(file, dep) {
   if (dep.startsWith('sap/')) return null;
-  if (!dep.startsWith('./') && !dep.startsWith('../')) return dep.replace(/^sap_ui5\//, '').replace(/\.js$/, '');
+  if (!dep.startsWith('./') && !dep.startsWith('../')) return dep.replace(/^checklist\/app\//, '').replace(/\.js$/, '');
   return path.posix.normalize(path.posix.join(path.posix.dirname(file), dep)).replace(/\.js$/, '');
 }
 

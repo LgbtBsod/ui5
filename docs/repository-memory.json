@@ -431,7 +431,7 @@
         "manager/HeartbeatManager.js",
         "manager/LockStatusMonitor.js"
       ],
-      "fingerprint": "\"sap_ui5/manager/shared/ManagerRuntime\",|\"sap_ui5/manager/shared/TimerRuntime\"|], function (EventProvider, ManagerRuntime, TimerRuntime) {"
+      "fingerprint": "\"checklist/app/manager/shared/ManagerRuntime\",|\"checklist/app/manager/shared/TimerRuntime\"|], function (EventProvider, ManagerRuntime, TimerRuntime) {"
     },
     {
       "files": [
@@ -539,14 +539,14 @@
         "service/domain/cache/usecases/CacheReadUseCase.js",
         "service/domain/cache/usecases/CacheWriteUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/UseCase\",|\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/domain/cache/ports/BrowserCachePort\""
+      "fingerprint": "\"checklist/app/service/framework/UseCase\",|\"checklist/app/service/framework/Result\",|\"checklist/app/service/domain/cache/ports/BrowserCachePort\""
     },
     {
       "files": [
         "service/domain/cache/usecases/CacheReadUseCase.js",
         "service/domain/cache/usecases/CacheWriteUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/domain/cache/ports/BrowserCachePort\"|], function (UseCase, Result, BrowserCachePort) {"
+      "fingerprint": "\"checklist/app/service/framework/Result\",|\"checklist/app/service/domain/cache/ports/BrowserCachePort\"|], function (UseCase, Result, BrowserCachePort) {"
     },
     {
       "files": [
@@ -584,21 +584,21 @@
         "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
         "service/domain/detail/usecases/AttachmentUploadUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/UseCase\",|\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/domain/shared/UseCaseResultUtils\","
+      "fingerprint": "\"checklist/app/service/framework/UseCase\",|\"checklist/app/service/framework/Result\",|\"checklist/app/service/domain/shared/UseCaseResultUtils\","
     },
     {
       "files": [
         "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
         "service/domain/detail/usecases/AttachmentUploadUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/domain/shared/UseCaseResultUtils\",|\"sap_ui5/service/domain/detail/AttachmentEffectSupport\","
+      "fingerprint": "\"checklist/app/service/framework/Result\",|\"checklist/app/service/domain/shared/UseCaseResultUtils\",|\"checklist/app/service/domain/detail/AttachmentEffectSupport\","
     },
     {
       "files": [
         "service/domain/detail/usecases/AttachmentDeleteUseCase.js",
         "service/domain/detail/usecases/AttachmentUploadUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/domain/shared/UseCaseResultUtils\",|\"sap_ui5/service/domain/detail/AttachmentEffectSupport\",|\"sap_ui5/service/domain/detail/DetailStateAccess\","
+      "fingerprint": "\"checklist/app/service/domain/shared/UseCaseResultUtils\",|\"checklist/app/service/domain/detail/AttachmentEffectSupport\",|\"checklist/app/service/domain/detail/DetailStateAccess\","
     },
     {
       "files": [
@@ -612,21 +612,21 @@
         "service/domain/detail/usecases/AutosaveDetailUseCase.js",
         "service/domain/detail/usecases/SaveDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/detail/DetailSaveRuntimeSupport\","
+      "fingerprint": "\"checklist/app/service/framework/Result\",|\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/detail/DetailSaveRuntimeSupport\","
     },
     {
       "files": [
         "service/domain/detail/usecases/AutosaveDetailUseCase.js",
         "service/domain/detail/usecases/SaveDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/detail/DetailSaveRuntimeSupport\",|\"sap_ui5/service/domain/shared/UseCaseInputUtils\","
+      "fingerprint": "\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/detail/DetailSaveRuntimeSupport\",|\"checklist/app/service/domain/shared/UseCaseInputUtils\","
     },
     {
       "files": [
         "service/domain/detail/usecases/AutosaveDetailUseCase.js",
         "service/domain/detail/usecases/SaveDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/domain/detail/DetailSaveRuntimeSupport\",|\"sap_ui5/service/domain/shared/UseCaseInputUtils\",|\"sap_ui5/service/domain/shared/StatePaths\","
+      "fingerprint": "\"checklist/app/service/domain/detail/DetailSaveRuntimeSupport\",|\"checklist/app/service/domain/shared/UseCaseInputUtils\",|\"checklist/app/service/domain/shared/StatePaths\","
     },
     {
       "files": [
@@ -697,35 +697,35 @@
         "service/domain/detail/usecases/EnterEditUseCase.js",
         "service/domain/detail/usecases/OpenDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/detail/DetailAuthorizationSupport\","
+      "fingerprint": "\"checklist/app/service/framework/Result\",|\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/detail/DetailAuthorizationSupport\","
     },
     {
       "files": [
         "service/domain/detail/usecases/EnterEditUseCase.js",
         "service/domain/detail/usecases/OpenDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/detail/DetailAuthorizationSupport\",|\"sap_ui5/service/domain/shared/UseCaseInputUtils\","
+      "fingerprint": "\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/detail/DetailAuthorizationSupport\",|\"checklist/app/service/domain/shared/UseCaseInputUtils\","
     },
     {
       "files": [
         "service/domain/detail/usecases/EnterEditUseCase.js",
         "service/domain/detail/usecases/OpenDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/domain/detail/DetailAuthorizationSupport\",|\"sap_ui5/service/domain/shared/UseCaseInputUtils\",|\"sap_ui5/service/domain/shared/StatePaths\","
+      "fingerprint": "\"checklist/app/service/domain/detail/DetailAuthorizationSupport\",|\"checklist/app/service/domain/shared/UseCaseInputUtils\",|\"checklist/app/service/domain/shared/StatePaths\","
     },
     {
       "files": [
         "service/domain/detail/usecases/EnterEditUseCase.js",
         "service/domain/detail/usecases/OpenDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/domain/shared/UseCaseInputUtils\",|\"sap_ui5/service/domain/shared/StatePaths\",|\"sap_ui5/util/CreateSentinel\""
+      "fingerprint": "\"checklist/app/service/domain/shared/UseCaseInputUtils\",|\"checklist/app/service/domain/shared/StatePaths\",|\"checklist/app/util/CreateSentinel\""
     },
     {
       "files": [
         "service/domain/detail/usecases/EnterEditUseCase.js",
         "service/domain/detail/usecases/OpenDetailUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/domain/shared/StatePaths\",|\"sap_ui5/util/CreateSentinel\"|], function (UseCase, Result, Effects, DetailAuthorizationSupport, UseCaseInputUtils, StatePaths, CreateSe"
+      "fingerprint": "\"checklist/app/service/domain/shared/StatePaths\",|\"checklist/app/util/CreateSentinel\"|], function (UseCase, Result, Effects, DetailAuthorizationSupport, UseCaseInputUtils, StatePaths, CreateSe"
     },
     {
       "files": [
@@ -762,7 +762,7 @@
         "service/domain/lock/usecases/TakeoverLockUseCase.js",
         "service/domain/search/usecases/BootstrapSearchUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/shared/StatePaths\"|], function (UseCase, Result, Effects, StatePaths) {"
+      "fingerprint": "\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/shared/StatePaths\"|], function (UseCase, Result, Effects, StatePaths) {"
     },
     {
       "files": [
@@ -770,21 +770,21 @@
         "service/domain/detail/usecases/ValidateChecklistUseCase.js",
         "service/domain/detail/usecases/ValueHelpLocationUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/detail/DetailStateAccess\","
+      "fingerprint": "\"checklist/app/service/framework/Result\",|\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/detail/DetailStateAccess\","
     },
     {
       "files": [
         "service/domain/detail/usecases/PersonSuggestUseCase.js",
         "service/domain/detail/usecases/ValueHelpLocationUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/detail/DetailStateAccess\",|\"sap_ui5/service/domain/shared/UseCaseResultUtils\""
+      "fingerprint": "\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/detail/DetailStateAccess\",|\"checklist/app/service/domain/shared/UseCaseResultUtils\""
     },
     {
       "files": [
         "service/domain/detail/usecases/PersonSuggestUseCase.js",
         "service/domain/detail/usecases/ValueHelpLocationUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/domain/detail/DetailStateAccess\",|\"sap_ui5/service/domain/shared/UseCaseResultUtils\"|], function (UseCase, Result, Effects, DetailStateAccess, UseCaseResultUtils) "
+      "fingerprint": "\"checklist/app/service/domain/detail/DetailStateAccess\",|\"checklist/app/service/domain/shared/UseCaseResultUtils\"|], function (UseCase, Result, Effects, DetailStateAccess, UseCaseResultUtils) "
     },
     {
       "files": [
@@ -792,21 +792,21 @@
         "service/domain/search/usecases/RebindSearchUseCase.js",
         "service/domain/search/usecases/SelectRowUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Result\",|\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/search/SearchSelectionEffects\","
+      "fingerprint": "\"checklist/app/service/framework/Result\",|\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/search/SearchSelectionEffects\","
     },
     {
       "files": [
         "service/domain/search/usecases/ExecuteSearchUseCase.js",
         "service/domain/search/usecases/RebindSearchUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/framework/Effects\",|\"sap_ui5/service/domain/search/SearchSelectionEffects\",|\"sap_ui5/service/domain/shared/StatePaths\""
+      "fingerprint": "\"checklist/app/service/framework/Effects\",|\"checklist/app/service/domain/search/SearchSelectionEffects\",|\"checklist/app/service/domain/shared/StatePaths\""
     },
     {
       "files": [
         "service/domain/search/usecases/ExecuteSearchUseCase.js",
         "service/domain/search/usecases/RebindSearchUseCase.js"
       ],
-      "fingerprint": "\"sap_ui5/service/domain/search/SearchSelectionEffects\",|\"sap_ui5/service/domain/shared/StatePaths\"|], function (UseCase, Result, Effects, SearchSelectionEffects, StatePaths) {"
+      "fingerprint": "\"checklist/app/service/domain/search/SearchSelectionEffects\",|\"checklist/app/service/domain/shared/StatePaths\"|], function (UseCase, Result, Effects, SearchSelectionEffects, StatePaths) {"
     },
     {
       "files": [

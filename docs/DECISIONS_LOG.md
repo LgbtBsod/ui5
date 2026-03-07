@@ -131,7 +131,7 @@
 
 ## 2026-03-04 Search Support Architecture Gate Cleanup
 
-- What changed: removed the forbidden `controller/support -> service/framework/ComponentRuntimeSupport` dependency by moving the shared search datetime formatter into [SearchControllerSupport.js](/Users/lgbtb/Desktop/sap_ui5/controller/support/SearchControllerSupport.js) and keeping [SearchViewSupport.js](/Users/lgbtb/Desktop/sap_ui5/controller/support/SearchViewSupport.js) inside the allowlisted controller-support layer.
+- What changed: removed the forbidden `controller/support -> service/framework/ComponentRuntimeSupport` dependency by moving the shared search datetime formatter into [SearchControllerSupport.js](/Users/lgbtb/Desktop/checklist/app/controller/support/SearchControllerSupport.js) and keeping [SearchViewSupport.js](/Users/lgbtb/Desktop/checklist/app/controller/support/SearchViewSupport.js) inside the allowlisted controller-support layer.
 - Consistency Check: follows `STYLE_CONTEXT.md` rules for architecture-first consistency and shared patterns over one-off controller imports.
 - Self-review: behavior stayed identical, but the layering is now coherent and static QA no longer has a known red gate.
 - Validation: `final-static-qa.js`, `check-xml-views`, and `interaction-smoke.py` all passed after the import cleanup.

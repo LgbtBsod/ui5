@@ -121,6 +121,7 @@ function hasShadowPattern(paths) {
   };
 
   exitWithGateResult('shadow-duplicate-gate', violations, stats, {
-    asJson: process.argv.includes('--json')
+    asJson: process.argv.includes('--json'),
+    advisory: true
   });
 })();

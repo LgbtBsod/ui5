@@ -3,8 +3,9 @@ sap.ui.define([], function () {
 
     var _iResizeRafId = 0;
     var _iResizeEndTimer = 0;
+    var _iShellRefreshRafId = 0;
     var _RESIZE_END_DELAY_MS = 120;
-    var _RESIZE_CLASS = "rnvResizing";
+    var _RESIZE_CLASS = "chkResizing";
 
     function _scheduleInvalidate(oLayout) {
         if (_iResizeRafId) {
@@ -76,8 +77,8 @@ sap.ui.define([], function () {
             if (!oStaticArea || !oStaticArea.classList) {
                 return;
             }
-            oStaticArea.classList.add("rnvApp");
-            oStaticArea.classList.add("rnvSkin");
+            oStaticArea.classList.add("chkApp");
+            oStaticArea.classList.add("chkSkin");
         },
 
         _applyCompactDensityClass: function () {
@@ -107,6 +108,21 @@ sap.ui.define([], function () {
             iBottom = Math.max(88, Math.round(oRect.bottom + 14));
             oDoc.style.setProperty("--app-shell-height", Math.round(oRect.height) + "px");
             oDoc.style.setProperty("--app-shell-offset", iBottom + "px");
+        },
+
+        _scheduleShellLayoutRefresh: function () {
+            var that = this;
+            if (_iShellRefreshRafId) {
+                window.cancelAnimationFrame(_iShellRefreshRafId);
+            }
+            _iShellRefreshRafId = window.requestAnimationFrame(function () {
+                _iShellRefreshRafId = 0;
+                window.requestAnimationFrame(function () {
+                    that._syncShellFlexAllocation();
+                    that._syncShellMetrics();
+                    that._syncLayoutViewportGeometry();
+                });
+            });
         }
     };
 });

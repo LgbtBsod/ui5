@@ -1,9 +1,9 @@
 ﻿sap.ui.define([
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/util/AttachmentUploadPolicy",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/controller/base/ControllerTextRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/util/AttachmentUploadPolicy",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, ControllerModelWriteSupport) {
     "use strict";
 

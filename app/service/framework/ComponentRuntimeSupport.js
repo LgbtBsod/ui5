@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/model/StatePaths",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/model/StatePaths",
+    "checklist/app/util/CreateSentinel"
 ], function (StatePaths, CreateSentinel) {
     "use strict";
 

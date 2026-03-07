@@ -9,7 +9,7 @@ sap.ui.define([
     "sap/m/ObjectStatus",
     "sap/m/ToolbarSpacer",
     "sap/m/Button",
-    "sap_ui5/control/ThemeToggle"
+    "checklist/app/control/ThemeToggle"
 ], function (
     Control,
     OverflowToolbar,
@@ -32,7 +32,7 @@ sap.ui.define([
         return oControl;
     }
 
-    return Control.extend("sap_ui5.control.AppShellHeader", {
+    return Control.extend("checklist.app.control.AppShellHeader", {
         metadata: {
             properties: {
                 eyebrow: { type: "string", defaultValue: "" },
@@ -115,7 +115,7 @@ sap.ui.define([
                 press: function () {
                     that.fireNotificationsPress({ anchor: that._oNotificationsButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("rnvRipple"), "High");
+            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
 
             this._oHelpButton = applyPriority(new Button({
                 icon: "sap-icon://sys-help",
@@ -123,7 +123,7 @@ sap.ui.define([
                 press: function () {
                     that.fireHelpPress({ anchor: that._oHelpButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("rnvRipple"), "High");
+            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
 
             this._oSettingsButton = applyPriority(new Button({
                 icon: "sap-icon://action-settings",
@@ -131,7 +131,7 @@ sap.ui.define([
                 press: function () {
                     that.fireSettingsPress({ anchor: that._oSettingsButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("rnvRipple"), "High");
+            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
 
             this._oAnalyticsButton = applyPriority(new Button({
                 icon: "sap-icon://business-objects-experience",
@@ -139,7 +139,7 @@ sap.ui.define([
                 press: function () {
                     that.fireAnalyticsPress({ anchor: that._oAnalyticsButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("rnvRipple"), "High");
+            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
 
             this._oThemeToggle = new ThemeToggle();
             this._oThemeToggle.attachPress(function () {
@@ -151,7 +151,7 @@ sap.ui.define([
                 press: function () {
                     that.fireUserPress({ anchor: that._oUserButton });
                 }
-            }).addStyleClass("shellUserBtn").addStyleClass("rnvRipple"), "NeverOverflow");
+            }).addStyleClass("shellUserBtn").addStyleClass("chkRipple"), "NeverOverflow");
 
             this.setAggregation("_toolbar", new OverflowToolbar({
                 content: [

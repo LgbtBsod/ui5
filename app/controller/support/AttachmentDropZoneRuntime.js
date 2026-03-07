@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/controller/support/AttachmentUploadCore"
+    "checklist/app/controller/support/AttachmentUploadCore"
 ], function (AttachmentUploadCore) {
     "use strict";
 

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/backend/GatewayErrorNormalizer"
+    "checklist/app/service/backend/GatewayErrorNormalizer"
 ], function (GatewayErrorNormalizer) {
     "use strict";
 

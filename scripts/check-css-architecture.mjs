@@ -1,10 +1,12 @@
 import fs from "fs";
+import path from "path";
 
-const entryPath = "css/style.css";
+const runtimeRoot = fs.existsSync(path.join(process.cwd(), "app", "css", "style.css")) ? "app" : "";
+const entryPath = path.join(runtimeRoot, "css/style.css").replace(/\\/g, "/");
 const forbiddenLegacyFiles = [
-  "css/modules/style-core.css",
-  "css/modules/style-components.css",
-  "css/modules/style-overrides.css"
+  path.join(runtimeRoot, "css/modules/style-core.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/style-components.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/style-overrides.css").replace(/\\/g, "/")
 ];
 const expectedImports = [
   '@import "modules/00_tokens.css";',
@@ -17,20 +19,22 @@ const expectedImports = [
   '@import "modules/23_dialogs.css";',
   '@import "modules/40_page_search.css";',
   '@import "modules/41_page_detail.css";',
+  '@import "modules/42_page_analytics.css";',
   '@import "modules/90_ui5_patches.css";'
 ];
 const modules = [
-  "css/modules/00_tokens.css",
-  "css/modules/01_theme-modes.css",
-  "css/modules/02_background.css",
-  "css/modules/10_base.css",
-  "css/modules/20_surface.css",
-  "css/modules/21_controls.css",
-  "css/modules/22_skeleton.css",
-  "css/modules/23_dialogs.css",
-  "css/modules/40_page_search.css",
-  "css/modules/41_page_detail.css",
-  "css/modules/90_ui5_patches.css"
+  path.join(runtimeRoot, "css/modules/00_tokens.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/01_theme-modes.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/02_background.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/10_base.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/20_surface.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/21_controls.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/22_skeleton.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/23_dialogs.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/40_page_search.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/41_page_detail.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/42_page_analytics.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/modules/90_ui5_patches.css").replace(/\\/g, "/")
 ];
 
 function fail(message) {
@@ -61,7 +65,7 @@ function assertPatchDiscipline(filePath, css) {
 
 const entry = fs.readFileSync(entryPath, "utf8").trim();
 if (entry !== expectedImports.join("\n")) {
-  fail("css/style.css must be entry-only with the exact module import order.");
+  fail(`${entryPath} must be entry-only with the exact module import order.`);
 }
 
 for (const legacyFile of forbiddenLegacyFiles) {
@@ -89,11 +93,11 @@ for (const file of modules) {
     .filter((selector) => !selector.startsWith("@"))
     .filter((selector) => selector.split(",").some((part) => {
       const normalized = part.trim().replace(/\s+/g, " ");
-      return !normalized.includes(".rnvApp ")
-        && !normalized.includes(".rnvAppRoot")
-        && !normalized.includes("#ui5_container.rnvAppRoot")
-        && !normalized.includes("body.rnvAppRoot")
-        && !normalized.includes("html.rnvAppRoot");
+      return !normalized.includes(".chkApp ")
+        && !normalized.includes(".chkAppRoot")
+        && !normalized.includes("#ui5_container.chkAppRoot")
+        && !normalized.includes("body.chkAppRoot")
+        && !normalized.includes("html.chkAppRoot");
     }));
   if (offenders.length) {
     fail(`${file} has unscoped .sap* selectors: ${offenders.slice(0, 3).join(", ")}`);

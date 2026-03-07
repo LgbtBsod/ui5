@@ -1,7 +1,7 @@
 sap.ui.define([
-  "sap_ui5/infra/adapters/LockAdapter",
-  "sap_ui5/service/framework/EffectApplier",
-  "sap_ui5/model/StatePaths"
+  "checklist/app/infra/adapters/LockAdapter",
+  "checklist/app/service/framework/EffectApplier",
+  "checklist/app/model/StatePaths"
 ], function (LockAdapter, EffectApplier, StatePaths) {
   "use strict";
 

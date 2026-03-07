@@ -10,9 +10,6 @@ sap.ui.define([], function () {
         searchMode: "EXACT",
         searchBackendTop: "100",
         searchMaxResults: "100",
-        requiresUserLogin: true,
-        testUser: "",
-        testUserLogin: "",
         currentUser: {
             uname: "",
             fullName: "",

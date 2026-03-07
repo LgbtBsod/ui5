@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/util/RuntimeTimerSanitizer",
-    "sap_ui5/util/runtime/TimerDefaults"
+    "checklist/app/util/RuntimeTimerSanitizer",
+    "checklist/app/util/runtime/TimerDefaults"
 ], function (RuntimeTimerSanitizer, TimerDefaults) {
     "use strict";
 

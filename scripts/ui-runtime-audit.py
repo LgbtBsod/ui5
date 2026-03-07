@@ -36,9 +36,9 @@ def geom_snapshot(page) -> dict[str, Any]:
     return page.evaluate(
         """
         () => {
-          const splitter = document.querySelector('#sap_ui5_comp---app--mainSplitter');
-          const left = document.querySelector('#sap_ui5_comp---app--mainSplitter-content-0');
-          const right = document.querySelector('#sap_ui5_comp---app--mainSplitter-content-1');
+          const splitter = document.querySelector('#checklist_app_comp---app--mainSplitter');
+          const left = document.querySelector('#checklist_app_comp---app--mainSplitter-content-0');
+          const right = document.querySelector('#checklist_app_comp---app--mainSplitter-content-1');
           const rect = (node) => node ? node.getBoundingClientRect().toJSON() : null;
           return {
             splitterClass: splitter?.className || '',
@@ -54,13 +54,13 @@ def geom_snapshot(page) -> dict[str, Any]:
 
 
 def wait_for_search_ready(page) -> None:
-    page.wait_for_selector("#sap_ui5_comp---app--mainSplitter", timeout=30000)
+    page.wait_for_selector("#checklist_app_comp---app--mainSplitter", timeout=30000)
     page.get_by_text("Create", exact=True).wait_for(timeout=30000)
     page.wait_for_timeout(1200)
 
 
 def wait_for_detail_ready(page) -> None:
-    page.wait_for_selector("#sap_ui5_comp---app--detailPaneHost--detailObjectPage", timeout=30000)
+    page.wait_for_selector("#checklist_app_comp---app--detailPaneHost--detailObjectPage", timeout=30000)
     page.wait_for_timeout(1500)
 
 
@@ -77,7 +77,7 @@ def invoke_search(page, method_name: str) -> None:
         """
         (methodName) => {
           const core = sap.ui.getCore();
-          const view = core.byId('sap_ui5_comp---app--searchPaneHost');
+          const view = core.byId('checklist_app_comp---app--searchPaneHost');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller[methodName] !== 'function') {
             throw new Error('Search controller method not found: ' + methodName);
@@ -94,7 +94,7 @@ def invoke_detail(page, method_name: str) -> None:
         """
         (methodName) => {
           const core = sap.ui.getCore();
-          const view = core.byId('sap_ui5_comp---app--detailPaneHost');
+          const view = core.byId('checklist_app_comp---app--detailPaneHost');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller[methodName] !== 'function') {
             throw new Error('Detail controller method not found: ' + methodName);
@@ -144,7 +144,7 @@ def main() -> int:
         create_before_dnd = page.evaluate(
             """
             () => {
-              const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+              const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
               return ((view.getModel('selected').getProperty('/attachments') || []).length);
             }
             """
@@ -152,7 +152,7 @@ def main() -> int:
         page.evaluate(
             """
             () => {
-              const zone = document.querySelector('#sap_ui5_comp---app--detailPaneHost--attachmentDropZone');
+              const zone = document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentDropZone');
               if (!zone) {
                 throw new Error('attachment drop zone not found in create mode');
               }
@@ -168,7 +168,7 @@ def main() -> int:
         create_after_dnd = page.evaluate(
             """
             () => {
-              const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+              const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
               const attachments = view.getModel('selected').getProperty('/attachments') || [];
               return {
                 count: attachments.length,
@@ -217,7 +217,7 @@ def main() -> int:
         tmp_file.write_text("ui audit attachment payload", encoding="utf-8")
 
         before_upload = len(current_requests(network, lambda item: "AttachmentSet" in item["url"] or "/$batch" in item["url"]))
-        page.locator("#sap_ui5_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(tmp_file.resolve()))
+        page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(tmp_file.resolve()))
         page.wait_for_timeout(2500)
         attachment_requests = current_requests(
             network[before_upload:],

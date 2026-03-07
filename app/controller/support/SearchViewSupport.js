@@ -1,14 +1,14 @@
 ﻿sap.ui.define([
-    "sap_ui5/controller/support/SearchControllerSupport",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/controller/support/SearchLoadRuntimeSupport",
-    "sap_ui5/controller/support/SearchRateProgress",
-    "sap_ui5/controller/support/SearchCommandPolicy",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/service/framework/ControlStyleRuntime",
-    "sap_ui5/service/framework/LazyDialogRuntime",
-    "sap_ui5/infra/navigation/WorkspaceRouteNavigation",
-    "sap_ui5/controller/base/ControllerTextRuntime"
+    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/controller/support/SearchLoadRuntimeSupport",
+    "checklist/app/controller/support/SearchRateProgress",
+    "checklist/app/controller/support/SearchCommandPolicy",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/ControlStyleRuntime",
+    "checklist/app/service/framework/LazyDialogRuntime",
+    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
+    "checklist/app/controller/base/ControllerTextRuntime"
 ], function (SearchControllerSupport, ControllerModelWriteSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, LazyDialogRuntime, WorkspaceRouteNavigation, ControllerTextRuntime) {
     "use strict";
 
@@ -28,7 +28,7 @@
     var SEARCH_INITIAL_ANALYTICS_DELAY_MS = 400;
     var SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS = 96;
     var EFFECT_DIALOGS = {
-        workflowAnalytics: "sap_ui5.view.fragment.WorkflowAnalyticsDialog"
+        workflowAnalytics: "checklist.app.view.fragment.WorkflowAnalyticsDialog"
     };
 
     function setViewProperty(oController, sPath, vValue) {
@@ -562,11 +562,11 @@
         if (!oColumn || !mRule) {
             return;
         }
-        if (typeof oColumn.data === "function" && typeof oColumn.data("rnvBaseVisible") !== "boolean") {
-            oColumn.data("rnvBaseVisible", !(typeof oColumn.getVisible === "function") || oColumn.getVisible());
+        if (typeof oColumn.data === "function" && typeof oColumn.data("chkBaseVisible") !== "boolean") {
+            oColumn.data("chkBaseVisible", !(typeof oColumn.getVisible === "function") || oColumn.getVisible());
         }
-        bBaseVisible = typeof oColumn.data === "function" && typeof oColumn.data("rnvBaseVisible") === "boolean"
-            ? oColumn.data("rnvBaseVisible")
+        bBaseVisible = typeof oColumn.data === "function" && typeof oColumn.data("chkBaseVisible") === "boolean"
+            ? oColumn.data("chkBaseVisible")
             : true;
         if (typeof oColumn.setWidth === "function") {
             oColumn.setWidth(bCompactViewport ? "auto" : (mRule.width || "auto"));
@@ -626,7 +626,7 @@
 
     function getWorkflowAnalyticsDialog(oController) {
         return LazyDialogRuntime.ensureDialog(oController, "workflowAnalytics", {
-            fragmentName: "sap_ui5.view.fragment.WorkflowAnalyticsDialog",
+            fragmentName: "checklist.app.view.fragment.WorkflowAnalyticsDialog",
             afterOpen: function (oDialog, oCtrl) {
                 if (oDialog && oDialog.data && !oDialog.data("workflowAnalyticsFocusBound")) {
                     oDialog.data("workflowAnalyticsFocusBound", true);

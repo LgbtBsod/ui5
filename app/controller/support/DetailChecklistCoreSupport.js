@@ -1,12 +1,12 @@
 sap.ui.define([
-    "sap_ui5/controller/support/DetailDialogSupport",
-    "sap_ui5/controller/support/DetailViewSupport",
-    "sap_ui5/controller/support/DetailAccessViewState",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/controller/support/DetailInfoCardLayoutSupport",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/DetailDialogSupport",
+    "checklist/app/controller/support/DetailViewSupport",
+    "checklist/app/controller/support/DetailAccessViewState",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/controller/support/DetailInfoCardLayoutSupport",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
 ], function (DetailDialogSupport, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 

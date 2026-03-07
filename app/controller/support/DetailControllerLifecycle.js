@@ -1,14 +1,14 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/controller/support/ControllerResourceCleanup",
-    "sap_ui5/service/domain/detail/DetailFacade",
-    "sap_ui5/service/framework/CtxFactory",
-    "sap_ui5/service/framework/FacadeCommandContract",
-    "sap_ui5/controller/base/ControllerTextRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailAccessViewState",
-    "sap_ui5/controller/support/DetailInfoCardLayoutSupport"
+    "checklist/app/controller/support/ControllerResourceCleanup",
+    "checklist/app/service/domain/detail/DetailFacade",
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailAccessViewState",
+    "checklist/app/controller/support/DetailInfoCardLayoutSupport"
 ], function (
     JSONModel,
     ControllerResourceCleanup,

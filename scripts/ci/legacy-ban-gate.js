@@ -72,7 +72,7 @@ function scanRoots() {
 function bannedSnippets() {
   return [
     "service/backend/BackendAdapter",
-    "sap_ui5/service/backend/BackendAdapter",
+    "checklist/app/service/backend/BackendAdapter",
     "service/backend/core/",
     "service/search/SearchFacade",
     "service/detail/DetailFacade",

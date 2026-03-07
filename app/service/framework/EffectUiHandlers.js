@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/service/framework/EffectBannerRouter",
-    "sap_ui5/service/framework/EffectDialogRuntime"
+    "checklist/app/service/framework/EffectBannerRouter",
+    "checklist/app/service/framework/EffectDialogRuntime"
 ], function (EffectBannerRouter, EffectDialogRuntime) {
     "use strict";
 

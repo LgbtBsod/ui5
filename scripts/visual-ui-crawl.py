@@ -47,8 +47,8 @@ def wait_for_app_ready(page: Page, delay: int = 1200) -> None:
             return false;
           }
           const core = sap.ui.getCore();
-          return !!core.byId('sap_ui5_comp---app--searchPaneHost')
-            && !!core.byId('sap_ui5_comp---app--detailPaneHost')
+          return !!core.byId('checklist_app_comp---app--searchPaneHost')
+            && !!core.byId('checklist_app_comp---app--detailPaneHost')
             && !!document.querySelector('.appShellHeader');
         }
         """,
@@ -61,7 +61,7 @@ def wait_for_detail_ready(page: Page, delay: int = 1500) -> None:
     wait_for_app_ready(page, delay)
     page.wait_for_function(
         """
-        () => !!document.querySelector('#sap_ui5_comp---app--detailPaneHost')
+        () => !!document.querySelector('#checklist_app_comp---app--detailPaneHost')
           && (
             !!document.querySelector('.detailControlPinnedDock')
             || !!document.querySelector('.detailControlInlineCard')
@@ -156,7 +156,7 @@ def get_first_root_id(page: Page) -> str:
                 return '';
               }
               const core = sap.ui.getCore();
-              const smartTable = core.byId('sap_ui5_comp---app--searchPaneHost--searchSmartTable');
+              const smartTable = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable');
               const table = smartTable && smartTable.getTable && smartTable.getTable();
               if (!table) {
                 return '';
@@ -185,7 +185,7 @@ def trigger_search_if_needed(page: Page) -> None:
         """
         () => {
           const core = sap.ui.getCore();
-          const view = core.byId('sap_ui5_comp---app--searchPaneHost');
+          const view = core.byId('checklist_app_comp---app--searchPaneHost');
           const controller = view && view.getController && view.getController();
           if (controller && typeof controller.onSmartSearch === 'function') {
             controller.onSmartSearch();
@@ -234,7 +234,7 @@ def scroll_search(page: Page, distance: int) -> None:
         (value) => {
           const candidates = [
             document.querySelector('.sapMPageEnableScrolling'),
-            document.querySelector('#sap_ui5_comp---app--searchPaneHost'),
+            document.querySelector('#checklist_app_comp---app--searchPaneHost'),
             document.scrollingElement
           ].filter(Boolean);
           const target = candidates.find((node) => (node.scrollHeight - node.clientHeight) > 120) || document.scrollingElement;
@@ -271,8 +271,8 @@ def reset_detail_scroll(page: Page) -> None:
 
 def maybe_open_table_overflow(page: Page) -> bool:
     selectors = [
-        "#sap_ui5_comp---app--searchPaneHost--smartTableCustomToolbar-overflowButton",
-        "#sap_ui5_comp---app--searchPaneHost--searchResultsActionRail-overflowButton",
+        "#checklist_app_comp---app--searchPaneHost--smartTableCustomToolbar-overflowButton",
+        "#checklist_app_comp---app--searchPaneHost--searchResultsActionRail-overflowButton",
         ".searchSmartToolbarRail .sapMTBOverflowButton",
         ".searchResultsActionRail .sapMTBOverflowButton",
     ]
@@ -362,7 +362,7 @@ def run() -> int:
         scroll_search(page, 640)
         capture(page, report["screenshots"], "search-scrolled", "Search page after scrolling into results", full_page=True)
 
-        if safe_click(page, "#sap_ui5_comp---app--searchPaneHost--searchScrollAnchorButton", timeout=2500):
+        if safe_click(page, "#checklist_app_comp---app--searchPaneHost--searchScrollAnchorButton", timeout=2500):
             capture(page, report["screenshots"], "search-scroll-anchor", "Scroll anchor returned focus toward filters", full_page=True)
 
         set_viewport(page, 1024, 900)

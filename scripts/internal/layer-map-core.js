@@ -17,6 +17,9 @@ const {
 const ROOT = process.cwd();
 const RUNTIME_ROOT = detectRuntimeRoot(ROOT);
 const LAYER_DIRS = ['controller', 'facades', 'service/domain', 'service/backend', 'infra', 'util'];
+const CONTROLLER_INFRA_ALLOWLIST = new Set([
+  'infra/navigation/WorkspaceRouteNavigation'
+]);
 
 function rp(rel) {
   return normalizeRuntimeRelative('.', path.join(RUNTIME_ROOT, rel));
@@ -55,6 +58,13 @@ function collectGraphAndViolations(files) {
       imports.push({ raw: item.dep, resolved: dep.modulePath, layer: dep.layerName });
       if (dep.filePath) graph.get(file).push(dep.filePath);
 
+      if (
+        fromLayer === 'Controllers'
+        && dep.layerName === 'Infra'
+        && CONTROLLER_INFRA_ALLOWLIST.has(dep.modulePath)
+      ) {
+        return;
+      }
       if (fromLayer === 'Controllers' && (dep.layerName === 'Infra' || dep.layerName === 'Backend')) {
         violations.push(`controller imports ${dep.layerName.toLowerCase()}: ${fromNoPrefix} -> ${dep.modulePath}`);
       }

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/infra/adapters/Ui5StyleAdapter"
+    "checklist/app/infra/adapters/Ui5StyleAdapter"
 ], function (Ui5StyleAdapter) {
     "use strict";
 

@@ -46,8 +46,8 @@ const workflowAnalyticsBreakdowns = read("view/fragment/WorkflowAnalyticsBreakdo
 const locationValueHelpDialog = read("view/fragment/LocationValueHelpDialog.fragment.xml");
 const lockSwitchStatus = read("view/fragment/LockSwitchStatus.fragment.xml");
 
-if (!/class="rnvApp"/.test(appView)) {
-  fail("App.view.xml must declare class=\"rnvApp\" on the root view.");
+if (!/class="chkApp"/.test(appView)) {
+  fail("App.view.xml must declare class=\"chkApp\" on the root view.");
 }
 
 if (/WorkflowAnalyticsDialog/.test(searchView)) {

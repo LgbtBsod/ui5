@@ -1,10 +1,10 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/shared/UseCaseResultUtils",
-    "sap_ui5/service/domain/detail/AttachmentEffectSupport",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/shared/UseCaseResultUtils",
+    "checklist/app/service/domain/detail/AttachmentEffectSupport",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/util/CreateSentinel"
 ], function (UseCase, Result, UseCaseResultUtils, AttachmentEffectSupport, DetailStateAccess, CreateSentinel) {
     "use strict";
 

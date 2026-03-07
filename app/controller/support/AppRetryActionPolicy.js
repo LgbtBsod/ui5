@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/service/framework/SecurityTokenRefresh",
-    "sap_ui5/service/framework/EffectActionRouting"
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/service/framework/SecurityTokenRefresh",
+    "checklist/app/service/framework/EffectActionRouting"
 ], function (ActionContract, SecurityTokenRefresh, EffectActionRouting) {
     "use strict";
 

@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap_ui5/controller/support/ControllerReturnFocusRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/service/framework/FocusRuntime"
+    "checklist/app/controller/support/ControllerReturnFocusRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/FocusRuntime"
 ], function (ControllerReturnFocusRuntime, ControllerModelWriteSupport, FocusRuntime) {
     "use strict";
 

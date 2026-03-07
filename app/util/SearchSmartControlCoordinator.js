@@ -1,6 +1,6 @@
 sap.ui.define([
-    "sap_ui5/util/search/SearchBindingPolicy",
-    "sap_ui5/util/search/RebindDebouncePolicy"
+    "checklist/app/util/search/SearchBindingPolicy",
+    "checklist/app/util/search/RebindDebouncePolicy"
 ], function (SearchBindingPolicy, RebindDebouncePolicy) {
     "use strict";
 

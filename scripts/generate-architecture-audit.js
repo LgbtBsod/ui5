@@ -72,7 +72,7 @@ function findStaleRefs() {
     ...listFiles(root, { include: ['test/**'] }),
     ...listFiles(root, { include: ['tests/**'] })
   ].filter((file) => !file.startsWith('scripts/legacy/'));
-  return [...new Set(targets)].filter((f) => /service\/usecase|sap_ui5\/service\/usecase/.test(read(path.join(root, f))));
+  return [...new Set(targets)].filter((f) => /service\/usecase|checklist\/app\/service\/usecase/.test(read(path.join(root, f))));
 }
 
 function extractValidators() {

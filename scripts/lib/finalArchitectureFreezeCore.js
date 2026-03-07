@@ -98,13 +98,13 @@ function validateMetrics(issues, metrics) {
 }
 
 function validateSupportModules(issues) {
-  if (!includesDependency('controller/Search.controller.js', 'sap_ui5/controller/support/SearchControllerSupport')) {
+  if (!includesDependency('controller/Search.controller.js', 'checklist/app/controller/support/SearchControllerSupport')) {
     issues.push('Search.controller.js must use controller/support/SearchControllerSupport');
   }
-  if (!includesDependency('controller/Search.controller.js', 'sap_ui5/controller/support/SearchRateProgress')) {
+  if (!includesDependency('controller/Search.controller.js', 'checklist/app/controller/support/SearchRateProgress')) {
     issues.push('Search.controller.js must use controller/support/SearchRateProgress');
   }
-  if (!includesDependency('controller/Detail.controller.js', 'sap_ui5/controller/support/DetailFormatters')) {
+  if (!includesDependency('controller/Detail.controller.js', 'checklist/app/controller/support/DetailFormatters')) {
     issues.push('Detail.controller.js must use controller/support/DetailFormatters');
   }
   const detailSupportFiles = collectJsFiles(path.join(ROOT, 'controller/support'), [])
@@ -112,12 +112,12 @@ function validateSupportModules(issues) {
     .filter((file) => /\/Detail.*\.js$/.test(file));
   const detailCreateSentinelFiles = ['controller/Detail.controller.js', ...detailSupportFiles];
   const hasDetailCreateSentinel = detailCreateSentinelFiles.some((file) =>
-    exists(file) && includesDependency(file, 'sap_ui5/util/CreateSentinel')
+    exists(file) && includesDependency(file, 'checklist/app/util/CreateSentinel')
   );
   if (!hasDetailCreateSentinel) {
     issues.push('Detail flow must use util/CreateSentinel (controller or extracted support module)');
   }
-  if (!includesDependency('Component.js', 'sap_ui5/service/framework/ComponentRuntimeSupport')) {
+  if (!includesDependency('Component.js', 'checklist/app/service/framework/ComponentRuntimeSupport')) {
     issues.push('Component.js must use service/framework/ComponentRuntimeSupport');
   }
 }

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/util/CreateSentinel"
 ], function (CreateSentinel) {
     "use strict";
 

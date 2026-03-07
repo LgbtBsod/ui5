@@ -1,9 +1,9 @@
 sap.ui.define([
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/service/domain/shared/UseCaseResultUtils"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/service/domain/shared/UseCaseResultUtils"
 ], function (UseCase, Result, Effects, DetailStateAccess, UseCaseResultUtils) {
     "use strict";
 

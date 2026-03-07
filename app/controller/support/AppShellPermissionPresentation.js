@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/controller/support/AppShellTextSupport"
+    "checklist/app/controller/support/AppShellTextSupport"
 ], function (AppShellTextSupport) {
     "use strict";
 

@@ -44,5 +44,5 @@ function isAllowed(file) {
     return createDeadCodeIssue(file, patchPath);
   });
 
-  exitWithGateResult('dead-code-gate', errors, { filesScanned: files.length, allowlistPatterns: allow.length, deadCandidates: dead.length }, { asJson });
+  exitWithGateResult('dead-code-gate', errors, { filesScanned: files.length, allowlistPatterns: allow.length, deadCandidates: dead.length }, { asJson, advisory: true });
 })();

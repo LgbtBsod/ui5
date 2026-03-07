@@ -56,209 +56,209 @@
     "sap/m/ObjectStatus",
     "sap/m/ToolbarSpacer",
     "sap/m/Button",
-    "sap_ui5/control/ThemeToggle"
+    "checklist/app/control/ThemeToggle"
   ],
   "control/ThemeToggle.js": [
     "sap/ui/core/Control"
   ],
   "controller/App.controller.js": [
-    "sap_ui5/controller/Base.controller",
-    "sap_ui5/controller/support/AppControllerActions"
+    "checklist/app/controller/Base.controller",
+    "checklist/app/controller/support/AppControllerActions"
   ],
   "controller/Base.controller.js": [
     "sap/ui/core/mvc/Controller",
-    "sap_ui5/controller/base/RouterMixin",
-    "sap_ui5/controller/base/ModelAccessMixin",
-    "sap_ui5/controller/base/EffectMixin",
-    "sap_ui5/controller/base/ThemeMixin"
+    "checklist/app/controller/base/RouterMixin",
+    "checklist/app/controller/base/ModelAccessMixin",
+    "checklist/app/controller/base/EffectMixin",
+    "checklist/app/controller/base/ThemeMixin"
   ],
   "controller/Detail.controller.js": [
-    "sap_ui5/controller/Base.controller",
-    "sap_ui5/controller/support/DetailControllerLifecycle",
-    "sap_ui5/controller/support/DetailFormatters",
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailControllerActions"
+    "checklist/app/controller/Base.controller",
+    "checklist/app/controller/support/DetailControllerLifecycle",
+    "checklist/app/controller/support/DetailFormatters",
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailControllerActions"
   ],
   "controller/Search.controller.js": [
-    "sap_ui5/controller/Base.controller",
-    "sap_ui5/controller/support/SearchControllerActions",
-    "sap_ui5/controller/support/SearchControllerSupport",
-    "sap_ui5/controller/support/SearchRateProgress"
+    "checklist/app/controller/Base.controller",
+    "checklist/app/controller/support/SearchControllerActions",
+    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/SearchRateProgress"
   ],
   "controller/TestUserDialog.controller.js": [
-    "sap_ui5/facades/AppFacade"
+    "checklist/app/facades/AppFacade"
   ],
   "controller/base/ControllerTextRuntime.js": [],
   "controller/base/EffectMixin.js": [
-    "sap_ui5/service/framework/EffectApplier",
-    "sap_ui5/service/framework/EffectUiHandlers",
-    "sap_ui5/service/framework/FeedbackBannerRuntime",
-    "sap_ui5/controller/base/ControllerTextRuntime"
+    "checklist/app/service/framework/EffectApplier",
+    "checklist/app/service/framework/EffectUiHandlers",
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/controller/base/ControllerTextRuntime"
   ],
   "controller/base/ModelAccessMixin.js": [
-    "sap_ui5/facades/LockFacade"
+    "checklist/app/facades/LockFacade"
   ],
   "controller/base/RouterMixin.js": [],
   "controller/base/ThemeMixin.js": [
-    "sap_ui5/service/framework/ThemeRuntime"
+    "checklist/app/service/framework/ThemeRuntime"
   ],
   "controller/support/AppControllerActions.js": [
-    "sap_ui5/controller/support/AppControllerLifecycleActions",
-    "sap_ui5/controller/support/AppControllerOverlayActions",
-    "sap_ui5/controller/support/AppControllerShellActions",
-    "sap_ui5/controller/support/AppControllerStateActions",
-    "sap_ui5/controller/support/AppControllerDomActions"
+    "checklist/app/controller/support/AppControllerLifecycleActions",
+    "checklist/app/controller/support/AppControllerOverlayActions",
+    "checklist/app/controller/support/AppControllerShellActions",
+    "checklist/app/controller/support/AppControllerStateActions",
+    "checklist/app/controller/support/AppControllerDomActions"
   ],
   "controller/support/AppControllerDomActions.js": [],
   "controller/support/AppControllerLifecycleActions.js": [
-    "sap_ui5/controller/support/ControllerResourceCleanup",
-    "sap_ui5/controller/support/SplitLayoutVisualSync",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/service/framework/AppShellCoordinator",
-    "sap_ui5/service/framework/SplitterModeApplier",
+    "checklist/app/controller/support/ControllerResourceCleanup",
+    "checklist/app/controller/support/SplitLayoutVisualSync",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/AppShellCoordinator",
+    "checklist/app/service/framework/SplitterModeApplier",
     "sap/ui/core/mvc/XMLView",
     "sap/ui/layout/SplitterLayoutData",
     "sap/ui/Device"
   ],
   "controller/support/AppControllerOverlayActions.js": [
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/service/framework/LazyDialogRuntime",
-    "sap_ui5/controller/support/ControllerReturnFocusRuntime"
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/LazyDialogRuntime",
+    "checklist/app/controller/support/ControllerReturnFocusRuntime"
   ],
   "controller/support/AppControllerShellActions.js": [
-    "sap_ui5/controller/TestUserDialog.controller",
-    "sap_ui5/controller/support/AppShellTextSupport",
-    "sap_ui5/controller/support/AppRetryActionPolicy",
-    "sap_ui5/controller/support/AppShellUserActionPolicy",
-    "sap_ui5/service/framework/ClipboardRuntime",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/service/framework/FeedbackBannerState",
-    "sap_ui5/service/framework/FeedbackBannerRuntime",
-    "sap_ui5/service/framework/SecurityTokenRefresh",
-    "sap_ui5/service/framework/AppShellCoordinator",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/TestUserDialog.controller",
+    "checklist/app/controller/support/AppShellTextSupport",
+    "checklist/app/controller/support/AppRetryActionPolicy",
+    "checklist/app/controller/support/AppShellUserActionPolicy",
+    "checklist/app/service/framework/ClipboardRuntime",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/FeedbackBannerState",
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/SecurityTokenRefresh",
+    "checklist/app/service/framework/AppShellCoordinator",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/AppControllerStateActions.js": [
-    "sap_ui5/controller/support/AppShellTextSupport",
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/AppShellTextSupport",
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/AppRetryActionPolicy.js": [
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/service/framework/SecurityTokenRefresh",
-    "sap_ui5/service/framework/EffectActionRouting"
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/service/framework/SecurityTokenRefresh",
+    "checklist/app/service/framework/EffectActionRouting"
   ],
   "controller/support/AppShellTextSupport.js": [
-    "sap_ui5/controller/base/ControllerTextRuntime"
+    "checklist/app/controller/base/ControllerTextRuntime"
   ],
   "controller/support/AppShellUserActionPolicy.js": [
-    "sap_ui5/service/framework/ActionContract"
+    "checklist/app/service/framework/ActionContract"
   ],
   "controller/support/AttachmentDropZoneRuntime.js": [
-    "sap_ui5/controller/support/AttachmentUploadCore"
+    "checklist/app/controller/support/AttachmentUploadCore"
   ],
   "controller/support/AttachmentUploadCore.js": [
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/util/AttachmentUploadPolicy",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/controller/base/ControllerTextRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/util/AttachmentUploadPolicy",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/AttachmentUploadSupport.js": [
-    "sap_ui5/controller/support/AttachmentUploadCore",
-    "sap_ui5/controller/support/AttachmentDropZoneRuntime"
+    "checklist/app/controller/support/AttachmentUploadCore",
+    "checklist/app/controller/support/AttachmentDropZoneRuntime"
   ],
   "controller/support/ControllerModelWriteSupport.js": [],
   "controller/support/ControllerResourceCleanup.js": [],
   "controller/support/ControllerReturnFocusRuntime.js": [
-    "sap_ui5/service/framework/FocusRuntime"
+    "checklist/app/service/framework/FocusRuntime"
   ],
   "controller/support/DetailAccessViewState.js": [],
   "controller/support/DetailActionConstants.js": [],
   "controller/support/DetailActionDialogSupport.js": [
-    "sap_ui5/controller/support/ControllerReturnFocusRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/service/framework/FocusRuntime"
+    "checklist/app/controller/support/ControllerReturnFocusRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/service/framework/FocusRuntime"
   ],
   "controller/support/DetailActionPinnedRailSupport.js": [
-    "sap_ui5/controller/support/DetailActionConstants"
+    "checklist/app/controller/support/DetailActionConstants"
   ],
   "controller/support/DetailActionViewportSupport.js": [
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/DetailAttachmentLocationActions.js": [
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/controller/support/DetailPersonInputSupport",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/controller/support/DetailPersonInputSupport",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/DetailChecklistCoreSupport.js": [
-    "sap_ui5/controller/support/DetailDialogSupport",
-    "sap_ui5/controller/support/DetailViewSupport",
-    "sap_ui5/controller/support/DetailAccessViewState",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/DetailDialogSupport",
+    "checklist/app/controller/support/DetailViewSupport",
+    "checklist/app/controller/support/DetailAccessViewState",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/DetailChecklistRowActions.js": [
-    "sap_ui5/controller/support/DetailCommandPolicy"
+    "checklist/app/controller/support/DetailCommandPolicy"
   ],
   "controller/support/DetailChecklistStateActions.js": [
-    "sap_ui5/service/framework/EffectApplier",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/controller/support/DetailCommandPolicy",
-    "sap_ui5/service/framework/ClipboardRuntime",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/service/framework/EffectApplier",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/controller/support/DetailCommandPolicy",
+    "checklist/app/service/framework/ClipboardRuntime",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/DetailCommandPolicy.js": [],
   "controller/support/DetailControllerActions.js": [
-    "sap_ui5/controller/support/DetailValidationSummarySupport",
-    "sap_ui5/controller/support/DetailActionConstants",
-    "sap_ui5/service/framework/FacadeCommandContract",
-    "sap_ui5/controller/support/DetailActionViewportSupport",
-    "sap_ui5/controller/support/DetailActionPinnedRailSupport",
-    "sap_ui5/controller/support/DetailActionDialogSupport",
-    "sap_ui5/controller/support/DetailChecklistCoreSupport",
-    "sap_ui5/controller/support/DetailChecklistStateActions",
-    "sap_ui5/controller/support/DetailChecklistRowActions",
-    "sap_ui5/controller/support/DetailAttachmentLocationActions"
+    "checklist/app/controller/support/DetailValidationSummarySupport",
+    "checklist/app/controller/support/DetailActionConstants",
+    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/controller/support/DetailActionViewportSupport",
+    "checklist/app/controller/support/DetailActionPinnedRailSupport",
+    "checklist/app/controller/support/DetailActionDialogSupport",
+    "checklist/app/controller/support/DetailChecklistCoreSupport",
+    "checklist/app/controller/support/DetailChecklistStateActions",
+    "checklist/app/controller/support/DetailChecklistRowActions",
+    "checklist/app/controller/support/DetailAttachmentLocationActions"
   ],
   "controller/support/DetailControllerLifecycle.js": [
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/controller/support/ControllerResourceCleanup",
-    "sap_ui5/service/domain/detail/DetailFacade",
-    "sap_ui5/service/framework/CtxFactory",
-    "sap_ui5/service/framework/FacadeCommandContract",
-    "sap_ui5/controller/base/ControllerTextRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/controller/support/AttachmentUploadSupport",
-    "sap_ui5/controller/support/DetailAccessViewState"
+    "checklist/app/controller/support/ControllerResourceCleanup",
+    "checklist/app/service/domain/detail/DetailFacade",
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/controller/support/AttachmentUploadSupport",
+    "checklist/app/controller/support/DetailAccessViewState"
   ],
   "controller/support/DetailDialogSupport.js": [
-    "sap_ui5/service/framework/DraftChecklistFactory",
-    "sap_ui5/service/framework/LazyDialogRuntime"
+    "checklist/app/service/framework/DraftChecklistFactory",
+    "checklist/app/service/framework/LazyDialogRuntime"
   ],
   "controller/support/DetailFormatters.js": [
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/controller/base/ControllerTextRuntime"
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/controller/base/ControllerTextRuntime"
   ],
   "controller/support/DetailPersonInputSupport.js": [
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/DetailSelectionSync.js": [
-    "sap_ui5/util/ValidationPathMap"
+    "checklist/app/util/ValidationPathMap"
   ],
   "controller/support/DetailValidationSummarySupport.js": [
-    "sap_ui5/controller/support/DetailSelectionSync",
-    "sap_ui5/controller/support/DetailPersonInputSupport",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/DetailSelectionSync",
+    "checklist/app/controller/support/DetailPersonInputSupport",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/DetailViewSupport.js": [
     "sap/f/GridListItem",
@@ -271,119 +271,119 @@
     "sap/m/ObjectStatus",
     "sap/ui/core/Item",
     "sap/ui/core/CustomData",
-    "sap_ui5/service/framework/ControlStyleRuntime",
-    "sap_ui5/controller/base/ControllerTextRuntime",
-    "sap_ui5/controller/support/SplitLayoutVisualSync",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/service/framework/ControlStyleRuntime",
+    "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/controller/support/SplitLayoutVisualSync",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/SearchCommandPolicy.js": [],
   "controller/support/SearchControllerActions.js": [
-    "sap_ui5/controller/support/ControllerResourceCleanup",
-    "sap_ui5/service/domain/search/SearchFacade",
-    "sap_ui5/service/framework/CtxFactory",
-    "sap_ui5/service/framework/FacadeCommandContract",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/controller/support/SearchCommandPolicy",
-    "sap_ui5/controller/support/SearchControllerSupport",
-    "sap_ui5/controller/support/SearchLoadRuntimeSupport",
-    "sap_ui5/controller/support/SearchRateProgress",
-    "sap_ui5/controller/support/SearchViewSupport"
+    "checklist/app/controller/support/ControllerResourceCleanup",
+    "checklist/app/service/domain/search/SearchFacade",
+    "checklist/app/service/framework/CtxFactory",
+    "checklist/app/service/framework/FacadeCommandContract",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/controller/support/SearchCommandPolicy",
+    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/SearchLoadRuntimeSupport",
+    "checklist/app/controller/support/SearchRateProgress",
+    "checklist/app/controller/support/SearchViewSupport"
   ],
   "controller/support/SearchControllerSupport.js": [
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/util/search/SearchMaxResults"
+    "checklist/app/util/search/SearchMaxResults"
   ],
   "controller/support/SearchLoadRuntimeSupport.js": [
-    "sap_ui5/controller/support/SearchControllerSupport",
-    "sap_ui5/controller/support/ControllerModelWriteSupport"
+    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/ControllerModelWriteSupport"
   ],
   "controller/support/SearchRateProgress.js": [],
   "controller/support/SearchViewSupport.js": [
-    "sap_ui5/controller/support/SearchControllerSupport",
-    "sap_ui5/controller/support/ControllerModelWriteSupport",
-    "sap_ui5/controller/support/SearchLoadRuntimeSupport",
-    "sap_ui5/controller/support/SearchRateProgress",
-    "sap_ui5/controller/support/SearchCommandPolicy",
-    "sap_ui5/service/framework/FocusRuntime",
-    "sap_ui5/service/framework/ControlStyleRuntime",
-    "sap_ui5/service/framework/LazyDialogRuntime",
-    "sap_ui5/controller/base/ControllerTextRuntime"
+    "checklist/app/controller/support/SearchControllerSupport",
+    "checklist/app/controller/support/ControllerModelWriteSupport",
+    "checklist/app/controller/support/SearchLoadRuntimeSupport",
+    "checklist/app/controller/support/SearchRateProgress",
+    "checklist/app/controller/support/SearchCommandPolicy",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/ControlStyleRuntime",
+    "checklist/app/service/framework/LazyDialogRuntime",
+    "checklist/app/controller/base/ControllerTextRuntime"
   ],
   "controller/support/SplitLayoutVisualSync.js": [],
   "facades/AppFacade.js": [
-    "sap_ui5/model/StatePaths"
+    "checklist/app/model/StatePaths"
   ],
   "facades/LockFacade.js": [
-    "sap_ui5/infra/adapters/LockAdapter"
+    "checklist/app/infra/adapters/LockAdapter"
   ],
   "infra/adapters/BrowserCacheAdapter.js": [],
   "infra/adapters/ClockAdapter.js": [],
   "infra/adapters/DictAdapter.js": [
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
-    "sap_ui5/util/ValueTokenParser"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
+    "checklist/app/util/ValueTokenParser"
   ],
   "infra/adapters/LastChangeSetAdapter.js": [
-    "sap_ui5/infra/odata/GatewayODataClient"
+    "checklist/app/infra/odata/GatewayODataClient"
   ],
   "infra/adapters/LocationLookupAdapter.js": [
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport"
   ],
   "infra/adapters/LockAdapter.js": [
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
-    "sap_ui5/infra/adapters/shared/GatewayIdentitySupport"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
+    "checklist/app/infra/adapters/shared/GatewayIdentitySupport"
   ],
   "infra/adapters/ODataChecklistRepoAdapter.js": [
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
-    "sap_ui5/infra/adapters/shared/ChecklistSnapshotMapper",
-    "sap_ui5/infra/adapters/shared/AttachmentRepoSupport",
-    "sap_ui5/infra/adapters/shared/GatewayIdentitySupport",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/service/backend/GatewayClient"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
+    "checklist/app/infra/adapters/shared/ChecklistSnapshotMapper",
+    "checklist/app/infra/adapters/shared/AttachmentRepoSupport",
+    "checklist/app/infra/adapters/shared/GatewayIdentitySupport",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/service/backend/GatewayClient"
   ],
   "infra/adapters/PersonSuggestAdapter.js": [
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport"
   ],
   "infra/adapters/SmartControlsAdapter.js": [
-    "sap_ui5/util/SearchSmartControlCoordinator"
+    "checklist/app/util/SearchSmartControlCoordinator"
   ],
   "infra/adapters/TelemetryAdapter.js": [
-    "sap_ui5/util/UxTelemetry"
+    "checklist/app/util/UxTelemetry"
   ],
   "infra/adapters/Ui5StateAdapter.js": [],
   "infra/adapters/Ui5StyleAdapter.js": [],
   "infra/adapters/WorkflowAnalyticsAdapter.js": [
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport"
   ],
   "infra/adapters/shared/AttachmentRepoSupport.js": [
-    "sap_ui5/infra/adapters/shared/GatewayAdapterSupport",
-    "sap_ui5/infra/adapters/shared/ChecklistSnapshotMapper",
-    "sap_ui5/service/backend/GatewayClient"
+    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
+    "checklist/app/infra/adapters/shared/ChecklistSnapshotMapper",
+    "checklist/app/service/backend/GatewayClient"
   ],
   "infra/adapters/shared/ChecklistSnapshotMapper.js": [],
   "infra/adapters/shared/GatewayAdapterSupport.js": [
-    "sap_ui5/infra/odata/GatewayODataClient",
-    "sap_ui5/infra/adapters/shared/ODataAdapterUtils"
+    "checklist/app/infra/odata/GatewayODataClient",
+    "checklist/app/infra/adapters/shared/ODataAdapterUtils"
   ],
   "infra/adapters/shared/GatewayIdentitySupport.js": [],
   "infra/adapters/shared/ODataAdapterUtils.js": [],
   "infra/navigation/RouteModeCoordinator.js": [
-    "sap_ui5/util/SplitterSizeService",
-    "sap_ui5/util/DebugLogger",
-    "sap_ui5/infra/navigation/RouteModeRules",
-    "sap_ui5/infra/navigation/SplitterModeApplier",
-    "sap_ui5/infra/navigation/RouteSync"
+    "checklist/app/util/SplitterSizeService",
+    "checklist/app/util/DebugLogger",
+    "checklist/app/infra/navigation/RouteModeRules",
+    "checklist/app/infra/navigation/SplitterModeApplier",
+    "checklist/app/infra/navigation/RouteSync"
   ],
   "infra/navigation/RouteModeRules.js": [],
   "infra/navigation/RouteSync.js": [
-    "sap_ui5/util/SplitterSizeService"
+    "checklist/app/util/SplitterSizeService"
   ],
   "infra/navigation/SplitterModeApplier.js": [],
   "infra/odata/GatewayODataClient.js": [
-    "sap_ui5/service/backend/GatewayClient"
+    "checklist/app/service/backend/GatewayClient"
   ],
   "infra/ui/SplitterDragGuard.js": [
-    "sap_ui5/util/DebugLogger"
+    "checklist/app/util/DebugLogger"
   ],
   "manager/ActivityMonitor.js": [
     "sap/ui/base/EventProvider"
@@ -396,51 +396,51 @@
   ],
   "manager/GCDManager.js": [
     "sap/ui/base/EventProvider",
-    "sap_ui5/manager/shared/ManagerRuntime",
-    "sap_ui5/manager/shared/TimerRuntime"
+    "checklist/app/manager/shared/ManagerRuntime",
+    "checklist/app/manager/shared/TimerRuntime"
   ],
   "manager/HeartbeatManager.js": [
     "sap/ui/base/EventProvider",
-    "sap_ui5/manager/shared/ManagerRuntime",
-    "sap_ui5/manager/shared/TimerRuntime"
+    "checklist/app/manager/shared/ManagerRuntime",
+    "checklist/app/manager/shared/TimerRuntime"
   ],
   "manager/LockStatusMonitor.js": [
     "sap/ui/base/EventProvider",
-    "sap_ui5/manager/shared/ManagerRuntime",
-    "sap_ui5/manager/shared/TimerRuntime"
+    "checklist/app/manager/shared/ManagerRuntime",
+    "checklist/app/manager/shared/TimerRuntime"
   ],
   "manager/ManagerFacade.js": [
-    "sap_ui5/manager/SmartCacheManager",
-    "sap_ui5/manager/HeartbeatManager",
-    "sap_ui5/manager/GCDManager",
-    "sap_ui5/manager/ActivityMonitor",
-    "sap_ui5/manager/AutoSaveCoordinator",
-    "sap_ui5/manager/ConnectivityCoordinator",
-    "sap_ui5/manager/LockStatusMonitor",
-    "sap_ui5/manager/SettingsManager"
+    "checklist/app/manager/SmartCacheManager",
+    "checklist/app/manager/HeartbeatManager",
+    "checklist/app/manager/GCDManager",
+    "checklist/app/manager/ActivityMonitor",
+    "checklist/app/manager/AutoSaveCoordinator",
+    "checklist/app/manager/ConnectivityCoordinator",
+    "checklist/app/manager/LockStatusMonitor",
+    "checklist/app/manager/SettingsManager"
   ],
   "manager/SettingsManager.js": [
-    "sap_ui5/util/DebugLogger"
+    "checklist/app/util/DebugLogger"
   ],
   "manager/SmartCacheManager.js": [
     "sap/ui/base/EventProvider",
-    "sap_ui5/util/SmartCacheStore",
-    "sap_ui5/util/SmartCacheUtils"
+    "checklist/app/util/SmartCacheStore",
+    "checklist/app/util/SmartCacheUtils"
   ],
   "manager/shared/ManagerRuntime.js": [],
   "manager/shared/TimerRuntime.js": [],
   "model/ModelFactory.js": [
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/model/StateSchema",
-    "sap_ui5/util/AttachmentUploadPolicy"
+    "checklist/app/model/StateSchema",
+    "checklist/app/util/AttachmentUploadPolicy"
   ],
   "model/StatePaths.js": [
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "model/StateSchema.js": [
-    "sap_ui5/model/schema/uiSchema",
-    "sap_ui5/model/schema/workflowSchema",
-    "sap_ui5/model/schema/navigationSchema"
+    "checklist/app/model/schema/uiSchema",
+    "checklist/app/model/schema/workflowSchema",
+    "checklist/app/model/schema/navigationSchema"
   ],
   "model/schema/navigationSchema.js": [],
   "model/schema/uiSchema.js": [],
@@ -456,7 +456,7 @@
   "ports/SmartControlsPort.js": [],
   "ports/TelemetryPort.js": [],
   "ports/UiStatePort.js": [],
-  "sap_ui5/Component-preload.js": [],
+  "checklist/app/Component-preload.js": [],
   "scripts/a11y-gate.js": [
     "./lib/gateFs"
   ],
@@ -1046,420 +1046,420 @@
   ],
   "service/SmartSearchAdapter.js": [],
   "service/backend/GatewayBackendService.js": [
-    "sap_ui5/service/backend/GatewayClient"
+    "checklist/app/service/backend/GatewayClient"
   ],
   "service/backend/GatewayClient.js": [
-    "sap_ui5/service/backend/GatewayErrorNormalizer",
+    "checklist/app/service/backend/GatewayErrorNormalizer",
     ");\n        }\n        if (FORBIDDEN_PATH_PATTERNS.some(function (oPattern) { return oPattern.test("
   ],
   "service/backend/GatewayErrorNormalizer.js": [],
   "service/domain/cache/ports/BrowserCachePort.js": [],
   "service/domain/cache/ports/LastChangeSetPort.js": [],
   "service/domain/cache/usecases/CacheReadUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/cache/ports/BrowserCachePort"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/cache/ports/BrowserCachePort"
   ],
   "service/domain/cache/usecases/CacheValidationUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/cache/ports/BrowserCachePort",
-    "sap_ui5/service/domain/cache/ports/LastChangeSetPort",
-    "sap_ui5/util/WorkflowTelemetry"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/cache/ports/BrowserCachePort",
+    "checklist/app/service/domain/cache/ports/LastChangeSetPort",
+    "checklist/app/util/WorkflowTelemetry"
   ],
   "service/domain/cache/usecases/CacheWriteUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/cache/ports/BrowserCachePort"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/cache/ports/BrowserCachePort"
   ],
   "service/domain/detail/AttachmentEffectSupport.js": [
-    "sap_ui5/service/framework/Effects"
+    "checklist/app/service/framework/Effects"
   ],
   "service/domain/detail/DetailAuthorizationSupport.js": [
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/domain/detail/DetailFacade.js": [
-    "sap_ui5/service/domain/detail/usecases/OpenDetailUseCase",
-    "sap_ui5/service/domain/detail/usecases/EnterEditUseCase",
-    "sap_ui5/service/domain/detail/usecases/SaveDetailUseCase",
-    "sap_ui5/service/domain/detail/usecases/ValidateChecklistUseCase",
-    "sap_ui5/service/domain/detail/usecases/AutosaveDetailUseCase",
-    "sap_ui5/service/domain/detail/usecases/CloseDetailUseCase",
-    "sap_ui5/service/domain/detail/usecases/DeleteChecklistUseCase",
-    "sap_ui5/service/domain/detail/usecases/ChangeStatusUseCase",
-    "sap_ui5/service/domain/detail/usecases/ResolveConflictUseCase",
-    "sap_ui5/service/domain/detail/usecases/AttachmentUploadUseCase",
-    "sap_ui5/service/domain/detail/usecases/AttachmentDeleteUseCase",
-    "sap_ui5/service/domain/detail/usecases/RowOpsUseCase",
-    "sap_ui5/service/domain/detail/usecases/ValueHelpLocationUseCase",
-    "sap_ui5/service/domain/detail/usecases/PersonSuggestUseCase",
-    "sap_ui5/service/domain/detail/usecases/LockLostUseCase",
-    "sap_ui5/service/domain/detail/usecases/ForceReadOnlyUseCase",
-    "sap_ui5/service/domain/lock/usecases/TakeoverLockUseCase",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/model/StatePaths"
+    "checklist/app/service/domain/detail/usecases/OpenDetailUseCase",
+    "checklist/app/service/domain/detail/usecases/EnterEditUseCase",
+    "checklist/app/service/domain/detail/usecases/SaveDetailUseCase",
+    "checklist/app/service/domain/detail/usecases/ValidateChecklistUseCase",
+    "checklist/app/service/domain/detail/usecases/AutosaveDetailUseCase",
+    "checklist/app/service/domain/detail/usecases/CloseDetailUseCase",
+    "checklist/app/service/domain/detail/usecases/DeleteChecklistUseCase",
+    "checklist/app/service/domain/detail/usecases/ChangeStatusUseCase",
+    "checklist/app/service/domain/detail/usecases/ResolveConflictUseCase",
+    "checklist/app/service/domain/detail/usecases/AttachmentUploadUseCase",
+    "checklist/app/service/domain/detail/usecases/AttachmentDeleteUseCase",
+    "checklist/app/service/domain/detail/usecases/RowOpsUseCase",
+    "checklist/app/service/domain/detail/usecases/ValueHelpLocationUseCase",
+    "checklist/app/service/domain/detail/usecases/PersonSuggestUseCase",
+    "checklist/app/service/domain/detail/usecases/LockLostUseCase",
+    "checklist/app/service/domain/detail/usecases/ForceReadOnlyUseCase",
+    "checklist/app/service/domain/lock/usecases/TakeoverLockUseCase",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/model/StatePaths"
   ],
   "service/domain/detail/DetailSaveRuntimeSupport.js": [],
   "service/domain/detail/DetailStateAccess.js": [],
   "service/domain/detail/DetailValidationSupport.js": [
-    "sap_ui5/util/ValidationPathMap"
+    "checklist/app/util/ValidationPathMap"
   ],
   "service/domain/detail/usecases/AttachmentDeleteUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/shared/UseCaseResultUtils",
-    "sap_ui5/service/domain/detail/AttachmentEffectSupport",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/shared/UseCaseResultUtils",
+    "checklist/app/service/domain/detail/AttachmentEffectSupport",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/domain/detail/usecases/AttachmentUploadUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/shared/UseCaseResultUtils",
-    "sap_ui5/service/domain/detail/AttachmentEffectSupport",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/util/DraftChecklistFactory"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/shared/UseCaseResultUtils",
+    "checklist/app/service/domain/detail/AttachmentEffectSupport",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/util/DraftChecklistFactory"
   ],
   "service/domain/detail/usecases/AutosaveDetailUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailSaveRuntimeSupport",
-    "sap_ui5/service/domain/shared/UseCaseInputUtils",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/DeltaPayloadBuilder"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailSaveRuntimeSupport",
+    "checklist/app/service/domain/shared/UseCaseInputUtils",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/DeltaPayloadBuilder"
   ],
   "service/domain/detail/usecases/ChangeStatusUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/UseCaseInputUtils",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/service/domain/detail/DetailValidationSupport",
-    "sap_ui5/util/ChecklistValidationService",
-    "sap_ui5/util/DeltaPayloadBuilder"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/UseCaseInputUtils",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/service/domain/detail/DetailValidationSupport",
+    "checklist/app/util/ChecklistValidationService",
+    "checklist/app/util/DeltaPayloadBuilder"
   ],
   "service/domain/detail/usecases/CloseDetailUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/domain/detail/usecases/DeleteChecklistUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/domain/detail/usecases/EnterEditUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
-    "sap_ui5/service/domain/shared/UseCaseInputUtils",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
+    "checklist/app/service/domain/shared/UseCaseInputUtils",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/domain/detail/usecases/ForceReadOnlyUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/detail/usecases/LockLostUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/detail/usecases/ForceReadOnlyUseCase"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/detail/usecases/ForceReadOnlyUseCase"
   ],
   "service/domain/detail/usecases/OpenDetailUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailAuthorizationSupport",
-    "sap_ui5/service/domain/shared/UseCaseInputUtils",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
+    "checklist/app/service/domain/shared/UseCaseInputUtils",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/domain/detail/usecases/PersonSuggestUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/service/domain/shared/UseCaseResultUtils"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/service/domain/shared/UseCaseResultUtils"
   ],
   "service/domain/detail/usecases/ResolveConflictUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/detail/usecases/RowOpsUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/util/ClientKeyGenerator"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/util/ClientKeyGenerator"
   ],
   "service/domain/detail/usecases/SaveDetailUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailSaveRuntimeSupport",
-    "sap_ui5/service/domain/shared/UseCaseInputUtils",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/DeltaPayloadBuilder",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailSaveRuntimeSupport",
+    "checklist/app/service/domain/shared/UseCaseInputUtils",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/DeltaPayloadBuilder",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/domain/detail/usecases/ValidateChecklistUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/service/domain/detail/DetailValidationSupport",
-    "sap_ui5/util/ChecklistValidationService"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/service/domain/detail/DetailValidationSupport",
+    "checklist/app/util/ChecklistValidationService"
   ],
   "service/domain/detail/usecases/ValueHelpLocationUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/detail/DetailStateAccess",
-    "sap_ui5/service/domain/shared/UseCaseResultUtils"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/detail/DetailStateAccess",
+    "checklist/app/service/domain/shared/UseCaseResultUtils"
   ],
   "service/domain/lock/usecases/TakeoverLockUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/search/ExportFacade.js": [
-    "sap_ui5/service/domain/search/usecases/ExportSearchUseCase"
+    "checklist/app/service/domain/search/usecases/ExportSearchUseCase"
   ],
   "service/domain/search/SearchFacade.js": [
-    "sap_ui5/service/domain/search/usecases/BootstrapSearchUseCase",
-    "sap_ui5/service/domain/search/usecases/BuildSearchFilterUseCase",
-    "sap_ui5/service/domain/search/usecases/ExecuteSearchUseCase",
-    "sap_ui5/service/domain/search/usecases/RebindSearchUseCase",
-    "sap_ui5/service/domain/search/usecases/SelectRowUseCase",
-    "sap_ui5/service/domain/search/usecases/SelectionChangedUseCase",
-    "sap_ui5/service/domain/search/ExportFacade",
-    "sap_ui5/service/domain/search/usecases/AnalyticsUseCase",
-    "sap_ui5/service/domain/search/usecases/ApplyRebindPolicyUseCase"
+    "checklist/app/service/domain/search/usecases/BootstrapSearchUseCase",
+    "checklist/app/service/domain/search/usecases/BuildSearchFilterUseCase",
+    "checklist/app/service/domain/search/usecases/ExecuteSearchUseCase",
+    "checklist/app/service/domain/search/usecases/RebindSearchUseCase",
+    "checklist/app/service/domain/search/usecases/SelectRowUseCase",
+    "checklist/app/service/domain/search/usecases/SelectionChangedUseCase",
+    "checklist/app/service/domain/search/ExportFacade",
+    "checklist/app/service/domain/search/usecases/AnalyticsUseCase",
+    "checklist/app/service/domain/search/usecases/ApplyRebindPolicyUseCase"
   ],
   "service/domain/search/SearchSelectionEffects.js": [
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/search/usecases/AnalyticsUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/framework/ComponentRuntimeSupport"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/framework/ComponentRuntimeSupport"
   ],
   "service/domain/search/usecases/ApplyRebindPolicyUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/util/search/SearchBindingPolicy"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/util/search/SearchBindingPolicy"
   ],
   "service/domain/search/usecases/BootstrapSearchUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/search/usecases/BuildSearchFilterUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/shared/StatePaths",
-    "sap_ui5/util/search/SearchFilterBuilder"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/util/search/SearchFilterBuilder"
   ],
   "service/domain/search/usecases/ExecuteSearchUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/search/SearchSelectionEffects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/search/SearchSelectionEffects",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/search/usecases/ExportSearchUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/util/ExcelExport"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/util/ExcelExport"
   ],
   "service/domain/search/usecases/RebindSearchUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/search/SearchSelectionEffects",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/search/SearchSelectionEffects",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/search/usecases/SelectRowUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/domain/search/SearchSelectionEffects",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/service/domain/shared/StatePaths"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/search/SearchSelectionEffects",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/service/domain/shared/StatePaths"
   ],
   "service/domain/search/usecases/SelectionChangedUseCase.js": [
-    "sap_ui5/service/framework/UseCase",
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/util/SearchSmartControlCoordinator"
+    "checklist/app/service/framework/UseCase",
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/util/SearchSmartControlCoordinator"
   ],
   "service/domain/shared/StatePaths.js": [],
   "service/domain/shared/UseCaseInputUtils.js": [],
   "service/domain/shared/UseCaseResultUtils.js": [
-    "sap_ui5/service/framework/Result"
+    "checklist/app/service/framework/Result"
   ],
   "service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js": [
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/util/TimeConfigService",
-    "sap_ui5/util/DebugLogger",
-    "sap_ui5/util/AttachmentUploadPolicy"
+    "checklist/app/service/framework/Result",
+    "checklist/app/util/TimeConfigService",
+    "checklist/app/util/DebugLogger",
+    "checklist/app/util/AttachmentUploadPolicy"
   ],
   "service/domain/shared/usecases/BootstrapAppUseCase.js": [
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/backend/GatewayBackendService"
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/backend/GatewayBackendService"
   ],
   "service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase.js": [
-    "sap_ui5/service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase",
-    "sap_ui5/service/framework/Result"
+    "checklist/app/service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase",
+    "checklist/app/service/framework/Result"
   ],
   "service/domain/shared/usecases/DiagnosticsUseCase.js": [
-    "sap_ui5/service/framework/Result",
-    "sap_ui5/service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase"
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase"
   ],
   "service/domain/shared/usecases/EnsureDictLoadedUseCase.js": [
-    "sap_ui5/service/framework/Result"
+    "checklist/app/service/framework/Result"
   ],
   "service/domain/shared/usecases/StartManagersUseCase.js": [
-    "sap_ui5/service/framework/Result"
+    "checklist/app/service/framework/Result"
   ],
   "service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase.js": [
-    "sap_ui5/service/framework/Result"
+    "checklist/app/service/framework/Result"
   ],
   "service/framework/ActionContract.js": [
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
   ],
   "service/framework/ActionDispatcher.js": [
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
   ],
   "service/framework/AppShellCoordinator.js": [
     "sap/ui/model/json/JSONModel",
-    "sap_ui5/infra/navigation/RouteModeCoordinator",
-    "sap_ui5/infra/navigation/SplitterModeApplier",
-    "sap_ui5/infra/ui/SplitterDragGuard",
-    "sap_ui5/util/DebugLogger",
-    "sap_ui5/service/framework/AppShellStateSync",
-    "sap_ui5/util/TimeConfigService",
-    "sap_ui5/util/runtime/TimerDefaults"
+    "checklist/app/infra/navigation/RouteModeCoordinator",
+    "checklist/app/infra/navigation/SplitterModeApplier",
+    "checklist/app/infra/ui/SplitterDragGuard",
+    "checklist/app/util/DebugLogger",
+    "checklist/app/service/framework/AppShellStateSync",
+    "checklist/app/util/TimeConfigService",
+    "checklist/app/util/runtime/TimerDefaults"
   ],
   "service/framework/AppShellStateSync.js": [
-    "sap_ui5/service/framework/LazyDialogRuntime"
+    "checklist/app/service/framework/LazyDialogRuntime"
   ],
   "service/framework/ClipboardRuntime.js": [],
   "service/framework/ComponentInitActionRoutingSupport.js": [],
   "service/framework/ComponentInitBootSupport.js": [],
   "service/framework/ComponentInitCrossTabSupport.js": [],
   "service/framework/ComponentInitFeedbackSupport.js": [
-    "sap_ui5/service/framework/FeedbackBannerRuntime"
+    "checklist/app/service/framework/FeedbackBannerRuntime"
   ],
   "service/framework/ComponentInitListenersSupport.js": [
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/service/framework/FeedbackBannerRuntime"
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/service/framework/FeedbackBannerRuntime"
   ],
   "service/framework/ComponentInitLockRuntimeSupport.js": [],
   "service/framework/ComponentInitManagerRuntimeSupport.js": [],
   "service/framework/ComponentInitRuntime.js": [],
   "service/framework/ComponentInitRuntimeSupport.js": [],
   "service/framework/ComponentInitSaveGuardSupport.js": [
-    "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/service/framework/SecurityTokenRefresh"
+    "checklist/app/service/framework/ActionContract",
+    "checklist/app/service/framework/SecurityTokenRefresh"
   ],
   "service/framework/ComponentLockReleaseSupport.js": [
-    "sap_ui5/model/StatePaths",
-    "sap_ui5/util/CreateSentinel",
-    "sap_ui5/service/backend/GatewayBackendService"
+    "checklist/app/model/StatePaths",
+    "checklist/app/util/CreateSentinel",
+    "checklist/app/service/backend/GatewayBackendService"
   ],
   "service/framework/ComponentRuntimeSupport.js": [
-    "sap_ui5/model/StatePaths",
-    "sap_ui5/util/CreateSentinel"
+    "checklist/app/model/StatePaths",
+    "checklist/app/util/CreateSentinel"
   ],
   "service/framework/ControlStyleRuntime.js": [
-    "sap_ui5/infra/adapters/Ui5StyleAdapter"
+    "checklist/app/infra/adapters/Ui5StyleAdapter"
   ],
   "service/framework/CtxFactory.js": [
-    "sap_ui5/infra/adapters/ODataChecklistRepoAdapter",
-    "sap_ui5/infra/adapters/LockAdapter",
-    "sap_ui5/infra/adapters/DictAdapter",
-    "sap_ui5/infra/adapters/WorkflowAnalyticsAdapter",
-    "sap_ui5/infra/adapters/PersonSuggestAdapter",
-    "sap_ui5/infra/adapters/LocationLookupAdapter",
-    "sap_ui5/infra/adapters/Ui5StateAdapter",
-    "sap_ui5/infra/adapters/TelemetryAdapter",
-    "sap_ui5/infra/adapters/ClockAdapter",
-    "sap_ui5/infra/adapters/SmartControlsAdapter",
-    "sap_ui5/infra/adapters/BrowserCacheAdapter",
-    "sap_ui5/infra/adapters/LastChangeSetAdapter",
-    "sap_ui5/service/domain/cache/usecases/CacheValidationUseCase",
-    "sap_ui5/service/domain/cache/usecases/CacheReadUseCase",
-    "sap_ui5/service/domain/cache/usecases/CacheWriteUseCase"
+    "checklist/app/infra/adapters/ODataChecklistRepoAdapter",
+    "checklist/app/infra/adapters/LockAdapter",
+    "checklist/app/infra/adapters/DictAdapter",
+    "checklist/app/infra/adapters/WorkflowAnalyticsAdapter",
+    "checklist/app/infra/adapters/PersonSuggestAdapter",
+    "checklist/app/infra/adapters/LocationLookupAdapter",
+    "checklist/app/infra/adapters/Ui5StateAdapter",
+    "checklist/app/infra/adapters/TelemetryAdapter",
+    "checklist/app/infra/adapters/ClockAdapter",
+    "checklist/app/infra/adapters/SmartControlsAdapter",
+    "checklist/app/infra/adapters/BrowserCacheAdapter",
+    "checklist/app/infra/adapters/LastChangeSetAdapter",
+    "checklist/app/service/domain/cache/usecases/CacheValidationUseCase",
+    "checklist/app/service/domain/cache/usecases/CacheReadUseCase",
+    "checklist/app/service/domain/cache/usecases/CacheWriteUseCase"
   ],
   "service/framework/DraftChecklistFactory.js": [
-    "sap_ui5/util/DraftChecklistFactory"
+    "checklist/app/util/DraftChecklistFactory"
   ],
   "service/framework/EffectActionRouting.js": [
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
   ],
   "service/framework/EffectApplier.js": [
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "sap_ui5/util/DebugLogger",
-    "sap_ui5/infra/adapters/Ui5StyleAdapter",
-    "sap_ui5/service/ui/StyleTokens",
-    "sap_ui5/service/framework/EffectTextResolver",
-    "sap_ui5/service/framework/EffectModelOps",
-    "sap_ui5/service/framework/EffectBannerRouter",
-    "sap_ui5/service/framework/EffectActionRouting",
-    "sap_ui5/service/framework/EffectDialogRuntime"
+    "checklist/app/util/DebugLogger",
+    "checklist/app/infra/adapters/Ui5StyleAdapter",
+    "checklist/app/service/ui/StyleTokens",
+    "checklist/app/service/framework/EffectTextResolver",
+    "checklist/app/service/framework/EffectModelOps",
+    "checklist/app/service/framework/EffectBannerRouter",
+    "checklist/app/service/framework/EffectActionRouting",
+    "checklist/app/service/framework/EffectDialogRuntime"
   ],
   "service/framework/EffectBannerRouter.js": [
-    "sap_ui5/service/framework/FeedbackBannerRuntime",
-    "sap_ui5/service/framework/EffectActionRouting"
+    "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/EffectActionRouting"
   ],
   "service/framework/EffectDialogRuntime.js": [
-    "sap_ui5/service/framework/LazyDialogRuntime",
-    "sap_ui5/service/framework/EffectActionRouting"
+    "checklist/app/service/framework/LazyDialogRuntime",
+    "checklist/app/service/framework/EffectActionRouting"
   ],
   "service/framework/EffectModelOps.js": [],
   "service/framework/EffectTextResolver.js": [],
   "service/framework/EffectUiHandlers.js": [
-    "sap_ui5/service/framework/EffectBannerRouter",
-    "sap_ui5/service/framework/EffectDialogRuntime"
+    "checklist/app/service/framework/EffectBannerRouter",
+    "checklist/app/service/framework/EffectDialogRuntime"
   ],
   "service/framework/Effects.js": [
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
   ],
   "service/framework/FacadeCommandContract.js": [
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
   ],
   "service/framework/FeedbackBannerRuntime.js": [
-    "sap_ui5/service/framework/FeedbackBannerState"
+    "checklist/app/service/framework/FeedbackBannerState"
   ],
   "service/framework/FeedbackBannerState.js": [
-    "sap_ui5/service/framework/RuntimeInput"
+    "checklist/app/service/framework/RuntimeInput"
   ],
   "service/framework/FeedbackPolicy.js": [
-    "sap_ui5/service/framework/Effects",
-    "sap_ui5/service/framework/NormalizedError"
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/framework/NormalizedError"
   ],
   "service/framework/FocusRuntime.js": [],
   "service/framework/LazyDialogRuntime.js": [
@@ -1467,15 +1467,15 @@
   ],
   "service/framework/NormalizedError.js": [],
   "service/framework/Result.js": [
-    "sap_ui5/service/framework/FeedbackPolicy"
+    "checklist/app/service/framework/FeedbackPolicy"
   ],
   "service/framework/RuntimeInput.js": [],
   "service/framework/SecurityTokenRefresh.js": [],
   "service/framework/SplitterModeApplier.js": [
-    "sap_ui5/infra/navigation/SplitterModeApplier"
+    "checklist/app/infra/navigation/SplitterModeApplier"
   ],
   "service/framework/ThemeRuntime.js": [
-    "sap_ui5/util/ThemeService"
+    "checklist/app/util/ThemeService"
   ],
   "service/framework/UseCase.js": [],
   "service/ui/StyleTokens.js": [],
@@ -1625,75 +1625,75 @@
     "sap/base/Log"
   ],
   "util/DeltaPayloadBuilder.js": [
-    "sap_ui5/util/delta/DeltaCore",
-    "sap_ui5/util/delta/DeltaDateCodec",
-    "sap_ui5/util/delta/DeltaFieldMappers",
-    "sap_ui5/util/delta/DeltaChildChanges"
+    "checklist/app/util/delta/DeltaCore",
+    "checklist/app/util/delta/DeltaDateCodec",
+    "checklist/app/util/delta/DeltaFieldMappers",
+    "checklist/app/util/delta/DeltaChildChanges"
   ],
   "util/DraftChecklistFactory.js": [
-    "sap_ui5/util/ClientKeyGenerator"
+    "checklist/app/util/ClientKeyGenerator"
   ],
   "util/ExcelExport.js": [],
   "util/FlowCoordinator.js": [
-    "sap_ui5/infra/adapters/LockAdapter",
-    "sap_ui5/service/framework/EffectApplier",
-    "sap_ui5/model/StatePaths"
+    "checklist/app/infra/adapters/LockAdapter",
+    "checklist/app/service/framework/EffectApplier",
+    "checklist/app/model/StatePaths"
   ],
   "util/InteractionFX.js": [],
   "util/RuntimeTimerSanitizer.js": [
-    "sap_ui5/util/runtime/TimerDefaults",
-    "sap_ui5/util/runtime/TimerSanitizer"
+    "checklist/app/util/runtime/TimerDefaults",
+    "checklist/app/util/runtime/TimerSanitizer"
   ],
   "util/SearchSmartControlCoordinator.js": [
-    "sap_ui5/util/search/SearchBindingPolicy",
-    "sap_ui5/util/search/RebindDebouncePolicy"
+    "checklist/app/util/search/SearchBindingPolicy",
+    "checklist/app/util/search/RebindDebouncePolicy"
   ],
   "util/SmartCacheStore.js": [],
   "util/SmartCacheUtils.js": [],
   "util/SplitterSizeService.js": [
-    "sap_ui5/util/DebugLogger",
-    "sap_ui5/util/layout/SplitterDefaults"
+    "checklist/app/util/DebugLogger",
+    "checklist/app/util/layout/SplitterDefaults"
   ],
   "util/ThemeDomRuntime.js": [],
   "util/ThemePhilosophy.js": [],
   "util/ThemeService.js": [
     "sap/ui/core/Core",
     "sap/ui/core/theming/Parameters",
-    "sap_ui5/util/ThemePhilosophy",
-    "sap_ui5/util/ValueTokenParser",
-    "sap_ui5/util/ThemeDomRuntime",
-    "sap_ui5/util/ThemeTokenRuntime"
+    "checklist/app/util/ThemePhilosophy",
+    "checklist/app/util/ValueTokenParser",
+    "checklist/app/util/ThemeDomRuntime",
+    "checklist/app/util/ThemeTokenRuntime"
   ],
   "util/ThemeTokenRuntime.js": [],
   "util/TimeConfigService.js": [
-    "sap_ui5/util/RuntimeTimerSanitizer",
-    "sap_ui5/util/runtime/TimerDefaults"
+    "checklist/app/util/RuntimeTimerSanitizer",
+    "checklist/app/util/runtime/TimerDefaults"
   ],
   "util/UxTelemetry.js": [],
   "util/ValidationPathMap.js": [],
   "util/ValueTokenParser.js": [],
   "util/WorkflowTelemetry.js": [
-    "sap_ui5/util/DebugLogger"
+    "checklist/app/util/DebugLogger"
   ],
   "util/delta/DeltaChildChanges.js": [
-    "sap_ui5/util/delta/DeltaCore"
+    "checklist/app/util/delta/DeltaCore"
   ],
   "util/delta/DeltaCore.js": [],
   "util/delta/DeltaDateCodec.js": [],
   "util/delta/DeltaFieldMappers.js": [
-    "sap_ui5/util/delta/DeltaDateCodec"
+    "checklist/app/util/delta/DeltaDateCodec"
   ],
   "util/layout/SplitterDefaults.js": [],
   "util/runtime/TimerDefaults.js": [],
   "util/runtime/TimerSanitizer.js": [
-    "sap_ui5/util/DebugLogger"
+    "checklist/app/util/DebugLogger"
   ],
   "util/search/RebindDebouncePolicy.js": [],
   "util/search/SearchBindingPolicy.js": [
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "sap_ui5/util/search/SearchFilterBuilder",
-    "sap_ui5/util/search/SearchMaxResults"
+    "checklist/app/util/search/SearchFilterBuilder",
+    "checklist/app/util/search/SearchMaxResults"
   ],
   "util/search/SearchFilterBuilder.js": [
     "sap/ui/model/Filter",

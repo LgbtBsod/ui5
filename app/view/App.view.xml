@@ -1,17 +1,17 @@
 <mvc:View
-    controllerName="sap_ui5.controller.App"
+    controllerName="checklist.app.controller.App"
     displayBlock="true"
-    class="rnvApp"
+    class="chkApp"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:html="http://www.w3.org/1999/xhtml"
-    xmlns:cc="sap_ui5.control"
+    xmlns:cc="checklist.app.control"
     xmlns:f="sap.f">
 
     <html:div class="bg-blobs" aria-hidden="true"></html:div>
     <html:div id="detailRailViewportLayer" class="detailRailViewportLayer" aria-hidden="true"></html:div>
 
-    <VBox class="rnvSkin appShell appLayoutSingle" fitContainer="true" width="100%">
+    <VBox class="chkSkin appShell appLayoutSingle" fitContainer="true" width="100%">
         <cc:AppShellHeader
             eyebrow="{i18n>shellEyebrow}"
             productName="{i18n>shellProductName}"
@@ -47,7 +47,7 @@
             type="{path:'state>/ui/feedback/banner/global/severity', formatter:'.formatGlobalBannerType'}"
             showIcon="true"
             visible="{state>/ui/feedback/banner/global/visible}"
-            class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop appFeedbackBanner rnvFeedbackStrip">
+            class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop appFeedbackBanner chkFeedbackStrip">
             <link>
                 <Link
                     text="{i18n>retryNowButton}"
@@ -79,12 +79,12 @@
             layout="{= ${state>/layout} || 'OneColumn' }"
             backgroundDesign="Transparent">
             <f:beginColumnPages>
-                <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="sap_ui5.view.Search" width="100%"/>
+                <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="checklist.app.view.Search" width="100%"/>
             </f:beginColumnPages>
             <f:midColumnPages>
-                <mvc:XMLView id="detailPaneHost" viewName="sap_ui5.view.Detail" width="100%"/>
-                <mvc:XMLView id="analyticsPaneHost" viewName="sap_ui5.view.Analytics" width="100%"/>
-                <mvc:XMLView id="accessDeniedPaneHost" viewName="sap_ui5.view.AccessDenied" width="100%"/>
+                <mvc:XMLView id="detailPaneHost" viewName="checklist.app.view.Detail" width="100%"/>
+                <mvc:XMLView id="analyticsPaneHost" viewName="checklist.app.view.Analytics" width="100%"/>
+                <mvc:XMLView id="accessDeniedPaneHost" viewName="checklist.app.view.AccessDenied" width="100%"/>
             </f:midColumnPages>
         </f:FlexibleColumnLayout>
     </VBox>

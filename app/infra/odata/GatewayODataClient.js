@@ -1,5 +1,5 @@
 sap.ui.define([
-    "sap_ui5/service/backend/GatewayClient"
+    "checklist/app/service/backend/GatewayClient"
 ], function (GatewayClient) {
     "use strict";
 

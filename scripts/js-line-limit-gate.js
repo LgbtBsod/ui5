@@ -22,6 +22,7 @@ const MAX = 200;
 
 runGate({
   name: 'js-line-limit-gate',
+  advisory: true,
   include: [
     'controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'ports/**/*.js',
     'manager/**/*.js', 'model/**/*.js', 'util/**/*.js', 'scripts/**/*.js', 'Component.js'

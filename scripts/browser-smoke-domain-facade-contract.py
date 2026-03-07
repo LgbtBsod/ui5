@@ -34,11 +34,11 @@ def main() -> int:
                 """
                 () => new Promise((resolve) => {
                     sap.ui.require([
-                        'sap_ui5/service/domain/detail/DetailFacade',
-                        'sap_ui5/service/domain/search/SearchFacade',
-                        'sap_ui5/service/domain/search/ExportFacade',
-                        'sap_ui5/facades/AppFacade',
-                        'sap_ui5/facades/LockFacade'
+                        'checklist/app/service/domain/detail/DetailFacade',
+                        'checklist/app/service/domain/search/SearchFacade',
+                        'checklist/app/service/domain/search/ExportFacade',
+                        'checklist/app/facades/AppFacade',
+                        'checklist/app/facades/LockFacade'
                     ], function (DetailFacade, SearchFacade, ExportFacade, AppFacade, LockFacade) {
                         var detail = new DetailFacade();
                         var search = new SearchFacade();

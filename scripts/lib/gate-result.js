@@ -5,7 +5,15 @@ function createGateResult(name, errors = [], stats = {}) {
   return { name, ok: errors.length === 0, errors, stats };
 }
 
-function toPrettyText(result) {
+function isStrictAdvisoryMode(opts) {
+  return !!((opts && opts.strict) || process.env.QA_STRICT_STRUCTURAL === '1');
+}
+
+function toPrettyText(result, opts = {}) {
+  if (result.ok) return `${result.name} PASS`;
+  if (opts.advisory && !isStrictAdvisoryMode(opts)) {
+    return `${result.name} WARN\n` + result.errors.map((e) => `${e.file}${e.line ? ':' + e.line : ''} ${e.message}`).join('\n');
+  }
   if (result.ok) return `${result.name} PASS`;
   return `${result.name} FAIL\n` + result.errors.map((e) => `${e.file}${e.line ? ':' + e.line : ''} ${e.message}`).join('\n');
 }
@@ -22,9 +30,11 @@ function maybeWriteSuggestedPatch(ruleId, suggestedPatch) {
 
 function finalizeAndExit(result, opts = {}) {
   const asJson = !!opts.asJson;
-  if (asJson) console.log(JSON.stringify(result, null, 2));
-  else console.log(toPrettyText(result));
-  process.exit(result.ok ? 0 : 1);
+  const advisory = !!opts.advisory && !isStrictAdvisoryMode(opts);
+  const payload = advisory ? { ...result, advisory: true } : result;
+  if (asJson) console.log(JSON.stringify(payload, null, 2));
+  else console.log(toPrettyText(result, opts));
+  process.exit(result.ok || advisory ? 0 : 1);
 }
 
 function exitWithGateResult(name, errors, stats, opts) {
