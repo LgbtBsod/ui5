@@ -433,7 +433,7 @@
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
                                                     </layoutData>
                                                 </Text>
-                                                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' }">
+                                                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${state>/mode} !== 'READ' }">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
                                                     </layoutData>
@@ -442,8 +442,8 @@
                                                     id="attachmentCategorySelect"
                                                     width="12rem"
                                                     selectedKey="{view>/attachmentCategoryKey}"
-                                                    visible="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' }"
-                                                    enabled="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    visible="{= ${state>/mode} !== 'READ' }"
+                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                                                     items="{ path: 'masterData>/attachmentTypes', templateShareable: true }">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="10rem"/>
@@ -456,26 +456,27 @@
                                                     sameFilenameAllowed="true"
                                                     useMultipart="false"
                                                     buttonText="{i18n>uploadAttachment}"
-                                                    enabled="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    visible="{= ${state>/mode} !== 'READ' }"
+                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                                                     change=".onAttachmentUploadChange"/>
                                             </OverflowToolbar>
-                                            <VBox id="attachmentDropScope" renderType="Bare" visible="{view>/attachmentsExpanded}">
-                                                <VBox
-                                                    id="attachmentDropZone"
-                                                    visible="{= ${state>/mode} !== 'READ' }"
-                                                    class="detailAttachmentDropZone">
-                                                    <HBox alignItems="Center" class="detailAttachmentDropZoneTop">
-                                                        <core:Icon src="sap-icon://upload" class="detailAttachmentDropZoneIcon"/>
-                                                        <VBox class="sapUiTinyMarginBegin">
-                                                            <Title level="H6" text="{i18n>attachmentDropZoneTitle}"/>
-                                                            <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText"/>
-                                                        </VBox>
-                                                    </HBox>
-                                                    <Text
-                                                        text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}"
-                                                        class="modeHintText detailAttachmentDropZoneMeta"/>
-                                                </VBox>
+                                            <VBox
+                                                id="attachmentDropZone"
+                                                visible="{= ${state>/mode} !== 'READ' }"
+                                                class="detailAttachmentDropZone">
+                                                <HBox alignItems="Center" class="detailAttachmentDropZoneTop">
+                                                    <core:Icon src="sap-icon://upload" class="detailAttachmentDropZoneIcon"/>
+                                                    <VBox class="sapUiTinyMarginBegin">
+                                                        <Title level="H6" text="{i18n>attachmentDropZoneTitle}"/>
+                                                        <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText"/>
+                                                    </VBox>
+                                                </HBox>
+                                                <Text
+                                                    text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}"
+                                                    class="modeHintText detailAttachmentDropZoneMeta"/>
+                                            </VBox>
 
+                                            <VBox id="attachmentDropScope" renderType="Bare" visible="{view>/attachmentsExpanded}">
                                                 <HBox
                                                     class="detailEmptyStateCard detailAttachmentsEmptyState"
                                                     renderType="Bare"

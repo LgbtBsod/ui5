@@ -220,7 +220,7 @@
 .rnvApp .detailControlRow .sapMBtn:hover .sapMBtnInner,
 .rnvApp .detailSectionAnchorBtn:hover .sapMBtnInner {
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(18, 36, 64, 0.14);
+  box-shadow: 0 6px 14px rgba(18, 36, 64, 0.08);
 }
 
 .rnvApp .searchActionToolbarDensity .sapMBtn:active .sapMBtnInner,
@@ -231,7 +231,7 @@
 
 .rnvApp .detailSectionAnchorBtn .sapMBtnInner,
 .rnvApp .detailSectionAnchorBtn.sapMBtn:hover .sapMBtnInner {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  background: color-mix(in srgb, var(--theme-rail-bg) 52%, transparent);
 }
 
 .rnvApp .searchFilterCardDense .sapMInputBaseContentWrapper,
@@ -244,11 +244,9 @@
 .rnvApp .detailSectionCard .sapMSlt,
 .rnvApp .detailSectionCard .sapMTimePicker,
 .rnvApp .detailSectionCard .sapMDatePicker {
-  border-color: transparent;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(244, 248, 255, 0.12)),
-    color-mix(in srgb, var(--surface-2) 88%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  border-color: color-mix(in srgb, var(--border-soft) 56%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .rnvApp .searchFilterCardDense .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,

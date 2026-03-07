@@ -1,10 +1,10 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <VBox class="detailControlBar" renderType="Bare" width="100%">
 
-        <HBox class="uxStatRow detailHeroStatBoard" wrap="Wrap" renderType="Bare">
+        <HBox class="uxStatRow detailHeroStatBoard detailHeroStatBoardCompact" wrap="Wrap" renderType="Bare">
             <HBox class="uxStatChip" renderType="Bare">
                 <Text text="{i18n>checklistLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/root/id} || ${i18n>newChecklist} }"/>
+                <Text text="{= ${selected>/basic/checklist_id} || ${selected>/root/checklist_id} || ${selected>/root/CHECKLIST_ID} || (${selected>/root/id} === '__CREATE' ? ${i18n>newChecklist} : '-') }"/>
             </HBox>
 
             <HBox class="uxStatChip" renderType="Bare">
@@ -24,36 +24,6 @@
             <HBox class="uxStatChip" renderType="Bare">
                 <Text text="{i18n>headerDateLabel}" class="sapUiTinyMarginEnd"/>
                 <Text text="{path:'selected>/basic/date', formatter:'.formatHeaderDate'}"/>
-            </HBox>
-
-            <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>observerLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/basic/OBSERVER_FULLNAME} || '-' }"/>
-            </HBox>
-
-            <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>observedLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/basic/OBSERVED_FULLNAME} || '-' }"/>
-            </HBox>
-
-            <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>equipmentLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/basic/equipment} || '-' }"/>
-            </HBox>
-
-            <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>locationLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/basic/LOCATION_NAME} || ${selected>/basic/LOCATION_TEXT} || ${selected>/basic/LOCATION_KEY} || '-' }"/>
-            </HBox>
-
-            <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>headerProfessionLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/basic/PROF_TEXT} || '-' }"/>
-            </HBox>
-
-            <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>headerLpcLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/basic/LPC_TEXT} || '-' }"/>
             </HBox>
 
             <HBox class="uxStatChip" renderType="Bare">
@@ -79,6 +49,13 @@
 
         <VBox class="detailControlToolbar detailControlToolbarStack" renderType="Bare" width="100%">
             <HBox class="detailSectionAnchorRail" renderType="Bare" wrap="Wrap" alignItems="Center">
+                <Button text="{i18n>detailAnchorOverview}"
+                        icon="sap-icon://overview-chart"
+                        type="Transparent"
+                        class="detailSectionAnchorBtn rnvRipple"
+                        press=".onJumpToDetailSection">
+                    <customData><core:CustomData key="targetSection" value="ssParticipants"/></customData>
+                </Button>
                 <Button text="{i18n>detailAnchorChecks}"
                         icon="sap-icon://inspection"
                         type="Transparent"

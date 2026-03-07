@@ -345,3 +345,39 @@ body.rnvAppRoot.appDark .rnvApp *::-webkit-scrollbar-thumb {
 .rnvApp .searchPaneCenterShell {
   gap: 1rem;
 }
+
+.rnvApp .appLayoutSingle #searchPaneHost .appContent,
+.rnvApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.rnvApp .appLayoutSingle #detailPaneHost .appContent,
+.rnvApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+.rnvApp .appLayoutSingle .analyticsScreenContent,
+.rnvApp .appLayoutSingle .accessDeniedScreenContent {
+  width: 90%;
+  max-width: none;
+  margin-inline: 5%;
+  box-sizing: border-box;
+}
+
+.rnvApp .appLayoutSingle .appShellHeader {
+  width: 90%;
+  max-width: none;
+  margin: 0.78rem 5% 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 61.25rem) {
+  .rnvApp .appLayoutSingle #searchPaneHost .appContent,
+  .rnvApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+  .rnvApp .appLayoutSingle #detailPaneHost .appContent,
+  .rnvApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+  .rnvApp .appLayoutSingle .analyticsScreenContent,
+  .rnvApp .appLayoutSingle .accessDeniedScreenContent {
+    width: calc(100% - 1.5rem);
+    margin-inline: 0.75rem;
+  }
+
+  .rnvApp .appLayoutSingle .appShellHeader {
+    width: calc(100% - 1.5rem);
+    margin-inline: 0.75rem;
+  }
+}

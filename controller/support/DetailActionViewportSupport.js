@@ -14,10 +14,6 @@ sap.ui.define([
         _scheduleAttachmentDropZoneBind: function (iAttempt) {
             var iNextAttempt = Number(iAttempt || 0);
             var oDropZone;
-            if (!ControllerModelWriteSupport.get(this, "view", "/attachmentsExpanded", false)) {
-                AttachmentUploadSupport.unbindDropZone(this);
-                return;
-            }
             if (this._iAttachmentDropZoneBindTimer) {
                 clearTimeout(this._iAttachmentDropZoneBindTimer);
                 this._iAttachmentDropZoneBindTimer = null;
@@ -26,9 +22,13 @@ sap.ui.define([
                 var oDropZoneDom;
                 this._iAttachmentDropZoneBindTimer = null;
                 AttachmentUploadSupport.syncUploaderPolicy(this);
-                AttachmentUploadSupport.bindDropZone(this);
                 oDropZone = this.byId("attachmentDropZone");
                 oDropZoneDom = oDropZone && oDropZone.getDomRef && oDropZone.getDomRef();
+                if (!oDropZoneDom) {
+                    AttachmentUploadSupport.unbindDropZone(this);
+                } else {
+                    AttachmentUploadSupport.bindDropZone(this);
+                }
                 if (!oDropZoneDom && iNextAttempt < 8) {
                     this._scheduleAttachmentDropZoneBind(iNextAttempt + 1);
                 }

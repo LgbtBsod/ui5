@@ -161,17 +161,16 @@
   position: relative;
   padding: 1rem;
   overflow: hidden;
-  box-shadow:
-    0 22px 48px rgba(18, 36, 64, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 42%, transparent);
+  box-shadow: none;
 }
 
 .rnvApp .detailHeroCard {
   padding-block: 1.1rem;
   background:
-    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.16), transparent 38%),
-    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.16), transparent 42%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.03) 44%),
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.14), transparent 38%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.12), transparent 42%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 44%),
     linear-gradient(180deg, var(--surface-1), var(--surface-2));
   transition: transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
@@ -182,8 +181,8 @@
   position: absolute;
   inset: 0 auto auto 0;
   width: 100%;
-  height: 0.22rem;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.18), rgba(var(--accent-rgb), 0.04));
+  height: 0.16rem;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent-rgb), 0.03));
   pointer-events: none;
 }
 
@@ -222,9 +221,7 @@
   padding: 0.28rem 0.78rem;
   border: 1px solid var(--status-chip-border, var(--theme-chip-border));
   background: var(--status-chip-bg, var(--theme-chip-bg));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 8px 18px var(--status-chip-glow, rgba(var(--accent-rgb), 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .rnvApp .uxStatChip {
@@ -273,16 +270,12 @@
   min-height: max-content;
   padding: 0.8rem 0.85rem 0.72rem;
   overflow: visible;
-  background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 46%),
-    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  background: color-mix(in srgb, var(--surface-1) 38%, transparent);
 }
 
 .rnvApp .detailControlStickyBlock .detailControlInlineCard,
 .rnvApp .detailControlStickyBlock.detailControlInlineCard {
-  box-shadow:
-    0 26px 54px rgba(18, 36, 64, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 24px rgba(18, 36, 64, 0.06);
 }
 
 .rnvApp .detailRailHint {
@@ -296,7 +289,7 @@
 
 .rnvApp .detailControlRowActions .sapMBtn .sapMBtnInner,
 .rnvApp .detailWorkflowRail .sapMBtn .sapMBtnInner {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .rnvApp .detailControlRowActions .sapMBtn .sapMBtnInner {
@@ -413,7 +406,7 @@
 }
 
 .rnvApp .detailContent .infoCardGrid .infoCardTile:hover {
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .rnvApp .detailInfoExperienceCard .infoCardHeaderRow {
@@ -438,6 +431,145 @@
   border-color: transparent;
   background: color-mix(in srgb, var(--theme-rail-bg) 82%, transparent);
   box-shadow: none;
+}
+
+.rnvApp .detailContent .sapUxAPObjectPageSubSection {
+  scroll-margin-top: calc(var(--app-shell-offset) + 5.25rem);
+}
+
+.rnvApp .detailControlStickyBlock {
+  top: 0.2rem;
+}
+
+.rnvApp .detailControlInlineCard {
+  padding: 0.56rem 0.7rem 0.52rem;
+}
+
+.rnvApp .detailControlBar {
+  gap: 0.38rem;
+}
+
+.rnvApp .detailHeroStatBoard.detailHeroStatBoardCompact {
+  gap: 0.35rem;
+}
+
+.rnvApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip {
+  gap: 0.24rem;
+  min-height: 1.72rem;
+  padding: 0.2rem 0.62rem;
+}
+
+.rnvApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip .sapMText:first-child {
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.rnvApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip .sapMText:last-child,
+.rnvApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip .sapMObjStatusText {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.rnvApp .detailSectionAnchorRail,
+.rnvApp .detailControlRowTop,
+.rnvApp .detailControlRowActions {
+  padding: 0.12rem 0.2rem;
+  row-gap: 0.3rem;
+  column-gap: 0.34rem;
+}
+
+.rnvApp .detailSectionAnchorRail {
+  margin-bottom: 0.12rem;
+}
+
+.rnvApp .detailSectionAnchorBtn .sapMBtnInner,
+.rnvApp .detailControlRow .sapMBtn .sapMBtnInner {
+  min-height: 1.95rem;
+}
+
+.rnvApp .detailSectionAnchorBtn .sapMBtnInner {
+  padding-inline: 0.72rem;
+}
+
+.rnvApp .detailControlRowActions .sapMBtnInner,
+.rnvApp .detailControlRowTop .sapMBtnInner {
+  padding-inline: 0.68rem;
+}
+
+.rnvApp .detailRailStatusChip {
+  padding: 0.14rem 0.38rem;
+}
+
+.rnvApp .detailRailStatusChip .sapMObjStatusText,
+.rnvApp .detailRailStatusChip .sapUiIcon {
+  font-size: 0.72rem;
+}
+
+.rnvApp .detailControlRowTop .sapMTBSpacer,
+.rnvApp .detailControlRowActions .sapMTBSpacer {
+  min-width: 0.25rem;
+}
+
+.rnvApp .detailRailHint {
+  margin-top: 0.08rem;
+  font-size: 0.7rem;
+}
+
+.rnvApp .detailInfoExperienceCard {
+  padding: 0.4rem 0.6rem;
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardGrid {
+  gap: 0.55rem;
+}
+
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+.rnvApp .detailInfoExperienceCard .infoCardGrid .sapFGridList {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+  gap: 0.55rem;
+}
+
+.rnvApp .detailContent .infoCardGrid .infoCardTile {
+  padding: 0.68rem 0.72rem 0.62rem;
+}
+
+.rnvApp .detailContent .infoCardGrid .infoCardTitle {
+  margin-bottom: 0.28rem;
+  font-size: 0.7rem;
+}
+
+.rnvApp .detailContent .infoCardGrid .infoCardValue,
+.rnvApp .detailContent .infoCardGrid .sapMText,
+.rnvApp .detailContent .infoCardGrid .sapMObjectStatusText,
+.rnvApp .detailContent .infoCardGrid .sapMObjStatusText {
+  font-size: 0.86rem;
+  line-height: 1.28;
+}
+
+.rnvApp .detailAttachmentToolbar .sapMBtn,
+.rnvApp .detailAttachmentToolbar .sapMSlt {
+  margin-top: 0.08rem;
+  margin-bottom: 0.08rem;
+}
+
+.rnvApp .detailAttachmentDropZone {
+  margin-bottom: 0.45rem;
+}
+
+@media (max-width: 53.75rem) {
+  .rnvApp .detailContent .sapUxAPObjectPageSubSection {
+    scroll-margin-top: calc(var(--app-shell-offset) + 3.75rem);
+  }
+
+  .rnvApp .detailControlInlineCard {
+    padding: 0.46rem 0.52rem 0.44rem;
+  }
+
+  .rnvApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip {
+    flex: 1 1 calc(50% - 0.35rem);
+  }
 }
 
 .rnvApp .detailAttachmentDropZone {
@@ -1204,15 +1336,13 @@ body.rnvAppRoot.appLight .rnvApp .detailAttachmentDropZone {
 .rnvApp .detailSectionCard .toolbarTransparent {
   padding: 0.28rem 0.35rem 0.5rem;
   border-radius: calc(var(--radius-lg) - 0.25rem);
-  border: 1px solid transparent;
-  background: color-mix(in srgb, var(--theme-rail-bg) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 28%, transparent);
+  background: color-mix(in srgb, var(--theme-rail-bg) 32%, transparent);
   box-shadow: none;
 }
 
 .rnvApp .detailSectionCard {
-  background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 46%),
-    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  background: color-mix(in srgb, var(--surface-1) 28%, transparent);
 }
 
 .rnvApp .detailSectionCard > .sapMFlexItem,
@@ -1368,17 +1498,15 @@ body.rnvAppRoot.appLight .rnvApp .detailControlInlineCard,
 body.rnvAppRoot.appLight .rnvApp .detailSectionCard,
 body.rnvAppRoot.appLight .rnvApp .detailContent .infoCardGrid .infoCardTile {
   background:
-    radial-gradient(circle at top right, rgba(111, 182, 255, 0.12), transparent 34%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08) 46%),
-    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+    radial-gradient(circle at top right, rgba(111, 182, 255, 0.08), transparent 34%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05) 46%),
+    color-mix(in srgb, var(--surface-1) 68%, transparent);
 }
 
 body.rnvAppRoot.appLight .rnvApp .detailWorkflowChip,
 body.rnvAppRoot.appLight .rnvApp .uxStatChip,
 body.rnvAppRoot.appLight .rnvApp .detailRailStatusChip {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    0 8px 18px rgba(83, 118, 165, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 body.rnvAppRoot.appLight .rnvApp .uxStatChip {

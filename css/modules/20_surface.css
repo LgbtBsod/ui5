@@ -8,11 +8,11 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  border: 0;
-  background: color-mix(in srgb, var(--surface-1) 62%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 46%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 32%, transparent);
   box-shadow: none;
-  backdrop-filter: blur(calc(var(--glass-blur) * 0.52)) saturate(108%);
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.52)) saturate(108%);
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.34)) saturate(104%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.34)) saturate(104%);
 }
 
 body.rnvAppRoot.platformPrecisionEnterprise .glassCard,
@@ -116,9 +116,9 @@ body.rnvAppRoot.platformCalmModern .rnvStack {
 
 .rnvApp .rnvStack {
   border-radius: var(--radius-lg);
-  border: 0;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 34%, transparent);
   overflow: hidden;
-  background: color-mix(in srgb, var(--surface-1) 58%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 30%, transparent);
   box-shadow: none;
 }
 
@@ -183,14 +183,14 @@ body.rnvAppRoot.appDark .rnvApp .infoCardTile:hover::before {
     var(--theme-shell-padding-inline)
     var(--theme-shell-padding-block-end);
   border-radius: var(--radius-xl);
-  border: 0;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 42%, transparent);
   background:
-    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.08), transparent 28%),
-    color-mix(in srgb, var(--shell-surface) 72%, transparent);
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.12), transparent 28%),
+    color-mix(in srgb, var(--shell-surface) 48%, transparent);
   box-shadow: none;
   overflow: visible;
-  backdrop-filter: blur(calc(var(--glass-blur) * 0.58)) saturate(112%);
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.58)) saturate(112%);
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.42)) saturate(108%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.42)) saturate(108%);
 }
 
 .rnvApp .appShellHeader .sapMBarChild,
@@ -241,8 +241,8 @@ body.rnvAppRoot.appDark .rnvApp .infoCardTile:hover::before {
 .rnvApp .shellContextChip {
   padding: 0.2rem 0.7rem;
   border-radius: 999px;
-  border: 0;
-  background: color-mix(in srgb, var(--shell-chip-bg) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 34%, transparent);
+  background: color-mix(in srgb, var(--shell-chip-bg) 36%, transparent);
   box-shadow: none;
 }
 

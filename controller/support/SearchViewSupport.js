@@ -558,11 +558,6 @@
     function applySearchColumnRule(oController, oColumn, mRule, sColumnKey) {
         var bCompactViewport = isCompactSearchViewport(oController);
         var iViewportWidth = resolveSearchViewportWidth(oController);
-        var bNarrowSearchPane = iViewportWidth > 0 && iViewportWidth <= 900;
-        var bMediumSearchPane = iViewportWidth > 900 && iViewportWidth <= 1120;
-        var bHideInNarrowPane = bNarrowSearchPane && mRule && mRule.importance !== "High";
-        var bHideInMediumPane = bMediumSearchPane && mRule && mRule.importance === "Low";
-        var bHideForViewport = !!(bHideInNarrowPane || bHideInMediumPane);
         var bBaseVisible;
         if (!oColumn || !mRule) {
             return;
@@ -577,19 +572,19 @@
             oColumn.setWidth(bCompactViewport ? "auto" : (mRule.width || "auto"));
         }
         if (typeof oColumn.setMinScreenWidth === "function") {
-            oColumn.setMinScreenWidth("");
+            oColumn.setMinScreenWidth(mRule.minScreenWidth || "");
         }
         if (typeof oColumn.setDemandPopin === "function") {
-            oColumn.setDemandPopin(false);
+            oColumn.setDemandPopin(!!mRule.demandPopin);
         }
         if (typeof oColumn.setImportance === "function" && mRule.importance) {
             oColumn.setImportance(mRule.importance);
         }
         if (typeof oColumn.setPopinDisplay === "function") {
-            oColumn.setPopinDisplay("Inline");
+            oColumn.setPopinDisplay(bCompactViewport ? "Block" : "Inline");
         }
         if (typeof oColumn.setVisible === "function") {
-            oColumn.setVisible(!!bBaseVisible && !bHideForViewport);
+            oColumn.setVisible(!!bBaseVisible);
         }
         if (typeof oColumn.setHAlign === "function" && (sColumnKey === "SuccessChecksRate" || sColumnKey === "SuccessBarriersRate")) {
             oColumn.setHAlign("Center");
@@ -597,7 +592,7 @@
         if (typeof oColumn.toggleStyleClass === "function") {
             oColumn.toggleStyleClass("searchColumnCritical", mRule.importance === "High");
             oColumn.toggleStyleClass("searchColumnSecondary", mRule.importance === "Low");
-            oColumn.toggleStyleClass("searchColumnHiddenNarrow", bHideForViewport);
+            oColumn.toggleStyleClass("searchColumnHiddenNarrow", false);
         }
     }
 

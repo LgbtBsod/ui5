@@ -85,6 +85,7 @@ sap.ui.define([
         var o = oBasic || {};
         var sBrowserTimezone = (Intl && Intl.DateTimeFormat && Intl.DateTimeFormat().resolvedOptions && Intl.DateTimeFormat().resolvedOptions().timeZone) || "UTC";
         return {
+            checklist_id: o.ChecklistId || o.ChecklistID || o.CHECKLIST_ID || o.checklist_id || "",
             date: toYmd(o.DateCheck || o.date),
             time: String(o.TimeCheck || o.time || "").slice(0, 5),
             timezone: o.TimeZone || o.timezone || sBrowserTimezone,
@@ -108,6 +109,8 @@ sap.ui.define([
     }
     function mapResult(oRoot, oBasic, oChecks, oBarriers) {
         var oRootRow = firstRow(oRoot);
+        var oBasicRow = firstRow(oBasic);
+        var oMappedBasic = mapBasic(oBasicRow);
         var sAggChangedOn = oRootRow.ChangedOn || oRootRow.AggChangedOn || "";
         var iVersionNumber = Number(oRootRow.VersionNumber || oRootRow.version_number || 0) || 0;
         var sRootId = String(oRootRow.Key || oRootRow.RootKey || oRootRow.pcct_uuid || "").trim();
@@ -120,13 +123,16 @@ sap.ui.define([
         if (sRootId && !oRootRow.pcct_uuid) {
             oRootRow.pcct_uuid = sRootId;
         }
+        if (oMappedBasic.checklist_id && !oRootRow.checklist_id) {
+            oRootRow.checklist_id = oMappedBasic.checklist_id;
+        }
         if (iVersionNumber) {
             oRootRow.version_number = iVersionNumber;
             oRootRow.VersionNumber = iVersionNumber;
         }
         return {
             root: oRootRow,
-            basic: mapBasic(firstRow(oBasic)),
+            basic: oMappedBasic,
             checks: GatewayAdapterSupport.asArray(oChecks).map(ChecklistSnapshotMapper.mapCheckRow),
             barriers: GatewayAdapterSupport.asArray(oBarriers).map(ChecklistSnapshotMapper.mapBarrierRow),
             attachments: [],

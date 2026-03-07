@@ -88,10 +88,19 @@
                     <VBox
                         id="searchFilterCard"
                         class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell">
+                        <VBox
+                            visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }"
+                            class="searchFilterSkeletonShell"
+                            renderType="Bare">
+                            <core:Fragment
+                                fragmentName="sap_ui5.view.fragment.SkeletonFormSection"
+                                type="XML"/>
+                        </VBox>
                         <smartFilterBar:SmartFilterBar
                             id="searchSmartFilterBar"
+                            visible="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} }"
                             class="searchSmartFilterWorkbench"
-                            busy="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }"
+                            busy="false"
                             busyIndicatorDelay="0"
                             entitySet="ChecklistSearchSet"
                             persistencyKey="{view>/smartFilterPersistencyKey}"
@@ -366,7 +375,7 @@
                 <VBox
                     id="searchResultsShell"
                     class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
-                    <VBox visible="{= ${view>/busy} &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
+                    <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
                         <core:Fragment
                             fragmentName="sap_ui5.view.fragment.SkeletonList"
                             type="XML"/>
@@ -378,7 +387,7 @@
                         busyIndicatorDelay="0">
                         <smartTable:SmartTable
                             id="searchSmartTable"
-                            visible="{= !${view>/busy} || !${view>/hasSearched} }"
+                            visible="{= (!${view>/busy} &amp;&amp; !${view>/tableBusy}) || !${view>/hasSearched} }"
                             entitySet="ChecklistSearchSet"
                             smartFilterId="searchSmartFilterBar"
                             tableType="ResponsiveTable"
@@ -386,7 +395,7 @@
                             useTablePersonalisation="true"
                             showRowCount="true"
                             showFullScreenButton="true"
-                            demandPopin="false"
+                            demandPopin="true"
                             header="{i18n>resultsLabel}"
                             persistencyKey="{view>/smartTablePersistencyKey}"
                             enableAutoBinding="false"
@@ -395,7 +404,7 @@
                             useExportToExcel="false"
                             initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,DateCheck,EquipName,ChangedOn"
                             requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal,DateCheck,EquipName,ChangedOn"
-                            class="searchSmartTableControl">
+                            class="searchSmartTableControl appSkeletonReveal">
                         </smartTable:SmartTable>
                     </VBox>
 

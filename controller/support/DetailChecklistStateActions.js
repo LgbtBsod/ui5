@@ -19,6 +19,12 @@ sap.ui.define([
         return iTop;
     }
 
+    function resolvePinnedRailHeight(oController) {
+        var oStickyHost = oController && oController.byId && oController.byId("detailControlPinnedDock");
+        var oStickyDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
+        return Math.round((oStickyDom && oStickyDom.offsetHeight) || 0);
+    }
+
     return {
         onToggleEdit: function (oEvent) {
             return DetailCommandPolicy.enterEdit(this, { state: !!oEvent.getParameter("state"), rootId: this._currentRootId() }).finally(function () {
@@ -130,7 +136,7 @@ sap.ui.define([
             oDomRef = oTarget.getDomRef && oTarget.getDomRef();
             if (!oDomRef) {
                 if (oObjectPage && typeof oObjectPage.scrollToSection === "function") {
-                    oObjectPage.scrollToSection(oTarget.getId(), 250, -28);
+                    oObjectPage.scrollToSection(oTarget.getId(), 250, -(resolvePinnedRailHeight(this) + 22));
                 }
                 return;
             }
@@ -149,18 +155,18 @@ sap.ui.define([
             if (!Number.isFinite(iTopOffset)) {
                 iTopOffset = 88;
             }
-            iPinnedHeight = (document.querySelector(".detailControlExperienceCard.detailControlCardViewportPinned") || {}).offsetHeight || 0;
+            iPinnedHeight = resolvePinnedRailHeight(this);
             if (oScrollHost && typeof oScrollHost.scrollTop === "number") {
                 iHostTop = (oScrollHost.getBoundingClientRect && oScrollHost.getBoundingClientRect().top) || 0;
                 iTargetTop = Math.max(
                     0,
-                    Math.round(resolveOffsetTopWithinHost(oTargetNode, oScrollHost) - (iTopOffset + iPinnedHeight + 22 - iHostTop))
+                    Math.round(resolveOffsetTopWithinHost(oTargetNode, oScrollHost) - (iTopOffset + iPinnedHeight + 16 - iHostTop))
                 );
                 oScrollHost.scrollTo({ top: iTargetTop, behavior: "smooth" });
                 return;
             }
             if (oObjectPage && typeof oObjectPage.scrollToSection === "function") {
-                oObjectPage.scrollToSection(oTarget.getId(), 250, -(iTopOffset + iPinnedHeight + 22));
+                oObjectPage.scrollToSection(oTarget.getId(), 250, -(iTopOffset + iPinnedHeight + 16));
                 return;
             }
             if (oTargetNode && typeof oTargetNode.scrollIntoView === "function") {
