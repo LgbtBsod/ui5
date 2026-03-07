@@ -7,7 +7,7 @@ pushd "%~dp0" || (
 )
 
 set "ROOT_DIR=."
-set "GATEWAY_DIR=mock_gate_way"
+set "GATEWAY_DIR=backend\\mock_gateway"
 set "REQ_FILE=%GATEWAY_DIR%\requirements.txt"
 set "VENV_DIR=%GATEWAY_DIR%\.venv"
 set "PYTHON_EXE="

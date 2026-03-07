@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$mockRoot = Join-Path $repoRoot "mock_gate_way"
+$mockRoot = Join-Path $repoRoot "backend\\mock_gateway"
 $pythonVenv = Join-Path $mockRoot ".venv\\Scripts\\python.exe"
 $pidDir = Join-Path $repoRoot "docs\\runtime"
 $backendPidFile = Join-Path $pidDir "mock_backend.pid"

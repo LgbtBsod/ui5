@@ -3,8 +3,10 @@ const fs = require("fs");
 const path = require("path");
 const { listFiles } = require("./lib/fileWalker");
 const { readJsonSafe, readTextSafe } = require("./lib/auditInput");
+const { detectRuntimeRoot } = require("./qa-shared");
 
 const ROOT = process.cwd();
+const RUNTIME_ROOT = detectRuntimeRoot(ROOT);
 const REPORT_PATH = path.join(ROOT, "docs/artifacts/feature-scan-report.json");
 const ALLOWLIST_PATH = path.join(ROOT, "scripts/feature-scan-allowlist.json");
 const EVENT_ATTRS = [
@@ -129,7 +131,7 @@ function collectTodoTriggers() {
 }
 
 function collectUnreachableRoutes() {
-    const manifestPath = path.join(ROOT, "manifest.json");
+    const manifestPath = path.join(ROOT, RUNTIME_ROOT, "manifest.json");
     if (!fs.existsSync(manifestPath)) {
         return [];
     }
@@ -205,7 +207,7 @@ function writeReport(report) {
             sleepSync(80 * (i + 1));
         }
     }
-    const fallbackPath = path.join(ROOT, "feature-scan-report.fallback.json");
+    const fallbackPath = path.join(ROOT, "docs/artifacts/feature-scan-report.fallback.json");
     fs.writeFileSync(fallbackPath, text);
     console.warn(`[feature:scan] WARN report path locked, wrote fallback report: ${fallbackPath}`);
     return fallbackPath;

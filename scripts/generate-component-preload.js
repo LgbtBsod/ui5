@@ -2,7 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(__dirname, '..');
+const ROOT = path.join(REPO_ROOT, 'app');
 const OUT_MAIN = path.join(ROOT, 'Component-preload.js');
 const OUT_NS_DIR = path.join(ROOT, 'sap_ui5');
 const OUT_NS = path.join(OUT_NS_DIR, 'Component-preload.js');
@@ -58,4 +59,4 @@ fs.writeFileSync(OUT_MAIN, banner + body, 'utf8');
 if (!fs.existsSync(OUT_NS_DIR)) fs.mkdirSync(OUT_NS_DIR, { recursive: true });
 fs.writeFileSync(OUT_NS, `/* namespace proxy */\n(function(){\n  var s = document.createElement('script');\n  s.src = '../Component-preload.js';\n  document.head.appendChild(s);\n}());\n`, 'utf8');
 
-console.log(`Generated preload with ${files.length} assets -> ${path.relative(ROOT, OUT_MAIN)}`);
+console.log(`Generated preload with ${files.length} assets -> ${path.relative(REPO_ROOT, OUT_MAIN)}`);

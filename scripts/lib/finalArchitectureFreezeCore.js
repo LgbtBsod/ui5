@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const { detectRuntimeRoot } = require('../qa-shared');
 
 const ROOT = process.cwd();
+const RUNTIME_ROOT = detectRuntimeRoot(ROOT);
 
 const REQUIRED_FILES = [
   'docs/final-architecture-contract.md',
@@ -20,11 +22,14 @@ const LIMITS = {
 };
 
 function read(file) {
-  return fs.readFileSync(path.join(ROOT, file), 'utf8');
+  const direct = path.join(ROOT, file);
+  const runtime = path.join(ROOT, RUNTIME_ROOT, file);
+  const target = fs.existsSync(direct) ? direct : runtime;
+  return fs.readFileSync(target, 'utf8');
 }
 
 function exists(file) {
-  return fs.existsSync(path.join(ROOT, file));
+  return fs.existsSync(path.join(ROOT, file)) || fs.existsSync(path.join(ROOT, RUNTIME_ROOT, file));
 }
 
 function countLines(file) {
@@ -103,6 +108,7 @@ function validateSupportModules(issues) {
     issues.push('Detail.controller.js must use controller/support/DetailFormatters');
   }
   const detailSupportFiles = collectJsFiles(path.join(ROOT, 'controller/support'), [])
+    .concat(collectJsFiles(path.join(ROOT, RUNTIME_ROOT, 'controller/support'), []))
     .filter((file) => /\/Detail.*\.js$/.test(file));
   const detailCreateSentinelFiles = ['controller/Detail.controller.js', ...detailSupportFiles];
   const hasDetailCreateSentinel = detailCreateSentinelFiles.some((file) =>
@@ -148,9 +154,13 @@ function validateLocalizationKeys(issues) {
 
 function validateCreateSentinelCentralization(issues) {
   const runtimeFiles = collectJsFiles(path.join(ROOT, 'controller'), [])
+    .concat(collectJsFiles(path.join(ROOT, RUNTIME_ROOT, 'controller'), []))
     .concat(collectJsFiles(path.join(ROOT, 'service'), []))
+    .concat(collectJsFiles(path.join(ROOT, RUNTIME_ROOT, 'service'), []))
     .concat(collectJsFiles(path.join(ROOT, 'infra'), []))
-    .concat(collectJsFiles(path.join(ROOT, 'util'), []));
+    .concat(collectJsFiles(path.join(ROOT, RUNTIME_ROOT, 'infra'), []))
+    .concat(collectJsFiles(path.join(ROOT, 'util'), []))
+    .concat(collectJsFiles(path.join(ROOT, RUNTIME_ROOT, 'util'), []));
   const localDefs = runtimeFiles.filter((file) => {
     if (file === 'util/CreateSentinel.js') {
       return false;

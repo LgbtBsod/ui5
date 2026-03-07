@@ -11,9 +11,14 @@ __pycache__/
 venv/
 env/
 ENV/
+backend/mock_gateway/.venv/
 mock_gate_way/.venv/
 
 # Python runtime outputs
+backend/mock_gateway/uploads/
+backend/mock_gateway/gateway.db
+backend/mock_gateway/gateway.db-shm
+backend/mock_gateway/gateway.db-wal
 mock_gate_way/uploads/
 mock_gate_way/gateway.db
 mock_gate_way/gateway.db-shm
@@ -23,6 +28,7 @@ mock_gate_way/gateway.db-wal
 *.log
 docs/runtime/
 artifacts/*.log
+backend/mock_gateway/tmp_mock*.log
 mock_gate_way/tmp_mock*.log
 artifacts/*
 # Visual review artifacts and temporary captures

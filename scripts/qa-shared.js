@@ -7,11 +7,20 @@ function normalizePath(filePath) {
   return filePath.replace(/\\/g, '/');
 }
 
+function resolveAbsolute(rootDir, relPath) {
+  return path.join(rootDir, relPath);
+}
 
 function detectRuntimeRoot(rootDir) {
-  const webappPath = resolveFromRoot(rootDir, 'webapp');
-  const webappManifest = resolveFromRoot(rootDir, 'webapp/manifest.json');
-  const webappComponent = resolveFromRoot(rootDir, 'webapp/Component.js');
+  const appPath = resolveAbsolute(rootDir, 'app');
+  const appManifest = resolveAbsolute(rootDir, 'app/manifest.json');
+  const appComponent = resolveAbsolute(rootDir, 'app/Component.js');
+  if (fs.existsSync(appPath) && fs.statSync(appPath).isDirectory() && (fs.existsSync(appManifest) || fs.existsSync(appComponent))) {
+    return 'app';
+  }
+  const webappPath = resolveAbsolute(rootDir, 'webapp');
+  const webappManifest = resolveAbsolute(rootDir, 'webapp/manifest.json');
+  const webappComponent = resolveAbsolute(rootDir, 'webapp/Component.js');
   if (fs.existsSync(webappPath) && fs.statSync(webappPath).isDirectory() && (fs.existsSync(webappManifest) || fs.existsSync(webappComponent))) {
     return 'webapp';
   }
@@ -24,7 +33,15 @@ function countFileLines(rootDir, relPath) {
 }
 
 function resolveFromRoot(rootDir, relPath) {
-  return path.join(rootDir, relPath);
+  const runtimeRoot = detectRuntimeRoot(rootDir);
+  const directPath = resolveAbsolute(rootDir, relPath);
+  if (fs.existsSync(directPath)) {
+    return directPath;
+  }
+  if (runtimeRoot !== '.') {
+    return resolveAbsolute(rootDir, path.join(runtimeRoot, relPath));
+  }
+  return directPath;
 }
 
 function fileExists(rootDir, relPath) {
@@ -36,17 +53,21 @@ function readText(rootDir, relPath) {
 }
 
 function collectFilesRecursively(rootDir, relDir, matcher, out) {
-  if (!fileExists(rootDir, relDir)) {
+  const runtimeRoot = detectRuntimeRoot(rootDir);
+  const physicalRelDir = fileExists(rootDir, relDir)
+    ? relDir
+    : (runtimeRoot !== '.' ? normalizePath(path.join(runtimeRoot, relDir)) : relDir);
+  if (!fileExists(rootDir, physicalRelDir)) {
     return;
   }
 
-  const absDir = resolveFromRoot(rootDir, relDir);
+  const absDir = resolveFromRoot(rootDir, physicalRelDir);
   for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
     if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'scripts') {
       continue;
     }
 
-    const relPath = normalizePath(path.join(relDir, entry.name));
+    const relPath = normalizePath(path.join(physicalRelDir, entry.name));
     if (entry.isDirectory()) {
       collectFilesRecursively(rootDir, relPath, matcher, out);
       continue;

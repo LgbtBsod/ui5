@@ -6,7 +6,7 @@ Usage:
 
 Defaults:
   url = http://127.0.0.1:8080/index.html
-  output_dir = artifacts/ux/baseline
+  output_dir = docs/artifacts/ux/baseline
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ except ModuleNotFoundError:
     sync_playwright = None
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
-OUT_DIR = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "artifacts/ux/baseline")
+OUT_DIR = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "docs/artifacts/ux/baseline")
 DETAIL_ROOT = "E49B679F518F4947BD7A0F2CC1C4AC46"
 
 

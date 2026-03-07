@@ -6,8 +6,10 @@ const { listFiles } = require('../lib/fileWalker');
 const { exitWithGateResult, maybeWriteSuggestedPatch } = require('../lib/gate-result');
 const { createDeadCodeIssue } = require('./gate-issue-presets');
 const { readJsonSafe } = require('../lib/auditInput');
+const { detectRuntimeRoot } = require('../qa-shared');
 
 const root = path.resolve(__dirname, '../..');
+const runtimeRoot = detectRuntimeRoot(root);
 const allowlistPath = path.join(root, 'scripts/ci/dead-code-allowlist.json');
 const allow = (readJsonSafe(allowlistPath, { patterns: [] }).patterns) || [];
 
@@ -25,7 +27,7 @@ function isAllowed(file) {
   const asJson = process.argv.includes('--json');
   const dirs = ['controller', 'service', 'infra', 'util', 'manager'];
   const files = dirs.flatMap((d) => listFiles(root, { include: [`${d}/*.js`, `${d}/**/*.js`] })).sort();
-  const entryFiles = ['Component.js'].filter((file) => fs.existsSync(path.join(root, file)));
+  const entryFiles = [path.join(runtimeRoot, 'Component.js').replace(/\\/g, '/')].filter((file) => fs.existsSync(path.join(root, file)));
   const scanFiles = [...new Set([...files, ...entryFiles])].sort();
   const rev = Object.fromEntries(files.map((f) => [f, []]));
 

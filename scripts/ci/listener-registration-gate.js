@@ -8,6 +8,7 @@ const { createGateResult, finalizeAndExit } = require('../lib/gate-result');
 const root = path.resolve(__dirname, '..', '..');
 const files = collectFilesByExtensions(root, ['.', 'controller', 'service', 'util'], ['.js'])
   .filter((file) => !file.startsWith('scripts/'))
+  .filter((file) => !file.startsWith('backend/mock_gateway/'))
   .filter((file) => !file.startsWith('mock_gate_way/'))
   .filter((file) => !file.startsWith('node_modules/'));
 

@@ -235,8 +235,8 @@ function printIssues(prefix, issues) {
 function checkBackendFoldersGuard(fails) {
   const candidates = getChangedFiles();
   for (const file of candidates) {
-    if (file.startsWith('sap_backend/')) {
-      addIssue(fails, 'I', file, 'sap_backend/ must remain untouched');
+    if (file.startsWith('backend/sap_backend/') || file.startsWith('sap_backend/')) {
+      addIssue(fails, 'I', file, 'backend/sap_backend/ must remain untouched');
     }
   }
 }

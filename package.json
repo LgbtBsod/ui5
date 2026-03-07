@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "lint:css": "stylelint css/style.css css/modules/00_tokens.css css/modules/01_theme-modes.css css/modules/02_background.css css/modules/10_base.css css/modules/20_surface.css css/modules/21_controls.css css/modules/22_skeleton.css css/modules/23_dialogs.css css/modules/40_page_search.css css/modules/41_page_detail.css css/modules/90_ui5_patches.css",
+    "lint:css": "stylelint app/css/style.css app/css/modules/00_tokens.css app/css/modules/01_theme-modes.css app/css/modules/02_background.css app/css/modules/10_base.css app/css/modules/20_surface.css app/css/modules/21_controls.css app/css/modules/22_skeleton.css app/css/modules/23_dialogs.css app/css/modules/40_page_search.css app/css/modules/41_page_detail.css app/css/modules/90_ui5_patches.css",
     "check:css-arch": "node scripts/check-css-architecture.mjs",
     "check:xml": "node scripts/check-xml-views.mjs",
     "check:baseline": "node scripts/pair-snapshots-gate.js",

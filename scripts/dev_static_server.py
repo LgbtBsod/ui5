@@ -160,7 +160,10 @@ class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 def main() -> None:
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
-    root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[1]
+    app_root = repo_root / "app"
+    webapp_root = repo_root / "webapp"
+    root = app_root if app_root.exists() else webapp_root if webapp_root.exists() else repo_root
 
     class ReusableTCPServer(socketserver.ThreadingTCPServer):
         allow_reuse_address = True

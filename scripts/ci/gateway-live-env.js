@@ -7,7 +7,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const rootDir = path.resolve(__dirname, '..', '..');
-const mockRoot = path.join(rootDir, 'mock_gate_way');
+const mockRoot = path.join(rootDir, 'backend', 'mock_gateway');
 const runtimeDir = path.join(rootDir, 'docs', 'runtime');
 const pythonBinRaw = process.env.PYTHON_BIN || process.env.PYTHON || 'python';
 const pythonBin = path.basename(pythonBinRaw) === pythonBinRaw ? pythonBinRaw : path.resolve(rootDir, pythonBinRaw);
