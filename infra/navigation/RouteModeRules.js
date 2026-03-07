@@ -22,6 +22,12 @@ sap.ui.define([], function () {
         if (sRouteName === "search") {
             return "OneColumn";
         }
+        if (sRouteName === "analytics") {
+            return "MidColumnFullScreen";
+        }
+        if (sRouteName === "accessDenied") {
+            return "TwoColumnsMidExpanded";
+        }
         if (sRouteName === "detail") {
             return "TwoColumnsMidExpanded";
         }

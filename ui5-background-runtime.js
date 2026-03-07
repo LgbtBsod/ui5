@@ -27,7 +27,8 @@
         enabled: true,
         interactive: true,
         visible: !document.hidden,
-        quality: "high"
+        quality: "high",
+        resizing: false
     };
 
     var tx = 0;
@@ -203,7 +204,7 @@
         var dt;
 
         raf = 0;
-        if (!state.visible || !state.enabled) {
+        if (!state.visible || !state.enabled || state.resizing) {
             return;
         }
 
@@ -224,7 +225,7 @@
             raf = 0;
         }
 
-        if (!state.visible || !state.enabled || !state.interactive) {
+        if (!state.visible || !state.enabled || !state.interactive || state.resizing) {
             return;
         }
 
@@ -343,23 +344,27 @@
                 enabled: state.enabled,
                 interactive: state.interactive,
                 visible: state.visible,
-                quality: state.quality
+                quality: state.quality,
+                resizing: state.resizing
             };
         },
         destroy: destroy,
         onResizeStart: function () {
+            state.resizing = true;
             pauseSVG();
             if (bgWrap) {
-                bgWrap.style.opacity = "0";
                 bgWrap.style.transition = "none";
-            }
-        },
-        onResizeEnd: function () {
-            if (bgWrap) {
-                bgWrap.style.transition = "opacity 200ms ease";
                 bgWrap.style.opacity = "1";
             }
-            if (state.enabled) {
+            ensureLoop();
+        },
+        onResizeEnd: function () {
+            state.resizing = false;
+            if (bgWrap) {
+                bgWrap.style.transition = "";
+                bgWrap.style.opacity = "1";
+            }
+            if (state.enabled && state.visible) {
                 unpauseSVG();
             }
             ensureLoop();

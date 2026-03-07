@@ -1,0 +1,126 @@
+.rnvApp .analyticsScreenContent,
+.rnvApp .accessDeniedScreenContent {
+  width: 100%;
+  min-width: 0;
+}
+
+.rnvApp .analyticsHeroCard,
+.rnvApp .accessDeniedHeroCard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 1.2rem;
+  border-radius: calc(var(--radius-lg) - 0.1rem);
+  border: 1px solid var(--border-soft);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.16), transparent 42%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 46%),
+    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  box-shadow:
+    0 22px 48px rgba(18, 36, 64, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .analyticsHeroCopy,
+.rnvApp .accessDeniedHeroCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  min-width: 0;
+  flex: 1 1 18rem;
+}
+
+.rnvApp .analyticsHeroActions,
+.rnvApp .accessDeniedHeroActions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.rnvApp .analyticsScreenSubtitle,
+.rnvApp .accessDeniedSubtitle,
+.rnvApp .accessDeniedMetaText {
+  color: var(--text-subtle);
+}
+
+.rnvApp .analyticsScreenTitle,
+.rnvApp .accessDeniedTitle {
+  line-height: 1.05;
+}
+
+.rnvApp .analyticsScreenBody {
+  gap: 0.9rem;
+}
+
+.rnvApp .analyticsScreenBody .searchAnalyticsDialogBreakdowns,
+.rnvApp .analyticsScreenBody .analyticsNarrativeBlock,
+.rnvApp .analyticsScreenBody .analyticsBreakdownSection {
+  width: 100%;
+}
+
+.rnvApp .accessDeniedHeroCard {
+  min-height: calc(100vh - var(--app-shell-offset) - 4.5rem);
+  align-items: center;
+  justify-content: center;
+}
+
+.rnvApp .accessDeniedVisual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(7rem, 18vw, 10rem);
+  height: clamp(7rem, 18vw, 10rem);
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, rgba(var(--accent-rgb), 0.18) 78%, transparent);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.24), transparent 52%),
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 86%, transparent), color-mix(in srgb, var(--surface-3) 90%, transparent));
+  box-shadow:
+    0 18px 40px rgba(18, 36, 64, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rnvApp .accessDeniedIcon {
+  font-size: clamp(2.75rem, 7vw, 4.6rem);
+  color: var(--accent);
+}
+
+.rnvApp .accessDeniedMetaRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  margin-top: 0.32rem;
+}
+
+.rnvApp .accessDeniedMetaTag {
+  padding: 0.3rem 0.82rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+}
+
+.rnvApp .accessDeniedBackendMessage {
+  margin-top: 0.38rem;
+}
+
+@media (max-width: 960px) {
+  .rnvApp .analyticsHeroCard,
+  .rnvApp .accessDeniedHeroCard {
+    padding: 1rem;
+  }
+
+  .rnvApp .analyticsHeroActions,
+  .rnvApp .accessDeniedHeroActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .rnvApp .accessDeniedHeroCard {
+    min-height: calc(100vh - var(--app-shell-offset) - 2.5rem);
+  }
+}

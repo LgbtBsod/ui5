@@ -78,8 +78,13 @@ html.rnvResizing .rnvApp * {
 }
 
 html.rnvResizing #ui5-bg {
-  opacity: 0 !important;
   pointer-events: none !important;
+  transition: none !important;
+}
+
+html.rnvResizing #ui5-bg #bgLight,
+html.rnvResizing #ui5-bg #bgDark {
+  transition: none !important;
 }
 
 .rnvApp .appRootFcl .sapFFCLColumn {

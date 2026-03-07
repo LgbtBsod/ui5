@@ -7,8 +7,9 @@
     "sap_ui5/service/framework/FocusRuntime",
     "sap_ui5/service/framework/ControlStyleRuntime",
     "sap_ui5/service/framework/LazyDialogRuntime",
+    "sap_ui5/infra/navigation/WorkspaceRouteNavigation",
     "sap_ui5/controller/base/ControllerTextRuntime"
-], function (SearchControllerSupport, ControllerModelWriteSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, LazyDialogRuntime, ControllerTextRuntime) {
+], function (SearchControllerSupport, ControllerModelWriteSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, LazyDialogRuntime, WorkspaceRouteNavigation, ControllerTextRuntime) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = {
@@ -1238,24 +1239,14 @@
     }
 
     function openWorkflowAnalytics(oController) {
-        oController._bWorkflowAnalyticsOpenRequested = true;
-        setViewProperty(oController, "/analyticsBusy", true);
-        setViewProperty(oController, "/analyticsError", "");
-        return getWorkflowAnalyticsDialog(oController)
-            .then(function (oDialog) {
-                if (oDialog && oDialog.open) {
-                    oDialog.open();
-                }
-                return SearchCommandPolicy.analytics(oController, { intent: "openDialog", userInitiated: true });
-            })
-            .finally(function () {
-                oController._bWorkflowAnalyticsOpenRequested = false;
-            });
+        oController._bWorkflowAnalyticsOpenRequested = false;
+        WorkspaceRouteNavigation.navigateToAnalytics(oController);
+        return Promise.resolve();
     }
 
     function closeWorkflowAnalytics(oController) {
         oController._bWorkflowAnalyticsOpenRequested = false;
-        SearchCommandPolicy.analytics(oController, { intent: "closeDialog" });
+        WorkspaceRouteNavigation.navigateBackFromAnalytics(oController);
     }
 
     function runExport(oController, sEntity) {

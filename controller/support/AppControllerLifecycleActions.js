@@ -20,6 +20,31 @@ sap.ui.define([
         return "OneColumn";
     }
 
+    function resolveMidColumnPageId(sRouteName) {
+        if (sRouteName === "analytics") {
+            return "analyticsPaneHost";
+        }
+        if (sRouteName === "accessDenied") {
+            return "accessDeniedPaneHost";
+        }
+        return "detailPaneHost";
+    }
+
+    function syncMidColumnPage(oController, sRouteName) {
+        var oLayout = oController.byId && oController.byId("mainFcl");
+        var oTargetPage = oController.byId && oController.byId(resolveMidColumnPageId(sRouteName));
+        var oCurrentPage;
+
+        if (!oLayout || !oTargetPage || typeof oLayout.toMidColumnPage !== "function") {
+            return;
+        }
+        oCurrentPage = oLayout.getCurrentMidColumnPage && oLayout.getCurrentMidColumnPage();
+        if (oCurrentPage && oCurrentPage.getId && oCurrentPage.getId() === oTargetPage.getId()) {
+            return;
+        }
+        oLayout.toMidColumnPage(oTargetPage);
+    }
+
     function markStartupReady() {
         if (typeof window === "undefined" || typeof window.__ui5MarkAppReady !== "function") {
             return;
@@ -66,6 +91,9 @@ sap.ui.define([
             if (this._oLayoutBinding) {
                 this._oLayoutBinding = ControllerResourceCleanup.destroyBinding(this._oLayoutBinding, this._fnLayoutSync);
             }
+            if (this._oRouteNameBinding) {
+                this._oRouteNameBinding = ControllerResourceCleanup.destroyBinding(this._oRouteNameBinding, this._fnLayoutSync);
+            }
             if (this._oShellStateModel && this._fnShellStateChange) {
                 this._oShellStateModel.detachPropertyChange(this._fnShellStateChange, this);
             }
@@ -100,19 +128,22 @@ sap.ui.define([
             }
             this._oLayoutBinding = oState.bindProperty("/layout");
             this._oLayoutBinding.attachChange(this._fnLayoutSync);
+            this._oRouteNameBinding = oState.bindProperty("/currentRouteName");
+            this._oRouteNameBinding.attachChange(this._fnLayoutSync);
         },
 
         _syncLayoutState: function () {
             var oState = this._getStateModel();
             var sLayoutRaw = oState && oState.getProperty ? oState.getProperty("/layout") : "OneColumn";
             var sLayout = normalizeLayout(sLayoutRaw);
+            var sRouteName = String(oState && oState.getProperty ? (oState.getProperty("/currentRouteName") || "search") : "search").trim() || "search";
             var sSelectedId = String(oState && oState.getProperty ? (oState.getProperty("/selectedId") || oState.getProperty("/activeObjectId") || "") : "").trim();
             var bSingle = sLayout === "OneColumn";
             var bDetailOnly = sLayout === "MidColumnFullScreen";
             var oRoot = this.getView && this.getView().getDomRef && this.getView().getDomRef();
             var oClassHost = (oRoot && oRoot.querySelector && oRoot.querySelector(".rnvSkin")) || oRoot;
             var oLayout = this.byId && this.byId("mainFcl");
-            if (!sSelectedId && sLayout !== "OneColumn") {
+            if (!sSelectedId && sLayout !== "OneColumn" && sRouteName !== "analytics") {
                 sLayout = "OneColumn";
                 bSingle = true;
                 bDetailOnly = false;
@@ -125,6 +156,7 @@ sap.ui.define([
             if (oLayout && typeof oLayout.getLayout === "function" && typeof oLayout.setLayout === "function" && oLayout.getLayout() !== sLayout) {
                 oLayout.setLayout(sLayout);
             }
+            syncMidColumnPage(this, sRouteName);
             if (oState && oState.setProperty && sLayoutRaw !== sLayout) {
                 oState.setProperty("/layout", sLayout);
             }

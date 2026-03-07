@@ -94,6 +94,7 @@ sap.ui.define([
             var sLockState;
             var sAutosaveState;
             var sUser;
+            var sCurrentRouteName;
             var oCurrentUser;
             var sFullName;
             var aPermissions;
@@ -108,6 +109,7 @@ sap.ui.define([
             }
             this._ensureAppViewDefaults();
             sSelectedId = String(oState.getProperty("/selectedId") || oState.getProperty("/activeObjectId") || "").trim();
+            sCurrentRouteName = String(oState.getProperty("/currentRouteName") || "search").trim() || "search";
             sLayoutKind = toLayoutKind(oState.getProperty("/layout"));
             sMode = String(oState.getProperty("/mode") || "READ").toUpperCase();
             sLockState = String(oState.getProperty("/lockOperationState") || "IDLE").toUpperCase();
@@ -122,7 +124,11 @@ sap.ui.define([
             bRuntimeManagedUser = true;
             bSearchWorkspace = !sSelectedId;
             bEditWorkspace = !bSearchWorkspace && sMode === "EDIT";
-            mShellPatch["/shell/routeLabel"] = sSelectedId ? getText(this, "shellRouteDetail", null, "Checklist workspace") : getText(this, "shellRouteSearch", null, "Search workspace");
+            mShellPatch["/shell/routeLabel"] = sCurrentRouteName === "analytics"
+                ? getText(this, "shellRouteAnalytics", null, "Analytics dashboard")
+                : (sCurrentRouteName === "accessDenied"
+                    ? getText(this, "shellRouteAccessDenied", null, "Restricted checklist")
+                    : (sSelectedId ? getText(this, "shellRouteDetail", null, "Checklist workspace") : getText(this, "shellRouteSearch", null, "Search workspace")));
             mShellPatch["/shell/layoutLabel"] = ({
                 single: getText(this, "shellLayoutSingle", null, "Search only"),
                 split: getText(this, "shellLayoutSplit", null, "Split workspace"),
@@ -135,9 +141,13 @@ sap.ui.define([
                 CREATE: getText(this, "shellModeCreate", null, "Draft mode")
             })[sMode] || getText(this, "shellModeRead", null, "Read mode");
             mShellPatch["/shell/modeState"] = this._shellModeState(sMode, sLockState);
-            mShellPatch["/shell/contextSubtitle"] = !sSelectedId ? getText(this, "shellContextSearch", null, "Discover, filter, and open checklist flows.")
-                : (CreateSentinel.isCreateId(sSelectedId) ? getText(this, "shellContextDraft", null, "Draft checklist workspace")
-                    : getText(this, "shellContextDetail", [sSelectedId], "Checklist " + sSelectedId));
+            mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === "analytics"
+                ? getText(this, "shellContextAnalytics", null, "Gateway-backed workflow dashboard with operational totals and breakdowns.")
+                : (sCurrentRouteName === "accessDenied"
+                    ? getText(this, "shellContextAccessDenied", [sSelectedId], "Checklist " + sSelectedId + " is restricted for the current session.")
+                    : (!sSelectedId ? getText(this, "shellContextSearch", null, "Discover, filter, and open checklist flows.")
+                        : (CreateSentinel.isCreateId(sSelectedId) ? getText(this, "shellContextDraft", null, "Draft checklist workspace")
+                            : getText(this, "shellContextDetail", [sSelectedId], "Checklist " + sSelectedId))));
             mShellPatch["/shell/userLabel"] = sFullName;
             mShellPatch["/shell/userMeta"] = sUser || getText(this, "shellUserLoginMissing", null, "Login is not set");
             mShellPatch["/shell/userLoginLabel"] = sUser || getText(this, "shellUserLoginMissing", null, "Login is not set");

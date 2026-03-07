@@ -1,7 +1,9 @@
 sap.ui.define([
     "sap_ui5/service/framework/ActionContract",
-    "sap_ui5/service/framework/FeedbackBannerRuntime"
-], function (ActionContract, FeedbackBannerRuntime) {
+    "sap_ui5/service/framework/FeedbackBannerRuntime",
+    "sap_ui5/service/domain/detail/usecases/ResolveDetailRouteUseCase",
+    "sap_ui5/util/CreateSentinel"
+], function (ActionContract, FeedbackBannerRuntime, ResolveDetailRouteUseCase, CreateSentinel) {
     "use strict";
     function attach(mOptions) {
         var oComponent = mOptions.component;
@@ -27,6 +29,83 @@ sap.ui.define([
         var fnResumePendingNavigationIntent = mOptions.resumePendingNavigationIntent;
         var fnEmitTelemetry = mOptions.emitTelemetry;
         var fnPublishTabSignal = mOptions.publishTabSignal;
+        var oResolveDetailRouteUseCase = new ResolveDetailRouteUseCase();
+
+        function resetDetailAccessGuard() {
+            oStateModel.setProperty("/detailAccessGuard", {
+                rootId: "",
+                userId: "",
+                canView: true,
+                canEdit: false,
+                canDelete: false,
+                reasonCode: "AUTHORIZED",
+                message: "",
+                checkedAt: ""
+            });
+        }
+
+        function rememberDetailAccessGuard(oPermission, sRootId) {
+            var oResolved = oPermission || {};
+            oStateModel.setProperty("/detailAccessGuard", {
+                rootId: String(oResolved.rootId || sRootId || "").trim(),
+                userId: String(oResolved.userId || "").trim(),
+                canView: oResolved.canView !== false,
+                canEdit: !!oResolved.canEdit,
+                canDelete: !!oResolved.canDelete,
+                reasonCode: String(oResolved.reasonCode || "AUTHORIZED").trim(),
+                message: String(oResolved.message || "").trim(),
+                checkedAt: new Date().toISOString()
+            });
+        }
+
+        function copyRouteArgs(mArgs) {
+            return JSON.parse(JSON.stringify(mArgs || {}));
+        }
+
+        function isDetailEntryRoute(sRouteName) {
+            return sRouteName === "detail" || sRouteName === "detailLayout";
+        }
+
+        function runDetailRouteGuard(oEvent) {
+            var sRouteName = String(oEvent.getParameter("name") || "").trim();
+            var mArgs = oEvent.getParameter("arguments") || {};
+            var sRootId = String(mArgs.id || "").trim();
+
+            if (!isDetailEntryRoute(sRouteName) || !sRootId || CreateSentinel.isCreateId(sRootId)) {
+                if (sRouteName !== "accessDenied") {
+                    resetDetailAccessGuard();
+                }
+                return false;
+            }
+
+            oEvent.preventDefault();
+            oStateModel.setProperty(StatePaths.UI_BUSY_GLOBAL, true);
+            oStateModel.setProperty(StatePaths.UI_BUSY_DETAIL, true);
+
+            Promise.resolve(oResolveDetailRouteUseCase.execute({
+                rootId: sRootId,
+                routeName: sRouteName,
+                routeArgs: copyRouteArgs(mArgs)
+            }, oComponent._ctx || {})).then(function (oResolvedRoute) {
+                rememberDetailAccessGuard(oResolvedRoute && oResolvedRoute.permission, sRootId);
+                oStateModel.setProperty("/navGuardBypass", true);
+                oComponent.getRouter().navTo(
+                    (oResolvedRoute && oResolvedRoute.routeName) || sRouteName,
+                    (oResolvedRoute && oResolvedRoute.routeArgs) || copyRouteArgs(mArgs),
+                    false
+                );
+            }).catch(function () {
+                resetDetailAccessGuard();
+                oStateModel.setProperty("/navGuardBypass", true);
+                oComponent.getRouter().navTo(sRouteName, copyRouteArgs(mArgs), false);
+            }).finally(function () {
+                oStateModel.setProperty(StatePaths.UI_BUSY_GLOBAL, false);
+                oStateModel.setProperty(StatePaths.UI_BUSY_DETAIL, false);
+            });
+
+            return true;
+        }
+
         oComponent._oStateLifecycleModel = oStateModel;
         oComponent._oSelectedLifecycleModel = oSelectedModel;
         oComponent._fnStateModelPropertyChange = function (oEvent) {
@@ -148,8 +227,17 @@ sap.ui.define([
         var oRouter = oComponent.getRouter();
         oComponent._oLifecycleRouter = oRouter;
         oComponent._fnBeforeRouteMatched = function (oEvent) {
+            var sRouteName = String(oEvent.getParameter("name") || "").trim();
             if (oStateModel.getProperty("/navGuardBypass")) {
+                var oGuardState = oStateModel.getProperty("/detailAccessGuard") || {};
+                var sGuardRootId = String(oGuardState.rootId || "").trim();
+                var sGuardedRootId = String((oEvent.getParameter("arguments") || {}).id || "").trim();
                 oStateModel.setProperty("/navGuardBypass", false);
+                if (isDetailEntryRoute(sRouteName) && (!sGuardRootId || sGuardRootId !== sGuardedRootId || oGuardState.canView === false)) {
+                    if (runDetailRouteGuard(oEvent)) {
+                        return;
+                    }
+                }
                 return;
             }
             if (oStateModel.getProperty(StatePaths.SAVE_IN_FLIGHT)) {
@@ -157,32 +245,38 @@ sap.ui.define([
                 fnQueuePendingNavigationIntent(oEvent);
                 return;
             }
-            if (!oStateModel.getProperty("/isDirty")) {
+            if (oStateModel.getProperty("/isDirty")) {
+                oEvent.preventDefault();
+                fnQueuePendingNavigationIntent(oEvent);
+                FlowCoordinator.confirmUnsavedAndHandle({
+                    getModel: oComponent.getModel.bind(oComponent),
+                    getResourceBundle: function () { return oComponent.getModel("i18n").getResourceBundle(); }
+                }, function () {
+                    return fnRunGuardedSave();
+                }).then(function (sDecision) {
+                    if (sDecision === "DISCARD") {
+                        var oPending = oStateModel.getProperty(StatePaths.PENDING_NAVIGATION_INTENT) || {};
+                        fnClearPendingNavigationIntent();
+                        oStateModel.setProperty("/navGuardBypass", true);
+                        oComponent.getRouter().navTo(oPending.routeName || oEvent.getParameter("name"), oPending.routeArgs || oEvent.getParameter("arguments") || {}, false);
+                        return;
+                    }
+                    if (sDecision === "SAVE" || sDecision === "NO_CHANGES") {
+                        fnResumePendingNavigationIntent();
+                        return;
+                    }
+                    if (sDecision === "CANCEL") {
+                        fnClearPendingNavigationIntent();
+                    }
+                });
                 return;
             }
-            oEvent.preventDefault();
-            fnQueuePendingNavigationIntent(oEvent);
-            FlowCoordinator.confirmUnsavedAndHandle({
-                getModel: oComponent.getModel.bind(oComponent),
-                getResourceBundle: function () { return oComponent.getModel("i18n").getResourceBundle(); }
-            }, function () {
-                return fnRunGuardedSave();
-            }).then(function (sDecision) {
-                if (sDecision === "DISCARD") {
-                    var oPending = oStateModel.getProperty(StatePaths.PENDING_NAVIGATION_INTENT) || {};
-                    fnClearPendingNavigationIntent();
-                    oStateModel.setProperty("/navGuardBypass", true);
-                    oComponent.getRouter().navTo(oPending.routeName || oEvent.getParameter("name"), oPending.routeArgs || oEvent.getParameter("arguments") || {}, false);
-                    return;
-                }
-                if (sDecision === "SAVE" || sDecision === "NO_CHANGES") {
-                    fnResumePendingNavigationIntent();
-                    return;
-                }
-                if (sDecision === "CANCEL") {
-                    fnClearPendingNavigationIntent();
-                }
-            });
+            if (runDetailRouteGuard(oEvent)) {
+                return;
+            }
+            if (sRouteName !== "accessDenied") {
+                resetDetailAccessGuard();
+            }
         };
         oRouter.attachBeforeRouteMatched(oComponent._fnBeforeRouteMatched, oComponent);
         oRouter.initialize();

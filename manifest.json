@@ -149,6 +149,16 @@
           "layout": "OneColumn"
         },
         {
+          "pattern": "analytics",
+          "name": "analytics",
+          "layout": "MidColumnFullScreen"
+        },
+        {
+          "pattern": "access-denied/{id}",
+          "name": "accessDenied",
+          "layout": "TwoColumnsMidExpanded"
+        },
+        {
           "pattern": "checklist/{id}",
           "name": "detail",
           "layout": "TwoColumnsMidExpanded"

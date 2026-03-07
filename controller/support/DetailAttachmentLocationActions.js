@@ -2,8 +2,9 @@ sap.ui.define([
     "sap_ui5/controller/support/AttachmentUploadSupport",
     "sap_ui5/controller/support/DetailCommandPolicy",
     "sap_ui5/controller/support/DetailPersonInputSupport",
+    "sap_ui5/infra/navigation/WorkspaceRouteNavigation",
     "sap_ui5/controller/support/ControllerModelWriteSupport"
-], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, ControllerModelWriteSupport) {
+], function (AttachmentUploadSupport, DetailCommandPolicy, DetailPersonInputSupport, WorkspaceRouteNavigation, ControllerModelWriteSupport) {
     "use strict";
 
     return {
@@ -28,13 +29,8 @@ sap.ui.define([
         },
 
         onOpenWorkflowAnalytics: function () {
-            var oRoot = this.getOwnerComponent && this.getOwnerComponent().getRootControl && this.getOwnerComponent().getRootControl();
-            var oSearchView = oRoot && oRoot.byId && oRoot.byId("searchPaneHost");
-            var oSearchController = oSearchView && oSearchView.getController && oSearchView.getController();
-            if (!oSearchController || typeof oSearchController.onOpenWorkflowAnalytics !== "function") {
-                return Promise.resolve();
-            }
-            return oSearchController.onOpenWorkflowAnalytics();
+            WorkspaceRouteNavigation.navigateToAnalytics(this);
+            return Promise.resolve();
         },
 
         onOpenAttachment: function (oEvent) {

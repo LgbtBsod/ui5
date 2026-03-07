@@ -26,6 +26,12 @@ sap.ui.define([], function () {
         if (sLayout === "OneColumn" || sRoute === "search") {
             return null;
         }
+        if (sRoute === "analytics") {
+            return normalizeId(oStateModel.getProperty("/selectedId") || oStateModel.getProperty("/activeObjectId"));
+        }
+        if (sRoute === "accessDenied" && sArgId) {
+            return sArgId;
+        }
         if ((sRoute === "detail" || sRoute === "detailLayout") && sArgId) {
             return sArgId;
         }
@@ -35,8 +41,10 @@ sap.ui.define([], function () {
     function syncRouteState(oStateModel, sNextLayout, sRouteName, mArgs) {
         var sLayout;
         var sPrevLayout;
+        var sPrevRouteName;
         var sNextSelectedId;
         var sPrevSelectedId;
+        var sNextRouteName;
         var bChanged = false;
         if (!oStateModel || typeof oStateModel.getProperty !== "function" || typeof oStateModel.setProperty !== "function") {
             return null;
@@ -47,7 +55,9 @@ sap.ui.define([], function () {
         }
         sPrevLayout = normalizeLayout(oStateModel.getProperty("/layout")) || "OneColumn";
         sPrevSelectedId = normalizeId(oStateModel.getProperty("/selectedId"));
+        sPrevRouteName = String(oStateModel.getProperty("/currentRouteName") || "search").trim() || "search";
         sNextSelectedId = resolveSelectedId(sLayout, sRouteName, mArgs, oStateModel);
+        sNextRouteName = String(sRouteName || "search").trim() || "search";
 
         if (sPrevLayout !== sLayout) {
             oStateModel.setProperty("/layout", sLayout);
@@ -57,9 +67,14 @@ sap.ui.define([], function () {
             oStateModel.setProperty("/selectedId", sNextSelectedId);
             bChanged = true;
         }
+        if (sPrevRouteName !== sNextRouteName) {
+            oStateModel.setProperty("/currentRouteName", sNextRouteName);
+            bChanged = true;
+        }
         return bChanged ? {
             layout: sLayout,
-            selectedId: sNextSelectedId
+            selectedId: sNextSelectedId,
+            currentRouteName: sNextRouteName
         } : null;
     }
 

@@ -10,9 +10,10 @@ sap.ui.define([
     "sap_ui5/service/framework/SecurityTokenRefresh",
     "sap_ui5/service/framework/AppShellCoordinator",
     "sap_ui5/controller/support/AppShellUserRefreshSupport",
+    "sap_ui5/infra/navigation/WorkspaceRouteNavigation",
     "sap_ui5/util/CreateSentinel",
     "sap_ui5/controller/support/ControllerModelWriteSupport"
-], function (TestUserDialogController, AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, CreateSentinel, ControllerModelWriteSupport) {
+], function (TestUserDialogController, AppShellTextSupport, AppRetryActionPolicy, AppShellUserActionPolicy, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, SecurityTokenRefresh, AppShellCoordinator, AppShellUserRefreshSupport, WorkspaceRouteNavigation, CreateSentinel, ControllerModelWriteSupport) {
     "use strict";
 
     var getText = AppShellTextSupport.getText;
@@ -77,15 +78,8 @@ sap.ui.define([
         },
 
         onOpenShellAnalytics: function (oEvent) {
-            var oSearchView = this.byId("searchPaneHost");
-            var oSearchController = oSearchView && oSearchView.getController && oSearchView.getController();
-            if (!oSearchController || typeof oSearchController.onOpenWorkflowAnalytics !== "function") {
-                if (typeof this.showI18nToast === "function") {
-                    this.showI18nToast("analyticsUnavailableToast");
-                }
-                return Promise.resolve();
-            }
-            return oSearchController.onOpenWorkflowAnalytics(oEvent);
+            WorkspaceRouteNavigation.navigateToAnalytics(this);
+            return Promise.resolve();
         },
 
         onOpenShellUserMenu: function (oEvent) {
