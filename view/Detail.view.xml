@@ -418,16 +418,22 @@
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
                                             <core:Fragment fragmentName="sap_ui5.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
-                                        <VBox id="attachmentDropScope" renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody">
+                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody">
                                             <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar">
                                                 <Title text="{i18n>attachmentsTitle}"/>
                                                 <ToolbarSpacer/>
+                                                <Button
+                                                    text="{= ${view>/attachmentsExpanded} ? ${i18n>hideAttachmentsSection} : ${i18n>showAttachmentsSection} }"
+                                                    type="Transparent"
+                                                    enabled="{= !${view>/attachmentBusy} }"
+                                                    press=".onToggleAttachmentsSection"
+                                                    class="sapUiTinyMarginEnd"/>
                                                 <Text text="{i18n>saveChecklistBeforeAttachment}" visible="{= ${state>/mode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
                                                     </layoutData>
                                                 </Text>
-                                                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${state>/mode} !== 'READ' }">
+                                                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' }">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
                                                     </layoutData>
@@ -436,8 +442,8 @@
                                                     id="attachmentCategorySelect"
                                                     width="12rem"
                                                     selectedKey="{view>/attachmentCategoryKey}"
-                                                    visible="{= ${state>/mode} !== 'READ' }"
-                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    visible="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' }"
+                                                    enabled="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                                                     items="{ path: 'masterData>/attachmentTypes', templateShareable: true }">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="10rem"/>
@@ -450,78 +456,80 @@
                                                     sameFilenameAllowed="true"
                                                     useMultipart="false"
                                                     buttonText="{i18n>uploadAttachment}"
-                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    enabled="{= ${view>/attachmentsExpanded} &amp;&amp; ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                                                     change=".onAttachmentUploadChange"/>
                                             </OverflowToolbar>
-                                            <VBox
-                                                id="attachmentDropZone"
-                                                visible="{= ${state>/mode} !== 'READ' }"
-                                                class="detailAttachmentDropZone">
-                                                <HBox alignItems="Center" class="detailAttachmentDropZoneTop">
-                                                    <core:Icon src="sap-icon://upload" class="detailAttachmentDropZoneIcon"/>
-                                                    <VBox class="sapUiTinyMarginBegin">
-                                                        <Title level="H6" text="{i18n>attachmentDropZoneTitle}"/>
-                                                        <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText"/>
-                                                    </VBox>
+                                            <VBox id="attachmentDropScope" renderType="Bare" visible="{view>/attachmentsExpanded}">
+                                                <VBox
+                                                    id="attachmentDropZone"
+                                                    visible="{= ${state>/mode} !== 'READ' }"
+                                                    class="detailAttachmentDropZone">
+                                                    <HBox alignItems="Center" class="detailAttachmentDropZoneTop">
+                                                        <core:Icon src="sap-icon://upload" class="detailAttachmentDropZoneIcon"/>
+                                                        <VBox class="sapUiTinyMarginBegin">
+                                                            <Title level="H6" text="{i18n>attachmentDropZoneTitle}"/>
+                                                            <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText"/>
+                                                        </VBox>
+                                                    </HBox>
+                                                    <Text
+                                                        text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}"
+                                                        class="modeHintText detailAttachmentDropZoneMeta"/>
+                                                </VBox>
+
+                                                <HBox
+                                                    class="detailEmptyStateCard detailAttachmentsEmptyState"
+                                                    renderType="Bare"
+                                                    visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
+                                                    <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon"/>
+                                                    <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle"/>
+                                                    <Text
+                                                        text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>saveChecklistBeforeAttachment} : ${i18n>detailEmptyAttachmentsText} }"
+                                                        class="detailEmptyStateText"/>
                                                 </HBox>
-                                                <Text
-                                                    text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}"
-                                                    class="modeHintText detailAttachmentDropZoneMeta"/>
+
+                                                <Table
+                                                    items="{selected>/attachments}"
+                                                    class="flatEditorTable detailAttachmentTable"
+                                                    busy="{view>/attachmentBusy}"
+                                                    busyIndicatorDelay="0"
+                                                    visible="{path:'selected>/attachments', formatter:'.hasRows'}"
+                                                    noDataText="{i18n>noAttachmentsData}">
+                                                    <columns>
+                                                        <Column><Text text="{i18n>attachmentFileName}"/></Column>
+                                                        <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentCategoryLabel}"/></Column>
+                                                        <Column width="7rem" hAlign="End"><Text text="{i18n>attachmentSize}"/></Column>
+                                                        <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentChangedOn}"/></Column>
+                                                        <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                                                            <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                                                        </Column>
+                                                    </columns>
+                                                    <items>
+                                                        <ColumnListItem>
+                                                            <cells>
+                                                                <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}"/>
+                                                                <Text text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
+                                                                <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
+                                                                <Text text="{selected>ChangedOn}"/>
+                                                                <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                                                    <Button
+                                                                        icon="sap-icon://download"
+                                                                        text="{i18n>rowActionDownload}"
+                                                                        type="Transparent"
+                                                                        press=".onOpenAttachment"
+                                                                        class="tableRowActionBtn"/>
+                                                                    <Button
+                                                                        icon="sap-icon://delete"
+                                                                        text="{i18n>rowActionDelete}"
+                                                                        type="Transparent"
+                                                                        press=".onDeleteAttachment"
+                                                                        visible="{= ${state>/mode} !== 'READ' }"
+                                                                        class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                                                </HBox>
+                                                            </cells>
+                                                        </ColumnListItem>
+                                                    </items>
+                                                </Table>
                                             </VBox>
-
-                                            <HBox
-                                                class="detailEmptyStateCard detailAttachmentsEmptyState"
-                                                renderType="Bare"
-                                                visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
-                                                <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon"/>
-                                                <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle"/>
-                                                <Text
-                                                    text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>saveChecklistBeforeAttachment} : ${i18n>detailEmptyAttachmentsText} }"
-                                                    class="detailEmptyStateText"/>
-                                            </HBox>
-
-                                            <Table
-                                                items="{selected>/attachments}"
-                                                class="flatEditorTable detailAttachmentTable"
-                                                busy="{view>/attachmentBusy}"
-                                                busyIndicatorDelay="0"
-                                                visible="{path:'selected>/attachments', formatter:'.hasRows'}"
-                                                noDataText="{i18n>noAttachmentsData}">
-                                                <columns>
-                                                    <Column><Text text="{i18n>attachmentFileName}"/></Column>
-                                                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentCategoryLabel}"/></Column>
-                                                    <Column width="7rem" hAlign="End"><Text text="{i18n>attachmentSize}"/></Column>
-                                                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentChangedOn}"/></Column>
-                                                    <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
-                                                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
-                                                    </Column>
-                                                </columns>
-                                                <items>
-                                                    <ColumnListItem>
-                                                        <cells>
-                                                            <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}"/>
-                                                            <Text text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
-                                                            <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
-                                                            <Text text="{selected>ChangedOn}"/>
-                                                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
-                                                                <Button
-                                                                    icon="sap-icon://download"
-                                                                    text="{i18n>rowActionDownload}"
-                                                                    type="Transparent"
-                                                                    press=".onOpenAttachment"
-                                                                    class="tableRowActionBtn"/>
-                                                                <Button
-                                                                    icon="sap-icon://delete"
-                                                                    text="{i18n>rowActionDelete}"
-                                                                    type="Transparent"
-                                                                    press=".onDeleteAttachment"
-                                                                    visible="{= ${state>/mode} !== 'READ' }"
-                                                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
-                                                            </HBox>
-                                                        </cells>
-                                                    </ColumnListItem>
-                                                </items>
-                                            </Table>
                                         </VBox>
                                     </VBox>
                                 </uxap:blocks>

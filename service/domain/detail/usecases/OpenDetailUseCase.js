@@ -44,6 +44,7 @@ sap.ui.define([
                 Effects.modelPatch("uiState", "/_detailSnapshot", oDraft || {}),
                 Effects.modelPatch("uiState", "/_detailCurrent", oDraft || {}),
                 Effects.modelPatch("selected", "/", oDraft || {}),
+                Effects.modelPatch("selected", "/attachments", (oDraft && oDraft.attachments) || []),
                 Effects.modelPatch("view", "/detailSkeletonBusy", false)
             ]));
         }
@@ -101,6 +102,7 @@ sap.ui.define([
                 Effects.modelPatch("uiState", "/_detailSnapshot", oSnapshot || {}),
                 Effects.modelPatch("uiState", "/_detailCurrent", oSnapshot || {}),
                 Effects.modelPatch("selected", "/", oSnapshot || {}),
+                Effects.modelPatch("selected", "/attachments", []),
                 Effects.modelPatch("view", "/detailSkeletonBusy", false)
             ]));
         }).catch(function (oError) {

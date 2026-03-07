@@ -217,6 +217,36 @@ def set_detail_edit_mode(page, state: bool) -> Any:
     )
 
 
+
+def ensure_attachments_expanded(page) -> None:
+    page.evaluate(
+        """
+        () => {
+          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const controller = view && view.getController && view.getController();
+          const viewModel = view && view.getModel && view.getModel('view');
+          if (!controller || typeof controller.onToggleAttachmentsSection !== 'function') {
+            throw new Error('onToggleAttachmentsSection is not available');
+          }
+          if (viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded')) {
+            return Promise.resolve(true);
+          }
+          return Promise.resolve(controller.onToggleAttachmentsSection());
+        }
+        """
+    )
+    page.wait_for_function(
+        """
+        () => {
+          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const viewModel = view && view.getModel && view.getModel('view');
+          return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'))
+            && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
+        }
+        """,
+        timeout=30000,
+    )
+    page.wait_for_timeout(1200)
 def main() -> int:
     if not ROOT_ID:
         print(json.dumps({"ok": False, "error": "ROOT_ID is required"}, ensure_ascii=False))
@@ -437,7 +467,8 @@ def main() -> int:
             invoke_view_controller_method(page, "sap_ui5_comp---app--analyticsPaneHost", "onCloseAnalytics")
             wait_for_detail_ready(page, ROOT_ID)
 
-            before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/$batch" in item["url"]])
+            ensure_attachments_expanded(page)
+            before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/" in item["url"]])
             page.locator("#sap_ui5_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_timeout(3200)
             attachment_requests = [

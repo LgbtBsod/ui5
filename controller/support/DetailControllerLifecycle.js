@@ -47,6 +47,8 @@ sap.ui.define([
         return {
             detailSkeletonBusy: false,
             attachmentBusy: false,
+            attachmentsExpanded: false,
+            attachmentsLoaded: false,
             checksBusy: false,
             barriersBusy: false,
             checksExpandedBusy: false,
@@ -200,4 +202,3 @@ sap.ui.define([
         }
     };
 });
-

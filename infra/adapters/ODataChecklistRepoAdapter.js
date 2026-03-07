@@ -169,10 +169,9 @@ sap.ui.define([
         var pBasic = GatewayAdapterSupport.get("ChecklistBasicInfoSet", { "$filter": "RootKey eq '" + sRootId + "'" });
         var pChecks = GatewayAdapterSupport.get("ChecklistCheckSet", { "$filter": "RootKey eq '" + sRootId + "'" });
         var pBarriers = GatewayAdapterSupport.get("ChecklistBarrierSet", { "$filter": "RootKey eq '" + sRootId + "'" });
-        var pAttachments = AttachmentRepoSupport.loadAttachments({ rootId: sRootId });
-        return Promise.all([pRoot, pBasic, pChecks, pBarriers, pAttachments]).then(function (aResult) {
+        return Promise.all([pRoot, pBasic, pChecks, pBarriers]).then(function (aResult) {
             var oSnapshot = mapResult(aResult[0], aResult[1], aResult[2], aResult[3]);
-            oSnapshot.attachments = (aResult[4] && aResult[4].attachments) || [];
+            oSnapshot.attachments = [];
             return oSnapshot;
         });
     }

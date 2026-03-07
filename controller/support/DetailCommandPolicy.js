@@ -41,7 +41,11 @@ sap.ui.define([], function () {
         return oController._run("resolveConflict", mInput || {});
     }
 
-    function attachmentLoad(oController, mInput) {`r`n        return oController._run("attachmentLoad", mInput || {});`r`n    }`r`n`r`n    function attachmentDelete(oController, mInput) {
+    function attachmentLoad(oController, mInput) {
+        return oController._run("attachmentLoad", mInput || {});
+    }
+
+    function attachmentDelete(oController, mInput) {
         return oController._run("attachmentDelete", mInput || {});
     }
 
@@ -72,6 +76,7 @@ sap.ui.define([], function () {
         changeStatus: changeStatus,
         rowOps: rowOps,
         resolveConflict: resolveConflict,
+        attachmentLoad: attachmentLoad,
         attachmentDelete: attachmentDelete,
         attachmentUpload: attachmentUpload,
         valueHelpLocation: valueHelpLocation,

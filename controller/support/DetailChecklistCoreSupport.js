@@ -60,6 +60,9 @@ sap.ui.define([
                 "/validationShown": false,
                 "/validationMissing": {},
                 "/deleteChecklistConfirmArmed": false,
+                "/attachmentsExpanded": false,
+                "/attachmentsLoaded": false,
+                "/attachmentBusy": false,
                 "/observerSuggestions": [],
                 "/observedSuggestions": [],
                 "/personSuggestHint": "",
@@ -93,6 +96,7 @@ sap.ui.define([
             if (bCreate) {
                 if (oSelected && oSelected.setData) {
                     oSelected.setData(DetailDialogSupport.createEmptyDraft());
+                    oSelected.setProperty("/attachments", []);
                 }
                 DetailCommandPolicy.open(this, { id: CreateSentinel.VALUE, rootId: CreateSentinel.VALUE });
                 return;

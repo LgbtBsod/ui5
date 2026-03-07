@@ -170,6 +170,39 @@ def invoke_delete(page, attachment_key: str) -> None:
     )
 
 
+
+def ensure_attachments_expanded(page) -> None:
+    page.evaluate(
+        """
+        () => {
+          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const controller = view && view.getController && view.getController();
+          const viewModel = view && view.getModel && view.getModel('view');
+          if (!controller || typeof controller.onToggleAttachmentsSection !== 'function') {
+            throw new Error('onToggleAttachmentsSection is not available');
+          }
+          if (viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded')) {
+            return Promise.resolve(true);
+          }
+          return Promise.resolve(controller.onToggleAttachmentsSection());
+        }
+        """
+    )
+    page.wait_for_function(
+        """
+        () => {
+          const view = sap.ui.getCore().byId('sap_ui5_comp---app--detailPaneHost');
+          const selected = view && view.getModel && view.getModel('selected');
+          const viewModel = view && view.getModel && view.getModel('view');
+          const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+          return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'))
+            && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'))
+            && Array.isArray(attachments);
+        }
+        """,
+        timeout=30000,
+    )
+    page.wait_for_timeout(1200)
 def main() -> int:
     if not ROOT_ID:
         print(json.dumps({"ok": False, "error": "ROOT_ID is required"}, ensure_ascii=False))
@@ -226,6 +259,7 @@ def main() -> int:
             if not ok_lock:
                 failures.append("detail.attachment_dirty.lock_acquired_clean")
 
+            ensure_attachments_expanded(page)
             upload_before = detail_state(page)
             upload_request_index = len(network)
             page.locator("#sap_ui5_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))

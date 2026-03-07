@@ -8,6 +8,7 @@ sap.ui.define([
     "sap_ui5/service/domain/detail/usecases/DeleteChecklistUseCase",
     "sap_ui5/service/domain/detail/usecases/ChangeStatusUseCase",
     "sap_ui5/service/domain/detail/usecases/ResolveConflictUseCase",
+    "sap_ui5/service/domain/detail/usecases/LoadAttachmentsUseCase",
     "sap_ui5/service/domain/detail/usecases/AttachmentUploadUseCase",
     "sap_ui5/service/domain/detail/usecases/AttachmentDeleteUseCase",
     "sap_ui5/service/domain/detail/usecases/RowOpsUseCase",
@@ -29,6 +30,7 @@ sap.ui.define([
     DeleteChecklistUseCase,
     ChangeStatusUseCase,
     ResolveConflictUseCase,
+    LoadAttachmentsUseCase,
     AttachmentUploadUseCase,
     AttachmentDeleteUseCase,
     RowOpsUseCase,
@@ -55,6 +57,7 @@ sap.ui.define([
             deleteChecklist: d.deleteChecklistUseCase || new DeleteChecklistUseCase(),
             changeStatus: d.changeStatusUseCase || new ChangeStatusUseCase(),
             resolveConflict: d.resolveConflictUseCase || new ResolveConflictUseCase(),
+            attachmentLoad: d.attachmentLoadUseCase || new LoadAttachmentsUseCase(),
             attachmentUpload: d.attachmentUploadUseCase || new AttachmentUploadUseCase(),
             attachmentDelete: d.attachmentDeleteUseCase || new AttachmentDeleteUseCase(),
             rowOps: d.rowOpsUseCase || new RowOpsUseCase(),
@@ -129,6 +132,7 @@ sap.ui.define([
     DetailFacade.prototype.deleteChecklist = function (i, c) { return this._uc.deleteChecklist.execute(i || {}, c || {}); };
     DetailFacade.prototype.changeStatus = function (i, c) { return this._uc.changeStatus.execute(i || {}, c || {}); };
     DetailFacade.prototype.resolveConflict = function (i, c) { return this._uc.resolveConflict.execute(i || {}, c || {}); };
+    DetailFacade.prototype.attachmentLoad = function (i, c) { return this._uc.attachmentLoad.execute(i || {}, c || {}); };
     DetailFacade.prototype.attachmentUpload = function (i, c) { return this._uc.attachmentUpload.execute(i || {}, c || {}); };
     DetailFacade.prototype.attachmentDelete = function (i, c) { return this._uc.attachmentDelete.execute(i || {}, c || {}); };
     DetailFacade.prototype.rowOps = function (i, c) { return this._uc.rowOps.execute(i || {}, c || {}); };

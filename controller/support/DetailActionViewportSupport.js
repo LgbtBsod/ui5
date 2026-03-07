@@ -14,6 +14,10 @@ sap.ui.define([
         _scheduleAttachmentDropZoneBind: function (iAttempt) {
             var iNextAttempt = Number(iAttempt || 0);
             var oDropZone;
+            if (!ControllerModelWriteSupport.get(this, "view", "/attachmentsExpanded", false)) {
+                AttachmentUploadSupport.unbindDropZone(this);
+                return;
+            }
             if (this._iAttachmentDropZoneBindTimer) {
                 clearTimeout(this._iAttachmentDropZoneBindTimer);
                 this._iAttachmentDropZoneBindTimer = null;

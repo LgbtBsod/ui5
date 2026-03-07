@@ -95,8 +95,18 @@ def create_checklist(opener, token: str) -> dict[str, Any]:
     status, data, _headers = request(opener, "POST", f"{SERVICE_ROOT}/CreateChecklist", headers={"X-CSRF-Token": token}, payload=payload)
     if status != 200:
         raise RuntimeError(f"CreateChecklist failed with {status}")
-    body = (data or {}).get("d") or {}
-    return body
+    return (data or {}).get("d") or {}
+
+
+def delete_checklist(opener, token: str, root_id: str) -> bool:
+    status, _body, _headers = request(
+        opener,
+        "DELETE",
+        f"{SERVICE_ROOT}/ChecklistRootSet('{root_id}')",
+        headers={"X-CSRF-Token": token},
+        expect_json=False,
+    )
+    return status == 204
 
 
 def run_browser_smoke_script(script_name: str, *script_args: str) -> dict[str, Any]:
@@ -156,6 +166,7 @@ def main() -> int:
     api_checks: list[dict[str, Any]] = []
     warnings: list[str] = []
     created_root_id = ""
+    browser_root_id = ""
     browser_report: dict[str, Any] = {}
     token = ""
     browser_failures: list[str] = []
@@ -272,26 +283,25 @@ def main() -> int:
         release_ok = release_status == 200 and bool(((release_payload or {}).get("d") or {}).get("Ok"))
         ensure(api_checks, "lock.release.gateway", release_ok, {"status": release_status})
 
+        browser_created = create_checklist(opener, token)
+        browser_root_id = str(browser_created.get("RootKey") or browser_created.get("Key") or "").strip().upper()
+        ensure(api_checks, "browser.root.created", bool(browser_root_id), {"rootId": browser_root_id})
+
         browser_report = combine_browser_reports({
             "facadeContract": run_browser_smoke_script("browser-smoke-domain-facade-contract.py", UI_URL),
-            "attachmentDirtyInvariant": run_browser_smoke_script("browser-smoke-detail-attachment-dirty-invariant.py", UI_URL, created_root_id),
-            "gatewayOnlyFlow": run_browser_smoke_script("browser-smoke-gateway-only-flow.py", UI_URL, created_root_id),
+            "attachmentDirtyInvariant": run_browser_smoke_script("browser-smoke-detail-attachment-dirty-invariant.py", UI_URL, browser_root_id),
+            "gatewayOnlyFlow": run_browser_smoke_script("browser-smoke-gateway-only-flow.py", UI_URL, browser_root_id),
         })
         browser_failures = list(browser_report.get("failures") or [])
     except Exception as exc:  # noqa: BLE001
         ensure(api_checks, "gateway.pack.exception", False, {"error": str(exc)})
         browser_failures.append("pack.exception")
     finally:
-        if created_root_id and token:
+        for root_id in [created_root_id, browser_root_id]:
+            if not root_id or not token:
+                continue
             try:
-                delete_status, _delete_body, _headers = request(
-                    opener,
-                    "DELETE",
-                    f"{SERVICE_ROOT}/ChecklistRootSet('{created_root_id}')",
-                    headers={"X-CSRF-Token": token},
-                    expect_json=False,
-                )
-                if delete_status != 204:
+                if not delete_checklist(opener, token, root_id):
                     warnings.append(ROOT_DELETE_WARNING)
             except Exception:  # noqa: BLE001
                 warnings.append(ROOT_DELETE_WARNING)
@@ -304,6 +314,7 @@ def main() -> int:
         "serviceRoot": SERVICE_ROOT,
         "status": "ok" if ok else "failed",
         "createdRootId": created_root_id,
+        "browserRootId": browser_root_id,
         "api": {
             "ok": not api_failures,
             "checks": api_checks,

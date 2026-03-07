@@ -96,12 +96,16 @@ sap.ui.define([
 
         return Promise.resolve(oRepo.autosaveChecklist({ rootId: sRootId, delta: oDelta, sessionGuid: sSessionGuid })).then(function (oSaved) {
             var sAt = (oSaved && oSaved.autosavedAt) || new Date().toISOString();
-            var oSavedSnapshot = (oSaved && oSaved.serverSnapshot) || readCurrentChecklist(mCtx);
+            var oCurrentChecklist = readCurrentChecklist(mCtx);
+            var aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
+            var oSavedSnapshot = (oSaved && oSaved.serverSnapshot) || oCurrentChecklist;
+            var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aCurrentAttachments });
             return Result.ok({ autosavedAt: sAt }, [
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "SAVED"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, sAt),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-                Effects.modelPatch("selected", "/", oSavedSnapshot),
+                Effects.modelPatch("selected", "/", oSelectedSnapshot),
+                Effects.modelPatch("selected", "/attachments", aCurrentAttachments),
                 Effects.modelPatch("uiState", "/_detailSnapshot", oSavedSnapshot),
                 Effects.modelPatch("uiState", "/_detailCurrent", oSavedSnapshot),
                 Effects.toast("autosaveSaved", "success")

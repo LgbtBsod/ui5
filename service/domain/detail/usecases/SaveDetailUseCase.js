@@ -26,14 +26,16 @@ sap.ui.define([
     function syncDraftAttachments(oRepo, sRootId, aAttachments) {
         var aPending = Array.isArray(aAttachments) ? aAttachments : [];
         if (!sRootId || !oRepo || typeof oRepo.uploadAttachment !== "function" || !aPending.length) {
-            return Promise.resolve(null);
+            return Promise.resolve([]);
         }
+
         function revokeLocalUrl(oAttachment) {
             var sUrl = oAttachment && oAttachment.localObjectUrl;
             if (sUrl && typeof window !== "undefined" && window.URL && typeof window.URL.revokeObjectURL === "function") {
                 window.URL.revokeObjectURL(sUrl);
             }
         }
+
         return aPending.reduce(function (oPromise, oAttachment) {
             return oPromise.then(function () {
                 return Promise.resolve(oRepo.uploadAttachment({
@@ -49,16 +51,18 @@ sap.ui.define([
                     }
                 }));
             });
-        }, Promise.resolve()).catch(function () {
+        }, Promise.resolve(null)).catch(function () {
             return null;
         }).then(function () {
             aPending.forEach(revokeLocalUrl);
-            if (typeof oRepo.loadDetailSnapshot === "function") {
-                return oRepo.loadDetailSnapshot({ rootId: sRootId }).catch(function () {
-                    return null;
+            if (typeof oRepo.loadAttachments === "function") {
+                return oRepo.loadAttachments({ rootId: sRootId }).then(function (oLoaded) {
+                    return (oLoaded && oLoaded.attachments) || [];
+                }).catch(function () {
+                    return [];
                 });
             }
-            return null;
+            return [];
         });
     }
 
@@ -84,6 +88,7 @@ sap.ui.define([
         var iClientVersion = DetailSaveRuntimeSupport.resolveVersionNumber(oCurrent, oSnapshot);
         var sSessionGuid = DetailSaveRuntimeSupport.readSessionGuid(mCtx, StatePaths);
         var sLockState = DetailSaveRuntimeSupport.readLockState(mCtx, StatePaths);
+        var aCurrentAttachments = Array.isArray((oCurrent && oCurrent.attachments) || null) ? oCurrent.attachments : [];
 
         if (!oRepo) {
             return Promise.resolve(Result.fail({ message: "Save handler unavailable", code: "SAVE_HANDLER_MISSING" }));
@@ -125,7 +130,7 @@ sap.ui.define([
             var oInitialSavedSnapshot = DetailSaveRuntimeSupport.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot);
             var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.pcct_uuid || oInitialSavedSnapshot.RootKey || oInitialSavedSnapshot.rootKey || oInitialSavedSnapshot.Key || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
             var pLockAcquire = Promise.resolve(null);
-            var pAttachmentSync = Promise.resolve(null);
+            var pAttachmentSync = Promise.resolve(aCurrentAttachments);
 
             if (bCreate && sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
                 pAttachmentSync = syncDraftAttachments(oRepo, sServerRootId, stagedAttachments(oCurrent));
@@ -141,34 +146,36 @@ sap.ui.define([
             }
 
             return Promise.all([pAttachmentSync, pLockAcquire]).then(function (aPostSave) {
-            var oAttachmentSnapshot = aPostSave[0];
-            var oLockResult = aPostSave[1];
-            var oSavedSnapshot = DetailSaveRuntimeSupport.preserveBasicFields(oAttachmentSnapshot || oInitialSavedSnapshot, oCurrent, oSnapshot);
-            var aEffects = [
-                Effects.toast("objectSaved", "success"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "SAVED"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, sNow),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-                Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
-                Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
-            ];
-            aEffects.push(Effects.modelPatch("uiState", "/_detailSnapshot", oSavedSnapshot));
-            aEffects.push(Effects.modelPatch("uiState", "/_detailCurrent", oSavedSnapshot));
-            aEffects.push(Effects.modelPatch("selected", "/", oSavedSnapshot));
-            if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
-                aEffects.push(Effects.modelPatch("state", "/activeObjectId", sServerRootId));
-                aEffects.push(Effects.modelPatch("state", "/selectedId", sServerRootId));
-                aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
-                if (bCreate) {
-                    var bLockAcquired = !!(oLockResult && oLockResult.ok);
-                    aEffects.push(Effects.modelPatch("state", "/postOpenHydratedRootId", sServerRootId));
-                    aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? "EDIT" : "READ"));
-                    aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? "LOCKED" : "IDLE"));
-                    aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));
-                    aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
+                var aSyncedAttachments = Array.isArray(aPostSave[0]) ? aPostSave[0] : aCurrentAttachments;
+                var oLockResult = aPostSave[1];
+                var oSavedSnapshot = DetailSaveRuntimeSupport.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
+                var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
+                var aEffects = [
+                    Effects.toast("objectSaved", "success"),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "SAVED"),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, sNow),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
+                    Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
+                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
+                    Effects.modelPatch("uiState", "/_detailSnapshot", oSavedSnapshot),
+                    Effects.modelPatch("uiState", "/_detailCurrent", oSavedSnapshot),
+                    Effects.modelPatch("selected", "/", oSelectedSnapshot),
+                    Effects.modelPatch("selected", "/attachments", aSyncedAttachments)
+                ];
+                if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
+                    aEffects.push(Effects.modelPatch("state", "/activeObjectId", sServerRootId));
+                    aEffects.push(Effects.modelPatch("state", "/selectedId", sServerRootId));
+                    aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
+                    if (bCreate) {
+                        var bLockAcquired = !!(oLockResult && oLockResult.ok);
+                        aEffects.push(Effects.modelPatch("state", "/postOpenHydratedRootId", sServerRootId));
+                        aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? "EDIT" : "READ"));
+                        aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? "LOCKED" : "IDLE"));
+                        aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));
+                        aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
+                    }
                 }
-            }
-            return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
+                return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
             });
         }).catch(function (oError) {
             return Result.fail(oError, [
