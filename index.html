@@ -43,7 +43,19 @@
             oRoot.setAttribute("data-startup-theme-mode", sStoredMode);
             oRoot.setAttribute("data-startup-animation-enabled", bAnimationEnabled ? "true" : "false");
             oRoot.setAttribute("data-startup-background-interactive", bBackgroundInteractive ? "true" : "false");
+            oRoot.setAttribute("data-ui5-app-ready", "false");
             window.__ui5BootstrapUrl = "https://ui5.sap.com/1.71.70/resources/sap-ui-core.js";
+            window.__ui5MarkAppReady = function () {
+                var oReadyRoot = document && document.documentElement;
+                var oReadyBody = document && document.body;
+                if (!oReadyRoot || oReadyRoot.getAttribute("data-ui5-app-ready") === "true") {
+                    return;
+                }
+                oReadyRoot.setAttribute("data-ui5-app-ready", "true");
+                if (oReadyBody) {
+                    oReadyBody.setAttribute("data-ui5-app-ready", "true");
+                }
+            };
         }());
     </script>
     <script src="./Component-preload.js"></script>
@@ -54,6 +66,15 @@
     html, body {
         height: 100% !important;
         margin: 0;
+    }
+    body {
+        background: #eef4f9;
+    }
+    html[data-startup-theme-mode="night"] body {
+        background: #08131f;
+    }
+    body.sapUiBody {
+        background: transparent !important;
     }
     #ui5-bg {
         position: fixed;
@@ -77,7 +98,131 @@
         height: 100% !important;
         width: 100%;
         position: relative;
-        z-index: 1;
+        z-index: 3;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 180ms ease, visibility 0s linear 180ms;
+    }
+    html[data-ui5-app-ready="true"] #ui5_container {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0s;
+    }
+    #startup-shell {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: clamp(1rem, 2.8vw, 2rem);
+        pointer-events: none;
+        transition: opacity 180ms ease, visibility 0s linear 180ms;
+    }
+    #startup-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(245, 249, 252, 0.84), rgba(234, 242, 249, 0.52));
+        backdrop-filter: blur(12px);
+    }
+    html[data-startup-theme-mode="night"] #startup-shell::before {
+        background: linear-gradient(180deg, rgba(8, 16, 26, 0.76), rgba(7, 18, 29, 0.54));
+    }
+    #startup-shell-card {
+        position: relative;
+        width: min(100%, 84rem);
+        display: grid;
+        gap: 1rem;
+        padding: 1rem 1.25rem 1.1rem;
+        border-radius: 1.75rem;
+        border: 1px solid rgba(126, 156, 198, 0.18);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(243, 248, 253, 0.56)),
+            rgba(241, 246, 251, 0.62);
+        box-shadow:
+            0 16px 42px rgba(35, 56, 84, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.55);
+        overflow: hidden;
+    }
+    html[data-startup-theme-mode="night"] #startup-shell-card {
+        border-color: rgba(110, 166, 208, 0.16);
+        background:
+            linear-gradient(180deg, rgba(15, 26, 39, 0.84), rgba(10, 20, 31, 0.62)),
+            rgba(9, 18, 29, 0.72);
+        box-shadow:
+            0 18px 48px rgba(1, 6, 12, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .startup-shell-header,
+    .startup-shell-grid {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+    .startup-shell-brand {
+        width: clamp(11rem, 28vw, 16rem);
+        height: 1rem;
+        border-radius: 999px;
+    }
+    .startup-shell-pill {
+        width: 7rem;
+        height: 0.75rem;
+        border-radius: 999px;
+    }
+    .startup-shell-panel {
+        flex: 1 1 18rem;
+        min-height: 6.5rem;
+        border-radius: 1.3rem;
+        border: 1px solid rgba(132, 164, 208, 0.16);
+        background: rgba(255, 255, 255, 0.42);
+        padding: 0.95rem 1rem;
+        display: grid;
+        gap: 0.65rem;
+    }
+    html[data-startup-theme-mode="night"] .startup-shell-panel {
+        border-color: rgba(113, 162, 208, 0.15);
+        background: rgba(11, 22, 34, 0.5);
+    }
+    .startup-shell-line,
+    .startup-shell-brand,
+    .startup-shell-pill {
+        background: linear-gradient(90deg, rgba(149, 177, 215, 0.16), rgba(255, 255, 255, 0.56), rgba(149, 177, 215, 0.16));
+        background-size: 200% 100%;
+        animation: startup-shell-pulse 1.35s ease-in-out infinite;
+    }
+    html[data-startup-theme-mode="night"] .startup-shell-line,
+    html[data-startup-theme-mode="night"] .startup-shell-brand,
+    html[data-startup-theme-mode="night"] .startup-shell-pill {
+        background: linear-gradient(90deg, rgba(79, 116, 154, 0.16), rgba(171, 212, 255, 0.28), rgba(79, 116, 154, 0.16));
+        background-size: 200% 100%;
+    }
+    .startup-shell-line {
+        height: 0.82rem;
+        border-radius: 999px;
+    }
+    .startup-shell-line.wide {
+        width: 100%;
+    }
+    .startup-shell-line.medium {
+        width: 72%;
+    }
+    .startup-shell-line.short {
+        width: 48%;
+    }
+    html[data-ui5-app-ready="true"] #startup-shell {
+        opacity: 0;
+        visibility: hidden;
+    }
+    @keyframes startup-shell-pulse {
+        0% {
+            background-position: 100% 0;
+        }
+        100% {
+            background-position: -100% 0;
+        }
     }
 </style>
 
@@ -433,6 +578,31 @@
     <div class="grain"></div>
     <div class="paper"></div>
   </div>
+    <div id="startup-shell" aria-hidden="true">
+        <div id="startup-shell-card">
+            <div class="startup-shell-header">
+                <div class="startup-shell-brand"></div>
+                <div class="startup-shell-pill"></div>
+            </div>
+            <div class="startup-shell-grid">
+                <div class="startup-shell-panel">
+                    <div class="startup-shell-line wide"></div>
+                    <div class="startup-shell-line medium"></div>
+                    <div class="startup-shell-line short"></div>
+                </div>
+                <div class="startup-shell-panel">
+                    <div class="startup-shell-line wide"></div>
+                    <div class="startup-shell-line medium"></div>
+                    <div class="startup-shell-line short"></div>
+                </div>
+                <div class="startup-shell-panel">
+                    <div class="startup-shell-line wide"></div>
+                    <div class="startup-shell-line medium"></div>
+                    <div class="startup-shell-line short"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="./ui5-background-runtime.js"></script>
     <div id="ui5_container" class="rnvAppRoot"></div>
 </body>

@@ -20,6 +20,13 @@ sap.ui.define([
         return "OneColumn";
     }
 
+    function markStartupReady() {
+        if (typeof window === "undefined" || typeof window.__ui5MarkAppReady !== "function") {
+            return;
+        }
+        window.__ui5MarkAppReady();
+    }
+
     return {
         onInit: function () {
             AppShellCoordinator.onInit(this);
@@ -52,6 +59,7 @@ sap.ui.define([
             this._syncShellMetrics();
             this._syncShellFlexAllocation();
             this._syncLayoutViewportGeometry();
+            this._markStartupReady();
         },
 
         onExit: function () {
@@ -98,18 +106,40 @@ sap.ui.define([
             var oState = this._getStateModel();
             var sLayoutRaw = oState && oState.getProperty ? oState.getProperty("/layout") : "OneColumn";
             var sLayout = normalizeLayout(sLayoutRaw);
+            var sSelectedId = String(oState && oState.getProperty ? (oState.getProperty("/selectedId") || oState.getProperty("/activeObjectId") || "") : "").trim();
             var bSingle = sLayout === "OneColumn";
             var bDetailOnly = sLayout === "MidColumnFullScreen";
             var oRoot = this.getView && this.getView().getDomRef && this.getView().getDomRef();
             var oClassHost = (oRoot && oRoot.querySelector && oRoot.querySelector(".rnvSkin")) || oRoot;
+            var oLayout = this.byId && this.byId("mainFcl");
+            if (!sSelectedId && sLayout !== "OneColumn") {
+                sLayout = "OneColumn";
+                bSingle = true;
+                bDetailOnly = false;
+            }
             if (oClassHost && oClassHost.classList) {
                 oClassHost.classList.toggle("appLayoutSingle", bSingle);
                 oClassHost.classList.toggle("appLayoutSplit", !bSingle && !bDetailOnly);
                 oClassHost.classList.toggle("appLayoutDetailOnly", bDetailOnly);
             }
+            if (oLayout && typeof oLayout.getLayout === "function" && typeof oLayout.setLayout === "function" && oLayout.getLayout() !== sLayout) {
+                oLayout.setLayout(sLayout);
+            }
             if (oState && oState.setProperty && sLayoutRaw !== sLayout) {
                 oState.setProperty("/layout", sLayout);
             }
+        },
+
+        _markStartupReady: function () {
+            if (this._bStartupReadyMarked) {
+                return;
+            }
+            this._bStartupReadyMarked = true;
+            if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+                window.requestAnimationFrame(markStartupReady);
+                return;
+            }
+            markStartupReady();
         },
 
         _bindShellStateSync: function () {

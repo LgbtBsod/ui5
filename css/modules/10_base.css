@@ -202,11 +202,31 @@ body.rnvAppRoot,
   margin-inline: auto;
 }
 
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumn,
-.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnContent {
+.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin,
+.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
   width: 100%;
   max-width: 100%;
   flex: 1 1 100%;
+}
+
+.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid,
+.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd {
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  flex: 0 0 0 !important;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border: 0;
+}
+
+.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent,
+.rnvApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd .sapFFCLColumnContent {
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden;
 }
 
 .rnvApp .appLayoutSingle #searchPaneHost .appContent,

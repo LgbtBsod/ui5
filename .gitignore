@@ -23,7 +23,7 @@ mock_gate_way/gateway.db-wal
 docs/runtime/
 artifacts/*.log
 mock_gate_way/tmp_mock*.log
-
+artifacts/*
 # Visual review artifacts and temporary captures
 artifacts/tmp_zip_compare/
 artifacts/ux/review/

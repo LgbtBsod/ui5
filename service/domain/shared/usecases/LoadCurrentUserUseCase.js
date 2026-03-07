@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap_ui5/service/framework/Result",
-    "sap_ui5/service/backend/GatewayBackendService"
-], function (Result, GatewayBackendService) {
+    "sap_ui5/service/backend/GatewayBackendService",
+    "sap_ui5/util/GatewayTextNormalizer"
+], function (Result, GatewayBackendService, GatewayTextNormalizer) {
     "use strict";
 
     function normalizePermissionRules(vValue) {
@@ -39,6 +40,10 @@ sap.ui.define([
         return aLabels;
     }
 
+    function normalizeProfileText(vValue) {
+        return GatewayTextNormalizer.normalize(vValue);
+    }
+
     function applyCurrentUserState(oStateModel, oProfile, sLogin) {
         if (!oStateModel) {
             return oProfile;
@@ -65,8 +70,8 @@ sap.ui.define([
             __ts: Date.now()
         }).then(function (oData) {
             return {
-                uname: String(oData && oData.Uname || sLogin || "").trim(),
-                fullName: String(oData && oData.FullName || sLogin || "").trim(),
+                uname: normalizeProfileText(oData && oData.Uname || sLogin || ""),
+                fullName: normalizeProfileText(oData && oData.FullName || sLogin || ""),
                 permissions: String(oData && oData.PermissionsCsv || "").split(",").map(function (sCode) {
                     return String(sCode || "").trim();
                 }).filter(Boolean),
@@ -74,7 +79,7 @@ sap.ui.define([
                 canView: !!(oData && oData.CanView),
                 canEdit: !!(oData && oData.CanEdit),
                 canDelete: !!(oData && oData.CanDelete),
-                summaryText: String(oData && oData.SummaryText || "").trim()
+                summaryText: normalizeProfileText(oData && oData.SummaryText || "")
             };
         });
     }
