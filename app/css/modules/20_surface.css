@@ -1,19 +1,4 @@
-.glassCard,
-.detailSectionCard,
-.detailControlInlineCard,
-.infoCardTile,
-.searchStatusStripStack,
-.chkStack,
-.detailAttachmentDropZone {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  border: 0;
-  background: var(--theme-block-bg);
-  box-shadow: none;
-  backdrop-filter: blur(calc(var(--glass-blur) * 0.34)) saturate(104%);
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.34)) saturate(104%);
-}
+
 
 body.chkAppRoot.platformPrecisionEnterprise .glassCard,
 body.chkAppRoot.platformPrecisionEnterprise .detailSectionCard,
@@ -114,29 +99,13 @@ body.chkAppRoot.platformCalmModern .chkStack {
   transform: none;
 }
 
-.chkApp .chkStack {
-  border-radius: var(--radius-lg);
-  border: 0;
-  overflow: hidden;
-  background: var(--theme-block-bg);
-  box-shadow: none;
-}
+
 
 .chkApp .chkStack > * {
   background: transparent;
 }
 
-body.chkAppRoot.appDark .chkApp .glassCard,
-body.chkAppRoot.appDark .chkApp .detailSectionCard,
-body.chkAppRoot.appDark .chkApp .detailControlInlineCard,
-body.chkAppRoot.appDark .chkApp .infoCardTile,
-body.chkAppRoot.appDark .chkApp .searchStatusStripStack,
-body.chkAppRoot.appDark .chkApp .chkStack,
-body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
-  background: color-mix(in srgb, rgba(14, 24, 39, 0.82) 74%, transparent);
-  border-color: transparent;
-  box-shadow: none;
-}
+
 
 body.chkAppRoot.appDark .chkApp .glassCard::before,
 body.chkAppRoot.appDark .chkApp .detailSectionCard::before,
