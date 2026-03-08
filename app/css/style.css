@@ -9299,3 +9299,553 @@ body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
   letter-spacing: 0.04em;
 }
 
+
+/* === 2026-03 UX hardening: unified translucent surfaces, no shadows, stable shell popover === */
+.chkApp .searchWorkbenchDock,
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsTable {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: 0;
+  box-sizing: border-box;
+}
+
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsTable,
+.chkApp .searchStatusStripStack,
+.chkApp .workflowStageCard,
+.chkApp .kpiCard,
+.chkApp .searchAnalyticsCard,
+.chkApp .analyticsHeroCard,
+.chkApp .accessDeniedHeroCard,
+.chkApp .analyticsNarrativeBlock,
+.chkApp .analyticsBreakdownSection,
+.chkApp .analyticsChartPanel,
+.chkApp .shellUserCard,
+.chkApp .shellSettingRow,
+.chkApp .shellThemeMeta,
+.chkApp .shellNotificationItem,
+.chkApp .shellHelpItem,
+.chkApp .detailHeroCard,
+.chkApp .detailSectionCard,
+.chkApp .detailControlInlineCard,
+.chkApp .detailAttachmentsCard,
+.chkApp .detailAttachmentDropZone,
+.chkApp .detailWorkflowRail,
+.chkApp .detailControlBar,
+.chkApp .infoCardTile,
+.chkApp .glassCard {
+  background: var(--theme-block-bg) !important;
+  box-shadow: none !important;
+}
+
+.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
+.chkApp .searchActionToolbarDensity .sapMSwt,
+.chkApp .searchActionToolbarDensity .sapMInputBaseContentWrapper,
+.chkApp .searchSelectionStatusChip,
+.chkApp .searchBusyPictogram,
+.chkApp .searchResultsTable .sapMListNoDataText,
+.chkApp .searchScrollAnchorBtn .sapMBtnInner,
+.chkApp .searchFilterCardDense .sapMSegBBtnSel .sapMSegBBtnInner,
+.chkApp .searchResultsTable .brandActionBtn.brandActionPrimary .sapMBtnInner,
+.chkApp .shellUserBtn .sapMBtnInner,
+.chkApp .shellPopover .shellUserActionBtn .sapMBtnInner,
+.chkApp .shellItemIcon,
+.chkApp .shellNotificationIcon {
+  box-shadow: none !important;
+}
+
+.chkApp .searchResultsTable .sapMListTblRow:hover,
+.chkApp .workflowStageCard:hover,
+.chkApp .kpiCard:hover,
+.chkApp .searchAnalyticsCard:hover,
+.chkApp .detailContent .infoCardGrid .infoCardTile:hover {
+  transform: none;
+}
+
+.chkApp .analyticsHeroCard,
+.chkApp .accessDeniedHeroCard,
+.chkApp .searchResultsTable .sapMListNoDataText,
+.chkApp .accessDeniedVisual,
+body.chkAppRoot .sapMMessageToast.glassToast {
+  background: var(--theme-block-bg) !important;
+  box-shadow: none !important;
+}
+
+.chkApp .shellPopover .sapMPopoverCont {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: min(80vh, 42rem);
+}
+
+.chkApp .shellUserBody {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chkApp .shellPopover .shellUserActionBtn,
+.chkApp .shellPopover .shellUserActionBtn .sapMBtnInner {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chkApp .shellPopover .shellUserActionBtn .sapMBtnInner {
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.chkApp .shellUserPermissionList {
+  max-height: min(34vh, 13rem);
+  overflow: auto;
+}
+
+/* === 2026-03 UX polish follow-up: full-width filters, flatter controls, translucent max-output toolbar === */
+.chkApp .searchExperienceStack,
+.chkApp .searchExperienceStack > .sapMFlexItem,
+.chkApp #searchWorkbenchDock,
+.chkApp #searchFilterCard,
+.chkApp .searchFilterExperienceShell,
+.chkApp .searchResultsExperienceShell,
+.chkApp .searchSmartFilterWorkbench,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar,
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBar,
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarGrid,
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarAdvArea,
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.chkApp .searchFilterExperienceShell,
+.chkApp .searchResultsExperienceShell,
+.chkApp .searchActionToolbarDensity,
+.chkApp .searchSmartToolbarRail,
+.chkApp #smartTableCustomToolbar,
+.chkApp #searchResultsToolbar,
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsTable,
+.chkApp .searchStatusStripStack,
+.chkApp .searchResultsTable .toolbarTransparent {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: var(--theme-block-bg) !important;
+}
+
+.chkApp .searchSmartToolbarRail,
+.chkApp #smartTableCustomToolbar {
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.28)) saturate(102%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.28)) saturate(102%);
+}
+
+.chkApp .searchFilterExperienceShell .sapMBtn .sapMBtnInner,
+.chkApp .searchResultsTable .sapMBtn .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner,
+.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
+.chkApp .searchFilterExperienceShell .sapMInputBaseContentWrapper,
+.chkApp .searchFilterExperienceShell .sapMSlt,
+.chkApp .searchFilterExperienceShell .sapMSegB,
+.chkApp .searchResultsExperienceShell .sapMInputBaseContentWrapper,
+.chkApp .searchResultsExperienceShell .sapMSlt,
+.chkApp .searchResultsExperienceShell .sapMSwt,
+.chkApp .searchSmartToolbarRail .sapMInputBaseContentWrapper,
+.chkApp .searchSmartToolbarRail .sapMSlt,
+.chkApp .searchSmartToolbarRail .sapMSwt,
+.chkApp .searchSelectionStatusChip,
+.chkApp .searchSummaryStatusChip,
+.chkApp .searchStageStatusChip {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.chkApp .searchSmartToolbarRail .backendTopInput .sapMInputBaseContentWrapper,
+.chkApp .searchSmartToolbarRail .maxRowsInput .sapMInputBaseContentWrapper,
+.chkApp .searchSmartToolbarRail .sapMSlt,
+.chkApp .searchSmartToolbarRail .sapMSwt {
+  background: color-mix(in srgb, var(--theme-block-bg) 78%, transparent) !important;
+}
+
+.chkApp .searchResultsTable .sapMListTblHeaderCell,
+.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell,
+.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell:first-child,
+.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell:last-child {
+  border: 0 !important;
+}
+
+/* === 2026-03 UX polish follow-up #2: denser surfaces, icon-first shell, single-border popover === */
+:root,
+.light-mode,
+:root.light-mode,
+.chkAppRoot.appLight,
+:root.chkAppRoot.light-mode {
+  --theme-block-bg: color-mix(in srgb, var(--surface-1) 24%, transparent);
+}
+
+:root.dark-mode,
+.chkAppRoot.appDark,
+:root.chkAppRoot.dark-mode {
+  --theme-block-bg: color-mix(in srgb, var(--surface-1) 28%, transparent);
+}
+
+.chkApp .shellActionBtn .sapMBtnInner,
+.chkApp .shellUserBtn .sapMBtnInner,
+.chkApp .themeDockSwitch,
+.chkApp .accentSwitch.sapMSwt,
+.chkApp .searchModeToggleSwitch.sapMSwt {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.chkApp .themeDockSwitch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chkApp .themeDockSwitchTrack,
+.chkApp .accentSwitch.sapMSwt .sapMSwtInner,
+.chkApp .searchModeToggleSwitch.sapMSwt .sapMSwtInner {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.chkApp .themeDockSwitchThumb,
+.chkApp .accentSwitch.sapMSwt .sapMSwtHandle,
+.chkApp .searchModeToggleSwitch.sapMSwt .sapMSwtHandle {
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+
+.chkApp .shellActionBtn .sapMBtnContent {
+  display: none;
+}
+
+.chkApp .shellActionBtn .sapMBtnIconLeft {
+  margin-inline-end: 0;
+}
+
+.chkApp .shellUserBtn .sapMBtnInner {
+  padding-inline: 0.78rem;
+}
+
+@media (max-width: 1280px) {
+  .chkApp .shellUserBtn .sapMBtnContent {
+    display: none;
+  }
+
+  .chkApp .shellUserBtn .sapMBtnIconLeft {
+    margin-inline-end: 0;
+  }
+}
+
+.chkApp .shellPopover {
+  border-radius: calc(var(--radius-lg) - 0.1rem) !important;
+}
+
+.chkApp .shellPopover .sapMPopoverCont {
+  border-radius: inherit;
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 52%, transparent);
+  background: color-mix(in srgb, var(--theme-block-bg) 92%, transparent) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.35)) saturate(106%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.35)) saturate(106%);
+}
+
+.chkApp .shellPopoverBody {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.chkApp .shellUserCard,
+.chkApp .shellSettingRow,
+.chkApp .shellThemeMeta,
+.chkApp .shellNotificationItem,
+.chkApp .shellHelpItem {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.chkApp .shellItemIcon,
+.chkApp .shellNotificationIcon {
+  border: 0 !important;
+}
+
+.chkApp .infoCardHeaderRow {
+  align-items: flex-start;
+}
+
+.chkApp .infoCardPinBtn {
+  flex: 0 0 auto;
+  margin-top: -0.1rem;
+}
+
+.chkApp .infoCardPinBtn .sapMBtnInner {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.chkApp .infoCardValue {
+  line-height: 1.32;
+}
+
+/* === 2026-03 UX polish follow-up #3: transparency tuning, toggle fix, analytics/detail flatten === */
+.chkApp .searchResultsTable .sapMListTblHeaderCell {
+  background: color-mix(in srgb, var(--theme-block-bg) 84%, transparent) !important;
+  border: 0 !important;
+}
+
+.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell,
+.chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell,
+.chkApp .searchResultsTable .sapMLIBSelected .sapMListTblCell,
+.chkApp .searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell,
+.chkApp .searchResultsTable .sapMListNoDataText {
+  background: color-mix(in srgb, var(--theme-block-bg) 72%, transparent) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.chkApp .searchResultsActionRail,
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchSelectionStatusChip,
+.chkApp .searchSummaryStatusChip,
+.chkApp .searchStageStatusChip,
+.chkApp .shellContextRail,
+.chkApp .shellContextChip {
+  filter: saturate(0.8);
+}
+
+/* toggle: restore stable thumb positioning + dark-mode offset */
+.chkApp .themeDockSwitchThumb {
+  top: 0.14rem !important;
+  transform: none !important;
+}
+
+.chkApp .themeDockSwitch.isDark .themeDockSwitchThumb {
+  transform: translate3d(1.78rem, 0, 0) !important;
+}
+
+.chkApp .accentSwitch.sapMSwt .sapMSwtHandle,
+.chkApp .searchModeToggleSwitch.sapMSwt .sapMSwtHandle {
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+
+/* session menu: single rounded contour + softer translucent body */
+.chkApp .shellPopover,
+.chkApp .shellPopover .sapMPopoverCont,
+.chkApp .shellPopover .sapMPopoverArr,
+.chkApp .shellPopover .sapMPopoverBScroll,
+.chkApp .shellPopover .sapMPopoverCont .sapMBar,
+.chkApp .shellPopover .sapMDialogScrollCont,
+.chkApp .shellPopover .sapMList,
+.chkApp .shellPopover .sapMListUl,
+.chkApp .shellPopover .shellUserPermissionList {
+  border-radius: calc(var(--radius-lg) - 0.08rem) !important;
+}
+
+.chkApp .shellPopover .sapMPopoverCont {
+  background: color-mix(in srgb, var(--theme-block-bg) 94%, transparent) !important;
+  border-color: color-mix(in srgb, var(--theme-rail-border) 40%, transparent) !important;
+}
+
+/* analytics: less black, softer rounded cards/panels */
+.chkApp .analyticsHeroCard,
+.chkApp .analyticsNarrativeBlock,
+.chkApp .analyticsBreakdownSection,
+.chkApp .analyticsChartPanel,
+.chkApp .analyticsTile,
+.chkApp .analyticsToplineSection,
+.chkApp .analyticsScreenBody .sapMPanel,
+.chkApp .analyticsScreenContent .sapMPanel,
+.chkApp .analyticsScreenContent .sapMPanelContent {
+  background: color-mix(in srgb, var(--theme-block-bg) 88%, transparent) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+/* detail: reduce extra layers to a single rounded subsection feel */
+.chkApp .detailContent .sapUxAPObjectPageSubSection,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionHeader,
+.chkApp .detailContent .sapUxAPBlockContainer,
+.chkApp .detailContent .sapUxAPSubSectionContent,
+.chkApp .detailMainExperienceStack,
+.chkApp .detailSectionBody,
+.chkApp .detailAttachmentsBody {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.chkApp .detailSectionCard,
+.chkApp .detailTableExperienceCard,
+.chkApp .detailInfoExperienceCard,
+.chkApp .detailAttachmentsCard {
+  border-radius: var(--radius-lg) !important;
+  border: 0 !important;
+  background: color-mix(in srgb, var(--theme-block-bg) 90%, transparent) !important;
+}
+
+/* datetime card: force vertical 3-row layout in edit mode */
+.chkApp .detailDateTimeGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.42rem;
+}
+
+.chkApp .detailDateTimeGrid .detailFieldStack {
+  width: 100%;
+}
+
+.chkApp .infoCardValue {
+  white-space: pre-line !important;
+}
+
+/* === 2026-03 UX polish follow-up #4: invert block scheme + filter-like input backgrounds === */
+html.appInvertedBlockScheme.chkAppRoot.appDark,
+body.appInvertedBlockScheme.chkAppRoot.appDark,
+.appInvertedBlockScheme .chkApp {
+  --theme-block-bg: color-mix(in srgb, rgba(232, 241, 255, 0.9) 34%, transparent);
+}
+
+html.appInvertedBlockScheme.chkAppRoot.appLight,
+body.appInvertedBlockScheme.chkAppRoot.appLight,
+.appInvertedBlockScheme.chkAppRoot.appLight .chkApp {
+  --theme-block-bg: color-mix(in srgb, rgba(18, 32, 54, 0.72) 28%, transparent);
+}
+
+.chkApp .searchFilterExperienceShell .sapMInputBaseContentWrapper,
+.chkApp .searchFilterExperienceShell .sapMSlt,
+.chkApp .searchFilterExperienceShell .sapMSegB,
+.chkApp .searchResultsExperienceShell .sapMInputBaseContentWrapper,
+.chkApp .searchResultsExperienceShell .sapMSlt,
+.chkApp .searchResultsExperienceShell .sapMSwt,
+.chkApp .searchSmartToolbarRail .sapMInputBaseContentWrapper,
+.chkApp .searchSmartToolbarRail .sapMSlt,
+.chkApp .searchSmartToolbarRail .sapMSwt {
+  background: color-mix(in srgb, var(--theme-block-bg) 76%, transparent) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .sapMInputBaseContentWrapper,
+body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .sapMSlt,
+body.chkAppRoot.appLight .chkApp .searchResultsExperienceShell .sapMInputBaseContentWrapper,
+body.chkAppRoot.appLight .chkApp .searchResultsExperienceShell .sapMSlt,
+body.chkAppRoot.appLight .chkApp .searchSmartToolbarRail .sapMInputBaseContentWrapper,
+body.chkAppRoot.appLight .chkApp .searchSmartToolbarRail .sapMSlt {
+  background: color-mix(in srgb, rgba(255, 255, 255, 0.42) 58%, rgba(205, 224, 252, 0.28)) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .sapMInputBaseContentWrapper,
+body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .sapMSlt,
+body.chkAppRoot.appDark .chkApp .searchResultsExperienceShell .sapMInputBaseContentWrapper,
+body.chkAppRoot.appDark .chkApp .searchResultsExperienceShell .sapMSlt,
+body.chkAppRoot.appDark .chkApp .searchSmartToolbarRail .sapMInputBaseContentWrapper,
+body.chkAppRoot.appDark .chkApp .searchSmartToolbarRail .sapMSlt {
+  background: color-mix(in srgb, rgba(33, 56, 92, 0.62) 70%, transparent) !important;
+}
+
+.chkApp .shellSettingsBody .sapMSwt,
+.chkApp .shellSettingsBody .sapMSwt .sapMSwtInner,
+.chkApp .shellSettingsBody .sapMSwt .sapMSwtHandle {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* === 2026-03 UX polish follow-up #5: search rows transparency, detail toolbar flattening, settings/session refinement === */
+body.chkAppRoot .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell,
+body.chkAppRoot .chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell,
+body.chkAppRoot .chkApp .searchResultsTable .sapMLIBSelected .sapMListTblCell,
+body.chkAppRoot .chkApp .searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell {
+  background: color-mix(in srgb, var(--theme-block-bg) 56%, transparent) !important;
+  border: 0 !important;
+}
+
+body.chkAppRoot .chkApp .searchResultsTable .sapMListTblHeaderCell {
+  background: color-mix(in srgb, var(--theme-block-bg) 64%, transparent) !important;
+  border: 0 !important;
+}
+
+/* Detail: remove extra layer backgrounds on chip/button rails */
+body.chkAppRoot .chkApp .detailSectionToolbar,
+body.chkAppRoot .chkApp .detailAttachmentToolbar,
+body.chkAppRoot .chkApp .detailControlRow,
+body.chkAppRoot .chkApp .detailControlRowTop,
+body.chkAppRoot .chkApp .detailControlRowActions,
+body.chkAppRoot .chkApp .toolbarTransparent {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Rounded + overflow-friendly toolbar */
+body.chkAppRoot .chkApp .searchSmartToolbarRail,
+body.chkAppRoot .chkApp #smartTableCustomToolbar {
+  border-radius: 999px !important;
+  overflow: hidden;
+}
+
+body.chkAppRoot .chkApp .searchSmartToolbarRail.sapMTBNewFlex,
+body.chkAppRoot .chkApp #smartTableCustomToolbar.sapMTBNewFlex {
+  flex-wrap: nowrap;
+}
+
+body.chkAppRoot .chkApp .searchSmartToolbarRail .sapMOTBOverflowButton,
+body.chkAppRoot .chkApp #smartTableCustomToolbar .sapMOTBOverflowButton {
+  margin-inline-start: 0.2rem;
+}
+
+/* Basic info inputs in detail card: more translucent like filter block */
+body.chkAppRoot .chkApp .detailInfoExperienceCard .sapMInputBaseContentWrapper,
+body.chkAppRoot .chkApp .detailInfoExperienceCard .sapMSlt,
+body.chkAppRoot .chkApp .detailInfoExperienceCard .sapMTimePicker,
+body.chkAppRoot .chkApp .detailInfoExperienceCard .sapMDatePicker {
+  background: color-mix(in srgb, var(--theme-block-bg) 74%, transparent) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Session/settings popovers: stronger rounding + unified contour */
+body.chkAppRoot .chkApp .shellPopover,
+body.chkAppRoot .chkApp .shellPopover .sapMPopoverCont,
+body.chkAppRoot .chkApp .shellPopover .sapMPopoverBScroll,
+body.chkAppRoot .chkApp .shellPopover .sapMPopoverCont .sapMBar,
+body.chkAppRoot .chkApp .shellPopover .sapMDialogScrollCont {
+  border-radius: var(--radius-lg) !important;
+}
+
+body.chkAppRoot .chkApp .shellSettingsBody,
+body.chkAppRoot .chkApp .shellUserBody {
+  max-height: min(82vh, 44rem);
+  overflow: auto;
+}
+
+body.chkAppRoot .chkApp .shellSettingsBody .shellSettingRow,
+body.chkAppRoot .chkApp .shellUserBody .shellUserCard,
+body.chkAppRoot .chkApp .shellUserBody .shellUserPermissionList {
+  border-radius: calc(var(--radius-md) - 0.08rem) !important;
+}
+
+/* New invert switch: make it visually obvious */
+body.chkAppRoot .chkApp #shellSettingsInvertSchemeSwitch.sapMSwt {
+  opacity: 1;
+}
+
+/* Toggle fine tuning: keep thumb centered and visible in both states */
+body.chkAppRoot .chkApp .themeDockSwitchThumb {
+  top: 50% !important;
+  margin-top: -0.76rem;
+}
+
+body.chkAppRoot .chkApp .themeDockSwitch.isDark .themeDockSwitchThumb {
+  transform: translate3d(1.78rem, 0, 0) !important;
+}

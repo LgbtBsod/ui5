@@ -165,9 +165,6 @@ sap.ui.define([
         });
         return pToken.then(function () {
         return toPromise(function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            var sBaseUrl = serviceUrl().replace(/\/+$/, "");
-            var sResolvedUrl = sBaseUrl + (sPath.charAt(0) === "/" ? sPath : "/" + sPath);
             var mModelHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
             var sCsrfToken = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
             var mHeaders;
@@ -183,43 +180,16 @@ sap.ui.define([
             if (sCsrfToken) {
                 mHeaders["X-CSRF-Token"] = sCsrfToken;
             }
-
-            if (typeof window !== "undefined" && /^\/(?!\/)/.test(sResolvedUrl)) {
-                sResolvedUrl = window.location.origin + sResolvedUrl;
-            }
-
-            xhr.open("PUT", sResolvedUrl, true);
-            xhr.withCredentials = true;
-            Object.keys(mHeaders).forEach(function (sName) {
-                var vValue = mHeaders[sName];
-                if (vValue === undefined || vValue === null || vValue === "") {
-                    return;
-                }
-                xhr.setRequestHeader(sName, String(vValue));
-            });
-            xhr.onload = function () {
-                if (xhr.status >= 200 && xhr.status < 300) {
+            oModel.update(sPath, vPayload || "", {
+                headers: mHeaders,
+                merge: false,
+                success: function () {
                     resolve({});
-                    return;
+                },
+                error: function (e) {
+                    reject(GatewayErrorNormalizer.normalizeError(e));
                 }
-                reject(GatewayErrorNormalizer.normalizeError({
-                    status: xhr.status,
-                    statusCode: xhr.status,
-                    message: xhr.statusText || "Gateway stream upload failed",
-                    responseText: xhr.responseText || "",
-                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
-                }));
-            };
-            xhr.onerror = function () {
-                reject(GatewayErrorNormalizer.normalizeError({
-                    status: xhr.status || 0,
-                    statusCode: xhr.status || 0,
-                    message: xhr.statusText || "Gateway stream upload failed",
-                    responseText: xhr.responseText || "",
-                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
-                }));
-            };
-            xhr.send(vPayload || null);
+            });
         });
         }); // end pToken.then
     }

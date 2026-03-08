@@ -130,8 +130,8 @@
                                             <VBox visible="{= !${view>/detailSkeletonBusy} }" renderType="Bare" class="appSkeletonReveal">
                                             <f:GridList id="infoCardGrid" items="{path:'view>/infoCards', factory: '.infoCardFactory'}" class="infoCardGrid" showSeparators="None">
                                             <f:dragDropConfig>
-                                                <dnd:DragInfo sourceAggregation="items" enabled="{= ${state>/mode} !== 'READ' }"/>
-                                                <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="{= ${state>/mode} !== 'READ' }" drop=".onInfoCardsDrop"/>
+                                                <dnd:DragInfo sourceAggregation="items" enabled="true"/>
+                                                <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="true" drop=".onInfoCardsDrop"/>
                                             </f:dragDropConfig>
                                             </f:GridList>
                                             </VBox>

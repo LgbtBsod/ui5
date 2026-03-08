@@ -74,18 +74,14 @@ sap.ui.define([
     }
 
     function formatDateTimeCardValue(sDate, sTime, sTimezone) {
-        var aParts = [];
-        var sHumanDate = formatHumanDate(sDate);
-        if (sHumanDate) {
-            aParts.push(sHumanDate);
-        }
-        if (sTime) {
-            aParts.push(String(sTime));
-        }
-        if (sTimezone) {
-            aParts.push(String(sTimezone));
-        }
-        return aParts.join("\n");
+        var sHumanDate = formatHumanDate(sDate) || "-";
+        var sTimeValue = String(sTime || "-");
+        var sTimezoneValue = String(sTimezone || "-");
+        return [
+            "Date: " + sHumanDate,
+            "Time: " + sTimeValue,
+            "Timezone: " + sTimezoneValue
+        ].join("\n");
     }
 
     function formatAutosaveTime(vValue) {

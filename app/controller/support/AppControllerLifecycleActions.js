@@ -74,6 +74,7 @@ sap.ui.define([
             this._syncStaticAreaScope();
             this._syncLayoutState();
             this._applyCompactDensityClass();
+            this._applyInvertedBlockSchemeClass();
             this._syncShellMetrics();
             this._syncShellFlexAllocation();
             this._syncLayoutViewportGeometry();

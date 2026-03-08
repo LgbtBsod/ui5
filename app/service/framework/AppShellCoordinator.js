@@ -74,7 +74,8 @@ sap.ui.define([
                 isDark: !!(oApplied && oApplied.isDark),
                 themeMode: (oApplied && oApplied.mode) || "morning",
                 animationEnabled: !oApplied || oApplied.animationEnabled !== false,
-                backgroundInteractive: !oApplied || oApplied.backgroundInteractive !== false
+                backgroundInteractive: !oApplied || oApplied.backgroundInteractive !== false,
+                invertedBlockScheme: false
             }), "appView");
             syncThemeState(oController, "init", oApplied);
             var oState = resolveStateModel(oController);
