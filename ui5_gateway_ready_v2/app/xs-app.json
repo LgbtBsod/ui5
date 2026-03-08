@@ -1,0 +1,18 @@
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/sap/opu/odata/sap/Z_UI5_SRV/(.*)",
+      "target": "/sap/opu/odata/sap/Z_UI5_SRV/$1",
+      "destination": "SAP_Gateway",
+      "csrfProtection": false
+    },
+    {
+      "source": "^(.*)",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}

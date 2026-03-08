@@ -1,0 +1,48 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <VBox class="searchStatusStripStack sapUiTinyMarginBottom chkStack">
+        <VBox visible="{= ${state>/isLoading} &amp;&amp; !${state>/loadError} }" class="searchCustomBusyPanel sapUiTinyMarginBottom">
+            <HBox class="searchCustomBusyHeader" alignItems="Center" justifyContent="SpaceBetween" renderType="Bare">
+                <Text id="busyPanelTitleText" text="{i18n>busyPanelTitle}" class="searchCustomBusyTitle"/>
+                <Text id="busyPanelSubtitleText" text="{i18n>busyPanelSubtitle}" class="searchCustomBusySubtitle"/>
+            </HBox>
+            <HBox class="searchCustomBusyPictogramRow" alignItems="Center" justifyContent="Center" renderType="Bare">
+                <core:Icon src="sap-icon://employee-approvals" decorative="true" class="searchBusyPictogram searchBusyPictogramOne"/>
+                <core:Icon src="sap-icon://factory" decorative="true" class="searchBusyPictogram searchBusyPictogramTwo"/>
+                <core:Icon src="sap-icon://inspection" decorative="true" class="searchBusyPictogram searchBusyPictogramThree"/>
+                <core:Icon src="sap-icon://task" decorative="true" class="searchBusyPictogram searchBusyPictogramFour"/>
+            </HBox>
+        </VBox>
+
+        <MessageStrip
+            text="{view>/filterHintText}"
+            type="{view>/filterHintType}"
+            visible="{view>/filterHintVisible}"
+            showIcon="true"
+            class="searchFilterHintBanner chkFeedbackStrip"/>
+
+        <MessageStrip
+            text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
+            type="Error"
+            visible="{state>/loadError}"
+            showIcon="true"
+            class="searchLoadStateBanner searchLoadErrorBanner chkFeedbackStrip"/>
+
+        <HBox
+            class="searchLoadRetryRow sapUiTinyMarginTop"
+            alignItems="Center"
+            justifyContent="SpaceBetween"
+            renderType="Bare"
+            visible="{state>/loadError}">
+            <Text
+                text="{= ${state>/networkOnline} === false ? ${i18n>searchOfflineMessage} : ${i18n>searchTimeoutMessage} }"
+                class="modeHintText"/>
+            <Button
+                text="{i18n>searchRetryAction}"
+                type="Transparent"
+                press=".onRetrySearchLoad"
+                enabled="{= !${state>/isLoading} }"/>
+        </HBox>
+    </VBox>
+</core:FragmentDefinition>

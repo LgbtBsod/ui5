@@ -1,0 +1,218 @@
+sap.ui.define([
+    "checklist/app/controller/support/DetailPersonInputSupport",
+    "checklist/app/service/framework/FocusRuntime",
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/SchedulingRuntime",
+    "checklist/app/util/ValidationPathMap"
+], function (DetailPersonInputSupport, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap) {
+    "use strict";
+
+    function validationSummaryPath(mStatePaths) {
+        return (mStatePaths && mStatePaths.VALIDATION_SUMMARY) || "/validationSummary";
+    }
+
+    function isFilledValidationValue(vValue) {
+        if (Array.isArray(vValue)) {
+            return vValue.length > 0;
+        }
+        if (typeof vValue === "boolean") {
+            return true;
+        }
+        return String(vValue == null ? "" : vValue).trim().length > 0;
+    }
+
+    function shouldTrackSelectedDirtyPath(sModelPath) {
+        var sPath = "/" + String(sModelPath || "").replace(/^\//, "");
+        if (sPath === "/") {
+            return false;
+        }
+        if (/^\/attachments(?:\/|$)/.test(sPath)) {
+            return false;
+        }
+        if (/^\/(?:root|meta)(?:\/|$)/.test(sPath)) {
+            return false;
+        }
+        return /^\/(?:basic|checks|barriers)(?:\/|$)/.test(sPath);
+    }
+
+    function resolveFocusDomRef(oControl) {
+        if (!oControl) {
+            return null;
+        }
+        if (typeof oControl.getFocusDomRef === "function") {
+            return oControl.getFocusDomRef() || null;
+        }
+        if (typeof oControl.getDomRef === "function") {
+            return oControl.getDomRef() || null;
+        }
+        return null;
+    }
+
+    function scrollInvalidIntoView(oControl) {
+        var oDomRef = resolveFocusDomRef(oControl);
+        if (!oDomRef || typeof oDomRef.scrollIntoView !== "function") {
+            return false;
+        }
+        try {
+            oDomRef.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+            return true;
+        } catch (_e) {
+            try {
+                oDomRef.scrollIntoView(true);
+                return true;
+            } catch (_e2) {
+                return false;
+            }
+        }
+    }
+
+    function compute(oController) {
+        var oSelectedModel = ModelStateRuntime.model(oController, "selected");
+        var aRequired = ModelStateRuntime.read(oController, "state", "/requiredFields", []) || [];
+        var mMissing = {};
+        var aMissingPaths = [];
+        var aMissingKeys = [];
+
+        (Array.isArray(aRequired) ? aRequired : []).forEach(function (sRequiredPath) {
+            var sPath = "/" + String(sRequiredPath || "").replace(/^\//, "");
+            var sKey = ValidationPathMap.toValidationKey(sPath);
+            var vCurrent = oSelectedModel ? ModelStateRuntime.read(oController, "selected", sPath, undefined) : undefined;
+            var bMissing = !isFilledValidationValue(vCurrent);
+            mMissing[sKey] = bMissing;
+            if (bMissing) {
+                aMissingPaths.push(sPath);
+                aMissingKeys.push(sKey);
+            }
+        });
+
+        return {
+            hasErrors: aMissingKeys.length > 0,
+            missingPaths: aMissingPaths,
+            missingKeys: aMissingKeys,
+            missingCount: aMissingKeys.length,
+            firstMissingPath: aMissingPaths[0] || "",
+            firstMissingKey: aMissingKeys[0] || "",
+            missingMap: mMissing
+        };
+    }
+
+    function recompute(oController, sSource, bShowValidation, mStatePaths) {
+        var oSummary;
+        if (!ModelStateRuntime.model(oController, "state") || !ModelStateRuntime.model(oController, "view")) {
+            return { hasErrors: false, missingPaths: [], missingKeys: [], firstMissingPath: "", firstMissingKey: "" };
+        }
+        oSummary = compute(oController);
+        ControllerViewStateRuntime.set(oController, "/validationMissing", oSummary.missingMap || {});
+        if (bShowValidation || ControllerViewStateRuntime.get(oController, "/validationShown")) {
+            ControllerViewStateRuntime.set(oController, "/validationShown", true);
+        }
+        ModelStateRuntime.write(oController, "state", validationSummaryPath(mStatePaths), {
+            hasErrors: !!oSummary.hasErrors,
+            missingPaths: oSummary.missingPaths || [],
+            missingKeys: oSummary.missingKeys || [],
+            missingCount: Number(oSummary.missingCount || 0) || 0,
+            source: String(sSource || "sync"),
+            firstMissingPath: oSummary.firstMissingPath || "",
+            firstMissingKey: oSummary.firstMissingKey || ""
+        });
+        return oSummary;
+    }
+
+    function focusFirstInvalidField(oController, mStatePaths) {
+        var sSummaryPath = validationSummaryPath(mStatePaths);
+        var oSummary = ModelStateRuntime.read(oController, "state", sSummaryPath, {}) || {};
+        var aMissingKeys = (oSummary && oSummary.missingKeys) || [];
+        var oView = oController.getView && oController.getView();
+        var aControls;
+        var oTarget;
+        if (!oView || !Array.isArray(aMissingKeys) || !aMissingKeys.length) {
+            return false;
+        }
+        aControls = oView.findAggregatedObjects(true, function (oControl) {
+            return !!(oControl && oControl.data && oControl.data("validationKey"));
+        });
+        oTarget = aMissingKeys.reduce(function (oFound, sKey) {
+            if (oFound) {
+                return oFound;
+            }
+            return aControls.find(function (oControl) {
+                return oControl && oControl.data && oControl.data("validationKey") === sKey;
+            }) || null;
+        }, null);
+        if (!oTarget) {
+            return false;
+        }
+        scrollInvalidIntoView(oTarget);
+        if (typeof oTarget.focus === "function" && FocusRuntime.focusSoon(oTarget)) {
+            return true;
+        }
+        var oDomRef = resolveFocusDomRef(oTarget);
+        if (!oDomRef || typeof oDomRef.focus !== "function") {
+            return false;
+        }
+        SchedulingRuntime.restartTimer(0, function () {
+            oDomRef.focus();
+        }, 0);
+        return true;
+    }
+
+    function onSelectedChecklistChanged(oController, oEvent, mStatePaths) {
+        var oSelectedModel = ModelStateRuntime.model(oController, "selected");
+        var oUiStateModel = ModelStateRuntime.model(oController, "uiState");
+        var sPath = oEvent && oEvent.getParameter && oEvent.getParameter("path");
+        var aRequired = ModelStateRuntime.read(oController, "state", "/requiredFields", []) || [];
+        var sValidationKey;
+        var sRequiredPath;
+        var sModelPath;
+        var sMode;
+        var vCurrent;
+
+        if (!ModelStateRuntime.model(oController, "view") || !oSelectedModel || !sPath) {
+            return;
+        }
+
+        sModelPath = "/" + String(sPath || "").replace(/^\//, "");
+        if (sPath === "/") {
+            ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
+        }
+        DetailPersonInputSupport.syncDrafts(oController, oSelectedModel, sModelPath);
+
+        if (oUiStateModel) {
+            if (sPath === "/") {
+                ModelStateRuntime.syncDetailCurrent(oController, ModelStateRuntime.read(oController, "selected", "/", {}) || {});
+            } else {
+                ModelStateRuntime.write(
+                    oController,
+                    "uiState",
+                    "/_detailCurrent" + sModelPath,
+                    ModelStateRuntime.read(oController, "selected", sModelPath, undefined)
+                );
+            }
+        }
+
+        sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", "/mode", ""), "");
+        if (shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {
+            ModelStateRuntime.write(oController, "state", "/isDirty", true);
+        }
+
+        sRequiredPath = sModelPath;
+        if (aRequired.indexOf(sRequiredPath) < 0) {
+            recompute(oController, "selectedSync", false, mStatePaths);
+            return;
+        }
+
+        sValidationKey = ValidationPathMap.toValidationKey(sRequiredPath);
+        vCurrent = ModelStateRuntime.read(oController, "selected", sRequiredPath, undefined);
+        ControllerViewStateRuntime.set(oController, "/validationMissing/" + sValidationKey, !isFilledValidationValue(vCurrent));
+        recompute(oController, "fieldChange", false, mStatePaths);
+    }
+
+    return {
+        compute: compute,
+        recompute: recompute,
+        focusFirstInvalidField: focusFirstInvalidField,
+        onSelectedChecklistChanged: onSelectedChecklistChanged
+    };
+});

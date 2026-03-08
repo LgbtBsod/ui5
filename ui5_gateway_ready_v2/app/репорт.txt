@@ -1,0 +1,12 @@
+Баг 16 — AttachmentSet: неправильный ключ в URL-предикате
+Key='xxx' → AttachmentKey='xxx' в PUT (/$value) и DELETE-запросах, а также в соответствующих DIRECT_PUT_ALLOWLIST / DIRECT_DELETE_ALLOWLIST паттернах GatewayClient.js. Без этого загрузка и удаление вложений на SAP Gateway всегда возвращали 404.
+Баг 17 — fetchPermission без .catch(): необработанное исключение
+checkChecklistPermission обращается к ChecklistPermissionSet, которого нет на некоторых Gateway-бэкендах. При ошибке 404 весь EnterEditUseCase и OpenDetailUseCase крашились. Добавлен .catch() с fallback {canView: true, canEdit: true}.
+Баг 18 — AnalyticsRefreshStateSet и ChecklistPermissionSet отсутствовали в metadata.xml
+Оба entity type и entity set добавлены в metadata.xml. WorkflowAnalyticsAdapter также обёрнут .catch() для работы на Gateway без этого набора.
+Баг 19 — Promise.prototype.finally не поддерживается в IE11
+BrowserCacheAdapter.withStore использовал .finally(). Заменено на .then(resolve, reject) совместимую цепочку (Component.js имеет полифил, но он недоступен при старте модуля).
+Баг 20 — Отсутствующие i18n-ключи экспорта
+nothingToExport и searchExportSuccess использовались в ExportSearchUseCase через Effects.toast, но отсутствовали во всех .properties-файлах. Добавлены в 4 локали.
+Баг 21 — Отсутствующий i18n-ключ вида
+filterBarrierSegmentLabel использовался в Search.view.xml (строка 152), но не был определён. Добавлен во все локали.

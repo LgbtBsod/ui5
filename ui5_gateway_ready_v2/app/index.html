@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Checklist</title>
+    <link rel="icon" href="data:,">
+    <link rel="dns-prefetch" href="//ui5.sap.com">
+    <link rel="preconnect" href="https://ui5.sap.com" crossorigin>
+    <link rel="preload" href="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js" as="script" crossorigin>
+    <script>
+        (function () {
+            var sStoredMode = "morning";
+            var bAnimationEnabled = true;
+            var bBackgroundInteractive = true;
+            var sThemeProfileKey = "checklist_app_theme_profile";
+            var sLegacyThemeProfileKey = "sap_ui5_theme_profile";
+            var sThemeModeKey = "checklist_app_theme";
+            var sLegacyThemeModeKey = "sap_ui5_theme";
+            var sRawProfile;
+            var oProfile;
+            var oRoot = document.documentElement;
+            try {
+                sRawProfile = window.localStorage.getItem(sThemeProfileKey) || window.localStorage.getItem(sLegacyThemeProfileKey);
+                if (sRawProfile) {
+                    oProfile = JSON.parse(sRawProfile);
+                    sStoredMode = oProfile && oProfile.mode ? oProfile.mode : "morning";
+                    if (typeof (oProfile && oProfile.animationEnabled) === "boolean") {
+                        bAnimationEnabled = oProfile.animationEnabled;
+                    }
+                    if (typeof (oProfile && oProfile.backgroundInteractive) === "boolean") {
+                        bBackgroundInteractive = oProfile.backgroundInteractive;
+                    }
+                } else {
+                    sStoredMode = window.localStorage.getItem(sThemeModeKey) || window.localStorage.getItem(sLegacyThemeModeKey) || "morning";
+                }
+            } catch (e) {}
+            sStoredMode = String(sStoredMode || "").toLowerCase() === "night" ? "night" : "morning";
+            if (sStoredMode === "morning") {
+                oRoot.classList.add("light-mode");
+            } else {
+                oRoot.classList.remove("light-mode");
+            }
+            oRoot.classList.add("chkAppRoot");
+            oRoot.classList.toggle("theme-motion-disabled", !bAnimationEnabled);
+            oRoot.classList.toggle("theme-motion-enabled", !!bAnimationEnabled);
+            oRoot.setAttribute("data-startup-theme-mode", sStoredMode);
+            oRoot.setAttribute("data-startup-animation-enabled", bAnimationEnabled ? "true" : "false");
+            oRoot.setAttribute("data-startup-background-interactive", bBackgroundInteractive ? "true" : "false");
+            oRoot.setAttribute("data-ui5-app-ready", "false");
+            window.__ui5BootstrapUrl = "https://ui5.sap.com/1.71.70/resources/sap-ui-core.js";
+            window.__ui5MarkAppReady = function () {
+                var oReadyRoot = document && document.documentElement;
+                var oReadyBody = document && document.body;
+                if (!oReadyRoot || oReadyRoot.getAttribute("data-ui5-app-ready") === "true") {
+                    return;
+                }
+                oReadyRoot.setAttribute("data-ui5-app-ready", "true");
+                if (oReadyBody) {
+                    oReadyBody.setAttribute("data-ui5-app-ready", "true");
+                }
+            };
+        }());
+    </script>
+    <script>
+    // Component-preload.js is optional (dev/build artifact)
+    (function() {
+        try {
+            var s = document.createElement('script');
+            s.src = './Component-preload.js';
+            s.onerror = function() { /* not available on gateway, UI5 will load modules directly */ };
+            document.head.appendChild(s);
+        } catch(e) {}
+    }());
+</script>
+
+        <!--src="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js"-->
+
+<style>
+    html, body {
+        height: 100% !important;
+        margin: 0;
+    }
+    body {
+        background: #eef4f9;
+    }
+    html[data-startup-theme-mode="night"] body {
+        background: #08131f;
+    }
+    body.sapUiBody {
+        background: transparent !important;
+    }
+    #ui5-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+        contain: strict;
+        will-change: opacity;
+    }
+    #ui5-bg .bg,
+    #ui5-bg .dither,
+    #ui5-bg .grain,
+    #ui5-bg .paper {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+    #ui5_container {
+        height: 100% !important;
+        width: 100%;
+        position: relative;
+        z-index: 3;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 180ms ease, visibility 0s linear 180ms;
+    }
+    html[data-ui5-app-ready="true"] #ui5_container {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0s;
+    }
+    #startup-shell {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: clamp(1rem, 2.8vw, 2rem);
+        pointer-events: none;
+        transition: opacity 180ms ease, visibility 0s linear 180ms;
+    }
+    #startup-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(245, 249, 252, 0.84), rgba(234, 242, 249, 0.52));
+        backdrop-filter: blur(12px);
+    }
+    html[data-startup-theme-mode="night"] #startup-shell::before {
+        background: linear-gradient(180deg, rgba(8, 16, 26, 0.76), rgba(7, 18, 29, 0.54));
+    }
+    #startup-shell-card {
+        position: relative;
+        width: min(100%, 84rem);
+        display: grid;
+        gap: 1rem;
+        padding: 1rem 1.25rem 1.1rem;
+        border-radius: 1.75rem;
+        border: 1px solid rgba(126, 156, 198, 0.18);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(243, 248, 253, 0.56)),
+            rgba(241, 246, 251, 0.62);
+        box-shadow:
+            0 16px 42px rgba(35, 56, 84, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.55);
+        overflow: hidden;
+    }
+    html[data-startup-theme-mode="night"] #startup-shell-card {
+        border-color: rgba(110, 166, 208, 0.16);
+        background:
+            linear-gradient(180deg, rgba(15, 26, 39, 0.84), rgba(10, 20, 31, 0.62)),
+            rgba(9, 18, 29, 0.72);
+        box-shadow:
+            0 18px 48px rgba(1, 6, 12, 0.32),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .startup-shell-header,
+    .startup-shell-grid {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+    .startup-shell-brand {
+        width: clamp(11rem, 28vw, 16rem);
+        height: 1rem;
+        border-radius: 999px;
+    }
+    .startup-shell-pill {
+        width: 7rem;
+        height: 0.75rem;
+        border-radius: 999px;
+    }
+    .startup-shell-panel {
+        flex: 1 1 18rem;
+        min-height: 6.5rem;
+        border-radius: 1.3rem;
+        border: 1px solid rgba(132, 164, 208, 0.16);
+        background: rgba(255, 255, 255, 0.42);
+        padding: 0.95rem 1rem;
+        display: grid;
+        gap: 0.65rem;
+    }
+    html[data-startup-theme-mode="night"] .startup-shell-panel {
+        border-color: rgba(113, 162, 208, 0.15);
+        background: rgba(11, 22, 34, 0.5);
+    }
+    .startup-shell-line,
+    .startup-shell-brand,
+    .startup-shell-pill {
+        background: linear-gradient(90deg, rgba(149, 177, 215, 0.16), rgba(255, 255, 255, 0.56), rgba(149, 177, 215, 0.16));
+        background-size: 200% 100%;
+        animation: startup-shell-pulse 1.35s ease-in-out infinite;
+    }
+    html[data-startup-theme-mode="night"] .startup-shell-line,
+    html[data-startup-theme-mode="night"] .startup-shell-brand,
+    html[data-startup-theme-mode="night"] .startup-shell-pill {
+        background: linear-gradient(90deg, rgba(79, 116, 154, 0.16), rgba(171, 212, 255, 0.28), rgba(79, 116, 154, 0.16));
+        background-size: 200% 100%;
+    }
+    .startup-shell-line {
+        height: 0.82rem;
+        border-radius: 999px;
+    }
+    .startup-shell-line.wide {
+        width: 100%;
+    }
+    .startup-shell-line.medium {
+        width: 72%;
+    }
+    .startup-shell-line.short {
+        width: 48%;
+    }
+    html[data-ui5-app-ready="true"] #startup-shell {
+        opacity: 0;
+        visibility: hidden;
+    }
+    @keyframes startup-shell-pulse {
+        0% {
+            background-position: 100% 0;
+        }
+        100% {
+            background-position: -100% 0;
+        }
+    }
+</style>
+
+    <script>
+        (function () {
+            function loadBootstrapScript() {
+                var oScript = document.createElement("script");
+                oScript.id = "sap-ui-bootstrap";
+                oScript.src = window.__ui5BootstrapUrl || "https://ui5.sap.com/1.71.70/resources/sap-ui-core.js";
+                oScript.async = true;
+                oScript.crossOrigin = "anonymous";
+                oScript.setAttribute("data-sap-ui-theme", "sap_horizon");
+                oScript.setAttribute("data-sap-ui-libs", "sap.m,sap.f,sap.ui.layout,sap.ui.comp,sap.uxap");
+                oScript.setAttribute("data-sap-ui-resourceroots", '{"checklist.app":"./"}');
+                oScript.setAttribute("data-sap-ui-compatVersion", "edge");
+                oScript.setAttribute("data-sap-ui-async", "true");
+                oScript.setAttribute("data-sap-ui-preload", "async");
+                oScript.setAttribute("data-sap-ui-xx-componentPreload", "on");
+                oScript.onload = function () {
+                    if (window.sap && sap.ui && sap.ui.getCore) {
+                        attachInit();
+                        return;
+                    }
+                    document.documentElement.setAttribute("data-ui5-bootstrap-error", "true");
+                    window.console.error("UI5 bootstrap loaded but sap.ui.getCore is unavailable.");
+                };
+                oScript.onerror = function () {
+                    document.documentElement.setAttribute("data-ui5-bootstrap-error", "true");
+                    window.console.error("UI5 bootstrap failed to load.");
+                };
+                document.head.appendChild(oScript);
+            }
+
+            function mountComponent() {
+            (window.__ui5PreloadQueue || []).forEach(function (aEntry) {
+                if (window.sap && sap.ui && sap.ui.require && sap.ui.require.preload) {
+                    sap.ui.require.preload(aEntry[0], aEntry[1]);
+                }
+            });
+            window.__ui5PreloadQueue = [];
+            sap.ui.require([
+                "sap/ui/core/ComponentContainer",
+                "checklist/app/infra/adapters/Ui5StyleAdapter"
+            ], function (ComponentContainer, Ui5StyleAdapter) {
+                function splitClassNames(sClassNames) {
+                    return String(sClassNames || "").split(/\s+/).map(function (sName) {
+                        return sName.trim();
+                    }).filter(Boolean);
+                }
+
+                function applyStyleClass(oTarget, sClassNames, sMethodName) {
+                    if (!oTarget || typeof oTarget[sMethodName] !== "function") {
+                        return oTarget;
+                    }
+                    splitClassNames(sClassNames).forEach(function (sClassName) {
+                        oTarget[sMethodName](sClassName);
+                    });
+                    return oTarget;
+                }
+
+                if (Ui5StyleAdapter && typeof Ui5StyleAdapter.enableOn !== "function") {
+                    Ui5StyleAdapter.enableOn = function (oTarget, sClassNames) {
+                        return applyStyleClass(oTarget, sClassNames, "addStyleClass");
+                    };
+                }
+
+                if (Ui5StyleAdapter && typeof Ui5StyleAdapter.disableOn !== "function") {
+                    Ui5StyleAdapter.disableOn = function (oTarget, sClassNames) {
+                        return applyStyleClass(oTarget, sClassNames, "removeStyleClass");
+                    };
+                }
+
+                if (Ui5StyleAdapter && typeof Ui5StyleAdapter.restartOn !== "function") {
+                    Ui5StyleAdapter.restartOn = function (oTarget, sClassName) {
+                        var oDomRef;
+                        applyStyleClass(oTarget, sClassName, "removeStyleClass");
+                        oDomRef = oTarget && oTarget.getDomRef && oTarget.getDomRef();
+                        if (oDomRef) {
+                            void oDomRef.offsetWidth;
+                        }
+                        return applyStyleClass(oTarget, sClassName, "addStyleClass");
+                    };
+                }
+
+                new ComponentContainer({
+                    name: "checklist.app",
+                    manifest: true,
+                    settings: { id: "checklist_app_comp" },
+                    async: true,
+                    height: "100%"
+                }).placeAt("ui5_container");
+            });
+            }
+
+            function attachInit() {
+                sap.ui.getCore().attachInit(mountComponent);
+            }
+
+            if (window.sap && sap.ui && sap.ui.getCore) {
+                attachInit();
+                return;
+            }
+            loadBootstrapScript();
+        }());
+    </script>
+</head>
+<body class="sapUiBody">
+    <script>
+        (function () {
+            var sMode = document.documentElement.getAttribute("data-startup-theme-mode") || "morning";
+            var bAnimationEnabled = document.documentElement.getAttribute("data-startup-animation-enabled") !== "false";
+            var bBackgroundInteractive = document.documentElement.getAttribute("data-startup-background-interactive") !== "false";
+            document.body.classList.add("chkAppRoot");
+            document.body.classList.add(sMode === "night" ? "appDark" : "appLight");
+            document.body.classList.add(sMode === "night" ? "nightMode" : "lightMode");
+            document.body.classList.toggle("theme-motion-disabled", !bAnimationEnabled);
+            document.body.classList.toggle("theme-motion-enabled", !!bAnimationEnabled);
+            document.body.setAttribute("data-theme", sMode === "night" ? "dark" : "light");
+            document.body.setAttribute("data-bg-enabled", bAnimationEnabled ? "true" : "false");
+            document.body.setAttribute("data-bg-interactive", bBackgroundInteractive ? "true" : "false");
+            document.body.setAttribute("data-quality", "high");
+        }());
+    </script>
+    <div id="ui5-bg" aria-hidden="true">
+    <!-- LIGHT: mix of "oil-slick" + "aurora silk" (soft, corporate) -->
+    <svg class="bg" id="bgLight" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <!-- Oil base (from your preferred light) -->
+        <linearGradient id="L_pastelBase" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#d8fbff"/>
+          <stop offset="22%"  stop-color="#fff4bf"/>
+          <stop offset="44%"  stop-color="#f2d6ff"/>
+          <stop offset="66%"  stop-color="#ffd6de"/>
+          <stop offset="88%"  stop-color="#c8ffe3"/>
+          <stop offset="100%" stop-color="#d8fbff"/>
+          <!-- 5% faster: 220s -> 209s -->
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="360 0.5 0.5" dur="209s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <linearGradient id="L_sheen" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#54f1ff" stop-opacity="0.16"/>
+          <stop offset="25%"  stop-color="#ffd35a" stop-opacity="0.14"/>
+          <stop offset="50%"  stop-color="#ff6fd0" stop-opacity="0.13"/>
+          <stop offset="75%"  stop-color="#9a8bff" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="#5dffb2" stop-opacity="0.15"/>
+          <!-- 5% faster: 280s -> 266s -->
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="-360 0.5 0.5" dur="266s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <filter id="L_swirl" x="-60%" y="-60%" width="220%" height="220%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.0065 0.0085" numOctaves="3" seed="11" result="n">
+            <!-- 5% faster: 26s -> 24.7s -->
+            <animate attributeName="baseFrequency" dur="24.7s"
+              values="0.0060 0.0080; 0.0072 0.0092; 0.0065 0.0085; 0.0070 0.0090; 0.0060 0.0080"
+              repeatCount="indefinite"/>
+          </feTurbulence>
+          <feColorMatrix in="n" type="matrix" result="n2"
+            values="1.35 0   0   0  0
+                    0   1.18 0   0  0
+                    0   0   1.00 0  0
+                    0   0   0   1  0" />
+          <feDisplacementMap in="SourceGraphic" in2="n2" scale="72" xChannelSelector="R" yChannelSelector="G" result="d">
+            <!-- 5% faster: 36s -> 34.2s -->
+            <animate attributeName="scale" dur="34.2s" values="52;88;62;84;52" repeatCount="indefinite"/>
+          </feDisplacementMap>
+          <feGaussianBlur in="d" stdDeviation="0.55" result="b"/>
+          <feBlend in="d" in2="b" mode="screen"/>
+        </filter>
+
+        <filter id="L_microDrift" x="-60%" y="-60%" width="220%" height="220%">
+          <feTurbulence type="turbulence" baseFrequency="0.012" numOctaves="1" seed="5" result="t">
+            <!-- 5% faster: 20s -> 19s -->
+            <animate attributeName="baseFrequency" dur="19s"
+              values="0.011;0.015;0.013;0.014;0.011" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="t" scale="18" xChannelSelector="B" yChannelSelector="R"/>
+        </filter>
+
+        <!-- Aurora silk overlay (light) -->
+        <linearGradient id="L_aurA" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#2ad7ff" stop-opacity="0.22"/>
+          <stop offset="28%"  stop-color="#9f8cff" stop-opacity="0.18"/>
+          <stop offset="56%"  stop-color="#ff7fcf" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="#35ffd0" stop-opacity="0.18"/>
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="-360 0.5 0.5" dur="589s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <linearGradient id="L_aurB" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#35ffd0" stop-opacity="0.14"/>
+          <stop offset="45%"  stop-color="#6fc2ff" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#ff86d2" stop-opacity="0.10"/>
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="360 0.5 0.5" dur="703s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <filter id="L_silkCoarse" x="-90%" y="-90%" width="280%" height="280%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.0036 0.0052" numOctaves="2" seed="13" result="n">
+            <animate attributeName="baseFrequency" dur="52s"
+              values="0.0032 0.0048; 0.0041 0.0060; 0.0036 0.0052; 0.0040 0.0058; 0.0032 0.0048"
+              repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="88" xChannelSelector="R" yChannelSelector="G" result="d">
+            <animate attributeName="scale" dur="62s" values="62;98;70;92;62" repeatCount="indefinite"/>
+          </feDisplacementMap>
+          <feGaussianBlur in="d" stdDeviation="0.65" result="b"/>
+          <feBlend in="d" in2="b" mode="screen"/>
+        </filter>
+
+        <filter id="L_silkMicro" x="-90%" y="-90%" width="280%" height="280%">
+          <feTurbulence type="turbulence" baseFrequency="0.013 0.019" numOctaves="1" seed="14" result="t">
+            <animate attributeName="baseFrequency" dur="24s"
+              values="0.012 0.018; 0.015 0.021; 0.013 0.019; 0.014 0.020; 0.012 0.018"
+              repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="t" scale="10" xChannelSelector="B" yChannelSelector="R" result="d"/>
+          <feGaussianBlur in="d" stdDeviation="0.25" result="b"/>
+          <feBlend in="d" in2="b" mode="screen"/>
+        </filter>
+      </defs>
+
+      <!-- Separate layers for subtle interaction depth -->
+      <g id="lightBase" filter="url(#L_swirl)">
+        <rect x="-180" y="-180" width="1360" height="1360" fill="url(#L_pastelBase)"/>
+        <rect x="-200" y="-200" width="1400" height="1400" fill="url(#L_sheen)" style="mix-blend-mode: screen;"/>
+      </g>
+
+      <g id="lightOilMicro" opacity="0.22" filter="url(#L_microDrift)">
+        <rect x="-220" y="-220" width="1440" height="1440" fill="url(#L_pastelBase)"/>
+      </g>
+
+      <!-- Aurora overlay: keep subtle, no neon -->
+      <g id="lightAurora" filter="url(#L_silkCoarse)" opacity="0.70">
+        <rect x="-240" y="-240" width="1480" height="1480" fill="url(#L_aurA)"
+              style="mix-blend-mode: multiply;" opacity="0.22"/>
+        <rect x="-240" y="-240" width="1480" height="1480" fill="url(#L_aurB)"
+              style="mix-blend-mode: screen;" opacity="0.16"/>
+        <rect x="-240" y="-240" width="1480" height="1480" fill="url(#L_aurA)"
+              style="mix-blend-mode: overlay;" opacity="0.10"/>
+      </g>
+
+      <g id="lightAuroraMicro" filter="url(#L_silkMicro)" opacity="0.40">
+        <rect x="-240" y="-240" width="1480" height="1480" fill="url(#L_aurA)"
+              style="mix-blend-mode: screen;" opacity="0.12"/>
+      </g>
+    </svg>
+
+    <!-- DARK: Aurora silk -->
+    <svg class="bg" id="bgDark" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="d_base" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#050816"/>
+          <stop offset="38%"  stop-color="#082a57"/>
+          <stop offset="72%"  stop-color="#1d0b49"/>
+          <stop offset="100%" stop-color="#050816"/>
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="360 0.5 0.5" dur="560s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <radialGradient id="d_lift" cx="52%" cy="48%" r="125%">
+          <stop offset="0%"   stop-color="#0b1e44" stop-opacity="0.24"/>
+          <stop offset="58%"  stop-color="#070b1a" stop-opacity="0.11"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+
+        <linearGradient id="d_rA" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#37d7ff" stop-opacity="0.26"/>
+          <stop offset="30%"  stop-color="#9d8cff" stop-opacity="0.22"/>
+          <stop offset="60%"  stop-color="#ff86d2" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#2fffc4" stop-opacity="0.22"/>
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="-360 0.5 0.5" dur="620s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <linearGradient id="d_rB" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#2fffc4" stop-opacity="0.18"/>
+          <stop offset="45%"  stop-color="#6fc2ff" stop-opacity="0.16"/>
+          <stop offset="100%" stop-color="#ff86d2" stop-opacity="0.14"/>
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="360 0.5 0.5" dur="740s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <linearGradient id="d_rC" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#ffe7a3" stop-opacity="0.10"/>
+          <stop offset="35%"  stop-color="#ffb3d9" stop-opacity="0.10"/>
+          <stop offset="70%"  stop-color="#8ad6ff" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#ffe7a3" stop-opacity="0.10"/>
+          <animateTransform attributeName="gradientTransform" type="rotate"
+            from="0 0.5 0.5" to="-360 0.5 0.5" dur="860s" repeatCount="indefinite"/>
+        </linearGradient>
+
+        <filter id="d_coarse" x="-90%" y="-90%" width="280%" height="280%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.0032 0.0048" numOctaves="2" seed="7" result="n">
+            <animate attributeName="baseFrequency" dur="56s"
+              values="0.0029 0.0044; 0.0039 0.0057; 0.0032 0.0048; 0.0037 0.0053; 0.0029 0.0044"
+              repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="136" xChannelSelector="R" yChannelSelector="G" result="d">
+            <animate attributeName="scale" dur="66s" values="98;152;110;144;98" repeatCount="indefinite"/>
+          </feDisplacementMap>
+          <feGaussianBlur in="d" stdDeviation="0.90" result="b"/>
+          <feBlend in="d" in2="b" mode="screen"/>
+        </filter>
+
+        <filter id="d_micro" x="-90%" y="-90%" width="280%" height="280%">
+          <feTurbulence type="turbulence" baseFrequency="0.012 0.018" numOctaves="1" seed="12" result="t">
+            <animate attributeName="baseFrequency" dur="22s"
+              values="0.011 0.017; 0.014 0.020; 0.012 0.018; 0.013 0.019; 0.011 0.017"
+              repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="t" scale="18" xChannelSelector="B" yChannelSelector="R" result="d"/>
+          <feGaussianBlur in="d" stdDeviation="0.35" result="b"/>
+          <feBlend in="d" in2="b" mode="screen"/>
+        </filter>
+
+        <filter id="d_haze" x="-90%" y="-90%" width="280%" height="280%">
+          <feGaussianBlur stdDeviation="2.0" result="b"/>
+          <feComponentTransfer in="b">
+            <feFuncA type="linear" slope="0.72"/>
+          </feComponentTransfer>
+        </filter>
+      </defs>
+
+      <g id="dLayerBase">
+        <rect x="-260" y="-260" width="1520" height="1520" fill="url(#d_base)"/>
+        <rect x="-260" y="-260" width="1520" height="1520" fill="url(#d_lift)" opacity="0.90"/>
+      </g>
+
+      <g id="dLayerCoarse" filter="url(#d_coarse)">
+        <rect x="-280" y="-280" width="1560" height="1560" fill="url(#d_rA)"
+              style="mix-blend-mode: screen;" opacity="0.96"/>
+        <rect x="-280" y="-280" width="1560" height="1560" fill="url(#d_rB)"
+              style="mix-blend-mode: soft-light;" opacity="0.88"/>
+        <rect x="-280" y="-280" width="1560" height="1560" fill="url(#d_rA)"
+              style="mix-blend-mode: overlay;" opacity="0.34"/>
+      </g>
+
+      <g id="dLayerMicro" filter="url(#d_micro)" style="opacity: var(--microOpacityDark);">
+        <rect x="-280" y="-280" width="1560" height="1560" fill="url(#d_rC)"
+              style="mix-blend-mode: screen;" opacity="0.65"/>
+        <rect x="-280" y="-280" width="1560" height="1560" fill="url(#d_rB)"
+              style="mix-blend-mode: overlay;" opacity="0.22"/>
+      </g>
+
+      <g id="dLayerHaze">
+        <rect x="-260" y="-260" width="1520" height="1520" fill="url(#d_lift)" opacity="0.12" filter="url(#d_haze)"/>
+      </g>
+    </svg>
+
+    <div class="dither"></div>
+    <div class="grain"></div>
+    <div class="paper"></div>
+  </div>
+    <div id="startup-shell" aria-hidden="true">
+        <div id="startup-shell-card">
+            <div class="startup-shell-header">
+                <div class="startup-shell-brand"></div>
+                <div class="startup-shell-pill"></div>
+            </div>
+            <div class="startup-shell-grid">
+                <div class="startup-shell-panel">
+                    <div class="startup-shell-line wide"></div>
+                    <div class="startup-shell-line medium"></div>
+                    <div class="startup-shell-line short"></div>
+                </div>
+                <div class="startup-shell-panel">
+                    <div class="startup-shell-line wide"></div>
+                    <div class="startup-shell-line medium"></div>
+                    <div class="startup-shell-line short"></div>
+                </div>
+                <div class="startup-shell-panel">
+                    <div class="startup-shell-line wide"></div>
+                    <div class="startup-shell-line medium"></div>
+                    <div class="startup-shell-line short"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./ui5-background-runtime.js"></script>
+    <div id="ui5_container" class="chkAppRoot"></div>
+</body>
+</html>
+
+
+

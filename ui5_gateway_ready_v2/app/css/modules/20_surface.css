@@ -1,0 +1,408 @@
+.glassCard,
+.detailSectionCard,
+.detailControlInlineCard,
+.infoCardTile,
+.searchStatusStripStack,
+.chkStack,
+.detailAttachmentDropZone {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 46%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 32%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.34)) saturate(104%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.34)) saturate(104%);
+}
+
+body.chkAppRoot.platformPrecisionEnterprise .glassCard,
+body.chkAppRoot.platformPrecisionEnterprise .detailSectionCard,
+body.chkAppRoot.platformPrecisionEnterprise .detailControlInlineCard,
+body.chkAppRoot.platformPrecisionEnterprise .infoCardTile {
+  box-shadow: none;
+}
+
+body.chkAppRoot.platformCalmModern .glassCard,
+body.chkAppRoot.platformCalmModern .detailSectionCard,
+body.chkAppRoot.platformCalmModern .detailControlInlineCard,
+body.chkAppRoot.platformCalmModern .infoCardTile,
+body.chkAppRoot.platformCalmModern .chkStack {
+  box-shadow: var(--shadow-soft);
+}
+
+.glassCard::before,
+.detailSectionCard::before,
+.detailControlInlineCard::before,
+.infoCardTile::before {
+  content: none;
+}
+
+.glassCard::after,
+.detailSectionCard::after,
+.detailControlInlineCard::after,
+.infoCardTile::after {
+  content: none;
+}
+
+.chkApp .detailHeroCard::after,
+.chkApp .detailControlInlineCard::after,
+.chkApp .detailSectionCard::after,
+.chkApp .searchFilterCardDense::after,
+.chkApp .searchResultsTable::after {
+  display: none;
+}
+
+.chkStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chk-stack-gap);
+}
+
+.chkStack > * {
+  border-radius: 0;
+}
+
+.chkStack > :first-child {
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+.chkStack > :last-child {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+.infoCardTile {
+  padding: 1rem 1rem 0.96rem;
+  min-height: 100%;
+  transition: transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.infoCardTitle {
+  display: block;
+  margin-bottom: 0.54rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.infoCardValue {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.46;
+  white-space: pre-line;
+  color: var(--text-main);
+}
+
+.chkApp .infoCardTile:hover,
+.chkApp .detailSectionCard:hover,
+.chkApp .detailControlInlineCard:hover,
+.chkApp .detailAttachmentDropZone:hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.chkApp .glassCard:hover::before,
+.chkApp .detailSectionCard:hover::before,
+.chkApp .detailControlInlineCard:hover::before,
+.chkApp .infoCardTile:hover::before {
+  opacity: 0;
+  transform: none;
+}
+
+.chkApp .chkStack {
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 34%, transparent);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-1) 30%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .chkStack > * {
+  background: transparent;
+}
+
+body.chkAppRoot.appDark .chkApp .glassCard,
+body.chkAppRoot.appDark .chkApp .detailSectionCard,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard,
+body.chkAppRoot.appDark .chkApp .infoCardTile,
+body.chkAppRoot.appDark .chkApp .searchStatusStripStack,
+body.chkAppRoot.appDark .chkApp .chkStack,
+body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
+  background: color-mix(in srgb, rgba(14, 24, 39, 0.82) 74%, transparent);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+body.chkAppRoot.appDark .chkApp .glassCard::before,
+body.chkAppRoot.appDark .chkApp .detailSectionCard::before,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard::before,
+body.chkAppRoot.appDark .chkApp .infoCardTile::before,
+body.chkAppRoot.appDark .chkApp .glassCard::after,
+body.chkAppRoot.appDark .chkApp .detailSectionCard::after,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard::after,
+body.chkAppRoot.appDark .chkApp .infoCardTile::after {
+  opacity: 0;
+}
+
+body.chkAppRoot.appDark .chkApp .glassCard:hover,
+body.chkAppRoot.appDark .chkApp .detailSectionCard:hover,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard:hover,
+body.chkAppRoot.appDark .chkApp .infoCardTile:hover,
+body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone:hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+body.chkAppRoot.appDark .chkApp .glassCard:hover::before,
+body.chkAppRoot.appDark .chkApp .detailSectionCard:hover::before,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard:hover::before,
+body.chkAppRoot.appDark .chkApp .infoCardTile:hover::before {
+  opacity: 0;
+  transform: none;
+}
+
+.chkApp .appShellHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: clamp(0.45rem, 1vw, 0.8rem);
+  row-gap: 0.55rem;
+  flex: 0 0 auto;
+  margin: 0.78rem clamp(0.85rem, 2vw, 1.5rem) 0;
+  max-width: calc(100% - (2 * clamp(1rem, 2vw, 1.75rem)));
+  height: auto;
+  min-height: var(--theme-shell-min-height);
+  padding:
+    var(--theme-shell-padding-block-start)
+    var(--theme-shell-padding-inline)
+    var(--theme-shell-padding-block-end);
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 42%, transparent);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.12), transparent 28%),
+    color-mix(in srgb, var(--shell-surface) 48%, transparent);
+  box-shadow: none;
+  overflow: visible;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.42)) saturate(108%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.42)) saturate(108%);
+}
+
+.chkApp .appShellHeader .sapMBarChild,
+.chkApp .appShellHeader .sapMFlexItem {
+  min-width: 0;
+  margin: 0;
+}
+
+.chkApp .appShellHeader .sapMTBSpacer {
+  flex: 1 1 0%;
+  min-width: 0.5rem;
+}
+
+.chkApp .shellBrandCluster {
+  flex: 1 1 16rem;
+  min-width: min(100%, 15rem);
+  max-width: min(100%, 24rem);
+  gap: 0.16rem;
+}
+
+.chkApp .shellEyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.chkApp .shellProductTitle {
+  margin: 0;
+  font-size: var(--theme-shell-title-size);
+  font-weight: var(--theme-shell-title-weight);
+  color: var(--text-main);
+}
+
+.chkApp .shellContextSubtitle {
+  max-width: 100%;
+  color: var(--text-subtle);
+  line-height: 1.35;
+}
+
+.chkApp .shellContextRail {
+  flex: 1 1 16rem;
+  min-width: 0;
+  gap: var(--theme-shell-context-gap);
+  margin-left: 0.35rem;
+}
+
+.chkApp .shellContextChip {
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 34%, transparent);
+  background: color-mix(in srgb, var(--shell-chip-bg) 36%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .shellContextChip .sapMObjStatusText,
+.chkApp .shellContextChip .sapUiIcon {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.appDensityCompact .chkApp .appContent {
+  padding: clamp(0.85rem, 1.4vw, 1.2rem);
+}
+
+.appDensityCompact .chkApp .searchFilterCardDense,
+.appDensityCompact .chkApp .searchResultsTable,
+.appDensityCompact .chkApp .detailHeroCard,
+.appDensityCompact .chkApp .detailSectionCard,
+.appDensityCompact .chkApp .detailControlInlineCard {
+  padding: 0.85rem;
+}
+
+.appDensityCompact .chkApp .appShellHeader {
+  min-height: calc(var(--theme-shell-min-height) - 0.5rem);
+  padding:
+    calc(var(--theme-shell-padding-block-start) - 0.18rem)
+    calc(var(--theme-shell-padding-inline) - 0.12rem)
+    calc(var(--theme-shell-padding-block-end) - 0.22rem);
+}
+
+body.chkAppRoot.appDark .chkApp .shellContextChip .sapMObjStatusText,
+body.chkAppRoot.appDark .chkApp .shellContextChip .sapUiIcon,
+body.chkAppRoot.appDark .chkApp .shellContextSubtitle {
+  color: rgba(237, 244, 255, 0.88);
+}
+
+@media (max-width: 61.25rem) {
+  .chkApp .appShellHeader {
+    gap: 0.5rem;
+  }
+
+  .chkApp .shellBrandCluster {
+    min-width: min(100%, 10rem);
+    flex-basis: 10rem;
+  }
+
+  .chkApp .shellContextRail {
+    margin-left: 0;
+  }
+
+  .chkApp .shellContextSubtitle {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+}
+
+/* Narrow shell/header baseline */
+@media (max-width: 32rem) {
+  .chkApp .appShellHeader {
+    column-gap: 0.55rem;
+    row-gap: 0.38rem;
+    margin-top: 0.58rem;
+    margin-inline: 0.72rem;
+    padding:
+      calc(var(--theme-shell-padding-block-start) * 0.82)
+      clamp(0.72rem, 3.5vw, 0.92rem)
+      calc(var(--theme-shell-padding-block-end) * 0.82);
+    border-radius: calc(var(--radius-xl) - 0.2rem);
+  }
+
+  .chkApp .shellBrandCluster {
+    gap: 0.08rem;
+  }
+
+  .chkApp .shellProductTitle {
+    font-size: clamp(1.02rem, 4.8vw, 1.22rem);
+    line-height: 1.08;
+  }
+
+  .chkApp .shellContextSubtitle {
+    line-height: 1.28;
+  }
+
+  .chkApp .shellContextRail {
+    flex: 1 1 100%;
+    margin-left: 0;
+    gap: 0.32rem;
+  }
+
+  .chkApp .shellContextChip {
+    padding: 0.16rem 0.58rem;
+  }
+}
+
+@media (max-width: 75rem) {
+  .chkApp .appShellHeader .sapMTBSpacer {
+    display: none;
+  }
+
+  .chkApp .shellBrandCluster {
+    order: 1;
+    flex: 1 1 16rem;
+    max-width: none;
+  }
+
+  .chkApp .shellActionBtn,
+  .chkApp .shellThemeToggle,
+  .chkApp .shellUserBtn {
+    order: 2;
+  }
+
+  .chkApp .shellContextRail {
+    order: 3;
+    flex: 1 1 100%;
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 45rem) {
+  .chkApp .infoCardTitle {
+    font-size: 0.74rem;
+  }
+
+  .chkApp .infoCardValue {
+    font-size: 0.94rem;
+    line-height: 1.4;
+  }
+}
+
+/* 2026-03 surface simplification */
+.glassCard,
+.detailSectionCard,
+.detailControlInlineCard,
+.infoCardTile,
+.searchStatusStripStack,
+.chkStack,
+.detailAttachmentDropZone {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 24%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.28)) saturate(102%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.28)) saturate(102%);
+}
+
+.chkApp .chkStack {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 18%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+}
+
+body.chkAppRoot.appDark .chkApp .glassCard,
+body.chkAppRoot.appDark .chkApp .detailSectionCard,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard,
+body.chkAppRoot.appDark .chkApp .infoCardTile,
+body.chkAppRoot.appDark .chkApp .searchStatusStripStack,
+body.chkAppRoot.appDark .chkApp .chkStack,
+body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
+  background: color-mix(in srgb, rgba(14, 24, 39, 0.72) 66%, transparent);
+}
