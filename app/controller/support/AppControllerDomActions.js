@@ -91,6 +91,15 @@ sap.ui.define([
             ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appDensityCompact", bCompact);
         },
 
+        _applyInvertedBlockSchemeClass: function () {
+            var bInverted = !!ModelStateRuntime.read(this, "appView", "/invertedBlockScheme", false);
+            var oRoot = document && document.documentElement;
+            var oBody = document && document.body;
+            var oContainer = document && document.getElementById && document.getElementById("ui5_container");
+            var oAppDom = this.getView && this.getView().getDomRef && this.getView().getDomRef();
+            ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appInvertedBlockScheme", bInverted);
+        },
+
         _syncShellMetrics: function () {
             var oRoot = this.getView && this.getView().getDomRef && this.getView().getDomRef();
             var oShellHeader = oRoot && oRoot.querySelector && oRoot.querySelector(".appShellHeader");

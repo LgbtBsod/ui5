@@ -191,6 +191,17 @@ sap.ui.define([
             return bState;
         },
 
+        onToggleInvertedBlockScheme: function (oEvent) {
+            var bState = ModelStateRuntime.writeBoolean(
+                this,
+                "appView",
+                "/invertedBlockScheme",
+                oEvent && oEvent.getParameter && oEvent.getParameter("state")
+            );
+            this._applyInvertedBlockSchemeClass();
+            return bState;
+        },
+
         formatGlobalBannerType: function (sSeverity) {
             return FeedbackBannerState.toUi5MessageType(sSeverity);
         },

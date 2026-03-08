@@ -53,6 +53,18 @@
                     <Switch id="shellSettingsInteractionSwitch" state="{appView>/backgroundInteractive}" enabled="{appView>/animationEnabled}" change=".onToggleBackgroundInteraction"/>
                 </HBox>
 
+
+                <HBox class="shellSettingRow" renderType="Bare" justifyContent="SpaceBetween" alignItems="Center">
+                    <VBox renderType="Bare" class="shellSettingCopy">
+                        <HBox class="shellItemHeader" renderType="Bare" alignItems="Center">
+                            <core:Icon src="sap-icon://color-fill" decorative="true" class="shellItemIcon"/>
+                            <Title text="{i18n>shellSettingInvertSchemeTitle}" level="H6"/>
+                        </HBox>
+                        <Text text="{i18n>shellSettingInvertSchemeText}" class="shellHelpText"/>
+                    </VBox>
+                    <Switch id="shellSettingsInvertSchemeSwitch" state="{appView>/invertedBlockScheme}" change=".onToggleInvertedBlockScheme"/>
+                </HBox>
+
             </VBox>
         </content>
     </ResponsivePopover>
