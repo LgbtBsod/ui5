@@ -34,7 +34,11 @@ sap.ui.define([
     function refreshCurrentUser(oController) {
         var oState = oController && oController._getStateModel && oController._getStateModel();
         var oAppView = oController && oController._getAppViewModel && oController._getAppViewModel();
+        var bAlreadyBusy = !!ModelStateRuntime.read(oController, "appView", "/shell/userRefreshBusy", false);
         if (!oState) {
+            return Promise.resolve(false);
+        }
+        if (bAlreadyBusy) {
             return Promise.resolve(false);
         }
         if (oAppView) {
