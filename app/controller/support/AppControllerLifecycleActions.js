@@ -53,7 +53,7 @@ sap.ui.define([
             this._mShellOverlaySkipRestore = {};
             this._mShellOverlayFocusTargets = {
                 notifications: "shellNotificationsList",
-                settings: "shellSettingsHintsSwitch",
+                settings: "shellSettingsAnimationSwitch",
                 user: "shellUserRefreshButton"
             };
             this._oTestUserDialogReturnFocus = null;
