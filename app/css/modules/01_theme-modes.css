@@ -33,9 +33,9 @@
   --ui-sem-bg-alpha: 0.08;
   --accent: var(--ui-t4-cta-on-primary);
   --accent-rgb: 0, 112, 242;
-  --surface-0: rgba(255, 255, 255, 0.56);
-  --surface-1: rgba(255, 255, 255, 0.72);
-  --surface-2: rgba(245, 246, 247, 0.86);
+  --surface-0: rgba(255, 255, 255, 0.46);
+  --surface-1: rgba(255, 255, 255, 0.62);
+  --surface-2: rgba(245, 246, 247, 0.76);
   --surface-3: rgba(234, 236, 238, 0.96);
   --border-soft: rgba(213, 218, 221, 0.62);
   --border-strong: rgba(0, 112, 242, 0.4);
@@ -93,9 +93,9 @@
   --radius-md: 1rem;
   --radius-lg: 1.32rem;
   --theme-table-header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(243, 248, 255, 0.18));
-  --theme-table-cell-bg: rgba(255, 255, 255, 0.1);
-  --theme-table-cell-hover-bg: rgba(255, 255, 255, 0.18);
-  --theme-table-cell-selected-bg: rgba(var(--accent-rgb), 0.14);
+  --theme-table-cell-bg: rgba(255, 255, 255, 0.075);
+  --theme-table-cell-hover-bg: rgba(255, 255, 255, 0.135);
+  --theme-table-cell-selected-bg: rgba(var(--accent-rgb), 0.105);
   --theme-toggle-shell-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(233, 243, 255, 0.76));
   --theme-toggle-shell-shadow: 0 14px 28px rgba(86, 120, 166, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.48);
   --theme-toggle-track-bg: linear-gradient(135deg, rgba(124, 203, 255, 0.94), rgba(255, 231, 198, 0.92));
@@ -261,9 +261,9 @@ body.appDark,
   --radius-md: 1.24rem;
   --radius-lg: 1.64rem;
   --theme-table-header-bg: linear-gradient(180deg, rgba(93, 114, 148, 0.2), rgba(36, 48, 69, 0.2));
-  --theme-table-cell-bg: rgba(15, 28, 48, 0.62);
-  --theme-table-cell-hover-bg: rgba(29, 49, 78, 0.74);
-  --theme-table-cell-selected-bg: rgba(59, 126, 255, 0.24);
+  --theme-table-cell-bg: rgba(15, 28, 48, 0.465);
+  --theme-table-cell-hover-bg: rgba(29, 49, 78, 0.555);
+  --theme-table-cell-selected-bg: rgba(59, 126, 255, 0.18);
   --theme-toggle-shell-bg: linear-gradient(180deg, rgba(17, 28, 46, 0.96), rgba(28, 41, 66, 0.84));
   --theme-toggle-shell-shadow: 0 16px 32px rgba(2, 8, 18, 0.42), inset 0 1px 0 rgba(203, 226, 255, 0.12);
   --theme-toggle-track-bg: linear-gradient(135deg, rgba(19, 27, 46, 0.98), rgba(92, 105, 156, 0.88));
