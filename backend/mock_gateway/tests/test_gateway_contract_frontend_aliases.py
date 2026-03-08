@@ -343,3 +343,43 @@ def test_checklist_permission_set_supports_view_edit_delete_deny_patterns():
         assert no_delete.get("CanEdit") is True
         assert no_delete.get("CanDelete") is False
         assert no_delete.get("ReasonCode") == "NO_DELETE_AUTH"
+
+
+def test_odata_x_http_method_override_delete_is_supported():
+    with TestClient(app) as client:
+        token = _csrf(client)
+
+        create_payload = {
+            "FullPayload": {
+                "root": {"id": "__CREATE", "status": "DRAFT"},
+                "basic": {
+                    "date": "2026-03-02",
+                    "equipment": "Delete me",
+                    "LOCATION_KEY": "LOC-001-01-01",
+                    "LOCATION_NAME": "Area A",
+                    "LOCATION_TEXT": "Area A",
+                    "OBSERVER_FULLNAME": "Observer One",
+                    "OBSERVED_FULLNAME": "Observed One",
+                    "LPC_KEY": "L2",
+                    "PROF_KEY": "PR1",
+                },
+                "checks": [],
+                "barriers": [],
+            }
+        }
+        created = client.post(f"{SERVICE_ROOT}/CreateChecklist", json=create_payload, headers={"X-CSRF-Token": token})
+        assert created.status_code == 200
+        created_key = created.json().get("d", {}).get("RootKey")
+        assert created_key
+
+        delete_resp = client.post(
+            f"{SERVICE_ROOT}/ChecklistRootSet({created_key})",
+            headers={
+                "X-CSRF-Token": token,
+                "X-HTTP-Method": "DELETE",
+            },
+        )
+        assert delete_resp.status_code == 204
+
+        read_after_delete = client.get(f"{SERVICE_ROOT}/ChecklistRootSet({created_key})")
+        assert read_after_delete.status_code == 404

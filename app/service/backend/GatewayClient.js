@@ -157,12 +157,15 @@ sap.ui.define([
         var oOptions = mOptions || {};
         return toPromise(function (resolve, reject) {
             var oModel = ensureModel();
-            var xhr = new XMLHttpRequest();
-            var sBaseUrl = serviceUrl();
-            var sResolvedUrl = sBaseUrl + sPath;
             var mModelHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
             var sCsrfToken = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
             var mHeaders;
+            var oRequestHandle;
+
+            if (typeof oModel._createRequest !== "function" || typeof oModel._request !== "function") {
+                reject(new Error("ODataModel stream upload API is not available"));
+                return;
+            }
 
             delete mModelHeaders["content-type"];
             delete mModelHeaders["Content-Type"];
@@ -176,42 +179,20 @@ sap.ui.define([
                 mHeaders["X-CSRF-Token"] = sCsrfToken;
             }
 
-            if (typeof window !== "undefined" && /^\/(?!\/)/.test(sResolvedUrl)) {
-                sResolvedUrl = window.location.origin + sResolvedUrl;
+            try {
+                oRequestHandle = oModel._createRequest(sPath, null, "PUT", mHeaders, vPayload || null, undefined, undefined, true);
+                oModel._request(
+                    oRequestHandle,
+                    function (oData, oResponse) {
+                        resolve(oResponse || oData || {});
+                    },
+                    function (oError) {
+                        reject(GatewayErrorNormalizer.normalizeError(oError));
+                    }
+                );
+            } catch (e) {
+                reject(GatewayErrorNormalizer.normalizeError(e));
             }
-
-            xhr.open("PUT", sResolvedUrl, true);
-            xhr.withCredentials = true;
-            Object.keys(mHeaders).forEach(function (sName) {
-                var vValue = mHeaders[sName];
-                if (vValue === undefined || vValue === null || vValue === "") {
-                    return;
-                }
-                xhr.setRequestHeader(sName, String(vValue));
-            });
-            xhr.onload = function () {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve({});
-                    return;
-                }
-                reject(GatewayErrorNormalizer.normalizeError({
-                    status: xhr.status,
-                    statusCode: xhr.status,
-                    message: xhr.statusText || "Gateway stream upload failed",
-                    responseText: xhr.responseText || "",
-                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
-                }));
-            };
-            xhr.onerror = function () {
-                reject(GatewayErrorNormalizer.normalizeError({
-                    status: xhr.status || 0,
-                    statusCode: xhr.status || 0,
-                    message: xhr.statusText || "Gateway stream upload failed",
-                    responseText: xhr.responseText || "",
-                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
-                }));
-            };
-            xhr.send(vPayload || null);
         });
     }
     return {
