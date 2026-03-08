@@ -23,11 +23,21 @@ from services.metadata_cache import refresh_metadata
 from services.settings_service import DEFAULT_REQUIRED_FIELDS, DEFAULT_UPLOAD_POLICY
 from models import ChecklistRoot, FrontendRuntimeSettings
 from utils.odata import SERVICE_ROOT, odata_error_response
+from utils.odata_batch import extract_boundary, parse_batch_request
 from utils.odata_csrf import CsrfStore
 from utils.sap_message import build_sap_message
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
+
+_LOG_BODY_METHODS = {"POST", "PUT", "PATCH", "MERGE", "DELETE"}
+_LOG_BODY_CONTENT_TYPES = (
+    "application/json",
+    "application/xml",
+    "text/plain",
+    "multipart/mixed",
+)
+_LOG_BODY_MAX_CHARS = 4000
 
 
 def _split_full_name(s_full_name: str) -> tuple[str, str, str]:
@@ -39,6 +49,63 @@ def _split_full_name(s_full_name: str) -> tuple[str, str, str]:
     if len(parts) == 2:
         return parts[1], parts[0], ""
     return parts[1], parts[0], " ".join(parts[2:])
+
+
+def _trim_for_log(s_value: str, i_limit: int = _LOG_BODY_MAX_CHARS) -> str:
+    text = str(s_value or "")
+    if len(text) <= i_limit:
+        return text
+    return f"{text[:i_limit]}... <trimmed {len(text) - i_limit} chars>"
+
+
+def _format_batch_operations_for_log(s_body: str, s_content_type: str) -> list[str]:
+    try:
+        s_boundary = extract_boundary(s_content_type)
+        a_operations = parse_batch_request(s_body, s_boundary)
+    except Exception as exc:  # noqa: BLE001
+        return [f"batch_parse_error={type(exc).__name__}"]
+
+    a_lines: list[str] = []
+    i_index = 1
+    for o_item in a_operations:
+        if isinstance(o_item, list):
+            for o_operation in o_item:
+                a_lines.append(f"[{i_index}] {o_operation.method} {o_operation.path}")
+                i_index += 1
+            continue
+        a_lines.append(f"[{i_index}] {o_item.method} {o_item.path}")
+        i_index += 1
+    return a_lines
+
+
+
+
+def _resolve_effective_method(request: Request) -> str:
+    s_method = request.method.upper()
+    if s_method != "POST":
+        return s_method
+    s_override = str(
+        request.headers.get("X-HTTP-Method")
+        or request.headers.get("X-HTTP-Method-Override")
+        or ""
+    ).strip().upper()
+    if s_override in {"PUT", "PATCH", "MERGE", "DELETE"}:
+        return s_override
+    return s_method
+
+def _build_request_log_lines(request: Request, b_content_forced: bool, s_body_text: str | None, s_effective_method: str) -> list[str]:
+    s_content_type = str(request.headers.get("content-type") or "").lower()
+    s_method_suffix = "" if s_effective_method == request.method.upper() else f" (effective={s_effective_method})"
+    a_lines = [f"REQ {request.method}{s_method_suffix} {request.url.path} query={request.url.query or '-'}"]
+
+    if b_content_forced:
+        if "multipart/mixed" in s_content_type:
+            a_batch_ops = _format_batch_operations_for_log(s_body_text or "", s_content_type)
+            a_lines.append("REQ batch operations:")
+            a_lines.extend(f"  - {s_line}" for s_line in a_batch_ops)
+        else:
+            a_lines.append(f"REQ body={_trim_for_log(s_body_text or '')}")
+    return a_lines
 
 
 
@@ -358,7 +425,23 @@ async def odata_response_headers_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def request_response_logging(request: Request, call_next):
-    logger.info("REQ %s %s query=%s", request.method, request.url.path, request.url.query or "-")
+    s_effective_method = _resolve_effective_method(request)
+    if s_effective_method != request.method.upper():
+        request.scope["method"] = s_effective_method
+
+    s_content_type = str(request.headers.get("content-type") or "").lower()
+    b_method_with_body = s_effective_method in _LOG_BODY_METHODS
+    b_supported_content_type = any(s_item in s_content_type for s_item in _LOG_BODY_CONTENT_TYPES)
+    b_read_body = b_method_with_body and b_supported_content_type
+
+    s_body_text: str | None = None
+    if b_read_body:
+        body_bytes = await request.body()
+        s_body_text = body_bytes.decode("utf-8", errors="replace")
+
+    for s_line in _build_request_log_lines(request, b_read_body, s_body_text, s_effective_method):
+        logger.info(s_line)
+
     response = await call_next(request)
     logger.info("RES %s %s status=%s", request.method, request.url.path, response.status_code)
     return response
