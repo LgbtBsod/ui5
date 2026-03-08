@@ -167,6 +167,8 @@ def main() -> int:
     warnings: list[str] = []
     created_root_id = ""
     browser_root_id = ""
+    browser_attachment_root_id = ""
+    browser_flow_root_id = ""
     browser_report: dict[str, Any] = {}
     token = ""
     browser_failures: list[str] = []
@@ -287,17 +289,25 @@ def main() -> int:
         browser_root_id = str(browser_created.get("RootKey") or browser_created.get("Key") or "").strip().upper()
         ensure(api_checks, "browser.root.created", bool(browser_root_id), {"rootId": browser_root_id})
 
+        browser_attachment_created = create_checklist(opener, token)
+        browser_attachment_root_id = str(browser_attachment_created.get("RootKey") or browser_attachment_created.get("Key") or "").strip().upper()
+        ensure(api_checks, "browser.attachment.root.created", bool(browser_attachment_root_id), {"rootId": browser_attachment_root_id})
+
+        browser_flow_created = create_checklist(opener, token)
+        browser_flow_root_id = str(browser_flow_created.get("RootKey") or browser_flow_created.get("Key") or "").strip().upper()
+        ensure(api_checks, "browser.flow.root.created", bool(browser_flow_root_id), {"rootId": browser_flow_root_id})
+
         browser_report = combine_browser_reports({
             "facadeContract": run_browser_smoke_script("browser-smoke-domain-facade-contract.py", UI_URL),
-            "attachmentDirtyInvariant": run_browser_smoke_script("browser-smoke-detail-attachment-dirty-invariant.py", UI_URL, browser_root_id),
-            "gatewayOnlyFlow": run_browser_smoke_script("browser-smoke-gateway-only-flow.py", UI_URL, browser_root_id),
+            "attachmentDirtyInvariant": run_browser_smoke_script("browser-smoke-detail-attachment-dirty-invariant.py", UI_URL, browser_attachment_root_id),
+            "gatewayOnlyFlow": run_browser_smoke_script("browser-smoke-gateway-only-flow.py", UI_URL, browser_flow_root_id),
         })
         browser_failures = list(browser_report.get("failures") or [])
     except Exception as exc:  # noqa: BLE001
         ensure(api_checks, "gateway.pack.exception", False, {"error": str(exc)})
         browser_failures.append("pack.exception")
     finally:
-        for root_id in [created_root_id, browser_root_id]:
+        for root_id in [created_root_id, browser_root_id, browser_attachment_root_id, browser_flow_root_id]:
             if not root_id or not token:
                 continue
             try:

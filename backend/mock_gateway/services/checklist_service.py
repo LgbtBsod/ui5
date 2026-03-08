@@ -11,6 +11,7 @@ from utils.time import now_utc
 BASIC_FIELD_MAP = {
     "date": "date",
     "equipment": "equipment",
+    "BUKRS": "bukrs",
     "LPC_TEXT": "lpc_text",
     "OBSERVER_FULLNAME": "observer_fullname",
     "OBSERVER_PERNER": "observer_perner",
@@ -26,6 +27,39 @@ BASIC_FIELD_MAP = {
     "LOCATION_NAME": "location_name",
     "LOCATION_TEXT": "location_text",
 }
+
+
+_BUKRS_BY_ORGUNIT = {
+    "EHS": "1000",
+    "QA": "1000",
+    "LABORATORY": "1000",
+    "WAREHOUSE": "1000",
+    "MAINTENANCE": "2000",
+    "REPAIR": "2000",
+    "ENERGY": "2000",
+    "PRODUCTION": "3000",
+    "EXTRACTION": "3000",
+    "COMPRESSOR": "3000",
+    "PREPARATION": "3000",
+}
+
+
+def resolve_bukrs_from_observer(observer_perner: str | None, observer_orgunit: str | None, bukrs_hint: str | None = None) -> str:
+    hinted = str(bukrs_hint or "").strip()
+    if hinted:
+        return hinted
+
+    org_unit = str(observer_orgunit or "").strip().upper()
+    for needle, bukrs in _BUKRS_BY_ORGUNIT.items():
+        if needle in org_unit:
+            return bukrs
+
+    perner = str(observer_perner or "").strip()
+    if perner and perner[-1].isdigit():
+        bucket = int(perner[-1]) % 3
+        return ["1000", "2000", "3000"][bucket]
+
+    return "1000"
 
 
 def lpc_allows_barriers(lpc: str) -> bool:
@@ -56,6 +90,7 @@ class ChecklistService:
         root = ChecklistRoot(
             checklist_id=checklist_id,
             lpc=lpc,
+            integration_flag=False,
             created_by=user_id,
             changed_by=user_id,
         )
@@ -81,6 +116,7 @@ class ChecklistService:
             "changed_on": root.changed_on,
             "date": root.date or "",
             "equipment": root.equipment or "",
+            "bukrs": root.bukrs or "",
             "lpc_text": root.lpc_text or "",
             "observer_fullname": root.observer_fullname or "",
             "observer_perner": root.observer_perner or "",
@@ -185,6 +221,11 @@ class ChecklistService:
             for incoming_key, model_field in BASIC_FIELD_MAP.items():
                 if incoming_key in basic_payload:
                     setattr(root, model_field, basic_payload.get(incoming_key) or "")
+            root.bukrs = resolve_bukrs_from_observer(
+                root.observer_perner,
+                root.observer_orgunit,
+                root.bukrs,
+            )
 
         for incoming_key, model_field in BASIC_FIELD_MAP.items():
             if incoming_key in data:
@@ -235,6 +276,11 @@ class ChecklistService:
             for incoming_key, model_field in BASIC_FIELD_MAP.items():
                 if incoming_key in basic_payload:
                     setattr(root, model_field, basic_payload.get(incoming_key) or "")
+            root.bukrs = resolve_bukrs_from_observer(
+                root.observer_perner,
+                root.observer_orgunit,
+                root.bukrs,
+            )
 
         if checks_payload is not None and (not is_autosave or force):
             db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root_id).delete()
@@ -378,10 +424,12 @@ class ChecklistService:
             checklist_id=f"{source.checklist_id}_COPY",
             lpc=source.lpc,
             status="01",
+            integration_flag=bool(source.integration_flag),
             date=current_time.date().isoformat(),
             time_check=current_time.strftime("%H:%M"),
             time_zone=source.time_zone or "UTC",
             equipment=source.equipment,
+            bukrs=source.bukrs,
             lpc_text=source.lpc_text,
             observer_fullname=source.observer_fullname,
             observer_perner=source.observer_perner,

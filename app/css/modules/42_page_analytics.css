@@ -56,10 +56,55 @@
   gap: 0.9rem;
 }
 
-.chkApp .analyticsScreenBody .searchAnalyticsDialogBreakdowns,
+.chkApp .analyticsToplineSection,
+.chkApp .analyticsBreakdownSection {
+  width: 100%;
+}
+
+.chkApp .analyticsToplineGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.chkApp .analyticsTile {
+  min-width: 13rem;
+  flex: 1 1 13rem;
+}
+
+.chkApp .analyticsToplineMetaGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.chkApp .analyticsChartPanel {
+  border-radius: calc(var(--radius-lg) - 0.12rem);
+}
+
+.chkApp .analyticsTabBar {
+  width: 100%;
+}
+
+.chkApp .analyticsComparisonToolbar {
+  gap: 0.65rem;
+}
+
+.chkApp .analyticsMatrixScroller {
+  width: 100%;
+}
+
+.chkApp .analyticsMatrixTable {
+  min-width: 78rem;
+}
+
 .chkApp .analyticsScreenBody .analyticsNarrativeBlock,
 .chkApp .analyticsScreenBody .analyticsBreakdownSection {
   width: 100%;
+}
+
+.chkApp .analyticsBuilderToolbar {
+  gap: 0.65rem;
 }
 
 .chkApp .accessDeniedHeroCard {

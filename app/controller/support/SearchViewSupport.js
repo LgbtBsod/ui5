@@ -5,7 +5,6 @@
     "checklist/app/controller/support/SearchCommandPolicy",
     "checklist/app/service/framework/FocusRuntime",
     "checklist/app/service/framework/ControlStyleRuntime",
-    "checklist/app/service/framework/DialogOrchestrator",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
@@ -14,7 +13,7 @@
     "checklist/app/util/TimeConfigService",
     "checklist/app/util/ThemeDomRuntime",
     "checklist/app/controller/support/SearchViewStateSupport"
-], function (SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, DialogOrchestrator, NavigationIntentService, ControllerTextRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, TimeConfigService, ThemeDomRuntime, SearchViewStateSupport) {
+], function (SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchCommandPolicy, FocusRuntime, ControlStyleRuntime, NavigationIntentService, ControllerTextRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, TimeConfigService, ThemeDomRuntime, SearchViewStateSupport) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = {
@@ -32,9 +31,6 @@
     var SEARCH_WORKING_HINT_MS = 2000;
     var SEARCH_INITIAL_ANALYTICS_DELAY_MS = 400;
     var SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS = 96;
-    var EFFECT_DIALOGS = {
-        workflowAnalytics: "checklist.app.view.fragment.WorkflowAnalyticsDialog"
-    };
 
     function resolveStartupPerf(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
@@ -606,46 +602,6 @@
         oController._sSearchTableLayoutKey = sLayoutKey;
     }
 
-    function getWorkflowAnalyticsDialog(oController) {
-        return DialogOrchestrator.ensure(oController, "workflowAnalytics", {
-            fragmentName: "checklist.app.view.fragment.WorkflowAnalyticsDialog",
-            afterOpen: function (oDialog, oCtrl) {
-                if (oDialog && oDialog.data && !oDialog.data("workflowAnalyticsFocusBound")) {
-                    oDialog.data("workflowAnalyticsFocusBound", true);
-                }
-                FocusRuntime.focusSoon(oCtrl && oCtrl.byId && oCtrl.byId("workflowAnalyticsCloseButton"));
-            },
-            afterClose: function (_oDialog, oCtrl) {
-                if (oCtrl && typeof oCtrl._restoreWorkflowAnalyticsFocus === "function") {
-                    oCtrl._restoreWorkflowAnalyticsFocus();
-                }
-            }
-        });
-    }
-
-    function ensureEffectDialog(oController, sId) {
-        return EFFECT_DIALOGS[sId] ? getWorkflowAnalyticsDialog(oController) : Promise.resolve(null);
-    }
-
-    function shouldAllowDialogEffect(oController, sId, sAction) {
-        if (sId !== "workflowAnalytics" || sAction !== "open") {
-            return true;
-        }
-        if (!oController._bWorkflowAnalyticsOpenRequested) {
-            return false;
-        }
-        oController._bWorkflowAnalyticsOpenRequested = false;
-        return true;
-    }
-
-    function closeWorkflowAnalyticsIfOpen(oController) {
-        var oDialog = oController.byId("workflowAnalyticsDialog");
-        oController._bWorkflowAnalyticsOpenRequested = false;
-        if (oDialog && oDialog.isOpen && oDialog.isOpen() && oDialog.close) {
-            oDialog.close();
-        }
-    }
-
     function resolveSmartSearchButton(oController) {
         var oSmartFilterBar = oController.byId("searchSmartFilterBar");
         var aButtons;
@@ -1104,7 +1060,6 @@
     }
 
     function onSearchMatched(oController) {
-        closeWorkflowAnalyticsIfOpen(oController);
         syncSmartControlAvailability(oController);
         bindSearchViewportRuntime(oController);
         logStartupMetric(oController, "firstRouteReady");
@@ -1204,13 +1159,11 @@
     }
 
     function openWorkflowAnalytics(oController) {
-        oController._bWorkflowAnalyticsOpenRequested = false;
         NavigationIntentService.navigateToAnalytics(oController);
         return Promise.resolve();
     }
 
     function closeWorkflowAnalytics(oController) {
-        oController._bWorkflowAnalyticsOpenRequested = false;
         NavigationIntentService.navigateBackFromAnalytics(oController);
     }
 
@@ -1236,7 +1189,6 @@
         clearSelection: clearSelection,
         clearAnalyticsRefreshTimer: clearAnalyticsRefreshTimer,
         closeWorkflowAnalytics: closeWorkflowAnalytics,
-        ensureEffectDialog: ensureEffectDialog,
         focusSearchResults: focusSearchResultsTable,
         focusSearchToolbar: focusSearchToolbar,
         onBeforeSmartTableRebind: onBeforeSmartTableRebind,
@@ -1248,7 +1200,6 @@
         scrollToSearchFilters: scrollToSearchFilters,
         selectVisibleRows: selectVisibleRows,
         setSearchActionBusy: setSearchActionBusy,
-        shouldAllowDialogEffect: shouldAllowDialogEffect,
         syncSmartControlAvailability: syncSmartControlAvailability,
         unbindSearchViewportRuntime: unbindSearchViewportRuntime,
         unbindPowerUserShortcuts: unbindPowerUserShortcuts

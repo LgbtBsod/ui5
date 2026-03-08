@@ -15,11 +15,13 @@ class ChecklistRoot(Base):
     checklist_id = Column(String, nullable=False)
     lpc = Column(String, nullable=False)
     status = Column(String, default="01")
+    integration_flag = Column(Boolean, default=False)
 
     date = Column(String, default="")
     time_check = Column(String, default="")
     time_zone = Column(String, default="")
     equipment = Column(String, default="")
+    bukrs = Column(String, default="")
     lpc_text = Column(String, default="")
 
     observer_fullname = Column(String, default="")
@@ -207,10 +209,15 @@ class AnalyticsSnapshot(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     month_key = Column(String, nullable=False)
+    selected_year = Column(INTEGER, default=0)
+    source_key = Column(String, default="ALL")
+    available_years_json = Column(Text, default="[]")
     total_checklists = Column(INTEGER, default=0)
     month_checklists = Column(INTEGER, default=0)
     failed_checks = Column(INTEGER, default=0)
     failed_barriers = Column(INTEGER, default=0)
+    failed_checklist_count = Column(INTEGER, default=0)
+    failed_barrier_checklist_count = Column(INTEGER, default=0)
     closed_count = Column(INTEGER, default=0)
     registered_count = Column(INTEGER, default=0)
     avg_checks_rate = Column(Float, default=0)
@@ -226,12 +233,32 @@ class AnalyticsBreakdown(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     month_key = Column(String, nullable=False)
+    selected_year = Column(INTEGER, default=0)
+    source_key = Column(String, default="ALL")
     dimension = Column(String, nullable=False)
     metric = Column(String, nullable=False)
     bucket_key = Column(String, nullable=False)
     bucket_text = Column(String, nullable=False)
     metric_value = Column(INTEGER, default=0)
     sort_order = Column(INTEGER, default=0)
+    changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
+
+
+class AnalyticsRefreshState(Base):
+    __tablename__ = "analytics_refresh_state"
+
+    task_key = Column(String, primary_key=True)
+    task_name = Column(String, nullable=False, default="")
+    status = Column(String, nullable=False, default="IDLE")
+    is_running = Column(Boolean, default=False)
+    requested_at = Column(DateTime, nullable=True)
+    requested_by = Column(String, default="")
+    started_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    last_success_at = Column(DateTime, nullable=True)
+    last_error = Column(Text, default="")
+    last_message = Column(Text, default="")
+    active_run_id = Column(String, default="")
     changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
 
 

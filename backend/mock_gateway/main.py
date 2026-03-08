@@ -48,7 +48,7 @@ def ensure_schema_compatibility() -> None:
     if "checklist_root" in inspector.get_table_names():
         existing = {col["name"] for col in inspector.get_columns("checklist_root")}
         required = [
-            "date", "time_check", "time_zone", "equipment", "lpc_text",
+            "integration_flag", "date", "time_check", "time_zone", "equipment", "bukrs", "lpc_text",
             "observer_fullname", "observer_perner", "observer_position", "observer_orgunit", "observer_integration_name",
             "observed_fullname", "observed_perner", "observed_position", "observed_orgunit", "observed_integration_name",
             "location_key", "location_name", "location_text", "version_number",
@@ -60,6 +60,8 @@ def ensure_schema_compatibility() -> None:
                     continue
                 if col == "version_number":
                     conn.execute(text("ALTER TABLE checklist_root ADD COLUMN version_number INTEGER DEFAULT 1"))
+                elif col == "integration_flag":
+                    conn.execute(text("ALTER TABLE checklist_root ADD COLUMN integration_flag BOOLEAN DEFAULT 0"))
                 else:
                     conn.execute(text(f"ALTER TABLE checklist_root ADD COLUMN {col} VARCHAR"))
                 logger.info("Added missing checklist_root column: %s", col)
@@ -95,8 +97,13 @@ def ensure_schema_compatibility() -> None:
     if "analytics_snapshot" in inspector.get_table_names():
         analytics_existing = {col["name"] for col in inspector.get_columns("analytics_snapshot")}
         analytics_required = {
+            "selected_year": "INTEGER DEFAULT 0",
+            "source_key": "VARCHAR DEFAULT 'ALL'",
+            "available_years_json": "TEXT DEFAULT '[]'",
             "closed_count": "INTEGER DEFAULT 0",
             "registered_count": "INTEGER DEFAULT 0",
+            "failed_checklist_count": "INTEGER DEFAULT 0",
+            "failed_barrier_checklist_count": "INTEGER DEFAULT 0",
             "avg_checks_rate": "REAL DEFAULT 0",
             "avg_barriers_rate": "REAL DEFAULT 0",
             "healthy_count": "INTEGER DEFAULT 0",
@@ -110,6 +117,19 @@ def ensure_schema_compatibility() -> None:
                 conn.execute(text(f"ALTER TABLE analytics_snapshot ADD COLUMN {col} {sql_type}"))
                 logger.info("Added missing analytics_snapshot column: %s", col)
 
+    if "analytics_breakdown" in inspector.get_table_names():
+        breakdown_existing = {col["name"] for col in inspector.get_columns("analytics_breakdown")}
+        breakdown_required = {
+            "selected_year": "INTEGER DEFAULT 0",
+            "source_key": "VARCHAR DEFAULT 'ALL'",
+        }
+        with engine.begin() as conn:
+            for col, sql_type in breakdown_required.items():
+                if col in breakdown_existing:
+                    continue
+                conn.execute(text(f"ALTER TABLE analytics_breakdown ADD COLUMN {col} {sql_type}"))
+                logger.info("Added missing analytics_breakdown column: %s", col)
+
 
 def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
     current_count = db.query(ChecklistRoot).filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))).count()
@@ -119,6 +139,7 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
     lpc_pool = ["LPC-01", "LPC-02", "LPC-03", "LPC-04", "LPC-05"]
     status_pool = ["DRAFT", "REGISTERED", "CLOSED"]
     equipment_pool = ["Pump", "Compressor", "Conveyor", "Boiler", "Generator"]
+    bukrs_pool = ["1000", "2000", "3000"]
     observer_pool = [
         "Ivan Ivanov",
         "Anna Petrova",
@@ -138,10 +159,12 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
                 checklist_id=f"CHK-{sequence:05d}",
                 lpc=random.choice(lpc_pool),
                 status=random.choice(status_pool),
+                integration_flag=(sequence % 4 == 0),
                 date=changed_on.date().isoformat(),
                 time_check=changed_on.strftime("%H:%M"),
                 time_zone="Europe/Saratov",
                 equipment=random.choice(equipment_pool),
+                bukrs=random.choice(bukrs_pool),
                 observer_fullname=random.choice(observer_pool),
                 changed_on=changed_on,
                 changed_by="SYSTEM",
@@ -155,6 +178,39 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
     db.commit()
     logger.info("Seeded checklist roots for search compatibility: added=%s total=%s", to_create, minimum_rows)
     return to_create
+
+
+def _ensure_integration_samples(db, minimum_ratio: float = 0.18) -> int:
+    roots = db.query(ChecklistRoot).filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))).order_by(ChecklistRoot.created_on.asc()).all()
+    total = len(roots)
+    if total == 0:
+        return 0
+    current_integration = [root for root in roots if bool(root.integration_flag)]
+    target_count = max(1, int(total * float(minimum_ratio or 0)))
+    if len(current_integration) >= target_count:
+        return 0
+
+    updated = 0
+    for root in roots:
+        if bool(root.integration_flag):
+            continue
+        root.integration_flag = True
+        root.bukrs = ""
+        root.location_key = ""
+        root.location_name = ""
+        root.location_text = ""
+        root.observer_fullname = ""
+        root.observer_perner = ""
+        root.observer_position = ""
+        root.observer_orgunit = ""
+        updated += 1
+        if len(current_integration) + updated >= target_count:
+            break
+
+    if updated:
+        db.commit()
+        logger.info("Backfilled integration sample checklist roots: updated=%s target=%s total=%s", updated, target_count, total)
+    return updated
 
 
 async def lock_cleanup_job() -> None:
@@ -185,8 +241,8 @@ async def analytics_refresh_job() -> None:
         try:
             settings_row = db.query(FrontendRuntimeSettings).first()
             interval_ms = int(getattr(settings_row, "analytics_refresh_ms", 300000) or 300000)
-            if AnalyticsService.should_refresh(max(5, int(interval_ms / 1000))):
-                AnalyticsService.refresh_cache(db)
+            if AnalyticsService.should_refresh(db, max(5, int(interval_ms / 1000))):
+                AnalyticsService.refresh_cache(db, trigger="scheduler")
             sleep_seconds = 5 if AnalyticsService._dirty else max(5, min(60, int(interval_ms / 1000)))
         except Exception:
             logger.exception("Failed to refresh analytics cache")
@@ -205,6 +261,7 @@ async def lifespan(_: FastAPI):
     try:
         seed_reference_data(db)
         _seed_checklist_roots_if_needed(db, minimum_rows=100)
+        _ensure_integration_samples(db)
         oSettings = db.query(FrontendRuntimeSettings).first()
         if not oSettings:
             db.add(FrontendRuntimeSettings(
@@ -224,7 +281,7 @@ async def lifespan(_: FastAPI):
                 bChanged = True
             if bChanged:
                 db.commit()
-        AnalyticsService.refresh_cache(db)
+        AnalyticsService.refresh_cache(db, trigger="startup")
     finally:
         db.close()
 

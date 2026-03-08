@@ -65,6 +65,7 @@ Generated from runtime root: `app`.
   - `checklist/app/service/framework/FacadeCommandRuntime` -> `service/framework/FacadeCommandRuntime` [Util]
   - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
   - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
+  - `checklist/app/service/framework/SchedulingRuntime` -> `service/framework/SchedulingRuntime` [Util]
 - `controller/support/AppControllerDomActions.js`
   - `checklist/app/service/framework/ModelStateRuntime` -> `service/framework/ModelStateRuntime` [Util]
   - `checklist/app/util/ThemeDomRuntime` -> `util/ThemeDomRuntime` [Util]
@@ -142,6 +143,7 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/DetailCommandPolicy` -> `controller/support/DetailCommandPolicy` [Controllers]
   - `checklist/app/controller/support/DetailPersonInputSupport` -> `controller/support/DetailPersonInputSupport` [Controllers]
   - `checklist/app/service/framework/AttachmentFlowService` -> `service/framework/AttachmentFlowService` [Util]
+  - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
   - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
   - `checklist/app/service/framework/SchedulingRuntime` -> `service/framework/SchedulingRuntime` [Util]
 - `controller/support/DetailChecklistCoreSupport.js`

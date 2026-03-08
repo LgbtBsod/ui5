@@ -1,9 +1,7 @@
 sap.ui.define([
     "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer"
-], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer) {
+    "checklist/app/service/framework/Result"
+], function (UseCase, Result) {
     "use strict";
 
     function AnalyticsUseCase() {
@@ -16,18 +14,10 @@ sap.ui.define([
     AnalyticsUseCase.prototype.execute = function (mInput, mCtx) {
         var sIntent = (mInput && mInput.intent) || "";
         var bSilent = !!(mInput && mInput.silent);
-        var bUserInitiated = !!(mInput && mInput.userInitiated);
 
         if (!sIntent) {
             return Promise.resolve(Result.ok({}, []));
         }
-        if (sIntent === "closeDialog") {
-            return Promise.resolve(Result.ok({}, [
-                Effects.modelPatch("view", "/analyticsBusy", false),
-                Effects.dialog("workflowAnalytics", "close", {})
-            ]));
-        }
-
         var oAnalytics = mCtx && mCtx.analytics;
 
         if (sIntent === "refreshRail") {
@@ -57,30 +47,7 @@ sap.ui.define([
             });
         }
 
-        if (sIntent !== "openDialog" || !bUserInitiated) {
-            return Promise.resolve(Result.ok({}, [
-                Effects.modelPatch("view", "/analyticsBusy", false)
-            ]));
-        }
-
-        var pDetailed = (oAnalytics && typeof oAnalytics.fetchDetailed === "function")
-            ? oAnalytics.fetchDetailed()
-            : Promise.resolve(AnalyticsPayloadNormalizer.createEmptyDashboard());
-
-        return Promise.resolve(pDetailed).then(function (oSummary) {
-            var mAnalytics = AnalyticsPayloadNormalizer.normalizeDashboard(oSummary);
-
-            return Result.ok({ analytics: mAnalytics }, [
-                Effects.modelPatch("view", "/analyticsBusy", false),
-                Effects.modelPatch("view", "/analyticsError", ""),
-                Effects.modelPatch("view", "/analytics", mAnalytics)
-            ]);
-        }).catch(function (oError) {
-            return Result.fail(oError, [
-                Effects.modelPatch("view", "/analyticsBusy", false),
-                Effects.modelPatch("view", "/analyticsError", String((oError && oError.message) || "Analytics unavailable"))
-            ]);
-        });
+        return Promise.resolve(Result.ok({}, []));
     };
 
     return AnalyticsUseCase;

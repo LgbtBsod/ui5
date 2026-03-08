@@ -26,7 +26,8 @@ sap.ui.define([
         /^LockAcquire$/i,
         /^LockHeartbeat$/i,
         /^LockRelease$/i,
-        /^CopyChecklist$/i
+        /^CopyChecklist$/i,
+        /^AnalyticsRefreshTrigger$/i
     ];
     var DIRECT_FUNCTION_BODY_ALLOWLIST = [
         /^SetChecklistStatus$/i

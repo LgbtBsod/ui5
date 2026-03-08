@@ -15,7 +15,7 @@ from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistR
 from services.authorization_service import AuthorizationService
 from services.hierarchy_service import HierarchyService
 from services.analytics_service import AnalyticsService
-from services.checklist_service import ChecklistService
+from services.checklist_service import ChecklistService, resolve_bukrs_from_observer
 from services.current_user_service import CurrentUserService
 from services.lock_service import LockService
 from services.metadata_cache import get_metadata, metadata_refreshed_at_iso
@@ -58,6 +58,7 @@ SEARCH_MAP = {
     "LpcText": "lpc_text",
     "Profession": "observed_position",
     "ProfessionText": "observed_position",
+    "Bukrs": "bukrs",
     "Status": "status",
     "ChangedOn": "changed_on",
     "EquipName": "equipment",
@@ -297,17 +298,21 @@ def _normalize_basic_payload(basic: dict | None, db: Session) -> dict:
     profession = _pick_text(basic, "Profession", "PROF_KEY", "profession", "professionKey")
     location_name = _pick_text(basic, "LocationName", "LOCATION_NAME", "locationName")
     location_text = _pick_text(basic, "LocationText", "LOCATION_TEXT", "locationText") or location_name
+    observer_perner = _pick_text(basic, "ObserverPernr", "OBSERVER_PERNER", "observerPernr", "observer_perner")
+    observer_orgunit = _pick_text(basic, "ObserverOrgUnit", "OBSERVER_ORGUNIT", "observerOrgUnit", "observer_orgunit")
+    bukrs = _pick_text(basic, "Bukrs", "BUKRS", "bukrs")
     return {
         "date": _date_ymd_from_any(_pick_first_present(basic, "DateCheck", "date", "dateCheck")),
         "time_check": _pick_text(basic, "TimeCheck", "time", "timeCheck"),
         "time_zone": _pick_text(basic, "TimeZone", "timezone", "timeZone"),
         "equipment": _pick_text(basic, "EquipName", "equipment", "Equipment"),
+        "bukrs": resolve_bukrs_from_observer(observer_perner, observer_orgunit, bukrs),
         "lpc": lpc,
         "lpc_text": _pick_text(basic, "LpcText", "LPC_TEXT", "lpcText") or (_dict_text(db, "LPC", lpc) if lpc else ""),
         "observer_fullname": _pick_text(basic, "ObserverFullname", "OBSERVER_FULLNAME", "observerFullname", "observer_fullname"),
-        "observer_perner": _pick_text(basic, "ObserverPernr", "OBSERVER_PERNER", "observerPernr", "observer_perner"),
+        "observer_perner": observer_perner,
         "observer_position": _pick_text(basic, "ObserverPosition", "OBSERVER_POSITION", "observerPosition", "observer_position"),
-        "observer_orgunit": _pick_text(basic, "ObserverOrgUnit", "OBSERVER_ORGUNIT", "observerOrgUnit", "observer_orgunit"),
+        "observer_orgunit": observer_orgunit,
         "observed_fullname": _pick_text(basic, "ObservedFullname", "OBSERVED_FULLNAME", "observedFullname", "observed_fullname"),
         "observed_perner": _pick_text(basic, "ObservedPernr", "OBSERVED_PERNER", "observedPernr", "observed_perner"),
         "observed_position": profession or _pick_text(basic, "ObservedPosition", "OBSERVED_POSITION", "observedPosition", "observed_position"),
@@ -323,6 +328,7 @@ def _apply_basic_payload(root: ChecklistRoot, basic: dict) -> None:
     root.time_check = str(basic.get("time_check") or "")
     root.time_zone = str(basic.get("time_zone") or "")
     root.equipment = str(basic.get("equipment") or "")
+    root.bukrs = str(basic.get("bukrs") or "")
     root.lpc = str(basic.get("lpc") or "")
     root.lpc_text = str(basic.get("lpc_text") or "")
     root.observer_fullname = str(basic.get("observer_fullname") or "")
@@ -631,12 +637,15 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
         "TimeCheck": root.time_check or "",
         "TimeZone": root.time_zone or "",
         "LocationKey": root.location_key or "",
+        "Bukrs": root.bukrs or "",
         "Lpc": lpc,
         "LpcText": lpc_text or lpc,
         "Profession": profession,
         "ProfessionText": profession_text or profession,
         "EquipName": root.equipment or "",
         "Status": _status_external(root.status),
+        "IntegrationFlag": bool(root.integration_flag),
+        "SourceKey": "INTEGRATION" if bool(root.integration_flag) else "WEB",
         "ChangedOn": format_datetime(root.changed_on),
         "CreatedOn": format_datetime(root.created_on),
         "RequestId": root.checklist_id or "",
@@ -676,6 +685,7 @@ def _to_basic(root: ChecklistRoot) -> dict:
         "RootKey": root_key,
         "LocationKey": root.location_key or "",
         "LocationName": root.location_name or root.location_text or "",
+        "Bukrs": root.bukrs or "",
         "ObserverPernr": root.observer_perner or "",
         "ObserverFullname": root.observer_fullname or "",
         "ObserverPosition": root.observer_position or "",
@@ -1251,7 +1261,7 @@ def service_document():
     return odata_entity({"EntitySets": [
         "ChecklistSearchSet", "ChecklistRootSet", "ChecklistBasicInfoSet", "ChecklistCheckSet", "ChecklistBarrierSet",
         "DictionaryItemSet", "PersonVHSet", "LastChangeSet", "LockStatusSet", "ChecklistPermissionSet", "RuntimeSettingsSet",
-        "CurrentUserSet", "SimpleAnalyticalSet", "WorkflowAnalyticsBreakdownSet", "AttachmentFolderSet", "AttachmentSet",
+        "CurrentUserSet", "SimpleAnalyticalSet", "WorkflowAnalyticsBreakdownSet", "AnalyticsRefreshStateSet", "AttachmentFolderSet", "AttachmentSet",
     ]})
 
 
@@ -1729,6 +1739,7 @@ def create_checklist(payload: dict, response: Response, db: Session = Depends(ge
         checklist_id=requested_id or _next_checklist_id(db),
         lpc=str(basic_values.get("lpc") or ""),
         status=_normalize_status_input(requested_status),
+        integration_flag=False,
         created_by=user_name,
         changed_by=user_name,
         version_number=1,

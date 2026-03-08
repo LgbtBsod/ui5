@@ -1,70 +1,47 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <HBox class="kpiGrid searchAnalyticsDialogGrid analyticsToplineGrid" renderType="Bare" wrap="Wrap">
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://task" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{view>/analytics/total}" level="H3"/>
-        </VBox>
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://inspection" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{view>/analytics/failedChecks}" level="H3"/>
-        </VBox>
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://alert" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>kpiFailedBarriers}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{view>/analytics/failedBarriers}" level="H3"/>
-        </VBox>
-    </HBox>
+    <VBox class="sapUiSmallMarginTop analyticsToplineSection" renderType="Bare">
+        <HBox class="analyticsToplineGrid" wrap="Wrap" renderType="Bare">
+            <GenericTile header="{i18n>kpiVisible}" subheader="{view>/analytics/sourceText}" class="analyticsTile">
+                <tileContent>
+                    <TileContent>
+                        <NumericContent value="{view>/analytics/total}" indicator="None" valueColor="Neutral"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>kpiFailedChecks}" subheader="{i18n>analyticsFailedChecklistCount}" class="analyticsTile">
+                <tileContent>
+                    <TileContent footer="{= ${i18n>analyticsFailedChecklistCount} + ': ' + ${view>/analytics/failedChecklistCount} }">
+                        <NumericContent value="{view>/analytics/failedChecks}" scale="" indicator="None" valueColor="Error"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>kpiFailedBarriers}" subheader="{i18n>analyticsFailedBarrierChecklistCount}" class="analyticsTile">
+                <tileContent>
+                    <TileContent footer="{= ${i18n>analyticsFailedBarrierChecklistCount} + ': ' + ${view>/analytics/failedBarrierChecklistCount} }">
+                        <NumericContent value="{view>/analytics/failedBarriers}" indicator="None" valueColor="Critical"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>analyticsAvgChecksRate}" subheader="{i18n>analyticsChecksSuccessRate}" class="analyticsTile">
+                <tileContent>
+                    <TileContent>
+                        <NumericContent value="{view>/analytics/avgChecksRate}" scale="%" indicator="None" valueColor="Good"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>analyticsAvgBarriersRate}" subheader="{i18n>analyticsBarriersSuccessRate}" class="analyticsTile">
+                <tileContent>
+                    <TileContent>
+                        <NumericContent value="{view>/analytics/avgBarriersRate}" scale="%" indicator="None" valueColor="Good"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+        </HBox>
 
-    <HBox class="kpiGrid sapUiSmallMarginTop searchAnalyticsDialogGrid analyticsToplineGrid analyticsToplineGridSecondary" renderType="Bare" wrap="Wrap">
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://calendar" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>analyticsSelectedYear}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{view>/analytics/selectedYear}" level="H4"/>
-        </VBox>
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://history" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>analyticsPreviousYear}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{view>/analytics/previousYear}" level="H4"/>
-        </VBox>
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://status-positive" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>analyticsClosedCount}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{view>/analytics/closedCount}" level="H4"/>
-        </VBox>
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://status-critical" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>analyticsRegisteredCount}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{view>/analytics/registeredCount}" level="H4"/>
-        </VBox>
-        <VBox class="kpiCard">
-            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
-                <core:Icon src="sap-icon://chain-link" class="kpiLabelIcon" decorative="true"/>
-                <Text text="{i18n>analyticsSource}" class="kpiLabel"/>
-            </HBox>
-            <Title text="{= ${view>/analytics/source} === 'backend' ? ${i18n>analyticsSourceBackend} : (${view>/analytics/source} || ${i18n>analyticsSourceGateway}) }" level="H5"/>
-        </VBox>
-    </HBox>
-
-    <VBox class="analyticsBarsWrap sapUiSmallMarginTop searchAnalyticsDialogBars analyticsNarrativeBlock">
-        <Text text="{i18n>workflowAnalyticsBars}" class="kpiLabel sapUiTinyMarginBottom"/>
-        <ProgressIndicator percentValue="{view>/analytics/avgChecksRate}" displayValue="{= ${i18n>analyticsAvgChecksRate} + ': ' + ${view>/analytics/avgChecksRate} + '%' }" state="Success" class="sapUiTinyMarginBottom"/>
-        <ProgressIndicator percentValue="{view>/analytics/avgBarriersRate}" displayValue="{= ${i18n>analyticsAvgBarriersRate} + ': ' + ${view>/analytics/avgBarriersRate} + '%' }" state="Warning" class="sapUiTinyMarginBottom"/>
-        <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analytics/refreshedAt} || '-') }" class="kpiLabel"/>
+        <HBox class="analyticsToplineMetaGrid sapUiSmallMarginTop" wrap="Wrap" renderType="Bare">
+            <ObjectStatus text="{= ${i18n>analyticsSelectedYear} + ': ' + ${view>/analytics/selectedYear} }" state="Information"/>
+            <ObjectStatus text="{= ${i18n>analyticsPreviousYear} + ': ' + ${view>/analytics/previousYear} }" state="None"/>
+            <ObjectStatus text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analytics/refreshedAt} || '-') }" state="Success"/>
+        </HBox>
     </VBox>
 </core:FragmentDefinition>

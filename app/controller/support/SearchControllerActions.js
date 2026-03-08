@@ -1,7 +1,6 @@
 sap.ui.define([
     "checklist/app/controller/support/ControllerResourceCleanup",
     "checklist/app/service/domain/search/SearchFacade",
-    "checklist/app/service/framework/FocusRuntime",
     "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
@@ -13,7 +12,7 @@ sap.ui.define([
     "checklist/app/service/framework/SchedulingRuntime",
     "checklist/app/util/search/SearchMaxResults",
     "checklist/app/controller/support/SearchViewStateSupport"
-], function (ControllerResourceCleanup, SearchFacade, FocusRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SchedulingRuntime, SearchMaxResults, SearchViewStateSupport) {
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SchedulingRuntime, SearchMaxResults, SearchViewStateSupport) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -27,14 +26,11 @@ sap.ui.define([
     return {
         onInit: function () {
             this._facade = new SearchFacade();
-            this._mLazyDialogs = {};
             this._iAnalyticsRefreshTimer = null;
             this._iAnalyticsRailPulseTimer = null;
             this._iSearchWorkingHintTimer = null;
             this._iInitialAnalyticsTimer = null;
             this._iInitialAnalyticsIdleId = null;
-            this._bWorkflowAnalyticsOpenRequested = false;
-            this._oWorkflowAnalyticsReturnFocus = null;
             this._searchRateProgress = SearchRateProgress;
             this._sSearchUiSessionKey = SearchViewStateSupport.resolveSearchUiSessionKey();
             this.setModel(SearchViewStateSupport.createViewModel(this._sSearchUiSessionKey), "view");
@@ -65,9 +61,6 @@ sap.ui.define([
                 this._oAnalyticsRefreshBinding = ControllerResourceCleanup.destroyBinding(this._oAnalyticsRefreshBinding, this._fnAnalyticsRefreshChanged);
             }
             this._fnAnalyticsRefreshChanged = null;
-            ControllerResourceCleanup.destroyMapEntries(this._mLazyDialogs);
-            this._mLazyDialogs = null;
-            this._oWorkflowAnalyticsReturnFocus = null;
         },
 
         _withActionBusy: function (sViewBusyPath, fnAction, fnSyncControlBusy) {
@@ -92,14 +85,6 @@ sap.ui.define([
 
         _tryInitialSmartRebind: function () {
             return false;
-        },
-
-        ensureEffectDialog: function (sId) {
-            return SearchViewSupport.ensureEffectDialog(this, sId);
-        },
-
-        shouldAllowDialogEffect: function (sId, sAction) {
-            return SearchViewSupport.shouldAllowDialogEffect(this, sId, sAction);
         },
 
         _onSearchMatched: function () {
@@ -275,24 +260,7 @@ sap.ui.define([
         },
 
         onOpenWorkflowAnalytics: function (oEvent) {
-            var oSource = (oEvent && oEvent.getParameter && oEvent.getParameter("anchor"))
-                || (oEvent && oEvent.getSource && oEvent.getSource())
-                || (oEvent && oEvent.source)
-                || null;
-            if (oSource) {
-                this._oWorkflowAnalyticsReturnFocus = oSource;
-            }
             return SearchViewSupport.openWorkflowAnalytics(this);
-        },
-
-        onCloseWorkflowAnalytics: function () {
-            SearchViewSupport.closeWorkflowAnalytics(this);
-        },
-
-        _restoreWorkflowAnalyticsFocus: function () {
-            var oFocusTarget = this._oWorkflowAnalyticsReturnFocus;
-            FocusRuntime.focusSoon(oFocusTarget);
-            this._oWorkflowAnalyticsReturnFocus = null;
         },
 
         formatWorkflowStageText: function (sStage) {

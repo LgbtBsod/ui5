@@ -58,6 +58,12 @@ sap.ui.define([], function () {
         });
     }
 
+    function wait(iDelayMs) {
+        return new Promise(function (resolve) {
+            window.setTimeout(resolve, Math.max(0, Number(iDelayMs) || 0));
+        });
+    }
+
     return {
         clearTimer: clearTimer,
         restartTimer: restartTimer,
@@ -65,6 +71,7 @@ sap.ui.define([], function () {
         requestFrameOnce: requestFrameOnce,
         restartFrame: restartFrame,
         nextFrame: nextFrame,
-        nextDoubleFrame: nextDoubleFrame
+        nextDoubleFrame: nextDoubleFrame,
+        wait: wait
     };
 });

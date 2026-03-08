@@ -16,7 +16,9 @@ sap.ui.define([
     LoadAnalyticsDashboardUseCase.prototype.execute = function (mInput, mCtx) {
         var oAnalytics = mCtx && mCtx.analytics;
         var mRequest = {
-            selectedYear: Number(mInput && mInput.selectedYear) || 0
+            selectedYear: Number(mInput && mInput.selectedYear) || 0,
+            compareYear: Number(mInput && mInput.compareYear) || 0,
+            selectedSource: String(mInput && mInput.selectedSource || "").trim()
         };
         var pDetailed = (oAnalytics && typeof oAnalytics.fetchDetailed === "function")
             ? oAnalytics.fetchDetailed(mRequest)
