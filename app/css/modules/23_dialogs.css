@@ -633,9 +633,13 @@ body.chkAppRoot.appDark .chkApp .dialogDataTable {
   margin-top: 0.4rem;
 }
 
-.chkApp .shellUserActionBtn .sapMBtnInner {
+.chkApp .shellPopover .shellUserActionBtn .sapMBtnInner {
   min-width: 100%;
+  min-height: 2.3rem;
   border-radius: 999px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chkApp .analyticsNarrativeBlock,
@@ -687,4 +691,50 @@ body.chkAppRoot.appDark .sapMMessageToast.glassToast {
   box-shadow:
     0 22px 48px rgba(1, 6, 16, 0.28),
     inset 0 1px 0 rgba(203, 226, 255, 0.08);
+}
+
+
+/* 2026-03 follow-up: user popover stability + contextual toasts */
+.chkApp .shellPopover .sapMPopoverCont {
+  overflow: auto;
+  max-height: min(80vh, 40rem);
+}
+
+.chkApp .shellUserBody {
+  min-width: min(100%, 24rem);
+}
+
+.chkApp .shellUserPermissionList {
+  max-height: min(34vh, 14rem);
+  overflow: auto;
+  border-radius: calc(var(--radius-md) - 0.1rem);
+}
+
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--success,
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--warning,
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--error,
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--info {
+  border-radius: calc(var(--radius-lg) + 0.08rem);
+  padding: 0.72rem 0.95rem;
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--success {
+  border-color: rgba(var(--semantic-success-rgb), 0.44);
+  background: linear-gradient(180deg, rgba(var(--semantic-success-rgb), 0.22), rgba(var(--semantic-success-rgb), 0.08));
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--warning {
+  border-color: rgba(var(--semantic-warning-rgb), 0.44);
+  background: linear-gradient(180deg, rgba(var(--semantic-warning-rgb), 0.2), rgba(var(--semantic-warning-rgb), 0.08));
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--error {
+  border-color: rgba(var(--semantic-danger-rgb), 0.48);
+  background: linear-gradient(180deg, rgba(var(--semantic-danger-rgb), 0.22), rgba(var(--semantic-danger-rgb), 0.09));
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--info {
+  border-color: rgba(var(--semantic-info-rgb), 0.42);
+  background: linear-gradient(180deg, rgba(var(--semantic-info-rgb), 0.2), rgba(var(--semantic-info-rgb), 0.08));
 }

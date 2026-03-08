@@ -14,12 +14,7 @@ sap.ui.define([
     }
 
     function normalizeCards(aCards) {
-        var aPinned = [];
-        var aFree = [];
-        cloneCards(aCards).forEach(function (oCard) {
-            (oCard.pinned ? aPinned : aFree).push(oCard);
-        });
-        return aPinned.concat(aFree).map(function (oCard, iIndex) {
+        return cloneCards(aCards).map(function (oCard, iIndex) {
             oCard.order = iIndex;
             return oCard;
         });
@@ -102,21 +97,10 @@ sap.ui.define([
     function togglePin(oController, sKey) {
         var aCards = cloneCards(ControllerViewStateRuntime.get(oController, "/infoCards", []));
         var iIndex = findCardIndex(aCards, sKey);
-        var oCard;
-        var iTarget;
         if (iIndex < 0) {
             return false;
         }
-        oCard = aCards[iIndex];
-        aCards.splice(iIndex, 1);
-        oCard.pinned = !oCard.pinned;
-        if (oCard.pinned) {
-            iTarget = aCards.filter(function (oEntry) { return oEntry.pinned; }).length;
-        } else {
-            iTarget = aCards.findIndex(function (oEntry) { return !oEntry.pinned; });
-            iTarget = iTarget < 0 ? aCards.length : iTarget;
-        }
-        aCards.splice(iTarget, 0, oCard);
+        aCards[iIndex].pinned = !aCards[iIndex].pinned;
         writeCards(oController, aCards, sKey);
         return true;
     }

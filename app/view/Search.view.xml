@@ -87,6 +87,7 @@
                 <VBox id="searchWorkbenchDock" class="searchWorkbenchDock" renderType="Bare">
                     <VBox
                         id="searchFilterCard"
+                        width="100%"
                         class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell">
                         <VBox
                             visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }"
@@ -185,7 +186,7 @@
                             enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }"
                             class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                                <OverflowToolbarLayoutData priority="High" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
@@ -197,7 +198,7 @@
                             tooltip="{i18n>searchShortcutOpen}"
                             class="brandActionBtn brandActionGhost searchOpenActionBtn sapUiTinyMarginEnd">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Low"/>
+                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
@@ -211,7 +212,7 @@
                             press=".onScrollSearchResultsToolbarAnchor"
                             class="searchToolbarNavBtn searchToolbarNavBtnUp">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
@@ -223,7 +224,7 @@
                             tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }"
                             class="brandActionBtn brandActionGhost searchCopyActionBtn sapUiTinyMarginEnd">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Low"/>
+                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
@@ -235,7 +236,7 @@
                             tooltip="{i18n>searchShortcutSelectVisible}"
                             class="brandActionBtn brandActionGhost searchSelectVisibleActionBtn sapUiTinyMarginEnd">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Low"/>
+                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
@@ -247,7 +248,7 @@
                             tooltip="{i18n>searchShortcutClearSelection}"
                             class="brandActionBtn brandActionGhost searchClearSelectionActionBtn sapUiTinyMarginEnd">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Disappear"/>
+                                <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
@@ -283,7 +284,7 @@
                             class="searchSelectionPrimaryId"
                             wrapping="false">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Low"/>
+                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
                             </layoutData>
                         </Text>
 
@@ -374,6 +375,7 @@
 
                 <VBox
                     id="searchResultsShell"
+                    width="100%"
                     class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
                     <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
                         <core:Fragment

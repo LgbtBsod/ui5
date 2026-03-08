@@ -3,8 +3,10 @@
         id="shellUserPopover"
         class="glassDialog shellPopover"
         title="{i18n>shellUserTitle}"
-        contentWidth="22rem"
-        placement="Bottom">
+        contentWidth="24rem"
+        placement="Bottom"
+        horizontalScrolling="false"
+        verticalScrolling="true">
         <content>
             <VBox class="shellPopoverBody shellUserBody" renderType="Bare">
                 <Text text="{i18n>shellUserSubtitle}" class="shellPopoverIntro"/>
@@ -60,6 +62,7 @@
                         icon="sap-icon://refresh"
                         type="Transparent"
                         busy="{appView>/shell/userRefreshBusy}"
+                        busyIndicatorDelay="0"
                         press=".onRefreshShellUser"
                         class="shellUserActionBtn"/>
                 </VBox>

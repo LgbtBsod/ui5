@@ -23,6 +23,10 @@ sap.ui.define([
         return String(sNormalizedValue || "").trim() || sSafeFallback || "100";
     }
 
+    function normalizeOptionalRequestValue(sNormalizedValue) {
+        return String(sNormalizedValue || "").trim();
+    }
+
     return {
         onInit: function () {
             this._facade = new SearchFacade();
@@ -223,7 +227,14 @@ sap.ui.define([
         onBackendTopChange: function (oEvent) {
             var sValue = SearchMaxResults.normalizeSearchBackendTopValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-            sValue = normalizeRequestValue(sValue, ModelStateRuntime.read(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
+            sValue = normalizeOptionalRequestValue(sValue);
+            var sCurrentValue = String(ModelStateRuntime.read(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP) || "").trim();
+            if (sCurrentValue === sValue) {
+                if (oSource && typeof oSource.setValue === "function") {
+                    oSource.setValue(sValue);
+                }
+                return;
+            }
             ModelStateRuntime.write(this, "state", "/searchBackendTop", sValue);
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
@@ -240,7 +251,7 @@ sap.ui.define([
             var oMaxRowsInput = this.byId("maxRowsInput");
             var sBackendTop = SearchMaxResults.normalizeSearchBackendTopValue(oBackendTopInput && oBackendTopInput.getValue && oBackendTopInput.getValue());
             var sMaxRows = SearchMaxResults.normalizeSearchMaxResultsValue(oMaxRowsInput && oMaxRowsInput.getValue && oMaxRowsInput.getValue());
-            sBackendTop = normalizeRequestValue(sBackendTop, ModelStateRuntime.read(this, "state", "/searchBackendTop", DEFAULT_SEARCH_BACKEND_TOP));
+            sBackendTop = normalizeOptionalRequestValue(sBackendTop);
             sMaxRows = normalizeRequestValue(sMaxRows, ModelStateRuntime.read(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
             ModelStateRuntime.write(this, "state", "/searchBackendTop", sBackendTop);
             ModelStateRuntime.write(this, "state", "/searchMaxResults", sMaxRows);

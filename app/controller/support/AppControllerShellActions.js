@@ -45,9 +45,6 @@ sap.ui.define([
         }).then(function (oResult) {
             oController._syncShellState();
             oController._syncShellMetrics();
-            if (typeof oController._scheduleShellLayoutRefresh === "function") {
-                oController._scheduleShellLayoutRefresh();
-            }
             if (typeof oController.showI18nToast === "function" && oResult && oResult.ok) {
                 oController.showI18nToast("shellContextRefreshed");
             }
