@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "checklist/app/controller/support/SearchSelectionSupport",
     "checklist/app/controller/support/SearchLoadRuntimeSupport",
     "checklist/app/controller/support/SearchRateProgress",

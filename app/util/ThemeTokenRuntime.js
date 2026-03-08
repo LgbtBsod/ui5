@@ -45,6 +45,9 @@ sap.ui.define([
 
     function syncTokensFromUI5(Core, Parameters, fnSyncDocumentRootClasses) {
         var oRoot = document && document.documentElement;
+        if (!Parameters || typeof Parameters.get !== "function") {
+            return;
+        }
         var sCurrentTheme = Core && Core.getConfiguration && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? String(Core.getConfiguration().getTheme() || "").toLowerCase()
             : "";

@@ -1,5 +1,5 @@
 {
-  "_version": "1.12.0",
+  "_version": "1.21.0",
   "sap.app": {
     "id": "checklist.app",
     "type": "application",
@@ -72,7 +72,8 @@
           "deferredGroups": [
             "changes",
             "autosave",
-            "saveFlow"
+            "saveFlow",
+            "locks"
           ],
           "changeGroups": {
             "*": {
@@ -175,15 +176,6 @@
       "backendMode": "real",
       "uiContractVersion": "1.0.0"
     },
-    "flexEnabled": false,
-    "dataSources": {
-      "mainService": {
-        "uri": "/sap/opu/odata/sap/Z_UI5_SRV/",
-        "type": "OData",
-        "settings": {
-          "odataVersion": "2.0"
-        }
-      }
-    }
+    "flexEnabled": false
   }
 }

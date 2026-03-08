@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "sap/ui/core/UIComponent",
     "checklist/app/model/ModelFactory",
     "checklist/app/service/SmartSearchAdapter",
@@ -77,15 +77,21 @@
 ) {
     "use strict";
 
+    // Polyfill: Promise.prototype.finally (not available in IE11 / older SAP WebAS Chromium)
+    if (typeof Promise === "function" && typeof Promise.prototype.finally !== "function") {
+        Promise.prototype.finally = function (fnCallback) {
+            var P = this.constructor || Promise;
+            return this.then(
+                function (vValue) { return P.resolve(typeof fnCallback === "function" ? fnCallback() : undefined).then(function () { return vValue; }); },
+                function (oReason) { return P.resolve(typeof fnCallback === "function" ? fnCallback() : undefined).then(function () { throw oReason; }); }
+            );
+        };
+    }
+
+
     return UIComponent.extend("checklist.app.Component", {
         metadata: {
             manifest: "json"
-        },
-        createContent: function () {
-            return sap.ui.xmlview({
-                id: this.createId("app"),
-                viewName: "checklist.app.view.App"
-            });
         },
         init: function () {
             return ComponentInitRuntime.runInit.call(this, arguments, {

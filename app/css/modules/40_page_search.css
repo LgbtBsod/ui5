@@ -1,15 +1,11 @@
 .chkApp .searchFilterCardDense,
 .chkApp .searchWorkbenchDock,
-.chkApp .searchFilterCardDense,
 .chkApp .searchResultsActionRail,
 .chkApp .searchSmartToolbarRail,
 .chkApp .searchResultsExperienceShell,
 .chkApp .searchResultsTable,
 .chkApp .searchStatusStripStack,
-.chkApp .searchFilterExperienceShell,
-.chkApp .searchResultsExperienceShell,
-.chkApp .searchFilterCardDense,
-.chkApp .searchResultsTable {
+.chkApp .searchFilterExperienceShell {
   overflow: visible;
 }
 

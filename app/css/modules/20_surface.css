@@ -383,6 +383,8 @@ body.chkAppRoot.appDark .chkApp .shellContextSubtitle {
 .searchStatusStripStack,
 .chkStack,
 .detailAttachmentDropZone {
+  position: relative;
+  overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--border-soft) 24%, transparent);
   background: color-mix(in srgb, var(--surface-1) 18%, transparent);
   box-shadow: none;

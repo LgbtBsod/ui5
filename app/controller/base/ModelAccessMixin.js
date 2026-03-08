@@ -44,7 +44,7 @@ sap.ui.define(["checklist/app/service/domain/shared/LockFacade"], function (Lock
             if (!sBase64) { return ""; }
             var sBinary = atob(String(sBase64));
             var aHex = [];
-            for (var i = 0; i < sBinary.length; i += 1) { aHex.push(sBinary.charCodeAt(i).toString(16).padStart(2, "0")); }
+            for (var i = 0; i < sBinary.length; i += 1) { var h = sBinary.charCodeAt(i).toString(16); aHex.push(h.length >= 2 ? h : "0" + h); }
             return aHex.join("");
         }
     };

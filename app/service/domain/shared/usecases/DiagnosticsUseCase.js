@@ -14,7 +14,7 @@ sap.ui.define([
                 mainServiceModel: ctx.mainServiceModel,
                 stateModel: ctx.stateModel,
                 syncCapability: fnSync,
-                onMetadataFailed: input && input.onMetadataFailed
+                onMetadataFailed: (ctx && ctx.onMetadataFailed) || (input && input.onMetadataFailed)
             });
             return Promise.resolve(Result.ok({ wired: true }, []));
         }

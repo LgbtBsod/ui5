@@ -182,10 +182,11 @@ sap.ui.define([
                 var pCompareBreakdown = iCompareYear === iSelectedYear
                     ? GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", mParams)
                     : GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", mCompareParams);
+                var pRefreshState = GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')").catch(function () { return null; });
                 return Promise.all([
                     GatewayAdapterSupport.get("SimpleAnalyticalSet", mParams),
                     GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", mParams),
-                    GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')"),
+                    pRefreshState,
                     pCompareBreakdown
                 ]).then(function (aResult) {
                     return Object.assign({}, normalizeSummary(aResult[0]), {
@@ -197,14 +198,16 @@ sap.ui.define([
                 });
             },
             fetchRefreshState: function () {
-                return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')").then(normalizeRefreshState);
+                return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')")
+                    .then(normalizeRefreshState)
+                    .catch(function () { return normalizeRefreshState(null); });
             },
             requestRefresh: function (mInput) {
                 return GatewayAdapterSupport.postFunction("AnalyticsRefreshTrigger", {
                     TaskKey: "ANALYTICS_REFRESH",
                     RequestedBy: String(mInput && mInput.requestedBy || "")
                 }).then(function () {
-                    return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')");
+                    return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')").catch(function () { return null; });
                 }).then(normalizeRefreshState);
             }
         };

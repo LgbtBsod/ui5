@@ -45,7 +45,8 @@ sap.ui.define([
         return oUnwrapped || {};
     }
     function pad2(iValue) {
-        return String(iValue).padStart(2, "0");
+        var s = String(iValue);
+        return s.length >= 2 ? s : "0" + s;
     }
     function formatUtcDate(oDate) {
         if (!(oDate instanceof Date) || Number.isNaN(oDate.getTime())) {

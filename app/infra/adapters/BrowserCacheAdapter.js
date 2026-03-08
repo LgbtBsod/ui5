@@ -24,7 +24,7 @@ sap.ui.define([], function () {
                 var st = tx.objectStore(STORE);
                 Promise.resolve(fn(st)).then(resolve).catch(reject);
                 tx.onerror = function () { reject(tx.error || new Error("indexeddb_tx_failed")); };
-            }).finally(function () { db.close(); });
+            }).then(function (vResult) { db.close(); return vResult; }, function (oError) { db.close(); throw oError; });
         });
     }
 

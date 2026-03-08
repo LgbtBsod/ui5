@@ -33,6 +33,20 @@ sap.ui.define([], function () {
         });
     }
 
+    function parseResponseHeaders(vHeaders) {
+        if (!vHeaders) { return {}; }
+        if (typeof vHeaders === "object" && !Array.isArray(vHeaders)) { return vHeaders; }
+        var mResult = {};
+        String(vHeaders).split(/\r?\n/).forEach(function (sLine) {
+            var iColon = sLine.indexOf(":");
+            if (iColon < 1) { return; }
+            var sKey = sLine.slice(0, iColon).trim().toLowerCase();
+            var sVal = sLine.slice(iColon + 1).trim();
+            if (sKey) { mResult[sKey] = sVal; }
+        });
+        return mResult;
+    }
+
     function normalizeODataError(oError) {
         var oEnvelope = pickEnvelope(oError);
         var sCode = String(
@@ -50,7 +64,7 @@ sap.ui.define([], function () {
             message: sMessage,
             statusCode: Number((oError && (oError.statusCode || oError.status)) || 0) || 0,
             details: extractDetails(oEnvelope),
-            responseHeaders: (oError && oError.responseHeaders) || {}
+            responseHeaders: parseResponseHeaders((oError && oError.responseHeaders) || {})
         };
     }
 

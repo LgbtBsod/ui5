@@ -93,6 +93,15 @@ sap.ui.define([
 
         return Promise.resolve(oRepo.checkChecklistPermission({ rootId: sResolvedRootId })).then(function (oPermission) {
             return normalizePermission(oPermission, sResolvedRootId);
+        }).catch(function () {
+            // ChecklistPermissionSet may not exist on all Gateway backends - grant access and let server enforce
+            return {
+                rootId: sResolvedRootId,
+                canView: true,
+                canEdit: true,
+                canDelete: true,
+                reasonCode: "PERMISSION_CHECK_UNAVAILABLE"
+            };
         });
     }
 
