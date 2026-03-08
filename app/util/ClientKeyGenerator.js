@@ -16,7 +16,9 @@ sap.ui.define([], function () {
 
     function toHex32(aValues) {
         return (aValues || []).map(function (nValue) {
-            return (Number(nValue) >>> 0).toString(16).padStart(8, "0");
+            var s = (Number(nValue) >>> 0).toString(16);
+            while (s.length < 8) { s = "0" + s; }
+            return s;
         }).join("").slice(0, 32).toUpperCase();
     }
 

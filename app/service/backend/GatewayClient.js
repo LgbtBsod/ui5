@@ -27,20 +27,19 @@ sap.ui.define([
         /^LockHeartbeat$/i,
         /^LockRelease$/i,
         /^CopyChecklist$/i,
-        /^AnalyticsRefreshTrigger$/i
-    ];
-    var DIRECT_FUNCTION_BODY_ALLOWLIST = [
+        /^AnalyticsRefreshTrigger$/i,
         /^SetChecklistStatus$/i
+    ];
+    var DIRECT_FUNCTION_BODY_ALLOWLIST = [];
+    var DIRECT_PUT_ALLOWLIST = [
+        /^\/AttachmentSet\(AttachmentKey='[^']+'\)\/\$value$/i
     ];
     var DIRECT_CREATE_ALLOWLIST = [
         /^\/AttachmentSet(?:$|[?(])/i
     ];
-    var DIRECT_PUT_ALLOWLIST = [
-        /^\/AttachmentSet\(Key='[^']+'\)\/\$value$/i
-    ];
     var DIRECT_DELETE_ALLOWLIST = [
         /^\/ChecklistRootSet\('[^']+'\)$/i,
-        /^\/AttachmentSet\(Key='[^']+'\)$/i
+        /^\/AttachmentSet\(AttachmentKey='[^']+'\)$/i
     ];
     function ensureModel() { if (!_oModel) { throw new Error("GatewayClient model is not initialized"); } return _oModel; }
     function toPromise(fnExecutor) { return new Promise(function (resolve, reject) { fnExecutor(resolve, reject); }); }
@@ -155,17 +154,23 @@ sap.ui.define([
 
     function withDirectPut(sPath, vPayload, mOptions) {
         var oOptions = mOptions || {};
+        // Ensure we have a CSRF token before the PUT - ODataModel may not have fetched it yet
+        var oModel;
+        try { oModel = ensureModel(); } catch (e) { return Promise.reject(e); }
+        var sCsrfCheck = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
+        var pToken = sCsrfCheck ? Promise.resolve(sCsrfCheck) : new Promise(function (res) {
+            oModel.refreshSecurityToken(function () {
+                res(oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "");
+            }, function () { res(""); }, true);
+        });
+        return pToken.then(function () {
         return toPromise(function (resolve, reject) {
-            var oModel = ensureModel();
+            var xhr = new XMLHttpRequest();
+            var sBaseUrl = serviceUrl().replace(/\/+$/, "");
+            var sResolvedUrl = sBaseUrl + (sPath.charAt(0) === "/" ? sPath : "/" + sPath);
             var mModelHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
             var sCsrfToken = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
             var mHeaders;
-            var oRequestHandle;
-
-            if (typeof oModel._createRequest !== "function" || typeof oModel._request !== "function") {
-                reject(new Error("ODataModel stream upload API is not available"));
-                return;
-            }
 
             delete mModelHeaders["content-type"];
             delete mModelHeaders["Content-Type"];
@@ -179,21 +184,44 @@ sap.ui.define([
                 mHeaders["X-CSRF-Token"] = sCsrfToken;
             }
 
-            try {
-                oRequestHandle = oModel._createRequest(sPath, null, "PUT", mHeaders, vPayload || null, undefined, undefined, true);
-                oModel._request(
-                    oRequestHandle,
-                    function (oData, oResponse) {
-                        resolve(oResponse || oData || {});
-                    },
-                    function (oError) {
-                        reject(GatewayErrorNormalizer.normalizeError(oError));
-                    }
-                );
-            } catch (e) {
-                reject(GatewayErrorNormalizer.normalizeError(e));
+            if (typeof window !== "undefined" && /^\/(?!\/)/.test(sResolvedUrl)) {
+                sResolvedUrl = window.location.origin + sResolvedUrl;
             }
+
+            xhr.open("PUT", sResolvedUrl, true);
+            xhr.withCredentials = true;
+            Object.keys(mHeaders).forEach(function (sName) {
+                var vValue = mHeaders[sName];
+                if (vValue === undefined || vValue === null || vValue === "") {
+                    return;
+                }
+                xhr.setRequestHeader(sName, String(vValue));
+            });
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve({});
+                    return;
+                }
+                reject(GatewayErrorNormalizer.normalizeError({
+                    status: xhr.status,
+                    statusCode: xhr.status,
+                    message: xhr.statusText || "Gateway stream upload failed",
+                    responseText: xhr.responseText || "",
+                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
+                }));
+            };
+            xhr.onerror = function () {
+                reject(GatewayErrorNormalizer.normalizeError({
+                    status: xhr.status || 0,
+                    statusCode: xhr.status || 0,
+                    message: xhr.statusText || "Gateway stream upload failed",
+                    responseText: xhr.responseText || "",
+                    responseHeaders: xhr.getAllResponseHeaders ? xhr.getAllResponseHeaders() : ""
+                }));
+            };
+            xhr.send(vPayload || null);
         });
+        }); // end pToken.then
     }
     return {
         setModel: function (oModel, mOptions) {

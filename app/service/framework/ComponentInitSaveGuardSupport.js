@@ -52,12 +52,14 @@ sap.ui.define([
             if (!sRootId) {
                 return Promise.resolve(false);
             }
-            ModelStateRuntime.setManyOnModel(oStateModel, {
-                [oStatePaths.SAVE_IN_FLIGHT]: true,
-                [oStatePaths.UI_BUSY_DETAIL]: true,
-                [oStatePaths.UI_BUSY_GLOBAL]: true,
-                "/autosaveState": "SAVING"
-            });
+            ModelStateRuntime.setManyOnModel(oStateModel, (function () {
+                var m = {};
+                m[oStatePaths.SAVE_IN_FLIGHT] = true;
+                m[oStatePaths.UI_BUSY_DETAIL] = true;
+                m[oStatePaths.UI_BUSY_GLOBAL] = true;
+                m["/autosaveState"] = "SAVING";
+                return m;
+            }()));
             oComponent._iSaveWorkingTimer = SchedulingRuntime.restartTimer(oComponent._iSaveWorkingTimer, function () {
                 if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
                     fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("info", "workingMessageLong", {
@@ -101,11 +103,13 @@ sap.ui.define([
                 return false;
             }).finally(function () {
                 oComponent._iSaveWorkingTimer = SchedulingRuntime.clearTimer(oComponent._iSaveWorkingTimer);
-                ModelStateRuntime.setManyOnModel(oStateModel, {
-                    [oStatePaths.SAVE_IN_FLIGHT]: false,
-                    [oStatePaths.UI_BUSY_DETAIL]: false,
-                    [oStatePaths.UI_BUSY_GLOBAL]: false
-                });
+                ModelStateRuntime.setManyOnModel(oStateModel, (function () {
+                    var m = {};
+                    m[oStatePaths.SAVE_IN_FLIGHT] = false;
+                    m[oStatePaths.UI_BUSY_DETAIL] = false;
+                    m[oStatePaths.UI_BUSY_GLOBAL] = false;
+                    return m;
+                }()));
                 oComponent._pGuardedSavePromise = null;
             });
             return oComponent._pGuardedSavePromise;

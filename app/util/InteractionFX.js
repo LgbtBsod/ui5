@@ -58,7 +58,7 @@ sap.ui.define([
             ThemeDomRuntime.removeClass([oTarget], RIPPLE_CLASS);
             void oTarget.offsetWidth;
             ThemeDomRuntime.addClass([oTarget], RIPPLE_CLASS);
-            iRippleTimer = SchedulingRuntime.restartTimer(0, function () {
+            iRippleTimer = SchedulingRuntime.restartTimer(iRippleTimer, function () {
                 ThemeDomRuntime.removeClass([oTarget], RIPPLE_CLASS);
                 iRippleTimer = 0;
             }, RIPPLE_DURATION_MS);

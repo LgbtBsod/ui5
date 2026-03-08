@@ -41,7 +41,7 @@ sap.ui.define([
             ClientRowId: sClientRowId
         }).then(function (oCreated) {
             var sAttachmentKey = String((oCreated && (oCreated.AttachmentKey || oCreated.Key)) || "").trim().toUpperCase();
-            return GatewayClient.putPath("/AttachmentSet(Key='" + sAttachmentKey + "')/$value", oFile, {
+            return GatewayClient.putPath("/AttachmentSet(AttachmentKey='" + sAttachmentKey + "')/$value", oFile, {
                 contentType: oMeta.mimeType || oFile.type || "application/octet-stream",
                 headers: {
                     "Slug": oMeta.fileName || oFile.name || (sAttachmentKey + ".bin"),
@@ -65,7 +65,7 @@ sap.ui.define([
         if (!sAttachmentId) {
             return Promise.resolve({ deleted: true, attachments: [] });
         }
-        return GatewayClient.deletePath("/AttachmentSet(Key='" + sAttachmentId + "')").then(function () {
+        return GatewayClient.deletePath("/AttachmentSet(AttachmentKey='" + sAttachmentId + "')").then(function () {
             return loadAttachments({ rootId: sRootId }).then(function (oList) {
                 return { deleted: true, attachments: oList.attachments || [] };
             });

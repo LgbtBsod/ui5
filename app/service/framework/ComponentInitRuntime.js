@@ -202,7 +202,16 @@ sap.ui.define([
             });
             ModelStateRuntime.writeOnModel(oEnvModel, "/variables", mVars);
             Promise.resolve().then(function () {
-                return Promise.allSettled([
+                // allSettled polyfill: wraps each promise so none can reject the outer Promise.all
+                function allSettledPolyfill(aPromises) {
+                    return Promise.all((aPromises || []).map(function (p) {
+                        return Promise.resolve(p).then(
+                            function (v) { return { status: "fulfilled", value: v }; },
+                            function (e) { return { status: "rejected", reason: e }; }
+                        );
+                    }));
+                }
+                return allSettledPolyfill([
                     Promise.resolve(typeof fnLoadCurrentUser === "function" ? fnLoadCurrentUser() : null),
                     fnLoadRuntimeSettings(),
                     Promise.resolve(EnsureDictLoadedUseCase.execute({}, oComponent._ctx)).catch(function () {
@@ -729,10 +738,9 @@ sap.ui.define([
             }
         });
         oComponent._oAutoSave.attachEvent("autosaveStart", function () {
-            ModelStateRuntime.setManyOnModel(oStateModel, {
-                "/autosaveState": "SAVING",
-                [StatePaths.SAVE_IN_FLIGHT]: true
-            });
+            var mStart = { "/autosaveState": "SAVING" };
+            mStart[StatePaths.SAVE_IN_FLIGHT] = true;
+            ModelStateRuntime.setManyOnModel(oStateModel, mStart);
             if (ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
                     ActionContract.RETRY_ACTIONS.SAVE,
@@ -743,18 +751,15 @@ sap.ui.define([
             fnEmitTelemetry("autosave.triggered", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveDone", function () {
-            ModelStateRuntime.setManyOnModel(oStateModel, {
-                "/autosaveState": "SAVED",
-                "/autosaveAt": new Date().toISOString(),
-                [StatePaths.SAVE_IN_FLIGHT]: false
-            });
+            var mDone = { "/autosaveState": "SAVED", "/autosaveAt": new Date().toISOString() };
+            mDone[StatePaths.SAVE_IN_FLIGHT] = false;
+            ModelStateRuntime.setManyOnModel(oStateModel, mDone);
             DebugLogger.info("Component", "autosave done", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveError", function (oEvent) {
-            ModelStateRuntime.setManyOnModel(oStateModel, {
-                "/autosaveState": "ERROR",
-                [StatePaths.SAVE_IN_FLIGHT]: false
-            });
+            var mErr = { "/autosaveState": "ERROR" };
+            mErr[StatePaths.SAVE_IN_FLIGHT] = false;
+            ModelStateRuntime.setManyOnModel(oStateModel, mErr);
             fnSetGlobalBanner(
                 ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false
                     ? FeedbackBannerRuntime.createNetworkRetryBannerInput(
@@ -925,12 +930,11 @@ sap.ui.define([
             var oCacheModel = reuseJsonModel(this.getModel("cache"), ModelFactory.createCacheModel);
             var oEnvModel = ModelFactory.createEnvModel();
             var mTimerDefaults = TimeConfigService.buildDefaultTimerMap();
-            ModelStateRuntime.setManyOnModel(oStateModel, {
-                "/timers": mTimerDefaults,
-                [StatePaths.SAVE_IN_FLIGHT]: false,
-                [StatePaths.PENDING_NAVIGATION_INTENT]: null,
-                [StatePaths.TAB_CONFLICT_STATE]: { active: false, source: "", at: "" }
-            });
+            var mInitState = { "/timers": mTimerDefaults };
+            mInitState[StatePaths.SAVE_IN_FLIGHT] = false;
+            mInitState[StatePaths.PENDING_NAVIGATION_INTENT] = null;
+            mInitState[StatePaths.TAB_CONFLICT_STATE] = { active: false, source: "", at: "" };
+            ModelStateRuntime.setManyOnModel(oStateModel, mInitState);
             var fnEmitTelemetry = function (sEventName, oPayload) {
                 return WorkflowTelemetry.emit(sEventName, {
                     stateModel: oStateModel,
@@ -987,7 +991,8 @@ sap.ui.define([
                         "RuntimeSettingsSet(GLOBAL)",
                         (oError && oError.message) || oError || "runtime_settings_load_failed"
                     ));
-                    return Promise.reject(oError);
+                    // Non-fatal: resolve with empty config so boot sequence continues
+                    return {};
                 }.bind(this));
             }.bind(this);
             var fnResolveCorrelationId = oFeedbackRuntime.resolveCorrelationId;

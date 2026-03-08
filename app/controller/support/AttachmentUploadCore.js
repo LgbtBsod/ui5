@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "checklist/app/util/CreateSentinel",
     "checklist/app/util/AttachmentUploadPolicy",
     "checklist/app/controller/support/DetailCommandPolicy",

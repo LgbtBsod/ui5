@@ -70,7 +70,9 @@ sap.ui.define([
 
     function toEffects(oError) {
         var oNormalized = normalize(oError);
-        var aEffects = [Effects.modelPatch("state", "/ui/feedback/inlineErrors", oNormalized.kind === "VALIDATION" ? oNormalized.params : {})];
+        var aEffects = oNormalized.kind === NormalizedError.KINDS.VALIDATION
+            ? [Effects.modelPatch("state", "/ui/feedback/inlineErrors", oNormalized.params)]
+            : [];
         var sKind = String(oNormalized.kind || "").toUpperCase();
 
         if (sKind === "CONFLICT") {
