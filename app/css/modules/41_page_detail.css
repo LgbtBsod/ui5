@@ -2489,6 +2489,80 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   }
 }
 
+/* 2026-03 production readability pass */
+.chkApp .detailHeroCard,
+.chkApp .detailControlInlineCard,
+.chkApp .detailSectionCard,
+.chkApp .detailAttachmentsCard,
+.chkApp .detailInfoExperienceCard,
+.chkApp .detailEmptyStateCard,
+.chkApp .detailAttachmentDropZone {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 82%, transparent);
+  background: var(--theme-block-bg);
+  box-shadow: var(--theme-block-shadow);
+}
+
+.chkApp .detailSectionAnchorRail,
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions,
+.chkApp .detailWorkflowRail,
+.chkApp .detailAttachmentToolbar,
+.chkApp .detailSectionToolbar {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
+  background: var(--theme-rail-bg);
+  box-shadow: none;
+}
+
+.chkApp .detailControlInlineCard .sapMInputBaseContentWrapper,
+.chkApp .detailSectionCard .sapMInputBaseContentWrapper,
+.chkApp .detailSectionCard .sapMSlt,
+.chkApp .detailSectionCard .sapMTimePicker,
+.chkApp .detailSectionCard .sapMDatePicker,
+.chkApp .detailSemanticMetaBlock .sapMObjStatus {
+  background: var(--theme-workbench-control-bg);
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 88%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .detailGridTable .sapUiTableColCell,
+.chkApp .flatEditorTable .sapMListTblHeaderCell,
+.chkApp .detailAttachmentTable .sapMListTblHeaderCell {
+  background: var(--theme-table-header-bg);
+  color: var(--text-muted);
+}
+
+.chkApp .detailGridTable .sapUiTableCell,
+.chkApp .flatEditorTable .sapMListTblCell,
+.chkApp .detailAttachmentTable .sapMListTblCell {
+  background: var(--theme-table-cell-bg);
+  color: var(--text-main);
+}
+
+.chkApp .detailSectionCard .sapMListTblRow:hover .sapMListTblCell,
+.chkApp .detailGridTable .sapUiTableTr:hover .sapUiTableCell {
+  background: var(--theme-table-cell-hover-bg);
+}
+
+.chkApp .tableRowActionBtn .sapMBtnInner {
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 82%, transparent);
+  background: var(--theme-workbench-control-bg);
+  color: var(--text-main);
+  box-shadow: none;
+}
+
+.chkApp .tableRowActionBtnDanger .sapMBtnInner {
+  border-color: var(--control-danger-border);
+  background: color-mix(in srgb, var(--control-danger-bg) 28%, var(--theme-workbench-control-bg));
+  color: var(--text-main);
+}
+
+.chkApp .detailHeroCard:hover,
+.chkApp .detailContent .infoCardGrid .infoCardTile:hover,
+.chkApp .tableRowActionBtn:hover .sapMBtnInner {
+  transform: none;
+  box-shadow: none;
+}
+
 /* Base detail visual layer */
 .chkApp .detailHeroCard,
 .chkApp .detailWorkflowRail,
@@ -2715,6 +2789,80 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   border-radius: 999px;
   border-color: transparent;
   background: color-mix(in srgb, var(--theme-rail-bg) 82%, transparent);
+  box-shadow: none;
+}
+
+/* 2026-03 production readability pass */
+.chkApp .detailHeroCard,
+.chkApp .detailControlInlineCard,
+.chkApp .detailSectionCard,
+.chkApp .detailAttachmentsCard,
+.chkApp .detailInfoExperienceCard,
+.chkApp .detailEmptyStateCard,
+.chkApp .detailAttachmentDropZone {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 82%, transparent);
+  background: var(--theme-block-bg);
+  box-shadow: var(--theme-block-shadow);
+}
+
+.chkApp .detailSectionAnchorRail,
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions,
+.chkApp .detailWorkflowRail,
+.chkApp .detailAttachmentToolbar,
+.chkApp .detailSectionToolbar {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
+  background: var(--theme-rail-bg);
+  box-shadow: none;
+}
+
+.chkApp .detailControlInlineCard .sapMInputBaseContentWrapper,
+.chkApp .detailSectionCard .sapMInputBaseContentWrapper,
+.chkApp .detailSectionCard .sapMSlt,
+.chkApp .detailSectionCard .sapMTimePicker,
+.chkApp .detailSectionCard .sapMDatePicker,
+.chkApp .detailSemanticMetaBlock .sapMObjStatus {
+  background: var(--theme-workbench-control-bg);
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 88%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .detailGridTable .sapUiTableColCell,
+.chkApp .flatEditorTable .sapMListTblHeaderCell,
+.chkApp .detailAttachmentTable .sapMListTblHeaderCell {
+  background: var(--theme-table-header-bg);
+  color: var(--text-muted);
+}
+
+.chkApp .detailGridTable .sapUiTableCell,
+.chkApp .flatEditorTable .sapMListTblCell,
+.chkApp .detailAttachmentTable .sapMListTblCell {
+  background: var(--theme-table-cell-bg);
+  color: var(--text-main);
+}
+
+.chkApp .detailSectionCard .sapMListTblRow:hover .sapMListTblCell,
+.chkApp .detailGridTable .sapUiTableTr:hover .sapUiTableCell {
+  background: var(--theme-table-cell-hover-bg);
+}
+
+.chkApp .tableRowActionBtn .sapMBtnInner {
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 82%, transparent);
+  background: var(--theme-workbench-control-bg);
+  color: var(--text-main);
+  box-shadow: none;
+}
+
+.chkApp .tableRowActionBtnDanger .sapMBtnInner {
+  border-color: var(--control-danger-border);
+  background: color-mix(in srgb, var(--control-danger-bg) 28%, var(--theme-workbench-control-bg));
+  color: var(--text-main);
+}
+
+.chkApp .detailHeroCard:hover,
+.chkApp .detailContent .infoCardGrid .infoCardTile:hover,
+.chkApp .tableRowActionBtn:hover .sapMBtnInner {
+  transform: none;
   box-shadow: none;
 }
 

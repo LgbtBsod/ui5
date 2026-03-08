@@ -370,15 +370,15 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
 .chkApp .appLayoutSingle .analyticsScreenContent,
 .chkApp .appLayoutSingle .accessDeniedScreenContent {
-  width: 95%;
-  max-width: none;
-  margin-inline: 2.5%;
+  width: min(calc(100% - 2rem), 96rem);
+  max-width: 96rem;
+  margin-inline: auto;
 }
 
 .chkApp .appLayoutSingle .appShellHeader {
-  width: 95%;
-  max-width: none;
-  margin: 0.78rem 2.5% 0;
+  width: min(calc(100% - 2rem), 96rem);
+  max-width: 96rem;
+  margin: 0.78rem auto 0;
 }
 
 .chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {

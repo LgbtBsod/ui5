@@ -786,14 +786,61 @@ body.chkAppRoot.appDark .chkApp .tableActionHeaderLabel {
   box-shadow: none;
 }
 
-.chkApp .sapMBtn .sapMBtnInner,
 .chkApp .sapMBtnTransparent .sapMBtnInner,
 .chkApp .sapMInputBaseContentWrapper,
 .chkApp .sapMSlt,
 .chkApp .sapMSwt,
 .chkApp .sapMComboBoxBase {
-  border-color: transparent;
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 78%, transparent);
   box-shadow: none;
+}
+
+.chkApp .sapMBtnTransparent .sapMBtnInner {
+  background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
+  color: var(--text-main);
+}
+
+.chkApp .sapMBtnTransparent:not(.sapMBtnDisabled):hover .sapMBtnInner,
+.chkApp .sapMBtnTransparent:not(.sapMBtnDisabled):focus .sapMBtnInner {
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 92%, transparent);
+  background: color-mix(in srgb, var(--theme-workbench-control-bg) 96%, var(--theme-table-cell-selected-bg) 12%);
+}
+
+.chkApp .sapMSegB {
+  padding: 0.12rem;
+  border: 1px solid color-mix(in srgb, var(--theme-workbench-control-border) 82%, transparent);
+  border-radius: 999px;
+  background: var(--theme-workbench-rail-bg);
+}
+
+.chkApp .sapMSegB .sapMSegBBtn .sapMSegBBtnInner {
+  min-height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-subtle);
+  box-shadow: none;
+}
+
+.chkApp .sapMSegB .sapMSegBBtn.sapMSegBBtnSel .sapMSegBBtnInner {
+  background: color-mix(in srgb, var(--theme-table-cell-selected-bg) 78%, var(--theme-workbench-control-bg));
+  color: var(--text-main);
+}
+
+.chkApp .sapMBtn.sapMBtnDisabled .sapMBtnInner,
+.chkApp .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseContentWrapper,
+.chkApp .sapMSlt.sapMSltDisabled,
+.chkApp .sapMSwt.sapMSwtDisabled {
+  opacity: 0.72;
+  background: color-mix(in srgb, var(--theme-workbench-control-bg) 82%, transparent);
+}
+
+.chkApp .sapMBtn.sapMBtnDisabled .sapMBtnContent,
+.chkApp .sapMBtn.sapMBtnDisabled .sapUiIcon,
+.chkApp .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseInner,
+.chkApp .sapMSlt.sapMSltDisabled .sapMSltLabel,
+.chkApp .sapMSwt.sapMSwtDisabled .sapMSwtText {
+  color: var(--text-muted);
 }
 
 .chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,

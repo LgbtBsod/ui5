@@ -32,6 +32,54 @@ sap.ui.define([
         return oControl;
     }
 
+    function syncHeaderContent(oControl) {
+        if (!oControl) {
+            return;
+        }
+
+        if (oControl._oEyebrow) {
+            oControl._oEyebrow.setText(oControl.getEyebrow());
+        }
+        if (oControl._oProductTitle) {
+            oControl._oProductTitle.setText(oControl.getProductName());
+        }
+        if (oControl._oContextSubtitle) {
+            oControl._oContextSubtitle.setText(oControl.getContextSubtitle());
+        }
+        if (oControl._oRouteStatus) {
+            oControl._oRouteStatus.setText(oControl.getRouteLabel());
+        }
+        if (oControl._oLayoutStatus) {
+            oControl._oLayoutStatus.setText(oControl.getLayoutLabel());
+            oControl._oLayoutStatus.setState(oControl.getLayoutState());
+        }
+        if (oControl._oModeStatus) {
+            oControl._oModeStatus.setText(oControl.getModeLabel());
+            oControl._oModeStatus.setState(oControl.getModeState());
+        }
+        if (oControl._oNotificationsButton) {
+            oControl._oNotificationsButton.setTooltip(oControl.getNotificationsTooltip());
+        }
+        if (oControl._oHelpButton) {
+            oControl._oHelpButton.setTooltip(oControl.getHelpTooltip());
+        }
+        if (oControl._oSettingsButton) {
+            oControl._oSettingsButton.setTooltip(oControl.getSettingsTooltip());
+        }
+        if (oControl._oAnalyticsButton) {
+            oControl._oAnalyticsButton.setTooltip(oControl.getAnalyticsTooltip());
+        }
+        if (oControl._oThemeToggle) {
+            oControl._oThemeToggle.setDark(oControl.getDark());
+            oControl._oThemeToggle.setTooltip(oControl.getThemeTooltip());
+        }
+        if (oControl._oUserButton) {
+            oControl._oUserButton.setText(oControl.getUserLabel());
+            oControl._oUserButton.setTooltip(oControl.getUserTooltip());
+            oControl._oUserButton.setIcon(oControl.getUserIcon());
+        }
+    }
+
     return Control.extend("checklist.app.control.AppShellHeader", {
         metadata: {
             properties: {
@@ -185,27 +233,21 @@ sap.ui.define([
                     this._oUserButton
                 ]
             }).addStyleClass("shellHeaderCard").addStyleClass("appShellHeader"));
+
+            syncHeaderContent(this);
         },
 
         onBeforeRendering: function () {
-            this._oEyebrow.setText(this.getEyebrow());
-            this._oProductTitle.setText(this.getProductName());
-            this._oContextSubtitle.setText(this.getContextSubtitle());
+            syncHeaderContent(this);
+        },
 
-            this._oRouteStatus.setText(this.getRouteLabel());
-            this._oLayoutStatus.setText(this.getLayoutLabel());
-            this._oLayoutStatus.setState(this.getLayoutState());
-            this._oModeStatus.setText(this.getModeLabel());
-            this._oModeStatus.setState(this.getModeState());
-
-            this._oNotificationsButton.setTooltip(this.getNotificationsTooltip());
-            this._oHelpButton.setTooltip(this.getHelpTooltip());
-            this._oSettingsButton.setTooltip(this.getSettingsTooltip());
-            this._oAnalyticsButton.setTooltip(this.getAnalyticsTooltip());
-            this._oThemeToggle.setDark(this.getDark());
-            this._oThemeToggle.setTooltip(this.getThemeTooltip());
-            this._oUserButton.setText(this.getUserLabel());
-            this._oUserButton.setTooltip(this.getUserTooltip());
+        setProperty: function (sPropertyName, vValue, bSuppressInvalidate) {
+            Control.prototype.setProperty.call(this, sPropertyName, vValue, true);
+            syncHeaderContent(this);
+            if (!bSuppressInvalidate) {
+                this.invalidate();
+            }
+            return this;
         },
 
         setDark: function (bDark) {

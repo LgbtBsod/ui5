@@ -2613,3 +2613,93 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     padding: 0.08rem 0.08rem 0.22rem;
   }
 }
+
+/* 2026-03 production readability pass */
+.chkApp .kpiCard,
+.chkApp .workflowStageCard,
+.chkApp .searchAnalyticsCard,
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsTable,
+.chkApp .searchStatusStripStack {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 82%, transparent);
+  background: var(--theme-block-bg);
+  box-shadow: var(--theme-block-shadow);
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .searchResultsTable .toolbarTransparent,
+.chkApp .searchToolbarMetaRail,
+.chkApp .searchActionToolbarDensity,
+.chkApp .searchResultsActionRail,
+.chkApp .searchSmartToolbarRail {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
+  background: var(--theme-rail-bg);
+  box-shadow: none;
+}
+
+.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
+.chkApp .searchFilterCardDense .sapMSlt,
+.chkApp .searchFilterCardDense .sapMSegB,
+.chkApp .searchResultsTable .sapMInputBaseContentWrapper,
+.chkApp .searchResultsTable .sapMSlt,
+.chkApp .searchResultsTable .sapMSwt,
+.chkApp .searchSmartToolbarRail .backendTopInput .sapMInputBaseContentWrapper,
+.chkApp .searchSmartToolbarRail .maxRowsInput .sapMInputBaseContentWrapper {
+  background: var(--theme-workbench-control-bg);
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 88%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .searchFilterCardDense .sapMLabel,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarItemLabel,
+.chkApp .searchAnalyticsMeta,
+.chkApp .searchUpdatedAtText,
+.chkApp .searchRateLegendPrefix,
+.chkApp .searchRateLegendItem .sapMText,
+.chkApp .searchToolbarMetaRail .sapMText {
+  color: var(--text-subtle);
+}
+
+.chkApp .kpiLabel,
+.chkApp .workflowEyebrow,
+.chkApp .searchResultsTable .sapMListTblHeaderCell .sapMText {
+  color: var(--text-muted);
+}
+
+.chkApp .searchResultsTable .sapMListTblHeaderCell {
+  background: var(--theme-table-header-bg);
+  opacity: 1;
+}
+
+.chkApp .searchResultsTable .sapMListTblCell,
+.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
+  background: var(--theme-table-cell-bg);
+  opacity: 1;
+}
+
+.chkApp .searchResultsTable .sapMListTblCell .sapMText,
+.chkApp .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
+.chkApp .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
+.chkApp .searchResultsTable .sapMListTblCell .sapMLnk,
+.chkApp .searchResultsTable .sapMListTblCell .sapMObjStatusText {
+  color: var(--text-main);
+}
+
+.chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell,
+.chkApp .searchResultsTable .sapMLIBActive .sapMListTblCell {
+  background: var(--theme-table-cell-hover-bg);
+}
+
+.chkApp .searchResultsTable .sapMLIBSelected .sapMListTblCell,
+.chkApp .searchResultsTable .sapMListTblRow.sapMLIBFocusable:focus .sapMListTblCell {
+  background: var(--theme-table-cell-selected-bg);
+}
+
+.chkApp .searchSelectionStatusChip,
+.chkApp .searchSummaryStatusChip,
+.chkApp .searchStageStatusChip {
+  border: 1px solid color-mix(in srgb, var(--theme-chip-border) 78%, transparent);
+  background: var(--theme-rail-bg);
+  box-shadow: none;
+}

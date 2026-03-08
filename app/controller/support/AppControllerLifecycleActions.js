@@ -88,6 +88,12 @@ sap.ui.define([
             if (this._oRouteNameBinding) {
                 this._oRouteNameBinding = ControllerResourceCleanup.destroyBinding(this._oRouteNameBinding, this._fnLayoutSync);
             }
+            if (this._oShellUserBinding) {
+                this._oShellUserBinding = ControllerResourceCleanup.destroyBinding(this._oShellUserBinding, this._fnShellStateChange);
+            }
+            if (this._oShellFrontendSourceBinding) {
+                this._oShellFrontendSourceBinding = ControllerResourceCleanup.destroyBinding(this._oShellFrontendSourceBinding, this._fnShellStateChange);
+            }
             if (this._oShellStateModel && this._fnShellStateChange) {
                 this._oShellStateModel.detachPropertyChange(this._fnShellStateChange, this);
             }
@@ -175,6 +181,10 @@ sap.ui.define([
                 this._fnShellStateChange = this._syncShellState.bind(this);
                 this._oShellStateModel = oState;
                 oState.attachPropertyChange(this._fnShellStateChange, this);
+                this._oShellUserBinding = oState.bindProperty("/currentUser/fetchedAt");
+                this._oShellUserBinding.attachChange(this._fnShellStateChange);
+                this._oShellFrontendSourceBinding = oState.bindProperty("/frontendConfigSource");
+                this._oShellFrontendSourceBinding.attachChange(this._fnShellStateChange);
             }
             if (oLayout && !this._fnShellLayoutChange) {
                 this._fnShellLayoutChange = this._syncShellState.bind(this);
