@@ -3158,3 +3158,19 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 .chkApp .detailInfoExperienceCard .detailDateTimeGrid .sapMSlt {
   grid-column: auto;
 }
+
+/* 2026-03 ui-bugs: subsection background flattening */
+.chkApp .detailContent .sapUxAPObjectPageSubSection,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionFitContainer,
+.chkApp .detailContent .sapUxAPBlockContainer,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionHeader,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionHeader .sapUxAPObjectPageSubSectionTitle {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.chkApp .detailSectionCard {
+  background: color-mix(in srgb, var(--theme-block-bg) 82%, transparent);
+  box-shadow: none;
+}

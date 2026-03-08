@@ -2621,3 +2621,59 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   border: 0;
   box-shadow: none;
 }
+
+/* 2026-03 ui-bugs: compact filter set + segmented pill + airy tables */
+.chkApp .searchFilterCardDense .sapMSegB {
+  min-width: 13.5rem;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn {
+  border-radius: 0;
+  border-right-width: 0;
+  background: transparent;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn:first-child {
+  border-radius: 999px 0 0 999px;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn:last-child {
+  border-radius: 0 999px 999px 0;
+  border-right-width: 1px;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn.sapMSegBBtnSel {
+  box-shadow: none;
+}
+
+.chkApp .searchResultsTable .sapMListTblHeaderCell {
+  background: color-mix(in srgb, var(--theme-table-header-bg) 78%, transparent);
+  opacity: 0.84;
+}
+
+.chkApp .searchResultsTable .sapMListTblCell {
+  background: color-mix(in srgb, var(--theme-table-cell-bg) 88%, transparent);
+  opacity: 0.9;
+}
+
+.chkApp .searchResultsTable .sapMListTblRow {
+  border-radius: calc(var(--radius-md) - 0.25rem);
+  overflow: hidden;
+}
+
+.chkApp .searchResultsTable .sapMCb,
+.chkApp .searchResultsTable .sapMCbBg,
+.chkApp .searchResultsTable .sapMListTblSelCol {
+  display: none !important;
+}
+
+.chkApp .searchResultsTable .sapMListTbl .sapMLIBPlaceholder,
+.chkApp .searchResultsTable .sapMListTbl .sapMSLI,
+.chkApp .searchResultsTable .sapMListTbl .sapMObjStatus,
+.chkApp .searchResultsTable .sapMListTbl .sapMSkeleton,
+.chkApp .searchResultsTable .sapMListTbl .sapMSkeletonWrapper {
+  opacity: 0.78;
+}
