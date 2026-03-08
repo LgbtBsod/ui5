@@ -695,10 +695,7 @@ body.chkAppRoot.appDark .sapMMessageToast.glassToast {
 
 
 /* 2026-03 follow-up: user popover stability + contextual toasts */
-.chkApp .shellPopover .sapMPopoverCont {
-  overflow: auto;
-  max-height: min(80vh, 40rem);
-}
+
 
 .chkApp .shellUserBody {
   min-width: min(100%, 24rem);

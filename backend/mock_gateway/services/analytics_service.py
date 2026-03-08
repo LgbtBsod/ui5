@@ -27,6 +27,14 @@ def _iso_z(value) -> str:
     return o_dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def _as_utc(value):
+    if value is None:
+        return None
+    if getattr(value, "tzinfo", None) is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
 class AnalyticsService:
     _dirty = False
     _last_success_at = None
@@ -480,9 +488,11 @@ class AnalyticsService:
             return True
         if AnalyticsService._dirty:
             return True
-        if not AnalyticsService._last_success_at:
+        last_success_at = _as_utc(AnalyticsService._last_success_at) or _as_utc(row.last_success_at)
+        if not last_success_at:
             return True
-        age = (now_utc() - AnalyticsService._last_success_at).total_seconds()
+        AnalyticsService._last_success_at = last_success_at
+        age = (now_utc() - last_success_at).total_seconds()
         return age >= max(5, int(max_age_seconds or 0))
 
     @staticmethod
