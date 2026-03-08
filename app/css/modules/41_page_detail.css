@@ -2782,3 +2782,116 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   background: color-mix(in srgb, var(--theme-block-bg) 82%, transparent);
   box-shadow: none;
 }
+
+/* 2026-03 gateway-prep ui: unified detail surfaces + tighter datetime card */
+.chkApp .detailControlInlineCard,
+.chkApp .detailSectionCard,
+.chkApp .detailTableExperienceCard,
+.chkApp .detailInfoExperienceCard,
+.chkApp .detailContent .infoCardGrid .infoCardTile {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 24%, transparent);
+  background: color-mix(in srgb, var(--theme-block-bg) 82%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardGrid .infoCardTile,
+.chkApp .detailSectionCard .toolbarTransparent,
+.chkApp .detailControlInlineCard .toolbarTransparent,
+.chkApp .detailWorkflowRail,
+.chkApp .detailControlRow,
+.chkApp .detailSectionToolbar {
+  background: transparent;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardGrid {
+  gap: 0.88rem;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] {
+  grid-column: span 1;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] .infoCardTile {
+  min-height: 6.2rem;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observer"] .infoCardTile,
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observed"] .infoCardTile {
+  min-height: 7.8rem;
+}
+
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.34rem;
+}
+
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid .sapMInputBase,
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid .sapMSlt,
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid .sapMDatePicker,
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid .sapMTimePicker,
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid .sapMSltLabel {
+  width: 100%;
+  min-width: 0;
+}
+
+.chkApp .detailControlInlineCard,
+.chkApp .detailSectionCard,
+.chkApp .detailInfoExperienceCard,
+.chkApp .detailContent .infoCardGrid .infoCardTile {
+  background: color-mix(in srgb, var(--theme-block-bg) 76%, transparent);
+}
+
+.chkApp .detailSectionCard > .sapMTB,
+.chkApp .detailSectionCard > .sapMOTB,
+.chkApp .detailSectionToolbar,
+.chkApp .detailWorkflowRail,
+.chkApp .detailControlRow {
+  background: color-mix(in srgb, var(--theme-rail-bg) 58%, transparent);
+  border-color: color-mix(in srgb, var(--theme-rail-border) 78%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .detailSectionCard .sapMListTblHeaderCell,
+.chkApp .detailGridTable .sapUiTableColCell {
+  background: color-mix(in srgb, var(--theme-table-header-bg) 62%, transparent);
+}
+
+.chkApp .detailSectionCard .sapMListTblCell,
+.chkApp .detailGridTable .sapUiTableCell {
+  background: color-mix(in srgb, var(--theme-table-cell-bg) 68%, transparent);
+}
+
+@media (min-width: 96rem) {
+  .chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] {
+    grid-column: span 1;
+  }
+}
+
+.chkApp .detailControlInlineCard,
+.chkApp .detailSectionCard,
+.chkApp .detailTableExperienceCard,
+.chkApp .detailInfoExperienceCard,
+.chkApp .detailContent .infoCardGrid .infoCardTile {
+  background: color-mix(in srgb, var(--theme-block-bg) 64%, transparent) !important;
+  box-shadow: none !important;
+}
+
+.chkApp .detailControlInlineCard {
+  background-image: none !important;
+}
+
+.chkApp .detailSectionCard > .sapMTB,
+.chkApp .detailSectionCard > .sapMOTB,
+.chkApp .detailSectionToolbar,
+.chkApp .detailWorkflowRail,
+.chkApp .detailControlRow,
+.chkApp .detailInfoExperienceCard .infoCardPinBtn .sapMBtnInner {
+  background: color-mix(in srgb, var(--theme-rail-bg) 46%, transparent) !important;
+  box-shadow: none !important;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI,
+.chkApp .detailInfoExperienceCard .sapFGridListDefault,
+.chkApp .detailInfoExperienceCard .sapFGridList {
+  background: transparent !important;
+}

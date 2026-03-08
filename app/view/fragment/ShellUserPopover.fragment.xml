@@ -3,10 +3,10 @@
         id="shellUserPopover"
         class="glassDialog shellPopover"
         title="{i18n>shellUserTitle}"
-        contentWidth="20rem"
+        contentWidth="24rem"
         placement="Bottom"
         horizontalScrolling="false"
-        verticalScrolling="true">
+        verticalScrolling="false">
         <content>
             <VBox class="shellPopoverBody shellUserBody" renderType="Bare">
                 <Text text="{i18n>shellUserSubtitle}" class="shellPopoverIntro"/>

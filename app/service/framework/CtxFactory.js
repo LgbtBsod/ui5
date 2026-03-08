@@ -9,7 +9,11 @@ sap.ui.define([
     "checklist/app/infra/adapters/TelemetryAdapter",
     "checklist/app/infra/adapters/ClockAdapter",
     "checklist/app/infra/adapters/SmartControlsAdapter",
-    "checklist/app/infra/adapters/LastChangeSetAdapter"
+    "checklist/app/infra/adapters/BrowserCacheAdapter",
+    "checklist/app/infra/adapters/LastChangeSetAdapter",
+    "checklist/app/service/domain/cache/usecases/CacheValidationUseCase",
+    "checklist/app/service/domain/cache/usecases/CacheReadUseCase",
+    "checklist/app/service/domain/cache/usecases/CacheWriteUseCase"
 ], function (
     ODataChecklistRepoAdapter,
     LockAdapter,
@@ -21,7 +25,11 @@ sap.ui.define([
     TelemetryAdapter,
     ClockAdapter,
     SmartControlsAdapter,
-    LastChangeSetAdapter
+    BrowserCacheAdapter,
+    LastChangeSetAdapter,
+    CacheValidationUseCase,
+    CacheReadUseCase,
+    CacheWriteUseCase
 ) {
     "use strict";
 
@@ -83,7 +91,11 @@ sap.ui.define([
             }),
             clock: safeBuild(ClockAdapter),
             smartControls: (mViewRefs ? safeBuild(SmartControlsAdapter, mViewRefs) : null),
-            lastChangeSet: safeBuild(LastChangeSetAdapter)
+            cache: safeBuild(BrowserCacheAdapter),
+            lastChangeSet: safeBuild(LastChangeSetAdapter),
+            cacheValidation: new CacheValidationUseCase(),
+            cacheRead: new CacheReadUseCase(),
+            cacheWrite: new CacheWriteUseCase()
         };
     }
 
