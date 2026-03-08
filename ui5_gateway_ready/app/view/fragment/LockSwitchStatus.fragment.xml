@@ -1,0 +1,24 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <BusyIndicator visible="{state>/lockOperationPending}" size="1rem" class="sapUiTinyMarginEnd">
+        <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+    </BusyIndicator>
+    <Switch
+        id="detailEditSwitch"
+        visible="{= ${state>/mode} !== 'CREATE' }"
+        state="{= ${state>/mode} === 'EDIT' }"
+        enabled="{= ${state>/mode} !== 'CREATE' &amp;&amp; !${state>/lockOperationPending} }"
+        busy="{state>/lockOperationPending}"
+        busyIndicatorDelay="0"
+        customTextOn=""
+        customTextOff=""
+        change=".onToggleEdit"
+        class="accentSwitch accentSwitchEditMode chkRipple">
+        <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+    </Switch>
+    <ObjectStatus
+        text="{state>/lockOperationText}"
+        state="{= ${state>/lockOperationState} === 'LOCKED' ? 'Success' : 'Information' }"
+        class="sapUiTinyMarginBegin detailRailStatusChip">
+        <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+    </ObjectStatus>
+</core:FragmentDefinition>

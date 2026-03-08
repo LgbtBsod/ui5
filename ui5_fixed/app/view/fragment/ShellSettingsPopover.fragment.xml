@@ -1,0 +1,59 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <ResponsivePopover
+        id="shellSettingsPopover"
+        class="glassDialog shellPopover"
+        title="{i18n>shellSettingsTitle}"
+        contentWidth="26rem"
+        placement="Bottom">
+        <content>
+            <VBox class="shellPopoverBody shellSettingsBody" renderType="Bare">
+                <Text text="{i18n>shellSettingsSubtitle}" class="shellPopoverIntro"/>
+
+                <HBox class="shellSettingRow" renderType="Bare" justifyContent="SpaceBetween" alignItems="Center">
+                    <VBox renderType="Bare" class="shellSettingCopy">
+                        <HBox class="shellItemHeader" renderType="Bare" alignItems="Center">
+                            <core:Icon src="sap-icon://inspection" decorative="true" class="shellItemIcon"/>
+                            <Title text="{i18n>shellSettingHintsTitle}" level="H6"/>
+                        </HBox>
+                        <Text text="{i18n>shellSettingHintsText}" class="shellHelpText"/>
+                    </VBox>
+                    <Switch id="shellSettingsHintsSwitch" state="{layout>/personalization/showHints}" change=".onToggleShellHints"/>
+                </HBox>
+
+                <HBox class="shellSettingRow" renderType="Bare" justifyContent="SpaceBetween" alignItems="Center">
+                    <VBox renderType="Bare" class="shellSettingCopy">
+                        <HBox class="shellItemHeader" renderType="Bare" alignItems="Center">
+                            <core:Icon src="sap-icon://table-view" decorative="true" class="shellItemIcon"/>
+                            <Title text="{i18n>shellSettingDensityTitle}" level="H6"/>
+                        </HBox>
+                        <Text text="{i18n>shellSettingDensityText}" class="shellHelpText"/>
+                    </VBox>
+                    <Switch id="shellSettingsDensitySwitch" state="{appView>/compactDensity}" change=".onToggleCompactDensity"/>
+                </HBox>
+
+                <HBox class="shellSettingRow" renderType="Bare" justifyContent="SpaceBetween" alignItems="Center">
+                    <VBox renderType="Bare" class="shellSettingCopy">
+                        <HBox class="shellItemHeader" renderType="Bare" alignItems="Center">
+                            <core:Icon src="sap-icon://synchronize" decorative="true" class="shellItemIcon"/>
+                            <Title text="{i18n>shellSettingAnimationTitle}" level="H6"/>
+                        </HBox>
+                        <Text text="{i18n>shellSettingAnimationText}" class="shellHelpText"/>
+                    </VBox>
+                    <Switch id="shellSettingsAnimationSwitch" state="{appView>/animationEnabled}" change=".onToggleThemeAnimation"/>
+                </HBox>
+
+                <HBox class="shellSettingRow" renderType="Bare" justifyContent="SpaceBetween" alignItems="Center">
+                    <VBox renderType="Bare" class="shellSettingCopy">
+                        <HBox class="shellItemHeader" renderType="Bare" alignItems="Center">
+                            <core:Icon src="sap-icon://gesture" decorative="true" class="shellItemIcon"/>
+                            <Title text="{i18n>shellSettingInteractionTitle}" level="H6"/>
+                        </HBox>
+                        <Text text="{i18n>shellSettingInteractionText}" class="shellHelpText"/>
+                    </VBox>
+                    <Switch id="shellSettingsInteractionSwitch" state="{appView>/backgroundInteractive}" enabled="{appView>/animationEnabled}" change=".onToggleBackgroundInteraction"/>
+                </HBox>
+
+            </VBox>
+        </content>
+    </ResponsivePopover>
+</core:FragmentDefinition>

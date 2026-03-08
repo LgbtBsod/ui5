@@ -1,0 +1,16 @@
+Баг 7 — DiagnosticsUseCase: onMetadataFailed бралась из input, а передавалась в ctx
+Ошибка метаданных OData молча поглощалась — приложение не получало уведомление о недоступности сервиса. Теперь ищем в обоих местах.
+Баг 8 — Promise.allSettled не существует в IE11 и старых SAP-системах
+Заменён встроенным полифилом через Promise.all + catch. Теперь ни один из параллельных запросов при старте не роняет всю загрузку.
+Баг 9 — AnalyticsRefreshTrigger есть в allowlist GatewayClient, но отсутствует в metadata.xml
+Добавлен FunctionImport — без него OData-модель выбрасывает ошибку при вызове.
+Баг 10 — Component.js имел createContent() при наличии rootView в манифесте
+Двойная инициализация App.view.xml — контроллер инициализировался дважды, что ломало привязки состояния. createContent() удалён.
+Баг 11 — GatewayClient.withDirectPut: URL собирался без нормализации слеша
+serviceUrl() уже содержит путь без финального /, а sPath начинается с / — но раньше это не гарантировалось. Теперь явно нормализуется.
+Баг 12 — withDirectPut не запрашивал CSRF-токен перед PUT
+При первом обращении токен может быть ещё не получен ODataModel. Теперь если токена нет — сначала вызывается refreshSecurityToken, и только потом идёт PUT.
+Баг 13 — GatewayErrorNormalizer: responseHeaders возвращались как сырая строка
+Заголовки ответа OData приходят строкой "key: value\nkey2: value2" — теперь парсятся в объект.
+Баг 14 — manifest.json: группа locks не была в deferredGroups
+Lock-операции (LockAcquire, LockHeartbeat, LockRelease) маршрутизировались в группу locks, но она не была отложенной — OData-модель отправляла их немедленно, игнорируя submitChanges. Исправлено.

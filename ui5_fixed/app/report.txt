@@ -1,0 +1,19 @@
+Готово, бро. Нашёл и исправил 9 багов для запуска на SAP Gateway:
+
+Критические баги (ломали запуск на Gateway):
+
+    Дублирующий dataSources в manifest.json — был прописан и в sap.app, и в sap.ui5. UI5 ODataModel брал не тот источник. Удалил лишний из sap.ui5.
+    Component-preload.js загружался жёстко — на BSP этого файла нет, страница падала при загрузке. Сделал опциональную загрузку с onerror.
+    Статические mock OData файлы (/app/sap/opu/odata/...) — лежали прямо в директории приложения и перехватывали реальные запросы к Gateway. Удалены полностью.
+    CSS @import в style.css — в BSP-контексте @import из manifest-CSS нестабилен. Все модули склеены в один файл.
+
+Серьёзные баги:
+
+    BOM (byte order mark) в 4 JS файлах — Component.js, SearchViewSupport.js, DetailViewSupport.js, AttachmentUploadCore.js. Вызывал silent parse errors в IE/старых движках.
+    Смешанные CRLF/LF окончания строк — 57 JS файлов и 7 XML с Windows line endings. Нормализованы в LF.
+    _version: "1.12.0" в манифесте — слишком старая для UI5 1.71.70. Обновлён до 1.21.0.
+    Мёртвый закомментированный <script src> тег в index.html — мусор, убран.
+
+Добавлено:
+
+    xs-app.json — дескриптор деплоя для SAP BTP/ABAP с проксированием OData запросов на Gateway.

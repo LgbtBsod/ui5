@@ -1,0 +1,416 @@
+<mvc:View
+    controllerName="checklist.app.controller.Search"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:smartTable="sap.ui.comp.smarttable">
+
+    <Page
+        showHeader="false"
+        enableScrolling="true"
+        class="pageTransparent">
+
+        <content>
+            <VBox class="appContent searchExperienceStack">
+
+                <HBox class="workflowRail searchHeaderKpiRail searchAnalyticsRailShell" renderType="Bare" wrap="Wrap" justifyContent="Start" alignItems="Stretch">
+                    <HBox id="searchAnalyticsRail" class="searchAnalyticsRailGrid" renderType="Bare" wrap="Wrap">
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                                <core:Icon src="sap-icon://task" class="kpiLabelIcon" decorative="true"/>
+                                <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
+                            </HBox>
+                            <VBox visible="{view>/analyticsRailBusy}" class="appSkeletonMetric" renderType="Bare">
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                            </VBox>
+                            <Title text="{view>/analyticsRail/total}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal"/>
+                            <Text
+                                text="{= ${i18n>analyticsSource} + ': ' + (${view>/analyticsRail/sourceText} || '-') }"
+                                class="searchAnalyticsMeta"
+                                visible="{= !${view>/analyticsRailBusy} }"/>
+                        </VBox>
+
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                                <core:Icon src="sap-icon://history" class="kpiLabelIcon" decorative="true"/>
+                                <Text text="{i18n>kpiMonthTotal}" class="kpiLabel"/>
+                            </HBox>
+                            <VBox visible="{view>/analyticsRailBusy}" class="appSkeletonMetric" renderType="Bare">
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                            </VBox>
+                            <Title text="{view>/analyticsRail/monthly}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal"/>
+                            <Text
+                                text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analyticsRail/refreshedAtText} || '-') }"
+                                class="searchAnalyticsMeta"
+                                visible="{= !${view>/analyticsRailBusy} }"/>
+                        </VBox>
+
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                                <core:Icon src="sap-icon://inspection" class="kpiLabelIcon" decorative="true"/>
+                                <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
+                            </HBox>
+                            <VBox visible="{view>/analyticsRailBusy}" class="appSkeletonMetric" renderType="Bare">
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                            </VBox>
+                            <Title text="{view>/analyticsRail/failedChecks}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal"/>
+                            <Text
+                                text="{= ${i18n>analyticsAvgChecksRate} + ': ' + (${view>/analyticsRail/avgChecksRate} || 0) + '%' }"
+                                class="searchAnalyticsMeta"
+                                visible="{= !${view>/analyticsRailBusy} }"/>
+                        </VBox>
+
+                        <VBox class="kpiCard searchAnalyticsCard">
+                            <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
+                                <core:Icon src="sap-icon://alert" class="kpiLabelIcon" decorative="true"/>
+                                <Text text="{i18n>kpiFailedBarriers}" class="kpiLabel"/>
+                            </HBox>
+                            <VBox visible="{view>/analyticsRailBusy}" class="appSkeletonMetric" renderType="Bare">
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
+                                <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                            </VBox>
+                            <Title text="{view>/analyticsRail/failedBarriers}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal"/>
+                            <Text
+                                text="{= ${i18n>analyticsAvgBarriersRate} + ': ' + (${view>/analyticsRail/avgBarriersRate} || 0) + '%' }"
+                                class="searchAnalyticsMeta"
+                                visible="{= !${view>/analyticsRailBusy} }"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+
+                <core:Fragment fragmentName="checklist.app.view.fragment.SearchLoadStatePanel" type="XML"/>
+
+                <VBox id="searchWorkbenchDock" class="searchWorkbenchDock" renderType="Bare">
+                    <VBox
+                        id="searchFilterCard"
+                        class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell">
+                        <VBox
+                            visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }"
+                            class="searchFilterSkeletonShell"
+                            renderType="Bare">
+                            <core:Fragment
+                                fragmentName="checklist.app.view.fragment.SkeletonFormSection"
+                                type="XML"/>
+                        </VBox>
+                        <smartFilterBar:SmartFilterBar
+                            id="searchSmartFilterBar"
+                            visible="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} }"
+                            class="searchSmartFilterWorkbench"
+                            busy="false"
+                            busyIndicatorDelay="0"
+                            entitySet="ChecklistSearchSet"
+                            persistencyKey="{view>/smartFilterPersistencyKey}"
+                            useToolbar="true"
+                            showGoOnFB="true"
+                            showClearOnFB="true"
+                            searchEnabled="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} &amp;&amp; !${view>/searchActionBusy} }"
+                            liveMode="false"
+                            enableBasicSearch="false"
+                            useDateRangeType="true"
+                            initialise=".onSmartFilterInitialise"
+                            search=".onSmartSearch"
+                            filterChange=".onSmartFilterChanged">
+
+                            <smartFilterBar:controlConfiguration>
+                                <smartFilterBar:ControlConfiguration key="Id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
+                                <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="LpcText" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="ProfessionText" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="LocationKey" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="Status" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="DateCheck" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="EquipName" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="ChangedOn" visibleInAdvancedArea="true"/>
+
+                                <smartFilterBar:ControlConfiguration
+                                    key="FailChecksSegmentControl"
+                                    label="{i18n>filterFailSegmentLabel}"
+                                    visibleInAdvancedArea="true">
+                                    <smartFilterBar:customControl>
+                                        <VBox class="customFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                                            <SegmentedButton
+                                                id="FailChecksSegmentControl"
+                                                selectedKey="{state>/search/checksFailSegment}"
+                                                selectionChange=".onChecksFailSegmentChange"
+                                                class="resultSegmentControl">
+                                                <items>
+                                                    <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
+                                                    <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
+                                                    <SegmentedButtonItem key="SUCCESS" text="{i18n>filterFailSegmentSuccess}"/>
+                                                </items>
+                                            </SegmentedButton>
+                                        </VBox>
+                                    </smartFilterBar:customControl>
+                                </smartFilterBar:ControlConfiguration>
+
+                                <smartFilterBar:ControlConfiguration
+                                    key="FailBarriersSegmentControl"
+                                    label="{i18n>filterBarrierSegmentLabel}"
+                                    visibleInAdvancedArea="true">
+                                    <smartFilterBar:customControl>
+                                        <VBox class="customFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                                            <SegmentedButton
+                                                id="FailBarriersSegmentControl"
+                                                selectedKey="{state>/search/barriersFailSegment}"
+                                                selectionChange=".onBarriersFailSegmentChange"
+                                                class="resultSegmentControl">
+                                                <items>
+                                                    <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
+                                                    <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
+                                                    <SegmentedButtonItem key="SUCCESS" text="{i18n>filterFailSegmentSuccess}"/>
+                                                </items>
+                                            </SegmentedButton>
+                                        </VBox>
+                                    </smartFilterBar:customControl>
+                                </smartFilterBar:ControlConfiguration>
+                            </smartFilterBar:controlConfiguration>
+
+                        </smartFilterBar:SmartFilterBar>
+                    </VBox>
+
+                    <OverflowToolbar
+                        id="searchResultsActionRail"
+                        width="100%"
+                        class="toolbarTransparent tableActionToolbar searchActionToolbarDensity searchResultsActionRail">
+                        <Button
+                            text="{i18n>createButton}"
+                            icon="sap-icon://task"
+                            press=".onCreate"
+                            tooltip="{i18n>searchShortcutCreate}"
+                            busy="{= ${view>/bootstrapBusy} || ${view>/createActionBusy} }"
+                            enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }"
+                            class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                            </layoutData>
+                        </Button>
+
+                        <Button
+                            text="{i18n>openButton}"
+                            icon="sap-icon://open-command-field"
+                            press=".onOpenSelected"
+                            enabled="{view>/hasSelection}"
+                            tooltip="{i18n>searchShortcutOpen}"
+                            class="brandActionBtn brandActionGhost searchOpenActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low"/>
+                            </layoutData>
+                        </Button>
+
+                        <Button
+                            id="searchToolbarUpButton"
+                            icon="sap-icon://navigation-up-arrow"
+                            text="{i18n>searchBackToResultsToolbarButton}"
+                            type="Emphasized"
+                            visible="{view>/resultsToolbarNavVisible}"
+                            tooltip="{i18n>searchBackToResultsToolbarTooltip}"
+                            press=".onScrollSearchResultsToolbarAnchor"
+                            class="searchToolbarNavBtn searchToolbarNavBtnUp">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                            </layoutData>
+                        </Button>
+
+                        <Button
+                            text="{i18n>copyButton}"
+                            icon="sap-icon://copy"
+                            press=".onCopy"
+                            enabled="{view>/canCopy}"
+                            tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }"
+                            class="brandActionBtn brandActionGhost searchCopyActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low"/>
+                            </layoutData>
+                        </Button>
+
+                        <Button
+                            text="{i18n>selectVisibleButton}"
+                            icon="sap-icon://multi-select"
+                            press=".onSelectVisibleRows"
+                            enabled="{= ${view>/hasRows} &amp;&amp; !${view>/tableBusy} }"
+                            tooltip="{i18n>searchShortcutSelectVisible}"
+                            class="brandActionBtn brandActionGhost searchSelectVisibleActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low"/>
+                            </layoutData>
+                        </Button>
+
+                        <Button
+                            text="{i18n>clearSelectionButton}"
+                            icon="sap-icon://sys-cancel"
+                            press=".onClearSelection"
+                            enabled="{view>/hasSelection}"
+                            tooltip="{i18n>searchShortcutClearSelection}"
+                            class="brandActionBtn brandActionGhost searchClearSelectionActionBtn sapUiTinyMarginEnd">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Disappear"/>
+                            </layoutData>
+                        </Button>
+
+                        <ToolbarSpacer/>
+
+                        <Button
+                            id="searchToolbarFiltersButton"
+                            icon="sap-icon://filter"
+                            text="{i18n>searchBackToFiltersButton}"
+                            type="Transparent"
+                            visible="{view>/scrollNavVisible}"
+                            tooltip="{i18n>searchBackToFiltersTooltip}"
+                            press=".onScrollSearchAnchor"
+                            class="searchToolbarNavBtn searchToolbarNavBtnFilters">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="High"/>
+                            </layoutData>
+                        </Button>
+
+                        <ObjectStatus
+                            text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }"
+                            state="{= ${view>/selectionCount} ? 'Success' : 'Information' }"
+                            class="searchSelectionStatusChip">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Disappear"/>
+                            </layoutData>
+                        </ObjectStatus>
+
+                        <Text
+                            text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowId} }"
+                            visible="{view>/hasSelection}"
+                            tooltip="{view>/selectedRowId}"
+                            class="searchSelectionPrimaryId"
+                            wrapping="false">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low"/>
+                            </layoutData>
+                        </Text>
+
+                    </OverflowToolbar>
+
+                    <OverflowToolbar id="smartTableCustomToolbar" width="100%" class="toolbarTransparent searchSmartToolbarRail">
+                        <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
+                        <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
+                        <ToolbarSpacer/>
+
+                        <Input
+                            id="backendTopInput"
+                            value="{state>/searchBackendTop}"
+                            type="Number"
+                            placeholder="{i18n>searchBackendTopLabel}"
+                            width="10rem"
+                            change=".onBackendTopChange"
+                            submit=".onBackendTopChange"
+                            ariaLabelledBy="searchBackendTopA11y"
+                            class="backendTopInput">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="8rem"/>
+                            </layoutData>
+                        </Input>
+
+                        <Input
+                            id="maxRowsInput"
+                            value="{state>/searchMaxResults}"
+                            type="Number"
+                            placeholder="{i18n>searchMaxResultsLabel}"
+                            width="10rem"
+                            change=".onMaxRowsChange"
+                            submit=".onMaxRowsChange"
+                            ariaLabelledBy="searchMaxRowsA11y"
+                            class="maxRowsInput">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="8rem"/>
+                            </layoutData>
+                        </Input>
+
+                        <Switch
+                            state="{= ${state>/searchMode} === 'LOOSE' }"
+                            change=".onSearchModeToggle"
+                            customTextOn=""
+                            customTextOff=""
+                            class="accentSwitch searchModeToggleSwitch">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Disappear"/>
+                            </layoutData>
+                        </Switch>
+
+                        <MenuButton
+                            text="{i18n>exportMenuButton}"
+                            buttonMode="Split"
+                            defaultAction=".onExportMenuDefault"
+                            enabled="{view>/canExport}"
+                            tooltip="{i18n>searchShortcutExport}"
+                            class="brandActionBtn brandActionGhost"
+                            icon="sap-icon://excel-attachment">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low"/>
+                            </layoutData>
+
+                            <menu>
+                                <Menu itemSelected=".onExportMenuAction">
+                                    <items>
+                                        <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view">
+                                            <customData>
+                                                <core:CustomData key="entity" value="screen"/>
+                                            </customData>
+                                        </MenuItem>
+                                        <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2">
+                                            <customData>
+                                                <core:CustomData key="entity" value="barrier"/>
+                                            </customData>
+                                        </MenuItem>
+                                        <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection">
+                                            <customData>
+                                                <core:CustomData key="entity" value="check"/>
+                                            </customData>
+                                        </MenuItem>
+                                    </items>
+                                </Menu>
+                            </menu>
+                        </MenuButton>
+                    </OverflowToolbar>
+                </VBox>
+
+                <VBox
+                    id="searchResultsShell"
+                    class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
+                    <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
+                        <core:Fragment
+                            fragmentName="checklist.app.view.fragment.SkeletonList"
+                            type="XML"/>
+                    </VBox>
+
+                    <VBox
+                        renderType="Bare"
+                        busy="{= ${view>/tableBusy} || ${view>/exportBusy} }"
+                        busyIndicatorDelay="0">
+                        <smartTable:SmartTable
+                            id="searchSmartTable"
+                            visible="{= (!${view>/busy} &amp;&amp; !${view>/tableBusy}) || !${view>/hasSearched} }"
+                            entitySet="ChecklistSearchSet"
+                            smartFilterId="searchSmartFilterBar"
+                            tableType="ResponsiveTable"
+                            useVariantManagement="true"
+                            useTablePersonalisation="true"
+                            showRowCount="true"
+                            showFullScreenButton="true"
+                            demandPopin="true"
+                            header="{i18n>resultsLabel}"
+                            persistencyKey="{view>/smartTablePersistencyKey}"
+                            enableAutoBinding="false"
+                            beforeRebindTable=".onBeforeSmartTableRebind"
+                            initialise=".onSmartTableInitialise"
+                            useExportToExcel="false"
+                            initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,DateCheck,EquipName,ChangedOn"
+                            requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal,DateCheck,EquipName,ChangedOn"
+                            class="searchSmartTableControl appSkeletonReveal">
+                        </smartTable:SmartTable>
+                    </VBox>
+
+                </VBox>
+
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

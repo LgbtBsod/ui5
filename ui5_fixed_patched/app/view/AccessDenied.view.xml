@@ -1,0 +1,64 @@
+<mvc:View
+    controllerName="checklist.app.controller.AccessDenied"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Page
+        showHeader="false"
+        enableScrolling="true"
+        class="pageTransparent"
+        busy="{view>/busy}"
+        busyIndicatorDelay="0">
+        <content>
+            <VBox class="appContent accessDeniedScreenContent" renderType="Bare">
+                <HBox class="glassCard accessDeniedHeroCard" renderType="Bare" wrap="Wrap">
+                    <VBox class="accessDeniedVisual" renderType="Bare">
+                        <core:Icon src="sap-icon://locked" class="accessDeniedIcon"/>
+                    </VBox>
+
+                    <VBox class="accessDeniedHeroCopy" renderType="Bare">
+                        <Text text="{i18n>accessDeniedEyebrow}" class="workflowEyebrow"/>
+                        <Title text="{i18n>accessDeniedScreenTitle}" level="H2" class="accessDeniedTitle"/>
+                        <Text text="{i18n>accessDeniedScreenSubtitle}" class="accessDeniedSubtitle"/>
+
+                        <HBox class="accessDeniedMetaRow" renderType="Bare" wrap="Wrap">
+                            <ObjectStatus
+                                text="{= ${i18n>checklistLabel} + ': ' + (${view>/rootId} || '-') }"
+                                state="Information"
+                                class="accessDeniedMetaTag"/>
+                            <ObjectStatus
+                                text="{view>/reasonCode}"
+                                state="Error"
+                                visible="{= !!${view>/reasonCode} }"
+                                class="accessDeniedMetaTag"/>
+                        </HBox>
+
+                        <Text
+                            text="{i18n>accessDeniedNoDataHint}"
+                            class="accessDeniedMetaText"/>
+                        <Text
+                            text="{view>/message}"
+                            visible="{= !!${view>/message} }"
+                            class="accessDeniedMetaText accessDeniedBackendMessage"/>
+                    </VBox>
+
+                    <HBox class="accessDeniedHeroActions" renderType="Bare" wrap="Wrap">
+                        <Button
+                            text="{i18n>retryButton}"
+                            icon="sap-icon://refresh"
+                            type="Transparent"
+                            press=".onRetryAccessCheck"
+                            class="brandActionBtn brandActionGhost"/>
+                        <Button
+                            text="{i18n>searchPageTitle}"
+                            icon="sap-icon://nav-back"
+                            type="Emphasized"
+                            press=".onBackToSearch"
+                            class="brandActionBtn brandActionPrimary"/>
+                    </HBox>
+                </HBox>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

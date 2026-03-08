@@ -1,0 +1,421 @@
+.chkApp,
+.chkApp .chkSkin,
+.chkApp .appShell {
+  min-height: 100%;
+  height: 100%;
+  color: var(--text-main);
+}
+
+html.chkAppRoot,
+body.chkAppRoot,
+.chkAppRoot.sapUiBody,
+#ui5_container.chkAppRoot {
+  height: 100%;
+  overflow: hidden;
+}
+
+.chkApp .appShell {
+  position: relative;
+  z-index: 1;
+}
+
+.chkApp .detailRailViewportLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.chkApp .appShell > .sapMFlexItem:first-child {
+  flex: 0 0 auto;
+  height: auto;
+}
+
+.chkApp .appShell > .sapMFlexItem:last-child {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+.chkApp .appShell > .sapMFlexItem {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chkApp .appRootFcl,
+.chkApp #searchPaneHost,
+.chkApp #detailPaneHost,
+.chkApp [id$="-searchPaneHost"],
+.chkApp [id$="-detailPaneHost"] {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chkApp .appRootFcl .sapFFCLColumn,
+.chkApp .appRootFcl .sapFFCLColumnContent {
+  height: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav > .sapMNavItem,
+.chkApp .appRootFcl .sapFFCLColumnContent .sapUiView {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapMNav,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapUiView,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapUiView,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapUiView,
+.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapUiView {
+  width: 100%;
+  max-width: none;
+}
+
+.chkApp .appRootFcl .sapFFCLColumn {
+  overflow: hidden;
+}
+
+.chkApp .appRootFcl,
+.chkApp .appRootFcl .sapFFCLColumn,
+.chkApp .appRootFcl .sapFFCLColumnContent {
+  background: transparent;
+}
+
+.chkApp .appRootFcl .sapFFCLArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  background: transparent;
+}
+
+.chkApp .appRootFcl .sapFFCLArrow::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, rgba(var(--accent-rgb), 0.16) 14%, rgba(var(--accent-rgb), 0.16) 86%, transparent);
+  opacity: 0;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+
+.chkApp .appRootFcl .sapFFCLNavigationButton {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+}
+
+.chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
+  min-width: 1.55rem;
+  width: 1.55rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(241, 246, 255, 0.22)),
+    var(--surface-1);
+  box-shadow:
+    0 6px 18px rgba(58, 92, 138, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnIcon {
+  color: var(--accent);
+  font-size: 0.72rem;
+}
+
+.chkApp .appRootFcl .sapFFCLNavigationButton:hover .sapMBtnInner,
+.chkApp .appRootFcl .sapFFCLNavigationButton:focus .sapMBtnInner {
+  border-color: rgba(var(--accent-rgb), 0.32);
+  box-shadow:
+    0 8px 20px rgba(58, 92, 138, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52);
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLArrow,
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLNavigationButton,
+.chkApp .appLayoutDetailOnly .appRootFcl .sapFFCLNavigationButton,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLNavigationButton {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLArrow,
+.chkApp .appLayoutDetailOnly .appRootFcl .sapFFCLArrow {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chkApp .searchPaneCenterShell {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+}
+
+.chkApp .pageTransparent {
+  background: transparent;
+}
+
+.chkApp .appContent {
+  padding: clamp(1rem, 2vw, 1.75rem);
+}
+
+.chkApp .toolbarTransparent,
+.chkApp .toolbarTransparent.sapMTB {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.chkApp .chkSkin:not(.appLayoutSplit, .appLayoutDetailOnly) #searchPaneHost,
+.chkApp .chkSkin:not(.appLayoutSplit, .appLayoutDetailOnly) [id$="-searchPaneHost"] {
+  width: min(100%, 82rem);
+  max-width: 82rem;
+  margin-inline: auto;
+}
+
+.chkApp .appLayoutSingle #searchPaneHost,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 100%;
+}
+
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd {
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  flex: 0 0 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border: 0;
+}
+
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent,
+.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd .sapFFCLColumnContent {
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chkApp .appLayoutSingle #searchPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.chkApp .appLayoutSingle #detailPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent {
+  width: min(100%, 84rem);
+  max-width: 84rem;
+  margin-inline: auto;
+}
+
+.chkApp .appLayoutSingle .appShellHeader {
+  width: min(calc(100% - (2 * clamp(0.85rem, 2vw, 1.5rem))), 84rem);
+  max-width: 84rem;
+  margin-inline: auto;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"],
+.chkApp .appLayoutDetailOnly #searchPaneHost,
+.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+.chkApp #searchPaneHost,
+.chkApp #detailPaneHost,
+.chkApp [id$="-searchPaneHost"],
+.chkApp [id$="-detailPaneHost"],
+.chkApp #searchPaneHost > .sapUiXMLView,
+.chkApp #detailPaneHost > .sapUiXMLView,
+.chkApp [id$="-searchPaneHost"] > .sapUiXMLView,
+.chkApp [id$="-detailPaneHost"] > .sapUiXMLView {
+  overflow: hidden;
+}
+
+.chkApp .pageTransparent,
+.chkApp .pageTransparent > section,
+.chkApp .pageTransparent .sapMPageEnableScrolling,
+.chkApp .pageTransparent .sapMPageScroll {
+  min-height: 0;
+}
+
+.chkApp .sapMScrollCont,
+.chkApp .sapMDialogScrollCont,
+.chkApp .sapMDialogScroll,
+.chkApp .sapUiTableCtrlScr,
+.chkApp .sapUiTableVSb,
+.chkApp .sapUiTableHSb,
+.chkApp .sapMListTblCnt,
+.chkApp .tableScrollWrap {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--accent-rgb), 0.34) rgba(160, 184, 220, 0.12);
+}
+
+.chkApp *::-webkit-scrollbar {
+  width: 0.72rem;
+  height: 0.72rem;
+}
+
+.chkApp *::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(160, 184, 220, 0.05));
+}
+
+.chkApp *::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.08)),
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.5), rgba(var(--accent-rgb), 0.22));
+  background-clip: padding-box;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.chkApp *::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.1)),
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.66), rgba(var(--accent-rgb), 0.34));
+  background-clip: padding-box;
+}
+
+.chkApp *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-track {
+  background:
+    linear-gradient(180deg, rgba(126, 156, 208, 0.08), rgba(16, 28, 47, 0.12));
+}
+
+body.chkAppRoot.appDark .chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
+  border-color: rgba(118, 170, 255, 0.26);
+  background:
+    linear-gradient(180deg, rgba(29, 50, 82, 0.96), rgba(12, 26, 44, 0.94));
+  box-shadow:
+    0 8px 20px rgba(2, 8, 18, 0.3),
+    inset 0 1px 0 rgba(216, 231, 255, 0.12);
+}
+
+body.chkAppRoot.appDark .chkApp .appRootFcl .sapFFCLArrow::after {
+  background: linear-gradient(180deg, transparent, rgba(118, 170, 255, 0.2) 14%, rgba(118, 170, 255, 0.2) 86%, transparent);
+}
+
+body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(180deg, rgba(212, 228, 255, 0.16), rgba(212, 228, 255, 0.02)),
+    linear-gradient(180deg, rgba(155, 187, 255, 0.46), rgba(91, 132, 214, 0.26));
+  background-clip: padding-box;
+}
+
+.chkApp .detailExperienceCanvas,
+.chkApp .detailMainExperienceStack,
+.chkApp .searchPaneCenterShell {
+  gap: 1rem;
+}
+
+.chkApp .appLayoutSingle #searchPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.chkApp .appLayoutSingle #detailPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+.chkApp .appLayoutSingle .analyticsScreenContent,
+.chkApp .appLayoutSingle .accessDeniedScreenContent {
+  width: 90%;
+  max-width: none;
+  margin-inline: 5%;
+  box-sizing: border-box;
+}
+
+.chkApp .appLayoutSingle .appShellHeader {
+  width: 90%;
+  max-width: none;
+  margin: 0.78rem 5% 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 61.25rem) {
+  .chkApp .appLayoutSingle #searchPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+  .chkApp .appLayoutSingle #detailPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+  .chkApp .appLayoutSingle .analyticsScreenContent,
+  .chkApp .appLayoutSingle .accessDeniedScreenContent {
+    width: calc(100% - 1.5rem);
+    margin-inline: 0.75rem;
+  }
+
+  .chkApp .appLayoutSingle .appShellHeader {
+    width: calc(100% - 1.5rem);
+    margin-inline: 0.75rem;
+  }
+}
+
+/* 2026-03 layout rebalance */
+.chkApp .appLayoutSingle #searchPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.chkApp .appLayoutSingle #detailPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+.chkApp .appLayoutSingle .analyticsScreenContent,
+.chkApp .appLayoutSingle .accessDeniedScreenContent {
+  width: 95%;
+  max-width: none;
+  margin-inline: 2.5%;
+}
+
+.chkApp .appLayoutSingle .appShellHeader {
+  width: 95%;
+  max-width: none;
+  margin: 0.78rem 2.5% 0;
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
+  padding-left: 0.15rem;
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent {
+  padding-right: 0.2rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .appContent,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .appContent {
+  padding-left: 0.78rem;
+  padding-right: 0.62rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .appContent,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .appContent {
+  padding-left: 0.58rem;
+  padding-right: 0.42rem;
+}

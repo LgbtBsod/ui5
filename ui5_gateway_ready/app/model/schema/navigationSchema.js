@@ -1,0 +1,28 @@
+sap.ui.define([], function () {
+    "use strict";
+
+    return {
+        mode: "READ",
+        layout: "OneColumn",
+        currentRouteName: "search",
+        selectedId: null,
+        sessionId: null,
+        activeObjectId: null,
+        copySourceId: null,
+        navGuardBypass: false,
+        analyticsNavReturn: {
+            routeName: "search",
+            routeArgs: {}
+        },
+        detailAccessGuard: {
+            rootId: "",
+            userId: "",
+            canView: true,
+            canEdit: false,
+            canDelete: false,
+            reasonCode: "AUTHORIZED",
+            message: "",
+            checkedAt: ""
+        }
+    };
+});

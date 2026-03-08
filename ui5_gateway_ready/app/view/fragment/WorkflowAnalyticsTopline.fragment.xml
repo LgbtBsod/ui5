@@ -1,0 +1,47 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox class="sapUiSmallMarginTop analyticsToplineSection" renderType="Bare">
+        <HBox class="analyticsToplineGrid" wrap="Wrap" renderType="Bare">
+            <GenericTile header="{i18n>kpiVisible}" subheader="{view>/analytics/sourceText}" class="analyticsTile">
+                <tileContent>
+                    <TileContent>
+                        <NumericContent value="{view>/analytics/total}" indicator="None" valueColor="Neutral"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>kpiFailedChecks}" subheader="{i18n>analyticsFailedChecklistCount}" class="analyticsTile">
+                <tileContent>
+                    <TileContent footer="{= ${i18n>analyticsFailedChecklistCount} + ': ' + ${view>/analytics/failedChecklistCount} }">
+                        <NumericContent value="{view>/analytics/failedChecks}" scale="" indicator="None" valueColor="Error"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>kpiFailedBarriers}" subheader="{i18n>analyticsFailedBarrierChecklistCount}" class="analyticsTile">
+                <tileContent>
+                    <TileContent footer="{= ${i18n>analyticsFailedBarrierChecklistCount} + ': ' + ${view>/analytics/failedBarrierChecklistCount} }">
+                        <NumericContent value="{view>/analytics/failedBarriers}" indicator="None" valueColor="Critical"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>analyticsAvgChecksRate}" subheader="{i18n>analyticsChecksSuccessRate}" class="analyticsTile">
+                <tileContent>
+                    <TileContent>
+                        <NumericContent value="{view>/analytics/avgChecksRate}" scale="%" indicator="None" valueColor="Good"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+            <GenericTile header="{i18n>analyticsAvgBarriersRate}" subheader="{i18n>analyticsBarriersSuccessRate}" class="analyticsTile">
+                <tileContent>
+                    <TileContent>
+                        <NumericContent value="{view>/analytics/avgBarriersRate}" scale="%" indicator="None" valueColor="Good"/>
+                    </TileContent>
+                </tileContent>
+            </GenericTile>
+        </HBox>
+
+        <HBox class="analyticsToplineMetaGrid sapUiSmallMarginTop" wrap="Wrap" renderType="Bare">
+            <ObjectStatus text="{= ${i18n>analyticsSelectedYear} + ': ' + ${view>/analytics/selectedYear} }" state="Information"/>
+            <ObjectStatus text="{= ${i18n>analyticsCompareYearLabel} + ': ' + ${view>/analytics/compareYear} }" state="None"/>
+            <ObjectStatus text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analytics/refreshedAt} || '-') }" state="Success"/>
+        </HBox>
+    </VBox>
+</core:FragmentDefinition>
