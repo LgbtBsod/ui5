@@ -1,5 +1,5 @@
 @import "modules/00_tokens.css";
-@import "modules/01_theme-modes.css";
+@import "modules/01_theme-modes.css?v=20260308a";
 @import "modules/02_background.css";
 @import "modules/10_base.css";
 @import "modules/20_surface.css";

@@ -10,9 +10,9 @@
 .chkApp .detailSectionCard .sapMSlt,
 .chkApp .detailSectionCard .sapMTimePicker,
 .chkApp .detailSectionCard .sapMDatePicker {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(242, 247, 255, 0.22));
-  border-color: rgba(128, 162, 220, 0.34);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: var(--theme-workbench-control-bg);
+  border-color: var(--theme-workbench-control-border);
+  box-shadow: var(--theme-workbench-control-shadow);
 }
 
 body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
@@ -25,10 +25,9 @@ body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMInputBaseContentWrapper,
 body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMSlt,
 body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMTimePicker,
 body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
-  background:
-    linear-gradient(180deg, rgba(42, 60, 89, 0.28), rgba(17, 27, 45, 0.16)),
-    color-mix(in srgb, rgba(18, 31, 50, 0.9) 92%, transparent);
-  box-shadow: inset 0 1px 0 rgba(199, 221, 255, 0.05);
+  background: var(--theme-workbench-control-bg);
+  border-color: var(--theme-workbench-control-border);
+  box-shadow: var(--theme-workbench-control-shadow);
 }
 
 /* UI5 overflow patch: stock overflow buttons expose unreadable icon/text mix in compact rails. */

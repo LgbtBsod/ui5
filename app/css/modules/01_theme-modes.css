@@ -33,9 +33,9 @@
   --ui-sem-bg-alpha: 0.08;
   --accent: var(--ui-t4-cta-on-primary);
   --accent-rgb: 0, 112, 242;
-  --surface-0: rgba(255, 255, 255, 0.46);
-  --surface-1: rgba(255, 255, 255, 0.62);
-  --surface-2: rgba(245, 246, 247, 0.76);
+  --surface-0: rgba(255, 255, 255, 0.48);
+  --surface-1: rgba(255, 255, 255, 0.66);
+  --surface-2: rgba(245, 246, 247, 0.8);
   --surface-3: rgba(234, 236, 238, 0.96);
   --border-soft: rgba(213, 218, 221, 0.62);
   --border-strong: rgba(0, 112, 242, 0.4);
@@ -83,18 +83,18 @@
   --bg-grain-dot: rgba(0, 0, 0, 0.07);
   --bg-paper-light: rgba(255, 255, 255, 0.05);
   --bg-paper-dark: rgba(0, 0, 0, 0.05);
-  --theme-rail-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(242, 247, 255, 0.18));
+  --theme-rail-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(242, 247, 255, 0.14));
   --theme-rail-border: rgba(136, 171, 226, 0.24);
   --theme-rail-shadow: 0 12px 28px rgba(91, 124, 168, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.42);
-  --theme-block-bg: color-mix(in srgb, var(--surface-1) 19%, transparent);
+  --theme-block-bg: color-mix(in srgb, var(--surface-1) 23%, transparent);
   --theme-chip-bg: rgba(255, 255, 255, 0.24);
   --theme-chip-border: rgba(128, 162, 220, 0.22);
   --focus-ring: 0 0 0 0.18rem rgba(var(--accent-rgb), 0.34);
   --radius-md: 1rem;
   --radius-lg: 1.32rem;
   --theme-table-header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(243, 248, 255, 0.18));
-  --theme-table-cell-bg: rgba(255, 255, 255, 0.075);
-  --theme-table-cell-hover-bg: rgba(255, 255, 255, 0.135);
+  --theme-table-cell-bg: rgba(255, 255, 255, 0.1);
+  --theme-table-cell-hover-bg: rgba(255, 255, 255, 0.15);
   --theme-table-cell-selected-bg: rgba(var(--accent-rgb), 0.105);
   --theme-toggle-shell-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(233, 243, 255, 0.76));
   --theme-toggle-shell-shadow: 0 14px 28px rgba(86, 120, 166, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.48);
@@ -130,10 +130,10 @@
   --theme-stage-title-weight: 650;
   --theme-stage-title-letter-spacing: -0.018em;
   --theme-kpi-value-size: 1.5rem;
-  --theme-workbench-rail-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(240, 246, 255, 0.58));
+  --theme-workbench-rail-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(240, 246, 255, 0.62));
   --theme-workbench-rail-border: rgba(124, 160, 220, 0.34);
   --theme-workbench-rail-shadow: 0 14px 30px rgba(91, 124, 168, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.46);
-  --theme-workbench-control-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(241, 247, 255, 0.74));
+  --theme-workbench-control-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(241, 247, 255, 0.74));
   --theme-workbench-control-border: rgba(105, 145, 212, 0.48);
   --theme-workbench-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 10px 22px rgba(79, 118, 176, 0.1);
   --theme-workbench-control-height: 2.45rem;
@@ -201,10 +201,10 @@ body.appDark,
   --ui-sem-bg-alpha: 0.12;
   --accent: var(--ui-t4-cta-on-primary);
   --accent-rgb: 77, 177, 255;
-  --surface-0: rgba(11, 20, 36, 0.5);
-  --surface-1: rgba(14, 27, 46, 0.72);
-  --surface-2: rgba(16, 30, 50, 0.82);
-  --surface-3: rgba(22, 38, 60, 0.92);
+  --surface-0: rgba(15, 27, 45, 0.4);
+  --surface-1: rgba(22, 38, 62, 0.58);
+  --surface-2: rgba(28, 46, 74, 0.68);
+  --surface-3: rgba(34, 55, 86, 0.82);
   --border-soft: rgba(91, 115, 139, 0.5);
   --border-strong: rgba(77, 177, 255, 0.48);
   --text-main: var(--ui-t1-main-on-primary);
@@ -251,18 +251,18 @@ body.appDark,
   --bg-grain-dot: rgba(255, 255, 255, 0.08);
   --bg-paper-light: rgba(255, 255, 255, 0.05);
   --bg-paper-dark: rgba(0, 0, 0, 0.05);
-  --theme-rail-bg: linear-gradient(180deg, rgba(82, 101, 135, 0.22), rgba(18, 29, 47, 0.24));
-  --theme-rail-border: rgba(136, 166, 226, 0.18);
-  --theme-rail-shadow: 0 18px 36px rgba(1, 6, 16, 0.34), inset 0 1px 0 rgba(193, 215, 255, 0.08);
-  --theme-block-bg: color-mix(in srgb, var(--surface-1) 18%, transparent);
+  --theme-rail-bg: linear-gradient(180deg, rgba(106, 133, 181, 0.18), rgba(28, 45, 72, 0.14));
+  --theme-rail-border: rgba(136, 166, 226, 0.16);
+  --theme-rail-shadow: 0 14px 30px rgba(1, 6, 16, 0.16), inset 0 1px 0 rgba(193, 215, 255, 0.06);
+  --theme-block-bg: color-mix(in srgb, var(--surface-1) 24%, transparent);
   --theme-chip-bg: rgba(155, 187, 255, 0.1);
   --theme-chip-border: rgba(126, 156, 208, 0.24);
   --focus-ring: 0 0 0 0.24rem rgba(var(--accent-rgb), 0.28);
   --radius-md: 1.24rem;
   --radius-lg: 1.64rem;
-  --theme-table-header-bg: linear-gradient(180deg, rgba(93, 114, 148, 0.2), rgba(36, 48, 69, 0.2));
-  --theme-table-cell-bg: rgba(15, 28, 48, 0.465);
-  --theme-table-cell-hover-bg: rgba(29, 49, 78, 0.555);
+  --theme-table-header-bg: linear-gradient(180deg, rgba(112, 133, 172, 0.18), rgba(40, 54, 82, 0.14));
+  --theme-table-cell-bg: rgba(19, 33, 56, 0.26);
+  --theme-table-cell-hover-bg: rgba(28, 45, 74, 0.34);
   --theme-table-cell-selected-bg: rgba(59, 126, 255, 0.18);
   --theme-toggle-shell-bg: linear-gradient(180deg, rgba(17, 28, 46, 0.96), rgba(28, 41, 66, 0.84));
   --theme-toggle-shell-shadow: 0 16px 32px rgba(2, 8, 18, 0.42), inset 0 1px 0 rgba(203, 226, 255, 0.12);
@@ -285,8 +285,8 @@ body.appDark,
   --theme-shell-title-weight: 760;
   --theme-shell-context-gap: 0.56rem;
   --theme-shell-action-bg:
-    linear-gradient(180deg, rgba(66, 83, 115, 0.34), rgba(18, 29, 47, 0.22)),
-    linear-gradient(180deg, rgba(14, 24, 41, 0.88), rgba(28, 41, 66, 0.72));
+    linear-gradient(180deg, rgba(94, 118, 160, 0.22), rgba(30, 45, 70, 0.16)),
+    linear-gradient(180deg, rgba(27, 42, 68, 0.76), rgba(38, 56, 88, 0.58));
   --theme-shell-action-border: rgba(126, 156, 208, 0.24);
   --theme-shell-action-shadow: 0 12px 24px rgba(2, 8, 18, 0.24), inset 0 1px 0 rgba(203, 226, 255, 0.12);
   --theme-shell-action-padding-inline: 0.94rem;
@@ -298,12 +298,12 @@ body.appDark,
   --theme-stage-title-weight: 650;
   --theme-stage-title-letter-spacing: -0.018em;
   --theme-kpi-value-size: 1.5rem;
-  --theme-workbench-rail-bg: linear-gradient(180deg, rgba(88, 109, 145, 0.28), rgba(16, 28, 47, 0.34));
-  --theme-workbench-rail-border: rgba(126, 156, 208, 0.22);
-  --theme-workbench-rail-shadow: 0 18px 34px rgba(1, 6, 16, 0.28), inset 0 1px 0 rgba(193, 215, 255, 0.08);
-  --theme-workbench-control-bg: linear-gradient(180deg, rgba(17, 31, 52, 0.98), rgba(24, 40, 64, 0.86));
-  --theme-workbench-control-border: rgba(126, 156, 208, 0.3);
-  --theme-workbench-control-shadow: inset 0 1px 0 rgba(216, 231, 255, 0.08), 0 10px 22px rgba(1, 6, 16, 0.22);
+  --theme-workbench-rail-bg: linear-gradient(180deg, rgba(102, 129, 176, 0.22), rgba(27, 42, 68, 0.18));
+  --theme-workbench-rail-border: rgba(126, 156, 208, 0.2);
+  --theme-workbench-rail-shadow: 0 14px 28px rgba(1, 6, 16, 0.14), inset 0 1px 0 rgba(193, 215, 255, 0.06);
+  --theme-workbench-control-bg: linear-gradient(180deg, rgba(27, 43, 69, 0.7), rgba(19, 33, 56, 0.54));
+  --theme-workbench-control-border: rgba(126, 156, 208, 0.24);
+  --theme-workbench-control-shadow: inset 0 1px 0 rgba(216, 231, 255, 0.06), 0 8px 18px rgba(1, 6, 16, 0.12);
   --theme-workbench-control-height: 2.45rem;
   --theme-table-row-height: 3.36rem;
   --theme-table-header-size: 0.73rem;
@@ -323,6 +323,9 @@ body.chkAppRoot.appLight.appInvertedBlockScheme {
   --theme-rail-bg: linear-gradient(180deg, rgba(33, 47, 73, 0.72), rgba(11, 20, 35, 0.66));
   --theme-rail-border: rgba(190, 210, 243, 0.18);
   --theme-rail-shadow: 0 16px 34px rgba(6, 12, 22, 0.22), inset 0 1px 0 rgba(236, 244, 255, 0.08);
+  --text-main: rgb(234, 241, 255);
+  --text-subtle: rgba(194, 207, 232, 0.92);
+  --text-muted: rgba(170, 185, 214, 0.88);
   --theme-table-header-bg: linear-gradient(180deg, rgba(31, 45, 70, 0.48), rgba(16, 28, 47, 0.34));
   --theme-table-cell-bg: rgba(17, 31, 52, 0.32);
   --theme-table-cell-hover-bg: rgba(26, 44, 72, 0.42);
@@ -333,6 +336,11 @@ body.chkAppRoot.appLight.appInvertedBlockScheme {
   --theme-workbench-control-bg: linear-gradient(180deg, rgba(21, 35, 58, 0.82), rgba(16, 28, 47, 0.66));
   --theme-workbench-control-border: rgba(195, 216, 247, 0.2);
   --theme-workbench-control-shadow: inset 0 1px 0 rgba(236, 244, 255, 0.08), 0 10px 22px rgba(6, 12, 22, 0.14);
+  --shell-surface: linear-gradient(180deg, rgba(24, 39, 64, 0.82), rgba(39, 56, 88, 0.66));
+  --shell-border: rgba(174, 198, 236, 0.18);
+  --shell-chip-bg: rgba(155, 187, 255, 0.12);
+  --shell-chip-border: rgba(190, 210, 243, 0.22);
+  --theme-toggle-icon-color: rgba(235, 242, 255, 0.92);
 }
 
 body.chkAppRoot.appDark.appInvertedBlockScheme {
@@ -340,6 +348,9 @@ body.chkAppRoot.appDark.appInvertedBlockScheme {
   --theme-rail-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(239, 245, 255, 0.24));
   --theme-rail-border: rgba(92, 118, 158, 0.18);
   --theme-rail-shadow: 0 14px 30px rgba(160, 179, 207, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  --text-main: rgb(34, 53, 72);
+  --text-subtle: rgba(71, 94, 117, 0.92);
+  --text-muted: rgba(91, 115, 139, 0.88);
   --theme-table-header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(238, 244, 255, 0.16));
   --theme-table-cell-bg: rgba(255, 255, 255, 0.12);
   --theme-table-cell-hover-bg: rgba(255, 255, 255, 0.18);
@@ -350,6 +361,11 @@ body.chkAppRoot.appDark.appInvertedBlockScheme {
   --theme-workbench-control-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(241, 247, 255, 0.52));
   --theme-workbench-control-border: rgba(108, 142, 196, 0.22);
   --theme-workbench-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 10px 22px rgba(160, 179, 207, 0.12);
+  --shell-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(239, 246, 255, 0.78));
+  --shell-border: rgba(114, 144, 190, 0.22);
+  --shell-chip-bg: rgba(255, 255, 255, 0.28);
+  --shell-chip-border: rgba(128, 162, 220, 0.22);
+  --theme-toggle-icon-color: rgba(24, 70, 138, 0.94);
 }
 
 @media (prefers-reduced-motion: reduce) {

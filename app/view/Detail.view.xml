@@ -127,7 +127,7 @@
                                             <VBox visible="{view>/detailSkeletonBusy}" renderType="Bare">
                                                 <core:Fragment fragmentName="checklist.app.view.fragment.SkeletonFormSection" type="XML"/>
                                             </VBox>
-                                            <VBox visible="{= !${view>/detailSkeletonBusy} }" renderType="Bare" class="appSkeletonReveal">
+                                            <VBox visible="{= !${view>/detailSkeletonBusy} }" renderType="Bare" class="appSkeletonReveal detailSectionBody detailInfoSectionBody">
                                             <f:GridList id="infoCardGrid" items="{path:'view>/infoCards', factory: '.infoCardFactory'}" class="infoCardGrid" showSeparators="None">
                                             <f:dragDropConfig>
                                                 <dnd:DragInfo sourceAggregation="items" enabled="true"/>
@@ -279,7 +279,7 @@
                             <!-- Barriers -->
                             <uxap:ObjectPageSubSection id="ssBarriers" title="{i18n>barriersTitle}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                                 <uxap:blocks>
-                                    <VBox class="glassCard detailSectionCard detailTableExperienceCard" width="100%" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
+                                    <VBox class="glassCard detailSectionCard detailTableExperienceCard detailBarriersTableCard" width="100%" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
                                             <core:Fragment fragmentName="checklist.app.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
@@ -326,11 +326,11 @@
                                             rows="{selected>/barriers}"
                                             selectionMode="None"
                                             visibleRowCountMode="Auto"
-                                            minAutoRowCount="6"
+                                            minAutoRowCount="7"
                                             rowHeight="48"
                                             busy="{view>/barriersBusy}"
                                             busyIndicatorDelay="0"
-                                            class="flatEditorGridTable detailGridTable">
+                                            class="flatEditorGridTable detailGridTable detailBarriersGridTable">
                                             <t:columns>
                                                 <t:Column width="3rem">
                                                     <Label text=""/>

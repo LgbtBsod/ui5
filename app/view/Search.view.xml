@@ -338,10 +338,10 @@
                             defaultAction=".onExportMenuDefault"
                             enabled="{view>/canExport}"
                             tooltip="{i18n>searchShortcutExport}"
-                            class="brandActionBtn brandActionGhost"
+                            class="brandActionBtn brandActionGhost searchExportMenuBtn"
                             icon="sap-icon://excel-attachment">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Low"/>
+                                <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
                             </layoutData>
 
                             <menu>
@@ -381,6 +381,7 @@
 
                     <VBox
                         renderType="Bare"
+                        class="searchResultsBody"
                         busy="{= ${view>/tableBusy} || ${view>/exportBusy} }"
                         busyIndicatorDelay="0">
                         <smartTable:SmartTable
