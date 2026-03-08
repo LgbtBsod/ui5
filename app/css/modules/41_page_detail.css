@@ -433,6 +433,65 @@
   box-shadow: none;
 }
 
+/* 2026-03 detail transparency + split gutter */
+.chkApp .detailHeroCard,
+.chkApp .detailControlInlineCard,
+.chkApp .detailSectionCard {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 18%, transparent);
+}
+
+.chkApp .detailHeroCard {
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.08), transparent 38%),
+    color-mix(in srgb, var(--surface-1) 18%, transparent);
+}
+
+.chkApp .detailWorkflowChip,
+.chkApp .uxStatChip,
+.chkApp .detailRailStatusChip,
+.chkApp .detailControlStickyBlock .detailControlInlineCard,
+.chkApp .detailControlStickyBlock.detailControlInlineCard,
+.chkApp .detailHeroCard:hover {
+  box-shadow: none;
+}
+
+.chkApp .detailWorkflowChip:hover,
+.chkApp .uxStatChip:hover,
+.chkApp .detailRailStatusChip:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.chkApp .detailControlInlineCard {
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+}
+
+.chkApp .detailSectionCard {
+  background: color-mix(in srgb, var(--surface-1) 16%, transparent);
+}
+
+.chkApp .detailSectionCard .toolbarTransparent {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 12%, transparent);
+  background: color-mix(in srgb, var(--theme-rail-bg) 18%, transparent);
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailTableExperienceCard,
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard,
+.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentsCard,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailTableExperienceCard,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentsCard {
+  padding:
+    calc(0.72rem * var(--theme-density-scale))
+    calc(0.66rem * var(--theme-density-scale))
+    calc(0.76rem * var(--theme-density-scale));
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailSectionCard,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionCard {
+  padding: 0.76rem 0.72rem 0.82rem;
+}
+
 .chkApp .detailContent .sapUxAPObjectPageSubSection {
   scroll-margin-top: calc(var(--app-shell-offset) + 5.25rem);
 }

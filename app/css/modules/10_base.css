@@ -381,3 +381,41 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
     margin-inline: 0.75rem;
   }
 }
+
+/* 2026-03 layout rebalance */
+.chkApp .appLayoutSingle #searchPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.chkApp .appLayoutSingle #detailPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+.chkApp .appLayoutSingle .analyticsScreenContent,
+.chkApp .appLayoutSingle .accessDeniedScreenContent {
+  width: 95%;
+  max-width: none;
+  margin-inline: 2.5%;
+}
+
+.chkApp .appLayoutSingle .appShellHeader {
+  width: 95%;
+  max-width: none;
+  margin: 0.78rem 2.5% 0;
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
+  padding-left: 0.15rem;
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent {
+  padding-right: 0.2rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .appContent,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .appContent {
+  padding-left: 0.78rem;
+  padding-right: 0.62rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .appContent,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .appContent {
+  padding-left: 0.58rem;
+  padding-right: 0.42rem;
+}

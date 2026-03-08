@@ -169,3 +169,56 @@
     min-height: calc(100vh - var(--app-shell-offset) - 2.5rem);
   }
 }
+
+/* 2026-03 analytics visual pass */
+.chkApp .analyticsHeroCard,
+.chkApp .accessDeniedHeroCard {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 20%, transparent);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.08), transparent 42%),
+    color-mix(in srgb, var(--surface-1) 18%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .analyticsTile,
+.chkApp .analyticsChartPanel,
+.chkApp .analyticsScreenBody .sapMPanel,
+.chkApp .analyticsScreenBody .sapMGT {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 18%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .analyticsScreenBody .sapMPanel,
+.chkApp .analyticsScreenBody .sapMGT {
+  border-radius: calc(var(--radius-lg) - 0.1rem);
+}
+
+.chkApp .analyticsScreenBody .sapMPanelHdr,
+.chkApp .analyticsScreenBody .sapMPanelContent,
+.chkApp .analyticsScreenBody .sapMGTHdrContent {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.chkApp .analyticsComparisonToolbar,
+.chkApp .analyticsBuilderToolbar {
+  padding: 0.35rem 0.42rem;
+  border-radius: calc(var(--radius-lg) - 0.22rem);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 12%, transparent);
+  background: color-mix(in srgb, var(--theme-rail-bg) 18%, transparent);
+}
+
+.chkApp .analyticsScreenContent .sapMInputBaseContentWrapper,
+.chkApp .analyticsScreenContent .sapMSlt,
+.chkApp .analyticsScreenContent .sapMComboBoxBase {
+  background: color-mix(in srgb, var(--surface-2) 34%, transparent);
+  border-color: color-mix(in srgb, var(--border-soft) 14%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .analyticsScreenContent .sapMBtn .sapMBtnInner,
+.chkApp .accessDeniedVisual {
+  box-shadow: none;
+}

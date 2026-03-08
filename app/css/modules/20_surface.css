@@ -374,3 +374,33 @@ body.chkAppRoot.appDark .chkApp .shellContextSubtitle {
     line-height: 1.4;
   }
 }
+
+/* 2026-03 surface simplification */
+.glassCard,
+.detailSectionCard,
+.detailControlInlineCard,
+.infoCardTile,
+.searchStatusStripStack,
+.chkStack,
+.detailAttachmentDropZone {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 24%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.28)) saturate(102%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.28)) saturate(102%);
+}
+
+.chkApp .chkStack {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 18%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+}
+
+body.chkAppRoot.appDark .chkApp .glassCard,
+body.chkAppRoot.appDark .chkApp .detailSectionCard,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard,
+body.chkAppRoot.appDark .chkApp .infoCardTile,
+body.chkAppRoot.appDark .chkApp .searchStatusStripStack,
+body.chkAppRoot.appDark .chkApp .chkStack,
+body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
+  background: color-mix(in srgb, rgba(14, 24, 39, 0.72) 66%, transparent);
+}

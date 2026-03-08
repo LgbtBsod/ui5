@@ -2414,3 +2414,148 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     top: auto;
   }
 }
+
+/* 2026-03 search simplification + split sticky up */
+.chkApp .kpiCard,
+.chkApp .analyticsChartCard {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 20%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+  box-shadow: none;
+  transition: border-color 220ms ease;
+}
+
+.chkApp .workflowStageCard:hover,
+.chkApp .kpiCard:hover,
+.chkApp .searchAnalyticsCard:hover {
+  transform: none;
+  border-color: color-mix(in srgb, var(--border-strong) 34%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB {
+  flex-wrap: wrap;
+  row-gap: 0.3rem;
+  column-gap: 0.28rem;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.chkApp .searchFilterCardDense {
+  padding: 0.82rem 0.88rem 0.76rem;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 20%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+}
+
+.chkApp .searchResultsTable {
+  padding: 0.82rem;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 20%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 20%, transparent);
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.chkApp .searchResultsTable .toolbarTransparent,
+.chkApp .searchToolbarMetaRail {
+  padding: 0.18rem 0.24rem;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 14%, transparent);
+  background: color-mix(in srgb, var(--theme-rail-bg) 20%, transparent);
+}
+
+.chkApp .searchFilterCardDense .sapMLabel,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarItemLabel {
+  font-size: 0.74rem;
+}
+
+.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
+.chkApp .searchFilterCardDense .sapMSlt,
+.chkApp .searchFilterCardDense .sapMSegB,
+.chkApp .searchResultsTable .sapMInputBaseContentWrapper,
+.chkApp .searchResultsTable .sapMSlt,
+.chkApp .searchResultsTable .sapMSwt {
+  background: color-mix(in srgb, var(--surface-2) 38%, transparent);
+  border-color: color-mix(in srgb, var(--border-soft) 16%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .searchActionToolbarDensity {
+  row-gap: 0.32rem;
+  column-gap: 0.28rem;
+  min-height: 2.52rem;
+  padding: 0.2rem 0.24rem 0.24rem;
+  background: color-mix(in srgb, var(--theme-rail-bg) 26%, transparent);
+}
+
+.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
+.chkApp .searchActionToolbarDensity .sapMSwt,
+.chkApp .searchActionToolbarDensity .sapMInputBaseContentWrapper,
+.chkApp .searchToolbarNavBtnUp .sapMBtnInner,
+.chkApp .searchSelectionStatusChip,
+.chkApp .searchSummaryStatusChip,
+.chkApp .searchStageStatusChip {
+  box-shadow: none;
+}
+
+.chkApp .searchSelectionStatusChip {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 16%, transparent);
+  background: color-mix(in srgb, var(--theme-workbench-rail-bg) 20%, transparent);
+}
+
+.chkApp .searchSummaryStatusChip,
+.chkApp .searchStageStatusChip {
+  border: 1px solid color-mix(in srgb, var(--theme-chip-border) 54%, transparent);
+  background: color-mix(in srgb, var(--theme-chip-bg) 76%, transparent);
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterCardDense,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense {
+  padding: 0.64rem 0.66rem 0.7rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail {
+  position: sticky;
+  top: calc(var(--app-shell-offset, 0px) + 0.46rem);
+  z-index: 4;
+  margin-top: 0.1rem;
+  margin-bottom: 0.35rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchToolbarNavBtnUp,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchToolbarNavBtnUp {
+  display: inline-flex;
+}
+
+/* smart filter stabilization after visual pass */
+.chkApp .searchWorkbenchDock > .searchFilterCardDense {
+  width: min(100%, 70rem);
+  max-width: 70rem;
+  margin-inline: auto;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchDock > .searchFilterCardDense,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchDock > .searchFilterCardDense {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+}
+
+.chkApp .searchFilterCardDense .sapMInputBase,
+.chkApp .searchFilterCardDense .sapMSlt,
+.chkApp .searchFilterCardDense .sapMDatePicker,
+.chkApp .searchFilterCardDense .sapMTimePicker {
+  min-width: min(100%, 10.5rem);
+}
+
+.chkApp .searchFilterCardDense .customFilterWrapper {
+  min-width: min(100%, 12rem);
+  flex: 1 1 12rem;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB {
+  width: 100%;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn {
+  min-width: 0;
+  flex: 1 1 0;
+}
