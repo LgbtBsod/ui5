@@ -1099,10 +1099,10 @@ sap.ui.define([
         }
         configureSearchResultTable(oController, oInnerTable, true);
         if (oInnerTable.setMode) {
-            oInnerTable.setMode("MultiSelect");
+            oInnerTable.setMode("SingleSelectMaster");
         }
         if (oInnerTable.setIncludeItemInSelection) {
-            oInnerTable.setIncludeItemInSelection(false);
+            oInnerTable.setIncludeItemInSelection(true);
         }
         if (oInnerTable.removeSelections) {
             oInnerTable.removeSelections(true);

@@ -118,14 +118,10 @@
 
                             <smartFilterBar:controlConfiguration>
                                 <smartFilterBar:ControlConfiguration key="Id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
-                                <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
-                                <smartFilterBar:ControlConfiguration key="LpcText" visibleInAdvancedArea="true"/>
-                                <smartFilterBar:ControlConfiguration key="ProfessionText" visibleInAdvancedArea="true"/>
-                                <smartFilterBar:ControlConfiguration key="LocationKey" visibleInAdvancedArea="true"/>
-                                <smartFilterBar:ControlConfiguration key="Status" visibleInAdvancedArea="true"/>
                                 <smartFilterBar:ControlConfiguration key="DateCheck" visibleInAdvancedArea="true"/>
-                                <smartFilterBar:ControlConfiguration key="EquipName" visibleInAdvancedArea="true"/>
-                                <smartFilterBar:ControlConfiguration key="ChangedOn" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="LocationKey" visibleInAdvancedArea="true" hasTypeAhead="true"/>
+                                <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
+                                <smartFilterBar:ControlConfiguration key="ProfessionText" visibleInAdvancedArea="true"/>
 
                                 <smartFilterBar:ControlConfiguration
                                     key="FailChecksSegmentControl"

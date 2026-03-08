@@ -86,15 +86,15 @@
   --theme-rail-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(242, 247, 255, 0.18));
   --theme-rail-border: rgba(136, 171, 226, 0.24);
   --theme-rail-shadow: 0 12px 28px rgba(91, 124, 168, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.42);
-  --theme-block-bg: color-mix(in srgb, var(--surface-1) 14%, transparent);
+  --theme-block-bg: color-mix(in srgb, var(--surface-1) 19%, transparent);
   --theme-chip-bg: rgba(255, 255, 255, 0.24);
   --theme-chip-border: rgba(128, 162, 220, 0.22);
   --focus-ring: 0 0 0 0.18rem rgba(var(--accent-rgb), 0.34);
   --radius-md: 1rem;
   --radius-lg: 1.32rem;
   --theme-table-header-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(243, 248, 255, 0.18));
-  --theme-table-cell-bg: rgba(255, 255, 255, 0.12);
-  --theme-table-cell-hover-bg: rgba(255, 255, 255, 0.22);
+  --theme-table-cell-bg: rgba(255, 255, 255, 0.1);
+  --theme-table-cell-hover-bg: rgba(255, 255, 255, 0.18);
   --theme-table-cell-selected-bg: rgba(var(--accent-rgb), 0.14);
   --theme-toggle-shell-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(233, 243, 255, 0.76));
   --theme-toggle-shell-shadow: 0 14px 28px rgba(86, 120, 166, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.48);

@@ -738,3 +738,28 @@ body.chkAppRoot .sapMMessageToast.glassToast.glassToast--info {
   border-color: rgba(var(--semantic-info-rgb), 0.42);
   background: linear-gradient(180deg, rgba(var(--semantic-info-rgb), 0.2), rgba(var(--semantic-info-rgb), 0.08));
 }
+
+/* 2026-03 ui-bugs: denser settings styling and compact user popover */
+.chkApp .shellSettingsBody {
+  gap: 0.85rem;
+}
+
+.chkApp .shellSettingsBody .shellSettingRow {
+  background: color-mix(in srgb, var(--theme-rail-bg) 80%, transparent);
+  border-color: color-mix(in srgb, var(--theme-rail-border) 82%, transparent);
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.9)) saturate(124%);
+}
+
+.chkApp .shellPopover .shellUserBody {
+  min-width: min(100%, 20rem);
+  max-width: 20rem;
+}
+
+.chkApp .shellPopover .sapMPopoverCont {
+  max-height: min(74vh, 34rem);
+}
+
+body.chkAppRoot.appLight .chkApp .shellSettingsBody .shellSettingRow,
+body.chkAppRoot.appLight .chkApp .shellUserCard {
+  background: color-mix(in srgb, var(--theme-rail-bg) 85%, transparent);
+}
