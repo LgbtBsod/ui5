@@ -142,16 +142,12 @@ sap.ui.define([
         },
         _stopAllManagers: function () {
             this._stopLockScopedManagers();
-            if (this._oConnectivity) {
-                this._oConnectivity.stop();
-            }
         },
         _collectManagers: function () {
             return {
                 heartbeat: this._oHeartbeat,
                 activity: this._oActivity,
                 autosave: this._oAutoSave,
-                connectivity: this._oConnectivity,
                 lockStatus: this._oLockStatus,
                 gcd: this._oGcd
             };
@@ -196,12 +192,6 @@ sap.ui.define([
                     intervalMs: mTimers.autoSaveIntervalMs,
                     debounceMs: mTimers.autoSaveDebounceMs
                 });
-            }
-            if (this._oConnectivity && this._oConnectivity.setGraceMs) {
-                this._oConnectivity.setGraceMs(mTimers.networkGraceMs);
-            }
-            if (this._oSmartCache && this._oSmartCache.configureFreshness) {
-                this._oSmartCache.configureFreshness({ freshMs: mTimers.cacheFreshMs, staleOkMs: mTimers.cacheStaleOkMs });
             }
         },
         _registerLockReleaseBeacon: function (oStateModel, oMainServiceModel) {

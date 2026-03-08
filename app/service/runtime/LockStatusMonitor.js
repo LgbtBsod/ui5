@@ -11,6 +11,7 @@ sap.ui.define([
             this._iIntervalMs = ManagerRuntime.readNumberOption(mOptions, "intervalMs");
             this._fnCheck = (mOptions && mOptions.checkFn) || function () { return Promise.resolve({}); };
             this._iTimer = null;
+            this._bRunning = false;
         },
 
         start: function () {
@@ -18,6 +19,7 @@ sap.ui.define([
                 return;
             }
             this.stop();
+            this._bRunning = true;
             this._iTimer = TimerRuntime.restartInterval(this._iTimer, function () {
                 this._fnCheck().then(function (oResult) {
                     this.fireEvent("status", oResult || {});
@@ -34,11 +36,12 @@ sap.ui.define([
                 return;
             }
             this._iIntervalMs = iNext;
-            if (this._iTimer) {
+            if (this._bRunning) {
                 this.start();
             }
         },
         stop: function () {
+            this._bRunning = false;
             this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearInterval);
         }
     });

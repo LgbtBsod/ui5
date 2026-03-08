@@ -21,6 +21,9 @@ sap.ui.define([
                 GET: function () {
                     return _toPromiseRead(m.path, m.params || {});
                 },
+                GET_FUNCTION: function () {
+                    return GatewayClient.callGetFunctionImport(sFunctionName, m.params || {});
+                },
                 POST_ENTITY: function () {
                     return GatewayClient.postToPath(_asPath(m.path), m.body || {});
                 },

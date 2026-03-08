@@ -238,10 +238,6 @@ sap.ui.define([
         },
 
         onRetrySearchLoad: function () {
-            if (ModelStateRuntime.read(this, "state", "/networkOnline", true) === false) {
-                this.showI18nError("searchOfflineMessage");
-                return Promise.resolve(false);
-            }
             SearchLoadRuntimeSupport.markLoading(this);
             SearchViewSupport.beginSearchLoadingFeedback(this);
             return SearchCommandPolicy.rebind(this, { source: "searchRetry" }).finally(function () {

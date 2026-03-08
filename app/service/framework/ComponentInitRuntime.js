@@ -216,13 +216,10 @@ sap.ui.define([
                     fnLoadRuntimeSettings(),
                     Promise.resolve(EnsureDictLoadedUseCase.execute({}, oComponent._ctx)).catch(function () {
                         return null;
-                    }),
-                    oComponent._oSmartCache.getCached("checkLists")
+                    })
                 ]);
             }).then(function (aResults) {
-                var oCacheResult = Array.isArray(aResults) ? aResults[3] : null;
-                var aCheckLists = (oCacheResult && oCacheResult.status === "fulfilled" && oCacheResult.value) || [];
-                aCheckLists = Array.isArray(aCheckLists) ? aCheckLists : [];
+                var aCheckLists = [];
                 ModelStateRuntime.writeOnModel(oCacheModel, "/pristineSnapshot", CloneUtil.clone(aCheckLists, []));
                 var sCacheAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
                 ModelStateRuntime.setManyOnModel(oCacheModel, {
@@ -230,10 +227,9 @@ sap.ui.define([
                         fetchedAt: sCacheAt,
                         count: aCheckLists.length
                     },
-                    "/keyMapping": oComponent._oSmartCache.snapshot().keyMapping
+                    "/keyMapping": {}
                 });
                 ModelStateRuntime.writeOnModel(oStateModel, "/cacheValidationAt", sCacheAt);
-                oComponent._oSmartCache.put("checkLists", aCheckLists);
             }).catch(function (oError) {
                 ModelStateRuntime.setManyOnModel(oStateModel, {
                     "/loadError": true,
@@ -465,33 +461,6 @@ sap.ui.define([
             };
         });
 
-        oComponent._oConnectivity.attachEvent("state", function (oEvent) {
-            var m = oEvent.getParameters() || {};
-            ModelStateRuntime.setManyOnModel(oStateModel, {
-                "/networkOnline": !!m.online,
-                "/networkGraceMode": !!m.isGrace,
-                "/networkGraceExpiresAt": m.graceExpiresAt || null
-            });
-            if (!m.online) {
-                fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
-                    mOptions.actionContract.RETRY_ACTIONS.SEARCH,
-                    "searchRetryAction",
-                    fnBundleText("retryLaterHint")
-                ));
-                return;
-            }
-            var oBanner = FeedbackBannerRuntime.getBanner(oStateModel, "global");
-            if (oBanner.retryAction === mOptions.actionContract.RETRY_ACTIONS.SEARCH) {
-                fnClearGlobalBanner();
-            }
-        });
-        oComponent._oConnectivity.attachEvent("graceExpired", function () {
-            fnHandleForceReadOnly({
-                reason: "NETWORK_GRACE_EXPIRED",
-                messageKey: "networkGraceExpired",
-                source: "connectivity"
-            });
-        });
         var oRouter = oComponent.getRouter();
         oComponent._oLifecycleRouter = oRouter;
         oComponent._fnBeforeRouteMatched = function (oEvent) {
@@ -668,7 +637,6 @@ sap.ui.define([
         var fnBundleText = mOptions.bundleText;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
 
-        oComponent._oSmartCache = new mManagers.SmartCacheManager({ freshMs: mTimerDefaults.cacheFreshMs, staleOkMs: mTimerDefaults.cacheStaleOkMs });
         oComponent._oHeartbeat = new mManagers.HeartbeatManager({
             intervalMs: Number(mTimerDefaults.heartbeatMs),
             heartbeatFn: function () {
@@ -707,8 +675,7 @@ sap.ui.define([
                 return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") === "EDIT" &&
                     bIsLocked &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
-                    !!ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") &&
-                    ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) !== false;
+                    !!ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
             },
             buildPayload: function () {
                 var sId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
@@ -741,12 +708,6 @@ sap.ui.define([
             var mStart = { "/autosaveState": "SAVING" };
             mStart[StatePaths.SAVE_IN_FLIGHT] = true;
             ModelStateRuntime.setManyOnModel(oStateModel, mStart);
-            if (ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false) {
-                fnSetGlobalBanner(FeedbackBannerRuntime.createNetworkRetryBannerInput(
-                    ActionContract.RETRY_ACTIONS.SAVE,
-                    "retryNowButton"
-                ));
-            }
             DebugLogger.info("Component", "autosave start", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
             fnEmitTelemetry("autosave.triggered", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
@@ -760,23 +721,15 @@ sap.ui.define([
             var mErr = { "/autosaveState": "ERROR" };
             mErr[StatePaths.SAVE_IN_FLIGHT] = false;
             ModelStateRuntime.setManyOnModel(oStateModel, mErr);
-            fnSetGlobalBanner(
-                ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false
-                    ? FeedbackBannerRuntime.createNetworkRetryBannerInput(
-                        ActionContract.RETRY_ACTIONS.SAVE,
-                        "retryNowButton"
-                    )
-                    : FeedbackBannerRuntime.createRetryBannerInput("error", "objectSaveFailed", {
-                        textArgs: [fnBundleText("autosaveError")],
-                        retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                        retryTextKey: "retryNowButton"
-                    })
-            );
+            fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("error", "objectSaveFailed", {
+                textArgs: [fnBundleText("autosaveError")],
+                retryAction: ActionContract.RETRY_ACTIONS.SAVE,
+                retryTextKey: "retryNowButton"
+            }));
             DebugLogger.info("Component", "autosave error", oEvent && oEvent.getParameters ? oEvent.getParameters() : {});
             fnEmitTelemetry("autosave.failed", ComponentRuntimeSupport.eventPayload(oEvent));
         });
 
-        oComponent._oConnectivity = new mManagers.ConnectivityCoordinator({ graceMs: Number(mTimerDefaults.networkGraceMs) });
         oComponent._oLockStatus = new mManagers.LockStatusMonitor({
             intervalMs: Number(mTimerDefaults.lockStatusMs),
             checkFn: function () {
@@ -818,12 +771,10 @@ sap.ui.define([
         var ModelFactory = mDeps.ModelFactory;
         var SmartSearchAdapter = mDeps.SmartSearchAdapter;
         var Managers = mDeps.Managers || {};
-        var SmartCacheManager = Managers.SmartCacheManager || mDeps.SmartCacheManager;
         var HeartbeatManager = Managers.HeartbeatManager || mDeps.HeartbeatManager;
         var GCDManager = Managers.GCDManager || mDeps.GCDManager;
         var ActivityMonitor = Managers.ActivityMonitor || mDeps.ActivityMonitor;
         var AutoSaveCoordinator = Managers.AutoSaveCoordinator || mDeps.AutoSaveCoordinator;
-        var ConnectivityCoordinator = Managers.ConnectivityCoordinator || mDeps.ConnectivityCoordinator;
         var LockStatusMonitor = Managers.LockStatusMonitor || mDeps.LockStatusMonitor;
         var JSONModel = mDeps.JSONModel;
         var FlowCoordinator = mDeps.FlowCoordinator;
@@ -934,6 +885,9 @@ sap.ui.define([
             mInitState[StatePaths.SAVE_IN_FLIGHT] = false;
             mInitState[StatePaths.PENDING_NAVIGATION_INTENT] = null;
             mInitState[StatePaths.TAB_CONFLICT_STATE] = { active: false, source: "", at: "" };
+            mInitState["/networkOnline"] = true;
+            mInitState["/networkGraceMode"] = false;
+            mInitState["/networkGraceExpiresAt"] = null;
             ModelStateRuntime.setManyOnModel(oStateModel, mInitState);
             var fnEmitTelemetry = function (sEventName, oPayload) {
                 return WorkflowTelemetry.emit(sEventName, {
@@ -1047,12 +1001,10 @@ sap.ui.define([
                 uiStateModel: oUiStateModel,
                 timerDefaults: mTimerDefaults,
                 managers: {
-                    SmartCacheManager: SmartCacheManager,
                     HeartbeatManager: HeartbeatManager,
                     GCDManager: GCDManager,
                     ActivityMonitor: ActivityMonitor,
                     AutoSaveCoordinator: AutoSaveCoordinator,
-                    ConnectivityCoordinator: ConnectivityCoordinator,
                     LockStatusMonitor: LockStatusMonitor
                 },
                 statePaths: StatePaths,

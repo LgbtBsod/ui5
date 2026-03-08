@@ -24,6 +24,14 @@ sap.ui.define([
         });
     }
 
+    function getFunction(sPath, mParams) {
+        return request({
+            method: "GET_FUNCTION",
+            path: sPath,
+            params: mParams || {}
+        });
+    }
+
     function asArray(vData) {
         return ODataAdapterUtils.asArray(vData);
     }
@@ -35,6 +43,7 @@ sap.ui.define([
     return {
         asArray: asArray,
         get: get,
+        getFunction: getFunction,
         postFunction: postFunction,
         request: request,
         unwrap: unwrap

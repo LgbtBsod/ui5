@@ -31,6 +31,9 @@ sap.ui.define([
         /^SetChecklistStatus$/i
     ];
     var DIRECT_FUNCTION_BODY_ALLOWLIST = [];
+    var DIRECT_GET_FUNCTION_ALLOWLIST = [
+        /^GetHierarchy$/i
+    ];
     var DIRECT_PUT_ALLOWLIST = [
         /^\/AttachmentSet\(AttachmentKey='[^']+'\)\/\$value$/i
     ];
@@ -154,19 +157,20 @@ sap.ui.define([
 
     function withDirectPut(sPath, vPayload, mOptions) {
         var oOptions = mOptions || {};
-        // Ensure we have a CSRF token before the PUT - ODataModel may not have fetched it yet
         var oModel;
         try { oModel = ensureModel(); } catch (e) { return Promise.reject(e); }
+
         var sCsrfCheck = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
         var pToken = sCsrfCheck ? Promise.resolve(sCsrfCheck) : new Promise(function (res) {
             oModel.refreshSecurityToken(function () {
                 res(oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "");
             }, function () { res(""); }, true);
         });
-        return pToken.then(function () {
-        return toPromise(function (resolve, reject) {
+
+        return pToken.then(function (sCsrfToken) {
+            var sBase = serviceUrl();
+            var sFullUrl = sBase + sPath;
             var mModelHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
-            var sCsrfToken = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
             var mHeaders;
 
             delete mModelHeaders["content-type"];
@@ -180,18 +184,48 @@ sap.ui.define([
             if (sCsrfToken) {
                 mHeaders["X-CSRF-Token"] = sCsrfToken;
             }
-            oModel.update(sPath, vPayload || "", {
-                headers: mHeaders,
-                merge: false,
-                success: function () {
-                    resolve({});
-                },
-                error: function (e) {
-                    reject(GatewayErrorNormalizer.normalizeError(e));
-                }
+
+            return new Promise(function (resolve, reject) {
+                var oXhr = new XMLHttpRequest();
+                oXhr.open("PUT", sFullUrl, true);
+                Object.keys(mHeaders).forEach(function (sKey) {
+                    oXhr.setRequestHeader(sKey, mHeaders[sKey]);
+                });
+                oXhr.onreadystatechange = function () {
+                    if (oXhr.readyState !== 4) {
+                        return;
+                    }
+                    if (oXhr.status >= 200 && oXhr.status < 300) {
+                        resolve({});
+                        return;
+                    }
+                    reject(GatewayErrorNormalizer.normalizeError({
+                        statusCode: oXhr.status,
+                        responseText: oXhr.responseText,
+                        responseHeaders: oXhr.getAllResponseHeaders()
+                    }));
+                };
+                oXhr.onerror = function () {
+                    reject(GatewayErrorNormalizer.normalizeError({ statusCode: 0, message: "Network error during binary PUT" }));
+                };
+                oXhr.send(vPayload || null);
             });
         });
-        }); // end pToken.then
+    }
+
+    function withDirectGetFunctionImport(sName, mParams) {
+        var sFunctionName = assertAllowedFunctionName(sName);
+        if (!allowlisted(sFunctionName, DIRECT_GET_FUNCTION_ALLOWLIST)) {
+            throw new Error("Unsupported GET function import: " + sFunctionName);
+        }
+        return toPromise(function (resolve, reject) {
+            ensureModel().callFunction("/" + sFunctionName, {
+                method: "GET",
+                urlParameters: mParams || {},
+                success: function (oData) { resolve(oData || {}); },
+                error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
+            });
+        });
     }
     return {
         setModel: function (oModel, mOptions) {
@@ -218,6 +252,9 @@ sap.ui.define([
         serviceUrl: serviceUrl,
         callFunctionImport: function (name, payload) {
             return withDirectFunctionImport(name, payload || {});
+        },
+        callGetFunctionImport: function (name, params) {
+            return withDirectGetFunctionImport(name, params || {});
         },
         postToPath: function (path, payload) {
             var sNormalized = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_POST_ALLOWLIST, "POST");

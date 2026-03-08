@@ -62,18 +62,6 @@
             };
         }());
     </script>
-    <script>
-    // Component-preload.js is optional (dev/build artifact)
-    (function() {
-        try {
-            var s = document.createElement('script');
-            s.src = './Component-preload.js';
-            s.onerror = function() { /* not available on gateway, UI5 will load modules directly */ };
-            document.head.appendChild(s);
-        } catch(e) {}
-    }());
-</script>
-
         <!--src="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js"-->
 
 <style>
@@ -254,7 +242,6 @@
                 oScript.setAttribute("data-sap-ui-compatVersion", "edge");
                 oScript.setAttribute("data-sap-ui-async", "true");
                 oScript.setAttribute("data-sap-ui-preload", "async");
-                oScript.setAttribute("data-sap-ui-xx-componentPreload", "on");
                 oScript.onload = function () {
                     if (window.sap && sap.ui && sap.ui.getCore) {
                         attachInit();
@@ -271,12 +258,6 @@
             }
 
             function mountComponent() {
-            (window.__ui5PreloadQueue || []).forEach(function (aEntry) {
-                if (window.sap && sap.ui && sap.ui.require && sap.ui.require.preload) {
-                    sap.ui.require.preload(aEntry[0], aEntry[1]);
-                }
-            });
-            window.__ui5PreloadQueue = [];
             sap.ui.require([
                 "sap/ui/core/ComponentContainer",
                 "checklist/app/infra/adapters/Ui5StyleAdapter"
