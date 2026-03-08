@@ -40,7 +40,7 @@
 
         <HBox class="analyticsToplineMetaGrid sapUiSmallMarginTop" wrap="Wrap" renderType="Bare">
             <ObjectStatus text="{= ${i18n>analyticsSelectedYear} + ': ' + ${view>/analytics/selectedYear} }" state="Information"/>
-            <ObjectStatus text="{= ${i18n>analyticsPreviousYear} + ': ' + ${view>/analytics/previousYear} }" state="None"/>
+            <ObjectStatus text="{= ${i18n>analyticsCompareYearLabel} + ': ' + ${view>/analytics/compareYear} }" state="None"/>
             <ObjectStatus text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analytics/refreshedAt} || '-') }" state="Success"/>
         </HBox>
     </VBox>

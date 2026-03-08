@@ -74,6 +74,10 @@ class AnalyticsService:
         return s_value or fallback_text
 
     @staticmethod
+    def _optional_text(v_value: str) -> str:
+        return str(v_value or "").strip()
+
+    @staticmethod
     def _month_label(i_month: int) -> str:
         return MONTH_LABELS[max(1, min(12, int(i_month))) - 1]
 
@@ -178,6 +182,9 @@ class AnalyticsService:
         failed_barriers_by_location = Counter()
         failed_checks_by_bukrs = Counter()
         failed_barriers_by_bukrs = Counter()
+        failed_checks_by_orgunit = Counter()
+        failed_barriers_by_orgunit = Counter()
+        total_barriers_by_number = Counter()
         failed_barriers_by_number = Counter()
         total_by_source = Counter()
         failed_checks_by_source = Counter()
@@ -226,12 +233,13 @@ class AnalyticsService:
                     successful_checks += 1
 
             for barrier in list(root.barriers or []):
+                barrier_key = str(int(barrier.position or 0)) if barrier.position else "UNKNOWN"
+                barrier_label = ("#" + barrier_key) if barrier_key != "UNKNOWN" else "Unknown barrier"
+                total_barriers_by_number[barrier_label] += 1
                 if bool(barrier.is_active):
                     successful_barriers += 1
                     continue
                 failed_barriers += 1
-                barrier_key = str(int(barrier.position or 0)) if barrier.position else "UNKNOWN"
-                barrier_label = ("#" + barrier_key) if barrier_key != "UNKNOWN" else "Unknown barrier"
                 failed_barriers_by_number[barrier_label] += 1
 
             totals_by_month[(root_year, root_month)]["TOTAL"] += 1
@@ -250,8 +258,9 @@ class AnalyticsService:
 
             profession = AnalyticsService._normalize_text(root.observed_position, "Unknown profession")
             lpc = AnalyticsService._normalize_text(root.lpc_text or root.lpc, "Unknown LPC")
-            location = AnalyticsService._normalize_text(root.location_text or root.location_name or root.location_key, "Unknown location")
-            bukrs = AnalyticsService._normalize_text(root.bukrs, "Unknown BUKRS")
+            location = AnalyticsService._optional_text(root.location_text or root.location_name or root.location_key)
+            bukrs = AnalyticsService._optional_text(root.bukrs)
+            observer_orgunit = AnalyticsService._optional_text(root.observer_orgunit)
             status = str(root.status or "").upper()
 
             summary["total"] += 1
@@ -261,14 +270,22 @@ class AnalyticsService:
                 summary["failedChecklistCount"] += 1
                 failed_checks_by_profession[profession] += failed_checks
                 failed_checks_by_lpc[lpc] += failed_checks
-                failed_checks_by_location[location] += failed_checks
-                failed_checks_by_bukrs[bukrs] += failed_checks
+                if location:
+                    failed_checks_by_location[location] += failed_checks
+                if bukrs:
+                    failed_checks_by_bukrs[bukrs] += failed_checks
+                if observer_orgunit:
+                    failed_checks_by_orgunit[observer_orgunit] += failed_checks
             if failed_barriers > 0:
                 summary["failedBarrierChecklistCount"] += 1
                 failed_barriers_by_profession[profession] += failed_barriers
                 failed_barriers_by_lpc[lpc] += failed_barriers
-                failed_barriers_by_location[location] += failed_barriers
-                failed_barriers_by_bukrs[bukrs] += failed_barriers
+                if location:
+                    failed_barriers_by_location[location] += failed_barriers
+                if bukrs:
+                    failed_barriers_by_bukrs[bukrs] += failed_barriers
+                if observer_orgunit:
+                    failed_barriers_by_orgunit[observer_orgunit] += failed_barriers
             if status in {"DONE", "CLOSED"}:
                 summary["closedCount"] += 1
             if status in {"SUBMITTED", "REGISTERED"}:
@@ -296,6 +313,9 @@ class AnalyticsService:
             + AnalyticsService._breakdown_rows("LOCATION", "FAILED_BARRIERS", failed_barriers_by_location)
             + AnalyticsService._breakdown_rows("BUKRS", "FAILED_CHECKS", failed_checks_by_bukrs)
             + AnalyticsService._breakdown_rows("BUKRS", "FAILED_BARRIERS", failed_barriers_by_bukrs)
+            + AnalyticsService._breakdown_rows("ORGUNIT", "FAILED_CHECKS", failed_checks_by_orgunit)
+            + AnalyticsService._breakdown_rows("ORGUNIT", "FAILED_BARRIERS", failed_barriers_by_orgunit)
+            + AnalyticsService._breakdown_rows("BARRIER_NUMBER", "TOTAL", total_barriers_by_number)
             + AnalyticsService._breakdown_rows("BARRIER_NUMBER", "FAILED_BARRIERS", failed_barriers_by_number)
             + AnalyticsService._breakdown_rows("SOURCE", "TOTAL", total_by_source)
             + AnalyticsService._breakdown_rows("SOURCE", "FAILED_CHECKS", failed_checks_by_source)

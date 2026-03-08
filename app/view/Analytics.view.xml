@@ -14,12 +14,12 @@
         busyIndicatorDelay="0">
         <headerContent>
             <ObjectStatus
-                text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? ${i18n>analyticsRefreshRunning} : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : (${view>/refreshState/lastSuccessAt} ? ${view>/refreshState/lastSuccessAt} : ${i18n>analyticsRefreshIdle}))) }"
+                text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? ${i18n>analyticsRefreshRunning} : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : (${view>/refreshState/lastSuccessAt} ? (${i18n>workflowUpdatedAt} + ': ' + ${view>/refreshState/lastSuccessAt}) : ${i18n>analyticsRefreshIdle}))) }"
                 state="{= ${view>/refreshState/status} === 'ERROR' ? 'Error' : ((${view>/refreshState/status} === 'REQUESTED' || ${view>/refreshState/isRunning}) ? 'Warning' : 'Success') }"/>
             <Button
                 text="{i18n>analyticsRefreshButton}"
                 icon="sap-icon://refresh"
-                type="Transparent"
+                type="Emphasized"
                 enabled="{= !${view>/refreshBusy} &amp;&amp; !${view>/refreshState/isRunning} &amp;&amp; ${view>/refreshState/status} !== 'REQUESTED' }"
                 press=".onRefreshAnalytics"/>
         </headerContent>
@@ -81,10 +81,10 @@
                         visible="{= !!${view>/error} }"
                         class="chkFeedbackStrip chkFeedbackWarning"/>
                     <MessageStrip
-                        text="{= ${view>/refreshState/isRunning} ? (${i18n>analyticsRefreshRunning} + ': ' + (${view>/refreshState/lastMessage} || '')) : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : '') }"
+                        text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? (${i18n>analyticsRefreshRunning} + ': ' + (${view>/refreshState/lastMessage} || '')) : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : '')) }"
                         type="Information"
                         showIcon="true"
-                        visible="{= !!${view>/refreshState/isRunning} || !!${view>/refreshState/lastError} }"
+                        visible="{= ${view>/refreshState/status} === 'REQUESTED' || !!${view>/refreshState/isRunning} || !!${view>/refreshState/lastError} }"
                         class="chkFeedbackStrip"/>
                     <core:Fragment fragmentName="checklist.app.view.fragment.WorkflowAnalyticsTopline" type="XML"/>
                     <core:Fragment fragmentName="checklist.app.view.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>

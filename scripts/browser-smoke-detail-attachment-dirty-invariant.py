@@ -21,6 +21,26 @@ def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> No
     checks.append({"name": name, "ok": bool(ok), "detail": detail})
 
 
+def is_navigation_race(exc: Exception) -> bool:
+    message = str(exc or "")
+    return "Execution context was destroyed" in message or "Cannot find context with specified id" in message
+
+
+def safe_evaluate(page, script: str, arg: Any = None, retries: int = 3):
+    last_error = None
+    for attempt in range(max(1, int(retries))):
+        try:
+            if arg is None:
+                return page.evaluate(script)
+            return page.evaluate(script, arg)
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+            if not is_navigation_race(exc) or attempt >= retries - 1:
+                raise
+            page.wait_for_timeout(750)
+    raise last_error
+
+
 def flush_report(report: dict[str, Any]) -> int:
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -83,7 +103,8 @@ def wait_for_search_ready(page) -> None:
 
 
 def detail_state(page) -> dict[str, Any]:
-    return page.evaluate(
+    return safe_evaluate(
+        page,
         """
         () => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -106,7 +127,8 @@ def detail_state(page) -> dict[str, Any]:
 
 
 def invoke_controller_method(page, view_id: str, method_name: str, *args: Any) -> Any:
-    return page.evaluate(
+    return safe_evaluate(
+        page,
         """
         ({ viewId, methodName, args }) => {
           const view = sap.ui.getCore().byId(viewId);
@@ -122,7 +144,8 @@ def invoke_controller_method(page, view_id: str, method_name: str, *args: Any) -
 
 
 def set_detail_edit_mode(page, state: bool) -> Any:
-    return page.evaluate(
+    return safe_evaluate(
+        page,
         """
         (targetState) => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -165,7 +188,8 @@ def enter_edit_or_report(page) -> tuple[bool, dict[str, Any]]:
 
 
 def invoke_delete(page, attachment_key: str) -> None:
-    page.evaluate(
+    safe_evaluate(
+        page,
         """
         (attachmentKey) => new Promise((resolve, reject) => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -195,7 +219,8 @@ def invoke_delete(page, attachment_key: str) -> None:
 
 
 def ensure_attachments_expanded(page) -> None:
-    page.evaluate(
+    safe_evaluate(
+        page,
         """
         () => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -215,12 +240,11 @@ def ensure_attachments_expanded(page) -> None:
         """
         () => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
-          const selected = view && view.getModel && view.getModel('selected');
           const viewModel = view && view.getModel && view.getModel('view');
-          const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
-          return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'))
-            && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'))
-            && Array.isArray(attachments);
+          const expanded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'));
+          const historyLoaded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
+          const uploaderReady = !!document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu');
+          return expanded && (historyLoaded || uploaderReady);
         }
         """,
         timeout=30000,

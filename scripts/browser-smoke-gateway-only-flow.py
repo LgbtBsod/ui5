@@ -21,6 +21,26 @@ def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> No
     checks.append({"name": name, "ok": bool(ok), "detail": detail})
 
 
+def is_navigation_race(exc: Exception) -> bool:
+    message = str(exc or "")
+    return "Execution context was destroyed" in message or "Cannot find context with specified id" in message
+
+
+def safe_evaluate(page, script: str, arg: Any = None, retries: int = 3):
+    last_error = None
+    for attempt in range(max(1, int(retries))):
+        try:
+            if arg is None:
+                return page.evaluate(script)
+            return page.evaluate(script, arg)
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+            if not is_navigation_race(exc) or attempt >= retries - 1:
+                raise
+            page.wait_for_timeout(750)
+    raise last_error
+
+
 def wait_for_search_ready(page) -> None:
     page.wait_for_function(
         """
@@ -162,7 +182,8 @@ def flush_report(report: dict[str, Any]) -> int:
 
 
 def detail_state(page) -> dict[str, Any]:
-    return page.evaluate(
+    return safe_evaluate(
+        page,
         """
         () => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -182,7 +203,8 @@ def detail_state(page) -> dict[str, Any]:
 
 
 def invoke_view_controller_method(page, view_id: str, method_name: str, *args: Any):
-    return page.evaluate(
+    return safe_evaluate(
+        page,
         """
         ({ viewId, methodName, args }) => {
           const view = sap.ui.getCore().byId(viewId);
@@ -198,7 +220,8 @@ def invoke_view_controller_method(page, view_id: str, method_name: str, *args: A
 
 
 def set_detail_edit_mode(page, state: bool) -> Any:
-    return page.evaluate(
+    return safe_evaluate(
+        page,
         """
         (targetState) => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -242,7 +265,8 @@ def enter_edit_or_report(page) -> tuple[bool, dict[str, Any]]:
 
 
 def ensure_attachments_expanded(page) -> None:
-    page.evaluate(
+    safe_evaluate(
+        page,
         """
         () => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -263,8 +287,10 @@ def ensure_attachments_expanded(page) -> None:
         () => {
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const viewModel = view && view.getModel && view.getModel('view');
-          return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'))
-            && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
+          const expanded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'));
+          const historyLoaded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
+          const uploaderReady = !!document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu');
+          return expanded && (historyLoaded || uploaderReady);
         }
         """,
         timeout=30000,
@@ -354,7 +380,8 @@ def main() -> int:
 
             save_before = detail_state(page)
             save_request_count_before = len(matching_requests(network, "SaveChanges"))
-            save_call = page.evaluate(
+            save_call = safe_evaluate(
+                page,
                 """
                 () => new Promise((resolve, reject) => {
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
@@ -398,7 +425,8 @@ def main() -> int:
 
             autosave_before = detail_state(page)
             autosave_request_count_before = len(matching_requests(network, "AutoSave"))
-            autosave_call = page.evaluate(
+            autosave_call = safe_evaluate(
+                page,
                 """
                 () => new Promise((resolve, reject) => {
                   sap.ui.require(['checklist/app/util/DeltaPayloadBuilder'], function (DeltaPayloadBuilder) {
@@ -464,7 +492,8 @@ def main() -> int:
             ) + len(
                 matching_requests(network, "WorkflowAnalyticsBreakdownSet")
             )
-            analytics_state = page.evaluate(
+            analytics_state = safe_evaluate(
+                page,
                 """
                 () => {
                   const core = sap.ui.getCore();
@@ -524,7 +553,8 @@ def main() -> int:
             wait_for_search_ready(page)
             page.wait_for_timeout(1600)
             after_release = len(matching_requests(network, "LockRelease"))
-            back_to_search = page.evaluate(
+            back_to_search = safe_evaluate(
+                page,
                 """
                 () => {
                   return {

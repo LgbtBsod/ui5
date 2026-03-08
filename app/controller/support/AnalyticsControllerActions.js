@@ -68,10 +68,19 @@ sap.ui.define([
                 FAILED_BARRIERS: "failedBarriersByBukrs"
             }
         },
+        ORGUNIT: {
+            vizType: "bar",
+            metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"],
+            chartKeyByMetric: {
+                FAILED_CHECKS: "failedChecksByOrgunit",
+                FAILED_BARRIERS: "failedBarriersByOrgunit"
+            }
+        },
         BARRIER_NUMBER: {
             vizType: "bar",
-            metricKeys: ["FAILED_BARRIERS"],
+            metricKeys: ["TOTAL", "FAILED_BARRIERS"],
             chartKeyByMetric: {
+                TOTAL: "totalBarriersByBarrierNumber",
                 FAILED_BARRIERS: "failedBarriersByBarrierNumber"
             }
         }
@@ -83,6 +92,7 @@ sap.ui.define([
         LPC: "analyticsDimensionLpc",
         LOCATION: "analyticsDimensionLocation",
         BUKRS: "analyticsDimensionBukrs",
+        ORGUNIT: "analyticsDimensionOrgunit",
         BARRIER_NUMBER: "analyticsDimensionBarrierNumber"
     };
     var BUILDER_METRIC_TEXT_KEY_MAP = {
@@ -110,6 +120,29 @@ sap.ui.define([
     function normalizeBuilderDimension(sDimension) {
         var sResolved = String(sDimension || "").trim().toUpperCase();
         return BUILDER_DIMENSION_RULES[sResolved] ? sResolved : "MONTH";
+    }
+
+    function buildBuilderDimensionOptions(oController, sSource) {
+        var sResolvedSource = String(sSource || "ALL").trim().toUpperCase();
+        var aDimensionKeys = ["MONTH", "SOURCE", "PROFESSION", "LPC", "BARRIER_NUMBER"];
+        if (sResolvedSource !== "INTEGRATION") {
+            aDimensionKeys = aDimensionKeys.concat(["LOCATION", "BUKRS", "ORGUNIT"]);
+        }
+        return aDimensionKeys.map(function (sDimensionKey) {
+            return {
+                key: sDimensionKey,
+                text: getText(oController, BUILDER_DIMENSION_TEXT_KEY_MAP[sDimensionKey], null, sDimensionKey)
+            };
+        });
+    }
+
+    function normalizeBuilderDimensionForSource(sDimension, sSource) {
+        var sResolvedDimension = normalizeBuilderDimension(sDimension);
+        var sResolvedSource = String(sSource || "ALL").trim().toUpperCase();
+        if (sResolvedSource === "INTEGRATION" && ["LOCATION", "BUKRS", "ORGUNIT"].indexOf(sResolvedDimension) >= 0) {
+            return "MONTH";
+        }
+        return sResolvedDimension;
     }
 
     function normalizeBuilderMetric(sDimension, sMetric) {
@@ -155,11 +188,15 @@ sap.ui.define([
             comparisonMetric: "FAILED_CHECKLISTS",
             builderDimension: "MONTH",
             builderMetric: "FAILED_CHECKLISTS",
+            builderDimensionOptions: [],
             builderMetricOptions: [],
             builderChartRows: [],
             builderChartTitle: "",
             builderVizType: "column",
             builderChartHasData: false,
+            builderSourceHintText: "",
+            compareYearHasData: true,
+            compareYearHintText: "",
             availableYears: [{ key: String(iCurrentYear), text: String(iCurrentYear) }],
             selectedSource: "ALL",
             refreshState: {
@@ -206,9 +243,14 @@ sap.ui.define([
 
         _applyBuilderSelection: function (mOverrides) {
             var oAnalytics = ControllerViewStateRuntime.get(this, "/analytics", {}) || {};
-            var sDimension = normalizeBuilderDimension((mOverrides && mOverrides.dimension) || ControllerViewStateRuntime.get(this, "/builderDimension", "MONTH"));
+            var sSelectedSource = String(ControllerViewStateRuntime.get(this, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
+            var sDimension = normalizeBuilderDimensionForSource(
+                (mOverrides && mOverrides.dimension) || ControllerViewStateRuntime.get(this, "/builderDimension", "MONTH"),
+                sSelectedSource
+            );
             var sMetric = normalizeBuilderMetric(sDimension, (mOverrides && mOverrides.metric) || ControllerViewStateRuntime.get(this, "/builderMetric", "FAILED_CHECKLISTS"));
             var aMetricOptions = buildBuilderMetricOptions(this, sDimension);
+            var aDimensionOptions = buildBuilderDimensionOptions(this, sSelectedSource);
             var aRows = resolveBuilderChartRows(oAnalytics, sDimension, sMetric);
             var sMetricText = getText(this, BUILDER_METRIC_TEXT_KEY_MAP[sMetric], null, sMetric);
             var sDimensionText = getText(this, BUILDER_DIMENSION_TEXT_KEY_MAP[sDimension], null, sDimension);
@@ -216,11 +258,45 @@ sap.ui.define([
             ControllerViewStateRuntime.setMany(this, {
                 "/builderDimension": sDimension,
                 "/builderMetric": sMetric,
+                "/builderDimensionOptions": aDimensionOptions,
                 "/builderMetricOptions": aMetricOptions,
                 "/builderChartRows": aRows,
                 "/builderChartTitle": getText(this, "analyticsBuilderTitlePattern", [sMetricText, sDimensionText], sMetricText + " by " + sDimensionText),
                 "/builderVizType": BUILDER_DIMENSION_RULES[sDimension].vizType,
                 "/builderChartHasData": Array.isArray(aRows) && aRows.length > 0
+            });
+        },
+
+        _syncAnalyticsContextHints: function () {
+            var oAnalytics = ControllerViewStateRuntime.get(this, "/analytics", {}) || {};
+            var sSelectedSource = String(ControllerViewStateRuntime.get(this, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
+            var sBuilderDimension = String(ControllerViewStateRuntime.get(this, "/builderDimension", "MONTH") || "MONTH").trim().toUpperCase();
+            var iSelectedYear = Number(oAnalytics.selectedYear || 0);
+            var iCompareYear = Number(ControllerViewStateRuntime.get(this, "/compareYear", 0) || 0);
+            var bCompareYearHasData = iSelectedYear === iCompareYear || !!oAnalytics.compareYearHasData;
+            var sCompareYearHintText = bCompareYearHasData
+                ? ""
+                : getText(this, "analyticsCompareYearNoData", [String(iCompareYear || "")], "No aggregated data for compare year " + String(iCompareYear || ""));
+            var sBuilderSourceHintText = "";
+            if (sSelectedSource === "INTEGRATION") {
+                sBuilderSourceHintText = getText(
+                    this,
+                    "analyticsIntegrationDimensionsNote",
+                    [],
+                    "Integration data can be analysed by month, LPC, profession, source and barrier number until enrichment fills BUKRS, location and observer org unit."
+                );
+            } else if (sSelectedSource === "ALL" && ["LOCATION", "BUKRS", "ORGUNIT"].indexOf(sBuilderDimension) >= 0) {
+                sBuilderSourceHintText = getText(
+                    this,
+                    "analyticsWebEnrichedDimensionsNote",
+                    [],
+                    "Web-enriched dimensions exclude incomplete integration records until enrichment fills BUKRS, location and observer org unit."
+                );
+            }
+            ControllerViewStateRuntime.setMany(this, {
+                "/compareYearHasData": bCompareYearHasData,
+                "/compareYearHintText": sCompareYearHintText,
+                "/builderSourceHintText": sBuilderSourceHintText
             });
         },
 
@@ -270,6 +346,7 @@ sap.ui.define([
                 this._setCompareYearValidation("None", "");
                 this._applyComparisonMetricSelection();
                 this._applyBuilderSelection();
+                this._syncAnalyticsContextHints();
                 return oResult;
             }.bind(this));
         },

@@ -28,6 +28,12 @@
                                 <ToolbarSpacer/>
                                 <ObjectStatus text="{= ${view>/selectedYear} + ' vs ' + ${view>/compareYear} }" state="Information"/>
                             </OverflowToolbar>
+                            <MessageStrip
+                                text="{view>/compareYearHintText}"
+                                type="Information"
+                                showIcon="true"
+                                visible="{= !${view>/compareYearHasData} &amp;&amp; !!${view>/compareYearHintText} }"
+                                class="chkFeedbackStrip sapUiTinyMarginBottom"/>
                             <viz:VizFrame
                                 vizType="line"
                                 width="100%"
@@ -109,22 +115,21 @@
                 <VBox class="analyticsBreakdownSection" renderType="Bare">
                     <Panel headerText="{view>/builderChartTitle}" expandable="false" class="analyticsChartPanel">
                         <content>
+                            <MessageStrip
+                                text="{view>/builderSourceHintText}"
+                                type="Information"
+                                showIcon="true"
+                                visible="{= !!${view>/builderSourceHintText} }"
+                                class="chkFeedbackStrip sapUiTinyMarginBottom"/>
                             <OverflowToolbar design="Transparent" class="analyticsBuilderToolbar">
                                 <Label text="{i18n>analyticsBuilderDimensionLabel}" labelFor="analyticsBuilderDimensionSelect"/>
                                 <Select
                                     id="analyticsBuilderDimensionSelect"
                                     width="14rem"
                                     selectedKey="{view>/builderDimension}"
-                                    change=".onSelectAnalyticsBuilderDimension">
-                                    <items>
-                                        <core:Item key="MONTH" text="{i18n>analyticsDimensionMonth}"/>
-                                        <core:Item key="SOURCE" text="{i18n>analyticsDimensionSource}"/>
-                                        <core:Item key="PROFESSION" text="{i18n>analyticsDimensionProfession}"/>
-                                        <core:Item key="LPC" text="{i18n>analyticsDimensionLpc}"/>
-                                        <core:Item key="LOCATION" text="{i18n>analyticsDimensionLocation}"/>
-                                        <core:Item key="BUKRS" text="{i18n>analyticsDimensionBukrs}"/>
-                                        <core:Item key="BARRIER_NUMBER" text="{i18n>analyticsDimensionBarrierNumber}"/>
-                                    </items>
+                                    change=".onSelectAnalyticsBuilderDimension"
+                                    items="{view>/builderDimensionOptions}">
+                                    <core:Item key="{view>key}" text="{view>text}"/>
                                 </Select>
                                 <Label text="{i18n>analyticsBuilderMetricLabel}" labelFor="analyticsBuilderMetricSelect"/>
                                 <Select
@@ -327,6 +332,28 @@
                                 </viz:feeds>
                             </viz:VizFrame>
                             <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByBukrs} }" class="analyticsChartEmpty"/>
+                        </content>
+                    </Panel>
+
+                    <Panel headerText="{i18n>analyticsFailedChecksByOrgunit}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                        <content>
+                            <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/failedChecksByOrgunit}">
+                                <viz:dataset>
+                                    <vizData:FlattenedDataset data="{view>/analytics/charts/failedChecksByOrgunit}">
+                                        <vizData:dimensions>
+                                            <vizData:DimensionDefinition name="Observer org unit" value="{view>label}"/>
+                                        </vizData:dimensions>
+                                        <vizData:measures>
+                                            <vizData:MeasureDefinition name="Failed checks" value="{view>value}"/>
+                                        </vizData:measures>
+                                    </vizData:FlattenedDataset>
+                                </viz:dataset>
+                                <viz:feeds>
+                                    <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed checks"/>
+                                    <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Observer org unit"/>
+                                </viz:feeds>
+                            </viz:VizFrame>
+                            <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByOrgunit} }" class="analyticsChartEmpty"/>
                         </content>
                     </Panel>
 

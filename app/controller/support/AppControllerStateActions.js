@@ -112,7 +112,7 @@ sap.ui.define([
             sAutosaveState = LayoutStateRuntime.readAutosaveState(oState, "IDLE");
             oCurrentUser = ModelStateRuntime.read(this, "state", "/currentUser", {}) || {};
             sUser = String(oCurrentUser.uname || "").trim();
-            sFullName = String(oCurrentUser.fullName || sUser || getText(this, "shellUserMissing", null, "User login required"));
+            sFullName = String(oCurrentUser.fullName || sUser || getText(this, "shellUserMissing", null, "Session profile unavailable"));
             aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
             aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
             bShowHints = !!ModelStateRuntime.read(this, "layout", "/personalization/showHints", false);

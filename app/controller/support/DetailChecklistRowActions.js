@@ -143,10 +143,6 @@ sap.ui.define([
 
         onDialogClosed: function () {
             DetailCommandPolicy.resolveConflict(this, { intent: "dialogClosed" });
-        },
-
-        onCloseWorkflowAnalytics: function () {
-            return null;
         }
     };
 });

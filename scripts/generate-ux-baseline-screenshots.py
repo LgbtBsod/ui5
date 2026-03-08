@@ -164,11 +164,10 @@ def action_detail(page: Page) -> None:
     open_detail(page)
 
 
-def action_analytics_dialog(page: Page) -> None:
-    page.goto(URL, wait_until="networkidle", timeout=90000)
+def action_analytics_page(page: Page) -> None:
+    page.goto(f"{URL}#/analytics", wait_until="networkidle", timeout=90000)
     wait_for_app_ready(page, 1200)
-    call_controller(page, "checklist_app_comp---app--searchPaneHost", "onOpenWorkflowAnalytics")
-    page.wait_for_selector(".sapMDialog", timeout=10000)
+    page.wait_for_selector(".analyticsScreenContent", timeout=12000)
     wait_ui(page, 1200)
 
 
@@ -197,7 +196,7 @@ def build_matrix(paths: dict[str, dict[str, pathlib.Path]]) -> dict:
     flow_map = {
         "search": "search",
         "detail": "detail",
-        "dialogs": "analytics-dialog",
+        "analytics": "analytics-page",
     }
     flows = {}
     for flow, state in flow_map.items():
@@ -221,7 +220,7 @@ def main() -> int:
     states = {
         "search": (action_search, "#checklist_app_comp---app--searchPaneHost"),
         "detail": (action_detail, "#checklist_app_comp---app--detailPaneHost"),
-        "analytics-dialog": (action_analytics_dialog, "#checklist_app_comp---app--searchPaneHost--workflowAnalyticsDialog"),
+        "analytics-page": (action_analytics_page, ".analyticsScreenContent"),
         "checks-dialog": (action_checks_dialog, "#checklist_app_comp---app--detailPaneHost--checksExpandedDialog"),
         "barriers-dialog": (action_barriers_dialog, "#checklist_app_comp---app--detailPaneHost--barriersExpandedDialog"),
         "location-dialog": (action_location_dialog, "#checklist_app_comp---app--detailPaneHost--locationValueHelpDialog"),

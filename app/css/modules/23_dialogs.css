@@ -647,11 +647,6 @@ body.chkAppRoot.appDark .chkApp .dialogDataTable {
   box-shadow: var(--theme-rail-shadow);
 }
 
-.chkApp .searchAnalyticsDialogInfo,
-.chkApp .searchAnalyticsDialogError {
-  margin-bottom: 0;
-}
-
 .chkApp .analyticsToplineGrid {
   gap: 0.78rem;
 }

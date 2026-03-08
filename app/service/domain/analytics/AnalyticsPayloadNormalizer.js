@@ -97,6 +97,12 @@ sap.ui.define([
         });
     }
 
+    function hasAnyChartValue(aRows) {
+        return (Array.isArray(aRows) ? aRows : []).some(function (oRow) {
+            return toNumber(oRow && oRow.value) > 0;
+        });
+    }
+
     function buildMonthlyMatrixRows(aRows, iSelectedYear, iCompareYear) {
         var aMetricDefs = [
             { key: "TOTAL", selectedProp: "selectedTotal", compareProp: "compareTotal" },
@@ -154,9 +160,12 @@ sap.ui.define([
         var aFailedBarriersByLocation = normalizeChartRows(o.charts && o.charts.failedBarriersByLocation);
         var aFailedChecksByBukrs = normalizeChartRows(o.charts && o.charts.failedChecksByBukrs);
         var aFailedBarriersByBukrs = normalizeChartRows(o.charts && o.charts.failedBarriersByBukrs);
+        var aFailedChecksByOrgunit = normalizeChartRows(o.charts && o.charts.failedChecksByOrgunit);
+        var aFailedBarriersByOrgunit = normalizeChartRows(o.charts && o.charts.failedBarriersByOrgunit);
         var aTotalBySource = normalizeChartRows(o.charts && o.charts.totalBySource);
         var aFailedChecksBySource = normalizeChartRows(o.charts && o.charts.failedChecksBySource);
         var aFailedBarriersBySource = normalizeChartRows(o.charts && o.charts.failedBarriersBySource);
+        var aTotalBarriersByBarrierNumber = normalizeChartRows(o.charts && o.charts.totalBarriersByBarrierNumber);
         var aFailedBarriersByBarrierNumber = normalizeChartRows(o.charts && o.charts.failedBarriersByBarrierNumber);
         var iSelectedYear = toNumber(o.selectedYear || o.SelectedYear);
         var iCompareYear = toNumber(o.compareYear || o.CompareYear || o.previousYear || o.PreviousYear);
@@ -195,6 +204,7 @@ sap.ui.define([
             refreshedAt: formatAnalyticsDateTime(o.refreshedAt || o.RefreshedAt || ""),
             source: String(o.source || o.Source || "ALL"),
             sourceText: String(o.sourceText || o.SourceText || o.source || o.Source || "All"),
+            compareYearHasData: hasAnyChartValue(o.comparisonCharts && o.comparisonCharts.monthlyTotal),
             refreshState: normalizeRefreshState(o.refreshState),
             monthlyComparison: aMonthlyComparison,
             monthlyMatrixRows: aMonthlyMatrixRows,
@@ -209,9 +219,12 @@ sap.ui.define([
                 failedBarriersByLocation: aFailedBarriersByLocation,
                 failedChecksByBukrs: aFailedChecksByBukrs,
                 failedBarriersByBukrs: aFailedBarriersByBukrs,
+                failedChecksByOrgunit: aFailedChecksByOrgunit,
+                failedBarriersByOrgunit: aFailedBarriersByOrgunit,
                 totalBySource: aTotalBySource,
                 failedChecksBySource: aFailedChecksBySource,
                 failedBarriersBySource: aFailedBarriersBySource,
+                totalBarriersByBarrierNumber: aTotalBarriersByBarrierNumber,
                 failedBarriersByBarrierNumber: aFailedBarriersByBarrierNumber,
                 monthlyTotal: normalizeChartRows(o.charts && o.charts.monthlyTotal),
                 monthlyFailedChecks: normalizeChartRows(o.charts && o.charts.monthlyFailedChecks),
@@ -228,9 +241,12 @@ sap.ui.define([
                 failedBarriersByLocation: aFailedBarriersByLocation.length > 0,
                 failedChecksByBukrs: aFailedChecksByBukrs.length > 0,
                 failedBarriersByBukrs: aFailedBarriersByBukrs.length > 0,
+                failedChecksByOrgunit: aFailedChecksByOrgunit.length > 0,
+                failedBarriersByOrgunit: aFailedBarriersByOrgunit.length > 0,
                 totalBySource: aTotalBySource.length > 0,
                 failedChecksBySource: aFailedChecksBySource.length > 0,
                 failedBarriersBySource: aFailedBarriersBySource.length > 0,
+                totalBarriersByBarrierNumber: aTotalBarriersByBarrierNumber.length > 0,
                 failedBarriersByBarrierNumber: aFailedBarriersByBarrierNumber.length > 0,
                 monthlyComparison: aMonthlyComparison.length > 0,
                 comparisonChart: mComparisonMetricSeries.FAILED_CHECKS.length > 0

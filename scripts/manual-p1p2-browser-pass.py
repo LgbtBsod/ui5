@@ -522,7 +522,7 @@ def run_shell_overlay_crawl(
         {"name": "notifications", "selector": ".shellActionBtn", "index": 0, "overlaySuffix": "shellNotificationsPopover-popover", "kind": "popover"},
         {"name": "help", "selector": ".shellActionBtn", "index": 1, "overlaySuffix": "shellHelpPopover-popover", "kind": "popover"},
         {"name": "settings", "selector": ".shellActionBtn", "index": 2, "overlaySuffix": "shellSettingsPopover-popover", "kind": "popover"},
-        {"name": "analytics", "selector": ".shellActionBtn", "index": 3, "overlaySuffix": "workflowAnalyticsDialog", "kind": "dialog"},
+        {"name": "analytics", "selector": ".shellActionBtn", "index": 3, "routeHash": "#/analytics", "routeSelector": ".analyticsScreenContent", "kind": "route"},
         {"name": "user", "selector": ".shellUserBtn", "index": 0, "overlaySuffix": "shellUserPopover-popover", "kind": "popover"},
     ]
 
@@ -532,16 +532,21 @@ def run_shell_overlay_crawl(
             "name": step["name"],
             "selector": step["selector"],
             "index": step["index"],
-            "overlaySuffix": step["overlaySuffix"],
             "kind": step["kind"],
         }
         passed = False
         screenshot_rel = ""
         try:
             page.locator(str(step["selector"])).nth(int(step["index"])).click(timeout=12000)
-            page.wait_for_selector(f"[id$='{step['overlaySuffix']}']", timeout=18000)
-            page.wait_for_timeout(320)
-            opened = is_overlay_visible_by_suffix(page, str(step["overlaySuffix"]))
+            if step["kind"] == "route":
+                page.wait_for_url(f"**{step['routeHash']}", timeout=18000)
+                page.wait_for_selector(str(step["routeSelector"]), timeout=18000)
+                page.wait_for_timeout(320)
+                opened = step["routeHash"] in page.url
+            else:
+                page.wait_for_selector(f"[id$='{step['overlaySuffix']}']", timeout=18000)
+                page.wait_for_timeout(320)
+                opened = is_overlay_visible_by_suffix(page, str(step["overlaySuffix"]))
             details["opened"] = opened
 
             screenshot_path = ARTIFACT_DIR / f"shell-{step['name']}-open.png"
@@ -602,21 +607,20 @@ def run_shell_overlay_crawl(
                 )
                 details["closeViaController"] = close_result
                 page.wait_for_timeout(260)
-            if step["kind"] == "dialog" and is_overlay_visible_by_suffix(page, str(step["overlaySuffix"])):
-                if page.locator("[id$='workflowAnalyticsCloseButton']").count() > 0:
-                    page.click("[id$='workflowAnalyticsCloseButton']", timeout=5000)
-                    page.wait_for_timeout(250)
+            if step["kind"] == "route" and step["routeHash"] in page.url:
+                page.go_back(wait_until="networkidle", timeout=12000)
+                page.wait_for_timeout(320)
             if step["kind"] == "popover":
                 page.wait_for_timeout(700)
-            closed = not is_overlay_visible_by_suffix(page, str(step["overlaySuffix"]))
+            closed = (step["routeHash"] not in page.url) if step["kind"] == "route" else (not is_overlay_visible_by_suffix(page, str(step["overlaySuffix"])))
             details["closed"] = closed
             passed = bool(opened and closed)
         except Exception as exc:  # noqa: BLE001
             details["error"] = str(exc)
 
         step_result = {
-            "category": "menu-shell" if step["name"] != "analytics" else "dialog-shell",
-            "action": f"open {step['name']} overlay and close with Escape",
+            "category": "menu-shell" if step["name"] != "analytics" else "route-shell",
+            "action": f"open {step['name']} {'route and return' if step['kind'] == 'route' else 'overlay and close with Escape'}",
             "passed": passed,
             "screenshot": screenshot_rel,
             "details": details,

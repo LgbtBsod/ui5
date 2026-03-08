@@ -58,6 +58,7 @@ Generated from runtime root: `app`.
   - `checklist/app/service/framework/ModelStateRuntime` -> `service/framework/ModelStateRuntime` [Util]
   - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
 - `controller/support/AnalyticsControllerActions.js`
+  - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
   - `checklist/app/service/domain/analytics/AnalyticsFacade` -> `service/domain/analytics/AnalyticsFacade` [Usecases]
   - `checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer` -> `service/domain/analytics/AnalyticsPayloadNormalizer` [Usecases]
   - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
@@ -231,7 +232,6 @@ Generated from runtime root: `app`.
 - `controller/support/SearchControllerActions.js`
   - `checklist/app/controller/support/ControllerResourceCleanup` -> `controller/support/ControllerResourceCleanup` [Controllers]
   - `checklist/app/service/domain/search/SearchFacade` -> `service/domain/search/SearchFacade` [Usecases]
-  - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
   - `checklist/app/service/framework/ControllerRouteRuntime` -> `service/framework/ControllerRouteRuntime` [Util]
   - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]
   - `checklist/app/service/framework/ModelStateRuntime` -> `service/framework/ModelStateRuntime` [Util]
@@ -263,7 +263,6 @@ Generated from runtime root: `app`.
   - `checklist/app/controller/support/SearchCommandPolicy` -> `controller/support/SearchCommandPolicy` [Controllers]
   - `checklist/app/service/framework/FocusRuntime` -> `service/framework/FocusRuntime` [Util]
   - `checklist/app/service/framework/ControlStyleRuntime` -> `service/framework/ControlStyleRuntime` [Util]
-  - `checklist/app/service/framework/DialogOrchestrator` -> `service/framework/DialogOrchestrator` [Util]
   - `checklist/app/service/framework/NavigationIntentService` -> `service/framework/NavigationIntentService` [Util]
   - `checklist/app/controller/base/ControllerTextRuntime` -> `controller/base/ControllerTextRuntime` [Controllers]
   - `checklist/app/service/framework/ControllerViewStateRuntime` -> `service/framework/ControllerViewStateRuntime` [Util]

@@ -25,16 +25,21 @@ sap.ui.define([], function () {
     function getText(oController, sTextKey, aArgs, sFallback) {
         var oBundle;
         var sKey = String(sTextKey || "");
+        var aResolvedArgs = Array.isArray(aArgs) ? aArgs : [];
+        var sResolvedText = "";
         if (!sKey) {
             return String(sFallback || "");
         }
         oBundle = resolveBundle(oController);
         try {
-            if (oBundle && oBundle.hasText && oBundle.hasText(sKey) && oBundle.getText) {
-                return oBundle.getText(sKey, Array.isArray(aArgs) ? aArgs : []);
+            if (oBundle && oBundle.getText) {
+                sResolvedText = String(oBundle.getText(sKey, aResolvedArgs) || "");
+                if (sResolvedText && sResolvedText !== sKey) {
+                    return sResolvedText;
+                }
             }
-            if (oBundle && !oBundle.hasText && oBundle.getText) {
-                return oBundle.getText(sKey, Array.isArray(aArgs) ? aArgs : []);
+            if (oBundle && oBundle.hasText && oBundle.hasText(sKey) && oBundle.getText) {
+                return String(oBundle.getText(sKey, aResolvedArgs) || "");
             }
         } catch (_e3) {
             return String(sFallback || sKey);

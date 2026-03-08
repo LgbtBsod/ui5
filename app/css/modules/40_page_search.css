@@ -6,11 +6,6 @@
 .chkApp .searchResultsExperienceShell,
 .chkApp .searchResultsTable,
 .chkApp .searchStatusStripStack,
-.chkApp .searchAnalyticsDialogBody {
-  width: 100%;
-  min-width: 0;
-}
-
 .chkApp .searchFilterExperienceShell,
 .chkApp .searchResultsExperienceShell,
 .chkApp .searchFilterCardDense,
@@ -492,11 +487,6 @@
 
 .chkApp .searchBusyPictogramFour {
   animation-delay: 0.42s, 0.42s;
-}
-
-.chkApp .searchAnalyticsDialogBody {
-  display: grid;
-  gap: 1rem;
 }
 
 .chkApp .searchStatusStripStack {

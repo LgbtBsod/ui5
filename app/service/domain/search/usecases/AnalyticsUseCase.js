@@ -1,7 +1,9 @@
 sap.ui.define([
     "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result"
-], function (UseCase, Result) {
+    "checklist/app/service/framework/Result",
+    "checklist/app/service/framework/Effects",
+    "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer"
+], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer) {
     "use strict";
 
     function AnalyticsUseCase() {
