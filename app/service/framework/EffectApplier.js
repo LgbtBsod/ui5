@@ -14,6 +14,7 @@ sap.ui.define([
 
     var DIALOG_CLASS = "glassDialog";
     var TOAST_CLASS = "glassToast";
+    var TOAST_LEVEL_CLASS_PREFIX = "glassToast--";
     var TOAST_DEDUPE_MS = 2500;
     var DIALOG_VARIANT_HANDLERS = {
         warning: MessageBox.warning,
@@ -54,8 +55,10 @@ sap.ui.define([
             mToastTimeline[sToastKey] = iNow;
         }
         if (sText) {
+            var sLevel = String((oEffect && oEffect.level) || "info").toLowerCase();
+            var sClassName = [TOAST_CLASS, TOAST_LEVEL_CLASS_PREFIX + sLevel].join(" ");
             MessageToast.show(String(sText), {
-                className: TOAST_CLASS,
+                className: sClassName,
                 duration: 3000
             });
         }

@@ -151,3 +151,19 @@ body.chkAppRoot.appDark,
     animation: none;
   }
 }
+
+
+/* 2026-03 follow-up: inline skeleton in current layout */
+.appSkeletonFormSectionInline {
+  width: 100%;
+  padding: 0.72rem 0.78rem;
+}
+
+.appSkeletonFormSectionInline .appSkeletonTableHeader,
+.appSkeletonFormSectionInline .appSkeletonTableRow {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.appSkeletonFormSectionInline .appSkeletonTableRow {
+  margin-top: 0.5rem;
+}

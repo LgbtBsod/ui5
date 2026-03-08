@@ -17,7 +17,7 @@
   background:
     radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.16), transparent 42%),
     linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 46%),
-    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+    var(--theme-block-bg);
   box-shadow:
     0 22px 48px rgba(18, 36, 64, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
@@ -120,7 +120,7 @@
   width: clamp(7rem, 18vw, 10rem);
   height: clamp(7rem, 18vw, 10rem);
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, rgba(var(--accent-rgb), 0.18) 78%, transparent);
+  border: 0;
   background:
     radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.24), transparent 52%),
     linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 86%, transparent), color-mix(in srgb, var(--surface-3) 90%, transparent));
@@ -145,8 +145,8 @@
 .chkApp .accessDeniedMetaTag {
   padding: 0.3rem 0.82rem;
   border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  border: 0;
+  background: var(--theme-block-bg);
 }
 
 .chkApp .accessDeniedBackendMessage {
@@ -173,10 +173,8 @@
 /* 2026-03 analytics visual pass */
 .chkApp .analyticsHeroCard,
 .chkApp .accessDeniedHeroCard {
-  border: 1px solid color-mix(in srgb, var(--border-soft) 20%, transparent);
-  background:
-    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.08), transparent 42%),
-    color-mix(in srgb, var(--surface-1) 18%, transparent);
+  border: 0;
+  background: var(--theme-block-bg);
   box-shadow: none;
 }
 
@@ -184,8 +182,8 @@
 .chkApp .analyticsChartPanel,
 .chkApp .analyticsScreenBody .sapMPanel,
 .chkApp .analyticsScreenBody .sapMGT {
-  border: 1px solid color-mix(in srgb, var(--border-soft) 18%, transparent);
-  background: color-mix(in srgb, var(--surface-1) 18%, transparent);
+  border: 0;
+  background: var(--theme-block-bg);
   box-shadow: none;
 }
 
@@ -206,8 +204,8 @@
 .chkApp .analyticsBuilderToolbar {
   padding: 0.35rem 0.42rem;
   border-radius: calc(var(--radius-lg) - 0.22rem);
-  border: 1px solid color-mix(in srgb, var(--border-soft) 12%, transparent);
-  background: color-mix(in srgb, var(--theme-rail-bg) 18%, transparent);
+  border: 0;
+  background: var(--theme-block-bg);
 }
 
 .chkApp .analyticsScreenContent .sapMInputBaseContentWrapper,

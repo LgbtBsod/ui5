@@ -161,7 +161,7 @@
   position: relative;
   padding: 1rem;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--border-soft) 42%, transparent);
+  border: 0;
   box-shadow: none;
 }
 
@@ -171,7 +171,7 @@
     radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.14), transparent 38%),
     radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.12), transparent 42%),
     linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 44%),
-    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+    var(--theme-block-bg);
   transition: transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
@@ -221,7 +221,7 @@
   padding: 0.28rem 0.78rem;
   border: 1px solid var(--status-chip-border, var(--theme-chip-border));
   background: var(--status-chip-bg, var(--theme-chip-bg));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  box-shadow: none;
 }
 
 .chkApp .uxStatChip {
@@ -471,8 +471,8 @@
 }
 
 .chkApp .detailSectionCard .toolbarTransparent {
-  border: 1px solid color-mix(in srgb, var(--border-soft) 12%, transparent);
-  background: color-mix(in srgb, var(--theme-rail-bg) 18%, transparent);
+  border: 0;
+  background: var(--theme-block-bg);
 }
 
 .chkApp .appLayoutSplit #detailPaneHost .detailTableExperienceCard,
@@ -909,7 +909,7 @@
   background:
     radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.16), transparent 34%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(248, 252, 255, 0.08)),
-    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+    var(--theme-block-bg);
 }
 
 .chkApp .detailAccessDeniedSceneVisual,
@@ -2915,7 +2915,7 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   overflow: visible;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04) 46%),
-    linear-gradient(180deg, var(--surface-1), var(--surface-2));
+    var(--theme-block-bg);
   box-shadow:
     0 22px 48px rgba(18, 36, 64, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
@@ -3118,4 +3118,43 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   border-color: transparent;
   background: color-mix(in srgb, var(--theme-rail-bg) 82%, transparent);
   box-shadow: none;
+}
+
+
+/* 2026-03 follow-up: detail card/subsection cleanup + expandable comments */
+.chkApp .detailControlInlineCard,
+.chkApp .detailSectionCard,
+.chkApp .detailTableExperienceCard,
+.chkApp .detailSectionBody,
+.chkApp .detailContent .sapUxAPObjectPageSubSection,
+.chkApp .detailContent .sapUxAPSubSectionContent,
+.chkApp .detailContent .sapUxAPBlockContainer {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+}
+
+.chkApp .flatEditorTable .commentExpandableField,
+.chkApp .flatEditorGridTable .commentExpandableField {
+  width: 100%;
+}
+
+.chkApp .commentExpandableField textarea {
+  min-height: 2rem;
+  transition: min-height 180ms ease;
+}
+
+.chkApp .commentExpandableField:focus-within textarea {
+  min-height: 4rem;
+}
+
+
+/* 2026-03 follow-up: compact date/time/timezone in 3 rows */
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.42rem;
+}
+
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid .sapMSlt {
+  grid-column: auto;
 }

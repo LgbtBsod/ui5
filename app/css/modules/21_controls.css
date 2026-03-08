@@ -3,7 +3,7 @@
   overflow: hidden;
 }
 
-.chkApp .themeDockSwitch {
+body.chkAppRoot .chkApp .themeDockSwitch {
   position: relative;
   z-index: 1;
   display: inline-flex;
@@ -13,9 +13,9 @@
   height: 2.15rem;
   padding: 0.18rem;
   border-radius: 999px;
-  border: 1px solid var(--border-soft);
+  border: 0;
   background: var(--theme-toggle-shell-bg);
-  box-shadow: var(--theme-toggle-shell-shadow);
+  box-shadow: none;
   backdrop-filter: blur(18px) saturate(136%);
   -webkit-backdrop-filter: blur(18px) saturate(136%);
   cursor: pointer;
@@ -28,7 +28,7 @@
   box-shadow: var(--focus-ring), var(--shadow-soft);
 }
 
-.chkApp .themeDockSwitchTrack {
+body.chkAppRoot .chkApp .shellThemeToggle .themeDockSwitchTrack {
   position: relative;
   display: block;
   width: 100%;
@@ -36,7 +36,7 @@
   overflow: hidden;
   border-radius: inherit;
   background: var(--theme-toggle-track-bg);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.24), inset 0 -3px 8px rgba(15, 30, 56, 0.12);
+  box-shadow: none;
   transition: background 220ms ease, box-shadow 220ms ease;
 }
 
@@ -50,16 +50,17 @@
   transition: opacity 220ms ease, transform 220ms ease;
 }
 
-.chkApp .themeDockSwitchThumb {
+body.chkAppRoot .chkApp .shellThemeToggle .themeDockSwitchThumb {
   position: absolute;
-  top: 0.14rem;
+  top: 50%;
   left: 0.16rem;
   width: 1.52rem;
   height: 1.52rem;
   border-radius: 50%;
   background: var(--theme-toggle-thumb-bg);
-  box-shadow: var(--theme-toggle-thumb-shadow);
-  transition: transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1), background 220ms ease, box-shadow 220ms ease;
+  box-shadow: none;
+  transition: transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1), background 220ms ease;
+  transform: translateY(-50%);
 }
 
 .chkApp .themeDockSwitchIcon {
@@ -119,8 +120,8 @@
   background: var(--theme-toggle-track-bg);
 }
 
-.chkApp .themeDockSwitch.isDark .themeDockSwitchThumb {
-  transform: translate3d(1.78rem, 0, 0);
+body.chkAppRoot .chkApp .shellThemeToggle .themeDockSwitch.isDark .themeDockSwitchThumb {
+  transform: translate3d(1.78rem, -50%, 0);
   background: var(--theme-toggle-thumb-bg);
 }
 
@@ -303,7 +304,7 @@ body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
   letter-spacing: 0.04em;
 }
 
-body.chkAppRoot.appDark .chkApp .themeDockSwitch {
+body.chkAppRoot.appDark body.chkAppRoot .chkApp .themeDockSwitch {
   box-shadow: var(--theme-toggle-shell-shadow);
 }
 
@@ -770,4 +771,44 @@ body.chkAppRoot.appDark .chkApp .tableActionHeaderLabel {
   .chkApp .tableRowActionBtn .sapMBtnInner {
     width: 100%;
   }
+}
+
+
+/* 2026-03 follow-up: flatten controls and fix theme toggle alignment */
+.chkApp .themeDockSwitch:hover,
+.chkApp .themeDockSwitch:hover .themeDockSwitchThumb,
+.chkApp .shellActionBtn:hover .sapMBtnInner,
+.chkApp .shellUserBtn:hover .sapMBtnInner,
+.chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner,
+.chkApp .detailControlRow .sapMBtn:hover .sapMBtnInner,
+.chkApp .detailSectionAnchorBtn:hover .sapMBtnInner {
+  transform: none;
+  box-shadow: none;
+}
+
+.chkApp .sapMBtn .sapMBtnInner,
+.chkApp .sapMBtnTransparent .sapMBtnInner,
+.chkApp .sapMInputBaseContentWrapper,
+.chkApp .sapMSlt,
+.chkApp .sapMSwt,
+.chkApp .sapMComboBoxBase {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn .sapMBtnIconLeft,
+.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnIconLeft {
+  margin-inline-end: 0;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn .sapMBtnContent,
+.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnContent {
+  line-height: 1.1;
 }

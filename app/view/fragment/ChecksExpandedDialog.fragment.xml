@@ -43,7 +43,7 @@
                         <t:Column>
                             <Label text="{i18n>commentLabel}"/>
                             <t:template>
-                                <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                                <TextArea value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                             </t:template>
                         </t:Column>
                         <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
@@ -77,7 +77,7 @@
                                 <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
                                 <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
                                 <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
-                                <Input value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}"/>
+                                <TextArea value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                 <Button
                                     icon="sap-icon://delete"
                                     text="{i18n>rowActionDelete}"
