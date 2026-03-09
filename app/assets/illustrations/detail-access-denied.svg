@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200" role="img" aria-labelledby="title desc">
+  <title id="title">Access denied</title>
+  <desc id="desc">Illustration for restricted checklist access</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5f8ff"/>
+      <stop offset="100%" stop-color="#e6eefc"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="24" fill="url(#bg)"/>
+  <rect x="64" y="42" width="192" height="116" rx="18" fill="#ffffff" stroke="#c8d8f2" stroke-width="2"/>
+  <circle cx="160" cy="88" r="28" fill="#eef3ff" stroke="#7b91b6" stroke-width="2"/>
+  <path d="M160 73c-7.18 0-13 5.82-13 13v9h26v-9c0-7.18-5.82-13-13-13Zm0 11a4 4 0 1 1 0 8a4 4 0 0 1 0-8Z" fill="#4a648f"/>
+  <rect x="108" y="118" width="104" height="10" rx="5" fill="#d9e5fb"/>
+  <rect x="123" y="136" width="74" height="8" rx="4" fill="#e8effd"/>
+</svg>

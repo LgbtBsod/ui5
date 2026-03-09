@@ -4,7 +4,6 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
-
 from utils.odata import SERVICE_ROOT
 from utils.odata_batch import (
     BatchOperation,

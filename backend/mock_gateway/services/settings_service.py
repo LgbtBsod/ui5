@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from config import FRONTEND_TIMER_TEST_PROFILE, LOCK_TTL
 from repo.settings_repo import SettingsRepo
 
 
@@ -114,18 +115,18 @@ class SettingsService:
         return {
             "Key": "GLOBAL",
             "CacheToleranceMs": SettingsService.GLOBAL_CACHE_TOLERANCE_MS,
-            "HeartbeatIntervalSec": max(1, int((row.heartbeat_ms or 240000) / 1000)),
-            "StatusPollIntervalSec": max(1, int((row.lock_status_ms or 60000) / 1000)),
-            "LockPollingIntervalSec": max(1, int((row.lock_status_ms or 60000) / 1000)),
-            "LockTtlSec": 300,
-            "IdleTimeoutSec": max(1, int((row.idle_ms or 600000) / 1000)),
-            "AutoSaveDebounceMs": int(row.autosave_debounce_ms or 1200),
-            "AutoSaveIntervalMs": int(row.autosave_interval_ms or 60000),
-            "GcdIntervalMs": int(row.gcd_ms or 300000),
-            "NetworkGraceMs": int(row.network_grace_ms or 60000),
-            "CacheFreshMs": int(row.cache_fresh_ms or 30000),
-            "CacheStaleOkMs": int(row.cache_stale_ok_ms or 90000),
-            "AnalyticsRefreshMs": int(row.analytics_refresh_ms or 300000),
+            "HeartbeatIntervalSec": max(1, int((row.heartbeat_ms or FRONTEND_TIMER_TEST_PROFILE["heartbeat_ms"]) / 1000)),
+            "StatusPollIntervalSec": max(1, int((row.lock_status_ms or FRONTEND_TIMER_TEST_PROFILE["lock_status_ms"]) / 1000)),
+            "LockPollingIntervalSec": max(1, int((row.lock_status_ms or FRONTEND_TIMER_TEST_PROFILE["lock_status_ms"]) / 1000)),
+            "LockTtlSec": max(1, int(LOCK_TTL.total_seconds())),
+            "IdleTimeoutSec": max(1, int((row.idle_ms or FRONTEND_TIMER_TEST_PROFILE["idle_ms"]) / 1000)),
+            "AutoSaveDebounceMs": int(row.autosave_debounce_ms or FRONTEND_TIMER_TEST_PROFILE["autosave_debounce_ms"]),
+            "AutoSaveIntervalMs": int(row.autosave_interval_ms or FRONTEND_TIMER_TEST_PROFILE["autosave_interval_ms"]),
+            "GcdIntervalMs": int(row.gcd_ms or FRONTEND_TIMER_TEST_PROFILE["gcd_ms"]),
+            "NetworkGraceMs": int(row.network_grace_ms or FRONTEND_TIMER_TEST_PROFILE["network_grace_ms"]),
+            "CacheFreshMs": int(row.cache_fresh_ms or FRONTEND_TIMER_TEST_PROFILE["cache_fresh_ms"]),
+            "CacheStaleOkMs": int(row.cache_stale_ok_ms or FRONTEND_TIMER_TEST_PROFILE["cache_stale_ok_ms"]),
+            "AnalyticsRefreshMs": int(row.analytics_refresh_ms or FRONTEND_TIMER_TEST_PROFILE["analytics_refresh_ms"]),
             "RequiredFieldsJson": json.dumps(required_fields),
             "UploadPolicyJson": json.dumps(upload_policy),
         }

@@ -159,11 +159,45 @@ body.chkAppRoot.appInvertedBlockScheme .chkApp .kpiCard {
   z-index: 13 !important;
 }
 
-.chkApp .searchSmartToolbarRail,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+.chkApp .searchSmartToolbarRail {
   position: sticky !important;
   top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 12rem)) !important;
   z-index: 12 !important;
+}
+
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  position: sticky !important;
+  top: var(--search-sticky-table-toolbar-top, calc(var(--app-shell-offset) + 15rem)) !important;
+  z-index: 11 !important;
+}
+
+.chkApp .searchResultsTable,
+.chkApp .searchResultsBody {
+  overflow: visible !important;
+}
+
+.chkApp .searchResultsTable .sapMListTblSelCol {
+  display: table-cell !important;
+  width: 2.75rem !important;
+}
+
+.chkApp .searchResultsTable .sapMCb {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.chkApp .searchResultsTable .sapMCbBg {
+  display: inline-block !important;
+}
+
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn,
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMMenuBtnRegular,
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMMenuBtnSplit {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 @media (max-width: 64rem) {

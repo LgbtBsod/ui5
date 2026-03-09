@@ -39,7 +39,7 @@ sap.ui.define([], function () {
         getSmartTableConfig: function () {
             return {
                 columns: ["id", "status", "checks", "barriers", "observer"],
-                selectionMode: "SingleSelectMaster"
+                selectionMode: "MultiSelect"
             };
         },
 

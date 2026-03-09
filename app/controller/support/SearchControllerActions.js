@@ -9,11 +9,12 @@ sap.ui.define([
     "checklist/app/controller/support/SearchLoadRuntimeSupport",
     "checklist/app/controller/support/SearchRateProgress",
     "checklist/app/controller/support/SearchViewSupport",
+    "checklist/app/controller/support/SearchRuntimeDockFix",
     "checklist/app/service/framework/SchedulingRuntime",
     "checklist/app/util/search/SearchMaxResults",
     "checklist/app/controller/support/SearchViewStateSupport",
     "sap/ui/core/Item"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SchedulingRuntime, SearchMaxResults, SearchViewStateSupport, Item) {
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SearchRuntimeDockFix, SchedulingRuntime, SearchMaxResults, SearchViewStateSupport, Item) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -51,6 +52,7 @@ sap.ui.define([
             SearchViewSupport.syncSmartControlAvailability(this);
             SearchViewSupport.bindPowerUserShortcuts(this);
             SearchViewSupport.bindSearchViewportRuntime(this);
+            SearchRuntimeDockFix.bind(this);
         },
 
         onExit: function () {
@@ -101,6 +103,7 @@ sap.ui.define([
 
         _onSearchMatched: function () {
             SearchViewSupport.onSearchMatched(this);
+            SearchRuntimeDockFix.sync(this, true);
         },
 
         _onDetailSearchContextMatched: function (oEvent) {
@@ -110,12 +113,14 @@ sap.ui.define([
                 return;
             }
             SearchViewSupport.onSearchMatched(this);
+            SearchRuntimeDockFix.sync(this, true);
         },
 
         onSmartFilterInitialise: function () {
             ControllerViewStateRuntime.set(this, "/smartFilterReady", true);
             this._bindLocationSuggest();
             SearchCommandPolicy.buildFilter(this, { source: "smartFilterInit" });
+            SearchRuntimeDockFix.bind(this);
         },
 
         _bindLocationSuggest: function () {
@@ -216,11 +221,13 @@ sap.ui.define([
 
         onSmartTableInitialise: function () {
             SearchViewSupport.onSmartTableInitialise(this);
+            SearchRuntimeDockFix.bind(this);
         },
 
         onBeforeSmartTableRebind: function (oEvent) {
             this._syncToolbarRequestInputs();
             SearchViewSupport.onBeforeSmartTableRebind(this, oEvent);
+            SearchRuntimeDockFix.sync(this, false);
         },
 
         onSmartSearch: function () {

@@ -341,7 +341,7 @@
                             class="brandActionBtn brandActionGhost searchExportMenuBtn"
                             icon="sap-icon://excel-attachment">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
+                                <OverflowToolbarLayoutData priority="High" moveToOverflow="true"/>
                             </layoutData>
 
                             <menu>

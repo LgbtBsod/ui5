@@ -1539,6 +1539,7 @@ def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="Ses
 
 @router.get(f"{SERVICE_ROOT}/ChecklistPermissionSet")
 def checklist_permission_set(
+    request: Request,
     filter: str | None = Query(None, alias="$filter"),
     orderby: str | None = Query(None, alias="$orderby"),
     top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"),
@@ -1547,6 +1548,7 @@ def checklist_permission_set(
     uname: str | None = Query(None, alias="Uname"),
     db: Session = Depends(get_db),
 ):
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request, explicit_uname=uname)
     filter = _normalize_filter_hex_keys(filter, fields=("RootKey",))
     rows, total = _apply_order_filter(
         db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)),
@@ -1557,16 +1559,17 @@ def checklist_permission_set(
         top,
         skip,
     )
-    payload = [_to_permission(row, uname, db=db) for row in rows]
+    payload = [_to_permission(row, resolved_uname, db=db) for row in rows]
     return odata_payload(payload, total if inlinecount == "allpages" else None)
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({{entity_key}})")
-def checklist_permission_entity(entity_key: str, uname: str | None = Query(None, alias="Uname"), db: Session = Depends(get_db)):
+def checklist_permission_entity(entity_key: str, request: Request, uname: str | None = Query(None, alias="Uname"), db: Session = Depends(get_db)):
     root, err = _load_root_or_error(db, entity_key)
     if err:
         return err
-    return odata_entity(_to_permission(root, uname, db=db))
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request, explicit_uname=uname)
+    return odata_entity(_to_permission(root, resolved_uname, db=db))
 
 
 def lock_control(payload: dict, db: Session):

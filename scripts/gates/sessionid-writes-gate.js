@@ -4,6 +4,7 @@ const path = require('path');
 
 const root = process.cwd();
 const offenders = [];
+const allowedFiles = new Set(['Component.js', 'app/Component.js']);
 
 function walk(dir) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -13,7 +14,7 @@ function walk(dir) {
     else if (e.isFile() && p.endsWith('.js')) {
       const rel = path.relative(root, p).replace(/\\/g, '/');
       const txt = fs.readFileSync(p, 'utf8');
-      if (/setProperty\(\s*["']\/sessionId["']/.test(txt) && rel !== 'Component.js') offenders.push(rel);
+      if (/setProperty\(\s*["']\/sessionId["']/.test(txt) && !allowedFiles.has(rel)) offenders.push(rel);
     }
   }
 }

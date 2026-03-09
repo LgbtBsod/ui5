@@ -4,6 +4,7 @@ from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Strin
 from sqlalchemy.dialects.sqlite import INTEGER
 from sqlalchemy.orm import relationship
 
+from config import FRONTEND_TIMER_TEST_PROFILE
 from database import Base
 from utils.time import now_utc
 
@@ -275,16 +276,16 @@ class FrontendRuntimeSettings(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     environment = Column(String, nullable=False, default="default")
-    heartbeat_ms = Column(INTEGER, default=240000)
-    lock_status_ms = Column(INTEGER, default=60000)
-    gcd_ms = Column(INTEGER, default=300000)
-    idle_ms = Column(INTEGER, default=600000)
-    autosave_interval_ms = Column(INTEGER, default=60000)
-    autosave_debounce_ms = Column(INTEGER, default=1200)
-    network_grace_ms = Column(INTEGER, default=60000)
-    cache_fresh_ms = Column(INTEGER, default=30000)
-    cache_stale_ok_ms = Column(INTEGER, default=90000)
-    analytics_refresh_ms = Column(INTEGER, default=300000)
+    heartbeat_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["heartbeat_ms"])
+    lock_status_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["lock_status_ms"])
+    gcd_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["gcd_ms"])
+    idle_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["idle_ms"])
+    autosave_interval_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["autosave_interval_ms"])
+    autosave_debounce_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["autosave_debounce_ms"])
+    network_grace_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["network_grace_ms"])
+    cache_fresh_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["cache_fresh_ms"])
+    cache_stale_ok_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["cache_stale_ok_ms"])
+    analytics_refresh_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["analytics_refresh_ms"])
     required_fields_json = Column(Text, default="[]")
     upload_policy_json = Column(Text, default="{}")
     changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)

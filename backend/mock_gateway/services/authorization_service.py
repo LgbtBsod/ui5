@@ -34,12 +34,27 @@ def _granted_operations(can_view: bool, can_edit: bool, can_delete: bool) -> lis
     return ops
 
 
-def _permissions_from_profile(db, user_id: str) -> tuple[bool, bool, bool] | None:
+def _permission_matches_scope(root: ChecklistRoot, permission: dict) -> bool:
+    scope_kind = str((permission or {}).get("scope_kind") or "all").strip().lower()
+    scope_value = str((permission or {}).get("scope_value") or "ALL").strip().upper() or "ALL"
+    if scope_kind == "all" or scope_value == "ALL":
+        return True
+    if scope_kind == "bukrs":
+        root_bukrs = str(getattr(root, "bukrs", "") or "").strip().upper()
+        return bool(root_bukrs) and root_bukrs == scope_value
+    return False
+
+
+def _permissions_from_profile(db, root: ChecklistRoot, user_id: str) -> tuple[bool, bool, bool] | None:
     profile = CurrentUserService.resolve_profile(db, explicit_uname=user_id)
     permissions = list(profile.get("permissions") or [])
     if not permissions:
         return None
-    permission_codes = {str((item or {}).get("code") or "").strip() for item in permissions}
+    permission_codes = {
+        str((item or {}).get("code") or "").strip()
+        for item in permissions
+        if _permission_matches_scope(root, item or {})
+    }
     return (
         "01" in permission_codes,
         "02" in permission_codes,
@@ -68,7 +83,7 @@ class AuthorizationService:
     @staticmethod
     def checklist_permissions(root: ChecklistRoot, user_id: str | None, db=None) -> dict:
         resolved_user = _normalize_user_id(user_id, db=db)
-        resolved_from_profile = _permissions_from_profile(db, resolved_user) if db is not None else None
+        resolved_from_profile = _permissions_from_profile(db, root, resolved_user) if db is not None else None
 
         if resolved_from_profile is not None:
             can_view, can_edit, can_delete = resolved_from_profile

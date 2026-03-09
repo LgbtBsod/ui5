@@ -151,6 +151,28 @@ sap.ui.define([
         return Math.max(0, Math.ceil(oDomRef.getBoundingClientRect().height || 0));
     }
 
+    function resolveDomHeight(vControlOrDom, sSelectorFallback) {
+        var oDomRef = vControlOrDom && vControlOrDom.nodeType ? vControlOrDom : (vControlOrDom && vControlOrDom.getDomRef && vControlOrDom.getDomRef());
+        if ((!oDomRef || !oDomRef.getBoundingClientRect) && typeof document !== "undefined" && sSelectorFallback) {
+            oDomRef = document.querySelector(sSelectorFallback);
+        }
+        if (!oDomRef || !oDomRef.getBoundingClientRect) {
+            return 0;
+        }
+        return Math.max(0, Math.ceil(oDomRef.getBoundingClientRect().height || 0));
+    }
+
+    function resolveSearchTableToolbarDom(oController) {
+        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
+        var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
+        return oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null;
+    }
+
+    function setSearchStickyTop(vControlOrDom, sTop) {
+        var oDomRef = vControlOrDom && vControlOrDom.nodeType ? vControlOrDom : (vControlOrDom && vControlOrDom.getDomRef && vControlOrDom.getDomRef());
+        ThemeDomRuntime.setStyleProperty([oDomRef], "top", sTop);
+    }
+
     function resolveDescendantHeight(oControl, sSelector) {
         var oDomRef = oControl && oControl.getDomRef && oControl.getDomRef();
         var oTarget = oDomRef && oDomRef.querySelector ? oDomRef.querySelector(sSelector) : null;
@@ -190,8 +212,7 @@ sap.ui.define([
     }
 
     function resolveResultsTableToolbarHeight(oController) {
-        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
-        return resolveDescendantHeight(oResultsShell, ".sapUiCompSmartTableToolbar");
+        return resolveDomHeight(resolveSearchTableToolbarDom(oController));
     }
 
     function syncSearchStickyOffsets(oController) {
@@ -200,14 +221,19 @@ sap.ui.define([
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
         var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
+        var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
         var iResultsToolbarHeight = resolveResultsTableToolbarHeight(oController);
-        var iFilterHeight = resolveOuterHeight(oFilterCard);
-        var iActionHeight = resolveOuterHeight(oActionRail);
-        var iToolbarHeight = resolveOuterHeight(oToolbarRail);
+        var iFilterHeight = resolveDomHeight(oFilterCard, ".searchFilterCardDense");
+        var iActionHeight = resolveDomHeight(oActionRail, ".searchResultsActionRail");
+        var iToolbarHeight = resolveDomHeight(oToolbarRail, ".searchSmartToolbarRail");
         var iDockHeight = resolveOuterHeight(oWorkbenchDock);
         var iTopBase = resolveShellHeaderOffset(oController, oScrollHost);
         var iStackGap = 6;
         var iResultsToolbarGap = iResultsToolbarHeight ? 8 : 0;
+        var iActionTop;
+        var iToolbarTop;
+        var iTableToolbarTop;
+        var iHeaderTop;
         if (!iDockHeight) {
             iDockHeight = iFilterHeight + iActionHeight + iToolbarHeight;
             if (iFilterHeight && iActionHeight) {
@@ -217,8 +243,10 @@ sap.ui.define([
                 iDockHeight += iStackGap;
             }
         }
-        var iTableToolbarTop = iTopBase + iDockHeight + 8;
-        var iHeaderTop = iTableToolbarTop + iResultsToolbarHeight + iResultsToolbarGap;
+        iActionTop = iTopBase + iFilterHeight + (iFilterHeight && iActionHeight ? iStackGap : 0);
+        iToolbarTop = iActionTop + iActionHeight + (iActionHeight && iToolbarHeight ? iStackGap : 0);
+        iTableToolbarTop = iToolbarTop + iToolbarHeight + (iToolbarHeight && iResultsToolbarHeight ? iResultsToolbarGap : 8);
+        iHeaderTop = iTableToolbarTop + iResultsToolbarHeight + iResultsToolbarGap;
         setSearchViewportCssVar(oController, "--search-sticky-dock-top", iTopBase + "px");
         setSearchViewportCssVar(
             oController,
@@ -226,11 +254,15 @@ sap.ui.define([
             (iActionHeight + iToolbarHeight + ((iActionHeight && iToolbarHeight) ? iStackGap : 0)) + "px"
         );
         setSearchViewportCssVar(oController, "--search-sticky-filter-top", iTopBase + "px");
-        setSearchViewportCssVar(oController, "--search-sticky-action-top", iTopBase + "px");
-        setSearchViewportCssVar(oController, "--search-sticky-toolbar-top", iTopBase + "px");
+        setSearchViewportCssVar(oController, "--search-sticky-action-top", iActionTop + "px");
+        setSearchViewportCssVar(oController, "--search-sticky-toolbar-top", iToolbarTop + "px");
         setSearchViewportCssVar(oController, "--search-sticky-table-toolbar-top", iTableToolbarTop + "px");
         setSearchViewportCssVar(oController, "--search-smarttable-toolbar-height", iResultsToolbarHeight + "px");
         setSearchViewportCssVar(oController, "--search-sticky-header-top", iHeaderTop + "px");
+        setSearchStickyTop(oFilterCard, iTopBase + "px");
+        setSearchStickyTop(oActionRail, iActionTop + "px");
+        setSearchStickyTop(oToolbarRail, iToolbarTop + "px");
+        setSearchStickyTop(oResultsToolbarDom, iTableToolbarTop + "px");
     }
 
     function scheduleSearchViewportSync(oController, bImmediate) {
@@ -275,8 +307,18 @@ sap.ui.define([
         var oViewDom = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
         var oWorkbenchDock = resolveSearchWorkbenchDock(oController);
         var oWorkbenchDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
+        var oFilterCard = oController.byId && oController.byId("searchFilterCard");
+        var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
+        var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
+        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
         var oShellHeader = typeof document !== "undefined" ? document.querySelector(".appShellHeader") : null;
-        [oViewDom, oScrollHost, oWorkbenchDom, oShellHeader].forEach(function (oTarget) {
+        [oViewDom, oScrollHost, oWorkbenchDom, oShellHeader,
+            oFilterCard && oFilterCard.getDomRef && oFilterCard.getDomRef(),
+            oActionRail && oActionRail.getDomRef && oActionRail.getDomRef(),
+            oToolbarRail && oToolbarRail.getDomRef && oToolbarRail.getDomRef(),
+            oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef(),
+            resolveSearchTableToolbarDom(oController)
+        ].forEach(function (oTarget) {
             if (oTarget && aTargets.indexOf(oTarget) < 0) {
                 aTargets.push(oTarget);
             }
@@ -624,6 +666,67 @@ sap.ui.define([
     function resolveSearchInnerTable(oController) {
         var oSmartTable = oController.byId("searchSmartTable");
         return oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
+    }
+
+    function resolveSearchSelectionMode(oController) {
+        var sSelectionMode = String(
+            ModelStateRuntime.read(oController, "state", "/smartTable/selectionMode", "")
+            || ModelStateRuntime.read(oController, "layout", "/smartTable/selectionMode", "")
+            || "MultiSelect"
+        ).trim() || "MultiSelect";
+        return sSelectionMode === "SingleSelectMaster" ? "MultiSelect" : sSelectionMode;
+    }
+
+    function resolveSearchTableCounts(oInnerTable) {
+        var aItems = oInnerTable && oInnerTable.getItems ? (oInnerTable.getItems() || []) : [];
+        var oBinding = oInnerTable && oInnerTable.getBinding ? oInnerTable.getBinding("items") : null;
+        var iVisibleCount = aItems.length;
+        var iTotalCount = oBinding && oBinding.getLength ? Number(oBinding.getLength()) : iVisibleCount;
+        if (!Number.isFinite(iTotalCount) || iTotalCount < 0) {
+            iTotalCount = iVisibleCount;
+        }
+        return {
+            visibleCount: iVisibleCount,
+            totalCount: iTotalCount,
+            hasRows: iTotalCount > 0 || iVisibleCount > 0
+        };
+    }
+
+    function syncSearchTableRuntimeState(oController, oInnerTable) {
+        var sSelectionMode;
+        var mCounts;
+        if (!oInnerTable) {
+            return null;
+        }
+        sSelectionMode = resolveSearchSelectionMode(oController);
+        if (oInnerTable.setMode) {
+            oInnerTable.setMode(sSelectionMode);
+        }
+        if (oInnerTable.setIncludeItemInSelection) {
+            oInnerTable.setIncludeItemInSelection(true);
+        }
+        mCounts = resolveSearchTableCounts(oInnerTable);
+        ControllerViewStateRuntime.setMany(oController, {
+            "/hasRows": mCounts.hasRows,
+            "/canExport": mCounts.hasRows
+        });
+        return mCounts;
+    }
+
+    function bindSearchTableRuntime(oController, oInnerTable) {
+        if (!oInnerTable || oInnerTable.data("searchRuntimeBound")) {
+            syncSearchTableRuntimeState(oController, oInnerTable);
+            return;
+        }
+        if (oInnerTable.attachUpdateFinished) {
+            oInnerTable.attachUpdateFinished(function () {
+                syncSearchTableRuntimeState(oController, oInnerTable);
+                bindSearchViewportRuntime(oController);
+                scheduleSearchViewportSync(oController, false);
+            });
+        }
+        oInnerTable.data("searchRuntimeBound", true);
+        syncSearchTableRuntimeState(oController, oInnerTable);
     }
 
     function normalizeChecklistIds(aIds) {
@@ -1039,6 +1142,7 @@ sap.ui.define([
     }
 
     function syncSmartControlAvailability(oController) {
+        syncSearchTableRuntimeState(oController, resolveSearchInnerTable(oController));
         ControllerViewStateRuntime.set(oController, "/tableBusy", false);
     }
 
@@ -1098,12 +1202,7 @@ sap.ui.define([
             return;
         }
         configureSearchResultTable(oController, oInnerTable, true);
-        if (oInnerTable.setMode) {
-            oInnerTable.setMode("SingleSelectMaster");
-        }
-        if (oInnerTable.setIncludeItemInSelection) {
-            oInnerTable.setIncludeItemInSelection(true);
-        }
+        bindSearchTableRuntime(oController, oInnerTable);
         if (oInnerTable.removeSelections) {
             oInnerTable.removeSelections(true);
         }
@@ -1147,7 +1246,11 @@ sap.ui.define([
                 if (oCtx && oCtx.smartControls && oCtx.smartControls.getVisibleRows) {
                     aRows = oCtx.smartControls.getVisibleRows() || [];
                 }
+                if (!aRows.length && oInnerTable) {
+                    aRows = oInnerTable.getItems ? (oInnerTable.getItems() || []) : [];
+                }
                 SearchLoadRuntimeSupport.applyLoadSuccess(oController, aRows);
+                syncSearchTableRuntimeState(oController, oInnerTable);
                 bindSearchViewportRuntime(oController);
                 scheduleSearchViewportSync(oController, true);
             }

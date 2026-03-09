@@ -28,6 +28,11 @@ sap.ui.define([
         };
     }
 
+    function readCurrentUserId(oController) {
+        var oStateModel = ModelStateRuntime.model(oController, "state");
+        return String(ModelStateRuntime.readOnModel(oStateModel, "/currentUser/uname", "") || "").trim();
+    }
+
     function clearDetailRuntimeState(oController) {
         ModelStateRuntime.resetDetailWorkflowState(oController);
         ModelStateRuntime.resetDetailRuntimeData(oController);
@@ -60,8 +65,13 @@ sap.ui.define([
         _readCachedGuard: function (sRootId) {
             var oGuard = ModelStateRuntime.read(this, "state", "/detailAccessGuard", {}) || {};
             var sGuardRootId = String(oGuard.rootId || "").trim();
+            var sGuardUserId = String(oGuard.userId || "").trim();
+            var sCurrentUserId = readCurrentUserId(this);
 
             if (sGuardRootId && sGuardRootId === String(sRootId || "").trim()) {
+                if (sCurrentUserId && sGuardUserId && sCurrentUserId !== sGuardUserId) {
+                    return null;
+                }
                 return oGuard;
             }
             return null;

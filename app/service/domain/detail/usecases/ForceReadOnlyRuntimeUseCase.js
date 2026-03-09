@@ -7,19 +7,19 @@ sap.ui.define([
 ], function (UseCase, Result, Effects, StatePaths, CreateSentinel) {
     "use strict";
 
-    function ForceReadOnlyUseCase() {
-        UseCase.call(this, "ForceReadOnlyUseCase");
+    function ForceReadOnlyRuntimeUseCase() {
+        UseCase.call(this, "ForceReadOnlyRuntimeUseCase");
     }
 
-    ForceReadOnlyUseCase.prototype = Object.create(UseCase.prototype);
-    ForceReadOnlyUseCase.prototype.constructor = ForceReadOnlyUseCase;
+    ForceReadOnlyRuntimeUseCase.prototype = Object.create(UseCase.prototype);
+    ForceReadOnlyRuntimeUseCase.prototype.constructor = ForceReadOnlyRuntimeUseCase;
 
     function isLockLostReason(sReason) {
         var sNormalized = String(sReason || "").toUpperCase();
         return sNormalized === "KILLED" || sNormalized === "EXPIRED" || sNormalized === "LOCK_EXPIRED" || sNormalized === "LOST";
     }
 
-    ForceReadOnlyUseCase.prototype.execute = function (mInput, mCtx) {
+    ForceReadOnlyRuntimeUseCase.prototype.execute = function (mInput, mCtx) {
         var sReason = String((mInput && mInput.reason) || "READ_ONLY").trim() || "READ_ONLY";
         var sMessageKey = String((mInput && mInput.messageKey) || "").trim();
         var bPreserveDirty = !!(mInput && mInput.preserveDirty);
@@ -72,5 +72,5 @@ sap.ui.define([
         });
     };
 
-    return ForceReadOnlyUseCase;
+    return ForceReadOnlyRuntimeUseCase;
 });

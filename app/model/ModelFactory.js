@@ -38,7 +38,7 @@ sap.ui.define([
         var oPersonalization = LayoutPersonalizationRuntime.readAll();
         return {
             smartFilter: { useCustomSmartFilters: true, variant: "default", fields: [] },
-            smartTable: { useCustomSmartTable: true, variant: "default", columns: [], selectionMode: "SingleSelectMaster" },
+            smartTable: { useCustomSmartTable: true, variant: "default", columns: [], selectionMode: "MultiSelect" },
             personalization: {
                 compactRows: !!oPersonalization.compactRows,
                 showHints: oPersonalization.showHints !== false,

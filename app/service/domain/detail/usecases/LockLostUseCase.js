@@ -1,13 +1,13 @@
 sap.ui.define([
     "checklist/app/service/framework/UseCase",
     "checklist/app/service/framework/Result",
-    "checklist/app/service/domain/detail/usecases/ForceReadOnlyUseCase"
-], function (UseCase, Result, ForceReadOnlyUseCase) {
+    "checklist/app/service/domain/detail/usecases/ForceReadOnlyRuntimeUseCase"
+], function (UseCase, Result, ForceReadOnlyRuntimeUseCase) {
     "use strict";
 
     function LockLostUseCase() {
         UseCase.call(this, "LockLostUseCase");
-        this._forceReadOnly = new ForceReadOnlyUseCase();
+        this._forceReadOnly = new ForceReadOnlyRuntimeUseCase();
     }
 
     LockLostUseCase.prototype = Object.create(UseCase.prototype);

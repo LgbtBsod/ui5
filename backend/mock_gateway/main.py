@@ -14,7 +14,7 @@ from sqlalchemy import inspect, text
 from api.analytics_api import router as analytics_router
 from api.batch_api import router as batch_router
 from api.gateway_canonical_api import router as gateway_canonical_router
-from config import CORS_ALLOWED_ORIGINS, LOCK_CLEANUP_INTERVAL_SECONDS, METADATA_REFRESH_INTERVAL_SECONDS
+from config import CORS_ALLOWED_ORIGINS, FRONTEND_TIMER_TEST_PROFILE, LOCK_CLEANUP_INTERVAL_SECONDS, METADATA_REFRESH_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.db_seed import seed_reference_data
 from services.analytics_service import AnalyticsService
@@ -333,13 +333,18 @@ async def lifespan(_: FastAPI):
         if not oSettings:
             db.add(FrontendRuntimeSettings(
                 environment="default",
-                autosave_debounce_ms=1200,
                 required_fields_json=json.dumps(DEFAULT_REQUIRED_FIELDS),
-                upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY)
+                upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY),
+                **FRONTEND_TIMER_TEST_PROFILE
             ))
             db.commit()
         else:
             bChanged = False
+            for sKey, vValue in FRONTEND_TIMER_TEST_PROFILE.items():
+                if int(getattr(oSettings, sKey, 0) or 0) == int(vValue):
+                    continue
+                setattr(oSettings, sKey, int(vValue))
+                bChanged = True
             if not str(getattr(oSettings, "required_fields_json", "") or "").strip():
                 oSettings.required_fields_json = json.dumps(DEFAULT_REQUIRED_FIELDS)
                 bChanged = True

@@ -15,7 +15,7 @@ sap.ui.define([
     "checklist/app/service/domain/detail/usecases/ValueHelpLocationUseCase",
     "checklist/app/service/domain/detail/usecases/PersonSuggestUseCase",
     "checklist/app/service/domain/detail/usecases/LockLostUseCase",
-    "checklist/app/service/domain/detail/usecases/ForceReadOnlyUseCase",
+    "checklist/app/service/domain/detail/usecases/ForceReadOnlyRuntimeUseCase",
     "checklist/app/service/domain/lock/usecases/TakeoverLockUseCase",
     "checklist/app/service/framework/Effects",
     "checklist/app/service/framework/ActionContract",
@@ -37,7 +37,7 @@ sap.ui.define([
     ValueHelpLocationUseCase,
     PersonSuggestUseCase,
     LockLostUseCase,
-    ForceReadOnlyUseCase,
+    ForceReadOnlyRuntimeUseCase,
     TakeoverLockUseCase,
     Effects,
     ActionContract,
@@ -64,7 +64,7 @@ sap.ui.define([
             valueHelpLocation: d.valueHelpLocationUseCase || new ValueHelpLocationUseCase(),
             personSuggest: d.personSuggestUseCase || new PersonSuggestUseCase(),
             lockLost: d.lockLostUseCase || new LockLostUseCase(),
-            forceReadOnly: d.forceReadOnlyUseCase || new ForceReadOnlyUseCase(),
+            forceReadOnly: d.forceReadOnlyUseCase || new ForceReadOnlyRuntimeUseCase(),
             takeoverLock: d.takeoverLockUseCase || new TakeoverLockUseCase()
         };
     }
