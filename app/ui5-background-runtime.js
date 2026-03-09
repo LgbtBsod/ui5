@@ -12,6 +12,18 @@
         return;
     }
 
+    bgWrap.style.display = "block";
+    [lightSvg, darkSvg].forEach(function (oLayer) {
+        if (oLayer && oLayer.style) {
+            oLayer.style.display = "block";
+        }
+    });
+    Array.prototype.slice.call(bgWrap.querySelectorAll(".bg, .dither, .grain, .paper")).forEach(function (oLayer) {
+        if (oLayer && oLayer.style) {
+            oLayer.style.display = "block";
+        }
+    });
+
     var lBase = document.getElementById("lightBase");
     var lOil = document.getElementById("lightOilMicro");
     var lAur = document.getElementById("lightAurora");
