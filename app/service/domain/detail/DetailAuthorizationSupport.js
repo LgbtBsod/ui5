@@ -1,6 +1,6 @@
 sap.ui.define([
     "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/model/StatePaths",
     "checklist/app/util/CreateSentinel"
 ], function (Effects, StatePaths, CreateSentinel) {
     "use strict";

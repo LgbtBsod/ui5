@@ -34,7 +34,7 @@ sap.ui.define([
     "checklist/app/util/CreateSentinel",
     "sap/ui/Device",
     "checklist/app/util/InteractionFX",
-    "checklist/app/util/ThemeService",
+    "checklist/app/service/framework/ThemeRuntime",
     "checklist/app/service/framework/SchedulingRuntime"
 ], function (
     UIComponent,
@@ -72,7 +72,7 @@ sap.ui.define([
     CreateSentinel,
     Device,
     InteractionFX,
-    ThemeService,
+    ThemeRuntime,
     SchedulingRuntime
 ) {
     "use strict";
@@ -128,7 +128,7 @@ sap.ui.define([
                 CreateSentinel: CreateSentinel,
                 Device: Device,
                 InteractionFX: InteractionFX,
-                ThemeService: ThemeService
+                ThemeService: ThemeRuntime
             });
         },
         _startCoreManagers: function () {

@@ -4,7 +4,7 @@ sap.ui.define([
     "checklist/app/service/framework/Effects",
     "checklist/app/service/domain/detail/DetailSaveRuntimeSupport",
     "checklist/app/service/domain/shared/UseCaseInputUtils",
-    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/model/StatePaths",
     "checklist/app/util/DeltaPayloadBuilder",
     "checklist/app/util/CreateSentinel"
 ], function (UseCase, Result, Effects, DetailSaveRuntimeSupport, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel) {

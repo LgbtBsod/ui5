@@ -81,6 +81,7 @@ sap.ui.define([
         formatHeaderDate: DetailFormatters.formatHeaderDate,
         formatInfoCardValue: DetailFormatters.formatInfoCardValue,
         formatPersonSuggestion: DetailFormatters.formatPersonSuggestion,
+        formatPersonSuggestionMeta: DetailFormatters.formatPersonSuggestionMeta,
         formatAttachmentSize: DetailFormatters.formatAttachmentSize,
         formatAttachmentUploadHint: function (aExtensions, iMaxSizeMb) {
             return AttachmentUploadCore.formatUploadHint(this, aExtensions, iMaxSizeMb);

@@ -40,20 +40,101 @@ sap.ui.define([
         return AUTOSAVE_STATE_MAP[sAutosaveState] || AUTOSAVE_STATE_MAP.IDLE;
     }
 
-    function mapPermissionPresentation(oController, oPermission) {
-        var sCode = String(oPermission && oPermission.code || "").trim();
+    function normalizePermissionRule(oPermission) {
+        return {
+            code: String(oPermission && oPermission.code || "").trim(),
+            scopeKind: String(oPermission && oPermission.scopeKind || "all").trim().toLowerCase() || "all",
+            scopeValue: String(oPermission && oPermission.scopeValue || "ALL").trim() || "ALL"
+        };
+    }
+
+    function buildPermissionScopeLabel(oController, oPermission) {
         var sScopeKind = String(oPermission && oPermission.scopeKind || "all").trim().toLowerCase() || "all";
         var sScopeValue = String(oPermission && oPermission.scopeValue || "ALL").trim() || "ALL";
-        var sTitle = getText(oController, PERMISSION_TEXT_KEY_MAP[sCode] || "shellPermissionUnknown", [sCode], sCode);
-        var sScopeLabel = sScopeKind === "bukrs" && sScopeValue.toUpperCase() !== "ALL"
+        return sScopeKind === "bukrs" && sScopeValue.toUpperCase() !== "ALL"
             ? getText(oController, "shellPermissionScopeBukrs", [sScopeValue], "BUKRS " + sScopeValue)
             : getText(oController, "shellPermissionScopeAll", null, "ALL");
+    }
+
+    function mapPermissionPresentation(oController, oPermission) {
+        var oRule = normalizePermissionRule(oPermission);
+        var sTitle = getText(oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || "shellPermissionUnknown", [oRule.code], oRule.code);
+        var sScopeLabel = buildPermissionScopeLabel(oController, oRule);
         return {
-            code: sCode,
-            title: sCode + " " + sTitle,
-            description: getText(oController, "shellPermissionDescription", [sTitle, sScopeLabel], "You have permissions for " + sTitle + " " + sScopeLabel),
-            scope: sScopeLabel
+            code: oRule.code,
+            title: sScopeLabel,
+            description: (oRule.code ? [oRule.code, sTitle].join(" ") : sTitle),
+            scope: sScopeLabel,
+            permissionTitle: sTitle
         };
+    }
+
+    function buildPermissionSheets(oController, aPermissionRules) {
+        var mGroups = {};
+        var aOrder = ["01", "02", "03"];
+        (Array.isArray(aPermissionRules) ? aPermissionRules : []).map(normalizePermissionRule).forEach(function (oRule) {
+            var sKey;
+            var oGroup;
+            if (!oRule.code) {
+                return;
+            }
+            sKey = oRule.scopeKind + ":" + oRule.scopeValue.toUpperCase();
+            oGroup = mGroups[sKey];
+            if (!oGroup) {
+                oGroup = {
+                    title: buildPermissionScopeLabel(oController, oRule),
+                    description: "",
+                    scope: "",
+                    codes: [],
+                    labels: []
+                };
+                mGroups[sKey] = oGroup;
+            }
+            if (oGroup.codes.indexOf(oRule.code) === -1) {
+                oGroup.codes.push(oRule.code);
+                oGroup.labels.push(getText(oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || "shellPermissionUnknown", [oRule.code], oRule.code));
+            }
+        });
+        return Object.keys(mGroups).map(function (sKey) {
+            var oGroup = mGroups[sKey];
+            oGroup.codes.sort(function (a, b) {
+                return aOrder.indexOf(a) - aOrder.indexOf(b);
+            });
+            oGroup.description = oGroup.codes.join(", ");
+            oGroup.scope = oGroup.labels.join(" / ");
+            oGroup.info = oGroup.scope;
+            return oGroup;
+        }).sort(function (a, b) {
+            if (a.title === "ALL") {
+                return -1;
+            }
+            if (b.title === "ALL") {
+                return 1;
+            }
+            return String(a.title).localeCompare(String(b.title));
+        });
+    }
+
+    function buildUserSummaryText(oController, aPermissionSheets, sBackendSummary) {
+        if (String(sBackendSummary || "").trim()) {
+            return String(sBackendSummary || "").trim();
+        }
+        if (!aPermissionSheets.length) {
+            return getText(oController, "shellUserPermissionsEmpty", null, "No permissions assigned");
+        }
+        return aPermissionSheets.map(function (oSheet) {
+            return oSheet.title + ": " + oSheet.description;
+        }).join("; ");
+    }
+
+    function buildHeaderUserLabel(sFullName, aPermissionSheets) {
+        var aShort = aPermissionSheets.map(function (oSheet) {
+            return oSheet.title + " " + oSheet.description;
+        }).filter(Boolean);
+        if (!aShort.length) {
+            return sFullName;
+        }
+        return sFullName + " - " + aShort.join(" | ");
     }
 
     return {
@@ -96,6 +177,8 @@ sap.ui.define([
             var sFullName;
             var aPermissions;
             var aPermissionRules;
+            var aPermissionSheets;
+            var sUserSummaryText;
             var bShowHints;
             var sFrontendSource;
             var bRuntimeManagedUser;
@@ -116,6 +199,8 @@ sap.ui.define([
             sFullName = String(oCurrentUser.fullName || sUser || getText(this, "shellUserMissing", null, "Session profile unavailable"));
             aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
             aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
+            aPermissionSheets = buildPermissionSheets(this, aPermissionRules);
+            sUserSummaryText = buildUserSummaryText(this, aPermissionSheets, oCurrentUser.summaryText);
             bShowHints = !!ModelStateRuntime.read(this, "layout", "/personalization/showHints", false);
             sFrontendSource = String(
                 ModelStateRuntime.read(this, "state", "/frontendConfigSource", "")
@@ -149,19 +234,12 @@ sap.ui.define([
                     : (!sSelectedId ? getText(this, "shellContextSearch", null, "Discover, filter, and open checklist flows.")
                         : (CreateSentinel.isCreateId(sSelectedId) ? getText(this, "shellContextDraft", null, "Draft checklist workspace")
                             : getText(this, "shellContextDetail", [sSelectedId], "Checklist " + sSelectedId))));
-            mShellPatch["/shell/userLabel"] = sFullName;
+            mShellPatch["/shell/userLabel"] = buildHeaderUserLabel(sFullName, aPermissionSheets);
             mShellPatch["/shell/userMeta"] = sUser || getText(this, "shellUserLoginMissing", null, "Login is not set");
             mShellPatch["/shell/userLoginLabel"] = sUser || getText(this, "shellUserLoginMissing", null, "Login is not set");
             mShellPatch["/shell/userEnvironmentLabel"] = sFrontendSource;
-            mShellPatch["/shell/userPermissions"] = aPermissionRules.map(mapPermissionPresentation.bind(null, this));
-            mShellPatch["/shell/userSummaryText"] = String(oCurrentUser.summaryText || "").trim()
-                || (mShellPatch["/shell/userPermissions"].length
-                    ? getText(this, "shellUserPermissionSummary", [mShellPatch["/shell/userPermissions"].map(function (oRule) {
-                        return oRule.title;
-                    }).join(" / ")], "You have permissions for " + mShellPatch["/shell/userPermissions"].map(function (oRule) {
-                        return oRule.title;
-                    }).join(" / ") + ".")
-                    : getText(this, "shellUserPermissionsEmpty", null, "No permissions assigned"));
+            mShellPatch["/shell/userPermissions"] = aPermissionSheets;
+            mShellPatch["/shell/userSummaryText"] = sUserSummaryText;
             mShellPatch["/shell/userSessionLabel"] = bRuntimeManagedUser ? getText(this, "shellUserSessionManaged", null, "Live backend profile") : getText(this, "shellUserSessionTest", null, "Test session identity");
             mShellPatch["/shell/userSessionState"] = aPermissionRules.length || aPermissions.length ? "Success" : "Warning";
             mShellPatch["/shell/userActionVisible"] = false;
@@ -171,7 +249,7 @@ sap.ui.define([
             mShellPatch["/shell/userActionKind"] = "";
             mShellPatch["/shell/userActionPassiveText"] = bEditWorkspace ? getText(this, "shellLockLocked", null, "Lock owned by you") : "";
             mShellPatch["/shell/userActionHint"] = getText(this, "shellUserHintRuntime", null, "The backend resolves the current SAP user profile for this session.");
-            mShellPatch["/shell/userTooltip"] = getText(this, "shellUserTooltipStandalone", null, "Open user session controls");
+            mShellPatch["/shell/userTooltip"] = sUserSummaryText || getText(this, "shellUserTooltipStandalone", null, "Open user session controls");
             mShellPatch["/shell/userIcon"] = "sap-icon://employee";
             mShellPatch["/shell/showHints"] = bShowHints;
             mShellPatch["/shell/notifications"] = this._buildShellNotifications(oState, sMode, sLockState, sAutosaveState);

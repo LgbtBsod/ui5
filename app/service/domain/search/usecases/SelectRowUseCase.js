@@ -4,7 +4,7 @@ sap.ui.define([
     "checklist/app/service/framework/Effects",
     "checklist/app/service/domain/search/SearchSelectionEffects",
     "checklist/app/util/CreateSentinel",
-    "checklist/app/service/domain/shared/StatePaths"
+    "checklist/app/model/StatePaths"
 ], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths) {
     "use strict";
 

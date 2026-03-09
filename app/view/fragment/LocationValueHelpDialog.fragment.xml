@@ -45,6 +45,12 @@
                                 <Text text="{view>location_name}" wrapping="false"/>
                             </t:template>
                         </t:Column>
+                        <t:Column width="12rem">
+                            <Label text="{i18n>locationIdLabel}"/>
+                            <t:template>
+                                <Text text="{view>location_id}" wrapping="false"/>
+                            </t:template>
+                        </t:Column>
                     </t:columns>
                 </t:TreeTable>
             </VBox>

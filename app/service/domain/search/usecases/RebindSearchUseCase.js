@@ -3,7 +3,7 @@ sap.ui.define([
     "checklist/app/service/framework/Result",
     "checklist/app/service/framework/Effects",
     "checklist/app/service/domain/search/SearchSelectionEffects",
-    "checklist/app/service/domain/shared/StatePaths"
+    "checklist/app/model/StatePaths"
 ], function (UseCase, Result, Effects, SearchSelectionEffects, StatePaths) {
     "use strict";
 

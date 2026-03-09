@@ -3,7 +3,7 @@ sap.ui.define([
     "checklist/app/service/framework/Result",
     "checklist/app/service/framework/Effects",
     "checklist/app/service/domain/shared/UseCaseInputUtils",
-    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/model/StatePaths",
     "checklist/app/service/domain/detail/DetailStateAccess",
     "checklist/app/service/domain/detail/DetailValidationSupport",
     "checklist/app/util/ChecklistValidationService",

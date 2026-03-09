@@ -1,7 +1,28 @@
-sap.ui.define([
-    "checklist/app/service/domain/shared/StatePaths"
-], function (StatePaths) {
+sap.ui.define([], function () {
     "use strict";
 
-    return StatePaths;
+    return {
+        PENDING_NAVIGATION_INTENT: "/pendingNavigationIntent",
+        SAVE_IN_FLIGHT: "/saveInFlight",
+        SESSION_ID: "/sessionId",
+        TAB_CONFLICT_STATE: "/tabConflictState",
+        UI_BUSY_DETAIL: "/ui/busy/detail",
+        UI_BUSY_GLOBAL: "/ui/busy/global",
+        UI_BUSY_SEARCH_TABLE: "/ui/busy/searchTable",
+        UI_FEEDBACK_CONFLICT_DIALOG: "/ui/feedback/conflictDialog",
+        VALIDATION_SUMMARY: "/validationSummary",
+        WORKFLOW_AUTOSAVE_ENABLED: "/autosaveEnabled",
+        WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT: "/workflow/detail/autosave/lastSavedAt",
+        WORKFLOW_DETAIL_AUTOSAVE_STATE: "/workflow/detail/autosave/state",
+        WORKFLOW_DETAIL_EDIT_MODE: "/workflow/detail/editMode",
+        WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lock/state",
+        WORKFLOW_DIRTY: "/isDirty",
+        WORKFLOW_EDIT_MODE: "/mode",
+        WORKFLOW_LOCK_LOST_REASON: "/lockLostReason",
+        WORKFLOW_LOCK_STATUS: "/lockOperationState",
+        WORKFLOW_SEARCH_MODE: "/workflow/search/mode",
+        WORKFLOW_SEARCH_SEGMENTS: "/workflow/search/segments",
+        WORKFLOW_SEARCH_SEGMENTS_BARRIERS: "/workflow/search/segments/barriers",
+        WORKFLOW_SEARCH_SEGMENTS_CHECKS: "/workflow/search/segments/checks"
+    };
 });

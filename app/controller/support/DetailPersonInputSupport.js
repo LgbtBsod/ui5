@@ -36,8 +36,44 @@ sap.ui.define([
         return (oSource && oSource.data && oSource.data("target")) || "observer";
     }
 
+    function ensureSelectionState(oController) {
+        if (!oController) {
+            return null;
+        }
+        if (!oController._mPendingPersonSuggestionSelection) {
+            oController._mPendingPersonSuggestionSelection = {};
+        }
+        return oController._mPendingPersonSuggestionSelection;
+    }
+
+    function rememberSuggestionSelection(oController, sTarget, sValue) {
+        var mState = ensureSelectionState(oController);
+        var sKey = String(sTarget || "observer").toLowerCase();
+        if (!mState) {
+            return;
+        }
+        mState[sKey] = String(sValue || "");
+    }
+
+    function consumeSuggestionSelection(oController, sTarget, sValue) {
+        var mState = ensureSelectionState(oController);
+        var sKey = String(sTarget || "observer").toLowerCase();
+        var sExpected;
+        if (!mState) {
+            return false;
+        }
+        sExpected = String(mState[sKey] || "");
+        if (!sExpected || sExpected !== String(sValue || "")) {
+            return false;
+        }
+        delete mState[sKey];
+        return true;
+    }
+
     return {
         syncDrafts: syncDrafts,
-        targetFromSource: targetFromSource
+        targetFromSource: targetFromSource,
+        rememberSuggestionSelection: rememberSuggestionSelection,
+        consumeSuggestionSelection: consumeSuggestionSelection
     };
 });

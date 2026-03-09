@@ -3,14 +3,14 @@ sap.ui.define([
     "checklist/app/controller/support/AppControllerLifecycleActions",
     "checklist/app/controller/support/AppControllerOverlayActions",
     "checklist/app/controller/support/AppControllerShellActions",
-    "checklist/app/controller/support/AppControllerStateActions",
+    "checklist/app/controller/support/AppControllerStateRuntimeActions",
     "checklist/app/controller/support/AppControllerDomActions"
 ], function (
     BaseController,
     AppControllerLifecycleActions,
     AppControllerOverlayActions,
     AppControllerShellActions,
-    AppControllerStateActions,
+    AppControllerStateRuntimeActions,
     AppControllerDomActions
 ) {
     "use strict";
@@ -20,7 +20,7 @@ sap.ui.define([
         AppControllerLifecycleActions,
         AppControllerOverlayActions,
         AppControllerShellActions,
-        AppControllerStateActions,
+        AppControllerStateRuntimeActions,
         AppControllerDomActions
     ));
 });

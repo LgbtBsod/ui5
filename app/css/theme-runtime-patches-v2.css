@@ -20,55 +20,17 @@ body.chkAppRoot,
 #ui5-bg {
   display: block !important;
   opacity: 1 !important;
-  background:
-    radial-gradient(64% 58% at 14% 18%, rgba(105, 200, 255, 0.2), transparent 72%),
-    radial-gradient(58% 54% at 82% 16%, rgba(255, 182, 220, 0.18), transparent 72%),
-    radial-gradient(56% 52% at 28% 86%, rgba(140, 244, 214, 0.16), transparent 70%),
-    linear-gradient(135deg, #f5f9ff 0%, #edf4ff 44%, #fbfdff 100%);
-}
-
-body[data-theme="dark"] #ui5-bg,
-body.chkAppRoot.appDark #ui5-bg,
-body.chkAppRoot.nightMode #ui5-bg {
-  background:
-    radial-gradient(72% 66% at 14% 18%, rgba(41, 199, 222, 0.18), transparent 72%),
-    radial-gradient(60% 56% at 80% 20%, rgba(118, 103, 255, 0.16), transparent 74%),
-    radial-gradient(58% 54% at 52% 84%, rgba(255, 96, 178, 0.14), transparent 74%),
-    linear-gradient(135deg, #07111f 0%, #08182d 46%, #050c17 100%);
-}
-
-body.chkAppRoot.appLight.appInvertedBlockScheme #ui5-bg {
-  background:
-    radial-gradient(72% 66% at 14% 18%, rgba(41, 199, 222, 0.18), transparent 72%),
-    radial-gradient(60% 56% at 80% 20%, rgba(118, 103, 255, 0.16), transparent 74%),
-    radial-gradient(58% 54% at 52% 84%, rgba(255, 96, 178, 0.14), transparent 74%),
-    linear-gradient(135deg, #07111f 0%, #08182d 46%, #050c17 100%) !important;
-}
-
-body.chkAppRoot.appDark.appInvertedBlockScheme #ui5-bg {
-  background:
-    radial-gradient(64% 58% at 14% 18%, rgba(105, 200, 255, 0.2), transparent 72%),
-    radial-gradient(58% 54% at 82% 16%, rgba(255, 182, 220, 0.18), transparent 72%),
-    radial-gradient(56% 52% at 28% 86%, rgba(140, 244, 214, 0.16), transparent 70%),
-    linear-gradient(135deg, #f5f9ff 0%, #edf4ff 44%, #fbfdff 100%) !important;
 }
 
 #ui5-bg .bg {
   display: block !important;
-  animation: none !important;
-  filter: none !important;
-  transform: none !important;
-  will-change: auto !important;
+  will-change: transform, opacity !important;
 }
 
 #ui5-bg .dither,
 #ui5-bg .grain,
-#ui5-bg .paper,
-.bg-blobs,
-.bg-blobs::before,
-.bg-blobs::after {
-  display: none !important;
-  animation: none !important;
+#ui5-bg .paper {
+  display: block !important;
 }
 
 #lightOilMicro,

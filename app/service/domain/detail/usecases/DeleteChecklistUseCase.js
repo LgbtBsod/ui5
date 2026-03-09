@@ -3,7 +3,7 @@ sap.ui.define([
     "checklist/app/service/framework/Result",
     "checklist/app/service/framework/Effects",
     "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-    "checklist/app/service/domain/shared/StatePaths",
+    "checklist/app/model/StatePaths",
     "checklist/app/util/CreateSentinel"
 ], function (UseCase, Result, Effects, DetailAuthorizationSupport, StatePaths, CreateSentinel) {
     "use strict";

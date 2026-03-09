@@ -1,6 +1,6 @@
 sap.ui.define([
     "checklist/app/service/framework/DialogOrchestrator",
-    "checklist/app/service/framework/DraftChecklistFactory",
+    "checklist/app/util/DraftChecklistFactory",
     "checklist/app/controller/support/DetailViewSupport",
     "checklist/app/controller/support/DetailAccessViewState",
     "checklist/app/controller/support/DetailActionConstants",

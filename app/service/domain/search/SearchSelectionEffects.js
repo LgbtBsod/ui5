@@ -1,6 +1,6 @@
 sap.ui.define([
     "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/shared/StatePaths"
+    "checklist/app/model/StatePaths"
 ], function (Effects, StatePaths) {
     "use strict";
 

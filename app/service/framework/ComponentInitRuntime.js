@@ -868,6 +868,7 @@ sap.ui.define([
             this.setModel(oStateModel, "state");
             this.setModel(oUiStateModel, "uiState");
             this.setModel(oViewModel, "view");
+            this.setModel(oViewModel, "appView");
             this.setModel(oMasterDataModel, "masterData");
             oDeviceModel.setDefaultBindingMode("OneWay");
             this.setModel(oDeviceModel, "device");

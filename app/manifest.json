@@ -34,7 +34,10 @@
           "uri": "css/claude-hyper.css"
         },
         {
-          "uri": "css/theme-runtime-patches.css"
+          "uri": "css/modules/02_background.css"
+        },
+        {
+          "uri": "css/theme-runtime-patches-v2.css"
         }
       ]
     },

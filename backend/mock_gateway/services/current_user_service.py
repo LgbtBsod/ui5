@@ -4,7 +4,6 @@ import json
 
 from models import AppUserProfile, RuntimeUserContext
 
-REQUEST_USER_HEADER = "X-PCCT-User"
 DEFAULT_RUNTIME_UNAME = "operator"
 PERMISSION_CODE_MAP = {
     "view": "01",
@@ -67,10 +66,6 @@ class CurrentUserService:
     def resolve_uname(db=None, request=None, explicit_uname: str | None = None) -> str:
         if explicit_uname:
             return _normalize_uname(explicit_uname)
-        if request is not None:
-            sHeaderUser = str(request.headers.get(REQUEST_USER_HEADER) or "").strip()
-            if sHeaderUser:
-                return _normalize_uname(sHeaderUser)
         if db is not None:
             row = db.get(RuntimeUserContext, "CURRENT")
             if row is not None:

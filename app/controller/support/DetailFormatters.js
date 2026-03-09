@@ -247,6 +247,10 @@ sap.ui.define([
             return [sName, sPosition, sPerner, sOrgUnit].filter(Boolean).join(" | ");
         },
 
+        formatPersonSuggestionMeta: function (sPerner, sPosition, sOrgUnit) {
+            return [sPerner, sPosition, sOrgUnit].filter(Boolean).join(" | ");
+        },
+
         formatAttachmentSize: function (nBytes) {
             var nValue = Number(nBytes || 0) || 0;
             if (nValue < 1024) {

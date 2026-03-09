@@ -14,11 +14,10 @@ sap.ui.define([
             var m = ctx.managers || {};
             var bLockActive = !!(input && input.lockRuntimeActive);
             if (input && input.scope === "core") {
-                startIf(m.heartbeat);
-                startIf(m.activity);
-                startIf(m.autosave);
+                if (m.gcd && m.gcd.resetOnFullSave) {
+                    m.gcd.resetOnFullSave();
+                }
                 startIf(m.connectivity);
-                startIf(m.lockStatus);
             }
             if (input && input.scope === "lock") {
                 if (bLockActive) {

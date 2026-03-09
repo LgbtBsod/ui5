@@ -88,25 +88,38 @@ sap.ui.define([
 
         onPersonSuggestionSelected: function (oEvent) {
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
+            var oSelectedItem = oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem");
+            var sTarget = DetailPersonInputSupport.targetFromSource(oSource);
+            var sSelectedValue = "";
             if (!this._isEditMode()) {
                 return;
             }
+            if (oSelectedItem && typeof oSelectedItem.getText === "function") {
+                sSelectedValue = String(oSelectedItem.getText() || "");
+            }
+            DetailPersonInputSupport.rememberSuggestionSelection(this, sTarget, sSelectedValue);
             DetailCommandPolicy.personSuggest(this, {
                 intent: "selected",
-                item: oEvent.getParameter("selectedItem"),
-                target: DetailPersonInputSupport.targetFromSource(oSource)
+                item: oSelectedItem,
+                target: sTarget
             });
         },
 
         onPersonInputChange: function (oEvent) {
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
+            var sTarget = DetailPersonInputSupport.targetFromSource(oSource);
+            var sValue;
             if (!this._isEditMode()) {
+                return;
+            }
+            sValue = String((oEvent && oEvent.getParameter && oEvent.getParameter("value")) || "");
+            if (DetailPersonInputSupport.consumeSuggestionSelection(this, sTarget, sValue)) {
                 return;
             }
             DetailCommandPolicy.personSuggest(this, {
                 intent: "manualChange",
-                value: oEvent.getParameter("value"),
-                target: DetailPersonInputSupport.targetFromSource(oSource)
+                value: sValue,
+                target: sTarget
             });
         },
 

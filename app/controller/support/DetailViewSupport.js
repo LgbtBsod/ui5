@@ -10,6 +10,7 @@ sap.ui.define([
     "sap/m/ObjectStatus",
     "sap/m/Button",
     "sap/ui/core/Item",
+    "sap/ui/core/ListItem",
     "sap/ui/core/CustomData",
     "checklist/app/controller/support/BindingContextReadSupport",
     "checklist/app/service/framework/ControlStyleRuntime",
@@ -18,7 +19,7 @@ sap.ui.define([
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/service/framework/ModelStateRuntime"
-], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ModelStateRuntime) {
+], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CoreListItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ModelStateRuntime) {
     "use strict";
 
     var CARD_REQUIRED_KEYS = {
@@ -168,16 +169,18 @@ sap.ui.define([
         oInput.bindAggregation("suggestionItems", {
             path: sPath,
             templateShareable: true,
-            template: new CoreItem({
+            template: new CoreListItem({
                 key: "{view>perner}",
-                text: {
+                text: "{view>fullName}",
+                additionalText: {
                     parts: [
-                        { path: "view>fullName" },
-                        { path: "view>position" },
                         { path: "view>perner" },
+                        { path: "view>position" },
                         { path: "view>orgUnit" }
                     ],
-                    formatter: oController.formatPersonSuggestion.bind(oController)
+                    formatter: function (sPerner, sPosition, sOrgUnit) {
+                        return [sPerner, sPosition, sOrgUnit].filter(Boolean).join(" | ");
+                    }
                 }
             })
         });
@@ -254,7 +257,7 @@ sap.ui.define([
         var oInput = new Input({
             value: "{" + sInputPath + "}",
             showSuggestion: "{= ${state>/mode} === 'EDIT' }",
-            startSuggestion: 1,
+            startSuggestion: 2,
             maxSuggestionWidth: "300%",
             filterSuggests: false,
             suggest: [oController.onPersonSuggest, oController],

@@ -68,7 +68,8 @@ sap.ui.define([
                     var aFiltered = aFlat.filter(function (oItem) {
                         if (!sQuery) { return true; }
                         return String(oItem.location_name || "").toLowerCase().indexOf(sQuery) >= 0
-                            || String(oItem.location_code || "").toLowerCase().indexOf(sQuery) >= 0;
+                            || String(oItem.location_code || "").toLowerCase().indexOf(sQuery) >= 0
+                            || String(oItem.location_id || "").toLowerCase().indexOf(sQuery) >= 0;
                     }).map(function (oItem) {
                         return Object.assign({}, oItem, { children: [] });
                     });

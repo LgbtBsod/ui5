@@ -741,27 +741,44 @@ def _to_current_user_stub_removed_duplicate() -> None:
     pass  # duplicate removed - see _to_current_user below
 
 
-def _current_user_summary(profile: dict) -> str:
-    permission_labels = {
-        "01": "просмотр",
-        "02": "редактирование / создание",
-        "03": "удаление",
-    }
-    labels = []
+def _permission_groups(profile: dict) -> list[dict]:
+    groups: dict[str, dict] = {}
+    order = {"01": 1, "02": 2, "03": 3}
     for permission in profile.get("permissions") or []:
         code = str((permission or {}).get("code") or "").strip()
-        scope_kind = str((permission or {}).get("scope_kind") or "all").strip().lower()
-        scope_value = str((permission or {}).get("scope_value") or "ALL").strip() or "ALL"
-        label = permission_labels.get(code)
-        if not label:
+        if not code:
             continue
-        if scope_kind == "bukrs" and scope_value.upper() != "ALL":
-            labels.append(label + " (BUKRS " + scope_value + ")")
-        else:
-            labels.append(label + " (ALL)")
-    if not labels:
-        return "У вас нет назначенных полномочий."
-    return "У вас есть полномочия на " + " / ".join(labels) + "."
+        scope_kind = str((permission or {}).get("scope_kind") or "all").strip().lower() or "all"
+        scope_value = str((permission or {}).get("scope_value") or "ALL").strip() or "ALL"
+        group_key = f"{scope_kind}:{scope_value.upper()}"
+        group = groups.setdefault(group_key, {
+            "scopeKind": scope_kind,
+            "scopeValue": scope_value.upper() if scope_kind == "bukrs" else "ALL",
+            "permissionCodes": [],
+        })
+        if code not in group["permissionCodes"]:
+            group["permissionCodes"].append(code)
+    result = list(groups.values())
+    for item in result:
+        item["permissionCodes"] = sorted(item.get("permissionCodes") or [], key=lambda value: order.get(value, 99))
+    result.sort(key=lambda item: (
+        0 if str(item.get("scopeKind") or "all") == "all" else 1,
+        str(item.get("scopeValue") or "ALL")
+    ))
+    return result
+
+
+def _current_user_summary(profile: dict) -> str:
+    groups = _permission_groups(profile)
+    if not groups:
+        return "Permissions: none"
+    parts = []
+    for item in groups:
+        scope_kind = str(item.get("scopeKind") or "all").strip().lower() or "all"
+        scope_value = str(item.get("scopeValue") or "ALL").strip() or "ALL"
+        prefix = "ALL" if scope_kind == "all" or scope_value == "ALL" else f"BUKRS {scope_value}"
+        parts.append(prefix + ": " + ",".join(item.get("permissionCodes") or []))
+    return "Permissions: " + "; ".join(parts)
 
 
 def _to_current_user(profile: dict) -> dict:

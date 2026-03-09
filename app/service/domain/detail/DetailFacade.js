@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/service/domain/detail/usecases/OpenDetailUseCase",
-    "checklist/app/service/domain/detail/usecases/EnterEditUseCase",
+    "checklist/app/service/domain/detail/usecases/OpenDetailRuntimeUseCase",
+    "checklist/app/service/domain/detail/usecases/EnterEditRuntimeUseCase",
     "checklist/app/service/domain/detail/usecases/SaveDetailUseCase",
     "checklist/app/service/domain/detail/usecases/ValidateChecklistUseCase",
     "checklist/app/service/domain/detail/usecases/AutosaveDetailUseCase",

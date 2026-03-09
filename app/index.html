@@ -124,6 +124,7 @@
     <div id="ui5_container" class="chkAppRoot"></div>
     <script src="ui5-background-runtime.js"></script>
     <script src="search-toolbar-sticky-runtime.js"></script>
+    <script src="shell-user-runtime.js"></script>
     <script>
         (function () {
             function splitClassNames(sClassNames) {
@@ -140,6 +141,13 @@
                     oTarget[sMethodName](sClassName);
                 });
                 return oTarget;
+            }
+
+            function loadPlainScript(sSrc) {
+                var oScript = document.createElement("script");
+                oScript.src = sSrc;
+                oScript.async = false;
+                document.head.appendChild(oScript);
             }
 
             function mountComponent() {
