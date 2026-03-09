@@ -1,14 +1,70 @@
-@import "modules/00_tokens.css";
-@import "modules/01_theme-modes.css?v=20260308a";
-@import "modules/02_background.css";
-@import "modules/10_base.css";
-@import "modules/20_surface.css";
-@import "modules/21_controls.css";
-@import "modules/22_skeleton.css";
-@import "modules/23_dialogs.css";
-@import "modules/40_page_search.css";
-@import "modules/41_page_detail.css";
-@import "modules/42_page_analytics.css";
-@import "modules/90_ui5_patches.css";
-@import "modules/91_ui5_layout_patches.css";
-@import "modules/92_ui5_surface_tuning.css";
+html,
+body,
+#ui5_container {
+    height: 100%;
+}
+
+body.sapUiBody {
+    background: #ffffff;
+}
+
+#ui5-bg,
+.bg-blobs,
+.dither,
+.grain,
+.paper,
+#detailRailViewportLayer {
+    display: none !important;
+}
+
+.chkApp,
+.appShell,
+.appRootFcl {
+    height: 100%;
+}
+
+.appShell {
+    gap: 0;
+}
+
+.pageTransparent .sapMPageEnableScrolling,
+.pageTransparent .sapMPageScroll {
+    background: #ffffff;
+}
+
+.chkApp .searchExperienceStack,
+.chkApp .searchWorkbenchDock,
+.chkApp .searchWorkbenchDock > .sapMFlexItem,
+.chkApp #searchResultsShell,
+.chkApp #searchResultsShell > .sapMFlexItem,
+.chkApp .searchResultsBody,
+.chkApp .searchSmartTableControl,
+.chkApp .searchResultsTable .sapUiCompSmartTable,
+.chkApp .searchResultsTable .sapUiCompSmartTableTable,
+.chkApp .searchResultsTable .sapUiCompSmartTableInnerTable,
+.chkApp .searchResultsTable .sapMListTblCnt,
+.chkApp .searchResultsTable .sapMListTbl,
+.chkApp .searchResultsTable .sapMTable {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.chkApp .searchWorkbenchDock {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsActionRail,
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsTable {
+    margin: 0;
+}
+
+.chkApp .searchResultsTable .sapUiCompSmartTableTable,
+.chkApp .searchResultsTable .sapUiCompSmartTableInnerTable,
+.chkApp .searchResultsTable .sapMListTblCnt {
+    overflow: visible !important;
+}

@@ -32,6 +32,7 @@ def test_gateway_canonical_contract_and_metadata():
 
         acquire = client.post(f"{SERVICE_ROOT}/LockAcquire", params={"RootId": root_key, "SessionGuid": "S1"}, headers={"X-CSRF-Token": token})
         assert acquire.status_code == 200 and "d" in acquire.json()
+        assert acquire.json().get("d", {}).get("Owner") == "operator"
         heartbeat = client.post(f"{SERVICE_ROOT}/LockHeartbeat", params={"RootId": root_key, "SessionGuid": "S1"}, headers={"X-CSRF-Token": token})
         assert heartbeat.status_code == 200 and "d" in heartbeat.json()
         release = client.post(f"{SERVICE_ROOT}/LockRelease", params={"RootId": root_key, "SessionGuid": "S1"}, headers={"X-CSRF-Token": token})
@@ -48,6 +49,10 @@ def test_gateway_canonical_contract_and_metadata():
         assert permission_body.get("ViewOperation") == "01"
         assert permission_body.get("ChangeOperation") == "02"
         assert permission_body.get("DeleteOperation") == "03"
+
+        runtime_permission = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})")
+        assert runtime_permission.status_code == 200 and "d" in runtime_permission.json()
+        assert runtime_permission.json().get("d", {}).get("UserId") == "operator"
         assert permission_body.get("GrantedOperations") == "01,02,03"
         assert permission_body.get("CanView") is True
         assert permission_body.get("CanEdit") is True

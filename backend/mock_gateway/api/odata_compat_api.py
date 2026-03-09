@@ -17,6 +17,7 @@ from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, LastChangeSe
 from services.checklist_service import ChecklistService
 from services.hierarchy_service import HierarchyService
 from services.lock_service import LockService
+from services.current_user_service import CurrentUserService
 from services.metadata_cache import get_metadata, metadata_refreshed_at_iso
 from utils.filter_parser import FilterParser
 from utils.odata import SERVICE_ROOT, format_datetime, format_entity_etag, odata_error_response, odata_payload
@@ -325,7 +326,7 @@ async def lock_acquire(request: Request, db: Session = Depends(get_db)):
             payload = {}
     obj = _extract_payload_value(payload, "object_uuid", "ObjectUuid") or _extract_payload_value(payload, "rootid", "RootId")
     session = _extract_payload_value(payload, "session_guid", "SessionGuid")
-    user = _extract_payload_value(payload, "uname", "Uname") or "ANON"
+    user = CurrentUserService.resolve_uname(db=db, request=request)
     steal_from = _extract_payload_value(payload, "steal_from", "StealFrom")
     if not obj or not session:
         return _error("VALIDATION_ERROR", "object_uuid/rootid and session_guid are required")
@@ -403,7 +404,7 @@ async def save_draft(request: Request, db: Session = Depends(get_db)):
     payload = await request.json()
     data = payload.get("payload") or payload.get("Payload") or {}
     session = payload.get("session_guid") or payload.get("SessionGuid")
-    user = payload.get("uname") or payload.get("Uname") or "ANON"
+    user = CurrentUserService.resolve_uname(db=db, request=request)
     temp_uuid = data.get("Uuid")
 
     new_root = ChecklistRoot(
@@ -474,7 +475,7 @@ async def copy_checklist(request: Request, db: Session = Depends(get_db)):
     payload = await request.json()
     source_uuid = payload.get("source_uuid") or payload.get("SourceUuid")
     session = payload.get("session_guid") or payload.get("SessionGuid") or uuid.uuid4().hex
-    user = payload.get("uname") or payload.get("Uname") or "ANON"
+    user = CurrentUserService.resolve_uname(db=db, request=request)
     if not source_uuid:
         return _error("VALIDATION_ERROR", "source_uuid is required")
     try:

@@ -1245,7 +1245,7 @@ def _merge_query_and_payload(request: Request, payload: dict | None = None) -> d
 def _lock_import_payload(action: str, root_id: str, session_guid: str, uname: str | None, payload: dict | None) -> dict:
     req = _import_payload(root_id=root_id, session_guid=session_guid, payload=payload)
     req["Action"] = action
-    req["Uname"] = uname or req.get("Uname") or "ANON"
+    req["Uname"] = uname or req.get("Uname") or ""
     return req
 
 
@@ -1573,7 +1573,7 @@ def lock_control(payload: dict, db: Session):
     action = str(payload.get("Action") or "").upper()
     root_key = str(payload.get("RootKey") or "")
     session = str(payload.get("SessionGuid") or "")
-    uname = str(payload.get("Uname") or "ANON")
+    uname = str(payload.get("Uname") or "").strip() or CurrentUserService.resolve_uname(db=db)
     if not root_key:
         return _err(400, "VALIDATION_ERROR", "RootKey is required")
     root_uuid = _entity_key(root_key)
@@ -1643,7 +1643,7 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
     merged = _merge_query_and_payload(request, body)
     resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
-    resolved_uname = uname or merged.get("Uname") or merged.get("uname")
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
     return lock_control(_lock_import_payload("ACQUIRE", resolved_root_id, resolved_session_guid, resolved_uname, merged), db)
@@ -1660,7 +1660,7 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
     merged = _merge_query_and_payload(request, body)
     resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
-    resolved_uname = uname or merged.get("Uname") or merged.get("uname")
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
     return lock_control(_lock_import_payload("HEARTBEAT", resolved_root_id, resolved_session_guid, resolved_uname, merged), db)
@@ -1677,7 +1677,7 @@ async def lock_release_function_import(request: Request, root_id: str | None = Q
     merged = _merge_query_and_payload(request, body)
     resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
-    resolved_uname = uname or merged.get("Uname") or merged.get("uname")
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
     return lock_control(_lock_import_payload("RELEASE", resolved_root_id, resolved_session_guid, resolved_uname, merged), db)
@@ -1704,7 +1704,7 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
     _apply_save_root(root, _save_request_root(payload), db)
     _apply_save_checks(db, root, payload.get("checks"))
     _apply_save_barriers(db, root, payload.get("barriers"))
-    root.changed_by = str(payload.get("Uname") or payload.get("uname") or root.changed_by or "ANON")
+    root.changed_by = CurrentUserService.resolve_uname(db=db) or root.changed_by or "ANON"
     root.changed_on = now_utc()
     root.version_number = int(root.version_number or 0) + 1
     db.commit()
@@ -1725,7 +1725,7 @@ def create_checklist(payload: dict, response: Response, db: Session = Depends(ge
     basic_values = _normalize_basic_payload(full.get("basic"), db)
     requested_id = _pick_text(root_block, "Id", "RequestId")
     requested_status = _pick_text(root_block, "Status", "status") or "DRAFT"
-    user_name = str(payload.get("Uname") or payload.get("uname") or "ANON")
+    user_name = CurrentUserService.resolve_uname(db=db)
 
     root = ChecklistRoot(
         id=str(uuid.uuid4()),
@@ -1766,7 +1766,7 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
     merged = _merge_query_and_payload(request, body)
     resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("SourceRootKey") or merged.get("source_root_key") or merged.get("SourceUuid")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
-    resolved_uname = uname or merged.get("Uname") or merged.get("uname") or "ANON"
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
 
@@ -1822,7 +1822,7 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
     _apply_save_root(root, _save_request_root(payload), db)
     _apply_save_checks(db, root, payload.get("checks"))
     _apply_save_barriers(db, root, payload.get("barriers"))
-    root.changed_by = str(payload.get("Uname") or payload.get("uname") or root.changed_by or "ANON")
+    root.changed_by = CurrentUserService.resolve_uname(db=db) or root.changed_by or "ANON"
     root.changed_on = now_utc()
     root.version_number = int(root.version_number or 0) + 1
     db.commit()

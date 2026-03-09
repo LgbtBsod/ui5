@@ -209,9 +209,7 @@ sap.ui.define([
                 reasonCode: "CREATE_DRAFT"
             });
         }
-        return GatewayAdapterSupport.get("ChecklistPermissionSet('" + sRootId + "')", {
-            Uname: GatewayIdentitySupport.resolveUserName(mDeps)
-        }).then(function (oResponse) {
+        return GatewayAdapterSupport.get("ChecklistPermissionSet('" + sRootId + "')").then(function (oResponse) {
             var oPermission = firstRow(oResponse);
             return {
                 rootId: String(oPermission.RootKey || sRootId).trim(),

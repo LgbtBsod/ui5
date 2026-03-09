@@ -367,46 +367,45 @@
                             </menu>
                         </MenuButton>
                     </OverflowToolbar>
-                </VBox>
-
-                <VBox
-                    id="searchResultsShell"
-                    width="100%"
-                    class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
-                    <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
-                        <core:Fragment
-                            fragmentName="checklist.app.view.fragment.SkeletonList"
-                            type="XML"/>
-                    </VBox>
-
                     <VBox
-                        renderType="Bare"
-                        class="searchResultsBody"
-                        busy="{= ${view>/tableBusy} || ${view>/exportBusy} }"
-                        busyIndicatorDelay="0">
-                        <smartTable:SmartTable
-                            id="searchSmartTable"
-                            visible="{= (!${view>/busy} &amp;&amp; !${view>/tableBusy}) || !${view>/hasSearched} }"
-                            entitySet="ChecklistSearchSet"
-                            smartFilterId="searchSmartFilterBar"
-                            tableType="ResponsiveTable"
-                            useVariantManagement="true"
-                            useTablePersonalisation="true"
-                            showRowCount="true"
-                            showFullScreenButton="true"
-                            demandPopin="true"
-                            header="{i18n>resultsLabel}"
-                            persistencyKey="{view>/smartTablePersistencyKey}"
-                            enableAutoBinding="false"
-                            beforeRebindTable=".onBeforeSmartTableRebind"
-                            initialise=".onSmartTableInitialise"
-                            useExportToExcel="false"
-                            initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,DateCheck,EquipName,ChangedOn"
-                            requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal,DateCheck,EquipName,ChangedOn"
-                            class="searchSmartTableControl appSkeletonReveal">
-                        </smartTable:SmartTable>
-                    </VBox>
+                        id="searchResultsShell"
+                        width="100%"
+                        class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
+                        <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
+                            <core:Fragment
+                                fragmentName="checklist.app.view.fragment.SkeletonList"
+                                type="XML"/>
+                        </VBox>
 
+                        <VBox
+                            renderType="Bare"
+                            class="searchResultsBody"
+                            busy="{= ${view>/tableBusy} || ${view>/exportBusy} }"
+                            busyIndicatorDelay="0">
+                            <smartTable:SmartTable
+                                id="searchSmartTable"
+                                visible="{= (!${view>/busy} &amp;&amp; !${view>/tableBusy}) || !${view>/hasSearched} }"
+                                entitySet="ChecklistSearchSet"
+                                smartFilterId="searchSmartFilterBar"
+                                tableType="ResponsiveTable"
+                                useVariantManagement="true"
+                                useTablePersonalisation="true"
+                                showRowCount="true"
+                                showFullScreenButton="true"
+                                demandPopin="true"
+                                header="{i18n>resultsLabel}"
+                                persistencyKey="{view>/smartTablePersistencyKey}"
+                                enableAutoBinding="false"
+                                beforeRebindTable=".onBeforeSmartTableRebind"
+                                initialise=".onSmartTableInitialise"
+                                useExportToExcel="false"
+                                initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,DateCheck,EquipName,ChangedOn"
+                                requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal,DateCheck,EquipName,ChangedOn"
+                                class="searchSmartTableControl appSkeletonReveal">
+                            </smartTable:SmartTable>
+                        </VBox>
+
+                    </VBox>
                 </VBox>
 
             </VBox>

@@ -143,6 +143,14 @@ class AppUserProfile(Base):
     changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
 
 
+class RuntimeUserContext(Base):
+    __tablename__ = "runtime_user_context"
+
+    key = Column(String, primary_key=True)
+    uname = Column(String, nullable=False, default="")
+    changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
+
+
 
 
 class SaveRequestLedger(Base):

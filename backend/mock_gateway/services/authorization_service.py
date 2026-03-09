@@ -13,9 +13,9 @@ _EDIT_DENY_MARKERS = ("noedit", "denyedit", "readonly", "viewonly", "denyall")
 _DELETE_DENY_MARKERS = ("nodelete", "denydelete", "readonly", "viewonly", "denyall")
 
 
-def _normalize_user_id(user_id: str | None) -> str:
+def _normalize_user_id(user_id: str | None, db=None) -> str:
     resolved = str(user_id or "").strip()
-    return resolved or CurrentUserService.resolve_uname()
+    return resolved or CurrentUserService.resolve_uname(db=db)
 
 
 def _contains_marker(user_id: str, markers: tuple[str, ...]) -> bool:
@@ -67,7 +67,7 @@ def _permission_payload(root: ChecklistRoot, user_id: str, can_view: bool, can_e
 class AuthorizationService:
     @staticmethod
     def checklist_permissions(root: ChecklistRoot, user_id: str | None, db=None) -> dict:
-        resolved_user = _normalize_user_id(user_id)
+        resolved_user = _normalize_user_id(user_id, db=db)
         resolved_from_profile = _permissions_from_profile(db, resolved_user) if db is not None else None
 
         if resolved_from_profile is not None:

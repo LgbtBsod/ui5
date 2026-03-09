@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from models import AppUserProfile
+from models import AppUserProfile, RuntimeUserContext
 
 REQUEST_USER_HEADER = "X-PCCT-User"
 DEFAULT_RUNTIME_UNAME = "operator"
@@ -64,16 +64,22 @@ def _normalize_permissions(value) -> list[dict]:
 
 class CurrentUserService:
     @staticmethod
-    def resolve_uname(request=None, explicit_uname: str | None = None) -> str:
+    def resolve_uname(db=None, request=None, explicit_uname: str | None = None) -> str:
         if explicit_uname:
             return _normalize_uname(explicit_uname)
         if request is not None:
-            return _normalize_uname(request.headers.get(REQUEST_USER_HEADER))
+            sHeaderUser = str(request.headers.get(REQUEST_USER_HEADER) or "").strip()
+            if sHeaderUser:
+                return _normalize_uname(sHeaderUser)
+        if db is not None:
+            row = db.get(RuntimeUserContext, "CURRENT")
+            if row is not None:
+                return _normalize_uname(getattr(row, "uname", None))
         return _normalize_uname(None)
 
     @staticmethod
     def resolve_profile(db, request=None, explicit_uname: str | None = None) -> dict:
-        uname = CurrentUserService.resolve_uname(request=request, explicit_uname=explicit_uname)
+        uname = CurrentUserService.resolve_uname(db=db, request=request, explicit_uname=explicit_uname)
         row = db.get(AppUserProfile, uname) if db is not None else None
         permissions = _normalize_permissions(getattr(row, "permissions_json", []))
         full_name = str(getattr(row, "full_name", "") or "").strip() or uname

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database import get_db
+from services.current_user_service import CurrentUserService
 from services.lock_service import LockService
 
 router = APIRouter(prefix="/lock", tags=["Lock"])
@@ -23,7 +24,7 @@ def acquire(
 ):
     obj = _param(object_uuid, pcct_uuid)
     session = _param(session_guid, user_id)
-    user = _param(uname, user_id)
+    user = _param(uname, user_id) or CurrentUserService.resolve_uname(db=db)
 
     if not obj or not session or not user:
         raise HTTPException(status_code=400, detail="MISSING_LOCK_PARAMS")
@@ -90,4 +91,3 @@ def status(
     except ValueError as exc:
         code = 410 if str(exc) == "LOCK_EXPIRED" else 409
         raise HTTPException(status_code=code, detail=str(exc)) from exc
-

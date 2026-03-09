@@ -2,7 +2,7 @@ import json
 from datetime import date
 import uuid
 
-from models import AppUserProfile, DictionaryItem, Location, Person
+from models import AppUserProfile, DictionaryItem, Location, Person, RuntimeUserContext
 
 
 _DICTIONARY_ENTRIES = {
@@ -109,6 +109,7 @@ def seed_reference_data(db) -> None:
     seed_persons(db)
     seed_locations(db)
     seed_user_profiles(db)
+    seed_runtime_user_context(db)
     db.commit()
 
 
@@ -211,3 +212,15 @@ def seed_user_profiles(db) -> None:
             full_name=full_name,
             permissions_json=serialized
         ))
+
+
+def seed_runtime_user_context(db) -> None:
+    row = db.get(RuntimeUserContext, "CURRENT")
+    if row:
+        if not str(row.uname or "").strip():
+            row.uname = "operator"
+        return
+    db.add(RuntimeUserContext(
+        key="CURRENT",
+        uname="operator"
+    ))

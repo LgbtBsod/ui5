@@ -9,7 +9,7 @@ sap.ui.define([
     "sap/m/ObjectStatus",
     "sap/m/ToolbarSpacer",
     "sap/m/Button",
-    "checklist/app/control/ThemeToggle"
+    "sap/m/Switch"
 ], function (
     Control,
     OverflowToolbar,
@@ -21,7 +21,7 @@ sap.ui.define([
     ObjectStatus,
     ToolbarSpacer,
     Button,
-    ThemeToggle
+    Switch
 ) {
     "use strict";
 
@@ -70,7 +70,7 @@ sap.ui.define([
             oControl._oAnalyticsButton.setTooltip(oControl.getAnalyticsTooltip());
         }
         if (oControl._oThemeToggle) {
-            oControl._oThemeToggle.setDark(oControl.getDark());
+            oControl._oThemeToggle.setState(oControl.getDark());
             oControl._oThemeToggle.setTooltip(oControl.getThemeTooltip());
         }
         if (oControl._oUserButton) {
@@ -145,17 +145,17 @@ sap.ui.define([
         init: function () {
             var that = this;
 
-            this._oEyebrow = new Text().addStyleClass("shellEyebrow");
+            this._oEyebrow = new Text();
             this._oProductTitle = new Title({
                 level: "H6"
-            }).addStyleClass("shellProductTitle");
-            this._oContextSubtitle = new Text().addStyleClass("shellContextSubtitle");
+            });
+            this._oContextSubtitle = new Text();
 
             this._oRouteStatus = applyPriority(new ObjectStatus({
                 state: "Information"
-            }).addStyleClass("shellContextChip"), "NeverOverflow");
-            this._oLayoutStatus = applyPriority(new ObjectStatus().addStyleClass("shellContextChip"), "Low");
-            this._oModeStatus = applyPriority(new ObjectStatus().addStyleClass("shellContextChip"), "Disappear");
+            }), "NeverOverflow");
+            this._oLayoutStatus = applyPriority(new ObjectStatus(), "Low");
+            this._oModeStatus = applyPriority(new ObjectStatus(), "Disappear");
 
             this._oNotificationsButton = applyPriority(new Button({
                 icon: "sap-icon://bell",
@@ -163,7 +163,7 @@ sap.ui.define([
                 press: function () {
                     that.fireNotificationsPress({ anchor: that._oNotificationsButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
+            }), "High");
 
             this._oHelpButton = applyPriority(new Button({
                 icon: "sap-icon://sys-help",
@@ -171,7 +171,7 @@ sap.ui.define([
                 press: function () {
                     that.fireHelpPress({ anchor: that._oHelpButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
+            }), "High");
 
             this._oSettingsButton = applyPriority(new Button({
                 icon: "sap-icon://action-settings",
@@ -179,7 +179,7 @@ sap.ui.define([
                 press: function () {
                     that.fireSettingsPress({ anchor: that._oSettingsButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
+            }), "High");
 
             this._oAnalyticsButton = applyPriority(new Button({
                 icon: "sap-icon://business-objects-experience",
@@ -187,19 +187,20 @@ sap.ui.define([
                 press: function () {
                     that.fireAnalyticsPress({ anchor: that._oAnalyticsButton });
                 }
-            }).addStyleClass("shellActionBtn").addStyleClass("chkRipple"), "High");
+            }), "High");
 
-            this._oThemeToggle = new ThemeToggle();
-            this._oThemeToggle.attachPress(function () {
-                that.fireThemePress({ anchor: that._oThemeToggle });
-            });
+            this._oThemeToggle = applyPriority(new Switch({
+                change: function () {
+                    that.fireThemePress({ anchor: that._oThemeToggle });
+                }
+            }), "High");
 
             this._oUserButton = applyPriority(new Button({
                 type: "Transparent",
                 press: function () {
                     that.fireUserPress({ anchor: that._oUserButton });
                 }
-            }).addStyleClass("shellUserBtn").addStyleClass("chkRipple"), "NeverOverflow");
+            }), "NeverOverflow");
 
             this.setAggregation("_toolbar", new OverflowToolbar({
                 content: [
@@ -210,7 +211,7 @@ sap.ui.define([
                             this._oProductTitle,
                             this._oContextSubtitle
                         ]
-                    }).addStyleClass("shellBrandCluster"),
+                    }),
                     new HBox({
                         renderType: "Bare",
                         wrap: "Wrap",
@@ -220,19 +221,16 @@ sap.ui.define([
                             this._oLayoutStatus,
                             this._oModeStatus
                         ]
-                    }).addStyleClass("shellContextRail"),
+                    }),
                     new ToolbarSpacer(),
                     this._oNotificationsButton,
                     this._oHelpButton,
                     this._oSettingsButton,
                     this._oAnalyticsButton,
-                    new VBox({
-                        renderType: "Bare",
-                        items: [this._oThemeToggle]
-                    }).addStyleClass("shellThemeToggle"),
+                    this._oThemeToggle,
                     this._oUserButton
                 ]
-            }).addStyleClass("shellHeaderCard").addStyleClass("appShellHeader"));
+            }).addStyleClass("appShellHeader"));
 
             syncHeaderContent(this);
         },
@@ -253,8 +251,8 @@ sap.ui.define([
         setDark: function (bDark) {
             var bValue = !!bDark;
             this.setProperty("dark", bValue, true);
-            if (this._oThemeToggle && this._oThemeToggle.setDark) {
-                this._oThemeToggle.setDark(bValue);
+            if (this._oThemeToggle && this._oThemeToggle.setState) {
+                this._oThemeToggle.setState(bValue);
             }
             return this;
         },
