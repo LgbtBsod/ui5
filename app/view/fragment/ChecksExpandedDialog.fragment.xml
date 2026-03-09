@@ -8,11 +8,12 @@
         draggable="true"
         resizable="true"
         stretchOnPhone="true"
-        busy="{view>/checksExpandedBusy}"
-        busyIndicatorDelay="0"
         initialFocus="checksExpandedCloseButton">
         <content>
-            <VBox class="expandedDialogContent dialogContentShell tableDialogBody" renderType="Bare">
+            <VBox class="expandedDialogContent dialogContentShell tableDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare">
+                <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/checksExpandedBusy}">
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                </VBox>
                 <t:Table
                     class="dialogDataTable detailGridTable"
                     visible="{= !${appView>/isPhoneViewport} }"

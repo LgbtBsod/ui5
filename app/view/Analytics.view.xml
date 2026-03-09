@@ -9,9 +9,7 @@
         showNavButton="true"
         navButtonPress=".onCloseAnalytics"
         enableScrolling="true"
-        class="pageTransparent"
-        busy="{view>/busy}"
-        busyIndicatorDelay="0">
+        class="pageTransparent">
         <headerContent>
             <ObjectStatus
                 text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? ${i18n>analyticsRefreshRunning} : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : (${view>/refreshState/lastSuccessAt} ? (${i18n>workflowUpdatedAt} + ': ' + ${view>/refreshState/lastSuccessAt}) : ${i18n>analyticsRefreshIdle}))) }"
@@ -72,7 +70,10 @@
         </subHeader>
 
         <content>
-            <VBox class="appContent analyticsScreenContent" renderType="Bare">
+            <VBox class="appContent analyticsScreenContent workflowBusyScope" renderType="Bare">
+                <VBox class="workflowBusyOverlayShell" renderType="Bare" visible="{view>/busy}">
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                </VBox>
                 <VBox class="glassCard analyticsHeroCard" renderType="Bare">
                     <Text text="{i18n>analyticsScreenEyebrow}" class="workflowEyebrow"/>
                     <Title text="{i18n>workflowAnalyticsTitle}" level="H2" class="analyticsScreenTitle"/>

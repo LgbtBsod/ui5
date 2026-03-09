@@ -26083,6 +26083,57 @@ body.chkAppRoot.appDark .chkApp .detailAccessDeniedSceneVisual {
   display: none !important;
 }
 
+.chkApp .workflowBusyScope {
+  position: relative;
+}
+
+.chkApp .workflowBusyOverlayShell {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  border-radius: inherit;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+body.chkAppRoot.appLight .chkApp .workflowBusyOverlayShell {
+  background:
+    linear-gradient(180deg, rgba(248, 252, 255, 0.86), rgba(238, 245, 255, 0.88)),
+    rgba(244, 249, 255, 0.72);
+}
+
+body.chkAppRoot.appDark .chkApp .workflowBusyOverlayShell {
+  background:
+    linear-gradient(180deg, rgba(8, 18, 39, 0.84), rgba(11, 20, 44, 0.9)),
+    rgba(8, 16, 36, 0.72);
+}
+
+.chkApp .workflowBusyOverlayShellInset {
+  border-radius: 1rem;
+}
+
+.chkApp .workflowBusyOverlayShellDialog {
+  border-radius: 1.25rem;
+}
+
+.chkApp .workflowBusyScopeSection {
+  min-height: 18rem;
+}
+
+.chkApp .workflowBusyScopeDialog {
+  min-height: 100%;
+}
+
+.chkApp .workflowBusyOverlayCard {
+  width: min(100%, 34rem);
+  margin: 0;
+  pointer-events: none;
+}
+
 /* ══════════════════════════════════════════════════════════════
    CH 12 · smartFilterGlass / filterCard — filter bar
    ══════════════════════════════════════════════════════════════ */

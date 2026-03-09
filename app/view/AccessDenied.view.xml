@@ -7,11 +7,12 @@
     <Page
         showHeader="false"
         enableScrolling="true"
-        class="pageTransparent"
-        busy="{view>/busy}"
-        busyIndicatorDelay="0">
+        class="pageTransparent">
         <content>
-            <VBox class="appContent accessDeniedScreenContent" renderType="Bare">
+            <VBox class="appContent accessDeniedScreenContent workflowBusyScope" renderType="Bare">
+                <VBox class="workflowBusyOverlayShell" renderType="Bare" visible="{view>/busy}">
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                </VBox>
                 <HBox class="glassCard accessDeniedHeroCard" renderType="Bare" wrap="Wrap">
                     <VBox class="accessDeniedVisual" renderType="Bare">
                         <core:Icon src="sap-icon://locked" class="accessDeniedIcon"/>

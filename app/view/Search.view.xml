@@ -379,9 +379,12 @@
 
                         <VBox
                             renderType="Bare"
-                            class="searchResultsBody"
-                            busy="{= ${view>/tableBusy} || ${view>/exportBusy} }"
-                            busyIndicatorDelay="0">
+                            class="searchResultsBody workflowBusyScope">
+                            <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/exportBusy}">
+                                <core:Fragment
+                                    fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay"
+                                    type="XML"/>
+                            </VBox>
                             <smartTable:SmartTable
                                 id="searchSmartTable"
                                 visible="{= (!${view>/busy} &amp;&amp; !${view>/tableBusy}) || !${view>/hasSearched} }"

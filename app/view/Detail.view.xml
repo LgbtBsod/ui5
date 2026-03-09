@@ -147,7 +147,10 @@
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
                                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
-                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody">
+                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody workflowBusyScope workflowBusyScopeSection">
+                                        <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/checksBusy}">
+                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                                        </VBox>
                                         <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
                                             <Title text="{i18n>checksTitle}"/>
                                             <ToolbarSpacer/>
@@ -192,8 +195,6 @@
                                             visibleRowCountMode="Auto"
                                             minAutoRowCount="6"
                                             rowHeight="48"
-                                            busy="{view>/checksBusy}"
-                                            busyIndicatorDelay="0"
                                             class="flatEditorGridTable detailGridTable">
                                             <t:columns>
                                                 <t:Column width="3rem">
@@ -240,8 +241,6 @@
                                             growing="true"
                                             growingThreshold="50"
                                             growingScrollToLoad="true"
-                                            busy="{view>/checksBusy}"
-                                            busyIndicatorDelay="0"
                                             visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/checks'}], formatter:'.isPhoneTableVisible'}"
                                             noDataText="{i18n>noChecksData}">
                                             <columns>
@@ -283,7 +282,10 @@
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
                                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
-                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody">
+                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody workflowBusyScope workflowBusyScopeSection">
+                                        <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/barriersBusy}">
+                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                                        </VBox>
                                         <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
                                             <Title text="{i18n>barriersTitle}"/>
                                             <ToolbarSpacer/>
@@ -328,8 +330,6 @@
                                             visibleRowCountMode="Auto"
                                             minAutoRowCount="7"
                                             rowHeight="48"
-                                            busy="{view>/barriersBusy}"
-                                            busyIndicatorDelay="0"
                                             class="flatEditorGridTable detailGridTable detailBarriersGridTable">
                                             <t:columns>
                                                 <t:Column width="3rem">
@@ -376,8 +376,6 @@
                                             growing="true"
                                             growingThreshold="50"
                                             growingScrollToLoad="true"
-                                            busy="{view>/barriersBusy}"
-                                            busyIndicatorDelay="0"
                                             visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/barriers'}], formatter:'.isPhoneTableVisible'}"
                                             noDataText="{i18n>noBarriersData}">
                                             <columns>
@@ -418,7 +416,10 @@
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
                                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
-                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody">
+                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody workflowBusyScope workflowBusyScopeSection">
+                                            <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/attachmentBusy}">
+                                                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                                            </VBox>
                                             <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar">
                                                 <Title text="{i18n>attachmentsTitle}"/>
                                                 <ToolbarSpacer/>
@@ -491,8 +492,6 @@
                                                 <Table
                                                     items="{selected>/attachments}"
                                                     class="flatEditorTable detailAttachmentTable"
-                                                    busy="{view>/attachmentBusy}"
-                                                    busyIndicatorDelay="0"
                                                     visible="{path:'selected>/attachments', formatter:'.hasRows'}"
                                                     noDataText="{i18n>noAttachmentsData}">
                                                     <columns>
