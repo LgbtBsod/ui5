@@ -9,8 +9,8 @@ from fastapi.responses import JSONResponse
 from .odata_datetime import to_odata_date_ms
 from .odata_etag import etag_for_datetime
 
-SERVICE_ROOT = "/sap/opu/odata/sap/Z_UI5_SRV"
-ODATA_NS = "Z_UI5_SRV"
+SERVICE_ROOT = "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV"
+ODATA_NS = "Z_EHS_PRODUCTION_CONTROL_CKLT_SRV"
 
 
 def format_datetime(value: datetime | None) -> str | None:

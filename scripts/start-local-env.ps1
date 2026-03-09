@@ -91,7 +91,7 @@ $uiProcess = Start-Process `
 
 $uiProcess.Id | Set-Content $uiPidFile
 
-$backendStatus = Wait-Http -Url "http://127.0.0.1:$BackendPort/sap/opu/odata/sap/Z_UI5_SRV/`$metadata" -TimeoutSeconds 20 -Name "Mock backend"
+$backendStatus = Wait-Http -Url "http://127.0.0.1:$BackendPort/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/`$metadata" -TimeoutSeconds 20 -Name "Mock backend"
 $uiStatus = Wait-Http -Url "http://127.0.0.1:$UiPort/index.html" -TimeoutSeconds 20 -Name "UI server"
 
 Write-Host "Backend: http://127.0.0.1:$BackendPort ($backendStatus)"

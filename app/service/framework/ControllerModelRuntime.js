@@ -9,10 +9,19 @@ sap.ui.define([], function () {
         return oController && oController.getOwnerComponent ? oController.getOwnerComponent() : null;
     }
 
+    function resolveTarget(oController) {
+        if (oController && typeof oController.getModel === "function") {
+            return oController;
+        }
+        return null;
+    }
+
     function resolveNamedModel(oController, sName, bOwnerFallback) {
         var oView = resolveView(oController);
+        var oTarget = resolveTarget(oController);
         var oOwner = bOwnerFallback === false ? null : resolveOwner(oController);
         return (oView && oView.getModel && oView.getModel(sName))
+            || (oTarget && oTarget.getModel && oTarget.getModel(sName))
             || (oOwner && oOwner.getModel && oOwner.getModel(sName))
             || null;
     }

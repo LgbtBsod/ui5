@@ -65,7 +65,7 @@ start "UI5 Server" cmd /k "cd /d . && %VENV_DIR%\Scripts\python.exe scripts\dev_
 echo ==============================
 echo Environment is up.
 echo Gateway:      http://localhost:%PORT_GATEWAY%
-echo Service root: http://localhost:%PORT_GATEWAY%/sap/opu/odata/sap/Z_UI5_SRV/
+echo Service root: http://localhost:%PORT_GATEWAY%/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/
 echo UI5:          http://localhost:%PORT_UI%
 echo QA check:     npm run qa
 echo ==============================
