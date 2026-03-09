@@ -33,8 +33,6 @@
                     </HBox>
                     <HBox class="shellUserContextChips" renderType="Bare" wrap="Wrap">
                         <ObjectStatus text="{appView>/shell/routeLabel}" state="Information" class="shellContextChip"/>
-                        <ObjectStatus text="{appView>/shell/layoutLabel}" state="{appView>/shell/layoutState}" class="shellContextChip"/>
-                        <ObjectStatus text="{appView>/shell/modeLabel}" state="{appView>/shell/modeState}" class="shellContextChip"/>
                     </HBox>
                     <Text text="{appView>/shell/userActionHint}" class="shellHelpText"/>
                 </VBox>

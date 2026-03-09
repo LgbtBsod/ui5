@@ -27,10 +27,6 @@ sap.ui.define([
             this._syncShellState();
         },
 
-        onOpenShellNotifications: function (oEvent) {
-            return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "notifications");
-        },
-
         onOpenShellHelp: function (oEvent) {
             return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "help");
         },

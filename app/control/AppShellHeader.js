@@ -49,17 +49,6 @@ sap.ui.define([
         if (oControl._oRouteStatus) {
             oControl._oRouteStatus.setText(oControl.getRouteLabel());
         }
-        if (oControl._oLayoutStatus) {
-            oControl._oLayoutStatus.setText(oControl.getLayoutLabel());
-            oControl._oLayoutStatus.setState(oControl.getLayoutState());
-        }
-        if (oControl._oModeStatus) {
-            oControl._oModeStatus.setText(oControl.getModeLabel());
-            oControl._oModeStatus.setState(oControl.getModeState());
-        }
-        if (oControl._oNotificationsButton) {
-            oControl._oNotificationsButton.setTooltip(oControl.getNotificationsTooltip());
-        }
         if (oControl._oHelpButton) {
             oControl._oHelpButton.setTooltip(oControl.getHelpTooltip());
         }
@@ -87,17 +76,11 @@ sap.ui.define([
                 productName: { type: "string", defaultValue: "" },
                 contextSubtitle: { type: "string", defaultValue: "" },
                 routeLabel: { type: "string", defaultValue: "" },
-                layoutLabel: { type: "string", defaultValue: "" },
-                layoutState: { type: "string", defaultValue: "Information" },
-                modeLabel: { type: "string", defaultValue: "" },
-                modeState: { type: "string", defaultValue: "Information" },
-                notificationsText: { type: "string", defaultValue: "" },
                 helpText: { type: "string", defaultValue: "" },
                 settingsText: { type: "string", defaultValue: "" },
                 analyticsText: { type: "string", defaultValue: "" },
                 userLabel: { type: "string", defaultValue: "" },
                 userIcon: { type: "string", defaultValue: "sap-icon://employee" },
-                notificationsTooltip: { type: "string", defaultValue: "" },
                 helpTooltip: { type: "string", defaultValue: "" },
                 settingsTooltip: { type: "string", defaultValue: "" },
                 analyticsTooltip: { type: "string", defaultValue: "" },
@@ -109,11 +92,6 @@ sap.ui.define([
                 _toolbar: { type: "sap.m.OverflowToolbar", multiple: false, visibility: "hidden" }
             },
             events: {
-                notificationsPress: {
-                    parameters: {
-                        anchor: { type: "sap.ui.core.Control" }
-                    }
-                },
                 helpPress: {
                     parameters: {
                         anchor: { type: "sap.ui.core.Control" }
@@ -154,16 +132,6 @@ sap.ui.define([
             this._oRouteStatus = applyPriority(new ObjectStatus({
                 state: "Information"
             }), "NeverOverflow");
-            this._oLayoutStatus = applyPriority(new ObjectStatus(), "Low");
-            this._oModeStatus = applyPriority(new ObjectStatus(), "Disappear");
-
-            this._oNotificationsButton = applyPriority(new Button({
-                icon: "sap-icon://bell",
-                type: "Transparent",
-                press: function () {
-                    that.fireNotificationsPress({ anchor: that._oNotificationsButton });
-                }
-            }), "High");
 
             this._oHelpButton = applyPriority(new Button({
                 icon: "sap-icon://sys-help",
@@ -217,13 +185,10 @@ sap.ui.define([
                         wrap: "Wrap",
                         alignItems: "Center",
                         items: [
-                            this._oRouteStatus,
-                            this._oLayoutStatus,
-                            this._oModeStatus
+                            this._oRouteStatus
                         ]
                     }),
                     new ToolbarSpacer(),
-                    this._oNotificationsButton,
                     this._oHelpButton,
                     this._oSettingsButton,
                     this._oAnalyticsButton,

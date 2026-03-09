@@ -65,6 +65,9 @@ sap.ui.define([
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
         var oIntent = buildCurrentIntent(oStateModel);
+        if (String(oIntent.routeName || "") === "accessDenied") {
+            oIntent = buildFallbackIntent();
+        }
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
             routeName: String(oIntent.routeName || "search"),
@@ -96,6 +99,9 @@ sap.ui.define([
         var oRouter = oController && oController.getRouter && oController.getRouter();
 
         if (!oIntent.routeName) {
+            oIntent = buildFallbackIntent();
+        }
+        if (String(oIntent.routeName || "") === "accessDenied") {
             oIntent = buildFallbackIntent();
         }
         if (oRouter && typeof oRouter.navTo === "function") {

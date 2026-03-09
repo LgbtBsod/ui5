@@ -60,8 +60,8 @@ sap.ui.define([
             var sClassName = [TOAST_CLASS, TOAST_LEVEL_CLASS_PREFIX + sLevel].join(" ");
             MessageToast.show(String(sText), {
                 className: sClassName,
-                duration: 3000
-            });
+            duration: 2200
+        });
         }
     }
     function banner(oController, oEffect, oOptions) {

@@ -32901,3 +32901,109 @@ body.chkAppRoot.appDark .chkApp .workflowBusyOverlayShell {
     padding-inline-end: 0 !important;
   }
 }
+
+/* Narrow polish: shell/search/detail stretching and alignment */
+.chkApp .appLayoutSingle #searchPaneHost,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"],
+.chkApp .appLayoutSingle #detailPaneHost,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"],
+.chkApp .appLayoutSingle #analyticsPaneHost,
+.chkApp .appLayoutSingle [id$="-analyticsPaneHost"] {
+  padding-inline: clamp(0.5rem, 1.35vw, 1rem) !important;
+  box-sizing: border-box !important;
+}
+
+.chkApp .searchAnalyticsRail,
+.chkApp .searchAnalyticsRailGrid,
+.chkApp .analyticsToplineGrid,
+.chkApp .detailHeroStatBoard {
+  width: 100% !important;
+  align-items: stretch !important;
+}
+
+.chkApp .searchAnalyticsRailGrid > .searchAnalyticsCard,
+.chkApp .analyticsToplineGrid > .kpiCard,
+.chkApp .detailHeroStatBoard > .uxStatChip {
+  flex: 1 1 13rem !important;
+  min-width: 13rem !important;
+}
+
+.chkApp .searchAnalyticsCard,
+.chkApp .analyticsToplineGrid .kpiCard,
+.chkApp .detailHeroStatBoardCompact .uxStatChip {
+  justify-content: center !important;
+}
+
+.chkApp .searchAnalyticsCard .sapMTitle,
+.chkApp .analyticsToplineGrid .kpiCard .sapMTitle,
+.chkApp .analyticsToplineGrid .kpiCard .sapMObjectNumberText,
+.chkApp .analyticsToplineGrid .kpiCard .kpiNumber,
+.chkApp .detailHeroStatBoardCompact .uxStatChip .sapMText,
+.chkApp .detailHeroStatBoardCompact .uxStatChip .sapMObjStatus,
+.chkApp .detailHeroStatBoardCompact .uxStatChip .sapMObjStatusText {
+  text-align: center !important;
+}
+
+.chkApp .analyticsHeroCard,
+.chkApp .analyticsScreenBody,
+.chkApp .searchWorkbenchDock,
+.chkApp .detailControlBar {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.chkApp .detailDateTimeGrid,
+.chkApp .detailInfoExperienceCard .detailDateTimeGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.chkApp .detailDateTimeGrid .sapMSlt,
+.chkApp .detailDateTimeGrid .sapMSlt .sapMSltLabel,
+.chkApp .detailDateTimeGrid .sapMInputBase,
+.chkApp .detailDateTimeGrid .sapMDatePicker,
+.chkApp .detailDateTimeGrid .sapMTimePicker {
+  width: 100% !important;
+}
+
+.chkApp .detailAttachmentDropZone,
+.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentDropZone,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentDropZone {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.chkApp .detailAttachmentDropZoneTop,
+.chkApp .detailAttachmentDropZone > .sapMHBox,
+.chkApp .detailAttachmentsBody {
+  width: 100% !important;
+}
+
+.chkApp .detailAttachmentDropZone .sapMFlexItem,
+.chkApp .detailAttachmentDropZoneTop .sapMFlexItem {
+  flex: 1 1 auto !important;
+}
+
+.chkApp .searchSmartToolbarRail .sapMTBSpacer,
+.chkApp .searchResultsActionRail .sapMTBSpacer {
+  min-width: 0 !important;
+}
+
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn,
+.chkApp .searchResultsActionRail .searchCreateActionBtn {
+  margin-inline-start: 0.25rem !important;
+}
+
+@media (max-width: 64rem) {
+  .chkApp .searchAnalyticsRailGrid > .searchAnalyticsCard,
+  .chkApp .analyticsToplineGrid > .kpiCard,
+  .chkApp .detailHeroStatBoard > .uxStatChip {
+    min-width: 11rem !important;
+  }
+}
+
+@media (max-width: 48rem) {
+  .chkApp .detailDateTimeGrid,
+  .chkApp .detailInfoExperienceCard .detailDateTimeGrid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

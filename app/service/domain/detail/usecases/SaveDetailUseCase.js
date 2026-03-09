@@ -174,6 +174,8 @@ sap.ui.define([
                     if (bCreate) {
                         var bLockAcquired = !!(oLockResult && oLockResult.ok);
                         aEffects.push(Effects.modelPatch("state", "/postOpenHydratedRootId", sServerRootId));
+                        aEffects.push(Effects.modelPatch("state", "/mode", bLockAcquired ? "EDIT" : "READ"));
+                        aEffects.push(Effects.modelPatch("state", "/lockOperationState", bLockAcquired ? "LOCKED" : "IDLE"));
                         aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? "EDIT" : "READ"));
                         aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? "LOCKED" : "IDLE"));
                         aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));

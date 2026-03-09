@@ -10,7 +10,6 @@ sap.ui.define([
     "use strict";
 
     var SHELL_OVERLAY_FRAGMENTS = {
-        notifications: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellNotificationsPopover",
         help: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellHelpPopover",
         settings: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellSettingsPopover",
         user: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellUserPopover"

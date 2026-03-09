@@ -179,7 +179,7 @@
                             enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }"
                             class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="High" moveToOverflow="true"/>
+                                <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                             </layoutData>
                         </Button>
 
@@ -299,7 +299,7 @@
                             ariaLabelledBy="searchBackendTopA11y"
                             class="backendTopInput">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="8rem"/>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="8rem"/>
                             </layoutData>
                         </Input>
 
@@ -314,7 +314,7 @@
                             ariaLabelledBy="searchMaxRowsA11y"
                             class="maxRowsInput">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="8rem"/>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="8rem"/>
                             </layoutData>
                         </Input>
 
@@ -325,7 +325,7 @@
                             customTextOff=""
                             class="accentSwitch searchModeToggleSwitch">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Disappear"/>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                             </layoutData>
                         </Switch>
 
@@ -338,7 +338,7 @@
                             class="brandActionBtn brandActionGhost searchExportMenuBtn"
                             icon="sap-icon://excel-attachment">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="High" moveToOverflow="true"/>
+                                <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                             </layoutData>
 
                             <menu>
