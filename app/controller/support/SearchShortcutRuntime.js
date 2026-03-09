@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/controller/support/SearchSelectionRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchSelectionRuntime"
 ], function (SearchSelectionRuntime) {
     "use strict";
 

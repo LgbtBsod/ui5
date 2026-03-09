@@ -1,15 +1,16 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/shared/UseCaseInputUtils",
-    "checklist/app/model/StatePaths",
-    "checklist/app/service/domain/detail/DetailStateAccess",
-    "checklist/app/service/domain/detail/DetailValidationSupport",
-    "checklist/app/util/ChecklistValidationService",
-    "checklist/app/util/DeltaPayloadBuilder",
-    "checklist/app/util/CloneUtil"
-], function (UseCase, Result, Effects, UseCaseInputUtils, StatePaths, DetailStateAccess, DetailValidationSupport, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ChecklistValidationService",
+    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil"
+], function (UseCase, Result, Effects, UseCaseInputUtils, StatePaths, DetailStateAccess, DetailSaveSupport, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
     "use strict";
 
     function ChangeStatusUseCase() {
@@ -23,16 +24,6 @@ sap.ui.define([
         return CloneUtil.clone(vValue, {});
     }
 
-    function readSessionGuid(mCtx) {
-        var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get("state", StatePaths.SESSION_ID)) || "";
-    }
-
-    function readLockState(mCtx) {
-        var oUiState = mCtx && mCtx.uiState;
-        return String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE)) || "").toUpperCase();
-    }
-
     ChangeStatusUseCase.prototype.execute = function (mInput, mCtx) {
         var sRootId = UseCaseInputUtils.rootId(mInput);
         var sStatus = UseCaseInputUtils.text(mInput && mInput.status).toUpperCase();
@@ -41,7 +32,7 @@ sap.ui.define([
         var oSnapshot = DetailStateAccess.readDetailSnapshot(mCtx);
         var oNextChecklist;
         var oDelta;
-        var sSessionGuid = readSessionGuid(mCtx);
+        var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);
         var oValidation = ChecklistValidationService.validateRequiredFields(oChecklist, {
             requiredFields: DetailStateAccess.readRequiredFields(mCtx)
         });
@@ -66,7 +57,7 @@ sap.ui.define([
                 missingPaths: oValidation.missingPaths || []
             }, [
                 Effects.modelPatch("view", "/validationShown", true),
-                Effects.modelPatch("view", "/validationMissing", DetailValidationSupport.toMissingMap(oValidation.missingPaths)),
+                Effects.modelPatch("view", "/validationMissing", ValidationPathMap.toMissingMap(oValidation.missingPaths)),
                 Effects.toast("checklistValidationFailedToast", "warning")
             ]));
         }
@@ -83,7 +74,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")
             ]));
         }
-        if (!sSessionGuid || readLockState(mCtx) !== "LOCKED") {
+        if (!sSessionGuid || DetailSaveSupport.readLockState(mCtx, StatePaths) !== "LOCKED") {
             return Promise.resolve(Result.fail({ message: "Active lock is required before status change", code: "LOCK_REQUIRED" }, [
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")

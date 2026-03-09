@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/util/ThemeDomRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime"
 ], function (ThemeDomRuntime) {
     "use strict";
 

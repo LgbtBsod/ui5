@@ -1,20 +1,110 @@
 sap.ui.define([
-    "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/service/domain/analytics/AnalyticsFacade",
-    "checklist/app/controller/support/AnalyticsBuilderSupport",
-    "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/service/framework/CtxFactory",
-    "checklist/app/service/framework/FacadeCommandRuntime",
-    "checklist/app/service/framework/ControllerRouteRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/SchedulingRuntime"
-], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderSupport, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AnalyticsBuilderRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "sap/m/ResponsivePopover",
+    "sap/m/List",
+    "sap/m/StandardListItem"
+], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderRuntime, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime, ModelStateRuntime, ResponsivePopover, List, StandardListItem) {
     "use strict";
 
     var getText = ControllerTextRuntime.getText;
     var REFRESH_STATE_TASK_KEY = "ANALYTICS_REFRESH";
     var REFRESH_POLL_DELAY_MS = 1800;
     var REFRESH_POLL_MAX_ATTEMPTS = 12;
+
+    function buildCompareYearOptions(oController) {
+        var mSeen = {};
+        var aOptions = [];
+
+        function pushYear(vYear) {
+            var sYear = String(vYear || "").trim();
+            if (!/^\d{4}$/.test(sYear) || mSeen[sYear]) {
+                return;
+            }
+            mSeen[sYear] = true;
+            aOptions.push({
+                key: sYear,
+                text: sYear
+            });
+        }
+
+        (ControllerViewStateRuntime.get(oController, "/availableYears", []) || []).forEach(function (oYear) {
+            pushYear((oYear && (oYear.key || oYear.text)) || "");
+        });
+        pushYear(ControllerViewStateRuntime.get(oController, "/selectedYear", ""));
+        pushYear(ControllerViewStateRuntime.get(oController, "/compareYear", ""));
+        pushYear(Number(ControllerViewStateRuntime.get(oController, "/selectedYear", 0)) - 1);
+
+        return aOptions.sort(function (aLeft, aRight) {
+            return Number(aRight && aRight.key) - Number(aLeft && aLeft.key);
+        });
+    }
+
+    function syncCompareYearDefaults(oController, sSelectedYear) {
+        var iSelectedYear = Number(String(sSelectedYear || "").trim());
+        var sDefaultCompareYear = iSelectedYear > 0 ? String(iSelectedYear - 1) : "";
+        ControllerViewStateRuntime.set(oController, "/compareYear", sDefaultCompareYear);
+        ControllerViewStateRuntime.set(oController, "/compareYearOptions", buildCompareYearOptions(oController));
+        return sDefaultCompareYear;
+    }
+
+    function extractPresetFromEvent(oEvent) {
+        var oSource = oEvent && oEvent.getSource && oEvent.getSource();
+        return String((oSource && oSource.data && oSource.data("preset")) || "").trim().toUpperCase();
+    }
+
+    function applyYearPreset(oController, sPreset) {
+        var iCurrentYear = new Date().getFullYear();
+        var iSelectedYear = sPreset === "PREVIOUS" ? (iCurrentYear - 1) : iCurrentYear;
+        var sSelectedYear = String(iSelectedYear);
+        syncCompareYearDefaults(oController, sSelectedYear);
+        ControllerViewStateRuntime.setMany(oController, {
+            "/selectedYear": sSelectedYear,
+            "/activeYearPreset": sPreset || "CURRENT"
+        });
+        return oController._loadAnalytics("yearPresetChanged");
+    }
+
+    function readSelectedSource(oController) {
+        return String(ControllerViewStateRuntime.get(oController, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
+    }
+
+    function buildSearchDrilldownIntent(sFilterKey, sFilterValue, oController, mExtras) {
+        return {
+            source: "analytics",
+            filterKey: String(sFilterKey || "").trim(),
+            filterValue: String(sFilterValue || "").trim(),
+            selectedYear: String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "").trim(),
+            compareYear: String(ControllerViewStateRuntime.get(oController, "/compareYear", "") || "").trim(),
+            analyticsSource: readSelectedSource(oController),
+            extras: Object.assign({}, mExtras || {})
+        };
+    }
+
+    function extractDrilldownPayload(oEvent) {
+        var aData = oEvent && oEvent.getParameter && oEvent.getParameter("data");
+        var oEntry = Array.isArray(aData) && aData.length ? aData[0] : null;
+        var oPoint = oEntry && (oEntry.data || oEntry.dataContext || {});
+        return oPoint || {};
+    }
+
+    function queueAnalyticsDrilldown(oController, sFilterKey, sFilterValue, mExtras) {
+        var sValue = String(sFilterValue || "").trim();
+        if (!sFilterKey || !sValue) {
+            return Promise.resolve(false);
+        }
+        ModelStateRuntime.write(oController, "state", "/analyticsDrilldownIntent", buildSearchDrilldownIntent(sFilterKey, sValue, oController, mExtras));
+        NavigationIntentService.navigateToSearch(oController);
+        return Promise.resolve(true);
+    }
 
     function isRefreshQueued(oRefreshState) {
         var sStatus = String(oRefreshState && oRefreshState.status || "").trim().toUpperCase();
@@ -29,9 +119,9 @@ sap.ui.define([
         onInit: function () {
             this._facade = new AnalyticsFacade();
             ControllerViewStateRuntime.initModel(this, function () {
-                return AnalyticsBuilderSupport.createInitialViewState(REFRESH_STATE_TASK_KEY);
+                return AnalyticsBuilderRuntime.createInitialViewState(REFRESH_STATE_TASK_KEY);
             });
-            AnalyticsBuilderSupport.applyBuilderSelection(this);
+            AnalyticsBuilderRuntime.applyBuilderSelection(this);
             ControllerRouteRuntime.attachMatched(this, [
                 { name: "analytics", handler: this._onAnalyticsMatched }
             ]);
@@ -39,19 +129,23 @@ sap.ui.define([
 
         onExit: function () {
             ControllerRouteRuntime.detachAllMatched(this);
+            if (this._oCompareYearPopover && typeof this._oCompareYearPopover.destroy === "function") {
+                this._oCompareYearPopover.destroy();
+            }
+            this._oCompareYearPopover = null;
             this._facade = null;
         },
 
         _applyComparisonMetricSelection: function () {
-            AnalyticsBuilderSupport.applyComparisonMetricSelection(this);
+            AnalyticsBuilderRuntime.applyComparisonMetricSelection(this);
         },
 
         _applyBuilderSelection: function (mOverrides) {
-            AnalyticsBuilderSupport.applyBuilderSelection(this, mOverrides || {});
+            AnalyticsBuilderRuntime.applyBuilderSelection(this, mOverrides || {});
         },
 
         _syncAnalyticsContextHints: function () {
-            AnalyticsBuilderSupport.syncAnalyticsContextHints(this);
+            AnalyticsBuilderRuntime.syncAnalyticsContextHints(this);
         },
 
         _setCompareYearValidation: function (sState, sText) {
@@ -90,6 +184,8 @@ sap.ui.define([
                 }
                 if (oAnalytics.compareYear) {
                     ControllerViewStateRuntime.set(this, "/compareYear", String(oAnalytics.compareYear));
+                } else if (oAnalytics.selectedYear) {
+                    syncCompareYearDefaults(this, String(oAnalytics.selectedYear));
                 }
                 if (oAnalytics.source) {
                     ControllerViewStateRuntime.set(this, "/selectedSource", String(oAnalytics.source));
@@ -97,6 +193,7 @@ sap.ui.define([
                 if (oAnalytics.refreshState) {
                     ControllerViewStateRuntime.set(this, "/refreshState", oAnalytics.refreshState);
                 }
+                ControllerViewStateRuntime.set(this, "/compareYearOptions", buildCompareYearOptions(this));
                 this._setCompareYearValidation("None", "");
                 this._applyComparisonMetricSelection();
                 this._applyBuilderSelection();
@@ -177,7 +274,7 @@ sap.ui.define([
                 return Promise.resolve();
             }
             ControllerViewStateRuntime.set(this, "/selectedYear", sYear);
-            ControllerViewStateRuntime.set(this, "/compareYear", String(Math.max((Number(sYear) || 0) - 1, 0)));
+            syncCompareYearDefaults(this, sYear);
             this._setCompareYearValidation("None", "");
             return this._loadAnalytics("yearChanged");
         },
@@ -219,12 +316,59 @@ sap.ui.define([
                 return Promise.resolve();
             }
             ControllerViewStateRuntime.set(this, "/compareYear", String(iYear));
+            ControllerViewStateRuntime.set(this, "/compareYearOptions", buildCompareYearOptions(this));
             this._setCompareYearValidation("None", "");
             return this._loadAnalytics("compareYearChanged");
         },
 
+        onOpenAnalyticsCompareYearHelp: function (oEvent) {
+            var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+            var aOptions = buildCompareYearOptions(this);
+            var oList;
+
+            if (!oSource) {
+                return;
+            }
+            ControllerViewStateRuntime.set(this, "/compareYearOptions", aOptions);
+            if (!this._oCompareYearPopover) {
+                oList = new List({
+                    mode: "SingleSelectMaster",
+                    growing: false,
+                    includeItemInSelection: true,
+                    selectionChange: function (oSelectEvent) {
+                        var oItem = oSelectEvent.getParameter("listItem");
+                        var sYear = String(oItem && oItem.getTitle && oItem.getTitle() || "").trim();
+                        if (!/^\d{4}$/.test(sYear)) {
+                            return;
+                        }
+                        ControllerViewStateRuntime.set(this, "/compareYear", sYear);
+                        ControllerViewStateRuntime.set(this, "/compareYearOptions", buildCompareYearOptions(this));
+                        this._setCompareYearValidation("None", "");
+                        this._oCompareYearPopover.close();
+                        this._loadAnalytics("compareYearQuickPick");
+                    }.bind(this),
+                    items: {
+                        path: "view>/compareYearOptions",
+                        templateShareable: true,
+                        template: new StandardListItem({
+                            title: "{view>text}",
+                            type: "Active"
+                        })
+                    }
+                });
+                this._oCompareYearPopover = new ResponsivePopover({
+                    placement: "Bottom",
+                    contentWidth: "12rem",
+                    contentHeight: "16rem",
+                    content: [oList]
+                });
+                this.getView().addDependent(this._oCompareYearPopover);
+            }
+            this._oCompareYearPopover.openBy(oSource);
+        },
+
         onSelectAnalyticsMetric: function (oEvent) {
-            var sMetric = AnalyticsBuilderSupport.getSelectedKeyFromEvent(oEvent);
+            var sMetric = AnalyticsBuilderRuntime.getSelectedKeyFromEvent(oEvent);
             if (!sMetric) {
                 return;
             }
@@ -233,7 +377,7 @@ sap.ui.define([
         },
 
         onSelectAnalyticsBuilderDimension: function (oEvent) {
-            var sDimension = AnalyticsBuilderSupport.getSelectedKeyFromEvent(oEvent);
+            var sDimension = AnalyticsBuilderRuntime.getSelectedKeyFromEvent(oEvent);
             if (!sDimension) {
                 return;
             }
@@ -241,11 +385,66 @@ sap.ui.define([
         },
 
         onSelectAnalyticsBuilderMetric: function (oEvent) {
-            var sMetric = AnalyticsBuilderSupport.getSelectedKeyFromEvent(oEvent);
+            var sMetric = AnalyticsBuilderRuntime.getSelectedKeyFromEvent(oEvent);
             if (!sMetric) {
                 return;
             }
             this._applyBuilderSelection({ metric: sMetric });
+        },
+
+        onApplyAnalyticsYearPreset: function (oEvent) {
+            var sPreset = extractPresetFromEvent(oEvent);
+            if (!sPreset) {
+                return Promise.resolve();
+            }
+            return applyYearPreset(this, sPreset);
+        },
+
+        onDrilldownAnalyticsBuilder: function (oEvent) {
+            var sDimension = String(ControllerViewStateRuntime.get(this, "/builderDimension", "MONTH") || "MONTH").trim().toUpperCase();
+            var oPoint = extractDrilldownPayload(oEvent);
+            var sLabel = String((oPoint && (oPoint.Dimension || oPoint.label || oPoint.labelShort)) || "").trim();
+            var mMap = {
+                LPC: "Lpc",
+                PROFESSION: "ProfessionText",
+                LOCATION: "LocationKey"
+            };
+            return queueAnalyticsDrilldown(this, mMap[sDimension], sLabel, {
+                dimension: sDimension,
+                metric: String(ControllerViewStateRuntime.get(this, "/builderMetric", "") || "").trim().toUpperCase()
+            });
+        },
+
+        onDrilldownAnalyticsSource: function (oEvent) {
+            var oPoint = extractDrilldownPayload(oEvent);
+            var sSource = String((oPoint && oPoint.Source) || "").trim().toUpperCase();
+            if (!sSource || sSource === "ALL") {
+                return Promise.resolve(false);
+            }
+            return queueAnalyticsDrilldown(this, "Source", sSource, {
+                dimension: "SOURCE"
+            });
+        },
+
+        onDrilldownAnalyticsProfession: function (oEvent) {
+            var oPoint = extractDrilldownPayload(oEvent);
+            return queueAnalyticsDrilldown(this, "ProfessionText", String((oPoint && oPoint.Profession) || "").trim(), {
+                dimension: "PROFESSION"
+            });
+        },
+
+        onDrilldownAnalyticsLpc: function (oEvent) {
+            var oPoint = extractDrilldownPayload(oEvent);
+            return queueAnalyticsDrilldown(this, "Lpc", String((oPoint && oPoint.LPC) || "").trim(), {
+                dimension: "LPC"
+            });
+        },
+
+        onDrilldownAnalyticsLocation: function (oEvent) {
+            var oPoint = extractDrilldownPayload(oEvent);
+            return queueAnalyticsDrilldown(this, "LocationKey", String((oPoint && oPoint.Location) || "").trim(), {
+                dimension: "LOCATION"
+            });
         },
 
         onCloseAnalytics: function () {

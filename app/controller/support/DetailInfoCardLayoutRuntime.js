@@ -1,9 +1,9 @@
 sap.ui.define([
-    "checklist/app/controller/support/BindingContextReadSupport",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/FocusRuntime",
-    "checklist/app/service/framework/LayoutPersonalizationRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/BindingContextReadSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime"
 ], function (BindingContextReadSupport, ControllerViewStateRuntime, ModelStateRuntime, FocusRuntime, LayoutPersonalizationRuntime) {
     "use strict";
 

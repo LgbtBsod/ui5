@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/behavior/BehaviorResolver",
-    "checklist/app/service/framework/behavior/FeedbackDefaultHandlers",
-    "checklist/app/service/framework/behavior/FeedbackOverrideHandlers"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackOverrideHandlers"
 ], function (BehaviorResolver, FeedbackDefaultHandlers, FeedbackOverrideHandlers) {
     "use strict";
 

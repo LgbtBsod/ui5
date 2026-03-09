@@ -1,14 +1,16 @@
 sap.ui.define([
-    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
-    "checklist/app/infra/adapters/shared/ChecklistSnapshotMapper",
-    "checklist/app/infra/adapters/shared/AttachmentRepoSupport",
-    "checklist/app/infra/adapters/shared/GatewayIdentitySupport",
-    "checklist/app/util/CreateSentinel",
-    "checklist/app/service/backend/GatewayClient"
-], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, GatewayIdentitySupport, CreateSentinel, GatewayClient) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/AttachmentRepoSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayIdentitySupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
+], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, GatewayIdentitySupport, AccessPayload, DetailRuntimePayload, CreateSentinel, GatewayClient) {
     "use strict";
-    function rootId(mArgs) { return String((mArgs && mArgs.rootId) || "").trim(); }
-    function normalizeRootKey(sRootId) { return CreateSentinel.isCreateId(sRootId) ? "" : String(sRootId || "").trim(); }
+    function rootId(mArgs) { return DetailRuntimePayload.rootId(mArgs); }
+    function normalizeRootKey(sRootId) { return DetailRuntimePayload.normalizeRootKey(sRootId); }
     function resolveServerRootId(oPayload, sFallbackRootId) {
         var oData = oPayload || {};
         return String(
@@ -201,25 +203,19 @@ sap.ui.define([
     function checkChecklistPermission(mArgs, mDeps) {
         var sRootId = normalizeRootKey(rootId(mArgs));
         if (!sRootId) {
-            return Promise.resolve({
+            return Promise.resolve(AccessPayload.normalizePermission({
                 rootId: sRootId,
                 canView: true,
                 canEdit: true,
                 canDelete: false,
                 reasonCode: "CREATE_DRAFT"
-            });
+            }, sRootId));
         }
         return GatewayAdapterSupport.get("ChecklistPermissionSet('" + sRootId + "')").then(function (oResponse) {
             var oPermission = firstRow(oResponse);
-            return {
-                rootId: String(oPermission.RootKey || sRootId).trim(),
-                userId: String(oPermission.UserId || "").trim(),
-                canView: oPermission.CanView !== false,
-                canEdit: oPermission.CanEdit !== false,
-                canDelete: oPermission.CanDelete !== false,
-                reasonCode: String(oPermission.ReasonCode || "AUTHORIZED").trim(),
-                message: String(oPermission.Message || "").trim()
-            };
+            return AccessPayload.normalizePermission(oPermission, sRootId, {
+                reasonCode: "AUTHORIZED"
+            });
         });
     }
 

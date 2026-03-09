@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/controller/support/BindingContextReadSupport"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/BindingContextReadSupport"
 ], function (BindingContextReadSupport) {
     "use strict";
 

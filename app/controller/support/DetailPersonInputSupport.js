@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
 ], function (ModelStateRuntime, ControllerViewStateRuntime, ControllerModelRuntime) {
     "use strict";
 

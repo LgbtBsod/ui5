@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/framework/ComponentRuntimeSupport"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport"
 ], function (ComponentRuntimeSupport) {
     "use strict";
 
@@ -103,6 +103,85 @@ sap.ui.define([
         });
     }
 
+    function hasAnySeriesValue(aRows) {
+        return (Array.isArray(aRows) ? aRows : []).some(function (oRow) {
+            return toNumber(oRow && oRow.selectedValue) > 0 || toNumber(oRow && oRow.compareValue) > 0;
+        });
+    }
+
+    function buildAvailableYears(vYears, iSelectedYear, iCompareYear, iPreviousYear) {
+        var mSeen = {};
+        var aItems = [];
+
+        function pushYear(vYear) {
+            var iYear = toNumber(vYear);
+            var sYear = iYear > 0 ? String(iYear) : String(vYear || "").trim();
+            if (!/^\d{4}$/.test(sYear) || mSeen[sYear]) {
+                return;
+            }
+            mSeen[sYear] = true;
+            aItems.push({
+                key: sYear,
+                text: sYear
+            });
+        }
+
+        (Array.isArray(vYears) ? vYears : []).forEach(function (oYear) {
+            pushYear((oYear && (oYear.key || oYear.text || oYear.year || oYear.Year)) || "");
+        });
+        [iSelectedYear, iCompareYear, iPreviousYear].forEach(pushYear);
+
+        return aItems.sort(function (aLeft, aRight) {
+            return toNumber(aRight && aRight.key) - toNumber(aLeft && aLeft.key);
+        });
+    }
+
+    function formatSignedValue(nValue) {
+        var nRounded = Math.round(toNumber(nValue));
+        if (nRounded > 0) {
+            return "+" + String(nRounded);
+        }
+        return String(nRounded);
+    }
+
+    function buildDeltaState(nValue, bPositiveIsGood) {
+        var nSafe = toNumber(nValue);
+        if (nSafe === 0) {
+            return "None";
+        }
+        if (bPositiveIsGood) {
+            return nSafe > 0 ? "Success" : "Error";
+        }
+        return nSafe < 0 ? "Success" : "Error";
+    }
+
+    function buildKpiDeltas(oDashboard, aMonthlyComparison) {
+        var aRows = Array.isArray(aMonthlyComparison) ? aMonthlyComparison : [];
+
+        function sumBy(sProp) {
+            return aRows.reduce(function (nAcc, oRow) {
+                return nAcc + toNumber(oRow && oRow[sProp]);
+            }, 0);
+        }
+
+        function buildDelta(nSelected, nCompare, bPositiveIsGood) {
+            var nValue = toNumber(nSelected) - toNumber(nCompare);
+            return {
+                value: nValue,
+                text: formatSignedValue(nValue),
+                state: buildDeltaState(nValue, bPositiveIsGood)
+            };
+        }
+
+        return {
+            total: buildDelta(oDashboard.total, sumBy("compareTotal"), true),
+            failedChecks: buildDelta(oDashboard.failedChecks, sumBy("compareFailedChecks"), false),
+            failedBarriers: buildDelta(oDashboard.failedBarriers, sumBy("compareFailedBarriers"), false),
+            failedChecklistCount: buildDelta(oDashboard.failedChecklistCount, sumBy("compareFailedChecklists"), false),
+            failedBarrierChecklistCount: buildDelta(oDashboard.failedBarrierChecklistCount, sumBy("compareFailedBarrierChecklists"), false)
+        };
+    }
+
     function buildMonthlyMatrixRows(aRows, iSelectedYear, iCompareYear) {
         var aMetricDefs = [
             { key: "TOTAL", selectedProp: "selectedTotal", compareProp: "compareTotal" },
@@ -170,6 +249,13 @@ sap.ui.define([
         var iSelectedYear = toNumber(o.selectedYear || o.SelectedYear);
         var iCompareYear = toNumber(o.compareYear || o.CompareYear || o.previousYear || o.PreviousYear);
         var aMonthlyComparison = buildMonthlyComparison(o.charts || {}, o.comparisonCharts || {});
+        var mKpiDeltas = buildKpiDeltas({
+            total: toNumber(o.total || o.Total),
+            failedChecks: toNumber(o.failedChecks || o.FailedChecks),
+            failedBarriers: toNumber(o.failedBarriers || o.FailedBarriers),
+            failedChecklistCount: toNumber(o.failedChecklistCount || o.FailedChecklistCount),
+            failedBarrierChecklistCount: toNumber(o.failedBarrierChecklistCount || o.FailedBarrierChecklistCount)
+        }, aMonthlyComparison);
         var mComparisonMetricSeries = {
             TOTAL: buildMetricSeriesRows(aMonthlyComparison, "TOTAL"),
             FAILED_CHECKS: buildMetricSeriesRows(aMonthlyComparison, "FAILED_CHECKS"),
@@ -178,18 +264,12 @@ sap.ui.define([
             FAILED_BARRIER_CHECKLISTS: buildMetricSeriesRows(aMonthlyComparison, "FAILED_BARRIER_CHECKLISTS")
         };
         var aMonthlyMatrixRows = buildMonthlyMatrixRows(aMonthlyComparison, iSelectedYear, iCompareYear);
-        var aAvailableYears = (Array.isArray(o.availableYears) ? o.availableYears : []).map(function (oYear) {
-            return {
-                key: String((oYear && oYear.key) || ""),
-                text: String((oYear && oYear.text) || (oYear && oYear.key) || "")
-            };
-        }).filter(function (oYear) {
-            return !!oYear.key;
-        });
+        var iPreviousYear = toNumber(o.previousYear || o.PreviousYear);
+        var aAvailableYears = buildAvailableYears(o.availableYears, iSelectedYear, iCompareYear, iPreviousYear);
 
         return {
             selectedYear: iSelectedYear,
-            previousYear: toNumber(o.previousYear || o.PreviousYear),
+            previousYear: iPreviousYear,
             compareYear: iCompareYear,
             availableYears: aAvailableYears,
             total: toNumber(o.total || o.Total),
@@ -208,6 +288,7 @@ sap.ui.define([
             refreshState: normalizeRefreshState(o.refreshState),
             monthlyComparison: aMonthlyComparison,
             monthlyMatrixRows: aMonthlyMatrixRows,
+            deltas: mKpiDeltas,
             comparisonMetricSeries: mComparisonMetricSeries,
             comparisonChartRows: mComparisonMetricSeries.FAILED_CHECKS,
             charts: {
@@ -248,8 +329,8 @@ sap.ui.define([
                 failedBarriersBySource: aFailedBarriersBySource.length > 0,
                 totalBarriersByBarrierNumber: aTotalBarriersByBarrierNumber.length > 0,
                 failedBarriersByBarrierNumber: aFailedBarriersByBarrierNumber.length > 0,
-                monthlyComparison: aMonthlyComparison.length > 0,
-                comparisonChart: mComparisonMetricSeries.FAILED_CHECKS.length > 0
+                monthlyComparison: hasAnySeriesValue(aMonthlyComparison),
+                comparisonChart: hasAnySeriesValue(mComparisonMetricSeries.FAILED_CHECKS)
             }
         };
     }

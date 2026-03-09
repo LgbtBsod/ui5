@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel",
-    "checklist/app/service/framework/ModelStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
 ], function (StatePaths, CreateSentinel, ModelStateRuntime) {
     "use strict";
 

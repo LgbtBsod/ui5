@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/framework/behavior/BehaviorRegistry"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
 ], function (BehaviorRegistry) {
     "use strict";
 

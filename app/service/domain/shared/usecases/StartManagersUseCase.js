@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/framework/Result"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result"
 ], function (Result) {
     "use strict";
 

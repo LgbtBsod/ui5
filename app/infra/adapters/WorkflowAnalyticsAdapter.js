@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/infra/adapters/shared/GatewayAdapterSupport"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport"
 ], function (GatewayAdapterSupport) {
     "use strict";
 

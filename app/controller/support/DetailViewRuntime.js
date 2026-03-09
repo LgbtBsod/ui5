@@ -12,14 +12,14 @@ sap.ui.define([
     "sap/ui/core/Item",
     "sap/ui/core/ListItem",
     "sap/ui/core/CustomData",
-    "checklist/app/controller/support/BindingContextReadSupport",
-    "checklist/app/service/framework/ControlStyleRuntime",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/ModelStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/BindingContextReadSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
 ], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CoreListItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ControllerModelRuntime, ModelStateRuntime) {
     "use strict";
 

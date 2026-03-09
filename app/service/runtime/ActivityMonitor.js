@@ -1,10 +1,10 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "checklist/app/service/runtime/shared/TimerRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
 ], function (EventProvider, TimerRuntime) {
     "use strict";
 
-    return EventProvider.extend("checklist.app.service.runtime.ActivityMonitor", {
+    return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.ActivityMonitor", {
         constructor: function (mOptions) {
             EventProvider.apply(this, arguments);
             this._iIdleMs = Number(mOptions && mOptions.idleMs);

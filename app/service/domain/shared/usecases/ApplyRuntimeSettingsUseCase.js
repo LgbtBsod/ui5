@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/service/framework/Result",
-    "checklist/app/util/TimeConfigService",
-    "checklist/app/util/DebugLogger",
-    "checklist/app/util/AttachmentUploadPolicy"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService",
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy"
 ], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy) {
     "use strict";
 

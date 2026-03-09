@@ -1,11 +1,11 @@
 sap.ui.define([
     "sap/ui/core/Core",
     "sap/ui/core/theming/Parameters",
-    "checklist/app/util/ThemePhilosophy",
-    "checklist/app/util/ValueTokenParser",
-    "checklist/app/util/ThemeDomRuntime",
-    "checklist/app/util/ThemeTokenRuntime",
-    "checklist/app/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/util/ThemePhilosophy",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ValueTokenParser",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ThemeTokenRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (Core, Parameters, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime) {
     "use strict";
 

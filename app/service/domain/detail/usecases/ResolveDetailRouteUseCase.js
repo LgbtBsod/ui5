@@ -1,8 +1,9 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-    "checklist/app/util/CreateSentinel"
-], function (UseCase, DetailAuthorizationSupport, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (UseCase, DetailAuthorizationSupport, UseCaseInputUtils, CreateSentinel) {
     "use strict";
 
     function ResolveDetailRouteUseCase() {
@@ -13,7 +14,7 @@ sap.ui.define([
     ResolveDetailRouteUseCase.prototype.constructor = ResolveDetailRouteUseCase;
 
     ResolveDetailRouteUseCase.prototype.execute = function (mInput, mCtx) {
-        var sRootId = String((mInput && (mInput.rootId || mInput.id)) || "").trim();
+        var sRootId = UseCaseInputUtils.rootId(mInput);
         var sRouteName = String((mInput && mInput.routeName) || "detail").trim() || "detail";
         var mRouteArgs = (mInput && mInput.routeArgs) || {};
 

@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/detail/DetailStateAccess",
-    "checklist/app/service/domain/detail/DetailValidationSupport",
-    "checklist/app/util/ChecklistValidationService"
-], function (UseCase, Result, Effects, DetailStateAccess, DetailValidationSupport, ChecklistValidationService) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ChecklistValidationService"
+], function (UseCase, Result, Effects, DetailStateAccess, ValidationPathMap, ChecklistValidationService) {
     "use strict";
 
     function ValidateChecklistUseCase() {
@@ -39,7 +39,7 @@ sap.ui.define([
                 Effects.toast("checklistValidationUnavailableToast", "warning")
             ]));
         }
-        var mMissing = DetailValidationSupport.toMissingMap(oValidation.missingPaths);
+        var mMissing = ValidationPathMap.toMissingMap(oValidation.missingPaths);
         var aMissingKeys = Object.keys(mMissing || {}).filter(function (sKey) { return !!mMissing[sKey]; });
 
         return Promise.resolve(Result.ok({

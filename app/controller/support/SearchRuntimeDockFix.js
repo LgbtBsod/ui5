@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/SchedulingRuntime",
-    "checklist/app/util/ThemeDomRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime"
 ], function (ControllerViewStateRuntime, SchedulingRuntime, ThemeDomRuntime) {
     "use strict";
 

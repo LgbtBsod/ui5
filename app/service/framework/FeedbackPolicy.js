@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/framework/NormalizedError"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NormalizedError"
 ], function (Effects, NormalizedError) {
     "use strict";
 

@@ -1,12 +1,12 @@
 sap.ui.define([
-    "checklist/app/controller/support/AttachmentUploadCore",
-    "checklist/app/controller/support/DetailCommandPolicy",
-    "checklist/app/controller/support/DetailPersonInputSupport",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AttachmentUploadCore",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailPersonInputSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime) {
     "use strict";
 

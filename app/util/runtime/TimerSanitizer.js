@@ -1,4 +1,4 @@
-sap.ui.define(["checklist/app/util/DebugLogger"], function (DebugLogger) {
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger"], function (DebugLogger) {
     "use strict";
 
     function parseNumber(vValue) {

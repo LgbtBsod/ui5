@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/DialogOrchestrator",
-    "checklist/app/service/framework/EffectTextResolver",
-    "checklist/app/service/framework/behavior/BehaviorRegistry"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
 ], function (DialogOrchestrator, EffectTextResolver, BehaviorRegistry) {
     "use strict";
 

@@ -1,17 +1,17 @@
 sap.ui.define([
-    "checklist/app/controller/Base.controller",
-    "checklist/app/controller/support/DetailControllerLifecycle",
-    "checklist/app/controller/support/DetailValidationSummarySupport",
-    "checklist/app/controller/support/DetailActionConstants",
-    "checklist/app/controller/support/DetailActionViewportRuntime",
-    "checklist/app/controller/support/DetailActionPinnedRailRuntime",
-    "checklist/app/controller/support/DetailActionDialogRuntime",
-    "checklist/app/controller/support/DetailChecklistRuntime",
-    "checklist/app/controller/support/DetailChecklistStateActions",
-    "checklist/app/controller/support/DetailChecklistRowActions",
-    "checklist/app/controller/support/DetailAttachmentLocationActions",
-    "checklist/app/controller/support/DetailFormatters",
-    "checklist/app/controller/support/AttachmentUploadCore"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailControllerLifecycle",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailValidationSummarySupport",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionViewportRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionPinnedRailRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionDialogRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailChecklistRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailChecklistStateActions",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailChecklistRowActions",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailAttachmentLocationActions",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailFormatters",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AttachmentUploadCore"
 ], function (
     BaseController,
     DetailControllerLifecycle,
@@ -94,5 +94,5 @@ sap.ui.define([
         formatAutosaveText: DetailFormatters.formatAutosaveText
     });
 
-    return BaseController.extend("checklist.app.controller.Detail", mControllerDefinition);
+    return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Detail", mControllerDefinition);
 });

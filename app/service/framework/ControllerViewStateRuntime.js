@@ -1,7 +1,7 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
 ], function (JSONModel, ModelStateRuntime, ControllerModelRuntime) {
     "use strict";
 

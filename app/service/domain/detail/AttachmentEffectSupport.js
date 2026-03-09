@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/framework/Effects"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects"
 ], function (Effects) {
     "use strict";
 

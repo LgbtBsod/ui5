@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/util/DebugLogger"
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger"
 ], function (DebugLogger) {
     "use strict";
 

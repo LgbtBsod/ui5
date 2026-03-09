@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/backend/GatewayBackendService"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService"
 ], function (Result, GatewayBackendService) {
     "use strict";
 

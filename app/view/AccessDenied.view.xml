@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="checklist.app.controller.AccessDenied"
+    controllerName="PRODUCTION_CONTROL_CHECKLIST.controller.AccessDenied"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core">

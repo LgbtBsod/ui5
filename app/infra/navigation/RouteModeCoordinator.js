@@ -1,9 +1,9 @@
 sap.ui.define([
-    "checklist/app/util/DebugLogger",
-    "checklist/app/infra/navigation/RouteModeRules",
-    "checklist/app/infra/navigation/RouteSync",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeRules",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteSync",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
 ], function (DebugLogger, RouteModeRules, RouteSync, LayoutStateRuntime, ModelStateRuntime) {
     "use strict";
 

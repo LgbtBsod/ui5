@@ -1,9 +1,9 @@
 sap.ui.define([
-    "checklist/app/controller/support/AttachmentUploadCore",
-    "checklist/app/controller/support/AttachmentDropZoneRuntime",
-    "checklist/app/controller/support/DetailActionConstants",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AttachmentUploadCore",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AttachmentDropZoneRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (AttachmentUploadCore, AttachmentDropZoneRuntime, DetailActionConstants, ControllerViewStateRuntime, SchedulingRuntime) {
     "use strict";
 

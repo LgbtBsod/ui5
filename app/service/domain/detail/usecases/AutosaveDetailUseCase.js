@@ -1,12 +1,13 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/detail/DetailSaveRuntimeSupport",
-    "checklist/app/service/domain/shared/UseCaseInputUtils",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/DeltaPayloadBuilder"
-], function (UseCase, Result, Effects, DetailSaveRuntimeSupport, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder"
+], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -29,7 +30,7 @@ sap.ui.define([
     }
 
     function readCurrentChecklist(mCtx) {
-        return readSelectedChecklist(mCtx) || DetailSaveRuntimeSupport.readCurrentChecklist(mCtx);
+        return readSelectedChecklist(mCtx) || DetailSaveSupport.readCurrentChecklist(mCtx);
     }
 
     function resolveDelta(mInput, mCtx) {
@@ -37,7 +38,7 @@ sap.ui.define([
             return mInput.delta;
         }
         var oCurrent = readCurrentChecklist(mCtx);
-        var oSnapshot = DetailSaveRuntimeSupport.readBaseSnapshot(mCtx);
+        var oSnapshot = DetailSaveSupport.readBaseSnapshot(mCtx);
         var oMappedCurrent = mapFieldDelta(mInput, oCurrent) || oCurrent;
         return DeltaPayloadBuilder.buildDeltaPayload(oMappedCurrent, oSnapshot) || null;
     }
@@ -53,7 +54,7 @@ sap.ui.define([
     function resolveClientVersion(oDelta, mCtx) {
         var oSnapshot = readCurrentChecklist(mCtx);
         var oCurrent = { root: { version_number: oDelta && oDelta.client_version } };
-        return DetailSaveRuntimeSupport.resolveVersionNumber(
+        return DetailSaveSupport.resolveVersionNumber(
             oCurrent,
             oSnapshot
         );
@@ -66,7 +67,7 @@ sap.ui.define([
         var sRootId = UseCaseInputUtils.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oDelta;
-        var sSessionGuid = DetailSaveRuntimeSupport.readSessionGuid(mCtx, StatePaths);
+        var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);
 
         if (!isAutosaveAllowed(mCtx)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: "AUTOSAVE_GUARD" }, []));
@@ -94,7 +95,11 @@ sap.ui.define([
             ]));
         }
 
-        return Promise.resolve(oRepo.autosaveChecklist({ rootId: sRootId, delta: oDelta, sessionGuid: sSessionGuid })).then(function (oSaved) {
+        return Promise.resolve(oRepo.autosaveChecklist(DetailRuntimePayload.saveRequest({
+            rootId: sRootId,
+            delta: oDelta,
+            sessionGuid: sSessionGuid
+        }))).then(function (oSaved) {
             var sAt = (oSaved && oSaved.autosavedAt) || new Date().toISOString();
             var oCurrentChecklist = readCurrentChecklist(mCtx);
             var aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];

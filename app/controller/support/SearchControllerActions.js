@@ -1,19 +1,19 @@
 sap.ui.define([
-    "checklist/app/controller/support/ControllerResourceCleanup",
-    "checklist/app/service/domain/search/SearchFacade",
-    "checklist/app/service/framework/ControllerRouteRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/controller/support/SearchCommandPolicy",
-    "checklist/app/controller/support/SearchSelectionRuntime",
-    "checklist/app/controller/support/SearchLoadRuntime",
-    "checklist/app/controller/support/SearchRateProgress",
-    "checklist/app/controller/support/SearchViewRuntime",
-    "checklist/app/controller/support/SearchRuntimeDockFix",
-    "checklist/app/service/framework/SchedulingRuntime",
-    "checklist/app/service/framework/UiDecisionCoordinator",
-    "checklist/app/util/search/SearchMaxResults",
-    "checklist/app/controller/support/SearchViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/ControllerResourceCleanup",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchSelectionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchLoadRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchRateProgress",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchRuntimeDockFix",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewStateRuntime",
     "sap/ui/core/Item"
 ], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SearchRuntimeDockFix, SchedulingRuntime, UiDecisionCoordinator, SearchMaxResults, SearchViewStateRuntime, Item) {
     "use strict";
@@ -28,6 +28,59 @@ sap.ui.define([
 
     function normalizeOptionalRequestValue(sNormalizedValue) {
         return String(sNormalizedValue || "").trim();
+    }
+
+    function readAnalyticsDrilldownIntent(oController) {
+        return ModelStateRuntime.read(oController, "state", "/analyticsDrilldownIntent", null);
+    }
+
+    function clearAnalyticsDrilldownIntent(oController) {
+        ModelStateRuntime.write(oController, "state", "/analyticsDrilldownIntent", null);
+    }
+
+    function applyFilterValue(oControl, sValue) {
+        if (!oControl) {
+            return false;
+        }
+        if (typeof oControl.setSelectedKey === "function") {
+            oControl.setSelectedKey(sValue);
+        }
+        if (typeof oControl.setValue === "function") {
+            oControl.setValue(sValue);
+        }
+        if (typeof oControl.setTokens === "function") {
+            oControl.setTokens([]);
+        }
+        return true;
+    }
+
+    function applyAnalyticsDrilldownIntent(oController) {
+        var oIntent = readAnalyticsDrilldownIntent(oController) || {};
+        var sFilterKey = String(oIntent.filterKey || "").trim();
+        var sFilterValue = String(oIntent.filterValue || "").trim();
+        var oSmartFilterBar = oController.byId("searchSmartFilterBar");
+        var oControl;
+        var mFilterData;
+
+        if (!sFilterKey || !sFilterValue || !oSmartFilterBar) {
+            return false;
+        }
+        if (typeof oSmartFilterBar.isInitialised === "function" && !oSmartFilterBar.isInitialised()) {
+            return false;
+        }
+        oControl = typeof oSmartFilterBar.getControlByKey === "function" ? oSmartFilterBar.getControlByKey(sFilterKey) : null;
+        applyFilterValue(oControl, sFilterValue);
+        if (typeof oSmartFilterBar.getFilterData === "function" && typeof oSmartFilterBar.setFilterData === "function") {
+            mFilterData = Object.assign({}, oSmartFilterBar.getFilterData() || {});
+            mFilterData[sFilterKey] = sFilterValue;
+            oSmartFilterBar.setFilterData(mFilterData, true);
+        }
+        clearAnalyticsDrilldownIntent(oController);
+        SearchCommandPolicy.buildFilter(oController, { source: "analyticsDrilldown" });
+        if (ControllerViewStateRuntime.get(oController, "/smartTableReady")) {
+            SearchCommandPolicy.rebind(oController, { source: "analyticsDrilldown" });
+        }
+        return true;
     }
 
     return {
@@ -105,6 +158,7 @@ sap.ui.define([
         _onSearchMatched: function () {
             SearchViewRuntime.onSearchMatched(this);
             SearchRuntimeDockFix.sync(this, true);
+            applyAnalyticsDrilldownIntent(this);
         },
 
         _onDetailSearchContextMatched: function (oEvent) {
@@ -122,6 +176,7 @@ sap.ui.define([
             this._bindLocationSuggest();
             SearchCommandPolicy.buildFilter(this, { source: "smartFilterInit" });
             SearchRuntimeDockFix.bind(this);
+            applyAnalyticsDrilldownIntent(this);
         },
 
         _bindLocationSuggest: function () {

@@ -1,19 +1,19 @@
 sap.ui.define([
-    "checklist/app/service/domain/shared/usecases/LoadCurrentUserUseCase",
-    "checklist/app/service/framework/FeedbackBannerRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/RetryCoordinator",
-    "checklist/app/service/framework/SecurityTokenRefresh",
-    "checklist/app/service/framework/UiDecisionCoordinator"
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/LoadCurrentUserUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RetryCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator"
 ], function (LoadCurrentUserUseCase, FeedbackBannerRuntime, ControllerModelRuntime, ModelStateRuntime, RetryCoordinator, SecurityTokenRefresh, UiDecisionCoordinator) {
     "use strict";
 
     var SHELL_OVERLAY_FRAGMENTS = {
-        notifications: "checklist.app.view.fragment.ShellNotificationsPopover",
-        help: "checklist.app.view.fragment.ShellHelpPopover",
-        settings: "checklist.app.view.fragment.ShellSettingsPopover",
-        user: "checklist.app.view.fragment.ShellUserPopover"
+        notifications: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellNotificationsPopover",
+        help: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellHelpPopover",
+        settings: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellSettingsPopover",
+        user: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellUserPopover"
     };
 
     function openShellOverlayByKey(oController, oEvent, sKey) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Checklist</title>
+    <title>PRODUCTION_CONTROL_CHECKLIST</title>
     <link rel="icon" href="data:,">
     <link rel="dns-prefetch" href="//ui5.sap.com">
     <link rel="preconnect" href="https://ui5.sap.com" crossorigin>
@@ -153,7 +153,7 @@
             function mountComponent() {
                 sap.ui.require([
                     "sap/ui/core/ComponentContainer",
-                    "checklist/app/infra/adapters/Ui5StyleAdapter"
+                    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/Ui5StyleAdapter"
                 ], function (ComponentContainer, Ui5StyleAdapter) {
                     if (Ui5StyleAdapter && typeof Ui5StyleAdapter.enableOn !== "function") {
                         Ui5StyleAdapter.enableOn = function (oTarget, sClassNames) {
@@ -180,7 +180,7 @@
                     }
 
                     new ComponentContainer({
-                        name: "checklist.app",
+                        name: "PRODUCTION_CONTROL_CHECKLIST",
                         manifest: true,
                         settings: { id: "checklist_app_comp" },
                         async: true,
@@ -202,7 +202,7 @@
                 oScript.crossOrigin = "anonymous";
                 oScript.setAttribute("data-sap-ui-theme", "sap_horizon");
                 oScript.setAttribute("data-sap-ui-libs", "sap.m,sap.f,sap.ui.layout,sap.ui.comp,sap.uxap");
-                oScript.setAttribute("data-sap-ui-resourceroots", "{\"checklist.app\":\"./\"}");
+                oScript.setAttribute("data-sap-ui-resourceroots", "{\"PRODUCTION_CONTROL_CHECKLIST\":\"./\"}");
                 oScript.setAttribute("data-sap-ui-compatVersion", "edge");
                 oScript.setAttribute("data-sap-ui-async", "true");
                 oScript.setAttribute("data-sap-ui-preload", "async");

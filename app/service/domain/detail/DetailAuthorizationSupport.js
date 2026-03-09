@@ -1,23 +1,17 @@
 sap.ui.define([
-    "checklist/app/service/framework/Effects",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel"
-], function (Effects, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (Effects, AccessPayload, StatePaths, CreateSentinel) {
     "use strict";
 
     var DENIED_ILLUSTRATION = "assets/illustrations/detail-access-denied.svg";
 
     function normalizePermission(oPermission, sRootId) {
-        var oResolved = oPermission || {};
-        return {
-            rootId: String(oResolved.rootId || oResolved.RootKey || sRootId || "").trim(),
-            userId: String(oResolved.userId || oResolved.UserId || "").trim(),
-            canView: oResolved.canView !== false && oResolved.CanView !== false,
-            canEdit: oResolved.canEdit !== false && oResolved.CanEdit !== false,
-            canDelete: oResolved.canDelete !== false && oResolved.CanDelete !== false,
-            reasonCode: String(oResolved.reasonCode || oResolved.ReasonCode || "AUTHORIZED").trim() || "AUTHORIZED",
-            message: String(oResolved.message || oResolved.Message || "").trim()
-        };
+        return AccessPayload.normalizePermission(oPermission, sRootId, {
+            reasonCode: "AUTHORIZED"
+        });
     }
 
     function buildAccessState(oPermission, bDenied) {
@@ -106,6 +100,7 @@ sap.ui.define([
     }
 
     return {
+        buildAccessState: buildAccessState,
         contentAccessEffects: contentAccessEffects,
         deniedActionEffects: deniedActionEffects,
         fetchPermission: fetchPermission,

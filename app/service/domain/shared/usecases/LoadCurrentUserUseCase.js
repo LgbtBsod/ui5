@@ -1,83 +1,19 @@
 sap.ui.define([
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/backend/GatewayBackendService",
-    "checklist/app/util/GatewayTextNormalizer"
-], function (Result, GatewayBackendService, GatewayTextNormalizer) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/CurrentUserProfile"
+], function (Result, GatewayBackendService, CurrentUserProfile) {
     "use strict";
 
-    function normalizePermissionRules(vValue) {
-        var aItems = [];
-        try {
-            aItems = JSON.parse(String(vValue || "[]"));
-        } catch (_oError) {
-            aItems = [];
-        }
-        if (!Array.isArray(aItems)) {
-            return [];
-        }
-        return aItems.map(function (oItem) {
-            return {
-                code: String(oItem && oItem.code || "").trim(),
-                scopeKind: String(oItem && (oItem.scope_kind || oItem.scopeKind) || "all").trim().toLowerCase() || "all",
-                scopeValue: String(oItem && (oItem.scope_value || oItem.scopeValue) || "ALL").trim() || "ALL"
-            };
-        }).filter(function (oItem) {
-            return !!oItem.code;
-        });
-    }
-
     function buildSummary(oProfile) {
-        var aLabels = [];
-        if (oProfile.canView) {
-            aLabels.push("view");
-        }
-        if (oProfile.canEdit) {
-            aLabels.push("edit");
-        }
-        if (oProfile.canDelete) {
-            aLabels.push("delete");
-        }
-        return aLabels;
-    }
-
-    function normalizeProfileText(vValue) {
-        return GatewayTextNormalizer.normalize(vValue);
-    }
-
-    function applyCurrentUserState(oStateModel, oProfile, sLogin) {
-        if (!oStateModel) {
-            return oProfile;
-        }
-        oStateModel.setProperty("/currentUser", {
-            uname: oProfile.uname || "",
-            fullName: oProfile.fullName || "",
-            permissions: oProfile.permissions || [],
-            permissionRules: oProfile.permissionRules || [],
-            canView: !!oProfile.canView,
-            canEdit: !!oProfile.canEdit,
-            canDelete: !!oProfile.canDelete,
-            summaryText: oProfile.summaryText || "",
-            fetchedAt: new Date().toISOString()
-        });
-        return oProfile;
+        return CurrentUserProfile.permissionKeys(oProfile);
     }
 
     function readCurrentUser(sLogin) {
         return GatewayBackendService.readEntity("CurrentUserSet", "'CURRENT'", {
             __ts: Date.now()
         }).then(function (oData) {
-            return {
-                uname: normalizeProfileText(oData && oData.Uname || sLogin || ""),
-                fullName: normalizeProfileText(oData && oData.FullName || sLogin || ""),
-                permissions: String(oData && oData.PermissionsCsv || "").split(",").map(function (sCode) {
-                    return String(sCode || "").trim();
-                }).filter(Boolean),
-                permissionRules: normalizePermissionRules(oData && oData.PermissionRulesJson),
-                canView: !!(oData && oData.CanView),
-                canEdit: !!(oData && oData.CanEdit),
-                canDelete: !!(oData && oData.CanDelete),
-                summaryText: normalizeProfileText(oData && oData.SummaryText || "")
-            };
+            return CurrentUserProfile.normalizeCurrentUser(oData, sLogin);
         });
     }
 
@@ -86,7 +22,7 @@ sap.ui.define([
             var sLogin = String(mInput && mInput.login || "").trim();
             var oStateModel = mDeps && mDeps.stateModel;
             return readCurrentUser(sLogin).then(function (oProfile) {
-                applyCurrentUserState(oStateModel, oProfile, sLogin);
+                oProfile = CurrentUserProfile.applyCurrentUserState(oStateModel, oProfile);
                 oProfile.permissionKeys = buildSummary(oProfile);
                 return Result.ok({
                     user: oProfile.uname,

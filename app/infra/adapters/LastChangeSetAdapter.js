@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/infra/odata/GatewayODataClient"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient"
 ], function (GatewayODataClient) {
     "use strict";
 

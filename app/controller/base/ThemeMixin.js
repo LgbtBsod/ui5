@@ -1,4 +1,4 @@
-sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeRuntime) {
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime"], function (ThemeRuntime) {
     "use strict";
 
     var DEFAULT_MODE = ThemeRuntime.DEFAULT_MODE;

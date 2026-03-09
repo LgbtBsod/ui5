@@ -1,10 +1,10 @@
 sap.ui.define([
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel",
-    "checklist/app/service/backend/GatewayBackendService",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
 ], function (StatePaths, CreateSentinel, GatewayBackendService, RootIdRuntime, LayoutStateRuntime, ModelStateRuntime) {
     "use strict";
 

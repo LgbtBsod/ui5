@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/service/framework/behavior/BehaviorResolver",
-    "checklist/app/service/framework/behavior/DialogDefaultHandlers",
-    "checklist/app/service/framework/behavior/DialogOverrideHandlers",
-    "checklist/app/service/framework/EffectApplier"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DialogDefaultHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DialogOverrideHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier"
 ], function (BehaviorResolver, DialogDefaultHandlers, DialogOverrideHandlers, EffectApplier) {
     "use strict";
 

@@ -1,12 +1,13 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-    "checklist/app/service/domain/shared/UseCaseInputUtils",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, UseCaseInputUtils, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, CreateSentinel) {
     "use strict";
 
     function EnterEditUseCase() {
@@ -15,11 +16,6 @@ sap.ui.define([
 
     EnterEditUseCase.prototype = Object.create(UseCase.prototype);
     EnterEditUseCase.prototype.constructor = EnterEditUseCase;
-
-    function readSessionGuid(mCtx) {
-        var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get("state", StatePaths.SESSION_ID)) || "";
-    }
 
     function readCode(oLock) {
         return String((oLock && oLock.code) || "").toUpperCase();
@@ -37,13 +33,13 @@ sap.ui.define([
         var bEdit = !!(mInput && mInput.state);
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = UseCaseInputUtils.rootId(mInput);
-        var sSessionGuid = readSessionGuid(mCtx);
+        var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var bCreateDraft = CreateSentinel.isCreateId(sRootId);
 
         if (!bEdit) {
             var pRelease = Promise.resolve();
             if (sRootId && !CreateSentinel.isCreateId(sRootId) && oLockPort && typeof oLockPort.release === "function" && sSessionGuid) {
-                pRelease = Promise.resolve(oLockPort.release({ rootId: sRootId, sessionGuid: sSessionGuid })).catch(function () { return null; });
+                pRelease = Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () { return null; });
             }
             return pRelease.then(function () {
                 return Result.ok({ code: "READ" }, readOnlyEffects());
@@ -78,7 +74,7 @@ sap.ui.define([
                 if (oValidationData && oValidationData.invalidated) {
                     return Result.fail({ message: "Cache invalidated; retry edit", code: "CACHE_INVALIDATED" }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat(readOnlyEffects()));
                 }
-                return Promise.resolve(oLockPort.acquire({ rootId: sRootId, sessionGuid: sSessionGuid })).then(function (oLock) {
+                return Promise.resolve(oLockPort.acquire(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).then(function (oLock) {
                     return {
                         lock: oLock,
                         permission: oPermission

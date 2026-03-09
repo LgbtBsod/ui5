@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/util/CreateSentinel"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
 ], function (ControllerTextRuntime, CreateSentinel) {
     "use strict";
 

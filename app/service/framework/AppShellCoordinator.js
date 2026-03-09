@@ -1,12 +1,12 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "checklist/app/infra/navigation/RouteModeCoordinator",
-    "checklist/app/util/DebugLogger",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/util/TimeConfigService",
-    "checklist/app/util/runtime/TimerDefaults",
-    "checklist/app/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/TimerDefaults",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (JSONModel, RouteModeCoordinator, DebugLogger, ControllerModelRuntime, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime) {
     "use strict";
 

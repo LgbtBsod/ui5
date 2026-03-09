@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/framework/EffectTextResolver"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver"
 ], function (EffectTextResolver) {
     "use strict";
 

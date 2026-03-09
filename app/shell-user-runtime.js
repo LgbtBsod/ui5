@@ -1,6 +1,12 @@
 (function () {
     "use strict";
 
+    var CurrentUserProfile = window.sap && sap.ui && sap.ui.requireSync
+        ? sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/CurrentUserProfile")
+        : null;
+    var PermissionPresentation = window.sap && sap.ui && sap.ui.requireSync
+        ? sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation")
+        : null;
     var CODE_LABELS = {
         "01": "View",
         "02": "Edit/Create",
@@ -9,6 +15,9 @@
     var REFRESH_MS = 15000;
 
     function normalizeRule(rule) {
+        if (CurrentUserProfile && typeof CurrentUserProfile.normalizePermissionRule === "function") {
+            return CurrentUserProfile.normalizePermissionRule(rule);
+        }
         return {
             code: String(rule && rule.code || "").trim(),
             scopeKind: String(rule && (rule.scopeKind || rule.scope_kind) || "all").trim().toLowerCase() || "all",
@@ -17,6 +26,9 @@
     }
 
     function normalizePermissionRules(value) {
+        if (CurrentUserProfile && typeof CurrentUserProfile.normalizePermissionRules === "function") {
+            return CurrentUserProfile.normalizePermissionRules(value);
+        }
         var items = [];
         try {
             items = JSON.parse(String(value || "[]"));
@@ -32,6 +44,9 @@
     }
 
     function normalizeCurrentUser(payload) {
+        if (CurrentUserProfile && typeof CurrentUserProfile.normalizeCurrentUser === "function") {
+            return CurrentUserProfile.withFetchedAt(CurrentUserProfile.normalizeCurrentUser(payload, ""));
+        }
         var data = payload && payload.d ? payload.d : (payload || {});
         return {
             uname: String(data.Uname || data.uname || "").trim(),
@@ -56,68 +71,30 @@
     }
 
     function buildSheets(permissionRules) {
-        var groups = {};
-        var order = { "01": 1, "02": 2, "03": 3 };
-        (Array.isArray(permissionRules) ? permissionRules : []).map(normalizeRule).forEach(function (rule) {
-            var key = rule.scopeKind + ":" + String(rule.scopeValue || "ALL").toUpperCase();
-            var group;
-            if (!rule.code) {
-                return;
-            }
-            group = groups[key];
-            if (!group) {
-                group = {
-                    title: scopeLabel(rule),
-                    description: "",
-                    scope: "",
-                    info: "",
-                    codes: [],
-                    labels: []
-                };
-                groups[key] = group;
-            }
-            if (group.codes.indexOf(rule.code) === -1) {
-                group.codes.push(rule.code);
-                group.labels.push(CODE_LABELS[rule.code] || rule.code);
-            }
-        });
-        return Object.keys(groups).map(function (key) {
-            var group = groups[key];
-            group.codes.sort(function (a, b) {
-                return (order[a] || 99) - (order[b] || 99);
+        if (PermissionPresentation && typeof PermissionPresentation.buildPermissionSheets === "function") {
+            return PermissionPresentation.buildPermissionSheets(permissionRules, {
+                codeOrder: ["01", "02", "03"],
+                scopeLabel: scopeLabel,
+                codeLabel: function (rule) {
+                    return CODE_LABELS[rule.code] || rule.code;
+                }
             });
-            group.description = group.codes.join(", ");
-            group.scope = group.labels.join(" / ");
-            group.info = group.scope;
-            return group;
-        }).sort(function (a, b) {
-            if (a.title === "ALL") {
-                return -1;
-            }
-            if (b.title === "ALL") {
-                return 1;
-            }
-            return String(a.title).localeCompare(String(b.title));
-        });
+        }
+        return [];
     }
 
     function buildSummaryText(summaryText, sheets) {
-        if (String(summaryText || "").trim()) {
-            return String(summaryText || "").trim();
+        if (PermissionPresentation && typeof PermissionPresentation.buildSummaryText === "function") {
+            return PermissionPresentation.buildSummaryText(summaryText, sheets, "");
         }
-        return sheets.map(function (sheet) {
-            return sheet.title + ": " + sheet.description;
-        }).join("; ");
+        return String(summaryText || "").trim();
     }
 
     function buildHeaderLabel(fullName, sheets) {
-        var suffix = sheets.map(function (sheet) {
-            return sheet.title + ": " + sheet.description;
-        }).join(" | ");
-        if (!suffix) {
-            return fullName;
+        if (PermissionPresentation && typeof PermissionPresentation.buildHeaderLabel === "function") {
+            return PermissionPresentation.buildHeaderLabel(fullName, sheets, " | ");
         }
-        return fullName + " | " + suffix;
+        return fullName;
     }
 
     function resolveModels() {
@@ -151,7 +128,6 @@
         models.appViewModel.setProperty("/shell/userPermissions", sheets);
         models.appViewModel.setProperty("/shell/userSummaryText", summaryText);
         models.appViewModel.setProperty("/shell/userTooltip", summaryText || fullName);
-        models.view.__shellUserRuntimeBound = true;
         return true;
     }
 
@@ -179,16 +155,17 @@
     }
 
     function syncFromBackend() {
-        if (window.__shellUserRuntimeBusy) {
+        window.__shellUserRuntime = window.__shellUserRuntime || {};
+        if (window.__shellUserRuntime.busy) {
             return Promise.resolve(false);
         }
-        window.__shellUserRuntimeBusy = true;
+        window.__shellUserRuntime.busy = true;
         return fetchCurrentUser().then(function (currentUser) {
             return applyToModels(currentUser);
         }).catch(function () {
             return false;
         }).finally(function () {
-            window.__shellUserRuntimeBusy = false;
+            window.__shellUserRuntime.busy = false;
         });
     }
 
@@ -197,10 +174,11 @@
     }
 
     function startPolling() {
-        if (window.__shellUserRuntimeTimer) {
+        window.__shellUserRuntime = window.__shellUserRuntime || {};
+        if (window.__shellUserRuntime.timer) {
             return;
         }
-        window.__shellUserRuntimeTimer = window.setInterval(syncFromBackend, REFRESH_MS);
+        window.__shellUserRuntime.timer = window.setInterval(syncFromBackend, REFRESH_MS);
     }
 
     document.addEventListener("visibilitychange", function () {

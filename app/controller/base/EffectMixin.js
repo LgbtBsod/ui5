@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/framework/FeedbackCoordinator"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator"
 ], function (FeedbackCoordinator) {
     "use strict";
 

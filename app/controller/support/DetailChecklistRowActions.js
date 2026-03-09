@@ -1,9 +1,10 @@
 sap.ui.define([
-    "checklist/app/controller/support/BindingContextReadSupport",
-    "checklist/app/controller/support/DetailCommandPolicy",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/controller/support/DetailInfoCardLayoutRuntime"
-], function (BindingContextReadSupport, DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/BindingContextReadSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailInfoCardLayoutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
+], function (BindingContextReadSupport, DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutRuntime, ModelStateRuntime) {
     "use strict";
 
     var ROW_ENTITY_CONFIG = {
@@ -22,11 +23,28 @@ sap.ui.define([
     function runRowOperation(oController, sEntity, sOp, mInput) {
         var oConfig = ROW_ENTITY_CONFIG[sEntity] || {};
         var sBusyPath = (sOp === "expand" || sOp === "collapse") ? oConfig.dialogBusyPath : oConfig.rowBusyPath;
+        var sBeforeMode = String(ModelStateRuntime.read(oController, "state", "/mode", "READ") || "READ").trim().toUpperCase();
+        var sBeforeLockState = String(ModelStateRuntime.read(oController, "state", "/lockOperationState", "IDLE") || "IDLE").trim().toUpperCase();
         if (!sBusyPath) {
             return Promise.resolve();
         }
         return oController._withViewFlag(sBusyPath, function () {
             return DetailCommandPolicy.rowOps(oController, Object.assign({ entity: sEntity, op: sOp }, mInput || {}));
+        }).then(function (vResult) {
+            var sCurrentMode;
+            var sCurrentLockState;
+            if (sOp !== "expand" && sOp !== "collapse") {
+                return vResult;
+            }
+            sCurrentMode = String(ModelStateRuntime.read(oController, "state", "/mode", "READ") || "READ").trim().toUpperCase();
+            sCurrentLockState = String(ModelStateRuntime.read(oController, "state", "/lockOperationState", "IDLE") || "IDLE").trim().toUpperCase();
+            if ((sBeforeMode === "EDIT" || sBeforeMode === "CREATE") &&
+                sCurrentMode === "READ" &&
+                ((sBeforeMode === "EDIT" && sCurrentLockState === "LOCKED" && sBeforeLockState === "LOCKED") ||
+                    sBeforeMode === "CREATE")) {
+                ModelStateRuntime.write(oController, "state", "/mode", sBeforeMode);
+            }
+            return vResult;
         });
     }
 

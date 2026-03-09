@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/infra/odata/GatewayODataClient",
-    "checklist/app/infra/adapters/shared/ODataAdapterUtils"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils"
 ], function (GatewayODataClient, ODataAdapterUtils) {
     "use strict";
 

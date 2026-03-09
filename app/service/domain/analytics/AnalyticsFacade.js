@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/domain/analytics/usecases/LoadAnalyticsDashboardUseCase"
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/usecases/LoadAnalyticsDashboardUseCase"
 ], function (LoadAnalyticsDashboardUseCase) {
     "use strict";
 

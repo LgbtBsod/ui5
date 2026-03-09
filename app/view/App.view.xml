@@ -1,10 +1,10 @@
 <mvc:View
-    controllerName="checklist.app.controller.App"
+    controllerName="PRODUCTION_CONTROL_CHECKLIST.controller.App"
     displayBlock="true"
     class="chkApp"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:cc="checklist.app.control"
+    xmlns:cc="PRODUCTION_CONTROL_CHECKLIST.control"
     xmlns:f="sap.f">
 
     <VBox class="chkSkin appShell appLayoutSingle" fitContainer="true" width="100%">
@@ -75,12 +75,12 @@
             layout="{= ${state>/layout} || 'OneColumn' }"
             backgroundDesign="Transparent">
             <f:beginColumnPages>
-                <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="checklist.app.view.Search" width="100%"/>
+                <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Search" width="100%"/>
             </f:beginColumnPages>
             <f:midColumnPages>
-                <mvc:XMLView id="detailPaneHost" viewName="checklist.app.view.Detail" width="100%"/>
-                <mvc:XMLView id="analyticsPaneHost" viewName="checklist.app.view.Analytics" width="100%"/>
-                <mvc:XMLView id="accessDeniedPaneHost" viewName="checklist.app.view.AccessDenied" width="100%"/>
+                <mvc:XMLView id="detailPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Detail" width="100%"/>
+                <mvc:XMLView id="analyticsPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Analytics" width="100%"/>
+                <mvc:XMLView id="accessDeniedPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.AccessDenied" width="100%"/>
             </f:midColumnPages>
         </f:FlexibleColumnLayout>
     </VBox>

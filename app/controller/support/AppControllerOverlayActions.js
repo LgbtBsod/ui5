@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/FocusRuntime",
-    "checklist/app/service/framework/LazyDialogRuntime",
-    "checklist/app/controller/support/ControllerReturnFocusRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LazyDialogRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/ControllerReturnFocusRuntime"
 ], function (FocusRuntime, LazyDialogRuntime, ControllerReturnFocusRuntime) {
     "use strict";
 

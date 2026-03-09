@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/behavior/BehaviorResolver",
-    "checklist/app/service/framework/behavior/NavigationDefaultHandlers",
-    "checklist/app/service/framework/behavior/NavigationOverrideHandlers"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/NavigationDefaultHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/NavigationOverrideHandlers"
 ], function (BehaviorResolver, NavigationDefaultHandlers, NavigationOverrideHandlers) {
     "use strict";
 

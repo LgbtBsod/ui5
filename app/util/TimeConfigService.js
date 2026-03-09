@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/util/RuntimeTimerSanitizer",
-    "checklist/app/util/runtime/TimerDefaults",
-    "checklist/app/service/framework/ModelStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/util/RuntimeTimerSanitizer",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/TimerDefaults",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
 ], function (RuntimeTimerSanitizer, TimerDefaults, ModelStateRuntime) {
     "use strict";
 

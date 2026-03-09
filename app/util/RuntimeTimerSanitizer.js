@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/util/runtime/TimerDefaults",
-    "checklist/app/util/runtime/TimerSanitizer"
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/TimerDefaults",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/TimerSanitizer"
 ], function (RANGES, TimerSanitizer) {
     "use strict";
 

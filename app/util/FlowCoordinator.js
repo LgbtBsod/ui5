@@ -1,5 +1,5 @@
 sap.ui.define([
-  "checklist/app/service/framework/WorkflowCoordinator"
+  "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator"
 ], function (WorkflowCoordinator) {
   "use strict";
 

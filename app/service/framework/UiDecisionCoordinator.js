@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/behavior/BehaviorResolver",
-    "checklist/app/service/framework/behavior/UiDecisionDefaultHandlers",
-    "checklist/app/service/framework/behavior/UiDecisionOverrideHandlers"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionOverrideHandlers"
 ], function (BehaviorResolver, UiDecisionDefaultHandlers, UiDecisionOverrideHandlers) {
     "use strict";
 

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/domain/search/usecases/ExportSearchUseCase"
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ExportSearchUseCase"
 ], function (ExportSearchUseCase) {
     "use strict";
 

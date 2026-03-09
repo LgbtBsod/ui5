@@ -1,12 +1,14 @@
 sap.ui.define([
-    "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/service/framework/ActionContract",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/util/CreateSentinel",
-    "checklist/app/service/framework/ModelStateRuntime"
-], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, CreateSentinel, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/CurrentUserProfile",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
+], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, CurrentUserProfile, PermissionPresentation, CreateSentinel, ModelStateRuntime) {
     "use strict";
     var getText = ControllerTextRuntime.getText;
     var PERMISSION_TEXT_KEY_MAP = {
@@ -42,11 +44,7 @@ sap.ui.define([
     }
 
     function normalizePermissionRule(oPermission) {
-        return {
-            code: String(oPermission && oPermission.code || "").trim(),
-            scopeKind: String(oPermission && oPermission.scopeKind || "all").trim().toLowerCase() || "all",
-            scopeValue: String(oPermission && oPermission.scopeValue || "ALL").trim() || "ALL"
-        };
+        return CurrentUserProfile.normalizePermissionRule(oPermission);
     }
 
     function buildPermissionScopeLabel(oController, oPermission) {
@@ -71,71 +69,27 @@ sap.ui.define([
     }
 
     function buildPermissionSheets(oController, aPermissionRules) {
-        var mGroups = {};
-        var aOrder = ["01", "02", "03"];
-        (Array.isArray(aPermissionRules) ? aPermissionRules : []).map(normalizePermissionRule).forEach(function (oRule) {
-            var sKey;
-            var oGroup;
-            if (!oRule.code) {
-                return;
+        return PermissionPresentation.buildPermissionSheets(aPermissionRules, {
+            codeOrder: ["01", "02", "03"],
+            scopeLabel: function (oRule) {
+                return buildPermissionScopeLabel(oController, oRule);
+            },
+            codeLabel: function (oRule) {
+                return getText(oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || "shellPermissionUnknown", [oRule.code], oRule.code);
             }
-            sKey = oRule.scopeKind + ":" + oRule.scopeValue.toUpperCase();
-            oGroup = mGroups[sKey];
-            if (!oGroup) {
-                oGroup = {
-                    title: buildPermissionScopeLabel(oController, oRule),
-                    description: "",
-                    scope: "",
-                    codes: [],
-                    labels: []
-                };
-                mGroups[sKey] = oGroup;
-            }
-            if (oGroup.codes.indexOf(oRule.code) === -1) {
-                oGroup.codes.push(oRule.code);
-                oGroup.labels.push(getText(oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || "shellPermissionUnknown", [oRule.code], oRule.code));
-            }
-        });
-        return Object.keys(mGroups).map(function (sKey) {
-            var oGroup = mGroups[sKey];
-            oGroup.codes.sort(function (a, b) {
-                return aOrder.indexOf(a) - aOrder.indexOf(b);
-            });
-            oGroup.description = oGroup.codes.join(", ");
-            oGroup.scope = oGroup.labels.join(" / ");
-            oGroup.info = oGroup.scope;
-            return oGroup;
-        }).sort(function (a, b) {
-            if (a.title === "ALL") {
-                return -1;
-            }
-            if (b.title === "ALL") {
-                return 1;
-            }
-            return String(a.title).localeCompare(String(b.title));
         });
     }
 
     function buildUserSummaryText(oController, aPermissionSheets, sBackendSummary) {
-        if (String(sBackendSummary || "").trim()) {
-            return String(sBackendSummary || "").trim();
-        }
-        if (!aPermissionSheets.length) {
-            return getText(oController, "shellUserPermissionsEmpty", null, "No permissions assigned");
-        }
-        return aPermissionSheets.map(function (oSheet) {
-            return oSheet.title + ": " + oSheet.description;
-        }).join("; ");
+        return PermissionPresentation.buildSummaryText(
+            sBackendSummary,
+            aPermissionSheets,
+            getText(oController, "shellUserPermissionsEmpty", null, "No permissions assigned")
+        );
     }
 
     function buildHeaderUserLabel(sFullName, aPermissionSheets) {
-        var aShort = aPermissionSheets.map(function (oSheet) {
-            return oSheet.title + " " + oSheet.description;
-        }).filter(Boolean);
-        if (!aShort.length) {
-            return sFullName;
-        }
-        return sFullName + " - " + aShort.join(" | ");
+        return PermissionPresentation.buildHeaderLabel(sFullName, aPermissionSheets, " - ");
     }
 
     return {

@@ -1,9 +1,9 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "checklist/app/service/framework/ComponentRuntimeSupport",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/util/search/SearchMaxResults"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults"
 ], function (JSONModel, ComponentRuntimeSupport, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults) {
     "use strict";
 

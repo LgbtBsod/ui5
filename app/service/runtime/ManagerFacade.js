@@ -1,12 +1,12 @@
 sap.ui.define([
-    "checklist/app/service/runtime/SmartCacheManager",
-    "checklist/app/service/runtime/HeartbeatManager",
-    "checklist/app/service/runtime/GCDManager",
-    "checklist/app/service/runtime/ActivityMonitor",
-    "checklist/app/service/runtime/AutoSaveCoordinator",
-    "checklist/app/service/runtime/ConnectivityCoordinator",
-    "checklist/app/service/runtime/LockStatusMonitor",
-    "checklist/app/service/runtime/SettingsManager"
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/SmartCacheManager",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/HeartbeatManager",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/GCDManager",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ActivityMonitor",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/AutoSaveCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ConnectivityCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/LockStatusMonitor",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/SettingsManager"
 ], function (
     SmartCacheManager,
     HeartbeatManager,

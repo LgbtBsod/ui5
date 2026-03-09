@@ -15,7 +15,7 @@ sap.ui.define([
         var sMessage = "[" + String(sScope || "UI5") + "] " + String(sEvent || "");
         var oSafePayload = oPayload || {};
 
-        Log.info(sMessage, JSON.stringify(oSafePayload), "checklist.app.util.DebugLogger");
+        Log.info(sMessage, JSON.stringify(oSafePayload), "PRODUCTION_CONTROL_CHECKLIST.util.DebugLogger");
     }
 
     return {

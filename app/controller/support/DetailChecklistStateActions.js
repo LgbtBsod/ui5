@@ -1,15 +1,16 @@
 sap.ui.define([
-    "checklist/app/controller/support/DetailActionConstants",
-    "checklist/app/controller/support/DetailCommandPolicy",
-    "checklist/app/service/framework/ClipboardRuntime",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/UiDecisionCoordinator",
-    "checklist/app/util/CreateSentinel"
-], function (DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ClipboardRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, CreateSentinel) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -55,7 +56,28 @@ sap.ui.define([
 
     function close(oController) {
         resetDeleteChecklistConfirmArmed(oController);
-        return DetailCommandPolicy.close(oController, RootIdRuntime.withCurrentRootId(oController));
+        return WorkflowCoordinator.confirmUnsavedAndHandle(oController, function () {
+            return save(oController, {
+                saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
+            });
+        }).then(function (sDecision) {
+            if (sDecision === "CANCEL" || sDecision === "SAVE_FAILED") {
+                return false;
+            }
+            if (sDecision === "DISCARD") {
+                ModelStateRuntime.resetDetailWorkflowState(oController, {
+                    "/layout": "OneColumn",
+                    "/selectedId": "",
+                    "/activeObjectId": ""
+                });
+                ModelStateRuntime.resetDetailRuntimeData(oController);
+                NavigationIntentService.navigateToSearch(oController);
+                return true;
+            }
+            return DetailCommandPolicy.close(oController, RootIdRuntime.withCurrentRootId(oController, {
+                intent: "close"
+            }));
+        });
     }
 
     function armDelete(oController) {

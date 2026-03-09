@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/controller/support/DetailPersonInputSupport",
-    "checklist/app/service/framework/FocusRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/SchedulingRuntime",
-    "checklist/app/util/ValidationPathMap"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailPersonInputSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap"
 ], function (DetailPersonInputSupport, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap) {
     "use strict";
 

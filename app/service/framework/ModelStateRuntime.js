@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/util/CloneUtil"
+    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil"
 ], function (CloneUtil) {
     "use strict";
 

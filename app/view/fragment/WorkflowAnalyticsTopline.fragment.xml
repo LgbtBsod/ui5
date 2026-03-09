@@ -3,21 +3,21 @@
         <HBox class="analyticsToplineGrid" wrap="Wrap" renderType="Bare">
             <GenericTile header="{i18n>kpiVisible}" subheader="{view>/analytics/sourceText}" class="analyticsTile">
                 <tileContent>
-                    <TileContent>
+                    <TileContent footer="{= ${i18n>analyticsDeltaShort} + ' ' + ${view>/analytics/compareYear} + ': ' + ${view>/analytics/deltas/total/text} }">
                         <NumericContent value="{view>/analytics/total}" indicator="None" valueColor="Neutral"/>
                     </TileContent>
                 </tileContent>
             </GenericTile>
             <GenericTile header="{i18n>kpiFailedChecks}" subheader="{i18n>analyticsFailedChecklistCount}" class="analyticsTile">
                 <tileContent>
-                    <TileContent footer="{= ${i18n>analyticsFailedChecklistCount} + ': ' + ${view>/analytics/failedChecklistCount} }">
+                    <TileContent footer="{= ${i18n>analyticsDeltaShort} + ' ' + ${view>/analytics/compareYear} + ': ' + ${view>/analytics/deltas/failedChecks/text} + ' | ' + ${i18n>analyticsFailedChecklistCount} + ': ' + ${view>/analytics/failedChecklistCount} }">
                         <NumericContent value="{view>/analytics/failedChecks}" scale="" indicator="None" valueColor="Error"/>
                     </TileContent>
                 </tileContent>
             </GenericTile>
             <GenericTile header="{i18n>kpiFailedBarriers}" subheader="{i18n>analyticsFailedBarrierChecklistCount}" class="analyticsTile">
                 <tileContent>
-                    <TileContent footer="{= ${i18n>analyticsFailedBarrierChecklistCount} + ': ' + ${view>/analytics/failedBarrierChecklistCount} }">
+                    <TileContent footer="{= ${i18n>analyticsDeltaShort} + ' ' + ${view>/analytics/compareYear} + ': ' + ${view>/analytics/deltas/failedBarriers/text} + ' | ' + ${i18n>analyticsFailedBarrierChecklistCount} + ': ' + ${view>/analytics/failedBarrierChecklistCount} }">
                         <NumericContent value="{view>/analytics/failedBarriers}" indicator="None" valueColor="Critical"/>
                     </TileContent>
                 </tileContent>

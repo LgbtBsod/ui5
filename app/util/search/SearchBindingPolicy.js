@@ -1,8 +1,8 @@
 sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "checklist/app/util/search/SearchFilterBuilder",
-    "checklist/app/util/search/SearchMaxResults"
+    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchFilterBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults"
 ], function (Filter, FilterOperator, SearchFilterBuilder, SearchMaxResults) {
     "use strict";
 

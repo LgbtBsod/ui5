@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/util/ClientKeyGenerator"
+    "PRODUCTION_CONTROL_CHECKLIST/util/ClientKeyGenerator"
 ], function (ClientKeyGenerator) {
     "use strict";
 

@@ -1,14 +1,14 @@
 sap.ui.define([
-    "checklist/app/controller/support/ControllerResourceCleanup",
-    "checklist/app/service/domain/detail/DetailFacade",
-    "checklist/app/service/framework/ControllerRouteRuntime",
-    "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/controller/support/DetailAccessViewState",
-    "checklist/app/controller/support/DetailInfoCardLayoutRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/ControllerResourceCleanup",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailAccessViewState",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailInfoCardLayoutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (
     ControllerResourceCleanup,
     DetailFacade,

@@ -1,8 +1,8 @@
 sap.ui.define([
-  "checklist/app/util/delta/DeltaCore",
-  "checklist/app/util/delta/DeltaDateCodec",
-  "checklist/app/util/delta/DeltaFieldMappers",
-  "checklist/app/util/delta/DeltaChildChanges"
+  "PRODUCTION_CONTROL_CHECKLIST/util/delta/DeltaCore",
+  "PRODUCTION_CONTROL_CHECKLIST/util/delta/DeltaDateCodec",
+  "PRODUCTION_CONTROL_CHECKLIST/util/delta/DeltaFieldMappers",
+  "PRODUCTION_CONTROL_CHECKLIST/util/delta/DeltaChildChanges"
 ], function (DeltaCore, DeltaDateCodec, DeltaFieldMappers, DeltaChildChanges) {
   "use strict";
 

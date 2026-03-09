@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/service/framework/ActionContract",
-    "checklist/app/service/framework/behavior/BehaviorResolver",
-    "checklist/app/service/framework/behavior/RetryDefaultHandlers",
-    "checklist/app/service/framework/behavior/RetryOverrideHandlers"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/RetryDefaultHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/RetryOverrideHandlers"
 ], function (ActionContract, BehaviorResolver, RetryDefaultHandlers, RetryOverrideHandlers) {
     "use strict";
 

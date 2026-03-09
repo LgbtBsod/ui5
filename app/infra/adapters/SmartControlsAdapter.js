@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/util/SearchSmartControlCoordinator"
+    "PRODUCTION_CONTROL_CHECKLIST/util/SearchSmartControlCoordinator"
 ], function (SearchSmartControlCoordinator) {
     "use strict";
 

@@ -1,11 +1,12 @@
 sap.ui.define([
-    "checklist/app/service/framework/CtxFactory",
-    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-    "checklist/app/service/framework/ControllerRouteRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/NavigationIntentService"
-], function (CtxFactory, DetailAuthorizationSupport, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService"
+], function (CtxFactory, DetailAuthorizationSupport, AccessPayload, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService) {
     "use strict";
 
     function buildInitialViewState(sRootId) {
@@ -18,14 +19,7 @@ sap.ui.define([
     }
 
     function normalizeGuard(oGuard, sRootId) {
-        var oResolved = oGuard || {};
-
-        return {
-            busy: false,
-            rootId: String(oResolved.rootId || sRootId || "").trim(),
-            reasonCode: String(oResolved.reasonCode || "NO_VIEW_PERMISSION").trim(),
-            message: String(oResolved.message || "").trim()
-        };
+        return AccessPayload.buildDeniedViewState(oGuard, sRootId);
     }
 
     function readCurrentUserId(oController) {
@@ -95,25 +89,17 @@ sap.ui.define([
                     NavigationIntentService.navigateToDetail(this, sRootId);
                     return;
                 }
-                ModelStateRuntime.writeOnModel(oStateModel, "/detailAccessGuard", {
-                    rootId: String((oPermission && oPermission.rootId) || sRootId || "").trim(),
-                    userId: String((oPermission && oPermission.userId) || "").trim(),
-                    canView: false,
-                    canEdit: !!(oPermission && oPermission.canEdit),
-                    canDelete: !!(oPermission && oPermission.canDelete),
-                    reasonCode: String((oPermission && oPermission.reasonCode) || "NO_VIEW_PERMISSION").trim(),
-                    message: String((oPermission && oPermission.message) || "").trim(),
-                    checkedAt: new Date().toISOString()
-                });
+                ModelStateRuntime.writeOnModel(oStateModel, "/detailAccessGuard", Object.assign(
+                    AccessPayload.buildGuard(oPermission, sRootId, {
+                        canView: false,
+                        reasonCode: "NO_VIEW_PERMISSION"
+                    }),
+                    { checkedAt: new Date().toISOString() }
+                ));
                 this._renderGuardState(oPermission, sRootId);
             }.bind(this)).catch(function () {
                 ControllerViewStateRuntime.replace(this, function () {
-                    return {
-                        busy: false,
-                        rootId: String(sRootId || "").trim(),
-                        reasonCode: "NO_VIEW_PERMISSION",
-                        message: ""
-                    };
+                    return AccessPayload.buildDeniedViewState(null, sRootId);
                 });
             }.bind(this));
         },

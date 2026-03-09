@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/util/ThemeService"
+    "PRODUCTION_CONTROL_CHECKLIST/util/ThemeService"
 ], function (ThemeService) {
     "use strict";
 

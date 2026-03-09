@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/service/framework/ActionContract",
-    "checklist/app/service/framework/EffectActionRouting",
-    "checklist/app/service/framework/SecurityTokenRefresh",
-    "checklist/app/service/framework/behavior/BehaviorRegistry"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
 ], function (ActionContract, EffectActionRouting, SecurityTokenRefresh, BehaviorRegistry) {
     "use strict";
 

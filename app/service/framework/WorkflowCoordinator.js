@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/behavior/BehaviorResolver",
-    "checklist/app/service/framework/behavior/WorkflowDefaultHandlers",
-    "checklist/app/service/framework/behavior/WorkflowOverrideHandlers"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowDefaultHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowOverrideHandlers"
 ], function (BehaviorResolver, WorkflowDefaultHandlers, WorkflowOverrideHandlers) {
     "use strict";
 

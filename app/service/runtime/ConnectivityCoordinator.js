@@ -1,10 +1,10 @@
 sap.ui.define([
   "sap/ui/base/EventProvider",
-  "checklist/app/service/runtime/shared/TimerRuntime"
+  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
 ], function (EventProvider, TimerRuntime) {
   "use strict";
 
-  return EventProvider.extend("checklist.app.service.runtime.ConnectivityCoordinator", {
+  return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.ConnectivityCoordinator", {
     constructor: function (mOptions) {
       EventProvider.apply(this, arguments);
       this._iGraceMs = Number(mOptions && mOptions.graceMs);

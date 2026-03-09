@@ -1,4 +1,4 @@
-sap.ui.define(["checklist/app/service/domain/shared/LockFacade"], function (LockFacade) {
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade"], function (LockFacade) {
     "use strict";
 
     return {

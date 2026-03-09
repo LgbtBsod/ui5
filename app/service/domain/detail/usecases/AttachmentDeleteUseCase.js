@@ -1,11 +1,12 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/domain/shared/UseCaseResultUtils",
-    "checklist/app/service/domain/detail/AttachmentEffectSupport",
-    "checklist/app/service/domain/detail/DetailStateAccess",
-    "checklist/app/util/CreateSentinel"
-], function (UseCase, Result, UseCaseResultUtils, AttachmentEffectSupport, DetailStateAccess, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (UseCase, Result, UseCaseResultUtils, UseCaseInputUtils, AttachmentEffectSupport, DetailStateAccess, CreateSentinel) {
     "use strict";
 
     function cleanupObjectUrl(oAttachment) {
@@ -24,7 +25,7 @@ sap.ui.define([
 
     AttachmentDeleteUseCase.prototype.execute = function (mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
-        var sRootId = String((mInput && mInput.rootId) || "").trim();
+        var sRootId = UseCaseInputUtils.rootId(mInput);
         var oAttachment = (mInput && mInput.attachment) || null;
         if (!sRootId || CreateSentinel.isCreateId(sRootId) || (oAttachment && oAttachment.staged)) {
             cleanupObjectUrl(oAttachment);

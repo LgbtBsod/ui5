@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="checklist.app.controller.Detail"
+    controllerName="PRODUCTION_CONTROL_CHECKLIST.controller.Detail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
@@ -52,7 +52,7 @@
                     class="glassCard detailControlInlineCard detailControlExperienceCard"
                     renderType="Bare"
                     width="100%">
-                    <core:Fragment fragmentName="checklist.app.view.fragment.DetailControlRail" type="XML"/>
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailControlRail" type="XML"/>
                 </VBox>
             </VBox>
 
@@ -108,7 +108,7 @@
                             <uxap:ObjectPageSubSection id="ssParticipants" title="">
                                 <uxap:blocks>
                                     <VBox renderType="Bare" width="100%" class="detailMainExperienceStack">
-                                        <core:Fragment fragmentName="checklist.app.view.fragment.LockKilledBanner" type="XML"/>
+                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.LockKilledBanner" type="XML"/>
                                         <VBox
                                             class="detailCreateModeBanner searchFilterHintBanner sapUiTinyMarginBottom appSkeletonReveal"
                                             renderType="Bare"
@@ -125,7 +125,7 @@
                                         </VBox>
                                         <VBox class="glassCard detailSectionCard detailInfoExperienceCard" width="100%">
                                             <VBox visible="{view>/detailSkeletonBusy}" renderType="Bare">
-                                                <core:Fragment fragmentName="checklist.app.view.fragment.SkeletonFormSection" type="XML"/>
+                                                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonFormSection" type="XML"/>
                                             </VBox>
                                             <VBox visible="{= !${view>/detailSkeletonBusy} }" renderType="Bare" class="appSkeletonReveal detailSectionBody detailInfoSectionBody">
                                             <f:GridList id="infoCardGrid" items="{path:'view>/infoCards', factory: '.infoCardFactory'}" class="infoCardGrid" showSeparators="None">
@@ -145,7 +145,7 @@
                                 <uxap:blocks>
                                     <VBox class="glassCard detailSectionCard detailTableExperienceCard" width="100%">
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
-                                            <core:Fragment fragmentName="checklist.app.view.fragment.SkeletonTableSection" type="XML"/>
+                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
                                         <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody">
                                         <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
@@ -281,7 +281,7 @@
                                 <uxap:blocks>
                                     <VBox class="glassCard detailSectionCard detailTableExperienceCard detailBarriersTableCard" width="100%" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
-                                            <core:Fragment fragmentName="checklist.app.view.fragment.SkeletonTableSection" type="XML"/>
+                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
                                         <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody">
                                         <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
@@ -416,7 +416,7 @@
                                 <uxap:blocks>
                                     <VBox class="glassCard detailSectionCard detailTableExperienceCard detailAttachmentsCard" width="100%">
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
-                                            <core:Fragment fragmentName="checklist.app.view.fragment.SkeletonTableSection" type="XML"/>
+                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
                                         <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody">
                                             <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar">

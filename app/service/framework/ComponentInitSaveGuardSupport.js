@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/service/framework/ActionContract",
-    "checklist/app/service/framework/SecurityTokenRefresh",
-    "checklist/app/service/framework/FeedbackBannerRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/TelemetryRuntime",
-    "checklist/app/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (ActionContract, SecurityTokenRefresh, FeedbackBannerRuntime, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime) {
     "use strict";
 

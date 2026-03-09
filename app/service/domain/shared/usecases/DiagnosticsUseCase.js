@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase"
 ], function (Result, ComponentStartupDiagnosticsUseCase) {
     "use strict";
 

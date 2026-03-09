@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/service/framework/FacadeCommandRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandRuntime"
 ], function (FacadeCommandRuntime) {
     "use strict";
 

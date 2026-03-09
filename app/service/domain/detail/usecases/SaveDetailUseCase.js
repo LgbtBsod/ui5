@@ -1,13 +1,14 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/detail/DetailSaveRuntimeSupport",
-    "checklist/app/service/domain/shared/UseCaseInputUtils",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/DeltaPayloadBuilder",
-    "checklist/app/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailSaveRuntimeSupport, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -72,22 +73,22 @@ sap.ui.define([
     }
 
     function readCurrentChecklist(mCtx) {
-        return readSelectedChecklist(mCtx) || DetailSaveRuntimeSupport.readCurrentChecklist(mCtx);
+        return readSelectedChecklist(mCtx) || DetailSaveSupport.readCurrentChecklist(mCtx);
     }
 
     SaveDetailUseCase.prototype.execute = function (mInput, mCtx) {
         var sRootId = UseCaseInputUtils.rootId(mInput);
         var oUiState = mCtx && mCtx.uiState;
         var oCurrent = readCurrentChecklist(mCtx);
-        var oSnapshot = DetailSaveRuntimeSupport.readBaseSnapshot(mCtx);
+        var oSnapshot = DetailSaveSupport.readBaseSnapshot(mCtx);
         var oDelta = (mInput && mInput.delta) || DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oSnapshot);
         var oRepo = mCtx && mCtx.repo;
         var oLock = mCtx && mCtx.lock;
         var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "").toUpperCase();
         var bCreate = CreateSentinel.isCreateId(sRootId) || sMode === "CREATE";
-        var iClientVersion = DetailSaveRuntimeSupport.resolveVersionNumber(oCurrent, oSnapshot);
-        var sSessionGuid = DetailSaveRuntimeSupport.readSessionGuid(mCtx, StatePaths);
-        var sLockState = DetailSaveRuntimeSupport.readLockState(mCtx, StatePaths);
+        var iClientVersion = DetailSaveSupport.resolveVersionNumber(oCurrent, oSnapshot);
+        var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);
+        var sLockState = DetailSaveSupport.readLockState(mCtx, StatePaths);
         var aCurrentAttachments = Array.isArray((oCurrent && oCurrent.attachments) || null) ? oCurrent.attachments : [];
 
         if (!oRepo) {
@@ -123,11 +124,15 @@ sap.ui.define([
 
         var pSave = bCreate
             ? Promise.resolve(oRepo.createChecklist({ delta: oCurrent }))
-            : Promise.resolve(oRepo.saveChecklist({ rootId: sRootId, delta: oDelta, sessionGuid: sSessionGuid }));
+            : Promise.resolve(oRepo.saveChecklist(DetailRuntimePayload.saveRequest({
+                rootId: sRootId,
+                delta: oDelta,
+                sessionGuid: sSessionGuid
+            })));
 
         return pSave.then(function (oSaved) {
             var sNow = new Date().toISOString();
-            var oInitialSavedSnapshot = DetailSaveRuntimeSupport.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot);
+            var oInitialSavedSnapshot = DetailSaveSupport.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot);
             var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.pcct_uuid || oInitialSavedSnapshot.RootKey || oInitialSavedSnapshot.rootKey || oInitialSavedSnapshot.Key || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
             var pLockAcquire = Promise.resolve(null);
             var pAttachmentSync = Promise.resolve(aCurrentAttachments);
@@ -137,10 +142,10 @@ sap.ui.define([
             }
 
             if (bCreate && sServerRootId && !CreateSentinel.isCreateId(sServerRootId) && oLock && typeof oLock.acquire === "function" && sSessionGuid) {
-                pLockAcquire = Promise.resolve(oLock.acquire({
+                pLockAcquire = Promise.resolve(oLock.acquire(DetailRuntimePayload.lockRequest({
                     rootId: sServerRootId,
                     sessionGuid: sSessionGuid
-                })).catch(function () {
+                }, null, StatePaths))).catch(function () {
                     return null;
                 });
             }
@@ -148,7 +153,7 @@ sap.ui.define([
             return Promise.all([pAttachmentSync, pLockAcquire]).then(function (aPostSave) {
                 var aSyncedAttachments = Array.isArray(aPostSave[0]) ? aPostSave[0] : aCurrentAttachments;
                 var oLockResult = aPostSave[1];
-                var oSavedSnapshot = DetailSaveRuntimeSupport.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
+                var oSavedSnapshot = DetailSaveSupport.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
                 var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
                 var aEffects = [
                     Effects.toast("objectSaved", "success"),

@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/controller/support/AttachmentUploadCore",
-    "checklist/app/service/framework/ControlStyleRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AttachmentUploadCore",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime"
 ], function (AttachmentUploadCore, ControlStyleRuntime) {
     "use strict";
 

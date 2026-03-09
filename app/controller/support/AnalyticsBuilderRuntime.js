@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer",
-    "checklist/app/service/framework/ControllerViewStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsPayloadNormalizer",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime"
 ], function (ControllerTextRuntime, AnalyticsPayloadNormalizer, ControllerViewStateRuntime) {
     "use strict";
 

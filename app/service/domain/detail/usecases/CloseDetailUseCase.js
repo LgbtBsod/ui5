@@ -1,10 +1,11 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel"
-], function (UseCase, Result, Effects, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel) {
     "use strict";
 
     function CloseDetailUseCase() {
@@ -17,13 +18,13 @@ sap.ui.define([
     CloseDetailUseCase.prototype.execute = function (mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
-        var sRootId = (mInput && mInput.rootId) || (oUiState && oUiState.get("state", "/activeObjectId"));
-        var sSessionGuid = oUiState && oUiState.get("state", StatePaths.SESSION_ID);
+        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
+        var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var aEffects;
 
         var pRelease = Promise.resolve();
         if (sRootId && !CreateSentinel.isCreateId(sRootId) && sSessionGuid && oLockPort && typeof oLockPort.release === "function") {
-            pRelease = Promise.resolve(oLockPort.release({ rootId: sRootId, sessionGuid: sSessionGuid })).catch(function () {
+            pRelease = Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () {
                 return { ok: false, code: "ERROR", released: false, messageKey: "lockReleaseFailed" };
             });
         }

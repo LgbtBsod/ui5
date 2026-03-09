@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/util/DebugLogger",
-    "checklist/app/service/framework/TelemetryRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime"
 ], function (DebugLogger, TelemetryRuntime) {
     "use strict";
 

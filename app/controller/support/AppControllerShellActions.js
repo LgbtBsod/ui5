@@ -1,14 +1,14 @@
 sap.ui.define([
-    "checklist/app/service/framework/ActionContract",
-    "checklist/app/controller/support/AppShellActionRuntime",
-    "checklist/app/service/framework/ClipboardRuntime",
-    "checklist/app/service/framework/FocusRuntime",
-    "checklist/app/service/framework/FeedbackBannerState",
-    "checklist/app/service/framework/FeedbackBannerRuntime",
-    "checklist/app/service/framework/AppShellCoordinator",
-    "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/UiDecisionCoordinator"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppShellActionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ClipboardRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerState",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator"
 ], function (ActionContract, AppShellActionRuntime, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, AppShellCoordinator, NavigationIntentService, ModelStateRuntime, UiDecisionCoordinator) {
     "use strict";
 

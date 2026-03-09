@@ -1,9 +1,9 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/domain/cache/ports/BrowserCachePort",
-    "checklist/app/service/domain/cache/ports/LastChangeSetPort",
-    "checklist/app/util/WorkflowTelemetry"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/ports/BrowserCachePort",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/ports/LastChangeSetPort",
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
 ], function (UseCase, Result, BrowserCachePort, LastChangeSetPort, WorkflowTelemetry) {
     "use strict";
 

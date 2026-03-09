@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/infra/adapters/shared/GatewayAdapterSupport",
-    "checklist/app/util/ValueTokenParser"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ValueTokenParser"
 ], function (GatewayAdapterSupport, ValueTokenParser) {
     "use strict";
 

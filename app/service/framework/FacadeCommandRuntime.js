@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/service/framework/CtxFactory",
-    "checklist/app/service/framework/RuntimeInput"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput"
 ], function (CtxFactory, RuntimeInput) {
     "use strict";
 

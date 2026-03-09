@@ -1,10 +1,10 @@
 sap.ui.define([
-    "checklist/app/service/framework/EffectApplier",
-    "checklist/app/service/framework/EffectBannerRouter",
-    "checklist/app/service/framework/EffectTextResolver",
-    "checklist/app/service/framework/FeedbackBannerRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/behavior/BehaviorRegistry"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectBannerRouter",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
 ], function (EffectApplier, EffectBannerRouter, EffectTextResolver, FeedbackBannerRuntime, ControllerModelRuntime, BehaviorRegistry) {
     "use strict";
 

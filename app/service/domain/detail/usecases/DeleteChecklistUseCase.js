@@ -1,17 +1,13 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, StatePaths, CreateSentinel) {
     "use strict";
-
-    function resolveRootId(mInput, mCtx) {
-        var oUiState = mCtx && mCtx.uiState;
-        return String((mInput && mInput.rootId) || (oUiState && oUiState.get("state", "/activeObjectId")) || "").trim();
-    }
 
     function DeleteChecklistUseCase() {
         UseCase.call(this, "DeleteChecklistUseCase");
@@ -22,7 +18,7 @@ sap.ui.define([
 
     DeleteChecklistUseCase.prototype.execute = function (mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
-        var sRootId = resolveRootId(mInput, mCtx);
+        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(Result.fail({ message: "No checklist to delete", code: "NO_CHECKLIST" }, [
@@ -48,18 +44,15 @@ sap.ui.define([
                     Effects.modelPatch("selected", "/", {}),
                     Effects.modelPatch("uiState", "/_detailCurrent", {}),
                     Effects.modelPatch("uiState", "/_detailSnapshot", {}),
-                    Effects.modelPatch("view", "/accessState", {
-                        denied: false,
+                    Effects.modelPatch("view", "/accessState", DetailAuthorizationSupport.buildAccessState({
                         rootId: "",
                         userId: "",
                         canView: true,
                         canEdit: true,
                         canDelete: true,
                         reasonCode: "AUTHORIZED",
-                        titleKey: "",
-                        messageKey: "",
-                        illustrationSrc: "assets/illustrations/detail-access-denied.svg"
-                    }),
+                        message: ""
+                    }, false)),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),

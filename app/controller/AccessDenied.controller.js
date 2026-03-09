@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/controller/Base.controller",
-    "checklist/app/controller/support/AccessDeniedControllerActions"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AccessDeniedControllerActions"
 ], function (BaseController, AccessDeniedControllerActions) {
     "use strict";
 
-    return BaseController.extend("checklist.app.controller.AccessDenied", Object.assign({}, AccessDeniedControllerActions));
+    return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.AccessDenied", Object.assign({}, AccessDeniedControllerActions));
 });

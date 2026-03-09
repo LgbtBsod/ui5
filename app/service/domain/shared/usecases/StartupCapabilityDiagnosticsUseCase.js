@@ -1,4 +1,4 @@
-sap.ui.define(["checklist/app/service/framework/Result"], function (Result) {
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/Result"], function (Result) {
     "use strict";
 
     function buildDiagnostics(mInput) {

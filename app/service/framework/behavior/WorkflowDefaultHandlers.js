@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/infra/adapters/LockAdapter",
-    "checklist/app/service/framework/DialogOrchestrator",
-    "checklist/app/model/StatePaths",
-    "checklist/app/service/framework/FeedbackCoordinator",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/behavior/BehaviorRegistry"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
 ], function (LockAdapter, DialogOrchestrator, StatePaths, FeedbackCoordinator, RootIdRuntime, ModelStateRuntime, BehaviorRegistry) {
     "use strict";
 

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "checklist/app/util/UxTelemetry"
+    "PRODUCTION_CONTROL_CHECKLIST/util/UxTelemetry"
 ], function (UxTelemetry) {
     "use strict";
 

@@ -1,23 +1,23 @@
 sap.ui.define([
-    "checklist/app/service/framework/DialogOrchestrator",
-    "checklist/app/util/DraftChecklistFactory",
-    "checklist/app/controller/support/DetailViewRuntime",
-    "checklist/app/controller/support/DetailAccessViewState",
-    "checklist/app/controller/support/DetailActionConstants",
-    "checklist/app/controller/support/DetailCommandPolicy",
-    "checklist/app/controller/support/DetailInfoCardLayoutRuntime",
-    "checklist/app/service/framework/FeedbackCoordinator",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/util/CreateSentinel"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
+    "PRODUCTION_CONTROL_CHECKLIST/util/DraftChecklistFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailViewRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailAccessViewState",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailInfoCardLayoutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
 ], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
     "use strict";
 
     var EFFECT_DIALOG_FRAGMENTS = {
-        locationValueHelp: "checklist.app.view.fragment.LocationValueHelpDialog",
-        checksExpanded: "checklist.app.view.fragment.ChecksExpandedDialog",
-        barriersExpanded: "checklist.app.view.fragment.BarriersExpandedDialog"
+        locationValueHelp: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.LocationValueHelpDialog",
+        checksExpanded: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ChecksExpandedDialog",
+        barriersExpanded: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.BarriersExpandedDialog"
     };
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
 
@@ -69,6 +69,8 @@ sap.ui.define([
             var sLayoutArg = String(mArgs.layout || "").toLowerCase();
             var bCreate = CreateSentinel.isCreateId(sId);
             var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? "MidColumnFullScreen" : "TwoColumnsMidExpanded";
+            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
+            var sCurrentRootId = String(ModelStateRuntime.read(this, "state", "/activeObjectId", "") || "").trim();
             var mStatePatch = {
                 "/activeObjectId": bCreate ? CreateSentinel.VALUE : sId,
                 "/selectedId": bCreate ? CreateSentinel.VALUE : sId,
@@ -91,6 +93,17 @@ sap.ui.define([
             var oSelected = this.getModel("selected");
             var oSelectedData = (oSelected && oSelected.getData && oSelected.getData()) || {};
             var sSelectedRootId = String((oSelectedData && oSelectedData.root && oSelectedData.root.id) || "").trim();
+            var bLayoutOnlyTransition = !bCreate &&
+                sCurrentRootId === sId &&
+                sSelectedRootId === sId &&
+                ["detail", "detailLayout"].indexOf(sCurrentRouteName) >= 0 &&
+                ["detail", "detailLayout"].indexOf(sRouteName) >= 0;
+
+            if (bLayoutOnlyTransition) {
+                ModelStateRuntime.setMany(this, "state", mStatePatch);
+                this._applyLayoutState(sRouteLayout, { syncRoute: false });
+                return;
+            }
 
             if (bCreate) {
                 mStatePatch["/mode"] = "CREATE";

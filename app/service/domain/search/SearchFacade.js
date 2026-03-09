@@ -1,13 +1,13 @@
 sap.ui.define([
-    "checklist/app/service/domain/search/usecases/BootstrapSearchUseCase",
-    "checklist/app/service/domain/search/usecases/BuildSearchFilterUseCase",
-    "checklist/app/service/domain/search/usecases/ExecuteSearchUseCase",
-    "checklist/app/service/domain/search/usecases/RebindSearchUseCase",
-    "checklist/app/service/domain/search/usecases/SelectRowUseCase",
-    "checklist/app/service/domain/search/usecases/SelectionChangedUseCase",
-    "checklist/app/service/domain/search/ExportFacade",
-    "checklist/app/service/domain/search/usecases/AnalyticsUseCase",
-    "checklist/app/service/domain/search/usecases/ApplyRebindPolicyUseCase"
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/BootstrapSearchUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/BuildSearchFilterUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ExecuteSearchUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/RebindSearchUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/SelectRowUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/SelectionChangedUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/ExportFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/AnalyticsUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ApplyRebindPolicyUseCase"
 ], function (
     BootstrapSearchUseCase,
     BuildSearchFilterUseCase,

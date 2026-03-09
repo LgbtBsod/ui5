@@ -1,12 +1,12 @@
 sap.ui.define([
-    "checklist/app/controller/support/ControllerResourceCleanup",
-    "checklist/app/service/framework/AppShellCoordinator",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime",
-    "checklist/app/service/framework/RootIdRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/SchedulingRuntime",
-    "checklist/app/util/ThemeDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/ControllerResourceCleanup",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime",
     "sap/ui/Device"
 ], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device) {
     "use strict";

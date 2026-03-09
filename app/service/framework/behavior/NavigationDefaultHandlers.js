@@ -1,7 +1,7 @@
 sap.ui.define([
-    "checklist/app/infra/navigation/WorkspaceRouteNavigation",
-    "checklist/app/service/framework/behavior/BehaviorRegistry",
-    "checklist/app/service/framework/ModelStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
 ], function (WorkspaceRouteNavigation, BehaviorRegistry, ModelStateRuntime) {
     "use strict";
 

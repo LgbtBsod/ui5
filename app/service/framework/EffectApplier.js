@@ -1,15 +1,15 @@
 sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "checklist/app/util/DebugLogger",
-    "checklist/app/infra/adapters/Ui5StyleAdapter",
-    "checklist/app/service/ui/StyleTokens",
-    "checklist/app/service/framework/EffectTextResolver",
-    "checklist/app/service/framework/EffectBannerRouter",
-    "checklist/app/service/framework/EffectActionRouting",
-    "checklist/app/service/framework/EffectDialogRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/util/CloneUtil"
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/Ui5StyleAdapter",
+    "PRODUCTION_CONTROL_CHECKLIST/service/ui/StyleTokens",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectBannerRouter",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectDialogRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil"
 ], function (MessageToast, MessageBox, DebugLogger, Ui5StyleAdapter, StyleTokens, EffectTextResolver, EffectBannerRouter, EffectActionRouting, EffectDialogRuntime, ModelStateRuntime, CloneUtil) {
     "use strict";
 

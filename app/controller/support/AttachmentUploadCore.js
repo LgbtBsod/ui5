@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/util/CreateSentinel",
-    "checklist/app/util/AttachmentUploadPolicy",
-    "checklist/app/controller/support/DetailCommandPolicy",
-    "checklist/app/controller/base/ControllerTextRuntime",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
 ], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime) {
     "use strict";
 
@@ -167,7 +167,7 @@ sap.ui.define([
             oController,
             "attachmentUploadHint",
             [sTypes || "-", sSize],
-            [sTypes, sSize ? sSize + " MB" : ""].filter(Boolean).join(" · ")
+            [sTypes, sSize ? sSize + " MB" : ""].filter(Boolean).join(" Â· ")
         );
     }
 

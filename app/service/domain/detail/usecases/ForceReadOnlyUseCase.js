@@ -1,10 +1,11 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel"
-], function (UseCase, Result, Effects, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel) {
     "use strict";
 
     function ForceReadOnlyUseCase() {
@@ -25,8 +26,8 @@ sap.ui.define([
         var bPreserveDirty = !!(mInput && mInput.preserveDirty);
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
-        var sRootId = String((mInput && mInput.rootId) || (oUiState && oUiState.get("state", "/activeObjectId")) || "").trim();
-        var sSessionGuid = String((oUiState && oUiState.get("state", StatePaths.SESSION_ID)) || "").trim();
+        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
+        var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_EDIT_MODE)) || "").toUpperCase();
         var sLockState = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_LOCK_STATUS)) || "").toUpperCase();
         var bShouldRelease = !!(
@@ -40,7 +41,7 @@ sap.ui.define([
         );
         var aEffects;
         var pRelease = bShouldRelease
-            ? Promise.resolve(oLockPort.release({ rootId: sRootId, sessionGuid: sSessionGuid })).catch(function () {
+            ? Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () {
                 return { ok: false, released: false, messageKey: "lockReleaseFailed" };
             })
             : Promise.resolve(null);

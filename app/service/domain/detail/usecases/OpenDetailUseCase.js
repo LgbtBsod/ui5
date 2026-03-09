@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/service/framework/UseCase",
-    "checklist/app/service/framework/Result",
-    "checklist/app/service/framework/Effects",
-    "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-    "checklist/app/service/domain/shared/UseCaseInputUtils",
-    "checklist/app/model/StatePaths",
-    "checklist/app/util/CreateSentinel"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
 ], function (UseCase, Result, Effects, DetailAuthorizationSupport, UseCaseInputUtils, StatePaths, CreateSentinel) {
     "use strict";
 

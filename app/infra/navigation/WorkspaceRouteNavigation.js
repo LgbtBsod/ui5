@@ -1,8 +1,8 @@
 sap.ui.define([
-    "checklist/app/util/CloneUtil",
-    "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/ControllerModelRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
 ], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime) {
     "use strict";
 
@@ -75,7 +75,14 @@ sap.ui.define([
     }
 
     function navigateToAnalytics(oController) {
+        var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
+        var sCurrentRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "search") || "search").trim() || "search";
+
+        if (sCurrentRouteName === "analytics") {
+            navigateToSearch(oController);
+            return;
+        }
 
         setAnalyticsReturnIntent(oController);
         if (oRouter && typeof oRouter.navTo === "function") {

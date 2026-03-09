@@ -1,6 +1,6 @@
 sap.ui.define([
-    "checklist/app/service/framework/LazyDialogRuntime",
-    "checklist/app/service/framework/EffectActionRouting"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LazyDialogRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectActionRouting"
 ], function (LazyDialogRuntime, EffectActionRouting) {
     "use strict";
 

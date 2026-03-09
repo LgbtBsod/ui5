@@ -1,10 +1,10 @@
 sap.ui.define([
-    "checklist/app/controller/Base.controller",
-    "checklist/app/controller/support/AppControllerLifecycleActions",
-    "checklist/app/controller/support/AppControllerOverlayActions",
-    "checklist/app/controller/support/AppControllerShellActions",
-    "checklist/app/controller/support/AppControllerStateRuntimeActions",
-    "checklist/app/controller/support/AppControllerDomActions"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerLifecycleActions",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerOverlayActions",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerShellActions",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerStateRuntimeActions",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerDomActions"
 ], function (
     BaseController,
     AppControllerLifecycleActions,
@@ -15,7 +15,7 @@ sap.ui.define([
 ) {
     "use strict";
 
-    return BaseController.extend("checklist.app.controller.App", Object.assign(
+    return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.App", Object.assign(
         {},
         AppControllerLifecycleActions,
         AppControllerOverlayActions,
