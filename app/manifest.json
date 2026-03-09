@@ -32,6 +32,9 @@
       "css": [
         {
           "uri": "css/claude-hyper.css"
+        },
+        {
+          "uri": "css/theme-runtime-patches.css"
         }
       ]
     },

@@ -202,6 +202,7 @@ sap.ui.define([
 
     function createInfoCardWrapper(sId, oContext) {
         var oItem = new GridListItem(sId, {
+            type: "Active",
             customData: [
                 new CustomData({
                     key: "cardkey",
@@ -431,6 +432,9 @@ sap.ui.define([
                 return;
             }
             oController.onInfoCardKeyDown(oEvent, sKey);
+        });
+        oItem.attachBrowserEvent("click", function (oEvent) {
+            oController.onInfoCardPress(oEvent, sKey, oItem);
         });
         if (sKey === "observer" || sKey === "observed") {
             oShell.addItem(createObserverCardContent(oController, sKey));

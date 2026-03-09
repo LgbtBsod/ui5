@@ -197,6 +197,7 @@
                 oScript.setAttribute("data-sap-ui-compatVersion", "edge");
                 oScript.setAttribute("data-sap-ui-async", "true");
                 oScript.setAttribute("data-sap-ui-preload", "async");
+                oScript.setAttribute("data-sap-ui-xx-componentPreload", "off");
                 oScript.onload = function () {
                     if (window.sap && sap.ui && sap.ui.getCore) {
                         attachInit();

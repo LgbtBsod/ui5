@@ -2703,3 +2703,36 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   background: var(--theme-rail-bg);
   box-shadow: none;
 }
+
+/* 2026-03 functional follow-up: restore per-block sticky behavior in search */
+.chkApp .searchWorkbenchDock {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+
+.chkApp .searchFilterCardDense {
+  position: sticky;
+  top: var(--search-sticky-filter-top, var(--app-shell-offset));
+  z-index: 14;
+}
+
+.chkApp .searchResultsActionRail {
+  position: sticky;
+  top: var(--search-sticky-action-top, calc(var(--app-shell-offset) + 9rem));
+  z-index: 13;
+}
+
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  position: sticky;
+  top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 12rem));
+  z-index: 12;
+}
+
+@media (max-width: 64rem) {
+  .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+    position: static;
+    top: auto;
+  }
+}

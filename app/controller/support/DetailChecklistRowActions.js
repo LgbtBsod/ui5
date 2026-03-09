@@ -30,6 +30,39 @@ sap.ui.define([
         });
     }
 
+    function findFocusableField(oRoot) {
+        if (!oRoot || !oRoot.querySelector) {
+            return null;
+        }
+        return oRoot.querySelector([
+            "input:not([disabled]):not([readonly])",
+            "textarea:not([disabled]):not([readonly])",
+            "[role='combobox']:not([aria-disabled='true'])",
+            ".sapMSlt:not(.sapMSltDisabled)",
+            ".sapMSwt:not(.sapMSwtDisabled)"
+        ].join(","));
+    }
+
+    function isInteractiveTarget(oTarget) {
+        if (!oTarget || !oTarget.closest) {
+            return false;
+        }
+        return !!oTarget.closest([
+            ".sapMInputBase",
+            ".sapMSlt",
+            ".sapMBtn",
+            ".sapMSwt",
+            "input",
+            "textarea",
+            "select",
+            "button",
+            "a",
+            "[role='button']",
+            "[role='switch']",
+            "[role='combobox']"
+        ].join(","));
+    }
+
     return {
         onAddCheckRow: function () {
             return runRowOperation(this, "check", "add");
@@ -108,6 +141,23 @@ sap.ui.define([
                 return;
             }
             DetailInfoCardLayoutSupport.togglePin(this, BindingContextReadSupport.read(oContext, "key", ""));
+        },
+
+        onInfoCardPress: function (oEvent, sCardKey, oItem) {
+            var oTarget = oEvent && oEvent.target;
+            var oDomRef;
+            var oFocusable;
+            var sNormalized = String(sCardKey || "").trim();
+            if (!sNormalized || !this._isEditMode() || isInteractiveTarget(oTarget)) {
+                return;
+            }
+            oDomRef = oItem && oItem.getDomRef ? oItem.getDomRef() : null;
+            oFocusable = findFocusableField(oDomRef);
+            if (oFocusable && typeof oFocusable.focus === "function") {
+                oFocusable.focus();
+                return;
+            }
+            DetailInfoCardLayoutSupport.focusCardByKey(this, sNormalized);
         },
 
         onInfoCardKeyDown: function (oEvent, sCardKey) {

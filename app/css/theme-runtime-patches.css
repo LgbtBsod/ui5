@@ -1,0 +1,174 @@
+:root,
+html.chkAppRoot,
+body.chkAppRoot,
+#ui5_container.chkAppRoot {
+  --glass-blur: 0px;
+  --glass-blur-sm: 0px;
+  --glass-blur-md: 0px;
+  --glass-blur-lg: 0px;
+  --glass-sat: 100%;
+  --shadow-soft: none;
+  --shadow-deep: none;
+  --shell-shadow: none;
+  --theme-rail-shadow: none;
+  --theme-block-shadow: none;
+  --control-primary-shadow: none;
+  --control-danger-shadow: none;
+  --control-success-shadow: none;
+}
+
+#ui5-bg {
+  display: block !important;
+  opacity: 1 !important;
+  background:
+    radial-gradient(64% 58% at 14% 18%, rgba(105, 200, 255, 0.2), transparent 72%),
+    radial-gradient(58% 54% at 82% 16%, rgba(255, 182, 220, 0.18), transparent 72%),
+    radial-gradient(56% 52% at 28% 86%, rgba(140, 244, 214, 0.16), transparent 70%),
+    linear-gradient(135deg, #f5f9ff 0%, #edf4ff 44%, #fbfdff 100%);
+}
+
+body[data-theme="dark"] #ui5-bg,
+body.chkAppRoot.appDark #ui5-bg,
+body.chkAppRoot.nightMode #ui5-bg {
+  background:
+    radial-gradient(72% 66% at 14% 18%, rgba(41, 199, 222, 0.18), transparent 72%),
+    radial-gradient(60% 56% at 80% 20%, rgba(118, 103, 255, 0.16), transparent 74%),
+    radial-gradient(58% 54% at 52% 84%, rgba(255, 96, 178, 0.14), transparent 74%),
+    linear-gradient(135deg, #07111f 0%, #08182d 46%, #050c17 100%);
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme #ui5-bg {
+  background:
+    radial-gradient(72% 66% at 14% 18%, rgba(41, 199, 222, 0.18), transparent 72%),
+    radial-gradient(60% 56% at 80% 20%, rgba(118, 103, 255, 0.16), transparent 74%),
+    radial-gradient(58% 54% at 52% 84%, rgba(255, 96, 178, 0.14), transparent 74%),
+    linear-gradient(135deg, #07111f 0%, #08182d 46%, #050c17 100%) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme #ui5-bg {
+  background:
+    radial-gradient(64% 58% at 14% 18%, rgba(105, 200, 255, 0.2), transparent 72%),
+    radial-gradient(58% 54% at 82% 16%, rgba(255, 182, 220, 0.18), transparent 72%),
+    radial-gradient(56% 52% at 28% 86%, rgba(140, 244, 214, 0.16), transparent 70%),
+    linear-gradient(135deg, #f5f9ff 0%, #edf4ff 44%, #fbfdff 100%) !important;
+}
+
+#ui5-bg .bg {
+  display: block !important;
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+#ui5-bg .dither,
+#ui5-bg .grain,
+#ui5-bg .paper,
+.bg-blobs,
+.bg-blobs::before,
+.bg-blobs::after {
+  display: none !important;
+  animation: none !important;
+}
+
+#lightOilMicro,
+#lightAurora,
+#lightAuroraMicro,
+#dLayerCoarse,
+#dLayerMicro,
+#dLayerHaze {
+  opacity: 0.78;
+}
+
+.chkApp .appShellHeader,
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsTable,
+.chkApp .searchResultsActionRail,
+.chkApp .searchSmartToolbarRail,
+.chkApp .detailSectionCard,
+.chkApp .detailControlInlineCard,
+.chkApp .searchAnalyticsCard,
+.chkApp .workflowStageCard,
+.chkApp .kpiCard,
+.chkApp .sapMDialog,
+.chkApp .sapMPopover,
+.chkApp .sapMResponsivePopover,
+.chkApp .sapMBtn .sapMBtnInner,
+.chkApp .sapMInputBaseContentWrapper,
+.chkApp .sapMSlt,
+.chkApp .sapMSegB,
+.chkApp .sapMSwt,
+.chkApp .sapMListTblRow .sapMListTblCell,
+.chkApp .sapMListTblHeaderCell,
+.chkApp .sapUiCompSmartTableToolbar,
+.chkApp .sapUiCompSmartTable,
+.chkApp .shellPopover,
+.chkApp .shellActionBtn .sapMBtnInner {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.chkApp .sapMBtn .sapMBtnInner,
+.chkApp .sapMSegBBtn .sapMSegBBtnInner,
+.chkApp .sapMListTblRow,
+.chkApp .searchResultsTable,
+.chkApp .searchFilterCardDense,
+.chkApp .detailSectionCard,
+.chkApp .appShellHeader {
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease !important;
+  transform: none !important;
+}
+
+html.chkAppRoot.theme-switching .chkApp *,
+html.chkAppRoot.theme-switching .sapMDialog,
+html.chkAppRoot.theme-switching .sapMPopover,
+html.chkAppRoot.theme-switching .sapMSelectList {
+  animation: none !important;
+}
+
+body.chkAppRoot.appInvertedBlockScheme .chkApp .appShellHeader,
+body.chkAppRoot.appInvertedBlockScheme .chkApp .searchFilterCardDense,
+body.chkAppRoot.appInvertedBlockScheme .chkApp .searchResultsTable,
+body.chkAppRoot.appInvertedBlockScheme .chkApp .detailSectionCard,
+body.chkAppRoot.appInvertedBlockScheme .chkApp .searchAnalyticsCard,
+body.chkAppRoot.appInvertedBlockScheme .chkApp .workflowStageCard,
+body.chkAppRoot.appInvertedBlockScheme .chkApp .kpiCard {
+  border-color: rgba(125, 154, 202, 0.34) !important;
+}
+
+/* Functional runtime patches */
+.chkApp .searchWorkbenchDock {
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+}
+
+.chkApp .searchFilterCardDense {
+  position: sticky !important;
+  top: var(--search-sticky-filter-top, var(--app-shell-offset)) !important;
+  z-index: 14 !important;
+}
+
+.chkApp .searchResultsActionRail {
+  position: sticky !important;
+  top: var(--search-sticky-action-top, calc(var(--app-shell-offset) + 9rem)) !important;
+  z-index: 13 !important;
+}
+
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  position: sticky !important;
+  top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 12rem)) !important;
+  z-index: 12 !important;
+}
+
+@media (max-width: 64rem) {
+  .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+    position: static !important;
+    top: auto !important;
+  }
+}
