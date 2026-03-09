@@ -128,7 +128,7 @@ sap.ui.define([
                 CreateSentinel: CreateSentinel,
                 Device: Device,
                 InteractionFX: InteractionFX,
-                ThemeService: ThemeRuntime
+                ThemeRuntime: ThemeRuntime
             });
         },
         _startCoreManagers: function () {

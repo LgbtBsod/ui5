@@ -1,227 +1,37 @@
 sap.ui.define([
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/service/domain/analytics/AnalyticsFacade",
-    "checklist/app/service/domain/analytics/AnalyticsPayloadNormalizer",
+    "checklist/app/controller/support/AnalyticsBuilderSupport",
     "checklist/app/service/framework/NavigationIntentService",
-    "checklist/app/service/framework/ControllerCtxRuntime",
+    "checklist/app/service/framework/CtxFactory",
     "checklist/app/service/framework/FacadeCommandRuntime",
     "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/SchedulingRuntime"
-], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsPayloadNormalizer, NavigationIntentService, ControllerCtxRuntime, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime) {
+], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderSupport, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime) {
     "use strict";
 
     var getText = ControllerTextRuntime.getText;
     var REFRESH_STATE_TASK_KEY = "ANALYTICS_REFRESH";
     var REFRESH_POLL_DELAY_MS = 1800;
     var REFRESH_POLL_MAX_ATTEMPTS = 12;
-    var BUILDER_DIMENSION_RULES = {
-        MONTH: {
-            vizType: "column",
-            metricKeys: ["TOTAL", "FAILED_CHECKS", "FAILED_BARRIERS", "FAILED_CHECKLISTS", "FAILED_BARRIER_CHECKLISTS"],
-            chartKeyByMetric: {
-                TOTAL: "monthlyTotal",
-                FAILED_CHECKS: "monthlyFailedChecks",
-                FAILED_BARRIERS: "monthlyFailedBarriers",
-                FAILED_CHECKLISTS: "monthlyFailedChecklists",
-                FAILED_BARRIER_CHECKLISTS: "monthlyFailedBarrierChecklists"
-            }
-        },
-        SOURCE: {
-            vizType: "bar",
-            metricKeys: ["TOTAL", "FAILED_CHECKS", "FAILED_BARRIERS"],
-            chartKeyByMetric: {
-                TOTAL: "totalBySource",
-                FAILED_CHECKS: "failedChecksBySource",
-                FAILED_BARRIERS: "failedBarriersBySource"
-            }
-        },
-        PROFESSION: {
-            vizType: "bar",
-            metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"],
-            chartKeyByMetric: {
-                FAILED_CHECKS: "failedChecksByProfession",
-                FAILED_BARRIERS: "failedBarriersByProfession"
-            }
-        },
-        LPC: {
-            vizType: "bar",
-            metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"],
-            chartKeyByMetric: {
-                FAILED_CHECKS: "failedChecksByLpc",
-                FAILED_BARRIERS: "failedBarriersByLpc"
-            }
-        },
-        LOCATION: {
-            vizType: "bar",
-            metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"],
-            chartKeyByMetric: {
-                FAILED_CHECKS: "failedChecksByLocation",
-                FAILED_BARRIERS: "failedBarriersByLocation"
-            }
-        },
-        BUKRS: {
-            vizType: "bar",
-            metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"],
-            chartKeyByMetric: {
-                FAILED_CHECKS: "failedChecksByBukrs",
-                FAILED_BARRIERS: "failedBarriersByBukrs"
-            }
-        },
-        ORGUNIT: {
-            vizType: "bar",
-            metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"],
-            chartKeyByMetric: {
-                FAILED_CHECKS: "failedChecksByOrgunit",
-                FAILED_BARRIERS: "failedBarriersByOrgunit"
-            }
-        },
-        BARRIER_NUMBER: {
-            vizType: "bar",
-            metricKeys: ["TOTAL", "FAILED_BARRIERS"],
-            chartKeyByMetric: {
-                TOTAL: "totalBarriersByBarrierNumber",
-                FAILED_BARRIERS: "failedBarriersByBarrierNumber"
-            }
-        }
-    };
-    var BUILDER_DIMENSION_TEXT_KEY_MAP = {
-        MONTH: "analyticsDimensionMonth",
-        SOURCE: "analyticsDimensionSource",
-        PROFESSION: "analyticsDimensionProfession",
-        LPC: "analyticsDimensionLpc",
-        LOCATION: "analyticsDimensionLocation",
-        BUKRS: "analyticsDimensionBukrs",
-        ORGUNIT: "analyticsDimensionOrgunit",
-        BARRIER_NUMBER: "analyticsDimensionBarrierNumber"
-    };
-    var BUILDER_METRIC_TEXT_KEY_MAP = {
-        TOTAL: "analyticsMetricTotal",
-        FAILED_CHECKS: "analyticsMetricFailedChecks",
-        FAILED_BARRIERS: "analyticsMetricFailedBarriers",
-        FAILED_CHECKLISTS: "analyticsMetricFailedChecklistCount",
-        FAILED_BARRIER_CHECKLISTS: "analyticsMetricFailedBarrierChecklistCount"
-    };
 
     function isRefreshQueued(oRefreshState) {
         var sStatus = String(oRefreshState && oRefreshState.status || "").trim().toUpperCase();
         return !!(oRefreshState && oRefreshState.isRunning) || sStatus === "REQUESTED" || sStatus === "RUNNING";
     }
 
-    function getSelectedKeyFromEvent(oEvent) {
-        return String(
-            oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem") && oEvent.getParameter("selectedItem").getKey() ||
-            oEvent && oEvent.getParameter && oEvent.getParameter("selectedKey") ||
-            oEvent && oEvent.getSource && oEvent.getSource().getSelectedKey && oEvent.getSource().getSelectedKey() ||
-            ""
-        ).trim().toUpperCase();
-    }
-
-    function normalizeBuilderDimension(sDimension) {
-        var sResolved = String(sDimension || "").trim().toUpperCase();
-        return BUILDER_DIMENSION_RULES[sResolved] ? sResolved : "MONTH";
-    }
-
-    function buildBuilderDimensionOptions(oController, sSource) {
-        var sResolvedSource = String(sSource || "ALL").trim().toUpperCase();
-        var aDimensionKeys = ["MONTH", "SOURCE", "PROFESSION", "LPC", "BARRIER_NUMBER"];
-        if (sResolvedSource !== "INTEGRATION") {
-            aDimensionKeys = aDimensionKeys.concat(["LOCATION", "BUKRS", "ORGUNIT"]);
-        }
-        return aDimensionKeys.map(function (sDimensionKey) {
-            return {
-                key: sDimensionKey,
-                text: getText(oController, BUILDER_DIMENSION_TEXT_KEY_MAP[sDimensionKey], null, sDimensionKey)
-            };
-        });
-    }
-
-    function normalizeBuilderDimensionForSource(sDimension, sSource) {
-        var sResolvedDimension = normalizeBuilderDimension(sDimension);
-        var sResolvedSource = String(sSource || "ALL").trim().toUpperCase();
-        if (sResolvedSource === "INTEGRATION" && ["LOCATION", "BUKRS", "ORGUNIT"].indexOf(sResolvedDimension) >= 0) {
-            return "MONTH";
-        }
-        return sResolvedDimension;
-    }
-
-    function normalizeBuilderMetric(sDimension, sMetric) {
-        var sResolvedDimension = normalizeBuilderDimension(sDimension);
-        var oRule = BUILDER_DIMENSION_RULES[sResolvedDimension];
-        var sResolvedMetric = String(sMetric || "").trim().toUpperCase();
-        if (oRule.metricKeys.indexOf(sResolvedMetric) >= 0) {
-            return sResolvedMetric;
-        }
-        return oRule.metricKeys[0];
-    }
-
-    function buildBuilderMetricOptions(oController, sDimension) {
-        var sResolvedDimension = normalizeBuilderDimension(sDimension);
-        return (BUILDER_DIMENSION_RULES[sResolvedDimension].metricKeys || []).map(function (sMetricKey) {
-            return {
-                key: sMetricKey,
-                text: getText(oController, BUILDER_METRIC_TEXT_KEY_MAP[sMetricKey], null, sMetricKey)
-            };
-        });
-    }
-
-    function resolveBuilderChartRows(oAnalytics, sDimension, sMetric) {
-        var sResolvedDimension = normalizeBuilderDimension(sDimension);
-        var sResolvedMetric = normalizeBuilderMetric(sResolvedDimension, sMetric);
-        var oRule = BUILDER_DIMENSION_RULES[sResolvedDimension];
-        var sChartKey = oRule && oRule.chartKeyByMetric && oRule.chartKeyByMetric[sResolvedMetric];
-        return sChartKey && oAnalytics && oAnalytics.charts && Array.isArray(oAnalytics.charts[sChartKey])
-            ? oAnalytics.charts[sChartKey]
-            : [];
-    }
-
-    function buildInitialViewState() {
-        var iCurrentYear = new Date().getFullYear();
-        return {
-            busy: false,
-            error: "",
-            refreshBusy: false,
-            selectedYear: String(iCurrentYear),
-            compareYear: String(iCurrentYear - 1),
-            compareYearValueState: "None",
-            compareYearValueStateText: "",
-            comparisonMetric: "FAILED_CHECKLISTS",
-            builderDimension: "MONTH",
-            builderMetric: "FAILED_CHECKLISTS",
-            builderDimensionOptions: [],
-            builderMetricOptions: [],
-            builderChartRows: [],
-            builderChartTitle: "",
-            builderVizType: "column",
-            builderChartHasData: false,
-            builderSourceHintText: "",
-            compareYearHasData: true,
-            compareYearHintText: "",
-            availableYears: [{ key: String(iCurrentYear), text: String(iCurrentYear) }],
-            selectedSource: "ALL",
-            refreshState: {
-                taskKey: REFRESH_STATE_TASK_KEY,
-                taskName: "Analytics Refresh",
-                status: "IDLE",
-                isRunning: false,
-                requestedAt: "",
-                requestedBy: "",
-                startedAt: "",
-                finishedAt: "",
-                lastSuccessAt: "",
-                lastError: "",
-                lastMessage: "",
-                activeRunId: ""
-            },
-            analytics: AnalyticsPayloadNormalizer.createEmptyDashboard()
-        };
+    function buildCtx(oController) {
+        return CtxFactory.buildCtx(oController, {});
     }
 
     return {
         onInit: function () {
             this._facade = new AnalyticsFacade();
-            ControllerViewStateRuntime.initModel(this, buildInitialViewState);
-            this._applyBuilderSelection();
+            ControllerViewStateRuntime.initModel(this, function () {
+                return AnalyticsBuilderSupport.createInitialViewState(REFRESH_STATE_TASK_KEY);
+            });
+            AnalyticsBuilderSupport.applyBuilderSelection(this);
             ControllerRouteRuntime.attachMatched(this, [
                 { name: "analytics", handler: this._onAnalyticsMatched }
             ]);
@@ -233,71 +43,15 @@ sap.ui.define([
         },
 
         _applyComparisonMetricSelection: function () {
-            var sMetric = String(ControllerViewStateRuntime.get(this, "/comparisonMetric", "FAILED_CHECKLISTS") || "FAILED_CHECKLISTS").trim().toUpperCase();
-            var oAnalytics = ControllerViewStateRuntime.get(this, "/analytics", {}) || {};
-            var mSeries = oAnalytics.comparisonMetricSeries || {};
-            var aRows = Array.isArray(mSeries[sMetric]) ? mSeries[sMetric] : [];
-            ControllerViewStateRuntime.set(this, "/analytics/comparisonChartRows", aRows);
-            ControllerViewStateRuntime.set(this, "/comparisonMetric", sMetric);
+            AnalyticsBuilderSupport.applyComparisonMetricSelection(this);
         },
 
         _applyBuilderSelection: function (mOverrides) {
-            var oAnalytics = ControllerViewStateRuntime.get(this, "/analytics", {}) || {};
-            var sSelectedSource = String(ControllerViewStateRuntime.get(this, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
-            var sDimension = normalizeBuilderDimensionForSource(
-                (mOverrides && mOverrides.dimension) || ControllerViewStateRuntime.get(this, "/builderDimension", "MONTH"),
-                sSelectedSource
-            );
-            var sMetric = normalizeBuilderMetric(sDimension, (mOverrides && mOverrides.metric) || ControllerViewStateRuntime.get(this, "/builderMetric", "FAILED_CHECKLISTS"));
-            var aMetricOptions = buildBuilderMetricOptions(this, sDimension);
-            var aDimensionOptions = buildBuilderDimensionOptions(this, sSelectedSource);
-            var aRows = resolveBuilderChartRows(oAnalytics, sDimension, sMetric);
-            var sMetricText = getText(this, BUILDER_METRIC_TEXT_KEY_MAP[sMetric], null, sMetric);
-            var sDimensionText = getText(this, BUILDER_DIMENSION_TEXT_KEY_MAP[sDimension], null, sDimension);
-
-            ControllerViewStateRuntime.setMany(this, {
-                "/builderDimension": sDimension,
-                "/builderMetric": sMetric,
-                "/builderDimensionOptions": aDimensionOptions,
-                "/builderMetricOptions": aMetricOptions,
-                "/builderChartRows": aRows,
-                "/builderChartTitle": getText(this, "analyticsBuilderTitlePattern", [sMetricText, sDimensionText], sMetricText + " by " + sDimensionText),
-                "/builderVizType": BUILDER_DIMENSION_RULES[sDimension].vizType,
-                "/builderChartHasData": Array.isArray(aRows) && aRows.length > 0
-            });
+            AnalyticsBuilderSupport.applyBuilderSelection(this, mOverrides || {});
         },
 
         _syncAnalyticsContextHints: function () {
-            var oAnalytics = ControllerViewStateRuntime.get(this, "/analytics", {}) || {};
-            var sSelectedSource = String(ControllerViewStateRuntime.get(this, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
-            var sBuilderDimension = String(ControllerViewStateRuntime.get(this, "/builderDimension", "MONTH") || "MONTH").trim().toUpperCase();
-            var iSelectedYear = Number(oAnalytics.selectedYear || 0);
-            var iCompareYear = Number(ControllerViewStateRuntime.get(this, "/compareYear", 0) || 0);
-            var bCompareYearHasData = iSelectedYear === iCompareYear || !!oAnalytics.compareYearHasData;
-            var sCompareYearHintText = bCompareYearHasData
-                ? ""
-                : getText(this, "analyticsCompareYearNoData", [String(iCompareYear || "")], "No aggregated data for compare year " + String(iCompareYear || ""));
-            var sBuilderSourceHintText = "";
-            if (sSelectedSource === "INTEGRATION") {
-                sBuilderSourceHintText = getText(
-                    this,
-                    "analyticsIntegrationDimensionsNote",
-                    [],
-                    "Integration data can be analysed by month, LPC, profession, source and barrier number until enrichment fills BUKRS, location and observer org unit."
-                );
-            } else if (sSelectedSource === "ALL" && ["LOCATION", "BUKRS", "ORGUNIT"].indexOf(sBuilderDimension) >= 0) {
-                sBuilderSourceHintText = getText(
-                    this,
-                    "analyticsWebEnrichedDimensionsNote",
-                    [],
-                    "Web-enriched dimensions exclude incomplete integration records until enrichment fills BUKRS, location and observer org unit."
-                );
-            }
-            ControllerViewStateRuntime.setMany(this, {
-                "/compareYearHasData": bCompareYearHasData,
-                "/compareYearHintText": sCompareYearHintText,
-                "/builderSourceHintText": sBuilderSourceHintText
-            });
+            AnalyticsBuilderSupport.syncAnalyticsContextHints(this);
         },
 
         _setCompareYearValidation: function (sState, sText) {
@@ -325,7 +79,7 @@ sap.ui.define([
                     compareYear: Number(sCompareYear) || 0,
                     selectedSource: sSelectedSource
                 },
-                ControllerCtxRuntime.buildDefault(this)
+                buildCtx(this)
             ).then(function (oResult) {
                 var oAnalytics = ControllerViewStateRuntime.get(this, "/analytics", {}) || {};
                 if (Array.isArray(oAnalytics.availableYears) && oAnalytics.availableYears.length) {
@@ -352,7 +106,7 @@ sap.ui.define([
         },
 
         _pollRefreshStateUntilSettled: function (iAttemptsLeft) {
-            var oCtx = ControllerCtxRuntime.buildDefault(this);
+            var oCtx = buildCtx(this);
             var iRemaining = Number(iAttemptsLeft);
             return Promise.resolve(oCtx && oCtx.analytics && oCtx.analytics.fetchRefreshState ? oCtx.analytics.fetchRefreshState() : null).then(function (oState) {
                 var oRefreshState = oState || {};
@@ -373,7 +127,7 @@ sap.ui.define([
         },
 
         onRefreshAnalytics: function () {
-            var oCtx = ControllerCtxRuntime.buildDefault(this);
+            var oCtx = buildCtx(this);
             var oRefreshState = ControllerViewStateRuntime.get(this, "/refreshState", {}) || {};
             if (isRefreshQueued(oRefreshState)) {
                 ControllerViewStateRuntime.set(this, "/refreshBusy", true);
@@ -470,7 +224,7 @@ sap.ui.define([
         },
 
         onSelectAnalyticsMetric: function (oEvent) {
-            var sMetric = getSelectedKeyFromEvent(oEvent);
+            var sMetric = AnalyticsBuilderSupport.getSelectedKeyFromEvent(oEvent);
             if (!sMetric) {
                 return;
             }
@@ -479,7 +233,7 @@ sap.ui.define([
         },
 
         onSelectAnalyticsBuilderDimension: function (oEvent) {
-            var sDimension = getSelectedKeyFromEvent(oEvent);
+            var sDimension = AnalyticsBuilderSupport.getSelectedKeyFromEvent(oEvent);
             if (!sDimension) {
                 return;
             }
@@ -487,7 +241,7 @@ sap.ui.define([
         },
 
         onSelectAnalyticsBuilderMetric: function (oEvent) {
-            var sMetric = getSelectedKeyFromEvent(oEvent);
+            var sMetric = AnalyticsBuilderSupport.getSelectedKeyFromEvent(oEvent);
             if (!sMetric) {
                 return;
             }

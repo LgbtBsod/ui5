@@ -2,26 +2,26 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "checklist/app/infra/navigation/RouteModeCoordinator",
     "checklist/app/util/DebugLogger",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/util/TimeConfigService",
     "checklist/app/util/runtime/TimerDefaults",
     "checklist/app/service/framework/SchedulingRuntime"
-], function (JSONModel, RouteModeCoordinator, DebugLogger, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime) {
+], function (JSONModel, RouteModeCoordinator, DebugLogger, ControllerModelRuntime, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime) {
     "use strict";
 
     function resolveStateModel(oController) {
-        return oController.getModel("state") ||
-            (oController.getOwnerComponent && oController.getOwnerComponent() && oController.getOwnerComponent().getModel("state"));
+        return ControllerModelRuntime.state(oController);
     }
 
     function ensureControllerStateModel(oController, oStateModel) {
-        if (oStateModel && !oController.getModel("state")) {
-            oController.getView().setModel(oStateModel, "state");
+        if (oStateModel && !ControllerModelRuntime.state(oController)) {
+            ControllerModelRuntime.view(oController).setModel(oStateModel, "state");
         }
     }
 
     function syncThemeState(oController, sSource, oThemeResult) {
-        var oAppView = oController.getView().getModel("appView");
+        var oAppView = ControllerModelRuntime.appView(oController);
         var sStoredTheme = oController.getCurrentTheme();
         var bIsDark = !!(oThemeResult && oThemeResult.isDark);
         var bAnimationEnabled = !oThemeResult || oThemeResult.animationEnabled !== false;

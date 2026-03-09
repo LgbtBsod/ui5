@@ -5,16 +5,17 @@ sap.ui.define([
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/controller/support/SearchCommandPolicy",
-    "checklist/app/controller/support/SearchSelectionSupport",
-    "checklist/app/controller/support/SearchLoadRuntimeSupport",
+    "checklist/app/controller/support/SearchSelectionRuntime",
+    "checklist/app/controller/support/SearchLoadRuntime",
     "checklist/app/controller/support/SearchRateProgress",
-    "checklist/app/controller/support/SearchViewSupport",
+    "checklist/app/controller/support/SearchViewRuntime",
     "checklist/app/controller/support/SearchRuntimeDockFix",
     "checklist/app/service/framework/SchedulingRuntime",
+    "checklist/app/service/framework/UiDecisionCoordinator",
     "checklist/app/util/search/SearchMaxResults",
-    "checklist/app/controller/support/SearchViewStateSupport",
+    "checklist/app/controller/support/SearchViewStateRuntime",
     "sap/ui/core/Item"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionSupport, SearchLoadRuntimeSupport, SearchRateProgress, SearchViewSupport, SearchRuntimeDockFix, SchedulingRuntime, SearchMaxResults, SearchViewStateSupport, Item) {
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SearchRuntimeDockFix, SchedulingRuntime, UiDecisionCoordinator, SearchMaxResults, SearchViewStateRuntime, Item) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -41,25 +42,25 @@ sap.ui.define([
             this._aLocationSuggestCache = [];
             this._sLocationSuggestNeedle = "";
             this._searchRateProgress = SearchRateProgress;
-            this._sSearchUiSessionKey = SearchViewStateSupport.resolveSearchUiSessionKey();
-            this.setModel(SearchViewStateSupport.createViewModel(this._sSearchUiSessionKey), "view");
+            this._sSearchUiSessionKey = SearchViewStateRuntime.resolveSearchUiSessionKey();
+            this.setModel(SearchViewStateRuntime.createViewModel(this._sSearchUiSessionKey), "view");
             ControllerRouteRuntime.attachMatched(this, [
                 { name: "search", handler: this._onSearchMatched },
                 { name: "detail", handler: this._onDetailSearchContextMatched },
                 { name: "detailLayout", handler: this._onDetailSearchContextMatched }
             ]);
-            SearchViewSupport.bindAnalyticsRefreshTimer(this);
-            SearchViewSupport.syncSmartControlAvailability(this);
-            SearchViewSupport.bindPowerUserShortcuts(this);
-            SearchViewSupport.bindSearchViewportRuntime(this);
+            SearchViewRuntime.bindAnalyticsRefreshTimer(this);
+            SearchViewRuntime.syncSmartControlAvailability(this);
+            SearchViewRuntime.bindPowerUserShortcuts(this);
+            SearchViewRuntime.bindSearchViewportRuntime(this);
             SearchRuntimeDockFix.bind(this);
         },
 
         onExit: function () {
             ControllerRouteRuntime.detachAllMatched(this);
-            SearchViewSupport.unbindPowerUserShortcuts(this);
-            SearchViewSupport.unbindSearchViewportRuntime(this);
-            SearchViewSupport.clearAnalyticsRefreshTimer(this);
+            SearchViewRuntime.unbindPowerUserShortcuts(this);
+            SearchViewRuntime.unbindSearchViewportRuntime(this);
+            SearchViewRuntime.clearAnalyticsRefreshTimer(this);
             this._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(this._iAnalyticsRailPulseTimer);
             this._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(this._iSearchWorkingHintTimer);
             this._iInitialAnalyticsTimer = SchedulingRuntime.clearTimer(this._iInitialAnalyticsTimer);
@@ -94,7 +95,7 @@ sap.ui.define([
         },
 
         _syncSmartControlAvailability: function () {
-            SearchViewSupport.syncSmartControlAvailability(this);
+            SearchViewRuntime.syncSmartControlAvailability(this);
         },
 
         _tryInitialSmartRebind: function () {
@@ -102,7 +103,7 @@ sap.ui.define([
         },
 
         _onSearchMatched: function () {
-            SearchViewSupport.onSearchMatched(this);
+            SearchViewRuntime.onSearchMatched(this);
             SearchRuntimeDockFix.sync(this, true);
         },
 
@@ -112,7 +113,7 @@ sap.ui.define([
             if (sLayout === "MidColumnFullScreen") {
                 return;
             }
-            SearchViewSupport.onSearchMatched(this);
+            SearchViewRuntime.onSearchMatched(this);
             SearchRuntimeDockFix.sync(this, true);
         },
 
@@ -220,43 +221,43 @@ sap.ui.define([
         },
 
         onSmartTableInitialise: function () {
-            SearchViewSupport.onSmartTableInitialise(this);
+            SearchViewRuntime.onSmartTableInitialise(this);
             SearchRuntimeDockFix.bind(this);
         },
 
         onBeforeSmartTableRebind: function (oEvent) {
             this._syncToolbarRequestInputs();
-            SearchViewSupport.onBeforeSmartTableRebind(this, oEvent);
+            SearchViewRuntime.onBeforeSmartTableRebind(this, oEvent);
             SearchRuntimeDockFix.sync(this, false);
         },
 
         onSmartSearch: function () {
-            if (!SearchViewStateSupport.isSmartControlsReady(this)) {
+            if (!SearchViewStateRuntime.isSmartControlsReady(this)) {
                 return Promise.resolve();
             }
             this._syncToolbarRequestInputs();
-            SearchLoadRuntimeSupport.markLoading(this);
-            SearchViewSupport.beginSearchLoadingFeedback(this);
+            SearchLoadRuntime.markLoading(this);
+            SearchViewRuntime.beginSearchLoadingFeedback(this);
             return this._withActionBusy("/searchActionBusy", function () {
                 return SearchCommandPolicy.executeSearch(this, { source: "smartSearch" });
             }.bind(this), function (bBusy) {
-                SearchViewSupport.setSearchActionBusy(this, bBusy);
+                SearchViewRuntime.setSearchActionBusy(this, bBusy);
             }.bind(this));
         },
 
         onRetrySearchLoad: function () {
-            SearchLoadRuntimeSupport.markLoading(this);
-            SearchViewSupport.beginSearchLoadingFeedback(this);
+            SearchLoadRuntime.markLoading(this);
+            SearchViewRuntime.beginSearchLoadingFeedback(this);
             return SearchCommandPolicy.rebind(this, { source: "searchRetry" }).finally(function () {
-                SearchLoadRuntimeSupport.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
+                SearchLoadRuntime.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
             }.bind(this)).catch(function (oError) {
-                SearchLoadRuntimeSupport.applyLoadError(this, String((oError && oError.message) || "Search request failed"));
+                SearchLoadRuntime.applyLoadError(this, String((oError && oError.message) || "Search request failed"));
                 return Promise.reject(oError);
             });
         },
 
         onCreate: function () {
-            SearchViewSupport.captureSearchScrollPosition(this);
+            SearchViewRuntime.captureSearchScrollPosition(this);
             return this._withActionBusy("/createActionBusy", function () {
                 return SearchCommandPolicy.selectRow(this, { intent: "create" });
             }.bind(this));
@@ -265,52 +266,61 @@ sap.ui.define([
         onOpenSelected: function () {
             var iSelectionCount = Number(ControllerViewStateRuntime.get(this, "/selectionCount", 0));
             var sSelectedRowId = String(ControllerViewStateRuntime.get(this, "/selectedRowId", "") || "").trim();
-            if (!sSelectedRowId) {
-                this.showI18nError("nothingToOpen");
-                SearchViewSupport.focusSearchResults(this);
-                return Promise.resolve(false);
-            }
-            if (iSelectionCount > 1) {
-                this.showI18nToast("searchOpenUsesFirstHint", [iSelectionCount]);
-            }
-            SearchViewSupport.captureSearchScrollPosition(this);
-            return SearchCommandPolicy.selectRow(this, { intent: "open", rootId: sSelectedRowId, source: "toolbarOpenSelected" });
+            return UiDecisionCoordinator.guardOpenSelected({
+                controller: this,
+                selectionCount: iSelectionCount,
+                selectedRowId: sSelectedRowId,
+                onMissingSelection: function () {
+                    SearchViewRuntime.focusSearchResults(this);
+                }.bind(this)
+            }).then(function (bAllowed) {
+                if (!bAllowed) {
+                    return false;
+                }
+                SearchViewRuntime.captureSearchScrollPosition(this);
+                return SearchCommandPolicy.selectRow(this, { intent: "open", rootId: sSelectedRowId, source: "toolbarOpenSelected" });
+            }.bind(this));
         },
 
         onCopy: function () {
             var iSelectionCount = Number(ControllerViewStateRuntime.get(this, "/selectionCount", 0));
-            if (iSelectionCount > 1) {
-                this.showI18nError("searchCopySingleSelectionHint");
-                SearchViewSupport.focusSearchToolbar(this);
-                return Promise.resolve(false);
-            }
-            SearchViewSupport.captureSearchScrollPosition(this);
-            return SearchCommandPolicy.selectRow(this, { intent: "copy" });
+            return UiDecisionCoordinator.guardCopySelection({
+                controller: this,
+                selectionCount: iSelectionCount,
+                onBlockedSelection: function () {
+                    SearchViewRuntime.focusSearchToolbar(this);
+                }.bind(this)
+            }).then(function (bAllowed) {
+                if (!bAllowed) {
+                    return false;
+                }
+                SearchViewRuntime.captureSearchScrollPosition(this);
+                return SearchCommandPolicy.selectRow(this, { intent: "copy" });
+            }.bind(this));
         },
 
         onSelectVisibleRows: function () {
-            return SearchViewSupport.selectVisibleRows(this).then(function (mResult) {
+            return SearchViewRuntime.selectVisibleRows(this).then(function (mResult) {
                 if (!mResult || !mResult.count) {
-                    this.showI18nError("searchSelectVisibleEmpty");
-                    return false;
+                    return UiDecisionCoordinator.notifySelectVisibleEmpty({ controller: this });
                 }
                 return true;
             }.bind(this));
         },
 
         onClearSelection: function () {
-            return SearchViewSupport.clearSelection(this).then(function () {
-                SearchViewSupport.focusSearchResults(this);
+            return SearchViewRuntime.clearSelection(this).then(function () {
+                SearchViewRuntime.focusSearchResults(this);
                 return true;
             }.bind(this));
         },
 
         onScrollSearchAnchor: function () {
-            return SearchViewSupport.scrollToSearchFilters(this);
+            return SearchViewRuntime.scrollToSearchFilters(this);
         },
 
         onScrollSearchResultsToolbarAnchor: function () {
-            return SearchViewSupport.scrollToSearchResultsToolbar(this);
+            return SearchViewRuntime.scrollToSearchResultsToolbar(this);
         },
 
         onMaxRowsChange: function (oEvent) {
@@ -321,7 +331,7 @@ sap.ui.define([
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
-            SearchViewStateSupport.syncSearchTableRequestWindow(this);
+            SearchViewStateRuntime.syncSearchTableRequestWindow(this);
         },
 
         onBackendTopChange: function (oEvent) {
@@ -339,7 +349,7 @@ sap.ui.define([
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
-            SearchViewStateSupport.syncSearchTableRequestWindow(this);
+            SearchViewStateRuntime.syncSearchTableRequestWindow(this);
             if (ControllerViewStateRuntime.get(this, "/hasSearched") &&
                 ControllerViewStateRuntime.get(this, "/smartTableReady")) {
                 SearchCommandPolicy.rebind(this, { source: "backendTopChange" });
@@ -361,7 +371,7 @@ sap.ui.define([
             if (oMaxRowsInput && typeof oMaxRowsInput.setValue === "function") {
                 oMaxRowsInput.setValue(sMaxRows);
             }
-            SearchViewStateSupport.syncSearchTableRequestWindow(this);
+            SearchViewStateRuntime.syncSearchTableRequestWindow(this);
         },
 
         onSearchModeToggle: function (oEvent) {
@@ -371,21 +381,21 @@ sap.ui.define([
         },
 
         onOpenWorkflowAnalytics: function (oEvent) {
-            return SearchViewSupport.openWorkflowAnalytics(this);
+            return SearchViewRuntime.openWorkflowAnalytics(this);
         },
 
         formatWorkflowStageText: function (sStage) {
-            return SearchViewStateSupport.formatWorkflowStageText(this.getResourceBundle && this.getResourceBundle(), sStage);
+            return SearchViewStateRuntime.formatWorkflowStageText(this.getResourceBundle && this.getResourceBundle(), sStage);
         },
 
         formatWorkflowStageState: function (sStage) {
-            return SearchViewStateSupport.formatWorkflowStageState(sStage);
+            return SearchViewStateRuntime.formatWorkflowStageState(sStage);
         },
 
         onSearchTableSelectionChange: function (oEvent) {
             var oSmartTable = this.byId("searchSmartTable");
             var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
-            var aSelectedRowIds = SearchSelectionSupport.extractSelectedRowIds(oEvent, oInnerTable);
+            var aSelectedRowIds = SearchSelectionRuntime.extractSelectedRowIds(oEvent, oInnerTable);
             var sSelectedRowId = aSelectedRowIds[0] || "";
             SearchCommandPolicy.selectionChanged(this, {
                 event: oEvent,
@@ -396,11 +406,11 @@ sap.ui.define([
         },
 
         onSearchTableItemPress: function (oEvent) {
-            var sSelectedRowId = SearchSelectionSupport.extractSelectedRowId(oEvent);
+            var sSelectedRowId = SearchSelectionRuntime.extractSelectedRowId(oEvent);
             if (!sSelectedRowId) {
                 return;
             }
-            SearchViewSupport.captureSearchScrollPosition(this);
+            SearchViewRuntime.captureSearchScrollPosition(this);
             SearchCommandPolicy.selectionChanged(this, {
                 selectedRowId: sSelectedRowId,
                 selectedRowIds: [sSelectedRowId],
@@ -422,12 +432,12 @@ sap.ui.define([
         },
 
         onExportMenuDefault: function () {
-            return SearchViewSupport.runExport(this, "screen");
+            return SearchViewRuntime.runExport(this, "screen");
         },
 
         onExportMenuAction: function (oEvent) {
             var oItem = oEvent.getParameter("item");
-            return SearchViewSupport.runExport(this, oItem && oItem.data("entity") || "screen");
+            return SearchViewRuntime.runExport(this, oItem && oItem.data("entity") || "screen");
         }
     };
 });

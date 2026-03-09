@@ -1,12 +1,12 @@
-sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeService) {
+sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeRuntime) {
     "use strict";
 
-    var DEFAULT_MODE = ThemeService.DEFAULT_MODE;
-    var DEFAULT_ANIMATION_ENABLED = ThemeService.DEFAULT_ANIMATION_ENABLED;
-    var DEFAULT_BACKGROUND_INTERACTIVE = ThemeService.DEFAULT_BACKGROUND_INTERACTIVE;
+    var DEFAULT_MODE = ThemeRuntime.DEFAULT_MODE;
+    var DEFAULT_ANIMATION_ENABLED = ThemeRuntime.DEFAULT_ANIMATION_ENABLED;
+    var DEFAULT_BACKGROUND_INTERACTIVE = ThemeRuntime.DEFAULT_BACKGROUND_INTERACTIVE;
 
     function readThemeProfile() {
-        var oProfile = ThemeService.getThemeProfile ? ThemeService.getThemeProfile() : null;
+        var oProfile = ThemeRuntime.getThemeProfile ? ThemeRuntime.getThemeProfile() : null;
         return {
             mode: (oProfile && oProfile.mode) || DEFAULT_MODE,
             animationEnabled: oProfile && typeof oProfile.animationEnabled === "boolean" ? oProfile.animationEnabled : DEFAULT_ANIMATION_ENABLED,
@@ -17,7 +17,7 @@ sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeS
     return {
         getCurrentTheme: function () {
             var oProfile = readThemeProfile();
-            return ThemeService.themeForMode(oProfile.mode);
+            return ThemeRuntime.themeForMode(oProfile.mode);
         },
         getCurrentThemeMode: function () {
             return readThemeProfile().mode;
@@ -30,22 +30,22 @@ sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeS
             return !!readThemeProfile().backgroundInteractive;
         },
         setThemeAnimationEnabled: function (bEnabled) {
-            var oProfile = ThemeService.setThemeAnimationEnabled
-                ? ThemeService.setThemeAnimationEnabled(!!bEnabled)
+            var oProfile = ThemeRuntime.setThemeAnimationEnabled
+                ? ThemeRuntime.setThemeAnimationEnabled(!!bEnabled)
                 : { mode: this.getCurrentThemeMode(), animationEnabled: !!bEnabled };
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(oProfile.mode, null, {
+            return ThemeRuntime.applyThemeMode(oProfile.mode, null, {
                 animationEnabled: oProfile.animationEnabled,
                 backgroundInteractive: oProfile.backgroundInteractive,
                 persist: false
             });
         },
         setThemeBackgroundInteractive: function (bEnabled) {
-            var oProfile = ThemeService.setThemeBackgroundInteractive
-                ? ThemeService.setThemeBackgroundInteractive(!!bEnabled)
+            var oProfile = ThemeRuntime.setThemeBackgroundInteractive
+                ? ThemeRuntime.setThemeBackgroundInteractive(!!bEnabled)
                 : { mode: this.getCurrentThemeMode(), animationEnabled: this.isThemeAnimationEnabled(), backgroundInteractive: !!bEnabled };
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(oProfile.mode, null, {
+            return ThemeRuntime.applyThemeMode(oProfile.mode, null, {
                 animationEnabled: oProfile.animationEnabled,
                 backgroundInteractive: oProfile.backgroundInteractive,
                 persist: false
@@ -55,7 +55,7 @@ sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeS
             var oProfile = readThemeProfile();
             var sTarget = String(sMode || DEFAULT_MODE).toLowerCase() === "night" ? "night" : "morning";
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(sTarget, oClickXY || null, {
+            return ThemeRuntime.applyThemeMode(sTarget, oClickXY || null, {
                 animationEnabled: oProfile.animationEnabled,
                 backgroundInteractive: oProfile.backgroundInteractive
             });
@@ -63,7 +63,7 @@ sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeS
         applyStoredTheme: function () {
             var oProfile = readThemeProfile();
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(oProfile.mode, null, {
+            return ThemeRuntime.applyThemeMode(oProfile.mode, null, {
                 animationEnabled: oProfile.animationEnabled,
                 backgroundInteractive: oProfile.backgroundInteractive
             });
@@ -72,7 +72,7 @@ sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeS
             var oProfile = readThemeProfile();
             var sNextMode = this.isDarkThemeEnabled() ? "morning" : "night";
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(sNextMode, oClickXY, {
+            return ThemeRuntime.applyThemeMode(sNextMode, oClickXY, {
                 animationEnabled: oProfile.animationEnabled,
                 backgroundInteractive: oProfile.backgroundInteractive
             });
@@ -80,14 +80,14 @@ sap.ui.define(["checklist/app/service/framework/ThemeRuntime"], function (ThemeS
         _ensureThemeSyncListener: function () {
             if (this._fnThemeChangedHandler) { return; }
             this._fnThemeChangedHandler = function () {
-                ThemeService.syncTokensFromUI5();
+                ThemeRuntime.syncTokensFromUI5();
             }.bind(this);
             sap.ui.getCore().attachThemeChanged(this._fnThemeChangedHandler);
         },
         _applyTheme: function (sTheme) {
             var oProfile = readThemeProfile();
             this._ensureThemeSyncListener();
-            return ThemeService.applyTheme(sTheme, null, {
+            return ThemeRuntime.applyTheme(sTheme, null, {
                 animationEnabled: oProfile.animationEnabled,
                 backgroundInteractive: oProfile.backgroundInteractive
             });

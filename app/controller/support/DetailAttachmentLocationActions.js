@@ -2,37 +2,98 @@ sap.ui.define([
     "checklist/app/controller/support/AttachmentUploadCore",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/controller/support/DetailPersonInputSupport",
-    "checklist/app/service/framework/AttachmentFlowService",
     "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
+    "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/service/framework/SchedulingRuntime"
-], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, AttachmentFlowService, ControllerViewStateRuntime, NavigationIntentService, SchedulingRuntime) {
+], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime) {
     "use strict";
+
+    function deleteAttachment(oController, oEvent) {
+        var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext("selected");
+        var oRow = oCtx && oCtx.getObject && oCtx.getObject();
+        var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
+        if (!sAttachmentId) {
+            return Promise.resolve(false);
+        }
+        return ModelStateRuntime.withFlag(oController, "view", "/attachmentBusy", function () {
+            return DetailCommandPolicy.attachmentDelete(oController, RootIdRuntime.withCurrentRootId(oController, {
+                attachmentId: sAttachmentId,
+                attachment: oRow || null
+            }));
+        });
+    }
+
+    function toggleAttachmentsSection(oController) {
+        var bExpanded = !!ModelStateRuntime.read(oController, "view", "/attachmentsExpanded", false);
+        var bLoaded = !!ModelStateRuntime.read(oController, "view", "/attachmentsLoaded", false);
+        if (bExpanded) {
+            ModelStateRuntime.write(oController, "view", "/attachmentsExpanded", false);
+            if (oController && typeof oController._unbindAttachmentDropZone === "function") {
+                oController._unbindAttachmentDropZone();
+            }
+            return Promise.resolve({ collapsed: true });
+        }
+        ModelStateRuntime.write(oController, "view", "/attachmentsExpanded", true);
+        if (oController && typeof oController._scheduleAttachmentDropZoneBind === "function") {
+            oController._scheduleAttachmentDropZoneBind();
+        }
+        if (bLoaded) {
+            return Promise.resolve({ expanded: true, loaded: true });
+        }
+        return ModelStateRuntime.withFlag(oController, "view", "/attachmentBusy", function () {
+            return DetailCommandPolicy.attachmentLoad(oController, RootIdRuntime.withCurrentRootId(oController));
+        });
+    }
+
+    function openAttachment(oController, oEvent) {
+        var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext("selected");
+        var oRow = oCtx && oCtx.getObject && oCtx.getObject();
+        var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
+        var sLocalObjectUrl = String((oRow && oRow.localObjectUrl) || "").trim();
+        var oMainService = oController && oController.getModel && oController.getModel("mainService");
+        var sBaseUrl = String((oMainService && oMainService.sServiceUrl) || "").replace(/\/+$/, "");
+        var sFileName = String((oRow && oRow.FileName) || "attachment").trim() || "attachment";
+        var oLink;
+        var sHref;
+
+        function triggerDownload(sUrl) {
+            if (!sUrl) {
+                return false;
+            }
+            oLink = document.createElement("a");
+            oLink.href = sUrl;
+            oLink.download = sFileName;
+            oLink.rel = "noopener";
+            oLink.style.display = "none";
+            document.body.appendChild(oLink);
+            oLink.click();
+            document.body.removeChild(oLink);
+            return true;
+        }
+
+        if (sLocalObjectUrl) {
+            return triggerDownload(sLocalObjectUrl);
+        }
+        if (!sAttachmentId || !sBaseUrl) {
+            return false;
+        }
+        sHref = sBaseUrl + "/AttachmentSet(Key='" + sAttachmentId + "')/$value";
+        return triggerDownload(sHref);
+    }
 
     return {
         onAttachmentUploadChange: function (oEvent) {
-            return AttachmentFlowService.onUploaderChange(this, oEvent, {
-                onUploaderChange: AttachmentUploadCore.onUploaderChange
-            });
+            return AttachmentUploadCore.onUploaderChange(this, oEvent);
         },
 
         onDeleteAttachment: function (oEvent) {
-            return AttachmentFlowService.deleteAttachment(this, oEvent);
+            return deleteAttachment(this, oEvent);
         },
 
         onToggleAttachmentsSection: function () {
-            return AttachmentFlowService.toggleHistory(this, {
-                bindDropZone: function (oController) {
-                    if (oController && typeof oController._scheduleAttachmentDropZoneBind === "function") {
-                        oController._scheduleAttachmentDropZoneBind();
-                    }
-                },
-                unbindDropZone: function (oController) {
-                    if (oController && typeof oController._unbindAttachmentDropZone === "function") {
-                        oController._unbindAttachmentDropZone();
-                    }
-                }
-            });
+            return toggleAttachmentsSection(this);
         },
         onOpenWorkflowAnalytics: function () {
             NavigationIntentService.navigateToAnalytics(this);
@@ -40,7 +101,7 @@ sap.ui.define([
         },
 
         onOpenAttachment: function (oEvent) {
-            return AttachmentFlowService.openAttachment(this, oEvent);
+            return openAttachment(this, oEvent);
         },
 
         onOpenLocationValueHelp: function (oEvent) {

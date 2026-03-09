@@ -5,11 +5,12 @@ sap.ui.define([
     "checklist/app/infra/adapters/Ui5StyleAdapter",
     "checklist/app/service/ui/StyleTokens",
     "checklist/app/service/framework/EffectTextResolver",
-    "checklist/app/service/framework/EffectModelOps",
     "checklist/app/service/framework/EffectBannerRouter",
     "checklist/app/service/framework/EffectActionRouting",
-    "checklist/app/service/framework/EffectDialogRuntime"
-], function (MessageToast, MessageBox, DebugLogger, Ui5StyleAdapter, StyleTokens, EffectTextResolver, EffectModelOps, EffectBannerRouter, EffectActionRouting, EffectDialogRuntime) {
+    "checklist/app/service/framework/EffectDialogRuntime",
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/util/CloneUtil"
+], function (MessageToast, MessageBox, DebugLogger, Ui5StyleAdapter, StyleTokens, EffectTextResolver, EffectBannerRouter, EffectActionRouting, EffectDialogRuntime, ModelStateRuntime, CloneUtil) {
     "use strict";
 
     var DIALOG_CLASS = "glassDialog";
@@ -127,11 +128,35 @@ sap.ui.define([
         }
     }
     function inlineValidation(oController, oEffect) {
-        return EffectModelOps.patch(oController, {
+        return patchModel(oController, {
             modelName: oEffect.modelName || "state",
             path: oEffect.path || "/ui/feedback/inlineErrors",
             value: oEffect.value || {}
         });
+    }
+    function getModel(oController, sModelName) {
+        if (!oController || !oController.getModel) { return null; }
+        return oController.getModel(sModelName);
+    }
+    function busyModel(oController, oEffect) {
+        var oModel = getModel(oController, oEffect.modelName);
+        var sPath = oEffect.path || (oEffect.scope ? "/busy/" + oEffect.scope : "/busy");
+        ModelStateRuntime.writeOnModel(oModel, sPath, !!oEffect.value);
+    }
+    function patchModel(oController, oEffect) {
+        var oModel = getModel(oController, oEffect.modelName);
+        ModelStateRuntime.writeOnModel(oModel, oEffect.path, CloneUtil.clone(oEffect.value));
+    }
+    function mergeModel(oController, oEffect) {
+        var oModel = getModel(oController, oEffect.modelName);
+        var oCurrent;
+        if (!oModel || !oModel.getProperty || !oModel.setProperty) { return; }
+        oCurrent = ModelStateRuntime.readOnModel(oModel, oEffect.path, {}) || {};
+        ModelStateRuntime.writeOnModel(
+            oModel,
+            oEffect.path,
+            Object.assign({}, CloneUtil.clone(oCurrent), CloneUtil.clone(oEffect.partialObject || {}))
+        );
     }
     function styleTokenEnable(oController, oEffect) {
         return Ui5StyleAdapter.enable(oController, StyleTokens.resolveClassName(oEffect.token), oEffect.target || "view");
@@ -141,9 +166,9 @@ sap.ui.define([
     }
     var mEffectHandlers = {
         toast: function (oController, oEffect, oOptions) { return toast(oController, oEffect, oOptions); },
-        busy: function (oController, oEffect) { return EffectModelOps.busy(oController, oEffect); },
-        modelPatch: function (oController, oEffect) { return EffectModelOps.patch(oController, oEffect); },
-        modelMerge: function (oController, oEffect) { return EffectModelOps.merge(oController, oEffect); },
+        busy: function (oController, oEffect) { return busyModel(oController, oEffect); },
+        modelPatch: function (oController, oEffect) { return patchModel(oController, oEffect); },
+        modelMerge: function (oController, oEffect) { return mergeModel(oController, oEffect); },
         navigate: function (oController, oEffect) { return navigate(oController, oEffect); },
         banner: function (oController, oEffect, oOptions) { return banner(oController, oEffect, oOptions); },
         dialog: function (oController, oEffect, oOptions) { return dialog(oController, oEffect, oOptions); },

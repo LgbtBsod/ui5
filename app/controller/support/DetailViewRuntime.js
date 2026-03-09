@@ -18,8 +18,9 @@ sap.ui.define([
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/framework/ModelStateRuntime"
-], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CoreListItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ModelStateRuntime) {
+], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CoreListItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ControllerModelRuntime, ModelStateRuntime) {
     "use strict";
 
     var CARD_REQUIRED_KEYS = {
@@ -456,7 +457,7 @@ sap.ui.define([
         var bSyncRoute = !mOptions || mOptions.syncRoute !== false;
         var sRootId;
         var sLayout;
-        if (!oController.getModel("state")) {
+        if (!ControllerModelRuntime.state(oController)) {
             return;
         }
         sRootId = RootIdRuntime.resolveFromController(oController);

@@ -34,6 +34,9 @@ sap.ui.define([
         syncTokensFromUI5: function () {
             return ThemeService.syncTokensFromUI5();
         },
+        syncDocumentRootClasses: function () {
+            return ThemeService.syncDocumentRootClasses();
+        },
         syncAnimationClass: function (bEnabled) {
             return ThemeService.syncAnimationClass(bEnabled);
         },

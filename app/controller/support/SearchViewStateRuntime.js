@@ -2,8 +2,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "checklist/app/service/framework/ComponentRuntimeSupport",
     "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/util/search/SearchMaxResults"
-], function (JSONModel, ComponentRuntimeSupport, ControllerViewStateRuntime, SearchMaxResults) {
+], function (JSONModel, ComponentRuntimeSupport, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults) {
     "use strict";
 
     function createViewModel(sScope) {
@@ -95,7 +96,7 @@ sap.ui.define([
     function syncSearchTableRequestWindow(oController) {
         var oSmartTable = oController.byId("searchSmartTable");
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
-        var oStateModel = oController.getModel("state");
+        var oStateModel = ControllerModelRuntime.state(oController);
         var oStateData = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
         var iVisibleCap = SearchMaxResults.resolveMaxResults(oStateData) || 100;
         var iBackendTop = SearchMaxResults.resolveBackendTop(oStateData);

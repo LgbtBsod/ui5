@@ -1,6 +1,7 @@
 sap.ui.define([
-    "checklist/app/service/framework/ModelStateRuntime"
-], function (ModelStateRuntime) {
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime"
+], function (ModelStateRuntime, ControllerModelRuntime) {
     "use strict";
 
     function resolveFromStateModel(oStateModel) {
@@ -17,7 +18,7 @@ sap.ui.define([
     }
 
     function resolveFromController(oController) {
-        var oStateModel = oController && oController.getModel && oController.getModel("state");
+        var oStateModel = ControllerModelRuntime.state(oController);
         return resolveFromStateModel(oStateModel);
     }
 

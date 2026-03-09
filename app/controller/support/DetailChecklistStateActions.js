@@ -1,14 +1,15 @@
 sap.ui.define([
-    "checklist/app/service/framework/LockSaveFlowOrchestrator",
     "checklist/app/controller/support/DetailActionConstants",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/service/framework/ClipboardRuntime",
     "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/service/framework/RootIdRuntime",
+    "checklist/app/service/framework/UiDecisionCoordinator",
     "checklist/app/util/CreateSentinel"
-], function (LockSaveFlowOrchestrator, DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, CreateSentinel) {
+], function (DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, CreateSentinel) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -28,27 +29,82 @@ sap.ui.define([
         return Math.round((oStickyDom && oStickyDom.offsetHeight) || 0);
     }
 
+    function resetDeleteChecklistConfirmArmed(oController) {
+        ModelStateRuntime.write(oController, "view", "/deleteChecklistConfirmArmed", false);
+    }
+
+    function toggleEdit(oController, oEvent) {
+        return Promise.resolve(DetailCommandPolicy.enterEdit(oController, RootIdRuntime.withCurrentRootId(oController, {
+            state: !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"))
+        }))).finally(function () {
+            if (oController && typeof oController._scheduleAttachmentDropZoneBind === "function") {
+                oController._scheduleAttachmentDropZoneBind();
+            }
+        });
+    }
+
+    function save(oController, mOptions) {
+        var sSaveInFlightPath = (mOptions && mOptions.saveInFlightPath) || "/saveInFlight";
+        if (ModelStateRuntime.any(oController, "state", ["/isBusy", sSaveInFlightPath])) {
+            return Promise.resolve(false);
+        }
+        return ModelStateRuntime.withFlags(oController, "state", [sSaveInFlightPath, "/isBusy"], function () {
+            return DetailCommandPolicy.save(oController, RootIdRuntime.withCurrentRootId(oController));
+        });
+    }
+
+    function close(oController) {
+        resetDeleteChecklistConfirmArmed(oController);
+        return DetailCommandPolicy.close(oController, RootIdRuntime.withCurrentRootId(oController));
+    }
+
+    function armDelete(oController) {
+        var bCurrent;
+        if (ModelStateRuntime.any(oController, "state", ["/isBusy", "/lockOperationPending"])) {
+            return Promise.resolve(false);
+        }
+        bCurrent = !!ModelStateRuntime.read(oController, "view", "/deleteChecklistConfirmArmed", false);
+        ModelStateRuntime.write(oController, "view", "/deleteChecklistConfirmArmed", !bCurrent);
+        return Promise.resolve(true);
+    }
+
+    function confirmDelete(oController) {
+        return UiDecisionCoordinator.confirmDeleteChecklist({
+            controller: oController,
+            armed: !!ModelStateRuntime.read(oController, "view", "/deleteChecklistConfirmArmed", false),
+            busy: ModelStateRuntime.any(oController, "state", ["/isBusy", "/lockOperationPending"]),
+            onReset: function () {
+                resetDeleteChecklistConfirmArmed(oController);
+            },
+            onConfirm: function () {
+                return ModelStateRuntime.withFlag(oController, "state", "/isBusy", function () {
+                    return DetailCommandPolicy.deleteChecklist(oController, RootIdRuntime.withCurrentRootId(oController));
+                }, true, false);
+            }
+        });
+    }
+
     return {
         onToggleEdit: function (oEvent) {
-            return LockSaveFlowOrchestrator.toggleEdit(this, oEvent);
+            return toggleEdit(this, oEvent);
         },
 
         onSaveDetail: function () {
-            return LockSaveFlowOrchestrator.save(this, {
+            return save(this, {
                 saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
             });
         },
 
         onCloseDetail: function () {
-            return LockSaveFlowOrchestrator.close(this);
+            return close(this);
         },
 
         onArmDeleteChecklist: function () {
-            return LockSaveFlowOrchestrator.armDelete(this);
+            return armDelete(this);
         },
 
         onConfirmDeleteChecklist: function () {
-            return LockSaveFlowOrchestrator.confirmDelete(this);
+            return confirmDelete(this);
         },
 
         onDeleteChecklist: function () {
@@ -56,7 +112,7 @@ sap.ui.define([
         },
 
         onCopyDetailLink: function () {
-            var oState = this.getModel("state");
+            var oState = ControllerModelRuntime.state(this);
             var sId = RootIdRuntime.resolveActiveFromStateModel(oState);
             if (!sId || CreateSentinel.isCreateId(sId)) {
                 return;
@@ -69,7 +125,7 @@ sap.ui.define([
         },
 
         onToggleDetailFullscreen: function () {
-            var oState = this.getModel("state");
+            var oState = ControllerModelRuntime.state(this);
             if (!oState || !oState.getProperty || !oState.setProperty) {
                 return;
             }

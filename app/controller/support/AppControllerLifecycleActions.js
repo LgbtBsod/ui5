@@ -2,12 +2,13 @@ sap.ui.define([
     "checklist/app/controller/support/ControllerResourceCleanup",
     "checklist/app/service/framework/AppShellCoordinator",
     "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/SchedulingRuntime",
     "checklist/app/util/ThemeDomRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device) {
+], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device) {
     "use strict";
 
     var PHONE_MAX_WIDTH = 720;
@@ -194,24 +195,15 @@ sap.ui.define([
         },
 
         _getStateModel: function () {
-            var oView = this.getView && this.getView();
-            var oOwner = this.getOwnerComponent && this.getOwnerComponent();
-            return (oView && oView.getModel && oView.getModel("state")) ||
-                (oOwner && oOwner.getModel && oOwner.getModel("state")) ||
-                null;
+            return ControllerModelRuntime.state(this);
         },
 
         _getLayoutModel: function () {
-            var oView = this.getView && this.getView();
-            var oOwner = this.getOwnerComponent && this.getOwnerComponent();
-            return (oView && oView.getModel && oView.getModel("layout")) ||
-                (oOwner && oOwner.getModel && oOwner.getModel("layout")) ||
-                null;
+            return ControllerModelRuntime.layout(this);
         },
 
         _getAppViewModel: function () {
-            var oView = this.getView && this.getView();
-            return oView && oView.getModel && oView.getModel("appView");
+            return ControllerModelRuntime.appView(this);
         },
 
         _syncResponsiveViewport: function () {

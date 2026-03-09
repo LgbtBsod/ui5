@@ -1,12 +1,13 @@
 sap.ui.define([
     "checklist/app/service/framework/ModelStateRuntime",
-    "checklist/app/service/framework/ControllerViewStateRuntime"
-], function (ModelStateRuntime, ControllerViewStateRuntime) {
+    "checklist/app/service/framework/ControllerViewStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime"
+], function (ModelStateRuntime, ControllerViewStateRuntime, ControllerModelRuntime) {
     "use strict";
 
     function syncDrafts(oController, oSelectedModel, sModelPath) {
         var oBasic;
-        if (!oController || !oController.getModel || !oController.getModel("view") || !oSelectedModel || !oSelectedModel.getProperty) {
+        if (!oController || !ControllerModelRuntime.viewState(oController) || !oSelectedModel || !oSelectedModel.getProperty) {
             return;
         }
         if (sModelPath === "/") {

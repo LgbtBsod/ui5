@@ -1,17 +1,17 @@
 sap.ui.define([
     "checklist/app/service/framework/DialogOrchestrator",
     "checklist/app/util/DraftChecklistFactory",
-    "checklist/app/controller/support/DetailViewSupport",
+    "checklist/app/controller/support/DetailViewRuntime",
     "checklist/app/controller/support/DetailAccessViewState",
     "checklist/app/controller/support/DetailActionConstants",
     "checklist/app/controller/support/DetailCommandPolicy",
-    "checklist/app/controller/support/DetailInfoCardLayoutSupport",
+    "checklist/app/controller/support/DetailInfoCardLayoutRuntime",
     "checklist/app/service/framework/FeedbackCoordinator",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/NavigationIntentService",
     "checklist/app/util/CreateSentinel"
-], function (DialogOrchestrator, DraftChecklistFactory, DetailViewSupport, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutSupport, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
+], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
     "use strict";
 
     var EFFECT_DIALOG_FRAGMENTS = {
@@ -43,11 +43,11 @@ sap.ui.define([
         },
 
         infoCardFactory: function (sId, oContext) {
-            return DetailViewSupport.buildInfoCard(this, sId, oContext);
+            return DetailViewRuntime.buildInfoCard(this, sId, oContext);
         },
 
         _focusInfoCardByKey: function (sKey) {
-            DetailInfoCardLayoutSupport.focusCardByKey(this, sKey);
+            DetailInfoCardLayoutRuntime.focusCardByKey(this, sKey);
         },
 
         _isEditMode: function () {
@@ -59,7 +59,7 @@ sap.ui.define([
         },
 
         _applyLayoutState: function (sLayout, mOptions) {
-            DetailViewSupport.applyLayoutState(this, sLayout, mOptions);
+            DetailViewRuntime.applyLayoutState(this, sLayout, mOptions);
         },
 
         _onDetailMatched: function (oEvent) {
@@ -101,7 +101,7 @@ sap.ui.define([
             ModelStateRuntime.setMany(this, "state", mStatePatch);
             this._applyLayoutState(sRouteLayout, { syncRoute: false });
             ControllerViewStateRuntime.setMany(this, mViewPatch);
-            DetailInfoCardLayoutSupport.writeCards(this, ControllerViewStateRuntime.get(this, "/infoCards", []));
+            DetailInfoCardLayoutRuntime.writeCards(this, ControllerViewStateRuntime.get(this, "/infoCards", []));
             ModelStateRuntime.write(this, "state", STATE_PATHS.VALIDATION_SUMMARY, {
                 hasErrors: false,
                 missingPaths: [],

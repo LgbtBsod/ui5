@@ -2,8 +2,8 @@ sap.ui.define([
     "checklist/app/controller/support/BindingContextReadSupport",
     "checklist/app/controller/support/DetailCommandPolicy",
     "checklist/app/service/framework/ControllerViewStateRuntime",
-    "checklist/app/controller/support/DetailInfoCardLayoutSupport"
-], function (BindingContextReadSupport, DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutSupport) {
+    "checklist/app/controller/support/DetailInfoCardLayoutRuntime"
+], function (BindingContextReadSupport, DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutRuntime) {
     "use strict";
 
     var ROW_ENTITY_CONFIG = {
@@ -131,7 +131,7 @@ sap.ui.define([
                 iDroppedIndex -= 1;
             }
             aCards.splice(iDroppedIndex, 0, oDraggedCard);
-            DetailInfoCardLayoutSupport.writeCards(this, aCards, sDraggedKey);
+            DetailInfoCardLayoutRuntime.writeCards(this, aCards, sDraggedKey);
         },
 
         onToggleInfoCardPin: function (oEvent) {
@@ -140,7 +140,7 @@ sap.ui.define([
             if (!oContext) {
                 return;
             }
-            DetailInfoCardLayoutSupport.togglePin(this, BindingContextReadSupport.read(oContext, "key", ""));
+            DetailInfoCardLayoutRuntime.togglePin(this, BindingContextReadSupport.read(oContext, "key", ""));
         },
 
         onInfoCardPress: function (oEvent, sCardKey, oItem) {
@@ -157,7 +157,7 @@ sap.ui.define([
                 oFocusable.focus();
                 return;
             }
-            DetailInfoCardLayoutSupport.focusCardByKey(this, sNormalized);
+            DetailInfoCardLayoutRuntime.focusCardByKey(this, sNormalized);
         },
 
         onInfoCardKeyDown: function (oEvent, sCardKey) {
@@ -169,17 +169,17 @@ sap.ui.define([
             }
             if (bModifier && (sKey === "ArrowUp" || sKey === "ArrowLeft")) {
                 oEvent.preventDefault();
-                DetailInfoCardLayoutSupport.moveCard(this, sNormalized, -1);
+                DetailInfoCardLayoutRuntime.moveCard(this, sNormalized, -1);
                 return;
             }
             if (bModifier && (sKey === "ArrowDown" || sKey === "ArrowRight")) {
                 oEvent.preventDefault();
-                DetailInfoCardLayoutSupport.moveCard(this, sNormalized, 1);
+                DetailInfoCardLayoutRuntime.moveCard(this, sNormalized, 1);
                 return;
             }
             if (bModifier && (sKey === "p" || sKey === "P")) {
                 oEvent.preventDefault();
-                DetailInfoCardLayoutSupport.togglePin(this, sNormalized);
+                DetailInfoCardLayoutRuntime.togglePin(this, sNormalized);
             }
         },
 

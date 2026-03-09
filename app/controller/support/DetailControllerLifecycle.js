@@ -4,7 +4,8 @@ sap.ui.define([
     "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/controller/support/DetailAccessViewState",
-    "checklist/app/controller/support/DetailInfoCardLayoutSupport",
+    "checklist/app/controller/support/DetailInfoCardLayoutRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/SchedulingRuntime"
@@ -14,7 +15,8 @@ sap.ui.define([
     ControllerRouteRuntime,
     ControllerTextRuntime,
     DetailAccessViewState,
-    DetailInfoCardLayoutSupport,
+    DetailInfoCardLayoutRuntime,
+    ControllerModelRuntime,
     ControllerViewStateRuntime,
     ModelStateRuntime,
     SchedulingRuntime
@@ -64,7 +66,7 @@ sap.ui.define([
             accessState: DetailAccessViewState.createDefaultState(""),
             validationShown: false,
             validationMissing: {},
-            infoCards: DetailInfoCardLayoutSupport.resolveCards(oController, [
+            infoCards: DetailInfoCardLayoutRuntime.resolveCards(oController, [
                 { key: "datetime", title: fnText("dateTimeBlockLabel", "Date & Time"), pinned: true },
                 { key: "observer", title: fnText("observerLabel", "Observer"), pinned: true },
                 { key: "observed", title: fnText("observedLabel", "Observed"), pinned: true },
@@ -77,7 +79,7 @@ sap.ui.define([
     }
 
     function bindStateValidationModel(oController) {
-        oController._oStateValidationModel = oController.getModel("state") || null;
+        oController._oStateValidationModel = ControllerModelRuntime.state(oController);
         if (!oController._oStateValidationModel || !oController._oStateValidationModel.attachPropertyChange) {
             return;
         }
@@ -91,7 +93,7 @@ sap.ui.define([
             if (sPath !== "/mode" && sPath !== "/activeObjectId" && sPath !== "/selectedId") {
                 return;
             }
-            oViewModel = oController.getModel("view");
+            oViewModel = ControllerModelRuntime.viewState(oController);
             if (oViewModel) {
                 ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
             }
@@ -119,7 +121,7 @@ sap.ui.define([
 
             ControllerViewStateRuntime.initModel(this, buildInitialViewState.bind(null, this));
 
-            this._oSelectedModel = this.getModel("selected") || null;
+            this._oSelectedModel = ControllerModelRuntime.selected(this);
             if (this._oSelectedModel && this._oSelectedModel.attachPropertyChange) {
                 this._oSelectedModel.attachPropertyChange(this._onSelectedChecklistChanged, this);
             }

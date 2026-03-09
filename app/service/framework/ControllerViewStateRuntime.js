@@ -1,13 +1,14 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "checklist/app/service/framework/ModelStateRuntime"
-], function (JSONModel, ModelStateRuntime) {
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime"
+], function (JSONModel, ModelStateRuntime, ControllerModelRuntime) {
     "use strict";
 
     function initModel(oController, vState) {
         var vData = typeof vState === "function" ? vState() : vState;
         oController.setModel(new JSONModel(vData || {}), "view");
-        return oController.getModel("view");
+        return ControllerModelRuntime.viewState(oController);
     }
 
     function get(oController, sPath, vFallback) {
@@ -23,7 +24,7 @@ sap.ui.define([
     }
 
     function replace(oController, vState) {
-        var oModel = oController && oController.getModel ? oController.getModel("view") : null;
+        var oModel = ControllerModelRuntime.viewState(oController);
         var vData = typeof vState === "function" ? vState() : vState;
 
         if (!oModel || typeof oModel.setData !== "function") {

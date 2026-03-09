@@ -2,10 +2,11 @@ sap.ui.define([
     "checklist/app/controller/base/ControllerTextRuntime",
     "checklist/app/service/framework/ActionContract",
     "checklist/app/service/framework/LayoutStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/framework/RootIdRuntime",
     "checklist/app/util/CreateSentinel",
     "checklist/app/service/framework/ModelStateRuntime"
-], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, RootIdRuntime, CreateSentinel, ModelStateRuntime) {
+], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, CreateSentinel, ModelStateRuntime) {
     "use strict";
     var getText = ControllerTextRuntime.getText;
     var PERMISSION_TEXT_KEY_MAP = {
@@ -140,7 +141,7 @@ sap.ui.define([
     return {
         _ensureAppViewDefaults: function () {
             var mPatch = {};
-            if (!this._getAppViewModel()) {
+            if (!ControllerModelRuntime.appView(this)) {
                 return;
             }
             mPatch["/compactDensity"] = !!ModelStateRuntime.read(this, "appView", "/compactDensity", false);
@@ -163,8 +164,8 @@ sap.ui.define([
         },
 
         _syncShellState: function () {
-            var oState = this._getStateModel();
-            var oLayout = this._getLayoutModel();
+            var oState = ControllerModelRuntime.state(this);
+            var oLayout = ControllerModelRuntime.layout(this);
             var mShellPatch = {};
             var sSelectedId;
             var sLayoutKind;
@@ -184,7 +185,7 @@ sap.ui.define([
             var bRuntimeManagedUser;
             var bSearchWorkspace;
             var bEditWorkspace;
-            if (!this._getAppViewModel() || !oState) {
+            if (!ControllerModelRuntime.appView(this) || !oState) {
                 return;
             }
             this._ensureAppViewDefaults();

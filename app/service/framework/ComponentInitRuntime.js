@@ -804,7 +804,7 @@ sap.ui.define([
         var CreateSentinel = mDeps.CreateSentinel;
         var Device = mDeps.Device;
         var InteractionFX = mDeps.InteractionFX;
-        var ThemeService = mDeps.ThemeService;
+        var ThemeRuntime = mDeps.ThemeRuntime;
 
             UIComponent.prototype.init.apply(this, aInitArgs || []);
             this._startupPerf = this._startupPerf || {
@@ -812,7 +812,7 @@ sap.ui.define([
                 firstRouteReadyLogged: false,
                 analyticsStartedLogged: false
             };
-            ThemeService.syncDocumentRootClasses();
+            ThemeRuntime.syncDocumentRootClasses();
             var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "real";
             var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
             var sMainServiceUri = this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_UI5_SRV/";

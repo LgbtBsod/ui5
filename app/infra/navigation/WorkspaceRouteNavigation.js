@@ -1,8 +1,9 @@
 sap.ui.define([
     "checklist/app/util/CloneUtil",
     "checklist/app/service/framework/LayoutStateRuntime",
-    "checklist/app/service/framework/ModelStateRuntime"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime) {
+    "checklist/app/service/framework/ModelStateRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime) {
     "use strict";
 
     function cloneArgs(oArgs) {
@@ -10,7 +11,7 @@ sap.ui.define([
     }
 
     function readStateModel(oController) {
-        return oController && oController.getModel ? oController.getModel("state") : null;
+        return ControllerModelRuntime.state(oController);
     }
 
     function readSelectedId(oStateModel) {

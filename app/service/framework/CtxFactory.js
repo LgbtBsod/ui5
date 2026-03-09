@@ -11,6 +11,7 @@ sap.ui.define([
     "checklist/app/infra/adapters/SmartControlsAdapter",
     "checklist/app/infra/adapters/BrowserCacheAdapter",
     "checklist/app/infra/adapters/LastChangeSetAdapter",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/domain/cache/usecases/CacheValidationUseCase",
     "checklist/app/service/domain/cache/usecases/CacheReadUseCase",
     "checklist/app/service/domain/cache/usecases/CacheWriteUseCase"
@@ -27,6 +28,7 @@ sap.ui.define([
     SmartControlsAdapter,
     BrowserCacheAdapter,
     LastChangeSetAdapter,
+    ControllerModelRuntime,
     CacheValidationUseCase,
     CacheReadUseCase,
     CacheWriteUseCase
@@ -42,18 +44,18 @@ sap.ui.define([
     }
 
     function collectModels(oController) {
-        if (!oController || !oController.getModel) {
+        if (!oController) {
             return {};
         }
         return {
-            default: oController.getModel(),
-            view: oController.getModel("view"),
-            state: oController.getModel("state"),
-            uiState: oController.getModel("uiState"),
-            selected: oController.getModel("selected"),
-            masterData: oController.getModel("masterData"),
-            search: oController.getModel("search"),
-            env: oController.getModel("env")
+            default: ControllerModelRuntime.defaultModel(oController),
+            view: ControllerModelRuntime.viewState(oController),
+            state: ControllerModelRuntime.state(oController),
+            uiState: ControllerModelRuntime.uiState(oController),
+            selected: ControllerModelRuntime.selected(oController),
+            masterData: ControllerModelRuntime.masterData(oController),
+            search: ControllerModelRuntime.named(oController, "search", true),
+            env: ControllerModelRuntime.env(oController)
         };
     }
 

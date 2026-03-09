@@ -1,11 +1,12 @@
 sap.ui.define([
     "checklist/app/service/framework/FeedbackBannerRuntime",
-    "checklist/app/service/framework/EffectActionRouting"
-], function (FeedbackBannerRuntime, EffectActionRouting) {
+    "checklist/app/service/framework/EffectActionRouting",
+    "checklist/app/service/framework/ControllerModelRuntime"
+], function (FeedbackBannerRuntime, EffectActionRouting, ControllerModelRuntime) {
     "use strict";
 
     function readStateModel(oController) {
-        return oController && oController.getModel ? oController.getModel("state") : null;
+        return ControllerModelRuntime.state(oController);
     }
 
     function resolveTextKey(oEffect, sFallbackTextKey) {

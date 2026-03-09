@@ -1,11 +1,11 @@
 sap.ui.define([
-    "checklist/app/service/framework/ControllerCtxRuntime",
+    "checklist/app/service/framework/CtxFactory",
     "checklist/app/service/domain/detail/DetailAuthorizationSupport",
     "checklist/app/service/framework/ControllerRouteRuntime",
     "checklist/app/service/framework/ControllerViewStateRuntime",
     "checklist/app/service/framework/ModelStateRuntime",
     "checklist/app/service/framework/NavigationIntentService"
-], function (ControllerCtxRuntime, DetailAuthorizationSupport, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService) {
+], function (CtxFactory, DetailAuthorizationSupport, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService) {
     "use strict";
 
     function buildInitialViewState(sRootId) {
@@ -53,7 +53,7 @@ sap.ui.define([
         },
 
         _ctx: function () {
-            return ControllerCtxRuntime.buildDefault(this);
+            return CtxFactory.buildCtx(this, {});
         },
 
         _renderGuardState: function (oGuard, sRootId) {

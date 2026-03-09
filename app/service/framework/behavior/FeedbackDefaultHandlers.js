@@ -1,10 +1,11 @@
 sap.ui.define([
     "checklist/app/service/framework/EffectApplier",
+    "checklist/app/service/framework/EffectBannerRouter",
     "checklist/app/service/framework/EffectTextResolver",
-    "checklist/app/service/framework/EffectUiHandlers",
     "checklist/app/service/framework/FeedbackBannerRuntime",
+    "checklist/app/service/framework/ControllerModelRuntime",
     "checklist/app/service/framework/behavior/BehaviorRegistry"
-], function (EffectApplier, EffectTextResolver, EffectUiHandlers, FeedbackBannerRuntime, BehaviorRegistry) {
+], function (EffectApplier, EffectBannerRouter, EffectTextResolver, FeedbackBannerRuntime, ControllerModelRuntime, BehaviorRegistry) {
     "use strict";
 
     var FEEDBACK_SCOPE = "feedback";
@@ -22,16 +23,24 @@ sap.ui.define([
     function applyUseCaseResult(mContext) {
         var oController = mContext.controller;
         var oResult = mContext.result;
-        var oUiHandlers = EffectUiHandlers.create({
-            resolveTextKey: function (sKey, oCtrl) {
-                return resolveText({
-                    controller: oCtrl || oController,
-                    textKey: sKey,
-                    args: [],
-                    fallback: sKey
-                });
+        var oUiHandlers = {
+            banner: function (oEffect, oCtrl, oOptions) {
+                return EffectBannerRouter.handleEffect(oCtrl, oEffect, oOptions, {
+                    fallbackTextKey: "",
+                    resolveTextKey: function (sTextKey) {
+                        return resolveText({
+                            controller: oCtrl || oController,
+                            textKey: sTextKey,
+                            args: [],
+                            fallback: sTextKey
+                        });
+                    }
+                }, oOptions);
+            },
+            dialog: function (oEffect, oCtrl, oOptions) {
+                return false;
             }
-        });
+        };
         return EffectApplier.applyEffects(oController, oResult && oResult.effects, {
             resolveTextKey: function (sKey) {
                 return resolveText({
@@ -49,7 +58,7 @@ sap.ui.define([
     }
 
     function showGlobalMessage(mContext) {
-        var oState = mContext.controller && mContext.controller.getModel && mContext.controller.getModel("state");
+        var oState = ControllerModelRuntime.state(mContext.controller);
         var sText = resolveText({
             controller: mContext.controller,
             textKey: mContext.textKey,

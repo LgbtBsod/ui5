@@ -129,7 +129,7 @@
         return {
             view: view,
             stateModel: view.getModel("state"),
-            appViewModel: view.getModel("appView") || view.getModel("view"),
+            appViewModel: view.getModel("appView"),
             mainServiceModel: view.getModel("mainService") || view.getModel()
         };
     }
