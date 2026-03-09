@@ -1,8 +1,4 @@
-/* ================================================================
-   style.css  —  Enterprise UI5 Design System
-   Morning Star · Evening Horizon  |  2026 Edition
-   Build: 9I-Finish  |  31 layers  |  GPU-safe · Crafted · Complete
-   ================================================================ */
+/* style.css — Build 9M-Detail | 35 layers | 2026 */
 
 /* ==========================================================
    00_tokens.css — Global design tokens
@@ -26083,57 +26079,6 @@ body.chkAppRoot.appDark .chkApp .detailAccessDeniedSceneVisual {
   display: none !important;
 }
 
-.chkApp .workflowBusyScope {
-  position: relative;
-}
-
-.chkApp .workflowBusyOverlayShell {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.25rem;
-  border-radius: inherit;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-body.chkAppRoot.appLight .chkApp .workflowBusyOverlayShell {
-  background:
-    linear-gradient(180deg, rgba(248, 252, 255, 0.86), rgba(238, 245, 255, 0.88)),
-    rgba(244, 249, 255, 0.72);
-}
-
-body.chkAppRoot.appDark .chkApp .workflowBusyOverlayShell {
-  background:
-    linear-gradient(180deg, rgba(8, 18, 39, 0.84), rgba(11, 20, 44, 0.9)),
-    rgba(8, 16, 36, 0.72);
-}
-
-.chkApp .workflowBusyOverlayShellInset {
-  border-radius: 1rem;
-}
-
-.chkApp .workflowBusyOverlayShellDialog {
-  border-radius: 1.25rem;
-}
-
-.chkApp .workflowBusyScopeSection {
-  min-height: 18rem;
-}
-
-.chkApp .workflowBusyScopeDialog {
-  min-height: 100%;
-}
-
-.chkApp .workflowBusyOverlayCard {
-  width: min(100%, 34rem);
-  margin: 0;
-  pointer-events: none;
-}
-
 /* ══════════════════════════════════════════════════════════════
    CH 12 · smartFilterGlass / filterCard — filter bar
    ══════════════════════════════════════════════════════════════ */
@@ -29091,5 +29036,3809 @@ body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardValue {
   .chkApp .lockBannerIn {
     animation:  none !important;
     transition: none !important;
+  }
+}
+
+/* ================================================================
+   9J_perf2.css  —  Surgical Performance Fix 2 + Inverted Remaster
+   ================================================================
+   ROOT CAUSES IDENTIFIED:
+   1. chkSheenShift / chkThemeAmbientShift → animate filter:blur
+      = constant full-page repaint on compositing layer → LAG
+   2. 96 active backdrop-filter (kill block doesn't reach layers 9G+)
+   3. body::before/after running 4+ simultaneous animations
+   4. background animated via filter in keyframes
+   5. Inverted scheme missing complete color overrides
+   6. Theme switch: 400+ CSS rule recalcs simultaneously
+
+   FIXES:
+   A. Replace filter-animating keyframes with opacity-only versions
+   B. Full backdrop-filter kill after ALL layers
+   C. Static body background (no animated pseudo-elements)
+   D. Reduce all transition lists to transform + opacity only
+   E. Complete inverted scheme for both light+inv and dark+inv
+   F. Theme switch transition: only 200ms opacity crossfade
+   ================================================================ */
+
+/* ══════════════════════════════════════════════════════════════
+   A. KILL ALL BACKDROP-FILTER — absolute last rule, catches
+   everything added by 9G / 9H / 9I layers
+   ══════════════════════════════════════════════════════════════ */
+
+/* Nuclear kill — overrides ALL previous backdrop-filter */
+*,
+*::before,
+*::after {
+  backdrop-filter:         none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Explicit kills for the most-used components to prevent
+   any specificity wars from re-enabling them */
+.chkApp .glassCard,
+.chkApp .glassDialog,
+.chkApp .detailSectionCard,
+.chkApp .detailControlInlineCard,
+.chkApp .infoCardTile,
+.chkApp .kpiCard,
+.chkApp .searchFilterCardDense,
+.chkApp .searchFilterExperienceShell,
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsActionRail,
+.chkApp .appShellHeader,
+.chkApp .shellPopover,
+.chkApp .uxStatChip,
+.chkApp .detailRailStatusChip,
+.chkApp .detailControlBar,
+.chkApp .themeDockSwitch,
+.chkApp .detailHeroSurface,
+.chkApp .sapMDialog,
+.chkApp .sapMPopover,
+.chkApp .sapUiBLy,
+.chkApp .sapMDialogBlockLayer {
+  backdrop-filter:         none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   B. REPLACE ANIMATED filter:blur KEYFRAMES
+   chkSheenShift & chkThemeAmbientShift animate filter:blur
+   = constant GPU repaint. Replace with static opacity.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Override sheen shift — kill filter animation in keyframe */
+@keyframes chkSheenShift {
+  0%   { opacity: 0.72; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 0.72; }
+}
+
+@keyframes chkThemeAmbientShift {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes chkAmbientWash {
+  0%   { opacity: 0.80; }
+  100% { opacity: 0.95; }
+}
+
+/* Also kill the filter inside these - belt-and-suspenders */
+body.chkAppRoot::before,
+body.chkAppRoot::after,
+.bg-blobs::before,
+.bg-blobs::after {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   C. STATIC BODY BACKGROUND — no animated ::before/::after
+   Two simple radial-gradients, position fixed = single layer
+   ══════════════════════════════════════════════════════════════ */
+
+/* Disable ALL body pseudo-element animations */
+body.chkAppRoot::before,
+body.chkAppRoot::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Light theme — clean ambient */
+body.chkAppRoot.appLight {
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 10%,
+      rgba(180, 215, 255, 0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 85% 85%,
+      rgba(200, 230, 255, 0.40) 0%, transparent 65%),
+    linear-gradient(160deg, #EEF5FF 0%, #F5F8FF 50%, #EDF4FF 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Dark theme — clean deep */
+body.chkAppRoot.appDark {
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 8%,
+      rgba(20, 60, 130, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 45% at 82% 88%,
+      rgba(10, 40, 100, 0.38) 0%, transparent 62%),
+    linear-gradient(160deg, #080F1E 0%, #0C1628 50%, #07101C 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Light + Inverted */
+body.chkAppRoot.appLight.appInvertedBlockScheme {
+  background:
+    radial-gradient(ellipse 70% 50% at 18% 12%,
+      rgba(20, 55, 120, 0.42) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 45% at 80% 85%,
+      rgba(12, 38, 100, 0.34) 0%, transparent 60%),
+    linear-gradient(160deg, #0A1428 0%, #0E1C38 50%, #091220 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* Dark + Inverted */
+body.chkAppRoot.appDark.appInvertedBlockScheme {
+  background:
+    radial-gradient(ellipse 75% 55% at 16% 10%,
+      rgba(180, 215, 255, 0.40) 0%, transparent 65%),
+    radial-gradient(ellipse 58% 45% at 83% 87%,
+      rgba(200, 230, 255, 0.30) 0%, transparent 60%),
+    linear-gradient(160deg, #EEF5FF 0%, #F4F8FF 50%, #ECF3FF 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   D. THEME SWITCH OPTIMIZATION
+   Only opacity crossfade during theme switch (200ms)
+   No color/background/border transitions during class change
+   ══════════════════════════════════════════════════════════════ */
+
+/* During theme switch — disable all transitions except opacity */
+html.chkAppRoot.theme-switching * {
+  transition-property:
+    opacity, transform !important;
+  transition-duration:    160ms !important;
+  transition-timing-function: ease !important;
+  animation-play-state: paused !important;
+}
+
+/* After switch — restore normal transitions */
+html.chkAppRoot:not(.theme-switching) .chkApp .glassCard,
+html.chkAppRoot:not(.theme-switching) .chkApp .infoCardTile,
+html.chkAppRoot:not(.theme-switching) .chkApp .kpiCard {
+  transition: transform 160ms ease, box-shadow 160ms ease !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   E. TRIM EXPENSIVE TRANSITIONS
+   Replace multi-property transitions with only GPU-friendly ones
+   ══════════════════════════════════════════════════════════════ */
+
+/* Cards — only transform + box-shadow (GPU) */
+.chkApp .glassCard,
+.chkApp .infoCardTile,
+.chkApp .kpiCard.searchAnalyticsCard,
+.chkApp .analyticsTile,
+.chkApp .workflowStageCard,
+.chkApp .searchStageStoryCard,
+.chkApp .detailSectionCard {
+  transition: transform 160ms cubic-bezier(0.22,0.61,0.36,1),
+              box-shadow 160ms ease !important;
+}
+
+/* Buttons — only transform (GPU, instant feel) */
+.chkApp .brandActionBtn .sapMBtnInner,
+.chkApp .brandActionGhost .sapMBtnInner,
+.chkApp .tableRowActionBtn .sapMBtnInner,
+.chkApp .shellActionBtn .sapMBtnInner,
+.chkApp .shellUserBtn .sapMBtnInner,
+.chkApp .detailEmptyStateAction .sapMBtnInner,
+.chkApp .infoCardPinBtn .sapMBtnInner,
+.chkApp .appShellHeader .sapMBtn .sapMBtnInner {
+  transition: transform 110ms ease, opacity 110ms ease !important;
+}
+
+/* Input borders — only box-shadow (GPU outline) */
+.chkApp .sapMInputBaseContentWrapper,
+.chkApp .sapMSlt .sapMSltLabel,
+.chkApp .commentExpandableField .sapMTextAreaInner {
+  transition: box-shadow 130ms ease !important;
+}
+
+/* Switch thumb — only left + box-shadow */
+.chkApp .themeDockSwitchThumb {
+  transition: left 200ms cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 160ms ease !important;
+}
+
+/* Shell header */
+.chkApp .appShellHeader {
+  transition: box-shadow 200ms ease !important;
+}
+
+/* Kill transition on static elements */
+.chkApp .sapMLabel,
+.chkApp .sapMText,
+.chkApp .sapMTitle,
+.chkApp .kpiLabel,
+.chkApp .shellEyebrow,
+.chkApp .shellContextSubtitle,
+.chkApp .infoCardTitle,
+.chkApp .infoCardValue,
+.chkApp .searchAnalyticsMeta {
+  transition: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   F. COMPLETE INVERTED SCHEME — Light+Inv + Dark+Inv
+   From the screenshot: inverted mode has wrong colors everywhere
+   ══════════════════════════════════════════════════════════════ */
+
+/* ─── LIGHT + INVERTED (appLight + appInvertedBlockScheme) ───
+   Shell = dark, content cards = dark-on-dark glass
+   Text = light on dark background
+*/
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp {
+  color: rgba(215, 232, 255, 0.92) !important;
+}
+
+/* Surface tokens */
+body.chkAppRoot.appLight.appInvertedBlockScheme {
+  --surface-1: rgba(18, 32, 60, 0.88);
+  --surface-2: rgba(14, 26, 50, 0.85);
+  --surface-3: rgba(10, 20, 42, 0.82);
+  --text-main:   rgba(215, 232, 255, 0.92);
+  --text-subtle: rgba(160, 190, 235, 0.72);
+  --text-muted:  rgba(100, 140, 200, 0.58);
+  --accent:      #70BAFF;
+  --hz-accent:   #70BAFF;
+}
+
+/* Glass cards — dark glass in light+inv */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .glassCard,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailSectionCard,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailControlInlineCard,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .filterCard,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .searchFilterCardDense {
+  background:   rgba(18, 32, 60, 0.88) !important;
+  border-color: rgba(55, 90, 155, 0.38) !important;
+  box-shadow:   0 2px 12px rgba(0, 2, 18, 0.45) !important;
+}
+
+/* KPI cards */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .kpiCard.searchAnalyticsCard {
+  background:   rgba(14, 26, 50, 0.90) !important;
+  border-color: rgba(55, 90, 155, 0.35) !important;
+  box-shadow:   0 2px 10px rgba(0, 2, 18, 0.50) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .kpiCard .sapMTitle {
+  color: rgba(215, 232, 255, 0.94) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .kpiCard .kpiLabel {
+  color: rgba(140, 185, 240, 0.55) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .kpiCard .searchAnalyticsMeta {
+  color: rgba(130, 175, 230, 0.60) !important;
+}
+
+/* infoCard tiles */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .infoCardTile.mushroomCard {
+  background:   rgba(18, 32, 60, 0.88) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .infoCardTitle {
+  color: rgba(100, 150, 210, 0.55) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .infoCardValue {
+  color: rgba(210, 228, 255, 0.92) !important;
+}
+
+/* Search results table */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .searchResultsTable {
+  background:   rgba(12, 22, 44, 0.90) !important;
+  border-color: rgba(45, 80, 145, 0.38) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
+  background:   rgba(16, 28, 52, 0.85) !important;
+  border-color: rgba(45, 80, 145, 0.20) !important;
+  color:        rgba(210, 228, 255, 0.88) !important;
+}
+
+/* Table header */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapUiTableColCell,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapMListTblHeaderCell {
+  background:   rgba(12, 22, 44, 0.95) !important;
+  color:        rgba(140, 185, 240, 0.65) !important;
+  border-color: rgba(45, 80, 145, 0.28) !important;
+}
+
+/* Text in inverted */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapMText,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapMLabel {
+  color: rgba(195, 218, 255, 0.85) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapMTitle {
+  color: rgba(215, 232, 255, 0.94) !important;
+}
+
+/* Shell stays dark in light+inv */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .appShellHeader {
+  background:
+    radial-gradient(circle at top right, rgba(112, 186, 255, 0.10), transparent 30%),
+    rgba(14, 26, 50, 0.95) !important;
+  border-color: rgba(55, 90, 155, 0.40) !important;
+}
+
+/* Shell text */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .shellProductTitle {
+  color: rgba(215, 235, 255, 0.96) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .shellEyebrow,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .shellContextSubtitle {
+  color: rgba(140, 185, 240, 0.62) !important;
+}
+
+/* Inputs in inverted light */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapMInputBaseContentWrapper,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapMSltLabel {
+  background:   rgba(18, 32, 60, 0.88) !important;
+  border-color: rgba(55, 90, 155, 0.42) !important;
+  color:        rgba(205, 225, 255, 0.90) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp input,
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp textarea {
+  color: rgba(205, 225, 255, 0.90) !important;
+}
+
+/* Detail section toolbar */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailSectionToolbar {
+  border-color: rgba(45, 80, 145, 0.28) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailSectionToolbar .sapMTitle {
+  color: rgba(205, 225, 255, 0.90) !important;
+}
+
+/* Segment buttons */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .resultSegmentControl {
+  background:   rgba(18, 32, 60, 0.88) !important;
+  border-color: rgba(55, 90, 155, 0.40) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
+  color: rgba(175, 210, 255, 0.80) !important;
+}
+
+/* Status chips */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .appShellHeader .sapMObjStatusStateInformation {
+  background:   rgba(112, 186, 255, 0.14) !important;
+  border-color: rgba(112, 186, 255, 0.30) !important;
+  color:        rgba(175, 215, 255, 0.90) !important;
+}
+
+/* Flat editor table rows */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(odd) .sapUiTableCell {
+  background: rgba(16, 28, 52, 0.82) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(even) .sapUiTableCell {
+  background: rgba(12, 22, 44, 0.78) !important;
+}
+
+/* ─── DARK + INVERTED (appDark + appInvertedBlockScheme) ───
+   Shell = light/white, content cards = light-on-white glass
+   Text = dark on light background
+*/
+
+/* Surface tokens */
+body.chkAppRoot.appDark.appInvertedBlockScheme {
+  --surface-1: rgba(255, 255, 255, 0.88);
+  --surface-2: rgba(248, 252, 255, 0.85);
+  --surface-3: rgba(240, 247, 255, 0.82);
+  --text-main:   rgba(16, 32, 64, 0.92);
+  --text-subtle: rgba(60, 100, 160, 0.72);
+  --text-muted:  rgba(100, 140, 190, 0.58);
+  --accent:      #0058C8;
+  --hz-accent:   #0058C8;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp {
+  color: rgba(16, 32, 64, 0.92) !important;
+}
+
+/* Glass cards — light glass in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .glassCard,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailSectionCard,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailControlInlineCard,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .filterCard,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .searchFilterCardDense {
+  background:   rgba(255, 255, 255, 0.90) !important;
+  border-color: rgba(160, 200, 240, 0.50) !important;
+  box-shadow:   0 2px 12px rgba(12, 28, 52, 0.10) !important;
+}
+
+/* KPI cards */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .kpiCard.searchAnalyticsCard {
+  background:   rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(160, 200, 240, 0.48) !important;
+  box-shadow:   0 2px 10px rgba(12, 28, 52, 0.09) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .kpiCard .sapMTitle {
+  color: rgba(16, 32, 64, 0.92) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .kpiCard .kpiLabel {
+  color: rgba(60, 100, 160, 0.52) !important;
+}
+
+/* infoCard tiles */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardTile.mushroomCard {
+  background: rgba(255, 255, 255, 0.90) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardTitle {
+  color: rgba(60, 100, 160, 0.50) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardValue {
+  color: rgba(16, 32, 64, 0.90) !important;
+}
+
+/* Search results */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .searchResultsTable {
+  background:   rgba(248, 252, 255, 0.92) !important;
+  border-color: rgba(160, 200, 240, 0.45) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
+  background:   rgba(255, 255, 255, 0.86) !important;
+  border-color: rgba(160, 200, 240, 0.22) !important;
+  color:        rgba(16, 32, 64, 0.88) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapUiTableColCell,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapMListTblHeaderCell {
+  background:   rgba(240, 248, 255, 0.95) !important;
+  color:        rgba(60, 100, 160, 0.65) !important;
+  border-color: rgba(160, 200, 240, 0.30) !important;
+}
+
+/* Text in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapMText,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapMLabel {
+  color: rgba(30, 60, 110, 0.85) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapMTitle {
+  color: rgba(16, 32, 64, 0.92) !important;
+}
+
+/* Shell in dark+inv = light */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .appShellHeader {
+  background:
+    radial-gradient(circle at top right, rgba(0, 88, 200, 0.08), transparent 28%),
+    rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(160, 200, 240, 0.52) !important;
+  box-shadow:
+    0 2px 12px rgba(12, 28, 52, 0.10),
+    inset 0 -1px 0 rgba(0, 88, 200, 0.08) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .shellProductTitle {
+  color: rgba(16, 32, 64, 0.95) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .shellEyebrow,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .shellContextSubtitle {
+  color: rgba(60, 100, 160, 0.60) !important;
+}
+
+/* Shell action buttons in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .appShellHeader .sapMBtn .sapMBtnInner {
+  color: rgba(16, 32, 64, 0.78) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .appShellHeader .sapMBtn:hover .sapMBtnInner {
+  background:   rgba(0, 88, 200, 0.08) !important;
+  border-color: rgba(0, 88, 200, 0.22) !important;
+}
+
+/* Inputs in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapMInputBaseContentWrapper,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapMSltLabel {
+  background:   rgba(248, 252, 255, 0.92) !important;
+  border-color: rgba(160, 200, 240, 0.55) !important;
+  color:        rgba(16, 32, 64, 0.90) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp input,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp textarea {
+  color: rgba(16, 32, 64, 0.90) !important;
+}
+
+/* Segment buttons in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .resultSegmentControl {
+  background:   rgba(225, 240, 255, 0.88) !important;
+  border-color: rgba(160, 200, 240, 0.50) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
+  color: rgba(0, 56, 160, 0.80) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner {
+  background: #0058C8 !important;
+  color:      #fff !important;
+}
+
+/* Shell ObjectStatus chips in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .appShellHeader .sapMObjStatusStateInformation {
+  background:   rgba(0, 88, 200, 0.09) !important;
+  border-color: rgba(0, 88, 200, 0.26) !important;
+  color:        rgba(0, 56, 160, 0.88) !important;
+}
+
+/* Brand buttons in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .brandActionBtn.brandActionPrimary .sapMBtnInner {
+  background:   #0058C8 !important;
+  border-color: #0058C8 !important;
+  box-shadow:   0 2px 8px rgba(0, 88, 200, 0.30) !important;
+}
+
+/* Flat table rows in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(odd) .sapUiTableCell {
+  background: rgba(248, 252, 255, 0.88) !important;
+  color:      rgba(16, 32, 64, 0.88) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(even) .sapUiTableCell {
+  background: rgba(240, 248, 255, 0.85) !important;
+  color:      rgba(16, 32, 64, 0.88) !important;
+}
+
+/* Detail control bar chips in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailRailStatusChip {
+  border-color: rgba(160, 200, 240, 0.45) !important;
+  color:        rgba(30, 65, 130, 0.85) !important;
+}
+
+/* Empty states in dark+inv */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailEmptyStateCard {
+  background:   rgba(248, 252, 255, 0.88) !important;
+  border-color: rgba(160, 200, 240, 0.40) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailEmptyStateTitle {
+  color: rgba(16, 32, 64, 0.88) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailEmptyStateText {
+  color: rgba(60, 100, 160, 0.65) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   G. CARD TRANSITION TIMING — prevent jank on navigation
+   Detail card opens: use contain to limit paint
+   ══════════════════════════════════════════════════════════════ */
+
+/* containment for static cards */
+.chkApp .infoCardTile,
+.chkApp .kpiCard,
+.chkApp .analyticsTile,
+.chkApp .workflowStageCard {
+  contain: layout style paint !important;
+}
+
+/* containment for scrollable areas */
+.chkApp .flatEditorGridTable,
+.chkApp .searchResultsTable {
+  contain: layout style !important;
+}
+
+/* Detail page canvas — isolate stacking context */
+.chkApp .detailExperienceCanvas {
+  isolation: isolate !important;
+  contain:   layout !important;
+}
+
+/* Promote search results to own layer (stable, large element) */
+.chkApp .searchResultsTable {
+  will-change: transform !important;
+}
+
+/* Do NOT promote static cards */
+.chkApp .infoCardTile,
+.chkApp .kpiCard,
+.chkApp .glassCard {
+  will-change: auto !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   H. SKELETON ANIMATION OPTIMIZATION
+   Single shared animation, no per-element overhead
+   ══════════════════════════════════════════════════════════════ */
+
+/* Override shimmer to use transform instead of background-position */
+@keyframes _skShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.chkApp .appSkeleton.appSkeletonLine {
+  overflow:  hidden !important;
+  position:  relative !important;
+  animation: none !important;
+}
+
+/* Use ::after pseudo-element for shimmer sweep */
+.chkApp .appSkeleton.appSkeletonLine::after {
+  content:    '' !important;
+  position:   absolute !important;
+  inset:      0 !important;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.60) 50%,
+    transparent 100%
+  ) !important;
+  animation: _skShimmer 1.6s ease-in-out infinite !important;
+  will-change: transform !important;
+}
+
+body.chkAppRoot.appDark .chkApp .appSkeleton.appSkeletonLine::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(80, 130, 220, 0.28) 50%,
+    transparent 100%
+  ) !important;
+}
+
+/* Base color of skeleton lines */
+body.chkAppRoot.appLight .chkApp .appSkeleton.appSkeletonLine {
+  background: rgba(196, 215, 240, 0.55) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .appSkeleton.appSkeletonLine {
+  background: rgba(30, 50, 90, 0.70) !important;
+}
+
+/* Stagger via delay — siblings inherit will-change:transform on ::after only */
+.chkApp .appSkeletonTableRow:nth-child(2) .appSkeletonLine::after { animation-delay: 120ms !important; }
+.chkApp .appSkeletonTableRow:nth-child(3) .appSkeletonLine::after { animation-delay: 240ms !important; }
+.chkApp .appSkeletonTableRow:nth-child(4) .appSkeletonLine::after { animation-delay: 360ms !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   I. DETAIL CARD NAVIGATION — smooth open/close
+   Page transitions via opacity+translate, not all properties
+   ══════════════════════════════════════════════════════════════ */
+
+/* appSkeletonReveal — faster, transform-based */
+@keyframes appSkeletonRevealFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chkApp .appSkeletonReveal {
+  animation: appSkeletonRevealFade 220ms cubic-bezier(0.22,0.61,0.36,1) both !important;
+}
+
+/* Stagger reveal for sections */
+.chkApp .detailSectionCard:nth-child(1) .appSkeletonReveal { animation-delay:  0ms !important; }
+.chkApp .detailSectionCard:nth-child(2) .appSkeletonReveal { animation-delay: 40ms !important; }
+.chkApp .detailSectionCard:nth-child(3) .appSkeletonReveal { animation-delay: 80ms !important; }
+.chkApp .detailSectionCard:nth-child(n+4) .appSkeletonReveal { animation-delay:120ms !important; }
+
+/* infoCard grid items stagger */
+.chkApp .infoCardGridItem:nth-child(1)  { animation-delay:  0ms !important; }
+.chkApp .infoCardGridItem:nth-child(2)  { animation-delay: 30ms !important; }
+.chkApp .infoCardGridItem:nth-child(3)  { animation-delay: 60ms !important; }
+.chkApp .infoCardGridItem:nth-child(4)  { animation-delay: 90ms !important; }
+.chkApp .infoCardGridItem:nth-child(n+5){ animation-delay:110ms !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   J. REDUCED MOTION — complete coverage
+   ══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation:         none !important;
+    transition:        none !important;
+    animation-duration:1ms !important;
+  }
+
+  /* Keep functional spinners */
+  .sapMBusyIndicatorDot,
+  .sapUiLocalBusyIndicator .sapUiLocalBusyIndicatorAnimation > div {
+    animation: none !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   K. DIALOG BLOCK LAYER — lightweight overlay
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .sapUiBLy,
+.chkApp .sapMDialogBlockLayer {
+  background: rgba(6, 14, 28, 0.48) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: opacity 160ms ease !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .sapUiBLy,
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapUiBLy {
+  background: rgba(6, 14, 28, 0.55) !important;
+}
+
+/* ================================================================
+   9K_master.css  —  Master UX Layer · Complete Visual System
+   ================================================================
+   From screenshot analysis + full source read:
+
+   Ch 1   detailControlBar — full card remaster
+   Ch 2   uxStatChip — stat board chips (CHECKLIST/STATUS/DATE)
+   Ch 3   detailRailStatusChip — DRAFT/SYNCED/HEARTBEAT/AUTOSAVE
+   Ch 4   detailSectionAnchorBtn — Overview/Checks/Barriers/Attach
+   Ch 5   detailControlRowActions — Save/Close/Delete/Validate
+   Ch 6   accentSwitch edit mode — edit toggle pill
+   Ch 7   detailRailCloseAction — Close button
+   Ch 8   detailCreateModeBanner — create mode header
+   Ch 9   infoCard grid system — DATE/INSPECTOR/EQUIPMENT layout
+   Ch 10  Search left panel — KPI rail, filter, results table
+   Ch 11  Search table row — ID/STATUS/DATE visual hierarchy
+   Ch 12  Light theme surface audit — card/surface opacity
+   Ch 13  Dark theme surface audit — depth hierarchy
+   Ch 14  Control bar skeleton — loading state
+   Ch 15  "No permission" tooltip refinement
+   Ch 16  Detail section card separation
+   Ch 17  Responsive layout
+   Ch 18  Focus management
+   ================================================================ */
+
+/* ══════════════════════════════════════════════════════════════
+   CH 1 · detailControlBar — the sticky command card
+   Structure: glassCard > detailControlInlineCard > detailControlBar
+     > uxStatRow.detailHeroStatBoard (chips)
+     > detailControlToolbar > detailSectionAnchorRail (nav tabs)
+     > detailControlRow.detailControlRowTop (status chips + undo)
+     > detailControlRow.detailControlRowActions (close/save/delete)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Sticky dock */
+.chkApp .detailControlPinnedDock {
+  position: sticky !important;
+  top:      0 !important;
+  z-index:  30 !important;
+}
+
+/* Inner glass card */
+.chkApp .detailControlExperienceCard.detailControlInlineCard {
+  border-radius: 1rem !important;
+  overflow:      hidden !important;
+  padding:       0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailControlExperienceCard {
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,0.96) 0%,
+      rgba(248,252,255,0.94) 100%) !important;
+  border-color: rgba(160, 200, 240, 0.45) !important;
+  box-shadow:
+    0 2px 12px rgba(12, 28, 52, 0.08),
+    inset 0 1px 0 rgba(255,255,255,0.80) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlExperienceCard {
+  background:
+    linear-gradient(180deg,
+      rgba(16,28,54,0.96) 0%,
+      rgba(12,22,44,0.94) 100%) !important;
+  border-color: rgba(50, 85, 150, 0.38) !important;
+  box-shadow:
+    0 2px 14px rgba(0, 2, 18, 0.45),
+    inset 0 1px 0 rgba(100,160,255,0.06) !important;
+}
+
+/* Control bar VBox */
+.chkApp .detailControlBar {
+  display:        flex !important;
+  flex-direction: column !important;
+  gap:            0 !important;
+  padding:        0 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 2 · uxStatChip — CHECKLIST / OVERALL RESULT / STATUS / DATE
+   Shown in detailHeroStatBoard row at top of control card
+   ══════════════════════════════════════════════════════════════ */
+
+/* Stat row container */
+.chkApp .uxStatRow {
+  display:     flex !important;
+  flex-wrap:   wrap !important;
+  gap:         0.28rem !important;
+  align-items: center !important;
+  padding:     0.6rem 0.875rem 0.55rem !important;
+}
+
+.chkApp .detailHeroStatBoard {
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailHeroStatBoard {
+  border-color: rgba(160, 195, 240, 0.28) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailHeroStatBoard {
+  border-color: rgba(45, 80, 148, 0.25) !important;
+}
+
+/* Individual chip pill */
+.chkApp .uxStatChip {
+  display:       inline-flex !important;
+  align-items:   center !important;
+  gap:           0.28rem !important;
+  padding:       0.20rem 0.65rem !important;
+  border-radius: 999px !important;
+  border:        1px solid !important;
+  min-height:    1.65rem !important;
+  cursor:        default !important;
+}
+
+body.chkAppRoot.appLight .chkApp .uxStatChip {
+  background:   rgba(240, 248, 255, 0.85) !important;
+  border-color: rgba(160, 200, 240, 0.42) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .uxStatChip {
+  background:   rgba(16, 28, 54, 0.80) !important;
+  border-color: rgba(50, 85, 150, 0.32) !important;
+}
+
+/* Label text inside chip (e.g. "CHECKLIST") */
+.chkApp .detailHeroStatBoardCompact .uxStatChip .sapMText:first-child,
+.chkApp .uxStatChip > .sapMText.sapUiTinyMarginEnd {
+  font-size:      0.60rem !important;
+  font-weight:    820 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  line-height:    1 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
+  color: rgba(60, 100, 160, 0.55) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .uxStatChip .sapMText:first-child {
+  color: rgba(120, 170, 230, 0.55) !important;
+}
+
+/* Value text inside chip (e.g. "CHK-00039") */
+.chkApp .detailHeroStatBoardCompact .uxStatChip .sapMText:last-child {
+  font-size:            0.78rem !important;
+  font-weight:          700 !important;
+  font-variant-numeric: tabular-nums !important;
+  line-height:          1 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:last-child {
+  color: rgba(16, 32, 64, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .uxStatChip .sapMText:last-child {
+  color: rgba(210, 228, 255, 0.90) !important;
+}
+
+/* ObjectStatus inside chip (OVERALL RESULT / STATUS) */
+.chkApp .uxStatChip .sapMObjStatus {
+  padding:       0 !important;
+  border:        0 !important;
+  background:    none !important;
+  border-radius: 0 !important;
+  font-size:     0.78rem !important;
+  font-weight:   700 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 3 · detailRailStatusChip — the 4 status indicators
+   DRAFT · ALL CHANGES SYNCED · HEARTBEAT PAUSED · AUTOSAVE
+   These are ObjectStatus in an OverflowToolbar
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailRailStatusChip.sapMObjStatus {
+  display:       inline-flex !important;
+  align-items:   center !important;
+  gap:           0.24rem !important;
+  padding:       0.18rem 0.6rem !important;
+  border-radius: 999px !important;
+  border:        1.5px solid !important;
+  font-size:     0.72rem !important;
+  font-weight:   680 !important;
+  white-space:   nowrap !important;
+  line-height:   1 !important;
+  cursor:        default !important;
+}
+
+/* Icon */
+.chkApp .detailRailStatusChip .sapMObjStatusIcon.sapUiIcon {
+  font-size:  0.68rem !important;
+  flex-shrink:0 !important;
+}
+
+/* SYNCED / LOCKED = Success (green) */
+body.chkAppRoot.appLight .chkApp .detailRailStatusChip.sapMObjStatusStateSuccess {
+  background:   rgba(26, 124, 64, 0.08) !important;
+  border-color: rgba(26, 124, 64, 0.28) !important;
+  color:        rgba(10, 80, 32, 0.90) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusStateSuccess {
+  background:   rgba(93, 193, 34, 0.10) !important;
+  border-color: rgba(93, 193, 34, 0.28) !important;
+  color:        rgba(140, 220, 80, 0.92) !important;
+}
+
+/* DRAFT / WARNING */
+body.chkAppRoot.appLight .chkApp .detailRailStatusChip.sapMObjStatusStateWarning {
+  background:   rgba(195, 85, 0, 0.07) !important;
+  border-color: rgba(195, 85, 0, 0.24) !important;
+  color:        rgba(130, 50, 0, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusStateWarning {
+  background:   rgba(255, 149, 0, 0.10) !important;
+  border-color: rgba(255, 149, 0, 0.26) !important;
+  color:        rgba(255, 200, 80, 0.90) !important;
+}
+
+/* ERROR / AUTOSAVE DISABLED */
+body.chkAppRoot.appLight .chkApp .detailRailStatusChip.sapMObjStatusStateError {
+  background:   rgba(204, 0, 0, 0.07) !important;
+  border-color: rgba(204, 0, 0, 0.24) !important;
+  color:        rgba(150, 0, 0, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusStateError {
+  background:   rgba(255, 80, 110, 0.10) !important;
+  border-color: rgba(255, 80, 110, 0.26) !important;
+  color:        rgba(255, 130, 148, 0.90) !important;
+}
+
+/* Information — HEARTBEAT PAUSED, neutral */
+body.chkAppRoot.appLight .chkApp .detailRailStatusChip.sapMObjStatusStateInformation {
+  background:   rgba(0, 112, 242, 0.07) !important;
+  border-color: rgba(0, 112, 242, 0.22) !important;
+  color:        rgba(0, 56, 180, 0.85) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusStateInformation {
+  background:   rgba(77, 177, 255, 0.09) !important;
+  border-color: rgba(77, 177, 255, 0.24) !important;
+  color:        rgba(130, 200, 255, 0.88) !important;
+}
+
+/* None / neutral */
+body.chkAppRoot.appLight .chkApp .detailRailStatusChip.sapMObjStatusStateNone {
+  background:   rgba(240, 248, 255, 0.80) !important;
+  border-color: rgba(160, 200, 240, 0.38) !important;
+  color:        rgba(48, 88, 160, 0.70) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusStateNone {
+  background:   rgba(16, 28, 54, 0.75) !important;
+  border-color: rgba(50, 85, 150, 0.30) !important;
+  color:        rgba(130, 175, 235, 0.72) !important;
+}
+
+/* Status chip row container */
+.chkApp .detailControlRowTop.sapMTB,
+.chkApp .detailControlRowTop.sapMOTB {
+  background:    transparent !important;
+  border:        0 !important;
+  padding:       0.4rem 0.875rem !important;
+  min-height:    2.5rem !important;
+  gap:           0.3rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailControlRowTop {
+  border-color: rgba(160, 195, 240, 0.22) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlRowTop {
+  border-color: rgba(45, 80, 148, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 4 · detailSectionAnchorBtn — section nav tabs
+   Overview / Checks / Barriers / Attachments
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailSectionAnchorRail {
+  display:     flex !important;
+  flex-wrap:   nowrap !important;
+  gap:         0.15rem !important;
+  align-items: center !important;
+  padding:     0.3rem 0.6rem !important;
+  overflow-x:  auto !important;
+  scrollbar-width: none !important;
+}
+
+.chkApp .detailSectionAnchorRail::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Tab buttons */
+.chkApp .detailSectionAnchorBtn.sapMBtn .sapMBtnInner {
+  border-radius:  999px !important;
+  padding:        0 0.7rem !important;
+  min-height:     2rem !important;
+  border:         1px solid transparent !important;
+  background:     transparent !important;
+  font-size:      0.78rem !important;
+  font-weight:    640 !important;
+  gap:            0.3rem !important;
+  white-space:    nowrap !important;
+  transition:     background 110ms ease, border-color 110ms ease !important;
+}
+
+.chkApp .detailSectionAnchorBtn .sapMBtnIconLeft.sapUiIcon {
+  font-size: 0.76rem !important;
+  margin:    0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionAnchorBtn .sapMBtnInner {
+  color: rgba(48, 88, 155, 0.78) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionAnchorBtn .sapMBtnInner {
+  color: rgba(140, 190, 245, 0.78) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionAnchorBtn:hover .sapMBtnInner {
+  background:   rgba(0, 112, 242, 0.08) !important;
+  border-color: rgba(0, 112, 242, 0.20) !important;
+  color:        rgba(0, 56, 180, 0.90) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionAnchorBtn:hover .sapMBtnInner {
+  background:   rgba(77, 177, 255, 0.10) !important;
+  border-color: rgba(77, 177, 255, 0.24) !important;
+  color:        rgba(160, 210, 255, 0.90) !important;
+}
+
+.chkApp .detailSectionAnchorBtn:active .sapMBtnInner {
+  transform: scale(0.95) !important;
+}
+
+/* Anchor rail container */
+.chkApp .detailControlToolbar {
+  padding: 0 !important;
+}
+
+.chkApp .detailControlToolbarStack {
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailControlToolbarStack {
+  border-color: rgba(160, 195, 240, 0.22) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlToolbarStack {
+  border-color: rgba(45, 80, 148, 0.20) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 5 · detailControlRowActions — Close/Save/Delete/Validate
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailControlRowActions.sapMTB,
+.chkApp .detailControlRowActions.sapMOTB {
+  background:  transparent !important;
+  border:      0 !important;
+  padding:     0.45rem 0.875rem !important;
+  min-height:  3rem !important;
+  gap:         0.4rem !important;
+}
+
+/* All action buttons */
+.chkApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  min-height:    2.2rem !important;
+  padding:       0 1rem !important;
+  font-size:     0.82rem !important;
+  font-weight:   680 !important;
+  gap:           0.35rem !important;
+  border:        1.5px solid !important;
+  transition:    transform 110ms ease, opacity 110ms ease !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtn .sapMBtnIconLeft.sapUiIcon {
+  font-size:  0.82rem !important;
+  margin:     0 !important;
+  flex-shrink:0 !important;
+}
+
+/* Close button — ghost */
+.chkApp .detailRailCloseAction .sapMBtnInner,
+.chkApp .detailControlRowActions .sapMBtnTransparent .sapMBtnInner {
+  background:   transparent !important;
+  border-color: rgba(160, 200, 240, 0.40) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailRailCloseAction .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .detailControlRowActions .sapMBtnTransparent .sapMBtnInner {
+  color:        rgba(48, 88, 155, 0.85) !important;
+  border-color: rgba(140, 185, 235, 0.45) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailCloseAction .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .detailControlRowActions .sapMBtnTransparent .sapMBtnInner {
+  color:        rgba(140, 190, 245, 0.85) !important;
+  border-color: rgba(50, 90, 160, 0.40) !important;
+}
+
+/* Save button — solid accent */
+.chkApp .detailControlRowActions .sapMBtnEmphasized .sapMBtnInner {
+  background:   var(--hz-accent, #0070F2) !important;
+  border-color: var(--hz-accent, #0070F2) !important;
+  color:        #fff !important;
+  box-shadow:   0 2px 8px rgba(var(--hz-accent-rgb, 0,112,242), 0.30) !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtnEmphasized:hover .sapMBtnInner {
+  filter:     brightness(1.07) !important;
+  transform:  translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(var(--hz-accent-rgb, 0,112,242), 0.42) !important;
+}
+
+/* Delete / Reject button — red */
+.chkApp .detailControlRowActions .sapMBtnReject .sapMBtnInner {
+  background:   transparent !important;
+  border-color: rgba(204, 0, 0, 0.40) !important;
+  color:        rgba(180, 0, 0, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlRowActions .sapMBtnReject .sapMBtnInner {
+  border-color: rgba(255, 80, 110, 0.38) !important;
+  color:        rgba(255, 130, 148, 0.88) !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtnReject:hover .sapMBtnInner {
+  background: rgba(204, 0, 0, 0.07) !important;
+}
+
+/* Accept/Confirm (armed delete confirm) */
+.chkApp .detailControlRowActions .sapMBtnAccept .sapMBtnInner {
+  background:   rgba(26, 124, 64, 0.10) !important;
+  border-color: rgba(26, 124, 64, 0.35) !important;
+  color:        rgba(10, 80, 32, 0.90) !important;
+}
+
+/* Undo button */
+.chkApp .detailControlRowTop .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  border:        1px solid transparent !important;
+  background:    transparent !important;
+  font-size:     0.78rem !important;
+  min-height:    1.9rem !important;
+  padding:       0 0.65rem !important;
+  gap:           0.28rem !important;
+  transition:    background 110ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailControlRowTop .sapMBtn:hover .sapMBtnInner {
+  background:   rgba(0, 112, 242, 0.07) !important;
+  border-color: rgba(0, 112, 242, 0.20) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlRowTop .sapMBtn:hover .sapMBtnInner {
+  background:   rgba(77, 177, 255, 0.09) !important;
+  border-color: rgba(77, 177, 255, 0.22) !important;
+}
+
+/* Disabled state */
+.chkApp .detailControlRowActions .sapMBtn .sapMBtnInner.sapMBtnDisabled,
+.chkApp .detailControlRowActions .sapMBtn.sapMBtnDisabled .sapMBtnInner {
+  opacity:   0.40 !important;
+  transform: none !important;
+  cursor:    not-allowed !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 6 · accentSwitch — edit mode toggle in control bar
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .accentSwitch.accentSwitchEditMode.sapMSwt {
+  border-radius: 999px !important;
+  border:        1.5px solid !important;
+  min-width:     3rem !important;
+  height:        1.8rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .accentSwitchEditMode.sapMSwt {
+  background:   rgba(225, 240, 255, 0.90) !important;
+  border-color: rgba(140, 185, 235, 0.55) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .accentSwitchEditMode.sapMSwt {
+  background:   rgba(16, 28, 54, 0.88) !important;
+  border-color: rgba(50, 90, 160, 0.45) !important;
+}
+
+/* ON (edit mode) */
+body.chkAppRoot.appLight .chkApp .accentSwitchEditMode.sapMSwtOn {
+  background:   var(--hz-accent, #0070F2) !important;
+  border-color: var(--hz-accent, #0070F2) !important;
+  box-shadow:   0 0 0 3px rgba(0, 112, 242, 0.18) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .accentSwitchEditMode.sapMSwtOn {
+  background:   var(--hz-accent, #4DB1FF) !important;
+  border-color: var(--hz-accent, #4DB1FF) !important;
+  box-shadow:   0 0 0 3px rgba(77, 177, 255, 0.18) !important;
+}
+
+.chkApp .accentSwitchEditMode .sapMSwtHandle {
+  width:         1.3rem !important;
+  height:        1.3rem !important;
+  border-radius: 50% !important;
+  background:    #fff !important;
+  box-shadow:    0 1px 4px rgba(0, 0, 20, 0.20) !important;
+  transition:    left 200ms cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 7 · detailCreateModeBanner — create new checklist header
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailCreateModeBanner {
+  border-radius: 0.75rem !important;
+  padding:       0.875rem 1rem !important;
+  display:       flex !important;
+  flex-direction:column !important;
+  gap:           0.35rem !important;
+  border:        1px solid !important;
+  border-left:   3px solid var(--hz-accent, #0070F2) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailCreateModeBanner {
+  background:   rgba(0, 112, 242, 0.05) !important;
+  border-color: rgba(0, 112, 242, 0.22) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailCreateModeBanner {
+  background:   rgba(77, 177, 255, 0.07) !important;
+  border-color: rgba(77, 177, 255, 0.22) !important;
+}
+
+/* Create mode icon */
+.chkApp .detailCreateModeIcon.sapUiIcon {
+  font-size:     1.1rem !important;
+  width:         2rem !important;
+  height:        2rem !important;
+  border-radius: 0.5rem !important;
+  display:       flex !important;
+  align-items:   center !important;
+  justify-content:center !important;
+  flex-shrink:   0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailCreateModeIcon {
+  background: rgba(0, 112, 242, 0.10) !important;
+  color:      rgba(0, 64, 180, 0.82) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailCreateModeIcon {
+  background: rgba(77, 177, 255, 0.12) !important;
+  color:      rgba(120, 195, 255, 0.85) !important;
+}
+
+/* Banner top row */
+.chkApp .detailCreateModeBannerTop {
+  display:     flex !important;
+  align-items: center !important;
+  gap:         0.5rem !important;
+  flex-wrap:   wrap !important;
+}
+
+.chkApp .detailCreateModeTitle.sapMTitle {
+  font-size:   0.875rem !important;
+  font-weight: 740 !important;
+  margin:      0 !important;
+}
+
+.chkApp .detailCreateModeText.sapMText {
+  font-size:   0.78rem !important;
+  opacity:     0.65 !important;
+  line-height: 1.5 !important;
+}
+
+/* Create mode status chip (DRAFT/CHANGED) */
+.chkApp .detailCreateModeStatus.sapMObjStatus {
+  font-size:   0.70rem !important;
+  font-weight: 720 !important;
+  padding:     0.12rem 0.45rem !important;
+  border-radius:999px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 8 · infoCard grid — DATE/INSPECTOR/EQUIPMENT/LOCATION
+   f:GridList with auto-fill layout
+   ══════════════════════════════════════════════════════════════ */
+
+/* GridList container */
+.chkApp .infoCardGrid.sapFGridList {
+  background: transparent !important;
+  border:     0 !important;
+  padding:    0.75rem !important;
+}
+
+/* GridList item grid layout */
+.chkApp .infoCardGrid .sapFGridList {
+  display:               grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  gap:                   0.55rem !important;
+}
+
+/* GridListItem */
+.chkApp .infoCardGrid .sapFGLI {
+  border-radius: 0.875rem !important;
+  border:        1px solid !important;
+  overflow:      hidden !important;
+  padding:       0 !important;
+  transition:    transform 150ms ease, box-shadow 150ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .infoCardGrid .sapFGLI {
+  border-color: rgba(160, 200, 240, 0.40) !important;
+  background:   rgba(255, 255, 255, 0.82) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardGrid .sapFGLI {
+  border-color: rgba(50, 85, 150, 0.28) !important;
+  background:   rgba(14, 24, 48, 0.80) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .infoCardGrid .sapFGLI:hover {
+  transform:  translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(0, 112, 242, 0.10) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardGrid .sapFGLI:hover {
+  transform:  translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(0, 2, 20, 0.45) !important;
+}
+
+/* Drag state */
+.chkApp .infoCardGrid .sapFGLI[draggable="true"] {
+  cursor: grab !important;
+}
+
+.chkApp .infoCardGrid .sapFGLI:active {
+  cursor: grabbing !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 9 · Search left panel — KPI + filter + table
+   ══════════════════════════════════════════════════════════════ */
+
+/* App content layout */
+.chkApp .searchExperienceStack {
+  display:        flex !important;
+  flex-direction: column !important;
+  gap:            0.65rem !important;
+  padding:        0.75rem 1rem !important;
+}
+
+/* Analytics rail */
+.chkApp .searchAnalyticsRailShell {
+  width: 100% !important;
+}
+
+/* Filter card */
+.chkApp .searchFilterCardDense {
+  border-radius: 1rem !important;
+  overflow:      hidden !important;
+  padding:       0.875rem 1rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense {
+  background:   rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(160, 200, 240, 0.45) !important;
+  box-shadow:
+    0 1px 4px rgba(12, 28, 52, 0.06),
+    inset 0 1px 0 rgba(255,255,255,0.70) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense {
+  background:   rgba(14, 24, 48, 0.88) !important;
+  border-color: rgba(50, 85, 150, 0.32) !important;
+  box-shadow:   0 1px 6px rgba(0, 2, 16, 0.40) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 10 · Search results table — row visual hierarchy
+   ══════════════════════════════════════════════════════════════ */
+
+/* Table container */
+.chkApp .searchResultsTable {
+  border-radius: 1rem !important;
+  overflow:      hidden !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchResultsTable {
+  background:   rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(160, 200, 240, 0.45) !important;
+  box-shadow:
+    0 1px 6px rgba(12, 28, 52, 0.07),
+    inset 0 1px 0 rgba(255,255,255,0.65) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable {
+  background:   rgba(12, 20, 44, 0.90) !important;
+  border-color: rgba(45, 80, 148, 0.30) !important;
+  box-shadow:   0 1px 8px rgba(0, 2, 16, 0.45) !important;
+}
+
+/* Header row */
+.chkApp .searchResultsTable .sapMListTblHeaderRow .sapMListTblHeaderCell {
+  padding:    0.55rem 0.875rem !important;
+  font-size:  0.66rem !important;
+  font-weight:840 !important;
+  letter-spacing:0.07em !important;
+  text-transform:uppercase !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblHeaderCell {
+  background:   rgba(240, 248, 255, 0.95) !important;
+  border-color: rgba(160, 200, 240, 0.32) !important;
+  color:        rgba(60, 100, 160, 0.60) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblHeaderCell {
+  background:   rgba(14, 24, 48, 0.95) !important;
+  border-color: rgba(45, 80, 148, 0.25) !important;
+  color:        rgba(100, 155, 220, 0.60) !important;
+}
+
+/* Data row cells */
+.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
+  padding:        0.6rem 0.875rem !important;
+  vertical-align: middle !important;
+  border-bottom:  1px solid !important;
+  font-size:      0.84rem !important;
+  line-height:    1.35 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
+  background:   rgba(255, 255, 255, 0.80) !important;
+  border-color: rgba(160, 200, 240, 0.18) !important;
+  color:        rgba(18, 36, 72, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
+  background:   rgba(16, 26, 50, 0.82) !important;
+  border-color: rgba(45, 80, 148, 0.16) !important;
+  color:        rgba(205, 222, 248, 0.88) !important;
+}
+
+/* Row hover */
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell {
+  background: rgba(232, 244, 255, 0.92) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell {
+  background: rgba(22, 38, 72, 0.88) !important;
+}
+
+/* Selected row */
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRowSel .sapMListTblCell {
+  background:
+    linear-gradient(90deg,
+      rgba(0,112,242,0.06) 0%,
+      rgba(0,112,242,0.04) 100%) !important;
+  border-color: rgba(0, 112, 242, 0.16) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblRowSel .sapMListTblCell {
+  background:   rgba(0, 100, 220, 0.12) !important;
+  border-color: rgba(77, 177, 255, 0.20) !important;
+}
+
+/* Alternating rows */
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRow:nth-child(even) .sapMListTblCell {
+  background: rgba(248, 252, 255, 0.75) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblRow:nth-child(even) .sapMListTblCell {
+  background: rgba(14, 22, 46, 0.78) !important;
+}
+
+/* ID column — accent monospace */
+.chkApp .searchResultsTable .sapMListTblCell:nth-child(2) .sapMText {
+  font-family:          ui-monospace, 'Cascadia Code', monospace !important;
+  font-size:            0.80rem !important;
+  font-weight:          700 !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing:       0.01em !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblCell:nth-child(2) .sapMText {
+  color: rgba(0, 64, 180, 0.82) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblCell:nth-child(2) .sapMText {
+  color: rgba(120, 195, 255, 0.84) !important;
+}
+
+/* DATE column — tabular nums */
+.chkApp .searchResultsTable .sapMListTblCell:last-child .sapMText {
+  font-variant-numeric: tabular-nums !important;
+  font-size:            0.80rem !important;
+  opacity:              0.78 !important;
+}
+
+/* CLOSED status chip inside table */
+.chkApp .searchResultsTable .sapMListTblCell .sapMObjStatusStateNone {
+  opacity: 0.62 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 11 · "No permission" tooltip — Equipment card overlay
+   ══════════════════════════════════════════════════════════════ */
+
+/* SAP QuickView / Popover shown as permission tooltip */
+.chkApp .sapMPopover:has(.sapMText) {
+  border-radius: 0.75rem !important;
+  overflow:      hidden !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sapMPopover {
+  background:   rgba(255, 255, 255, 0.96) !important;
+  border:       1px solid rgba(160, 200, 240, 0.50) !important;
+  box-shadow:   0 8px 24px rgba(12, 28, 52, 0.15) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMPopover {
+  background:   rgba(16, 28, 54, 0.96) !important;
+  border:       1px solid rgba(50, 85, 150, 0.38) !important;
+  box-shadow:   0 8px 24px rgba(0, 2, 18, 0.55) !important;
+}
+
+/* "No permission" text in popover */
+.chkApp .sapMPopover .sapMText {
+  font-size:   0.82rem !important;
+  font-weight: 580 !important;
+  padding:     0.6rem 0.875rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 12 · Detail section cards — separation and depth
+   ══════════════════════════════════════════════════════════════ */
+
+/* Main experience section stack */
+.chkApp .detailMainExperienceStack {
+  display:        flex !important;
+  flex-direction: column !important;
+  gap:            0.65rem !important;
+  padding:        0.75rem 1rem 1rem !important;
+}
+
+/* Section card */
+.chkApp .detailSectionCard {
+  border-radius: 1rem !important;
+  overflow:      hidden !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionCard {
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,0.92) 0%,
+      rgba(250,253,255,0.90) 100%) !important;
+  border-color: rgba(160, 200, 240, 0.42) !important;
+  box-shadow:
+    0 1px 4px rgba(12, 28, 52, 0.06),
+    inset 0 1px 0 rgba(255,255,255,0.70) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionCard {
+  background:
+    linear-gradient(180deg,
+      rgba(16,28,54,0.90) 0%,
+      rgba(12,22,44,0.88) 100%) !important;
+  border-color: rgba(45, 80, 148, 0.28) !important;
+  box-shadow:
+    0 1px 6px rgba(0, 2, 16, 0.38),
+    inset 0 1px 0 rgba(100,160,255,0.04) !important;
+}
+
+/* Section body padding */
+.chkApp .detailSectionBody {
+  padding: 0 !important;
+}
+
+.chkApp .detailInfoSectionBody {
+  padding: 0.25rem !important;
+}
+
+/* infoCard section card */
+.chkApp .detailInfoExperienceCard.detailSectionCard {
+  overflow: visible !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 13 · Control bar skeleton
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailControlSkeletonCard {
+  border-radius: 1rem !important;
+  overflow:      hidden !important;
+  padding:       0.875rem 1rem !important;
+}
+
+.chkApp .detailControlSkeletonRow {
+  display:     flex !important;
+  gap:         0.5rem !important;
+  align-items: center !important;
+  padding:     0.4rem 0 0.75rem !important;
+  border-bottom: 1px solid rgba(160, 200, 240, 0.22) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlSkeletonRow {
+  border-color: rgba(45, 80, 148, 0.20) !important;
+}
+
+.chkApp .detailControlSkeletonButtons {
+  display:     flex !important;
+  gap:         0.5rem !important;
+  align-items: center !important;
+  padding-top: 0.65rem !important;
+}
+
+.chkApp .detailControlSkeletonButton {
+  width:         5.5rem !important;
+  height:        2.1rem !important;
+  border-radius: 999px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 14 · Global surface system fix — consistent depth
+   ══════════════════════════════════════════════════════════════ */
+
+/* Ensure the main app content areas have proper backgrounds */
+.chkApp .appContent {
+  background: transparent !important;
+}
+
+/* FCL panel backgrounds */
+body.chkAppRoot.appLight .chkApp .sapFFCL {
+  background: transparent !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapFFCL {
+  background: transparent !important;
+}
+
+/* sapMPage inside app — transparent */
+.chkApp .pageTransparent.sapMPage > .sapMPageHeader,
+.chkApp .pageTransparent.sapMPage > .sapMPageSubHeader {
+  background: transparent !important;
+}
+
+.chkApp .pageTransparent > .sapMPageHeader .sapMBar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 15 · Variant management / SmartFilterBar toolbar
+   ══════════════════════════════════════════════════════════════ */
+
+/* Variant selector */
+.chkApp .searchFilterCardDense .sapMVarMngmt,
+.chkApp .searchFilterCardDense .sapUiCompVariantMgmt {
+  border-radius: 999px !important;
+  border:        1px solid !important;
+  padding:       0 0.65rem !important;
+  min-height:    2rem !important;
+  font-size:     0.82rem !important;
+  font-weight:   660 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense .sapMVarMngmt {
+  background:   rgba(240, 248, 255, 0.88) !important;
+  border-color: rgba(140, 185, 235, 0.50) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMVarMngmt {
+  background:   rgba(16, 28, 54, 0.85) !important;
+  border-color: rgba(50, 85, 150, 0.40) !important;
+}
+
+/* Go/Search button */
+.chkApp .searchFilterCardDense .sapMBtnEmphasized .sapMBtnInner {
+  border-radius: 999px !important;
+  min-height:    2.1rem !important;
+  padding:       0 1.1rem !important;
+  background:    var(--hz-accent, #0070F2) !important;
+  border-color:  var(--hz-accent, #0070F2) !important;
+  color:         #fff !important;
+  font-weight:   700 !important;
+  box-shadow:    0 2px 8px rgba(var(--hz-accent-rgb, 0,112,242), 0.28) !important;
+}
+
+/* Hide filter / Clear buttons */
+.chkApp .searchFilterCardDense .sapMBtnTransparent .sapMBtnInner {
+  border-radius: 999px !important;
+  border:        1px solid rgba(160, 200, 240, 0.40) !important;
+  background:    transparent !important;
+  font-size:     0.78rem !important;
+  min-height:    2rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 16 · Responsive final fixes
+   ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 800px) {
+  .chkApp .detailMainExperienceStack {
+    padding: 0.5rem 0.5rem 0.75rem !important;
+  }
+
+  .chkApp .searchExperienceStack {
+    padding: 0.5rem 0.5rem !important;
+    gap:     0.5rem !important;
+  }
+
+  .chkApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+    padding: 0 0.7rem !important;
+  }
+
+  .chkApp .detailSectionAnchorRail {
+    flex-wrap: nowrap !important;
+    overflow-x:auto !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chkApp .uxStatRow {
+    padding: 0.4rem 0.6rem !important;
+    gap:     0.2rem !important;
+  }
+
+  .chkApp .uxStatChip {
+    padding: 0.15rem 0.45rem !important;
+  }
+
+  .chkApp .infoCardGrid .sapFGridList {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 17 · Final backdrop-filter nuclear kill
+   MUST be absolutely last in this file
+   ══════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  backdrop-filter:         none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ================================================================
+   9L_visual.css  —  Visual Excellence · Final Polish Pass
+   ================================================================
+   Targeting everything still visible in screenshot:
+
+   Ch 1   KPI cards — number prominence, icon semantic colors,
+          hover depth, update flash, skeleton quality
+   Ch 2   Filter bar — Smart filter inputs/selects, segment pills,
+          variant selector, Go button, density
+   Ch 3   Search toolbar — all action buttons correctly styled,
+          missing searchOpenActionBtn / searchCopyActionBtn
+   Ch 4   Table — sub-row expand area, selection highlight,
+          status CLOSED/OPEN chip quality
+   Ch 5   Control bar — detailRailHint "Tip:" text, hint padding,
+          accentSwitch ON/OFF ring, BusyIndicator in toolbar
+   Ch 6   Detail panel FCL — correct padding from FCL edge
+   Ch 7   Surface depth — light vs dark card layering system
+   Ch 8   Typography — number size, H4 weight, meta size
+   Ch 9   Animations — KPI entry, table row reveal, no blur
+   Ch 10  Final backdrop-filter kill (must stay last)
+   ================================================================ */
+
+/* ══════════════════════════════════════════════════════════════
+   CH 1 · KPI Cards — complete redesign
+   ══════════════════════════════════════════════════════════════ */
+
+/* Container rail */
+.chkApp .searchAnalyticsRailGrid {
+  display:               flex !important;
+  flex-wrap:             wrap !important;
+  gap:                   0.5rem !important;
+  width:                 100% !important;
+}
+
+/* Single KPI card */
+.chkApp .kpiCard.searchAnalyticsCard {
+  flex:           1 1 148px !important;
+  min-width:      148px !important;
+  max-width:      220px !important;
+  padding:        0.875rem 1rem 0.8rem !important;
+  border-radius:  0.875rem !important;
+  border:         1px solid !important;
+  display:        flex !important;
+  flex-direction: column !important;
+  gap:            0.28rem !important;
+  position:       relative !important;
+  overflow:       hidden !important;
+  cursor:         default !important;
+  transition:     transform 150ms ease, box-shadow 150ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .kpiCard.searchAnalyticsCard {
+  background:
+    linear-gradient(145deg,
+      rgba(255,255,255,0.96) 0%,
+      rgba(246,252,255,0.92) 100%) !important;
+  border-color: rgba(160,200,240,0.40) !important;
+  box-shadow:
+    0 1px 3px rgba(12,28,52,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.80) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .kpiCard.searchAnalyticsCard {
+  background:
+    linear-gradient(145deg,
+      rgba(18,30,58,0.94) 0%,
+      rgba(14,24,48,0.90) 100%) !important;
+  border-color: rgba(48,82,148,0.32) !important;
+  box-shadow:
+    0 1px 5px rgba(0,2,18,0.42),
+    inset 0 1px 0 rgba(100,160,255,0.05) !important;
+}
+
+/* Hover */
+body.chkAppRoot.appLight .chkApp .kpiCard.searchAnalyticsCard:hover {
+  transform:  translateY(-2px) !important;
+  box-shadow:
+    0 6px 18px rgba(0,112,242,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.90) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .kpiCard.searchAnalyticsCard:hover {
+  transform:  translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(0,2,20,0.48) !important;
+}
+
+/* Top accent line per card type */
+.chkApp .kpiCard.searchAnalyticsCard::before {
+  content:       '' !important;
+  position:      absolute !important;
+  top:           0 !important;
+  left:          0 !important;
+  right:         0 !important;
+  height:        2.5px !important;
+  border-radius: 0.875rem 0.875rem 0 0 !important;
+  opacity:       0.70 !important;
+}
+
+/* Label + icon row */
+.chkApp .kpiLabelRow {
+  display:       flex !important;
+  align-items:   center !important;
+  gap:           0.36rem !important;
+  margin-bottom: 0.2rem !important;
+}
+
+/* Icon badge */
+.chkApp .kpiCard .kpiLabelIcon.sapUiIcon {
+  width:         1.45rem !important;
+  height:        1.45rem !important;
+  border-radius: 0.42rem !important;
+  display:       inline-flex !important;
+  align-items:   center !important;
+  justify-content:center !important;
+  font-size:     0.72rem !important;
+  flex-shrink:   0 !important;
+}
+
+/* task icon → blue */
+.chkApp .kpiCard .kpiLabelIcon[data-sap-ui-icon-content="task"],
+.chkApp .kpiCard:nth-child(1) .kpiLabelIcon {
+  background: rgba(0,112,242,0.12) !important;
+  color:      rgba(0,64,200,0.82) !important;
+}
+body.chkAppRoot.appDark .chkApp .kpiCard:nth-child(1) .kpiLabelIcon {
+  background: rgba(77,177,255,0.14) !important;
+  color:      rgba(120,195,255,0.85) !important;
+}
+
+/* history icon → teal */
+.chkApp .kpiCard:nth-child(2) .kpiLabelIcon {
+  background: rgba(0,154,154,0.12) !important;
+  color:      rgba(0,100,100,0.82) !important;
+}
+body.chkAppRoot.appDark .chkApp .kpiCard:nth-child(2) .kpiLabelIcon {
+  background: rgba(0,210,210,0.12) !important;
+  color:      rgba(60,220,220,0.82) !important;
+}
+
+/* inspection icon → amber */
+.chkApp .kpiCard:nth-child(3) .kpiLabelIcon {
+  background: rgba(195,85,0,0.11) !important;
+  color:      rgba(140,60,0,0.82) !important;
+}
+body.chkAppRoot.appDark .chkApp .kpiCard:nth-child(3) .kpiLabelIcon {
+  background: rgba(255,149,0,0.12) !important;
+  color:      rgba(255,185,60,0.85) !important;
+}
+
+/* alert icon → red */
+.chkApp .kpiCard:nth-child(4) .kpiLabelIcon {
+  background: rgba(204,0,0,0.10) !important;
+  color:      rgba(160,0,0,0.82) !important;
+}
+body.chkAppRoot.appDark .chkApp .kpiCard:nth-child(4) .kpiLabelIcon {
+  background: rgba(255,80,110,0.12) !important;
+  color:      rgba(255,130,148,0.85) !important;
+}
+
+/* Top accent lines matching icon colors */
+.chkApp .kpiCard:nth-child(1)::before {
+  background: linear-gradient(90deg, rgba(0,112,242,0.60), transparent 80%) !important;
+}
+.chkApp .kpiCard:nth-child(2)::before {
+  background: linear-gradient(90deg, rgba(0,154,154,0.55), transparent 80%) !important;
+}
+.chkApp .kpiCard:nth-child(3)::before {
+  background: linear-gradient(90deg, rgba(195,85,0,0.55), transparent 80%) !important;
+}
+.chkApp .kpiCard:nth-child(4)::before {
+  background: linear-gradient(90deg, rgba(204,0,0,0.50), transparent 80%) !important;
+}
+
+/* Label text */
+.chkApp .kpiLabel {
+  font-size:      0.64rem !important;
+  font-weight:    780 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  line-height:    1.1 !important;
+  flex:           1 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .kpiLabel {
+  color: rgba(60,95,155,0.52) !important;
+}
+body.chkAppRoot.appDark .chkApp .kpiLabel {
+  color: rgba(110,165,230,0.52) !important;
+}
+
+/* The BIG number — H4 title */
+.chkApp .kpiCard .sapMTitleStyleH4,
+.chkApp .kpiCard .sapMTitle.sapMTitleStyleH4 {
+  font-size:            1.75rem !important;
+  font-weight:          820 !important;
+  line-height:          1.05 !important;
+  letter-spacing:       -0.025em !important;
+  font-variant-numeric: tabular-nums !important;
+  margin:               0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .kpiCard .sapMTitleStyleH4 {
+  color: rgba(14,28,58,0.92) !important;
+}
+body.chkAppRoot.appDark .chkApp .kpiCard .sapMTitleStyleH4 {
+  color: rgba(215,232,255,0.94) !important;
+}
+
+/* Meta text (date/subtitle below number) */
+.chkApp .searchAnalyticsMeta {
+  font-size:   0.66rem !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  margin-top:  0.12rem !important;
+  opacity:     0.52 !important;
+}
+
+/* Skeleton metric lines */
+.chkApp .appSkeletonMetric {
+  display:        flex !important;
+  flex-direction: column !important;
+  gap:            0.35rem !important;
+  padding-top:    0.1rem !important;
+}
+
+.chkApp .appSkeletonMetric .appSkeletonLineShort {
+  width:         3.5rem !important;
+  height:        1.75rem !important;
+  border-radius: 0.4rem !important;
+}
+
+.chkApp .appSkeletonMetric .appSkeletonLineMedium {
+  width:         5rem !important;
+  height:        0.7rem !important;
+  border-radius: 0.35rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 2 · Filter bar — inputs, segments, Go button
+   ══════════════════════════════════════════════════════════════ */
+
+/* SmartFilterBar workbench area */
+.chkApp .searchSmartFilterWorkbench {
+  padding: 0.5rem 0 0 !important;
+}
+
+/* Filter input fields */
+.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper {
+  border-radius: 0.5rem !important;
+  border:        1px solid !important;
+  min-height:    2rem !important;
+  transition:    border-color 120ms ease, box-shadow 120ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense .sapMInputBaseContentWrapper {
+  background:   rgba(248,252,255,0.90) !important;
+  border-color: rgba(160,200,240,0.48) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMInputBaseContentWrapper {
+  background:   rgba(14,24,48,0.88) !important;
+  border-color: rgba(48,82,148,0.40) !important;
+}
+
+.chkApp .searchFilterCardDense .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
+.chkApp .searchFilterCardDense .sapMInputBase:focus-within .sapMInputBaseContentWrapper {
+  border-color: var(--hz-accent,#0070F2) !important;
+  box-shadow:   0 0 0 2px rgba(0,112,242,0.14) !important;
+}
+
+/* Select (LPC, Status dropdowns) */
+.chkApp .searchFilterCardDense .sapMSlt .sapMSltLabel {
+  border-radius: 0.5rem !important;
+  border:        1px solid !important;
+  min-height:    2rem !important;
+  padding:       0 0.65rem !important;
+  font-size:     0.82rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense .sapMSlt .sapMSltLabel {
+  background:   rgba(248,252,255,0.90) !important;
+  border-color: rgba(160,200,240,0.48) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMSlt .sapMSltLabel {
+  background:   rgba(14,24,48,0.88) !important;
+  border-color: rgba(48,82,148,0.40) !important;
+}
+
+/* Filter labels */
+.chkApp .searchFilterCardDense .sapMLabel,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarItemLabel {
+  font-size:   0.70rem !important;
+  font-weight: 700 !important;
+  opacity:     0.62 !important;
+  line-height: 1.3 !important;
+}
+
+/* Segment buttons (All/Failed/Passed) */
+.chkApp .resultSegmentControl.sapMSegB {
+  border-radius: 999px !important;
+  border:        1px solid !important;
+  overflow:      hidden !important;
+  height:        2rem !important;
+  padding:       0.18rem !important;
+  gap:           0.1rem !important;
+  display:       inline-flex !important;
+  align-items:   center !important;
+}
+
+body.chkAppRoot.appLight .chkApp .resultSegmentControl {
+  background:   rgba(240,248,255,0.88) !important;
+  border-color: rgba(140,185,235,0.48) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .resultSegmentControl {
+  background:   rgba(14,24,48,0.85) !important;
+  border-color: rgba(48,82,148,0.38) !important;
+}
+
+.chkApp .resultSegmentControl .sapMSegBBtn {
+  border-radius: 999px !important;
+  border:        0 !important;
+  overflow:      hidden !important;
+}
+
+.chkApp .resultSegmentControl .sapMSegBBtnInner {
+  border-radius: 999px !important;
+  border:        0 !important;
+  padding:       0 0.65rem !important;
+  font-size:     0.75rem !important;
+  font-weight:   660 !important;
+  min-height:    1.62rem !important;
+  background:    transparent !important;
+  line-height:   1 !important;
+  transition:    background 100ms ease, color 100ms ease !important;
+}
+
+/* Unselected */
+body.chkAppRoot.appLight .chkApp .resultSegmentControl .sapMSegBBtnInner {
+  color: rgba(48,88,155,0.70) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .resultSegmentControl .sapMSegBBtnInner {
+  color: rgba(120,175,240,0.70) !important;
+}
+
+/* Selected */
+.chkApp .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner {
+  background: var(--hz-accent,#0070F2) !important;
+  color:      #fff !important;
+  font-weight:720 !important;
+}
+
+/* "All" = neutral (not colored) */
+.chkApp .resultSegmentControl .sapMSegBBtn:first-child.sapMSegBBtnSel .sapMSegBBtnInner {
+  background: rgba(0,112,242,0.15) !important;
+  color:      var(--hz-accent,#0070F2) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 3 · Search toolbar buttons
+   ══════════════════════════════════════════════════════════════ */
+
+/* All toolbar action buttons base */
+.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  min-height:    2rem !important;
+  padding:       0 0.75rem !important;
+  font-size:     0.78rem !important;
+  font-weight:   660 !important;
+  gap:           0.3rem !important;
+  border:        1px solid !important;
+  transition:    transform 100ms ease, opacity 100ms ease !important;
+}
+
+/* Ghost action buttons (Open, Copy, Select, Clear selection) */
+.chkApp .searchOpenActionBtn .sapMBtnInner,
+.chkApp .searchCopyActionBtn .sapMBtnInner,
+.chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+.chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  background: transparent !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchOpenActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchCopyActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  border-color: rgba(140,185,235,0.50) !important;
+  color:        rgba(48,88,155,0.82) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchCopyActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  border-color: rgba(48,82,148,0.42) !important;
+  color:        rgba(130,185,245,0.82) !important;
+}
+
+/* Hover state */
+body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner {
+  background:   rgba(0,112,242,0.07) !important;
+  border-color: rgba(0,112,242,0.25) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner {
+  background:   rgba(77,177,255,0.09) !important;
+  border-color: rgba(77,177,255,0.28) !important;
+}
+
+/* Export button */
+.chkApp .searchResultsActionRail .sapMBtn[title*="Export"] .sapMBtnInner,
+.chkApp .searchResultsActionRail .sapMBtnTransparent .sapMBtnInner {
+  background:    transparent !important;
+  border-color:  rgba(140,185,235,0.45) !important;
+}
+
+/* Nav up/down buttons */
+.chkApp .searchToolbarNavBtn .sapMBtnInner {
+  padding: 0 0.6rem !important;
+}
+
+/* Filters count button */
+.chkApp .searchToolbarNavBtnFilters .sapMBtnInner {
+  background: rgba(0,112,242,0.08) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchToolbarNavBtnFilters .sapMBtnInner {
+  background: rgba(77,177,255,0.10) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 4 · Table sub-rows and selection state
+   ══════════════════════════════════════════════════════════════ */
+
+/* Sub-row (expand area below main row) */
+.chkApp .searchResultsTable .sapMLIBDetail,
+.chkApp .searchResultsTable .sapMListTblSubRow {
+  padding:       0.5rem 0.875rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMLIBDetail {
+  background:   rgba(240,248,255,0.65) !important;
+  border-color: rgba(160,200,240,0.15) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMLIBDetail {
+  background:   rgba(12,20,42,0.65) !important;
+  border-color: rgba(44,76,142,0.15) !important;
+}
+
+/* Skeleton sub-row lines in the table */
+.chkApp .searchResultsTable .appSkeleton.appSkeletonLine {
+  height:        0.55rem !important;
+  border-radius: 999px !important;
+  margin:        0.2rem 0 !important;
+}
+
+/* Status chip in table (CLOSED/OPEN) */
+.chkApp .searchResultsTable .sapMObjStatus {
+  font-size:     0.70rem !important;
+  font-weight:   700 !important;
+  padding:       0.12rem 0.5rem !important;
+  border-radius: 999px !important;
+  border:        1px solid !important;
+  white-space:   nowrap !important;
+  display:       inline-flex !important;
+  align-items:   center !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMObjStatusStateNone {
+  background:   rgba(200,215,235,0.40) !important;
+  border-color: rgba(160,200,240,0.35) !important;
+  color:        rgba(80,110,160,0.65) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMObjStatusStateNone {
+  background:   rgba(22,35,62,0.60) !important;
+  border-color: rgba(48,80,140,0.30) !important;
+  color:        rgba(100,145,210,0.65) !important;
+}
+
+/* Progress bar in table cells (rate indicator) */
+.chkApp .searchResultsTable .sapMPI {
+  height:        5px !important;
+  border-radius: 999px !important;
+  overflow:      hidden !important;
+  min-width:     60px !important;
+}
+
+.chkApp .searchResultsTable .sapMPIBar {
+  height:        100% !important;
+  border-radius: 999px !important;
+  transition:    width 400ms ease !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 5 · Control bar refinements — hint text, BusyIndicator
+   ══════════════════════════════════════════════════════════════ */
+
+/* "Tip: press Save to keep lock ownership..." */
+.chkApp .detailRailHint {
+  font-size:   0.72rem !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  padding:     0.35rem 0.875rem 0.5rem !important;
+  opacity:     0.55 !important;
+  font-style:  italic !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailRailHint {
+  color: rgba(48,88,155,0.70) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailHint {
+  color: rgba(130,185,245,0.65) !important;
+}
+
+/* BusyIndicator in toolbar */
+.chkApp .detailControlRowTop .sapMBsyInd,
+.chkApp .detailControlRowActions .sapMBsyInd {
+  display:     inline-flex !important;
+  align-items: center !important;
+}
+
+.chkApp .detailControlRowTop .sapMBsyInd .sapMBusyIndicatorDot {
+  width:         4px !important;
+  height:        4px !important;
+  border-radius: 50% !important;
+}
+
+/* Undo button styling */
+.chkApp .detailControlRowTop .sapMBtn .sapMBtnIconLeft.sapUiIcon {
+  font-size: 0.80rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 6 · FCL panel — correct padding and overflow
+   ══════════════════════════════════════════════════════════════ */
+
+/* Mid column (detail panel) */
+.chkApp .appRootFcl .sapFFCLMidColumn {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Detail canvas root */
+.chkApp .detailContent.detailExperienceCanvas {
+  padding:        0 !important;
+  overflow-y:     auto !important;
+  overflow-x:     hidden !important;
+  scrollbar-width:thin !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailContent.detailExperienceCanvas {
+  scrollbar-color: rgba(160,200,240,0.45) transparent !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailContent.detailExperienceCanvas {
+  scrollbar-color: rgba(48,82,148,0.35) transparent !important;
+}
+
+/* uxap ObjectPageLayout padding cleanup */
+.chkApp #detailObjectPage.sapUxAPObjectPageLayout {
+  background: transparent !important;
+}
+
+.chkApp #detailObjectPage .sapUxAPObjectPageContent {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.chkApp #detailObjectPage .sapUxAPObjectPageSubSection {
+  padding:    0 !important;
+  background: transparent !important;
+}
+
+.chkApp #detailObjectPage .sapUxAPBlockBase {
+  padding:    0 !important;
+  background: transparent !important;
+}
+
+/* Detail main stack */
+.chkApp .detailMainExperienceStack {
+  padding: 0.65rem 0.875rem 1.25rem !important;
+  gap:     0.6rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 7 · Surface depth system — layered card hierarchy
+   ══════════════════════════════════════════════════════════════ */
+
+/* Level 0 — body (darkest in dark / lightest in light) */
+/* Level 1 — page background overlay: appContent */
+.chkApp .appContent {
+  background:   transparent !important;
+  min-height:   100% !important;
+}
+
+/* Level 2 — section cards */
+body.chkAppRoot.appLight .chkApp .glassCard,
+body.chkAppRoot.appLight .chkApp .detailSectionCard {
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,0.94) 0%,
+      rgba(248,253,255,0.91) 100%) !important;
+  border-color: rgba(160,200,240,0.40) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .glassCard,
+body.chkAppRoot.appDark .chkApp .detailSectionCard {
+  background:
+    linear-gradient(180deg,
+      rgba(18,30,58,0.92) 0%,
+      rgba(14,24,48,0.88) 100%) !important;
+  border-color: rgba(48,82,148,0.28) !important;
+}
+
+/* Level 3 — control inline card (slightly elevated) */
+body.chkAppRoot.appLight .chkApp .detailControlInlineCard {
+  background:   rgba(255,255,255,0.96) !important;
+  border-color: rgba(160,200,240,0.45) !important;
+  box-shadow:
+    0 2px 14px rgba(12,28,52,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.80) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard {
+  background:   rgba(18,30,58,0.96) !important;
+  border-color: rgba(48,82,148,0.38) !important;
+  box-shadow:
+    0 2px 16px rgba(0,2,18,0.48),
+    inset 0 1px 0 rgba(100,160,255,0.06) !important;
+}
+
+/* Filter card */
+body.chkAppRoot.appLight .chkApp .filterCard,
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense {
+  background:   rgba(255,255,255,0.92) !important;
+  border-color: rgba(160,200,240,0.42) !important;
+  box-shadow:
+    0 1px 4px rgba(12,28,52,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.70) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .filterCard,
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense {
+  background:   rgba(16,26,52,0.92) !important;
+  border-color: rgba(44,78,145,0.30) !important;
+  box-shadow:   0 1px 6px rgba(0,2,16,0.38) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 8 · Typography depth — contrast and hierarchy
+   ══════════════════════════════════════════════════════════════ */
+
+/* Ensure all sapMText in cards are readable */
+body.chkAppRoot.appLight .chkApp .detailSectionCard .sapMText,
+body.chkAppRoot.appLight .chkApp .glassCard .sapMText {
+  color: rgba(24,44,82,0.86) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMText,
+body.chkAppRoot.appDark .chkApp .glassCard .sapMText {
+  color: rgba(205,222,250,0.86) !important;
+}
+
+/* Section card headers */
+body.chkAppRoot.appLight .chkApp .detailSectionCard .sapMTitle {
+  color: rgba(14,28,58,0.92) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMTitle {
+  color: rgba(215,232,255,0.94) !important;
+}
+
+/* Filter card labels */
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense .sapMLabel {
+  color: rgba(48,88,155,0.62) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMLabel {
+  color: rgba(110,165,225,0.60) !important;
+}
+
+/* Input text */
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense input,
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense .sapMInputBaseInner {
+  color: rgba(14,28,58,0.90) !important;
+  font-size: 0.84rem !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense input,
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMInputBaseInner {
+  color: rgba(205,222,250,0.90) !important;
+  font-size: 0.84rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 9 · KPI entry animation — GPU-only, no blur
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes _kpiCardIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chkApp .kpiCard.searchAnalyticsCard {
+  animation: _kpiCardIn 280ms cubic-bezier(0.22,0.61,0.36,1) both !important;
+}
+
+.chkApp .kpiCard:nth-child(1) { animation-delay:  0ms !important; }
+.chkApp .kpiCard:nth-child(2) { animation-delay: 45ms !important; }
+.chkApp .kpiCard:nth-child(3) { animation-delay: 90ms !important; }
+.chkApp .kpiCard:nth-child(4) { animation-delay:130ms !important; }
+
+/* Number reveal — count-up simulation via opacity */
+@keyframes _numReveal {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chkApp .kpiCard .sapMTitle.appSkeletonReveal {
+  animation: _numReveal 320ms cubic-bezier(0.22,0.61,0.36,1) both !important;
+  animation-delay: 80ms !important;
+}
+
+/* Table rows appear */
+@keyframes _rowIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.chkApp .searchResultsTable .sapMListTblRow {
+  animation: _rowIn 180ms ease both !important;
+}
+
+.chkApp .searchResultsTable .sapMListTblRow:nth-child(1)  { animation-delay:   0ms !important; }
+.chkApp .searchResultsTable .sapMListTblRow:nth-child(2)  { animation-delay:  18ms !important; }
+.chkApp .searchResultsTable .sapMListTblRow:nth-child(3)  { animation-delay:  36ms !important; }
+.chkApp .searchResultsTable .sapMListTblRow:nth-child(4)  { animation-delay:  54ms !important; }
+.chkApp .searchResultsTable .sapMListTblRow:nth-child(5)  { animation-delay:  72ms !important; }
+.chkApp .searchResultsTable .sapMListTblRow:nth-child(n+6){ animation-delay:  90ms !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   CH 10 · Scrollbar polish
+   ══════════════════════════════════════════════════════════════ */
+
+/* Detail panel scrollbar */
+.chkApp .detailContent::-webkit-scrollbar,
+.chkApp .sapFFCLMidColumn::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+.chkApp .detailContent::-webkit-scrollbar-thumb,
+.chkApp .sapFFCLMidColumn::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailContent::-webkit-scrollbar-thumb {
+  background: rgba(120,175,240,0.35) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailContent::-webkit-scrollbar-thumb {
+  background: rgba(48,82,148,0.40) !important;
+}
+
+/* Search left panel scrollbar */
+.chkApp .searchExperienceStack::-webkit-scrollbar { width: 4px !important; }
+
+/* Infocard grid scrollbar */
+.chkApp .infoCardGrid::-webkit-scrollbar { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   FINAL · Absolute last backdrop-filter kill
+   ══════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  backdrop-filter:         none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ================================================================
+   9M_detail.css  —  Deep Detail Panel Polish
+   ================================================================
+   Based on full source read of buildInfoCard + createSimpleEditCardContent:
+
+   mushroomCard structure:
+     infoCardGridItem (GridListItem wrapper)
+       └─ infoCardTile mushroomCard (VBox)
+            ├─ infoCardHeaderRow (HBox: title ↔ pinBtn)
+            │    ├─ infoCardTitle (Text)
+            │    └─ infoCardPinBtn (Button: pushpin-off/on)
+            └─ [content by key]
+                 datetime  → infoCardValue (read) | detailDateTimeGrid (edit)
+                 equipment → infoCardValue | Input
+                 location  → infoCardValue | detailLocationInput + locationCodeLabel
+                 lpc       → infoCardValue | detailDictionarySelect
+                 profession→ infoCardValue | detailDictionarySelect
+                 observer  → detailSemanticMetaBlock
+                              ├─ infoCardValue (fullname read)
+                              ├─ detailPersonSuggestInput (edit)
+                              ├─ createPrefixedStatus → PERNER/Position/Org unit
+   
+   Ch 1   mushroomCard — complete tile system
+   Ch 2   infoCardTitle — card header label
+   Ch 3   infoCardPinBtn — pushpin button
+   Ch 4   infoCardValue — read state display
+   Ch 5   detailSemanticMetaBlock — observer/inspected meta
+   Ch 6   detailDateTimeGrid — edit mode date/time/timezone
+   Ch 7   detailPersonSuggestInput — person search input
+   Ch 8   detailDictionarySelect + detailLocationInput
+   Ch 9   infoCardGrid layout — GridList sizing and gap
+   Ch 10  infoCard focus + drag + animation
+   Ch 11  Checks section — table + expandable rows
+   Ch 12  detailSectionToolbar — section header bars
+   Ch 13  Validation MessageStrip
+   Ch 14  LockKilledBanner warning
+   Ch 15  Attachment section
+   Ch 16  Checks section empty state
+   Ch 17  Complete dark/light/inverted coverage
+   Ch 18  Final backdrop-filter kill
+   ================================================================ */
+
+/* ══════════════════════════════════════════════════════════════
+   CH 1 · mushroomCard — complete tile foundation
+   ══════════════════════════════════════════════════════════════ */
+
+/* The outer GridListItem wrapper */
+.chkApp .infoCardGrid .infoCardGridItem.sapFGLI,
+.chkApp .infoCardGrid li.sapFGLI {
+  margin:        0 !important;
+  padding:       0 !important;
+  border:        1px solid !important;
+  border-radius: 0.875rem !important;
+  overflow:      hidden !important;
+  background:    transparent !important;
+  box-shadow:    none !important;
+  list-style:    none !important;
+  display:       block !important;
+}
+
+body.chkAppRoot.appLight .chkApp .infoCardGrid .sapFGLI {
+  border-color: rgba(160, 200, 240, 0.38) !important;
+  box-shadow:   0 1px 3px rgba(12, 28, 52, 0.05) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardGrid .sapFGLI {
+  border-color: rgba(48, 82, 148, 0.28) !important;
+  box-shadow:   0 1px 4px rgba(0, 2, 16, 0.35) !important;
+}
+
+/* Inner VBox shell */
+.chkApp .infoCardTile.mushroomCard {
+  display:        flex !important;
+  flex-direction: column !important;
+  gap:            0.5rem !important;
+  padding:        0.875rem !important;
+  min-height:     6rem !important;
+  height:         100% !important;
+  border-radius:  0 !important; /* border is on sapFGLI */
+  position:       relative !important;
+  overflow:       hidden !important;
+  transition:     background 120ms ease !important;
+}
+
+/* Light theme */
+body.chkAppRoot.appLight .chkApp .infoCardTile.mushroomCard {
+  background:
+    linear-gradient(160deg,
+      rgba(255,255,255,0.96) 0%,
+      rgba(246,252,255,0.92) 100%) !important;
+}
+
+/* Dark theme */
+body.chkAppRoot.appDark .chkApp .infoCardTile.mushroomCard {
+  background:
+    linear-gradient(160deg,
+      rgba(18,30,58,0.92) 0%,
+      rgba(14,24,48,0.88) 100%) !important;
+}
+
+/* Hover — lift effect */
+body.chkAppRoot.appLight .chkApp .infoCardGrid .sapFGLI:hover {
+  border-color: rgba(0, 112, 242, 0.28) !important;
+  box-shadow:   0 4px 16px rgba(0, 112, 242, 0.09) !important;
+  transform:    translateY(-1px) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardGrid .sapFGLI:hover {
+  border-color: rgba(77, 177, 255, 0.24) !important;
+  box-shadow:   0 4px 16px rgba(0, 2, 20, 0.50) !important;
+  transform:    translateY(-1px) !important;
+}
+
+/* Accent left stripe on hover */
+.chkApp .infoCardTile.mushroomCard::before {
+  content:    '' !important;
+  position:   absolute !important;
+  left:       0 !important;
+  top:        0 !important;
+  bottom:     0 !important;
+  width:      3px !important;
+  background: var(--hz-accent, #0070F2) !important;
+  opacity:    0 !important;
+  transition: opacity 120ms ease !important;
+  border-radius: 0 2px 2px 0 !important;
+}
+
+.chkApp .infoCardGrid .sapFGLI:hover .infoCardTile.mushroomCard::before {
+  opacity: 0.50 !important;
+}
+
+/* Pinned card — persistent accent stripe */
+.chkApp .infoCardGrid .sapFGLI[data-cardkey] .infoCardTile.mushroomCard.pinned::before,
+.chkApp .infoCardTile.mushroomCard[data-pinned="true"]::before {
+  opacity: 0.85 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 2 · infoCardTitle — DATE & TIME / INSPECTOR / EQUIPMENT
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .infoCardTitle.sapMText {
+  display:        block !important;
+  font-size:      0.60rem !important;
+  font-weight:    860 !important;
+  letter-spacing: 0.10em !important;
+  text-transform: uppercase !important;
+  line-height:    1 !important;
+  margin-bottom:  0 !important;
+  flex-shrink:    0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .infoCardTitle {
+  color: rgba(48, 88, 155, 0.48) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardTitle {
+  color: rgba(100, 160, 230, 0.48) !important;
+}
+
+/* HeaderRow = title + pin button */
+.chkApp .infoCardHeaderRow {
+  display:         flex !important;
+  align-items:     center !important;
+  justify-content: space-between !important;
+  gap:             0.5rem !important;
+  min-height:      1.35rem !important;
+  flex-shrink:     0 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 3 · infoCardPinBtn — pushpin toggle
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .infoCardPinBtn.sapMBtn {
+  width:    1.5rem !important;
+  height:   1.5rem !important;
+  flex-shrink: 0 !important;
+}
+
+.chkApp .infoCardPinBtn .sapMBtnInner {
+  width:         1.5rem !important;
+  height:        1.5rem !important;
+  min-width:     0 !important;
+  padding:       0 !important;
+  border:        0 !important;
+  background:    transparent !important;
+  border-radius: 0.4rem !important;
+  display:       flex !important;
+  align-items:   center !important;
+  justify-content:center !important;
+  transition:    background 100ms ease, opacity 100ms ease !important;
+}
+
+.chkApp .infoCardPinBtn .sapMBtnIconLeft.sapUiIcon {
+  font-size:  0.72rem !important;
+  margin:     0 !important;
+  line-height:1 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .infoCardPinBtn .sapMBtnInner {
+  color: rgba(48, 88, 155, 0.40) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardPinBtn .sapMBtnInner {
+  color: rgba(100, 160, 230, 0.40) !important;
+}
+
+/* Hover */
+body.chkAppRoot.appLight .chkApp .infoCardPinBtn:hover .sapMBtnInner {
+  background: rgba(0, 112, 242, 0.08) !important;
+  color:      rgba(0, 64, 180, 0.80) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardPinBtn:hover .sapMBtnInner {
+  background: rgba(77, 177, 255, 0.10) !important;
+  color:      rgba(120, 195, 255, 0.82) !important;
+}
+
+/* Pinned state — filled icon */
+.chkApp .infoCardPinBtn.sapMBtnDefault.sapMFocusable .sapMBtnInner[data-pinned="true"],
+.chkApp .infoCardTile.mushroomCard .infoCardPinBtn .sapUiIcon[data-sap-ui-icon-content*="pushpin-on"] {
+  color: var(--hz-accent, #0070F2) !important;
+  opacity: 1 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 4 · infoCardValue — read mode display
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .infoCardValue.sapMText {
+  font-size:            0.92rem !important;
+  font-weight:          620 !important;
+  line-height:          1.45 !important;
+  white-space:          pre-line !important;
+  flex:                 1 !important;
+  min-height:           1.4rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .infoCardValue {
+  color: rgba(14, 28, 58, 0.90) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .infoCardValue {
+  color: rgba(210, 228, 255, 0.90) !important;
+}
+
+/* datetime card — monospace value */
+.chkApp .infoCardGrid .sapFGLI[data-cardkey="datetime"] .infoCardValue,
+.chkApp .infoCardGrid .sapFGLI[data-cardkey="equipment"] .infoCardValue {
+  font-family:          ui-monospace, 'Cascadia Code', monospace !important;
+  font-size:            0.86rem !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* PERNER / Position / Org Unit (ObjectStatus under observer) */
+.chkApp .detailSemanticMetaBlock .sapMObjStatus {
+  padding:       0 !important;
+  border:        0 !important;
+  background:    transparent !important;
+  border-radius: 0 !important;
+  font-size:     0.70rem !important;
+  font-weight:   560 !important;
+  line-height:   1.4 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSemanticMetaBlock .sapMObjStatus {
+  color: rgba(60, 95, 155, 0.60) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSemanticMetaBlock .sapMObjStatus {
+  color: rgba(120, 175, 240, 0.60) !important;
+}
+
+.chkApp .detailSemanticMetaBlock .sapMObjStatusText {
+  font-size: inherit !important;
+  color:     inherit !important;
+}
+
+/* Dash placeholder */
+.chkApp .infoCardValue.sapMText:empty::after,
+.chkApp .infoCardValue.sapMText[data-empty]::after {
+  content: "—" !important;
+  opacity: 0.30 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 5 · detailSemanticMetaBlock — observer/inspected
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailSemanticMetaBlock {
+  display:        flex !important;
+  flex-direction: column !important;
+  gap:            0.22rem !important;
+  width:          100% !important;
+  flex:           1 !important;
+}
+
+/* Fullname (main infoCardValue inside observer block) */
+.chkApp .detailSemanticMetaBlock .infoCardValue {
+  font-size:   0.90rem !important;
+  font-weight: 660 !important;
+  margin-bottom: 0.2rem !important;
+}
+
+/* PERNER: / Position: / Org unit: labels */
+.chkApp .detailSemanticMetaBlock .sapMObjStatusIcon.sapUiIcon {
+  display: none !important; /* hide icon — only text needed */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 6 · detailDateTimeGrid — edit mode date/time/tz
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailDateTimeGrid {
+  display:               grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap:                   0.45rem !important;
+  width:                 100% !important;
+}
+
+/* Timezone select — full width */
+.chkApp .detailDateTimeGrid .sapMSlt {
+  grid-column: 1 / -1 !important;
+}
+
+/* DatePicker / TimePicker inputs */
+.chkApp .detailDateTimeGrid .sapMDPInner,
+.chkApp .detailDateTimeGrid .sapMTPInput {
+  border-radius: 0.5rem !important;
+  min-height:    2.1rem !important;
+  font-size:     0.84rem !important;
+}
+
+.chkApp .detailDateTimeGrid .sapMInputBaseContentWrapper {
+  border-radius: 0.5rem !important;
+  min-height:    2.1rem !important;
+  border:        1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailDateTimeGrid .sapMInputBaseContentWrapper {
+  background:   rgba(248,252,255,0.92) !important;
+  border-color: rgba(160,200,240,0.50) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailDateTimeGrid .sapMInputBaseContentWrapper {
+  background:   rgba(14,24,48,0.90) !important;
+  border-color: rgba(48,82,148,0.42) !important;
+}
+
+.chkApp .detailDateTimeGrid .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
+.chkApp .detailDateTimeGrid .sapMInputBase:focus-within .sapMInputBaseContentWrapper {
+  border-color: var(--hz-accent, #0070F2) !important;
+  box-shadow:   0 0 0 2px rgba(0,112,242,0.14) !important;
+}
+
+/* Timezone Select control */
+.chkApp .detailDateTimeGrid .sapMSlt .sapMSltLabel {
+  border-radius: 0.5rem !important;
+  border:        1px solid !important;
+  min-height:    2.1rem !important;
+  padding:       0 0.65rem !important;
+  font-size:     0.82rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailDateTimeGrid .sapMSlt .sapMSltLabel {
+  background:   rgba(248,252,255,0.92) !important;
+  border-color: rgba(160,200,240,0.50) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailDateTimeGrid .sapMSlt .sapMSltLabel {
+  background:   rgba(14,24,48,0.90) !important;
+  border-color: rgba(48,82,148,0.42) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 7 · detailPersonSuggestInput
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailPersonSuggestInput.sapMInput {
+  width: 100% !important;
+}
+
+.chkApp .detailPersonSuggestInput .sapMInputBaseContentWrapper {
+  border-radius: 0.5rem !important;
+  border:        1px solid !important;
+  min-height:    2.2rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailPersonSuggestInput .sapMInputBaseContentWrapper {
+  background:   rgba(248,252,255,0.92) !important;
+  border-color: rgba(160,200,240,0.50) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailPersonSuggestInput .sapMInputBaseContentWrapper {
+  background:   rgba(14,24,48,0.90) !important;
+  border-color: rgba(48,82,148,0.42) !important;
+}
+
+.chkApp .detailPersonSuggestInput .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
+.chkApp .detailPersonSuggestInput:focus-within .sapMInputBaseContentWrapper {
+  border-color: var(--hz-accent, #0070F2) !important;
+  box-shadow:   0 0 0 2px rgba(0,112,242,0.14) !important;
+}
+
+.chkApp .detailPersonSuggestInput input.sapMInputBaseInner {
+  font-size:   0.84rem !important;
+  padding:     0 0.65rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 8 · detailDictionarySelect + detailLocationInput
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailDictionarySelect.sapMSlt,
+.chkApp .detailLocationInput.sapMInput {
+  width: 100% !important;
+}
+
+.chkApp .detailDictionarySelect .sapMSltLabel {
+  border-radius: 0.5rem !important;
+  border:        1px solid !important;
+  min-height:    2.2rem !important;
+  padding:       0 0.65rem !important;
+  font-size:     0.84rem !important;
+  width:         100% !important;
+}
+
+.chkApp .detailLocationInput .sapMInputBaseContentWrapper {
+  border-radius: 0.5rem !important;
+  border:        1px solid !important;
+  min-height:    2.2rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailDictionarySelect .sapMSltLabel,
+body.chkAppRoot.appLight .chkApp .detailLocationInput .sapMInputBaseContentWrapper {
+  background:   rgba(248,252,255,0.92) !important;
+  border-color: rgba(160,200,240,0.50) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailDictionarySelect .sapMSltLabel,
+body.chkAppRoot.appDark .chkApp .detailLocationInput .sapMInputBaseContentWrapper {
+  background:   rgba(14,24,48,0.90) !important;
+  border-color: rgba(48,82,148,0.42) !important;
+}
+
+/* Location code badge (PERNER-like pill below location input) */
+.chkApp .locationCodeLabel.sapMObjStatus,
+.chkApp .sapUiTinyMarginTop .locationCodeLabel {
+  font-family:   ui-monospace, 'Cascadia Code', monospace !important;
+  font-size:     0.66rem !important;
+  font-weight:   680 !important;
+  letter-spacing:0.02em !important;
+  padding:       0.12rem 0.45rem !important;
+  border-radius: 0.35rem !important;
+  border:        1px solid !important;
+  display:       inline-flex !important;
+  align-items:   center !important;
+  margin-top:    0.35rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .locationCodeLabel {
+  background:   rgba(240,248,255,0.88) !important;
+  border-color: rgba(140,185,235,0.45) !important;
+  color:        rgba(40,80,160,0.72) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .locationCodeLabel {
+  background:   rgba(14,24,48,0.85) !important;
+  border-color: rgba(48,82,148,0.40) !important;
+  color:        rgba(100,160,230,0.75) !important;
+}
+
+/* Equipment input */
+.chkApp .infoCardGrid .sapFGLI[data-cardkey="equipment"] .sapMInputBaseContentWrapper {
+  border-radius: 0.5rem !important;
+  border:        1px solid !important;
+  min-height:    2.1rem !important;
+  font-family:   ui-monospace, monospace !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 9 · infoCardGrid layout — GridList responsive
+   ══════════════════════════════════════════════════════════════ */
+
+/* GridList UL / container */
+.chkApp .infoCardGrid {
+  background: transparent !important;
+  border:     0 !important;
+  padding:    0 !important;
+}
+
+.chkApp .infoCardGrid .sapFGridListDefault,
+.chkApp .infoCardGrid .sapMListUl,
+.chkApp .infoCardGrid .sapMListItems,
+.chkApp .infoCardGrid .sapFGLIWrapper {
+  display:               grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)) !important;
+  gap:                   0.5rem !important;
+  padding:               0 !important;
+  margin:                0 !important;
+  border:                0 !important;
+  background:            transparent !important;
+  box-shadow:            none !important;
+  list-style:            none !important;
+}
+
+/* Consistent column sizing */
+.chkApp .infoCardGrid .sapFGLI {
+  break-inside:  avoid !important;
+  page-break-inside: avoid !important;
+}
+
+/* Observer/Inspected cards are taller — span if possible */
+.chkApp .infoCardGrid .sapFGLI[data-cardkey="observer"],
+.chkApp .infoCardGrid .sapFGLI[data-cardkey="observed"] {
+  grid-row:  auto !important;
+  min-height: 7rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 10 · infoCard focus / drag / reveal animation
+   ══════════════════════════════════════════════════════════════ */
+
+/* Focus ring on grid item */
+.chkApp .infoCardGrid .sapFGLI:focus {
+  outline: none !important;
+}
+
+.chkApp .infoCardGrid .sapFGLI:focus .infoCardTile.mushroomCard {
+  box-shadow:   0 0 0 2px var(--hz-accent, #0070F2) !important;
+  border-radius:0.875rem !important;
+}
+
+.chkApp .infoCardGrid .sapFGLI:focus-within .infoCardTile.mushroomCard {
+  box-shadow:   0 0 0 2px rgba(0,112,242,0.40) !important;
+}
+
+/* Drag cursor */
+.chkApp .infoCardGrid .sapFGLI[draggable="true"] {
+  cursor: grab !important;
+}
+
+.chkApp .infoCardGrid .sapFGLI:active {
+  cursor: grabbing !important;
+}
+
+/* Reveal animation */
+@keyframes _infoCardIn {
+  from { opacity: 0; transform: scale(0.97) translateY(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.chkApp .infoCardGrid .sapFGLI {
+  animation: _infoCardIn 220ms cubic-bezier(0.22,0.61,0.36,1) both !important;
+}
+
+.chkApp .infoCardGrid .sapFGLI:nth-child(1)  { animation-delay:  0ms !important; }
+.chkApp .infoCardGrid .sapFGLI:nth-child(2)  { animation-delay: 30ms !important; }
+.chkApp .infoCardGrid .sapFGLI:nth-child(3)  { animation-delay: 55ms !important; }
+.chkApp .infoCardGrid .sapFGLI:nth-child(4)  { animation-delay: 80ms !important; }
+.chkApp .infoCardGrid .sapFGLI:nth-child(n+5){ animation-delay:100ms !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   CH 11 · Checks section — flatEditorTable
+   ══════════════════════════════════════════════════════════════ */
+
+/* Checks sub-table container */
+.chkApp .flatEditorGridTable {
+  border-radius: 0.75rem !important;
+  overflow:      hidden !important;
+  border:        1px solid !important;
+  width:         100% !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable {
+  border-color: rgba(160,200,240,0.38) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable {
+  border-color: rgba(48,82,148,0.28) !important;
+}
+
+/* Column headers */
+.chkApp .flatEditorGridTable .sapUiTableColCell,
+.chkApp .flatEditorGridTable .sapUiTableCol {
+  font-size:     0.65rem !important;
+  font-weight:   820 !important;
+  letter-spacing:0.07em !important;
+  text-transform:uppercase !important;
+  padding:       0.5rem 0.875rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableColCell {
+  background:   rgba(240,248,255,0.96) !important;
+  border-color: rgba(160,200,240,0.30) !important;
+  color:        rgba(60,95,155,0.58) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableColCell {
+  background:   rgba(14,24,48,0.96) !important;
+  border-color: rgba(48,82,148,0.24) !important;
+  color:        rgba(100,160,230,0.58) !important;
+}
+
+/* Table rows */
+.chkApp .flatEditorGridTable .sapUiTableDataCell {
+  padding:       0.55rem 0.875rem !important;
+  vertical-align:middle !important;
+  font-size:     0.84rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(odd) .sapUiTableDataCell {
+  background:   rgba(255,255,255,0.80) !important;
+  border-color: rgba(160,200,240,0.16) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(even) .sapUiTableDataCell {
+  background:   rgba(248,252,255,0.70) !important;
+  border-color: rgba(160,200,240,0.16) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(odd) .sapUiTableDataCell {
+  background:   rgba(18,30,58,0.82) !important;
+  border-color: rgba(48,82,148,0.14) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(even) .sapUiTableDataCell {
+  background:   rgba(14,24,48,0.78) !important;
+  border-color: rgba(48,82,148,0.14) !important;
+}
+
+/* Row hover */
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableTr:hover .sapUiTableDataCell {
+  background: rgba(232,244,255,0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableTr:hover .sapUiTableDataCell {
+  background: rgba(22,36,70,0.88) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 12 · detailSectionToolbar — section header bars
+   The glassCard wraps: sectionTitle toolbar + sectionBody
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailSectionToolbar {
+  display:         flex !important;
+  align-items:     center !important;
+  justify-content: space-between !important;
+  padding:         0.65rem 1rem 0.6rem !important;
+  border-bottom:   1px solid !important;
+  gap:             0.5rem !important;
+  flex-shrink:     0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionToolbar {
+  border-color: rgba(160,200,240,0.28) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionToolbar {
+  border-color: rgba(48,82,148,0.22) !important;
+}
+
+/* Section title text */
+.chkApp .detailSectionToolbar .sapMTitle,
+.chkApp .detailSectionToolbar .sectionTitle {
+  font-size:   0.82rem !important;
+  font-weight: 760 !important;
+  margin:      0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionToolbar .sapMTitle {
+  color: rgba(14,28,58,0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionToolbar .sapMTitle {
+  color: rgba(210,228,255,0.90) !important;
+}
+
+/* Section toolbar buttons */
+.chkApp .detailSectionToolbar .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  min-height:    1.8rem !important;
+  padding:       0 0.6rem !important;
+  font-size:     0.75rem !important;
+  border:        1px solid transparent !important;
+  background:    transparent !important;
+  gap:           0.25rem !important;
+  transition:    background 100ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionToolbar .sapMBtn:hover .sapMBtnInner {
+  background:   rgba(0,112,242,0.07) !important;
+  border-color: rgba(0,112,242,0.20) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionToolbar .sapMBtn:hover .sapMBtnInner {
+  background:   rgba(77,177,255,0.09) !important;
+  border-color: rgba(77,177,255,0.22) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 13 · Validation MessageStrip
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .chkFeedbackStrip.sapMMsgStrip {
+  border-radius: 0.65rem !important;
+  border:        1px solid !important;
+  border-left:   3.5px solid !important;
+  padding:       0.5rem 0.75rem !important;
+  margin:        0.35rem 0 !important;
+}
+
+.chkApp .chkFeedbackStrip.chkFeedbackError.sapMMsgStrip {
+  background:   rgba(204,0,0,0.06) !important;
+  border-color: rgba(204,0,0,0.22) !important;
+}
+
+.chkApp .chkFeedbackStrip.chkFeedbackWarning.sapMMsgStrip {
+  background:   rgba(195,85,0,0.06) !important;
+  border-color: rgba(195,85,0,0.22) !important;
+}
+
+.chkApp .chkFeedbackStrip .sapMMsgStripMessage {
+  font-size:   0.78rem !important;
+  font-weight: 580 !important;
+}
+
+/* MessageStrip link */
+.chkApp .chkFeedbackStrip .sapMLnk {
+  font-size:   0.78rem !important;
+  font-weight: 680 !important;
+  color:       var(--hz-accent, #0070F2) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 14 · LockKilledBanner / searchFilterHintBanner
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .searchFilterHintBanner {
+  border-radius:  0.7rem !important;
+  border:         1px solid !important;
+  border-left:    3px solid !important;
+  padding:        0.65rem 0.875rem !important;
+  margin-bottom:  0.5rem !important;
+  overflow:       hidden !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterHintBanner.chkFeedbackWarning {
+  background:   rgba(195,85,0,0.05) !important;
+  border-color: rgba(195,85,0,0.20) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterHintBanner.chkFeedbackWarning {
+  background:   rgba(255,149,0,0.07) !important;
+  border-color: rgba(255,149,0,0.22) !important;
+}
+
+.chkApp .searchFilterHintBanner .sapMText {
+  font-size:   0.78rem !important;
+  line-height: 1.5 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 15 · Attachments section
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailAttachmentsCard {
+  border-radius: 1rem !important;
+  overflow:      hidden !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailAttachmentsCard {
+  background:   rgba(255,255,255,0.92) !important;
+  border-color: rgba(160,200,240,0.42) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailAttachmentsCard {
+  background:   rgba(16,26,52,0.90) !important;
+  border-color: rgba(44,78,145,0.28) !important;
+}
+
+/* Attachment item row */
+.chkApp .detailAttachmentItemRow {
+  display:       flex !important;
+  align-items:   center !important;
+  gap:           0.6rem !important;
+  padding:       0.5rem 1rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailAttachmentItemRow {
+  border-color: rgba(160,200,240,0.18) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailAttachmentItemRow {
+  border-color: rgba(48,82,148,0.15) !important;
+}
+
+/* Upload Collection (sapMUC) */
+.chkApp .sapMUC {
+  background:   transparent !important;
+  border-radius:0.75rem !important;
+}
+
+.chkApp .sapMUC .sapMUCList .sapMUCItem {
+  border-bottom: 1px solid !important;
+  padding:       0.55rem 1rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sapMUC .sapMUCItem {
+  border-color: rgba(160,200,240,0.18) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMUC .sapMUCItem {
+  border-color: rgba(48,82,148,0.15) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 16 · Empty states
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .detailEmptyStateCard {
+  display:        flex !important;
+  flex-direction: column !important;
+  align-items:    center !important;
+  justify-content:center !important;
+  padding:        2.5rem 1.5rem !important;
+  gap:            0.65rem !important;
+  text-align:     center !important;
+  border-radius:  1rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailEmptyStateCard {
+  background:   rgba(248,252,255,0.80) !important;
+  border-color: rgba(160,200,240,0.35) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailEmptyStateCard {
+  background:   rgba(14,24,48,0.80) !important;
+  border-color: rgba(44,78,145,0.25) !important;
+}
+
+.chkApp .detailEmptyStateTitle {
+  font-size:   0.92rem !important;
+  font-weight: 740 !important;
+  line-height: 1.3 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailEmptyStateTitle {
+  color: rgba(14,28,58,0.85) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailEmptyStateTitle {
+  color: rgba(210,228,255,0.88) !important;
+}
+
+.chkApp .detailEmptyStateText {
+  font-size:   0.80rem !important;
+  line-height: 1.5 !important;
+  max-width:   360px !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailEmptyStateText {
+  color: rgba(60,95,155,0.60) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailEmptyStateText {
+  color: rgba(100,160,230,0.60) !important;
+}
+
+/* Empty action button */
+.chkApp .detailEmptyStateAction .sapMBtnInner {
+  border-radius: 999px !important;
+  background:    var(--hz-accent, #0070F2) !important;
+  border-color:  var(--hz-accent, #0070F2) !important;
+  color:         #fff !important;
+  padding:       0 1.1rem !important;
+  min-height:    2.2rem !important;
+  font-size:     0.82rem !important;
+  font-weight:   680 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 17 · detailContent wrapable field — validation wrapper
+   ══════════════════════════════════════════════════════════════ */
+
+/* wrapEditableField adds a VBox around inputs for validation */
+.chkApp .infoCardTile .sapUiVlt {
+  width: 100% !important;
+}
+
+/* Required field marker via title asterisk */
+.chkApp .infoCardTitle.sapMText[data-required="true"]::after {
+  content:  ' *' !important;
+  color:    rgba(204, 0, 0, 0.80) !important;
+}
+
+/* Invalid field state */
+.chkApp .infoCardTile .sapMInputBaseError .sapMInputBaseContentWrapper,
+.chkApp .infoCardTile .sapMSltError .sapMSltLabel {
+  border-color: rgba(204, 0, 0, 0.55) !important;
+  box-shadow:   0 0 0 2px rgba(204, 0, 0, 0.12) !important;
+}
+
+/* detailFieldValidationText */
+.chkApp .detailFieldValidationText.sapMText {
+  font-size:   0.70rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  margin-top:  0.2rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailFieldValidationText {
+  color: rgba(180, 0, 0, 0.82) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailFieldValidationText {
+  color: rgba(255, 110, 130, 0.85) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 18 · Access denied card
+   ══════════════════════════════════════════════════════════════ */
+
+.chkApp .accessDeniedHeroCard {
+  border-radius: 1rem !important;
+  padding:       3rem 2rem !important;
+  display:       flex !important;
+  flex-direction:column !important;
+  align-items:   center !important;
+  gap:           1rem !important;
+  text-align:    center !important;
+}
+
+body.chkAppRoot.appLight .chkApp .accessDeniedHeroCard {
+  background:   rgba(248,252,255,0.92) !important;
+  border-color: rgba(160,200,240,0.40) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .accessDeniedHeroCard {
+  background:   rgba(14,24,48,0.92) !important;
+  border-color: rgba(44,78,145,0.30) !important;
+}
+
+.chkApp .detailAccessDeniedTitle {
+  font-size:   1.05rem !important;
+  font-weight: 780 !important;
+}
+
+.chkApp .detailAccessDeniedText {
+  font-size:   0.84rem !important;
+  opacity:     0.68 !important;
+  max-width:   400px !important;
+}
+
+/* Reason code chip */
+.chkApp .detailAccessDeniedReason.sapMObjStatus {
+  font-family:   ui-monospace, monospace !important;
+  font-size:     0.72rem !important;
+  border-radius: 0.45rem !important;
+  padding:       0.2rem 0.55rem !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CH 19 · Inverted scheme — detail panel components
+   ══════════════════════════════════════════════════════════════ */
+
+/* Light + Inverted */
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .infoCardTile.mushroomCard {
+  background:
+    linear-gradient(160deg,
+      rgba(18,30,58,0.92) 0%,
+      rgba(14,24,48,0.88) 100%) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .infoCardTitle {
+  color: rgba(100,160,230,0.48) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .infoCardValue {
+  color: rgba(210,228,255,0.90) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailSemanticMetaBlock .sapMObjStatus {
+  color: rgba(120,175,240,0.60) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .infoCardGrid .sapFGLI {
+  border-color: rgba(48,82,148,0.28) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailSectionCard {
+  background:
+    linear-gradient(180deg,
+      rgba(18,30,58,0.92) 0%,
+      rgba(14,24,48,0.88) 100%) !important;
+  border-color: rgba(48,82,148,0.28) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailSectionToolbar {
+  border-color: rgba(48,82,148,0.22) !important;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailSectionToolbar .sapMTitle {
+  color: rgba(210,228,255,0.90) !important;
+}
+
+/* Dark + Inverted */
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardTile.mushroomCard {
+  background:
+    linear-gradient(160deg,
+      rgba(255,255,255,0.94) 0%,
+      rgba(245,252,255,0.90) 100%) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardTitle {
+  color: rgba(48,88,155,0.48) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardValue {
+  color: rgba(14,28,58,0.90) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailSemanticMetaBlock .sapMObjStatus {
+  color: rgba(60,95,155,0.60) !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .infoCardGrid .sapFGLI {
+  border-color: rgba(160,200,240,0.38) !important;
+  background:   transparent !important;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .detailSectionCard {
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,0.94) 0%,
+      rgba(248,253,255,0.91) 100%) !important;
+  border-color: rgba(160,200,240,0.40) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FINAL · backdrop-filter nuclear kill (must be LAST)
+   ══════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  backdrop-filter:         none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Preserved app-specific busy overlay */
+.chkApp .workflowBusyScope {
+  position: relative;
+}
+
+.chkApp .workflowBusyOverlayShell {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  border-radius: inherit;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+body.chkAppRoot.appLight .chkApp .workflowBusyOverlayShell {
+  background:
+    linear-gradient(180deg, rgba(248, 252, 255, 0.86), rgba(238, 245, 255, 0.88)),
+    rgba(244, 249, 255, 0.72);
+}
+
+body.chkAppRoot.appDark .chkApp .workflowBusyOverlayShell {
+  background:
+    linear-gradient(180deg, rgba(8, 18, 39, 0.84), rgba(11, 20, 44, 0.9)),
+    rgba(8, 16, 36, 0.72);
+}
+
+.chkApp .workflowBusyOverlayShellInset {
+  border-radius: 1rem;
+}
+
+.chkApp .workflowBusyOverlayShellDialog {
+  border-radius: 1.25rem;
+}
+
+.chkApp .workflowBusyScopeSection {
+  min-height: 18rem;
+}
+
+.chkApp .workflowBusyScopeDialog {
+  min-height: 100%;
+}
+
+.chkApp .workflowBusyOverlayCard {
+  width: min(100%, 34rem);
+  margin: 0;
+  pointer-events: none;
+}
+
+/* Narrow post-theme fixes only */
+.chkApp .appLayoutSingle #searchPaneHost,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"],
+.chkApp .appLayoutSingle #detailPaneHost,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.chkApp .appLayoutSingle #searchPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+.chkApp .appLayoutSingle #detailPaneHost .appContent,
+.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent {
+  width: calc(100% - 2rem) !important;
+  max-width: none !important;
+}
+
+.chkApp .searchWorkbenchDock,
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsActionRail,
+.chkApp .searchFilterExperienceShell,
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBar,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar,
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterExperienceShell .sapMTB {
+  overflow: visible !important;
+}
+
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .searchResultsActionRail.sapMTBNewFlex,
+.chkApp .searchResultsActionRail {
+  flex-wrap: wrap !important;
+  row-gap: 0.55rem !important;
+  column-gap: 0.55rem !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.chkApp .searchFilterExperienceShell .sapMBarChild,
+.chkApp .searchResultsActionRail .sapMBarChild {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.chkApp .detailInfoSectionBody {
+  width: 100% !important;
+}
+
+.chkApp .infoCardGrid.sapFGridList,
+.chkApp .infoCardGrid .sapFGridList,
+.chkApp .infoCardGrid .sapFGridListDefault,
+.chkApp .infoCardGrid .sapMListUl,
+.chkApp .infoCardGrid .sapMListItems,
+.chkApp .infoCardGrid .sapFGLIWrapper {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)) !important;
+  gap: 0.8rem !important;
+  width: 100% !important;
+}
+
+.chkApp .infoCardGrid .sapFGLI,
+.chkApp .infoCardGrid .infoCardGridItem {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.chkApp .detailAttachmentsBody {
+  align-items: stretch !important;
+}
+
+.chkApp .detailAttachmentsEmptyState {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 13rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+.chkApp .detailAttachmentsEmptyState .sapMText {
+  max-width: 28rem !important;
+}
+
+@media (max-width: 61.25rem) {
+  .chkApp .appLayoutSingle #searchPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+  .chkApp .appLayoutSingle #detailPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent {
+    width: calc(100% - 1.5rem) !important;
+  }
+}
+
+@media (max-width: 37.5rem) {
+  .chkApp .appLayoutSingle #searchPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+  .chkApp .appLayoutSingle #detailPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent {
+    width: calc(100% - 1rem) !important;
   }
 }

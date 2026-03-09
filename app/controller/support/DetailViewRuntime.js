@@ -302,16 +302,19 @@ sap.ui.define([
             oEditBox.addItem(wrapEditableField(oController, new DatePicker({
                 value: "{selected>/basic/date}",
                 displayFormat: "EEE, dd MMM yyyy",
-                valueFormat: "yyyy-MM-dd"
+                valueFormat: "yyyy-MM-dd",
+                change: [oController.onRowValueChange, oController]
             }), "basic.date"));
             oEditBox.addItem(wrapEditableField(oController, new TimePicker({
                 value: "{selected>/basic/time}",
                 displayFormat: "HH:mm",
-                valueFormat: "HH:mm"
+                valueFormat: "HH:mm",
+                change: [oController.onRowValueChange, oController]
             }), "basic.time"));
             oEditBox.addItem(wrapEditableField(oController, bindSelectItems(new Select({
                 selectedKey: "{selected>/basic/timezone}",
-                forceSelection: false
+                forceSelection: false,
+                change: [oController.onRowValueChange, oController]
             }), "masterData>/timezones"), "basic.timezone"));
             oReadText.bindProperty("text", {
                 parts: [
@@ -331,7 +334,8 @@ sap.ui.define([
             });
         } else if (sKey === "equipment") {
             oEditBox.addItem(wrapEditableField(oController, new Input({
-                value: "{selected>/basic/equipment}"
+                value: "{selected>/basic/equipment}",
+                change: [oController.onRowValueChange, oController]
             }), "basic.equipment"));
             oReadText.bindProperty("text", {
                 path: "selected>/basic/equipment",

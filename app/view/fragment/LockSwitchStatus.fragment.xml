@@ -7,8 +7,6 @@
         visible="{= ${state>/mode} !== 'CREATE' }"
         state="{= ${state>/mode} === 'EDIT' }"
         enabled="{= ${state>/mode} !== 'CREATE' &amp;&amp; !${state>/lockOperationPending} }"
-        busy="{state>/lockOperationPending}"
-        busyIndicatorDelay="0"
         customTextOn=""
         customTextOff=""
         change=".onToggleEdit"

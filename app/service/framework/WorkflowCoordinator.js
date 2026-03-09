@@ -29,10 +29,11 @@ sap.ui.define([
                 payload: mPayload || {}
             });
         },
-        confirmUnsavedAndHandle: function (oController, fnOnSave) {
+        confirmUnsavedAndHandle: function (oController, fnOnSave, mOptions) {
             return runOperation("confirmUnsavedAndHandle", {
                 controller: oController,
-                onSave: fnOnSave
+                onSave: fnOnSave,
+                onCancel: mOptions && mOptions.onCancel
             });
         },
         handleBackendError: function (oController, oError, mHandlers) {

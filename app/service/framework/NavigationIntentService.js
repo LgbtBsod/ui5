@@ -63,8 +63,9 @@ sap.ui.define([
         });
     }
 
-    function queuePendingIntent(oStateModel, StatePaths, oRouteEvent) {
+    function queuePendingIntent(oComponent, oStateModel, StatePaths, oRouteEvent) {
         return runOperation("queuePendingIntent", {
+            component: oComponent,
             stateModel: oStateModel,
             statePaths: StatePaths,
             routeEvent: oRouteEvent
@@ -78,8 +79,24 @@ sap.ui.define([
         });
     }
 
+    function revertPendingIntent(oComponent, oStateModel, StatePaths) {
+        return runOperation("revertPendingIntent", {
+            component: oComponent,
+            stateModel: oStateModel,
+            statePaths: StatePaths
+        });
+    }
+
     function resumePendingIntent(oComponent, oStateModel, StatePaths) {
         return runOperation("resumePendingIntent", {
+            component: oComponent,
+            stateModel: oStateModel,
+            statePaths: StatePaths
+        });
+    }
+
+    function restorePendingIntent(oComponent, oStateModel, StatePaths) {
+        return runOperation("restorePendingIntent", {
             component: oComponent,
             stateModel: oStateModel,
             statePaths: StatePaths
@@ -97,7 +114,9 @@ sap.ui.define([
         navigateToSearch: navigateToSearch,
         queuePendingIntent: queuePendingIntent,
         clearPendingIntent: clearPendingIntent,
+        revertPendingIntent: revertPendingIntent,
         resumePendingIntent: resumePendingIntent,
+        restorePendingIntent: restorePendingIntent,
         registerBehaviorOverride: NavigationOverrideHandlers.register,
         unregisterBehaviorOverride: NavigationOverrideHandlers.unregister,
         clearBehaviorOverrides: NavigationOverrideHandlers.clear

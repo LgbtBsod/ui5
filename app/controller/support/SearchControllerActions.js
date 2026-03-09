@@ -12,10 +12,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchRuntimeDockFix",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewStateRuntime",
     "sap/ui/core/Item"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SearchRuntimeDockFix, SchedulingRuntime, UiDecisionCoordinator, SearchMaxResults, SearchViewStateRuntime, Item) {
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SearchRuntimeDockFix, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -314,7 +316,8 @@ sap.ui.define([
         onCreate: function () {
             SearchViewRuntime.captureSearchScrollPosition(this);
             return this._withActionBusy("/createActionBusy", function () {
-                return SearchCommandPolicy.selectRow(this, { intent: "create" });
+                NavigationIntentService.navigateToDetail(this, CreateSentinel.toRouteId());
+                return Promise.resolve(true);
             }.bind(this));
         },
 

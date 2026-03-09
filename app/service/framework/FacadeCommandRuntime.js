@@ -44,8 +44,9 @@ sap.ui.define([
         }) ? sMethod : sMethod;
     }
 
-    function normalizePayload(oPayload) {
-        var oInput = RuntimeInput.asObject(oPayload);
+    function normalizePayload(vCommandOrPayload, oPayload) {
+        var oResolvedPayload = arguments.length > 1 ? oPayload : vCommandOrPayload;
+        var oInput = RuntimeInput.asObject(oResolvedPayload);
         var oNormalized = Object.assign({}, oInput);
         if (Object.prototype.hasOwnProperty.call(oInput, "rootId")) {
             oNormalized.rootId = RuntimeInput.asString(oInput.rootId).trim();

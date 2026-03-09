@@ -48,7 +48,10 @@
                     visible="{appView>/shell/userActionVisible}"
                     class="shellUserActionBtn"/>
 
-                <VBox class="shellUserCard shellUserContextCard" renderType="Bare">
+                <VBox class="shellUserCard shellUserContextCard workflowBusyScope" renderType="Bare">
+                    <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{appView>/shell/userRefreshBusy}">
+                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                    </VBox>
                     <HBox class="shellItemHeader" renderType="Bare" alignItems="Center">
                         <core:Icon src="sap-icon://key-user-settings" decorative="true" class="shellItemIcon"/>
                         <Text text="{i18n>shellUserPermissionsTitle}" class="shellUserLabel"/>
@@ -61,8 +64,7 @@
                         text="{i18n>shellRefreshContextButton}"
                         icon="sap-icon://refresh"
                         type="Transparent"
-                        busy="{appView>/shell/userRefreshBusy}"
-                        busyIndicatorDelay="0"
+                        enabled="{= !${appView>/shell/userRefreshBusy} }"
                         press=".onRefreshShellUser"
                         class="shellUserActionBtn"/>
                 </VBox>

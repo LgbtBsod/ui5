@@ -7,10 +7,11 @@
         contentHeight="22rem"
         draggable="true"
         resizable="true"
-        busy="{view>/locationVhBusy}"
-        busyIndicatorDelay="0"
         initialFocus="locationValueHelpSearchField">
-        <VBox class="sapUiMediumMargin dialogContentShell valueHelpDialogBody" renderType="Bare" fitContainer="true">
+        <VBox class="sapUiMediumMargin dialogContentShell valueHelpDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare" fitContainer="true">
+            <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/locationVhBusy}">
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+            </VBox>
             <SearchField
                 id="locationValueHelpSearchField"
                 width="100%"
@@ -29,8 +30,6 @@
                 <t:TreeTable
                     id="locationValueHelpTreeTable"
                     class="dialogDataTable valueHelpTreeTable"
-                    busy="{view>/locationVhBusy}"
-                    busyIndicatorDelay="0"
                     selectionMode="Single"
                     selectionBehavior="RowOnly"
                     enableColumnReordering="false"

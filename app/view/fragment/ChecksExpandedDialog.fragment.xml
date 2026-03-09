@@ -32,19 +32,19 @@
                         <t:Column>
                             <Label text="{i18n>checkLabel}"/>
                             <t:template>
-                                <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
+                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
                             </t:template>
                         </t:Column>
                         <t:Column width="8rem">
                             <Label text="{i18n>statusLabel}"/>
                             <t:template>
-                                <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }"/>
                             </t:template>
                         </t:Column>
                         <t:Column>
                             <Label text="{i18n>commentLabel}"/>
                             <t:template>
-                                <TextArea value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                             </t:template>
                         </t:Column>
                         <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
@@ -76,9 +76,9 @@
                         <ColumnListItem>
                             <cells>
                                 <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
-                                <Input value="{selected>text}" editable="{= ${state>/mode} !== 'READ' }"/>
-                                <Switch state="{selected>result}" enabled="{= ${state>/mode} !== 'READ' }"/>
-                                <TextArea value="{selected>comment}" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
+                                <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                 <Button
                                     icon="sap-icon://delete"
                                     text="{i18n>rowActionDelete}"

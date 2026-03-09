@@ -6,12 +6,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailInfoCardLayoutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
+], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
     "use strict";
 
     var EFFECT_DIALOG_FRAGMENTS = {
@@ -20,6 +21,37 @@ sap.ui.define([
         barriersExpanded: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.BarriersExpandedDialog"
     };
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
+
+    function isDirtyTrackMode(oController) {
+        var sMode = String(ModelStateRuntime.read(oController, "state", "/mode", "READ") || "READ").trim().toUpperCase();
+        return sMode === "EDIT" || sMode === "CREATE";
+    }
+
+    function resolveSelectedBindingPath(oSource, sProperty) {
+        var oBinding = oSource && oSource.getBinding && oSource.getBinding(sProperty);
+        var oContext = oSource && oSource.getBindingContext && (oSource.getBindingContext("selected") || oSource.getBindingContext());
+        var sContextPath = String((oContext && oContext.getPath && oContext.getPath()) || "").trim();
+        var sBindingPath = String((oBinding && oBinding.getPath && oBinding.getPath()) || "").trim();
+        var sModelName = String((oBinding && oBinding.getModel && oBinding.getModel() && oBinding.getModel().sName) || "").trim();
+        if (!sBindingPath || (sModelName && sModelName !== "selected")) {
+            return "";
+        }
+        if (sBindingPath.charAt(0) === "/") {
+            return sBindingPath;
+        }
+        return (sContextPath ? sContextPath + "/" : "/") + sBindingPath;
+    }
+
+    function normalizeEventValue(oEvent, sParameterName, sPropertyName, oSource) {
+        var vValue = oEvent && oEvent.getParameter && oEvent.getParameter(sParameterName);
+        if (typeof vValue !== "undefined") {
+            return vValue;
+        }
+        if (oSource && typeof oSource.getProperty === "function") {
+            return oSource.getProperty(sPropertyName);
+        }
+        return undefined;
+    }
 
     return {
         ensureEffectDialog: function (sId) {
@@ -107,6 +139,7 @@ sap.ui.define([
 
             if (bCreate) {
                 mStatePatch["/mode"] = "CREATE";
+                mStatePatch[StatePaths.WORKFLOW_DETAIL_EDIT_MODE] = "CREATE";
                 mStatePatch["/lockOperationState"] = "IDLE";
                 mStatePatch["/autosaveEnabled"] = false;
                 mStatePatch["/isDirty"] = false;
@@ -164,6 +197,24 @@ sap.ui.define([
             return ModelStateRuntime.read(this, "state", "/activeObjectId", "")
                 || ModelStateRuntime.read(this, "state", "/selectedId", "")
                 || "";
+        },
+
+        _applySelectedFieldChange: function (oEvent, mOptions) {
+            var oSource = oEvent && oEvent.getSource && oEvent.getSource();
+            var sProperty = String((mOptions && mOptions.property) || "value").trim() || "value";
+            var sParameter = String((mOptions && mOptions.parameter) || sProperty).trim() || sProperty;
+            var sPath = resolveSelectedBindingPath(oSource, sProperty);
+            var vValue;
+            if (!oSource || !sPath || !isDirtyTrackMode(this)) {
+                return false;
+            }
+            vValue = normalizeEventValue(oEvent, sParameter, sProperty, oSource);
+            if (typeof vValue === "undefined") {
+                return false;
+            }
+            ModelStateRuntime.write(this, "selected", sPath, vValue);
+            ModelStateRuntime.write(this, "state", "/isDirty", true);
+            return true;
         },
 
         _resolveRowInput: function (oEvent) {

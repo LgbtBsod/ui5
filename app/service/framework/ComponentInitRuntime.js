@@ -306,13 +306,19 @@ sap.ui.define([
             var fnSetGlobalBanner = oFeedbackRuntime.setGlobalBanner;
             var fnClearGlobalBanner = oFeedbackRuntime.clearGlobalBanner;
             var fnQueuePendingNavigationIntent = function (oRouteEvent) {
-                return queuePendingNavigationIntent(oStateModel, StatePaths, oRouteEvent);
-            };
+                return queuePendingNavigationIntent(this, oStateModel, StatePaths, oRouteEvent);
+            }.bind(this);
             var fnClearPendingNavigationIntent = function () {
                 return clearPendingNavigationIntent(oStateModel, StatePaths);
             };
+            var fnRevertPendingNavigationIntent = function () {
+                return ComponentActionRuntime.revertPendingNavigationIntent(this, oStateModel, StatePaths);
+            }.bind(this);
             var fnResumePendingNavigationIntent = function () {
                 return resumePendingNavigationIntent(this, oStateModel, StatePaths);
+            }.bind(this);
+            var fnRestorePendingNavigationIntent = function () {
+                return ComponentActionRuntime.restorePendingNavigationIntent(this, oStateModel, StatePaths);
             }.bind(this);
             var fnRunGuardedSave = ComponentInitSaveGuardSupport.createRunGuardedSave({
                 component: this,
@@ -409,7 +415,9 @@ sap.ui.define([
                 runGuardedSave: fnRunGuardedSave,
                 queuePendingNavigationIntent: fnQueuePendingNavigationIntent,
                 clearPendingNavigationIntent: fnClearPendingNavigationIntent,
+                revertPendingNavigationIntent: fnRevertPendingNavigationIntent,
                 resumePendingNavigationIntent: fnResumePendingNavigationIntent,
+                restorePendingNavigationIntent: fnRestorePendingNavigationIntent,
                 emitTelemetry: fnEmitTelemetry,
                 publishTabSignal: fnPublishTabSignal,
                 telemetryRuntime: TelemetryRuntime,

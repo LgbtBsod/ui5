@@ -79,7 +79,9 @@ sap.ui.define([
         var fnRunGuardedSave = mOptions.runGuardedSave;
         var fnQueuePendingNavigationIntent = mOptions.queuePendingNavigationIntent;
         var fnClearPendingNavigationIntent = mOptions.clearPendingNavigationIntent;
+        var fnRevertPendingNavigationIntent = mOptions.revertPendingNavigationIntent;
         var fnResumePendingNavigationIntent = mOptions.resumePendingNavigationIntent;
+        var fnRestorePendingNavigationIntent = mOptions.restorePendingNavigationIntent;
         var fnEmitTelemetry = mOptions.emitTelemetry;
         var fnPublishTabSignal = mOptions.publishTabSignal;
 
@@ -109,8 +111,15 @@ sap.ui.define([
         oComponent._oSelectedLifecycleModel = oSelectedModel;
         oComponent._fnStateModelPropertyChange = function (oEvent) {
             var sPath = oEvent.getParameter("path") || "";
+            var sModeValue;
             if (["/mode", "/isBusy", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID].indexOf(sPath) >= 0) {
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
+            }
+            if (sPath === StatePaths.WORKFLOW_EDIT_MODE) {
+                sModeValue = String(oEvent.getParameter("value") || "READ").toUpperCase();
+                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") !== sModeValue) {
+                    ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, sModeValue);
+                }
             }
             if (sPath === "/mode") {
                 fnEmitTelemetry("workflow.mode.changed", mOptions.telemetryRuntime.stateValue(oEvent.getParameter("value")));
@@ -207,11 +216,17 @@ sap.ui.define([
             if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false)) {
                 oEvent.preventDefault();
                 fnQueuePendingNavigationIntent(oEvent);
+                if (typeof fnRevertPendingNavigationIntent === "function") {
+                    fnRevertPendingNavigationIntent();
+                }
                 return;
             }
             if (ModelStateRuntime.readOnModel(oStateModel, "/isDirty", false) && shouldGuardDetailNavigation(oStateModel, oEvent)) {
                 oEvent.preventDefault();
                 fnQueuePendingNavigationIntent(oEvent);
+                if (typeof fnRevertPendingNavigationIntent === "function") {
+                    fnRevertPendingNavigationIntent();
+                }
                 FlowCoordinator.confirmUnsavedAndHandle({
                     getModel: oComponent.getModel.bind(oComponent),
                     getResourceBundle: function () {
@@ -219,6 +234,16 @@ sap.ui.define([
                     }
                 }, function () {
                     return fnRunGuardedSave();
+                }, {
+                    onCancel: function () {
+                        if (typeof fnRestorePendingNavigationIntent === "function") {
+                            return fnRestorePendingNavigationIntent();
+                        }
+                        if (typeof fnClearPendingNavigationIntent === "function") {
+                            return fnClearPendingNavigationIntent();
+                        }
+                        return null;
+                    }
                 }).then(function (sDecision) {
                     if (sDecision === "DISCARD") {
                         var oPending = ModelStateRuntime.readOnModel(oStateModel, StatePaths.PENDING_NAVIGATION_INTENT, {}) || {};
@@ -231,9 +256,6 @@ sap.ui.define([
                     if (sDecision === "SAVE" || sDecision === "NO_CHANGES") {
                         fnResumePendingNavigationIntent();
                         return;
-                    }
-                    if (sDecision === "CANCEL") {
-                        fnClearPendingNavigationIntent();
                     }
                 });
                 return;

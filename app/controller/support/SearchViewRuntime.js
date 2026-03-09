@@ -81,6 +81,93 @@ sap.ui.define([
         oController._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(oController._iSearchWorkingHintTimer);
     }
 
+    function clearPendingSearchLoad(oController) {
+        oController._iPendingSearchLoadTimer = SchedulingRuntime.clearTimer(oController._iPendingSearchLoadTimer);
+        oController._oPendingSearchLoad = null;
+    }
+
+    function isSearchBindingSettled(oInnerTable) {
+        var oBinding = oInnerTable && oInnerTable.getBinding && oInnerTable.getBinding("items");
+        if (!oInnerTable || !oBinding) {
+            return false;
+        }
+        if (typeof oInnerTable.getBusy === "function" && oInnerTable.getBusy()) {
+            return false;
+        }
+        if (typeof oBinding.isPending === "function" && oBinding.isPending()) {
+            return false;
+        }
+        if (oBinding.bPendingRequest || oBinding.bPendingRefresh) {
+            return false;
+        }
+        if (typeof oBinding.isLengthFinal === "function") {
+            return !!oBinding.isLengthFinal();
+        }
+        return true;
+    }
+
+    function readSearchRows(oController, oInnerTable) {
+        var aRows = [];
+        var oCtx = oController._ctx && oController._ctx();
+        if (oCtx && oCtx.smartControls && oCtx.smartControls.getVisibleRows) {
+            aRows = oCtx.smartControls.getVisibleRows() || [];
+        }
+        if (!aRows.length && oInnerTable) {
+            aRows = oInnerTable.getItems ? (oInnerTable.getItems() || []) : [];
+        }
+        return aRows;
+    }
+
+    function settlePendingSearchLoad(oController, oOptions) {
+        var oPending = oController._oPendingSearchLoad;
+        var oInnerTable = oOptions && oOptions.innerTable;
+        var oError = oOptions && oOptions.error;
+        var sErrorMessage;
+        if (!oPending || oPending.settled) {
+            return;
+        }
+        oPending.settled = true;
+        clearPendingSearchLoad(oController);
+        hideSearchWorkingHint(oController);
+        if (oError) {
+            sErrorMessage = String((oError && (oError.message || oError.statusText)) || "Search request failed").trim();
+            SearchLoadRuntime.applyLoadError(oController, sErrorMessage);
+            return;
+        }
+        SearchLoadRuntime.applyLoadSuccess(oController, readSearchRows(oController, oInnerTable));
+        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
+        SearchViewportRuntime.bindSearchViewportRuntime(oController);
+        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+    }
+
+    function bindPendingSearchLoad(oController, oInnerTable) {
+        var iStartedAt = Date.now();
+        var fnPoll;
+        clearPendingSearchLoad(oController);
+        oController._oPendingSearchLoad = { settled: false };
+        if (!oInnerTable || typeof oInnerTable.attachEventOnce !== "function") {
+            return;
+        }
+        oInnerTable.attachEventOnce("updateFinished", function () {
+            settlePendingSearchLoad(oController, { innerTable: oInnerTable });
+        });
+        fnPoll = function () {
+            if (!oController._oPendingSearchLoad || oController._oPendingSearchLoad.settled) {
+                return;
+            }
+            if (isSearchBindingSettled(oInnerTable) || (Date.now() - iStartedAt) >= 8000) {
+                settlePendingSearchLoad(oController, { innerTable: oInnerTable });
+                return;
+            }
+            oController._iPendingSearchLoadTimer = SchedulingRuntime.restartTimer(
+                oController._iPendingSearchLoadTimer,
+                fnPoll,
+                250
+            );
+        };
+        oController._iPendingSearchLoadTimer = SchedulingRuntime.restartTimer(0, fnPoll, 250);
+    }
+
     function hideSearchWorkingHint(oController) {
         clearSearchWorkingHintTimer(oController);
         ControllerViewStateRuntime.set(oController, "/filterHintVisible", false);
@@ -286,35 +373,24 @@ sap.ui.define([
         ControllerViewStateRuntime.set(oController, "/tableBusy", true);
         scheduleSearchWorkingHint(oController);
         SearchViewportRuntime.scheduleSearchViewportSync(oController, false);
+        bindPendingSearchLoad(oController, oInnerTable);
         SearchCommandPolicy.applyRebindPolicy(oController, {
             source: "beforeRebind",
             bindingParams: oBindingParams || {},
             state: (oStateModel && oStateModel.getData && oStateModel.getData()) || {},
             onDataReceived: function (oDataEvent) {
-                var aRows = [];
                 var oError = oDataEvent && oDataEvent.getParameter
                     && (oDataEvent.getParameter("error") || oDataEvent.getParameter("data") && oDataEvent.getParameter("data").error);
-                var sErrorMessage = String((oError && (oError.message || oError.statusText)) || "").trim();
-                var oCtx = oController._ctx && oController._ctx();
-                hideSearchWorkingHint(oController);
-                if (oError) {
-                    SearchLoadRuntime.applyLoadError(oController, sErrorMessage);
-                    return;
-                }
-                if (oCtx && oCtx.smartControls && oCtx.smartControls.getVisibleRows) {
-                    aRows = oCtx.smartControls.getVisibleRows() || [];
-                }
-                if (!aRows.length && oInnerTable) {
-                    aRows = oInnerTable.getItems ? (oInnerTable.getItems() || []) : [];
-                }
-                SearchLoadRuntime.applyLoadSuccess(oController, aRows);
-                SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
-                SearchViewportRuntime.bindSearchViewportRuntime(oController);
-                SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+                settlePendingSearchLoad(oController, {
+                    innerTable: oInnerTable,
+                    error: oError
+                });
             }
         }).catch(function (oError) {
-            hideSearchWorkingHint(oController);
-            SearchLoadRuntime.applyLoadError(oController, String((oError && oError.message) || "Search request failed"));
+            settlePendingSearchLoad(oController, {
+                innerTable: oInnerTable,
+                error: oError
+            });
             return Promise.reject(oError);
         });
     }

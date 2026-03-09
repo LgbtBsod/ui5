@@ -86,16 +86,24 @@ sap.ui.define([
         };
     }
 
-    function queuePendingNavigationIntent(oStateModel, StatePaths, oRouteEvent) {
-        NavigationIntentService.queuePendingIntent(oStateModel, StatePaths, oRouteEvent);
+    function queuePendingNavigationIntent(component, oStateModel, StatePaths, oRouteEvent) {
+        NavigationIntentService.queuePendingIntent(component, oStateModel, StatePaths, oRouteEvent);
     }
 
     function clearPendingNavigationIntent(oStateModel, StatePaths) {
         NavigationIntentService.clearPendingIntent(oStateModel, StatePaths);
     }
 
+    function revertPendingNavigationIntent(component, oStateModel, StatePaths) {
+        return NavigationIntentService.revertPendingIntent(component, oStateModel, StatePaths);
+    }
+
     function resumePendingNavigationIntent(component, oStateModel, StatePaths) {
         return NavigationIntentService.resumePendingIntent(component, oStateModel, StatePaths);
+    }
+
+    function restorePendingNavigationIntent(component, oStateModel, StatePaths) {
+        return NavigationIntentService.restorePendingIntent(component, oStateModel, StatePaths);
     }
 
     return {
@@ -105,6 +113,8 @@ sap.ui.define([
         createApplyFacadeResult: createApplyFacadeResult,
         queuePendingNavigationIntent: queuePendingNavigationIntent,
         clearPendingNavigationIntent: clearPendingNavigationIntent,
-        resumePendingNavigationIntent: resumePendingNavigationIntent
+        revertPendingNavigationIntent: revertPendingNavigationIntent,
+        resumePendingNavigationIntent: resumePendingNavigationIntent,
+        restorePendingNavigationIntent: restorePendingNavigationIntent
     };
 });

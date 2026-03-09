@@ -44,6 +44,7 @@ sap.ui.define([
     function resolveUnsavedAction(sAction, mContext) {
         var oController = mContext && mContext.controller;
         var fnOnSave = mContext && mContext.onSave;
+        var fnOnCancel = mContext && mContext.onCancel;
         if (sAction === DialogOrchestrator.actions.YES) {
             return Promise.resolve(fnOnSave && fnOnSave()).then(function (vSaveResult) {
                 return (vSaveResult === false || (vSaveResult && vSaveResult.ok === false)) ? "SAVE_FAILED" : "SAVE";
@@ -63,7 +64,9 @@ sap.ui.define([
                 return "DISCARD";
             });
         }
-        return Promise.resolve("CANCEL");
+        return Promise.resolve(typeof fnOnCancel === "function" ? fnOnCancel() : null).then(function () {
+            return "CANCEL";
+        });
     }
 
     function confirmUnsavedAndHandle(mContext) {

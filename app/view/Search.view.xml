@@ -101,8 +101,6 @@
                             id="searchSmartFilterBar"
                             visible="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} }"
                             class="searchSmartFilterWorkbench"
-                            busy="false"
-                            busyIndicatorDelay="0"
                             entitySet="ChecklistSearchSet"
                             persistencyKey="{view>/smartFilterPersistencyKey}"
                             useToolbar="true"
@@ -178,7 +176,6 @@
                             icon="sap-icon://task"
                             press=".onCreate"
                             tooltip="{i18n>searchShortcutCreate}"
-                            busy="{= ${view>/bootstrapBusy} || ${view>/createActionBusy} }"
                             enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }"
                             class="brandActionBtn brandActionPrimary searchCreateActionBtn sapUiTinyMarginEnd">
                             <layoutData>

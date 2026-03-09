@@ -209,6 +209,20 @@ sap.ui.define([
             DetailCommandPolicy.rowOps(this, { op: "selectionToggle" });
         },
 
+        onRowValueChange: function (oEvent) {
+            this._applySelectedFieldChange(oEvent, {
+                property: "value",
+                parameter: "value"
+            });
+        },
+
+        onRowStateChange: function (oEvent) {
+            this._applySelectedFieldChange(oEvent, {
+                property: "state",
+                parameter: "state"
+            });
+        },
+
         onDialogClosed: function () {
             DetailCommandPolicy.resolveConflict(this, { intent: "dialogClosed" });
         }
