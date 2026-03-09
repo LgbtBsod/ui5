@@ -32842,3 +32842,62 @@ body.chkAppRoot.appDark .chkApp .workflowBusyOverlayShell {
     width: calc(100% - 1rem) !important;
   }
 }
+
+/* Narrow polish: SmartFilterBar spacing + detail card typography */
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarItem,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarItem {
+  min-width: clamp(8.4rem, 16vw, 10.4rem) !important;
+  padding-inline-end: 0.35rem !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarItemLabel,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarItemLabel {
+  margin-bottom: 0.22rem !important;
+  line-height: 1.25 !important;
+}
+
+.chkApp .searchFilterExperienceShell .sapMInputBase,
+.chkApp .searchFilterExperienceShell .sapMSlt,
+.chkApp .searchFilterExperienceShell .sapMSegB {
+  width: 100% !important;
+}
+
+.chkApp .infoCardTitle,
+.chkApp .infoCardTitle.sapMText,
+.chkApp .detailEmptyStateTitle,
+.chkApp .detailEmptyStateTitle.sapMTitle {
+  letter-spacing: 0.045em !important;
+  line-height: 1.2 !important;
+}
+
+.chkApp .infoCardValue,
+.chkApp .infoCardValue.sapMText {
+  line-height: 1.36 !important;
+}
+
+.chkApp .detailEmptyStateText,
+.chkApp .detailEmptyStateText.sapMText,
+.chkApp .detailInfoExperienceCard .sapMText,
+.chkApp .detailInfoExperienceCard .sapMLabel {
+  line-height: 1.42 !important;
+}
+
+.chkApp .detailSemanticMetaBlock {
+  gap: 0.28rem !important;
+}
+
+@media (max-width: 64rem) {
+  .chkApp .searchFilterExperienceShell .sapUiCompFilterBarItem,
+  .chkApp .searchFilterCardDense .sapUiCompFilterBarItem {
+    min-width: clamp(7.6rem, 22vw, 9.25rem) !important;
+  }
+}
+
+@media (max-width: 48rem) {
+  .chkApp .searchFilterExperienceShell .sapUiCompFilterBarItem,
+  .chkApp .searchFilterCardDense .sapUiCompFilterBarItem {
+    min-width: min(100%, 100%) !important;
+    padding-inline-end: 0 !important;
+  }
+}
