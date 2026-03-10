@@ -342,6 +342,15 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   gap: 1rem;
 }
 
+.chkApp .appShellHeader .sapMTitle,
+.chkApp .appShellHeader .sapMText {
+  white-space: nowrap;
+}
+
+.chkApp .appShellHeader .sapMText:empty {
+  display: none !important;
+}
+
 
 
 

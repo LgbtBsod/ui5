@@ -205,6 +205,59 @@
   box-shadow: none;
 }
 
+.chkApp .analyticsYearField {
+  gap: 0.25rem;
+}
+
+.chkApp .analyticsYearField .sapMInputBase,
+.chkApp .analyticsYearField .sapMInputBaseContentWrapper {
+  width: 7rem;
+}
+
+body.chkAppRoot .analyticsYearPickerPopover,
+body.chkAppRoot .analyticsYearPickerPopover .sapMPopoverCont,
+body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
+  border-radius: 1rem !important;
+}
+
+.chkApp .analyticsYearPickerBody {
+  padding: 0.75rem;
+}
+
+.chkApp .analyticsYearPickerButton,
+.chkApp .analyticsYearPickerButton .sapMBtnInner {
+  width: 100%;
+}
+
+.chkApp .analyticsChartPanel,
+.chkApp .analyticsChartPanel.sapMPanel,
+.chkApp .analyticsChartPanel .sapMPanelContent,
+.chkApp .analyticsChartPanel .sapMPanelExpandablePart,
+.chkApp .analyticsChartPanel .sapMPanelBGTransparent,
+.chkApp .analyticsChartPanel .sapMPanelWrappingDiv,
+.chkApp .analyticsChartPanel .sapMVIZVIZFrame,
+.chkApp .analyticsChartPanel .v-m-root,
+.chkApp .analyticsChartPanel svg,
+.chkApp .analyticsChartPanel .sapVizFrame,
+.chkApp .analyticsChartPanel .sapVizKitViewport {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.chkApp .analyticsChartPanel .sapMPanelContent {
+  border-top: 0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .analyticsChartPanel.sapMPanel,
+body.chkAppRoot.appLight .chkApp .analyticsChartPanel .sapMPanelContent {
+  background-color: rgba(248, 252, 255, 0.04) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .analyticsChartPanel.sapMPanel,
+body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
+  background-color: rgba(10, 20, 40, 0.22) !important;
+}
+
 /* Migrated from claude-hyper.css */
 .chkApp .analyticsChartEmpty.sapMText {
   display: block !important;

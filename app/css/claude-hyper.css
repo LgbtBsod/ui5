@@ -1562,28 +1562,24 @@ html.chkAppRoot.theme-switching .chkApp .shellSettingRow {
   width: 100%;
 }
 
-.chkApp .searchActionToolbarDensity,
 .chkApp .detailControlRow,
 .chkApp .detailSectionAnchorRail,
 .chkApp .detailWorkflowRail {
   align-items: center;
 }
 
-.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
 .chkApp .detailControlRow .sapMBtn .sapMBtnInner,
 .chkApp .detailSectionAnchorBtn .sapMBtnInner {
   border-radius: 999px;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
-.chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner,
 .chkApp .detailControlRow .sapMBtn:hover .sapMBtnInner,
 .chkApp .detailSectionAnchorBtn:hover .sapMBtnInner {
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(18, 36, 64, 0.08);
 }
 
-.chkApp .searchActionToolbarDensity .sapMBtn:active .sapMBtnInner,
 .chkApp .detailControlRow .sapMBtn:active .sapMBtnInner,
 .chkApp .detailSectionAnchorBtn:active .sapMBtnInner {
   transform: scale(0.98);
@@ -2132,7 +2128,6 @@ body.chkAppRoot.appDark .chkApp .tableActionHeaderLabel {
 /* 2026-03 follow-up: flatten controls and fix theme toggle alignment */
 .chkApp .shellActionBtn:hover .sapMBtnInner,
 .chkApp .shellUserBtn:hover .sapMBtnInner,
-.chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner,
 .chkApp .detailControlRow .sapMBtn:hover .sapMBtnInner,
 .chkApp .detailSectionAnchorBtn:hover .sapMBtnInner {
   transform: none;
@@ -3312,24 +3307,6 @@ body.chkAppRoot.appDark .sapMMessageToast.glassToast {
 
 
 
-.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner {
-  border-radius: 999px;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
-}
-
-.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
-.chkApp .searchActionToolbarDensity .sapMSwt,
-.chkApp .searchActionToolbarDensity .sapMInputBaseContentWrapper {
-  box-shadow: var(--theme-workbench-control-shadow);
-}
-
-.chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(18, 36, 64, 0.14);
-}
-
-
-
 .chkApp .searchResultsTable .sapMColumnHeader,
 .chkApp .searchResultsTable .sapMListTblCell .sapMText,
 .chkApp .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
@@ -4017,25 +3994,10 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   margin-inline-start: 0;
 }
 
-.chkApp .searchResultsActionRail .sapMOTBOverflowButton .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnInner,
 .chkApp .searchFilterExperienceShell .sapMOTBOverflowButton .sapMBtnInner {
   min-width: 2.4rem;
   padding-inline: 0.65rem;
   border-radius: 999px;
-}
-
-.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent {
-  font-size: 0;
-}
-
-.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after {
-  content: "...";
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
 }
 
 .chkApp .searchAnalyticsActionBtn .sapMBtnInner {
@@ -4046,20 +4008,6 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
     linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(242, 247, 255, 0.12)),
     var(--theme-rail-bg);
   border-color: rgba(var(--accent-rgb), 0.16);
-}
-
-.chkApp .searchSmartToolbarRail {
-  width: 100%;
-  min-width: 0;
-  margin-bottom: 0;
-  padding: 0.12rem 0.16rem;
-  border-color: var(--theme-workbench-rail-border);
-  background: var(--theme-workbench-rail-bg);
-  box-shadow: var(--theme-workbench-rail-shadow);
-  position: sticky;
-  top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 15rem));
-  z-index: 12;
-  box-sizing: border-box;
 }
 
 .chkApp .searchToolbarMetaRail {
@@ -7966,11 +7914,6 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   gap: 0.42rem;
 }
 
-.chkApp .detailControlToolbarStack,
-.chkApp .detailControlRow,
-  border: 0;
-  padding-inline: 0;
-}
 
 .chkApp .detailSectionCard > .sapMTB,
 .chkApp .detailSectionCard > .sapMOTB {
@@ -8081,14 +8024,6 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 .chkApp .detailRailHint {
   color: var(--text-subtle);
   font-size: 0.74rem;
-}
-
-.chkApp .detailControlRowTop .sapMSwt,
-.chkApp .detailControlRowTop .sapMObjStatus,
-.chkApp .detailControlRowTop .sapMBusyIndicator,
-.chkApp .detailControlRowActions .sapMBtn {
-  margin-top: 0.08rem;
-  margin-bottom: 0.08rem;
 }
 
 .chkApp .detailControlRowTop .sapMSwt {
@@ -34600,4 +34535,5 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentItem {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
 
