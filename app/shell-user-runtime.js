@@ -13,6 +13,7 @@
         "03": "Delete"
     };
     var REFRESH_MS = 15000;
+    var STARTUP_DEDUP_WINDOW_MS = 5000;
 
     function normalizeRule(rule) {
         if (CurrentUserProfile && typeof CurrentUserProfile.normalizePermissionRule === "function") {
@@ -155,17 +156,24 @@
     }
 
     function syncFromBackend() {
+        var oRuntime;
+        var iNow = Date.now();
         window.__shellUserRuntime = window.__shellUserRuntime || {};
-        if (window.__shellUserRuntime.busy) {
+        oRuntime = window.__shellUserRuntime;
+        if (oRuntime.busy) {
             return Promise.resolve(false);
         }
-        window.__shellUserRuntime.busy = true;
+        if (oRuntime.lastSyncAt && (iNow - oRuntime.lastSyncAt) < STARTUP_DEDUP_WINDOW_MS) {
+            return Promise.resolve(false);
+        }
+        oRuntime.busy = true;
         return fetchCurrentUser().then(function (currentUser) {
+            oRuntime.lastSyncAt = Date.now();
             return applyToModels(currentUser);
         }).catch(function () {
             return false;
         }).finally(function () {
-            window.__shellUserRuntime.busy = false;
+            oRuntime.busy = false;
         });
     }
 

@@ -388,3 +388,22 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
     var(--shell-surface);
   box-shadow: var(--shell-shadow);
 }
+
+/* Suspend expensive glass effects while UI5 swaps theme CSS. */
+html.chkAppRoot.theme-switching .chkApp .appShellHeader,
+html.chkAppRoot.theme-switching .chkApp .glassCard,
+html.chkAppRoot.theme-switching .chkApp .detailSectionCard,
+html.chkAppRoot.theme-switching .chkApp .detailControlInlineCard,
+html.chkAppRoot.theme-switching .chkApp .infoCardTile,
+html.chkAppRoot.theme-switching .chkApp .searchFilterCardDense,
+html.chkAppRoot.theme-switching .chkApp .searchResultsTable,
+html.chkAppRoot.theme-switching .chkApp .searchAnalyticsCard,
+html.chkAppRoot.theme-switching .chkApp .searchStatusStripStack,
+html.chkAppRoot.theme-switching .chkApp .detailAttachmentDropZone,
+html.chkAppRoot.theme-switching .chkApp .shellUserCard,
+html.chkAppRoot.theme-switching .chkApp .shellSettingRow {
+  transition: none;
+  animation: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

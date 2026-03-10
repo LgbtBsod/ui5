@@ -14,6 +14,11 @@
   display: none;
 }
 
+/* Hide the built-in SmartFilterBar filters button; the workbench already exposes local controls. */
+.chkApp .searchSmartFilterWorkbench button[id$="-btnFilters"] {
+  display: none;
+}
+
 
 
 .chkApp .searchHeaderKpiRail {
@@ -2735,4 +2740,60 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     position: static;
     top: auto;
   }
+}
+
+/* Normalize the search segmented filters without changing toolbar geometry. */
+.chkApp .searchFilterExperienceShell .resultSegmentControl.sapMSegB {
+  display: inline-flex;
+  align-items: stretch;
+  min-height: 2.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
+  min-height: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 0.9rem;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn:not(.sapMSegBBtnSel) .sapMSegBBtnInner {
+  color: rgba(26, 50, 89, 0.88);
+  background: rgba(244, 248, 255, 0.92);
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn.sapMSegBBtnSel .sapMSegBBtnInner {
+  color: #ffffff;
+}
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMBtnContent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB {
+  align-items: center;
+}
+
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar > .sapMBarChild,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB > .sapMBarChild {
+  align-self: center;
+}
+
+/* The built-in SmartFilterBar filters button only scrolls back to the top in this shell. */
+.chkApp .searchSmartFilterWorkbench button[id$="-btnFilters"] {
+  display: none;
 }

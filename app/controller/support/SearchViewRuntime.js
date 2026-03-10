@@ -337,6 +337,12 @@ sap.ui.define([
         refreshSearchTableIfNeeded(oController, "routeMatchedReturn");
     }
 
+    function syncSearchContextForDetailRoute(oController) {
+        syncSmartControlAvailability(oController);
+        SearchViewportRuntime.bindSearchViewportRuntime(oController);
+        SearchViewportRuntime.scheduleSearchViewportSync(oController, false);
+    }
+
     function onSmartTableInitialise(oController) {
         var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
         ControllerViewStateRuntime.set(oController, "/smartTableReady", true);
@@ -429,6 +435,7 @@ sap.ui.define([
         focusSearchResults: SearchSelectionRuntime.focusSearchResults,
         focusSearchToolbar: SearchSelectionRuntime.focusSearchToolbar,
         onBeforeSmartTableRebind: onBeforeSmartTableRebind,
+        syncSearchContextForDetailRoute: syncSearchContextForDetailRoute,
         onSearchMatched: onSearchMatched,
         onSmartTableInitialise: onSmartTableInitialise,
         openWorkflowAnalytics: openWorkflowAnalytics,

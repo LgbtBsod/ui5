@@ -523,8 +523,9 @@ def health():
     return {"status": "Gateway Simulator Running"}
 
 @app.get("/sap/bc/lrep/flex/data/checklist.app.Component")
+@app.get("/sap/bc/lrep/flex/data/PRODUCTION_CONTROL_CHECKLIST.Component")
 def ui5_flex_stub(appVersion: str | None = None):
-    return {"changes": [], "comp": {"name": "checklist.app.Component", "appVersion": appVersion or "1.0.0"}}
+    return {"changes": [], "comp": {"name": "PRODUCTION_CONTROL_CHECKLIST.Component", "appVersion": appVersion or "1.0.0"}}
 
 
 @app.get("/sap/bc/lrep/flex/settings")

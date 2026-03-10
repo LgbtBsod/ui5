@@ -212,7 +212,7 @@
                                                 <t:Column width="8rem">
                                                     <Label text="{i18n>statusLabel}"/>
                                                     <t:template>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
@@ -257,7 +257,7 @@
                                                     <cells>
                                                         <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
                                                         <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
                                                         <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                                         <Button
                                                             icon="sap-icon://delete"
@@ -347,7 +347,7 @@
                                                 <t:Column width="8rem">
                                                     <Label text="{i18n>statusLabel}"/>
                                                     <t:template>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
@@ -392,7 +392,7 @@
                                                     <cells>
                                                         <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
                                                         <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
                                                         <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                                         <Button
                                                             icon="sap-icon://delete"

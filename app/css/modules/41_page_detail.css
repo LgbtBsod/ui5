@@ -2563,6 +2563,16 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   box-shadow: none;
 }
 
+/* Keep denied state local to the detail column. */
+.chkApp .detailAccessDeniedScene + .detailControlPinnedDock,
+.chkApp .detailAccessDeniedScene + .detailControlPinnedDock + .detailControlSkeletonCard {
+  display: none;
+}
+
+.chkApp .detailAccessDeniedScene {
+  margin-top: 0;
+}
+
 /* Base detail visual layer */
 .chkApp .detailHeroCard,
 .chkApp .detailWorkflowRail,

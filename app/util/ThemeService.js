@@ -16,9 +16,10 @@ sap.ui.define([
     var LEGACY_THEME_PROFILE_STORAGE_KEY = "sap_ui5_theme_profile";
     var LEGACY_THEME_STORAGE_KEY = "sap_ui5_theme";
     var THEME_PROFILE_RECOVERY_KEY = "checklist_app_theme_profile_recovery_20260305";
+    var THEME_BG_INTERACTIVE_MIGRATION_KEY = "checklist_app_theme_bg_interactive_off_20260310";
     var DEFAULT_MODE = "morning";
     var DEFAULT_ANIMATION_ENABLED = true;
-    var DEFAULT_BACKGROUND_INTERACTIVE = true;
+    var DEFAULT_BACKGROUND_INTERACTIVE = false;
     var MODE_TO_THEME = {
         morning: "sap_horizon",
         night: "sap_horizon_dark"
@@ -68,22 +69,18 @@ sap.ui.define([
     function recoverLegacyProfileDefaults(oProfile) {
         var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled, oProfile && oProfile.backgroundInteractive);
         var sRecoveredFlag;
-        var bRecovered = false;
+        var sBgMigrationFlag;
         try {
             sRecoveredFlag = window.localStorage.getItem(THEME_PROFILE_RECOVERY_KEY);
             if (!sRecoveredFlag) {
-                if (oNormalized.animationEnabled !== true) {
-                    oNormalized.animationEnabled = true;
-                    bRecovered = true;
-                }
-                if (oNormalized.backgroundInteractive !== true) {
-                    oNormalized.backgroundInteractive = true;
-                    bRecovered = true;
-                }
-                if (bRecovered) {
-                    setThemeProfile(oNormalized);
-                }
+                setThemeProfile(oNormalized);
                 window.localStorage.setItem(THEME_PROFILE_RECOVERY_KEY, "done");
+            }
+            sBgMigrationFlag = window.localStorage.getItem(THEME_BG_INTERACTIVE_MIGRATION_KEY);
+            if (!sBgMigrationFlag && oNormalized.backgroundInteractive !== false) {
+                oNormalized.backgroundInteractive = false;
+                setThemeProfile(oNormalized);
+                window.localStorage.setItem(THEME_BG_INTERACTIVE_MIGRATION_KEY, "done");
             }
         } catch (e) {
             // Best-effort recovery only.
@@ -311,7 +308,9 @@ sap.ui.define([
         syncBackgroundRuntime(oRequestedProfile);
         markSwitching(!bAlreadyApplied, oRequestedProfile.animationEnabled);
         applyBodyClasses(sTheme);
-        syncTokensFromUI5();
+        if (bAlreadyApplied) {
+            syncTokensFromUI5();
+        }
         if (!bAlreadyApplied) {
             sPendingMode = sResolvedMode;
             SchedulingRuntime.nextFrame(function () {

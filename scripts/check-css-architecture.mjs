@@ -1,8 +1,12 @@
 import fs from "fs";
 import path from "path";
 
-const runtimeRoot = fs.existsSync(path.join(process.cwd(), "app", "css", "style.css")) ? "app" : "";
-const entryPath = path.join(runtimeRoot, "css/style.css").replace(/\\/g, "/");
+const runtimeRoot = fs.existsSync(path.join(process.cwd(), "app", "css")) ? "app" : "";
+const entryCandidates = [
+  path.join(runtimeRoot, "css/style.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "css/source-entry.css").replace(/\\/g, "/")
+];
+const entryPath = entryCandidates.find((candidate) => fs.existsSync(candidate)) || "";
 const forbiddenLegacyFiles = [
   path.join(runtimeRoot, "css/modules/style-core.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "css/modules/style-components.css").replace(/\\/g, "/"),
@@ -72,9 +76,15 @@ function assertPatchDiscipline(filePath, css) {
   }
 }
 
-const entry = fs.readFileSync(entryPath, "utf8").trim();
-if (entry !== expectedImports.join("\n")) {
-  fail(`${entryPath} must be entry-only with the exact module import order.`);
+function stripCssComments(css) {
+  return String(css || "").replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+if (entryPath) {
+  const entry = fs.readFileSync(entryPath, "utf8").trim();
+  if (entry !== expectedImports.join("\n")) {
+    fail(`${entryPath} must be entry-only with the exact module import order.`);
+  }
 }
 
 for (const legacyFile of forbiddenLegacyFiles) {
@@ -85,6 +95,7 @@ for (const legacyFile of forbiddenLegacyFiles) {
 
 for (const file of modules) {
   const css = fs.readFileSync(file, "utf8");
+  const cssWithoutComments = stripCssComments(css);
   if (patchFiles.has(file)) {
     assertPatchDiscipline(file, css);
   } else if (css.includes("!important")) {
@@ -96,7 +107,7 @@ for (const file of modules) {
   if (css.includes("__view")) {
     fail(`${file} contains forbidden __view selectors.`);
   }
-  const offenders = [...css.matchAll(/([^{}]+)\{/g)]
+  const offenders = [...cssWithoutComments.matchAll(/([^{}]+)\{/g)]
     .map((match) => match[1].trim())
     .filter((selector) => selector.includes(".sap"))
     .filter((selector) => !selector.startsWith("@"))

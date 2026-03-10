@@ -62,7 +62,7 @@ sap.ui.define([
             }
             mPatch["/compactDensity"] = !!ModelStateRuntime.read(this, "appView", "/compactDensity", false);
             mPatch["/animationEnabled"] = ModelStateRuntime.read(this, "appView", "/animationEnabled", true) !== false;
-            mPatch["/backgroundInteractive"] = ModelStateRuntime.read(this, "appView", "/backgroundInteractive", true) !== false;
+            mPatch["/backgroundInteractive"] = ModelStateRuntime.read(this, "appView", "/backgroundInteractive", false) === true;
             mPatch["/invertedBlockScheme"] = !!ModelStateRuntime.read(this, "appView", "/invertedBlockScheme", false);
             mPatch["/isPhoneViewport"] = !!ModelStateRuntime.read(this, "appView", "/isPhoneViewport", false);
             mPatch["/isTabletViewport"] = !!ModelStateRuntime.read(this, "appView", "/isTabletViewport", false);

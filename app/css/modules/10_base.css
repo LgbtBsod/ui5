@@ -400,3 +400,26 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   padding-left: 0.58rem;
   padding-right: 0.42rem;
 }
+
+/* Keep the FCL separator interactive in split mode. */
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLArrow {
+  opacity: 1;
+  pointer-events: auto;
+  width: 1rem;
+  min-width: 1rem;
+  cursor: col-resize;
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLArrow::after {
+  opacity: 1;
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLNavigationButton {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnSeparator {
+  width: 1px;
+  opacity: 1;
+}

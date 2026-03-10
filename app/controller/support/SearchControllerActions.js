@@ -169,7 +169,7 @@ sap.ui.define([
             if (sLayout === "MidColumnFullScreen") {
                 return;
             }
-            SearchViewRuntime.onSearchMatched(this);
+            SearchViewRuntime.syncSearchContextForDetailRoute(this);
             SearchRuntimeDockFix.sync(this, true);
         },
 

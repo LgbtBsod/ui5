@@ -5,15 +5,15 @@
         contentWidth="19rem"
         placement="Bottom">
         <customHeader>
-            <Bar>
+            <Bar class="analyticsYearPickerHeader">
                 <contentLeft>
-                    <Button icon="sap-icon://navigation-left-arrow" type="Transparent" press=".onNavigateAnalyticsYearPickerBack"/>
+                    <Button icon="sap-icon://navigation-left-arrow" type="Transparent" press=".onNavigateAnalyticsYearPickerBack" class="analyticsYearPickerNav analyticsYearPickerNavBack"/>
                 </contentLeft>
                 <contentMiddle>
-                    <Title text="{view>/yearPicker/rangeLabel}" level="H6"/>
+                    <Title text="{view>/yearPicker/rangeLabel}" level="H6" class="analyticsYearPickerTitle"/>
                 </contentMiddle>
                 <contentRight>
-                    <Button icon="sap-icon://navigation-right-arrow" type="Transparent" press=".onNavigateAnalyticsYearPickerForward"/>
+                    <Button icon="sap-icon://navigation-right-arrow" type="Transparent" press=".onNavigateAnalyticsYearPickerForward" class="analyticsYearPickerNav analyticsYearPickerNavForward"/>
                 </contentRight>
             </Bar>
         </customHeader>

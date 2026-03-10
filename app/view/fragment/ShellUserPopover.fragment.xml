@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <ResponsivePopover
         id="shellUserPopover"
-        class="glassDialog shellPopover"
+        class="glassDialog shellPopover shellUserPopover"
         title="{i18n>shellUserTitle}"
         contentWidth="24rem"
         placement="Bottom"
@@ -44,7 +44,7 @@
                     type="{appView>/shell/userActionType}"
                     press=".onShellUserPrimaryAction"
                     visible="{appView>/shell/userActionVisible}"
-                    class="shellUserActionBtn"/>
+                    class="shellUserActionBtn shellUserPrimaryActionBtn"/>
 
                 <VBox class="shellUserCard shellUserContextCard workflowBusyScope" renderType="Bare">
                     <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{appView>/shell/userRefreshBusy}">
@@ -54,7 +54,7 @@
                         <core:Icon src="sap-icon://key-user-settings" decorative="true" class="shellItemIcon"/>
                         <Text text="{i18n>shellUserPermissionsTitle}" class="shellUserLabel"/>
                     </HBox>
-                    <List items="{appView>/shell/userPermissions}" class="shellUserPermissionList" noDataText="{i18n>shellUserPermissionsEmpty}">
+                    <List items="{appView>/shell/userPermissions}" class="shellUserPermissionList shellUserPermissionsList" noDataText="{i18n>shellUserPermissionsEmpty}">
                         <StandardListItem title="{appView>title}" description="{appView>description}" info="{appView>scope}" icon="sap-icon://accept" type="Inactive"/>
                     </List>
                     <Button
@@ -64,7 +64,7 @@
                         type="Transparent"
                         enabled="{= !${appView>/shell/userRefreshBusy} }"
                         press=".onRefreshShellUser"
-                        class="shellUserActionBtn"/>
+                        class="shellUserActionBtn shellUserRefreshActionBtn"/>
                 </VBox>
 
                 <VBox class="shellUserCard shellUserPassiveCard" renderType="Bare" visible="{= !!${appView>/shell/userActionPassiveText} }">

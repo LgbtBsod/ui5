@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <ResponsivePopover
         id="shellSettingsPopover"
-        class="glassDialog shellPopover"
+        class="glassDialog shellPopover shellSettingsPopover"
         title="{i18n>shellSettingsTitle}"
         contentWidth="22rem"
         placement="Bottom">
@@ -17,7 +17,7 @@
                         </HBox>
                         <Text text="{i18n>shellSettingAnimationText}" class="shellHelpText"/>
                     </VBox>
-                    <Switch id="shellSettingsAnimationSwitch" state="{appView>/animationEnabled}" change=".onToggleThemeAnimation"/>
+                    <Switch id="shellSettingsAnimationSwitch" state="{appView>/animationEnabled}" change=".onToggleThemeAnimation" class="shellSettingsSwitch shellSettingsAnimationSwitch"/>
                 </HBox>
 
                 <HBox class="shellSettingRow" renderType="Bare" justifyContent="SpaceBetween" alignItems="Center">
@@ -28,7 +28,7 @@
                         </HBox>
                         <Text text="{i18n>shellSettingInteractionText}" class="shellHelpText"/>
                     </VBox>
-                    <Switch id="shellSettingsInteractionSwitch" state="{appView>/backgroundInteractive}" enabled="{appView>/animationEnabled}" change=".onToggleBackgroundInteraction"/>
+                    <Switch id="shellSettingsInteractionSwitch" state="{appView>/backgroundInteractive}" enabled="{appView>/animationEnabled}" change=".onToggleBackgroundInteraction" class="shellSettingsSwitch shellSettingsInteractionSwitch"/>
                 </HBox>
             </VBox>
         </content>

@@ -33,7 +33,7 @@
     class="sapUiBody chkAppRoot appLight lightMode theme-motion-enabled"
     data-theme="light"
     data-bg-enabled="true"
-    data-bg-interactive="true"
+    data-bg-interactive="false"
     data-quality="high"
 >
     <div id="ui5-bg" aria-hidden="true">
@@ -127,6 +127,8 @@
     <script src="shell-user-runtime.js"></script>
     <script>
         (function () {
+            var UI5_VERSION = "1.71.70";
+
             function splitClassNames(sClassNames) {
                 return String(sClassNames || "").split(/\s+/).map(function (sName) {
                     return sName.trim();
@@ -148,6 +150,51 @@
                 oScript.src = sSrc;
                 oScript.async = false;
                 document.head.appendChild(oScript);
+            }
+
+            function resolveStoredThemeMode() {
+                var sRawProfile = "";
+                var oParsedProfile = null;
+                var sMode = "morning";
+                try {
+                    sRawProfile = window.localStorage.getItem("checklist_app_theme_profile")
+                        || window.localStorage.getItem("sap_ui5_theme_profile")
+                        || "";
+                    if (sRawProfile) {
+                        oParsedProfile = JSON.parse(sRawProfile);
+                        sMode = String(oParsedProfile && oParsedProfile.mode || sMode).toLowerCase();
+                    } else {
+                        sMode = String(window.localStorage.getItem("sap_ui5_theme") || sMode).toLowerCase();
+                    }
+                } catch (e) {
+                    sMode = "morning";
+                }
+                return sMode === "night" || sMode === "sap_horizon_dark" || sMode === "sap_fiori_3_dark"
+                    ? "night"
+                    : "morning";
+            }
+
+            function scheduleAlternateThemePrefetch() {
+                var sAlternateTheme = resolveStoredThemeMode() === "night" ? "sap_horizon" : "sap_horizon_dark";
+                var aLibraries = [
+                    "sap/ui/core",
+                    "sap/m",
+                    "sap/f",
+                    "sap/ui/layout",
+                    "sap/ui/comp",
+                    "sap/uxap",
+                    "sap/ui/table",
+                    "sap/ui/unified",
+                    "sap/viz"
+                ];
+                aLibraries.forEach(function (sLibraryPath) {
+                    var oLink = document.createElement("link");
+                    oLink.rel = "prefetch";
+                    oLink.as = "style";
+                    oLink.crossOrigin = "anonymous";
+                    oLink.href = "https://ui5.sap.com/" + UI5_VERSION + "/resources/" + sLibraryPath + "/themes/" + sAlternateTheme + "/library.css";
+                    document.head.appendChild(oLink);
+                });
             }
 
             function mountComponent() {
@@ -225,6 +272,7 @@
                 return;
             }
 
+            scheduleAlternateThemePrefetch();
             loadBootstrapScript();
         }());
     </script>

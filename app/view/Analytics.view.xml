@@ -9,9 +9,10 @@
         showNavButton="true"
         navButtonPress=".onCloseAnalytics"
         enableScrolling="true"
-        class="pageTransparent">
+        class="pageTransparent analyticsPage">
         <headerContent>
             <ObjectStatus
+                class="analyticsRefreshStatus"
                 text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? ${i18n>analyticsRefreshRunning} : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : (${view>/refreshState/lastSuccessAt} ? (${i18n>workflowUpdatedAt} + ': ' + ${view>/refreshState/lastSuccessAt}) : ${i18n>analyticsRefreshIdle}))) }"
                 state="{= ${view>/refreshState/status} === 'ERROR' ? 'Error' : ((${view>/refreshState/status} === 'REQUESTED' || ${view>/refreshState/isRunning}) ? 'Warning' : 'Success') }"/>
             <Button
@@ -19,14 +20,16 @@
                 icon="sap-icon://refresh"
                 type="Emphasized"
                 enabled="{= !${view>/refreshBusy} &amp;&amp; !${view>/refreshState/isRunning} &amp;&amp; ${view>/refreshState/status} !== 'REQUESTED' }"
-                press=".onRefreshAnalytics"/>
+                press=".onRefreshAnalytics"
+                class="analyticsRefreshButton"/>
         </headerContent>
 
         <subHeader>
-            <OverflowToolbar design="Transparent">
-                <Label text="{i18n>analyticsSourceFilterLabel}" labelFor="analyticsSourceSwitch"/>
+            <OverflowToolbar design="Transparent" class="analyticsFilterToolbar">
+                <Label text="{i18n>analyticsSourceFilterLabel}" labelFor="analyticsSourceSwitch" class="analyticsFilterLabel analyticsSourceLabel"/>
                 <SegmentedButton
                     id="analyticsSourceSwitch"
+                    class="analyticsSourceSwitch"
                     selectedKey="{view>/selectedSource}"
                     selectionChange=".onSelectAnalyticsSource">
                     <items>
@@ -36,7 +39,7 @@
                     </items>
                 </SegmentedButton>
                 <ToolbarSpacer/>
-                <Label text="{i18n>analyticsYearLabel}" labelFor="analyticsYearSelect"/>
+                <Label text="{i18n>analyticsYearLabel}" labelFor="analyticsYearSelect" class="analyticsFilterLabel analyticsYearLabel"/>
                 <HBox class="analyticsYearField" renderType="Bare" alignItems="Center">
                     <Input
                         id="analyticsYearSelect"
@@ -50,18 +53,19 @@
                         icon="sap-icon://calendar"
                         type="Transparent"
                         tooltip="{i18n>analyticsYearLabel}"
-                        press=".onOpenAnalyticsSelectedYearPicker"/>
+                        press=".onOpenAnalyticsSelectedYearPicker"
+                        class="analyticsYearPickerTrigger"/>
                 </HBox>
-                <Button text="{i18n>analyticsPresetCurrent}" type="Transparent" press=".onApplyAnalyticsYearPreset">
+                <Button text="{i18n>analyticsPresetCurrent}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetCurrent">
                     <customData><core:CustomData key="preset" value="CURRENT"/></customData>
                 </Button>
-                <Button text="{i18n>analyticsPresetPrevious}" type="Transparent" press=".onApplyAnalyticsYearPreset">
+                <Button text="{i18n>analyticsPresetPrevious}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetPrevious">
                     <customData><core:CustomData key="preset" value="PREVIOUS"/></customData>
                 </Button>
-                <Button text="{i18n>analyticsPresetYtd}" type="Transparent" press=".onApplyAnalyticsYearPreset">
+                <Button text="{i18n>analyticsPresetYtd}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetYtd">
                     <customData><core:CustomData key="preset" value="YTD"/></customData>
                 </Button>
-                <Label text="{i18n>analyticsCompareYearLabel}" labelFor="analyticsCompareYearInput"/>
+                <Label text="{i18n>analyticsCompareYearLabel}" labelFor="analyticsCompareYearInput" class="analyticsFilterLabel analyticsCompareYearLabel"/>
                 <HBox class="analyticsYearField" renderType="Bare" alignItems="Center">
                     <Input
                         id="analyticsCompareYearInput"
@@ -77,7 +81,8 @@
                         icon="sap-icon://calendar"
                         type="Transparent"
                         tooltip="{i18n>analyticsCompareYearLabel}"
-                        press=".onOpenAnalyticsCompareYearPicker"/>
+                        press=".onOpenAnalyticsCompareYearPicker"
+                        class="analyticsYearPickerTrigger analyticsCompareYearPickerTrigger"/>
                 </HBox>
             </OverflowToolbar>
         </subHeader>
