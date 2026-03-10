@@ -167,3 +167,67 @@ body.chkAppRoot.appDark,
 .appSkeletonFormSectionInline .appSkeletonTableRow {
   margin-top: 0.5rem;
 }
+
+/* Migrated from claude-hyper.css: skeleton utility aliases used by fragments. */
+.chkApp .appSkeletonTableSection {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  padding: 0.65rem !important;
+}
+
+.chkApp .appSkeletonColSelect {
+  width: 1.4rem !important;
+  height: 1.4rem !important;
+  border-radius: 0.3rem !important;
+  flex-shrink: 0 !important;
+}
+
+.chkApp .appSkeletonColMain {
+  flex: 3 !important;
+  height: 0.72rem !important;
+  border-radius: 999px !important;
+  min-width: 0 !important;
+}
+
+.chkApp .appSkeletonColStatus {
+  flex: 1.2 !important;
+  height: 1.35rem !important;
+  border-radius: 999px !important;
+  min-width: 4rem !important;
+  max-width: 7rem !important;
+}
+
+.chkApp .appSkeletonColComment {
+  flex: 2 !important;
+  height: 0.65rem !important;
+  border-radius: 999px !important;
+  min-width: 0 !important;
+}
+
+.chkApp .appSkeletonColMeta {
+  flex: 1 !important;
+  height: 0.65rem !important;
+  border-radius: 999px !important;
+  min-width: 3rem !important;
+  max-width: 5.5rem !important;
+}
+
+.chkApp .appSkeletonMetric {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.35rem !important;
+  padding-block: 0.25rem !important;
+}
+
+.chkApp .appSkeletonMetric .appSkeletonLineShort {
+  width: 3.5rem !important;
+  height: 1.75rem !important;
+  border-radius: 0.4rem !important;
+}
+
+.chkApp .appSkeletonMetric .appSkeletonLineMedium {
+  width: 5rem !important;
+  height: 0.7rem !important;
+  border-radius: 0.35rem !important;
+}

@@ -19,6 +19,193 @@
   display: none;
 }
 
+/* Migrated from claude-hyper.css: filter shell wrappers.
+   Keep overflow visible so SmartFilterBar controls are not clipped. */
+.chkApp .smartFilterGlass {
+  border-radius: 0.875rem !important;
+  overflow: visible !important;
+}
+
+body.chkAppRoot.appLight .chkApp .smartFilterGlass {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid rgba(160, 200, 240, 0.40) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .smartFilterGlass {
+  background: rgba(14, 24, 46, 0.75) !important;
+  border: 1px solid rgba(55, 90, 155, 0.30) !important;
+}
+
+.chkApp .filterCard {
+  border-radius: 0.875rem !important;
+  overflow: visible !important;
+  padding: 0.65rem 0.875rem !important;
+}
+
+.chkApp .filterCard .sapUiCompFilterBarToolbar,
+.chkApp .filterCard .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .smartFilterGlass .sapUiCompFilterBarToolbar,
+.chkApp .smartFilterGlass .sapUiCompSmartFilterBar .sapMTB {
+  overflow: visible !important;
+}
+
+.chkApp .filterCard .sapMFlexItem,
+.chkApp .smartFilterGlass .sapMFlexItem {
+  min-width: 0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .filterCard {
+  background: rgba(248, 252, 255, 0.90) !important;
+  border: 1px solid rgba(160, 200, 240, 0.45) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .filterCard {
+  background: rgba(14, 24, 46, 0.80) !important;
+  border: 1px solid rgba(55, 90, 155, 0.32) !important;
+}
+
+/* Migrated from claude-hyper.css: ghost action and toolbar shell. */
+.chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
+  background: transparent !important;
+  border-color: rgba(var(--hz-accent-rgb, 0,112,242), 0.50) !important;
+  color: var(--hz-accent, #0070F2) !important;
+  box-shadow: none !important;
+}
+
+body.chkAppRoot.appDark .chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
+  border-color: rgba(77, 177, 255, 0.40) !important;
+  color: rgba(130, 200, 255, 0.92) !important;
+}
+
+.chkApp .brandActionBtn.brandActionGhost:hover .sapMBtnInner {
+  background: rgba(var(--hz-accent-rgb, 0,112,242), 0.07) !important;
+  border-color: rgba(var(--hz-accent-rgb, 0,112,242), 0.65) !important;
+  transform: translateY(-1px) !important;
+}
+
+.chkApp .brandActionBtn.brandActionGhost:active .sapMBtnInner {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+.chkApp .tableActionToolbar.sapMTB,
+.chkApp .tableActionToolbar.sapMOTB {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding-block: 0.35rem !important;
+  min-height: 2.75rem !important;
+}
+
+/* Migrated from claude-hyper.css: search action ghost buttons (live in Search.view.xml). */
+.chkApp .searchOpenActionBtn .sapMBtnInner,
+.chkApp .searchCopyActionBtn .sapMBtnInner,
+.chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+.chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  background: transparent !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchOpenActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchCopyActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  border-color: rgba(140, 185, 235, 0.50) !important;
+  color: rgba(48, 88, 155, 0.82) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchCopyActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  border-color: rgba(48, 82, 148, 0.42) !important;
+  color: rgba(130, 185, 245, 0.82) !important;
+}
+
+/* Migrated from claude-hyper.css: search load-state banner/retry and busy header text. */
+.chkApp .searchLoadErrorBanner {
+  border-radius: 0.75rem !important;
+  padding: 0.65rem 0.875rem !important;
+  font-size: 0.82rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchLoadErrorBanner {
+  background: rgba(204, 0, 0, 0.07) !important;
+  border: 1px solid rgba(204, 0, 0, 0.24) !important;
+  color: rgba(140, 0, 0, 0.90) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchLoadErrorBanner {
+  background: rgba(255, 92, 119, 0.09) !important;
+  border: 1px solid rgba(255, 92, 119, 0.24) !important;
+  color: rgba(255, 140, 160, 0.92) !important;
+}
+
+.chkApp .searchLoadRetryRow {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  margin-top: 0.35rem !important;
+  padding: 0.5rem 0 !important;
+}
+
+.chkApp .searchLoadRetryRow .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  padding: 0 0.75rem !important;
+  min-height: 1.85rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 680 !important;
+}
+
+.chkApp .searchLoadErrorBanner.sapMMsgStrip {
+  border-radius: 0.70rem !important;
+  border-left-width: 3.5px !important;
+  border-color: rgba(196, 14, 14, 0.30) !important;
+}
+
+.chkApp .searchCustomBusyHeader {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 1rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.chkApp .searchCustomBusyTitle.sapMText {
+  font-size: 0.88rem !important;
+  font-weight: 740 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchCustomBusyTitle {
+  color: rgba(14, 28, 58, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
+  color: rgba(210, 228, 255, 0.90) !important;
+}
+
+.chkApp .searchCustomBusySubtitle.sapMText {
+  font-size: 0.74rem !important;
+  opacity: 0.58 !important;
+  text-align: right !important;
+}
+
+.chkApp .searchCustomBusySubtitle {
+  max-width: 320px !important;
+}
+
+/* Migrated from claude-hyper.css: search panels opacity-only transition. */
+.chkApp .searchFilterExperienceCard,
+.chkApp .searchFilterCard,
+.chkApp .searchResultsTable,
+.chkApp .searchSmartTableControl,
+.chkApp .searchSmartToolbarRail,
+.chkApp .smartTableGlass {
+  transition: opacity 60ms ease !important;
+}
+
 
 
 .chkApp .searchHeaderKpiRail {

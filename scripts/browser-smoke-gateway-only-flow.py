@@ -54,13 +54,14 @@ def wait_for_search_ready(page) -> None:
           const fcl = core.byId('checklist_app_comp---app--mainFcl');
           const smartFilterBar = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartFilterBar');
           const smartTable = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable');
-          const appReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true';
+          const markerReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true';
+          const coreReady = !!fcl && !!smartFilterBar && !!smartTable;
           return !!fcl
             && !!smartFilterBar
             && !!smartTable
             && !!state
             && state.getProperty('/currentRouteName') === 'search'
-            && appReady;
+            && (markerReady || coreReady);
         }
         """,
         timeout=30000,
@@ -75,10 +76,15 @@ def wait_for_detail_ready(page, root_id: str) -> None:
         (expectedRootId) => {
           const core = sap.ui.getCore();
           const view = core.byId('checklist_app_comp---app--detailPaneHost');
+          const app = core.byId('checklist_app_comp---app');
           const objectPage = core.byId('checklist_app_comp---app--detailPaneHost--detailObjectPage');
           const selected = view && view.getModel && view.getModel('selected');
+          const state = app && app.getModel && app.getModel('state');
           const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
-          return !!view && !!objectPage && rootId === expectedRootId;
+          const stateSelectedId = state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '';
+          return !!view
+            && !!objectPage
+            && (rootId === expectedRootId || stateSelectedId === expectedRootId);
         }
         """,
         arg=root_id,

@@ -16,6 +16,7 @@ const uiPort = Number(process.env.GATEWAY_SMOKE_UI_PORT || 8080);
 const backendBase = process.env.GATEWAY_SMOKE_BACKEND_BASE || `http://127.0.0.1:${backendPort}`;
 const backendUrl = `${backendBase}/sap/opu/odata/sap/Z_UI5_SRV/$metadata`;
 const uiUrl = process.env.GATEWAY_SMOKE_UI_URL || `http://127.0.0.1:${uiPort}/index.html`;
+const useExternalBackend = String(process.env.GATEWAY_SMOKE_EXTERNAL_BACKEND || '').trim() === '1';
 const pidFiles = {
   backend: path.join(runtimeDir, 'gateway-live-backend.pid'),
   ui: path.join(runtimeDir, 'gateway-live-ui.pid')
@@ -125,29 +126,39 @@ function spawnDetached(name, command, args, options) {
 
 async function start() {
   ensureRuntimeDir();
-  stopPidFile(pidFiles.backend);
+  if (!useExternalBackend) {
+    stopPidFile(pidFiles.backend);
+  }
   stopPidFile(pidFiles.ui);
 
-  await spawnDetached('backend', pythonBin, ['-m', 'uvicorn', 'main:app', '--host', '127.0.0.1', '--port', String(backendPort)], {
-    cwd: mockRoot,
-    env: { ...process.env }
-  });
+  if (!useExternalBackend) {
+    await spawnDetached('backend', pythonBin, ['-m', 'uvicorn', 'main:app', '--host', '127.0.0.1', '--port', String(backendPort)], {
+      cwd: mockRoot,
+      env: { ...process.env }
+    });
+  } else {
+    removeFile(pidFiles.backend);
+  }
   await spawnDetached('ui', pythonBin, ['scripts/dev_static_server.py', String(uiPort)], {
     cwd: rootDir,
     env: { ...process.env, UI5_BACKEND_BASE: backendBase }
   });
 
-  await waitForUrl(backendUrl, 'Mock backend', 30000);
+  await waitForUrl(backendUrl, useExternalBackend ? 'SAP Gateway' : 'Mock backend', 30000);
   await waitForUrl(uiUrl, 'UI server', 30000);
 
-  console.log(`Backend: ${backendUrl}`);
+  console.log(`Backend: ${backendUrl}${useExternalBackend ? ' (external)' : ''}`);
   console.log(`UI: ${uiUrl}`);
   console.log(`Logs: ${runtimeDir}`);
 }
 
 function stop() {
   stopPidFile(pidFiles.ui);
-  stopPidFile(pidFiles.backend);
+  if (!useExternalBackend) {
+    stopPidFile(pidFiles.backend);
+  } else {
+    removeFile(pidFiles.backend);
+  }
   console.log(`Stopped gateway live env. Logs: ${runtimeDir}`);
 }
 

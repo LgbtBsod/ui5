@@ -1,6 +1,7 @@
 param(
     [int]$BackendPort = 8000,
-    [int]$UiPort = 8080
+    [int]$UiPort = 8080,
+    [string]$GatewayBaseUrl = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,6 +16,8 @@ $backendOut = Join-Path $pidDir "mock_backend.out.log"
 $backendErr = Join-Path $pidDir "mock_backend.err.log"
 $uiOut = Join-Path $pidDir "ui_server.out.log"
 $uiErr = Join-Path $pidDir "ui_server.err.log"
+$servicePath = "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/"
+$isRealGateway = -not [string]::IsNullOrWhiteSpace($GatewayBaseUrl)
 
 function Ensure-Dir([string]$Path) {
     if (-not (Test-Path $Path)) {
@@ -69,31 +72,52 @@ if (-not (Test-Path $pythonVenv)) {
 Stop-IfRunning -PidFile $backendPidFile -Port $BackendPort
 Stop-IfRunning -PidFile $uiPidFile -Port $UiPort
 
-$backendProcess = Start-Process `
-    -FilePath $pythonVenv `
-    -ArgumentList @("-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "$BackendPort") `
-    -WorkingDirectory $mockRoot `
-    -RedirectStandardOutput $backendOut `
-    -RedirectStandardError $backendErr `
-    -WindowStyle Hidden `
-    -PassThru
+$uiBackendBase = if ($isRealGateway) { $GatewayBaseUrl.TrimEnd("/") } else { "http://127.0.0.1:$BackendPort" }
 
-$backendProcess.Id | Set-Content $backendPidFile
+if ($isRealGateway) {
+    Remove-Item $backendPidFile -ErrorAction SilentlyContinue
+} else {
+    $backendProcess = Start-Process `
+        -FilePath $pythonVenv `
+        -ArgumentList @("-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "$BackendPort") `
+        -WorkingDirectory $mockRoot `
+        -RedirectStandardOutput $backendOut `
+        -RedirectStandardError $backendErr `
+        -WindowStyle Hidden `
+        -PassThru
 
-$uiProcess = Start-Process `
-    -FilePath "python" `
-    -ArgumentList @("scripts/dev_static_server.py", "$UiPort") `
-    -WorkingDirectory $repoRoot `
-    -RedirectStandardOutput $uiOut `
-    -RedirectStandardError $uiErr `
-    -WindowStyle Hidden `
-    -PassThru
+    $backendProcess.Id | Set-Content $backendPidFile
+}
+
+$prevUiBackendBase = $env:UI5_BACKEND_BASE
+$env:UI5_BACKEND_BASE = $uiBackendBase
+try {
+    $uiProcess = Start-Process `
+        -FilePath "python" `
+        -ArgumentList @("scripts/dev_static_server.py", "$UiPort") `
+        -WorkingDirectory $repoRoot `
+        -RedirectStandardOutput $uiOut `
+        -RedirectStandardError $uiErr `
+        -WindowStyle Hidden `
+        -PassThru
+} finally {
+    if ($null -eq $prevUiBackendBase) {
+        Remove-Item Env:UI5_BACKEND_BASE -ErrorAction SilentlyContinue
+    } else {
+        $env:UI5_BACKEND_BASE = $prevUiBackendBase
+    }
+}
 
 $uiProcess.Id | Set-Content $uiPidFile
 
-$backendStatus = Wait-Http -Url "http://127.0.0.1:$BackendPort/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/`$metadata" -TimeoutSeconds 20 -Name "Mock backend"
+$backendProbeBase = if ($isRealGateway) { $GatewayBaseUrl.TrimEnd("/") } else { "http://127.0.0.1:$BackendPort" }
+$backendStatus = Wait-Http -Url "$backendProbeBase$servicePath`$metadata" -TimeoutSeconds 20 -Name (if ($isRealGateway) { "SAP Gateway" } else { "Mock backend" })
 $uiStatus = Wait-Http -Url "http://127.0.0.1:$UiPort/index.html" -TimeoutSeconds 20 -Name "UI server"
 
-Write-Host "Backend: http://127.0.0.1:$BackendPort ($backendStatus)"
+if ($isRealGateway) {
+    Write-Host "Backend (SAP Gateway): $backendProbeBase ($backendStatus)"
+} else {
+    Write-Host "Backend: http://127.0.0.1:$BackendPort ($backendStatus)"
+}
 Write-Host "UI: http://127.0.0.1:$UiPort/index.html ($uiStatus)"
 Write-Host "Logs: $pidDir"

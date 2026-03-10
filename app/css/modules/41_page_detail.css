@@ -181,6 +181,169 @@
   padding-inline: 0;
 }
 
+/* Migrated from claude-hyper.css: detail hero stat rail and toolbar wrappers. */
+.chkApp .uxStatRow {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.45rem !important;
+}
+
+.chkApp .detailControlToolbar {
+  padding: 0 !important;
+}
+
+.chkApp .detailControlSkeletonButton {
+  width: 5.5rem !important;
+  height: 2.1rem !important;
+  border-radius: 999px !important;
+}
+
+.chkApp .detailRailCloseAction .sapMBtnInner,
+.chkApp .detailControlRowActions .sapMBtnTransparent .sapMBtnInner {
+  background: transparent !important;
+  border-color: rgba(160, 200, 240, 0.40) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailRailCloseAction .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .detailControlRowActions .sapMBtnTransparent .sapMBtnInner {
+  color: rgba(48, 88, 155, 0.85) !important;
+  border-color: rgba(140, 185, 235, 0.45) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailCloseAction .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .detailControlRowActions .sapMBtnTransparent .sapMBtnInner {
+  color: rgba(140, 190, 245, 0.85) !important;
+  border-color: rgba(50, 90, 160, 0.40) !important;
+}
+
+/* Migrated from claude-hyper.css: detail action rail buttons. */
+.chkApp .detailControlRowActions.sapMTB,
+.chkApp .detailControlRowActions.sapMOTB {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0.45rem 0.875rem !important;
+  min-height: 3rem !important;
+  gap: 0.4rem !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  min-height: 2.2rem !important;
+  padding: 0 1rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 680 !important;
+  gap: 0.35rem !important;
+  border: 1.5px solid !important;
+  transition: transform 110ms ease, opacity 110ms ease !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtn .sapMBtnIconLeft.sapUiIcon {
+  font-size: 0.82rem !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtnEmphasized .sapMBtnInner {
+  background: var(--hz-accent, #0070F2) !important;
+  border-color: var(--hz-accent, #0070F2) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(var(--hz-accent-rgb, 0,112,242), 0.30) !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtnEmphasized:hover .sapMBtnInner {
+  filter: brightness(1.07) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(var(--hz-accent-rgb, 0,112,242), 0.42) !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtnReject .sapMBtnInner {
+  background: transparent !important;
+  border-color: rgba(204, 0, 0, 0.40) !important;
+  color: rgba(180, 0, 0, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlRowActions .sapMBtnReject .sapMBtnInner {
+  border-color: rgba(255, 80, 110, 0.38) !important;
+  color: rgba(255, 130, 148, 0.88) !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtnReject:hover .sapMBtnInner {
+  background: rgba(204, 0, 0, 0.07) !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtnAccept .sapMBtnInner {
+  background: rgba(26, 124, 64, 0.10) !important;
+  border-color: rgba(26, 124, 64, 0.35) !important;
+  color: rgba(10, 80, 32, 0.90) !important;
+}
+
+.chkApp .detailControlRowTop .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  font-size: 0.78rem !important;
+  min-height: 1.9rem !important;
+  padding: 0 0.65rem !important;
+  gap: 0.28rem !important;
+  transition: background 110ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailControlRowTop .sapMBtn:hover .sapMBtnInner {
+  background: rgba(0, 112, 242, 0.07) !important;
+  border-color: rgba(0, 112, 242, 0.20) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailControlRowTop .sapMBtn:hover .sapMBtnInner {
+  background: rgba(77, 177, 255, 0.09) !important;
+  border-color: rgba(77, 177, 255, 0.22) !important;
+}
+
+.chkApp .detailControlRowActions .sapMBtn .sapMBtnInner.sapMBtnDisabled,
+.chkApp .detailControlRowActions .sapMBtn.sapMBtnDisabled .sapMBtnInner {
+  opacity: 0.40 !important;
+  transform: none !important;
+  cursor: not-allowed !important;
+}
+
+/* Migrated from claude-hyper.css: edit mode accent switch. */
+.chkApp .accentSwitch.accentSwitchEditMode.sapMSwt {
+  border-radius: 999px !important;
+  border: 1.5px solid !important;
+  min-width: 3rem !important;
+  height: 1.8rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .accentSwitchEditMode.sapMSwt {
+  background: rgba(225, 240, 255, 0.90) !important;
+  border-color: rgba(140, 185, 235, 0.55) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .accentSwitchEditMode.sapMSwt {
+  background: rgba(16, 28, 54, 0.88) !important;
+  border-color: rgba(50, 90, 160, 0.45) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .accentSwitchEditMode.sapMSwtOn {
+  background: var(--hz-accent, #0070F2) !important;
+  border-color: var(--hz-accent, #0070F2) !important;
+  box-shadow: 0 0 0 3px rgba(0, 112, 242, 0.18) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .accentSwitchEditMode.sapMSwtOn {
+  background: var(--hz-accent, #4DB1FF) !important;
+  border-color: var(--hz-accent, #4DB1FF) !important;
+  box-shadow: 0 0 0 3px rgba(77, 177, 255, 0.18) !important;
+}
+
+.chkApp .accentSwitchEditMode .sapMSwtHandle {
+  width: 1.3rem !important;
+  height: 1.3rem !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 20, 0.20) !important;
+  transition: left 200ms cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
 
 
 

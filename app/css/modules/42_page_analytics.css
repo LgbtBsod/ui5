@@ -204,3 +204,12 @@
 .chkApp .accessDeniedVisual {
   box-shadow: none;
 }
+
+/* Migrated from claude-hyper.css */
+.chkApp .analyticsChartEmpty.sapMText {
+  display: block !important;
+  text-align: center !important;
+  padding: 2rem 1rem !important;
+  font-size: 0.84rem !important;
+  opacity: 0.50 !important;
+}

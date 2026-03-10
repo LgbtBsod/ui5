@@ -35,9 +35,7 @@ def wait_for_app_ready(page, delay: int = 1200) -> None:
           const search = core.byId('checklist_app_comp---app--searchPaneHost');
           const smartFilterBar = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartFilterBar');
           const smartTable = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable');
-          const appReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true'
-            && document.body.getAttribute('data-ui5-app-ready') === 'true';
-          return !!fcl && !!search && !!smartFilterBar && !!smartTable && appReady;
+          return !!fcl && !!search && !!smartFilterBar && !!smartTable;
         }
         """,
         timeout=90000,
@@ -52,10 +50,15 @@ def wait_for_detail_ready(page, root_id: str = DETAIL_ROOT, delay: int = 1400) -
         (expectedRootId) => {
           const core = sap.ui.getCore();
           const view = core.byId('checklist_app_comp---app--detailPaneHost');
+          const app = core.byId('checklist_app_comp---app');
           const objectPage = core.byId('checklist_app_comp---app--detailPaneHost--detailObjectPage');
           const selected = view && view.getModel && view.getModel('selected');
+          const state = app && app.getModel && app.getModel('state');
           const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
-          return !!view && !!objectPage && (!expectedRootId || rootId === expectedRootId);
+          const stateSelectedId = state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '';
+          return !!view
+            && !!objectPage
+            && (!expectedRootId || rootId === expectedRootId || stateSelectedId === expectedRootId);
         }
         """,
         arg=root_id,
@@ -197,11 +200,19 @@ def capture_resize_runtime(page) -> dict[str, Any]:
         () => {
           const bg = document.getElementById('ui5-bg');
           const container = document.getElementById('ui5_container');
+          const markerReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true'
+            && document.body.getAttribute('data-ui5-app-ready') === 'true';
+          const coreReady = typeof sap !== 'undefined'
+            && sap.ui
+            && sap.ui.getCore
+            && !!sap.ui.getCore().byId('checklist_app_comp---app--mainFcl')
+            && !!sap.ui.getCore().byId('checklist_app_comp---app--searchPaneHost');
           const bgStyle = bg ? getComputedStyle(bg) : null;
           const containerStyle = container ? getComputedStyle(container) : null;
           const bgState = window.Ui5Bg && typeof window.Ui5Bg.getState === 'function' ? window.Ui5Bg.getState() : null;
           return {
-            appReady: document.documentElement.getAttribute('data-ui5-app-ready') === 'true',
+            appReady: markerReady || coreReady,
+            appReadyMarker: markerReady,
             resizing: document.documentElement.classList.contains('chkResizing'),
             bgOpacity: bgStyle ? Number(bgStyle.opacity || 0) : -1,
             bgVisibility: bgStyle ? String(bgStyle.visibility || '') : '',

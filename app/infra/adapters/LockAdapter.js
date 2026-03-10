@@ -29,6 +29,12 @@ sap.ui.define([
         return "LOCKED";
     }
 
+    function isMissingLockRelease(oError) {
+        var iStatus = Number((oError && (oError.statusCode || oError.status)) || 0) || 0;
+        var sCode = String((oError && oError.code) || "").trim().toUpperCase();
+        return iStatus === 404 || sCode === "404" || sCode === "NOT_FOUND";
+    }
+
     function normalizeResult(oRawResult, sToken) {
         var oResult = GatewayAdapterSupport.unwrap(oRawResult) || {};
         var bOk = !!(oResult.success || oResult.Success || oResult.Ok || oResult.lockOk || oResult.ok);
@@ -91,7 +97,10 @@ sap.ui.define([
                 return GatewayAdapterSupport.postFunction("LockRelease", withUserName({ RootId: sRootId, SessionGuid: sToken })).then(function (oResult) {
                     var oNormalized = normalizeResult(oResult, sToken);
                     return { ok: !!oNormalized.ok, code: oNormalized.code || "OK", released: true, killed: !!oNormalized.killed, messageKey: oNormalized.messageKey || "" };
-                }).catch(function () {
+                }).catch(function (oError) {
+                    if (isMissingLockRelease(oError)) {
+                        return { ok: true, code: "OK", released: false, killed: false, messageKey: "" };
+                    }
                     return { ok: false, code: "ERROR", released: false, killed: false, messageKey: "lockReleaseFailed" };
                 });
             }
