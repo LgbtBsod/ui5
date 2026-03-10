@@ -101,12 +101,7 @@ sap.ui.define([
         },
 
         onToggleInvertedBlockScheme: function (oEvent) {
-            var bState = ModelStateRuntime.writeBoolean(
-                this,
-                "appView",
-                "/invertedBlockScheme",
-                oEvent && oEvent.getParameter && oEvent.getParameter("state")
-            );
+            var bState = ModelStateRuntime.writeBoolean(this, "appView", "/invertedBlockScheme", false);
             this._applyInvertedBlockSchemeClass();
             return bState;
         },

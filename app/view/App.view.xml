@@ -9,9 +9,9 @@
 
     <VBox class="chkSkin appShell appLayoutSingle" fitContainer="true" width="100%">
         <cc:AppShellHeader
-            eyebrow="{i18n>shellEyebrow}"
+            eyebrow=""
             productName="{i18n>shellProductName}"
-            contextSubtitle="{appView>/shell/contextSubtitle}"
+            contextSubtitle=""
             routeLabel="{appView>/shell/routeLabel}"
             helpText="{i18n>shellHelpTitle}"
             settingsText="{i18n>shellSettingsTitle}"

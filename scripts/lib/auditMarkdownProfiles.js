@@ -19,7 +19,7 @@ function renderArchitectAuditMarkdown(report) {
           ['Search.controller.js lines', report.metrics.searchControllerLines],
           ['Detail.controller.js lines', report.metrics.detailControllerLines],
           ['Component.js lines', report.metrics.componentLines],
-          ['css/style.css lines', report.metrics.styleLines]
+          ['css/claude-hyper.css lines', report.metrics.styleLines]
         ])
       },
       {

@@ -20,7 +20,7 @@ function toMarkdown(report) {
     `- Search.controller.js lines: ${report.metrics.searchControllerLines}/${report.limits.searchControllerLines}`,
     `- Detail.controller.js lines: ${report.metrics.detailControllerLines}/${report.limits.detailControllerLines}`,
     `- Component.js lines: ${report.metrics.componentLines}/${report.limits.componentLines}`,
-    `- css/style.css lines: ${report.metrics.styleLines}/${report.limits.styleLines}`,
+    `- css/claude-hyper.css lines: ${report.metrics.styleLines}/${report.limits.styleLines}`,
     '',
     '## Issues',
     ...(report.issues.length ? report.issues.map((item) => `- ${item}`) : ['- none']),

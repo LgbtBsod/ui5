@@ -247,20 +247,6 @@
 
                         <ToolbarSpacer/>
 
-                        <Button
-                            id="searchToolbarFiltersButton"
-                            icon="sap-icon://filter"
-                            text="{i18n>searchBackToFiltersButton}"
-                            type="Transparent"
-                            visible="{view>/scrollNavVisible}"
-                            tooltip="{i18n>searchBackToFiltersTooltip}"
-                            press=".onScrollSearchAnchor"
-                            class="searchToolbarNavBtn searchToolbarNavBtnFilters">
-                            <layoutData>
-                                <OverflowToolbarLayoutData priority="High"/>
-                            </layoutData>
-                        </Button>
-
                         <ObjectStatus
                             text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }"
                             state="{= ${view>/selectionCount} ? 'Success' : 'Information' }"

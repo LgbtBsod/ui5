@@ -9,10 +9,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "sap/m/ResponsivePopover",
-    "sap/m/List",
-    "sap/m/StandardListItem"
-], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderRuntime, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime, ModelStateRuntime, ResponsivePopover, List, StandardListItem) {
+    "sap/ui/core/Fragment"
+], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderRuntime, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime, ModelStateRuntime, Fragment) {
     "use strict";
 
     var getText = ControllerTextRuntime.getText;
@@ -20,13 +18,30 @@ sap.ui.define([
     var REFRESH_POLL_DELAY_MS = 1800;
     var REFRESH_POLL_MAX_ATTEMPTS = 12;
 
-    function buildCompareYearOptions(oController) {
+    function isValidYearString(sYear) {
+        return /^\d{4}$/.test(String(sYear || "").trim());
+    }
+
+    function normalizeYearString(vYear) {
+        var sYear = String(vYear || "").trim();
+        var iYear;
+        if (!isValidYearString(sYear)) {
+            return "";
+        }
+        iYear = Number(sYear);
+        return Number.isFinite(iYear) && iYear > 0 ? String(iYear) : "";
+    }
+
+    function buildYearOptions(oController) {
         var mSeen = {};
         var aOptions = [];
+        var iCurrentYear = new Date().getFullYear();
+        var iStartYear = 1950;
+        var iEndYear = iCurrentYear + 5;
 
         function pushYear(vYear) {
-            var sYear = String(vYear || "").trim();
-            if (!/^\d{4}$/.test(sYear) || mSeen[sYear]) {
+            var sYear = normalizeYearString(vYear);
+            if (!sYear || mSeen[sYear]) {
                 return;
             }
             mSeen[sYear] = true;
@@ -41,17 +56,92 @@ sap.ui.define([
         });
         pushYear(ControllerViewStateRuntime.get(oController, "/selectedYear", ""));
         pushYear(ControllerViewStateRuntime.get(oController, "/compareYear", ""));
-        pushYear(Number(ControllerViewStateRuntime.get(oController, "/selectedYear", 0)) - 1);
+        for (; iEndYear >= iStartYear; iEndYear -= 1) {
+            pushYear(iEndYear);
+        }
 
         return aOptions.sort(function (aLeft, aRight) {
             return Number(aRight && aRight.key) - Number(aLeft && aLeft.key);
         });
     }
 
+    function buildCompareYearOptions(oController) {
+        var aOptions = buildYearOptions(oController);
+        var sDefaultCompareYear = normalizeYearString(Number(ControllerViewStateRuntime.get(oController, "/selectedYear", 0)) - 1);
+        if (sDefaultCompareYear && !aOptions.some(function (oYear) { return oYear && oYear.key === sDefaultCompareYear; })) {
+            aOptions.push({
+                key: sDefaultCompareYear,
+                text: sDefaultCompareYear
+            });
+        }
+        return aOptions.sort(function (aLeft, aRight) {
+            return Number(aRight && aRight.key) - Number(aLeft && aLeft.key);
+        });
+    }
+
+    function sanitizeYearValue(vValue) {
+        return String(vValue || "").replace(/\D+/g, "").slice(0, 4);
+    }
+
+    function buildYearPickerItems(iRangeStart, sTargetField, oController) {
+        var aItems = [];
+        var iYear;
+        var sActiveYear = String(ControllerViewStateRuntime.get(oController, "/" + sTargetField, "") || "").trim();
+        for (iYear = iRangeStart; iYear < iRangeStart + 20; iYear += 1) {
+            aItems.push({
+                key: String(iYear),
+                text: String(iYear),
+                selected: String(iYear) === sActiveYear
+            });
+        }
+        return aItems;
+    }
+
+    function syncYearPickerState(oController, sTargetField, iRangeStart) {
+        var iStart = Number(iRangeStart);
+        var iSafeStart = Number.isFinite(iStart) ? iStart : (new Date().getFullYear() - 9);
+        ControllerViewStateRuntime.setMany(oController, {
+            "/yearPicker/targetField": sTargetField,
+            "/yearPicker/rangeStart": iSafeStart,
+            "/yearPicker/rangeEnd": iSafeStart + 19,
+            "/yearPicker/rangeLabel": String(iSafeStart) + " - " + String(iSafeStart + 19),
+            "/yearPicker/items": buildYearPickerItems(iSafeStart, sTargetField, oController)
+        });
+    }
+
+    function ensureYearPickerRangeForValue(oController, sTargetField) {
+        var sYear = normalizeYearString(ControllerViewStateRuntime.get(oController, "/" + sTargetField, ""));
+        var iYear = Number(sYear);
+        var iRangeStart;
+        if (!iYear) {
+            syncYearPickerState(oController, sTargetField, new Date().getFullYear() - 9);
+            return;
+        }
+        iRangeStart = iYear - ((iYear - 1) % 20);
+        syncYearPickerState(oController, sTargetField, iRangeStart);
+    }
+
+    function ensureYearPicker(oController) {
+        if (oController._pAnalyticsYearPicker) {
+            return oController._pAnalyticsYearPicker;
+        }
+        oController._pAnalyticsYearPicker = Fragment.load({
+            id: oController.getView().getId(),
+            name: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.AnalyticsYearPickerPopover",
+            controller: oController
+        }).then(function (oPopover) {
+            oController.getView().addDependent(oPopover);
+            oController._oAnalyticsYearPicker = oPopover;
+            return oPopover;
+        });
+        return oController._pAnalyticsYearPicker;
+    }
+
     function syncCompareYearDefaults(oController, sSelectedYear) {
         var iSelectedYear = Number(String(sSelectedYear || "").trim());
         var sDefaultCompareYear = iSelectedYear > 0 ? String(iSelectedYear - 1) : "";
         ControllerViewStateRuntime.set(oController, "/compareYear", sDefaultCompareYear);
+        ControllerViewStateRuntime.set(oController, "/availableYears", buildYearOptions(oController));
         ControllerViewStateRuntime.set(oController, "/compareYearOptions", buildCompareYearOptions(oController));
         return sDefaultCompareYear;
     }
@@ -129,10 +219,11 @@ sap.ui.define([
 
         onExit: function () {
             ControllerRouteRuntime.detachAllMatched(this);
-            if (this._oCompareYearPopover && typeof this._oCompareYearPopover.destroy === "function") {
-                this._oCompareYearPopover.destroy();
+            if (this._oAnalyticsYearPicker && typeof this._oAnalyticsYearPicker.destroy === "function") {
+                this._oAnalyticsYearPicker.destroy();
             }
-            this._oCompareYearPopover = null;
+            this._oAnalyticsYearPicker = null;
+            this._pAnalyticsYearPicker = null;
             this._facade = null;
         },
 
@@ -193,6 +284,7 @@ sap.ui.define([
                 if (oAnalytics.refreshState) {
                     ControllerViewStateRuntime.set(this, "/refreshState", oAnalytics.refreshState);
                 }
+                ControllerViewStateRuntime.set(this, "/availableYears", buildYearOptions(this));
                 ControllerViewStateRuntime.set(this, "/compareYearOptions", buildCompareYearOptions(this));
                 this._setCompareYearValidation("None", "");
                 this._applyComparisonMetricSelection();
@@ -264,19 +356,33 @@ sap.ui.define([
         },
 
         onSelectAnalyticsYear: function (oEvent) {
-            var sYear = String(
+            var sYear = normalizeYearString(
                 oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem") && oEvent.getParameter("selectedItem").getKey() ||
+                oEvent && oEvent.getParameter && oEvent.getParameter("value") ||
                 oEvent && oEvent.getParameter && oEvent.getParameter("selectedKey") ||
+                oEvent && oEvent.getSource && oEvent.getSource().getValue && oEvent.getSource().getValue() ||
                 oEvent && oEvent.getSource && oEvent.getSource().getSelectedKey && oEvent.getSource().getSelectedKey() ||
                 ""
-            ).trim();
+            );
             if (!sYear) {
+                if (oEvent && oEvent.getSource && oEvent.getSource().setValue) {
+                    oEvent.getSource().setValue(String(ControllerViewStateRuntime.get(this, "/selectedYear", "") || ""));
+                }
                 return Promise.resolve();
             }
             ControllerViewStateRuntime.set(this, "/selectedYear", sYear);
+            ControllerViewStateRuntime.set(this, "/availableYears", buildYearOptions(this));
             syncCompareYearDefaults(this, sYear);
             this._setCompareYearValidation("None", "");
             return this._loadAnalytics("yearChanged");
+        },
+
+        onLiveChangeAnalyticsYear: function (oEvent) {
+            var oInput = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+            var sValue = sanitizeYearValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
+            if (oInput && oInput.getValue && oInput.getValue() !== sValue && oInput.setValue) {
+                oInput.setValue(sValue);
+            }
         },
 
         onSelectAnalyticsSource: function (oEvent) {
@@ -294,13 +400,13 @@ sap.ui.define([
 
         onChangeAnalyticsCompareYear: function (oEvent) {
             var oInput = oEvent && oEvent.getSource ? oEvent.getSource() : null;
-            var sRawYear = String(
+            var sRawYear = sanitizeYearValue(
                 oEvent && oEvent.getParameter && oEvent.getParameter("value") ||
                 oInput && oInput.getValue && oInput.getValue() ||
                 ""
-            ).trim();
+            );
             var sStoredCompareYear = String(ControllerViewStateRuntime.get(this, "/compareYear", "") || "").trim();
-            if (!/^\d{4}$/.test(sRawYear)) {
+            if (!isValidYearString(sRawYear)) {
                 if (oInput && oInput.setValue) {
                     oInput.setValue(sStoredCompareYear);
                 }
@@ -316,55 +422,80 @@ sap.ui.define([
                 return Promise.resolve();
             }
             ControllerViewStateRuntime.set(this, "/compareYear", String(iYear));
+            ControllerViewStateRuntime.set(this, "/availableYears", buildYearOptions(this));
             ControllerViewStateRuntime.set(this, "/compareYearOptions", buildCompareYearOptions(this));
             this._setCompareYearValidation("None", "");
             return this._loadAnalytics("compareYearChanged");
         },
 
-        onOpenAnalyticsCompareYearHelp: function (oEvent) {
-            var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
-            var aOptions = buildCompareYearOptions(this);
-            var oList;
+        onLiveChangeAnalyticsCompareYear: function (oEvent) {
+            var oInput = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+            var sValue = sanitizeYearValue(oEvent && oEvent.getParameter && oEvent.getParameter("value"));
+            if (oInput && oInput.getValue && oInput.getValue() !== sValue && oInput.setValue) {
+                oInput.setValue(sValue);
+            }
+            this._setCompareYearValidation("None", "");
+        },
 
-            if (!oSource) {
-                return;
+        onOpenAnalyticsSelectedYearPicker: function (oEvent) {
+            var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+            ensureYearPickerRangeForValue(this, "selectedYear");
+            return ensureYearPicker(this).then(function (oPopover) {
+                if (oSource) {
+                    oPopover.openBy(oSource);
+                }
+            });
+        },
+
+        onOpenAnalyticsCompareYearPicker: function (oEvent) {
+            var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+            ensureYearPickerRangeForValue(this, "compareYear");
+            return ensureYearPicker(this).then(function (oPopover) {
+                if (oSource) {
+                    oPopover.openBy(oSource);
+                }
+            });
+        },
+
+        onNavigateAnalyticsYearPickerBack: function () {
+            var sTargetField = String(ControllerViewStateRuntime.get(this, "/yearPicker/targetField", "selectedYear") || "selectedYear");
+            var iRangeStart = Number(ControllerViewStateRuntime.get(this, "/yearPicker/rangeStart", new Date().getFullYear() - 9) || 0);
+            syncYearPickerState(this, sTargetField, iRangeStart - 20);
+        },
+
+        onNavigateAnalyticsYearPickerForward: function () {
+            var sTargetField = String(ControllerViewStateRuntime.get(this, "/yearPicker/targetField", "selectedYear") || "selectedYear");
+            var iRangeStart = Number(ControllerViewStateRuntime.get(this, "/yearPicker/rangeStart", new Date().getFullYear() - 9) || 0);
+            syncYearPickerState(this, sTargetField, iRangeStart + 20);
+        },
+
+        onSelectAnalyticsYearFromPicker: function (oEvent) {
+            var sTargetField = String(ControllerViewStateRuntime.get(this, "/yearPicker/targetField", "selectedYear") || "selectedYear");
+            var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+            var sYear = normalizeYearString(oSource && oSource.data && oSource.data("year"));
+            if (!sYear) {
+                return Promise.resolve();
             }
-            ControllerViewStateRuntime.set(this, "/compareYearOptions", aOptions);
-            if (!this._oCompareYearPopover) {
-                oList = new List({
-                    mode: "SingleSelectMaster",
-                    growing: false,
-                    includeItemInSelection: true,
-                    selectionChange: function (oSelectEvent) {
-                        var oItem = oSelectEvent.getParameter("listItem");
-                        var sYear = String(oItem && oItem.getTitle && oItem.getTitle() || "").trim();
-                        if (!/^\d{4}$/.test(sYear)) {
-                            return;
-                        }
-                        ControllerViewStateRuntime.set(this, "/compareYear", sYear);
-                        ControllerViewStateRuntime.set(this, "/compareYearOptions", buildCompareYearOptions(this));
-                        this._setCompareYearValidation("None", "");
-                        this._oCompareYearPopover.close();
-                        this._loadAnalytics("compareYearQuickPick");
-                    }.bind(this),
-                    items: {
-                        path: "view>/compareYearOptions",
-                        templateShareable: true,
-                        template: new StandardListItem({
-                            title: "{view>text}",
-                            type: "Active"
-                        })
-                    }
-                });
-                this._oCompareYearPopover = new ResponsivePopover({
-                    placement: "Bottom",
-                    contentWidth: "12rem",
-                    contentHeight: "16rem",
-                    content: [oList]
-                });
-                this.getView().addDependent(this._oCompareYearPopover);
+            if (sTargetField === "compareYear") {
+                ControllerViewStateRuntime.set(this, "/compareYear", sYear);
+                ControllerViewStateRuntime.set(this, "/availableYears", buildYearOptions(this));
+                ControllerViewStateRuntime.set(this, "/compareYearOptions", buildCompareYearOptions(this));
+                this._setCompareYearValidation("None", "");
+                syncYearPickerState(this, sTargetField, Number(ControllerViewStateRuntime.get(this, "/yearPicker/rangeStart", 0) || 0));
+                if (this._oAnalyticsYearPicker) {
+                    this._oAnalyticsYearPicker.close();
+                }
+                return this._loadAnalytics("compareYearPicked");
             }
-            this._oCompareYearPopover.openBy(oSource);
+            ControllerViewStateRuntime.set(this, "/selectedYear", sYear);
+            ControllerViewStateRuntime.set(this, "/availableYears", buildYearOptions(this));
+            syncCompareYearDefaults(this, sYear);
+            this._setCompareYearValidation("None", "");
+            syncYearPickerState(this, sTargetField, Number(ControllerViewStateRuntime.get(this, "/yearPicker/rangeStart", 0) || 0));
+            if (this._oAnalyticsYearPicker) {
+                this._oAnalyticsYearPicker.close();
+            }
+            return this._loadAnalytics("yearPicked");
         },
 
         onSelectAnalyticsMetric: function (oEvent) {

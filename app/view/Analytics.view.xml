@@ -37,14 +37,21 @@
                 </SegmentedButton>
                 <ToolbarSpacer/>
                 <Label text="{i18n>analyticsYearLabel}" labelFor="analyticsYearSelect"/>
-                <Select
-                    id="analyticsYearSelect"
-                    width="10rem"
-                    selectedKey="{view>/selectedYear}"
-                    change=".onSelectAnalyticsYear"
-                    items="{view>/availableYears}">
-                    <core:Item key="{view>key}" text="{view>text}"/>
-                </Select>
+                <HBox class="analyticsYearField" renderType="Bare" alignItems="Center">
+                    <Input
+                        id="analyticsYearSelect"
+                        width="7rem"
+                        type="Text"
+                        value="{view>/selectedYear}"
+                        maxLength="4"
+                        liveChange=".onLiveChangeAnalyticsYear"
+                        change=".onSelectAnalyticsYear"/>
+                    <Button
+                        icon="sap-icon://calendar"
+                        type="Transparent"
+                        tooltip="{i18n>analyticsYearLabel}"
+                        press=".onOpenAnalyticsSelectedYearPicker"/>
+                </HBox>
                 <Button text="{i18n>analyticsPresetCurrent}" type="Transparent" press=".onApplyAnalyticsYearPreset">
                     <customData><core:CustomData key="preset" value="CURRENT"/></customData>
                 </Button>
@@ -55,17 +62,23 @@
                     <customData><core:CustomData key="preset" value="YTD"/></customData>
                 </Button>
                 <Label text="{i18n>analyticsCompareYearLabel}" labelFor="analyticsCompareYearInput"/>
-                <Input
-                    id="analyticsCompareYearInput"
-                    width="8rem"
-                    type="Text"
-                    value="{path: 'view>/compareYear', mode: 'OneWay'}"
-                    showValueHelp="true"
-                    valueState="{view>/compareYearValueState}"
-                    valueStateText="{view>/compareYearValueStateText}"
-                    maxLength="4"
-                    valueHelpRequest=".onOpenAnalyticsCompareYearHelp"
-                    change=".onChangeAnalyticsCompareYear"/>
+                <HBox class="analyticsYearField" renderType="Bare" alignItems="Center">
+                    <Input
+                        id="analyticsCompareYearInput"
+                        width="7rem"
+                        type="Text"
+                        value="{view>/compareYear}"
+                        valueState="{view>/compareYearValueState}"
+                        valueStateText="{view>/compareYearValueStateText}"
+                        maxLength="4"
+                        liveChange=".onLiveChangeAnalyticsCompareYear"
+                        change=".onChangeAnalyticsCompareYear"/>
+                    <Button
+                        icon="sap-icon://calendar"
+                        type="Transparent"
+                        tooltip="{i18n>analyticsCompareYearLabel}"
+                        press=".onOpenAnalyticsCompareYearPicker"/>
+                </HBox>
             </OverflowToolbar>
         </subHeader>
 

@@ -37,10 +37,11 @@ sap.ui.define([
         });
     }
 
-    function navigateToAccessDenied(oController, sRootId) {
+    function navigateToAccessDenied(oController, sRootId, mOptions) {
         return runOperation("navigateToAccessDenied", {
             controller: oController,
-            rootId: sRootId
+            rootId: sRootId,
+            options: mOptions || {}
         });
     }
 

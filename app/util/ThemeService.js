@@ -33,7 +33,7 @@ sap.ui.define([
         sap_fiori_3: true,
         sap_horizon: true
     };
-    var SWITCH_DURATION_MS = 760;
+    var SWITCH_DURATION_MS = 220;
     var iSwitchTimer = 0;
     var fnThemeChangedCleanup = null;
     var sPendingMode = "";
@@ -280,7 +280,7 @@ sap.ui.define([
         }
         iSwitchTimer = SchedulingRuntime.restartTimer(iSwitchTimer, function () {
             clearSwitching();
-        }, bAwaitThemeChanged ? Math.max(SWITCH_DURATION_MS, 1400) : SWITCH_DURATION_MS);
+        }, bAwaitThemeChanged ? Math.max(SWITCH_DURATION_MS, 520) : SWITCH_DURATION_MS);
     }
 
     function syncTokensFromUI5() {

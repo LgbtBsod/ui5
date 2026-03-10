@@ -146,7 +146,7 @@ sap.ui.define([
             return WorkspaceRouteNavigation.navigateToDetail(mContext.controller, mContext.rootId, mContext.layout);
         },
         navigateToAccessDenied: function (mContext) {
-            return WorkspaceRouteNavigation.navigateToAccessDenied(mContext.controller, mContext.rootId);
+            return WorkspaceRouteNavigation.navigateToAccessDenied(mContext.controller, mContext.rootId, mContext.options);
         },
         buildDetailHash: function (mContext) {
             return WorkspaceRouteNavigation.buildDetailHash(mContext.controller, mContext.rootId);

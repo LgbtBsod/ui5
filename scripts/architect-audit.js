@@ -35,7 +35,7 @@ function buildReport() {
     searchControllerLines: countLinesFromRoot(ROOT, 'controller/Search.controller.js'),
     detailControllerLines: countLinesFromRoot(ROOT, 'controller/Detail.controller.js'),
     componentLines: countLinesFromRoot(ROOT, 'Component.js'),
-    styleLines: countLinesFromRoot(ROOT, 'css/style.css')
+    styleLines: countLinesFromRoot(ROOT, 'css/claude-hyper.css')
   };
   const zonesOfGrowth = [];
 

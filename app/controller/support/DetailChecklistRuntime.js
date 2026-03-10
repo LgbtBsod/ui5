@@ -188,7 +188,6 @@ sap.ui.define([
                     message: String(oAccessState.message || "").trim(),
                     checkedAt: new Date().toISOString()
                 });
-                NavigationIntentService.navigateToAccessDenied(this, sId);
                 return oResult;
             }.bind(this));
         },

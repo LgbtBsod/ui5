@@ -77,7 +77,7 @@ function collectMetrics() {
     searchControllerLines: countLines('controller/Search.controller.js'),
     detailControllerLines: countLines('controller/Detail.controller.js'),
     componentLines: countLines('Component.js'),
-    styleLines: countLines('css/style.css')
+    styleLines: countLines('css/claude-hyper.css')
   };
 }
 

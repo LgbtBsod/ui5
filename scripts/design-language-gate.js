@@ -11,7 +11,7 @@ function read(file) {
 }
 
 const styleCss = [
-  read('css/style.css'),
+  read('css/claude-hyper.css'),
   read('css/modules/01_theme-modes.css'),
   read('css/modules/20_surface.css'),
   read('css/modules/21_controls.css'),
@@ -33,7 +33,7 @@ if (!/sap_horizon_dark/.test(themeService) || !/sap_horizon_dark/.test(themePhil
   fail('Theme layer must support sap_horizon_dark.');
 }
 if (!/:root\.light-mode/.test(styleCss) || !/body\.appDark/.test(styleCss)) {
-  fail('css/style.css must expose both Morning/Night token modes.');
+  fail('css/claude-hyper.css must expose both Morning/Night token modes.');
 }
 if (!/platformPrecisionEnterprise/.test(styleCss) || !/platformCalmModern/.test(styleCss) || !/platformPrecisionEnterprise/.test(themePhilosophy) || !/platformCalmModern/.test(themePhilosophy)) {
   fail('Theme philosophy bridge is missing distinct platform contracts.');
@@ -42,14 +42,14 @@ if (!/\.sapMSwt\b/.test(styleCss) || !/\.sapMInputBaseContentWrapper\b/.test(sty
   fail('Core control styling coverage missing for switch/input/dialog.');
 }
 if (!/backdrop-filter\s*:/.test(styleCss)) {
-  fail('Glass language missing: backdrop-filter not found in css/style.css.');
+  fail('Glass language missing: backdrop-filter not found in css/claude-hyper.css.');
 }
 
 if (issues.length) {
   exitWithMappedIssues(
     'design-language-gate',
     issues,
-    (issue) => ({ file: 'css/style.css', message: issue }),
+    (issue) => ({ file: 'css/claude-hyper.css', message: issue }),
     { checks: issues.length },
     { asJson: process.argv.includes('--json') }
   );

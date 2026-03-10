@@ -131,12 +131,17 @@ sap.ui.define([
         oRouter.navTo("detail", { id: sId }, false);
     }
 
-    function navigateToAccessDenied(oController, sRootId) {
+    function navigateToAccessDenied(oController, sRootId, mOptions) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var sId = String(sRootId || "").trim();
+        var bFullScreen = !!(mOptions && mOptions.fullScreen);
 
         if (oRouter && typeof oRouter.navTo === "function" && sId) {
-            oRouter.navTo("accessDenied", { id: sId }, false);
+            if (bFullScreen) {
+                oRouter.navTo("accessDenied", { id: sId }, false);
+                return;
+            }
+            oRouter.navTo("detail", { id: sId }, false);
         }
     }
 

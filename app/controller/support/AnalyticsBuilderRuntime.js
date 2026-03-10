@@ -74,6 +74,7 @@ sap.ui.define([
             builderDimension: "MONTH", builderMetric: "FAILED_CHECKLISTS", builderDimensionOptions: [], builderMetricOptions: [],
             builderChartRows: [], builderChartTitle: "", builderVizType: "column", builderChartHasData: false,
             builderSourceHintText: "", compareYearHasData: true, compareYearHintText: "",
+            yearPicker: { targetField: "selectedYear", rangeStart: iCurrentYear - 9, rangeEnd: iCurrentYear + 10, rangeLabel: "", items: [] },
             availableYears: [{ key: String(iCurrentYear), text: String(iCurrentYear) }], selectedSource: "ALL",
             refreshState: { taskKey: sTaskKey || "ANALYTICS_REFRESH", taskName: "Analytics Refresh", status: "IDLE", isRunning: false, requestedAt: "", requestedBy: "", startedAt: "", finishedAt: "", lastSuccessAt: "", lastError: "", lastMessage: "", activeRunId: "" },
             analytics: AnalyticsPayloadNormalizer.createEmptyDashboard()

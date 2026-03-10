@@ -123,7 +123,7 @@ check('No fallback REST/dataset anti-patterns on UI runtime path', () => {
 check('FCL integrity (App.view contains FlexibleColumnLayout + layout css hooks)', () => {
   const app = read('view/App.view.xml');
   const cssFiles = [
-    'css/style.css',
+    'css/claude-hyper.css',
     'css/modules/10_base.css',
     'css/modules/20_surface.css',
     'css/modules/21_controls.css',

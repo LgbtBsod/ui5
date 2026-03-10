@@ -1,5 +1,6 @@
 sap.ui.define([
     "sap/ui/core/Control",
+    "sap/ui/core/Icon",
     "sap/m/OverflowToolbar",
     "sap/m/OverflowToolbarLayoutData",
     "sap/m/VBox",
@@ -12,6 +13,7 @@ sap.ui.define([
     "sap/m/Switch"
 ], function (
     Control,
+    Icon,
     OverflowToolbar,
     OverflowToolbarLayoutData,
     VBox,
@@ -123,15 +125,15 @@ sap.ui.define([
         init: function () {
             var that = this;
 
-            this._oEyebrow = new Text();
+            this._oEyebrow = new Text().addStyleClass("shellEyebrow");
             this._oProductTitle = new Title({
                 level: "H6"
-            });
-            this._oContextSubtitle = new Text();
+            }).addStyleClass("shellProductTitle");
+            this._oContextSubtitle = new Text().addStyleClass("shellContextSubtitle");
 
             this._oRouteStatus = applyPriority(new ObjectStatus({
                 state: "Information"
-            }), "NeverOverflow");
+            }).addStyleClass("shellContextChip"), "NeverOverflow");
 
             this._oHelpButton = applyPriority(new Button({
                 icon: "sap-icon://sys-help",
@@ -139,7 +141,7 @@ sap.ui.define([
                 press: function () {
                     that.fireHelpPress({ anchor: that._oHelpButton });
                 }
-            }), "High");
+            }).addStyleClass("shellActionBtn"), "High");
 
             this._oSettingsButton = applyPriority(new Button({
                 icon: "sap-icon://action-settings",
@@ -147,7 +149,7 @@ sap.ui.define([
                 press: function () {
                     that.fireSettingsPress({ anchor: that._oSettingsButton });
                 }
-            }), "High");
+            }).addStyleClass("shellActionBtn"), "High");
 
             this._oAnalyticsButton = applyPriority(new Button({
                 icon: "sap-icon://business-objects-experience",
@@ -155,20 +157,39 @@ sap.ui.define([
                 press: function () {
                     that.fireAnalyticsPress({ anchor: that._oAnalyticsButton });
                 }
-            }), "High");
+            }).addStyleClass("shellActionBtn"), "High");
 
             this._oThemeToggle = applyPriority(new Switch({
+                customTextOn: "",
+                customTextOff: "",
                 change: function () {
                     that.fireThemePress({ anchor: that._oThemeToggle });
                 }
-            }), "High");
+            }).addStyleClass("shellThemeSwitch accentSwitch"), "High");
+
+            this._oThemeToggleDock = new HBox({
+                renderType: "Bare",
+                alignItems: "Center",
+                items: [
+                    new Icon({
+                        src: "sap-icon://lightbulb"
+                    }).addStyleClass("shellThemeGlyph shellThemeGlyphSun"),
+                    this._oThemeToggle,
+                    new Icon({
+                        src: "sap-icon://moon"
+                    }).addStyleClass("shellThemeGlyph shellThemeGlyphMoon")
+                ]
+            }).addStyleClass("shellThemeToggle");
+            this._oThemeToggleDock.setLayoutData(new OverflowToolbarLayoutData({
+                priority: "High"
+            }));
 
             this._oUserButton = applyPriority(new Button({
                 type: "Transparent",
                 press: function () {
                     that.fireUserPress({ anchor: that._oUserButton });
                 }
-            }), "NeverOverflow");
+            }).addStyleClass("shellUserBtn"), "NeverOverflow");
 
             this.setAggregation("_toolbar", new OverflowToolbar({
                 content: [
@@ -179,7 +200,7 @@ sap.ui.define([
                             this._oProductTitle,
                             this._oContextSubtitle
                         ]
-                    }),
+                    }).addStyleClass("shellBrandCluster"),
                     new HBox({
                         renderType: "Bare",
                         wrap: "Wrap",
@@ -187,12 +208,12 @@ sap.ui.define([
                         items: [
                             this._oRouteStatus
                         ]
-                    }),
+                    }).addStyleClass("shellContextRail"),
                     new ToolbarSpacer(),
                     this._oHelpButton,
                     this._oSettingsButton,
                     this._oAnalyticsButton,
-                    this._oThemeToggle,
+                    this._oThemeToggleDock,
                     this._oUserButton
                 ]
             }).addStyleClass("appShellHeader"));

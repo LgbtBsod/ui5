@@ -92,12 +92,12 @@ sap.ui.define([
         },
 
         _applyInvertedBlockSchemeClass: function () {
-            var bInverted = !!ModelStateRuntime.read(this, "appView", "/invertedBlockScheme", false);
             var oRoot = document && document.documentElement;
             var oBody = document && document.body;
             var oContainer = document && document.getElementById && document.getElementById("ui5_container");
             var oAppDom = this.getView && this.getView().getDomRef && this.getView().getDomRef();
-            ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appInvertedBlockScheme", bInverted);
+            ModelStateRuntime.write(this, "appView", "/invertedBlockScheme", false);
+            ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appInvertedBlockScheme", false);
         },
 
         _syncShellMetrics: function () {

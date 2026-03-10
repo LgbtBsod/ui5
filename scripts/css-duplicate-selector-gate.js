@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const TARGETS = [
-    "css/style.css",
+    "css/claude-hyper.css",
     "css/modules/00_tokens.css",
     "css/modules/01_theme-modes.css",
     "css/modules/02_background.css",

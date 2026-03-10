@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 
-const cssPath = process.argv[2] || 'css/style.css';
+const cssPath = process.argv[2] || 'css/claude-hyper.css';
 
 function fail(message) {
   console.error(message);
@@ -16,12 +16,7 @@ const lines = fs.readFileSync(cssPath, 'utf8').split(/\r?\n/);
 
 const tokenSectionStart = lines.findIndex((line) => line.includes('Section: tokens-and-theme-modes'));
 const bodySectionStart = lines.findIndex((line) => line.includes('Section: layout-shell-and-page-surfaces'));
-
-if (tokenSectionStart < 0 || bodySectionStart < 0 || bodySectionStart <= tokenSectionStart) {
-  fail('CSS accent governance gate: expected token/layout section markers were not found.');
-}
-
-const scopeStart = bodySectionStart + 1;
+const scopeStart = tokenSectionStart >= 0 && bodySectionStart > tokenSectionStart ? bodySectionStart + 1 : 0;
 const scopedLines = lines.slice(scopeStart);
 
 const hardcodedAccentCandidates = [];
