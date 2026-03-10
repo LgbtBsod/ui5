@@ -189,7 +189,7 @@ sap.ui.define([
             oInnerTable.setMode(sSelectionMode);
         }
         if (oInnerTable.setIncludeItemInSelection) {
-            oInnerTable.setIncludeItemInSelection(true);
+            oInnerTable.setIncludeItemInSelection(false);
         }
         mCounts = resolveSearchTableCounts(oInnerTable);
         ControllerViewStateRuntime.setMany(oController, {
@@ -235,10 +235,22 @@ sap.ui.define([
         ).trim();
     }
 
+    function extractChecklistDisplayIdFromObject(oObject) {
+        return String(
+            (oObject && (oObject.Id || oObject.id || oObject.ChecklistId || oObject.checklist_id || oObject.Key || oObject.key)) || ""
+        ).trim();
+    }
+
     function extractChecklistIdFromListItem(oListItem) {
         var oCtx = oListItem && oListItem.getBindingContext && oListItem.getBindingContext();
         var oObject = oCtx && oCtx.getObject && oCtx.getObject();
         return extractChecklistIdFromObject(oObject);
+    }
+
+    function extractChecklistDisplayIdFromListItem(oListItem) {
+        var oCtx = oListItem && oListItem.getBindingContext && oListItem.getBindingContext();
+        var oObject = oCtx && oCtx.getObject && oCtx.getObject();
+        return extractChecklistDisplayIdFromObject(oObject);
     }
 
     function extractSelectedRowIds(oEvent, oTable) {
@@ -281,15 +293,34 @@ sap.ui.define([
         return extractSelectedRowIds(oEvent, oTable)[0] || "";
     }
 
+    function extractSelectedRowDisplayId(oEvent, oTable) {
+        var oListItem = null;
+        var oSelectedItems = oTable && oTable.getSelectedItems ? (oTable.getSelectedItems() || []) : [];
+        if (oEvent && typeof oEvent.getParameter === "function") {
+            oListItem = oEvent.getParameter("listItem")
+                || oEvent.getParameter("item")
+                || oEvent.getParameter("selectedItem")
+                || ((oEvent.getParameter("listItems") || [])[0]);
+        }
+        oListItem = oListItem || oSelectedItems[0] || null;
+        return String((oListItem && extractChecklistDisplayIdFromListItem(oListItem)) || "").trim();
+    }
+
     function resolveSelectedRowIdsFromInnerTable(oInnerTable) {
         var aSelectedItems = oInnerTable && oInnerTable.getSelectedItems ? (oInnerTable.getSelectedItems() || []) : [];
         return normalizeChecklistIds(aSelectedItems.map(extractChecklistIdFromListItem));
     }
 
-    function applySelectionState(oController, aSelectedRowIds, sSource) {
+    function resolveSelectedRowDisplayIdFromInnerTable(oInnerTable) {
+        var aSelectedItems = oInnerTable && oInnerTable.getSelectedItems ? (oInnerTable.getSelectedItems() || []) : [];
+        return String((aSelectedItems[0] && extractChecklistDisplayIdFromListItem(aSelectedItems[0])) || "").trim();
+    }
+
+    function applySelectionState(oController, aSelectedRowIds, sSelectedRowDisplayId, sSource) {
         var aIds = normalizeChecklistIds(aSelectedRowIds);
         return SearchCommandPolicy.selectionChanged(oController, {
             selectedRowId: aIds[0] || "",
+            selectedRowDisplayId: String(sSelectedRowDisplayId || "").trim(),
             selectedRowIds: aIds,
             source: sSource || "selectionRuntime"
         });
@@ -409,7 +440,14 @@ sap.ui.define([
             });
         }
         aSelectedRowIds = resolveSelectedRowIdsFromInnerTable(oInnerTable);
-        return Promise.resolve(applySelectionState(oController, aSelectedRowIds, "selectVisibleRows")).then(function () {
+        return Promise.resolve(
+            applySelectionState(
+                oController,
+                aSelectedRowIds,
+                resolveSelectedRowDisplayIdFromInnerTable(oInnerTable),
+                "selectVisibleRows"
+            )
+        ).then(function () {
             return {
                 count: aSelectedRowIds.length,
                 selectedRowIds: aSelectedRowIds
@@ -422,13 +460,14 @@ sap.ui.define([
         if (oInnerTable && oInnerTable.removeSelections) {
             oInnerTable.removeSelections(true);
         }
-        return Promise.resolve(applySelectionState(oController, [], "clearSelection"));
+        return Promise.resolve(applySelectionState(oController, [], "", "clearSelection"));
     }
 
     return {
         bindSearchTableRuntime: bindSearchTableRuntime,
         clearSelection: clearSelection,
         configureSearchResultTable: configureSearchResultTable,
+        extractSelectedRowDisplayId: extractSelectedRowDisplayId,
         extractSelectedRowId: extractSelectedRowId,
         extractSelectedRowIds: extractSelectedRowIds,
         focusSearchFilters: focusSearchFilters,

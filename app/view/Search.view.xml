@@ -184,18 +184,6 @@
                         </Button>
 
                         <Button
-                            text="{i18n>openButton}"
-                            icon="sap-icon://open-command-field"
-                            press=".onOpenSelected"
-                            enabled="{view>/hasSelection}"
-                            tooltip="{i18n>searchShortcutOpen}"
-                            class="brandActionBtn brandActionGhost searchOpenActionBtn sapUiTinyMarginEnd">
-                            <layoutData>
-                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
-                            </layoutData>
-                        </Button>
-
-                        <Button
                             id="searchToolbarUpButton"
                             icon="sap-icon://navigation-up-arrow"
                             text="{i18n>searchBackToResultsToolbarButton}"
@@ -229,7 +217,7 @@
                             tooltip="{i18n>searchShortcutSelectVisible}"
                             class="brandActionBtn brandActionGhost searchSelectVisibleActionBtn sapUiTinyMarginEnd">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
+                                <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
@@ -257,9 +245,9 @@
                         </ObjectStatus>
 
                         <Text
-                            text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowId} }"
+                            text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }"
                             visible="{view>/hasSelection}"
-                            tooltip="{view>/selectedRowId}"
+                            tooltip="{view>/selectedRowDisplayId}"
                             class="searchSelectionPrimaryId"
                             wrapping="false">
                             <layoutData>
@@ -272,20 +260,24 @@
                     <OverflowToolbar id="smartTableCustomToolbar" width="100%" class="toolbarTransparent searchSmartToolbarRail">
                         <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
                         <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
-                        <ToolbarSpacer/>
+                        <Title text="Search" level="H6" class="searchToolbarGroupTitle">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
+                            </layoutData>
+                        </Title>
 
                         <Input
                             id="backendTopInput"
                             value="{state>/searchBackendTop}"
                             type="Number"
                             placeholder="{i18n>searchBackendTopLabel}"
-                            width="10rem"
+                            width="5rem"
                             change=".onBackendTopChange"
                             submit=".onBackendTopChange"
                             ariaLabelledBy="searchBackendTopA11y"
                             class="backendTopInput">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="8rem"/>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
                             </layoutData>
                         </Input>
 
@@ -294,13 +286,13 @@
                             value="{state>/searchMaxResults}"
                             type="Number"
                             placeholder="{i18n>searchMaxResultsLabel}"
-                            width="10rem"
+                            width="5rem"
                             change=".onMaxRowsChange"
                             submit=".onMaxRowsChange"
                             ariaLabelledBy="searchMaxRowsA11y"
                             class="maxRowsInput">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="8rem"/>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
                             </layoutData>
                         </Input>
 
@@ -315,10 +307,16 @@
                             </layoutData>
                         </Switch>
 
+                        <ToolbarSpacer/>
+
+                        <Title text="Output" level="H6" class="searchToolbarGroupTitle">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
+                            </layoutData>
+                        </Title>
+
                         <MenuButton
                             text="{i18n>exportMenuButton}"
-                            buttonMode="Split"
-                            defaultAction=".onExportMenuDefault"
                             enabled="{view>/canExport}"
                             tooltip="{i18n>searchShortcutExport}"
                             class="brandActionBtn brandActionGhost searchExportMenuBtn"

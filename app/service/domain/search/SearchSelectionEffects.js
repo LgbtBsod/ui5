@@ -7,6 +7,7 @@ sap.ui.define([
     function buildSelectionResetEffects(mOptions) {
         var aEffects = [
             Effects.modelPatch("view", "/selectedRowId", ""),
+            Effects.modelPatch("view", "/selectedRowDisplayId", ""),
             Effects.modelPatch("view", "/selectedRowIds", []),
             Effects.modelPatch("view", "/selectionCount", 0),
             Effects.modelPatch("view", "/hasSelection", false),

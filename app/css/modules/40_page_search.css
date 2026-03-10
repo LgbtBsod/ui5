@@ -50,7 +50,10 @@ body.chkAppRoot.appDark .chkApp .smartFilterGlass {
 }
 
 .chkApp .filterCard .sapMFlexItem,
-.chkApp .smartFilterGlass .sapMFlexItem {
+.chkApp .smartFilterGlass .sapMFlexItem,
+.chkApp .searchResultsActionRail .sapMFlexItem,
+.chkApp .searchSmartToolbarRail .sapMFlexItem,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar .sapMFlexItem {
   min-width: 0 !important;
 }
 
@@ -97,14 +100,12 @@ body.chkAppRoot.appDark .chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
 }
 
 /* Migrated from claude-hyper.css: search action ghost buttons (live in Search.view.xml). */
-.chkApp .searchOpenActionBtn .sapMBtnInner,
 .chkApp .searchCopyActionBtn .sapMBtnInner,
 .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
 .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   background: transparent !important;
 }
 
-body.chkAppRoot.appLight .chkApp .searchOpenActionBtn .sapMBtnInner,
 body.chkAppRoot.appLight .chkApp .searchCopyActionBtn .sapMBtnInner,
 body.chkAppRoot.appLight .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
 body.chkAppRoot.appLight .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
@@ -112,7 +113,6 @@ body.chkAppRoot.appLight .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   color: rgba(48, 88, 155, 0.82) !important;
 }
 
-body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner,
 body.chkAppRoot.appDark .chkApp .searchCopyActionBtn .sapMBtnInner,
 body.chkAppRoot.appDark .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
 body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
@@ -443,6 +443,27 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(18, 36, 64, 0.14);
+}
+
+.chkApp .searchSelectionStatusChip .sapMObjStatusText,
+.chkApp .searchSelectionStatusChip .sapUiIcon {
+  color: var(--text-main);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled .sapMBtnInner,
+.chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled:hover .sapMBtnInner {
+  transform: none;
+  filter: none;
+  opacity: 0.62;
+  box-shadow: none;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled .sapMBtnContent,
+.chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled .sapUiIcon {
+  color: var(--text-muted);
 }
 
 
@@ -2687,10 +2708,52 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   overflow: hidden;
 }
 
-.chkApp .searchResultsTable .sapMCb,
-.chkApp .searchResultsTable .sapMCbBg,
+.chkApp .searchToolbarGroupTitle {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chkApp .searchSmartToolbarRail .backendTopInput,
+.chkApp .searchSmartToolbarRail .maxRowsInput {
+  width: 5rem;
+  min-width: 5rem;
+  flex: 0 0 5rem;
+}
+
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn,
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn.sapMMenuBtn {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMMenuBtnRegular {
+  min-width: 5.6rem;
+  padding-inline: 0.58rem;
+}
+
+.chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMBtnContent {
+  max-width: none;
+}
+
 .chkApp .searchResultsTable .sapMListTblSelCol {
-  display: none;
+  display: table-cell;
+  width: 2.75rem;
+  min-width: 2.75rem;
+}
+
+.chkApp .searchResultsTable .sapMCb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chkApp .searchResultsTable .sapMCbBg {
+  display: inline-flex;
 }
 
 .chkApp .searchResultsTable .sapMListTbl .sapMLIBPlaceholder,
@@ -2775,7 +2838,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
   .chkApp .searchSmartToolbarRail .backendTopInput,
   .chkApp .searchSmartToolbarRail .maxRowsInput {
-    width: 6.6rem;
+    width: 5rem;
+    min-width: 5rem;
+    flex: 0 0 5rem;
   }
 
   .chkApp .searchSmartToolbarRail .backendTopInput .sapMInputBaseContentWrapper,
@@ -2794,6 +2859,12 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
   .chkApp .searchSmartToolbarRail .searchExportMenuBtn {
     margin-inline-start: auto;
+  }
+
+  .chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMBtnInner,
+  .chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMMenuBtnRegular {
+    min-width: 5.6rem;
+    padding-inline: 0.58rem;
   }
 
   .chkApp .searchResultsTable {

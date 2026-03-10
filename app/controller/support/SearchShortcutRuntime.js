@@ -48,7 +48,6 @@ sap.ui.define([
         }
         if ((bAccel && bShift && !bAlt) || (bAccel && bAlt && !bShift)) {
             if (sKey === "n") { return "create"; }
-            if (sKey === "o") { return "openSelected"; }
             if (sKey === "c") { return "copy"; }
             if (sKey === "a") { return "selectVisible"; }
             if (sKey === "l") { return "clearSelection"; }
@@ -73,10 +72,6 @@ sap.ui.define([
             oController.onCreate();
             return true;
         }
-        if (sAction === "openSelected" && typeof oController.onOpenSelected === "function") {
-            oController.onOpenSelected();
-            return true;
-        }
         if (sAction === "copy" && typeof oController.onCopy === "function") {
             oController.onCopy();
             return true;
@@ -93,8 +88,8 @@ sap.ui.define([
             oController.onSmartSearch();
             return true;
         }
-        if (sAction === "export" && typeof oController.onExportMenuDefault === "function") {
-            oController.onExportMenuDefault();
+        if (sAction === "export" && typeof oController.onExportScreen === "function") {
+            oController.onExportScreen();
             return true;
         }
         if (sAction === "focusFilters") {

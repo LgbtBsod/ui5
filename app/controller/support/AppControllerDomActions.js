@@ -9,8 +9,8 @@ sap.ui.define([
     var _iResizeEndTimer = 0;
     var _iResizeSafetyTimer = 0;
     var _iShellRefreshRafId = 0;
-    var _RESIZE_END_DELAY_MS = 120;
-    var _RESIZE_SAFETY_DELAY_MS = 480;
+    var _RESIZE_END_DELAY_MS = 360;
+    var _RESIZE_SAFETY_DELAY_MS = 1200;
     var _RESIZE_CLASS = "chkResizing";
 
     function _scheduleInvalidate(oLayout) {

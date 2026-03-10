@@ -321,25 +321,6 @@ sap.ui.define([
             }.bind(this));
         },
 
-        onOpenSelected: function () {
-            var iSelectionCount = Number(ControllerViewStateRuntime.get(this, "/selectionCount", 0));
-            var sSelectedRowId = String(ControllerViewStateRuntime.get(this, "/selectedRowId", "") || "").trim();
-            return UiDecisionCoordinator.guardOpenSelected({
-                controller: this,
-                selectionCount: iSelectionCount,
-                selectedRowId: sSelectedRowId,
-                onMissingSelection: function () {
-                    SearchViewRuntime.focusSearchResults(this);
-                }.bind(this)
-            }).then(function (bAllowed) {
-                if (!bAllowed) {
-                    return false;
-                }
-                SearchViewRuntime.captureSearchScrollPosition(this);
-                return SearchCommandPolicy.selectRow(this, { intent: "open", rootId: sSelectedRowId, source: "toolbarOpenSelected" });
-            }.bind(this));
-        },
-
         onCopy: function () {
             var iSelectionCount = Number(ControllerViewStateRuntime.get(this, "/selectionCount", 0));
             return UiDecisionCoordinator.guardCopySelection({
@@ -455,26 +436,18 @@ sap.ui.define([
             var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
             var aSelectedRowIds = SearchSelectionRuntime.extractSelectedRowIds(oEvent, oInnerTable);
             var sSelectedRowId = aSelectedRowIds[0] || "";
+            var sSelectedRowDisplayId = SearchSelectionRuntime.extractSelectedRowDisplayId(oEvent, oInnerTable);
             SearchCommandPolicy.selectionChanged(this, {
                 event: oEvent,
                 selectedRowId: sSelectedRowId,
+                selectedRowDisplayId: sSelectedRowDisplayId,
                 selectedRowIds: aSelectedRowIds,
                 source: "tableSelection"
             });
         },
 
-        onSearchTableItemPress: function (oEvent) {
-            var sSelectedRowId = SearchSelectionRuntime.extractSelectedRowId(oEvent);
-            if (!sSelectedRowId) {
-                return;
-            }
-            SearchViewRuntime.captureSearchScrollPosition(this);
-            SearchCommandPolicy.selectionChanged(this, {
-                selectedRowId: sSelectedRowId,
-                selectedRowIds: [sSelectedRowId],
-                source: "tableItemPress"
-            });
-            SearchCommandPolicy.selectRow(this, { intent: "open", rootId: sSelectedRowId, source: "tableItemPress" });
+        onSearchTableItemPress: function () {
+            return undefined;
         },
 
         onChecksFailSegmentChange: function (oEvent) {
@@ -489,7 +462,7 @@ sap.ui.define([
             return "SearchFilterBuilder.buildFailSegmentFilter";
         },
 
-        onExportMenuDefault: function () {
+        onExportScreen: function () {
             return SearchViewRuntime.runExport(this, "screen");
         },
 

@@ -112,7 +112,7 @@ sap.ui.define([
             oInnerTable.setMode("MultiSelect");
         }
         if (oInnerTable.setIncludeItemInSelection) {
-            oInnerTable.setIncludeItemInSelection(true);
+            oInnerTable.setIncludeItemInSelection(false);
         }
         mCounts = resolveCounts(oInnerTable);
         ControllerViewStateRuntime.setMany(oController, {

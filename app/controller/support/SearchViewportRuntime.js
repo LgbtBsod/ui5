@@ -177,6 +177,11 @@ sap.ui.define([
         setSearchStickyTop(oActionRail, iActionTop + "px");
         setSearchStickyTop(oToolbarRail, iToolbarTop + "px");
         setSearchStickyTop(oResultsToolbarDom, iTableToolbarTop + "px");
+        ThemeDomRuntime.setStyleProperties([oActionRail, oToolbarRail, oResultsToolbarDom], {
+            "overflow": "visible",
+            "overflow-x": "visible",
+            "overflow-y": "visible"
+        }, "important");
     }
 
     function scheduleSearchViewportSync(oController, bImmediate) {

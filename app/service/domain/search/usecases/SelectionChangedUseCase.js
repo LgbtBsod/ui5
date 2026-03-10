@@ -29,6 +29,7 @@ sap.ui.define([
     SelectionChangedUseCase.prototype.execute = function (mInput) {
         var aSelectedRowIds = [];
         var sSelectedRowId = "";
+        var sSelectedRowDisplayId = "";
         var iSelectionCount = 0;
         var bHasSelection = false;
         var bSingleSelection = false;
@@ -44,18 +45,21 @@ sap.ui.define([
         }
         aSelectedRowIds = normalizeChecklistIds(aSelectedRowIds);
         sSelectedRowId = aSelectedRowIds[0] || "";
+        sSelectedRowDisplayId = String((mInput && mInput.selectedRowDisplayId) || "").trim() || sSelectedRowId;
         iSelectionCount = aSelectedRowIds.length;
         bHasSelection = iSelectionCount > 0;
         bSingleSelection = iSelectionCount === 1;
 
         return Promise.resolve(Result.ok({
             selectedRowId: sSelectedRowId,
+            selectedRowDisplayId: sSelectedRowDisplayId,
             selectedRowIds: aSelectedRowIds,
             selectionCount: iSelectionCount,
             hasSelection: bHasSelection,
             canCopy: bSingleSelection
         }, [
             Effects.modelPatch("view", "/selectedRowId", sSelectedRowId),
+            Effects.modelPatch("view", "/selectedRowDisplayId", sSelectedRowDisplayId),
             Effects.modelPatch("view", "/selectedRowIds", aSelectedRowIds),
             Effects.modelPatch("view", "/selectionCount", iSelectionCount),
             Effects.modelPatch("view", "/hasSelection", bHasSelection),

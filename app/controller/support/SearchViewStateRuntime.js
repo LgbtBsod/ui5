@@ -35,6 +35,7 @@ sap.ui.define([
             canCopy: false,
             canDelete: false,
             selectedRowId: "",
+            selectedRowDisplayId: "",
             scrollNavVisible: false,
             resultsToolbarNavVisible: false,
             analyticsRailBusy: false,
