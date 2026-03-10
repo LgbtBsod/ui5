@@ -1646,16 +1646,12 @@ body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
 
 .chkApp .detailControlRow .sapMOTBOverflowButton .sapMBtnContent,
 .chkApp .detailWorkflowRail .sapMOTBOverflowButton .sapMBtnContent,
-.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent,
 .chkApp .detailSectionToolbar .sapMOTBOverflowButton .sapMBtnContent {
   font-size: 0;
 }
 
 .chkApp .detailControlRow .sapMOTBOverflowButton .sapMBtnContent::after,
 .chkApp .detailWorkflowRail .sapMOTBOverflowButton .sapMBtnContent::after,
-.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after,
 .chkApp .detailSectionToolbar .sapMOTBOverflowButton .sapMBtnContent::after {
   content: "...";
   font-size: 0.85rem;
@@ -4361,28 +4357,12 @@ body.chkAppRoot.appDark .chkApp .searchAnalyticsCardPrimary {
     linear-gradient(180deg, rgba(15, 28, 48, 0.96), rgba(21, 37, 60, 0.88));
 }
 
-body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
-body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
-body.chkAppRoot.appDark .chkApp .searchResultsActionRail,
-body.chkAppRoot.appDark .chkApp .searchSmartToolbarRail,
-body.chkAppRoot.appDark .chkApp .searchToolbarMetaRail {
-  background: color-mix(in srgb, var(--theme-workbench-rail-bg) 80%, transparent);
-}
-
 body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .sapMInputBaseContentWrapper,
 body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .sapMSlt,
 body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .sapMSegB {
   background: var(--theme-workbench-control-bg);
   border-color: var(--theme-workbench-control-border);
   box-shadow: var(--theme-workbench-control-shadow);
-}
-
-body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
-body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
-body.chkAppRoot.appLight .chkApp .searchResultsActionRail,
-body.chkAppRoot.appLight .chkApp .searchSmartToolbarRail,
-body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
-  background: var(--theme-workbench-rail-bg);
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .appContent,
@@ -7471,28 +7451,10 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   }
 }
 
-body.chkAppRoot.appDark .chkApp .detailWorkflowStoryRail,
-body.chkAppRoot.appDark .chkApp .detailSectionAnchorRail,
-body.chkAppRoot.appDark .chkApp .detailControlRowTop,
-body.chkAppRoot.appDark .chkApp .detailControlRowActions {
-  background: color-mix(in srgb, var(--theme-rail-bg) 88%, transparent);
-  border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
-  box-shadow: none;
-}
-
 body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
   background: var(--theme-block-bg);
   border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
   box-shadow: none;
-}
-
-body.chkAppRoot.appLight .chkApp .detailWorkflowStoryRail,
-body.chkAppRoot.appLight .chkApp .detailSectionAnchorRail,
-body.chkAppRoot.appLight .chkApp .detailControlRowTop,
-body.chkAppRoot.appLight .chkApp .detailControlRowActions,
-body.chkAppRoot.appLight .chkApp .detailAttachmentDropZone {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(242, 247, 255, 0.18));
 }
 
 @media (max-width: 68.75rem) {
@@ -8610,16 +8572,12 @@ body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
 /* UI5 overflow patch: stock overflow buttons expose unreadable icon/text mix in compact rails. */
 .chkApp .detailControlRow .sapMOTBOverflowButton .sapMBtnContent,
 .chkApp .detailWorkflowRail .sapMOTBOverflowButton .sapMBtnContent,
-.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent,
 .chkApp .detailSectionToolbar .sapMOTBOverflowButton .sapMBtnContent {
   font-size: 0;
 }
 
 .chkApp .detailControlRow .sapMOTBOverflowButton .sapMBtnContent::after,
 .chkApp .detailWorkflowRail .sapMOTBOverflowButton .sapMBtnContent::after,
-.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after,
 .chkApp .detailSectionToolbar .sapMOTBOverflowButton .sapMBtnContent::after {
   content: "...";
   font-size: 0.85rem;
@@ -8701,12 +8659,9 @@ body.chkAppRoot.appLight.appInvertedBlockScheme {
 .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
 .chkApp .searchResultsTable .toolbarTransparent,
 .chkApp .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .searchActionToolbarDensity,
-.chkApp .searchSmartToolbarRail,
 .chkApp .detailSectionCard > .sapMTB,
 .chkApp .detailSectionCard > .sapMOTB,
 .chkApp .detailSectionToolbar,
-.chkApp .detailWorkflowRail,
 .chkApp .detailControlRow,
 .chkApp .detailControlInlineCard .toolbarTransparent,
 .chkApp .detailInfoExperienceCard .infoCardPinBtn .sapMBtnInner {
@@ -8816,8 +8771,7 @@ body.chkAppRoot.appLight.appInvertedBlockScheme {
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
 .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
 .chkApp .searchResultsTable .toolbarTransparent,
-.chkApp .searchActionToolbarDensity,
-.chkApp .searchSmartToolbarRail {
+.chkApp .searchActionToolbarDensity {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -8834,8 +8788,6 @@ body.chkAppRoot.appLight.appInvertedBlockScheme {
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMInputBase,
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapUiCompVarMngmt,
 .chkApp .searchFilterCardDense .customFilterWrapper,
-.chkApp .searchResultsActionRail > .sapMFlexItem,
-.chkApp .searchSmartToolbarRail > .sapMFlexItem,
 .chkApp .detailSectionToolbar > .sapMFlexItem {
   min-width: 0;
   max-width: 100%;
@@ -8843,8 +8795,6 @@ body.chkAppRoot.appLight.appInvertedBlockScheme {
 
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMTBSpacer,
 .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTBSpacer,
-.chkApp .searchResultsActionRail .sapMTBSpacer,
-.chkApp .searchSmartToolbarRail .sapMTBSpacer,
 .chkApp .detailSectionToolbar .sapMTBSpacer {
   flex: 1 1 auto;
   min-width: 0;
@@ -9278,19 +9228,15 @@ body.chkAppRoot .shellPopover .shellNotificationItem {
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
 .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
 .chkApp .searchResultsTable .toolbarTransparent,
-.chkApp .searchActionToolbarDensity,
-.chkApp .searchSmartToolbarRail,
 .chkApp .detailSectionCard > .sapMTB,
 .chkApp .detailSectionCard > .sapMOTB,
 .chkApp .detailSectionToolbar,
-.chkApp .detailWorkflowRail,
 .chkApp .detailControlRow {
   border-radius: calc(var(--radius-md) + 0.02rem);
   padding: 0.48rem 0.72rem;
 }
 
 .chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner,
 .chkApp .detailSectionToolbar .sapMBtn .sapMBtnInner,
 .chkApp .detailControlRow .sapMBtn .sapMBtnInner {
   min-height: 2.1rem;
@@ -9298,7 +9244,6 @@ body.chkAppRoot .shellPopover .shellNotificationItem {
 }
 
 .chkApp .searchActionToolbarDensity .sapMSwt,
-.chkApp .searchSmartToolbarRail .sapMSwt,
 .chkApp .detailSectionToolbar .sapMSwt {
   min-height: 2rem;
 }
@@ -9439,13 +9384,7 @@ body.chkAppRoot .shellPopover .shellUserLabel {
   line-height: 1.4;
 }
 
-.chkApp .detailWorkflowRail,
 .chkApp .detailControlRow,
-.chkApp .detailControlRowTop,
-.chkApp .detailControlRowActions,
-.chkApp .detailWorkflowRail.sapMOTB,
-.chkApp .detailControlRowTop.sapMTBNewFlex,
-.chkApp .detailControlRowActions.sapMTBNewFlex,
 .chkApp .searchActionToolbarDensity {
   flex-wrap: wrap !important;
   row-gap: 0.42rem !important;
@@ -9453,16 +9392,12 @@ body.chkAppRoot .shellPopover .shellUserLabel {
   align-items: center !important;
 }
 
-.chkApp .detailControlRowTop .sapMBarChild,
-.chkApp .detailControlRowActions .sapMBarChild,
-.chkApp .detailWorkflowRail .sapMBarChild {
+.chkApp .detailControlRow .sapMBarChild {
   min-width: 0;
   max-width: 100%;
 }
 
-.chkApp .detailControlRowTop .sapMTBSpacer,
-.chkApp .detailControlRowActions .sapMTBSpacer,
-.chkApp .detailWorkflowRail .sapMTBSpacer {
+.chkApp .detailControlRow .sapMTBSpacer {
   flex: 1 1 auto !important;
   min-width: 0 !important;
 }
@@ -9486,7 +9421,6 @@ body.chkAppRoot .shellPopover .shellUserLabel {
 .chkApp .searchSelectionStatusChip .sapMObjStatusText,
 .chkApp .searchSummaryStatusChip .sapMObjStatusText,
 .chkApp .searchStageStatusChip .sapMObjStatusText,
-.chkApp .detailWorkflowRail .sapMObjStatusText,
 .chkApp .detailRailStatusChip .sapUiIcon,
 .chkApp .searchSelectionStatusChip .sapUiIcon,
 .chkApp .searchSummaryStatusChip .sapUiIcon,
@@ -9497,20 +9431,15 @@ body.chkAppRoot .shellPopover .shellUserLabel {
   line-height: 1.25;
 }
 
-.chkApp .detailWorkflowRail .sapMBtn,
 .chkApp .detailControlRow .sapMBtn {
   max-width: 100%;
 }
 
-.chkApp .detailWorkflowRail .sapMBtn .sapMBtnContent,
 .chkApp .detailControlRow .sapMBtn .sapMBtnContent {
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
-.chkApp .detailWorkflowRail .sapMObjStatus,
-.chkApp .detailControlRowTop .sapMObjStatus,
-.chkApp .detailControlRowTop .sapMSwt,
 .chkApp .detailControlRowActions .sapMBtn {
   margin: 0 !important;
 }
@@ -9721,8 +9650,6 @@ body.chkAppRoot.appInvertedBlockScheme .chkApp .detailEmptyStateTitle {
   .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
   .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
   .chkApp .searchResultsTable .toolbarTransparent,
-  .chkApp .searchActionToolbarDensity,
-  .chkApp .searchSmartToolbarRail,
   .chkApp .detailSectionToolbar,
   .chkApp .detailWorkflowRail,
   .chkApp .detailControlRow,
@@ -9847,8 +9774,6 @@ body.chkAppRoot.appInvertedBlockScheme .chkApp .detailEmptyStateTitle {
   .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
   .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
   .chkApp .searchResultsTable .toolbarTransparent,
-  .chkApp .searchActionToolbarDensity,
-  .chkApp .searchSmartToolbarRail,
   .chkApp .detailSectionToolbar,
   .chkApp .detailControlRow,
   .chkApp .detailControlRowTop,
@@ -10138,14 +10063,6 @@ body.chkAppRoot .chkApp {
 
 /* Action toolbar — keep overflow visible so dropdowns show */
 /* Prevent toolbar items shrinking to 0 */
-.chkApp .searchResultsActionRail .sapMBtn,
-.chkApp .searchSmartToolbarRail .sapMBtn,
-.chkApp .searchSmartToolbarRail .sapMMenuBtn {
-  flex: 0 0 auto;
-  min-width: 0;
-  max-width: 100%;
-}
-
 /* Filter items — responsive clamp so they never overflow/hide */
 .chkApp .searchFilterExperienceShell .sapUiCompFilterBarItem,
 .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapUiCompFilterBarItem {
@@ -10155,12 +10072,6 @@ body.chkAppRoot .chkApp {
 }
 
 /* Toolbar spacer — never force overflow */
-.chkApp .searchResultsActionRail .sapMTBSpacer,
-.chkApp .searchSmartToolbarRail .sapMTBSpacer {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
 /* Search KPI rail — align center, allow natural wrap */
 .chkApp .searchHeaderKpiRail {
   display: flex;
@@ -11122,45 +11033,6 @@ body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell {
 /* ──────────────────────────────────────────────────────────────
    § 6. TOOLBAR RAILS — компактные, выровненные
    ────────────────────────────────────────────────────────────── */
-
-.chkApp .searchResultsActionRail,
-.chkApp .searchSmartToolbarRail {
-  border-radius: calc(var(--r-16) - 0.05rem);
-  backdrop-filter: blur(var(--glass-blur-sm));
-  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
-  transition:
-    background var(--t-slow),
-    border-color var(--t-slow);
-}
-
-/* Toolbar buttons */
-.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
-.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .sapMMenuBtn .sapMBtnInner {
-  border-radius: var(--r-full);
-  transition:
-    transform var(--t-fast),
-    box-shadow var(--t-normal),
-    border-color var(--t-normal),
-    background var(--t-normal);
-  will-change: transform;
-}
-
-.chkApp .searchActionToolbarDensity .sapMBtn:not(.sapMBtnDisabled):hover .sapMBtnInner,
-.chkApp .searchResultsActionRail .sapMBtn:not(.sapMBtnDisabled):hover .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .sapMBtn:not(.sapMBtnDisabled):hover .sapMBtnInner {
-  transform: translateY(-1px);
-  box-shadow: var(--elev-2);
-  border-color: rgba(var(--accent-rgb), 0.2);
-}
-
-.chkApp .searchActionToolbarDensity .sapMBtn:active .sapMBtnInner,
-.chkApp .searchResultsActionRail .sapMBtn:active .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .sapMBtn:active .sapMBtnInner {
-  transform: scale(0.97);
-  transition-duration: 60ms;
-}
 
 /* Primary action button — акцентный */
 .chkApp .brandActionBtn.brandActionPrimary .sapMBtnInner,
@@ -16256,8 +16128,6 @@ body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .sapMMsgStripError {
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
 .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
 .chkApp .searchResultsTable .toolbarTransparent,
-.chkApp .searchActionToolbarDensity,
-.chkApp .searchSmartToolbarRail,
 .chkApp .detailSectionToolbar,
 .chkApp .detailControlRow {
   border-radius: var(--u-r-inner) !important;
@@ -17002,9 +16872,6 @@ body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblRow:nth-child(od
 }
 
 /* ── Dark toolbar rails ── */
-body.chkAppRoot.appDark .chkApp .searchResultsActionRail,
-body.chkAppRoot.appDark .chkApp .searchSmartToolbarRail,
-body.chkAppRoot.appDark .chkApp .detailWorkflowRail,
 body.chkAppRoot.appDark .chkApp .detailControlRow {
   background:
     linear-gradient(170deg,
@@ -17527,10 +17394,6 @@ body.chkAppRoot.appLight {
 }
 
 /* Toolbar rails inside cards */
-.chkApp .searchActionToolbarDensity,
-.chkApp .searchSmartToolbarRail,
-.chkApp .searchResultsActionRail,
-.chkApp .detailWorkflowRail,
 .chkApp .detailControlRow,
 .chkApp .detailSectionToolbar {
   background: rgba(247, 251, 255, 0.99) !important;
@@ -17715,7 +17578,6 @@ body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .searchResultsTable .sap
 
 body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .searchActionToolbarDensity,
 body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .searchSmartToolbarRail,
-body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailWorkflowRail,
 body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .detailControlRow {
   background: var(--ui-rebuild-rail-bg) !important;
   border-color: var(--ui-rebuild-rail-border) !important;
@@ -20419,9 +20281,6 @@ body.chkAppRoot.appDark {
   border-color: var(--border-0) !important;
 }
 
-.chkApp .searchActionToolbarDensity,
-.chkApp .searchSmartToolbarRail,
-.chkApp .detailWorkflowRail,
 .chkApp .detailControlRow {
   background:   var(--surf-2) !important;
   border-color: var(--border-1) !important;

@@ -360,6 +360,9 @@ sap.ui.define([
         if (oInnerTable.attachSelectionChange) {
             oInnerTable.attachSelectionChange(oController.onSearchTableSelectionChange, oController);
         }
+        if (oInnerTable.attachItemPress) {
+            oInnerTable.attachItemPress(oController.onSearchTableItemPress, oController);
+        }
         SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
         SearchRateProgress.wireTable(oController, oInnerTable);
         SearchViewportRuntime.bindSearchViewportRuntime(oController);

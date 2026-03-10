@@ -56,6 +56,19 @@ sap.ui.define([
         return true;
     }
 
+    function resolvePressedSearchRowId(oEvent) {
+        var oItem = oEvent && oEvent.getParameter && (
+            oEvent.getParameter("listItem")
+            || oEvent.getParameter("item")
+            || oEvent.getSource && oEvent.getSource()
+        );
+        var oCtx = oItem && oItem.getBindingContext && oItem.getBindingContext();
+        var oObject = oCtx && oCtx.getObject && oCtx.getObject();
+        return String(
+            (oObject && (oObject.Key || oObject.key || oObject.Id || oObject.id || oObject.RequestId || oObject.checklist_id)) || ""
+        ).trim();
+    }
+
     function applyAnalyticsDrilldownIntent(oController) {
         var oIntent = readAnalyticsDrilldownIntent(oController) || {};
         var sFilterKey = String(oIntent.filterKey || "").trim();
@@ -446,8 +459,17 @@ sap.ui.define([
             });
         },
 
-        onSearchTableItemPress: function () {
-            return undefined;
+        onSearchTableItemPress: function (oEvent) {
+            var sRootId = resolvePressedSearchRowId(oEvent);
+            if (!sRootId) {
+                return undefined;
+            }
+            SearchViewRuntime.captureSearchScrollPosition(this);
+            return SearchCommandPolicy.selectRow(this, {
+                intent: "open",
+                rootId: sRootId,
+                source: "tableItemPress"
+            });
         },
 
         onChecksFailSegmentChange: function (oEvent) {
