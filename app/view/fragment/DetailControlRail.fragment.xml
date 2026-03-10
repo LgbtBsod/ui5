@@ -233,8 +233,5 @@
             </OverflowToolbar>
         </VBox>
 
-        <Text text="{i18n>detailControlHint}"
-              class="detailRailHint sapUiTinyMarginTop"
-              visible="{layout>/personalization/showHints}"/>
     </VBox>
 </core:FragmentDefinition>

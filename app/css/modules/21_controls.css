@@ -748,3 +748,181 @@ body.chkAppRoot.appDark .chkApp .tableActionHeaderLabel {
 .chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnContent {
   line-height: 1.1;
 }
+
+/* Migrated from claude-hyper.css backlog: compact chip size variants. */
+.chkApp .chipSm {
+  padding: 0.12rem 0.45rem !important;
+  font-size: 0.64rem !important;
+}
+
+.chkApp .chipLg {
+  padding: 0.32rem 0.88rem !important;
+  font-size: 0.82rem !important;
+}
+
+.chkApp .chipSep {
+  width: 0.2rem !important;
+  height: 0.2rem !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+}
+
+body.chkAppRoot.appLight .chkApp .chipSep {
+  background: rgba(100, 140, 200, 0.4) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .chipSep {
+  background: rgba(100, 150, 210, 0.38) !important;
+}
+
+/* Migrated from claude-hyper.css backlog: chip/runtime semantic classes. */
+@keyframes _chipLivePulse {
+  0%,
+  100% { box-shadow: 0 0 0 0 rgba(var(--hz-success-rgb, 26, 124, 64), 0); }
+  50% { box-shadow: 0 0 0 4px rgba(var(--hz-success-rgb, 26, 124, 64), 0.16); }
+}
+
+.chkApp .chipLive,
+.chkApp .chipActive {
+  animation: _chipLivePulse 2.5s ease-in-out infinite !important;
+}
+
+.chkApp .workflowChip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.28rem !important;
+  border-radius: 999px !important;
+  padding: 0.14rem 0.62rem 0.14rem 0.52rem !important;
+  font-size: 0.71rem !important;
+  font-weight: 680 !important;
+  border: 1px solid var(--ac-bd, var(--theme-chip-border)) !important;
+  background: var(--ac-bg, var(--theme-chip-bg)) !important;
+  white-space: nowrap !important;
+}
+
+body.chkAppRoot.appLight .chkApp .workflowChip {
+  color: rgba(0, 44, 156, 0.84) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .workflowChip {
+  color: rgba(112, 188, 255, 0.88) !important;
+}
+
+.chkApp .statusChipPositive {
+  border-color: rgba(16, 122, 44, 0.28) !important;
+  background: rgba(16, 122, 44, 0.1) !important;
+  color: rgba(8, 86, 28, 0.88) !important;
+}
+
+.chkApp .statusChipNegative {
+  border-color: rgba(196, 16, 16, 0.28) !important;
+  background: rgba(196, 16, 16, 0.1) !important;
+  color: rgba(152, 0, 0, 0.88) !important;
+}
+
+.chkApp .statusChipWarning {
+  border-color: rgba(176, 76, 0, 0.28) !important;
+  background: rgba(176, 76, 0, 0.1) !important;
+  color: rgba(136, 56, 0, 0.88) !important;
+}
+
+.chkApp .statusChipInformative {
+  border-color: rgba(0, 108, 238, 0.28) !important;
+  background: rgba(0, 108, 238, 0.1) !important;
+  color: rgba(0, 50, 168, 0.88) !important;
+}
+
+.chkApp .statusChipNeutral {
+  border-color: rgba(96, 118, 178, 0.26) !important;
+  background: rgba(96, 118, 178, 0.1) !important;
+  color: rgba(60, 84, 148, 0.8) !important;
+}
+
+.chkApp .sapMBtnSuccess .sapMBtnInner,
+.chkApp .btnSuccess .sapMBtnInner {
+  background: var(--hz-success, #1a7c40) !important;
+}
+
+.chkApp .statusChip {
+  border-radius: 999px !important;
+  border: 1px solid var(--theme-chip-border) !important;
+  background: var(--theme-chip-bg) !important;
+  padding: 0.2rem 0.6rem !important;
+  font-size: 0.72rem !important;
+  font-weight: 650 !important;
+}
+
+.chkApp .shellNotificationBadge,
+.chkApp .notifBadge {
+  border-radius: 999px !important;
+  min-width: 1.1rem !important;
+  height: 1.1rem !important;
+  padding: 0 0.3rem !important;
+  font-size: 0.6rem !important;
+  font-weight: 820 !important;
+  font-variant-numeric: tabular-nums !important;
+  background: var(--sp-red, #cc0000) !important;
+  color: #fff !important;
+  border: 2px solid var(--surface-3, #fff) !important;
+}
+
+.chkApp .sapMOTBOverflowButton .sapMBtnInner,
+.chkApp .sapMBtn.overflowMenuBtn .sapMBtnInner {
+  background: transparent !important;
+  border-radius: 999px !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sapMOTBOverflowButton .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .sapMBtn.overflowMenuBtn .sapMBtnInner {
+  border: 1.5px solid rgba(118, 162, 218, 0.45) !important;
+  color: rgba(0, 64, 160, 0.75) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMOTBOverflowButton .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .sapMBtn.overflowMenuBtn .sapMBtnInner {
+  border: 1.5px solid rgba(77, 177, 255, 0.3) !important;
+  color: rgba(120, 196, 255, 0.8) !important;
+}
+
+@keyframes _iconAttention {
+  0%,
+  100% { transform: scale(1); }
+  20% { transform: scale(1.22) rotate(-8deg); }
+  40% { transform: scale(1.18) rotate(6deg); }
+  60% { transform: scale(1.14) rotate(-4deg); }
+  80% { transform: scale(1.1) rotate(2deg); }
+}
+
+.chkApp .iconAttention {
+  animation: _iconAttention 0.6s ease both;
+  animation-delay: 400ms;
+}
+
+.chkApp .shellActionBtn.active .sapMBtnInner,
+.chkApp .shellActionBtn[aria-pressed="true"] .sapMBtnInner {
+  background: rgba(var(--accent-rgb), 0.1) !important;
+  border-color: rgba(var(--accent-rgb), 0.32) !important;
+}
+
+.chkApp .toolbarDivider {
+  width: 1px !important;
+  align-self: stretch !important;
+  margin: 0.22rem 0.4rem !important;
+  flex-shrink: 0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .toolbarDivider {
+  background: rgba(118, 162, 218, 0.32) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .toolbarDivider {
+  background: rgba(77, 177, 255, 0.18) !important;
+}

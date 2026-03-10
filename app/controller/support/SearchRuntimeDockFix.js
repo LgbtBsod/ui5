@@ -25,14 +25,29 @@ sap.ui.define([
 
     function resolveScrollHost(oController) {
         var oViewDom = resolveViewDom(oController);
+        var aCandidates;
         var oNode = oViewDom && oViewDom.parentElement;
+        var oDocumentScrollHost;
+        if (oViewDom && oViewDom.querySelectorAll) {
+            aCandidates = Array.prototype.slice.call(oViewDom.querySelectorAll(".sapMPageEnableScrolling, .sapMPageScroll, .sapMPageEnableScrolling > div"));
+            oNode = aCandidates.find(function (oCandidate) {
+                return oCandidate && oCandidate.scrollHeight > oCandidate.clientHeight + 4;
+            }) || oNode;
+            if (oNode && oNode.scrollHeight > oNode.clientHeight + 4) {
+                return oNode;
+            }
+        }
         while (oNode && oNode !== document.body) {
             if (oNode.scrollHeight > oNode.clientHeight + 4) {
                 return oNode;
             }
             oNode = oNode.parentElement;
         }
-        return document.scrollingElement || document.documentElement || document.body;
+        oDocumentScrollHost = document.scrollingElement || document.documentElement || document.body;
+        if (oDocumentScrollHost && oDocumentScrollHost.scrollHeight > oDocumentScrollHost.clientHeight + 4) {
+            return oDocumentScrollHost;
+        }
+        return oDocumentScrollHost || null;
     }
 
     function resolveHeight(oNode) {

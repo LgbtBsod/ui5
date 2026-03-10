@@ -19,6 +19,48 @@
   display: none;
 }
 
+/* Migrated from claude-hyper.css backlog: search narrative and status helpers. */
+.chkApp .inputHint,
+.chkApp .sapMLabel + .sapMText.inputHint {
+  font-size: 0.7rem !important;
+  font-weight: 480 !important;
+  opacity: 0.55 !important;
+  line-height: 1.35 !important;
+  margin-top: 0.15rem !important;
+}
+
+.chkApp .searchResultsNarrativeRail .resultCountLabel {
+  color: var(--hz-accent, var(--accent)) !important;
+  font-weight: 750 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.chkApp .dataUpdatedPositive { animation: _dataFlashPositive 800ms ease both; }
+.chkApp .dataUpdatedNegative { animation: _dataFlashNegative 800ms ease both; }
+.chkApp .dataUpdated { animation: _dataFlashNeutral 600ms ease both; }
+
+.chkApp .sapMListTblRow.dataUpdated .sapMListTblCell {
+  animation: _dataFlashNeutral 600ms ease both !important;
+}
+
+@keyframes _dataFlashPositive {
+  0% { background: rgba(var(--hz-success-rgb, 26, 124, 64), 0); }
+  25% { background: rgba(var(--hz-success-rgb, 26, 124, 64), 0.12); }
+  100% { background: rgba(var(--hz-success-rgb, 26, 124, 64), 0); }
+}
+
+@keyframes _dataFlashNegative {
+  0% { background: rgba(var(--hz-danger-rgb, 204, 0, 0), 0); }
+  25% { background: rgba(var(--hz-danger-rgb, 204, 0, 0), 0.12); }
+  100% { background: rgba(var(--hz-danger-rgb, 204, 0, 0), 0); }
+}
+
+@keyframes _dataFlashNeutral {
+  0% { background: rgba(var(--hz-accent-rgb, 0, 112, 242), 0); }
+  25% { background: rgba(var(--hz-accent-rgb, 0, 112, 242), 0.1); }
+  100% { background: rgba(var(--hz-accent-rgb, 0, 112, 242), 0); }
+}
+
 /* Migrated from claude-hyper.css: filter shell wrappers.
    Keep overflow visible so SmartFilterBar controls are not clipped. */
 .chkApp .smartFilterGlass {
@@ -204,6 +246,12 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchSmartToolbarRail,
 .chkApp .smartTableGlass {
   transition: opacity 60ms ease !important;
+}
+
+/* Migrated from claude-hyper.css: explicit shell for Search results body. */
+.chkApp .searchResultsBody {
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 

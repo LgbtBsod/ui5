@@ -53,6 +53,7 @@ sap.ui.define([
         }
         if (oControl._oHelpButton) {
             oControl._oHelpButton.setTooltip(oControl.getHelpTooltip());
+            oControl._oHelpButton.setVisible(!!oControl.getShowHelp());
         }
         if (oControl._oSettingsButton) {
             oControl._oSettingsButton.setTooltip(oControl.getSettingsTooltip());
@@ -88,7 +89,8 @@ sap.ui.define([
                 analyticsTooltip: { type: "string", defaultValue: "" },
                 userTooltip: { type: "string", defaultValue: "" },
                 dark: { type: "boolean", defaultValue: false },
-                themeTooltip: { type: "string", defaultValue: "" }
+                themeTooltip: { type: "string", defaultValue: "" },
+                showHelp: { type: "boolean", defaultValue: false }
             },
             aggregations: {
                 _toolbar: { type: "sap.m.OverflowToolbar", multiple: false, visibility: "hidden" }

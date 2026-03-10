@@ -231,3 +231,104 @@ body.chkAppRoot.appDark,
   height: 0.7rem !important;
   border-radius: 0.35rem !important;
 }
+
+/* Migrated from claude-hyper.css backlog: skeleton variants + busy helpers. */
+.appSkeletonTitle {
+  height: 1.1rem;
+  width: 55%;
+  border-radius: 0.4rem !important;
+}
+
+.appSkeletonCircle {
+  border-radius: 50% !important;
+}
+
+.appSkeletonCard {
+  height: 7rem;
+  border-radius: 1rem !important;
+  border: 1px solid rgba(var(--hz-accent-rgb, 0, 112, 242), 0.06);
+}
+
+.chkApp .appSkeletonLine::after,
+.chkApp .appSkeletonBlock::after {
+  animation: _skShimmer 1.6s ease-in-out infinite !important;
+  will-change: transform !important;
+}
+
+@keyframes _skShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.chkApp .busyRing::before,
+.chkApp [data-busy-style="ring"] .sapMBusyIndicator::before {
+  content: "";
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 2.5px solid rgba(var(--hz-accent-rgb, var(--accent-rgb)), 0.18);
+  border-top-color: var(--hz-accent, var(--accent));
+  animation: _busySpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes _busySpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.chkApp .busyBar {
+  width: 100%;
+  height: 2px;
+  background: rgba(var(--hz-accent-rgb, var(--accent-rgb)), 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chkApp .busyBar::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--hz-accent, var(--accent)), transparent);
+  border-radius: inherit;
+  animation: _busyBarSlide 1.4s ease-in-out infinite;
+}
+
+@keyframes _busyBarSlide {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 140%;
+  }
+}
+
+.chkApp .busyPulse::after,
+.chkApp .sapMListTblRow.sapMListTblBusy::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(var(--hz-accent-rgb, var(--accent-rgb)), 0);
+  animation: _busyRowPulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes _busyRowPulse {
+  0%,
+  100% {
+    background: rgba(var(--hz-accent-rgb, var(--accent-rgb)), 0);
+  }
+  50% {
+    background: rgba(var(--hz-accent-rgb, var(--accent-rgb)), 0.05);
+  }
+}

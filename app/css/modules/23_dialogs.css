@@ -692,4 +692,181 @@ body.chkAppRoot.appDark .sapMMessageToast.glassToast {
   box-shadow: var(--theme-block-shadow);
 }
 
+/* Migrated from claude-hyper.css tail: static desktop list/notification states. */
+body.chkAppRoot.appLight .sapMSelectListItemSelected,
+body.chkAppRoot.appLight .sapMSLISelected {
+  background: rgba(0, 112, 242, 0.1) !important;
+  color: var(--accent, #0070f2) !important;
+}
+
+body.chkAppRoot.appDark .sapMSelectListItemSelected,
+body.chkAppRoot.appDark .sapMSLISelected {
+  background: rgba(77, 177, 255, 0.13) !important;
+  color: var(--accent, #4db1ff) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .shellPopoverList .sapMSLI:hover {
+  background: rgba(0, 112, 242, 0.04) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .shellPopoverList .sapMSLI:hover {
+  background: rgba(77, 177, 255, 0.06) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .shellNotificationItem.sapMSLIUnread {
+  background: rgba(0, 112, 242, 0.05) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .shellNotificationItem.sapMSLIUnread {
+  background: rgba(77, 177, 255, 0.07) !important;
+}
+
+.chkApp .shellNotificationStatus {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
+
+.chkApp .shellNotificationStatus.statusRead { background: rgba(120, 175, 240, 0.35) !important; }
+.chkApp .shellNotificationStatus.statusUnread { background: var(--accent, #0070f2) !important; }
+.chkApp .shellNotificationStatus.statusSuccess { background: rgba(10, 130, 40, 0.8) !important; }
+.chkApp .shellNotificationStatus.statusError { background: rgba(200, 10, 10, 0.8) !important; }
+
+/* Migrated from claude-hyper.css: shell user permissions and value-help class hooks. */
+body.chkAppRoot .shellPopover .shellUserPermissionList {
+  margin-top: 0.12rem;
+  border: 1px solid var(--theme-rail-border);
+  border-radius: calc(var(--radius-md) - 0.1rem);
+  background: transparent !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserPermissionList .sapMLIB {
+  min-height: 3.25rem;
+  background: transparent !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserPermissionList .sapMLIBContent {
+  font-size: 0.78rem !important;
+}
+
+body.chkAppRoot .valueHelpDialog,
+body.chkAppRoot .valueHelpDialog .sapMDialog {
+  max-width: min(96vw, 48rem);
+}
+
+body.chkAppRoot .valueHelpDialog .sapMDialogSection,
+body.chkAppRoot .valueHelpDialog .sapMDialogScrollCont,
+body.chkAppRoot .valueHelpDialog .sapMDialogScroll,
+body.chkAppRoot .valueHelpDialogBody,
+body.chkAppRoot .valueHelpTreeTableHost {
+  min-height: 0;
+  height: 100%;
+}
+
+/* Migrated from claude-hyper.css backlog: popover/toast semantic classes. */
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--success,
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--warning,
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--error,
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--info {
+  border-radius: calc(var(--radius-lg) + 0.08rem);
+  padding: 0.72rem 0.95rem;
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--success {
+  border-color: rgba(var(--semantic-success-rgb), 0.44);
+  background: linear-gradient(180deg, rgba(var(--semantic-success-rgb), 0.22), rgba(var(--semantic-success-rgb), 0.08));
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--warning {
+  border-color: rgba(var(--semantic-warning-rgb), 0.44);
+  background: linear-gradient(180deg, rgba(var(--semantic-warning-rgb), 0.2), rgba(var(--semantic-warning-rgb), 0.08));
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--error {
+  border-color: rgba(var(--semantic-danger-rgb), 0.48);
+  background: linear-gradient(180deg, rgba(var(--semantic-danger-rgb), 0.22), rgba(var(--semantic-danger-rgb), 0.09));
+}
+
+body.chkAppRoot .sapMMessageToast.glassToast.glassToast--info {
+  border-color: rgba(var(--semantic-info-rgb), 0.42);
+  background: linear-gradient(180deg, rgba(var(--semantic-info-rgb), 0.2), rgba(var(--semantic-info-rgb), 0.08));
+}
+
+.sapMMessageToast.toastSuccess {
+  border-color: rgba(var(--semantic-success-rgb), 0.36) !important;
+}
+
+.sapMMessageToast.toastError {
+  border-color: rgba(var(--semantic-danger-rgb), 0.4) !important;
+}
+
+.sapMMessageToast.toastWarning {
+  border-color: rgba(var(--semantic-warning-rgb), 0.38) !important;
+}
+
+.chkApp .shellPopover .shellNotificationItem.notificationDenied {
+  background: rgba(var(--semantic-danger-rgb), 0.07) !important;
+  border-color: rgba(var(--semantic-danger-rgb), 0.22) !important;
+}
+
+.chkApp .shellPopover .shellNotificationItem.notificationDenied .shellNotificationTitle {
+  color: var(--ui-sem-negative-label) !important;
+}
+
+.chkApp .shellPopover .shellUserInfoBlock {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  padding: 0.875rem 1rem !important;
+  border-bottom: 1px solid var(--border-0) !important;
+}
+
+.chkApp .shellPopover .shellUserName {
+  font-size: 0.925rem !important;
+  font-weight: 720 !important;
+  line-height: 1.2 !important;
+}
+
+.chkApp .shellPopover .shellUserEmail {
+  font-size: 0.72rem !important;
+  font-weight: 460 !important;
+  opacity: 0.55 !important;
+}
+
+.chkApp .shellPopover .sapMBtn.shellLogoutBtn .sapMBtnInner {
+  color: var(--hz-danger, #cc0000) !important;
+  opacity: 0.85 !important;
+}
+
+.chkApp .shellPopover .sapMBtn.shellLogoutBtn:hover .sapMBtnInner {
+  background: rgba(204, 0, 0, 0.07) !important;
+  color: var(--hz-danger, #cc0000) !important;
+  opacity: 1 !important;
+}
+
+.chkApp .shellPopover .shellPopoverFooter {
+  border-top: 1px solid var(--border-0) !important;
+  padding-top: 0.35rem !important;
+  margin-top: 0.35rem !important;
+}
+
+.chkApp .shellPopoverEmptyText {
+  font-size: 0.84rem !important;
+  text-align: center !important;
+  padding: 2rem 1rem !important;
+  opacity: 0.5 !important;
+}
+
+.chkApp .shellUserRole.sapMText {
+  font-size: 0.76rem !important;
+  opacity: 0.55 !important;
+  margin-top: 0.14rem !important;
+}
+
+.chkApp .shellUserCardActions {
+  padding: 0.875rem !important;
+  border-top: none !important;
+  gap: 0.4rem !important;
+}
 

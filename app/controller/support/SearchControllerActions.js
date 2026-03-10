@@ -9,7 +9,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchRateProgress",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchRuntimeDockFix",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
@@ -17,7 +16,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewStateRuntime",
     "sap/ui/core/Item"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SearchRuntimeDockFix, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item) {
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -121,7 +120,6 @@ sap.ui.define([
             SearchViewRuntime.syncSmartControlAvailability(this);
             SearchViewRuntime.bindPowerUserShortcuts(this);
             SearchViewRuntime.bindSearchViewportRuntime(this);
-            SearchRuntimeDockFix.bind(this);
         },
 
         onExit: function () {
@@ -172,7 +170,6 @@ sap.ui.define([
 
         _onSearchMatched: function () {
             SearchViewRuntime.onSearchMatched(this);
-            SearchRuntimeDockFix.sync(this, true);
             applyAnalyticsDrilldownIntent(this);
         },
 
@@ -183,14 +180,12 @@ sap.ui.define([
                 return;
             }
             SearchViewRuntime.syncSearchContextForDetailRoute(this);
-            SearchRuntimeDockFix.sync(this, true);
         },
 
         onSmartFilterInitialise: function () {
             ControllerViewStateRuntime.set(this, "/smartFilterReady", true);
             this._bindLocationSuggest();
             SearchCommandPolicy.buildFilter(this, { source: "smartFilterInit" });
-            SearchRuntimeDockFix.bind(this);
             applyAnalyticsDrilldownIntent(this);
         },
 
@@ -292,13 +287,11 @@ sap.ui.define([
 
         onSmartTableInitialise: function () {
             SearchViewRuntime.onSmartTableInitialise(this);
-            SearchRuntimeDockFix.bind(this);
         },
 
         onBeforeSmartTableRebind: function (oEvent) {
             this._syncToolbarRequestInputs();
             SearchViewRuntime.onBeforeSmartTableRebind(this, oEvent);
-            SearchRuntimeDockFix.sync(this, false);
         },
 
         onSmartSearch: function () {

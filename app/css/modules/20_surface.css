@@ -434,3 +434,65 @@ body.chkAppRoot.appDark .chkApp .appFeedbackBanner {
 .chkApp .appFeedbackCorrelation .sapMInputBaseContentWrapper {
   border-radius: 999px;
 }
+
+/* Migrated from claude-hyper.css backlog: shell alignment and pin state. */
+.chkApp .shellContextActions {
+  display: flex;
+  align-items: center;
+  gap: var(--theme-shell-context-gap, 0.48rem);
+  flex-shrink: 0;
+  overflow: visible;
+  flex-wrap: nowrap;
+  max-width: 100%;
+}
+
+.chkApp .shellTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--theme-shell-title-size);
+  font-weight: var(--theme-shell-title-weight);
+  color: var(--text-main);
+  letter-spacing: -0.012em;
+}
+
+.chkApp .appShellActions {
+  gap: 0.25rem !important;
+  align-items: center !important;
+}
+
+.chkApp .appShellHeader.shellPinned {
+  box-shadow:
+    0 16px 34px rgba(12, 28, 52, 0.18),
+    0 0 0 1px color-mix(in srgb, var(--shell-border) 90%, transparent) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
+  box-shadow:
+    0 18px 40px rgba(1, 6, 16, 0.36),
+    0 0 0 1px rgba(126, 156, 208, 0.22) !important;
+}
+
+.chkApp .heroCard,
+.chkApp .detailHeroCard {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 82%, transparent);
+  background: var(--theme-block-bg);
+  box-shadow: var(--theme-block-shadow);
+}
+
+.chkApp .mushroomCard {
+  border-radius: calc(var(--radius-lg) - 0.12rem) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 80%, transparent) !important;
+  background: var(--theme-block-bg) !important;
+  transition: transform 80ms ease, opacity 80ms ease !important;
+}
+
+.chkApp .mushroomGrid {
+  gap: 0.5rem !important;
+}
+
+.chkApp .infoCardGridItem {
+  min-width: 0;
+}

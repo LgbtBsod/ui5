@@ -1495,8 +1495,7 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
 
 .chkApp .detailControlBar > .sapMFlexItem,
 .chkApp .detailControlToolbarStack.sapMFlexBox,
-.chkApp .detailRailHeader.sapMFlexBox,
-.chkApp .detailRailHint {
+.chkApp .detailRailHeader.sapMFlexBox {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -1515,8 +1514,7 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
 .chkApp .detailHeroStatBoard,
 .chkApp .detailSectionAnchorRail,
 .chkApp .detailControlRowTop,
-.chkApp .detailControlRowActions,
-.chkApp .detailRailHint {
+.chkApp .detailControlRowActions {
   flex: 0 0 auto;
   align-self: stretch;
 }
@@ -2468,11 +2466,6 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   font-size: 0.74rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailRailHint,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailRailHint {
-  line-height: 1.3;
-}
-
 .chkApp .appLayoutSplit #detailPaneHost .detailSectionBody,
 .chkApp .appLayoutSplit #detailPaneHost .detailAttachmentsBody,
 .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionBody,
@@ -2745,6 +2738,459 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   box-shadow: none;
 }
 
+/* Migrated from claude-hyper.css backlog: detail typography and section helpers. */
+.chkApp .detailHeaderStack .sapMTitle,
+.chkApp .detailObjectHeaderTitle {
+  font-size: clamp(1.15rem, 2vw, 1.55rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.18 !important;
+}
+
+.chkApp .detailObjectHeaderSubtitle,
+.chkApp .detailHeaderStack .sapMObjectIdentifierText {
+  font-size: 0.78rem !important;
+  font-weight: 520 !important;
+  opacity: 0.58 !important;
+  margin-top: 0.12rem !important;
+}
+
+.chkApp .detailMetaLabel.sapMLabel,
+.chkApp .sapMFlexItem > .sapMLabel {
+  font-size: 0.64rem !important;
+  font-weight: 680 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  margin-bottom: 0.22rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailMetaLabel {
+  color: rgba(50, 80, 148, 0.48) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailMetaLabel {
+  color: rgba(110, 155, 230, 0.5) !important;
+}
+
+.chkApp .detailMetaValue.sapMText,
+.chkApp .sapMFlexItem > .sapMText {
+  font-size: 0.9rem !important;
+  font-weight: 520 !important;
+  line-height: 1.45 !important;
+}
+
+.chkApp .detailContentSection + .detailContentSection {
+  margin-top: 0.75rem !important;
+}
+
+.chkApp .detailSectionDivider {
+  height: 1px !important;
+  margin-block: 0.5rem !important;
+  border: 0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionDivider {
+  background: rgba(180, 204, 238, 0.45) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionDivider {
+  background: rgba(60, 90, 140, 0.26) !important;
+}
+
+.chkApp .detailAttachmentItem {
+  border-radius: 0.55rem !important;
+  padding: 0.5rem 0.75rem !important;
+  border: none !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailAttachmentItem {
+  background: rgba(0, 80, 200, 0.05) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailAttachmentItem {
+  background: rgba(50, 100, 210, 0.08) !important;
+}
+
+.chkApp .detailAttachmentItem:hover {
+  transform: translateX(2px) !important;
+}
+
+.chkApp .locationCodeLabel.sapMObjStatus,
+.chkApp .sapUiTinyMarginTop .locationCodeLabel {
+  font-family: ui-monospace, "Cascadia Code", monospace !important;
+  font-size: 0.66rem !important;
+  font-weight: 680 !important;
+  letter-spacing: 0.02em !important;
+  padding: 0.12rem 0.45rem !important;
+  border-radius: 0.35rem !important;
+  border: 1px solid !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  margin-top: 0.35rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .locationCodeLabel {
+  background: rgba(240, 248, 255, 0.88) !important;
+  border-color: rgba(140, 185, 235, 0.45) !important;
+  color: rgba(40, 80, 160, 0.72) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .locationCodeLabel {
+  background: rgba(14, 24, 48, 0.85) !important;
+  border-color: rgba(48, 82, 148, 0.4) !important;
+  color: rgba(100, 160, 230, 0.75) !important;
+}
+
+.chkApp .flatEditorTable .checkLabel {
+  font-size: 0.84rem !important;
+  font-weight: 520 !important;
+  line-height: 1.4 !important;
+}
+
+.chkApp .flatEditorTable .statusLabel {
+  font-size: 0.76rem !important;
+  font-weight: 660 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.chkApp .detailInfoCard {
+  padding: 0.75rem 0.875rem !important;
+  border-radius: calc(var(--radius-lg) - 0.12rem) !important;
+}
+
+.chkApp .detailRailActionBtn .sapMBtnInner {
+  transition: transform 50ms ease, opacity 50ms ease !important;
+  will-change: transform !important;
+}
+
+.chkApp .detailRailHint {
+  font-size: 0.74rem !important;
+  opacity: 0.58 !important;
+}
+
+.chkApp .sectionDivider {
+  height: 1px !important;
+  margin-block: 0.5rem !important;
+  border: 0 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sectionDivider {
+  background: rgba(180, 204, 238, 0.45) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sectionDivider {
+  background: rgba(60, 90, 140, 0.26) !important;
+}
+
+.chkApp .sectionTitle {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  opacity: 0.5 !important;
+}
+
+.chkApp .sectionTitle::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  border-radius: 999px;
+}
+
+body.chkAppRoot.appLight .chkApp .sectionTitle::after {
+  background: rgba(180, 204, 238, 0.55) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sectionTitle::after {
+  background: rgba(60, 90, 140, 0.3) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorTable .sapMListTblRow.editRow .sapMListTblCell {
+  background: rgba(0, 112, 242, 0.04) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMListTblRow.editRow .sapMListTblCell {
+  background: rgba(77, 177, 255, 0.06) !important;
+}
+
+.chkApp .flatEditorTable .sapMListTblRow.hasComment .sapMListTblCell {
+  vertical-align: top !important;
+  padding-top: 0.55rem !important;
+}
+
+.chkApp .flatEditorTable .sapMListTblRow.readRow .sapMListTblCell {
+  opacity: 0.96 !important;
+}
+
+.chkApp .infoCardTile.pinned {
+  border-color: color-mix(in srgb, var(--accent) 44%, var(--theme-rail-border)) !important;
+}
+/* Migrated from claude-hyper.css backlog: detail rail status chips + attachment rows. */
+.chkApp .detailRailStatusChip.chipOpen,
+.chkApp .detailRailStatusChip[data-state="Open"] {
+  background: rgba(0, 108, 238, 0.1) !important;
+  border-color: rgba(0, 108, 238, 0.28) !important;
+  color: rgba(0, 50, 168, 0.88) !important;
+}
+
+.chkApp .detailRailStatusChip.chipDone,
+.chkApp .detailRailStatusChip[data-state="Done"] {
+  background: rgba(16, 122, 44, 0.1) !important;
+  border-color: rgba(16, 122, 44, 0.28) !important;
+  color: rgba(8, 86, 28, 0.88) !important;
+}
+
+.chkApp .detailRailStatusChip.chipBlocked,
+.chkApp .detailRailStatusChip[data-state="Blocked"] {
+  background: rgba(196, 16, 16, 0.1) !important;
+  border-color: rgba(196, 16, 16, 0.28) !important;
+  color: rgba(152, 0, 0, 0.88) !important;
+}
+
+.chkApp .detailRailStatusChip.chipLocked,
+.chkApp .detailRailStatusChip[data-state="Locked"] {
+  background: rgba(176, 76, 0, 0.1) !important;
+  border-color: rgba(176, 76, 0, 0.28) !important;
+  color: rgba(136, 56, 0, 0.88) !important;
+}
+
+.chkApp .detailRailStatusChip.chipDraft,
+.chkApp .detailRailStatusChip[data-state="Draft"] {
+  background: rgba(96, 118, 178, 0.1) !important;
+  border-color: rgba(96, 118, 178, 0.26) !important;
+  color: rgba(60, 84, 148, 0.8) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipOpen {
+  color: rgba(108, 182, 255, 0.9) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipDone {
+  color: rgba(98, 212, 128, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipBlocked {
+  color: rgba(255, 112, 112, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipLocked {
+  color: rgba(255, 172, 78, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipDraft {
+  color: rgba(142, 182, 245, 0.85) !important;
+}
+
+.chkApp .detailAttachmentItemRow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  padding: 0.5rem 1rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .detailAttachmentItemRow {
+  border-color: rgba(160, 200, 240, 0.18) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .detailAttachmentItemRow {
+  border-color: rgba(48, 82, 148, 0.15) !important;
+}
+
+/* Migrated from claude-hyper.css: timeline/history list styling (static desktop). */
+.chkApp .sapMTLI {
+  padding: 0.6rem 0 0.6rem 1rem !important;
+  border-bottom: none !important;
+  position: relative !important;
+}
+
+.chkApp .sapMTLI::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0.35rem !important;
+  top: 1.6rem !important;
+  bottom: 0 !important;
+  width: 1px !important;
+  pointer-events: none !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sapMTLI::before {
+  background: rgba(0, 80, 200, 0.12) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMTLI::before {
+  background: rgba(100, 150, 230, 0.15) !important;
+}
+
+.chkApp .sapMTLIIcon,
+.chkApp .sapMTLICircle {
+  border-radius: 50% !important;
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  flex-shrink: 0 !important;
+  margin-top: 0.25rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sapMTLIIcon {
+  background: var(--hz-accent, #0070f2) !important;
+  opacity: 0.55 !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
+  background: var(--hz-accent, #4db1ff) !important;
+  opacity: 0.55 !important;
+}
+
+.chkApp .sapMTLITitle {
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+}
+
+.chkApp .sapMTLIDescription {
+  font-size: 0.78rem !important;
+  opacity: 0.62 !important;
+  line-height: 1.45 !important;
+  margin-top: 0.18rem !important;
+}
+
+.chkApp .sapMTLITimestamp {
+  font-size: 0.68rem !important;
+  font-variant-numeric: tabular-nums !important;
+  opacity: 0.44 !important;
+}
+
+/* Migrated from claude-hyper.css: classes used in Detail XML but not yet modularized. */
+.chkApp .detailChecksEmptyState,
+.chkApp .detailBarriersEmptyState {
+  border-radius: var(--radius-lg);
+}
+
+.chkApp .detailInfoSectionBody {
+  padding: 0.25rem !important;
+}
+
+.chkApp .modeHintText.sapMText {
+  font-size: 0.76rem !important;
+  font-style: italic !important;
+  opacity: 0.55 !important;
+  line-height: 1.5 !important;
+}
+
+.chkApp .flatEditorGridTable {
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  border: 1px solid !important;
+  width: 100% !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable {
+  border-color: rgba(160, 200, 240, 0.38) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable {
+  border-color: rgba(48, 82, 148, 0.28) !important;
+}
+
+.chkApp .flatEditorGridTable .sapUiTableColCell,
+.chkApp .flatEditorGridTable .sapUiTableCol {
+  font-size: 0.65rem !important;
+  font-weight: 820 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  padding: 0.5rem 0.875rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableColCell {
+  background: rgba(240, 248, 255, 0.96) !important;
+  border-color: rgba(160, 200, 240, 0.3) !important;
+  color: rgba(60, 95, 155, 0.58) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableColCell {
+  background: rgba(14, 24, 48, 0.96) !important;
+  border-color: rgba(48, 82, 148, 0.24) !important;
+  color: rgba(100, 160, 230, 0.58) !important;
+}
+
+.chkApp .flatEditorGridTable .sapUiTableDataCell {
+  padding: 0.55rem 0.875rem !important;
+  vertical-align: middle !important;
+  font-size: 0.84rem !important;
+  border-bottom: 1px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(odd) .sapUiTableDataCell {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(160, 200, 240, 0.16) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(even) .sapUiTableDataCell {
+  background: rgba(248, 252, 255, 0.7) !important;
+  border-color: rgba(160, 200, 240, 0.16) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(odd) .sapUiTableDataCell {
+  background: rgba(18, 30, 58, 0.82) !important;
+  border-color: rgba(48, 82, 148, 0.14) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableTr:nth-child(even) .sapUiTableDataCell {
+  background: rgba(14, 24, 48, 0.78) !important;
+  border-color: rgba(48, 82, 148, 0.14) !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorGridTable .sapUiTableTr:hover .sapUiTableDataCell {
+  background: rgba(232, 244, 255, 0.88) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorGridTable .sapUiTableTr:hover .sapUiTableDataCell {
+  background: rgba(22, 36, 70, 0.88) !important;
+}
+
+.chkApp .flatEditorTable .commentExpandableField,
+.chkApp .flatEditorGridTable .commentExpandableField {
+  width: 100%;
+}
+
+.chkApp .commentExpandableField textarea {
+  min-height: 2rem;
+  transition: min-height 180ms ease;
+}
+
+.chkApp .commentExpandableField:focus-within textarea {
+  min-height: 4rem;
+}
+
+.chkApp .commentExpandableField.sapMTextArea .sapMTextAreaInner {
+  border-radius: 0.4rem !important;
+  border: 1px solid !important;
+  font-size: 0.82rem !important;
+  padding: 0.3rem 0.5rem !important;
+  resize: none !important;
+  transition: border-color 120ms ease, box-shadow 120ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .commentExpandableField .sapMTextAreaInner {
+  border-color: rgba(160, 200, 240, 0.4) !important;
+  background: transparent !important;
+}
+
+body.chkAppRoot.appDark .chkApp .commentExpandableField .sapMTextAreaInner {
+  border-color: rgba(48, 82, 148, 0.35) !important;
+  background: transparent !important;
+}
+
+.chkApp .commentExpandableField .sapMTextAreaInner:focus {
+  border-color: var(--hz-accent, #0070f2) !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 242, 0.12) !important;
+  outline: none !important;
+}
+
 /* Keep denied state local to the detail column. */
 .chkApp .detailAccessDeniedScene + .detailControlPinnedDock,
 .chkApp .detailAccessDeniedScene + .detailControlPinnedDock + .detailControlSkeletonCard {
@@ -2909,11 +3355,6 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.01em;
-}
-
-.chkApp .detailRailHint {
-  color: var(--text-subtle);
-  font-size: 0.74rem;
 }
 
 .chkApp .detailControlRowTop .sapMSwt,

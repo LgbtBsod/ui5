@@ -382,3 +382,24 @@ body.chkAppRoot::after {
 .bg-blobs::after {
   display: none;
 }
+
+/* Migrated from claude-hyper.css backlog: explicit background state classes. */
+.chkApp .chkBgGradient,
+.chkBgGradient {
+  animation-play-state: running !important;
+}
+
+.chkApp .chkBgSheen,
+.chkBgSheen {
+  animation-play-state: running !important;
+}
+
+.chkApp .chkBgGrain,
+.chkBgGrain {
+  animation-play-state: running !important;
+}
+
+.chkApp .chkBgDither,
+.chkBgDither {
+  animation-play-state: running !important;
+}

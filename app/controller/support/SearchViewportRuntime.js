@@ -89,6 +89,17 @@ sap.ui.define([
         oController._iSearchViewportSyncTimer = SchedulingRuntime.clearTimer(oController._iSearchViewportSyncTimer);
     }
 
+    function schedulePostAnchorSync(oController) {
+        oController._iSearchAnchorSyncTimer = SchedulingRuntime.restartTimer(
+            oController._iSearchAnchorSyncTimer,
+            function () {
+                syncSearchViewportLayout(oController);
+                syncSearchScrollAffordances(oController);
+            },
+            280
+        );
+    }
+
     function syncSearchViewportLayout(oController) {
         var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
         SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, false);
@@ -316,6 +327,7 @@ sap.ui.define([
         }
         unbindSearchViewportObservers(oController);
         clearSearchViewportSyncTimer(oController);
+        oController._iSearchAnchorSyncTimer = SchedulingRuntime.clearTimer(oController._iSearchAnchorSyncTimer);
         oController._iSearchViewportSyncRaf = SchedulingRuntime.clearFrame(oController._iSearchViewportSyncRaf);
         oController._oSearchViewportDelegate = null;
         oController._oSearchScrollHost = null;
@@ -323,6 +335,7 @@ sap.ui.define([
         oController._fnSearchViewportResize = null;
         oController._sSearchTableLayoutKey = "";
         oController._iSearchViewportSyncTimer = 0;
+        oController._iSearchAnchorSyncTimer = 0;
         oController._iSearchViewportSyncRaf = 0;
     }
 
@@ -373,21 +386,21 @@ sap.ui.define([
         oHostRect = oScrollHost.getBoundingClientRect();
         oFilterRect = oFilterDom.getBoundingClientRect();
         iTargetTop = (oScrollHost.scrollTop || 0) + (oFilterRect.top - oHostRect.top) - iStickyOffset - 10;
-        if (typeof oScrollHost.scrollTo === "function") {
-            oScrollHost.scrollTo({ top: Math.max(0, iTargetTop), behavior: "smooth" });
-        } else {
-            oScrollHost.scrollTop = Math.max(0, iTargetTop);
-        }
+        oScrollHost.scrollTop = Math.max(0, iTargetTop);
         syncSearchScrollAffordances(oController);
+        schedulePostAnchorSync(oController);
         return Promise.resolve(true);
     }
 
     function scrollToSearchResultsToolbar(oController) {
         var oScrollHost = resolveSearchScrollHost(oController);
+        var oWorkbenchDock = oController.byId && oController.byId("searchWorkbenchDock");
+        var oWorkbenchDockDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
         var oResultsShell = oController.byId && oController.byId("searchResultsShell");
         var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
         var oFallbackToolbar = oController.byId && oController.byId("smartTableCustomToolbar");
-        var oToolbarDom = oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null;
+        var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
+        var oToolbarDom = oWorkbenchDockDom || (oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null);
         var oHostRect;
         var oToolbarRect;
         var iTargetTop;
@@ -404,12 +417,15 @@ sap.ui.define([
         oHostRect = oScrollHost.getBoundingClientRect();
         oToolbarRect = oToolbarDom.getBoundingClientRect();
         iTargetTop = (oScrollHost.scrollTop || 0) + (oToolbarRect.top - oHostRect.top) - iStickyOffset - 10;
-        if (typeof oScrollHost.scrollTo === "function") {
-            oScrollHost.scrollTo({ top: Math.max(0, iTargetTop), behavior: "smooth" });
-        } else {
-            oScrollHost.scrollTop = Math.max(0, iTargetTop);
+        oScrollHost.scrollTop = Math.max(0, iTargetTop);
+        if (oResultsToolbarDom && oResultsToolbarDom.style) {
+            oResultsToolbarDom.style.transform = "";
+            if (oResultsToolbarDom.dataset) {
+                oResultsToolbarDom.dataset.searchRuntimeTranslateY = "0";
+            }
         }
         syncSearchScrollAffordances(oController);
+        schedulePostAnchorSync(oController);
         return Promise.resolve(true);
     }
 

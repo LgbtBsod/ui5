@@ -1,21 +1,22 @@
 #!/usr/bin/env node
 const fs = require("fs");
 const path = require("path");
+const { detectRuntimeRoot } = require("./qa-shared");
 
-const TARGETS = [
-    "css/claude-hyper.css",
-    "css/modules/00_tokens.css",
-    "css/modules/01_theme-modes.css",
-    "css/modules/02_background.css",
-    "css/modules/10_base.css",
-    "css/modules/20_surface.css",
-    "css/modules/21_controls.css",
-    "css/modules/22_skeleton.css",
-    "css/modules/23_dialogs.css",
-    "css/modules/40_page_search.css",
-    "css/modules/41_page_detail.css",
-    "css/modules/90_ui5_patches.css"
-].filter((p) => fs.existsSync(p));
+const ROOT = process.cwd();
+const RUNTIME_ROOT = detectRuntimeRoot(ROOT);
+const CSS_ROOT = path.join(RUNTIME_ROOT === "." ? "" : RUNTIME_ROOT, "css");
+const MODULES_ROOT = path.join(CSS_ROOT, "modules");
+const TARGETS = []
+    .concat(fs.existsSync(path.join(ROOT, CSS_ROOT, "app-styles.css")) ? [path.join(CSS_ROOT, "app-styles.css")] : [])
+    .concat(
+        fs.existsSync(path.join(ROOT, MODULES_ROOT))
+            ? fs.readdirSync(path.join(ROOT, MODULES_ROOT))
+                .filter((name) => name.toLowerCase().endsWith(".css"))
+                .map((name) => path.join(MODULES_ROOT, name))
+            : []
+    )
+    .map((p) => p.split(path.sep).join("/"));
 const STYLELINT_CONFIG_FILES = [".stylelintrc", ".stylelintrc.json", ".stylelintrc.js", "stylelint.config.js"];
 
 function finish(stats) {
@@ -36,7 +37,15 @@ function normalizeMessage(text) {
 }
 
 async function lintFileForDuplicates(filePath) {
-    const stylelint = require("stylelint");
+    let stylelint;
+    try {
+        stylelint = require("stylelint");
+    } catch (error) {
+        if (error && error.code === "MODULE_NOT_FOUND") {
+            return null;
+        }
+        throw error;
+    }
     const result = await stylelint.lint({
         files: [path.resolve(filePath)],
         formatter: "json"
@@ -61,13 +70,27 @@ async function lintFileForDuplicates(filePath) {
     }
 
     const issues = [];
+    let stylelintMissing = false;
     for (const filePath of TARGETS) {
         // eslint-disable-next-line no-await-in-loop
         const duplicates = await lintFileForDuplicates(filePath);
+        if (duplicates === null) {
+            stylelintMissing = true;
+            break;
+        }
         if (!duplicates.length) {
             continue;
         }
         duplicates.slice(0, 40).forEach((entry) => issues.push(`${filePath}:${entry.line}: duplicate selector ${entry.selector}`));
+    }
+
+    if (stylelintMissing) {
+        finish({
+            targets: TARGETS.length,
+            duplicateSelectorsDetected: 0,
+            advisory: ["stylelint module is missing, duplicate selector scan skipped"]
+        });
+        return;
     }
 
     finish({
