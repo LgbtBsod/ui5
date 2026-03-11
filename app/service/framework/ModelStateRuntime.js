@@ -74,7 +74,7 @@ sap.ui.define([
     }
 
     function syncDetailCurrent(oController, vData) {
-        return write(oController, "uiState", "/_detailCurrent", clone(vData || {}, {}));
+        return !!(oController && vData);
     }
 
     function resetDetailWorkflowState(oController, mPatch) {
@@ -91,8 +91,7 @@ sap.ui.define([
 
     function resetDetailRuntimeData(oController) {
         replaceData(oController, "selected", {});
-        write(oController, "uiState", "/_detailSnapshot", {});
-        write(oController, "uiState", "/_detailCurrent", {});
+        replaceData(oController, "snapshot", {});
     }
 
     function withFlag(oController, sModelName, sPath, fnWork, vStart, vEnd) {

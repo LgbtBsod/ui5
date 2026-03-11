@@ -14,7 +14,7 @@ const pythonBin = path.basename(pythonBinRaw) === pythonBinRaw ? pythonBinRaw : 
 const backendPort = Number(process.env.GATEWAY_SMOKE_BACKEND_PORT || 8000);
 const uiPort = Number(process.env.GATEWAY_SMOKE_UI_PORT || 8080);
 const backendBase = process.env.GATEWAY_SMOKE_BACKEND_BASE || `http://127.0.0.1:${backendPort}`;
-const backendUrl = `${backendBase}/sap/opu/odata/sap/Z_UI5_SRV/$metadata`;
+const backendUrl = `${backendBase}/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$metadata`;
 const uiUrl = process.env.GATEWAY_SMOKE_UI_URL || `http://127.0.0.1:${uiPort}/index.html`;
 const useExternalBackend = String(process.env.GATEWAY_SMOKE_EXTERNAL_BACKEND || '').trim() === '1';
 const pidFiles = {

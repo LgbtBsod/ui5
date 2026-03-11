@@ -181,25 +181,28 @@ def seed_user_profiles(db) -> None:
                 {"code": "01", "scope": "all"},
                 {"code": "02", "scope": "all"},
                 {"code": "03", "scope": "all"},
+                {"code": "06", "scope": "all"},
             ]
         elif uname == "viewer":
             permissions = [
-                {"code": "01", "scope": "bukrs", "scopeValue": "1000"},
+                {"code": "03", "scope": "bukrs", "scopeValue": "1000"},
             ]
         elif uname == "editor":
             permissions = [
-                {"code": "01", "scope": "bukrs", "scopeValue": "1000"},
                 {"code": "02", "scope": "bukrs", "scopeValue": "1000"},
+                {"code": "03", "scope": "bukrs", "scopeValue": "1000"},
             ]
         elif uname == "deleter":
             permissions = [
-                {"code": "01", "scope": "all"},
-                {"code": "03", "scope": "bukrs", "scopeValue": "2000"},
+                {"code": "03", "scope": "all"},
+                {"code": "06", "scope": "bukrs", "scopeValue": "2000"},
             ]
         elif uname == "operator":
             permissions = [
                 {"code": "01", "scope": "bukrs", "scopeValue": "3000"},
                 {"code": "02", "scope": "bukrs", "scopeValue": "3000"},
+                {"code": "03", "scope": "bukrs", "scopeValue": "3000"},
+                {"code": "06", "scope": "bukrs", "scopeValue": "3000"},
             ]
         existing = db.get(AppUserProfile, uname)
         serialized = json.dumps(list(permissions), ensure_ascii=False)

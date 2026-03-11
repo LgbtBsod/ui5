@@ -50,7 +50,7 @@ sap.ui.define([
             var oSelected = oUiState && oUiState.get("view", "/locationVhSelection");
             return Promise.resolve(Result.ok({ selected: !!oSelected }, [
                 Effects.modelPatch("selected", "/basic/LOCATION_NAME", (oSelected && oSelected.location_name) || ""),
-                Effects.modelPatch("selected", "/basic/LOCATION_TEXT", (oSelected && oSelected.location_name) || ""),
+                Effects.modelPatch("selected", "/basic/LOCATION_TEXT", (oSelected && (oSelected.location_text || oSelected.location_name)) || ""),
                 Effects.modelPatch("selected", "/basic/LOCATION_KEY", (oSelected && (oSelected.location_code || oSelected.location_id)) || ""),
                 Effects.modelPatch("state", "/isDirty", !!oSelected),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),

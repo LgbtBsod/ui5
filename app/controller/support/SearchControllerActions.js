@@ -446,6 +446,7 @@ sap.ui.define([
             var oSource = oEvent && oEvent.getSource && oEvent.getSource();
             sValue = normalizeRequestValue(sValue, ModelStateRuntime.read(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
             ModelStateRuntime.write(this, "state", "/searchMaxResults", sValue);
+            ModelStateRuntime.write(this, "state", "/growingPageSize", sValue);
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
@@ -464,6 +465,7 @@ sap.ui.define([
                 return;
             }
             ModelStateRuntime.write(this, "state", "/searchBackendTop", sValue);
+            ModelStateRuntime.write(this, "state", "/searchFetchLimit", sValue);
             if (oSource && typeof oSource.setValue === "function") {
                 oSource.setValue(sValue);
             }
@@ -482,7 +484,9 @@ sap.ui.define([
             sBackendTop = normalizeOptionalRequestValue(sBackendTop);
             sMaxRows = normalizeRequestValue(sMaxRows, ModelStateRuntime.read(this, "state", "/searchMaxResults", DEFAULT_SEARCH_VISIBLE_ROWS));
             ModelStateRuntime.write(this, "state", "/searchBackendTop", sBackendTop);
+            ModelStateRuntime.write(this, "state", "/searchFetchLimit", sBackendTop);
             ModelStateRuntime.write(this, "state", "/searchMaxResults", sMaxRows);
+            ModelStateRuntime.write(this, "state", "/growingPageSize", sMaxRows);
             if (oBackendTopInput && typeof oBackendTopInput.setValue === "function") {
                 oBackendTopInput.setValue(sBackendTop);
             }

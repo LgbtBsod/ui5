@@ -13,7 +13,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchSelectionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchShortcutRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchShortcutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
 ], function (
     SearchLoadRuntime,
     SearchRateProgress,
@@ -29,7 +30,8 @@ sap.ui.define([
     ControllerModelRuntime,
     SearchViewportRuntime,
     SearchSelectionRuntime,
-    SearchShortcutRuntime
+    SearchShortcutRuntime,
+    StatePaths
 ) {
     "use strict";
 
@@ -178,7 +180,7 @@ sap.ui.define([
         return !!(
             ControllerViewStateRuntime.get(oController, "/tableBusy", false)
             || ControllerViewStateRuntime.get(oController, "/searchActionBusy", false)
-            || ModelStateRuntime.read(oController, "state", "/isLoading", false)
+            || ModelStateRuntime.read(oController, "state", StatePaths.UI_BUSY_SEARCH_TABLE, false)
         );
     }
 
@@ -412,14 +414,14 @@ sap.ui.define([
 
     function runExport(oController, sEntity) {
         var aSelectedRowIds = ControllerViewStateRuntime.get(oController, "/selectedRowIds", []) || [];
-        var iBackendTop = Number(ModelStateRuntime.read(oController, "state", "/searchBackendTop", 0)) || 0;
         ControllerViewStateRuntime.set(oController, "/exportBusy", true);
+        ModelStateRuntime.write(oController, "state", StatePaths.UI_BUSY_EXPORT, true);
         return SearchCommandPolicy.exportFlow(oController, {
             entity: sEntity || "screen",
-            selectedRowIds: Array.isArray(aSelectedRowIds) ? aSelectedRowIds.slice(0) : [],
-            backendTop: iBackendTop
+            selectedRowIds: Array.isArray(aSelectedRowIds) ? aSelectedRowIds.slice(0) : []
         }).finally(function () {
             ControllerViewStateRuntime.set(oController, "/exportBusy", false);
+            ModelStateRuntime.write(oController, "state", StatePaths.UI_BUSY_EXPORT, false);
         });
     }
 

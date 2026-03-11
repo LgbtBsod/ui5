@@ -91,8 +91,7 @@ sap.ui.define([
 
             return Result.ok({ status: sStatus, serverSnapshot: oSavedSnapshot }, [
                 Effects.modelPatch("selected", "/", oSavedSnapshot),
-                Effects.modelPatch("uiState", "/_detailCurrent", oSavedSnapshot),
-                Effects.modelPatch("uiState", "/_detailSnapshot", oSavedSnapshot),
+                Effects.modelPatch("snapshot", "/", oSavedSnapshot),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "SAVED"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, sNow),

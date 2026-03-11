@@ -17,7 +17,10 @@
                         <Text text="{i18n>shellUserCurrent}" class="shellUserLabel"/>
                     </HBox>
                     <Title text="{appView>/shell/userLabel}" level="H5"/>
-                    <Text text="{= ${i18n>shellUserLoginLabel} + ': ' + ${appView>/shell/userLoginLabel} }" class="shellHelpText"/>
+                    <Text
+                        text="{= ${i18n>shellUserLoginLabel} + ': ' + ${appView>/shell/userLoginLabel} }"
+                        class="shellHelpText"
+                        visible="{= !!${appView>/shell/userLoginLabel} }"/>
                     <Text text="{= ${i18n>shellUserEnvironment} + ': ' + ${appView>/shell/userEnvironmentLabel} }" class="shellHelpText"/>
                     <ObjectStatus
                         text="{appView>/shell/userSessionLabel}"

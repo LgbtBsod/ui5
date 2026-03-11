@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/SmartCacheManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/HeartbeatManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/GCDManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ActivityMonitor",
@@ -8,7 +7,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/LockStatusMonitor",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/SettingsManager"
 ], function (
-    SmartCacheManager,
     HeartbeatManager,
     GCDManager,
     ActivityMonitor,
@@ -20,7 +18,6 @@ sap.ui.define([
     "use strict";
 
     return {
-        SmartCacheManager: SmartCacheManager,
         HeartbeatManager: HeartbeatManager,
         GCDManager: GCDManager,
         ActivityMonitor: ActivityMonitor,

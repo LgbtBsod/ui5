@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV}"
+BASE_URL="${BASE_URL:-http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV}"
 ROOT_KEY="${ROOT_KEY:-00000000000000000000000000000001}"
 COOKIE_JAR="${COOKIE_JAR:-/tmp/ui5_gateway_cookie.txt}"
 TOKEN=""

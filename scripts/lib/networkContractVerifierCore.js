@@ -111,7 +111,7 @@ function collectIntents(rootDir) {
   const searchView = readText(rootDir, 'view/Search.view.xml');
   const searchControllerActions = readText(rootDir, 'controller/support/SearchControllerActions.js');
 
-  const odataRoot = '/sap/opu/odata/sap/Z_UI5_SRV/';
+  const odataRoot = '/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/';
   const useBatch = /new\s+sap\.ui\.model\.odata\.v2\.ODataModel\([^\)]*useBatch\s*:\s*true/s.test(component)
     || manifest?.['sap.ui5']?.models?.mainService?.settings?.useBatch === true;
 

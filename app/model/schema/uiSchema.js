@@ -5,7 +5,6 @@ sap.ui.define([], function () {
         isLoading: false,
         loadError: false,
         loadErrorMessage: "",
-        isBusy: false,
         saveInFlight: false,
         pendingNavigationIntent: null,
         isDirty: false,
@@ -47,8 +46,12 @@ sap.ui.define([], function () {
         capabilityDiagnostics: {},
         masterDataLoading: false,
         locationsLoading: false,
+        telemetry: {
+            events: [],
+            lastEvent: null
+        },
         ui: {
-            busy: { global: false, searchTable: false, detail: false },
+            busy: { global: false, searchTable: false, detail: false, analytics: false, export: false },
             feedback: {
                 banner: {
                     global: {

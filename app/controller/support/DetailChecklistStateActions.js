@@ -9,8 +9,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, CreateSentinel) {
+], function (DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, StatePaths, CreateSentinel) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -46,10 +47,10 @@ sap.ui.define([
 
     function save(oController, mOptions) {
         var sSaveInFlightPath = (mOptions && mOptions.saveInFlightPath) || "/saveInFlight";
-        if (ModelStateRuntime.any(oController, "state", ["/isBusy", sSaveInFlightPath])) {
+        if (ModelStateRuntime.any(oController, "state", [StatePaths.UI_BUSY_DETAIL, sSaveInFlightPath])) {
             return Promise.resolve(false);
         }
-        return ModelStateRuntime.withFlags(oController, "state", [sSaveInFlightPath, "/isBusy"], function () {
+        return ModelStateRuntime.withFlags(oController, "state", [sSaveInFlightPath, StatePaths.UI_BUSY_DETAIL], function () {
             return DetailCommandPolicy.save(oController, RootIdRuntime.withCurrentRootId(oController));
         });
     }
@@ -82,7 +83,7 @@ sap.ui.define([
 
     function armDelete(oController) {
         var bCurrent;
-        if (ModelStateRuntime.any(oController, "state", ["/isBusy", "/lockOperationPending"])) {
+        if (ModelStateRuntime.any(oController, "state", [StatePaths.UI_BUSY_DETAIL, "/lockOperationPending"])) {
             return Promise.resolve(false);
         }
         bCurrent = !!ModelStateRuntime.read(oController, "view", "/deleteChecklistConfirmArmed", false);
@@ -94,12 +95,12 @@ sap.ui.define([
         return UiDecisionCoordinator.confirmDeleteChecklist({
             controller: oController,
             armed: !!ModelStateRuntime.read(oController, "view", "/deleteChecklistConfirmArmed", false),
-            busy: ModelStateRuntime.any(oController, "state", ["/isBusy", "/lockOperationPending"]),
+            busy: ModelStateRuntime.any(oController, "state", [StatePaths.UI_BUSY_DETAIL, "/lockOperationPending"]),
             onReset: function () {
                 resetDeleteChecklistConfirmArmed(oController);
             },
             onConfirm: function () {
-                return ModelStateRuntime.withFlag(oController, "state", "/isBusy", function () {
+                return ModelStateRuntime.withFlag(oController, "state", StatePaths.UI_BUSY_DETAIL, function () {
                     return DetailCommandPolicy.deleteChecklist(oController, RootIdRuntime.withCurrentRootId(oController));
                 }, true, false);
             }

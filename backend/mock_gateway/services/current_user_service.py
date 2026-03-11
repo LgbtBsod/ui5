@@ -6,10 +6,12 @@ from models import AppUserProfile, RuntimeUserContext
 
 DEFAULT_RUNTIME_UNAME = "operator"
 PERMISSION_CODE_MAP = {
-    "view": "01",
+    "create": "01",
     "edit": "02",
-    "create": "02",
-    "delete": "03",
+    "change": "02",
+    "view": "03",
+    "display": "03",
+    "delete": "06",
 }
 
 
@@ -66,6 +68,10 @@ class CurrentUserService:
     def resolve_uname(db=None, request=None, explicit_uname: str | None = None) -> str:
         if explicit_uname:
             return _normalize_uname(explicit_uname)
+        if request is not None:
+            mock_uname = request.headers.get("X-Mock-User")
+            if mock_uname:
+                return _normalize_uname(mock_uname)
         if db is not None:
             row = db.get(RuntimeUserContext, "CURRENT")
             if row is not None:

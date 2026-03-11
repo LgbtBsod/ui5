@@ -63,8 +63,8 @@ function detectManifestContract(violations) {
   const ui5Model = ((sapUi5.models || {}).mainService) || {};
   const settings = ui5Model.settings || {};
 
-  if (appDataSource.uri !== '/sap/opu/odata/sap/Z_UI5_SRV/') {
-    runtimeGate.pushPipeViolation(violations, 'manifest.json', null, 'sap.app mainService uri must be /sap/opu/odata/sap/Z_UI5_SRV/');
+  if (appDataSource.uri !== '/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/') {
+    runtimeGate.pushPipeViolation(violations, 'manifest.json', null, 'sap.app mainService uri must be /sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/');
   }
   if (appDataSource.type !== 'OData') {
     runtimeGate.pushPipeViolation(violations, 'manifest.json', null, 'sap.app mainService type must be OData');

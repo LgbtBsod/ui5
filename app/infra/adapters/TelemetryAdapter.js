@@ -1,6 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/UxTelemetry"
-], function (UxTelemetry) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
+], function (WorkflowTelemetry) {
     "use strict";
 
     function create(mArgs) {
@@ -8,14 +8,22 @@ sap.ui.define([
 
         return {
             track: function (mEvent) {
-                var oSession = UxTelemetry.begin((mEvent && mEvent.event) || "event", (mEvent && mEvent.payload) || {});
-                UxTelemetry.end(oSession, "tracked", oStateModel);
+                return WorkflowTelemetry.emit((mEvent && mEvent.event) || "event", {
+                    stateModel: oStateModel,
+                    payload: Object.assign({
+                        outcome: "tracked"
+                    }, (mEvent && mEvent.payload) || {})
+                });
             },
 
             snapshot: function (mArgsSnapshot) {
-                var oSession = UxTelemetry.begin("snapshot", (mArgsSnapshot && mArgsSnapshot.context) || {});
-                UxTelemetry.end(oSession, "snapshot", oStateModel);
-                return Promise.resolve({ ok: true });
+                return Promise.resolve(WorkflowTelemetry.emit("snapshot", {
+                    stateModel: oStateModel,
+                    payload: {
+                        context: (mArgsSnapshot && mArgsSnapshot.context) || {},
+                        outcome: "snapshot"
+                    }
+                }));
             }
         };
     }

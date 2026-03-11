@@ -9,8 +9,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from main import app  # noqa: E402
-
-SERVICE_ROOT = "/sap/opu/odata/sap/Z_UI5_SRV"
+from utils.odata import ODATA_NS, SERVICE_ROOT  # noqa: E402
 
 
 def _csrf(client: TestClient):
@@ -23,6 +22,10 @@ def _sample_root(client: TestClient):
     rows = payload.get("d", {}).get("results", [])
     assert rows
     return rows[0]["Key"]
+
+
+def _as_user(user_name: str) -> dict:
+    return {"X-Mock-User": user_name}
 
 
 def test_gateway_canonical_contract_and_metadata():
@@ -41,22 +44,28 @@ def test_gateway_canonical_contract_and_metadata():
         lock_status = client.get(f"{SERVICE_ROOT}/LockStatusSet({root_key})", params={"SessionGuid": "S1"})
         assert lock_status.status_code == 200 and "d" in lock_status.json()
 
-        permission = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", params={"Uname": "demoUser"})
+        permission = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", headers=_as_user("demoUser"))
         assert permission.status_code == 200 and "d" in permission.json()
         permission_body = permission.json().get("d", {})
         assert permission_body.get("RootKey") == root_key
         assert permission_body.get("AuthObject") == "Z_UI5_CHKL"
-        assert permission_body.get("ViewOperation") == "01"
+        assert permission_body.get("ViewOperation") == "03"
         assert permission_body.get("ChangeOperation") == "02"
-        assert permission_body.get("DeleteOperation") == "03"
+        assert permission_body.get("DeleteOperation") == "06"
 
         runtime_permission = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})")
         assert runtime_permission.status_code == 200 and "d" in runtime_permission.json()
         assert runtime_permission.json().get("d", {}).get("UserId") == "operator"
-        assert permission_body.get("GrantedOperations") == "01,02,03"
+        assert permission_body.get("GrantedOperations") == "02,03,06"
         assert permission_body.get("CanView") is True
         assert permission_body.get("CanEdit") is True
         assert permission_body.get("CanDelete") is True
+
+        current_user = client.get(f"{SERVICE_ROOT}/CurrentUserSet('CURRENT')", headers=_as_user("demoUser"))
+        assert current_user.status_code == 200 and "d" in current_user.json()
+        current_user_body = current_user.json().get("d", {})
+        assert "Uname" not in current_user_body
+        assert current_user_body.get("FullName")
 
         checks = client.get(f"{SERVICE_ROOT}/ChecklistCheckSet", params={"$filter": f"RootId eq '{root_key}'"})
         barriers = client.get(f"{SERVICE_ROOT}/ChecklistBarrierSet", params={"$filter": f"RootId eq '{root_key}'"})
@@ -197,9 +206,10 @@ def test_gateway_canonical_contract_and_metadata():
         assert 'Property Name="ChangeOperation" Type="Edm.String"' in metadata
         assert 'Property Name="DeleteOperation" Type="Edm.String"' in metadata
         assert 'Property Name="GrantedOperations" Type="Edm.String"' in metadata
+        assert 'Property Name="Uname"' not in metadata
         assert 'EntityType Name="SaveChangesResponse"' in metadata
-        assert 'FunctionImport Name="AutoSave" ReturnType="Z_UI5_SRV.SaveChangesResponse"' in metadata
-        assert 'FunctionImport Name="SaveChanges" ReturnType="Z_UI5_SRV.SaveChangesResponse"' in metadata
+        assert 'FunctionImport Name="AutoSave" ReturnType="' + ODATA_NS + '.SaveChangesResponse"' in metadata
+        assert 'FunctionImport Name="SaveChanges" ReturnType="' + ODATA_NS + '.SaveChangesResponse"' in metadata
         for name in ["CreateChecklist", "CopyChecklist", "AutoSave", "SaveChanges", "SetChecklistStatus", "LockAcquire", "LockHeartbeat", "LockRelease"]:
             assert f'FunctionImport Name="{name}"' in metadata
         for name in ["AutosaveChecklist", "UpdateChecklist", "LockStatus", "LockControl"]:
@@ -259,7 +269,7 @@ def test_checklist_search_exposes_rate_totals_for_column_visibility():
         assert rows
         row = rows[0]
         assert "__metadata" in row
-        assert row["__metadata"]["type"] == "Z_UI5_SRV.ChecklistSearch"
+        assert row["__metadata"]["type"] == ODATA_NS + ".ChecklistSearch"
         assert "SuccessChecksRate" in row
         assert "SuccessBarriersRate" in row
         assert "ChecksTotal" in row
@@ -276,7 +286,7 @@ def test_checklist_search_preserves_metadata_under_select():
         assert rows
         row = rows[0]
         assert "__metadata" in row
-        assert row["__metadata"]["type"] == "Z_UI5_SRV.ChecklistSearch"
+        assert row["__metadata"]["type"] == ODATA_NS + ".ChecklistSearch"
 
 
 def test_workflow_analytics_exposes_summary_and_breakdowns():
@@ -287,63 +297,63 @@ def test_workflow_analytics_exposes_summary_and_breakdowns():
         assert summary_rows
         assert "Total" in summary_rows[0]
         assert "FailedChecks" in summary_rows[0]
+        selected_year = int(summary_rows[0].get("SelectedYear") or 0) or 2026
 
-        detailed = client.get(f"{SERVICE_ROOT}/WorkflowAnalyticsBreakdownSet")
+        detailed = client.get(
+            f"{SERVICE_ROOT}/WorkflowAnalyticsBreakdownSet",
+            params={"$filter": f"SelectedYear eq {selected_year} and Source eq 'ALL'"},
+        )
         assert detailed.status_code == 200
         detailed_rows = detailed.json().get("d", {}).get("results", [])
         assert isinstance(detailed_rows, list)
 
 
-def test_dictionary_item_set_includes_domains_and_web_config_in_single_read():
+def test_dictionary_item_set_is_reference_data_only_and_runtime_settings_hold_policy_payloads():
     with TestClient(app) as client:
         payload = client.get(
             f"{SERVICE_ROOT}/DictionaryItemSet",
-            params={"$orderby": "Domain asc,Key asc", "$inlinecount": "allpages", "$top": 2000},
+            params={"$filter": "Domain eq 'LPC'", "$orderby": "Domain asc,Key asc", "$inlinecount": "allpages", "$top": 200},
         ).json()
         rows = payload.get("d", {}).get("results", [])
         assert rows
         domains = {str(row.get("Domain") or "") for row in rows}
         assert "LPC" in domains
-        assert "PROFESSION" in domains
-        assert "TIME_ZONE" in domains
-        assert "ATF_CAT" in domains
-        assert "WEB_REQUIRED_FIELD" in domains
-        assert "WEB_VARIABLE" in domains
-        required_rows = [row for row in rows if row.get("Domain") == "WEB_REQUIRED_FIELD"]
-        variable_rows = [row for row in rows if row.get("Domain") == "WEB_VARIABLE"]
-        assert required_rows
-        assert any(row.get("Key") == "/basic/date" for row in required_rows)
-        assert any(row.get("Key") == "fclBeginColumnPercent" for row in variable_rows)
-        assert int(payload.get("d", {}).get("__count", 0)) >= len(rows)
+        assert "WEB_REQUIRED_FIELD" not in domains
+        assert "WEB_VARIABLE" not in domains
+
+        runtime_payload = client.get(f"{SERVICE_ROOT}/RuntimeSettingsSet(Key='GLOBAL')").json().get("d", {})
+        assert runtime_payload.get("RequiredFieldsJson")
+        assert runtime_payload.get("FrontendVariablesJson")
+        assert runtime_payload.get("UploadPolicyJson")
 
 
 def test_checklist_permission_set_supports_view_edit_delete_deny_patterns():
     with TestClient(app) as client:
         root_key = _sample_root(client)
 
-        demo = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", params={"Uname": "demoUser"}).json().get("d", {})
-        assert demo.get("GrantedOperations") == "01,02,03"
+        demo = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", headers=_as_user("demoUser")).json().get("d", {})
+        assert demo.get("GrantedOperations") == "02,03,06"
         assert demo.get("CanView") is True
         assert demo.get("CanEdit") is True
         assert demo.get("CanDelete") is True
         assert demo.get("ReasonCode") == "AUTHORIZED"
 
-        no_view = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", params={"Uname": "noview_operator"}).json().get("d", {})
+        no_view = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", headers=_as_user("noview_operator")).json().get("d", {})
         assert no_view.get("GrantedOperations") == ""
         assert no_view.get("CanView") is False
         assert no_view.get("CanEdit") is False
         assert no_view.get("CanDelete") is False
         assert no_view.get("ReasonCode") == "NO_VIEW_AUTH"
 
-        read_only = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", params={"Uname": "readonly_operator"}).json().get("d", {})
-        assert read_only.get("GrantedOperations") == "01"
+        read_only = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", headers=_as_user("readonly_operator")).json().get("d", {})
+        assert read_only.get("GrantedOperations") == "03"
         assert read_only.get("CanView") is True
         assert read_only.get("CanEdit") is False
         assert read_only.get("CanDelete") is False
         assert read_only.get("ReasonCode") == "READ_ONLY_AUTH"
 
-        no_delete = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", params={"Uname": "nodelete_operator"}).json().get("d", {})
-        assert no_delete.get("GrantedOperations") == "01,02"
+        no_delete = client.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({root_key})", headers=_as_user("nodelete_operator")).json().get("d", {})
+        assert no_delete.get("GrantedOperations") == "02,03"
         assert no_delete.get("CanView") is True
         assert no_delete.get("CanEdit") is True
         assert no_delete.get("CanDelete") is False

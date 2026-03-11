@@ -111,8 +111,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
                 Effects.modelPatch("selected", "/", oSelectedSnapshot),
                 Effects.modelPatch("selected", "/attachments", aCurrentAttachments),
-                Effects.modelPatch("uiState", "/_detailSnapshot", oSavedSnapshot),
-                Effects.modelPatch("uiState", "/_detailCurrent", oSavedSnapshot),
+                Effects.modelPatch("snapshot", "/", oSavedSnapshot),
                 Effects.toast("autosaveSaved", "success")
             ]);
         }).catch(function (oError) {

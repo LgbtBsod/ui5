@@ -115,6 +115,7 @@ sap.ui.define([
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
         var oUiStateModel = mOptions.uiStateModel;
+        var oSnapshotModel = mOptions.snapshotModel;
         var mTimerDefaults = mOptions.timerDefaults;
         var mManagers = mOptions.managers;
         var StatePaths = mOptions.statePaths;
@@ -168,7 +169,7 @@ sap.ui.define([
             buildPayload: function () {
                 var sId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
                 var oCurrent = fnResolveDetailCurrent();
-                var oBase = ModelStateRuntime.readOnModel(oUiStateModel, "/_detailSnapshot", {}) || {};
+                var oBase = ModelStateRuntime.readOnModel(oSnapshotModel, "/", {}) || {};
                 if (!sId || !oCurrent || !oCurrent.root || oCurrent.root.id !== sId) {
                     return null;
                 }

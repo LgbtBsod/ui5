@@ -8,28 +8,28 @@ sap.ui.define([
         return GatewayODataClient.request(mRequest);
     }
 
-    function get(sPath, mParams) {
-        return request({
+    function get(sPath, mParams, mOptions) {
+        return request(Object.assign({}, mOptions || {}, {
             method: "GET",
             path: sPath,
             params: mParams || {}
-        });
+        }));
     }
 
-    function postFunction(sPath, oBody) {
-        return request({
+    function postFunction(sPath, oBody, mOptions) {
+        return request(Object.assign({}, mOptions || {}, {
             method: "POST_FUNCTION",
             path: sPath,
             body: oBody || {}
-        });
+        }));
     }
 
-    function getFunction(sPath, mParams) {
-        return request({
+    function getFunction(sPath, mParams, mOptions) {
+        return request(Object.assign({}, mOptions || {}, {
             method: "GET_FUNCTION",
             path: sPath,
             params: mParams || {}
-        });
+        }));
     }
 
     function asArray(vData) {

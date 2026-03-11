@@ -31,6 +31,16 @@ sap.ui.define([
 
         return pRelease.then(function (oReleaseResult) {
             aEffects = [
+                Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                    status: "idle",
+                    ready: false,
+                    readyAt: "",
+                    error: "",
+                    rootId: "",
+                    mode: "READ",
+                    permissionKnown: false,
+                    lockKnown: false
+                }),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),

@@ -166,13 +166,14 @@ sap.ui.define([
             ThemeRuntime.syncDocumentRootClasses();
             var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "real";
             var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
-            var sMainServiceUri = this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_UI5_SRV/";
+            var sMainServiceUri = this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/";
             var oDataModel = reuseJsonModel(this.getModel("data"), ModelFactory.createDataModel);
             var oMplModel = reuseJsonModel(this.getModel("mpl"), ModelFactory.createMplModel);
             var oStateModel = reuseJsonModel(this.getModel("state"), ModelFactory.createStateModel);
             var oUiStateModel = reuseJsonModel(this.getModel("uiState"), ModelFactory.createUiStateModel);
             var oViewModel = reuseJsonModel(this.getModel("view"), ModelFactory.createViewModel);
             var oSelectedModel = reuseJsonModel(this.getModel("selected"), function () { return new JSONModel({}); });
+            var oSnapshotModel = reuseJsonModel(this.getModel("snapshot"), ModelFactory.createSnapshotModel);
             var oMasterDataModel = reuseJsonModel(this.getModel("masterData"), ModelFactory.createMasterDataModel);
             var oDeviceModel = new JSONModel(Device);
             var oMainServiceModel = this.getModel("mainService") || new ODataModel(sMainServiceUri, {
@@ -216,6 +217,7 @@ sap.ui.define([
             this.setModel(oDataModel, "data");
             this.setModel(oMplModel, "mpl");
             this.setModel(oSelectedModel, "selected");
+            this.setModel(oSnapshotModel, "snapshot");
             this.setModel(oStateModel, "state");
             this.setModel(oUiStateModel, "uiState");
             this.setModel(oViewModel, "view");
@@ -248,7 +250,7 @@ sap.ui.define([
                 });
             };
             var fnResolveDetailCurrent = function () {
-                return ComponentRuntimeSupport.resolveDetailCurrent(oSelectedModel, oUiStateModel);
+                return ComponentRuntimeSupport.resolveDetailCurrent(oSelectedModel);
             };
             var fnApplyFacadeResult = createApplyFacadeResult({
                 component: this,
@@ -297,8 +299,7 @@ sap.ui.define([
                         "RuntimeSettingsSet(GLOBAL)",
                         (oError && oError.message) || oError || "runtime_settings_load_failed"
                     ));
-                    // Non-fatal: resolve with empty config so boot sequence continues
-                    return {};
+                    throw oError || new Error("runtime_settings_load_failed");
                 }.bind(this));
             }.bind(this);
             var fnResolveCorrelationId = oFeedbackRuntime.resolveCorrelationId;
@@ -357,6 +358,7 @@ sap.ui.define([
                 component: this,
                 stateModel: oStateModel,
                 uiStateModel: oUiStateModel,
+                snapshotModel: oSnapshotModel,
                 timerDefaults: mTimerDefaults,
                 managers: {
                     HeartbeatManager: HeartbeatManager,
@@ -425,7 +427,7 @@ sap.ui.define([
                 actionContract: ActionContract
             });
 
-            runBootSequence({
+            return runBootSequence({
                 component: this,
                 stateModel: oStateModel,
                 envModel: oEnvModel,

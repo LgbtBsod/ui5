@@ -1,10 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/BindingContextReadSupport"
-], function (BindingContextReadSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/support/BindingContextReadSupport",
+    "sap/m/ProgressIndicator",
+    "sap/m/Text"
+], function (BindingContextReadSupport, ProgressIndicator, Text) {
     "use strict";
-
-    function getProgressIndicatorCtor() { return sap.ui.requireSync("sap/m/ProgressIndicator"); }
-    function getTextCtor() { return sap.ui.requireSync("sap/m/Text"); }
 
     function readColumnProperty(oColumn) {
         var vData, oData;
@@ -75,8 +74,6 @@ sap.ui.define([
         var bFull = Math.round(nRate) >= 100;
         var sDisplayValue = Math.round(nRate) + "%";
         var sState = bFull ? "Success" : "Error";
-        var ProgressIndicator = getProgressIndicatorCtor();
-        var Text = getTextCtor();
         var oIndicator;
         if (!oItem || typeof oItem.removeCell !== "function" || typeof oItem.insertCell !== "function" || !oCell) { return; }
         if (!bVisible) {

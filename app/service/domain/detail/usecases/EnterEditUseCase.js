@@ -61,9 +61,11 @@ sap.ui.define([
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
-        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId).then(function (oPermission) {
+        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
+            activity: DetailAuthorizationSupport.OPERATIONS.CHANGE
+        }).then(function (oPermission) {
             var pPrecheck;
-            if (!oPermission.canEdit) {
+            if (!oPermission.allowed) {
                 return Result.fail({ message: "No permission to edit checklist", code: "NO_EDIT_PERMISSION" }, DetailAuthorizationSupport.deniedActionEffects(oPermission, "detailEditPermissionDenied", readOnlyEffects()));
             }
             pPrecheck = (oCacheValidation && typeof oCacheValidation.execute === "function")

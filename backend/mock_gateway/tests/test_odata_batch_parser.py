@@ -8,6 +8,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
+from utils.odata import SERVICE_ROOT
 from utils.odata_batch import extract_boundary, parse_batch_request, parse_http_part
 
 
@@ -91,14 +92,14 @@ def test_parse_http_part_accepts_absolute_url_and_bom():
     raw_part = (
         "Content-Type: application/http\n"
         "Content-Transfer-Encoding: binary\n\n"
-        "\ufeffGET http://localhost:5000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$top=1 HTTP/1.1\n"
+        "\ufeffGET http://localhost:5000" + SERVICE_ROOT + "/ChecklistSearchSet?$top=1 HTTP/1.1\n"
         "Accept: application/json\n\n"
     )
 
     operation = parse_http_part(raw_part)
 
     assert operation.method == "GET"
-    assert operation.path == "http://localhost:5000/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$top=1"
+    assert operation.path == "http://localhost:5000" + SERVICE_ROOT + "/ChecklistSearchSet?$top=1"
 
 
 def test_parse_batch_request_accepts_http_2_request_line():
@@ -107,7 +108,7 @@ def test_parse_batch_request_accepts_http_2_request_line():
         "--batch_intent_boundary\n"
         "Content-Type: application/http\n"
         "Content-Transfer-Encoding: binary\n\n"
-        "GET /sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$top=1 HTTP/2\n"
+        "GET " + SERVICE_ROOT + "/ChecklistSearchSet?$top=1 HTTP/2\n"
         "Accept: application/json\n\n"
         "--batch_intent_boundary--\n"
     )

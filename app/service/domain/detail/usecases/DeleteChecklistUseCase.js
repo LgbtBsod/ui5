@@ -23,27 +23,38 @@ sap.ui.define([
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(Result.fail({ message: "No checklist to delete", code: "NO_CHECKLIST" }, [
                 Effects.toast("nothingToDelete", "warning"),
-                Effects.modelPatch("state", "/isBusy", false)
+                Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
             ]));
         }
 
         if (!oRepo || typeof oRepo.deleteChecklist !== "function") {
             return Promise.resolve(Result.fail({ message: "Delete unavailable", code: "DELETE_UNAVAILABLE" }, [
-                Effects.modelPatch("state", "/isBusy", false)
+                Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
             ]));
         }
 
-        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId).then(function (oPermission) {
-            if (!oPermission.canDelete) {
+        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
+            activity: DetailAuthorizationSupport.OPERATIONS.DELETE
+        }).then(function (oPermission) {
+            if (!oPermission.allowed) {
                 return Result.fail({ message: "No permission to delete checklist", code: "NO_DELETE_PERMISSION" }, DetailAuthorizationSupport.deniedActionEffects(oPermission, "detailDeletePermissionDenied", [
-                    Effects.modelPatch("state", "/isBusy", false)
+                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
                 ]));
             }
             return Promise.resolve(oRepo.deleteChecklist({ rootId: sRootId })).then(function () {
                 return Result.ok({ deleted: true, rootId: sRootId }, [
                     Effects.modelPatch("selected", "/", {}),
-                    Effects.modelPatch("uiState", "/_detailCurrent", {}),
-                    Effects.modelPatch("uiState", "/_detailSnapshot", {}),
+                    Effects.modelPatch("snapshot", "/", {}),
+                    Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                        status: "idle",
+                        ready: false,
+                        readyAt: "",
+                        error: "",
+                        rootId: "",
+                        mode: "READ",
+                        permissionKnown: false,
+                        lockKnown: false
+                    }),
                     Effects.modelPatch("view", "/accessState", DetailAuthorizationSupport.buildAccessState({
                         rootId: "",
                         userId: "",
@@ -59,7 +70,7 @@ sap.ui.define([
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                     Effects.modelPatch("state", "/lockOperationPending", false),
-                    Effects.modelPatch("state", "/isBusy", false),
+                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                     Effects.modelPatch("state", "/layout", "OneColumn"),
                     Effects.modelPatch("state", "/activeObjectId", null),
                     Effects.modelPatch("state", "/selectedId", null),
@@ -70,7 +81,7 @@ sap.ui.define([
             });
         }).catch(function (oError) {
             return Result.fail(oError, [
-                Effects.modelPatch("state", "/isBusy", false)
+                Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
             ]);
         });
     };

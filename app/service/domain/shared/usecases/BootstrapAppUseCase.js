@@ -15,18 +15,13 @@ sap.ui.define([
             var oStateModel = ctx && ctx.stateModel;
 
             if (oStateModel && oStateModel.setProperty) {
-                oStateModel.setProperty("/isLoading", true);
                 oStateModel.setProperty("/masterDataLoading", true);
                 oStateModel.setProperty("/locationsLoading", false);
                 oStateModel.setProperty("/backendMode", "real");
                 oStateModel.setProperty("/backendServiceUrl", GatewayBackendService.serviceUrl() || "");
             }
 
-            return Promise.resolve(Result.ok({ bootstrapped: true }, [])).finally(function () {
-                if (oStateModel && oStateModel.setProperty) {
-                    oStateModel.setProperty("/isLoading", false);
-                }
-            });
+            return Promise.resolve(Result.ok({ bootstrapped: true }, []));
         }
     };
 });

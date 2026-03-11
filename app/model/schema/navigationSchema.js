@@ -7,6 +7,7 @@ sap.ui.define([], function () {
         currentRouteName: "search",
         selectedId: null,
         sessionId: null,
+        tabSessionId: null,
         activeObjectId: null,
         copySourceId: null,
         navGuardBypass: false,

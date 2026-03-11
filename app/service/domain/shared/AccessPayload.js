@@ -12,11 +12,13 @@ sap.ui.define([], function () {
         return {
             rootId: text(oResolved.rootId || oResolved.RootKey, sRootId),
             userId: text(oResolved.userId || oResolved.UserId, ""),
-            canView: oResolved.canView !== false && oResolved.CanView !== false && oOptions.canView !== false,
-            canEdit: oResolved.canEdit !== false && oResolved.CanEdit !== false && oOptions.canEdit !== false,
-            canDelete: oResolved.canDelete !== false && oResolved.CanDelete !== false && oOptions.canDelete !== false,
+            canCreate: !!(oResolved.canCreate || oResolved.CanCreate || oOptions.canCreate),
+            canView: !!(oResolved.canView || oResolved.CanView || oOptions.canView),
+            canEdit: !!(oResolved.canEdit || oResolved.CanEdit || oOptions.canEdit),
+            canDelete: !!(oResolved.canDelete || oResolved.CanDelete || oOptions.canDelete),
             reasonCode: text(oResolved.reasonCode || oResolved.ReasonCode, oOptions.reasonCode || "AUTHORIZED"),
-            message: text(oResolved.message || oResolved.Message, oOptions.message || "")
+            message: text(oResolved.message || oResolved.Message, oOptions.message || ""),
+            requestedActivity: text(oResolved.requestedActivity || oResolved.RequestedActivity, oOptions.requestedActivity || "")
         };
     }
 
@@ -25,11 +27,13 @@ sap.ui.define([], function () {
         return {
             rootId: oResolved.rootId,
             userId: oResolved.userId,
+            canCreate: !!oResolved.canCreate,
             canView: !!oResolved.canView,
             canEdit: !!oResolved.canEdit,
             canDelete: !!oResolved.canDelete,
             reasonCode: oResolved.reasonCode,
-            message: oResolved.message
+            message: oResolved.message,
+            requestedActivity: oResolved.requestedActivity
         };
     }
 

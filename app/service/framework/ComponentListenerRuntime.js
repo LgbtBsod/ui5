@@ -112,7 +112,7 @@ sap.ui.define([
         oComponent._fnStateModelPropertyChange = function (oEvent) {
             var sPath = oEvent.getParameter("path") || "";
             var sModeValue;
-            if (["/mode", "/isBusy", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID].indexOf(sPath) >= 0) {
+            if (["/mode", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID, StatePaths.UI_BUSY_GLOBAL, StatePaths.UI_BUSY_DETAIL].indexOf(sPath) >= 0) {
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
             }
             if (sPath === StatePaths.WORKFLOW_EDIT_MODE) {
@@ -145,9 +145,7 @@ sap.ui.define([
                 }
             }
         };
-        oComponent._fnSelectedModelPropertyChange = function () {
-            ComponentRuntimeSupport.syncDetailCurrentFromSelected(oSelectedModel, oUiStateModel);
-        };
+        oComponent._fnSelectedModelPropertyChange = function () { return; };
         oStateModel.attachPropertyChange(oComponent._fnStateModelPropertyChange, oComponent);
         oSelectedModel.attachPropertyChange(oComponent._fnSelectedModelPropertyChange, oComponent);
         oComponent._detachInitRuntimeListeners = function () {
@@ -162,7 +160,6 @@ sap.ui.define([
             }
         };
         ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
-        ComponentRuntimeSupport.syncDetailCurrentFromSelected(oSelectedModel, oUiStateModel);
         oComponent._fnOnFullSave = function () {
             oComponent._oGcd.resetOnFullSave();
         };

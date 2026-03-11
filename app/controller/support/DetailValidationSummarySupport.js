@@ -160,7 +160,6 @@ sap.ui.define([
 
     function onSelectedChecklistChanged(oController, oEvent, mStatePaths) {
         var oSelectedModel = ModelStateRuntime.model(oController, "selected");
-        var oUiStateModel = ModelStateRuntime.model(oController, "uiState");
         var sPath = oEvent && oEvent.getParameter && oEvent.getParameter("path");
         var aRequired = ModelStateRuntime.read(oController, "state", "/requiredFields", []) || [];
         var sValidationKey;
@@ -178,19 +177,6 @@ sap.ui.define([
             ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
         }
         DetailPersonInputSupport.syncDrafts(oController, oSelectedModel, sModelPath);
-
-        if (oUiStateModel) {
-            if (sPath === "/") {
-                ModelStateRuntime.syncDetailCurrent(oController, ModelStateRuntime.read(oController, "selected", "/", {}) || {});
-            } else {
-                ModelStateRuntime.write(
-                    oController,
-                    "uiState",
-                    "/_detailCurrent" + sModelPath,
-                    ModelStateRuntime.read(oController, "selected", sModelPath, undefined)
-                );
-            }
-        }
 
         sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", "/mode", ""), "");
         if (shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {

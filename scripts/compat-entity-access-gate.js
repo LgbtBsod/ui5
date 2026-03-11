@@ -11,7 +11,7 @@ const files = collectFilesByExtensions(root, ['controller', 'service', 'infra', 
 const metadataFiles = [
   path.join(root, 'mock_gate_way/services/metadata_builder.py'),
   path.join(root, 'localService/metadata.xml'),
-  path.join(root, 'sap/opu/odata/sap/Z_UI5_SRV/$metadata')
+  path.join(root, 'sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$metadata')
 ];
 
 function buildMetadataText(sources) {

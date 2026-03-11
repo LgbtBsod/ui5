@@ -25,7 +25,7 @@ sap.ui.define([
                 oProfile = CurrentUserProfile.applyCurrentUserState(oStateModel, oProfile);
                 oProfile.permissionKeys = buildSummary(oProfile);
                 return Result.ok({
-                    user: oProfile.uname,
+                    user: oProfile.fullName || "",
                     profile: oProfile
                 });
             });

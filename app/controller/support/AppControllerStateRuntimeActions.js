@@ -13,9 +13,10 @@ sap.ui.define([
 
     var getText = ControllerTextRuntime.getText;
     var PERMISSION_TEXT_KEY_MAP = {
-        "01": "shellPermissionView",
-        "02": "shellPermissionEditCreate",
-        "03": "shellPermissionDelete"
+        "01": "shellPermissionCreate",
+        "02": "shellPermissionChange",
+        "03": "shellPermissionDisplay",
+        "06": "shellPermissionDelete"
     };
 
     function normalizePermissionRule(oPermission) {
@@ -32,7 +33,7 @@ sap.ui.define([
 
     function buildPermissionSheets(oController, aPermissionRules) {
         return PermissionPresentation.buildPermissionSheets(aPermissionRules, {
-            codeOrder: ["01", "02", "03"],
+            codeOrder: ["01", "02", "03", "06"],
             scopeLabel: function (oRule) {
                 return buildPermissionScopeLabel(oController, oRule);
             },
@@ -99,7 +100,6 @@ sap.ui.define([
             var mShellPatch = {};
             var sSelectedId;
             var sMode;
-            var sUser;
             var sCurrentRouteName;
             var oCurrentUser;
             var sFullName;
@@ -122,8 +122,7 @@ sap.ui.define([
             sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
             sMode = LayoutStateRuntime.readMode(oState, "READ");
             oCurrentUser = ModelStateRuntime.read(this, "state", "/currentUser", {}) || {};
-            sUser = String(oCurrentUser.uname || "").trim();
-            sFullName = String(oCurrentUser.fullName || sUser || getText(this, "shellUserMissing", null, "Session profile unavailable"));
+            sFullName = String(oCurrentUser.fullName || getText(this, "shellUserMissing", null, "Session profile unavailable"));
             aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
             aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
             aPermissionSheets = buildPermissionSheets(this, aPermissionRules);
@@ -150,8 +149,8 @@ sap.ui.define([
                         : (CreateSentinel.isCreateId(sSelectedId) ? getText(this, "shellContextDraft", null, "Draft checklist workspace")
                             : getText(this, "shellContextDetail", [sSelectedId], "Checklist " + sSelectedId))));
             mShellPatch["/shell/userLabel"] = buildHeaderUserLabel(sFullName, aPermissionSheets);
-            mShellPatch["/shell/userMeta"] = sUser || getText(this, "shellUserLoginMissing", null, "Login is not set");
-            mShellPatch["/shell/userLoginLabel"] = sUser || getText(this, "shellUserLoginMissing", null, "Login is not set");
+            mShellPatch["/shell/userMeta"] = sFullName;
+            mShellPatch["/shell/userLoginLabel"] = "";
             mShellPatch["/shell/userEnvironmentLabel"] = sFrontendSource;
             mShellPatch["/shell/userPermissions"] = aPermissionSheets;
             mShellPatch["/shell/userSummaryText"] = sUserSummaryText;
@@ -170,6 +169,9 @@ sap.ui.define([
             mShellPatch["/shell/userIcon"] = "sap-icon://employee";
             mShellPatch["/shell/showHints"] = bShowHints;
             ModelStateRuntime.setMany(this, "appView", mShellPatch);
+            if (typeof this._markStartupReady === "function") {
+                this._markStartupReady();
+            }
         }
     };
 });

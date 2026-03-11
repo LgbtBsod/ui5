@@ -30,12 +30,12 @@ sap.ui.define([], function () {
 
     function readCurrentChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get("selected", "/")) || (oUiState && oUiState.get("uiState", "/_detailCurrent")) || {};
+        return (oUiState && oUiState.get("selected", "/")) || {};
     }
 
     function readBaseSnapshot(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get("uiState", "/_detailSnapshot")) || {};
+        return (oUiState && oUiState.get("snapshot", "/")) || {};
     }
 
     function resolveVersionNumber(oCurrent, oSnapshot) {

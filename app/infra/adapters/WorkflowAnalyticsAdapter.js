@@ -137,6 +137,23 @@ sap.ui.define([
         return iSelectedYear > 0 ? (iSelectedYear - 1) : 0;
     }
 
+    function escapeFilterString(sValue) {
+        return String(sValue || "").replace(/'/g, "''");
+    }
+
+    function buildBreakdownFilter(mInput) {
+        var iSelectedYear = toNumber(mInput && mInput.selectedYear);
+        var sSelectedSource = String(mInput && mInput.selectedSource || "").trim();
+        var aParts = [];
+        if (iSelectedYear > 0) {
+            aParts.push("SelectedYear eq " + iSelectedYear);
+        }
+        if (sSelectedSource) {
+            aParts.push("Source eq '" + escapeFilterString(sSelectedSource) + "'");
+        }
+        return aParts.join(" and ");
+    }
+
     function create() {
         function readParams(mInput) {
             var iSelectedYear = toNumber(mInput && mInput.selectedYear);
@@ -169,23 +186,40 @@ sap.ui.define([
 
         return {
             fetchSummary: function (mInput) {
-                return GatewayAdapterSupport.get("SimpleAnalyticalSet", readParams(mInput)).then(normalizeSummary);
+                return GatewayAdapterSupport.get("SimpleAnalyticalSet", readParams(mInput), {
+                    responseGuardKey: "analytics.summary"
+                }).then(normalizeSummary);
             },
             fetchDetailed: function (mInput) {
                 var mParams = readParams(mInput);
+                var sBreakdownFilter = buildBreakdownFilter(mInput);
                 var iSelectedYear = toNumber(mInput && mInput.selectedYear);
                 var iCompareYear = resolveCompareYear(mInput, iSelectedYear);
                 var mCompareParams = readParams({
                     selectedYear: iCompareYear,
                     selectedSource: mInput && mInput.selectedSource
                 });
+                var sCompareBreakdownFilter = buildBreakdownFilter({
+                    selectedYear: iCompareYear,
+                    selectedSource: mInput && mInput.selectedSource
+                });
                 var pCompareBreakdown = iCompareYear === iSelectedYear
-                    ? GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", mParams)
-                    : GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", mCompareParams);
-                var pRefreshState = GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')").catch(function () { return null; });
+                    ? GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", { "$filter": sBreakdownFilter }, {
+                        responseGuardKey: "analytics.breakdown.compare"
+                    })
+                    : GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", { "$filter": sCompareBreakdownFilter }, {
+                        responseGuardKey: "analytics.breakdown.compare"
+                    });
+                var pRefreshState = GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')", {}, {
+                    responseGuardKey: "analytics.refreshState"
+                }).catch(function () { return null; });
                 return Promise.all([
-                    GatewayAdapterSupport.get("SimpleAnalyticalSet", mParams),
-                    GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", mParams),
+                    GatewayAdapterSupport.get("SimpleAnalyticalSet", mParams, {
+                        responseGuardKey: "analytics.summary"
+                    }),
+                    GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", { "$filter": sBreakdownFilter }, {
+                        responseGuardKey: "analytics.breakdown.primary"
+                    }),
                     pRefreshState,
                     pCompareBreakdown
                 ]).then(function (aResult) {
@@ -198,7 +232,9 @@ sap.ui.define([
                 });
             },
             fetchRefreshState: function () {
-                return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')")
+                return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')", {}, {
+                    responseGuardKey: "analytics.refreshState"
+                })
                     .then(normalizeRefreshState)
                     .catch(function () { return normalizeRefreshState(null); });
             },
@@ -207,7 +243,9 @@ sap.ui.define([
                     TaskKey: "ANALYTICS_REFRESH",
                     RequestedBy: String(mInput && mInput.requestedBy || "")
                 }).then(function () {
-                    return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')").catch(function () { return null; });
+                    return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')", {}, {
+                        responseGuardKey: "analytics.refreshState"
+                    }).catch(function () { return null; });
                 }).then(normalizeRefreshState);
             }
         };

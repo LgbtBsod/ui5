@@ -4,9 +4,10 @@ from services.current_user_service import CurrentUserService
 from models import ChecklistRoot
 
 AUTH_OBJECT_CHECKLIST = "Z_UI5_CHKL"
-OPERATION_VIEW = "01"
+OPERATION_CREATE = "01"
 OPERATION_CHANGE = "02"
-OPERATION_DELETE = "03"
+OPERATION_VIEW = "03"
+OPERATION_DELETE = "06"
 
 _VIEW_DENY_MARKERS = ("noview", "denyview", "noaccess", "denyall")
 _EDIT_DENY_MARKERS = ("noedit", "denyedit", "readonly", "viewonly", "denyall")
@@ -25,10 +26,10 @@ def _contains_marker(user_id: str, markers: tuple[str, ...]) -> bool:
 
 def _granted_operations(can_view: bool, can_edit: bool, can_delete: bool) -> list[str]:
     ops = []
-    if can_view:
-        ops.append(OPERATION_VIEW)
     if can_edit:
         ops.append(OPERATION_CHANGE)
+    if can_view:
+        ops.append(OPERATION_VIEW)
     if can_delete:
         ops.append(OPERATION_DELETE)
     return ops
@@ -56,9 +57,9 @@ def _permissions_from_profile(db, root: ChecklistRoot, user_id: str) -> tuple[bo
         if _permission_matches_scope(root, item or {})
     }
     return (
-        "01" in permission_codes,
+        "03" in permission_codes,
         "02" in permission_codes,
-        "03" in permission_codes
+        "06" in permission_codes
     )
 
 

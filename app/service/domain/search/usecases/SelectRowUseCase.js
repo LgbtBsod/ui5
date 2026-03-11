@@ -50,13 +50,23 @@ sap.ui.define([
             if (!oRepo || typeof oRepo.deleteChecklist !== "function") {
                 return Promise.resolve(Result.fail({ message: "Delete unavailable", code: "DELETE_UNAVAILABLE" }));
             }
-            return Promise.resolve(oRepo.deleteChecklist({ rootId: sRootId })).then(function () {
-                if (oSmart && typeof oSmart.rebindSearchTable === "function") {
-                    oSmart.rebindSearchTable();
+            return Promise.resolve(oRepo.checkChecklistPermission({
+                rootId: sRootId,
+                activity: "06"
+            })).then(function (oPermission) {
+                if (!oPermission || oPermission.canDelete !== true) {
+                    return Result.fail({ message: "No permission to delete checklist", code: "NO_DELETE_PERMISSION" }, [
+                        Effects.toast("detailDeletePermissionDenied", "warning")
+                    ]);
                 }
-                return Result.ok({ selectedRootId: sRootId, intent: sIntent }, SearchSelectionEffects.buildSelectionResetEffects().concat([
-                    Effects.toast("checklistDeleted", "success")
-                ]));
+                return Promise.resolve(oRepo.deleteChecklist({ rootId: sRootId })).then(function () {
+                    if (oSmart && typeof oSmart.rebindSearchTable === "function") {
+                        oSmart.rebindSearchTable();
+                    }
+                    return Result.ok({ selectedRootId: sRootId, intent: sIntent }, SearchSelectionEffects.buildSelectionResetEffects().concat([
+                        Effects.toast("checklistDeleted", "success")
+                    ]));
+                });
             }).catch(function (oError) {
                 return Result.fail(oError);
             });
@@ -81,8 +91,7 @@ sap.ui.define([
                 }
                 return Result.ok({ selectedRootId: sRootId, intent: sIntent }, [
                     Effects.modelPatch("selected", "/", oSnapshot),
-                    Effects.modelPatch("uiState", "/_detailCurrent", oSnapshot),
-                    Effects.modelPatch("uiState", "/_detailSnapshot", oSnapshot),
+                    Effects.modelPatch("snapshot", "/", oSnapshot),
                     Effects.modelPatch("state", "/activeObjectId", sCopiedRootId),
                     Effects.modelPatch("state", "/selectedId", sCopiedRootId),
                     Effects.modelPatch("state", "/postOpenHydratedRootId", sCopiedRootId),

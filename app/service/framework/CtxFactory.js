@@ -53,6 +53,7 @@ sap.ui.define([
             state: ControllerModelRuntime.state(oController),
             uiState: ControllerModelRuntime.uiState(oController),
             selected: ControllerModelRuntime.selected(oController),
+            snapshot: ControllerModelRuntime.snapshot(oController),
             masterData: ControllerModelRuntime.masterData(oController),
             search: ControllerModelRuntime.named(oController, "search", true),
             env: ControllerModelRuntime.env(oController)
@@ -63,10 +64,10 @@ sap.ui.define([
         var mModels = collectModels(oController);
         var oUiStateAdapter;
 
-        if (!mModels.uiState) {
-            throw new Error("CtxFactory: required model \"uiState\" is missing");
-        }
-
+        // Historical name only: `uiState` in the context is a facade adapter over
+        // normalized named models (`state`, `selected`, `snapshot`, `view`, etc.).
+        // It is not a business-data owner and must stay tolerant to missing legacy
+        // `uiState` JSONModel instances during the sunset period.
         oUiStateAdapter = safeBuild(Ui5StateAdapter, mModels);
 
         return {
@@ -93,7 +94,9 @@ sap.ui.define([
             }),
             clock: safeBuild(ClockAdapter),
             smartControls: (mViewRefs ? safeBuild(SmartControlsAdapter, mViewRefs) : null),
-            cache: safeBuild(BrowserCacheAdapter),
+            cache: safeBuild(BrowserCacheAdapter, {
+                stateModel: mModels.state
+            }),
             lastChangeSet: safeBuild(LastChangeSetAdapter),
             cacheValidation: new CacheValidationUseCase(),
             cacheRead: new CacheReadUseCase(),

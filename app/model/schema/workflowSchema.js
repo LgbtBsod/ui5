@@ -10,12 +10,14 @@ sap.ui.define([], function () {
         searchMode: "EXACT",
         searchBackendTop: "100",
         searchMaxResults: "100",
+        searchFetchLimit: "100",
+        growingPageSize: "100",
+        exportLimit: 200000,
         searchSortKey: "DateCheck",
         searchSortDescending: true,
         searchGroupKey: "",
         searchGroupDescending: false,
         currentUser: {
-            uname: "",
             fullName: "",
             permissions: [],
             permissionRules: [],
@@ -28,6 +30,12 @@ sap.ui.define([], function () {
         frontendVariables: {},
         frontendConfigSource: "gateway",
         requestGroups: { save: "saveFlow", autosave: "autosave", lock: "locks", unlock: "locks", lockHeartbeat: "locks", lockStatus: "locks", functionImport: "locks" },
+        readiness: {
+            app: { status: "pending", ready: false, readyAt: "", error: "" },
+            search: { status: "pending", ready: false, readyAt: "", error: "" },
+            detail: { status: "idle", ready: false, readyAt: "", error: "", rootId: "", mode: "READ", permissionKnown: false, lockKnown: false },
+            analytics: { status: "idle", ready: false, readyAt: "", error: "" }
+        },
         operationalKpiSnapshots: [],
         operationalKpiSnapshotLimit: 50,
         workflow: {

@@ -43,8 +43,7 @@ sap.ui.define([
     function normalizeCurrentUser(vPayload, sFallbackLogin) {
         var oData = vPayload && vPayload.d ? vPayload.d : (vPayload || {});
         return {
-            uname: normalizeText(oData.Uname || oData.uname || sFallbackLogin || ""),
-            fullName: normalizeText(oData.FullName || oData.fullName || sFallbackLogin || ""),
+            fullName: normalizeText(oData.FullName || oData.fullName || ""),
             permissions: normalizePermissionCodes(oData.PermissionsCsv || oData.permissionsCsv),
             permissionRules: normalizePermissionRules(oData.PermissionRulesJson || oData.permissionRulesJson || oData.permissionRules),
             canView: !!(oData.CanView || oData.canView),

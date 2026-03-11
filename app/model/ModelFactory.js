@@ -71,6 +71,10 @@ sap.ui.define([
             });
         },
 
+        createSnapshotModel: function () {
+            return createModel({});
+        },
+
         createCacheModel: function () {
             return createModel({ byRootKey: {}, pristineSnapshot: null, keyMapping: {}, lastServerState: null });
         },

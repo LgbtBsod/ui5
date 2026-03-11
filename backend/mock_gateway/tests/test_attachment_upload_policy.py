@@ -9,8 +9,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from main import app  # noqa: E402
-
-SERVICE_ROOT = "/sap/opu/odata/sap/Z_UI5_SRV"
+from utils.odata import SERVICE_ROOT  # noqa: E402
 
 
 def _csrf(client: TestClient):

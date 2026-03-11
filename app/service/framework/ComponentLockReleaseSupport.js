@@ -24,8 +24,6 @@ sap.ui.define([
         var sSessionGuid = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || "").trim();
         var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, ""), "");
         var sLockState = LayoutStateRuntime.normalizeState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, ""), "");
-        var oCurrentUser = ModelStateRuntime.readOnModel(oStateModel, "/currentUser", {}) || {};
-        var sUser = String(oCurrentUser.uname || "").trim();
         if (!sRootId || !sSessionGuid || CreateSentinel.isCreateId(sRootId)) {
             return null;
         }
@@ -34,8 +32,7 @@ sap.ui.define([
         }
         return {
             RootId: sRootId,
-            SessionGuid: sSessionGuid,
-            Uname: sUser
+            SessionGuid: sSessionGuid
         };
     }
 

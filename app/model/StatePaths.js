@@ -3,10 +3,17 @@ sap.ui.define([], function () {
 
     return {
         PENDING_NAVIGATION_INTENT: "/pendingNavigationIntent",
+        READINESS_ANALYTICS: "/readiness/analytics",
+        READINESS_APP: "/readiness/app",
+        READINESS_DETAIL: "/readiness/detail",
+        READINESS_SEARCH: "/readiness/search",
         SAVE_IN_FLIGHT: "/saveInFlight",
         SESSION_ID: "/sessionId",
+        TAB_SESSION_ID: "/tabSessionId",
         TAB_CONFLICT_STATE: "/tabConflictState",
+        UI_BUSY_ANALYTICS: "/ui/busy/analytics",
         UI_BUSY_DETAIL: "/ui/busy/detail",
+        UI_BUSY_EXPORT: "/ui/busy/export",
         UI_BUSY_GLOBAL: "/ui/busy/global",
         UI_BUSY_SEARCH_TABLE: "/ui/busy/searchTable",
         UI_FEEDBACK_CONFLICT_DIALOG: "/ui/feedback/conflictDialog",

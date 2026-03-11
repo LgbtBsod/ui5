@@ -421,6 +421,111 @@ def _date_ms_from_any(value) -> int:
         return 0
 
 
+def _export_pick_text(value) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, (str, int, float, bool)):
+        return str(value).strip()
+    if isinstance(value, list):
+        for item in value:
+            resolved = _export_pick_text(item)
+            if resolved:
+                return resolved
+        return ""
+    if isinstance(value, dict):
+        for key in ("value", "key", "text", "value1", "low"):
+            if key in value and value.get(key) is not None:
+                resolved = _export_pick_text(value.get(key))
+                if resolved:
+                    return resolved
+        for key in ("items", "ranges"):
+            entries = value.get(key)
+            if isinstance(entries, list) and entries:
+                resolved = _export_pick_text(entries[0])
+                if resolved:
+                    return resolved
+    return ""
+
+
+def _normalize_export_limit(value) -> int:
+    try:
+        parsed = int(str(value or "").strip() or "200000")
+    except Exception:
+        parsed = 200000
+    return max(1, min(200000, parsed))
+
+
+def _normalize_export_search_contract(payload: dict | None) -> dict:
+    contract = payload if isinstance(payload, dict) else {}
+    return {
+        "filterId": _export_pick_text(contract.get("filterId")),
+        "filterDateFrom": _export_pick_text(contract.get("filterDateFrom")),
+        "filterDateTo": _export_pick_text(contract.get("filterDateTo")),
+        "filterLpc": _export_pick_text(contract.get("filterLpc")),
+        "filterProfession": _export_pick_text(contract.get("filterProfession")),
+        "filterStatus": _export_pick_text(contract.get("filterStatus")),
+        "searchMode": str(contract.get("searchMode") or "EXACT").strip().upper() or "EXACT",
+        "checksSegment": str(contract.get("checksSegment") or "ALL").strip().upper() or "ALL",
+        "barriersSegment": str(contract.get("barriersSegment") or "ALL").strip().upper() or "ALL",
+    }
+
+
+def _export_segment_match(segment: str, failed: bool) -> bool:
+    normalized = str(segment or "ALL").strip().upper() or "ALL"
+    if normalized == "FAILED":
+        return bool(failed)
+    if normalized == "SUCCESS":
+        return not bool(failed)
+    return True
+
+
+def _search_contract_matches(root: ChecklistRoot, contract: dict, db: Session) -> bool:
+    filter_id = str(contract.get("filterId") or "").strip().lower()
+    filter_date_from = _date_ymd_from_any(contract.get("filterDateFrom"))
+    filter_date_to = _date_ymd_from_any(contract.get("filterDateTo")) or filter_date_from
+    filter_lpc = str(contract.get("filterLpc") or "").strip().lower()
+    filter_profession = str(contract.get("filterProfession") or "").strip().lower()
+    filter_status = str(contract.get("filterStatus") or "").strip().upper()
+    search_mode = str(contract.get("searchMode") or "EXACT").strip().upper() or "EXACT"
+    checks_segment = str(contract.get("checksSegment") or "ALL").strip().upper() or "ALL"
+    barriers_segment = str(contract.get("barriersSegment") or "ALL").strip().upper() or "ALL"
+
+    root_id_hex = _hex(root.id)
+    root_date = str(root.date or "").strip()
+    root_status = _status_external(root.status)
+    root_lpc = str(root.lpc or "").strip()
+    root_lpc_text = _dict_text(db, "LPC", root_lpc) or root_lpc
+    root_profession = str(root.observed_position or "").strip()
+    root_profession_text = _dict_text(db, "PROFESSION", root_profession) or root_profession
+    checks_failed = any((c.status or "").upper() == "FAIL" for c in (root.checks or []))
+    barriers_failed = any(not bool(b.is_active) for b in (root.barriers or []))
+
+    matches = []
+    if filter_id:
+        matches.append(
+            filter_id in str(root.checklist_id or "").lower()
+            or filter_id in str(root_id_hex or "").lower()
+        )
+    if filter_date_from:
+        matches.append(bool(root_date) and root_date >= filter_date_from and (not filter_date_to or root_date <= filter_date_to))
+    if filter_lpc:
+        matches.append(filter_lpc in root_lpc.lower() or filter_lpc in root_lpc_text.lower())
+    if filter_profession:
+        matches.append(filter_profession in root_profession.lower() or filter_profession in root_profession_text.lower())
+    if filter_status:
+        matches.append(filter_status == str(root_status or "").upper())
+    if checks_segment != "ALL":
+        matches.append(_export_segment_match(checks_segment, checks_failed))
+    if barriers_segment != "ALL":
+        matches.append(_export_segment_match(barriers_segment, barriers_failed))
+
+    if not matches:
+        return True
+    if search_mode == "LOOSE":
+        return any(matches)
+    return all(matches)
+
+
 def _build_search_predicate(filter_expr: str | None):
     expr = str(filter_expr or "").strip()
     if not expr:
@@ -594,7 +699,7 @@ def _rate(items, pred) -> float:
 def _entity_metadata(entity_type: str, entity_set: str, key_value: str) -> dict:
     safe_key = str(key_value or "").replace("'", "''")
     return {
-        "type": f"Z_UI5_SRV.{entity_type}",
+        "type": f"Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.{entity_type}",
         "uri": f"{SERVICE_ROOT}/{entity_set}('{safe_key}')",
     }
 
@@ -685,6 +790,7 @@ def _to_basic(root: ChecklistRoot) -> dict:
         "RootKey": root_key,
         "LocationKey": root.location_key or "",
         "LocationName": root.location_name or root.location_text or "",
+        "LocationText": root.location_text or root.location_name or "",
         "Bukrs": root.bukrs or "",
         "ObserverPernr": root.observer_perner or "",
         "ObserverFullname": root.observer_fullname or "",
@@ -743,7 +849,7 @@ def _to_current_user_stub_removed_duplicate() -> None:
 
 def _permission_groups(profile: dict) -> list[dict]:
     groups: dict[str, dict] = {}
-    order = {"01": 1, "02": 2, "03": 3}
+    order = {"01": 1, "02": 2, "03": 3, "06": 4}
     for permission in profile.get("permissions") or []:
         code = str((permission or {}).get("code") or "").strip()
         if not code:
@@ -788,13 +894,12 @@ def _to_current_user(profile: dict) -> dict:
     return {
         "__metadata": _entity_metadata("CurrentUser", "CurrentUserSet", key),
         "Key": key,
-        "Uname": str(profile.get("uname") or ""),
         "FullName": str(profile.get("full_name") or ""),
         "PermissionsCsv": ",".join(permission_codes),
         "PermissionRulesJson": json.dumps(permissions, ensure_ascii=False),
-        "CanView": "01" in permission_codes,
+        "CanView": "03" in permission_codes,
         "CanEdit": "02" in permission_codes,
-        "CanDelete": "03" in permission_codes,
+        "CanDelete": "06" in permission_codes,
         "SummaryText": _current_user_summary(profile),
     }
 
@@ -1243,7 +1348,6 @@ def _import_payload(root_id: str | None = None, session_guid: str | None = None,
         "Changes": body.get("Changes") or [],
         "ClientAggChangedOn": body.get("ClientAggChangedOn"),
         "FullPayload": body.get("FullPayload") or body,
-        "Uname": body.get("Uname") or body.get("uname") or "ANON",
     }
     # Preserve lock-specific fields that must not be dropped
     for _k in ("Force", "StealFrom", "NewStatus"):
@@ -1259,10 +1363,9 @@ def _merge_query_and_payload(request: Request, payload: dict | None = None) -> d
     return merged
 
 
-def _lock_import_payload(action: str, root_id: str, session_guid: str, uname: str | None, payload: dict | None) -> dict:
+def _lock_import_payload(action: str, root_id: str, session_guid: str, payload: dict | None) -> dict:
     req = _import_payload(root_id=root_id, session_guid=session_guid, payload=payload)
     req["Action"] = action
-    req["Uname"] = uname or req.get("Uname") or ""
     return req
 
 
@@ -1562,10 +1665,9 @@ def checklist_permission_set(
     top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"),
     skip: int = Query(0, alias="$skip"),
     inlinecount: str | None = Query(None, alias="$inlinecount"),
-    uname: str | None = Query(None, alias="Uname"),
     db: Session = Depends(get_db),
 ):
-    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request, explicit_uname=uname)
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     filter = _normalize_filter_hex_keys(filter, fields=("RootKey",))
     rows, total = _apply_order_filter(
         db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)),
@@ -1581,11 +1683,11 @@ def checklist_permission_set(
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistPermissionSet({{entity_key}})")
-def checklist_permission_entity(entity_key: str, request: Request, uname: str | None = Query(None, alias="Uname"), db: Session = Depends(get_db)):
+def checklist_permission_entity(entity_key: str, request: Request, db: Session = Depends(get_db)):
     root, err = _load_root_or_error(db, entity_key)
     if err:
         return err
-    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request, explicit_uname=uname)
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     return odata_entity(_to_permission(root, resolved_uname, db=db))
 
 
@@ -1593,7 +1695,7 @@ def lock_control(payload: dict, db: Session):
     action = str(payload.get("Action") or "").upper()
     root_key = str(payload.get("RootKey") or "")
     session = str(payload.get("SessionGuid") or "")
-    uname = str(payload.get("Uname") or "").strip() or CurrentUserService.resolve_uname(db=db)
+    uname = CurrentUserService.resolve_uname(db=db)
     if not root_key:
         return _err(400, "VALIDATION_ERROR", "RootKey is required")
     root_uuid = _entity_key(root_key)
@@ -1653,7 +1755,7 @@ def lock_control(payload: dict, db: Session):
 
 
 @router.post(f"{SERVICE_ROOT}/LockAcquire")
-async def lock_acquire_function_import(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), uname: str | None = Query(None, alias="Uname"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def lock_acquire_function_import(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
     body = payload or {}
     if not body:
         try:
@@ -1663,14 +1765,13 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
     merged = _merge_query_and_payload(request, body)
     resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
-    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
-    return lock_control(_lock_import_payload("ACQUIRE", resolved_root_id, resolved_session_guid, resolved_uname, merged), db)
+    return lock_control(_lock_import_payload("ACQUIRE", resolved_root_id, resolved_session_guid, merged), db)
 
 
 @router.post(f"{SERVICE_ROOT}/LockHeartbeat")
-async def lock_heartbeat_function_import(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), uname: str | None = Query(None, alias="Uname"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def lock_heartbeat_function_import(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
     body = payload or {}
     if not body:
         try:
@@ -1680,14 +1781,13 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
     merged = _merge_query_and_payload(request, body)
     resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
-    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
-    return lock_control(_lock_import_payload("HEARTBEAT", resolved_root_id, resolved_session_guid, resolved_uname, merged), db)
+    return lock_control(_lock_import_payload("HEARTBEAT", resolved_root_id, resolved_session_guid, merged), db)
 
 
 @router.post(f"{SERVICE_ROOT}/LockRelease")
-async def lock_release_function_import(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), uname: str | None = Query(None, alias="Uname"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def lock_release_function_import(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
     body = payload or {}
     if not body:
         try:
@@ -1697,10 +1797,9 @@ async def lock_release_function_import(request: Request, root_id: str | None = Q
     merged = _merge_query_and_payload(request, body)
     resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
-    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
-    return lock_control(_lock_import_payload("RELEASE", resolved_root_id, resolved_session_guid, resolved_uname, merged), db)
+    return lock_control(_lock_import_payload("RELEASE", resolved_root_id, resolved_session_guid, merged), db)
 
 
 @router.post(f"{SERVICE_ROOT}/AutoSave")
@@ -1776,7 +1875,7 @@ def create_checklist(payload: dict, response: Response, db: Session = Depends(ge
 
 
 @router.post(f"{SERVICE_ROOT}/CopyChecklist")
-async def copy_checklist(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), uname: str | None = Query(None, alias="Uname"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def copy_checklist(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
     body = payload or {}
     if not body:
         try:
@@ -1931,36 +2030,94 @@ async def get_hierarchy(request: Request, date_check: str | None = Query(None, a
 
 @router.post(f"{SERVICE_ROOT}/ReportExport")
 def report_export(payload: dict, db: Session = Depends(get_db)):
+    payload = payload if isinstance(payload, dict) else {}
+    selection_mode = str(payload.get("SelectionMode") or "").strip().lower()
+    entity = str(payload.get("Entity") or "screen").strip().lower() or "screen"
+    export_limit = _normalize_export_limit(payload.get("Limit") or payload.get("limit"))
     root_keys = payload.get("RootKeys") or payload.get("keys") or payload.get("ids") or []
-    # Support single RootKey param (from callFunction with single key)
+
     if not root_keys:
         single_key = payload.get("RootKey") or payload.get("root_id") or ""
         if single_key:
             root_keys = [single_key]
+
+    root_keys = [str(value or "").strip() for value in root_keys if str(value or "").strip()]
+    if root_keys and len(root_keys) > export_limit:
+        return _err(400, "EXPORT_LIMIT_EXCEEDED", "Selected export exceeds configured limit")
+
+    roots = []
+    if root_keys:
+        roots_by_key = {}
+        for key in root_keys:
+            root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(key)), ChecklistRoot.is_deleted.isnot(True)).first()
+            if root:
+                roots_by_key[str(key)] = root
+        roots = [roots_by_key[key] for key in root_keys if key in roots_by_key]
+    elif selection_mode == "all":
+        search_contract = _normalize_export_search_contract(payload.get("SearchContract"))
+        roots = [
+            root for root in db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)).all()
+            if _search_contract_matches(root, search_contract, db)
+        ]
+
     rows = []
-    for key in root_keys:
-        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(key))).first()
-        if not root:
-            continue
+    for root in roots:
         base = _to_search(root, db=db)
         checks = [_to_check(c) for c in root.checks]
         barriers = [_to_barrier(b) for b in root.barriers]
-        if not checks and not barriers:
+        base_row = {
+            "RootKey": base["Key"],
+            "Id": base["Id"],
+            "Lpc": base.get("Lpc", ""),
+            "LpcText": base.get("LpcText", ""),
+            "Profession": base.get("Profession", ""),
+            "ProfessionText": base.get("ProfessionText", ""),
+            "LocationKey": base.get("LocationKey", ""),
+            "Status": base.get("Status", ""),
+            "EquipName": base.get("EquipName", ""),
+            "ChangedOn": base.get("ChangedOn", ""),
+            "DateCheck": base["DateCheck"],
+        }
+
+        if entity == "screen":
             rows.append({
-                "RootKey": base["Key"], "Id": base["Id"],
-                "Lpc": base.get("Lpc", ""), "LpcText": base.get("LpcText", ""),
-                "Profession": base.get("Profession", ""), "ProfessionText": base.get("ProfessionText", ""),
-                "DateCheck": base["DateCheck"],
-                "ItemType": "ROOT", "Num": 0,
+                **base_row,
+                "ItemType": "ROOT",
+                "Num": 0,
                 "Text": "", "Comment": "", "Result": None
             })
+            continue
+
+        if entity == "check":
+            for c in checks:
+                txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "CHECK", DictionaryItem.key == str(c["ChecksNum"])).first()
+                rows.append({
+                    **base_row,
+                    "ItemType": "CHECK",
+                    "Num": c["ChecksNum"],
+                    "Text": txt.text if txt else c.get("Text", ""),
+                    "Comment": c["Comment"],
+                    "Result": c["Result"]
+                })
+            continue
+
+        if entity == "barrier":
+            for b in barriers:
+                txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "BARRIER", DictionaryItem.key == str(b["BarriersNum"])).first()
+                rows.append({
+                    **base_row,
+                    "ItemType": "BARRIER",
+                    "Num": b["BarriersNum"],
+                    "Text": txt.text if txt else b.get("Text", ""),
+                    "Comment": b["Comment"],
+                    "Result": b["Result"]
+                })
+            continue
+
         for c in checks:
             txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "CHECK", DictionaryItem.key == str(c["ChecksNum"])).first()
             rows.append({
-                "RootKey": base["Key"], "Id": base["Id"],
-                "Lpc": base.get("Lpc", ""), "LpcText": base.get("LpcText", ""),
-                "Profession": base.get("Profession", ""), "ProfessionText": base.get("ProfessionText", ""),
-                "DateCheck": base["DateCheck"],
+                **base_row,
                 "ItemType": "CHECK", "Num": c["ChecksNum"],
                 "Text": txt.text if txt else c.get("Text", ""),
                 "Comment": c["Comment"], "Result": c["Result"]
@@ -1976,6 +2133,8 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
                 "Text": txt.text if txt else b.get("Text", ""),
                 "Comment": b["Comment"], "Result": b["Result"]
             })
+    if len(rows) > export_limit:
+        return _err(400, "EXPORT_LIMIT_EXCEEDED", "Export exceeds configured limit")
     return odata_collection(rows)
 
 

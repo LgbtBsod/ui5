@@ -110,14 +110,14 @@
 
                 <ToolbarSpacer/>
 
-                <BusyIndicator visible="{= ${state>/isBusy} || ${state>/saveInFlight} }" size="1rem" class="sapUiTinyMarginEnd">
+                <BusyIndicator visible="{= ${state>/ui/busy/detail} || ${state>/saveInFlight} }" size="1rem" class="sapUiTinyMarginEnd">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </BusyIndicator>
 
                 <Button icon="sap-icon://undo"
                         text="{i18n>objectCancel}"
                         visible="{= ${state>/mode} !== 'READ' &amp;&amp; !!${state>/isDirty} }"
-                        enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
+                        enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onCancelEditFromDetail"
                         tooltip="{i18n>objectCancel}"
                         class="chkRipple">
@@ -130,7 +130,7 @@
                 <Button icon="sap-icon://nav-back"
                         text="{i18n>closeButton}"
                         type="Transparent"
-                        enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
+                        enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onCloseDetail"
                         tooltip="{i18n>closeDetails}"
                         class="detailRailCloseAction chkRipple">
@@ -142,7 +142,7 @@
                 <Button icon="sap-icon://save" type="Emphasized"
                         text="{i18n>objectSave}"
                         visible="{= ${state>/mode} !== 'READ' }"
-                        enabled="{= !${state>/isBusy} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
+                        enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onSaveDetail"
                         tooltip="{i18n>objectSave}"
                         class="chkRipple">
@@ -153,7 +153,7 @@
                         text="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
                         type="{= ${view>/deleteChecklistConfirmArmed} ? 'Transparent' : 'Reject' }"
                         visible="{parts:[{path:'state>/mode'},{path:'selected>/root/id'}], formatter:'.formatDeleteChecklistVisible'}"
-                        enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
+                        enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onArmDeleteChecklist"
                         tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
                         class="chkRipple">
@@ -164,7 +164,7 @@
                         text="{i18n>deleteConfirmButton}"
                         type="Reject"
                         visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${state>/mode} === 'EDIT' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
-                        enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
+                        enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onConfirmDeleteChecklist"
                         tooltip="{i18n>deleteConfirmButton}"
                         class="chkRipple">
@@ -175,7 +175,7 @@
                         type="Transparent"
                         press=".onCopyDetailLink"
                         tooltip="{i18n>detailCopyLinkTooltip}"
-                        enabled="{= !${state>/isBusy} }"
+                        enabled="{= !${state>/ui/busy/detail} }"
                         class="chkRipple"
                         visible="{path:'selected>/root/id', formatter:'.formatCopyLinkVisible'}">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
@@ -192,7 +192,7 @@
                 <Button icon="sap-icon://inspection"
                         text="{i18n>validateButton}"
                         visible="{= ${state>/mode} !== 'READ' }"
-                        enabled="{= !${state>/isBusy} &amp;&amp; !${state>/lockOperationPending} }"
+                        enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onValidateChecklist"
                         tooltip="{i18n>validateButton}"
                         class="chkRipple">

@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (CurrentUserProfile) {
     "use strict";
 
-    var DEFAULT_CODE_ORDER = ["01", "02", "03"];
+    var DEFAULT_CODE_ORDER = ["01", "02", "03", "06"];
 
     function buildPermissionSheets(aPermissionRules, mOptions) {
         var mGroups = {};

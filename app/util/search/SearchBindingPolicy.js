@@ -52,7 +52,7 @@ sap.ui.define([
         }
         applySortAndGroupPolicy(oBindingParams, mState);
 
-        var iMax = SearchMaxResults.resolveBackendTop(mState);
+        var iMax = SearchMaxResults.resolveSearchFetchLimit(mState);
         oBindingParams.parameters = oBindingParams.parameters || {};
         if (iMax > 0) {
             oBindingParams.parameters.$top = iMax;

@@ -7,15 +7,82 @@ sap.ui.define([
     "use strict";
 
     var DENIED_ILLUSTRATION = "assets/illustrations/detail-access-denied.svg";
+    var OPERATIONS = {
+        CREATE: "01",
+        CHANGE: "02",
+        DISPLAY: "03",
+        DELETE: "06"
+    };
 
-    function normalizePermission(oPermission, sRootId) {
-        return AccessPayload.normalizePermission(oPermission, sRootId, {
-            reasonCode: "AUTHORIZED"
+    function resolveRequestedActivity(mOptions) {
+        var sActivity = String((mOptions && (mOptions.activity || mOptions.actvt)) || "").trim();
+        return sActivity || OPERATIONS.DISPLAY;
+    }
+
+    function activityAllowed(oPermission, sActivity) {
+        var oResolved = oPermission || {};
+        switch (String(sActivity || "").trim()) {
+        case OPERATIONS.CREATE:
+            return !!oResolved.canCreate;
+        case OPERATIONS.CHANGE:
+            return !!oResolved.canEdit;
+        case OPERATIONS.DELETE:
+            return !!oResolved.canDelete;
+        case OPERATIONS.DISPLAY:
+        default:
+            return !!oResolved.canView;
+        }
+    }
+
+    function defaultDeniedReason(sActivity) {
+        switch (String(sActivity || "").trim()) {
+        case OPERATIONS.CREATE:
+            return "NO_CREATE_PERMISSION";
+        case OPERATIONS.CHANGE:
+            return "NO_EDIT_PERMISSION";
+        case OPERATIONS.DELETE:
+            return "NO_DELETE_PERMISSION";
+        case OPERATIONS.DISPLAY:
+        default:
+            return "NO_VIEW_PERMISSION";
+        }
+    }
+
+    function normalizePermission(oPermission, sRootId, mOptions) {
+        var sRequestedActivity = resolveRequestedActivity(mOptions);
+        var oResolved = AccessPayload.normalizePermission(oPermission, sRootId, {
+            reasonCode: "AUTHORIZED",
+            requestedActivity: sRequestedActivity
+        });
+        var bAllowed = activityAllowed(oResolved, sRequestedActivity);
+
+        if (sRequestedActivity === OPERATIONS.CREATE && !Object.prototype.hasOwnProperty.call(oResolved, "canCreate")) {
+            oResolved.canCreate = !!(oPermission && (oPermission.canCreate || oPermission.CanCreate));
+            bAllowed = activityAllowed(oResolved, sRequestedActivity);
+        }
+        if (!bAllowed) {
+            oResolved.reasonCode = String(oResolved.reasonCode || defaultDeniedReason(sRequestedActivity)).trim() || defaultDeniedReason(sRequestedActivity);
+        }
+        oResolved.allowed = bAllowed;
+        return oResolved;
+    }
+
+    function deniedPermission(sRootId, sRequestedActivity, sReasonCode, sMessage) {
+        return normalizePermission({
+            rootId: sRootId,
+            canCreate: false,
+            canView: false,
+            canEdit: false,
+            canDelete: false,
+            reasonCode: sReasonCode || defaultDeniedReason(sRequestedActivity),
+            message: sMessage || ""
+        }, sRootId, {
+            activity: sRequestedActivity
         });
     }
 
     function buildAccessState(oPermission, bDenied) {
-        var oResolved = normalizePermission(oPermission);
+        var oResolved = normalizePermission(oPermission, (oPermission && oPermission.rootId) || "");
         return {
             denied: !!bDenied,
             rootId: oResolved.rootId,
@@ -38,7 +105,10 @@ sap.ui.define([
     }
 
     function openDeniedEffects(oPermission) {
-        return [
+        var oResolved = normalizePermission(oPermission, (oPermission && oPermission.rootId) || "", {
+            activity: OPERATIONS.DISPLAY
+        });
+        var aEffects = [
             Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
             Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
@@ -48,12 +118,15 @@ sap.ui.define([
             Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
             Effects.modelPatch("selected", "/", {}),
-            Effects.modelPatch("uiState", "/_detailSnapshot", {}),
-            Effects.modelPatch("uiState", "/_detailCurrent", {}),
+            Effects.modelPatch("snapshot", "/", {}),
             Effects.modelPatch("view", "/detailSkeletonBusy", false),
-            Effects.modelPatch("view", "/accessState", buildAccessState(oPermission, true)),
+            Effects.modelPatch("view", "/accessState", buildAccessState(oResolved, true)),
             Effects.toast("detailViewPermissionDenied", "warning")
         ];
+        if (oResolved.rootId && !CreateSentinel.isCreateId(oResolved.rootId)) {
+            aEffects.push(Effects.navigate("accessDenied", { id: oResolved.rootId }, true));
+        }
+        return aEffects;
     }
 
     function deniedActionEffects(oPermission, sTextKey, aExtraEffects) {
@@ -62,44 +135,39 @@ sap.ui.define([
         ]);
     }
 
-    function fetchPermission(mCtx, sRootId) {
+    function fetchPermission(mCtx, sRootId, mOptions) {
         var oRepo = mCtx && mCtx.repo;
         var sResolvedRootId = String(sRootId || "").trim();
+        var sRequestedActivity = resolveRequestedActivity(mOptions);
 
-        if (!sResolvedRootId || CreateSentinel.isCreateId(sResolvedRootId)) {
-            return Promise.resolve({
-                rootId: sResolvedRootId,
-                canView: true,
-                canEdit: true,
-                canDelete: false,
-                reasonCode: "CREATE_DRAFT"
-            });
-        }
         if (!oRepo || typeof oRepo.checkChecklistPermission !== "function") {
-            return Promise.resolve({
-                rootId: sResolvedRootId,
-                canView: true,
-                canEdit: true,
-                canDelete: true,
-                reasonCode: "CHECK_SKIPPED"
-            });
+            return Promise.resolve(deniedPermission(
+                sResolvedRootId,
+                sRequestedActivity,
+                "PERMISSION_CHECK_UNAVAILABLE",
+                "Permission backend is unavailable"
+            ));
         }
 
-        return Promise.resolve(oRepo.checkChecklistPermission({ rootId: sResolvedRootId })).then(function (oPermission) {
-            return normalizePermission(oPermission, sResolvedRootId);
+        return Promise.resolve(oRepo.checkChecklistPermission({
+            rootId: sResolvedRootId,
+            activity: sRequestedActivity
+        })).then(function (oPermission) {
+            return normalizePermission(oPermission, sResolvedRootId, {
+                activity: sRequestedActivity
+            });
         }).catch(function () {
-            // ChecklistPermissionSet may not exist on all Gateway backends - grant access and let server enforce
-            return {
-                rootId: sResolvedRootId,
-                canView: true,
-                canEdit: true,
-                canDelete: true,
-                reasonCode: "PERMISSION_CHECK_UNAVAILABLE"
-            };
+            return deniedPermission(
+                sResolvedRootId,
+                sRequestedActivity,
+                "PERMISSION_CHECK_FAILED",
+                "Permission could not be confirmed"
+            );
         });
     }
 
     return {
+        OPERATIONS: OPERATIONS,
         buildAccessState: buildAccessState,
         contentAccessEffects: contentAccessEffects,
         deniedActionEffects: deniedActionEffects,

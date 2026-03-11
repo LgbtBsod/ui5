@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (ComponentRuntimeSupport, ControllerViewStateRuntime, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (ComponentRuntimeSupport, ControllerViewStateRuntime, ModelStateRuntime, StatePaths) {
     "use strict";
 
     function formatSearchDateTime(vDate) {
@@ -25,18 +26,17 @@ sap.ui.define([
 
     function setLoadStatus(oController, mStatus) {
         var oStatus = mStatus || {};
-        ModelStateRuntime.setMany(oController, "state", {
-            "/isLoading": !!oStatus.isLoading,
-            "/isBusy": !!oStatus.isBusy,
+        var mState = {
             "/loadError": !!oStatus.loadError,
             "/loadErrorMessage": oStatus.loadError ? String(oStatus.loadErrorMessage || "Search request failed") : ""
-        });
+        };
+        mState[StatePaths.UI_BUSY_SEARCH_TABLE] = !!oStatus.isBusy;
+        ModelStateRuntime.setMany(oController, "state", mState);
     }
 
     function markLoading(oController) {
         ControllerViewStateRuntime.set(oController, "/tableBusy", true);
         setLoadStatus(oController, {
-            isLoading: true,
             isBusy: true,
             loadError: false
         });
@@ -45,7 +45,6 @@ sap.ui.define([
     function applyLoadError(oController, sErrorMessage) {
         setSettledViewState(oController, false, "REVIEW");
         setLoadStatus(oController, {
-            isLoading: false,
             isBusy: false,
             loadError: true,
             loadErrorMessage: sErrorMessage
@@ -56,7 +55,6 @@ sap.ui.define([
         var iCount = Array.isArray(aRows) ? aRows.length : 0;
         setSettledViewState(oController, iCount > 0, iCount > 0 ? "ANALYZE" : "DISCOVER");
         setLoadStatus(oController, {
-            isLoading: false,
             isBusy: false,
             loadError: false
         });

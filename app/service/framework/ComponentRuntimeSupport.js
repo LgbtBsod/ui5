@@ -31,6 +31,22 @@ sap.ui.define([
         return sNext;
     }
 
+    function ensureTabSessionId(oStateModel) {
+        var sCurrent = ModelStateRuntime.readOnModel(oStateModel, StatePaths.TAB_SESSION_ID, "");
+        var sStored = window.sessionStorage.getItem("pcct_tab_session_id") || "";
+        if (sCurrent) {
+            return sCurrent;
+        }
+        if (sStored) {
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_SESSION_ID, sStored);
+            return sStored;
+        }
+        var sNext = "T" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_SESSION_ID, sNext);
+        window.sessionStorage.setItem("pcct_tab_session_id", sNext);
+        return sNext;
+    }
+
     function formatHumanDateTime(vDate) {
         var oDate = vDate instanceof Date ? vDate : new Date(vDate || Date.now());
         if (Number.isNaN(oDate.getTime())) {
@@ -64,35 +80,33 @@ sap.ui.define([
     function syncUiStateMode(oStateModel, oUiStateModel) {
         ModelStateRuntime.setManyOnModel(oUiStateModel, {
             "/mode": ModelStateRuntime.readOnModel(oStateModel, "/mode", "READ") || "READ",
-            "/busy": !!(ModelStateRuntime.readOnModel(oStateModel, "/isBusy", false) || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)),
+            "/busy": !!(
+                ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_GLOBAL, false)
+                || ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_DETAIL, false)
+                || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)
+            ),
             "/currentRootKey": ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "",
             "/sessionGuid": ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || ""
         });
     }
 
-    function syncDetailCurrentFromSelected(oSelectedModel, oUiStateModel) {
-        var oSelected = oSelectedModel.getData() || {};
-        ModelStateRuntime.writeOnModel(oUiStateModel, "/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
+    function syncDetailCurrentFromSelected() {
+        return;
     }
 
-    function resolveDetailCurrent(oSelectedModel, oUiStateModel) {
+    function resolveDetailCurrent(oSelectedModel) {
         var oSelected = oSelectedModel.getData() || {};
-        var oCurrent = ModelStateRuntime.readOnModel(oUiStateModel, "/_detailCurrent", {}) || {};
         if (oSelected && oSelected.root) {
-            ModelStateRuntime.writeOnModel(oUiStateModel, "/_detailCurrent", ModelStateRuntime.clone(oSelected, {}));
-            return ModelStateRuntime.readOnModel(oUiStateModel, "/_detailCurrent", {}) || {};
+            return ModelStateRuntime.clone(oSelected, {});
         }
-        if (oCurrent && oCurrent.root) {
-            return oCurrent;
-        }
-        syncDetailCurrentFromSelected(oSelectedModel, oUiStateModel);
-        return ModelStateRuntime.readOnModel(oUiStateModel, "/_detailCurrent", {}) || {};
+        return ModelStateRuntime.clone(oSelected, {});
     }
 
     return {
         resolveBootDetailId: resolveBootDetailId,
         isCreateBootHash: isCreateBootHash,
         ensureSessionId: ensureSessionId,
+        ensureTabSessionId: ensureTabSessionId,
         formatHumanDateTime: formatHumanDateTime,
         eventPayload: eventPayload,
         applyLockProbeState: applyLockProbeState,

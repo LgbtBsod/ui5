@@ -104,10 +104,9 @@ sap.ui.define([
 
     DetailFacade.prototype.discardChanges = function (_i, c) {
         var oUiState = c && c.uiState;
-        var oSnapshot = (oUiState && oUiState.get("uiState", "/_detailSnapshot")) || {};
+        var oSnapshot = (oUiState && oUiState.get("snapshot", "/")) || {};
         return Promise.resolve({ ok: true, effects: [
             Effects.modelPatch("selected", "/", oSnapshot),
-            Effects.modelPatch("uiState", "/_detailCurrent", oSnapshot),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE")
         ]});

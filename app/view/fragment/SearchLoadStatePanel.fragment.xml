@@ -2,7 +2,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
     <VBox class="searchStatusStripStack sapUiTinyMarginBottom chkStack">
-        <VBox visible="{= ${state>/isLoading} &amp;&amp; !${state>/loadError} }" class="searchCustomBusyPanel sapUiTinyMarginBottom">
+        <VBox visible="{= ${state>/ui/busy/searchTable} &amp;&amp; !${state>/loadError} }" class="searchCustomBusyPanel sapUiTinyMarginBottom">
             <HBox class="searchCustomBusyHeader" alignItems="Center" justifyContent="SpaceBetween" renderType="Bare">
                 <Text id="busyPanelTitleText" text="{i18n>busyPanelTitle}" class="searchCustomBusyTitle"/>
                 <Text id="busyPanelSubtitleText" text="{i18n>busyPanelSubtitle}" class="searchCustomBusySubtitle"/>
@@ -42,7 +42,7 @@
                 text="{i18n>searchRetryAction}"
                 type="Transparent"
                 press=".onRetrySearchLoad"
-                enabled="{= !${state>/isLoading} }"/>
+                enabled="{= !${state>/ui/busy/searchTable} }"/>
         </HBox>
     </VBox>
 </core:FragmentDefinition>

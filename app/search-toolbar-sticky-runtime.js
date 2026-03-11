@@ -3,66 +3,52 @@
 
     var iFrame = 0;
     var oObserver = null;
+    var oToolbarObserver = null;
+    var oHost = null;
+    var oToolbar = null;
+    var bBound = false;
+    var bSearchRoute = false;
+
+    function onSearchRoute() {
+        var sHash = String(window.location.hash || "");
+        return sHash === "#" || sHash.indexOf("/search") >= 0;
+    }
 
     function resolveScrollHost() {
         var aNodes = Array.prototype.slice.call(document.querySelectorAll(".sapMPageEnableScrolling, .sapMPageScroll"));
-        var oHost = aNodes.find(function (oNode) {
+        var oResolved = aNodes.find(function (oNode) {
             return oNode && oNode.scrollHeight > oNode.clientHeight + 4;
         });
-        return oHost || document.scrollingElement || document.documentElement || document.body;
+        return oResolved || document.scrollingElement || document.documentElement || document.body;
     }
 
-    function resolveOffsetWithinHost(oNode, oHost) {
-        var oNodeRect;
-        var oHostRect;
-        if (!oNode || !oHost || !oNode.getBoundingClientRect || !oHost.getBoundingClientRect) {
-            return 0;
+    function clearToolbarState() {
+        if (!oToolbar) {
+            return;
         }
-        oNodeRect = oNode.getBoundingClientRect();
-        oHostRect = oHost.getBoundingClientRect();
-        return Math.round((oNodeRect.top - oHostRect.top) + (oHost.scrollTop || 0));
+        oToolbar.classList.remove("searchToolbarStickyRuntimeActive");
+        oToolbar.style.transform = "";
+        oToolbar.style.zIndex = "";
+        if (oToolbar.dataset) {
+            delete oToolbar.dataset.searchStickyRuntimeTranslateY;
+        }
+    }
+
+    function refreshTargets() {
+        oToolbar = document.querySelector(".searchResultsTable .sapUiCompSmartTableToolbar");
+        oHost = resolveScrollHost();
+        bSearchRoute = onSearchRoute();
+        if (!bSearchRoute || !oToolbar || !oHost) {
+            clearToolbarState();
+            return;
+        }
+        oToolbar.classList.add("searchToolbarStickyRuntimeActive");
+        oToolbar.style.transform = "";
+        oToolbar.style.zIndex = "11";
     }
 
     function applyResultsToolbarDock() {
-        var oToolbar;
-        var oShell;
-        var oHost;
-        var iCurrentTranslate;
-        var iNaturalTop;
-        var iShellTop;
-        var iShellHeight;
-        var iToolbarHeight;
-        var iTargetTop;
-        var iDesiredTranslate;
-        var iMaxTranslate;
-        var iTranslate;
-
-        if (String(window.location.hash || "").indexOf("/search") < 0 && String(window.location.hash || "") !== "#") {
-            return;
-        }
-
-        oToolbar = document.querySelector(".searchResultsTable .sapUiCompSmartTableToolbar");
-        oShell = document.querySelector(".searchResultsTable");
-        oHost = resolveScrollHost();
-        if (!oToolbar || !oShell || !oHost) {
-            return;
-        }
-
-        iCurrentTranslate = Number((oToolbar.dataset && oToolbar.dataset.searchStickyRuntimeTranslateY) || 0);
-        iNaturalTop = resolveOffsetWithinHost(oToolbar, oHost) - iCurrentTranslate;
-        iShellTop = resolveOffsetWithinHost(oShell, oHost);
-        iShellHeight = Math.round(oShell.getBoundingClientRect().height || 0);
-        iToolbarHeight = Math.round(oToolbar.getBoundingClientRect().height || 0);
-        iTargetTop = Math.round(parseFloat(getComputedStyle(oToolbar).top) || 0);
-        iDesiredTranslate = Math.max(0, Math.round((oHost.scrollTop || 0) + iTargetTop - iNaturalTop));
-        iMaxTranslate = Math.max(0, iShellTop + iShellHeight - iToolbarHeight - iNaturalTop - 8);
-        iTranslate = Math.min(iDesiredTranslate, iMaxTranslate);
-
-        oToolbar.style.transform = iTranslate > 0 ? "translateY(" + iTranslate + "px)" : "";
-        oToolbar.style.zIndex = "11";
-        if (oToolbar.dataset) {
-            oToolbar.dataset.searchStickyRuntimeTranslateY = String(iTranslate);
-        }
+        refreshTargets();
     }
 
     function scheduleApply() {
@@ -76,23 +62,39 @@
     }
 
     function bind() {
-        if (!oObserver && typeof MutationObserver === "function") {
-            oObserver = new MutationObserver(function () {
-                scheduleApply();
-            });
-            oObserver.observe(document.documentElement, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ["class", "style"]
-            });
+        if (bBound) {
+            scheduleApply();
+            return;
         }
+        bBound = true;
+        refreshTargets();
 
-        window.addEventListener("scroll", scheduleApply, { passive: true, capture: true });
         window.addEventListener("resize", scheduleApply, { passive: true });
         window.addEventListener("hashchange", scheduleApply, { passive: true });
-        document.addEventListener("click", scheduleApply, true);
-        setInterval(scheduleApply, 500);
+        document.addEventListener("transitionend", scheduleApply, true);
+        document.addEventListener("animationend", scheduleApply, true);
+
+        if (!oObserver && typeof MutationObserver === "function") {
+            oObserver = new MutationObserver(function () {
+                refreshTargets();
+                scheduleApply();
+            });
+            oObserver.observe(document.body || document.documentElement, {
+                childList: true,
+                subtree: true
+            });
+        }
+        if (!oToolbarObserver && typeof MutationObserver === "function") {
+            oToolbarObserver = new MutationObserver(scheduleApply);
+            if (oToolbar) {
+                oToolbarObserver.observe(oToolbar, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ["class", "style"]
+                });
+            }
+        }
         scheduleApply();
     }
 

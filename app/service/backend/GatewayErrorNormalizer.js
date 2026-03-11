@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy"
+], function (RequestResiliencePolicy) {
     "use strict";
 
     function parseJsonSafe(vRaw) {
@@ -49,6 +51,7 @@ sap.ui.define([], function () {
 
     function normalizeODataError(oError) {
         var oEnvelope = pickEnvelope(oError);
+        var mHeaders = parseResponseHeaders((oError && oError.responseHeaders) || {});
         var sCode = String(
             (oEnvelope && oEnvelope.code) ||
             (oError && (oError.code || oError.statusCode || oError.status)) ||
@@ -59,13 +62,23 @@ sap.ui.define([], function () {
             (oError && oError.message) ||
             "OData request failed"
         );
-        return {
+        var oNormalized = {
             code: sCode,
             message: sMessage,
             statusCode: Number((oError && (oError.statusCode || oError.status)) || 0) || 0,
             details: extractDetails(oEnvelope),
-            responseHeaders: parseResponseHeaders((oError && oError.responseHeaders) || {})
+            responseHeaders: mHeaders,
+            correlationId: String(
+                mHeaders["x-correlation-id"]
+                || mHeaders["x-request-id"]
+                || (oError && (oError.correlationId || oError.requestId))
+                || ""
+            ).trim()
         };
+        var oPolicy = RequestResiliencePolicy.classify((oError && oError.requestMethod) || "", oNormalized);
+        oNormalized.kind = oPolicy.kind;
+        oNormalized.retryable = !!oPolicy.retryable;
+        return oNormalized;
     }
 
     return {

@@ -53,6 +53,9 @@ sap.ui.define([], function () {
         selected: function (oController) {
             return resolveNamedModel(oController, "selected", true);
         },
+        snapshot: function (oController) {
+            return resolveNamedModel(oController, "snapshot", true);
+        },
         masterData: function (oController) {
             return resolveNamedModel(oController, "masterData", true);
         },

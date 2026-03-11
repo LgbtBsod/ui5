@@ -36,6 +36,7 @@ sap.ui.define([
 
     CacheValidationUseCase.prototype.execute = function (mInput, mCtx) {
         var sRootId = (mInput && mInput.rootId) || "";
+        var sEntityKind = (mInput && mInput.entityKind) || "detailSnapshot";
         var iTolerance = Number((mInput && mInput.toleranceMs) || 5500);
         var oCache = mCtx && mCtx.cache;
         var oLastChangeSet = mCtx && mCtx.lastChangeSet;
@@ -46,19 +47,29 @@ sap.ui.define([
             return Promise.resolve(Result.ok({ valid: false, reason: "cache_ports_missing" }));
         }
         return Promise.all([
-            Promise.resolve(oCache.read(sRootId)),
+            Promise.resolve(oCache.read(sRootId, sEntityKind)),
             Promise.resolve(oLastChangeSet.readAggChangedOn(sRootId))
         ]).then(function (a) {
-            var oSnap = a[0] || null;
+            var oEntry = a[0] || null;
+            var oSnap = oEntry && oEntry.payload || null;
             var iSrv = Number(a[1] || 0);
-            var iCli = toMs(readSnapshotStamp(oSnap));
+            var iCli = toMs((oEntry && oEntry.lastChangeSet) || readSnapshotStamp(oSnap));
             var bHasSnapshot = !!oSnap;
             var bValid = bHasSnapshot && Math.abs(iSrv - iCli) <= iTolerance;
             var bInvalidate = bHasSnapshot && !bValid;
-            var pInvalidate = (bInvalidate && typeof oCache.clear === "function") ? Promise.resolve(oCache.clear(sRootId)).catch(function () { return null; }) : Promise.resolve(null);
+            var pInvalidate = (bInvalidate && typeof oCache.clear === "function")
+                ? Promise.resolve(oCache.clear(sRootId, sEntityKind)).catch(function () { return null; })
+                : Promise.resolve(null);
             return pInvalidate.then(function () {
                 emit(mCtx, { rootId: sRootId, valid: bValid, invalidated: bInvalidate, serverStamp: iSrv, cacheStamp: iCli });
-                return Result.ok({ valid: bValid, invalidated: bInvalidate, serverStamp: iSrv, cacheStamp: iCli, snapshot: bValid ? oSnap : null });
+                return Result.ok({
+                    cacheEntry: oEntry,
+                    valid: bValid,
+                    invalidated: bInvalidate,
+                    serverStamp: iSrv,
+                    cacheStamp: iCli,
+                    snapshot: bValid ? oSnap : null
+                });
             });
         });
     };

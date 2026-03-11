@@ -38,6 +38,9 @@ sap.ui.define([
                 }
                 return Result.ok({ analyticsRail: oSummary || {} }, aEffects);
             }).catch(function (oError) {
+                if (String((oError && oError.code) || "").trim().toUpperCase() === "OUTDATED_RESPONSE") {
+                    return Result.ok({ ignored: true }, []);
+                }
                 var aEffects = [
                     Effects.modelPatch("view", "/analyticsError", String((oError && oError.message) || "Analytics unavailable"))
                 ];

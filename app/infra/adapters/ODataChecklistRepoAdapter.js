@@ -2,12 +2,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/AttachmentRepoSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayIdentitySupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
-], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, GatewayIdentitySupport, AccessPayload, DetailRuntimePayload, CreateSentinel, GatewayClient) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/CurrentUserProfile"
+], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, AccessPayload, DetailRuntimePayload, CreateSentinel, GatewayClient, CurrentUserProfile) {
     "use strict";
     function rootId(mArgs) { return DetailRuntimePayload.rootId(mArgs); }
     function normalizeRootKey(sRootId) { return DetailRuntimePayload.normalizeRootKey(sRootId); }
@@ -103,7 +103,7 @@ sap.ui.define([
             OBSERVED_ORGUNIT: o.ObservedOrgUnit || o.OBSERVED_ORGUNIT || "",
             LOCATION_KEY: o.LocationKey || o.LOCATION_KEY || "",
             LOCATION_NAME: o.LocationName || o.LOCATION_NAME || "",
-            LOCATION_TEXT: o.LocationName || o.LOCATION_TEXT || "",
+            LOCATION_TEXT: o.LocationText || o.LOCATION_TEXT || "",
             LPC_KEY: o.Lpc || o.LPC_KEY || "",
             LPC_TEXT: o.LpcText || o.LPC_TEXT || o.Lpc || "",
             PROF_KEY: o.Profession || o.PROF_KEY || "",
@@ -200,37 +200,111 @@ sap.ui.define([
         });
     }
 
+    function parseGrantedOperations(vValue) {
+        return String(vValue || "").split(",").map(function (sCode) {
+            return String(sCode || "").trim();
+        }).filter(Boolean);
+    }
+
+    function normalizeChecklistIds(aIds) {
+        var mSeen = {};
+        return (aIds || []).reduce(function (aAcc, sId) {
+            var sNormalized = String(sId || "").trim();
+            if (!sNormalized || mSeen[sNormalized]) {
+                return aAcc;
+            }
+            mSeen[sNormalized] = true;
+            aAcc.push(sNormalized);
+            return aAcc;
+        }, []);
+    }
+
+    function permissionFromCurrentUser(oResponse, sActivity) {
+        var oProfile = CurrentUserProfile.normalizeCurrentUser(oResponse || {}, "");
+        var aCodes = Array.isArray(oProfile.permissionRules)
+            ? oProfile.permissionRules.map(function (oRule) {
+                return String((oRule && oRule.code) || "").trim();
+            }).filter(Boolean)
+            : [];
+        var bCanCreate = aCodes.indexOf("01") >= 0;
+        var bCanEdit = aCodes.indexOf("02") >= 0;
+        var bCanView = aCodes.indexOf("03") >= 0;
+        var bCanDelete = aCodes.indexOf("06") >= 0;
+        var mReasonCode = {
+            "01": bCanCreate ? "AUTHORIZED" : "NO_CREATE_AUTH",
+            "02": bCanEdit ? "AUTHORIZED" : "NO_EDIT_AUTH",
+            "03": bCanView ? "AUTHORIZED" : "NO_VIEW_AUTH",
+            "06": bCanDelete ? "AUTHORIZED" : "NO_DELETE_AUTH"
+        };
+        return AccessPayload.normalizePermission({
+            rootId: "",
+            userId: "",
+            canCreate: bCanCreate,
+            canView: bCanView,
+            canEdit: bCanEdit,
+            canDelete: bCanDelete,
+            reasonCode: mReasonCode[String(sActivity || "").trim()] || "NO_VIEW_AUTH",
+            message: "",
+            requestedActivity: sActivity
+        }, "", {
+            requestedActivity: sActivity
+        });
+    }
+
     function checkChecklistPermission(mArgs, mDeps) {
         var sRootId = normalizeRootKey(rootId(mArgs));
+        var sActivity = String((mArgs && (mArgs.activity || mArgs.ACTVT)) || "").trim();
         if (!sRootId) {
-            return Promise.resolve(AccessPayload.normalizePermission({
-                rootId: sRootId,
-                canView: true,
-                canEdit: true,
-                canDelete: false,
-                reasonCode: "CREATE_DRAFT"
-            }, sRootId));
+            if (sActivity !== "01") {
+                return Promise.resolve(AccessPayload.normalizePermission({
+                    rootId: "",
+                    userId: "",
+                    canCreate: false,
+                    canView: false,
+                    canEdit: false,
+                    canDelete: false,
+                    reasonCode: "INVALID_PERMISSION_TARGET",
+                    message: "RootKey is required for non-create permissions",
+                    requestedActivity: sActivity
+                }, "", {
+                    requestedActivity: sActivity
+                }));
+            }
+            return GatewayAdapterSupport.get("CurrentUserSet('CURRENT')", {
+                "__ts": Date.now()
+            }).then(function (oResponse) {
+                return permissionFromCurrentUser(oResponse, sActivity);
+            });
         }
-        return GatewayAdapterSupport.get("ChecklistPermissionSet('" + sRootId + "')").then(function (oResponse) {
+        return GatewayAdapterSupport.get("ChecklistPermissionSet('" + sRootId + "')", {
+            ACTVT: sActivity
+        }).then(function (oResponse) {
             var oPermission = firstRow(oResponse);
-            return AccessPayload.normalizePermission(oPermission, sRootId, {
-                reasonCode: "AUTHORIZED"
+            var aGranted = parseGrantedOperations(oPermission && oPermission.GrantedOperations);
+            return AccessPayload.normalizePermission({
+                rootId: sRootId,
+                userId: String((oPermission && (oPermission.UserId || oPermission.userId)) || "").trim(),
+                canCreate: aGranted.indexOf("01") >= 0,
+                canView: !!(oPermission && oPermission.CanView) || aGranted.indexOf("03") >= 0,
+                canEdit: !!(oPermission && oPermission.CanEdit) || aGranted.indexOf("02") >= 0,
+                canDelete: !!(oPermission && oPermission.CanDelete) || aGranted.indexOf("06") >= 0,
+                reasonCode: String((oPermission && (oPermission.ReasonCode || oPermission.reasonCode)) || "AUTHORIZED").trim() || "AUTHORIZED",
+                message: String((oPermission && (oPermission.Message || oPermission.message)) || "").trim(),
+                requestedActivity: sActivity
+            }, sRootId, {
+                requestedActivity: sActivity
             });
         });
     }
 
     function create(mDeps) {
-        function withUserName(oPayload) {
-            return GatewayIdentitySupport.withUserName(oPayload, mDeps || {});
-        }
-
         return {
             loadDetailSnapshot: loadDetailSnapshot,
             saveChecklist: function (mArgs) {
                 var sRootId = rootId(mArgs);
                 var oDelta = (mArgs && mArgs.delta) || {};
                 var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-                var oRequest = withUserName(normalizeSavePayload(sRootId, oDelta));
+                var oRequest = normalizeSavePayload(sRootId, oDelta);
                 if (sSessionGuid) {
                     oRequest.SessionGuid = sSessionGuid;
                     oRequest.session_guid = sSessionGuid;
@@ -243,7 +317,7 @@ sap.ui.define([
             },
             createChecklist: function (mArgs) {
                 var oCurrent = (mArgs && mArgs.delta) || {};
-                var oRequest = withUserName(normalizeSavePayload("", oCurrent));
+                var oRequest = normalizeSavePayload("", oCurrent);
                 return GatewayAdapterSupport.request({ method: "POST_ENTITY", path: "CreateChecklist", body: oRequest }).then(function (oServerPayload) {
                     return enrichServerSnapshot(oServerPayload, "").then(function (oServerSnapshot) {
                         return { serverSnapshot: oServerSnapshot || {}, lastChangeSet: {}, serverResponse: oServerPayload || {} };
@@ -253,10 +327,10 @@ sap.ui.define([
             copyChecklist: function (mArgs) {
                 var sRootId = rootId(mArgs);
                 var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-                return GatewayAdapterSupport.postFunction("CopyChecklist", withUserName({
+                return GatewayAdapterSupport.postFunction("CopyChecklist", {
                     RootId: normalizeRootKey(sRootId),
                     SessionGuid: sSessionGuid
-                })).then(function (oServerPayload) {
+                }).then(function (oServerPayload) {
                     return enrichServerSnapshot(oServerPayload, "").then(function (oServerSnapshot) {
                         return { serverSnapshot: oServerSnapshot || {}, serverResponse: oServerPayload || {} };
                     });
@@ -266,7 +340,7 @@ sap.ui.define([
                 var sRootId = rootId(mArgs);
                 var oDelta = (mArgs && mArgs.delta) || {};
                 var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-                var oRequest = withUserName(normalizeSavePayload(sRootId, oDelta));
+                var oRequest = normalizeSavePayload(sRootId, oDelta);
                 if (sSessionGuid) {
                     oRequest.SessionGuid = sSessionGuid;
                     oRequest.session_guid = sSessionGuid;
@@ -279,6 +353,27 @@ sap.ui.define([
             },
             setChecklistStatus: setChecklistStatus,
             deleteChecklist: deleteChecklist,
+            exportSearchResults: function (mArgs) {
+                var aRootIds = normalizeChecklistIds((mArgs && (mArgs.rootIds || mArgs.RootKeys)) || []);
+                var oPayload = {
+                    Entity: String((mArgs && mArgs.entity) || "screen").trim() || "screen",
+                    Limit: Math.max(1, Number((mArgs && mArgs.limit) || 0) || 200000),
+                    SelectionMode: String((mArgs && mArgs.selectionMode) || (aRootIds.length ? "selected" : "all")).trim() || "all"
+                };
+                if (aRootIds.length) {
+                    oPayload.RootKeys = aRootIds;
+                }
+                if (!aRootIds.length && mArgs && mArgs.searchContract) {
+                    oPayload.SearchContract = Object.assign({}, mArgs.searchContract);
+                }
+                return GatewayAdapterSupport.request({
+                    method: "POST_ENTITY",
+                    path: "ReportExport",
+                    body: oPayload
+                }).then(function (oResponse) {
+                    return GatewayAdapterSupport.asArray(oResponse);
+                });
+            },
             checkChecklistPermission: function (mArgs) {
                 return checkChecklistPermission(mArgs, mDeps || {});
             },

@@ -13,7 +13,7 @@ from playwright.sync_api import sync_playwright
 
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
-SERVICE_ROOT = "http://127.0.0.1:8000/sap/opu/odata/sap/Z_UI5_SRV"
+SERVICE_ROOT = "http://127.0.0.1:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV"
 REPORT_PATH = Path("docs/ui-runtime-audit-latest.json")
 
 

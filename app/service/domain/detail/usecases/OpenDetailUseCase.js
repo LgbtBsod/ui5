@@ -30,33 +30,67 @@ sap.ui.define([
         var sRootId = UseCaseInputUtils.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
+        var sReadyAt = new Date().toISOString();
 
         if (CreateSentinel.isCreateId(sRootId)) {
             var oDraft = (oUiState && oUiState.get("selected", "/")) || {};
-            return Promise.resolve(Result.ok({ snapshot: oDraft || {} }, [
-                Effects.modelPatch("view", "/accessState", {
-                    denied: false,
-                    rootId: CreateSentinel.VALUE,
-                    userId: "",
-                    canView: true,
-                    canEdit: true,
-                    canDelete: false,
-                    reasonCode: "CREATE_DRAFT",
-                    titleKey: "",
-                    messageKey: "",
-                    illustrationSrc: "assets/illustrations/detail-access-denied.svg"
-                }),
-                Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
-                Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "CREATE"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                Effects.modelPatch("uiState", "/_detailSnapshot", oDraft || {}),
-                Effects.modelPatch("uiState", "/_detailCurrent", oDraft || {}),
-                Effects.modelPatch("selected", "/", oDraft || {}),
-                Effects.modelPatch("selected", "/attachments", (oDraft && oDraft.attachments) || []),
-                Effects.modelPatch("view", "/detailSkeletonBusy", false)
-            ]));
+            return DetailAuthorizationSupport.fetchPermission(mCtx || {}, "", {
+                activity: DetailAuthorizationSupport.OPERATIONS.CREATE
+            }).then(function (oPermission) {
+                if (!oPermission.allowed) {
+                    return Result.fail({ message: "No permission to create checklist", code: "NO_CREATE_PERMISSION" }, DetailAuthorizationSupport.deniedActionEffects(oPermission, "detailCreatePermissionDenied", [
+                        Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                            status: "denied",
+                            ready: false,
+                            readyAt: "",
+                            error: "NO_CREATE_PERMISSION",
+                            rootId: CreateSentinel.VALUE,
+                            mode: "READ",
+                            permissionKnown: true,
+                            lockKnown: true
+                        }),
+                        Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
+                        Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
+                        Effects.modelPatch("selected", "/", {}),
+                        Effects.modelPatch("snapshot", "/", {}),
+                        Effects.modelPatch("view", "/detailSkeletonBusy", false),
+                        Effects.navigate("search", {}, true)
+                    ]));
+                }
+                return Result.ok({ snapshot: oDraft || {} }, [
+                    Effects.modelPatch("view", "/accessState", {
+                        denied: false,
+                        rootId: CreateSentinel.VALUE,
+                        userId: "",
+                        canView: false,
+                        canEdit: true,
+                        canDelete: false,
+                        reasonCode: "CREATE_DRAFT",
+                        titleKey: "",
+                        messageKey: "",
+                        illustrationSrc: "assets/illustrations/detail-access-denied.svg"
+                    }),
+                    Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                        status: "ready",
+                        ready: true,
+                        readyAt: sReadyAt,
+                        error: "",
+                        rootId: CreateSentinel.VALUE,
+                        mode: "CREATE",
+                        permissionKnown: true,
+                        lockKnown: true
+                    }),
+                    Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
+                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "CREATE"),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+                    Effects.modelPatch("snapshot", "/", oDraft || {}),
+                    Effects.modelPatch("selected", "/", oDraft || {}),
+                    Effects.modelPatch("selected", "/attachments", (oDraft && oDraft.attachments) || []),
+                    Effects.modelPatch("view", "/detailSkeletonBusy", false)
+                ]);
+            });
         }
 
         if (!sRootId || !oRepo || typeof oRepo.loadDetailSnapshot !== "function") {
@@ -65,10 +99,23 @@ sap.ui.define([
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
-        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId).then(function (oPermission) {
+        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
+            activity: DetailAuthorizationSupport.OPERATIONS.DISPLAY
+        }).then(function (oPermission) {
             var pValidation;
-            if (!oPermission.canView) {
-                return Result.fail({ message: "No permission to open checklist", code: "NO_VIEW_PERMISSION" }, DetailAuthorizationSupport.openDeniedEffects(oPermission));
+            if (!oPermission.allowed) {
+                return Result.fail({ message: "No permission to open checklist", code: "NO_VIEW_PERMISSION" }, [
+                    Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                        status: "denied",
+                        ready: false,
+                        readyAt: "",
+                        error: "NO_VIEW_PERMISSION",
+                        rootId: sRootId,
+                        mode: "READ",
+                        permissionKnown: true,
+                        lockKnown: false
+                    })
+                ].concat(DetailAuthorizationSupport.openDeniedEffects(oPermission)));
             }
             pValidation = (oCacheValidation && typeof oCacheValidation.execute === "function")
                 ? Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
@@ -107,17 +154,36 @@ sap.ui.define([
             var oPermission = oResolved && oResolved.permission;
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sRootId);
             return Result.ok({ snapshot: oSnapshot || {} }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat([
+                Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                    status: "ready",
+                    ready: true,
+                    readyAt: sReadyAt,
+                    error: "",
+                    rootId: sRootId,
+                    mode: "READ",
+                    permissionKnown: true,
+                    lockKnown: true
+                }),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
-                Effects.modelPatch("uiState", "/_detailSnapshot", oSnapshot || {}),
-                Effects.modelPatch("uiState", "/_detailCurrent", oSnapshot || {}),
+                Effects.modelPatch("snapshot", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/attachments", aLoadedAttachments),
                 Effects.modelPatch("view", "/detailSkeletonBusy", false)
             ]));
         }).catch(function (oError) {
             return Result.fail(oError, [
+                Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                    status: "error",
+                    ready: false,
+                    readyAt: "",
+                    error: String((oError && oError.message) || "detail_open_failed"),
+                    rootId: sRootId,
+                    mode: "READ",
+                    permissionKnown: false,
+                    lockKnown: false
+                }),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("view", "/detailSkeletonBusy", false)
             ]);

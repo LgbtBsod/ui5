@@ -163,7 +163,16 @@ sap.ui.define([
         },
 
         _markStartupReady: function () {
+            var oStateModel;
+            var bAppReady;
+            var bIsLoading;
             if (this._bStartupReadyMarked) {
+                return;
+            }
+            oStateModel = this._getStateModel();
+            bAppReady = !!ModelStateRuntime.readOnModel(oStateModel, "/readiness/app/ready", false);
+            bIsLoading = !!ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false);
+            if (!bAppReady || bIsLoading) {
                 return;
             }
             this._bStartupReadyMarked = true;

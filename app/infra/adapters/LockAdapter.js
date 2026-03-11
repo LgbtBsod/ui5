@@ -1,7 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayIdentitySupport"
-], function (GatewayAdapterSupport, GatewayIdentitySupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport"
+], function (GatewayAdapterSupport) {
     "use strict";
 
     function normalizeLockToken(mArgs) {
@@ -59,15 +58,11 @@ sap.ui.define([
     }
 
     function create(mDeps) {
-        function withUserName(oPayload) {
-            return GatewayIdentitySupport.withUserName(oPayload, mDeps || {});
-        }
-
         return {
             acquire: function (mArgs) {
                 var sRootId = mArgs && mArgs.rootId;
                 var sSession = normalizeLockToken(mArgs);
-                return GatewayAdapterSupport.postFunction("LockAcquire", withUserName({ RootId: sRootId, SessionGuid: sSession, Force: !!(mArgs && mArgs.force), StealFrom: (mArgs && mArgs.stealFrom) || (mArgs && mArgs.force ? sSession : "") })).then(function (oResult) {
+                return GatewayAdapterSupport.postFunction("LockAcquire", { RootId: sRootId, SessionGuid: sSession, Force: !!(mArgs && mArgs.force), StealFrom: (mArgs && mArgs.stealFrom) || (mArgs && mArgs.force ? sSession : "") }).then(function (oResult) {
                     return normalizeResult(oResult, sSession);
                 }).catch(function (oError) {
                     return { ok: false, code: "ERROR", killed: false, messageKey: "lockAcquireFailed", raw: oError || {} };
@@ -76,7 +71,7 @@ sap.ui.define([
             heartbeat: function (mArgs) {
                 var sRootId = mArgs && mArgs.rootId;
                 var sToken = normalizeLockToken(mArgs);
-                return GatewayAdapterSupport.postFunction("LockHeartbeat", withUserName({ RootId: sRootId, SessionGuid: sToken })).then(function (oResult) {
+                return GatewayAdapterSupport.postFunction("LockHeartbeat", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
                     return normalizeResult(oResult, sToken);
                 }).catch(function (oError) {
                     return { ok: false, code: "ERROR", killed: false, messageKey: "lockHeartbeatFailed", raw: oError || {} };
@@ -94,7 +89,7 @@ sap.ui.define([
             release: function (mArgs) {
                 var sRootId = mArgs && mArgs.rootId;
                 var sToken = normalizeLockToken(mArgs);
-                return GatewayAdapterSupport.postFunction("LockRelease", withUserName({ RootId: sRootId, SessionGuid: sToken })).then(function (oResult) {
+                return GatewayAdapterSupport.postFunction("LockRelease", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
                     var oNormalized = normalizeResult(oResult, sToken);
                     return { ok: !!oNormalized.ok, code: oNormalized.code || "OK", released: true, killed: !!oNormalized.killed, messageKey: oNormalized.messageKey || "" };
                 }).catch(function (oError) {

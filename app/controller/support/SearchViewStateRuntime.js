@@ -99,8 +99,8 @@ sap.ui.define([
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
         var oStateModel = ControllerModelRuntime.state(oController);
         var oStateData = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
-        var iVisibleCap = SearchMaxResults.resolveMaxResults(oStateData) || 100;
-        var iBackendTop = SearchMaxResults.resolveBackendTop(oStateData);
+        var iVisibleCap = SearchMaxResults.resolveGrowingPageSize(oStateData) || 100;
+        var iBackendTop = SearchMaxResults.resolveSearchFetchLimit(oStateData);
         var iThreshold = iVisibleCap;
         var bGrowing = true;
 

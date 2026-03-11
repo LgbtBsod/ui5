@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-BASE="${BASE:-http://localhost:8000/sap/opu/odata/sap/Z_UI5_SRV}"
+BASE="${BASE:-http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV}"
 ROOT="${ROOT:-0123456789ABCDEF0123456789ABCDEF}"
 SESS="${SESS:-sess-1}"
 
@@ -56,4 +56,4 @@ echo
 
 echo "[14] batch read"
 B="batch_123"
-curl -sS -H "Content-Type: multipart/mixed; boundary=$B" -H "X-CSRF-Token: $TOKEN" --data-binary $'--'$B'\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET /sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$top=1 HTTP/1.1\r\n\r\n--'$B'--\r\n' "$BASE/\$batch" >/dev/null && echo ok
+curl -sS -H "Content-Type: multipart/mixed; boundary=$B" -H "X-CSRF-Token: $TOKEN" --data-binary $'--'$B'\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET /sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ChecklistSearchSet?$top=1 HTTP/1.1\r\n\r\n--'$B'--\r\n' "$BASE/\$batch" >/dev/null && echo ok

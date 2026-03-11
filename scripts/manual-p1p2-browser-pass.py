@@ -911,7 +911,7 @@ def run_slow_network_check(browser, tracker: ScenarioTracker, artifact_rows: lis
         time.sleep(2.6)
         route.continue_()
 
-    page.route("**/sap/opu/odata/sap/Z_UI5_SRV/$batch*", delayed_batch)
+    page.route("**/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$batch*", delayed_batch)
     page.goto(route_url("#/search"), wait_until="networkidle", timeout=90000)
     wait_for_app_ready(page, 1400)
 

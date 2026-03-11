@@ -321,7 +321,7 @@ def main() -> int:
             page = browser.new_page(viewport={"width": 1440, "height": 960})
 
             def on_request(req) -> None:
-                if "/sap/opu/odata/sap/Z_UI5_SRV" not in req.url:
+        if "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV" not in req.url:
                     return
                 network.append(
                     {

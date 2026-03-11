@@ -19,23 +19,22 @@ sap.ui.define([
         var mRouteArgs = (mInput && mInput.routeArgs) || {};
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
-            return Promise.resolve({
-                allowed: true,
-                routeName: sRouteName,
-                routeArgs: mRouteArgs,
-                permission: {
-                    rootId: sRootId,
-                    canView: true,
-                    canEdit: true,
-                    canDelete: false,
-                    reasonCode: "CREATE_DRAFT",
-                    message: ""
-                }
+            return DetailAuthorizationSupport.fetchPermission(mCtx || {}, "", {
+                activity: DetailAuthorizationSupport.OPERATIONS.CREATE
+            }).then(function (oPermission) {
+                return {
+                    allowed: !!(oPermission && oPermission.allowed),
+                    routeName: oPermission && oPermission.allowed ? sRouteName : "search",
+                    routeArgs: oPermission && oPermission.allowed ? mRouteArgs : {},
+                    permission: oPermission || {}
+                };
             });
         }
 
-        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId).then(function (oPermission) {
-            var bAllowed = !!(oPermission && oPermission.canView);
+        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
+            activity: DetailAuthorizationSupport.OPERATIONS.DISPLAY
+        }).then(function (oPermission) {
+            var bAllowed = !!(oPermission && oPermission.allowed);
 
             return {
                 allowed: bAllowed,

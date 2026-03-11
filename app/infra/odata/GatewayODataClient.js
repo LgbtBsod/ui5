@@ -8,10 +8,6 @@ sap.ui.define([
         return s.charAt(0) === "/" ? s : "/" + s;
     }
 
-    function _toPromiseRead(sPath, mParams) {
-        return GatewayClient.rawRead(_asPath(sPath), mParams || {});
-    }
-
     return {
         request: function (mOptions) {
             var m = mOptions || {};
@@ -19,16 +15,16 @@ sap.ui.define([
             var sFunctionName = _asPath(m.path).replace(/^\//, "").split("?")[0];
             var mDispatch = {
                 GET: function () {
-                    return _toPromiseRead(m.path, m.params || {});
+                    return GatewayClient.rawRead(_asPath(m.path), m.params || {}, m);
                 },
                 GET_FUNCTION: function () {
-                    return GatewayClient.callGetFunctionImport(sFunctionName, m.params || {});
+                    return GatewayClient.callGetFunctionImport(sFunctionName, m.params || {}, m);
                 },
                 POST_ENTITY: function () {
-                    return GatewayClient.postToPath(_asPath(m.path), m.body || {});
+                    return GatewayClient.postToPath(_asPath(m.path), m.body || {}, m);
                 },
                 POST_FUNCTION: function () {
-                    return GatewayClient.callFunctionImport(sFunctionName, m.body || {});
+                    return GatewayClient.callFunctionImport(sFunctionName, m.body || {}, m);
                 }
             };
             var fn = mDispatch[sMethod] || mDispatch.POST_FUNCTION;

@@ -1,11 +1,12 @@
 import logging
+import re
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from database import get_db
 from services.analytics_service import AnalyticsService, TASK_KEY_ANALYTICS_REFRESH
-from utils.odata import ODATA_NS, SERVICE_ROOT, odata_payload
+from utils.odata import ODATA_NS, SERVICE_ROOT, odata_error_response, odata_payload
 from utils.odata_response import odata_entity
 
 router = APIRouter(tags=["Analytics"])
@@ -101,6 +102,17 @@ def _to_refresh_state_row(payload: dict) -> dict:
     }
 
 
+def _parse_breakdown_filter(filter_expr: str | None) -> tuple[int | None, str | None]:
+    s_filter = str(filter_expr or "").strip()
+    if not s_filter:
+        return None, None
+    oYearMatch = re.search(r"SelectedYear\s+eq\s+(\d{4})", s_filter, flags=re.IGNORECASE)
+    oSourceMatch = re.search(r"Source\s+eq\s+'([^']*)'", s_filter, flags=re.IGNORECASE)
+    iYear = int(oYearMatch.group(1)) if oYearMatch else None
+    sSource = oSourceMatch.group(1).replace("''", "'") if oSourceMatch else None
+    return iYear, sSource
+
+
 @router.get("/WorkflowAnalytics")
 def workflow_analytics(year: int | None = None, source: str | None = None, db: Session = Depends(get_db)):
     payload = AnalyticsService.get_workflow_analytics(db, year, source)
@@ -123,14 +135,20 @@ def simple_analytical(year: int | None = None, source: str | None = None, db: Se
 
 
 @router.get(f"{SERVICE_ROOT}/SimpleAnalyticalSet")
-def simple_analytical_set(year: int | None = None, source: str | None = None, db: Session = Depends(get_db)):
+def simple_analytical_set(year: int | None = None, source: str | None = None, filter_expr: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)):
+    iFilterYear, sFilterSource = _parse_breakdown_filter(filter_expr)
+    year = iFilterYear if iFilterYear is not None else year
+    source = sFilterSource if sFilterSource is not None else source
     payload = AnalyticsService.get_process_summary(db, year, source)
     return odata_payload([_to_summary_row(payload)])
 
 
 @router.get(f"{SERVICE_ROOT}/WorkflowAnalyticsBreakdownSet")
-def workflow_analytics_breakdown_set(year: int | None = None, source: str | None = None, db: Session = Depends(get_db)):
-    rows = AnalyticsService.get_breakdown_rows(db, year, source)
+def workflow_analytics_breakdown_set(filter_expr: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)):
+    iYear, sSource = _parse_breakdown_filter(filter_expr)
+    if not str(filter_expr or "").strip():
+        return odata_error_response(400, "VALIDATION_ERROR", "WorkflowAnalyticsBreakdownSet requires $filter")
+    rows = AnalyticsService.get_breakdown_rows(db, iYear, sSource)
     return odata_payload([_to_breakdown_row(row) for row in rows])
 
 

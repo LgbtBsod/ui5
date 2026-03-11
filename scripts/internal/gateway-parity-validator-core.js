@@ -10,7 +10,7 @@ const {
 const { getChangedFiles } = require('../lib/git-changes');
 
 const ROOT = process.cwd();
-const REQUIRED_SERVICE_ROOT = '/sap/opu/odata/sap/Z_UI5_SRV/';
+const REQUIRED_SERVICE_ROOT = '/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/';
 const MANIFEST_PATH = 'manifest.json';
 const COMPONENT_PATH = 'Component.js';
 

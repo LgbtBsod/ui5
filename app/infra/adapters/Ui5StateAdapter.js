@@ -23,6 +23,9 @@ sap.ui.define([], function () {
         var oModels = mModels || {};
 
         return {
+            // The adapter name is historical. Callers use logical buckets such as
+            // `selected`, `snapshot`, `state`, and `view`; the adapter simply
+            // routes those reads/writes to the corresponding named model.
             get: function (sModelName, sPath) {
                 return withModel(oModels, sModelName, function (oModel) {
                     if (!oModel.getProperty) {

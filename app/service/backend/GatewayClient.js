@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer"
-], function (GatewayErrorNormalizer) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestCoordinator"
+], function (GatewayErrorNormalizer, RequestCoordinator) {
     "use strict";
 
     var _oModel = null;
@@ -44,12 +45,40 @@ sap.ui.define([
         /^\/ChecklistRootSet\('[^']+'\)$/i,
         /^\/AttachmentSet\(AttachmentKey='[^']+'\)$/i
     ];
-    function ensureModel() { if (!_oModel) { throw new Error("GatewayClient model is not initialized"); } return _oModel; }
-    function toPromise(fnExecutor) { return new Promise(function (resolve, reject) { fnExecutor(resolve, reject); }); }
+
+    function ensureModel() {
+        if (!_oModel) {
+            throw new Error("GatewayClient model is not initialized");
+        }
+        return _oModel;
+    }
+
+    function toPromise(fnExecutor) {
+        return new Promise(function (resolve, reject) {
+            fnExecutor(resolve, reject);
+        });
+    }
+
+    function toRequestHandle(fnExecutor) {
+        var fnAbort = function () { return; };
+        var pPromise = new Promise(function (resolve, reject) {
+            try {
+                fnAbort = fnExecutor(resolve, reject) || fnAbort;
+            } catch (oError) {
+                reject(oError);
+            }
+        });
+        return {
+            promise: pPromise,
+            abort: typeof fnAbort === "function" ? fnAbort : function () { return; }
+        };
+    }
+
     function normalizePath(sPath) {
         var sNormalized = String(sPath || "");
         return sNormalized.charAt(0) === "/" ? sNormalized : ("/" + sNormalized);
     }
+
     function assertCanonicalPath(sPath) {
         FORBIDDEN_PATH_PATTERNS.forEach(function (oPattern) {
             if (oPattern.test(sPath)) {
@@ -58,6 +87,7 @@ sap.ui.define([
         });
         return sPath;
     }
+
     function assertAllowedPath(sPath, aAllowed, sOperation) {
         var bAllowed = (aAllowed || []).some(function (oPattern) {
             return oPattern.test(sPath);
@@ -67,6 +97,7 @@ sap.ui.define([
         }
         return sPath;
     }
+
     function assertAllowedFunctionName(sName) {
         var sResolved = String(sName || "").trim();
         if (!sResolved) {
@@ -77,11 +108,13 @@ sap.ui.define([
         }
         return sResolved;
     }
+
     function allowlisted(sValue, aAllowed) {
         return (aAllowed || []).some(function (oPattern) {
             return oPattern.test(sValue);
         });
     }
+
     function encodeUrlParameters(mParameters) {
         return Object.keys(mParameters || {}).reduce(function (aPairs, sKey) {
             var vValue = mParameters[sKey];
@@ -93,10 +126,30 @@ sap.ui.define([
         }, []).join("&");
     }
 
-    function withRead(sPath, params) {
-        return toPromise(function (resolve, reject) {
-            ensureModel().read(assertCanonicalPath(normalizePath(sPath)), { urlParameters: params || {}, success: function (oData) { resolve(oData || {}); }, error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); } });
-        });
+    function serializePayload(vPayload) {
+        try {
+            return JSON.stringify(vPayload || {});
+        } catch (_e) {
+            return "";
+        }
+    }
+
+    function buildHeaders(mHeaders, sCorrelationId) {
+        var mResolved = Object.assign({}, mHeaders || {});
+        if (sCorrelationId) {
+            mResolved["X-Correlation-ID"] = sCorrelationId;
+            mResolved["X-Request-ID"] = sCorrelationId;
+        }
+        return mResolved;
+    }
+
+    function normalizeError(oError, sMethod, sCorrelationId) {
+        var oNormalized = GatewayErrorNormalizer.normalizeError(oError);
+        oNormalized.requestMethod = sMethod;
+        if (!oNormalized.correlationId && sCorrelationId) {
+            oNormalized.correlationId = sCorrelationId;
+        }
+        return oNormalized;
     }
 
     function serviceUrl() {
@@ -107,89 +160,127 @@ sap.ui.define([
         return String((oModel && oModel.sServiceUrl) || "").replace(/\/+$/, "");
     }
 
-    function withDirectPost(sPath, oPayload) {
-        return toPromise(function (resolve, reject) {
-            ensureModel().create(sPath, oPayload || {}, {
+    function withReadRequest(sPath, mParams, mHeaders) {
+        return toRequestHandle(function (resolve, reject) {
+            return ensureModel().read(assertCanonicalPath(normalizePath(sPath)), {
+                urlParameters: mParams || {},
+                headers: mHeaders || {},
                 success: function (oData) { resolve(oData || {}); },
-                error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
+                error: function (e) { reject(e); }
             });
         });
     }
-    function withDirectDelete(sPath) {
-        return toPromise(function (resolve, reject) {
-            ensureModel().remove(sPath, {
+
+    function withDirectPostRequest(sPath, oPayload, mHeaders) {
+        return toRequestHandle(function (resolve, reject) {
+            return ensureModel().create(sPath, oPayload || {}, {
+                headers: mHeaders || {},
                 success: function (oData) { resolve(oData || {}); },
-                error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
+                error: function (e) { reject(e); }
             });
         });
     }
-    function withDirectCreateEntity(sPath, oPayload, mParameters) {
-        return toPromise(function (resolve, reject) {
-            var oOptions = Object.assign({
+
+    function withDirectDeleteRequest(sPath, mHeaders) {
+        return toRequestHandle(function (resolve, reject) {
+            return ensureModel().remove(sPath, {
+                headers: mHeaders || {},
                 success: function (oData) { resolve(oData || {}); },
-                error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
-            }, mParameters || {});
-            ensureModel().create(sPath, oPayload || {}, oOptions);
+                error: function (e) { reject(e); }
+            });
         });
     }
-    function withDirectFunctionImport(sName, oPayload) {
+
+    function withDirectCreateEntityRequest(sPath, oPayload, mParameters, mHeaders) {
+        return toRequestHandle(function (resolve, reject) {
+            var oOptions = Object.assign({}, mParameters || {}, {
+                headers: Object.assign({}, (mParameters && mParameters.headers) || {}, mHeaders || {}),
+                success: function (oData) { resolve(oData || {}); },
+                error: function (e) { reject(e); }
+            });
+            return ensureModel().create(sPath, oPayload || {}, oOptions);
+        });
+    }
+
+    function withDirectFunctionImportRequest(sName, oPayload, mHeaders) {
         var sFunctionName = assertAllowedFunctionName(sName);
         if (allowlisted(sFunctionName, DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
-            return toPromise(function (resolve, reject) {
-                ensureModel().callFunction("/" + sFunctionName, {
+            return toRequestHandle(function (resolve, reject) {
+                return ensureModel().callFunction("/" + sFunctionName, {
                     method: "POST",
                     urlParameters: oPayload || {},
+                    headers: mHeaders || {},
                     success: function (oData) { resolve(oData || {}); },
-                    error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
+                    error: function (e) { reject(e); }
                 });
             });
         }
         if (allowlisted(sFunctionName, DIRECT_FUNCTION_BODY_ALLOWLIST)) {
-            return toPromise(function (resolve, reject) {
-                ensureModel().create("/" + sFunctionName, oPayload || {}, {
+            return toRequestHandle(function (resolve, reject) {
+                return ensureModel().create("/" + sFunctionName, oPayload || {}, {
+                    headers: mHeaders || {},
                     success: function (oData) { resolve(oData || {}); },
-                    error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
+                    error: function (e) { reject(e); }
                 });
             });
         }
         throw new Error("Unsupported function import: " + sFunctionName);
     }
 
-    function withDirectPut(sPath, vPayload, mOptions) {
-        var oOptions = mOptions || {};
-        var oModel;
-        try { oModel = ensureModel(); } catch (e) { return Promise.reject(e); }
-
-        var sCsrfCheck = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
-        var pToken = sCsrfCheck ? Promise.resolve(sCsrfCheck) : new Promise(function (res) {
-            oModel.refreshSecurityToken(function () {
-                res(oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "");
-            }, function () { res(""); }, true);
+    function withDirectGetFunctionImportRequest(sName, mParams, mHeaders) {
+        var sFunctionName = assertAllowedFunctionName(sName);
+        if (!allowlisted(sFunctionName, DIRECT_GET_FUNCTION_ALLOWLIST)) {
+            throw new Error("Unsupported GET function import: " + sFunctionName);
+        }
+        return toRequestHandle(function (resolve, reject) {
+            return ensureModel().callFunction("/" + sFunctionName, {
+                method: "GET",
+                urlParameters: mParams || {},
+                headers: mHeaders || {},
+                success: function (oData) { resolve(oData || {}); },
+                error: function (e) { reject(e); }
+            });
         });
+    }
 
-        return pToken.then(function (sCsrfToken) {
+    function withDirectPutRequest(sPath, vPayload, mOptions, mHeaders) {
+        var oOptions = mOptions || {};
+        var oModel = ensureModel();
+        var oXhr = null;
+        var bAborted = false;
+        var sCsrfCheck = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
+        var pToken = sCsrfCheck ? Promise.resolve(sCsrfCheck) : new Promise(function (resolve) {
+            oModel.refreshSecurityToken(function () {
+                resolve(oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "");
+            }, function () { resolve(""); }, true);
+        });
+        var pPromise = pToken.then(function (sCsrfToken) {
             var sBase = serviceUrl();
             var sFullUrl = sBase + sPath;
             var mModelHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
-            var mHeaders;
+            var mResolvedHeaders;
 
             delete mModelHeaders["content-type"];
             delete mModelHeaders["Content-Type"];
-            mHeaders = Object.assign({
+            mResolvedHeaders = Object.assign({
                 "Accept": "application/json",
                 "DataServiceVersion": "2.0",
                 "MaxDataServiceVersion": "2.0",
                 "Content-Type": oOptions.contentType || "application/octet-stream"
-            }, mModelHeaders, oOptions.headers || {});
+            }, mModelHeaders, mHeaders || {});
             if (sCsrfToken) {
-                mHeaders["X-CSRF-Token"] = sCsrfToken;
+                mResolvedHeaders["X-CSRF-Token"] = sCsrfToken;
             }
 
             return new Promise(function (resolve, reject) {
-                var oXhr = new XMLHttpRequest();
+                if (bAborted) {
+                    reject({ statusCode: 0, message: "Request aborted" });
+                    return;
+                }
+                oXhr = new XMLHttpRequest();
                 oXhr.open("PUT", sFullUrl, true);
-                Object.keys(mHeaders).forEach(function (sKey) {
-                    oXhr.setRequestHeader(sKey, mHeaders[sKey]);
+                Object.keys(mResolvedHeaders).forEach(function (sKey) {
+                    oXhr.setRequestHeader(sKey, mResolvedHeaders[sKey]);
                 });
                 oXhr.onreadystatechange = function () {
                     if (oXhr.readyState !== 4) {
@@ -199,34 +290,41 @@ sap.ui.define([
                         resolve({});
                         return;
                     }
-                    reject(GatewayErrorNormalizer.normalizeError({
+                    reject({
                         statusCode: oXhr.status,
                         responseText: oXhr.responseText,
                         responseHeaders: oXhr.getAllResponseHeaders()
-                    }));
+                    });
                 };
                 oXhr.onerror = function () {
-                    reject(GatewayErrorNormalizer.normalizeError({ statusCode: 0, message: "Network error during binary PUT" }));
+                    reject({ statusCode: 0, message: "Network error during binary PUT" });
                 };
                 oXhr.send(vPayload || null);
             });
         });
+
+        return {
+            promise: pPromise,
+            abort: function () {
+                bAborted = true;
+                if (oXhr) {
+                    try {
+                        oXhr.abort();
+                    } catch (_e) {
+                        return;
+                    }
+                }
+            }
+        };
     }
 
-    function withDirectGetFunctionImport(sName, mParams) {
-        var sFunctionName = assertAllowedFunctionName(sName);
-        if (!allowlisted(sFunctionName, DIRECT_GET_FUNCTION_ALLOWLIST)) {
-            throw new Error("Unsupported GET function import: " + sFunctionName);
-        }
-        return toPromise(function (resolve, reject) {
-            ensureModel().callFunction("/" + sFunctionName, {
-                method: "GET",
-                urlParameters: mParams || {},
-                success: function (oData) { resolve(oData || {}); },
-                error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }
-            });
+    function executeRequest(mRequest) {
+        var oRequest = mRequest || {};
+        return RequestCoordinator.execute(oRequest).catch(function (oError) {
+            throw normalizeError(oError, oRequest.method, oRequest.correlationId);
         });
     }
+
     return {
         setModel: function (oModel, mOptions) {
             _oModel = oModel || null;
@@ -246,41 +344,140 @@ sap.ui.define([
             oModel.setHeaders(mHeaders);
             return mHeaders;
         },
-        readEntity: function (entitySet, key, params) { return withRead("/" + entitySet + "(" + key + ")", params); },
-        rawRead: function (path, params) { return withRead(normalizePath(path), params); },
-        readSet: function (entitySet, params) { return withRead("/" + entitySet, params).then(function (oData) { return (oData && oData.results) || []; }); },
+        readEntity: function (entitySet, key, mParams, mOptions) {
+            return this.rawRead("/" + entitySet + "(" + key + ")", mParams || {}, mOptions || {});
+        },
+        rawRead: function (path, mParams, mOptions) {
+            var sPath = assertCanonicalPath(normalizePath(path));
+            var oOptions = mOptions || {};
+            return executeRequest({
+                method: "GET",
+                dedupeKey: "GET|" + sPath + "|" + encodeUrlParameters(mParams || {}),
+                responseGuardKey: oOptions.responseGuardKey,
+                timeoutMs: oOptions.timeoutMs,
+                retryCount: oOptions.retryCount,
+                correlationId: oOptions.correlationId,
+                requestFactory: function (mRuntime) {
+                    var sCorrelationId = mRuntime && mRuntime.correlationId;
+                    return withReadRequest(sPath, mParams || {}, buildHeaders(oOptions.headers, sCorrelationId));
+                }
+            });
+        },
+        readSet: function (entitySet, mParams, mOptions) {
+            return this.rawRead("/" + entitySet, mParams || {}, mOptions || {}).then(function (oData) {
+                return (oData && oData.results) || [];
+            });
+        },
         serviceUrl: serviceUrl,
-        callFunctionImport: function (name, payload) {
-            return withDirectFunctionImport(name, payload || {});
+        callFunctionImport: function (name, oPayload, mOptions) {
+            var oOptions = mOptions || {};
+            return executeRequest({
+                method: "POST_FUNCTION",
+                timeoutMs: oOptions.timeoutMs,
+                retryCount: 0,
+                correlationId: oOptions.correlationId,
+                requestFactory: function (mRuntime) {
+                    var sCorrelationId = mRuntime && mRuntime.correlationId;
+                    return withDirectFunctionImportRequest(name, oPayload || {}, buildHeaders(oOptions.headers, sCorrelationId));
+                }
+            });
         },
-        callGetFunctionImport: function (name, params) {
-            return withDirectGetFunctionImport(name, params || {});
+        callGetFunctionImport: function (name, mParams, mOptions) {
+            var oOptions = mOptions || {};
+            return executeRequest({
+                method: "GET_FUNCTION",
+                dedupeKey: "GET_FUNCTION|" + String(name || "") + "|" + encodeUrlParameters(mParams || {}),
+                responseGuardKey: oOptions.responseGuardKey,
+                timeoutMs: oOptions.timeoutMs,
+                retryCount: oOptions.retryCount,
+                correlationId: oOptions.correlationId,
+                requestFactory: function (mRuntime) {
+                    var sCorrelationId = mRuntime && mRuntime.correlationId;
+                    return withDirectGetFunctionImportRequest(name, mParams || {}, buildHeaders(oOptions.headers, sCorrelationId));
+                }
+            });
         },
-        postToPath: function (path, payload) {
-            var sNormalized = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_POST_ALLOWLIST, "POST");
-            return withDirectPost(sNormalized, payload || {});
+        postToPath: function (path, oPayload, mOptions) {
+            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_POST_ALLOWLIST, "POST");
+            var oOptions = mOptions || {};
+            return executeRequest({
+                method: "POST_ENTITY",
+                timeoutMs: oOptions.timeoutMs,
+                retryCount: 0,
+                correlationId: oOptions.correlationId,
+                requestFactory: function (mRuntime) {
+                    var sCorrelationId = mRuntime && mRuntime.correlationId;
+                    return withDirectPostRequest(sPath, oPayload || {}, buildHeaders(oOptions.headers, sCorrelationId));
+                }
+            });
         },
-        createEntity: function (path, payload, mParameters) {
-            var sNormalized = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_CREATE_ALLOWLIST, "CREATE");
-            return withDirectCreateEntity(sNormalized, payload || {}, mParameters || {});
+        createEntity: function (path, oPayload, mParameters) {
+            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_CREATE_ALLOWLIST, "CREATE");
+            var oOptions = mParameters || {};
+            return executeRequest({
+                method: "CREATE",
+                timeoutMs: oOptions.timeoutMs,
+                retryCount: 0,
+                correlationId: oOptions.correlationId,
+                requestFactory: function (mRuntime) {
+                    var sCorrelationId = mRuntime && mRuntime.correlationId;
+                    return withDirectCreateEntityRequest(sPath, oPayload || {}, oOptions || {}, buildHeaders(oOptions.headers, sCorrelationId));
+                }
+            });
         },
-        deletePath: function (path) {
-            var sNormalized = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_DELETE_ALLOWLIST, "DELETE");
-            return withDirectDelete(sNormalized);
+        deletePath: function (path, mOptions) {
+            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_DELETE_ALLOWLIST, "DELETE");
+            var oOptions = mOptions || {};
+            return executeRequest({
+                method: "DELETE",
+                timeoutMs: oOptions.timeoutMs,
+                retryCount: 0,
+                correlationId: oOptions.correlationId,
+                requestFactory: function (mRuntime) {
+                    var sCorrelationId = mRuntime && mRuntime.correlationId;
+                    return withDirectDeleteRequest(sPath, buildHeaders(oOptions.headers, sCorrelationId));
+                }
+            });
         },
-        putPath: function (path, payload, mOptions) {
-            var sNormalized = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_PUT_ALLOWLIST, "PUT");
-            return withDirectPut(sNormalized, payload, mOptions || {});
+        putPath: function (path, vPayload, mOptions) {
+            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_PUT_ALLOWLIST, "PUT");
+            var oOptions = mOptions || {};
+            return executeRequest({
+                method: "PUT",
+                timeoutMs: oOptions.timeoutMs,
+                retryCount: 0,
+                correlationId: oOptions.correlationId,
+                requestFactory: function (mRuntime) {
+                    var sCorrelationId = mRuntime && mRuntime.correlationId;
+                    return withDirectPutRequest(sPath, vPayload, oOptions || {}, buildHeaders(oOptions.headers, sCorrelationId));
+                }
+            });
         },
         batch: function (groupId) {
             return toPromise(function (resolve, reject) {
-                ensureModel().submitChanges({ groupId: groupId || undefined, success: function (oData) { resolve((oData && (oData.__batchResponses || oData.__changeResponses)) || []); }, error: function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); } });
+                ensureModel().submitChanges({
+                    groupId: groupId || undefined,
+                    success: function (oData) {
+                        resolve((oData && (oData.__batchResponses || oData.__changeResponses)) || []);
+                    },
+                    error: function (e) {
+                        reject(GatewayErrorNormalizer.normalizeError(e));
+                    }
+                });
             });
         },
         fetchCsrfToken: function () {
-            return toPromise(function (resolve, reject) { ensureModel().refreshSecurityToken(function () { resolve(true); }, function (e) { reject(GatewayErrorNormalizer.normalizeError(e)); }, true); });
+            return toPromise(function (resolve, reject) {
+                ensureModel().refreshSecurityToken(function () {
+                    resolve(true);
+                }, function (e) {
+                    reject(GatewayErrorNormalizer.normalizeError(e));
+                }, true);
+            });
         },
-        refreshSecurityToken: function () { return this.fetchCsrfToken(); },
+        refreshSecurityToken: function () {
+            return this.fetchCsrfToken();
+        },
         normalizeError: GatewayErrorNormalizer.normalizeError,
         normalizeODataError: GatewayErrorNormalizer.normalizeODataError
     };

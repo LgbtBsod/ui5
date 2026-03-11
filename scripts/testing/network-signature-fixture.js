@@ -9,8 +9,8 @@ function assert(condition, message) {
 }
 
 (function main() {
-  const a = canonicalizeUrl('https://host/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?$skip=0&$top=10&sap-language=EN&$filter=HasFailedChecks%20eq%20true');
-  const b = canonicalizeUrl('/sap/opu/odata/sap/Z_UI5_SRV/ChecklistSearchSet?sap-ui-debug=true&$top=10&$filter=HasFailedChecks%20%20eq%20%20true&$skip=0');
+const a = canonicalizeUrl('https://host/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ChecklistSearchSet?$skip=0&$top=10&sap-language=EN&$filter=HasFailedChecks%20eq%20true');
+const b = canonicalizeUrl('/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ChecklistSearchSet?sap-ui-debug=true&$top=10&$filter=HasFailedChecks%20%20eq%20%20true&$skip=0');
   assert(a === b, 'canonicalizeUrl should normalize noisy params and preserve semantic equality');
 
   const s1 = signature({ method: 'get', url: '/x?$top=10&$skip=0', body: '' });

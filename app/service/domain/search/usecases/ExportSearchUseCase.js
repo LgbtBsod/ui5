@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ExcelExport"
-], function (UseCase, Result, Effects, ExcelExport) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/ExcelExport",
+    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults"
+], function (UseCase, Result, Effects, ExcelExport, SearchMaxResults) {
     "use strict";
 
     function ExportSearchUseCase() {
@@ -30,61 +31,136 @@ sap.ui.define([
         }, []);
     }
 
+    function pickFilterValue(vValue) {
+        if (vValue == null) {
+            return "";
+        }
+        if (typeof vValue === "string" || typeof vValue === "number" || typeof vValue === "boolean") {
+            return String(vValue).trim();
+        }
+        if (Array.isArray(vValue)) {
+            return pickFilterValue(vValue[0]);
+        }
+        if (typeof vValue === "object") {
+            if (Object.prototype.hasOwnProperty.call(vValue, "value")) {
+                return pickFilterValue(vValue.value);
+            }
+            if (Object.prototype.hasOwnProperty.call(vValue, "key")) {
+                return pickFilterValue(vValue.key);
+            }
+            if (Object.prototype.hasOwnProperty.call(vValue, "text")) {
+                return pickFilterValue(vValue.text);
+            }
+            if (Array.isArray(vValue.items) && vValue.items.length) {
+                return pickFilterValue(vValue.items[0]);
+            }
+            if (Array.isArray(vValue.ranges) && vValue.ranges.length) {
+                return pickFilterValue(vValue.ranges[0]);
+            }
+            if (Object.prototype.hasOwnProperty.call(vValue, "value1")) {
+                return pickFilterValue(vValue.value1);
+            }
+            if (Object.prototype.hasOwnProperty.call(vValue, "low")) {
+                return pickFilterValue(vValue.low);
+            }
+        }
+        return "";
+    }
+
+    function normalizeDateRange(vValue) {
+        var oRange = vValue && typeof vValue === "object" && !Array.isArray(vValue)
+            ? vValue
+            : {};
+        var aRanges = Array.isArray(oRange.ranges) ? oRange.ranges : [];
+        var oFirstRange = aRanges[0] || oRange;
+        var sFrom = pickFilterValue(oFirstRange.value1 || oFirstRange.low || vValue);
+        var sTo = pickFilterValue(oFirstRange.value2 || oFirstRange.high || sFrom);
+        return {
+            dateFrom: sFrom,
+            dateTo: sTo || sFrom
+        };
+    }
+
     function normalizeRows(aRows, sEntity) {
         return (aRows || []).map(function (oRow) {
             var o = oRow || {};
             return {
+                RootKey: pick(o.RootKey || o.rootKey || o.Key || o.key, ""),
                 Id: pick(o.Id || o.id, ""),
                 Lpc: pick(o.LpcText || o.Lpc || o.lpc, ""),
                 Profession: pick(o.ProfessionText || o.Profession || o.profession, ""),
                 Location: pick(o.LocationKey || o.location_key, ""),
                 Status: pick(o.Status || o.status, ""),
-                SuccessChecksRate: pick(o.SuccessChecksRate || o.success_checks_rate, ""),
-                SuccessBarriersRate: pick(o.SuccessBarriersRate || o.success_barriers_rate || o.barriers_rate, ""),
                 DateCheck: pick(o.DateCheck || o.date_check, ""),
                 EquipName: pick(o.EquipName || o.equipment, ""),
-                ChangedOn: pick(o.ChangedOn || o.changed_on, "")
+                ChangedOn: pick(o.ChangedOn || o.changed_on, ""),
+                ItemType: pick(o.ItemType || o.itemType, ""),
+                Num: pick(o.Num || o.num, ""),
+                Text: pick(o.Text || o.text, ""),
+                Comment: pick(o.Comment || o.comment, ""),
+                Result: pick(o.Result || o.result, "")
             };
         }).filter(function (oRow) {
-            if (sEntity === "check") {
-                return oRow.SuccessChecksRate !== "";
+            if (sEntity === "check" || sEntity === "barrier") {
+                return oRow.ItemType !== "ROOT";
             }
-            if (sEntity === "barrier") {
-                return oRow.SuccessBarriersRate !== "";
-            }
-            return true;
+            return oRow.ItemType === "ROOT" || !oRow.ItemType;
         });
     }
 
-    function extractChecklistId(oRow) {
-        return String(
-            (oRow && (oRow.Key || oRow.key || oRow.Id || oRow.id || oRow.RequestId || oRow.checklist_id)) || ""
-        ).trim();
+    function buildSearchContract(mInput, mCtx) {
+        var oSmart = mCtx && mCtx.smartControls;
+        var oStateModel = mCtx && mCtx.stateModel;
+        var mFilterData = (mInput && mInput.filterData) || (
+            oSmart && typeof oSmart.getSmartFilterData === "function"
+                ? oSmart.getSmartFilterData()
+                : {}
+        ) || {};
+        var mState = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
+        var mDateRange = normalizeDateRange(mFilterData.DateCheck);
+        return {
+            filterId: pickFilterValue(mFilterData.Id),
+            filterDateFrom: mDateRange.dateFrom,
+            filterDateTo: mDateRange.dateTo,
+            filterLpc: pickFilterValue(mFilterData.Lpc),
+            filterProfession: pickFilterValue(mFilterData.ProfessionText),
+            filterStatus: pickFilterValue(mFilterData.Status),
+            searchMode: String(mState.searchMode || "EXACT").toUpperCase(),
+            checksSegment: String(((mState.search || {}).checksFailSegment) || mState.filterFailedChecks || "ALL").toUpperCase(),
+            barriersSegment: String(((mState.search || {}).barriersFailSegment) || mState.filterFailedBarriers || "ALL").toUpperCase(),
+            limit: SearchMaxResults.resolveExportLimit(mState)
+        };
     }
 
     function resolveExportRows(mInput, mCtx) {
-        var oSmart = mCtx && mCtx.smartControls;
+        var oRepo = mCtx && mCtx.repo;
+        var oStateModel = mCtx && mCtx.stateModel;
         var aSelectedIds = normalizeChecklistIds(mInput && mInput.selectedRowIds);
-        var iBackendTop = Math.max(0, Number(mInput && mInput.backendTop) || 0);
-        if (!oSmart) {
-            return Promise.resolve([]);
+        var mState = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
+        var iExportLimit = SearchMaxResults.resolveExportLimit(mState);
+        var oRequest;
+
+        if (!oRepo || typeof oRepo.exportSearchResults !== "function") {
+            return Promise.reject(new Error("EXPORT_HANDLER_MISSING"));
         }
+        if (aSelectedIds.length > iExportLimit) {
+            return Promise.reject(new Error("EXPORT_LIMIT_EXCEEDED"));
+        }
+
+        oRequest = {
+            entity: (mInput && mInput.entity) || "screen",
+            limit: iExportLimit
+        };
+
         if (aSelectedIds.length) {
-            return Promise.resolve(
-                typeof oSmart.getSelectedRows === "function" ? oSmart.getSelectedRows() : []
-            ).then(function (aSelectedRows) {
-                var aRows = Array.isArray(aSelectedRows) && aSelectedRows.length
-                    ? aSelectedRows
-                    : (typeof oSmart.getVisibleRows === "function" ? oSmart.getVisibleRows() : []);
-                return aRows.filter(function (oRow) {
-                    return aSelectedIds.indexOf(extractChecklistId(oRow)) >= 0;
-                });
-            });
+            oRequest.rootIds = aSelectedIds;
+            oRequest.selectionMode = "selected";
+        } else {
+            oRequest.selectionMode = "all";
+            oRequest.searchContract = buildSearchContract(mInput, mCtx);
         }
-        if (typeof oSmart.getBoundRows === "function") {
-            return Promise.resolve(oSmart.getBoundRows(iBackendTop));
-        }
-        return Promise.resolve(typeof oSmart.getVisibleRows === "function" ? oSmart.getVisibleRows() : []);
+
+        return Promise.resolve(oRepo.exportSearchResults(oRequest));
     }
 
     ExportSearchUseCase.prototype.execute = function (mInput, mCtx) {
@@ -103,6 +179,10 @@ sap.ui.define([
                 Effects.toast("searchExportSuccess", "info"),
                 Effects.log("info", "Export completed", { entity: sEntity, rows: aNormalized.length })
             ]);
+        }).catch(function (oError) {
+            var sCode = String((oError && (oError.code || oError.message)) || "").trim().toUpperCase();
+            var sMessageCode = sCode === "EXPORT_LIMIT_EXCEEDED" ? "EXPORT_LIMIT_EXCEEDED" : "EXPORT_FAILED";
+            return Result.fail({ message: sMessageCode, code: sMessageCode }, [Effects.toast("exportFailed", "error")]);
         });
     };
 

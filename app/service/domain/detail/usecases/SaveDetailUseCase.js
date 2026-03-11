@@ -162,8 +162,7 @@ sap.ui.define([
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
                     Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
                     Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                    Effects.modelPatch("uiState", "/_detailSnapshot", oSavedSnapshot),
-                    Effects.modelPatch("uiState", "/_detailCurrent", oSavedSnapshot),
+                    Effects.modelPatch("snapshot", "/", oSavedSnapshot),
                     Effects.modelPatch("selected", "/", oSelectedSnapshot),
                     Effects.modelPatch("selected", "/attachments", aSyncedAttachments)
                 ];

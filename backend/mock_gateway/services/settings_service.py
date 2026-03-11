@@ -128,5 +128,6 @@ class SettingsService:
             "CacheStaleOkMs": int(row.cache_stale_ok_ms or FRONTEND_TIMER_TEST_PROFILE["cache_stale_ok_ms"]),
             "AnalyticsRefreshMs": int(row.analytics_refresh_ms or FRONTEND_TIMER_TEST_PROFILE["analytics_refresh_ms"]),
             "RequiredFieldsJson": json.dumps(required_fields),
+            "FrontendVariablesJson": json.dumps(DEFAULT_FRONTEND_VARIABLES),
             "UploadPolicyJson": json.dumps(upload_policy),
         }
