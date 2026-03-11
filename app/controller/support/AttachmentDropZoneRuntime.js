@@ -24,10 +24,15 @@ sap.ui.define([
     function hasFiles(oEvent) {
         var oTransfer = oEvent && oEvent.dataTransfer;
         var aTypes = oTransfer && oTransfer.types;
+        var aFiles = oTransfer && oTransfer.files;
+        if (aFiles && aFiles.length) {
+            return true;
+        }
         if (!aTypes) {
             return false;
         }
-        return Array.prototype.indexOf.call(aTypes, "Files") >= 0;
+        return Array.prototype.indexOf.call(aTypes, "Files") >= 0
+            || Array.prototype.indexOf.call(aTypes, "application/x-moz-file") >= 0;
     }
 
     function isWithinDropScope(oController, oEvent) {

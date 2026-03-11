@@ -1,9 +1,10 @@
 sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
     "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchFilterBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults"
-], function (Filter, FilterOperator, SearchFilterBuilder, SearchMaxResults) {
+], function (Filter, FilterOperator, Sorter, SearchFilterBuilder, SearchMaxResults) {
     "use strict";
 
     function pickFilterValue(vValue) {
@@ -49,6 +50,7 @@ sap.ui.define([
         if (sSearchMode === "LOOSE" && oBindingParams.filters.length > 1) {
             oBindingParams.filters = [new Filter({ filters: oBindingParams.filters, and: false })];
         }
+        applySortAndGroupPolicy(oBindingParams, mState);
 
         var iMax = SearchMaxResults.resolveBackendTop(mState);
         oBindingParams.parameters = oBindingParams.parameters || {};
@@ -70,6 +72,46 @@ sap.ui.define([
             if (typeof fnDataReceived === "function") { fnDataReceived(oDataEvent); }
         };
         return oBindingParams;
+    }
+
+    function readSortKey(mState) {
+        var sSortKey = String(mState.searchSortKey || "").trim();
+        return sSortKey || "DateCheck";
+    }
+
+    function readGroupKey(mState) {
+        return String(mState.searchGroupKey || "").trim();
+    }
+
+    function readBool(vFlag, bDefault) {
+        if (typeof vFlag === "boolean") {
+            return vFlag;
+        }
+        return !!bDefault;
+    }
+
+    function createGroupFunction(sPath) {
+        return function (oContext) {
+            var vValue = oContext && oContext.getProperty ? oContext.getProperty(sPath) : "";
+            var sText = String(vValue == null ? "-" : vValue).trim() || "-";
+            return { key: sText, text: sText };
+        };
+    }
+
+    function applySortAndGroupPolicy(oBindingParams, mState) {
+        var sSortKey = readSortKey(mState || {});
+        var sGroupKey = readGroupKey(mState || {});
+        var bSortDescending = readBool((mState || {}).searchSortDescending, true);
+        var bGroupDescending = readBool((mState || {}).searchGroupDescending, false);
+        var aSorters = [];
+
+        if (sGroupKey) {
+            aSorters.push(new Sorter(sGroupKey, bGroupDescending, createGroupFunction(sGroupKey)));
+        }
+        if (sSortKey && (!sGroupKey || sGroupKey !== sSortKey || bGroupDescending !== bSortDescending)) {
+            aSorters.push(new Sorter(sSortKey, bSortDescending));
+        }
+        oBindingParams.sorter = aSorters;
     }
 
     return {

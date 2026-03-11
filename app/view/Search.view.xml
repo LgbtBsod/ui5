@@ -260,11 +260,18 @@
                     <OverflowToolbar id="smartTableCustomToolbar" width="100%" class="toolbarTransparent searchSmartToolbarRail">
                         <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
                         <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
+                        <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
                         <Title text="Search" level="H6" class="searchToolbarGroupTitle">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                             </layoutData>
                         </Title>
+
+                        <Label text="{i18n>searchBackendTopLabel}" labelFor="backendTopInput" class="searchToolbarFieldLabel">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
+                            </layoutData>
+                        </Label>
 
                         <Input
                             id="backendTopInput"
@@ -281,6 +288,12 @@
                             </layoutData>
                         </Input>
 
+                        <Label text="{i18n>searchMaxResultsLabel}" labelFor="maxRowsInput" class="searchToolbarFieldLabel">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
+                            </layoutData>
+                        </Label>
+
                         <Input
                             id="maxRowsInput"
                             value="{state>/searchMaxResults}"
@@ -296,6 +309,16 @@
                             </layoutData>
                         </Input>
 
+                        <ObjectStatus
+                            text="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}"
+                            state="Information"
+                            ariaLabelledBy="searchModeA11y"
+                            class="searchModeStatusChip">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
+                            </layoutData>
+                        </ObjectStatus>
+
                         <Switch
                             state="{= ${state>/searchMode} === 'LOOSE' }"
                             change=".onSearchModeToggle"
@@ -309,11 +332,27 @@
 
                         <ToolbarSpacer/>
 
-                        <Title text="Output" level="H6" class="searchToolbarGroupTitle">
+                        <Button
+                            text="{i18n>searchSortButton}"
+                            icon="sap-icon://sort"
+                            type="Transparent"
+                            press=".onOpenSearchSortDialog"
+                            class="brandActionGhost searchSortButton">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                             </layoutData>
-                        </Title>
+                        </Button>
+
+                        <Button
+                            text="{i18n>searchGroupButton}"
+                            icon="sap-icon://group-2"
+                            type="Transparent"
+                            press=".onOpenSearchGroupDialog"
+                            class="brandActionGhost searchGroupButton">
+                            <layoutData>
+                                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
+                            </layoutData>
+                        </Button>
 
                         <MenuButton
                             text="{i18n>exportMenuButton}"

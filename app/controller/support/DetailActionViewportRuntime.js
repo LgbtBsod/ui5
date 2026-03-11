@@ -53,7 +53,7 @@ sap.ui.define([
     return {
         _bindAttachmentDropZone: function () {
             var oDropZone = this.byId("attachmentDropZone");
-            var oScope = this.byId("attachmentDropZone");
+            var oScope = this.byId("attachmentDropScope") || oDropZone;
             var oDomRef = oDropZone && oDropZone.getDomRef && oDropZone.getDomRef();
             var oScopeDom = oScope && oScope.getDomRef && oScope.getDomRef();
 

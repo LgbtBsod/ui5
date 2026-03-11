@@ -1980,8 +1980,7 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
     display: block;
   }
 
-  .chkApp .detailSectionBody,
-  .chkApp .detailAttachmentsBody {
+  .chkApp .detailSectionBody {
     overflow-x: auto;
   }
 
@@ -2173,30 +2172,6 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   .chkApp .detailAttachmentTable {
     min-width: 36rem;
   }
-}
-
-body.chkAppRoot.appDark .chkApp .detailWorkflowStoryRail,
-body.chkAppRoot.appDark .chkApp .detailSectionAnchorRail,
-body.chkAppRoot.appDark .chkApp .detailControlRowTop,
-body.chkAppRoot.appDark .chkApp .detailControlRowActions {
-  background: color-mix(in srgb, var(--theme-rail-bg) 88%, transparent);
-  border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
-  box-shadow: none;
-}
-
-body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
-  background: var(--theme-block-bg);
-  border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
-  box-shadow: none;
-}
-
-body.chkAppRoot.appLight .chkApp .detailWorkflowStoryRail,
-body.chkAppRoot.appLight .chkApp .detailSectionAnchorRail,
-body.chkAppRoot.appLight .chkApp .detailControlRowTop,
-body.chkAppRoot.appLight .chkApp .detailControlRowActions,
-body.chkAppRoot.appLight .chkApp .detailAttachmentDropZone {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(242, 247, 255, 0.18));
 }
 
 @media (max-width: 68.75rem) {

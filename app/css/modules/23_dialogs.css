@@ -433,10 +433,21 @@
 }
 
 /* Keep MessageBox/Warning dialogs readable and structurally stable. */
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog {
+  background: var(--theme-block-bg) !important;
+}
+
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogTitle,
-.chkApp .chkSkin .sapMDialog.sapMMessageDialog > .sapMBar.sapMHeader-CTX {
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog > .sapMBar.sapMHeader-CTX,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogFooter {
   min-height: 3rem;
   padding-inline: 1rem;
+  background: var(--theme-block-bg) !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogTitle .sapMTitle,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBtn .sapMBtnContent {
+  color: var(--text-main) !important;
 }
 
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection {
@@ -445,6 +456,7 @@
   height: auto;
   display: block !important;
   background: var(--theme-block-bg) !important;
+  overflow: hidden !important;
 }
 
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogScrollCont,
@@ -452,8 +464,8 @@
   padding: 0;
   min-height: 1.8rem;
   height: auto !important;
-  overflow: auto !important;
-  background: transparent !important;
+  overflow: hidden !important;
+  background: var(--theme-block-bg) !important;
 }
 
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection > .sapMDialogScrollCont,
@@ -1409,5 +1421,85 @@ body.chkAppRoot.appDark .chkApp .shellPopoverList .sapMListItem {
 @media print {
   .chkApp .shellUserBtn {
     display: none !important;
+  }
+}
+
+/* 2026-03 message dialog stability:
+   avoid background bleed/stripes and keep warning popup fully opaque. */
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogScroll,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogScrollCont,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogFooter,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMBar {
+  background: var(--theme-block-bg) !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogTitleGroup {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogScroll {
+  border: 0 !important;
+}
+
+/* 2026-03 shell popover final geometry lock.
+   Keep user menu stable and prevent internal blocks from spilling/clipping. */
+body.chkAppRoot .shellPopover,
+body.chkAppRoot .shellPopover.sapMPopover,
+body.chkAppRoot .shellPopover.sapMResponsivePopover {
+  width: min(92vw, 26rem) !important;
+  min-width: min(22rem, 92vw) !important;
+  max-width: min(92vw, 26rem) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  contain: none !important;
+}
+
+body.chkAppRoot .shellPopover .sapMPopoverCont,
+body.chkAppRoot .shellPopover .sapMDialogScrollCont,
+body.chkAppRoot .shellPopover .sapMDialogScroll,
+body.chkAppRoot .shellPopover .shellPopoverBody,
+body.chkAppRoot .shellPopover .shellUserBody,
+body.chkAppRoot .shellPopover .shellSettingsBody {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserCard,
+body.chkAppRoot .shellPopover .shellSettingRow,
+body.chkAppRoot .shellPopover .shellHelpItem,
+body.chkAppRoot .shellPopover .shellNotificationItem,
+body.chkAppRoot .shellPopover .shellUserPermissionList {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+body.chkAppRoot .shellPopover .sapMBtn .sapMBtnInner,
+body.chkAppRoot .shellPopover .sapMBtn .sapMBtnContent,
+body.chkAppRoot .shellPopover .sapMText,
+body.chkAppRoot .shellPopover .sapMTitle,
+body.chkAppRoot .shellPopover .sapMLabel {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+@media (max-width: 40rem) {
+  body.chkAppRoot .shellPopover,
+  body.chkAppRoot .shellPopover.sapMPopover,
+  body.chkAppRoot .shellPopover.sapMResponsivePopover {
+    width: calc(100vw - 1rem) !important;
+    min-width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
   }
 }

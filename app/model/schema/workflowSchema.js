@@ -10,6 +10,10 @@ sap.ui.define([], function () {
         searchMode: "EXACT",
         searchBackendTop: "100",
         searchMaxResults: "100",
+        searchSortKey: "DateCheck",
+        searchSortDescending: true,
+        searchGroupKey: "",
+        searchGroupDescending: false,
         currentUser: {
             uname: "",
             fullName: "",

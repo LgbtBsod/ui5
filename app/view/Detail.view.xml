@@ -477,8 +477,8 @@
                                                     class="modeHintText detailAttachmentDropZoneMeta"/>
                                             </VBox>
 
-                                            <VBox id="attachmentDropScope" renderType="Bare">
-                                                <VBox id="attachmentSessionScope" renderType="Bare" visible="{= !${view>/attachmentsExpanded} }">
+                                            <VBox id="attachmentDropScope" renderType="Bare" width="100%">
+                                                <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{= !${view>/attachmentsExpanded} }">
                                                     <Table
                                                         items="{view>/sessionAttachments}"
                                                         class="flatEditorTable detailAttachmentTable detailAttachmentTableSession"
@@ -521,7 +521,7 @@
                                                     </Table>
                                                 </VBox>
 
-                                                <VBox id="attachmentExpandedScope" renderType="Bare" visible="{view>/attachmentsExpanded}">
+                                                <VBox id="attachmentExpandedScope" renderType="Bare" width="100%" visible="{view>/attachmentsExpanded}">
                                                 <HBox
                                                     class="detailEmptyStateCard detailAttachmentsEmptyState"
                                                     renderType="Bare"

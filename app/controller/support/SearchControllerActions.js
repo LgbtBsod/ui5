@@ -15,8 +15,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewStateRuntime",
-    "sap/ui/core/Item"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item) {
+    "sap/ui/core/Item",
+    "sap/m/ViewSettingsDialog",
+    "sap/m/ViewSettingsItem"
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item, ViewSettingsDialog, ViewSettingsItem) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -68,6 +70,57 @@ sap.ui.define([
         ).trim();
     }
 
+    function resolveSortItems(oController) {
+        var oBundle = oController.getResourceBundle && oController.getResourceBundle();
+        return [
+            { key: "DateCheck", text: oBundle && oBundle.getText("searchSortDateCheck") || "Date" },
+            { key: "Id", text: oBundle && oBundle.getText("searchSortId") || "ID" },
+            { key: "Status", text: oBundle && oBundle.getText("searchSortStatus") || "Status" },
+            { key: "LpcText", text: oBundle && oBundle.getText("searchSortLpc") || "LPC" },
+            { key: "ProfessionText", text: oBundle && oBundle.getText("searchSortProfession") || "Profession" },
+            { key: "ChangedOn", text: oBundle && oBundle.getText("searchSortChangedOn") || "Changed on" }
+        ];
+    }
+
+    function resolveGroupItems(oController) {
+        var oBundle = oController.getResourceBundle && oController.getResourceBundle();
+        return [
+            { key: "__NONE__", text: oBundle && oBundle.getText("searchGroupNone") || "No grouping" },
+            { key: "Status", text: oBundle && oBundle.getText("searchGroupStatus") || "Status" },
+            { key: "LpcText", text: oBundle && oBundle.getText("searchGroupLpc") || "LPC" },
+            { key: "ProfessionText", text: oBundle && oBundle.getText("searchGroupProfession") || "Profession" },
+            { key: "DateCheck", text: oBundle && oBundle.getText("searchGroupDateCheck") || "Date" }
+        ];
+    }
+
+    function shouldRebindSearch(oController) {
+        return !!(ControllerViewStateRuntime.get(oController, "/hasSearched")
+            && ControllerViewStateRuntime.get(oController, "/smartTableReady"));
+    }
+
+    function applySearchSortSettings(oController, mSettings) {
+        var sSortKey = String((mSettings && mSettings.sortKey) || "").trim() || "DateCheck";
+        var bSortDescending = !!(mSettings && mSettings.sortDescending);
+        ModelStateRuntime.write(oController, "state", "/searchSortKey", sSortKey);
+        ModelStateRuntime.write(oController, "state", "/searchSortDescending", bSortDescending);
+        if (shouldRebindSearch(oController)) {
+            SearchCommandPolicy.rebind(oController, { source: "searchSortSettings" });
+        }
+    }
+
+    function applySearchGroupSettings(oController, mSettings) {
+        var sGroupKey = String((mSettings && mSettings.groupKey) || "").trim();
+        var bGroupDescending = !!(mSettings && mSettings.groupDescending);
+        if (sGroupKey === "__NONE__") {
+            sGroupKey = "";
+        }
+        ModelStateRuntime.write(oController, "state", "/searchGroupKey", sGroupKey);
+        ModelStateRuntime.write(oController, "state", "/searchGroupDescending", bGroupDescending);
+        if (shouldRebindSearch(oController)) {
+            SearchCommandPolicy.rebind(oController, { source: "searchGroupSettings" });
+        }
+    }
+
     function applyAnalyticsDrilldownIntent(oController) {
         var oIntent = readAnalyticsDrilldownIntent(oController) || {};
         var sFilterKey = String(oIntent.filterKey || "").trim();
@@ -111,6 +164,18 @@ sap.ui.define([
             this._searchRateProgress = SearchRateProgress;
             this._sSearchUiSessionKey = SearchViewStateRuntime.resolveSearchUiSessionKey();
             this.setModel(SearchViewStateRuntime.createViewModel(this._sSearchUiSessionKey), "view");
+            if (!String(ModelStateRuntime.read(this, "state", "/searchSortKey", "")).trim()) {
+                ModelStateRuntime.write(this, "state", "/searchSortKey", "DateCheck");
+            }
+            if (typeof ModelStateRuntime.read(this, "state", "/searchSortDescending", undefined) !== "boolean") {
+                ModelStateRuntime.write(this, "state", "/searchSortDescending", true);
+            }
+            if (!String(ModelStateRuntime.read(this, "state", "/searchGroupKey", "")).trim()) {
+                ModelStateRuntime.write(this, "state", "/searchGroupKey", "");
+            }
+            if (typeof ModelStateRuntime.read(this, "state", "/searchGroupDescending", undefined) !== "boolean") {
+                ModelStateRuntime.write(this, "state", "/searchGroupDescending", false);
+            }
             ControllerRouteRuntime.attachMatched(this, [
                 { name: "search", handler: this._onSearchMatched },
                 { name: "detail", handler: this._onDetailSearchContextMatched },
@@ -142,6 +207,14 @@ sap.ui.define([
                 this._oAnalyticsRefreshBinding = ControllerResourceCleanup.destroyBinding(this._oAnalyticsRefreshBinding, this._fnAnalyticsRefreshChanged);
             }
             this._fnAnalyticsRefreshChanged = null;
+            if (this._oSearchSortDialog) {
+                this._oSearchSortDialog.destroy();
+                this._oSearchSortDialog = null;
+            }
+            if (this._oSearchGroupDialog) {
+                this._oSearchGroupDialog.destroy();
+                this._oSearchGroupDialog = null;
+            }
         },
 
         _withActionBusy: function (sViewBusyPath, fnAction, fnSyncControlBusy) {
@@ -423,6 +496,72 @@ sap.ui.define([
             var bLoose = !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"));
             ModelStateRuntime.write(this, "state", "/searchMode", bLoose ? "LOOSE" : "EXACT");
             SearchCommandPolicy.executeSearch(this, { intent: "searchModeToggle", state: bLoose });
+        },
+
+        formatSearchModeChipText: function (sMode) {
+            var oBundle = this.getResourceBundle && this.getResourceBundle();
+            var sNorm = String(sMode || "").toUpperCase() === "LOOSE" ? "LOOSE" : "EXACT";
+            var sLabel = oBundle && oBundle.getText("searchModeLabel") || "Mode";
+            var sModeText = sNorm === "LOOSE"
+                ? (oBundle && oBundle.getText("searchModeLoose") || "Loose")
+                : (oBundle && oBundle.getText("searchModeExact") || "Exact");
+            return sLabel + ": " + sModeText;
+        },
+
+        onOpenSearchSortDialog: function () {
+            var sSelectedKey = String(ModelStateRuntime.read(this, "state", "/searchSortKey", "DateCheck") || "DateCheck");
+            var bSelectedDescending = !!ModelStateRuntime.read(this, "state", "/searchSortDescending", true);
+            var oBundle = this.getResourceBundle && this.getResourceBundle();
+            if (!this._oSearchSortDialog) {
+                this._oSearchSortDialog = new ViewSettingsDialog({
+                    title: oBundle && oBundle.getText("searchSortDialogTitle") || "Sort",
+                    confirm: this.onSearchSortDialogConfirm.bind(this)
+                });
+                resolveSortItems(this).forEach(function (oItem) {
+                    this._oSearchSortDialog.addSortItem(new ViewSettingsItem({ key: oItem.key, text: oItem.text }));
+                }.bind(this));
+                this.getView().addDependent(this._oSearchSortDialog);
+            }
+            this._oSearchSortDialog.setSelectedSortItem(sSelectedKey);
+            this._oSearchSortDialog.setSortDescending(bSelectedDescending);
+            this._oSearchSortDialog.open("sort");
+        },
+
+        onSearchSortDialogConfirm: function (oEvent) {
+            var oSortItem = oEvent && oEvent.getParameter && oEvent.getParameter("sortItem");
+            var bSortDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("sortDescending"));
+            applySearchSortSettings(this, {
+                sortKey: oSortItem && oSortItem.getKey && oSortItem.getKey(),
+                sortDescending: bSortDescending
+            });
+        },
+
+        onOpenSearchGroupDialog: function () {
+            var sSelectedKey = String(ModelStateRuntime.read(this, "state", "/searchGroupKey", "") || "__NONE__");
+            var bSelectedDescending = !!ModelStateRuntime.read(this, "state", "/searchGroupDescending", false);
+            var oBundle = this.getResourceBundle && this.getResourceBundle();
+            if (!this._oSearchGroupDialog) {
+                this._oSearchGroupDialog = new ViewSettingsDialog({
+                    title: oBundle && oBundle.getText("searchGroupDialogTitle") || "Group",
+                    confirm: this.onSearchGroupDialogConfirm.bind(this)
+                });
+                resolveGroupItems(this).forEach(function (oItem) {
+                    this._oSearchGroupDialog.addGroupItem(new ViewSettingsItem({ key: oItem.key, text: oItem.text }));
+                }.bind(this));
+                this.getView().addDependent(this._oSearchGroupDialog);
+            }
+            this._oSearchGroupDialog.setSelectedGroupItem(sSelectedKey || "__NONE__");
+            this._oSearchGroupDialog.setGroupDescending(bSelectedDescending);
+            this._oSearchGroupDialog.open("group");
+        },
+
+        onSearchGroupDialogConfirm: function (oEvent) {
+            var oGroupItem = oEvent && oEvent.getParameter && oEvent.getParameter("groupItem");
+            var bGroupDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("groupDescending"));
+            applySearchGroupSettings(this, {
+                groupKey: oGroupItem && oGroupItem.getKey && oGroupItem.getKey(),
+                groupDescending: bGroupDescending
+            });
         },
 
         onOpenWorkflowAnalytics: function (oEvent) {

@@ -17,6 +17,7 @@ body.chkAppRoot,
 .chkApp .appShell {
   position: relative;
   z-index: 1;
+  --app-content-inline-pad: clamp(1rem, 2vw, 1.75rem);
 }
 
 .chkApp .detailRailViewportLayer {
@@ -177,7 +178,7 @@ body.chkAppRoot,
 }
 
 .chkApp .appContent {
-  padding: clamp(1rem, 2vw, 1.75rem);
+  padding: var(--app-content-inline-pad);
 }
 
 .chkApp .toolbarTransparent,
@@ -233,8 +234,8 @@ body.chkAppRoot,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
 .chkApp .appLayoutSingle #detailPaneHost .appContent,
 .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent {
-  width: min(100%, 84rem);
-  max-width: 84rem;
+  width: min(calc(100% - 1rem), 110rem);
+  max-width: 110rem;
   margin-inline: auto;
 }
 
@@ -385,8 +386,8 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 }
 
 .chkApp .appLayoutSingle .appShellHeader {
-  width: min(calc(100% - 1rem), 110rem);
-  max-width: 110rem;
+  width: min(calc(100% - 1rem - (2 * var(--app-content-inline-pad))), 110rem);
+  max-width: calc(110rem - (2 * var(--app-content-inline-pad)));
   margin: 0.78rem auto 0;
 }
 
@@ -571,4 +572,25 @@ kbd.chkKbd {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* Keep compact side paddings on narrower desktop/tablet widths.
+   Placed after base rebalance to avoid accidental override by later root rules. */
+@media (max-width: 61.25rem) {
+  .chkApp .appLayoutSingle #searchPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
+  .chkApp .appLayoutSingle #detailPaneHost .appContent,
+  .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+  .chkApp .appLayoutSingle .analyticsScreenContent,
+  .chkApp .appLayoutSingle .accessDeniedScreenContent {
+    width: calc(100% - 1.5rem);
+    max-width: calc(100% - 1.5rem);
+    margin-inline: 0.75rem;
+  }
+
+  .chkApp .appLayoutSingle .appShellHeader {
+    width: calc(100% - 1.5rem);
+    max-width: calc(100% - 1.5rem);
+    margin-inline: 0.75rem;
+  }
 }

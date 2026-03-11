@@ -7,7 +7,6 @@ sap.ui.define([
     "sap/m/HBox",
     "sap/m/Text",
     "sap/m/Title",
-    "sap/m/ObjectStatus",
     "sap/m/ToolbarSpacer",
     "sap/m/Button",
     "sap/m/Switch"
@@ -20,7 +19,6 @@ sap.ui.define([
     HBox,
     Text,
     Title,
-    ObjectStatus,
     ToolbarSpacer,
     Button,
     Switch
@@ -47,10 +45,6 @@ sap.ui.define([
         }
         if (oControl._oContextSubtitle) {
             oControl._oContextSubtitle.setText(oControl.getContextSubtitle());
-        }
-        if (oControl._oRouteStatus) {
-            oControl._oRouteStatus.setText(oControl.getRouteLabel());
-            oControl._oRouteStatus.setVisible(!!String(oControl.getRouteLabel() || "").trim());
         }
         if (oControl._oHelpButton) {
             oControl._oHelpButton.setTooltip(oControl.getHelpTooltip());
@@ -134,10 +128,6 @@ sap.ui.define([
             }).addStyleClass("shellProductTitle");
             this._oContextSubtitle = new Text().addStyleClass("shellContextSubtitle");
 
-            this._oRouteStatus = applyPriority(new ObjectStatus({
-                state: "Information"
-            }).addStyleClass("shellContextChip"), "NeverOverflow");
-
             this._oHelpButton = applyPriority(new Button({
                 icon: "sap-icon://sys-help",
                 type: "Transparent",
@@ -204,14 +194,6 @@ sap.ui.define([
                             this._oContextSubtitle
                         ]
                     }).addStyleClass("shellBrandCluster"),
-                    new HBox({
-                        renderType: "Bare",
-                        wrap: "Wrap",
-                        alignItems: "Center",
-                        items: [
-                            this._oRouteStatus
-                        ]
-                    }).addStyleClass("shellContextRail"),
                     new ToolbarSpacer(),
                     this._oHelpButton,
                     this._oSettingsButton,
