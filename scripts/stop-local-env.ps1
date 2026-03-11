@@ -9,6 +9,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $pidDir = Join-Path $repoRoot "docs\\runtime"
 $backendPidFile = Join-Path $pidDir "mock_backend.pid"
 $uiPidFile = Join-Path $pidDir "ui_server.pid"
+$guardPidFile = Join-Path $pidDir "env_guard.pid"
 
 function Stop-ByPidFile([string]$PidFile) {
     if (-not (Test-Path $PidFile)) {
@@ -38,6 +39,7 @@ function Stop-ByPort([int]$Port) {
 
 Stop-ByPidFile $backendPidFile
 Stop-ByPidFile $uiPidFile
+Stop-ByPidFile $guardPidFile
 Stop-ByPort $BackendPort
 Stop-ByPort $UiPort
 

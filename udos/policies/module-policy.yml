@@ -1,3 +1,0 @@
-modules:
-  forbid_controller_to_infra_direct: true
-  forbid_cross_domain_usecase_imports: true

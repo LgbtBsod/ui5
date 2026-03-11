@@ -1,9 +1,0 @@
-{
-  "fileCost": 1,
-  "locCost": 0.1,
-  "lockTouch": 5,
-  "autosaveTouch": 4,
-  "cacheTouch": 3,
-  "statePathTouch": 2,
-  "layerRiskEdge": 10
-}
