@@ -115,6 +115,7 @@ sap.ui.define([
                 "/deleteChecklistConfirmArmed": false,
                 "/attachmentsExpanded": false,
                 "/attachmentsLoaded": false,
+                "/sessionAttachments": [],
                 "/attachmentBusy": false,
                 "/observerSuggestions": [],
                 "/observedSuggestions": [],

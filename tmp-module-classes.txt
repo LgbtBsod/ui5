@@ -367,6 +367,7 @@ searchWorkbenchDock
 sectionDivider
 sectionTitle
 shellActionBtn
+shellAnalyticsBtn
 shellBrandCluster
 shellContextActions
 shellContextChip

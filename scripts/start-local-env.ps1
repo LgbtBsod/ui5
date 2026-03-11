@@ -111,7 +111,8 @@ try {
 $uiProcess.Id | Set-Content $uiPidFile
 
 $backendProbeBase = if ($isRealGateway) { $GatewayBaseUrl.TrimEnd("/") } else { "http://127.0.0.1:$BackendPort" }
-$backendStatus = Wait-Http -Url "$backendProbeBase$servicePath`$metadata" -TimeoutSeconds 20 -Name (if ($isRealGateway) { "SAP Gateway" } else { "Mock backend" })
+$backendName = if ($isRealGateway) { "SAP Gateway" } else { "Mock backend" }
+$backendStatus = Wait-Http -Url "$backendProbeBase$servicePath`$metadata" -TimeoutSeconds 20 -Name $backendName
 $uiStatus = Wait-Http -Url "http://127.0.0.1:$UiPort/index.html" -TimeoutSeconds 20 -Name "UI server"
 
 if ($isRealGateway) {

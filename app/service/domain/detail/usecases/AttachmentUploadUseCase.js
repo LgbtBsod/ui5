@@ -1,12 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/DraftChecklistFactory"
-], function (UseCase, Result, UseCaseResultUtils, AttachmentEffectSupport, DetailStateAccess, CreateSentinel, DraftChecklistFactory) {
+], function (UseCase, Result, Effects, UseCaseResultUtils, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, CreateSentinel, DraftChecklistFactory) {
     "use strict";
 
     function buildLocalObjectUrl(oFile) {
@@ -49,6 +51,21 @@ sap.ui.define([
         };
     }
 
+    function buildUploadEffects(mCtx, oAttachment, sToastKey) {
+        var aCurrentAll = DetailStateAccess.readCurrentAttachments(mCtx);
+        var oUiState = mCtx && mCtx.uiState;
+        var bLoadedAll = !!(oUiState && oUiState.get("view", "/attachmentsLoaded"));
+        var aSession = (oUiState && oUiState.get("view", "/sessionAttachments")) || [];
+        var aAllNext = oAttachment ? AttachmentIdentity.appendUnique(aCurrentAll, oAttachment) : (Array.isArray(aCurrentAll) ? aCurrentAll.slice() : []);
+        var aSessionNext = oAttachment ? AttachmentIdentity.appendUnique(aSession, Object.assign({}, oAttachment, { _sessionUpload: true })) : (Array.isArray(aSession) ? aSession.slice() : []);
+        var aEffects = AttachmentEffectSupport.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentUploaded", "success");
+        aEffects.push(Effects.modelPatch("view", "/sessionAttachments", aSessionNext));
+        if (bLoadedAll) {
+            aEffects.push(Effects.modelPatch("view", "/attachmentsLoaded", true));
+        }
+        return aEffects;
+    }
+
     function AttachmentUploadUseCase() {
         UseCase.call(this, "AttachmentUploadUseCase");
     }
@@ -63,16 +80,17 @@ sap.ui.define([
             return Promise.resolve(stageLocalAttachment(mInput, mCtx)).then(function (oRes) {
                 return Result.ok(
                     oRes || {},
-                    AttachmentEffectSupport.buildAttachmentSyncEffects((oRes && oRes.attachments) || [], "attachmentUploaded", "success")
+                    buildUploadEffects(mCtx, (oRes && oRes.attachment) || null, "attachmentUploaded")
                 );
             });
         }
         return UseCaseResultUtils.callOrDefault(function () {
             return oRepo && oRepo.uploadAttachment(mInput || {});
         }, { attachment: {} }).then(function (oRes) {
+            var oAttachment = (oRes && oRes.attachment) || stageLocalAttachment(mInput, mCtx).attachment;
             return Result.ok(
                 oRes || {},
-                AttachmentEffectSupport.buildAttachmentSyncEffects((oRes && oRes.attachments) || [], "attachmentUploaded", "success")
+                buildUploadEffects(mCtx, oAttachment, "attachmentUploaded")
             );
         }).catch(function (oError) {
             return Result.fail(oError, AttachmentEffectSupport.buildAttachmentBusyResetEffects());

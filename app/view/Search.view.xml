@@ -193,7 +193,7 @@
                             press=".onScrollSearchResultsToolbarAnchor"
                             class="searchToolbarNavBtn searchToolbarNavBtnUp">
                             <layoutData>
-                                <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
+                                <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                             </layoutData>
                         </Button>
 

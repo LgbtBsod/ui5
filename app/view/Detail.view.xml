@@ -416,7 +416,7 @@
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
                                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
-                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody workflowBusyScope workflowBusyScopeSection">
+                                        <VBox id="detailAttachmentsBody" renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody workflowBusyScope workflowBusyScopeSection">
                                             <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/attachmentBusy}">
                                                 <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
                                             </VBox>
@@ -477,7 +477,51 @@
                                                     class="modeHintText detailAttachmentDropZoneMeta"/>
                                             </VBox>
 
-                                            <VBox id="attachmentDropScope" renderType="Bare" visible="{view>/attachmentsExpanded}">
+                                            <VBox id="attachmentDropScope" renderType="Bare">
+                                                <VBox id="attachmentSessionScope" renderType="Bare" visible="{= !${view>/attachmentsExpanded} }">
+                                                    <Table
+                                                        items="{view>/sessionAttachments}"
+                                                        class="flatEditorTable detailAttachmentTable detailAttachmentTableSession"
+                                                        visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}"
+                                                        noDataText="{i18n>noAttachmentsData}">
+                                                        <columns>
+                                                            <Column><Text text="{i18n>attachmentFileName}"/></Column>
+                                                            <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentCategoryLabel}"/></Column>
+                                                            <Column width="7rem" hAlign="End"><Text text="{i18n>attachmentSize}"/></Column>
+                                                            <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentChangedOn}"/></Column>
+                                                            <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                                                                <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                                                            </Column>
+                                                        </columns>
+                                                        <items>
+                                                            <ColumnListItem>
+                                                                <cells>
+                                                                    <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}"/>
+                                                                    <Text text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
+                                                                    <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
+                                                                    <Text text="{view>ChangedOn}"/>
+                                                                    <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                                                        <Button
+                                                                            icon="sap-icon://download"
+                                                                            text="{i18n>rowActionDownload}"
+                                                                            type="Transparent"
+                                                                            press=".onOpenAttachment"
+                                                                            class="tableRowActionBtn"/>
+                                                                        <Button
+                                                                            icon="sap-icon://delete"
+                                                                            text="{i18n>rowActionDelete}"
+                                                                            type="Transparent"
+                                                                            press=".onDeleteAttachment"
+                                                                            visible="{= ${state>/mode} !== 'READ' }"
+                                                                            class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                                                    </HBox>
+                                                                </cells>
+                                                            </ColumnListItem>
+                                                        </items>
+                                                    </Table>
+                                                </VBox>
+
+                                                <VBox id="attachmentExpandedScope" renderType="Bare" visible="{view>/attachmentsExpanded}">
                                                 <HBox
                                                     class="detailEmptyStateCard detailAttachmentsEmptyState"
                                                     renderType="Bare"
@@ -529,6 +573,7 @@
                                                         </ColumnListItem>
                                                     </items>
                                                 </Table>
+                                                </VBox>
                                             </VBox>
                                         </VBox>
                                     </VBox>

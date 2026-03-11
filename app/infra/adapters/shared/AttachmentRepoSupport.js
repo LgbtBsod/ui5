@@ -49,12 +49,22 @@ sap.ui.define([
                     "X-CategoryKey": String(oMeta.categoryKey || "GEN").trim() || "GEN"
                 }
             }).then(function () {
-            return loadAttachments({ rootId: sRootId }).then(function (oList) {
+                var oMapped = ChecklistSnapshotMapper.mapAttachmentRow(Object.assign({}, oCreated, {
+                    AttachmentKey: sAttachmentKey,
+                    Key: sAttachmentKey,
+                    RootKey: sRootId,
+                    FolderKey: String(oMeta.folderKey || sRootId).trim() || sRootId,
+                    CategoryKey: String(oMeta.categoryKey || "GEN").trim() || "GEN",
+                    CategoryText: String(oCreated && oCreated.CategoryText || "").trim(),
+                    FileName: oMeta.fileName || oFile.name || "",
+                    MimeType: oMeta.mimeType || oFile.type || "application/octet-stream",
+                    FileSize: Number(oMeta.fileSize || oFile.size || 0) || 0,
+                    ChangedOn: new Date().toISOString(),
+                    CreatedOn: String(oCreated && oCreated.CreatedOn || new Date().toISOString())
+                }));
                 return {
-                    attachment: (oList.attachments || []).filter(function (oItem) { return oItem.AttachmentKey === sAttachmentKey; })[0] || null,
-                    attachments: oList.attachments || []
+                    attachment: oMapped
                 };
-            });
             });
         });
     }
@@ -63,12 +73,10 @@ sap.ui.define([
         var sRootId = normalizeRootKey(mArgs && mArgs.rootId);
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
         if (!sAttachmentId) {
-            return Promise.resolve({ deleted: true, attachments: [] });
+            return Promise.resolve({ deleted: true });
         }
         return GatewayClient.deletePath("/AttachmentSet(AttachmentKey='" + sAttachmentId + "')").then(function () {
-            return loadAttachments({ rootId: sRootId }).then(function (oList) {
-                return { deleted: true, attachments: oList.attachments || [] };
-            });
+            return { deleted: true };
         });
     }
 

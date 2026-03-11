@@ -50,6 +50,7 @@ sap.ui.define([
         }
         if (oControl._oRouteStatus) {
             oControl._oRouteStatus.setText(oControl.getRouteLabel());
+            oControl._oRouteStatus.setVisible(!!String(oControl.getRouteLabel() || "").trim());
         }
         if (oControl._oHelpButton) {
             oControl._oHelpButton.setTooltip(oControl.getHelpTooltip());
@@ -159,7 +160,7 @@ sap.ui.define([
                 press: function () {
                     that.fireAnalyticsPress({ anchor: that._oAnalyticsButton });
                 }
-            }).addStyleClass("shellActionBtn"), "High");
+            }).addStyleClass("shellActionBtn shellAnalyticsBtn"), "High");
 
             this._oThemeToggle = applyPriority(new Switch({
                 customTextOn: "",

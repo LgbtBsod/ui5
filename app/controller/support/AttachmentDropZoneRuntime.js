@@ -31,7 +31,7 @@ sap.ui.define([
     }
 
     function isWithinDropScope(oController, oEvent) {
-        var oDropZoneDom = oController && oController._attachmentDropZoneDom;
+        var oDropZoneDom = (oController && oController._attachmentDropScopeDom) || (oController && oController._attachmentDropZoneDom);
         var oTarget = oEvent && oEvent.target;
         var iX = Number(oEvent && oEvent.clientX);
         var iY = Number(oEvent && oEvent.clientY);

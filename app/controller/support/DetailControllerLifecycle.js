@@ -49,6 +49,7 @@ sap.ui.define([
             attachmentBusy: false,
             attachmentsExpanded: false,
             attachmentsLoaded: false,
+            sessionAttachments: [],
             checksBusy: false,
             barriersBusy: false,
             checksExpandedBusy: false,

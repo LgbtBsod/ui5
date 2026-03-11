@@ -108,20 +108,21 @@ sap.ui.define([
 
     function syncSearchScrollAffordances(oController) {
         var oScrollHost = resolveSearchScrollHost(oController);
-        var iTop = oScrollHost ? Number(oScrollHost.scrollTop || 0) : 0;
         var oResultsShell = oController.byId && oController.byId("searchResultsShell");
         var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
+        var iTop = oScrollHost ? Number(oScrollHost.scrollTop || 0) : 0;
         var oResultsToolbarDom = oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null;
         var oHostRect;
-        var oToolbarRect;
-        var iToolbarTop = 0;
+        var oAnchorRect;
+        var iAnchorTop = 0;
+        var oAnchorDom = oResultsShellDom || oResultsToolbarDom;
         ControllerViewStateRuntime.set(oController, "/scrollNavVisible", iTop > 220);
-        if (oScrollHost && oResultsToolbarDom && oScrollHost.getBoundingClientRect && oResultsToolbarDom.getBoundingClientRect) {
+        if (oScrollHost && oAnchorDom && oScrollHost.getBoundingClientRect && oAnchorDom.getBoundingClientRect) {
             oHostRect = oScrollHost.getBoundingClientRect();
-            oToolbarRect = oResultsToolbarDom.getBoundingClientRect();
-            iToolbarTop = iTop + (oToolbarRect.top - oHostRect.top);
+            oAnchorRect = oAnchorDom.getBoundingClientRect();
+            iAnchorTop = iTop + (oAnchorRect.top - oHostRect.top);
         }
-        ControllerViewStateRuntime.set(oController, "/resultsToolbarNavVisible", !!oResultsToolbarDom && iTop > (iToolbarTop + 120));
+        ControllerViewStateRuntime.set(oController, "/resultsToolbarNavVisible", !!oAnchorDom && iTop > (iAnchorTop + 120));
     }
 
     function flushSearchViewportSync(oController) {
@@ -394,13 +395,11 @@ sap.ui.define([
 
     function scrollToSearchResultsToolbar(oController) {
         var oScrollHost = resolveSearchScrollHost(oController);
-        var oWorkbenchDock = oController.byId && oController.byId("searchWorkbenchDock");
-        var oWorkbenchDockDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
         var oResultsShell = oController.byId && oController.byId("searchResultsShell");
         var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
         var oFallbackToolbar = oController.byId && oController.byId("smartTableCustomToolbar");
         var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
-        var oToolbarDom = oWorkbenchDockDom || (oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null);
+        var oToolbarDom = oResultsShellDom || oResultsToolbarDom;
         var oHostRect;
         var oToolbarRect;
         var iTargetTop;
@@ -418,12 +417,6 @@ sap.ui.define([
         oToolbarRect = oToolbarDom.getBoundingClientRect();
         iTargetTop = (oScrollHost.scrollTop || 0) + (oToolbarRect.top - oHostRect.top) - iStickyOffset - 10;
         oScrollHost.scrollTop = Math.max(0, iTargetTop);
-        if (oResultsToolbarDom && oResultsToolbarDom.style) {
-            oResultsToolbarDom.style.transform = "";
-            if (oResultsToolbarDom.dataset) {
-                oResultsToolbarDom.dataset.searchRuntimeTranslateY = "0";
-            }
-        }
         syncSearchScrollAffordances(oController);
         schedulePostAnchorSync(oController);
         return Promise.resolve(true);

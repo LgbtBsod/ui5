@@ -496,3 +496,10 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
 .chkApp .infoCardGridItem {
   min-width: 0;
 }
+
+/* Global pseudo-element backdrop reset carried from monolith hardening. */
+*::before,
+*::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

@@ -10,7 +10,7 @@
     <VBox class="chkSkin appShell appLayoutSingle" fitContainer="true" width="100%">
         <cc:AppShellHeader
             eyebrow=""
-            productName="{i18n>shellProductName}"
+            productName="{appView>/shell/productName}"
             contextSubtitle=""
             routeLabel="{appView>/shell/routeLabel}"
             settingsText="{i18n>shellSettingsTitle}"

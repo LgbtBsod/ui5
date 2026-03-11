@@ -379,14 +379,14 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 .chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
 .chkApp .appLayoutSingle .analyticsScreenContent,
 .chkApp .appLayoutSingle .accessDeniedScreenContent {
-  width: min(calc(100% - 2rem), 96rem);
-  max-width: 96rem;
+  width: min(calc(100% - 1rem), 110rem);
+  max-width: 110rem;
   margin-inline: auto;
 }
 
 .chkApp .appLayoutSingle .appShellHeader {
-  width: min(calc(100% - 2rem), 96rem);
-  max-width: 96rem;
+  width: min(calc(100% - 1rem), 110rem);
+  max-width: 110rem;
   margin: 0.78rem auto 0;
 }
 
@@ -431,6 +431,21 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 .chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnSeparator {
   width: 1px;
   opacity: 1;
+}
+
+/* Keep layout stable during drag-resize and FCL transitions. */
+html.chkResizing .chkApp .appRootFcl .sapFFCLColumn,
+html.chkResizing .chkApp .appRootFcl .sapFFCLColumnContent,
+html.chkResizing .chkApp *,
+html.chkResizing #ui5-bg,
+html.chkResizing #ui5-bg #bgLight,
+html.chkResizing #ui5-bg #bgDark {
+  transition-duration: 0ms !important;
+  transition: none !important;
+}
+
+html.chkResizing #ui5-bg {
+  pointer-events: none !important;
 }
 
 /* Migrated from claude-hyper.css backlog: app states and skip-link helpers. */
@@ -491,6 +506,42 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 .chkApp .skipLink:focus,
 .skipToMain:focus {
   top: 0 !important;
+}
+
+/* Live region flash keeps SR announcements noticeable during async updates. */
+@keyframes _liveRegionFlash {
+  0%,
+  100% { outline: 2px solid transparent; }
+  50% { outline: 2px solid rgba(var(--hz-accent-rgb, 0, 112, 242), 0.3); }
+}
+
+[aria-live="assertive"]:not(:empty),
+[aria-live="polite"]:not(:empty) {
+  animation: _liveRegionFlash 600ms ease both;
+}
+
+/* Baseline global scrollbar contract inherited from monolith. */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(120, 175, 240, 0.22) transparent !important;
+}
+
+*::-webkit-scrollbar {
+  width: 3px !important;
+  height: 3px !important;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+  background: rgba(120, 175, 240, 0.22) !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 155, 228, 0.44) !important;
 }
 
 .chkApp .kbdBadge,

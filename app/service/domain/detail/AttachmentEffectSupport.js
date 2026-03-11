@@ -20,7 +20,14 @@ sap.ui.define([
     }
 
     function buildAttachmentSyncEffects(aAttachments, sToastKey, sToastLevel) {
-        return buildAttachmentLoadEffects(aAttachments, sToastKey, sToastLevel);
+        var aSafeAttachments = Array.isArray(aAttachments) ? aAttachments : [];
+        var aEffects = [
+            Effects.modelPatch("selected", "/attachments", aSafeAttachments)
+        ].concat(buildAttachmentBusyResetEffects());
+        if (sToastKey) {
+            aEffects.push(Effects.toast(sToastKey, sToastLevel || "info"));
+        }
+        return aEffects;
     }
 
     return {

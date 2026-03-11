@@ -106,6 +106,7 @@ detailAttachmentDropZoneIcon
 detailAttachmentDropZoneMeta
 detailAttachmentDropZoneTop
 detailAttachmentTable
+detailAttachmentTableSession
 detailAttachmentToolbar
 detailAttachmentsBody
 detailAttachmentsCard
@@ -227,6 +228,7 @@ searchToolbarNavBtn
 searchToolbarNavBtnUp
 searchWorkbenchDock
 shellActionBtn
+shellActionBtn shellAnalyticsBtn
 shellBrandCluster
 shellContextChip
 shellContextRail

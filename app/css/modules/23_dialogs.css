@@ -432,6 +432,48 @@
   border-radius: 999px;
 }
 
+/* Keep MessageBox/Warning dialogs readable and structurally stable. */
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog > .sapMBar.sapMHeader-CTX {
+  min-height: 3rem;
+  padding-inline: 1rem;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection {
+  padding: 0.75rem 0.95rem 0.9rem;
+  min-height: 3rem;
+  height: auto;
+  display: block !important;
+  background: var(--theme-block-bg) !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogScrollCont,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogScroll {
+  padding: 0;
+  min-height: 1.8rem;
+  height: auto !important;
+  overflow: auto !important;
+  background: transparent !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection > .sapMDialogScrollCont,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection > .sapMDialogScrollCont > .sapMDialogScroll {
+  display: block !important;
+  min-height: 1.8rem !important;
+  max-height: none !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection .sapMText,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection .sapMLabel {
+  color: var(--text-main) !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogFooter {
+  padding: 0.35rem 0.7rem;
+}
+
 body.chkAppRoot.appDark .chkApp .glassDialog .sapMDialogTitle,
 body.chkAppRoot.appDark .chkApp .glassDialog .sapMDialogSection,
 body.chkAppRoot.appDark .chkApp .glassDialog .sapMDialogScroll,
@@ -856,6 +898,31 @@ body.chkAppRoot .sapMMessageToast.glassToast.glassToast--info {
   text-align: center !important;
   padding: 2rem 1rem !important;
   opacity: 0.5 !important;
+}
+
+@keyframes _tooltipIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sapUiTooltip,
+[role="tooltip"],
+.sapUiRespRectangle {
+  border-radius: 0.5rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  padding: 0.35rem 0.6rem !important;
+  max-width: 22rem !important;
+  pointer-events: none !important;
+  animation: _tooltipIn 140ms ease both !important;
+}
+
+.chkApp .chkSkin .sapMDialog.glassDialog,
+.chkApp .chkSkin .sapMPopover,
+.chkApp .chkSkin .sapMResponsivePopover {
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
 }
 
 .chkApp .shellUserRole.sapMText {

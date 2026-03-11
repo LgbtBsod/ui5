@@ -28,7 +28,13 @@
 .chkApp .detailContent .sapUxAPObjectPageSubSectionHeader,
 .chkApp .detailContent .sapUxAPBlockContainer,
 .chkApp .detailContent .sapUxAPAnchorBar,
-.chkApp .detailContent .sapUxAPAnchorBarScrollContainer {
+.chkApp .detailContent .sapUxAPAnchorBarScrollContainer,
+.chkApp .detailContent [id$="detailObjectPage-spacer"],
+.chkApp .detailContent [id*="detailObjectPage-spacer"],
+.chkApp .detailContent .sapFDynamicPageContentWrapper::before,
+.chkApp .detailContent .sapFDynamicPageContentWrapper::after,
+.chkApp .detailContent .sapFDynamicPageHeader::before,
+.chkApp .detailContent .sapFDynamicPageHeader::after {
   background: transparent;
 }
 
@@ -52,6 +58,15 @@
   min-width: 0;
   min-height: 0;
   padding-bottom: 0;
+}
+
+.chkApp .detailContent .sapFDynamicPageHeader,
+.chkApp .detailContent .sapFDynamicPageHeaderWithContent,
+.chkApp .detailContent .sapFDynamicPageHeaderContent,
+.chkApp .detailContent .sapFDynamicPageHeaderContentWrapper,
+.chkApp .detailContent [id$="detailObjectPage-spacer"] {
+  box-shadow: none !important;
+  border: 0 !important;
 }
 
 .chkApp .detailContent,
@@ -1749,6 +1764,17 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   max-width: 100%;
 }
 
+/* Keep attachment drop strip/table on the same full row width. */
+.chkApp .detailAttachmentsBody {
+  align-items: stretch;
+  overflow-x: visible;
+}
+
+.chkApp .detailAttachmentsBody > * {
+  align-self: stretch;
+  width: 100%;
+}
+
 .chkApp .detailBarriersGridTable {
   min-height: 18.9rem;
 }
@@ -1790,6 +1816,9 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   box-shadow: var(--theme-rail-shadow);
   transition: min-height 200ms ease, transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
   border: 1px solid rgba(var(--accent-rgb), 0.16);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .chkApp .detailAttachmentDropZone.isAttachmentDropPrimed {

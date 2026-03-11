@@ -47,6 +47,23 @@
   line-height: 1.05;
 }
 
+.chkApp .analyticsHeroCard .workflowEyebrow,
+.chkApp .analyticsHeroCard .analyticsScreenTitle,
+.chkApp .analyticsHeroCard .analyticsScreenSubtitle {
+  width: 100%;
+  text-align: center;
+}
+
+.chkApp .shellAnalyticsBtn .sapMBtnInner {
+  min-width: 2.9rem;
+  min-height: 2.3rem;
+  padding-inline: 0.72rem;
+}
+
+.chkApp .shellAnalyticsBtn .sapMBtnIcon {
+  font-size: 1rem;
+}
+
 .chkApp .analyticsScreenBody {
   gap: 0.9rem;
 }

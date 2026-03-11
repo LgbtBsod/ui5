@@ -68,6 +68,7 @@ sap.ui.define([
             mPatch["/isTabletViewport"] = !!ModelStateRuntime.read(this, "appView", "/isTabletViewport", false);
             if (!ModelStateRuntime.read(this, "appView", "/shell", null)) {
                 mPatch["/shell"] = {
+                    productName: "",
                     routeLabel: "",
                     contextSubtitle: "",
                     userLabel: "",
@@ -137,9 +138,10 @@ sap.ui.define([
             bSearchWorkspace = !sSelectedId;
             bEditWorkspace = !bSearchWorkspace && sMode === "EDIT";
 
-            mShellPatch["/shell/routeLabel"] = sCurrentRouteName === "analytics"
-                ? "Process analytics zone"
-                : "Checklist interaction area";
+            mShellPatch["/shell/productName"] = sCurrentRouteName === "analytics"
+                ? getText(this, "shellProductNameAnalytics", null, "Аналитика чек-листов производственного контроля")
+                : getText(this, "shellProductNameSearch", null, "Чек-листы производственного контроля");
+            mShellPatch["/shell/routeLabel"] = "";
             mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === "analytics"
                 ? getText(this, "shellContextAnalytics", null, "Gateway-backed workflow dashboard with operational totals and breakdowns.")
                 : (sCurrentRouteName === "accessDenied"

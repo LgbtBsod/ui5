@@ -53,7 +53,9 @@ sap.ui.define([
     return {
         _bindAttachmentDropZone: function () {
             var oDropZone = this.byId("attachmentDropZone");
+            var oScope = this.byId("attachmentDropZone");
             var oDomRef = oDropZone && oDropZone.getDomRef && oDropZone.getDomRef();
+            var oScopeDom = oScope && oScope.getDomRef && oScope.getDomRef();
 
             AttachmentUploadCore.syncUploaderPolicy(this);
             ensureDropZoneDelegate(this, oDropZone);
@@ -61,7 +63,7 @@ sap.ui.define([
                 this._unbindAttachmentDropZone();
                 return;
             }
-            if (this._attachmentDropZoneDom === oDomRef) {
+            if (this._attachmentDropZoneDom === oDomRef && this._attachmentDropScopeDom === (oScopeDom || oDomRef)) {
                 return;
             }
 
@@ -69,10 +71,11 @@ sap.ui.define([
             this._attachmentDragDepth = 0;
             ensureHandlers(this, AttachmentDropZoneRuntime.dropScopeSpecs);
             ensureHandlers(this, AttachmentDropZoneRuntime.globalSpecs);
-            toggleListeners(oDomRef, AttachmentDropZoneRuntime.dropScopeSpecs, this, true);
+            toggleListeners(oScopeDom || oDomRef, AttachmentDropZoneRuntime.dropScopeSpecs, this, true);
             toggleListeners(document, AttachmentDropZoneRuntime.globalSpecs, this, true);
+            toggleListeners(window, AttachmentDropZoneRuntime.globalSpecs, this, true);
             this._attachmentDropZoneDom = oDomRef;
-            this._attachmentDropScopeDom = oDomRef;
+            this._attachmentDropScopeDom = oScopeDom || oDomRef;
         },
 
         _unbindAttachmentDropZone: function () {
@@ -85,6 +88,7 @@ sap.ui.define([
                 toggleListeners(this._attachmentDropScopeDom, AttachmentDropZoneRuntime.dropScopeSpecs, this, false);
             }
             toggleListeners(document, AttachmentDropZoneRuntime.globalSpecs, this, false);
+            toggleListeners(window, AttachmentDropZoneRuntime.globalSpecs, this, false);
             this._attachmentDropZoneDom = null;
             this._attachmentDropScopeDom = null;
             this._attachmentDragDepth = 0;

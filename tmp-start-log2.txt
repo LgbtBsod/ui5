@@ -1,0 +1,14 @@
+==============================
+Starting current local UI stack ...
+==============================
+
+Backend: http://127.0.0.1:8000 (200)
+UI: http://127.0.0.1:8080/index.html (200)
+Logs: C:\Users\lgbtb\Desktop\ui5\docs\\runtime
+
+==============================
+Environment is up.
+UI:            http://127.0.0.1:8080/index.html
+Service root:  http://127.0.0.1:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/
+Stop command:  powershell -NoProfile -ExecutionPolicy Bypass -File scripts\stop-local-env.ps1
+==============================

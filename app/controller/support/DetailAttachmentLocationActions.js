@@ -10,8 +10,13 @@ sap.ui.define([
 ], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime) {
     "use strict";
 
+    function resolveAttachmentContext(oEvent) {
+        var oSource = oEvent && oEvent.getSource && oEvent.getSource();
+        return (oSource && oSource.getBindingContext && (oSource.getBindingContext("selected") || oSource.getBindingContext("view"))) || null;
+    }
+
     function deleteAttachment(oController, oEvent) {
-        var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext("selected");
+        var oCtx = resolveAttachmentContext(oEvent);
         var oRow = oCtx && oCtx.getObject && oCtx.getObject();
         var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
         if (!sAttachmentId) {
@@ -48,7 +53,7 @@ sap.ui.define([
     }
 
     function openAttachment(oController, oEvent) {
-        var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext("selected");
+        var oCtx = resolveAttachmentContext(oEvent);
         var oRow = oCtx && oCtx.getObject && oCtx.getObject();
         var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
         var sLocalObjectUrl = String((oRow && oRow.localObjectUrl) || "").trim();
