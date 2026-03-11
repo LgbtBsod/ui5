@@ -1055,9 +1055,9 @@ body.chkAppRoot .shellPopover .sapMIBar.sapMHeader-CTX {
 
 body.chkAppRoot .shellPopover .shellUserBody,
 body.chkAppRoot .shellPopover .shellSettingsBody {
-  width: min(100%, 24rem);
-  max-width: 24rem;
-  gap: 0.72rem;
+  width: 100%;
+  max-width: 100%;
+  gap: 0.56rem;
 }
 
 body.chkAppRoot .shellPopover .shellUserCard,
@@ -1072,9 +1072,9 @@ body.chkAppRoot .shellPopover .shellNotificationItem {
 body.chkAppRoot .shellPopover .shellSettingRow {
   align-items: start;
   flex-wrap: wrap;
-  row-gap: 0.72rem;
-  column-gap: 0.82rem;
-  padding: 0.82rem 0.9rem;
+  row-gap: 0.48rem;
+  column-gap: 0.56rem;
+  padding: 0.68rem 0.74rem;
 }
 
 body.chkAppRoot .shellPopover .shellUserActionBtn,
@@ -1142,7 +1142,7 @@ body.chkAppRoot .shellPopover .shellUserLabel {
 body.chkAppRoot .shellPopover .shellUserCard,
 body.chkAppRoot .shellPopover .shellHelpItem,
 body.chkAppRoot .shellPopover .shellNotificationItem {
-  padding: 0.72rem 0.8rem;
+  padding: 0.64rem 0.72rem;
 }
 
 body.chkAppRoot .shellPopover .shellSettingCopy,
@@ -1189,10 +1189,11 @@ body.chkAppRoot .shellPopover .shellUserPermissionList {
   margin-top: 0.12rem;
   border: 1px solid var(--theme-rail-border);
   border-radius: calc(var(--radius-md) - 0.1rem);
+  overflow: hidden;
 }
 
 body.chkAppRoot .shellPopover .shellUserPermissionList .sapMLIB {
-  min-height: 3.25rem;
+  min-height: 2.6rem;
 }
 
 body.chkAppRoot .shellPopover .shellNotificationTitle,
@@ -1353,11 +1354,11 @@ body.chkAppRoot.appDark .chkApp .shellUserContextCard {
 }
 
 .chkApp .shellUserPermissionList {
-  padding: 0 0.75rem 0.5rem !important; font-size: 0.72rem !important; opacity: 0.65 !important; line-height:1.5 !important;
+  padding: 0 0.56rem 0.4rem !important; font-size: 0.72rem !important; opacity: 0.65 !important; line-height:1.45 !important;
 }
 
 .chkApp .shellUserActionBtn .sapMBtnInner {
-  border-radius: 0.55rem !important; justify-content:flex-start !important; padding: 0 0.875rem !important; min-height: 2.25rem !important; font-size: 0.84rem !important; width: 100% !important; border: 0 !important; background: transparent !important; box-shadow: none !important; gap: 0.5rem !important; transition: background 110ms ease, color 110ms ease !important;
+  border-radius: 0.55rem !important; justify-content:flex-start !important; padding: 0 0.75rem !important; min-height: 2rem !important; font-size: 0.8rem !important; width: 100% !important; border: 0 !important; background: transparent !important; box-shadow: none !important; gap: 0.42rem !important; transition: background 110ms ease, color 110ms ease !important;
 }
 
 body.chkAppRoot.appLight .chkApp .shellUserCard {
@@ -1369,7 +1370,7 @@ body.chkAppRoot.appLight .chkApp .shellUserCard {
 }
 
 .chkApp .shellUserActionBtn.sapMBtn .sapMBtnInner {
-  border-radius: 999px !important; background: var(--hz-accent,#0070F2) !important; border-color: var(--hz-accent,#0070F2) !important; color: #fff !important; min-height: 2rem !important; padding: 0 1rem !important; font-size: 0.78rem !important; font-weight: 680 !important;
+  border-radius: 999px !important; background: var(--hz-accent,#0070F2) !important; border-color: var(--hz-accent,#0070F2) !important; color: #fff !important; min-height: 1.9rem !important; padding: 0 0.88rem !important; font-size: 0.76rem !important; font-weight: 680 !important;
 }
 
 body.chkAppRoot.appLight .chkApp .shellSettingRow {
@@ -1459,11 +1460,17 @@ body.chkAppRoot.appDark .chkApp .shellPopoverList .sapMListItem {
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogTitleGroup {
   border-bottom: 0 !important;
   box-shadow: none !important;
+  background: var(--theme-block-bg) !important;
 }
 
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection,
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogScroll {
   border: 0 !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogFooter .sapMBtn .sapMBtnInner {
+  min-width: 5.4rem !important;
+  border-radius: 999px !important;
 }
 
 /* 2026-03 shell popover final geometry lock.

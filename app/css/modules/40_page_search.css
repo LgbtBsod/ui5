@@ -1469,7 +1469,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 .chkApp .searchSmartToolbarRail .sapMMenuBtn {
   flex: 0 0 auto;
   min-width: 0;
-  margin-inline-start: 0.48rem;
+  margin-inline-start: 0.14rem;
 }
 
 .chkApp .searchSmartToolbarRail .sapMMenuBtn .sapMBtnInner,
@@ -1488,7 +1488,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 }
 
 .chkApp .searchSmartToolbarRail .searchExportMenuBtn {
-  margin-inline-start: 0.48rem;
+  margin-inline-start: 0.14rem;
   flex: 0 0 auto;
   min-width: 0;
 }
@@ -1638,9 +1638,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .appLayoutSplit #searchPaneHost .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapUiCompFilterBarToolbar,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB {
-  padding: 0.2rem 0.24rem;
+  padding: 0.14rem 0.18rem;
   padding-inline: 0.12rem;
-  row-gap: 0.35rem;
+  row-gap: 0.18rem;
   column-gap: 0.12rem;
 }
 
@@ -1652,9 +1652,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .appLayoutSplit #searchPaneHost .searchActionToolbarDensity,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchActionToolbarDensity {
   min-height: 2.6rem;
-  padding: 0.2rem 0.24rem 0.26rem;
-  row-gap: 0.24rem;
-  column-gap: 0.24rem;
+  padding: 0.14rem 0.18rem 0.18rem;
+  row-gap: 0.18rem;
+  column-gap: 0.18rem;
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchSelectionPrimaryId,
@@ -1663,7 +1663,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 0.7rem;
-  flex: 1 1 12rem;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
@@ -1677,7 +1677,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
 .chkApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail {
-  padding-inline: 0.24rem;
+  padding-inline: 0.18rem;
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail .sapMBtn,
@@ -1730,7 +1730,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail {
-  padding-inline: 0.24rem;
+  padding-inline: 0.18rem;
   position: sticky;
   top: var(--search-sticky-action-top, calc(var(--app-shell-offset) + 9rem));
   z-index: 21;
@@ -1861,21 +1861,21 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
   .chkApp .searchActionToolbarDensity,
   .chkApp .searchSmartToolbarRail {
-    row-gap: 0.24rem;
-    column-gap: 0.2rem;
+    row-gap: 0.18rem;
+    column-gap: 0.16rem;
   }
 
   .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
   .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
   .chkApp .searchResultsTable .toolbarTransparent,
   .chkApp .searchToolbarMetaRail {
-    padding: 0.18rem 0.22rem;
+    padding: 0.14rem 0.18rem;
   }
 
   .chkApp .searchSmartToolbarRail .backendTopInput,
   .chkApp .searchSmartToolbarRail .maxRowsInput {
-    flex-basis: 8.4rem;
-    min-width: 7.25rem;
+    flex-basis: 5.2rem;
+    min-width: 5rem;
   }
 
   .chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
@@ -1951,8 +1951,8 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     flex-wrap: wrap;
     overflow-x: hidden;
     overflow-y: visible;
-    row-gap: 0.35rem;
-    column-gap: 0.28rem;
+    row-gap: 0.18rem;
+    column-gap: 0.16rem;
   }
 
   .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
@@ -2193,14 +2193,14 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
   .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
     position: static;
-    margin-top: 0.36rem;
-    padding-bottom: 0.3rem;
+    margin-top: 0.24rem;
+    padding-bottom: 0.16rem;
     top: auto;
   }
 
   .chkApp .searchSmartToolbarRail .backendTopInput,
   .chkApp .searchSmartToolbarRail .maxRowsInput {
-    min-width: 7rem;
+    min-width: 5rem;
   }
 
   .chkApp .searchResultsActionRail .searchSelectionStatusChip,
@@ -2373,7 +2373,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
 .chkApp .searchFilterCardDense .customFilterWrapper {
   min-width: min(100%, 12rem);
-  flex: 1 1 12rem;
+  flex: 1 1 10rem;
 }
 
 
@@ -2530,9 +2530,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
   .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
   .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB {
-    padding: 0.18rem 0.28rem 0.16rem;
-    row-gap: 0.24rem;
-    column-gap: 0.24rem;
+    padding: 0.14rem 0.18rem 0.14rem;
+    row-gap: 0.18rem;
+    column-gap: 0.18rem;
     align-items: center;
   }
 
@@ -2583,15 +2583,15 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   .chkApp .searchResultsActionRail,
   .chkApp .searchSmartToolbarRail,
   .chkApp .searchToolbarMetaRail {
-    padding: 0.18rem 0.32rem;
-    column-gap: 0.32rem;
+    padding: 0.14rem 0.18rem;
+    column-gap: 0.18rem;
   }
 
   .chkApp .searchActionToolbarDensity {
     min-height: 2.4rem;
-    padding: 0.18rem 0.28rem 0.2rem;
-    row-gap: 0.22rem;
-    column-gap: 0.24rem;
+    padding: 0.14rem 0.18rem 0.16rem;
+    row-gap: 0.18rem;
+    column-gap: 0.18rem;
     background: color-mix(in srgb, var(--theme-workbench-rail-bg) 78%, transparent);
   }
 
@@ -2743,9 +2743,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsActionRail,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail {
   isolation: auto;
-  padding-inline: 0.24rem;
-  row-gap: 0.28rem;
-  column-gap: 0.24rem;
+  padding-inline: 0.16rem;
+  row-gap: 0.18rem;
+  column-gap: 0.16rem;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
@@ -2800,8 +2800,8 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .appLayoutSingle #searchPaneHost .searchSmartToolbarRail .maxRowsInput,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail .backendTopInput,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail .maxRowsInput {
-  flex: 0 1 7rem;
-  min-width: 6.2rem;
+  flex: 0 1 5.2rem;
+  min-width: 4.4rem;
 }
 
 .chkApp .appLayoutSingle #searchPaneHost .searchWorkbenchDock > .searchFilterCardDense,
@@ -2826,10 +2826,10 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   flex: 1 1 auto;
   flex-wrap: wrap;
   justify-content: flex-end;
-  row-gap: 0.28rem;
-  column-gap: 0.28rem;
+  row-gap: 0.18rem;
+  column-gap: 0.18rem;
   margin-inline-end: 0;
-  padding-inline-end: 0.12rem;
+  padding-inline-end: 0.04rem;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -2852,8 +2852,8 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   flex-wrap: wrap;
   align-items: center;
   align-content: center;
-  row-gap: 0.28rem;
-  column-gap: 0.24rem;
+  row-gap: 0.18rem;
+  column-gap: 0.16rem;
 }
 
 .chkApp .appLayoutSingle #searchPaneHost .searchSmartToolbarRail .sapMTBSpacer,
@@ -3398,7 +3398,7 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
   align-items: center;
   align-content: flex-start;
   row-gap: 0.3rem;
-  column-gap: 0.24rem;
+  column-gap: 0.16rem;
   overflow-x: clip;
 }
 
