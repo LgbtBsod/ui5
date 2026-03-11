@@ -147,7 +147,6 @@ sap.ui.define([
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
         var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
-        var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
         var iResultsToolbarHeight = resolveResultsTableToolbarHeight(oController);
         var iFilterHeight = resolveDomHeight(oFilterCard, ".searchFilterCardDense");
         var iActionHeight = resolveDomHeight(oActionRail, ".searchResultsActionRail");
@@ -155,11 +154,8 @@ sap.ui.define([
         var iDockHeight = resolveOuterHeight(oWorkbenchDock);
         var iTopBase = resolveShellHeaderOffset(oController, oScrollHost);
         var iStackGap = 6;
-        var iResultsToolbarGap = iResultsToolbarHeight ? 8 : 0;
         var iActionTop;
         var iToolbarTop;
-        var iTableToolbarTop;
-        var iHeaderTop;
         if (!iDockHeight) {
             iDockHeight = iFilterHeight + iActionHeight + iToolbarHeight;
             if (iFilterHeight && iActionHeight) {
@@ -171,8 +167,6 @@ sap.ui.define([
         }
         iActionTop = iTopBase + iFilterHeight + (iFilterHeight && iActionHeight ? iStackGap : 0);
         iToolbarTop = iActionTop + iActionHeight + (iActionHeight && iToolbarHeight ? iStackGap : 0);
-        iTableToolbarTop = iToolbarTop + iToolbarHeight + (iToolbarHeight && iResultsToolbarHeight ? iResultsToolbarGap : 8);
-        iHeaderTop = iTableToolbarTop + iResultsToolbarHeight + iResultsToolbarGap;
         setSearchViewportCssVar(oController, "--search-sticky-dock-top", iTopBase + "px");
         setSearchViewportCssVar(
             oController,
@@ -182,14 +176,11 @@ sap.ui.define([
         setSearchViewportCssVar(oController, "--search-sticky-filter-top", iTopBase + "px");
         setSearchViewportCssVar(oController, "--search-sticky-action-top", iActionTop + "px");
         setSearchViewportCssVar(oController, "--search-sticky-toolbar-top", iToolbarTop + "px");
-        setSearchViewportCssVar(oController, "--search-sticky-table-toolbar-top", iTableToolbarTop + "px");
         setSearchViewportCssVar(oController, "--search-smarttable-toolbar-height", iResultsToolbarHeight + "px");
-        setSearchViewportCssVar(oController, "--search-sticky-header-top", iHeaderTop + "px");
         setSearchStickyTop(oFilterCard, iTopBase + "px");
         setSearchStickyTop(oActionRail, iActionTop + "px");
         setSearchStickyTop(oToolbarRail, iToolbarTop + "px");
-        setSearchStickyTop(oResultsToolbarDom, iTableToolbarTop + "px");
-        ThemeDomRuntime.setStyleProperties([oActionRail, oToolbarRail, oResultsToolbarDom], {
+        ThemeDomRuntime.setStyleProperties([oActionRail, oToolbarRail], {
             "overflow": "visible",
             "overflow-x": "visible",
             "overflow-y": "visible"
