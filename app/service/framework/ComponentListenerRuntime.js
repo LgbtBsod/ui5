@@ -63,41 +63,6 @@ sap.ui.define([
         return sMode === "EDIT" || sLockState === "EDIT_LOCKED";
     }
 
-    function normalizeLegacyLockState(sCanonicalLockState) {
-        switch (String(sCanonicalLockState || "").toUpperCase()) {
-        case "EDIT_LOCKED":
-            return "LOCKED";
-        case "ACQUIRING_LOCK":
-            return "ACQUIRING_LOCK";
-        case "LOCK_LOST":
-            return "LOCK_LOST";
-        case "IDLE_TIMEOUT_GRACE":
-            return "IDLE_TIMEOUT_GRACE";
-        case "FORCED_READ_ONLY":
-            return "FORCED_READ_ONLY";
-        case "READ_ONLY":
-        case "IDLE":
-        default:
-            return "IDLE";
-        }
-    }
-
-    function syncLegacyLockAliases(oStateModel, StatePaths) {
-        var sCanonicalMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
-        var sCanonicalLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").toUpperCase();
-        var sLegacyMode = sCanonicalMode === "CREATE"
-            ? "CREATE"
-            : (sCanonicalMode === "EDIT" && sCanonicalLockState === "EDIT_LOCKED" ? "EDIT" : "READ");
-        var sLegacyLockState = normalizeLegacyLockState(sCanonicalLockState);
-
-        if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "READ") !== sLegacyMode) {
-            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, sLegacyMode);
-        }
-        if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "IDLE") !== sLegacyLockState) {
-            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, sLegacyLockState);
-        }
-    }
-
     function syncDetailMeta(oStateModel, StatePaths) {
         var oReadiness = ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_DETAIL, {}) || {};
         var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
@@ -200,9 +165,6 @@ sap.ui.define([
             ].indexOf(sPath) >= 0) {
                 syncDetailMeta(oStateModel, StatePaths);
             }
-            if ([StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE].indexOf(sPath) >= 0) {
-                syncLegacyLockAliases(oStateModel, StatePaths);
-            }
             if (sPath === "/mode") {
                 fnEmitTelemetry("workflow.mode.changed", mOptions.telemetryRuntime.stateValue(oEvent.getParameter("value")));
             }
@@ -241,7 +203,6 @@ sap.ui.define([
                 window.removeEventListener("beforeunload", oComponent._fnBeforeUnload);
             }
         };
-        syncLegacyLockAliases(oStateModel, StatePaths);
         ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
         syncDetailMeta(oStateModel, StatePaths);
         oComponent._fnOnFullSave = function () {

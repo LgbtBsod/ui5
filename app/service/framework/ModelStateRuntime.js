@@ -1,7 +1,52 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil"
-], function (CloneUtil) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (CloneUtil, StatePaths) {
     "use strict";
+
+    function normalizeLegacyLockState(sCanonicalLockState) {
+        switch (String(sCanonicalLockState || "").toUpperCase()) {
+        case "EDIT_LOCKED":
+            return "LOCKED";
+        case "ACQUIRING_LOCK":
+            return "ACQUIRING_LOCK";
+        case "LOCK_LOST":
+            return "LOCK_LOST";
+        case "IDLE_TIMEOUT_GRACE":
+            return "IDLE_TIMEOUT_GRACE";
+        case "FORCED_READ_ONLY":
+            return "FORCED_READ_ONLY";
+        case "READ_ONLY":
+        case "IDLE":
+        default:
+            return "IDLE";
+        }
+    }
+
+    function syncLegacyWorkflowAliases(oModel, sPath) {
+        var sCanonicalMode;
+        var sCanonicalLockState;
+        var sLegacyMode;
+        var sLegacyLockState;
+        if (!oModel || typeof oModel.setProperty !== "function") {
+            return;
+        }
+        if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
+            return;
+        }
+        sCanonicalMode = String(oModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) || "READ").toUpperCase();
+        sCanonicalLockState = String(oModel.getProperty(StatePaths.WORKFLOW_DETAIL_LOCK_STATE) || "READ_ONLY").toUpperCase();
+        sLegacyMode = sCanonicalMode === "CREATE"
+            ? "CREATE"
+            : (sCanonicalMode === "EDIT" && sCanonicalLockState === "EDIT_LOCKED" ? "EDIT" : "READ");
+        sLegacyLockState = normalizeLegacyLockState(sCanonicalLockState);
+        if (oModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) !== sLegacyMode) {
+            oModel.setProperty(StatePaths.WORKFLOW_EDIT_MODE, sLegacyMode);
+        }
+        if (oModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) !== sLegacyLockState) {
+            oModel.setProperty(StatePaths.WORKFLOW_LOCK_STATUS, sLegacyLockState);
+        }
+    }
 
     function model(oController, sModelName) {
         return oController && oController.getModel ? oController.getModel(sModelName) : null;
@@ -12,6 +57,7 @@ sap.ui.define([
             return false;
         }
         oModel.setProperty(sPath, vValue);
+        syncLegacyWorkflowAliases(oModel, sPath);
         return true;
     }
 
@@ -43,6 +89,7 @@ sap.ui.define([
             return false;
         }
         oModel.setProperty(sPath, vValue);
+        syncLegacyWorkflowAliases(oModel, sPath);
         return true;
     }
 
@@ -81,6 +128,8 @@ sap.ui.define([
         return setMany(oController, "state", Object.assign({
             "/mode": "READ",
             "/lockOperationState": "IDLE",
+            [StatePaths.WORKFLOW_DETAIL_EDIT_MODE]: "READ",
+            [StatePaths.WORKFLOW_DETAIL_LOCK_STATE]: "IDLE",
             "/autosaveState": "IDLE",
             "/autosaveAt": null,
             "/autosaveEnabled": false,
