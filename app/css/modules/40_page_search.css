@@ -679,6 +679,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchResultsTable .sapMListTblCell .sapMObjStatusText {
   font-size: var(--theme-table-body-size);
   line-height: var(--theme-table-body-line-height);
+  color: var(--text-main);
 }
 
 .chkApp .searchResultsTable .sapMListTblCell .sapMText,
@@ -1018,8 +1019,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   margin-inline-end: 0.55rem;
 }
 
-.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn .sapMBtnInner,
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtnInner {
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn .sapMBtnInner {
   min-height: var(--theme-workbench-control-height);
   border-radius: calc(var(--radius-sm) - 0.06rem);
 }
@@ -1063,18 +1063,25 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   flex: 1 1 0;
   margin: 0;
   min-width: 3.45rem;
+  display: inline-flex;
+  align-items: stretch;
 }
 
 .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
-  min-height: calc(var(--theme-workbench-control-height) - 0.18rem);
-  padding-inline: 0.76rem;
+  min-height: 2.5rem;
+  height: 2.5rem;
+  padding-inline: 0.9rem;
   font-size: 0.8rem;
-  line-height: 1.12rem;
+  line-height: 1;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   color: var(--text-subtle);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 
@@ -1255,6 +1262,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   justify-self: stretch;
   align-self: stretch;
   box-sizing: border-box;
+  max-height: none;
 }
 
 
@@ -1307,9 +1315,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 
 .chkApp .searchResultsTable .sapUiCompSmartTable,
 .chkApp .searchResultsTable .sapUiCompSmartTableTable,
-.chkApp .searchResultsTable .sapUiCompSmartTableInnerTable,
 .chkApp .searchResultsTable .sapMListTblCnt,
-.chkApp .searchResultsTable .sapMListTbl,
 .chkApp .searchResultsTable .sapMFlexItem,
 .chkApp .searchResultsTable > .sapMFlexItem {
   background: transparent;
@@ -1322,9 +1328,6 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   flex: 1 1 100%;
   align-self: stretch;
   box-sizing: border-box;
-}
-
-.chkApp .searchResultsTable .sapUiCompSmartTable {
   border-radius: calc(var(--radius-lg) - 0.14rem);
 }
 
@@ -1360,7 +1363,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   min-width: 100%;
   table-layout: auto;
   border-collapse: separate;
-  border-spacing: 0 0.46rem;
+  border-spacing: 0 0.78rem;
 }
 
 .chkApp .searchResultsTable .sapMListTblCnt {
@@ -1629,6 +1632,8 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 0.7rem;
+  flex: 1 1 12rem;
+  min-width: 0;
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarItem,
@@ -1655,16 +1660,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchSelectionStatusChip,
-.chkApp .appLayoutSplit #searchPaneHost .searchSelectionPrimaryId,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSelectionStatusChip,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSelectionPrimaryId {
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSelectionStatusChip {
   flex: 0 1 auto;
-  min-width: 0;
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchSelectionPrimaryId,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSelectionPrimaryId {
-  flex: 1 1 12rem;
   min-width: 0;
 }
 
@@ -1741,10 +1739,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .searchSmartToolbarRail .maxRowsInput .sapMInputBaseContentWrapper {
   min-height: 2.25rem;
   border-radius: 999px;
-}
-
-.chkApp .searchResultsTable .sapMListTbl {
-  border-spacing: 0 0.78rem;
 }
 
 @media (max-width: 1200px) {
@@ -1992,11 +1986,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     gap: 0.35rem;
   }
 
-  .chkApp .searchResultsTable .sapMListTbl,
-  .chkApp .searchResultsTable .sapUiCompSmartTableInnerTable {
-    table-layout: auto;
-  }
-
   .chkApp .searchResultsTable .sapMListTblCell {
     min-width: 0;
   }
@@ -2049,11 +2038,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .searchFilterExperienceShell .customFilterWrapper {
   width: 100%;
   min-width: 0;
-}
-
-.chkApp .searchFilterExperienceShell .resultSegmentControl.sapMSegB {
-  width: min(100%, 12.6rem);
-  min-width: 11rem;
 }
 
 .chkApp .searchFilterExperienceShell .resultSegmentControl.sapMSegB .sapMSegBBtn {
@@ -2362,10 +2346,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
 
 
-.chkApp .searchWorkbenchDock > .searchFilterCardDense {
-  max-height: none;
-}
-
 .chkApp .searchSelectionPrimaryId {
   max-width: min(11rem, 21vw);
   font-size: 0.62rem;
@@ -2639,8 +2619,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 }
 
 .chkApp .kpiLabel,
-.chkApp .workflowEyebrow,
-.chkApp .searchResultsTable .sapMListTblHeaderCell .sapMText {
+.chkApp .workflowEyebrow {
   color: var(--text-muted);
 }
 
@@ -2653,14 +2632,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
   background: var(--theme-table-cell-bg);
   opacity: 1;
-}
-
-.chkApp .searchResultsTable .sapMListTblCell .sapMText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMLnk,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjStatusText {
-  color: var(--text-main);
 }
 
 .chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell,
@@ -2829,22 +2800,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   min-height: 2.5rem;
   border-radius: 999px;
   overflow: hidden;
-}
-
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn {
-  display: inline-flex;
-  align-items: stretch;
-}
-
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
-  min-height: 2.5rem;
-  height: 2.5rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding-inline: 0.9rem;
-  line-height: 1;
-  box-sizing: border-box;
 }
 
 body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn:not(.sapMSegBBtnSel) .sapMSegBBtnInner {
