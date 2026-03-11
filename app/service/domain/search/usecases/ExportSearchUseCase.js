@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/util/ExcelExport",
-    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults"
-], function (UseCase, Result, Effects, ExcelExport, SearchMaxResults) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
+], function (UseCase, Result, Effects, ExcelExport, SearchMaxResults, WorkflowTelemetry) {
     "use strict";
 
     function ExportSearchUseCase() {
@@ -163,10 +164,19 @@ sap.ui.define([
         return Promise.resolve(oRepo.exportSearchResults(oRequest));
     }
 
+    function emitExportTelemetry(mCtx, sEventName, oPayload) {
+        WorkflowTelemetry.emit(sEventName, {
+            stateModel: mCtx && mCtx.stateModel,
+            payload: oPayload || {}
+        });
+    }
+
     ExportSearchUseCase.prototype.execute = function (mInput, mCtx) {
         var sEntity = (mInput && mInput.entity) || "screen";
         return resolveExportRows(mInput || {}, mCtx || {}).then(function (aRows) {
             var aNormalized = normalizeRows(aRows, sEntity);
+            var aSelectedIds = normalizeChecklistIds(mInput && mInput.selectedRowIds);
+            var sMode = aSelectedIds.length ? "selected" : "all";
             if (!aNormalized.length) {
                 return Result.fail({ message: "No export data", code: "NO_EXPORT_DATA" }, [Effects.toast("nothingToExport", "warning")]);
             }
@@ -175,6 +185,11 @@ sap.ui.define([
             } catch (_e) {
                 return Result.fail({ message: "Export failed", code: "EXPORT_FAILED" }, [Effects.toast("exportFailed", "error")]);
             }
+            emitExportTelemetry(mCtx, sMode === "selected" ? "export.selected.completed" : "export.all.completed", {
+                entity: sEntity,
+                rows: aNormalized.length,
+                selectionMode: sMode
+            });
             return Result.ok({ entity: sEntity, exported: aNormalized.length }, [
                 Effects.toast("searchExportSuccess", "info"),
                 Effects.log("info", "Export completed", { entity: sEntity, rows: aNormalized.length })
@@ -182,6 +197,10 @@ sap.ui.define([
         }).catch(function (oError) {
             var sCode = String((oError && (oError.code || oError.message)) || "").trim().toUpperCase();
             var sMessageCode = sCode === "EXPORT_LIMIT_EXCEEDED" ? "EXPORT_LIMIT_EXCEEDED" : "EXPORT_FAILED";
+            emitExportTelemetry(mCtx, sCode === "EXPORT_LIMIT_EXCEEDED" ? "export.limit.exceeded" : "export.failed", {
+                entity: sEntity,
+                code: sMessageCode
+            });
             return Result.fail({ message: sMessageCode, code: sMessageCode }, [Effects.toast("exportFailed", "error")]);
         });
     };

@@ -15,7 +15,6 @@ sap.ui.define([
             var oStateModel = ctx && ctx.stateModel;
 
             if (oStateModel && oStateModel.setProperty) {
-                oStateModel.setProperty("/masterDataLoading", true);
                 oStateModel.setProperty("/locationsLoading", false);
                 oStateModel.setProperty("/backendMode", "real");
                 oStateModel.setProperty("/backendServiceUrl", GatewayBackendService.serviceUrl() || "");

@@ -8,7 +8,7 @@ sap.ui.define([
 
         return {
             track: function (mEvent) {
-                return WorkflowTelemetry.emit((mEvent && mEvent.event) || "event", {
+                return WorkflowTelemetry.emit((mEvent && mEvent.event) || "telemetry.event", {
                     stateModel: oStateModel,
                     payload: Object.assign({
                         outcome: "tracked"
@@ -17,7 +17,7 @@ sap.ui.define([
             },
 
             snapshot: function (mArgsSnapshot) {
-                return Promise.resolve(WorkflowTelemetry.emit("snapshot", {
+                return Promise.resolve(WorkflowTelemetry.emit("telemetry.snapshot", {
                     stateModel: oStateModel,
                     payload: {
                         context: (mArgsSnapshot && mArgsSnapshot.context) || {},

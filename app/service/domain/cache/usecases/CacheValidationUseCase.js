@@ -28,7 +28,7 @@ sap.ui.define([
     CacheValidationUseCase.prototype.constructor = CacheValidationUseCase;
 
     function emit(mCtx, oPayload) {
-        WorkflowTelemetry.emit("cache.validation.result", {
+        WorkflowTelemetry.emit("cache.validation", {
             stateModel: mCtx && mCtx.stateModel,
             payload: oPayload || {}
         });
@@ -61,6 +61,22 @@ sap.ui.define([
                 ? Promise.resolve(oCache.clear(sRootId, sEntityKind)).catch(function () { return null; })
                 : Promise.resolve(null);
             return pInvalidate.then(function () {
+                if (!bHasSnapshot) {
+                    WorkflowTelemetry.emit("cache.miss", {
+                        stateModel: mCtx && mCtx.stateModel,
+                        payload: { rootId: sRootId, entityKind: sEntityKind }
+                    });
+                } else if (bValid) {
+                    WorkflowTelemetry.emit("cache.hit", {
+                        stateModel: mCtx && mCtx.stateModel,
+                        payload: { rootId: sRootId, entityKind: sEntityKind }
+                    });
+                } else if (bInvalidate) {
+                    WorkflowTelemetry.emit("cache.invalidated", {
+                        stateModel: mCtx && mCtx.stateModel,
+                        payload: { rootId: sRootId, entityKind: sEntityKind }
+                    });
+                }
                 emit(mCtx, { rootId: sRootId, valid: bValid, invalidated: bInvalidate, serverStamp: iSrv, cacheStamp: iCli });
                 return Result.ok({
                     cacheEntry: oEntry,

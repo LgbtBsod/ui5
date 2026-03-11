@@ -4,9 +4,11 @@ sap.ui.define([
     "use strict";
 
     /**
-     * ZERO-LEGACY dictionary bootstrap.
+     * Search init bundle loader.
      *
-     * Must use DictPort (infra/adapters/DictAdapter) and never call legacy BackendAdapter.
+     * This use case owns only the search bootstrap dictionary/reference-data bundle.
+     * App boot readiness stays in ComponentBootRuntime; detail/analytics-specific data
+     * must be loaded by their own route/domain flows.
      */
     return {
         execute: function (input, ctx) {

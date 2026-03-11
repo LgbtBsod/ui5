@@ -49,7 +49,6 @@ sap.ui.define([
                             permissionKnown: true,
                             lockKnown: true
                         }),
-                        Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
                         Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                         Effects.modelPatch("selected", "/", {}),
                         Effects.modelPatch("snapshot", "/", {}),
@@ -80,7 +79,6 @@ sap.ui.define([
                         permissionKnown: true,
                         lockKnown: true
                     }),
-                    Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
                     Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "CREATE"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
@@ -164,7 +162,6 @@ sap.ui.define([
                     permissionKnown: true,
                     lockKnown: true
                 }),
-                Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
                 Effects.modelPatch("snapshot", "/", oSnapshot || {}),

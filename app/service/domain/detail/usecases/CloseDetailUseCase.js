@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
+], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry) {
     "use strict";
 
     function CloseDetailUseCase() {
@@ -30,6 +31,20 @@ sap.ui.define([
         }
 
         return pRelease.then(function (oReleaseResult) {
+            if (sRootId && !CreateSentinel.isCreateId(sRootId) && sSessionGuid) {
+                WorkflowTelemetry.emit(
+                    oReleaseResult && oReleaseResult.ok !== false && oReleaseResult.released !== false
+                        ? "lock.release.completed"
+                        : "lock.release.failed",
+                    {
+                        stateModel: mCtx && mCtx.stateModel,
+                        payload: {
+                            rootId: sRootId,
+                            source: "close_detail"
+                        }
+                    }
+                );
+            }
             aEffects = [
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                     status: "idle",

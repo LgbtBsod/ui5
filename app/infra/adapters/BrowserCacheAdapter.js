@@ -9,6 +9,10 @@ sap.ui.define([
     var DEFAULT_ENTITY_KIND = "detailSnapshot";
     var SCHEMA_VERSION = 2;
 
+    // Session-scoped snapshots live in IndexedDB and are namespaced by tabSessionId.
+    // Persistent preferences belong to dedicated local preference runtimes, while
+    // SmartFilter/SmartTable personalization stays with standard SAP mechanisms.
+
     function nowIso() {
         return new Date().toISOString();
     }
@@ -126,6 +130,28 @@ sap.ui.define([
         });
     }
 
+    function iterateIndex(oIndex, fnVisit) {
+        return new Promise(function (resolve, reject) {
+            var oRequest = oIndex.openCursor();
+
+            oRequest.onsuccess = function () {
+                var oCursor = oRequest.result;
+                if (!oCursor) {
+                    resolve();
+                    return;
+                }
+                Promise.resolve(fnVisit(oCursor)).then(function () {
+                    oCursor.continue();
+                }).catch(function (oError) {
+                    reject(oError);
+                });
+            };
+            oRequest.onerror = function () {
+                reject(oRequest.error || new Error("indexeddb_cursor_failed"));
+            };
+        });
+    }
+
     function create(mArgs) {
         var oStateModel = mArgs && mArgs.stateModel;
 
@@ -142,6 +168,57 @@ sap.ui.define([
                 oStateModel.setProperty(StatePaths.TAB_SESSION_ID, sResolved);
             }
             return sResolved;
+        }
+
+        function clearByTabSessionId(sTabSessionId) {
+            var sResolvedTabSessionId = String(sTabSessionId || "").trim();
+            if (!sResolvedTabSessionId) {
+                return Promise.resolve({ cleared: 0, tabSessionId: "" });
+            }
+            return withStore("readwrite", function (st) {
+                var oIndex = st.index("byTabSessionId");
+                var iCleared = 0;
+                return iterateIndex(oIndex, function (oCursor) {
+                    var oValue = oCursor && oCursor.value || {};
+                    if (String(oValue.tabSessionId || "").trim() !== sResolvedTabSessionId) {
+                        return null;
+                    }
+                    iCleared += 1;
+                    oCursor.delete();
+                    return null;
+                }).then(function () {
+                    return {
+                        cleared: iCleared,
+                        tabSessionId: sResolvedTabSessionId
+                    };
+                });
+            });
+        }
+
+        function cleanupStaleSessions(sActiveTabSessionId) {
+            var sResolvedActiveTabSessionId = String(sActiveTabSessionId || resolveTabSessionId()).trim();
+            if (!sResolvedActiveTabSessionId) {
+                return Promise.resolve({ cleared: 0, activeTabSessionId: "" });
+            }
+            return withStore("readwrite", function (st) {
+                var oIndex = st.index("byTabSessionId");
+                var iCleared = 0;
+                return iterateIndex(oIndex, function (oCursor) {
+                    var oValue = oCursor && oCursor.value || {};
+                    var sEntryTabSessionId = String(oValue.tabSessionId || "").trim();
+                    if (!sEntryTabSessionId || sEntryTabSessionId === sResolvedActiveTabSessionId) {
+                        return null;
+                    }
+                    iCleared += 1;
+                    oCursor.delete();
+                    return null;
+                }).then(function () {
+                    return {
+                        cleared: iCleared,
+                        activeTabSessionId: sResolvedActiveTabSessionId
+                    };
+                });
+            });
         }
 
         return {
@@ -204,6 +281,19 @@ sap.ui.define([
                     st.delete(buildStoreKey(sTabSessionId, sResolvedEntityKind, sResolvedRootId));
                     return true;
                 });
+            },
+            clearCurrentTab: function () {
+                return clearByTabSessionId(resolveTabSessionId());
+            },
+            clearByTabSessionId: clearByTabSessionId,
+            cleanupStaleSessions: cleanupStaleSessions,
+            resolveTabSessionId: resolveTabSessionId,
+            describeStorageContract: function () {
+                return {
+                    sessionCache: "indexeddb_tab_session",
+                    preferences: "persistent_local_storage",
+                    personalization: "sap_standard_personalization"
+                };
             }
         };
     }

@@ -432,6 +432,7 @@ sap.ui.define([
                 stateModel: oStateModel,
                 envModel: oEnvModel,
                 cacheModel: oCacheModel,
+                cacheAdapter: this._ctx && this._ctx.cache,
                 bootstrapAppUseCase: BootstrapAppUseCase,
                 ensureDictLoadedUseCase: EnsureDictLoadedUseCase,
                 componentRuntimeSupport: ComponentRuntimeSupport,

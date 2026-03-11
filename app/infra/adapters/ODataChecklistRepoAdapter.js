@@ -270,6 +270,10 @@ sap.ui.define([
                     requestedActivity: sActivity
                 }));
             }
+            // Provisional SAP Gateway seam: create permission currently resolves from
+            // CurrentUserSet('CURRENT') because a dedicated ACTVT=01 permission entity
+            // is not available yet. Keep the frontend ACTVT contract unchanged and
+            // replace only this source once the backend exposes the final endpoint.
             return GatewayAdapterSupport.get("CurrentUserSet('CURRENT')", {
                 "__ts": Date.now()
             }).then(function (oResponse) {

@@ -1,6 +1,9 @@
 sap.ui.define([], function () {
     "use strict";
 
+    // Persistent local preferences live here. Session-scoped runtime/search/detail
+    // snapshots belong to BrowserCacheAdapter in IndexedDB and must not be merged
+    // with personalization concerns.
     var STORAGE_KEY = "checklist_app_layout_personalization";
     var LEGACY_STORAGE_KEY = "sap_ui5_layout_personalization";
 

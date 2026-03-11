@@ -307,6 +307,31 @@ def test_workflow_analytics_exposes_summary_and_breakdowns():
         detailed_rows = detailed.json().get("d", {}).get("results", [])
         assert isinstance(detailed_rows, list)
 
+        missing_filter = client.get(f"{SERVICE_ROOT}/WorkflowAnalyticsBreakdownSet")
+        assert missing_filter.status_code == 400
+
+
+def test_search_fetch_scope_and_export_scope_stay_separate():
+    with TestClient(app) as client:
+        token = _csrf(client)
+        limited_search = client.get(f"{SERVICE_ROOT}/ChecklistSearchSet", params={"$top": 1})
+        limited_rows = limited_search.json().get("d", {}).get("results", [])
+        assert len(limited_rows) == 1
+
+        export_all = client.post(
+            f"{SERVICE_ROOT}/ReportExport",
+            json={
+                "SelectionMode": "all",
+                "Entity": "screen",
+                "SearchContract": {},
+                "Limit": 200000,
+            },
+            headers={"X-CSRF-Token": token},
+        )
+        assert export_all.status_code == 200
+        export_rows = export_all.json().get("d", {}).get("results", [])
+        assert len(export_rows) > len(limited_rows)
+
 
 def test_dictionary_item_set_is_reference_data_only_and_runtime_settings_hold_policy_payloads():
     with TestClient(app) as client:

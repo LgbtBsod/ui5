@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, CreateSentinel, WorkflowTelemetry) {
     "use strict";
 
     function EnterEditUseCase() {
@@ -35,13 +36,28 @@ sap.ui.define([
         var sRootId = UseCaseInputUtils.rootId(mInput);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var bCreateDraft = CreateSentinel.isCreateId(sRootId);
+        var bShouldRelease = !!(sRootId && !CreateSentinel.isCreateId(sRootId) && oLockPort && typeof oLockPort.release === "function" && sSessionGuid);
 
         if (!bEdit) {
             var pRelease = Promise.resolve();
-            if (sRootId && !CreateSentinel.isCreateId(sRootId) && oLockPort && typeof oLockPort.release === "function" && sSessionGuid) {
+            if (bShouldRelease) {
                 pRelease = Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () { return null; });
             }
-            return pRelease.then(function () {
+            return pRelease.then(function (oReleaseResult) {
+                if (bShouldRelease) {
+                    WorkflowTelemetry.emit(
+                        oReleaseResult && oReleaseResult.ok !== false && oReleaseResult.released !== false
+                            ? "lock.release.completed"
+                            : "lock.release.failed",
+                        {
+                            stateModel: mCtx && mCtx.stateModel,
+                            payload: {
+                                rootId: sRootId,
+                                source: "enter_edit_toggle"
+                            }
+                        }
+                    );
+                }
                 return Result.ok({ code: "READ" }, readOnlyEffects());
             });
         }
@@ -91,6 +107,13 @@ sap.ui.define([
             var oPermission = oResolved && oResolved.permission;
             var sCode = readCode(oLock);
             if (oLock && oLock.ok && sCode !== "KILLED") {
+                WorkflowTelemetry.emit("lock.acquire.success", {
+                    stateModel: mCtx && mCtx.stateModel,
+                    payload: {
+                        rootId: sRootId,
+                        source: "enter_edit"
+                    }
+                });
                 return Result.ok({ code: "OK", lock: oLock }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat([
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "EDIT"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "LOCKED"),
@@ -98,16 +121,36 @@ sap.ui.define([
                 ]));
             }
             if (sCode === "LOCKED_OWN_SESSION") {
+                WorkflowTelemetry.emit("lock.acquire.failed", {
+                    stateModel: mCtx && mCtx.stateModel,
+                    payload: { rootId: sRootId, source: "enter_edit", code: sCode }
+                });
                 return Result.fail({ message: "Lock held by own session", code: "LOCKED_OWN_SESSION", legacyCode: "LOCK_ACQUIRE_FAILED", lock: oLock || {} }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === "EXPIRED") {
+                WorkflowTelemetry.emit("lock.acquire.failed", {
+                    stateModel: mCtx && mCtx.stateModel,
+                    payload: { rootId: sRootId, source: "enter_edit", code: sCode }
+                });
                 return Result.fail({ message: "Lock expired", code: "EXPIRED", legacyCode: "LOCK_ACQUIRE_FAILED", lock: oLock || {} }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === "KILLED") {
+                WorkflowTelemetry.emit("lock.acquire.failed", {
+                    stateModel: mCtx && mCtx.stateModel,
+                    payload: { rootId: sRootId, source: "enter_edit", code: sCode }
+                });
                 return Result.fail({ message: "Lock killed", code: "KILLED", legacyCode: "LOCK_ACQUIRE_FAILED", lock: oLock || {} }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn("lockKilledMessage")]));
             }
+            WorkflowTelemetry.emit("lock.acquire.failed", {
+                stateModel: mCtx && mCtx.stateModel,
+                payload: { rootId: sRootId, source: "enter_edit", code: sCode || "LOCKED" }
+            });
             return Result.fail({ message: "Lock acquire failed", code: "LOCKED", legacyCode: "LOCK_ACQUIRE_FAILED", lock: oLock || {} }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn("lockAcquireFailed")]));
         }).catch(function (oError) {
+            WorkflowTelemetry.emit("lock.acquire.failed", {
+                stateModel: mCtx && mCtx.stateModel,
+                payload: { rootId: sRootId, source: "enter_edit", code: String((oError && oError.code) || "ERROR") }
+            });
             return Result.fail(oError, readOnlyEffects());
         });
     };

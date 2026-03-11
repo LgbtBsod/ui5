@@ -80,9 +80,9 @@ sap.ui.define([
     function syncUiStateMode(oStateModel, oUiStateModel) {
         ModelStateRuntime.setManyOnModel(oUiStateModel, {
             "/mode": ModelStateRuntime.readOnModel(oStateModel, "/mode", "READ") || "READ",
+            // Startup loading remains global via /isLoading; all runtime work stays scoped.
             "/busy": !!(
-                ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_GLOBAL, false)
-                || ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_DETAIL, false)
+                ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_DETAIL, false)
                 || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)
             ),
             "/currentRootKey": ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "",

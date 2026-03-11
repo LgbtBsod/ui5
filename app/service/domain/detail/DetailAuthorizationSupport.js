@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (Effects, AccessPayload, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
+], function (Effects, AccessPayload, StatePaths, CreateSentinel, WorkflowTelemetry) {
     "use strict";
 
     var DENIED_ILLUSTRATION = "assets/illustrations/detail-access-denied.svg";
@@ -81,6 +82,22 @@ sap.ui.define([
         });
     }
 
+    function emitPermissionDenied(mCtx, oPermission, sRequestedActivity) {
+        var oResolved = oPermission || {};
+        if (oResolved.allowed) {
+            return;
+        }
+        WorkflowTelemetry.emit("permission.denied", {
+            stateModel: mCtx && mCtx.stateModel,
+            payload: {
+                rootId: String(oResolved.rootId || "").trim(),
+                activity: String(sRequestedActivity || "").trim(),
+                reasonCode: String(oResolved.reasonCode || "").trim(),
+                message: String(oResolved.message || "").trim()
+            }
+        });
+    }
+
     function buildAccessState(oPermission, bDenied) {
         var oResolved = normalizePermission(oPermission, (oPermission && oPermission.rootId) || "");
         return {
@@ -109,7 +126,6 @@ sap.ui.define([
             activity: OPERATIONS.DISPLAY
         });
         var aEffects = [
-            Effects.modelPatch("state", StatePaths.UI_BUSY_GLOBAL, false),
             Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
@@ -141,28 +157,34 @@ sap.ui.define([
         var sRequestedActivity = resolveRequestedActivity(mOptions);
 
         if (!oRepo || typeof oRepo.checkChecklistPermission !== "function") {
-            return Promise.resolve(deniedPermission(
+            var oMissingPermission = deniedPermission(
                 sResolvedRootId,
                 sRequestedActivity,
                 "PERMISSION_CHECK_UNAVAILABLE",
                 "Permission backend is unavailable"
-            ));
+            );
+            emitPermissionDenied(mCtx, oMissingPermission, sRequestedActivity);
+            return Promise.resolve(oMissingPermission);
         }
 
         return Promise.resolve(oRepo.checkChecklistPermission({
             rootId: sResolvedRootId,
             activity: sRequestedActivity
         })).then(function (oPermission) {
-            return normalizePermission(oPermission, sResolvedRootId, {
+            var oResolved = normalizePermission(oPermission, sResolvedRootId, {
                 activity: sRequestedActivity
             });
+            emitPermissionDenied(mCtx, oResolved, sRequestedActivity);
+            return oResolved;
         }).catch(function () {
-            return deniedPermission(
+            var oFailedPermission = deniedPermission(
                 sResolvedRootId,
                 sRequestedActivity,
                 "PERMISSION_CHECK_FAILED",
                 "Permission could not be confirmed"
             );
+            emitPermissionDenied(mCtx, oFailedPermission, sRequestedActivity);
+            return oFailedPermission;
         });
     }
 

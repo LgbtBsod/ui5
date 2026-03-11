@@ -36,6 +36,16 @@ sap.ui.define([], function () {
             detail: { status: "idle", ready: false, readyAt: "", error: "", rootId: "", mode: "READ", permissionKnown: false, lockKnown: false },
             analytics: { status: "idle", ready: false, readyAt: "", error: "" }
         },
+        detailMeta: {
+            rootId: "",
+            readiness: { status: "idle", ready: false, readyAt: "", error: "" },
+            mode: "READ",
+            lock: { state: "IDLE", known: false },
+            dirty: false,
+            permission: { known: false, allowed: false },
+            save: { state: "IDLE", lastSavedAt: null },
+            validation: { state: "idle" }
+        },
         operationalKpiSnapshots: [],
         operationalKpiSnapshotLimit: 50,
         workflow: {

@@ -2,24 +2,13 @@
     "use strict";
 
     var iFrame = 0;
-    var oObserver = null;
-    var oToolbarObserver = null;
-    var oHost = null;
+    var iRetryBudget = 0;
     var oToolbar = null;
     var bBound = false;
-    var bSearchRoute = false;
 
-    function onSearchRoute() {
+    function isSearchRoute() {
         var sHash = String(window.location.hash || "");
         return sHash === "#" || sHash.indexOf("/search") >= 0;
-    }
-
-    function resolveScrollHost() {
-        var aNodes = Array.prototype.slice.call(document.querySelectorAll(".sapMPageEnableScrolling, .sapMPageScroll"));
-        var oResolved = aNodes.find(function (oNode) {
-            return oNode && oNode.scrollHeight > oNode.clientHeight + 4;
-        });
-        return oResolved || document.scrollingElement || document.documentElement || document.body;
     }
 
     function clearToolbarState() {
@@ -29,73 +18,54 @@
         oToolbar.classList.remove("searchToolbarStickyRuntimeActive");
         oToolbar.style.transform = "";
         oToolbar.style.zIndex = "";
-        if (oToolbar.dataset) {
-            delete oToolbar.dataset.searchStickyRuntimeTranslateY;
-        }
+        oToolbar = null;
     }
 
-    function refreshTargets() {
-        oToolbar = document.querySelector(".searchResultsTable .sapUiCompSmartTableToolbar");
-        oHost = resolveScrollHost();
-        bSearchRoute = onSearchRoute();
-        if (!bSearchRoute || !oToolbar || !oHost) {
+    function resolveToolbar() {
+        if (!isSearchRoute()) {
             clearToolbarState();
-            return;
+            return null;
+        }
+        oToolbar = document.querySelector(".searchResultsTable .sapUiCompSmartTableToolbar");
+        if (!oToolbar) {
+            clearToolbarState();
+            return null;
         }
         oToolbar.classList.add("searchToolbarStickyRuntimeActive");
         oToolbar.style.transform = "";
         oToolbar.style.zIndex = "11";
+        return oToolbar;
     }
 
-    function applyResultsToolbarDock() {
-        refreshTargets();
-    }
-
-    function scheduleApply() {
+    function scheduleRefresh() {
         if (iFrame) {
             return;
         }
         iFrame = window.requestAnimationFrame(function () {
+            var oResolvedToolbar;
             iFrame = 0;
-            applyResultsToolbarDock();
+            oResolvedToolbar = resolveToolbar();
+            if (!oResolvedToolbar && isSearchRoute() && iRetryBudget > 0) {
+                iRetryBudget -= 1;
+                scheduleRefresh();
+            }
         });
+    }
+
+    function triggerSearchRouteRefresh() {
+        iRetryBudget = isSearchRoute() ? 24 : 0;
+        scheduleRefresh();
     }
 
     function bind() {
         if (bBound) {
-            scheduleApply();
+            triggerSearchRouteRefresh();
             return;
         }
         bBound = true;
-        refreshTargets();
-
-        window.addEventListener("resize", scheduleApply, { passive: true });
-        window.addEventListener("hashchange", scheduleApply, { passive: true });
-        document.addEventListener("transitionend", scheduleApply, true);
-        document.addEventListener("animationend", scheduleApply, true);
-
-        if (!oObserver && typeof MutationObserver === "function") {
-            oObserver = new MutationObserver(function () {
-                refreshTargets();
-                scheduleApply();
-            });
-            oObserver.observe(document.body || document.documentElement, {
-                childList: true,
-                subtree: true
-            });
-        }
-        if (!oToolbarObserver && typeof MutationObserver === "function") {
-            oToolbarObserver = new MutationObserver(scheduleApply);
-            if (oToolbar) {
-                oToolbarObserver.observe(oToolbar, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                    attributeFilter: ["class", "style"]
-                });
-            }
-        }
-        scheduleApply();
+        window.addEventListener("hashchange", triggerSearchRouteRefresh, { passive: true });
+        window.addEventListener("resize", scheduleRefresh, { passive: true });
+        triggerSearchRouteRefresh();
     }
 
     if (document.readyState === "loading") {

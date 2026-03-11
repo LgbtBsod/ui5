@@ -51,6 +51,9 @@ sap.ui.define([
         });
     }
 
+    // Frontend composition seam for the SAP Gateway search-init bundle.
+    // This remains search-domain only; detail/analytics boot data must not be
+    // folded back into this loader even before dedicated backend bundle sets exist.
     function loadSearchBundle() {
         return Promise.all([
             loadDomain(DOMAIN_KEYS.LPC),
@@ -95,7 +98,7 @@ sap.ui.define([
                         rawByDomain: mGrouped
                     });
                     oMasterDataModel.setProperty("/dictLoaded", true);
-                    return { loaded: true };
+                    return { loaded: true, bundle: "searchInit" };
                 });
             },
             getItem: function (mLookup) {

@@ -56,7 +56,6 @@ sap.ui.define([
                 var m = {};
                 m[oStatePaths.SAVE_IN_FLIGHT] = true;
                 m[oStatePaths.UI_BUSY_DETAIL] = true;
-                m[oStatePaths.UI_BUSY_GLOBAL] = true;
                 m["/autosaveState"] = "SAVING";
                 return m;
             }()));
@@ -107,7 +106,6 @@ sap.ui.define([
                     var m = {};
                     m[oStatePaths.SAVE_IN_FLIGHT] = false;
                     m[oStatePaths.UI_BUSY_DETAIL] = false;
-                    m[oStatePaths.UI_BUSY_GLOBAL] = false;
                     return m;
                 }()));
                 oComponent._pGuardedSavePromise = null;

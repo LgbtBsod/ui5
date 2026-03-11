@@ -63,6 +63,45 @@ sap.ui.define([
         return sMode === "EDIT" || sLockState === "LOCKED";
     }
 
+    function syncDetailMeta(oStateModel, StatePaths) {
+        var oReadiness = ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_DETAIL, {}) || {};
+        var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
+        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE") || "IDLE").toUpperCase();
+        var sAutosaveState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE") || "IDLE").toUpperCase();
+        var sValidationSource = String((ModelStateRuntime.readOnModel(oStateModel, StatePaths.VALIDATION_SUMMARY, {}) || {}).source || "idle");
+        var bDirty = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
+        var bPermissionKnown = !!oReadiness.permissionKnown;
+        var sReadinessStatus = String(oReadiness.status || "idle").trim() || "idle";
+        var bAllowed = bPermissionKnown && sReadinessStatus !== "denied" && sReadinessStatus !== "error";
+
+        ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {
+            rootId: String(oReadiness.rootId || ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "").trim(),
+            readiness: {
+                status: sReadinessStatus,
+                ready: !!oReadiness.ready,
+                readyAt: String(oReadiness.readyAt || ""),
+                error: String(oReadiness.error || "")
+            },
+            mode: sMode,
+            lock: {
+                state: sLockState,
+                known: !!oReadiness.lockKnown
+            },
+            dirty: bDirty,
+            permission: {
+                known: bPermissionKnown,
+                allowed: bAllowed
+            },
+            save: {
+                state: sAutosaveState,
+                lastSavedAt: ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null)
+            },
+            validation: {
+                state: sValidationSource || "idle"
+            }
+        });
+    }
+
     function attachInitListeners(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
@@ -112,8 +151,20 @@ sap.ui.define([
         oComponent._fnStateModelPropertyChange = function (oEvent) {
             var sPath = oEvent.getParameter("path") || "";
             var sModeValue;
-            if (["/mode", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID, StatePaths.UI_BUSY_GLOBAL, StatePaths.UI_BUSY_DETAIL].indexOf(sPath) >= 0) {
+            if (["/mode", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID, StatePaths.UI_BUSY_DETAIL].indexOf(sPath) >= 0) {
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
+            }
+            if ([
+                "/activeObjectId",
+                StatePaths.READINESS_DETAIL,
+                StatePaths.WORKFLOW_DETAIL_EDIT_MODE,
+                StatePaths.WORKFLOW_DETAIL_LOCK_STATE,
+                StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE,
+                StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT,
+                StatePaths.WORKFLOW_DIRTY,
+                StatePaths.VALIDATION_SUMMARY
+            ].indexOf(sPath) >= 0) {
+                syncDetailMeta(oStateModel, StatePaths);
             }
             if (sPath === StatePaths.WORKFLOW_EDIT_MODE) {
                 sModeValue = String(oEvent.getParameter("value") || "READ").toUpperCase();
@@ -160,6 +211,7 @@ sap.ui.define([
             }
         };
         ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
+        syncDetailMeta(oStateModel, StatePaths);
         oComponent._fnOnFullSave = function () {
             oComponent._oGcd.resetOnFullSave();
         };

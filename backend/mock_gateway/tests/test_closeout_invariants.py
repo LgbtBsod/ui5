@@ -53,6 +53,12 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
         "legacyBusy": "/isBusy",
         "mockHeader": "X-Mock-User",
         "publicUname": "Uname",
+        "gatewayIdentitySupport": "GatewayIdentitySupport",
+        "withUserName": "withUserName",
+        "resolveUserName": "resolveUserName",
+        "smartCacheManager": "SmartCacheManager",
+        "legacyDetailCurrent": "_detailCurrent",
+        "legacyDetailSnapshot": "_detailSnapshot",
     }
 
     for path in APP_ROOT.rglob("*"):
@@ -66,18 +72,29 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
 def test_boot_and_runtime_source_lock_strict_success_path():
     boot_text = _read(APP_ROOT / "service" / "framework" / "ComponentBootRuntime.js")
     init_text = _read(APP_ROOT / "service" / "framework" / "ComponentInitRuntime.js")
+    cache_text = _read(APP_ROOT / "infra" / "adapters" / "BrowserCacheAdapter.js")
+    runtime_support = _read(APP_ROOT / "service" / "framework" / "ComponentRuntimeSupport.js")
+    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentListenerRuntime.js")
 
     assert 'var bBootCompleted = false;' in boot_text
     assert 'resolveSettledStageError(aStageResults[0], "load_current_user_failed")' in boot_text
     assert 'resolveSettledStageError(aStageResults[1], "load_runtime_settings_failed")' in boot_text
     assert 'resolveSettledStageError(aStageResults[2], "bootstrap_init_bundle_failed")' in boot_text
+    assert 'cleanupStaleSessions' in boot_text
     assert 'if (bBootCompleted) {' in boot_text
     assert boot_text.index('if (bBootCompleted) {') < boot_text.index('oComponent._startCoreManagers();')
     assert 'ModelStateRuntime.writeOnModel(oStateModel, "/readiness/app", {' in boot_text
 
     assert 'return runBootSequence({' in init_text
+    assert 'cacheAdapter: this._ctx && this._ctx.cache,' in init_text
     assert 'throw oError || new Error("runtime_settings_load_failed");' in init_text
     assert 'return mDeps.LoadCurrentUserUseCase && mDeps.LoadCurrentUserUseCase.refresh' in init_text
+
+    assert 'clearCurrentTab: function () {' in cache_text
+    assert 'clearByTabSessionId: clearByTabSessionId,' in cache_text
+    assert 'cleanupStaleSessions: cleanupStaleSessions,' in cache_text
+    assert 'StatePaths.UI_BUSY_GLOBAL' not in runtime_support
+    assert 'StatePaths.UI_BUSY_GLOBAL' not in listener_runtime
 
 
 def test_open_detail_source_checks_permission_before_cache_and_backend_load():
@@ -108,6 +125,48 @@ def test_search_request_window_supports_legacy_search_max_results_shape():
     assert 'typeof SearchMaxResults.resolveGrowingPageSize === "function"' in source
     assert 'typeof SearchMaxResults.resolveMaxResults === "function"' in source
     assert 'resolveGrowingPageSize: resolveGrowingPageSize,' in util_source
+
+
+def test_sticky_runtime_is_route_scoped_without_global_body_observer():
+    source = _read(APP_ROOT / "search-toolbar-sticky-runtime.js")
+
+    assert 'document.body' not in source
+    assert 'new MutationObserver' not in source
+    assert 'window.addEventListener("hashchange", triggerSearchRouteRefresh' in source
+    assert 'window.addEventListener("resize", scheduleRefresh' in source
+    assert 'document.querySelector(".searchResultsTable .sapUiCompSmartTableToolbar")' in source
+
+
+def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
+    state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
+    workflow_schema = _read(APP_ROOT / "model" / "schema" / "workflowSchema.js")
+    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentListenerRuntime.js")
+
+    assert 'DETAIL_META: "/detailMeta",' in state_paths
+    assert 'detailMeta:' in workflow_schema
+    assert 'syncDetailMeta(oStateModel, StatePaths);' in listener_runtime
+
+
+def test_standardized_telemetry_event_names_cover_permission_cache_lock_and_analytics_flows():
+    permission_source = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailAuthorizationSupport.js")
+    cache_source = _read(APP_ROOT / "service" / "domain" / "cache" / "usecases" / "CacheValidationUseCase.js")
+    enter_edit_source = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "EnterEditUseCase.js")
+    close_detail_source = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "CloseDetailUseCase.js")
+    search_analytics_source = _read(APP_ROOT / "service" / "domain" / "search" / "usecases" / "AnalyticsUseCase.js")
+    dashboard_analytics_source = _read(APP_ROOT / "service" / "domain" / "analytics" / "usecases" / "LoadAnalyticsDashboardUseCase.js")
+
+    assert 'permission.denied' in permission_source
+    assert 'cache.hit' in cache_source
+    assert 'cache.miss' in cache_source
+    assert 'cache.invalidated' in cache_source
+    assert 'lock.acquire.success' in enter_edit_source
+    assert 'lock.acquire.failed' in enter_edit_source
+    assert 'lock.release.completed' in enter_edit_source
+    assert 'lock.release.completed' in close_detail_source
+    assert 'analytics.search.loaded' in search_analytics_source
+    assert 'analytics.search.error' in search_analytics_source
+    assert 'analytics.dashboard.loaded' in dashboard_analytics_source
+    assert 'analytics.dashboard.error' in dashboard_analytics_source
 
 
 def test_report_export_respects_selected_and_all_found_contracts():

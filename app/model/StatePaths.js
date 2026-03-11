@@ -2,6 +2,7 @@ sap.ui.define([], function () {
     "use strict";
 
     return {
+        DETAIL_META: "/detailMeta",
         PENDING_NAVIGATION_INTENT: "/pendingNavigationIntent",
         READINESS_ANALYTICS: "/readiness/analytics",
         READINESS_APP: "/readiness/app",
@@ -14,6 +15,7 @@ sap.ui.define([], function () {
         UI_BUSY_ANALYTICS: "/ui/busy/analytics",
         UI_BUSY_DETAIL: "/ui/busy/detail",
         UI_BUSY_EXPORT: "/ui/busy/export",
+        // Legacy compatibility only: startup-related consumers must prefer /isLoading.
         UI_BUSY_GLOBAL: "/ui/busy/global",
         UI_BUSY_SEARCH_TABLE: "/ui/busy/searchTable",
         UI_FEEDBACK_CONFLICT_DIALOG: "/ui/feedback/conflictDialog",
