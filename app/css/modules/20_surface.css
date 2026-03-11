@@ -409,10 +409,19 @@ html.chkAppRoot.theme-switching .chkApp .shellSettingRow {
 }
 
 /* 2026-03 shell final alignment pass:
-   keep header width equal to search content width and remove context chip line. */
-.chkApp .appLayoutSingle .appShellHeader {
-  width: min(calc(100% - 1rem - (2 * var(--app-content-inline-pad))), 110rem) !important;
-  max-width: calc(110rem - (2 * var(--app-content-inline-pad))) !important;
+   keep header width tied to the same appContent host as search content. */
+.chkApp .appShellHeaderHost {
+  width: min(calc(100% - 1rem), 110rem) !important;
+  max-width: 110rem !important;
+  margin-inline: auto !important;
+}
+
+.chkApp .appShellHeaderHost .appShellHeader,
+.chkApp .appShellHeaderHost .appShellHeader.sapMHBox,
+.chkApp .appShellHeaderHost .appShellHeader.sapMVBox {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
 }
 
 .chkApp .appShellHeader .shellContextSubtitle {
@@ -420,7 +429,7 @@ html.chkAppRoot.theme-switching .chkApp .shellSettingRow {
 }
 
 @media (max-width: 61.25rem) {
-  .chkApp .appLayoutSingle .appShellHeader {
+  .chkApp .appShellHeaderHost {
     width: calc(100% - 1.5rem) !important;
     max-width: calc(100% - 1.5rem) !important;
   }
@@ -515,14 +524,6 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
   min-width: 0;
 }
 
-/* 2026-03 gap shortlist pass: shell parity selectors (header/actions exact). */
-.chkApp .appShellHeader.sapMHBox,
-.chkApp .appShellHeader.sapMVBox {
-  width: calc(100% - (2 * clamp(1rem, 2vw, 1.75rem)));
-  max-width: calc(100% - (2 * clamp(1rem, 2vw, 1.75rem)));
-  min-width: 0;
-}
-
 .chkApp .appShellHeader .sapMBtn .sapMBtnInner,
 .chkApp .shellThemeToggle .sapMBtnInner,
 .chkApp .shellUserActionBtn .sapMBtnInner,
@@ -557,6 +558,25 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
   font-size: var(--theme-shell-action-label-size);
   font-weight: var(--theme-shell-action-label-weight);
   letter-spacing: 0.01em;
+}
+
+.chkApp .appShellHeader .sapMHBox,
+.chkApp .appShellHeader .sapMVBox,
+.chkApp .appShellHeader .sapMFlexItem,
+.chkApp .appShellHeader .appShellActions,
+.chkApp .appShellHeader .shellContextActions {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.chkApp .appShellHeader .shellTitle,
+.chkApp .appShellHeader .sapMTitle,
+.chkApp .appShellHeader .sapMText,
+.chkApp .appShellHeader .sapMLabel,
+.chkApp .appShellHeader .sapMBtnContent {
+  min-width: 0 !important;
+  max-width: 100% !important;
 }
 
 /* Global pseudo-element backdrop reset carried from monolith hardening. */

@@ -1273,6 +1273,28 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   max-height: none;
 }
 
+.chkApp .searchWorkbenchDock > .searchResultsActionRail {
+  margin-top: 0.1rem;
+  margin-bottom: 0.22rem;
+  position: sticky;
+  top: var(--search-sticky-action-top, calc(var(--app-shell-offset) + 9rem));
+  z-index: 21;
+}
+
+.chkApp .searchWorkbenchDock > .searchSmartToolbarRail {
+  margin-top: 0;
+  margin-bottom: 0.26rem;
+  position: sticky;
+  top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 12rem));
+  z-index: 20;
+}
+
+.chkApp .searchWorkbenchDock > .searchResultsTable {
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
+
 
 
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar {
@@ -1286,8 +1308,8 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
   margin-bottom: 0.46rem;
   padding: 0.14rem 0.16rem 0.28rem;
-  position: sticky;
-  top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 12rem));
+  position: relative;
+  top: auto;
   z-index: 12;
   width: 100%;
   max-width: 100%;
@@ -1304,6 +1326,13 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   -webkit-backdrop-filter: blur(10px) saturate(108%);
   overflow-x: hidden;
   overflow-y: visible;
+}
+
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMTB,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMIBar {
+  position: relative !important;
+  top: auto !important;
+  z-index: 1 !important;
 }
 
 
@@ -3558,4 +3587,45 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
 .chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar {
   overflow-x: hidden !important;
+}
+
+/* 2026-03 search container normalization:
+   keep workbench, filter shell and results shell inside parent VBox in all desktop layouts. */
+.chkApp .searchWorkbenchDock,
+.chkApp .searchFilterExperienceShell,
+.chkApp .searchResultsExperienceShell,
+.chkApp .searchFilterCardDense,
+.chkApp .searchResultsActionRail,
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsTable,
+.chkApp .searchResultsTable > .sapMVBox,
+.chkApp .searchResultsTable > .sapMFlexBox,
+.chkApp .searchResultsTable .sapUiCompSmartTable,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar,
+.chkApp .searchResultsTable .sapUiCompSmartTableTable {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.chkApp .searchWorkbenchDock > .sapMFlexItem,
+.chkApp .searchFilterExperienceShell > .sapMFlexItem,
+.chkApp .searchResultsExperienceShell > .sapMFlexItem,
+.chkApp .searchFilterCardDense > .sapMFlexItem,
+.chkApp .searchResultsTable .sapMFlexItem,
+.chkApp .searchResultsTable .sapMVBox,
+.chkApp .searchResultsTable .sapMHBox {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }

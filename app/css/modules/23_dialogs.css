@@ -1538,3 +1538,94 @@ body.chkAppRoot .shellPopover .sapMHBox {
     max-width: calc(100vw - 1rem) !important;
   }
 }
+
+/* 2026-03 dialog/popover normalization:
+   keep user menu and warning dialogs structurally compact after module split. */
+body.chkAppRoot .shellPopover .shellPopoverBody,
+body.chkAppRoot .shellPopover .shellUserBody,
+body.chkAppRoot .shellPopover .shellSettingsBody {
+  display: grid !important;
+  gap: 0.56rem !important;
+  padding: 0.74rem 0.8rem 0.82rem !important;
+  align-content: start !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserCard,
+body.chkAppRoot .shellPopover .shellSettingRow,
+body.chkAppRoot .shellPopover .shellHelpItem,
+body.chkAppRoot .shellPopover .shellNotificationItem,
+body.chkAppRoot .shellPopover .shellThemeMeta,
+body.chkAppRoot .shellPopover .shellUserPermissionList {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.chkAppRoot .shellPopover .shellSettingRow {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  column-gap: 0.56rem !important;
+  row-gap: 0.48rem !important;
+  padding: 0.68rem 0.74rem !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserPermissionList .sapMLIB,
+body.chkAppRoot .shellPopover .shellPopoverList .sapMLIB,
+body.chkAppRoot .shellPopover .shellPopoverList .sapMListItem,
+body.chkAppRoot .shellPopover .shellPopoverList .sapMSLI {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserPermissionList .sapMLIBContent,
+body.chkAppRoot .shellPopover .shellPopoverList .sapMLIBContent,
+body.chkAppRoot .shellPopover .shellPopoverList .sapMSLITitleOnly,
+body.chkAppRoot .shellPopover .shellPopoverList .sapMSLIDescription,
+body.chkAppRoot .shellPopover .shellPopoverList .sapMSLIInfo {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserActionBtn,
+body.chkAppRoot .shellPopover .shellUserActionBtn.sapMBtn,
+body.chkAppRoot .shellPopover .shellUserActionBtn .sapMBtnInner {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserActionBtn .sapMBtnInner {
+  min-height: 1.9rem !important;
+  padding: 0 0.88rem !important;
+  justify-content: flex-start !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog {
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: var(--theme-block-shadow) !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog > .sapMBar.sapMHeader-CTX,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogFooter {
+  padding-inline: 0.9rem !important;
+  min-height: 2.9rem !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogSection {
+  padding: 0.7rem 0.9rem 0.82rem !important;
+  min-height: 2.4rem !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMDialogFooter {
+  padding: 0.3rem 0.65rem !important;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog .sapMBtn .sapMBtnInner {
+  min-width: 5.4rem !important;
+  min-height: 1.9rem !important;
+  border-radius: 999px !important;
+}
