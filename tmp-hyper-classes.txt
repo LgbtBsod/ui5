@@ -38,9 +38,7 @@ analyticsToplineSection
 analyticsValue
 appContent
 appDark
-appDensityCompact
 appInvertedBlockScheme
-appLayoutDetailOnly
 appLayoutFull
 appLayoutSingle
 appLayoutSplit
@@ -60,8 +58,6 @@ appSkeletonLine
 appSkeletonLineLong
 appSkeletonLineMedium
 appSkeletonLineShort
-appSkeletonList
-appSkeletonMushroomCard
 appSkeletonReveal
 appSkeletonTableHeader
 appSkeletonTableRow
@@ -97,7 +93,6 @@ chkBgGrain
 chkBgSheen
 chkFeedbackError
 chkFeedbackStrip
-chkFeedbackSuccess
 chkFeedbackWarning
 chkKbd
 chkPageIn
@@ -106,7 +101,6 @@ chkRipple
 chkSkin
 chkStack
 commentExpandableField
-compactDialogBody
 customFilterWrapper
 dataUpdated
 dataUpdatedNegative
@@ -140,7 +134,6 @@ detailContentSection
 detailControlBar
 detailControlCardDocked
 detailControlExperienceCard
-detailControlHostInline
 detailControlInlineCard
 detailControlPinnedDock
 detailControlRow
@@ -234,7 +227,6 @@ infoCardTile
 infoCardTitle
 infoCardValue
 inputHint
-is-rippling
 isAttachmentDropActive
 isAttachmentDropPrimed
 isViewportPinned
@@ -271,14 +263,11 @@ pageLoading
 pageTransparent
 paper
 pinned
-platformCalmModern
-platformPrecisionEnterprise
 rateBar
 readRow
 resultCountLabel
 resultSegmentControl
 searchActionToolbarDensity
-searchAnalyticsActionBtn
 searchAnalyticsBreakdownGrid
 searchAnalyticsCard
 searchAnalyticsCardPrimary
@@ -295,7 +284,6 @@ searchCreateActionBtn
 searchCustomBusyPanel
 searchCustomBusyPictogramRow
 searchExperienceStack
-searchExportMenuBtn
 searchFilterCardDense
 searchFilterExperienceCard
 searchFilterExperienceShell
@@ -305,7 +293,6 @@ searchGoActionBtn
 searchHeaderKpiRail
 searchLoadStateBanner
 searchModeToggleSwitch
-searchPaneCenterShell
 searchRateCell
 searchRateCellFull
 searchRateCellPartial
@@ -326,7 +313,6 @@ searchSmartToolbarRail
 searchStageStatusChip
 searchStageStoryCard
 searchStatusStripStack
-searchStorySubtitle
 searchSummaryStatusChip
 searchToolbarMetaRail
 searchToolbarNavBtn
@@ -368,13 +354,6 @@ shellSettingCopy
 shellSettingRow
 shellSettingsBody
 shellSettingsSwitch
-shellThemeGlyph
-shellThemeGlyphMoon
-shellThemeGlyphSun
-shellThemeMeta
-shellThemeMetaIcon
-shellThemeMetaInfo
-shellThemeMetaLabel
 shellThemeSwitch
 shellThemeToggle
 shellTitle
@@ -415,7 +394,6 @@ tableRowActionBar
 tableRowActionBtn
 tableRowActionBtnDanger
 tableScrollWrap
-theme-motion-disabled
 theme-switching
 toastError
 toastSuccess
@@ -425,10 +403,8 @@ toolbarTransparent
 uxStatChip
 valueHelpDialog
 valueHelpDialogBody
-valueHelpTreeTable
 valueHelpTreeTableHost
 workflowChip
 workflowEyebrow
-workflowRail
 workflowStageCard
 workflowStageCount
