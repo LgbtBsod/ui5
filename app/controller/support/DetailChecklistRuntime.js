@@ -23,7 +23,7 @@ sap.ui.define([
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
 
     function isDirtyTrackMode(oController) {
-        var sMode = String(ModelStateRuntime.read(oController, "state", "/mode", "READ") || "READ").trim().toUpperCase();
+        var sMode = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
         return sMode === "EDIT" || sMode === "CREATE";
     }
 
@@ -83,7 +83,7 @@ sap.ui.define([
         },
 
         _isEditMode: function () {
-            return ModelStateRuntime.read(this, "state", "/mode") === "EDIT";
+            return ModelStateRuntime.read(this, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE) === "EDIT";
         },
 
         _showToast: function (sTextKey) {

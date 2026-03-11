@@ -5,9 +5,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/CurrentUserProfile"
-], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, AccessPayload, DetailRuntimePayload, CreateSentinel, GatewayClient, CurrentUserProfile) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
+], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, AccessPayload, DetailRuntimePayload, CreateSentinel, GatewayClient) {
     "use strict";
     function rootId(mArgs) { return DetailRuntimePayload.rootId(mArgs); }
     function normalizeRootKey(sRootId) { return DetailRuntimePayload.normalizeRootKey(sRootId); }
@@ -219,43 +218,32 @@ sap.ui.define([
         }, []);
     }
 
-    function permissionFromCurrentUser(oResponse, sActivity) {
-        var oProfile = CurrentUserProfile.normalizeCurrentUser(oResponse || {}, "");
-        var aCodes = Array.isArray(oProfile.permissionRules)
-            ? oProfile.permissionRules.map(function (oRule) {
-                return String((oRule && oRule.code) || "").trim();
-            }).filter(Boolean)
-            : [];
-        var bCanCreate = aCodes.indexOf("01") >= 0;
-        var bCanEdit = aCodes.indexOf("02") >= 0;
-        var bCanView = aCodes.indexOf("03") >= 0;
-        var bCanDelete = aCodes.indexOf("06") >= 0;
-        var mReasonCode = {
-            "01": bCanCreate ? "AUTHORIZED" : "NO_CREATE_AUTH",
-            "02": bCanEdit ? "AUTHORIZED" : "NO_EDIT_AUTH",
-            "03": bCanView ? "AUTHORIZED" : "NO_VIEW_AUTH",
-            "06": bCanDelete ? "AUTHORIZED" : "NO_DELETE_AUTH"
-        };
+    function normalizePermissionResponse(oPermission, sRootId, sActivity) {
+        var aGranted = parseGrantedOperations(oPermission && oPermission.GrantedOperations);
+        var bCanCreate = !!(oPermission && oPermission.CanCreate) || aGranted.indexOf("01") >= 0;
+        var bCanView = !!(oPermission && oPermission.CanView) || aGranted.indexOf("03") >= 0;
+        var bCanEdit = !!(oPermission && oPermission.CanEdit) || aGranted.indexOf("02") >= 0;
+        var bCanDelete = !!(oPermission && oPermission.CanDelete) || aGranted.indexOf("06") >= 0;
         return AccessPayload.normalizePermission({
-            rootId: "",
-            userId: "",
+            rootId: sRootId,
+            userId: String((oPermission && (oPermission.UserId || oPermission.userId)) || "").trim(),
             canCreate: bCanCreate,
             canView: bCanView,
             canEdit: bCanEdit,
             canDelete: bCanDelete,
-            reasonCode: mReasonCode[String(sActivity || "").trim()] || "NO_VIEW_AUTH",
-            message: "",
+            reasonCode: String((oPermission && (oPermission.ReasonCode || oPermission.reasonCode)) || "AUTHORIZED").trim() || "AUTHORIZED",
+            message: String((oPermission && (oPermission.Message || oPermission.message)) || "").trim(),
             requestedActivity: sActivity
-        }, "", {
+        }, sRootId, {
             requestedActivity: sActivity
         });
     }
 
     function checkCreatePermission(sActivity) {
-        return GatewayAdapterSupport.get("CurrentUserSet('CURRENT')", {
+        return GatewayAdapterSupport.get("ChecklistCreatePermissionSet('CURRENT')", {
             "__ts": Date.now()
         }).then(function (oResponse) {
-            return permissionFromCurrentUser(oResponse, sActivity);
+            return normalizePermissionResponse(firstRow(oResponse), "", sActivity);
         });
     }
 
@@ -283,21 +271,7 @@ sap.ui.define([
         return GatewayAdapterSupport.get("ChecklistPermissionSet('" + sRootId + "')", {
             ACTVT: sActivity
         }).then(function (oResponse) {
-            var oPermission = firstRow(oResponse);
-            var aGranted = parseGrantedOperations(oPermission && oPermission.GrantedOperations);
-            return AccessPayload.normalizePermission({
-                rootId: sRootId,
-                userId: String((oPermission && (oPermission.UserId || oPermission.userId)) || "").trim(),
-                canCreate: aGranted.indexOf("01") >= 0,
-                canView: !!(oPermission && oPermission.CanView) || aGranted.indexOf("03") >= 0,
-                canEdit: !!(oPermission && oPermission.CanEdit) || aGranted.indexOf("02") >= 0,
-                canDelete: !!(oPermission && oPermission.CanDelete) || aGranted.indexOf("06") >= 0,
-                reasonCode: String((oPermission && (oPermission.ReasonCode || oPermission.reasonCode)) || "AUTHORIZED").trim() || "AUTHORIZED",
-                message: String((oPermission && (oPermission.Message || oPermission.message)) || "").trim(),
-                requestedActivity: sActivity
-            }, sRootId, {
-                requestedActivity: sActivity
-            });
+            return normalizePermissionResponse(firstRow(oResponse), sRootId, sActivity);
         });
     }
 

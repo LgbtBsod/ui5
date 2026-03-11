@@ -35,6 +35,12 @@ def _granted_operations(can_view: bool, can_edit: bool, can_delete: bool) -> lis
     return ops
 
 
+def _has_create_permission(db, user_id: str) -> bool:
+    profile = CurrentUserService.resolve_profile(db, explicit_uname=user_id)
+    permissions = list(profile.get("permissions") or [])
+    return any(str((item or {}).get("code") or "").strip() == OPERATION_CREATE for item in permissions)
+
+
 def _permission_matches_scope(root: ChecklistRoot, permission: dict) -> bool:
     scope_kind = str((permission or {}).get("scope_kind") or "all").strip().lower()
     scope_value = str((permission or {}).get("scope_value") or "ALL").strip().upper() or "ALL"
@@ -68,10 +74,12 @@ def _permission_payload(root: ChecklistRoot, user_id: str, can_view: bool, can_e
         "root_id": str(root.id or ""),
         "user_id": user_id,
         "auth_object": AUTH_OBJECT_CHECKLIST,
+        "create_operation": OPERATION_CREATE,
         "view_operation": OPERATION_VIEW,
         "change_operation": OPERATION_CHANGE,
         "delete_operation": OPERATION_DELETE,
         "granted_operations": _granted_operations(can_view, can_edit, can_delete),
+        "can_create": False,
         "can_view": bool(can_view),
         "can_edit": bool(can_edit),
         "can_delete": bool(can_delete),
@@ -81,6 +89,27 @@ def _permission_payload(root: ChecklistRoot, user_id: str, can_view: bool, can_e
 
 
 class AuthorizationService:
+    @staticmethod
+    def create_permission(user_id: str | None, db=None) -> dict:
+        resolved_user = _normalize_user_id(user_id, db=db)
+        can_create = _has_create_permission(db, resolved_user) if db is not None else False
+        return {
+            "root_id": "",
+            "user_id": resolved_user,
+            "auth_object": AUTH_OBJECT_CHECKLIST,
+            "create_operation": OPERATION_CREATE,
+            "view_operation": OPERATION_VIEW,
+            "change_operation": OPERATION_CHANGE,
+            "delete_operation": OPERATION_DELETE,
+            "granted_operations": [OPERATION_CREATE] if can_create else [],
+            "can_create": can_create,
+            "can_view": False,
+            "can_edit": False,
+            "can_delete": False,
+            "reason_code": "AUTHORIZED" if can_create else "NO_CREATE_AUTH",
+            "message": "Checklist create access granted" if can_create else "No permission to create a checklist",
+        }
+
     @staticmethod
     def checklist_permissions(root: ChecklistRoot, user_id: str | None, db=None) -> dict:
         resolved_user = _normalize_user_id(user_id, db=db)

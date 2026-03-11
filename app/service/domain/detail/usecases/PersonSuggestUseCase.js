@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils"
-], function (UseCase, Result, Effects, DetailStateAccess, UseCaseResultUtils) {
+], function (UseCase, Result, Effects, DetailStateAccess, StatePaths, UseCaseResultUtils) {
     "use strict";
 
     function PersonSuggestUseCase() {
@@ -22,7 +23,7 @@ sap.ui.define([
 
     function resolveMode(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return String((oUiState && oUiState.get("state", "/mode")) || "READ").toUpperCase();
+        return String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "READ").toUpperCase();
     }
     function inputPathForTarget(sTarget) {
         return String(sTarget || "").toLowerCase() === "observed" ? "/observedInputValue" : "/observerInputValue";

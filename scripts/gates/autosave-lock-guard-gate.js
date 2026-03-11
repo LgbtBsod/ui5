@@ -10,24 +10,24 @@ const coordinatorTxt = fs.readFileSync(coordinatorFile, 'utf8');
 const useCaseTxt = fs.readFileSync(useCaseFile, 'utf8');
 
 const hasComponentEditLock =
-  /WORKFLOW_EDIT_MODE/.test(componentTxt) &&
-  /WORKFLOW_LOCK_STATUS/.test(componentTxt) &&
+  /WORKFLOW_DETAIL_EDIT_MODE/.test(componentTxt) &&
+  /WORKFLOW_DETAIL_LOCK_STATE/.test(componentTxt) &&
   /=== "EDIT"/.test(componentTxt) &&
-  /=== "LOCKED"/.test(componentTxt);
+  /=== "EDIT_LOCKED"/.test(componentTxt);
 const hasCoordinatorLockGuard =
   /lockGuardFn/.test(coordinatorTxt) &&
   /_fnShouldSave/.test(coordinatorTxt) &&
-  /autosave aborted: mode must be EDIT and lockOperationState must be LOCKED/.test(coordinatorTxt);
+  /autosave aborted: editMode must be EDIT and workflow\/detail\/lock\/state must be EDIT_LOCKED/.test(coordinatorTxt);
 const hasUseCaseGuard =
-  /WORKFLOW_EDIT_MODE/.test(useCaseTxt) &&
-  /WORKFLOW_LOCK_STATUS/.test(useCaseTxt) &&
+  /WORKFLOW_DETAIL_EDIT_MODE/.test(useCaseTxt) &&
+  /WORKFLOW_DETAIL_LOCK_STATE/.test(useCaseTxt) &&
   /WORKFLOW_DIRTY/.test(useCaseTxt) &&
   /sEditMode === "EDIT"/.test(useCaseTxt) &&
-  /sLockStatus === "LOCKED"/.test(useCaseTxt) &&
+  /sLockStatus === "EDIT_LOCKED"/.test(useCaseTxt) &&
   /&& bDirty/.test(useCaseTxt);
 
 if (!hasComponentEditLock || !hasCoordinatorLockGuard || !hasUseCaseGuard) {
-  console.error('autosave-lock-guard-gate failed: missing EDIT/LOCKED/dirty guard in autosave path');
+  console.error('autosave-lock-guard-gate failed: missing canonical EDIT/EDIT_LOCKED/dirty guard in autosave path');
   process.exit(1);
 }
 console.log('autosave-lock-guard-gate passed');

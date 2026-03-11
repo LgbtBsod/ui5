@@ -233,7 +233,7 @@ sap.ui.define([
             return oControl;
         }
         oControl.bindProperty("visible", {
-            path: "state>/mode",
+            path: "state>/workflow/detail/editMode",
             formatter: function (sMode) { return sMode === "READ"; }
         });
         return oControl;
@@ -244,7 +244,7 @@ sap.ui.define([
             return oControl;
         }
         oControl.bindProperty("visible", {
-            path: "state>/mode",
+            path: "state>/workflow/detail/editMode",
             formatter: function (sMode) { return sMode !== "READ"; }
         });
         return oControl;
@@ -257,7 +257,7 @@ sap.ui.define([
         var oReadText = createReadInfoText("{selected>/basic/" + sUpper + "_FULLNAME}");
         var oInput = new Input({
             value: "{" + sInputPath + "}",
-            showSuggestion: "{= ${state>/mode} === 'EDIT' }",
+            showSuggestion: "{= ${state>/workflow/detail/editMode} === 'EDIT' }",
             startSuggestion: 2,
             maxSuggestionWidth: "300%",
             filterSuggests: false,
@@ -408,7 +408,7 @@ sap.ui.define([
             }
         });
         oPinButton.bindProperty("visible", {
-            path: "state>/mode",
+            path: "state>/workflow/detail/editMode",
             formatter: function (sMode) {
                 return sMode !== "READ";
             }

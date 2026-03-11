@@ -84,7 +84,7 @@ sap.ui.define([
         var oDelta = (mInput && mInput.delta) || DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oSnapshot);
         var oRepo = mCtx && mCtx.repo;
         var oLock = mCtx && mCtx.lock;
-        var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_EDIT_MODE)) || "").toUpperCase();
+        var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "").toUpperCase();
         var bCreate = CreateSentinel.isCreateId(sRootId) || sMode === "CREATE";
         var iClientVersion = DetailSaveSupport.resolveVersionNumber(oCurrent, oSnapshot);
         var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);

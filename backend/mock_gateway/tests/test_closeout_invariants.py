@@ -116,6 +116,52 @@ def test_export_source_separates_selected_and_all_found_contracts():
     assert 'oRequest.selectionMode = "all";' in source
     assert 'oRequest.searchContract = buildSearchContract(mInput, mCtx);' in source
     assert 'SearchMaxResults.resolveExportLimit(mState)' in source
+    assert 'filterLocationKey:' in source
+
+
+def test_create_permission_contract_is_current_identity_only():
+    source = _read(APP_ROOT / "infra" / "adapters" / "ODataChecklistRepoAdapter.js")
+    readme = _read(BACKEND_ROOT / "README_ODATA.md")
+
+    assert "ChecklistCreatePermissionSet('CURRENT')" in source
+    assert "Productive create-permission seam rules:" in readme
+    assert "response entity identity also stays `RootKey='CURRENT'`" in readme
+    assert "normalizePermissionResponse()" in readme
+
+
+def test_local_validation_guide_matches_real_repo_assets():
+    guide_path = REPO_ROOT / "docs" / "LOCAL_VALIDATION.md"
+    guide = _read(guide_path)
+
+    assert guide_path.exists()
+    assert "scripts/start-local-env.ps1" in guide
+    assert "scripts/stop-local-env.ps1" in guide
+    assert "node scripts/gateway-live-smoke-runner.js" in guide
+    assert "Manual smoke playbook" in guide
+    assert "EDIT_LOCKED" in guide
+    assert "filterLocationKey" in guide
+
+
+def test_start_local_env_supports_python_fallback_and_external_gateway_mode():
+    source = _read(REPO_ROOT / "scripts" / "start-local-env.ps1")
+
+    assert "PYTHON_BIN" in source
+    assert "py -3 launcher" in source
+    assert "python on PATH" in source
+    assert "FastAPI and uvicorn" in source
+    assert "-GatewayBaseUrl" in source or "GatewayBaseUrl" in source
+
+
+def test_telemetry_uses_canonical_lock_state_vocabulary():
+    telemetry_runtime = _read(APP_ROOT / "service" / "framework" / "TelemetryRuntime.js")
+    workflow_telemetry = _read(APP_ROOT / "util" / "WorkflowTelemetry.js")
+    lock_gate = _read(REPO_ROOT / "scripts" / "gates" / "lock-state-enum-gate.js")
+
+    assert "lockState:" in telemetry_runtime
+    assert "lockOperationState:" not in telemetry_runtime
+    assert "lockState:" in workflow_telemetry
+    assert "lockOperationState:" not in workflow_telemetry
+    assert "lockState" in lock_gate
 
 
 def test_search_request_window_supports_legacy_search_max_results_shape():
@@ -128,13 +174,16 @@ def test_search_request_window_supports_legacy_search_max_results_shape():
 
 
 def test_sticky_runtime_is_route_scoped_without_global_body_observer():
-    source = _read(APP_ROOT / "search-toolbar-sticky-runtime.js")
+    legacy_path = APP_ROOT / "search-toolbar-sticky-runtime.js"
+    source = _read(APP_ROOT / "controller" / "support" / "SearchViewportRuntime.js")
 
-    assert 'document.body' not in source
-    assert 'new MutationObserver' not in source
-    assert 'window.addEventListener("hashchange", triggerSearchRouteRefresh' in source
-    assert 'window.addEventListener("resize", scheduleRefresh' in source
-    assert 'document.querySelector(".searchResultsTable .sapUiCompSmartTableToolbar")' in source
+    assert not legacy_path.exists()
+    assert "MutationObserver" not in source
+    assert 'new window.ResizeObserver(function () {' in source
+    assert 'window.addEventListener("resize", oController._fnSearchViewportResize);' in source
+    assert 'window.removeEventListener("resize", oController._fnSearchViewportResize);' in source
+    assert 'oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });' in source
+    assert 'oObserver.disconnect();' in source
 
 
 def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
@@ -203,6 +252,7 @@ def test_report_export_respects_selected_and_all_found_contracts():
                 "Entity": "screen",
                 "SearchContract": {
                     "filterId": hidden_row["Id"],
+                    "filterLocationKey": hidden_row["LocationKey"],
                 },
                 "Limit": 200000,
             },
@@ -212,3 +262,4 @@ def test_report_export_respects_selected_and_all_found_contracts():
         all_found_rows = all_found_resp.json().get("d", {}).get("results", [])
         assert all_found_rows
         assert {row.get("Id") for row in all_found_rows} == {hidden_row["Id"]}
+        assert {row.get("LocationKey") for row in all_found_rows} == {hidden_row["LocationKey"]}

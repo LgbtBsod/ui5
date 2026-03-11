@@ -31,7 +31,6 @@ from utils.time import now_utc
 from utils.sap_message import build_sap_message
 from repo.settings_repo import SettingsRepo
 from services.settings_service import DEFAULT_FRONTEND_VARIABLES, SettingsService
-from services.export_service import ExportService
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -461,6 +460,7 @@ def _normalize_export_search_contract(payload: dict | None) -> dict:
         "filterId": _export_pick_text(contract.get("filterId")),
         "filterDateFrom": _export_pick_text(contract.get("filterDateFrom")),
         "filterDateTo": _export_pick_text(contract.get("filterDateTo")),
+        "filterLocationKey": _export_pick_text(contract.get("filterLocationKey")),
         "filterLpc": _export_pick_text(contract.get("filterLpc")),
         "filterProfession": _export_pick_text(contract.get("filterProfession")),
         "filterStatus": _export_pick_text(contract.get("filterStatus")),
@@ -483,6 +483,7 @@ def _search_contract_matches(root: ChecklistRoot, contract: dict, db: Session) -
     filter_id = str(contract.get("filterId") or "").strip().lower()
     filter_date_from = _date_ymd_from_any(contract.get("filterDateFrom"))
     filter_date_to = _date_ymd_from_any(contract.get("filterDateTo")) or filter_date_from
+    filter_location_key = str(contract.get("filterLocationKey") or "").strip().lower()
     filter_lpc = str(contract.get("filterLpc") or "").strip().lower()
     filter_profession = str(contract.get("filterProfession") or "").strip().lower()
     filter_status = str(contract.get("filterStatus") or "").strip().upper()
@@ -493,6 +494,7 @@ def _search_contract_matches(root: ChecklistRoot, contract: dict, db: Session) -
     root_id_hex = _hex(root.id)
     root_date = str(root.date or "").strip()
     root_status = _status_external(root.status)
+    root_location_key = str(root.location_key or "").strip()
     root_lpc = str(root.lpc or "").strip()
     root_lpc_text = _dict_text(db, "LPC", root_lpc) or root_lpc
     root_profession = str(root.observed_position or "").strip()
@@ -508,6 +510,8 @@ def _search_contract_matches(root: ChecklistRoot, contract: dict, db: Session) -
         )
     if filter_date_from:
         matches.append(bool(root_date) and root_date >= filter_date_from and (not filter_date_to or root_date <= filter_date_to))
+    if filter_location_key:
+        matches.append(filter_location_key in root_location_key.lower())
     if filter_lpc:
         matches.append(filter_lpc in root_lpc.lower() or filter_lpc in root_lpc_text.lower())
     if filter_profession:
@@ -817,10 +821,34 @@ def _to_permission(root: ChecklistRoot, user_id: str | None, db: Session | None 
         "RootKey": root_key,
         "UserId": str(permission.get("user_id") or ""),
         "AuthObject": str(permission.get("auth_object") or ""),
+        "CreateOperation": str(permission.get("create_operation") or ""),
         "ViewOperation": str(permission.get("view_operation") or ""),
         "ChangeOperation": str(permission.get("change_operation") or ""),
         "DeleteOperation": str(permission.get("delete_operation") or ""),
         "GrantedOperations": ",".join(permission.get("granted_operations") or []),
+        "CanCreate": bool(permission.get("can_create")),
+        "CanView": bool(permission.get("can_view")),
+        "CanEdit": bool(permission.get("can_edit")),
+        "CanDelete": bool(permission.get("can_delete")),
+        "ReasonCode": str(permission.get("reason_code") or ""),
+        "Message": str(permission.get("message") or ""),
+    }
+
+
+def _to_create_permission(user_id: str | None, db: Session | None = None) -> dict:
+    permission = AuthorizationService.create_permission(user_id, db=db)
+    root_key = "CURRENT"
+    return {
+        "__metadata": _entity_metadata("ChecklistPermission", "ChecklistCreatePermissionSet", root_key),
+        "RootKey": root_key,
+        "UserId": str(permission.get("user_id") or ""),
+        "AuthObject": str(permission.get("auth_object") or ""),
+        "CreateOperation": str(permission.get("create_operation") or ""),
+        "ViewOperation": str(permission.get("view_operation") or ""),
+        "ChangeOperation": str(permission.get("change_operation") or ""),
+        "DeleteOperation": str(permission.get("delete_operation") or ""),
+        "GrantedOperations": ",".join(permission.get("granted_operations") or []),
+        "CanCreate": bool(permission.get("can_create")),
         "CanView": bool(permission.get("can_view")),
         "CanEdit": bool(permission.get("can_edit")),
         "CanDelete": bool(permission.get("can_delete")),
@@ -1373,7 +1401,7 @@ def _lock_import_payload(action: str, root_id: str, session_guid: str, payload: 
 def service_document():
     return odata_entity({"EntitySets": [
         "ChecklistSearchSet", "ChecklistRootSet", "ChecklistBasicInfoSet", "ChecklistCheckSet", "ChecklistBarrierSet",
-        "DictionaryItemSet", "PersonVHSet", "LastChangeSet", "LockStatusSet", "ChecklistPermissionSet", "RuntimeSettingsSet",
+        "DictionaryItemSet", "PersonVHSet", "LastChangeSet", "LockStatusSet", "ChecklistPermissionSet", "ChecklistCreatePermissionSet", "RuntimeSettingsSet",
         "CurrentUserSet", "SimpleAnalyticalSet", "WorkflowAnalyticsBreakdownSet", "AnalyticsRefreshStateSet", "AttachmentFolderSet", "AttachmentSet",
     ]})
 
@@ -1584,6 +1612,26 @@ def current_user_entity(entity_key: str, request: Request, response: Response, d
     profile = CurrentUserService.resolve_profile(db, request=request)
     response.headers["Cache-Control"] = "no-store"
     return odata_entity(_to_current_user(profile))
+
+
+@router.get(f"{SERVICE_ROOT}/ChecklistCreatePermissionSet")
+def checklist_create_permission_set(request: Request, response: Response, db: Session = Depends(get_db)):
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
+    response.headers["Cache-Control"] = "no-store"
+    return odata_collection([_to_create_permission(resolved_uname, db=db)])
+
+
+@router.get(f"{SERVICE_ROOT}/ChecklistCreatePermissionSet({{entity_key}})")
+def checklist_create_permission_entity(entity_key: str, request: Request, response: Response, db: Session = Depends(get_db)):
+    cleaned = str(entity_key or "").strip()
+    if cleaned.startswith("RootKey=") or cleaned.startswith("Key="):
+        cleaned = cleaned.split("=", 1)[1]
+    cleaned = cleaned.strip("\'\"")
+    if cleaned and cleaned.upper() != "CURRENT":
+        return _err(404, "NOT_FOUND", "Create permission not found")
+    resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
+    response.headers["Cache-Control"] = "no-store"
+    return odata_entity(_to_create_permission(resolved_uname, db=db))
 
 
 @router.get(f"{SERVICE_ROOT}/LastChangeSet({{entity_key}})")

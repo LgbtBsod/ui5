@@ -55,7 +55,6 @@ sap.ui.define([
         if (sAction === DialogOrchestrator.actions.NO) {
             return releaseWithTrySave(mContext).then(function () {
                 ModelStateRuntime.resetDetailWorkflowState(oController, {
-                    [StatePaths.WORKFLOW_LOCK_STATUS]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_LOCK_STATUS, "IDLE") || "IDLE",
                     [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE") || "IDLE",
                     [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                     [StatePaths.WORKFLOW_AUTOSAVE_ENABLED]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false) === true,

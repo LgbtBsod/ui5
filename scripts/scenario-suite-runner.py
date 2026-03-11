@@ -175,7 +175,7 @@ P0_CHECKS = {
         ("service/framework/ComponentInitRuntime.js", "fnResumePendingNavigationIntent")
     ],
     "D3": [
-        ("view/fragment/DetailControlRail.fragment.xml", "enabled=\"{= !${state>/isBusy} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }\""),
+        ("view/fragment/DetailControlRail.fragment.xml", "enabled=\"{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }\""),
         ("controller/support/DetailChecklistStateActions.js", "onValidateChecklist")
     ],
     "E1": [

@@ -128,6 +128,7 @@ sap.ui.define([
             filterId: pickStateOrFilter(mFilterData.Id, mState.filterId),
             filterDateFrom: mDateRange.dateFrom,
             filterDateTo: mDateRange.dateTo,
+            filterLocationKey: pickStateOrFilter(mFilterData.LocationKey, mState.filterLocationKey),
             filterLpc: pickStateOrFilter(mFilterData.Lpc, mState.filterLpc),
             filterProfession: pickFilterValue(mFilterData.ProfessionText),
             filterStatus: pickFilterValue(mFilterData.Status),

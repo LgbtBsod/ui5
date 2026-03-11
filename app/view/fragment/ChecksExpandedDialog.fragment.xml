@@ -26,28 +26,28 @@
                         <t:Column width="3rem">
                             <Label text=""/>
                             <t:template>
-                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                             </t:template>
                         </t:Column>
                         <t:Column>
                             <Label text="{i18n>checkLabel}"/>
                             <t:template>
-                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
+                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                             </t:template>
                         </t:Column>
                         <t:Column width="8rem">
                             <Label text="{i18n>statusLabel}"/>
                             <t:template>
-                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
+                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
                             </t:template>
                         </t:Column>
                         <t:Column>
                             <Label text="{i18n>commentLabel}"/>
                             <t:template>
-                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                             </t:template>
                         </t:Column>
-                        <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                        <t:Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                             <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                             <t:template>
                                 <Button
@@ -68,24 +68,24 @@
                         <Column><Text text="{i18n>checkLabel}"/></Column>
                         <Column><Text text="{i18n>statusLabel}"/></Column>
                         <Column><Text text="{i18n>commentLabel}"/></Column>
-                        <Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                        <Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                             <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                         </Column>
                     </columns>
                     <items>
                         <ColumnListItem>
                             <cells>
-                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
-                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
-                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
-                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
+                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                 <Button
                                     icon="sap-icon://delete"
                                     text="{i18n>rowActionDelete}"
                                     width="100%"
                                     type="Transparent"
                                     press=".onDeleteCheckRow"
-                                    visible="{= ${state>/mode} !== 'READ' }"
+                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                     class="tableRowActionBtn tableRowActionBtnDanger"/>
                             </cells>
                         </ColumnListItem>

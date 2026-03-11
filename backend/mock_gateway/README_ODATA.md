@@ -11,6 +11,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 UI5 expects the mock backend on `http://localhost:8000`.
 
+For reproducible local startup and smoke steps from this repo, use `docs/LOCAL_VALIDATION.md`.
+
 ## Canonical entity sets
 
 - `ChecklistSearchSet`
@@ -23,6 +25,7 @@ UI5 expects the mock backend on `http://localhost:8000`.
 - `LastChangeSet`
 - `LockStatusSet`
 - `ChecklistPermissionSet`
+- `ChecklistCreatePermissionSet`
 - `CurrentUserSet`
 - `RuntimeSettingsSet`
 - `SimpleAnalyticalSet`
@@ -65,8 +68,16 @@ Runtime settings are the canonical source for:
 Examples:
 ```bash
 curl "http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ChecklistPermissionSet('<ROOT_KEY_HEX>')"
-curl "http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/CurrentUserSet('CURRENT')"
+curl "http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ChecklistCreatePermissionSet('CURRENT')"
 ```
+
+Productive create-permission seam rules:
+- request identity is always `ChecklistCreatePermissionSet('CURRENT')`
+- response entity identity also stays `RootKey='CURRENT'`
+- payload shape stays on the shared `ChecklistPermission` DTO: `GrantedOperations`, `CanCreate`, `CanView`, `CanEdit`, `CanDelete`, `ReasonCode`, `Message`
+- denied create permission returns the same DTO shape with empty `GrantedOperations`, `CanCreate=false`, and a non-permissive `ReasonCode`; it must not expose checklist payloads
+- transport or backend failures stay transport/backend failures; the frontend only normalizes successful DTO payloads in `normalizePermissionResponse()` and must not synthesize permissive fallback state
+- frontend adapter alignment point is `app/infra/adapters/ODataChecklistRepoAdapter.js` via `normalizePermissionResponse()`
 
 The frontend must not send `Uname` for create/save/copy/lock flows. The mock backend resolves identity server-side.
 For local mock tests only, identity can be overridden with the `X-Mock-User` request header.
@@ -82,6 +93,21 @@ curl "http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/
 
 Do not rely on plain query params for breakdown requests.
 
+## Additional rollout alignment points
+
+- `LastChangeSet(RootKey='<ROOT_KEY_HEX>')`
+  - returns only freshness data for optimistic reload checks
+  - frontend should treat it as change-detection metadata, not as a detail payload source
+- Checklist read path
+  - frontend detail load composes `ChecklistRootSet`, `ChecklistBasicInfoSet`, `ChecklistCheckSet`, `ChecklistBarrierSet`
+  - productive Gateway differences should be adapted in `app/infra/adapters/ODataChecklistRepoAdapter.js`, not in detail use cases
+- Save/update path
+  - `CreateChecklist`, `SaveChanges`, `AutoSave` return server snapshot hints; the frontend still rehydrates to canonical `selected` and `snapshot`
+- Permission-denied path
+  - denied permission must stay DTO-only and must not reveal business payload, cache payload, or unrelated fallback resources
+- Analytics breakdown path
+  - `WorkflowAnalyticsBreakdownSet` stays filter-driven and route-lazy; productive differences belong at the adapter/request boundary, not in search readiness logic
+
 ## Export contract
 
 Selected export:
@@ -95,8 +121,15 @@ Export all by search contract:
 ```bash
 curl -X POST "http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ReportExport" \
   -H "Content-Type: application/json" -H "X-CSRF-Token: <token>" \
-  -d '{"Entity":"screen","SelectionMode":"all","Limit":200000,"SearchContract":{"filterId":"","filterDateFrom":"2026-01-01","filterDateTo":"2026-12-31","filterLpc":"","filterProfession":"","filterStatus":"","searchMode":"EXACT","checksSegment":"ALL","barriersSegment":"ALL"}}'
+  -d '{"Entity":"screen","SelectionMode":"all","Limit":200000,"SearchContract":{"filterId":"","filterDateFrom":"2026-01-01","filterDateTo":"2026-12-31","filterLocationKey":"","filterLpc":"","filterProfession":"","filterStatus":"","searchMode":"EXACT","checksSegment":"ALL","barriersSegment":"ALL"}}'
 ```
+
+Contract notes:
+
+- `SelectionMode='selected'` must use `RootKeys`
+- `SelectionMode='all'` must use `SearchContract`
+- `filterLocationKey` is part of search membership and must remain in the export-all-found contract
+- export scope must remain independent from visible table rows, `$top`, `searchFetchLimit`, and `growingPageSize`
 
 ## Batch sample
 ```bash

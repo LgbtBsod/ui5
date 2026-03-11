@@ -165,7 +165,7 @@
                                                 text="{i18n>addRow}"
                                         icon="sap-icon://task"
                                                 press=".onAddCheckRow"
-                                                visible="{= ${state>/mode} !== 'READ' }">
+                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                                                 <layoutData>
                                                     <OverflowToolbarLayoutData priority="High"/>
                                                 </layoutData>
@@ -184,7 +184,7 @@
                                         icon="sap-icon://task"
                                                 type="Transparent"
                                                 press=".onAddCheckRow"
-                                                visible="{= ${state>/mode} !== 'READ' }"
+                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                                 class="detailEmptyStateAction"/>
                                         </VBox>
 
@@ -200,28 +200,28 @@
                                                 <t:Column width="3rem">
                                                     <Label text=""/>
                                                     <t:template>
-                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
                                                     <Label text="{i18n>checkLabel}"/>
                                                     <t:template>
-                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column width="8rem">
                                                     <Label text="{i18n>statusLabel}"/>
                                                     <t:template>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
                                                     <Label text="{i18n>commentLabel}"/>
                                                     <t:template>
-                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                                     </t:template>
                                                 </t:Column>
-                                                <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                <t:Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                                                     <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                                                     <t:template>
                                                         <Button
@@ -248,23 +248,23 @@
                                                 <Column><Text text="{i18n>checkLabel}"/></Column>
                                                 <Column><Text text="{i18n>statusLabel}"/></Column>
                                                 <Column><Text text="{i18n>commentLabel}"/></Column>
-                                                <Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                <Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                                                     <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                                                 </Column>
                                             </columns>
                                             <items>
                                                 <ColumnListItem>
                                                     <cells>
-                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
-                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
-                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
+                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                                         <Button
                                                             icon="sap-icon://delete"
                                                             text="{i18n>rowActionDelete}"
                                                             type="Transparent"
                                                             press=".onDeleteCheckRow"
-                                                            visible="{= ${state>/mode} !== 'READ' }"
+                                                            visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                                             class="tableRowActionBtn tableRowActionBtnDanger"/>
                                                     </cells>
                                                 </ColumnListItem>
@@ -300,7 +300,7 @@
                                                 text="{i18n>addRow}"
                                                 icon="sap-icon://quality-issue"
                                                 press=".onAddBarrierRow"
-                                                visible="{= ${state>/mode} !== 'READ' }">
+                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                                                 <layoutData>
                                                     <OverflowToolbarLayoutData priority="High"/>
                                                 </layoutData>
@@ -319,7 +319,7 @@
                                                 icon="sap-icon://quality-issue"
                                                 type="Transparent"
                                                 press=".onAddBarrierRow"
-                                                visible="{= ${state>/mode} !== 'READ' }"
+                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                                 class="detailEmptyStateAction"/>
                                         </VBox>
 
@@ -335,28 +335,28 @@
                                                 <t:Column width="3rem">
                                                     <Label text=""/>
                                                     <t:template>
-                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
                                                     <Label text="{i18n>barrierLabel}"/>
                                                     <t:template>
-                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
+                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column width="8rem">
                                                     <Label text="{i18n>statusLabel}"/>
                                                     <t:template>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
                                                     <Label text="{i18n>commentLabel}"/>
                                                     <t:template>
-                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                                     </t:template>
                                                 </t:Column>
-                                                <t:Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                <t:Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                                                     <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                                                     <t:template>
                                                         <Button
@@ -383,23 +383,23 @@
                                                 <Column><Text text="{i18n>barrierLabel}"/></Column>
                                                 <Column><Text text="{i18n>statusLabel}"/></Column>
                                                 <Column><Text text="{i18n>commentLabel}"/></Column>
-                                                <Column width="10rem" hAlign="Center" visible="{= ${state>/mode} !== 'READ' }">
+                                                <Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                                                     <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                                                 </Column>
                                             </columns>
                                             <items>
                                                 <ColumnListItem>
                                                     <cells>
-                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/mode} !== 'READ' }"/>
-                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }"/>
-                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/mode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
-                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/mode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                                        <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
+                                                        <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
                                                         <Button
                                                             icon="sap-icon://delete"
                                                             text="{i18n>rowActionDelete}"
                                                             type="Transparent"
                                                             press=".onDeleteBarrierRow"
-                                                            visible="{= ${state>/mode} !== 'READ' }"
+                                                            visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                                             class="tableRowActionBtn tableRowActionBtnDanger"/>
                                                     </cells>
                                                 </ColumnListItem>
@@ -429,12 +429,12 @@
                                                     enabled="{= !${view>/attachmentBusy} }"
                                                     press=".onToggleAttachmentsSection"
                                                     class="sapUiTinyMarginEnd"/>
-                                                <Text text="{i18n>saveChecklistBeforeAttachment}" visible="{= ${state>/mode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText">
+                                                <Text text="{i18n>saveChecklistBeforeAttachment}" visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
                                                     </layoutData>
                                                 </Text>
-                                                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${state>/mode} !== 'READ' }">
+                                                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
                                                     </layoutData>
@@ -443,8 +443,8 @@
                                                     id="attachmentCategorySelect"
                                                     width="12rem"
                                                     selectedKey="{view>/attachmentCategoryKey}"
-                                                    visible="{= ${state>/mode} !== 'READ' }"
-                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                                                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                                                     items="{ path: 'masterData>/attachmentTypes', templateShareable: true }">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="10rem"/>
@@ -457,13 +457,13 @@
                                                     sameFilenameAllowed="true"
                                                     useMultipart="false"
                                                     buttonText="{i18n>uploadAttachment}"
-                                                    visible="{= ${state>/mode} !== 'READ' }"
-                                                    enabled="{= ${state>/mode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                                                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                                                     change=".onAttachmentUploadChange"/>
                                             </OverflowToolbar>
                                             <VBox
                                                 id="attachmentDropZone"
-                                                visible="{= ${state>/mode} !== 'READ' }"
+                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                                 class="detailAttachmentDropZone">
                                                 <HBox alignItems="Center" class="detailAttachmentDropZoneTop">
                                                     <core:Icon src="sap-icon://upload" class="detailAttachmentDropZoneIcon"/>
@@ -512,7 +512,7 @@
                                                                             text="{i18n>rowActionDelete}"
                                                                             type="Transparent"
                                                                             press=".onDeleteAttachment"
-                                                                            visible="{= ${state>/mode} !== 'READ' }"
+                                                                            visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                                                             class="tableRowActionBtn tableRowActionBtnDanger"/>
                                                                     </HBox>
                                                                 </cells>
@@ -566,7 +566,7 @@
                                                                         text="{i18n>rowActionDelete}"
                                                                         type="Transparent"
                                                                         press=".onDeleteAttachment"
-                                                                        visible="{= ${state>/mode} !== 'READ' }"
+                                                                        visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                                                                         class="tableRowActionBtn tableRowActionBtnDanger"/>
                                                                 </HBox>
                                                             </cells>

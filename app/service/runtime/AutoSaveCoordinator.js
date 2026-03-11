@@ -65,7 +65,7 @@ sap.ui.define([
     _runIfNeeded: function () {
       if (!this._fnLockGuard()) {
         if (typeof console !== "undefined" && console.warn) {
-          console.warn("[AutoSaveCoordinator] autosave aborted: mode must be EDIT and lockOperationState must be LOCKED");
+          console.warn("[AutoSaveCoordinator] autosave aborted: editMode must be EDIT and workflow/detail/lock/state must be EDIT_LOCKED");
         }
         return Promise.resolve(null);
       }

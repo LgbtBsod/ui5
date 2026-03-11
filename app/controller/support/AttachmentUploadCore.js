@@ -3,10 +3,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime) {
+], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime) {
     "use strict";
 
     var ATTACHMENT_EXTENSION_TO_MIME = {
@@ -52,7 +53,7 @@ sap.ui.define([
 
     function canUploadAttachments(oController) {
         var sRootId = oController._currentRootId && oController._currentRootId();
-        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", "/mode", "READ"), "READ");
+        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"), "READ");
         return !!sRootId && sMode !== "READ";
     }
 

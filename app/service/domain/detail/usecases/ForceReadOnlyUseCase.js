@@ -59,7 +59,7 @@ sap.ui.define([
         return pRelease.then(function (oReleaseResult) {
             aEffects = [
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "FORCED_READ_ONLY"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, sTransitionState),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),

@@ -1,12 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailPersonInputSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap"
-], function (DetailPersonInputSupport, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap) {
+], function (DetailPersonInputSupport, StatePaths, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap) {
     "use strict";
 
     function validationSummaryPath(mStatePaths) {
@@ -178,7 +179,7 @@ sap.ui.define([
         }
         DetailPersonInputSupport.syncDrafts(oController, oSelectedModel, sModelPath);
 
-        sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", "/mode", ""), "");
+        sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""), "");
         if (shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {
             ModelStateRuntime.write(oController, "state", "/isDirty", true);
         }

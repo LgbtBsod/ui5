@@ -67,6 +67,15 @@ def test_gateway_canonical_contract_and_metadata():
         assert "Uname" not in current_user_body
         assert current_user_body.get("FullName")
 
+        create_permission = client.get(f"{SERVICE_ROOT}/ChecklistCreatePermissionSet('CURRENT')")
+        assert create_permission.status_code == 200 and "d" in create_permission.json()
+        create_permission_body = create_permission.json().get("d", {})
+        assert create_permission_body.get("RootKey") == "CURRENT"
+        assert create_permission_body.get("AuthObject") == "Z_UI5_CHKL"
+        assert create_permission_body.get("CreateOperation") == "01"
+        assert create_permission_body.get("CanCreate") is True
+        assert create_permission_body.get("GrantedOperations") == "01"
+
         checks = client.get(f"{SERVICE_ROOT}/ChecklistCheckSet", params={"$filter": f"RootId eq '{root_key}'"})
         barriers = client.get(f"{SERVICE_ROOT}/ChecklistBarrierSet", params={"$filter": f"RootId eq '{root_key}'"})
         assert checks.status_code == 200 and "d" in checks.json()
@@ -201,7 +210,10 @@ def test_gateway_canonical_contract_and_metadata():
         assert 'EntitySet Name="ChecklistBarrierSet"' in metadata
         assert 'EntitySet Name="PersonVHSet"' in metadata
         assert 'EntitySet Name="ChecklistPermissionSet"' in metadata
+        assert 'EntitySet Name="ChecklistCreatePermissionSet"' in metadata
         assert 'EntityType Name="ChecklistPermission"' in metadata
+        assert 'Property Name="CreateOperation" Type="Edm.String"' in metadata
+        assert 'Property Name="CanCreate" Type="Edm.Boolean"' in metadata
         assert 'Property Name="ViewOperation" Type="Edm.String"' in metadata
         assert 'Property Name="ChangeOperation" Type="Edm.String"' in metadata
         assert 'Property Name="DeleteOperation" Type="Edm.String"' in metadata

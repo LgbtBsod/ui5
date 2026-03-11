@@ -150,7 +150,7 @@ sap.ui.define([
         oComponent._oSelectedLifecycleModel = oSelectedModel;
         oComponent._fnStateModelPropertyChange = function (oEvent) {
             var sPath = oEvent.getParameter("path") || "";
-            if (["/mode", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID, StatePaths.UI_BUSY_DETAIL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE].indexOf(sPath) >= 0) {
+            if (["/isLoading", "/activeObjectId", StatePaths.SESSION_ID, StatePaths.UI_BUSY_DETAIL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE].indexOf(sPath) >= 0) {
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
             }
             if ([
@@ -165,10 +165,10 @@ sap.ui.define([
             ].indexOf(sPath) >= 0) {
                 syncDetailMeta(oStateModel, StatePaths);
             }
-            if (sPath === "/mode") {
+            if (sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
                 fnEmitTelemetry("workflow.mode.changed", mOptions.telemetryRuntime.stateValue(oEvent.getParameter("value")));
             }
-            if (sPath === "/lockOperationState") {
+            if (sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
                 fnEmitTelemetry("lock.state.changed", mOptions.telemetryRuntime.stateValue(oEvent.getParameter("value")));
             }
             if ([StatePaths.SAVE_IN_FLIGHT, StatePaths.WORKFLOW_DIRTY].indexOf(sPath) >= 0 &&

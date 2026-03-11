@@ -27,6 +27,94 @@ function Ensure-Dir([string]$Path) {
     }
 }
 
+function New-PythonCandidate([string]$FilePath, [string[]]$PrefixArgs, [string]$Source) {
+    return [PSCustomObject]@{
+        FilePath = $FilePath
+        PrefixArgs = @($PrefixArgs)
+        Source = $Source
+    }
+}
+
+function Resolve-PythonCandidates() {
+    $candidates = @()
+    $seen = @{}
+
+    if (Test-Path $pythonVenv) {
+        $key = ($pythonVenv.Trim().ToLowerInvariant() + "|")
+        if (-not $seen.ContainsKey($key)) {
+            $seen[$key] = $true
+            $candidates += (New-PythonCandidate -FilePath $pythonVenv -PrefixArgs @() -Source "backend/mock_gateway/.venv")
+        }
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:PYTHON_BIN)) {
+        $filePath = $env:PYTHON_BIN.Trim()
+        $key = ($filePath.ToLowerInvariant() + "|")
+        if (-not $seen.ContainsKey($key)) {
+            $seen[$key] = $true
+            $candidates += (New-PythonCandidate -FilePath $filePath -PrefixArgs @() -Source "PYTHON_BIN")
+        }
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:PYTHON)) {
+        $filePath = $env:PYTHON.Trim()
+        $key = ($filePath.ToLowerInvariant() + "|")
+        if (-not $seen.ContainsKey($key)) {
+            $seen[$key] = $true
+            $candidates += (New-PythonCandidate -FilePath $filePath -PrefixArgs @() -Source "PYTHON")
+        }
+    }
+    if (Get-Command py -ErrorAction SilentlyContinue) {
+        $key = "py|-3"
+        if (-not $seen.ContainsKey($key)) {
+            $seen[$key] = $true
+            $candidates += (New-PythonCandidate -FilePath "py" -PrefixArgs @("-3") -Source "py -3 launcher")
+        }
+    }
+    if (Get-Command python -ErrorAction SilentlyContinue) {
+        $key = "python|"
+        if (-not $seen.ContainsKey($key)) {
+            $seen[$key] = $true
+            $candidates += (New-PythonCandidate -FilePath "python" -PrefixArgs @() -Source "python on PATH")
+        }
+    }
+
+    return $candidates
+}
+
+function Test-PythonCandidate([object]$Candidate, [switch]$RequireBackendDeps) {
+    $probeCode = if ($RequireBackendDeps.IsPresent) {
+        "import fastapi, uvicorn; print('ok')"
+    } else {
+        "import sys; print(sys.version)"
+    }
+    try {
+        $null = & $Candidate.FilePath @($Candidate.PrefixArgs + @("-c", $probeCode)) 2>$null
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+function Resolve-PythonCommand([switch]$RequireBackendDeps) {
+    $candidates = Resolve-PythonCandidates
+    foreach ($candidate in $candidates) {
+        if (Test-PythonCandidate -Candidate $candidate -RequireBackendDeps:$RequireBackendDeps.IsPresent) {
+            return $candidate
+        }
+    }
+
+    $candidateHints = ($candidates | ForEach-Object {
+        if ($_.PrefixArgs.Count) {
+            return "$($_.FilePath) $($_.PrefixArgs -join ' ')"
+        }
+        return $_.FilePath
+    }) -join ", "
+
+    if ($RequireBackendDeps.IsPresent) {
+        throw "Python with FastAPI and uvicorn was not found. Tried: $candidateHints. Either create backend/mock_gateway/.venv, set PYTHON_BIN/PYTHON to a prepared interpreter, or use -GatewayBaseUrl to run against an external SAP Gateway."
+    }
+    throw "Python was not found. Tried: $candidateHints. Set PYTHON_BIN/PYTHON, install Python 3, or create backend/mock_gateway/.venv."
+}
+
 function Stop-IfRunning([string]$PidFile, [int]$Port) {
     if (Test-Path $PidFile) {
         $existingPid = Get-Content $PidFile -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -69,9 +157,7 @@ function Wait-Http([string]$Url, [int]$TimeoutSeconds, [string]$Name) {
 
 Ensure-Dir $pidDir
 
-if (-not (Test-Path $pythonVenv)) {
-    throw "Python venv not found: $pythonVenv"
-}
+$pythonCommand = Resolve-PythonCommand -RequireBackendDeps:(!$isRealGateway)
 
 Stop-IfRunning -PidFile $backendPidFile -Port $BackendPort
 Stop-IfRunning -PidFile $uiPidFile -Port $UiPort
@@ -83,8 +169,8 @@ if ($isRealGateway) {
     Remove-Item $backendPidFile -ErrorAction SilentlyContinue
 } else {
     $backendProcess = Start-Process `
-        -FilePath $pythonVenv `
-        -ArgumentList @("-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "$BackendPort") `
+        -FilePath $pythonCommand.FilePath `
+        -ArgumentList @($pythonCommand.PrefixArgs + @("-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "$BackendPort")) `
         -WorkingDirectory $mockRoot `
         -RedirectStandardOutput $backendOut `
         -RedirectStandardError $backendErr `
@@ -98,8 +184,8 @@ $prevUiBackendBase = $env:UI5_BACKEND_BASE
 $env:UI5_BACKEND_BASE = $uiBackendBase
 try {
     $uiProcess = Start-Process `
-        -FilePath "python" `
-        -ArgumentList @("scripts/dev_static_server.py", "$UiPort") `
+        -FilePath $pythonCommand.FilePath `
+        -ArgumentList @($pythonCommand.PrefixArgs + @("scripts/dev_static_server.py", "$UiPort")) `
         -WorkingDirectory $repoRoot `
         -RedirectStandardOutput $uiOut `
         -RedirectStandardError $uiErr `
@@ -150,5 +236,6 @@ if ($isRealGateway) {
 } else {
     Write-Host "Backend: http://127.0.0.1:$BackendPort ($backendStatus)"
 }
+Write-Host "Python: $($pythonCommand.FilePath) $($pythonCommand.PrefixArgs -join ' ') [$($pythonCommand.Source)]"
 Write-Host "UI: http://127.0.0.1:$UiPort/index.html ($uiStatus)"
 Write-Host "Logs: $pidDir"

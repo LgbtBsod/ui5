@@ -14,7 +14,7 @@ sap.ui.define([
             sessionId: "",
             activeObjectId: "",
             mode: "READ",
-            lockOperationState: "IDLE",
+            lockState: "IDLE",
             timestamp: new Date().toISOString()
         }, TelemetryRuntime.workflowContextFromStateModel(oStateModel), oOptions.payload || {});
 

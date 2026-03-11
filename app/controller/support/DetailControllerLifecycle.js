@@ -5,6 +5,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailAccessViewState",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailInfoCardLayoutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -16,6 +17,7 @@ sap.ui.define([
     ControllerTextRuntime,
     DetailAccessViewState,
     DetailInfoCardLayoutRuntime,
+    StatePaths,
     ControllerModelRuntime,
     ControllerViewStateRuntime,
     ModelStateRuntime,
@@ -91,7 +93,7 @@ sap.ui.define([
                 oController._recomputeValidationSummary("requiredFieldsChanged", false);
                 return;
             }
-            if (sPath !== "/mode" && sPath !== "/activeObjectId" && sPath !== "/selectedId") {
+            if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== "/activeObjectId" && sPath !== "/selectedId") {
                 return;
             }
             oViewModel = ControllerModelRuntime.viewState(oController);

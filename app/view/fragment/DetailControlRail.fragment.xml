@@ -28,7 +28,7 @@
 
             <HBox class="uxStatChip" renderType="Bare">
                 <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${state>/mode} !== 'READ' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
+                <Text text="{= ${state>/workflow/detail/editMode} !== 'READ' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
             </HBox>
         </HBox>
 
@@ -95,15 +95,15 @@
                 </ObjectStatus>
 
                 <ObjectStatus icon="sap-icon://history"
-                              text="{parts:[{path:'state>/mode'},{path:'state>/lockOperationState'}], formatter:'.formatHeartbeatText'}"
-                              state="{= ${state>/mode} === 'EDIT' &amp;&amp; ${state>/lockOperationState} === 'LOCKED' ? 'Success' : 'Information' }"
+                              text="{parts:[{path:'state>/workflow/detail/editMode'},{path:'state>/workflow/detail/lock/state'}], formatter:'.formatHeartbeatText'}"
+                              state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockOperationState'}"
                               class="detailRailStatusChip">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </ObjectStatus>
 
                 <ObjectStatus icon="sap-icon://synchronize"
-                              text="{parts:[{path:'state>/mode'},{path:'state>/autosaveState'}], formatter:'.formatAutosaveText'}"
-                              state="{= ${state>/mode} !== 'EDIT' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }"
+                              text="{parts:[{path:'state>/workflow/detail/editMode'},{path:'state>/workflow/detail/lock/state'},{path:'state>/autosaveState'}], formatter:'.formatAutosaveText'}"
+                              state="{= ${state>/workflow/detail/editMode} !== 'EDIT' || ${state>/workflow/detail/lock/state} !== 'EDIT_LOCKED' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }"
                               class="detailRailStatusChip">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </ObjectStatus>
@@ -116,7 +116,7 @@
 
                 <Button icon="sap-icon://undo"
                         text="{i18n>objectCancel}"
-                        visible="{= ${state>/mode} !== 'READ' &amp;&amp; !!${state>/isDirty} }"
+                        visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${state>/isDirty} }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onCancelEditFromDetail"
                         tooltip="{i18n>objectCancel}"
@@ -141,7 +141,7 @@
 
                 <Button icon="sap-icon://save" type="Emphasized"
                         text="{i18n>objectSave}"
-                        visible="{= ${state>/mode} !== 'READ' }"
+                        visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onSaveDetail"
                         tooltip="{i18n>objectSave}"
@@ -152,7 +152,7 @@
                 <Button icon="sap-icon://delete"
                         text="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
                         type="{= ${view>/deleteChecklistConfirmArmed} ? 'Transparent' : 'Reject' }"
-                        visible="{parts:[{path:'state>/mode'},{path:'selected>/root/id'}], formatter:'.formatDeleteChecklistVisible'}"
+                        visible="{parts:[{path:'state>/workflow/detail/editMode'},{path:'selected>/root/id'}], formatter:'.formatDeleteChecklistVisible'}"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onArmDeleteChecklist"
                         tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
@@ -163,7 +163,7 @@
                 <Button icon="sap-icon://accept"
                         text="{i18n>deleteConfirmButton}"
                         type="Reject"
-                        visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${state>/mode} === 'EDIT' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                        visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${state>/workflow/detail/editMode} === 'EDIT' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onConfirmDeleteChecklist"
                         tooltip="{i18n>deleteConfirmButton}"
@@ -191,7 +191,7 @@
 
                 <Button icon="sap-icon://inspection"
                         text="{i18n>validateButton}"
-                        visible="{= ${state>/mode} !== 'READ' }"
+                        visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onValidateChecklist"
                         tooltip="{i18n>validateButton}"
@@ -201,7 +201,7 @@
 
                 <Button icon="sap-icon://status-inactive"
                         text="{i18n>statusDraft}"
-                        visible="{= ${state>/mode} === 'EDIT' }"
+                        visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
                         tooltip="{i18n>statusDraft}"
                         class="chkRipple">
@@ -211,7 +211,7 @@
 
                 <Button icon="sap-icon://status-critical"
                         text="{i18n>statusRegistered}"
-                        visible="{= ${state>/mode} === 'EDIT' }"
+                        visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
                         tooltip="{i18n>statusRegistered}"
                         class="chkRipple">
@@ -221,7 +221,7 @@
 
                 <Button icon="sap-icon://status-positive"
                         text="{i18n>statusClosed}"
-                        visible="{= ${state>/mode} === 'EDIT' }"
+                        visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
                         tooltip="{i18n>statusClosed}"
                         class="chkRipple">

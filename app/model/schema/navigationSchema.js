@@ -2,7 +2,6 @@ sap.ui.define([], function () {
     "use strict";
 
     return {
-        mode: "READ",
         layout: "OneColumn",
         currentRouteName: "search",
         selectedId: null,

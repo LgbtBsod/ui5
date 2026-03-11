@@ -1434,14 +1434,14 @@ def run_contract_module_checks(browser, tracker: ScenarioTracker) -> None:
         and bool(confirm_effect)
         and confirm_effect.get("payload", {}).get("confirmAction") == "detail.takeoverLock"
         and b2.get("takeoverPayload", {}).get("force") is True
-        and any(fx.get("path") == "/mode" and fx.get("value") == "EDIT" for fx in takeover_effects)
-        and any(fx.get("path") == "/mode" and fx.get("value") == "READ" for fx in cancel_effects)
+        and any(fx.get("path") == "/workflow/detail/editMode" and fx.get("value") == "EDIT" for fx in takeover_effects)
+        and any(fx.get("path") == "/workflow/detail/editMode" and fx.get("value") == "READ" for fx in cancel_effects)
     )
     tracker.add("B2", "takeover flow exposes confirm, takeover, and cancel outcomes", b2_ok, b2)
 
     k2 = payload.get("k2", {})
     denied_effects = k2.get("deniedEffects", [])
-    k2_ok = any(fx.get("modelName") == "view" and fx.get("path") == "/accessState" for fx in denied_effects) and any(fx.get("modelName") == "state" and fx.get("path") == "/mode" and fx.get("value") == "READ" for fx in denied_effects)
+    k2_ok = any(fx.get("modelName") == "view" and fx.get("path") == "/accessState" for fx in denied_effects) and any(fx.get("modelName") == "state" and fx.get("path") == "/workflow/detail/editMode" and fx.get("value") == "READ" for fx in denied_effects)
     tracker.add("K2", "permission denied routes to read-only and denied state", k2_ok, k2)
 
     e3 = payload.get("e3", {})
@@ -1475,8 +1475,8 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
           const detail = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost");
           const state = detail && detail.getModel && detail.getModel("state");
           if (state && state.setProperty) {
-            state.setProperty("/mode", "EDIT");
-            state.setProperty("/lockOperationState", "LOCKED");
+            state.setProperty("/workflow/detail/editMode", "EDIT");
+            state.setProperty("/workflow/detail/lock/state", "EDIT_LOCKED");
           }
         }
         """
@@ -1487,8 +1487,8 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
         () => {
           const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
-            mode: state.getProperty("/mode"),
-            lock: state.getProperty("/lockOperationState"),
+            mode: state.getProperty("/workflow/detail/editMode"),
+            lock: state.getProperty("/workflow/detail/lock/state"),
             conflict: state.getProperty("/tabConflictState")
           };
         }
@@ -1517,8 +1517,8 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
         () => {
           const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
-            mode: state.getProperty("/mode"),
-            lock: state.getProperty("/lockOperationState"),
+            mode: state.getProperty("/workflow/detail/editMode"),
+            lock: state.getProperty("/workflow/detail/lock/state"),
             conflict: state.getProperty("/tabConflictState"),
             bannerVisible: state.getProperty("/ui/feedback/banner/global/visible"),
             bannerText: state.getProperty("/ui/feedback/banner/global/text")
@@ -1550,8 +1550,8 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
         () => {
           const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
-            mode: state.getProperty("/mode"),
-            lock: state.getProperty("/lockOperationState"),
+            mode: state.getProperty("/workflow/detail/editMode"),
+            lock: state.getProperty("/workflow/detail/lock/state"),
             activeObjectId: state.getProperty("/activeObjectId")
           };
         }
@@ -1567,8 +1567,8 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
         () => {
           const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
-            mode: state.getProperty("/mode"),
-            lock: state.getProperty("/lockOperationState")
+            mode: state.getProperty("/workflow/detail/editMode"),
+            lock: state.getProperty("/workflow/detail/lock/state")
           };
         }
         """
@@ -1580,8 +1580,8 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
         () => {
           const state = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost").getModel("state");
           return {
-            mode: state.getProperty("/mode"),
-            lock: state.getProperty("/lockOperationState"),
+            mode: state.getProperty("/workflow/detail/editMode"),
+            lock: state.getProperty("/workflow/detail/lock/state"),
             activeObjectId: state.getProperty("/activeObjectId"),
             pendingNav: state.getProperty("/pendingNavigationIntent")
           };

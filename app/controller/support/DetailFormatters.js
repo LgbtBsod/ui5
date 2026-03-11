@@ -18,6 +18,13 @@ sap.ui.define([
         SUCCESS: "Success",
         ERROR: "Error"
     };
+    var LOCK_ACTIVE_STATES = {
+        EDIT_LOCKED: true
+    };
+    var LOCK_TRANSITION_STATES = {
+        ACQUIRING_LOCK: true,
+        IDLE_TIMEOUT_GRACE: true
+    };
 
     function text(oController, sKey, vArgs, vFallback) {
         var aArgs = [];
@@ -189,7 +196,16 @@ sap.ui.define([
             if (LOCK_OPERATION_STATES[sNormalizedState]) {
                 return LOCK_OPERATION_STATES[sNormalizedState];
             }
-            return String(sMode || "").toUpperCase() === "EDIT" ? "Success" : "Information";
+            if (LOCK_ACTIVE_STATES[sNormalizedState]) {
+                return "Success";
+            }
+            if (sNormalizedState === "LOCK_LOST" || sNormalizedState === "FORCED_READ_ONLY") {
+                return "Error";
+            }
+            if (LOCK_TRANSITION_STATES[sNormalizedState]) {
+                return "Warning";
+            }
+            return String(sMode || "").toUpperCase() === "EDIT" ? "Warning" : "Information";
         },
 
         formatI18nByKey: function (sKey) {
@@ -197,12 +213,26 @@ sap.ui.define([
         },
 
         formatHeartbeatText: function (sMode, sLockState) {
-            return (sMode === "EDIT" && sLockState === "LOCKED")
-                ? text(this, "heartbeatLockedActive")
-                : text(this, "heartbeatInactive");
+            var sNormalizedLockState = String(sLockState || "").toUpperCase();
+            if (String(sMode || "").toUpperCase() === "EDIT" && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
+                return text(this, "heartbeatLockedActive");
+            }
+            if (sNormalizedLockState === "ACQUIRING_LOCK") {
+                return text(this, "autosaveSaving", "Saving...");
+            }
+            if (sNormalizedLockState === "IDLE_TIMEOUT_GRACE") {
+                return text(this, "idleTimeoutGraceBannerTitle", "Idle timeout warning");
+            }
+            if (sNormalizedLockState === "LOCK_LOST") {
+                return text(this, "lockLostBannerTitle", "Lock lost");
+            }
+            if (sNormalizedLockState === "FORCED_READ_ONLY") {
+                return text(this, "detailForcedReadOnlyTitle", "Read-only enforced");
+            }
+            return text(this, "heartbeatInactive");
         },
 
-        formatAutosaveText: function (sMode, sAutosaveState) {
+        formatAutosaveText: function (sMode, sLockState, sAutosaveState) {
             var sState = String(sAutosaveState || "IDLE").toUpperCase();
             var mKeyByState = {
                 IDLE: "autosaveWaiting",
@@ -210,7 +240,9 @@ sap.ui.define([
                 SAVED: "autosaveSaved",
                 ERROR: "autosaveError"
             };
-            if (sMode !== "EDIT") {
+            var sNormalizedMode = String(sMode || "").toUpperCase();
+            var sNormalizedLockState = String(sLockState || "").toUpperCase();
+            if (sNormalizedMode !== "EDIT" || !LOCK_ACTIVE_STATES[sNormalizedLockState]) {
                 return text(this, "autosaveDisabled");
             }
             return text(this, mKeyByState[sState] || "autosaveWaiting");

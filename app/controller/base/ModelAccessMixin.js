@@ -17,11 +17,6 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade"],
             if (!sObjectId || !sSessionId) { return Promise.resolve(); }
             return LockFacade.release(sObjectId, sSessionId);
         },
-        setLockUiState: function (oStateModel, sState, sText) {
-            if (!oStateModel) { return; }
-            oStateModel.setProperty("/lockOperationState", sState || "IDLE");
-            oStateModel.setProperty("/lockOperationText", sText || "");
-        },
         setLockPending: function (oStateModel, bPending) { if (oStateModel) { oStateModel.setProperty("/lockOperationPending", !!bPending); } },
         deleteRowFromEvent: function (oEvent, sModelName, sCollectionPath) {
             var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext(sModelName);

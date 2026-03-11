@@ -199,8 +199,8 @@ def detail_state(page) -> dict[str, Any]:
             rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
             version: selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0,
             equipment: selected && selected.getProperty ? String(selected.getProperty('/basic/equipment') || '') : '',
-            mode: state && state.getProperty ? String(state.getProperty('/mode') || '') : '',
-            lockState: state && state.getProperty ? String(state.getProperty('/lockOperationState') || '') : '',
+            mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
+            lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '',
             autosaveState: state && state.getProperty ? String(state.getProperty('/autosaveState') || '') : ''
           };
         }
@@ -254,7 +254,7 @@ def enter_edit_or_report(page) -> tuple[bool, dict[str, Any]]:
             () => {
               const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
               const state = view && view.getModel && view.getModel('state');
-              return !!(state && state.getProperty && state.getProperty('/mode') === 'EDIT');
+              return !!(state && state.getProperty && state.getProperty('/workflow/detail/editMode') === 'EDIT');
             }
             """,
             timeout=20000,
@@ -321,7 +321,7 @@ def main() -> int:
             page = browser.new_page(viewport={"width": 1440, "height": 960})
 
             def on_request(req) -> None:
-        if "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV" not in req.url:
+                if "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV" not in req.url:
                     return
                 network.append(
                     {
@@ -414,7 +414,7 @@ def main() -> int:
                   const state = view && view.getModel && view.getModel('state');
                   const selected = view && view.getModel && view.getModel('selected');
                   const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
-                  return version > Number(prevVersion || 0) && !!(state && state.getProperty && state.getProperty('/isBusy') === false);
+                  return version > Number(prevVersion || 0) && !!(state && state.getProperty && state.getProperty('/ui/busy/detail') === false);
                 }
                 """,
                 arg=save_before.get("version") or 0,
