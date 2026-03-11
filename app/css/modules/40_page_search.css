@@ -3118,3 +3118,28 @@ body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .resultSegmentCont
   align-items: center;
   align-content: center;
 }
+
+
+/* 2026-03 full signal parity pass: search (exact, from claude-hyper.css). */
+@media (max-width: 45rem) {
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMTBSpacer {
+display: none;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTBSpacer {
+display: none;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompVarMngmt {
+flex: 1 1 100%;
+    min-width: 0;
+}
+
+}
+
+.chkApp .searchWorkbenchDock > .searchResultsTable {
+width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+}
+

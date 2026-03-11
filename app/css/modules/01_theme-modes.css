@@ -2,6 +2,7 @@
 .light-mode,
 :root.light-mode,
 .chkAppRoot.appLight,
+body.chkAppRoot.appLight,
 :root.chkAppRoot.light-mode {
   --ui-s0-background: rgb(255, 255, 255);
   --ui-s1-primary: rgb(255, 255, 255);
