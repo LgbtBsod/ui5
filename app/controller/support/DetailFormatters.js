@@ -182,7 +182,7 @@ sap.ui.define([
             return bDirty ? "Warning" : "Success";
         },
 
-        formatLockOperationText: function (sTextValue, sMode) {
+        formatLockStateText: function (sTextValue, sMode) {
             if (sTextValue) {
                 return sTextValue;
             }
@@ -191,7 +191,7 @@ sap.ui.define([
                 : text(this, "modeRead", "Read");
         },
 
-        formatLockOperationState: function (sState, sMode) {
+        formatLockStateSemantic: function (sState, sMode) {
             var sNormalizedState = String(sState || "").toUpperCase();
             if (LOCK_OPERATION_STATES[sNormalizedState]) {
                 return LOCK_OPERATION_STATES[sNormalizedState];

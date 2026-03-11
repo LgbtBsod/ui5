@@ -48,6 +48,19 @@ def flush_report(report: dict[str, Any]) -> int:
     return 1 if report.get("failures") else 0
 
 
+def classify_failure(step: str, error: Exception | str) -> str:
+    message = str(error or "")
+    if "Execution context was destroyed" in message or "Cannot find context with specified id" in message:
+        return "page/context lifecycle bug"
+    if "Timeout" in message:
+        if "attachment" in step or "attachments" in step:
+            return "readiness/wait bug"
+        return "tooling bug"
+    if "Locator" in message or "selector" in message:
+        return "selector bug"
+    return "tooling bug"
+
+
 def matching_requests(network: list[dict[str, Any]], marker: str) -> list[dict[str, Any]]:
     return [
         item
@@ -244,11 +257,12 @@ def ensure_attachments_expanded(page) -> None:
           const expanded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'));
           const historyLoaded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
           const uploaderReady = !!document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu');
-          return expanded && (historyLoaded || uploaderReady);
+          return expanded && uploaderReady && (historyLoaded || uploaderReady);
         }
         """,
         timeout=30000,
     )
+    page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").wait_for(timeout=10000)
     page.wait_for_timeout(1200)
 def main() -> int:
     if not ROOT_ID:
@@ -259,6 +273,7 @@ def main() -> int:
     failures: list[str] = []
     network: list[dict[str, Any]] = []
     last_state: dict[str, Any] = {}
+    current_step = "startup"
     attachment_file = Path("docs/runtime/gateway-dirty-invariant-attachment.txt")
     attachment_file.parent.mkdir(parents=True, exist_ok=True)
     attachment_file.write_text("attachment dirty invariant payload", encoding="utf-8")
@@ -282,9 +297,11 @@ def main() -> int:
 
             page.on("request", on_request)
 
+            current_step = "route.open.detail"
             page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="networkidle", timeout=90000)
             wait_for_detail_ready(page, ROOT_ID)
 
+            current_step = "lock.acquire"
             before_lock = len(matching_requests(network, "LockAcquire"))
             edit_ok, edit_detail = enter_edit_or_report(page)
             after_lock = len(matching_requests(network, "LockAcquire"))
@@ -312,7 +329,9 @@ def main() -> int:
                     "lastState": last_state,
                 })
 
+            current_step = "attachments.expand"
             ensure_attachments_expanded(page)
+            current_step = "attachments.upload"
             upload_before = detail_state(page)
             upload_request_index = len(network)
             page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
@@ -380,6 +399,7 @@ def main() -> int:
             if not ok_upload:
                 failures.append("detail.attachment_upload_keeps_clean_state")
 
+            current_step = "attachments.delete"
             delete_before = detail_state(page)
             delete_request_index = len(network)
             invoke_delete(page, uploaded_key)
@@ -430,6 +450,7 @@ def main() -> int:
             if not ok_delete:
                 failures.append("detail.attachment_delete_keeps_clean_state")
 
+            current_step = "lock.release"
             before_release = len(matching_requests(network, "LockRelease"))
             invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseDetail")
             wait_for_search_ready(page)
@@ -443,7 +464,12 @@ def main() -> int:
             browser.close()
     except Exception as exc:  # noqa: BLE001
         failures.append("browser.exception")
-        ensure(checks, "browser.exception", False, {"error": str(exc), "lastState": last_state})
+        ensure(checks, "browser.exception", False, {
+            "error": str(exc),
+            "lastState": last_state,
+            "step": current_step,
+            "classification": classify_failure(current_step, exc)
+        })
 
     report = {
         "generatedAt": int(time.time()),
@@ -454,6 +480,10 @@ def main() -> int:
         "failures": failures,
         "networkSample": network[-25:],
         "lastState": last_state,
+        "failureContext": {
+            "step": current_step,
+            "classification": classify_failure(current_step, failures[-1] if failures else "")
+        } if failures else {},
     }
     return flush_report(report)
 

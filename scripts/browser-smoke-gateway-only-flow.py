@@ -187,6 +187,19 @@ def flush_report(report: dict[str, Any]) -> int:
     return 1 if report.get("failures") else 0
 
 
+def classify_failure(step: str, error: Exception | str) -> str:
+    message = str(error or "")
+    if "Execution context was destroyed" in message or "Cannot find context with specified id" in message:
+        return "page/context lifecycle bug"
+    if "Timeout" in message:
+        if "analytics" in step or "attachment" in step:
+            return "readiness/wait bug"
+        return "tooling bug"
+    if "Locator" in message or "selector" in message:
+        return "selector bug"
+    return "tooling bug"
+
+
 def detail_state(page) -> dict[str, Any]:
     return safe_evaluate(
         page,
@@ -296,11 +309,12 @@ def ensure_attachments_expanded(page) -> None:
           const expanded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'));
           const historyLoaded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
           const uploaderReady = !!document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu');
-          return expanded && (historyLoaded || uploaderReady);
+          return expanded && uploaderReady && (historyLoaded || uploaderReady);
         }
         """,
         timeout=30000,
     )
+    page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").wait_for(timeout=10000)
     page.wait_for_timeout(1200)
 def main() -> int:
     if not ROOT_ID:
@@ -311,6 +325,7 @@ def main() -> int:
     checks: list[dict[str, Any]] = []
     failures: list[str] = []
     last_state: dict[str, Any] = {}
+    current_step = "startup"
     attachment_file = Path("docs/runtime/gateway-smoke-attachment.txt")
     attachment_file.parent.mkdir(parents=True, exist_ok=True)
     attachment_file.write_text("gateway browser smoke attachment payload", encoding="utf-8")
@@ -334,10 +349,12 @@ def main() -> int:
 
             page.on("request", on_request)
 
+            current_step = "route.open.search"
             page.goto(UI_URL, wait_until="networkidle", timeout=90000)
             wait_for_search_ready(page)
 
-            smart_controls = page.evaluate(
+            smart_controls = safe_evaluate(
+                page,
                 """
                 () => {
                   const core = sap.ui.getCore();
@@ -355,6 +372,7 @@ def main() -> int:
             if not ok_smart:
                 failures.append("search.smart.gateway.controls")
 
+            current_step = "route.open.detail"
             page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="networkidle", timeout=90000)
             wait_for_detail_ready(page, ROOT_ID)
 
@@ -365,6 +383,7 @@ def main() -> int:
             if not ok_open:
                 failures.append("detail.route.opened")
 
+            current_step = "lock.acquire"
             before_lock = len(matching_requests(network, "LockAcquire"))
             edit_ok, edit_detail = enter_edit_or_report(page)
             after_lock = len(matching_requests(network, "LockAcquire"))
@@ -384,6 +403,7 @@ def main() -> int:
                 browser.close()
                 return flush_report(build_report(checks, failures, network, {"lastState": last_state}))
 
+            current_step = "detail.save"
             save_before = detail_state(page)
             save_request_count_before = len(matching_requests(network, "SaveChanges"))
             save_call = safe_evaluate(
@@ -429,6 +449,7 @@ def main() -> int:
             if not ok_save:
                 failures.append("detail.save.gateway")
 
+            current_step = "detail.autosave"
             autosave_before = detail_state(page)
             autosave_request_count_before = len(matching_requests(network, "AutoSave"))
             autosave_call = safe_evaluate(
@@ -486,6 +507,7 @@ def main() -> int:
             if not ok_autosave:
                 failures.append("detail.autosave.gateway")
 
+            current_step = "analytics.open"
             analytics_request_before = len(
                 matching_requests(network, "SimpleAnalyticalSet")
             ) + len(
@@ -520,11 +542,14 @@ def main() -> int:
             ensure(checks, "analytics.screen.gateway", ok_analytics, {"before": analytics_request_before, "after": analytics_request_after, "state": analytics_state})
             if not ok_analytics:
                 failures.append("analytics.screen.gateway")
+            current_step = "analytics.close"
             invoke_view_controller_method(page, "checklist_app_comp---app--analyticsPaneHost", "onCloseAnalytics")
             wait_for_detail_ready(page, ROOT_ID)
 
+            current_step = "attachments.expand"
             ensure_attachments_expanded(page)
-            before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/" in item["url"]])
+            current_step = "attachments.upload"
+            before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "")])
             page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_timeout(3200)
             attachment_requests = [
@@ -554,6 +579,7 @@ def main() -> int:
             if not (has_attachment_post and has_attachment_put):
                 failures.append("detail.attachment.gateway")
 
+            current_step = "lock.release"
             before_release = len(matching_requests(network, "LockRelease"))
             invoke_view_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseDetail")
             wait_for_search_ready(page)
@@ -578,9 +604,20 @@ def main() -> int:
             browser.close()
     except Exception as exc:  # noqa: BLE001
         failures.append("browser.exception")
-        ensure(checks, "browser.exception", False, {"error": str(exc), "lastState": last_state})
+        ensure(checks, "browser.exception", False, {
+            "error": str(exc),
+            "lastState": last_state,
+            "step": current_step,
+            "classification": classify_failure(current_step, exc)
+        })
 
-    return flush_report(build_report(checks, failures, network, {"lastState": last_state}))
+    return flush_report(build_report(checks, failures, network, {
+        "lastState": last_state,
+        "failureContext": {
+            "step": current_step,
+            "classification": classify_failure(current_step, failures[-1] if failures else "")
+        } if failures else {}
+    }))
 
 
 if __name__ == "__main__":

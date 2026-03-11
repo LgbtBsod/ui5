@@ -96,7 +96,7 @@
 
                 <ObjectStatus icon="sap-icon://history"
                               text="{parts:[{path:'state>/workflow/detail/editMode'},{path:'state>/workflow/detail/lock/state'}], formatter:'.formatHeartbeatText'}"
-                              state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockOperationState'}"
+                              state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateSemantic'}"
                               class="detailRailStatusChip">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </ObjectStatus>

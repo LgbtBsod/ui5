@@ -1,0 +1,15 @@
+backend/mock_gateway/gateway.db
+backend/mock_gateway/gateway.db-shm
+backend/mock_gateway/gateway.db-wal
+backend/mock_gateway/uploads/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+docs/runtime/*.log
+docs/runtime/*.pid
+docs/runtime/*.txt
+docs/artifacts/
+artifacts/
+.playwright/
+playwright-report/
+test-results/

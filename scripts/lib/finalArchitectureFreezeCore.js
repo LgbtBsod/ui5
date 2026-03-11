@@ -7,7 +7,7 @@ const RUNTIME_ROOT = detectRuntimeRoot(ROOT);
 
 const REQUIRED_FILES = [
   'docs/final-architecture-contract.md',
-  'controller/support/SearchControllerSupport.js',
+  'controller/support/SearchControllerActions.js',
   'controller/support/SearchRateProgress.js',
   'controller/support/DetailFormatters.js',
   'service/framework/ComponentRuntimeSupport.js',
@@ -98,13 +98,13 @@ function validateMetrics(issues, metrics) {
 }
 
 function validateSupportModules(issues) {
-  if (!includesDependency('controller/Search.controller.js', 'checklist/app/controller/support/SearchControllerSupport')) {
-    issues.push('Search.controller.js must use controller/support/SearchControllerSupport');
+  if (!includesDependency('controller/Search.controller.js', 'PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchControllerActions')) {
+    issues.push('Search.controller.js must use controller/support/SearchControllerActions');
   }
-  if (!includesDependency('controller/Search.controller.js', 'checklist/app/controller/support/SearchRateProgress')) {
-    issues.push('Search.controller.js must use controller/support/SearchRateProgress');
+  if (!includesDependency('controller/support/SearchControllerActions.js', 'PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchRateProgress')) {
+    issues.push('SearchControllerActions.js must use controller/support/SearchRateProgress');
   }
-  if (!includesDependency('controller/Detail.controller.js', 'checklist/app/controller/support/DetailFormatters')) {
+  if (!includesDependency('controller/Detail.controller.js', 'PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailFormatters')) {
     issues.push('Detail.controller.js must use controller/support/DetailFormatters');
   }
   const detailSupportFiles = collectJsFiles(path.join(ROOT, 'controller/support'), [])
@@ -112,12 +112,12 @@ function validateSupportModules(issues) {
     .filter((file) => /\/Detail.*\.js$/.test(file));
   const detailCreateSentinelFiles = ['controller/Detail.controller.js', ...detailSupportFiles];
   const hasDetailCreateSentinel = detailCreateSentinelFiles.some((file) =>
-    exists(file) && includesDependency(file, 'checklist/app/util/CreateSentinel')
+    exists(file) && includesDependency(file, 'PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel')
   );
   if (!hasDetailCreateSentinel) {
     issues.push('Detail flow must use util/CreateSentinel (controller or extracted support module)');
   }
-  if (!includesDependency('Component.js', 'checklist/app/service/framework/ComponentRuntimeSupport')) {
+  if (!includesDependency('Component.js', 'PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport')) {
     issues.push('Component.js must use service/framework/ComponentRuntimeSupport');
   }
 }
