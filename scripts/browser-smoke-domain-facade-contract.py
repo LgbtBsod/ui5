@@ -20,6 +20,44 @@ def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> No
     checks.append({"name": name, "ok": bool(ok), "detail": detail})
 
 
+def is_navigation_race(exc: Exception) -> bool:
+    message = str(exc or "")
+    return "Execution context was destroyed" in message or "Cannot find context with specified id" in message
+
+
+def safe_evaluate(page, script: str, retries: int = 3):
+    last_error = None
+    for attempt in range(max(1, int(retries))):
+        try:
+            return page.evaluate(script)
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+            if not is_navigation_race(exc) or attempt >= retries - 1:
+                raise
+            page.wait_for_timeout(750)
+    raise last_error
+
+
+def wait_for_ui_ready(page) -> None:
+    page.wait_for_function(
+        """
+        () => {
+          if (typeof sap === 'undefined' || !sap.ui || !sap.ui.getCore) {
+            return false;
+          }
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
+          const state = app && app.getModel && app.getModel('state');
+          return !!app
+            && !!state
+            && state.getProperty('/currentRouteName') === 'search';
+        }
+        """,
+        timeout=30000,
+    )
+    page.wait_for_timeout(1200)
+
+
 def main() -> int:
     checks: list[dict[str, Any]] = []
     failures: list[str] = []
@@ -29,8 +67,10 @@ def main() -> int:
             browser = p.chromium.launch()
             page = browser.new_page(viewport={"width": 1440, "height": 900})
             page.goto(UI_URL, wait_until="networkidle", timeout=90000)
+            wait_for_ui_ready(page)
 
-            result = page.evaluate(
+            result = safe_evaluate(
+                page,
                 """
                 () => new Promise((resolve) => {
                     sap.ui.require([

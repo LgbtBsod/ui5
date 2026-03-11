@@ -80,10 +80,12 @@ def create_checklist(opener, token: str) -> dict[str, Any]:
             "basic": {
                 "date": "2026-03-04",
                 "equipment": "Gateway Smoke Pump",
+                "BUKRS": "3000",
                 "LOCATION_KEY": "LOC-001-01-01",
                 "LOCATION_NAME": "Area A",
                 "LOCATION_TEXT": "Area A",
                 "OBSERVER_FULLNAME": "Gateway Smoke Observer",
+                "OBSERVER_ORGUNIT": "Production Shift A",
                 "OBSERVED_FULLNAME": "Gateway Smoke Observed",
                 "LPC_KEY": "L2",
                 "PROF_KEY": "PR1",
