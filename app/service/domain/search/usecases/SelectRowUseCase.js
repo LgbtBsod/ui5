@@ -96,7 +96,7 @@ sap.ui.define([
                     Effects.modelPatch("state", "/selectedId", sCopiedRootId),
                     Effects.modelPatch("state", "/postOpenHydratedRootId", sCopiedRootId),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "EDIT"),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "LOCKED"),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "EDIT_LOCKED"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
                     Effects.toast("checklistCopied", "success"),

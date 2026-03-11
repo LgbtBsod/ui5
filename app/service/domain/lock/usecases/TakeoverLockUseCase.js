@@ -28,8 +28,8 @@ sap.ui.define([
                 return Result.fail({ code: "TAKEOVER_FAILED", lock: oRes || {} });
             }
             return Result.ok({ ok: true, lock: oRes }, [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_EDIT_MODE, "EDIT"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_STATUS, "LOCKED"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "EDIT"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "EDIT_LOCKED"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
             ]);
         });

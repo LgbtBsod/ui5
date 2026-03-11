@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (ModelStateRuntime, StatePaths) {
     "use strict";
 
     function normalizeLayout(vLayout) {
@@ -41,15 +42,15 @@ sap.ui.define([
 
     function readMode(oStateModel, sFallback) {
         return normalizeMode(
-            ModelStateRuntime.readOnModel(oStateModel, "/mode", ""),
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""),
             sFallback || "READ"
         );
     }
 
     function readLockState(oStateModel, sFallback) {
         return normalizeState(
-            ModelStateRuntime.readOnModel(oStateModel, "/lockOperationState", ""),
-            sFallback || "IDLE"
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, ""),
+            sFallback || "READ_ONLY"
         );
     }
 

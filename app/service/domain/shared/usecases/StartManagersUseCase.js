@@ -17,7 +17,6 @@ sap.ui.define([
                 if (m.gcd && m.gcd.resetOnFullSave) {
                     m.gcd.resetOnFullSave();
                 }
-                startIf(m.connectivity);
             }
             if (input && input.scope === "lock") {
                 if (bLockActive) {

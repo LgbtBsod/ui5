@@ -115,7 +115,7 @@ sap.ui.define([
         if (!bCreate && oDelta && !oDelta.client_version && iClientVersion) {
             oDelta = Object.assign({}, oDelta, { client_version: iClientVersion });
         }
-        if (!bCreate && (!sSessionGuid || sLockState !== "LOCKED")) {
+        if (!bCreate && (!sSessionGuid || sLockState !== "EDIT_LOCKED")) {
             return Promise.resolve(Result.fail({ message: "Active lock is required before save", code: "LOCK_REQUIRED" }, [
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")
@@ -173,10 +173,8 @@ sap.ui.define([
                     if (bCreate) {
                         var bLockAcquired = !!(oLockResult && oLockResult.ok);
                         aEffects.push(Effects.modelPatch("state", "/postOpenHydratedRootId", sServerRootId));
-                        aEffects.push(Effects.modelPatch("state", "/mode", bLockAcquired ? "EDIT" : "READ"));
-                        aEffects.push(Effects.modelPatch("state", "/lockOperationState", bLockAcquired ? "LOCKED" : "IDLE"));
                         aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? "EDIT" : "READ"));
-                        aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? "LOCKED" : "IDLE"));
+                        aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? "EDIT_LOCKED" : "READ_ONLY"));
                         aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));
                         aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
                     }

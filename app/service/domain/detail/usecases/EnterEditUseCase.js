@@ -6,9 +6,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, CreateSentinel, WorkflowTelemetry) {
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry) {
     "use strict";
 
     function EnterEditUseCase() {
@@ -25,7 +26,7 @@ sap.ui.define([
     function readOnlyEffects() {
         return [
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY"),
             Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
         ];
     }
@@ -37,6 +38,7 @@ sap.ui.define([
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var bCreateDraft = CreateSentinel.isCreateId(sRootId);
         var bShouldRelease = !!(sRootId && !CreateSentinel.isCreateId(sRootId) && oLockPort && typeof oLockPort.release === "function" && sSessionGuid);
+        var oStateModel = mCtx && mCtx.stateModel;
 
         if (!bEdit) {
             var pRelease = Promise.resolve();
@@ -77,6 +79,10 @@ sap.ui.define([
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
+        if (oStateModel) {
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "ACQUIRING_LOCK");
+        }
+
         return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
             activity: DetailAuthorizationSupport.OPERATIONS.CHANGE
         }).then(function (oPermission) {
@@ -116,7 +122,7 @@ sap.ui.define([
                 });
                 return Result.ok({ code: "OK", lock: oLock }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat([
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "EDIT"),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "LOCKED"),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "EDIT_LOCKED"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
                 ]));
             }

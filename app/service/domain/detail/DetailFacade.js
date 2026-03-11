@@ -96,8 +96,8 @@ sap.ui.define([
 
     DetailFacade.prototype.cancelEnterEdit = function (_i, _c) {
         return Promise.resolve({ ok: true, effects: [
-            Effects.modelPatch("state", StatePaths.WORKFLOW_EDIT_MODE, "READ"),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_STATUS, "IDLE"),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY"),
             Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false)
         ]});
     };

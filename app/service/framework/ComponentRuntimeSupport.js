@@ -68,7 +68,9 @@ sap.ui.define([
     function applyLockProbeState(oPayload, oStateModel) {
         var bKilled = !!(oPayload && (oPayload.killed || oPayload.is_killed));
         var bOk = !!(oPayload && (oPayload.ok || oPayload.lockOk || oPayload.success || oPayload.Ok));
-        var bLost = !bKilled && !bOk && ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") === "EDIT";
+        var bLost = !bKilled && !bOk &&
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === "EDIT" &&
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === "EDIT_LOCKED";
         return {
             killed: bKilled,
             lost: bLost,

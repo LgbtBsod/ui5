@@ -164,6 +164,7 @@ sap.ui.define([
                 }),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY"),
                 Effects.modelPatch("snapshot", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/attachments", aLoadedAttachments),

@@ -68,6 +68,11 @@ sap.ui.define([
         return "";
     }
 
+    function pickStateOrFilter(vFilterValue, vStateValue) {
+        var sFilterValue = pickFilterValue(vFilterValue);
+        return sFilterValue || pickFilterValue(vStateValue);
+    }
+
     function normalizeDateRange(vValue) {
         var oRange = vValue && typeof vValue === "object" && !Array.isArray(vValue)
             ? vValue
@@ -120,16 +125,15 @@ sap.ui.define([
         var mState = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
         var mDateRange = normalizeDateRange(mFilterData.DateCheck);
         return {
-            filterId: pickFilterValue(mFilterData.Id),
+            filterId: pickStateOrFilter(mFilterData.Id, mState.filterId),
             filterDateFrom: mDateRange.dateFrom,
             filterDateTo: mDateRange.dateTo,
-            filterLpc: pickFilterValue(mFilterData.Lpc),
+            filterLpc: pickStateOrFilter(mFilterData.Lpc, mState.filterLpc),
             filterProfession: pickFilterValue(mFilterData.ProfessionText),
             filterStatus: pickFilterValue(mFilterData.Status),
             searchMode: String(mState.searchMode || "EXACT").toUpperCase(),
             checksSegment: String(((mState.search || {}).checksFailSegment) || mState.filterFailedChecks || "ALL").toUpperCase(),
-            barriersSegment: String(((mState.search || {}).barriersFailSegment) || mState.filterFailedBarriers || "ALL").toUpperCase(),
-            limit: SearchMaxResults.resolveExportLimit(mState)
+            barriersSegment: String(((mState.search || {}).barriersFailSegment) || mState.filterFailedBarriers || "ALL").toUpperCase()
         };
     }
 

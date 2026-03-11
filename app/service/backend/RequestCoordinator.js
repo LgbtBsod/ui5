@@ -75,12 +75,13 @@ sap.ui.define([
         var sGuardKey = String(oRequest.responseGuardKey || "").trim();
         var iTimeoutMs = RequestResiliencePolicy.resolveTimeoutMs(sMethod, oRequest.timeoutMs);
         var iRetryLimit = RequestResiliencePolicy.resolveRetryCount(sMethod, oRequest.retryCount);
-        var iGuardToken = sGuardKey ? ResponseGuard.mark(sGuardKey) : 0;
         var oExisting = sDedupeKey ? InFlightRegistry.get(sDedupeKey) : null;
         var oStoredEntry = null;
+        var iGuardToken = 0;
 
         function runAttempt(iAttempt) {
             var oFactoryResult;
+            var oSupersededHandle;
             try {
                 oFactoryResult = normalizeFactoryResult(
                     typeof oRequest.requestFactory === "function"
@@ -93,6 +94,17 @@ sap.ui.define([
             } catch (oError) {
                 return Promise.reject(attachCorrelationId(oError, sCorrelationId));
             }
+            if (sGuardKey && RequestResiliencePolicy.isSafeRead(sMethod)) {
+                oSupersededHandle = ResponseGuard.replaceActiveHandle(sGuardKey, iGuardToken, oFactoryResult);
+                if (oSupersededHandle && oSupersededHandle.handle && typeof oSupersededHandle.handle.abort === "function" &&
+                    Number(oSupersededHandle.token || 0) !== Number(iGuardToken || 0)) {
+                    try {
+                        oSupersededHandle.handle.abort();
+                    } catch (_abortError) {
+                        // Abort is best-effort; outdated response guarding still applies.
+                    }
+                }
+            }
             return withTimeout(oFactoryResult, iTimeoutMs, sCorrelationId).then(function (vResponse) {
                 if (sGuardKey && !ResponseGuard.isCurrent(sGuardKey, iGuardToken)) {
                     throw createOutdatedError(sCorrelationId, sGuardKey);
@@ -100,6 +112,9 @@ sap.ui.define([
                 return vResponse;
             }).catch(function (oError) {
                 var oResolvedError = attachCorrelationId(oError, sCorrelationId);
+                if (sGuardKey && !ResponseGuard.isCurrent(sGuardKey, iGuardToken)) {
+                    throw createOutdatedError(sCorrelationId, sGuardKey);
+                }
                 var oPolicy = RequestResiliencePolicy.classify(sMethod, oResolvedError);
                 if (iAttempt < iRetryLimit && oPolicy.retryable) {
                     return runAttempt(iAttempt + 1);
@@ -112,7 +127,14 @@ sap.ui.define([
             return oExisting.promise;
         }
 
+        if (sGuardKey) {
+            iGuardToken = ResponseGuard.mark(sGuardKey);
+        }
+
         var pFinal = runAttempt(0).finally(function () {
+            if (sGuardKey) {
+                ResponseGuard.clearActiveHandle(sGuardKey, iGuardToken);
+            }
             if (sDedupeKey) {
                 InFlightRegistry.remove(sDedupeKey, oStoredEntry);
             }

@@ -139,9 +139,8 @@ sap.ui.define([
             }
 
             if (bCreate) {
-                mStatePatch["/mode"] = "CREATE";
                 mStatePatch[StatePaths.WORKFLOW_DETAIL_EDIT_MODE] = "CREATE";
-                mStatePatch["/lockOperationState"] = "IDLE";
+                mStatePatch[StatePaths.WORKFLOW_DETAIL_LOCK_STATE] = "IDLE";
                 mStatePatch["/autosaveEnabled"] = false;
                 mStatePatch["/isDirty"] = false;
             }

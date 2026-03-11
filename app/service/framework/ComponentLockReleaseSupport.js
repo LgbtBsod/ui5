@@ -22,12 +22,12 @@ sap.ui.define([
     function readActiveLockPayload(oStateModel) {
         var sRootId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
         var sSessionGuid = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || "").trim();
-        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, ""), "");
-        var sLockState = LayoutStateRuntime.normalizeState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, ""), "");
+        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""), "");
+        var sLockState = LayoutStateRuntime.normalizeState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, ""), "");
         if (!sRootId || !sSessionGuid || CreateSentinel.isCreateId(sRootId)) {
             return null;
         }
-        if (sMode !== "EDIT" || sLockState !== "LOCKED") {
+        if (sMode !== "EDIT" || sLockState !== "EDIT_LOCKED") {
             return null;
         }
         return {

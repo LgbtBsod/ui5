@@ -45,10 +45,10 @@ sap.ui.define([
 
     function isAutosaveAllowed(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        var sEditMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_EDIT_MODE)) || "").toUpperCase();
-        var sLockStatus = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_LOCK_STATUS)) || "").toUpperCase();
+        var sEditMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "").toUpperCase();
+        var sLockStatus = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE)) || "").toUpperCase();
         var bDirty = !!(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DIRTY));
-        return sEditMode === "EDIT" && sLockStatus === "LOCKED" && bDirty;
+        return sEditMode === "EDIT" && sLockStatus === "EDIT_LOCKED" && bDirty;
     }
 
     function resolveClientVersion(oDelta, mCtx) {

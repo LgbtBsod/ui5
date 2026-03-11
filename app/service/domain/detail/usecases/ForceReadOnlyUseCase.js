@@ -2,10 +2,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel) {
+], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel) {
     "use strict";
 
     function ForceReadOnlyUseCase() {
@@ -20,6 +21,10 @@ sap.ui.define([
         return sNormalized === "KILLED" || sNormalized === "EXPIRED" || sNormalized === "LOCK_EXPIRED" || sNormalized === "LOST";
     }
 
+    function isIdleTimeoutReason(sReason) {
+        return String(sReason || "").toUpperCase() === "IDLE_TIMEOUT";
+    }
+
     ForceReadOnlyUseCase.prototype.execute = function (mInput, mCtx) {
         var sReason = String((mInput && mInput.reason) || "READ_ONLY").trim() || "READ_ONLY";
         var sMessageKey = String((mInput && mInput.messageKey) || "").trim();
@@ -28,18 +33,23 @@ sap.ui.define([
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
-        var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_EDIT_MODE)) || "").toUpperCase();
-        var sLockState = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_LOCK_STATUS)) || "").toUpperCase();
+        var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "").toUpperCase();
+        var sLockState = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE)) || "").toUpperCase();
+        var oStateModel = mCtx && mCtx.stateModel;
+        var sTransitionState = isIdleTimeoutReason(sReason) ? "IDLE_TIMEOUT_GRACE" : (isLockLostReason(sReason) ? "LOCK_LOST" : "FORCED_READ_ONLY");
         var bShouldRelease = !!(
             sRootId &&
             sSessionGuid &&
             !CreateSentinel.isCreateId(sRootId) &&
             sMode === "EDIT" &&
-            sLockState === "LOCKED" &&
+            sLockState === "EDIT_LOCKED" &&
             oLockPort &&
             typeof oLockPort.release === "function"
         );
         var aEffects;
+        if (oStateModel) {
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, sTransitionState);
+        }
         var pRelease = bShouldRelease
             ? Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () {
                 return { ok: false, released: false, messageKey: "lockReleaseFailed" };
@@ -48,8 +58,8 @@ sap.ui.define([
 
         return pRelease.then(function (oReleaseResult) {
             aEffects = [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_EDIT_MODE, "READ"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_STATUS, "IDLE"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "FORCED_READ_ONLY"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),

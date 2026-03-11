@@ -14,6 +14,7 @@ sap.ui.define([], function () {
         cacheValidationAt: "",
         idleExpires: null,
         lockOperationPending: false,
+        // Compatibility mirror derived from the canonical detail lock lifecycle.
         lockOperationState: "IDLE",
         lockOperationText: "",
         lockLostReason: "",

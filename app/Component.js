@@ -153,7 +153,8 @@ sap.ui.define([
             };
         },
         _isLockRuntimeActive: function (oStateModel) {
-            return oStateModel.getProperty(StatePaths.WORKFLOW_EDIT_MODE) === "EDIT" && oStateModel.getProperty(StatePaths.WORKFLOW_LOCK_STATUS) === "LOCKED";
+            return oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) === "EDIT"
+                && oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_LOCK_STATE) === "EDIT_LOCKED";
         },
         _syncLockScopedManagers: function (oStateModel) {
             var bActive = this._isLockRuntimeActive(oStateModel);

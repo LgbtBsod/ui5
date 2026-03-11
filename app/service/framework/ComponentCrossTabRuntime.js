@@ -49,12 +49,12 @@ sap.ui.define([
             var sSignalType = String(oPayload.type || "").toUpperCase();
             var sSignalRootId = String(oPayload.rootId || "").trim();
             var sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "").trim();
-            var sMode = String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_EDIT_MODE, "") || "").toUpperCase();
-            var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_LOCK_STATUS, "") || "").toUpperCase();
+            var sMode = String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") || "").toUpperCase();
+            var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") || "").toUpperCase();
             if (!sSignalType || oPayload.tabId === sThisTabId || !sSignalRootId || !sCurrentRootId || sSignalRootId !== sCurrentRootId) {
                 return;
             }
-            if (sSignalType !== "LOCK_OWNED" || sMode !== "EDIT" || sLockState !== "LOCKED") {
+            if (sSignalType !== "LOCK_OWNED" || sMode !== "EDIT" || sLockState !== "EDIT_LOCKED") {
                 return;
             }
             ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.TAB_CONFLICT_STATE, {

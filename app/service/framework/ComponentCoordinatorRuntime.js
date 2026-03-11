@@ -132,8 +132,8 @@ sap.ui.define([
         oComponent._oHeartbeat = new mManagers.HeartbeatManager({
             intervalMs: Number(mTimerDefaults.heartbeatMs),
             heartbeatFn: function () {
-                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") !== "EDIT" ||
-                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") !== "LOCKED") {
+                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== "EDIT" ||
+                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") !== "EDIT_LOCKED") {
                     return Promise.resolve({ success: true, is_killed: false, skipped: true });
                 }
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.heartbeat !== "function") {
@@ -152,16 +152,16 @@ sap.ui.define([
             intervalMs: Number(mTimerDefaults.autoSaveIntervalMs),
             debounceMs: Number(mTimerDefaults.autoSaveDebounceMs),
             lockGuardFn: function () {
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") === "LOCKED";
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === "EDIT_LOCKED";
             },
             guardFn: function () {
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") === "EDIT" &&
-                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") === "LOCKED" &&
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === "EDIT" &&
+                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === "EDIT_LOCKED" &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
             },
             shouldSave: function () {
-                var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") === "LOCKED";
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") === "EDIT" &&
+                var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === "EDIT_LOCKED";
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === "EDIT" &&
                     bIsLocked &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
                     !!ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
@@ -221,8 +221,8 @@ sap.ui.define([
         oComponent._oLockStatus = new mManagers.LockStatusMonitor({
             intervalMs: Number(mTimerDefaults.lockStatusMs),
             checkFn: function () {
-                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "") !== "EDIT" ||
-                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "") !== "LOCKED") {
+                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== "EDIT" ||
+                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") !== "EDIT_LOCKED") {
                     return Promise.resolve({ success: true, is_killed: false, skipped: true });
                 }
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.status !== "function") {

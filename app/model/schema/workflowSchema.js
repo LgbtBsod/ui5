@@ -40,7 +40,9 @@ sap.ui.define([], function () {
             rootId: "",
             readiness: { status: "idle", ready: false, readyAt: "", error: "" },
             mode: "READ",
-            lock: { state: "IDLE", known: false },
+            // Canonical lifecycle supports IDLE, READ_ONLY, ACQUIRING_LOCK, EDIT_LOCKED, LOCK_LOST,
+            // IDLE_TIMEOUT_GRACE, and FORCED_READ_ONLY.
+            lock: { state: "READ_ONLY", known: false },
             dirty: false,
             permission: { known: false, allowed: false },
             save: { state: "IDLE", lastSavedAt: null },
@@ -49,7 +51,9 @@ sap.ui.define([], function () {
         operationalKpiSnapshots: [],
         operationalKpiSnapshotLimit: 50,
         workflow: {
-            detail: { editMode: "READ", lock: { state: "IDLE" }, autosave: { state: "IDLE", lastSavedAt: null } },
+            // Canonical lifecycle supports IDLE, READ_ONLY, ACQUIRING_LOCK, EDIT_LOCKED, LOCK_LOST,
+            // IDLE_TIMEOUT_GRACE, and FORCED_READ_ONLY.
+            detail: { editMode: "READ", lock: { state: "READ_ONLY" }, autosave: { state: "IDLE", lastSavedAt: null } },
             search: { mode: "EXACT", segments: { checks: "ALL", barriers: "ALL" } }
         },
         operationalKpi: {

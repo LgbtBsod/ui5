@@ -74,7 +74,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")
             ]));
         }
-        if (!sSessionGuid || DetailSaveSupport.readLockState(mCtx, StatePaths) !== "LOCKED") {
+        if (!sSessionGuid || DetailSaveSupport.readLockState(mCtx, StatePaths) !== "EDIT_LOCKED") {
             return Promise.resolve(Result.fail({ message: "Active lock is required before status change", code: "LOCK_REQUIRED" }, [
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")

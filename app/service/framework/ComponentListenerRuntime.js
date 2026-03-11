@@ -54,19 +54,54 @@ sap.ui.define([
     }
 
     function shouldReleaseDetailLock(oStateModel, oRouteEvent) {
-        var sMode = normalizeRouteName(ModelStateRuntime.readOnModel(oStateModel, "/mode", "READ")).toUpperCase();
-        var sLockState = normalizeRouteName(ModelStateRuntime.readOnModel(oStateModel, "/lockOperationState", "IDLE")).toUpperCase();
+        var sMode = normalizeRouteName(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/editMode", "READ")).toUpperCase();
+        var sLockState = normalizeRouteName(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/lock/state", "READ_ONLY")).toUpperCase();
 
         if (!shouldGuardDetailNavigation(oStateModel, oRouteEvent)) {
             return false;
         }
-        return sMode === "EDIT" || sLockState === "LOCKED";
+        return sMode === "EDIT" || sLockState === "EDIT_LOCKED";
+    }
+
+    function normalizeLegacyLockState(sCanonicalLockState) {
+        switch (String(sCanonicalLockState || "").toUpperCase()) {
+        case "EDIT_LOCKED":
+            return "LOCKED";
+        case "ACQUIRING_LOCK":
+            return "ACQUIRING_LOCK";
+        case "LOCK_LOST":
+            return "LOCK_LOST";
+        case "IDLE_TIMEOUT_GRACE":
+            return "IDLE_TIMEOUT_GRACE";
+        case "FORCED_READ_ONLY":
+            return "FORCED_READ_ONLY";
+        case "READ_ONLY":
+        case "IDLE":
+        default:
+            return "IDLE";
+        }
+    }
+
+    function syncLegacyLockAliases(oStateModel, StatePaths) {
+        var sCanonicalMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
+        var sCanonicalLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").toUpperCase();
+        var sLegacyMode = sCanonicalMode === "CREATE"
+            ? "CREATE"
+            : (sCanonicalMode === "EDIT" && sCanonicalLockState === "EDIT_LOCKED" ? "EDIT" : "READ");
+        var sLegacyLockState = normalizeLegacyLockState(sCanonicalLockState);
+
+        if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, "READ") !== sLegacyMode) {
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_EDIT_MODE, sLegacyMode);
+        }
+        if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, "IDLE") !== sLegacyLockState) {
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_LOCK_STATUS, sLegacyLockState);
+        }
     }
 
     function syncDetailMeta(oStateModel, StatePaths) {
         var oReadiness = ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_DETAIL, {}) || {};
         var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
-        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE") || "IDLE").toUpperCase();
+        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").toUpperCase();
         var sAutosaveState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE") || "IDLE").toUpperCase();
         var sValidationSource = String((ModelStateRuntime.readOnModel(oStateModel, StatePaths.VALIDATION_SUMMARY, {}) || {}).source || "idle");
         var bDirty = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
@@ -150,8 +185,7 @@ sap.ui.define([
         oComponent._oSelectedLifecycleModel = oSelectedModel;
         oComponent._fnStateModelPropertyChange = function (oEvent) {
             var sPath = oEvent.getParameter("path") || "";
-            var sModeValue;
-            if (["/mode", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID, StatePaths.UI_BUSY_DETAIL].indexOf(sPath) >= 0) {
+            if (["/mode", "/isLoading", "/activeObjectId", StatePaths.SESSION_ID, StatePaths.UI_BUSY_DETAIL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE].indexOf(sPath) >= 0) {
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
             }
             if ([
@@ -166,11 +200,8 @@ sap.ui.define([
             ].indexOf(sPath) >= 0) {
                 syncDetailMeta(oStateModel, StatePaths);
             }
-            if (sPath === StatePaths.WORKFLOW_EDIT_MODE) {
-                sModeValue = String(oEvent.getParameter("value") || "READ").toUpperCase();
-                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") !== sModeValue) {
-                    ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, sModeValue);
-                }
+            if ([StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE].indexOf(sPath) >= 0) {
+                syncLegacyLockAliases(oStateModel, StatePaths);
             }
             if (sPath === "/mode") {
                 fnEmitTelemetry("workflow.mode.changed", mOptions.telemetryRuntime.stateValue(oEvent.getParameter("value")));
@@ -184,14 +215,14 @@ sap.ui.define([
                 ModelStateRuntime.readOnModel(oStateModel, StatePaths.PENDING_NAVIGATION_INTENT, null)) {
                 fnResumePendingNavigationIntent();
             }
-            if (["/mode", "/lockOperationState", "/activeObjectId"].indexOf(sPath) >= 0) {
+            if ([StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "/activeObjectId"].indexOf(sPath) >= 0) {
                 var sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "").trim();
                 var sCurrentMode = mOptions.layoutStateRuntime.readMode(oStateModel, "");
                 var sCurrentLockState = mOptions.layoutStateRuntime.readLockState(oStateModel, "");
-                if (sCurrentRootId && sCurrentMode === "EDIT" && sCurrentLockState === "LOCKED") {
+                if (sCurrentRootId && sCurrentMode === "EDIT" && sCurrentLockState === "EDIT_LOCKED") {
                     ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
                     fnPublishTabSignal("LOCK_OWNED", { rootId: sCurrentRootId });
-                } else if (sCurrentRootId && sPath === "/mode" && sCurrentMode !== "EDIT") {
+                } else if (sCurrentRootId && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sCurrentMode !== "EDIT") {
                     fnPublishTabSignal("LOCK_RELEASED", { rootId: sCurrentRootId });
                 }
             }
@@ -210,6 +241,7 @@ sap.ui.define([
                 window.removeEventListener("beforeunload", oComponent._fnBeforeUnload);
             }
         };
+        syncLegacyLockAliases(oStateModel, StatePaths);
         ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
         syncDetailMeta(oStateModel, StatePaths);
         oComponent._fnOnFullSave = function () {
@@ -221,7 +253,8 @@ sap.ui.define([
         oComponent.setModel(oMasterDataModel, "masterData");
         oComponent.setModel(oEnvModel, "env");
         oComponent._fnBeforeUnload = function (oEvent) {
-            var bHasUnsaved = ModelStateRuntime.readOnModel(oStateModel, "/mode", "") === "EDIT" &&
+            var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
+            var bHasUnsaved = (sMode === "EDIT" || sMode === "CREATE") &&
                 ModelStateRuntime.readOnModel(oStateModel, "/isDirty", false);
             if (!bHasUnsaved) {
                 return;
@@ -242,7 +275,7 @@ sap.ui.define([
             oComponent._oAutoSave.touch();
         };
         oComponent._oDirtyStateBinding.attachChange(oComponent._fnDirtyStateBindingChange);
-        oComponent._aLockScopedStateBindings = ["/lockOperationState", "/mode"].map(function (sPath) {
+        oComponent._aLockScopedStateBindings = [StatePaths.WORKFLOW_DETAIL_LOCK_STATE, StatePaths.WORKFLOW_DETAIL_EDIT_MODE].map(function (sPath) {
             var oBinding = oStateModel.bindProperty(sPath);
             var fnBindingChange = function () {
                 oComponent._syncLockScopedManagers(oStateModel);
