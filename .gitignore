@@ -4,6 +4,7 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *.pyd
+*.pyс
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -44,7 +45,7 @@ docs/architecture-map.md
 docs/runtime/*.pid
 docs/runtime/*.log
 docs/runtime/*.txt
-
+docs/
 # Local media dumps
 *.mp4
 *.zip
