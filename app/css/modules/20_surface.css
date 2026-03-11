@@ -497,6 +497,40 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
   min-width: 0;
 }
 
+/* 2026-03 gap shortlist pass: shell parity selectors (header/actions exact). */
+.chkApp .appShellHeader.sapMHBox,
+.chkApp .appShellHeader.sapMVBox {
+  width: calc(100% - (2 * clamp(1rem, 2vw, 1.75rem)));
+  max-width: calc(100% - (2 * clamp(1rem, 2vw, 1.75rem)));
+  min-width: 0;
+}
+
+.chkApp .appShellHeader .sapMBtn .sapMBtnInner,
+.chkApp .shellThemeToggle .sapMBtnInner,
+.chkApp .shellUserActionBtn .sapMBtnInner,
+.chkApp .shellUserActionBtn.sapMBtn .sapMBtnInner {
+  border-radius: 999px;
+}
+
+.chkApp .appShellHeader .sapMBtn:hover .sapMBtnInner,
+.chkApp .shellActionBtn:not(.sapMBtnDisabled):hover .sapMBtnInner {
+  background: color-mix(in srgb, rgba(var(--accent-rgb), 0.1) 84%, transparent);
+}
+
+.chkApp .shellActionBtn:active .sapMBtnInner,
+.chkApp .shellActionBtn:not(.sapMBtnDisabled):active .sapMBtnInner {
+  transform: translateY(0);
+}
+
+.chkApp .appShellHeader .sapMOverflowToolbarMenuButton {
+  flex: 0 0 auto;
+}
+
+.chkApp .appShellHeader .shellContextChip .sapMObjStatusText,
+.chkApp .shellActionBtn .sapUiIcon {
+  color: var(--text-main);
+}
+
 /* Global pseudo-element backdrop reset carried from monolith hardening. */
 *::before,
 *::after {

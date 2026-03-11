@@ -2767,6 +2767,58 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   box-shadow: none;
 }
 
+/* 2026-03 gap shortlist pass: detail parity selectors (exact). */
+.chkApp #detailObjectPage.sapUxAPObjectPageLayout,
+.chkApp #detailObjectPage .sapUxAPObjectPageContent,
+.chkApp #detailObjectPage .sapUxAPObjectPageSubSection,
+.chkApp #detailObjectPage .sapUxAPBlockBase {
+  background: transparent;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chkApp .detailDateTimeGrid .sapMInputBase:focus-within .sapMInputBaseContentWrapper,
+.chkApp .detailPersonSuggestInput:focus-within .sapMInputBaseContentWrapper {
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 94%, var(--accent));
+  box-shadow: 0 0 0 2px color-mix(in srgb, rgba(var(--accent-rgb), 0.2) 84%, transparent);
+}
+
+.chkApp .detailAccessDeniedReason.sapMObjStatus,
+.chkApp .detailAttachmentDropZoneMeta.sapMText,
+.chkApp .detailAttachmentTable .sapMListTblCell .sapMText,
+.chkApp .detailAttachmentTable .sapMListTblHeaderCell .sapMText,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionHeader .sapUxAPObjectPageSubSectionTitle {
+  color: var(--text-main);
+}
+
+.chkApp .detailAttachmentDropZoneIcon.sapUiIcon {
+  color: var(--accent);
+}
+
+.chkApp .detailBarriersGridTable .sapUiTableDataCell,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionContent {
+  background: transparent;
+}
+
+.chkApp .detailControlRow.sapMTB {
+  background: transparent;
+  border: 0;
+}
+
+.chkApp .detailControlRow .sapMBarChild,
+.chkApp .detailControlRow .sapMBtn,
+.chkApp .detailControlRow .sapMTBSpacer {
+  min-width: 0;
+}
+
+.chkApp .detailControlRow .sapMBtn .sapMBtnContent {
+  color: inherit;
+}
+
+.chkApp .detailControlRowActions .sapMBsyInd {
+  color: var(--accent);
+}
+
 /* Migrated from claude-hyper.css backlog: detail typography and section helpers. */
 .chkApp .detailHeaderStack .sapMTitle,
 .chkApp .detailObjectHeaderTitle {

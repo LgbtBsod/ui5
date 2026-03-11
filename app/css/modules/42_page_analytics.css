@@ -424,3 +424,54 @@ body.chkAppRoot.appDark .chkApp .workflowStageCount {
   border-radius: 999px !important;
   overflow: hidden !important;
 }
+
+/* 2026-03 gap shortlist pass: analytics parity selectors (exact). */
+.chkApp .analyticsTabBar.sapMITB {
+  width: 100%;
+  background: transparent;
+}
+
+.chkApp .analyticsTabBar.sapMITB::-webkit-scrollbar,
+.chkApp .analyticsMatrixScroller::-webkit-scrollbar {
+  height: 0.48rem;
+  width: 0.48rem;
+}
+
+.chkApp .analyticsMatrixScroller::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-rail-border) 80%, transparent);
+}
+
+.chkApp .analyticsChartPanel .sapMPanelHdr,
+.chkApp .analyticsScreenTitle.sapMTitle,
+.chkApp .analyticsScreenSubtitle.sapMText,
+.chkApp .analyticsToplineMetaGrid .sapMText {
+  color: var(--text-main);
+}
+
+.chkApp .analyticsMatrixTable.sapMList,
+.chkApp .analyticsMatrixTable .sapMListTblCell,
+.chkApp .analyticsMatrixTable .sapMListTblHeaderCell {
+  background: transparent;
+}
+
+.chkApp .analyticsTile .sapMNCValue {
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.chkApp .analyticsTabBar .sapMITBHead,
+.chkApp .analyticsTabBar .sapMITBFilter {
+  background: transparent;
+  border: 0;
+}
+
+.chkApp .analyticsTabBar .sapMITBText,
+.chkApp .analyticsTabBar .sapMITBItem .sapMITBText,
+.chkApp .analyticsTabBar .sapMITBSelected .sapMITBText {
+  color: var(--text-main);
+}
+
+.chkApp .analyticsTabBar .sapMITBSelected::after {
+  background: var(--accent);
+}

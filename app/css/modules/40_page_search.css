@@ -1,4 +1,4 @@
-.chkApp .searchFilterCardDense,
+﻿.chkApp .searchFilterCardDense,
 .chkApp .searchWorkbenchDock,
 .chkApp .searchResultsActionRail,
 .chkApp .searchSmartToolbarRail,
@@ -1145,6 +1145,10 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 }
 
 .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn:last-child .sapMSegBBtnInner {
+  border-radius: 0 999px 999px 0;
+}
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn:last-child {
   border-radius: 0 999px 999px 0;
 }
 
@@ -3052,4 +3056,65 @@ body.chkAppRoot.appLight .chkApp .searchFilterExperienceShell .resultSegmentCont
 .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar > .sapMBarChild,
 .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB > .sapMBarChild {
   align-self: center;
+}
+
+/* 2026-03 gap shortlist pass: search parity selectors. */
+.chkApp #searchResultsShell,
+.chkApp [id$="-searchResultsShell"],
+.chkApp #searchResultsShell > .sapMFlexItem,
+.chkApp [id$="-searchResultsShell"] > .sapMFlexItem,
+.chkApp #searchResultsShell > .sapMFlexItem > .sapMVBox,
+.chkApp [id$="-searchResultsShell"] > .sapMFlexItem > .sapMVBox,
+.chkApp #searchResultsShell>.sapMFlexItem,
+.chkApp [id$="-searchResultsShell"]>.sapMFlexItem,
+.chkApp #searchResultsShell>.sapMFlexItem>.sapMVBox,
+.chkApp [id$="-searchResultsShell"]>.sapMFlexItem>.sapMVBox {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.chkApp .searchResultsTable.searchResultsExperienceShell,
+.chkApp .searchResultsTable.searchResultsExperienceShell > .sapMFlexItem,
+.chkApp .searchResultsTable.searchResultsExperienceShell>.sapMFlexItem {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chkApp .searchResultsTable .sapMLIBDetail {
+  min-width: 0;
+  color: var(--text-main);
+}
+
+.chkApp .searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell:first-child {
+  box-shadow: inset 2px 0 0 color-mix(in srgb, rgba(var(--accent-rgb), 0.72) 88%, transparent);
+}
+
+.chkApp .searchAnalyticsCard .sapMText,
+.chkApp .searchAnalyticsCard .sapMTitleStyleAuto {
+  color: var(--text-subtle);
+}
+
+.chkApp .searchAnalyticsCard.sapMVBox {
+  width: 100%;
+  min-width: 0;
+}
+
+.chkApp .searchAnalyticsCardPrimary .sapMObjectNumberText {
+  font-variant-numeric: tabular-nums;
+}
+
+.chkApp .searchAnalyticsRailPulse .searchAnalyticsCard .sapMTitle {
+  animation: searchAnalyticsRailFadeUpdate 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail.sapMTBNewFlex,
+.chkApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail.sapMTBNewFlex,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail.sapMTBNewFlex,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail.sapMTBNewFlex {
+  flex-wrap: nowrap;
+  align-items: center;
+  align-content: center;
 }

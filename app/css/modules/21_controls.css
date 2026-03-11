@@ -363,6 +363,23 @@ html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip {
   animation: chkFeedbackEnter var(--feedback-enter-duration) var(--feedback-enter-ease) both;
 }
 
+/* 2026-03 gap shortlist pass: sap_structural parity selectors (exact). */
+.chkApp .chkFeedbackStrip.sapMMessageStrip,
+.chkApp .chkFeedbackError.sapMMessageStrip {
+  border-radius: calc(var(--radius-sm) - 0.1rem);
+  border: 1px solid var(--feedback-info-border);
+  background: var(--feedback-info-bg);
+  color: var(--feedback-info-text);
+  box-shadow: 0 12px 24px var(--feedback-info-glow);
+}
+
+.chkApp .chkFeedbackError.sapMMessageStrip {
+  border-color: var(--feedback-error-border);
+  background: var(--feedback-error-bg);
+  color: var(--feedback-error-text);
+  box-shadow: 0 12px 24px var(--feedback-error-glow);
+}
+
 html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripWarning,
 html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripError {
   animation:

@@ -1,4 +1,4 @@
-.glassDialog,
+﻿.glassDialog,
 .expandedDialogContent {
   color: var(--text-main);
 }
@@ -937,3 +937,75 @@ body.chkAppRoot .sapMMessageToast.glassToast.glassToast--info {
   gap: 0.4rem !important;
 }
 
+
+/* 2026-03 gap shortlist pass: dialogs_popovers parity selectors. */
+.chkApp .dialogSearchField .sapMSFF:focus-within {
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 96%, var(--accent));
+  box-shadow: 0 0 0 2px color-mix(in srgb, rgba(var(--accent-rgb), 0.2) 84%, transparent);
+}
+
+.sapMDialog :focus {
+  outline-color: color-mix(in srgb, rgba(var(--accent-rgb), 0.72) 86%, transparent);
+  outline-offset: 1px;
+}
+
+.chkApp .shellPopover.sapMPopover,
+.chkApp .shellPopover.sapMResponsivePopover,
+.chkApp .shellPopover .sapMPopoverCont,
+.chkApp .shellPopover .sapMDialogScroll,
+body.chkAppRoot .shellPopover .sapMDialogScroll {
+  background: var(--theme-block-bg);
+}
+
+.chkApp .shellPopover .sapMBtn .sapMBtnInner {
+  border-radius: 999px;
+}
+
+.chkApp .shellPopover .sapMPopoverArr::before,
+.chkApp .shellPopover .sapMPopoverArr::after {
+  box-shadow: none;
+}
+
+.chkApp .shellPopoverList.sapMList,
+.chkApp .shellPopoverList .sapMCLI,
+.chkApp .shellPopoverList .sapMListItem,
+.chkApp .shellPopoverList .sapMSLI {
+  background: transparent;
+}
+
+.chkApp .shellPopoverList .sapMSLITitle,
+.chkApp .shellPopoverList .sapMSLIDescription,
+.chkApp .shellPopoverList .sapMSLIInfo {
+  color: var(--text-main);
+}
+
+body.chkAppRoot .shellPopover .sapMBar,
+body.chkAppRoot .shellPopover .sapMHeader-CTX,
+body.chkAppRoot .shellPopover .sapMIBar.sapMHeader-CTX {
+  background: var(--theme-block-bg);
+  border: 0;
+}
+
+body.chkAppRoot .shellPopover .sapMLIB {
+  background: var(--theme-table-cell-bg);
+}
+
+/* 2026-03 gap shortlist pass: shell parity selectors (popover/notification exact). */
+.chkApp .shellHelpText.sapMText,
+.chkApp .shellNotificationTitle.sapMText,
+.chkApp .shellNotificationValue.sapMText {
+  color: var(--text-main);
+}
+
+.chkApp .shellItemIcon.sapUiIcon,
+.chkApp .shellNotificationIcon.sapUiIcon {
+  color: var(--accent);
+}
+
+.chkApp .shellNotificationItem.sapMSLIUnread .sapMSLITitle {
+  font-weight: 700;
+}
+
+.chkApp .shellNotificationStatus.sapMObjStatus {
+  color: var(--text-main);
+}
