@@ -435,7 +435,7 @@ def main() -> int:
                 page,
                 """
                 () => new Promise((resolve, reject) => {
-                  sap.ui.require(['checklist/app/util/DeltaPayloadBuilder'], function (DeltaPayloadBuilder) {
+                  sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder'], function (DeltaPayloadBuilder) {
                     const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                     const controller = view && view.getController && view.getController();
                     const selected = view && view.getModel && view.getModel('selected');

@@ -74,10 +74,10 @@ def main() -> int:
                 """
                 () => new Promise((resolve) => {
                     sap.ui.require([
-                        'checklist/app/service/domain/detail/DetailFacade',
-                        'checklist/app/service/domain/search/SearchFacade',
-                        'checklist/app/service/domain/search/ExportFacade',
-                        'checklist/app/service/domain/shared/LockFacade'
+                        'PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade',
+                        'PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchFacade',
+                        'PRODUCTION_CONTROL_CHECKLIST/service/domain/search/ExportFacade',
+                        'PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade'
                     ], function (DetailFacade, SearchFacade, ExportFacade, LockFacade) {
                         var detail = new DetailFacade();
                         var search = new SearchFacade();
@@ -118,6 +118,8 @@ def main() -> int:
                 })
                 """
             )
+            page.wait_for_load_state("networkidle", timeout=30000)
+            page.wait_for_timeout(1500)
 
             browser.close()
 

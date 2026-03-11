@@ -1258,7 +1258,7 @@ def run_feedback_toast_check(browser, tracker: ScenarioTracker) -> None:
     result = page.evaluate(
         """
         () => new Promise((resolve) => {
-          sap.ui.require(["checklist/app/service/framework/EffectApplier", "sap/m/MessageToast"], function (EffectApplier, MessageToast) {
+          sap.ui.require(["PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier", "sap/m/MessageToast"], function (EffectApplier, MessageToast) {
             const detail = sap.ui.getCore().byId("checklist_app_comp---app--detailPaneHost");
             const controller = detail && detail.getController && detail.getController();
             if (!controller) {
@@ -1299,12 +1299,12 @@ def run_contract_module_checks(browser, tracker: ScenarioTracker) -> None:
         """
         () => new Promise((resolve) => {
           sap.ui.require([
-            "checklist/app/service/framework/FeedbackPolicy",
-            "checklist/app/service/domain/detail/DetailFacade",
-            "checklist/app/service/domain/detail/DetailAuthorizationSupport",
-            "checklist/app/util/search/SearchMaxResults",
-            "checklist/app/controller/support/SearchControllerSupport"
-          ], function (FeedbackPolicy, DetailFacade, DetailAuthorizationSupport, SearchMaxResults, SearchControllerSupport) {
+            "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackPolicy",
+            "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
+            "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+            "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
+            "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewStateRuntime"
+          ], function (FeedbackPolicy, DetailFacade, DetailAuthorizationSupport, SearchMaxResults, SearchViewStateRuntime) {
             const result = {};
             const authNorm = FeedbackPolicy.normalize({
               status: 401,
@@ -1389,7 +1389,7 @@ def run_contract_module_checks(browser, tracker: ScenarioTracker) -> None:
                   topNegative: SearchMaxResults.normalizeSearchBackendTopValue("-10")
                 };
                 result.l2 = {
-                  timeExample: SearchControllerSupport.formatHumanDateTime(new Date("2026-03-05T10:00:00Z")),
+              timeExample: SearchViewStateRuntime.formatHumanDateTime(new Date("2026-03-05T10:00:00Z")),
                   numberExample: new Intl.NumberFormat(undefined).format(12345.67)
                 };
                 resolve({ ok: true, result });

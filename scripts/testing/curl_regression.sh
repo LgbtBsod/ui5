@@ -56,12 +56,12 @@ echo "[8] LastChangeSet"
 req GET "$BASE_URL/LastChangeSet(RootKey='${ROOT_KEY}')" -b "$COOKIE_JAR" | head -c 400; echo
 
 echo "[9] LockAcquire / LockHeartbeat / LockRelease"
-req POST "$BASE_URL/LockAcquire?RootId=${ROOT_KEY}&SessionGuid=TEST-SESSION&Uname=TEST" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
-req POST "$BASE_URL/LockHeartbeat?RootId=${ROOT_KEY}&SessionGuid=TEST-SESSION&Uname=TEST" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
-req POST "$BASE_URL/LockRelease?RootId=${ROOT_KEY}&SessionGuid=TEST-SESSION&Uname=TEST" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/LockAcquire?RootId=${ROOT_KEY}&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/LockHeartbeat?RootId=${ROOT_KEY}&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/LockRelease?RootId=${ROOT_KEY}&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
 
 echo "[10] CopyChecklist"
-req POST "$BASE_URL/CopyChecklist?RootId=${ROOT_KEY}&SessionGuid=TEST-COPY-SESSION&Uname=TEST" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/CopyChecklist?RootId=${ROOT_KEY}&SessionGuid=TEST-COPY-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
 
 echo "[10] AutoSave sample"
 req POST "$BASE_URL/AutoSave" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
@@ -80,7 +80,7 @@ req GET "$BASE_URL/GetHierarchy?DateCheck=datetime'2026-03-01T00:00:00'&Method='
 
 echo "[14] ReportExport sample"
 req POST "$BASE_URL/ReportExport" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
-  --data "{\"Mode\":\"KEYS\",\"RootKeys\":[\"${ROOT_KEY}\"]}" | head -c 350; echo
+  --data "{\"Entity\":\"screen\",\"SelectionMode\":\"selected\",\"RootKeys\":[\"${ROOT_KEY}\"],\"Limit\":200000}" | head -c 350; echo
 
 echo "[15] Attachment stream PUT/GET"
 ATT_KEY="${ROOT_KEY}::sample.txt"

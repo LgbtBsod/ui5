@@ -31,7 +31,7 @@ curl -sS "$BASE/LastChangeSet(RootKey='$ROOT')"
 echo
 
 echo "[8] lock acquire"
-curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockAcquire?RootId=$ROOT&SessionGuid=$SESS&Uname=DEMO"
+curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockAcquire?RootId=$ROOT&SessionGuid=$SESS"
 echo
 
 echo "[9] lock status"
@@ -39,11 +39,11 @@ curl -sS "$BASE/LockStatusSet(RootKey='$ROOT')?SessionGuid=$SESS"
 echo
 
 echo "[10] lock heartbeat"
-curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockHeartbeat?RootId=$ROOT&SessionGuid=$SESS&Uname=DEMO"
+curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockHeartbeat?RootId=$ROOT&SessionGuid=$SESS"
 echo
 
 echo "[11] lock release"
-curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockRelease?RootId=$ROOT&SessionGuid=$SESS&Uname=DEMO"
+curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockRelease?RootId=$ROOT&SessionGuid=$SESS"
 echo
 
 echo "[12] hierarchy"
@@ -51,7 +51,7 @@ curl -sS "$BASE/GetHierarchy?DateCheck=datetime'2025-01-01T00:00:00'&Method=loca
 echo
 
 echo "[13] report export"
-curl -sS -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' -d '{"RootKeys":["'$ROOT'"]}' "$BASE/ReportExport"
+curl -sS -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' -d '{"Entity":"screen","SelectionMode":"selected","RootKeys":["'$ROOT'"],"Limit":200000}' "$BASE/ReportExport"
 echo
 
 echo "[14] batch read"
