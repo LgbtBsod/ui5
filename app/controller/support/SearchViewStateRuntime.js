@@ -94,12 +94,31 @@ sap.ui.define([
         return true;
     }
 
+    function resolveVisibleCap(mStateData) {
+        var sValue;
+        var iParsed;
+
+        if (SearchMaxResults && typeof SearchMaxResults.resolveGrowingPageSize === "function") {
+            return SearchMaxResults.resolveGrowingPageSize(mStateData);
+        }
+        if (SearchMaxResults && typeof SearchMaxResults.resolveMaxResults === "function") {
+            return SearchMaxResults.resolveMaxResults(mStateData);
+        }
+
+        sValue = String((mStateData || {}).growingPageSize || (mStateData || {}).searchMaxResults || "").trim();
+        iParsed = Number(sValue);
+        if (!sValue || !isFinite(iParsed) || iParsed <= 0) {
+            return 0;
+        }
+        return Math.max(1, Math.min(9999, Math.floor(iParsed)));
+    }
+
     function syncSearchTableRequestWindow(oController) {
         var oSmartTable = oController.byId("searchSmartTable");
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
         var oStateModel = ControllerModelRuntime.state(oController);
         var oStateData = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
-        var iVisibleCap = SearchMaxResults.resolveGrowingPageSize(oStateData) || 100;
+        var iVisibleCap = resolveVisibleCap(oStateData) || 100;
         var iBackendTop = SearchMaxResults.resolveSearchFetchLimit(oStateData);
         var iThreshold = iVisibleCap;
         var bGrowing = true;

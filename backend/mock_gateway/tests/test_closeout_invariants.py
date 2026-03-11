@@ -101,6 +101,15 @@ def test_export_source_separates_selected_and_all_found_contracts():
     assert 'SearchMaxResults.resolveExportLimit(mState)' in source
 
 
+def test_search_request_window_supports_legacy_search_max_results_shape():
+    source = _read(APP_ROOT / "controller" / "support" / "SearchViewStateRuntime.js")
+    util_source = _read(APP_ROOT / "util" / "search" / "SearchMaxResults.js")
+
+    assert 'typeof SearchMaxResults.resolveGrowingPageSize === "function"' in source
+    assert 'typeof SearchMaxResults.resolveMaxResults === "function"' in source
+    assert 'resolveGrowingPageSize: resolveGrowingPageSize,' in util_source
+
+
 def test_report_export_respects_selected_and_all_found_contracts():
     with TestClient(app) as client:
         token = _csrf(client)
