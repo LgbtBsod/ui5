@@ -531,6 +531,16 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
   color: var(--text-main);
 }
 
+.chkApp .shellUserBtn .sapMBtnContent {
+  max-width: clamp(10ch, 18vw, 20ch);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--theme-shell-action-label-size);
+  font-weight: var(--theme-shell-action-label-weight);
+  letter-spacing: 0.01em;
+}
+
 /* Global pseudo-element backdrop reset carried from monolith hardening. */
 *::before,
 *::after {

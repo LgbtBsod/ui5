@@ -257,6 +257,7 @@ inputHint
 is-rippling
 isAttachmentDropActive
 isAttachmentDropPrimed
+isDark
 isViewportPinned
 kbdBadge
 kpiBarriers
@@ -297,11 +298,13 @@ rateBar
 readRow
 resultCountLabel
 resultSegmentControl
+searchActionBtn
 searchActionToolbarDensity
 searchAnalyticsActionBtn
 searchAnalyticsBreakdownGrid
 searchAnalyticsCard
 searchAnalyticsCardPrimary
+searchAnalyticsKpiGrid
 searchAnalyticsMeta
 searchAnalyticsRailGrid
 searchAnalyticsRailPulse
@@ -321,6 +324,7 @@ searchCustomBusySubtitle
 searchCustomBusyTitle
 searchExperienceStack
 searchExportMenuBtn
+searchFilterBarContent
 searchFilterCard
 searchFilterCardDense
 searchFilterExperienceCard
@@ -333,10 +337,13 @@ searchLoadErrorBanner
 searchLoadRetryRow
 searchLoadStateBanner
 searchModeToggleSwitch
+searchOpenActionBtn
 searchPaneCenterShell
+searchRateBar
 searchRateCell
 searchRateCellFull
 searchRateCellPartial
+searchRateFill
 searchRateLegend
 searchRateLegendItem
 searchRateLegendPrefix
@@ -354,6 +361,7 @@ searchSmartTableControl
 searchSmartToolbarRail
 searchStageStatusChip
 searchStageStoryCard
+searchStageTitle
 searchStatusStripStack
 searchStorySubtitle
 searchSummaryStatusChip
@@ -366,6 +374,8 @@ searchUpdatedAtText
 searchWorkbenchDock
 sectionDivider
 sectionTitle
+segBtnFailed
+segBtnSuccess
 shellActionBtn
 shellAnalyticsBtn
 shellBrandCluster
@@ -451,6 +461,12 @@ tableScrollWrap
 theme-motion-disabled
 theme-motion-enabled
 theme-switching
+themeDockSwitch
+themeDockSwitchIcon
+themeDockSwitchIconMoon
+themeDockSwitchIconSun
+themeDockSwitchThumb
+themeDockSwitchTrack
 toastError
 toastSuccess
 toastWarning

@@ -329,22 +329,18 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchAnalyticsBreakdownGrid,
 .chkApp .searchAnalyticsRailGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 0.9rem;
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+  contain: layout paint style;
 }
 
 .chkApp .searchAnalyticsRailShell {
   width: 100%;
   min-width: 0;
   margin-top: 0.25rem;
-}
-
-.chkApp .searchAnalyticsRailGrid {
-  width: 100%;
-  min-width: 0;
-  align-items: stretch;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  contain: layout paint style;
 }
 
 
@@ -429,16 +425,12 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchFilterCardDense .sapMSegBBtn .sapMSegBBtnInner,
 .chkApp .searchResultsTable .sapMBtn .sapMBtnInner {
   transition: transform 160ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  border-radius: 999px;
 }
 
 .chkApp .searchFilterCardDense .sapMSegBBtnSel .sapMSegBBtnInner,
 .chkApp .searchResultsTable .brandActionBtn.brandActionPrimary .sapMBtnInner {
   box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.18);
-}
-
-.chkApp .searchResultsTable .brandActionBtn .sapMBtnInner,
-.chkApp .searchResultsTable .sapMBtn .sapMBtnInner {
-  border-radius: 999px;
 }
 
 .chkApp .searchGoActionBtn.sapMBtnBusy .sapMBtnInner,
@@ -631,6 +623,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 }
 
 .chkApp .searchLoadStateBanner {
+  margin: 0;
   border-radius: calc(var(--radius-lg) - 0.22rem);
   border: 0;
   background: var(--theme-block-bg);
@@ -853,10 +846,6 @@ body.chkAppRoot.appDark .chkApp .searchFilterCardDense,
 body.chkAppRoot.appDark .chkApp .searchResultsTable {
   background: var(--theme-block-bg);
   border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
-}
-
-body.chkAppRoot.appDark .chkApp .searchFilterCardDense,
-body.chkAppRoot.appDark .chkApp .searchResultsTable {
   box-shadow: none;
 }
 
@@ -922,7 +911,6 @@ body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMLIBFocusable:focus .sap
 
 body.chkAppRoot.appDark .chkApp .workflowEyebrow,
 body.chkAppRoot.appDark .chkApp .kpiLabel,
-body.chkAppRoot.appDark .chkApp .searchAnalyticsMeta,
 body.chkAppRoot.appDark .chkApp .searchUpdatedAtText,
 body.chkAppRoot.appDark .chkApp .searchRateLegendPrefix,
 body.chkAppRoot.appDark .chkApp .searchRateLegendItem .sapMText,
@@ -1295,22 +1283,6 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 
 
 
-.chkApp .searchResultsTable .sapUiCompSmartTable,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .searchResultsTable .sapUiCompSmartTableTable {
-  background: transparent;
-}
-
-.chkApp .searchResultsTable .sapUiCompSmartTable,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  flex: 1 1 100%;
-  align-self: stretch;
-  box-sizing: border-box;
-}
-
 .chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
 .chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
 .chkApp .searchResultsTable .toolbarTransparent {
@@ -1361,10 +1333,6 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   line-height: var(--theme-table-body-line-height);
 }
 
-.chkApp .searchResultsTable .sapUiCompSmartTable {
-  border-radius: calc(var(--radius-lg) - 0.14rem);
-}
-
 .chkApp .searchResultsTable .sapUiCompSmartTable,
 .chkApp .searchResultsTable .sapUiCompSmartTableToolbar,
 .chkApp .searchResultsTable .sapUiCompSmartTableTable,
@@ -1374,14 +1342,25 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 .chkApp .searchResultsTable .sapMFlexItem,
 .chkApp .searchResultsTable > .sapMFlexItem,
 .chkApp .searchToolbarMetaRail {
+  background: transparent;
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
+.chkApp .searchResultsTable .sapUiCompSmartTable,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  flex: 1 1 100%;
+  align-self: stretch;
+  box-sizing: border-box;
+}
+
+.chkApp .searchResultsTable .sapUiCompSmartTable {
+  border-radius: calc(var(--radius-lg) - 0.14rem);
+}
+
 .chkApp .searchResultsTable .sapUiCompSmartTableTable,
-.chkApp .searchResultsTable .sapUiCompSmartTableInnerTable,
-.chkApp .searchResultsTable .sapMListTblCnt {
+.chkApp .searchResultsTable .sapUiCompSmartTableInnerTable {
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
@@ -1484,6 +1463,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMBarChild,
 .chkApp .searchToolbarMetaRail .sapMFlexItem {
   min-width: 0;
+  flex: 0 1 auto;
 }
 
 .chkApp .searchResultsActionRail .sapMOTBOverflowButton,
@@ -1503,12 +1483,8 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 .chkApp .searchResultsActionRail .sapMBtn,
 .chkApp .searchSmartToolbarRail .sapMBtn,
 .chkApp .searchSmartToolbarRail .sapMMenuBtn {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-.chkApp .searchSmartToolbarRail .sapMMenuBtn {
   flex: 0 0 auto;
+  min-width: 0;
   margin-inline-start: 0.48rem;
 }
 
@@ -1516,9 +1492,6 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 .chkApp .searchSmartToolbarRail .sapMMenuBtn .sapMMenuBtnRegular,
 .chkApp .searchSmartToolbarRail .sapMMenuBtn .sapMMenuBtnSplit {
   min-width: 8.35rem;
-}
-
-.chkApp .searchSmartToolbarRail .sapMMenuBtn .sapMBtnInner {
   padding-inline: 0.78rem;
 }
 
@@ -1528,6 +1501,8 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 
 .chkApp .searchSmartToolbarRail .searchExportMenuBtn {
   margin-inline-start: 0.48rem;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMBtnInner,
@@ -1544,20 +1519,8 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   flex: 0 0 5rem;
 }
 
-.chkApp .searchSmartToolbarRail .searchExportMenuBtn,
-.chkApp .searchSmartToolbarRail .searchExportMenuBtn.sapMMenuBtn {
-  flex: 0 0 auto;
-  min-width: 0;
-}
-
 .chkApp .searchSmartToolbarRail .searchExportMenuBtn .sapMBtnContent {
   max-width: none;
-}
-
-.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBarChild,
-.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMBarChild {
-  flex: 0 1 auto;
-  min-width: 0;
 }
 
 .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn,
@@ -1708,7 +1671,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
 .chkApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail {
   padding-inline: 0.24rem;
 }
@@ -1734,6 +1696,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .appLayoutSplit #searchPaneHost .searchSelectionPrimaryId,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSelectionPrimaryId {
   flex: 1 1 12rem;
+  min-width: 0;
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell,
@@ -1769,6 +1732,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail {
+  padding-inline: 0.24rem;
   position: sticky;
   top: var(--search-sticky-action-top, calc(var(--app-shell-offset) + 9rem));
   z-index: 21;
@@ -1919,11 +1883,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     min-width: 7.25rem;
   }
 
-  .chkApp .searchFilterExperienceShell .sapUiCompFilterBarItem,
-  .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapUiCompFilterBarItem {
-    min-width: clamp(8.4rem, 19vw, 9.8rem);
-  }
-
   .chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
   .chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner,
   .chkApp .searchSmartToolbarRail .sapMMenuBtn .sapMBtnInner {
@@ -1974,7 +1933,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     padding: 0.75rem;
   }
 
-  .chkApp .searchResultsActionRail,
   .chkApp .searchSmartToolbarRail {
     position: static;
     top: auto;
@@ -1983,6 +1941,10 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   }
 
   .chkApp .searchResultsActionRail {
+    position: static;
+    top: auto;
+    z-index: auto;
+    padding-inline: 0.2rem;
     row-gap: 0.24rem;
     column-gap: 0.22rem;
   }
@@ -2013,22 +1975,17 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     display: none;
   }
 
-  .chkApp .searchFilterExperienceShell .sapUiCompVarMngmt,
-  .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn,
-  .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMBtn {
-    flex: 0 1 auto;
-    max-width: 100%;
-  }
-
   .chkApp .searchFilterExperienceShell .sapUiCompVarMngmt {
     flex: 1 1 100%;
     min-width: 0;
+    max-width: 100%;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn,
   .chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMBtn {
-    margin-top: 0;
-    margin-bottom: 0;
+    flex: 0 1 auto;
   }
 
   .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn:last-child,
@@ -2040,7 +1997,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   .chkApp .searchSmartToolbarRail .sapMBtn,
   .chkApp .searchSmartToolbarRail .sapMMenuBtn,
   .chkApp .searchResultsActionRail .sapMOTBOverflowButton,
-  .chkApp .searchSelectionStatusChip,
   .chkApp .searchSelectionPrimaryId {
     flex: 0 1 auto;
     min-width: 0;
@@ -2072,7 +2028,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     table-layout: auto;
   }
 
-  .chkApp .searchResultsTable .sapMListTblHeaderCell,
   .chkApp .searchResultsTable .sapMListTblCell {
     min-width: 0;
   }
@@ -2086,16 +2041,13 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     white-space: normal;
   }
 
-  .chkApp .searchSelectionStatusChip {
-    margin-inline: 0;
-  }
-
   .chkApp .searchResultsTable .sapMListTblSubCntRow {
     grid-template-columns: 1fr;
     gap: 0.12rem;
   }
 
   .chkApp .searchResultsTable .sapMListTblHeaderCell {
+    min-width: 0;
     position: static;
     top: auto;
   }
@@ -2268,6 +2220,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     position: static;
     margin-top: 0.36rem;
     padding-bottom: 0.3rem;
+    top: auto;
   }
 
   .chkApp .searchSmartToolbarRail .backendTopInput,
@@ -2683,7 +2636,8 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
     min-width: 14.3rem;
     padding: 0.1rem;
     border-radius: 999px;
-    background: transparent;
+    background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
+    border-color: color-mix(in srgb, var(--theme-workbench-control-border) 74%, transparent);
   }
 
   .chkApp .searchFilterExperienceShell .resultSegmentControl.sapMSegB .sapMSegBBtn,
@@ -2718,8 +2672,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   .chkApp .searchSmartToolbarRail .maxRowsInput .sapMInputBaseContentWrapper,
   .chkApp .searchSmartToolbarRail .sapMSlt,
   .chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-  .chkApp .searchFilterCardDense .sapMSlt,
-  .chkApp .searchFilterCardDense .sapMSegB {
+  .chkApp .searchFilterCardDense .sapMSlt {
     background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
     border-color: color-mix(in srgb, var(--theme-workbench-control-border) 74%, transparent);
   }
@@ -2887,8 +2840,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   column-gap: 0.3rem;
   overflow: visible;
   align-items: center;
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% - 0.24rem);
+  max-width: calc(100% - 0.24rem);
+  margin-inline: 0.12rem;
   box-sizing: border-box;
   overflow-x: clip;
 }
@@ -2949,16 +2903,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   box-sizing: border-box;
 }
 
-.chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
-.chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB {
-  width: calc(100% - 0.24rem);
-  max-width: calc(100% - 0.24rem);
-  margin-inline: 0.12rem;
-  box-sizing: border-box;
-}
-
 .chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBarRight,
 .chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB .sapMBarRight,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBarRight,
@@ -2998,13 +2942,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCnt {
   max-width: 100%;
   overflow-x: auto;
-}
-
-@media (max-width: 64rem) {
-  .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
-    position: static;
-    top: auto;
-  }
 }
 
 /* Normalize the search segmented filters without changing toolbar geometry. */
@@ -3143,3 +3080,313 @@ width: 100%;
   margin-inline: 0;
 }
 
+
+/* 2026-03 claude parity: search switches + smart filter toolbar/vbox layout. */
+.chkApp .searchModeToggleSwitch.sapMSwt {
+  border-radius: 999px;
+  height: 1.65rem;
+  min-width: 2.8rem;
+  border: 1.5px solid;
+}
+
+body.chkAppRoot.appLight .chkApp .searchModeToggleSwitch {
+  background: rgba(240, 248, 255, 0.9);
+  border-color: rgba(140, 185, 235, 0.52);
+}
+
+body.chkAppRoot.appDark .chkApp .searchModeToggleSwitch {
+  background: rgba(14, 24, 48, 0.88);
+  border-color: rgba(48, 82, 148, 0.44);
+}
+
+.chkApp .searchModeToggleSwitch.sapMSwtOn {
+  background: var(--hz-accent, #0070f2);
+  border-color: var(--hz-accent, #0070f2);
+  box-shadow: 0 0 0 3px rgba(0, 112, 242, 0.16);
+}
+
+body.chkAppRoot.appDark .chkApp .searchModeToggleSwitch.sapMSwtOn {
+  background: var(--hz-accent, #4db1ff);
+  border-color: var(--hz-accent, #4db1ff);
+  box-shadow: 0 0 0 3px rgba(77, 177, 255, 0.18);
+}
+
+.chkApp .searchModeToggleSwitch .sapMSwtHandle {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 20, 0.2);
+  transition: left 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chkApp .searchActionToolbarDensity .sapMSwt,
+.chkApp .searchResultsTable .sapMSwt {
+  min-height: 2rem;
+}
+
+.chkApp .searchFilterCardDense,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar,
+.chkApp .searchFilterCardDense .sapUiCompFilterBar,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar.sapMTBNewFlex,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB.sapMTBNewFlex {
+  overflow: visible;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTB {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 0.45rem;
+  column-gap: 0.4rem;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar > .sapMFlexItem,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMFlexItem,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMBtn,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMSlt,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMInputBase,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapUiCompVarMngmt,
+.chkApp .searchFilterCardDense .customFilterWrapper {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMTBSpacer,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTBSpacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMTBRightAligned,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMTBRightAligned,
+.chkApp .searchFilterCardDense .sapUiCompFilterBarToolbar .sapMBarRight,
+.chkApp .searchFilterCardDense .sapUiCompSmartFilterBar .sapMBarRight {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 0.32rem;
+  column-gap: 0.32rem;
+}
+
+.chkApp .searchWorkbenchDock,
+.chkApp .searchWorkbenchDock > .searchFilterCardDense,
+.chkApp .searchWorkbenchDock > .searchResultsTable,
+.chkApp #searchResultsShell,
+.chkApp [id$="-searchResultsShell"],
+.chkApp #searchResultsShell > .sapMFlexItem,
+.chkApp [id$="-searchResultsShell"] > .sapMFlexItem,
+.chkApp #searchResultsShell > .sapMFlexItem > .sapMVBox,
+.chkApp [id$="-searchResultsShell"] > .sapMFlexItem > .sapMVBox {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: 0;
+}
+
+/* 2026-03 claude parity: variant management + smart filter utility buttons. */
+.chkApp .sapUiCompVarMngmt {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+
+.chkApp .sapUiCompVarMngmt .sapMBtn .sapMBtnInner {
+  border-radius: 999px !important;
+  min-height: 1.8rem !important;
+  padding: 0 0.65rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 650 !important;
+  border-style: dashed !important;
+  border-width: 1.5px !important;
+  background: transparent !important;
+  transition: background 130ms ease, border-color 130ms ease, color 130ms ease !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sapUiCompVarMngmt .sapMBtn .sapMBtnInner {
+  border-color: rgba(118, 162, 218, 0.5) !important;
+  color: rgba(48, 78, 130, 0.85) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapUiCompVarMngmt .sapMBtn .sapMBtnInner {
+  border-color: rgba(77, 177, 255, 0.3) !important;
+  color: rgba(140, 200, 255, 0.8) !important;
+}
+
+.chkApp .sapUiCompVarMngmt .sapMBtn:hover .sapMBtnInner {
+  border-style: solid !important;
+  border-color: var(--hz-accent, var(--accent)) !important;
+  color: var(--hz-accent, var(--accent)) !important;
+  background: rgba(var(--hz-accent-rgb, 0, 112, 242), 0.06) !important;
+}
+
+.chkApp .sapUiCompVarMngmt .sapMBtn.sapMBtnActive .sapMBtnInner,
+.chkApp .sapUiCompVarMngmt .sapMBtn[aria-pressed="true"] .sapMBtnInner {
+  border-style: solid !important;
+  border-color: var(--hz-accent, var(--accent)) !important;
+  background: rgba(var(--hz-accent-rgb, 0, 112, 242), 0.1) !important;
+  color: var(--hz-accent, var(--accent)) !important;
+  font-weight: 720 !important;
+}
+
+.chkApp .sapUiCompFilterBarShowAllFiltersBtn .sapMBtnInner,
+.chkApp .sapUiCompFilterBarHideAllFiltersBtn .sapMBtnInner {
+  font-size: var(--t-xs) !important;
+  padding: 0 0.6rem !important;
+  min-height: 1.7rem !important;
+  opacity: 0.8 !important;
+  border-style: dashed !important;
+}
+
+/* 2026-03 parity pass: smart_filter residual non-1:1 selectors from claude-hyper.css. */
+.chkApp .searchFilterCardDense.sapMVBox {
+  background: revert !important;
+}
+
+.chkApp .searchFilterCardDense input {
+  color: var(--ui-rebuild-block-text, var(--text-main));
+  -webkit-text-fill-color: var(--ui-rebuild-block-text, var(--text-main));
+}
+
+.chkApp .searchFilterCardDense .sapUiCompFilterBarItem {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
+}
+
+.chkApp .searchSmartToolbarRail .sapMTBSeparator {
+  width: 1px;
+  margin-inline: 0.25rem;
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 0;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+body.chkAppRoot.appLight.appInvertedBlockScheme .chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner {
+  color: #eef4ff;
+}
+
+body.chkAppRoot.appDark.appInvertedBlockScheme .chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner {
+  color: #22344c;
+}
+
+/* 2026-03 parity transfer: remaining smart_filter selectors from claude-hyper.css */
+.chkApp .searchFilterCardDense .resultSegmentControl {
+  width: 100%; min-width: 0; background: transparent; border: 0; box-shadow: none;
+}
+
+.chkApp .searchFilterCardDense .resultSegmentControl.sapMSegB {
+  width: 100%; min-width: 0; background: transparent; border: 0; box-shadow: none;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtnInner {
+  min-width: 0; padding-inline: 0.58rem; background: transparent; box-shadow: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn.sapMSegBBtnSel .sapMSegBBtnInner {
+  background: color-mix(in srgb, rgba(var(--accent-rgb), 0.14) 82%, transparent); border-color: color-mix(in srgb, rgba(var(--accent-rgb), 0.24) 82%, transparent);
+}
+
+.chkApp .searchSmartToolbarRail::-webkit-scrollbar {
+  display: none !important;
+}
+
+.chkApp .searchFilterCardDense .sapMVarMngmt {
+  border-radius: 999px !important; border: 1px solid !important; padding: 0 0.65rem !important; min-height: 2rem !important; font-size: 0.82rem !important; font-weight: 660 !important;
+}
+
+.chkApp .searchFilterCardDense .sapUiCompVariantMgmt {
+  border-radius: 999px !important; border: 1px solid !important; padding: 0 0.65rem !important; min-height: 2rem !important; font-size: 0.82rem !important; font-weight: 660 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense .sapMVarMngmt {
+  background: rgba(240, 248, 255, 0.88) !important; border-color: rgba(140, 185, 235, 0.50) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMVarMngmt {
+  background: rgba(16, 28, 54, 0.85) !important; border-color: rgba(50, 85, 150, 0.40) !important;
+}
+
+.chkApp .searchFilterCardDense .sapMBtnEmphasized .sapMBtnInner {
+  border-radius: 999px !important; min-height: 2.1rem !important; padding: 0 1.1rem !important; background: var(--hz-accent, #0070F2) !important; border-color: var(--hz-accent, #0070F2) !important; color: #fff !important; font-weight: 700 !important; box-shadow: 0 2px 8px rgba(var(--hz-accent-rgb, 0,112,242), 0.28) !important;
+}
+
+.chkApp .searchFilterCardDense .sapMBtnTransparent .sapMBtnInner {
+  border-radius: 999px !important; border: 1px solid rgba(160, 200, 240, 0.40) !important; background: transparent !important; font-size: 0.78rem !important; min-height: 2rem !important;
+}
+
+.chkApp .searchFilterCardDense .sapMInputBase:focus-within .sapMInputBaseContentWrapper {
+  border-color: var(--hz-accent,#0070F2) !important; box-shadow: 0 0 0 2px rgba(0,112,242,0.14) !important;
+}
+
+.chkApp .searchFilterCardDense .sapMSlt .sapMSltLabel {
+  border-radius: 0.5rem !important; border: 1px solid !important; min-height: 2rem !important; padding: 0 0.65rem !important; font-size: 0.82rem !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchFilterCardDense .sapMSlt .sapMSltLabel {
+  background: rgba(248,252,255,0.90) !important; border-color: rgba(160,200,240,0.48) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMSlt .sapMSltLabel {
+  background: rgba(14,24,48,0.88) !important; border-color: rgba(48,82,148,0.40) !important;
+}
+
+/* 2026-03 recovery pass: missing search classes from restored style.css */
+.chkApp .searchActionBtn .sapMBtnInner,
+.chkApp .searchOpenActionBtn .sapMBtnInner {
+  border-radius: 999px !important;
+}
+
+body.chkAppRoot.appLight .chkApp .searchOpenActionBtn .sapMBtnInner {
+  border-color: rgba(140, 185, 235, 0.5) !important;
+  color: rgba(48, 88, 155, 0.82) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
+  border-color: rgba(48, 82, 148, 0.42) !important;
+  color: rgba(130, 185, 245, 0.82) !important;
+}
+
+.chkApp .searchAnalyticsKpiGrid {
+  gap: 0.75rem !important;
+}
+
+.chkApp .searchFilterBarContent {
+  gap: 0.5rem !important;
+  padding: 0.75rem 0 !important;
+}
+
+.chkApp .searchRateBar {
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  height: 6px !important;
+}
+
+.chkApp .searchRateFill {
+  border-radius: 999px !important;
+  height: 100% !important;
+  transition: width 600ms cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+}
+
+.chkApp .searchStageTitle {
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-tight);
+  color: var(--text-main);
+}
+
+.chkApp .sapMSegBBtn.segBtnFailed.sapMSegBBtnSel .sapMSegBBtnInner {
+  background: var(--hz-danger, #CC0000) !important;
+}
+
+.chkApp .sapMSegBBtn.segBtnSuccess.sapMSegBBtnSel .sapMSegBBtnInner {
+  background: var(--hz-success, #1A7C40) !important;
+}

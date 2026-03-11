@@ -234,22 +234,22 @@ body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
 .chkApp .shellSettingsSwitch .sapMSwtLabel,
 .chkApp .detailResultSwitch .sapMSwtText,
 .chkApp .detailResultSwitch .sapMSwtLabel {
-  display: none;
+  display: none !important;
 }
 
 .chkApp .shellThemeSwitch .sapMSwtInner,
 .chkApp .searchModeToggleSwitch .sapMSwtInner,
 .chkApp .shellSettingsSwitch .sapMSwtInner,
 .chkApp .detailResultSwitch .sapMSwtInner {
-  padding-inline: 0;
+  padding-inline: 0 !important;
 }
 
 .chkApp .shellThemeSwitch.sapMSwtCont,
 .chkApp .shellSettingsSwitch.sapMSwtCont,
 .chkApp .detailResultSwitch.sapMSwtCont {
-  min-height: 2rem;
-  display: inline-flex;
-  align-items: center;
+  min-height: 2rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
 .chkApp .detailResultSwitch.sapMSwtCont {
@@ -974,4 +974,278 @@ body.chkAppRoot.appLight .chkApp .toolbarDivider {
 
 body.chkAppRoot.appDark .chkApp .toolbarDivider {
   background: rgba(77, 177, 255, 0.18) !important;
+}
+
+/* 2026-03 recovery pass: missing theme dock switch classes from restored style.css */
+body.chkAppRoot .chkApp .themeDockSwitch {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 2.15rem;
+  padding: 0.18rem;
+  border-radius: 999px;
+  border: 0;
+  background: var(--theme-toggle-shell-bg);
+  box-shadow: none;
+  backdrop-filter: blur(18px) saturate(136%);
+  -webkit-backdrop-filter: blur(18px) saturate(136%);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 180ms ease, box-shadow 220ms ease, background 220ms ease, border-color 220ms ease;
+}
+
+.chkApp .themeDockSwitch:focus-visible {
+  box-shadow: var(--focus-ring), var(--shadow-soft);
+}
+
+body.chkAppRoot .chkApp .shellThemeToggle .themeDockSwitchTrack {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--theme-toggle-track-bg);
+  box-shadow: none;
+  transition: background 220ms ease, box-shadow 220ms ease;
+}
+
+.chkApp .themeDockSwitchTrack::before {
+  content: "";
+  position: absolute;
+  inset: -20% -8%;
+  background: var(--theme-toggle-track-glow);
+  opacity: 0.88;
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+body.chkAppRoot .chkApp .shellThemeToggle .themeDockSwitchThumb {
+  position: absolute;
+  top: 50%;
+  left: 0.16rem;
+  width: 1.52rem;
+  height: 1.52rem;
+  border-radius: 50%;
+  background: var(--theme-toggle-thumb-bg);
+  box-shadow: none;
+  transition: transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1), background 220ms ease;
+  transform: translateY(-50%);
+}
+
+.chkApp .themeDockSwitchIcon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--theme-toggle-icon-color);
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.18);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.chkApp .themeDockSwitchIconSun { left: 0.5rem; }
+
+.chkApp .themeDockSwitchIconMoon {
+  right: 0.46rem;
+  opacity: 0.5;
+}
+
+.chkApp .themeDockSwitchIconSun::before {
+  content: "";
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentcolor;
+  box-shadow:
+    0 -0.35rem 0 0.1rem currentcolor,
+    0 0.35rem 0 0.1rem currentcolor,
+    -0.35rem 0 0 0.1rem currentcolor,
+    0.35rem 0 0 0.1rem currentcolor,
+    -0.25rem -0.25rem 0 0.1rem currentcolor,
+    0.25rem -0.25rem 0 0.1rem currentcolor,
+    -0.25rem 0.25rem 0 0.1rem currentcolor,
+    0.25rem 0.25rem 0 0.1rem currentcolor;
+  opacity: 0.72;
+  transform: scale(0.55);
+  transform-origin: center;
+}
+
+.chkApp .themeDockSwitchIconMoon::before {
+  content: "";
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset -0.15rem -0.05rem 0 0 currentcolor;
+  opacity: 0.72;
+  transform: rotate(-30deg);
+}
+
+.chkApp .themeDockSwitch.isDark .themeDockSwitchTrack {
+  background: var(--theme-toggle-track-bg);
+}
+
+body.chkAppRoot .chkApp .shellThemeToggle .themeDockSwitch.isDark .themeDockSwitchThumb {
+  transform: translate3d(1.78rem, -50%, 0);
+  background: var(--theme-toggle-thumb-bg);
+}
+
+.chkApp .themeDockSwitch.isDark .themeDockSwitchTrack::before {
+  opacity: 0.72;
+  transform: scale(1.02);
+}
+
+.chkApp .themeDockSwitch:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.chkApp .themeDockSwitch:hover .themeDockSwitchThumb {
+  box-shadow: 0 8px 18px rgba(10, 23, 43, 0.24);
+}
+
+.chkApp .themeDockSwitch.isDark .themeDockSwitchIconSun {
+  opacity: 0.45;
+}
+
+.chkApp .themeDockSwitch.isDark .themeDockSwitchIconMoon {
+  opacity: 1;
+}
+
+/* 2026-03 parity pass: switches residual non-1:1 selectors from claude-hyper.css. */
+body.chkAppRoot.appLight .chkApp .sapMSwt:not(.sapMSwtOn) {
+  background: var(--hz-sw-off-bg, rgba(218, 230, 248, 0.82)) !important;
+  border-color: var(--hz-sw-off-border, rgba(120, 162, 216, 0.52)) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMSwt:not(.sapMSwtOn) {
+  background: var(--hz-sw-off-bg, rgba(16, 28, 50, 0.88)) !important;
+  border-color: var(--hz-sw-off-border, rgba(77, 177, 255, 0.18)) !important;
+}
+
+.chkApp .sapMSwt.sapMSwtOn {
+  background: var(--hz-sw-on-bg, var(--hz-accent)) !important;
+  border-color: rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.44) !important;
+  box-shadow: 0 2px 8px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.26) !important;
+}
+
+.chkApp .sapMSwtHandle,
+.chkApp .sapMSwt .sapMSwtHandle {
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, #fff 0%, rgba(238, 246, 255, 0.95) 100%) !important;
+  box-shadow:
+    0 1px 4px rgba(4, 12, 26, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+}
+
+.chkApp .sapMSwt.sapMSwtOn .sapMSwtHandle {
+  box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.24) !important;
+}
+
+.chkApp .sapMSwt:not(.sapMSwtDisabled):hover {
+  box-shadow: 0 0 0 3px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.13) !important;
+}
+
+.chkApp .sapMSwtText {
+  font-size: 0.64rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+}
+
+body.chkAppRoot.appLight .chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtText {
+  color: rgba(80, 110, 158, 0.6) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtText {
+  color: rgba(var(--hz-accent-rgb, 77, 177, 255), 0.4) !important;
+}
+
+.chkApp .sapMSwt.sapMSwtOn .sapMSwtText {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* 2026-03 parity transfer: remaining switches selectors from claude-hyper.css */
+html.chkAppRoot.theme-switching .chkApp .searchFilterCardDense {
+  transition: none !important; animation: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
+
+.chkApp .detailSectionToolbar .sapMSwt {
+  min-height: 2rem;
+}
+
+.chkApp .sapMSwt:not(.sapMSwtOn) {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--theme-workbench-control-bg) 100%, transparent), color-mix(in srgb, var(--surface-3) 80%, transparent)) !important; border-color: var(--border-soft) !important; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.chkApp .sapMSwt.sapMSwtOn .sapMSwtLabelOn {
+  color: rgba(255, 255, 255, 0.94) !important;
+}
+
+.chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff {
+  color: var(--text-muted) !important;
+}
+
+.chkApp .sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover {
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.38), 0 0 0 3px rgba(var(--accent-rgb), 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .sapMSwtHandle {
+  background: linear-gradient(180deg, rgba(200, 218, 242, 0.98), rgba(168, 196, 230, 0.9)) !important;
+}
+
+.chkApp .sapMSwtDisabled {
+  cursor: not-allowed !important; pointer-events: none !important;
+}
+
+.chkApp .detailGridTable .sapMSwtOn {
+  background: var(--hz-accent,#0070F2) !important; border-color: var(--hz-accent,#0070F2) !important;
+}
+
+.chkApp .detailGridTable .sapMSwt {
+  border-radius: 999px !important; height: 1.5rem !important; min-width: 2.5rem !important; border: 1.5px solid !important;
+}
+
+body.chkAppRoot.appLight .chkApp .flatEditorTable .sapMSwt {
+  background: rgba(232,244,255,0.90) !important; border-color: rgba(136,178,232,0.48) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwt {
+  background: rgba(11,20,46,0.88) !important; border-color: rgba(46,86,158,0.42) !important;
+}
+
+body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwtOn {
+  background: var(--hz-accent,#4DB1FF) !important; border-color: var(--hz-accent,#4DB1FF) !important;
+}
+
+.chkApp .flatEditorTable .sapMSwtHandle {
+  width: 1.05rem !important; height: 1.05rem !important; background: #fff !important; border-radius: 50% !important; box-shadow: 0 1px 3px rgba(0,0,20,0.16) !important; transition: left 100ms cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+.chkApp .flatEditorTable .sapMSwt {
+  border: none !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.10) !important;
+}
+
+.chkApp .flatEditorTable .sapMSwtOn {
+  box-shadow: 0 1px 4px rgba(0,112,242,0.28) !important;
+}
+
+@media (max-width: 560px) {
+  .chkApp .detailControlRowTop .sapMSwt {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .chkApp .detailControlRowActions .sapMSwt {
+    flex: 0 1 auto; min-width: 0;
+  }
 }
