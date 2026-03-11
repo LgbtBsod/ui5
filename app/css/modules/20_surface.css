@@ -408,6 +408,24 @@ html.chkAppRoot.theme-switching .chkApp .shellSettingRow {
   -webkit-backdrop-filter: none;
 }
 
+/* 2026-03 shell final alignment pass:
+   keep header width equal to search content width and remove context chip line. */
+.chkApp .appLayoutSingle .appShellHeader {
+  width: min(calc(100% - 1rem - (2 * var(--app-content-inline-pad))), 110rem) !important;
+  max-width: calc(110rem - (2 * var(--app-content-inline-pad))) !important;
+}
+
+.chkApp .appShellHeader .shellContextSubtitle {
+  display: none !important;
+}
+
+@media (max-width: 61.25rem) {
+  .chkApp .appLayoutSingle .appShellHeader {
+    width: calc(100% - 1.5rem) !important;
+    max-width: calc(100% - 1.5rem) !important;
+  }
+}
+
 /* Migrated from claude-hyper.css */
 .chkApp .appFeedbackBanner {
   border-radius: 0.65rem !important;

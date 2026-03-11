@@ -1266,6 +1266,24 @@ body.chkAppRoot .shellPopover .shellNotificationItem .sapMFlexItem {
   font-size: 0.95rem; opacity: 0.9;
 }
 
+.chkApp .shellUserBtn,
+.chkApp .shellUserBtn .sapMBtnInner,
+.chkApp .shellUserBtn .sapMBtnContent {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.chkApp .shellUserBtn .sapMBtnInner {
+  overflow: hidden !important;
+}
+
+.chkApp .shellUserBtn .sapMBtnContent {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
 .chkApp .shellPopover .shellUserCard {
   border-radius: var(--u-r-card-in) !important;
 }
@@ -1492,6 +1510,16 @@ body.chkAppRoot .shellPopover .sapMLabel {
   max-width: 100% !important;
   min-width: 0 !important;
   overflow-wrap: anywhere !important;
+}
+
+body.chkAppRoot .shellPopover .shellUserContextChips,
+body.chkAppRoot .shellPopover .shellItemHeader,
+body.chkAppRoot .shellPopover .sapMFlexItem,
+body.chkAppRoot .shellPopover .sapMVBox,
+body.chkAppRoot .shellPopover .sapMHBox {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 @media (max-width: 40rem) {
