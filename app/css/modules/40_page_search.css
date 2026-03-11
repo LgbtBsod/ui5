@@ -1,10 +1,3 @@
-.chkApp .searchWorkbenchDock,
-.chkApp .searchResultsExperienceShell,
-.chkApp .searchStatusStripStack,
-.chkApp .searchFilterExperienceShell {
-  overflow: visible;
-}
-
 .chkApp .searchFilterCardDense::after,
 .chkApp .searchResultsTable::after {
   display: none;
@@ -266,7 +259,6 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   margin-top: 0.25rem;
 }
 
-.chkApp .workflowStageCard,
 .chkApp .kpiCard {
   border-radius: calc(var(--radius-lg) - 0.1rem);
 }
@@ -274,6 +266,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .workflowStageCard {
   min-width: 0;
   padding: 1rem 1.25rem;
+  border-radius: calc(var(--radius-lg) - 0.1rem);
   background:
     radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.14), transparent 42%),
     linear-gradient(150deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02) 42%),
@@ -313,8 +306,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   font-size: 0.7rem;
 }
 
-.chkApp .searchStorySubtitle,
-.chkApp .searchAnalyticsMeta {
+.chkApp .searchStorySubtitle {
   color: var(--text-subtle);
 }
 
@@ -401,11 +393,8 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 
 
 
-.chkApp .searchFilterCardDense .sapMLabel,
 .chkApp .searchFilterCardDense .sapMTitle,
-.chkApp .searchFilterCardDense .sapUiCompFilterBarItemLabel,
-.chkApp .searchResultsTable .sapMTitle,
-.chkApp .searchToolbarMetaRail .sapMText {
+.chkApp .searchResultsTable .sapMTitle {
   color: var(--text-main);
 }
 
@@ -465,12 +454,6 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
-.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
-.chkApp .searchActionToolbarDensity .sapMSwt,
-.chkApp .searchActionToolbarDensity .sapMInputBaseContentWrapper {
-  box-shadow: var(--theme-workbench-control-shadow);
-}
-
 .chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(18, 36, 64, 0.14);
@@ -500,9 +483,6 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 
 
 .chkApp .searchResultsTable .sapMColumnHeader,
-.chkApp .searchResultsTable .sapMListTblCell .sapMText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
 .chkApp .searchResultsTable .sapMListTblCell .sapMObjStatusText {
   overflow-wrap: anywhere;
 }
@@ -606,6 +586,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 
 .chkApp .searchStatusStripStack {
   gap: 0.45rem;
+  overflow: visible;
 }
 
 .chkApp .searchFilterHintBanner {
@@ -1261,6 +1242,7 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
   gap: 0.42rem;
+  overflow: visible;
 }
 
 
@@ -2332,7 +2314,6 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 }
 
 /* 2026-03 search simplification + split sticky up */
-.chkApp .kpiCard,
 .chkApp .analyticsChartCard {
   border: 1px solid color-mix(in srgb, var(--border-soft) 20%, transparent);
   background: color-mix(in srgb, var(--surface-1) 18%, transparent);
@@ -2342,55 +2323,16 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
 
 
-.chkApp .searchActionToolbarDensity {
-  padding: 0.18rem 0.24rem;
-  border: 1px solid color-mix(in srgb, var(--border-soft) 14%, transparent);
-  background: color-mix(in srgb, var(--theme-rail-bg) 20%, transparent);
-}
-
 .chkApp .searchFilterCardDense .sapMLabel,
 .chkApp .searchFilterCardDense .sapUiCompFilterBarItemLabel {
   font-size: 0.74rem;
 }
 
-.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-.chkApp .searchFilterCardDense .sapMSlt,
-.chkApp .searchFilterCardDense .sapMSegB,
-.chkApp .searchResultsTable .sapMInputBaseContentWrapper,
-.chkApp .searchResultsTable .sapMSlt,
-.chkApp .searchResultsTable .sapMSwt {
-  background: color-mix(in srgb, var(--surface-2) 38%, transparent);
-  border-color: color-mix(in srgb, var(--border-soft) 16%, transparent);
-  box-shadow: none;
-}
-
-.chkApp .searchActionToolbarDensity {
-  row-gap: 0.32rem;
-  column-gap: 0.28rem;
-  min-height: 2.52rem;
-  padding: 0.2rem 0.24rem 0.24rem;
-  background: color-mix(in srgb, var(--theme-rail-bg) 26%, transparent);
-}
-
 .chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
 .chkApp .searchActionToolbarDensity .sapMSwt,
 .chkApp .searchActionToolbarDensity .sapMInputBaseContentWrapper,
-.chkApp .searchToolbarNavBtnUp .sapMBtnInner,
-.chkApp .searchSelectionStatusChip,
-.chkApp .searchSummaryStatusChip,
-.chkApp .searchStageStatusChip {
+.chkApp .searchToolbarNavBtnUp .sapMBtnInner {
   box-shadow: none;
-}
-
-.chkApp .searchSelectionStatusChip {
-  border: 1px solid color-mix(in srgb, var(--border-soft) 16%, transparent);
-  background: color-mix(in srgb, var(--theme-workbench-rail-bg) 20%, transparent);
-}
-
-.chkApp .searchSummaryStatusChip,
-.chkApp .searchStageStatusChip {
-  border: 1px solid color-mix(in srgb, var(--theme-chip-border) 54%, transparent);
-  background: color-mix(in srgb, var(--theme-chip-bg) 76%, transparent);
 }
 
 /* smart filter stabilization after visual pass */
@@ -2440,13 +2382,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 
 
 /* 2026-03 follow-up: remove depth/shadows/borders and white input fills */
-.chkApp .kpiCard,
-.chkApp .analyticsChartCard,
-.chkApp .workflowStageCard,
-.chkApp .searchActionToolbarDensity,
-.chkApp .searchSelectionStatusChip,
-.chkApp .searchSummaryStatusChip,
-.chkApp .searchStageStatusChip {
+.chkApp .analyticsChartCard {
   border: 0;
   box-shadow: none;
   background: var(--theme-block-bg);
@@ -2459,8 +2395,7 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
   box-shadow: none;
 }
 
-.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-.chkApp .searchFilterCardDense .sapMSlt {
+.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper {
   background: color-mix(in srgb, var(--theme-block-bg) 88%, transparent);
   border-color: transparent;
   box-shadow: none;
@@ -2669,6 +2604,9 @@ body.chkAppRoot.appLight .chkApp .searchToolbarMetaRail {
 .chkApp .searchResultsTable .toolbarTransparent,
 .chkApp .searchActionToolbarDensity {
   padding: 0.18rem 0.24rem;
+  row-gap: 0.32rem;
+  column-gap: 0.28rem;
+  min-height: 2.52rem;
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
   background: var(--theme-rail-bg);
   box-shadow: none;
