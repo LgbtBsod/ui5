@@ -1,7 +1,8 @@
 param(
     [int]$BackendPort = 8000,
     [int]$UiPort = 8080,
-    [string]$GatewayBaseUrl = ""
+    [string]$GatewayBaseUrl = "",
+    [switch]$BindToParentShell
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,6 +17,7 @@ $backendOut = Join-Path $pidDir "mock_backend.out.log"
 $backendErr = Join-Path $pidDir "mock_backend.err.log"
 $uiOut = Join-Path $pidDir "ui_server.out.log"
 $uiErr = Join-Path $pidDir "ui_server.err.log"
+$guardPidFile = Join-Path $pidDir "env_guard.pid"
 $servicePath = "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/"
 $isRealGateway = -not [string]::IsNullOrWhiteSpace($GatewayBaseUrl)
 
@@ -37,15 +39,17 @@ function Stop-IfRunning([string]$PidFile, [int]$Port) {
         Remove-Item $PidFile -ErrorAction SilentlyContinue
     }
 
-    Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
-        Select-Object -ExpandProperty OwningProcess -Unique |
-        Where-Object { $_ -gt 4 } |
-        ForEach-Object {
-            try {
-                Stop-Process -Id $_ -Force -ErrorAction Stop
-            } catch {
+    if ($Port -gt 0) {
+        Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty OwningProcess -Unique |
+            Where-Object { $_ -gt 4 } |
+            ForEach-Object {
+                try {
+                    Stop-Process -Id $_ -Force -ErrorAction Stop
+                } catch {
+                }
             }
-        }
+    }
 }
 
 function Wait-Http([string]$Url, [int]$TimeoutSeconds, [string]$Name) {
@@ -71,6 +75,7 @@ if (-not (Test-Path $pythonVenv)) {
 
 Stop-IfRunning -PidFile $backendPidFile -Port $BackendPort
 Stop-IfRunning -PidFile $uiPidFile -Port $UiPort
+Stop-IfRunning -PidFile $guardPidFile -Port 0
 
 $uiBackendBase = if ($isRealGateway) { $GatewayBaseUrl.TrimEnd("/") } else { "http://127.0.0.1:$BackendPort" }
 
@@ -109,6 +114,31 @@ try {
 }
 
 $uiProcess.Id | Set-Content $uiPidFile
+
+if ($BindToParentShell.IsPresent) {
+    $parentPid = (Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId
+    if ($parentPid -gt 0) {
+        $stopScript = Join-Path $repoRoot "scripts\\stop-local-env.ps1"
+        $escapedStopScript = $stopScript.Replace("'", "''")
+        $guardCommand = @"
+`$ErrorActionPreference = 'SilentlyContinue'
+`$parentPid = $parentPid
+while (`$true) {
+    if (-not (Get-Process -Id `$parentPid -ErrorAction SilentlyContinue)) {
+        break
+    }
+    Start-Sleep -Seconds 2
+}
+& '$escapedStopScript' -BackendPort $BackendPort -UiPort $UiPort | Out-Null
+"@
+        $guardProcess = Start-Process `
+            -FilePath "powershell" `
+            -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-Command", $guardCommand) `
+            -WindowStyle Hidden `
+            -PassThru
+        $guardProcess.Id | Set-Content $guardPidFile
+    }
+}
 
 $backendProbeBase = if ($isRealGateway) { $GatewayBaseUrl.TrimEnd("/") } else { "http://127.0.0.1:$BackendPort" }
 $backendName = if ($isRealGateway) { "SAP Gateway" } else { "Mock backend" }
