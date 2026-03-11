@@ -14,7 +14,7 @@
         <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
     </Switch>
     <ObjectStatus
-        text="{parts:[{path:'state>/lockOperationText'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateText'}"
+        text="{parts:[{path:'state>/lockStateText'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateText'}"
         state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateSemantic'}"
         class="sapUiTinyMarginBegin detailRailStatusChip">
         <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>

@@ -477,9 +477,11 @@ def main() -> int:
                       reject(new Error('autosave delta is empty'));
                       return;
                     }
+                    window.__gatewaySmokeAutosave = { started: true, ok: false, equipment: sValue, deltaKeys: Object.keys(delta) };
                     Promise.resolve(controller._run('autosave', { rootId: sRootId, delta: delta }))
-                      .then(function () { resolve({ equipment: sValue, delta: delta }); })
-                      .catch(reject);
+                      .then(function () { window.__gatewaySmokeAutosave = { started: true, ok: true, equipment: sValue, deltaKeys: Object.keys(delta) }; })
+                      .catch(function (err) { window.__gatewaySmokeAutosave = { started: true, ok: false, equipment: sValue, deltaKeys: Object.keys(delta), error: String((err && err.message) || err || 'autosave failed') }; });
+                    resolve({ equipment: sValue, deltaKeys: Object.keys(delta) });
                   }, reject);
                 })
                 """
@@ -498,12 +500,17 @@ def main() -> int:
                 arg=autosave_before.get("version") or 0,
                 timeout=30000,
             )
+            page.wait_for_function(
+                "() => !!(window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.started)",
+                timeout=10000,
+            )
             page.wait_for_timeout(1200)
             autosave_after = detail_state(page)
             last_state = autosave_after
             autosave_requests = matching_requests(network, "AutoSave")
-            ok_autosave = len(autosave_requests) > autosave_request_count_before and autosave_after.get("version", 0) > autosave_before.get("version", 0) and autosave_after.get("autosaveState") == "SAVED" and autosave_after.get("equipment") == autosave_call.get("equipment")
-            ensure(checks, "detail.autosave.gateway", ok_autosave, {"before": autosave_before, "after": autosave_after, "requestCount": len(autosave_requests), "deltaKeys": sorted((autosave_call.get("delta") or {}).keys()), "transport": transport_snapshot(network, "AutoSave")})
+            autosave_status = safe_evaluate(page, "() => window.__gatewaySmokeAutosave || {}")
+            ok_autosave = len(autosave_requests) > autosave_request_count_before and autosave_after.get("version", 0) > autosave_before.get("version", 0) and autosave_after.get("autosaveState") == "SAVED" and autosave_after.get("equipment") == autosave_call.get("equipment") and bool(autosave_status.get("ok"))
+            ensure(checks, "detail.autosave.gateway", ok_autosave, {"before": autosave_before, "after": autosave_after, "requestCount": len(autosave_requests), "deltaKeys": sorted((autosave_call.get("deltaKeys") or [])), "autosaveStatus": autosave_status, "transport": transport_snapshot(network, "AutoSave")})
             if not ok_autosave:
                 failures.append("detail.autosave.gateway")
 

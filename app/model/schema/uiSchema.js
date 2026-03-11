@@ -14,7 +14,7 @@ sap.ui.define([], function () {
         cacheValidationAt: "",
         idleExpires: null,
         lockOperationPending: false,
-        lockOperationText: "",
+    lockStateText: "",
         lockLostReason: "",
         networkOnline: true,
         networkGraceMode: false,

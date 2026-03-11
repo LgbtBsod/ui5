@@ -337,6 +337,16 @@ def main() -> int:
             page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_function(
                 """
+                () => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
+                  return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'));
+                }
+                """,
+                timeout=10000,
+            )
+            page.wait_for_function(
+                """
                 (prevCount) => {
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const selected = view && view.getModel && view.getModel('selected');
@@ -349,6 +359,16 @@ def main() -> int:
                 """,
                 arg=upload_before.get("attachmentCount") or 0,
                 timeout=30000,
+            )
+            page.wait_for_function(
+                """
+                () => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
+                  return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy') === false);
+                }
+                """,
+                timeout=10000,
             )
             page.wait_for_timeout(1500)
             upload_after = detail_state(page)
