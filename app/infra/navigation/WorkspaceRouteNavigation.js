@@ -59,10 +59,16 @@ sap.ui.define([
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
         var oIntent = buildCurrentIntent(oStateModel);
+        var sMode = String(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/editMode", "READ") || "READ").trim().toUpperCase();
+        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/lock/state", "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
+        var sRootId = readSelectedId(oStateModel);
+        var bRestoreEdit = !!(sRootId && sMode === "EDIT" && sLockState === "EDIT_LOCKED");
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
             routeName: String(oIntent.routeName || "search"),
-            routeArgs: cloneArgs(oIntent.routeArgs)
+            routeArgs: cloneArgs(oIntent.routeArgs),
+            rootId: sRootId,
+            restoreEdit: bRestoreEdit
         });
 
         return oIntent;
@@ -88,9 +94,19 @@ sap.ui.define([
         var oStateModel = readStateModel(oController);
         var oIntent = cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
         var oRouter = oController && oController.getRouter && oController.getRouter();
+        var sTargetRootId;
 
         if (!oIntent.routeName) {
             oIntent = buildFallbackIntent();
+        }
+        sTargetRootId = String((oIntent && (oIntent.rootId || (oIntent.routeArgs && oIntent.routeArgs.id))) || "").trim();
+        if (oIntent && oIntent.restoreEdit && sTargetRootId) {
+            ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", {
+                rootId: sTargetRootId,
+                requestedAt: new Date().toISOString()
+            });
+        } else {
+            ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", null);
         }
         if (oRouter && typeof oRouter.navTo === "function") {
             oRouter.navTo(oIntent.routeName, oIntent.routeArgs || {}, false);

@@ -12,8 +12,11 @@ sap.ui.define([], function () {
         navGuardBypass: false,
         analyticsNavReturn: {
             routeName: "search",
-            routeArgs: {}
+            routeArgs: {},
+            rootId: "",
+            restoreEdit: false
         },
+        analyticsReturnRestoreEdit: null,
         detailAccessGuard: {
             rootId: "",
             userId: "",

@@ -375,22 +375,23 @@ def ensure_attachments_expanded(page) -> None:
     page.wait_for_function(
         """
         () => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const core = sap.ui.getCore();
+          const view = core.byId('checklist_app_comp---app--detailPaneHost');
           const viewModel = view && view.getModel && view.getModel('view');
           const expanded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'));
           const historyLoaded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
-          const uploaderReady = !!document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu');
-          return expanded && uploaderReady && (historyLoaded || uploaderReady);
+          const uploader = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          return expanded && !!uploader && (historyLoaded || true);
         }
         """,
         timeout=30000,
     )
-    page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").wait_for(timeout=10000)
     page.wait_for_function(
         """
         () => {
-          const control = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
-          const state = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost')?.getModel?.('state');
+          const core = sap.ui.getCore();
+          const control = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const state = core.byId('checklist_app_comp---app--detailPaneHost')?.getModel?.('state');
           return !!control
             && control.getEnabled && control.getEnabled()
             && !!state
@@ -401,6 +402,34 @@ def ensure_attachments_expanded(page) -> None:
         timeout=10000,
     )
     page.wait_for_timeout(1200)
+
+
+def invoke_attachment_upload(page, file_name: str, file_text: str, mime_type: str = "text/plain") -> Any:
+    return safe_evaluate(
+        page,
+        """
+        ({ fileName, fileText, mimeType }) => {
+          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const controller = view && view.getController && view.getController();
+          const uploader = controller && controller.byId && controller.byId('attachmentUploader');
+          if (!controller || typeof controller.onAttachmentUploadChange !== 'function') {
+            throw new Error('onAttachmentUploadChange is not available');
+          }
+          const file = new File([fileText], String(fileName || 'gateway-smoke.txt'), {
+            type: String(mimeType || 'text/plain')
+          });
+          return Promise.resolve(controller.onAttachmentUploadChange({
+            getSource: function () {
+              return uploader || null;
+            },
+            getParameter: function (name) {
+              return name === 'files' ? [file] : undefined;
+            }
+          }));
+        }
+        """,
+        {"fileName": file_name, "fileText": file_text, "mimeType": mime_type}
+    )
 def main() -> int:
     if not ROOT_ID:
         print(json.dumps({"ok": False, "error": "ROOT_ID is required"}, ensure_ascii=False))
@@ -675,7 +704,7 @@ def main() -> int:
                 failures.append("analytics.close.gateway")
 
             current_step = "attachments.expand"
-            ensure_attachments_expanded(page)
+            uploader_selector = ensure_attachments_expanded(page)
             current_step = "attachments.upload"
             attachment_before = safe_evaluate(
                 page,
@@ -697,7 +726,7 @@ def main() -> int:
                 """
             )
             before_upload = len(network)
-            page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
+            page.locator(uploader_selector).set_input_files(str(attachment_file.resolve()))
             page.wait_for_function(
                 """
                 (prevCount) => {

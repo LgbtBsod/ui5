@@ -27,6 +27,96 @@ sap.ui.define([
         return sMode === "EDIT" || sMode === "CREATE";
     }
 
+    function readAnalyticsReturnRestore(oController) {
+        return ModelStateRuntime.read(oController, "state", "/analyticsReturnRestoreEdit", null) || null;
+    }
+
+    function clearAnalyticsReturnRestore(oController) {
+        ModelStateRuntime.write(oController, "state", "/analyticsReturnRestoreEdit", null);
+    }
+
+    function isEditLockedState(oController) {
+        var sMode = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
+        var sLockState = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
+        return sMode === "EDIT" && sLockState === "EDIT_LOCKED";
+    }
+
+    function buildEditToggleEvent() {
+        return {
+            getParameter: function (sName) {
+                return sName === "state" ? true : undefined;
+            }
+        };
+    }
+
+    function requestAnalyticsEditRestore(oController, sRootId) {
+        if (!oController) {
+            return Promise.resolve(false);
+        }
+        if (typeof oController.onToggleEdit === "function") {
+            return Promise.resolve(oController.onToggleEdit(buildEditToggleEvent())).then(function () {
+                return isEditLockedState(oController);
+            });
+        }
+        return Promise.resolve(DetailCommandPolicy.enterEdit(oController, { rootId: sRootId })).then(function () {
+            return isEditLockedState(oController);
+        });
+    }
+
+    function restoreAnalyticsEditIfNeeded(oController, sRootId) {
+        var oRestore = readAnalyticsReturnRestore(oController);
+        var sRestoreRootId = String((oRestore && oRestore.rootId) || "").trim();
+        var iAttempts;
+
+        if (!sRootId || !sRestoreRootId || sRestoreRootId !== sRootId) {
+            return Promise.resolve(false);
+        }
+
+        if (isEditLockedState(oController)) {
+            clearAnalyticsReturnRestore(oController);
+            return Promise.resolve(true);
+        }
+
+        iAttempts = Number((oRestore && oRestore.attempts) || 0);
+        if (iAttempts >= 2) {
+            clearAnalyticsReturnRestore(oController);
+            return Promise.resolve(false);
+        }
+
+        ModelStateRuntime.write(oController, "state", "/analyticsReturnRestoreEdit", {
+            rootId: sRestoreRootId,
+            requestedAt: oRestore && oRestore.requestedAt ? oRestore.requestedAt : new Date().toISOString(),
+            attempts: iAttempts + 1
+        });
+
+        return requestAnalyticsEditRestore(oController, sRootId)
+            .then(function (bRestored) {
+                if (bRestored) {
+                    clearAnalyticsReturnRestore(oController);
+                    return true;
+                }
+                return new Promise(function (resolve) {
+                    setTimeout(function () {
+                        requestAnalyticsEditRestore(oController, sRootId)
+                            .then(function (bRetryRestored) {
+                                if (bRetryRestored) {
+                                    clearAnalyticsReturnRestore(oController);
+                                    resolve(true);
+                                    return;
+                                }
+                                resolve(false);
+                            })
+                            .catch(function () {
+                                resolve(false);
+                            });
+                    }, 0);
+                });
+            })
+            .catch(function () {
+                return false;
+            });
+    }
+
     function resolveSelectedBindingPath(oSource, sProperty) {
         var oBinding = oSource && oSource.getBinding && oSource.getBinding(sProperty);
         var oContext = oSource && oSource.getBindingContext && (oSource.getBindingContext("selected") || oSource.getBindingContext());
@@ -169,26 +259,34 @@ sap.ui.define([
             if (sPostOpenHydratedRootId && sPostOpenHydratedRootId === sId && sSelectedRootId === sId) {
                 ModelStateRuntime.write(this, "state", "/postOpenHydratedRootId", "");
                 ControllerViewStateRuntime.set(this, "/detailSkeletonBusy", false);
+                restoreAnalyticsEditIfNeeded(this, sId);
                 return;
             }
             ModelStateRuntime.write(this, "state", "/activeObjectId", sId);
             DetailCommandPolicy.open(this, { id: sId, rootId: sId }).then(function (oResult) {
                 var oAccessState;
-                if (!oResult || oResult.ok !== false || !oResult.error || oResult.error.code !== "NO_VIEW_PERMISSION") {
+                if (oResult && oResult.ok === false) {
+                    if (!oResult.error || oResult.error.code !== "NO_VIEW_PERMISSION") {
+                        clearAnalyticsReturnRestore(this);
+                        return oResult;
+                    }
+                    oAccessState = ControllerViewStateRuntime.get(this, "/accessState", {}) || {};
+                    ModelStateRuntime.write(this, "state", "/detailAccessGuard", {
+                        rootId: String(oAccessState.rootId || sId || "").trim(),
+                        userId: String(oAccessState.userId || "").trim(),
+                        canView: false,
+                        canEdit: !!oAccessState.canEdit,
+                        canDelete: !!oAccessState.canDelete,
+                        reasonCode: String(oAccessState.reasonCode || "NO_VIEW_PERMISSION").trim(),
+                        message: String(oAccessState.message || "").trim(),
+                        checkedAt: new Date().toISOString()
+                    });
+                    clearAnalyticsReturnRestore(this);
                     return oResult;
                 }
-                oAccessState = ControllerViewStateRuntime.get(this, "/accessState", {}) || {};
-                ModelStateRuntime.write(this, "state", "/detailAccessGuard", {
-                    rootId: String(oAccessState.rootId || sId || "").trim(),
-                    userId: String(oAccessState.userId || "").trim(),
-                    canView: false,
-                    canEdit: !!oAccessState.canEdit,
-                    canDelete: !!oAccessState.canDelete,
-                    reasonCode: String(oAccessState.reasonCode || "NO_VIEW_PERMISSION").trim(),
-                    message: String(oAccessState.message || "").trim(),
-                    checkedAt: new Date().toISOString()
+                return restoreAnalyticsEditIfNeeded(this, sId).then(function () {
+                    return oResult;
                 });
-                return oResult;
             }.bind(this));
         },
 

@@ -155,7 +155,8 @@ def detail_state(page) -> dict[str, Any]:
             sessionAttachmentCount: Array.isArray(sessionAttachments) ? sessionAttachments.length : 0,
             attachmentKeys: selectedKeys,
             sessionAttachmentKeys: sessionKeys,
-            allAttachmentKeys: selectedKeys.concat(sessionKeys.filter((key) => selectedKeys.indexOf(key) < 0))
+            allAttachmentKeys: selectedKeys.concat(sessionKeys.filter((key) => selectedKeys.indexOf(key) < 0)),
+            uniqueAttachmentCount: selectedKeys.concat(sessionKeys.filter((key) => selectedKeys.indexOf(key) < 0)).length
           };
         }
         """
@@ -269,7 +270,7 @@ def invoke_delete(page, attachment_key: str) -> None:
 
 
 
-def ensure_attachments_expanded(page) -> None:
+def ensure_attachments_expanded(page) -> str:
     safe_evaluate(
         page,
         """
@@ -290,24 +291,36 @@ def ensure_attachments_expanded(page) -> None:
     page.wait_for_function(
         """
         () => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const core = sap.ui.getCore();
+          const view = core.byId('checklist_app_comp---app--detailPaneHost');
           const viewModel = view && view.getModel && view.getModel('view');
           const expanded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'));
           const historyLoaded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
-          const uploaderReady = !!document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu');
-          return expanded && uploaderReady && (historyLoaded || uploaderReady);
+          const uploader = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const dom = uploader && uploader.getDomRef && uploader.getDomRef();
+          const input = dom && dom.querySelector && dom.querySelector('input[type=file]');
+          if (input && input.id) {
+            window.__gatewaySmokeAttachmentInputId = input.id;
+          }
+          return expanded && !!input && (historyLoaded || !!dom);
         }
         """,
         timeout=30000,
     )
-    page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").wait_for(timeout=10000)
     page.wait_for_function(
         """
         () => {
-          const control = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
-          const state = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost')?.getModel?.('state');
+          const core = sap.ui.getCore();
+          const control = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const state = core.byId('checklist_app_comp---app--detailPaneHost')?.getModel?.('state');
+          const dom = control && control.getDomRef && control.getDomRef();
+          const input = dom && dom.querySelector && dom.querySelector('input[type=file]');
+          if (input && input.id) {
+            window.__gatewaySmokeAttachmentInputId = input.id;
+          }
           return !!control
             && control.getEnabled && control.getEnabled()
+            && !!input
             && !!state
             && state.getProperty('/workflow/detail/editMode') === 'EDIT'
             && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED';
@@ -316,6 +329,22 @@ def ensure_attachments_expanded(page) -> None:
         timeout=10000,
     )
     page.wait_for_timeout(1200)
+    input_id = safe_evaluate(
+        page,
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const uploader = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const dom = uploader && uploader.getDomRef && uploader.getDomRef();
+          const input = dom && dom.querySelector && dom.querySelector('input[type=file]');
+          return String((input && input.id) || window.__gatewaySmokeAttachmentInputId || '').trim();
+        }
+        """
+    )
+    if not input_id:
+        raise RuntimeError("attachment uploader input not resolved")
+    page.locator(f"#{input_id}").wait_for(state="attached", timeout=10000)
+    return f"#{input_id}"
 def main() -> int:
     if not ROOT_ID:
         print(json.dumps({"ok": False, "error": "ROOT_ID is required"}, ensure_ascii=False))
@@ -382,11 +411,11 @@ def main() -> int:
                 })
 
             current_step = "attachments.expand"
-            ensure_attachments_expanded(page)
+            uploader_selector = ensure_attachments_expanded(page)
             current_step = "attachments.upload"
             upload_before = detail_state(page)
             upload_request_index = len(network)
-            page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
+            page.locator(uploader_selector).set_input_files(str(attachment_file.resolve()))
             page.wait_for_function(
                 """
                 (prevCount) => {
@@ -475,7 +504,6 @@ def main() -> int:
                 (payload) => {
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const selected = view && view.getModel && view.getModel('selected');
-                  const state = view && view.getModel && view.getModel('state');
                   const viewModel = view && view.getModel && view.getModel('view');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
                   const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
@@ -488,12 +516,11 @@ def main() -> int:
                   const attachmentGone = Array.isArray(combined)
                     && !combined.some((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim() === String(payload.key || ''));
                   return Array.isArray(combined)
-                    && combined.length < Number(payload.prevCount || 0)
                     && attachmentGone
-                    && attachmentGone;
+                    && combined.length < Number(payload.prevUniqueCount || 0);
                 }
                 """,
-                arg={"prevCount": max(delete_before.get("attachmentCount") or 0, delete_before.get("sessionAttachmentCount") or 0), "key": uploaded_key},
+                arg={"prevUniqueCount": delete_before.get("uniqueAttachmentCount") or 0, "key": uploaded_key},
                 timeout=30000,
             )
             page.wait_for_timeout(1500)
@@ -506,8 +533,8 @@ def main() -> int:
             ]
             ok_delete = (
                 len(delete_requests) == 0
-                and max(delete_after.get("attachmentCount", 0), delete_after.get("sessionAttachmentCount", 0))
-                    == max(0, max(delete_before.get("attachmentCount", 0), delete_before.get("sessionAttachmentCount", 0)) - 1)
+                and int(delete_after.get("uniqueAttachmentCount", 0))
+                    == max(0, int(delete_before.get("uniqueAttachmentCount", 0)) - 1)
                 and uploaded_key not in (delete_after.get("allAttachmentKeys", []) or [])
             )
             ensure(
