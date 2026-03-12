@@ -98,14 +98,17 @@ def wait_for_edit_detail_ready(page, root_id: str) -> None:
         """
         (expectedRootId) => {
           const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
           const detail = core.byId('checklist_app_comp---app--detailPaneHost');
+          const appState = app && app.getModel && app.getModel('state');
           const state = detail && detail.getModel && detail.getModel('state');
           const selected = detail && detail.getModel && detail.getModel('selected');
           const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
           return !!detail
+            && !!appState
             && !!state
             && rootId === expectedRootId
-            && state.getProperty('/currentRouteName') === 'detail'
+            && appState.getProperty('/currentRouteName') === 'detail'
             && state.getProperty('/workflow/detail/editMode') === 'EDIT'
             && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED'
             && state.getProperty('/ui/busy/detail') === false
@@ -628,15 +631,19 @@ def main() -> int:
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const viewModel = view && view.getModel && view.getModel('view');
                   const selected = view && view.getModel && view.getModel('selected');
+                  const state = view && view.getModel && view.getModel('state');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
                   return {
                     attachmentCount: Array.isArray(attachments) ? attachments.length : 0,
-                    busy: !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'))
+                    sessionAttachmentCount: Array.isArray(sessionAttachments) ? sessionAttachments.length : 0,
+                    busy: !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy')),
+                    isDirty: !!(state && state.getProperty && state.getProperty('/isDirty'))
                   };
                 }
                 """
             )
-            before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "")])
+            before_upload = len(network)
             page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_function(
                 """
@@ -652,7 +659,7 @@ def main() -> int:
                     || (Array.isArray(sessionAttachments) && sessionAttachments.length > Number(prevCount || 0));
                 }
                 """,
-                arg=attachment_before.get("attachmentCount") or 0,
+                arg=max(attachment_before.get("attachmentCount") or 0, attachment_before.get("sessionAttachmentCount") or 0),
                 timeout=10000,
             )
             page.wait_for_function(
@@ -668,38 +675,100 @@ def main() -> int:
                     Array.isArray(sessionAttachments) ? sessionAttachments.length : 0
                   );
                   return nextCount > Number(prevCount || 0)
-                    && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy') === false);
+                    && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy') === false)
+                    && !!(state && state.getProperty && state.getProperty('/isDirty') === true);
                 }
                 """,
-                arg=attachment_before.get("attachmentCount") or 0,
+                arg=max(attachment_before.get("attachmentCount") or 0, attachment_before.get("sessionAttachmentCount") or 0),
                 timeout=30000,
             )
             page.wait_for_timeout(1200)
-            attachment_requests = [
+            attachment_stage_requests = [
                 item
                 for item in network[before_upload:]
-                if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/$batch" in item["url"]
+                if any(marker in item["url"] or marker in item.get("post_data", "") for marker in ["AttachmentSet", "SaveChanges", "CreateChecklist", "AutoSave"])
             ]
-            has_attachment_post = any(
-                item["method"] == "POST"
-                and (
-                    "/AttachmentSet" in item["url"]
-                    or ("multipart/mixed" in str(item["headers"].get("content-type", "")) and "POST AttachmentSet" in item.get("post_data", ""))
-                )
-                for item in attachment_requests
+            attachment_after_stage = safe_evaluate(
+                page,
+                """
+                () => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
+                  const selected = view && view.getModel && view.getModel('selected');
+                  const state = view && view.getModel && view.getModel('state');
+                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                  return {
+                    attachmentCount: Array.isArray(attachments) ? attachments.length : 0,
+                    sessionAttachmentCount: Array.isArray(sessionAttachments) ? sessionAttachments.length : 0,
+                    isDirty: !!(state && state.getProperty && state.getProperty('/isDirty'))
+                  };
+                }
+                """
             )
-            has_attachment_put = any(
-                item["method"] == "PUT"
-                and "/AttachmentSet(Key='" in item["url"]
-                and "/$value" in item["url"]
-                for item in attachment_requests
+            stage_ok = (
+                len(attachment_stage_requests) == 0
+                and max(attachment_after_stage.get("attachmentCount", 0), attachment_after_stage.get("sessionAttachmentCount", 0))
+                    == max(attachment_before.get("attachmentCount", 0), attachment_before.get("sessionAttachmentCount", 0)) + 1
+                and attachment_after_stage.get("isDirty") is True
             )
+            attachment_save_before = len(matching_requests(network, "SaveChanges"))
+            attachment_save_before_state = detail_state(page)
+            invoke_view_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onSaveDetail")
+            page.wait_for_function(
+                """
+                (prevVersion) => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const state = view && view.getModel && view.getModel('state');
+                  const selected = view && view.getModel && view.getModel('selected');
+                  const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
+                  return version > Number(prevVersion || 0)
+                    && !!(state && state.getProperty && state.getProperty('/ui/busy/detail') === false)
+                    && !!(state && state.getProperty && state.getProperty('/isDirty') === false);
+                }
+                """,
+                arg=attachment_save_before_state.get("version") or 0,
+                timeout=30000,
+            )
+            page.wait_for_timeout(1200)
+            attachment_after_save = safe_evaluate(
+                page,
+                """
+                () => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
+                  const selected = view && view.getModel && view.getModel('selected');
+                  const state = view && view.getModel && view.getModel('state');
+                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                  return {
+                    attachmentCount: Array.isArray(attachments) ? attachments.length : 0,
+                    sessionAttachmentCount: Array.isArray(sessionAttachments) ? sessionAttachments.length : 0,
+                    isDirty: !!(state && state.getProperty && state.getProperty('/isDirty'))
+                  };
+                }
+                """
+            )
+            attachment_save_requests = matching_requests(network, "SaveChanges")
+            attachment_save_payloads = [
+                item for item in attachment_save_requests[attachment_save_before:]
+                if "\"attachments\"" in item.get("post_data", "") or "\"Value\"" in item.get("post_data", "")
+            ]
             attachment_transport = {
-                "postBatched": batch_operation_requests(attachment_requests, "POST", "AttachmentSet"),
-                "putBatched": batch_operation_requests(attachment_requests, "PUT", "AttachmentSet"),
+                "stageRequests": attachment_stage_requests,
+                "saveRequests": attachment_save_requests[attachment_save_before:],
+                "savePayloadsWithAttachments": attachment_save_payloads
             }
-            ensure(checks, "detail.attachment.gateway", has_attachment_post and has_attachment_put, {"requests": attachment_requests, "transport": attachment_transport})
-            if not (has_attachment_post and has_attachment_put):
+            attachment_ok = (
+                stage_ok
+                and len(attachment_save_requests) > attachment_save_before
+                and len(attachment_save_payloads) > 0
+                and max(attachment_after_save.get("attachmentCount", 0), attachment_after_save.get("sessionAttachmentCount", 0))
+                    >= max(attachment_before.get("attachmentCount", 0), attachment_before.get("sessionAttachmentCount", 0)) + 1
+                and attachment_after_save.get("isDirty") is False
+            )
+            ensure(checks, "detail.attachment.gateway", attachment_ok, {"before": attachment_before, "afterStage": attachment_after_stage, "afterSave": attachment_after_save, "transport": attachment_transport})
+            if not attachment_ok:
                 failures.append("detail.attachment.gateway")
 
             current_step = "lock.release"

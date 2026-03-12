@@ -55,12 +55,19 @@ sap.ui.define([], function () {
         return Object.assign({}, o, {
             Key: sKey,
             AttachmentKey: sKey,
+            RootKey: String(o.RootKey || o.rootKey || "").trim(),
+            ParentKey: String(o.ParentKey || o.parentKey || o.RootKey || o.rootKey || "").trim(),
+            FolderKey: String(o.FolderKey || o.folderKey || "").trim(),
             fileName: String(o.FileName || o.fileName || "").trim(),
             FileName: String(o.FileName || o.fileName || "").trim(),
             mimeType: String(o.MimeType || o.mimeType || "application/octet-stream").trim(),
             MimeType: String(o.MimeType || o.mimeType || "application/octet-stream").trim(),
+            description: String(o.Description || o.description || "").trim(),
+            Description: String(o.Description || o.description || "").trim(),
             fileSize: Number(o.FileSize || o.fileSize || 0) || 0,
             FileSize: Number(o.FileSize || o.fileSize || 0) || 0,
+            fileSizeContent: Number(o.FileSizeContent || o.fileSizeContent || o.FileSize || o.fileSize || 0) || 0,
+            FileSizeContent: Number(o.FileSizeContent || o.fileSizeContent || o.FileSize || o.fileSize || 0) || 0,
             changedOn: String(o.ChangedOn || o.changedOn || "").trim(),
             ChangedOn: String(o.ChangedOn || o.changedOn || "").trim(),
             createdOn: String(o.CreatedOn || o.createdOn || "").trim(),
@@ -68,7 +75,8 @@ sap.ui.define([], function () {
             categoryKey: String(o.CategoryKey || o.categoryKey || "GEN").trim(),
             CategoryKey: String(o.CategoryKey || o.categoryKey || "GEN").trim(),
             categoryText: String(o.CategoryText || o.categoryText || "").trim(),
-            CategoryText: String(o.CategoryText || o.categoryText || "").trim()
+            CategoryText: String(o.CategoryText || o.categoryText || "").trim(),
+            Value: String(o.Value || o.value || "").trim()
         });
     }
 

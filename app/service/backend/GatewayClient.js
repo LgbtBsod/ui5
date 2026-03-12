@@ -35,12 +35,6 @@ sap.ui.define([
     var DIRECT_GET_FUNCTION_ALLOWLIST = [
         /^GetHierarchy$/i
     ];
-    var DIRECT_PUT_ALLOWLIST = [
-        /^\/AttachmentSet\(AttachmentKey='[^']+'\)\/\$value$/i
-    ];
-    var DIRECT_CREATE_ALLOWLIST = [
-        /^\/AttachmentSet(?:$|[?(])/i
-    ];
     var DIRECT_DELETE_ALLOWLIST = [
         /^\/ChecklistRootSet\('[^']+'\)$/i,
         /^\/AttachmentSet\(AttachmentKey='[^']+'\)$/i
@@ -191,17 +185,6 @@ sap.ui.define([
         });
     }
 
-    function withDirectCreateEntityRequest(sPath, oPayload, mParameters, mHeaders) {
-        return toRequestHandle(function (resolve, reject) {
-            var oOptions = Object.assign({}, mParameters || {}, {
-                headers: Object.assign({}, (mParameters && mParameters.headers) || {}, mHeaders || {}),
-                success: function (oData) { resolve(oData || {}); },
-                error: function (e) { reject(e); }
-            });
-            return ensureModel().create(sPath, oPayload || {}, oOptions);
-        });
-    }
-
     function withDirectFunctionImportRequest(sName, oPayload, mHeaders) {
         var sFunctionName = assertAllowedFunctionName(sName);
         if (allowlisted(sFunctionName, DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
@@ -241,81 +224,6 @@ sap.ui.define([
                 error: function (e) { reject(e); }
             });
         });
-    }
-
-    function withDirectPutRequest(sPath, vPayload, mOptions, mHeaders) {
-        var oOptions = mOptions || {};
-        var oModel = ensureModel();
-        var oXhr = null;
-        var bAborted = false;
-        var sCsrfCheck = oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "";
-        var pToken = sCsrfCheck ? Promise.resolve(sCsrfCheck) : new Promise(function (resolve) {
-            oModel.refreshSecurityToken(function () {
-                resolve(oModel.getSecurityToken ? String(oModel.getSecurityToken() || "").trim() : "");
-            }, function () { resolve(""); }, true);
-        });
-        var pPromise = pToken.then(function (sCsrfToken) {
-            var sBase = serviceUrl();
-            var sFullUrl = sBase + sPath;
-            var mModelHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
-            var mResolvedHeaders;
-
-            delete mModelHeaders["content-type"];
-            delete mModelHeaders["Content-Type"];
-            mResolvedHeaders = Object.assign({
-                "Accept": "application/json",
-                "DataServiceVersion": "2.0",
-                "MaxDataServiceVersion": "2.0",
-                "Content-Type": oOptions.contentType || "application/octet-stream"
-            }, mModelHeaders, mHeaders || {});
-            if (sCsrfToken) {
-                mResolvedHeaders["X-CSRF-Token"] = sCsrfToken;
-            }
-
-            return new Promise(function (resolve, reject) {
-                if (bAborted) {
-                    reject({ statusCode: 0, message: "Request aborted" });
-                    return;
-                }
-                oXhr = new XMLHttpRequest();
-                oXhr.open("PUT", sFullUrl, true);
-                Object.keys(mResolvedHeaders).forEach(function (sKey) {
-                    oXhr.setRequestHeader(sKey, mResolvedHeaders[sKey]);
-                });
-                oXhr.onreadystatechange = function () {
-                    if (oXhr.readyState !== 4) {
-                        return;
-                    }
-                    if (oXhr.status >= 200 && oXhr.status < 300) {
-                        resolve({});
-                        return;
-                    }
-                    reject({
-                        statusCode: oXhr.status,
-                        responseText: oXhr.responseText,
-                        responseHeaders: oXhr.getAllResponseHeaders()
-                    });
-                };
-                oXhr.onerror = function () {
-                    reject({ statusCode: 0, message: "Network error during binary PUT" });
-                };
-                oXhr.send(vPayload || null);
-            });
-        });
-
-        return {
-            promise: pPromise,
-            abort: function () {
-                bAborted = true;
-                if (oXhr) {
-                    try {
-                        oXhr.abort();
-                    } catch (_e) {
-                        return;
-                    }
-                }
-            }
-        };
     }
 
     function executeRequest(mRequest) {
@@ -411,20 +319,6 @@ sap.ui.define([
                 }
             });
         },
-        createEntity: function (path, oPayload, mParameters) {
-            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_CREATE_ALLOWLIST, "CREATE");
-            var oOptions = mParameters || {};
-            return executeRequest({
-                method: "CREATE",
-                timeoutMs: oOptions.timeoutMs,
-                retryCount: 0,
-                correlationId: oOptions.correlationId,
-                requestFactory: function (mRuntime) {
-                    var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectCreateEntityRequest(sPath, oPayload || {}, oOptions || {}, buildHeaders(oOptions.headers, sCorrelationId));
-                }
-            });
-        },
         deletePath: function (path, mOptions) {
             var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_DELETE_ALLOWLIST, "DELETE");
             var oOptions = mOptions || {};
@@ -436,20 +330,6 @@ sap.ui.define([
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
                     return withDirectDeleteRequest(sPath, buildHeaders(oOptions.headers, sCorrelationId));
-                }
-            });
-        },
-        putPath: function (path, vPayload, mOptions) {
-            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_PUT_ALLOWLIST, "PUT");
-            var oOptions = mOptions || {};
-            return executeRequest({
-                method: "PUT",
-                timeoutMs: oOptions.timeoutMs,
-                retryCount: 0,
-                correlationId: oOptions.correlationId,
-                requestFactory: function (mRuntime) {
-                    var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectPutRequest(sPath, vPayload, oOptions || {}, buildHeaders(oOptions.headers, sCorrelationId));
                 }
             });
         },

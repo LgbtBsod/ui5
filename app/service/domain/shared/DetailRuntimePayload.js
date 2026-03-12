@@ -26,7 +26,8 @@ sap.ui.define([
         return {
             rootId: UseCaseInputUtils.rootId(mInput),
             sessionGuid: String((mInput && mInput.sessionGuid) || "").trim(),
-            delta: (mInput && mInput.delta) || {}
+            delta: (mInput && mInput.delta) || {},
+            attachments: (mInput && mInput.attachments) || []
         };
     }
 

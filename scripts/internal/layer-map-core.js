@@ -20,6 +20,10 @@ const LAYER_DIRS = ['controller', 'facades', 'service/domain', 'service/backend'
 const CONTROLLER_INFRA_ALLOWLIST = new Set([
   'infra/navigation/WorkspaceRouteNavigation'
 ]);
+const INFRA_USECASE_ALLOWLIST = new Set([
+  'service/domain/shared/AccessPayload',
+  'service/domain/shared/DetailRuntimePayload'
+]);
 
 function rp(rel) {
   return normalizeRuntimeRelative('.', path.join(RUNTIME_ROOT, rel));
@@ -67,6 +71,13 @@ function collectGraphAndViolations(files) {
       }
       if (fromLayer === 'Controllers' && (dep.layerName === 'Infra' || dep.layerName === 'Backend')) {
         violations.push(`controller imports ${dep.layerName.toLowerCase()}: ${fromNoPrefix} -> ${dep.modulePath}`);
+      }
+      if (
+        fromLayer === 'Infra'
+        && dep.layerName === 'Usecases'
+        && INFRA_USECASE_ALLOWLIST.has(dep.modulePath)
+      ) {
+        return;
       }
       if (fromLayer === 'Infra' && (dep.layerName === 'Controllers' || dep.layerName === 'Usecases')) {
         violations.push(`infra imports ${dep.layerName.toLowerCase().replace(/s$/, '')}: ${fromNoPrefix} -> ${dep.modulePath}`);

@@ -16,6 +16,7 @@
   "util/AttachmentUploadPolicy",
   "service/framework/AppShellCoordinator",
   "service/framework/ClipboardRuntime",
+  "service/framework/ControllerModelRuntime",
   "service/framework/ControllerRouteRuntime",
   "service/framework/ControllerCtxRuntime",
   "service/framework/ControllerViewStateRuntime",
@@ -44,7 +45,12 @@
   "service/framework/LazyDialogRuntime",
   "service/framework/LockSaveFlowOrchestrator",
   "service/framework/NavigationIntentService",
+  "service/framework/RetryCoordinator",
   "service/framework/SecurityTokenRefresh",
   "service/framework/SchedulingRuntime",
-  "service/framework/ThemeRuntime"
+  "service/framework/ThemeRuntime",
+  "service/framework/UiDecisionCoordinator",
+  "service/framework/WorkflowCoordinator",
+  "util/DraftChecklistFactory",
+  "model/StatePaths"
 ]

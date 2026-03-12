@@ -94,6 +94,7 @@ python -m pytest backend/mock_gateway/tests/test_gateway_contract_frontend_alias
 - `scripts/gates/autosave-lock-guard-gate.js`
 - contract/invariant pytest tests
 - `scripts/sap-gateway-only-gate.js`
+- `scripts/runtime-settings-gate.js`
 
 ### Partially failing
 
@@ -102,10 +103,7 @@ python -m pytest backend/mock_gateway/tests/test_gateway_contract_frontend_alias
   - current reason: detail route does not return to a stable `EDIT` + `EDIT_LOCKED` state within the current smoke contract after closing analytics
 - `scripts/browser-smoke-detail-attachment-dirty-invariant.py`
   - current failing step: `attachments.upload`
-  - current reason: upload transport completes, but attachment projection does not become observable in `selected>/attachments` or `view>/sessionAttachments` within the current smoke contract
-- `scripts/runtime-settings-gate.js`
-  - current failing step: runtime transport scan
-  - current reason: `app/service/backend/GatewayClient.js` still uses `XMLHttpRequest` for `PUT AttachmentSet(...)/$value`
+  - current reason: staged attachment does not satisfy the local projection or dirty-state contract expected by the smoke script before explicit save
 
 ### Not executed
 
@@ -176,9 +174,9 @@ These files are generated locally and must not be committed.
 
 - If `scripts/browser-smoke-detail-attachment-dirty-invariant.py` fails at `attachments.upload`:
   - inspect `docs/artifacts/gateway-browser-attachment-dirty-report.json`
-  - confirm whether `AttachmentSet` POST/PUT requests completed
-  - compare `selected>/attachments` and `view>/sessionAttachments` against the transport result
+  - confirm whether the staged row appeared in `selected>/attachments` or `view>/sessionAttachments`
+  - confirm there was no immediate `SaveChanges`, `CreateChecklist`, `AutoSave`, or `AttachmentSet` transport during staging
 - If `scripts/browser-smoke-gateway-only-flow.py` fails at `analytics.close`:
   - inspect `docs/artifacts/gateway-browser-smoke-report.json`
-  - verify whether the app returned to the detail route with `EDIT` + `EDIT_LOCKED`
-  - treat route-return instability separately from autosave/save transport, which should already be green before this step
+  - verify whether the app returned to app route `detail` and restored detail state `EDIT` + `EDIT_LOCKED`
+  - treat route-return instability separately from save/autosave/attachment-save transport, which should already be green before this step

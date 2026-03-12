@@ -1,4 +1,4 @@
-import io
+import base64
 import os
 import sys
 
@@ -24,85 +24,82 @@ def _sample_root(client: TestClient):
     return rows[0]["Key"]
 
 
-def test_attachment_upload_accepts_audio_under_10mb():
+def _attachment_payload(file_name: str, mime_type: str, body: bytes, category_key: str = "GEN"):
+    return {
+        "Key": "TMP-ATT-1",
+        "ParentKey": "",
+        "RootKey": "",
+        "FolderKey": "",
+        "CategoryKey": category_key,
+        "Type": category_key,
+        "FileName": file_name,
+        "Name": file_name,
+        "MimeType": mime_type,
+        "Description": "embedded upload",
+        "FileSize": len(body),
+        "FileSizeContent": len(body),
+        "Value": base64.b64encode(body).decode("ascii"),
+    }
+
+
+def test_create_checklist_accepts_embedded_attachment_under_10mb():
     with TestClient(app) as client:
         token = _csrf(client)
-        root_key = _sample_root(client)
         body = b"ID3" + (b"\x00" * 4096)
         created = client.post(
-            f"{SERVICE_ROOT}/AttachmentSet",
+            f"{SERVICE_ROOT}/CreateChecklist",
             json={
-                "RootKey": root_key,
-                "FolderKey": root_key,
-                "CategoryKey": "GEN",
-                "FileName": "voice-note.mp3",
-                "MimeType": "audio/mpeg",
-                "FileSize": len(body),
-                "ClientRowId": "TMP-ATT-1",
+                "FullPayload": {
+                    "root": {"id": "__CREATE", "status": "DRAFT"},
+                    "basic": {
+                        "date": "2026-03-02",
+                        "equipment": "Attachment create",
+                        "LOCATION_KEY": "LOC-001-01-01",
+                        "LOCATION_NAME": "Area A",
+                        "LOCATION_TEXT": "Area A",
+                        "OBSERVER_FULLNAME": "Observer One",
+                        "OBSERVED_FULLNAME": "Observed One",
+                        "LPC_KEY": "L2",
+                        "PROF_KEY": "PR1",
+                    },
+                    "checks": [],
+                    "barriers": [],
+                    "attachments": [_attachment_payload("voice-note.mp3", "audio/mpeg", body)],
+                }
             },
             headers={"X-CSRF-Token": token},
         )
-        assert created.status_code == 201
-        attachment_key = created.json().get("d", {}).get("AttachmentKey")
-        assert attachment_key
-
-        resp = client.put(
-            f"{SERVICE_ROOT}/AttachmentSet(Key='{attachment_key}')/$value",
-            content=body,
-            headers={
-                "X-CSRF-Token": token,
-                "Content-Type": "audio/mpeg",
-                "Slug": "voice-note.mp3",
-                "X-RootKey": root_key,
-                "X-CategoryKey": "GEN",
-            },
-        )
-
-        assert resp.status_code == 204
-
-        downloaded = client.get(
-            f"{SERVICE_ROOT}/AttachmentSet(Key='{attachment_key}')/$value",
-            headers={"X-CSRF-Token": token},
-        )
-
-        assert downloaded.status_code == 200
-        assert downloaded.content == body
+        assert created.status_code == 200
+        root_key = created.json().get("d", {}).get("RootKey")
+        attachments = client.get(f"{SERVICE_ROOT}/AttachmentSet", params={"$filter": f"RootKey eq '{root_key}'"})
+        assert attachments.status_code == 200
+        rows = attachments.json().get("d", {}).get("results", [])
+        assert len(rows) == 1
+        attachment_key = rows[0]["AttachmentKey"]
+        loaded = client.get(f"{SERVICE_ROOT}/AttachmentSet(AttachmentKey='{attachment_key}')")
+        assert loaded.status_code == 200
+        loaded_body = loaded.json().get("d", {})
+        assert loaded_body.get("FileName") == "voice-note.mp3"
+        assert loaded_body.get("Value") == base64.b64encode(body).decode("ascii")
 
 
-def test_attachment_upload_rejects_payload_over_10mb():
+def test_save_changes_rejects_embedded_attachment_over_10mb():
     with TestClient(app) as client:
         token = _csrf(client)
         root_key = _sample_root(client)
-        body = io.BytesIO()
-        body.write(b"RIFF")
-        body.write(b"\x00" * (10 * 1024 * 1024))
-        created = client.post(
-            f"{SERVICE_ROOT}/AttachmentSet",
+        acquire = client.post(f"{SERVICE_ROOT}/LockAcquire", params={"RootId": root_key, "SessionGuid": "ATT-S1"}, headers={"X-CSRF-Token": token})
+        assert acquire.status_code == 200
+        body = b"RIFF" + (b"\x00" * (10 * 1024 * 1024))
+        resp = client.post(
+            f"{SERVICE_ROOT}/SaveChanges",
             json={
-                "RootKey": root_key,
-                "FolderKey": root_key,
-                "CategoryKey": "GEN",
-                "FileName": "large-sample.wav",
-                "MimeType": "audio/wav",
-                "FileSize": len(body.getvalue()),
-                "ClientRowId": "TMP-ATT-2",
+                "root": {"pcct_uuid": root_key},
+                "checks": [],
+                "barriers": [],
+                "attachments": [_attachment_payload("large-sample.wav", "audio/wav", body)],
+                "client_version": 1,
+                "SessionGuid": "ATT-S1",
             },
             headers={"X-CSRF-Token": token},
         )
-        assert created.status_code == 201
-        attachment_key = created.json().get("d", {}).get("AttachmentKey")
-        assert attachment_key
-
-        resp = client.put(
-            f"{SERVICE_ROOT}/AttachmentSet(Key='{attachment_key}')/$value",
-            content=body.getvalue(),
-            headers={
-                "X-CSRF-Token": token,
-                "Content-Type": "audio/wav",
-                "Slug": "large-sample.wav",
-                "X-RootKey": root_key,
-                "X-CategoryKey": "GEN",
-            },
-        )
-
         assert resp.status_code == 413

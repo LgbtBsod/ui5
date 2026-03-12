@@ -52,13 +52,6 @@ sap.ui.define([], function () {
 
         /**
          * Optional implementation until backend attachments are available.
-         * @param {{rootId:string,fileMeta:Object,contentBase64?:string}} mArgs
-         * @returns {Promise<{attachment:Object}>}
-         */
-        uploadAttachment: function (mArgs) {},
-
-        /**
-         * Optional implementation until backend attachments are available.
          * @param {{rootId:string,attachmentId:string}} mArgs
          * @returns {Promise<{deleted:true}>}
          */

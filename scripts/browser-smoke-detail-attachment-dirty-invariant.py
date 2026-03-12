@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser smoke: attachment upload/delete must not set detail dirty state."""
+"""Browser smoke: staged attachment flow must stay local until explicit save."""
 
 from __future__ import annotations
 
@@ -389,10 +389,10 @@ def main() -> int:
                     Array.isArray(sessionAttachments) ? sessionAttachments.length : 0
                   );
                   return nextCount > Number(prevCount || 0)
-                    && !!(state && state.getProperty && state.getProperty('/isDirty') === false);
+                    && !!(state && state.getProperty && state.getProperty('/isDirty') === true);
                 }
                 """,
-                arg=upload_before.get("attachmentCount") or 0,
+                arg=max(upload_before.get("attachmentCount") or 0, upload_before.get("sessionAttachmentCount") or 0),
                 timeout=30000,
             )
             page.wait_for_function(
@@ -411,49 +411,31 @@ def main() -> int:
             upload_requests = [
                 item
                 for item in network[upload_request_index:]
-                if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "") or "/$batch" in item["url"]
+                if any(marker in item["url"] or marker in item.get("post_data", "") for marker in ["AttachmentSet", "SaveChanges", "CreateChecklist", "AutoSave"])
             ]
-            has_upload_post = any(
-                item["method"] == "POST"
-                and (
-                    "/AttachmentSet" in item["url"]
-                    or ("multipart/mixed" in str(item["headers"].get("content-type", "")) and "POST AttachmentSet" in item.get("post_data", ""))
-                )
-                for item in upload_requests
-            )
-            has_upload_put = any(
-                item["method"] == "PUT"
-                and "/AttachmentSet(Key='" in item["url"]
-                and "/$value" in item["url"]
-                for item in upload_requests
-            )
             uploaded_keys = [key for key in upload_after.get("allAttachmentKeys", []) if key not in (upload_before.get("allAttachmentKeys", []) or [])]
             uploaded_key = uploaded_keys[-1] if uploaded_keys else ""
             ok_upload = (
-                has_upload_post
-                and has_upload_put
-                and max(upload_after.get("attachmentCount", 0), upload_after.get("sessionAttachmentCount", 0))
+                max(upload_after.get("attachmentCount", 0), upload_after.get("sessionAttachmentCount", 0))
                     == max(upload_before.get("attachmentCount", 0), upload_before.get("sessionAttachmentCount", 0)) + 1
-                and upload_after.get("isDirty") is False
+                and upload_after.get("isDirty") is True
+                and len(upload_requests) == 0
                 and bool(uploaded_key)
             )
             ensure(
                 checks,
-                "detail.attachment_upload_keeps_clean_state",
+                "detail.attachment_upload_stages_dirty_draft",
                 ok_upload,
                 {
                     "before": upload_before,
                     "after": upload_after,
                     "uploadedKey": uploaded_key,
                     "requestCount": len(upload_requests),
-                    "batchedWrites": {
-                        "post": batch_operation_requests(upload_requests, "POST", "AttachmentSet"),
-                        "put": batch_operation_requests(upload_requests, "PUT", "AttachmentSet"),
-                    },
+                    "requests": upload_requests,
                 },
             )
             if not ok_upload:
-                failures.append("detail.attachment_upload_keeps_clean_state")
+                failures.append("detail.attachment_upload_stages_dirty_draft")
 
             current_step = "attachments.delete"
             delete_before = detail_state(page)
@@ -479,7 +461,7 @@ def main() -> int:
                   return Array.isArray(combined)
                     && combined.length < Number(payload.prevCount || 0)
                     && attachmentGone
-                    && !!(state && state.getProperty && state.getProperty('/isDirty') === false);
+                    && attachmentGone;
                 }
                 """,
                 arg={"prevCount": max(delete_before.get("attachmentCount") or 0, delete_before.get("sessionAttachmentCount") or 0), "key": uploaded_key},
@@ -494,15 +476,14 @@ def main() -> int:
                 if ("AttachmentSet(Key='" in item["url"] and item["method"] == "DELETE") or "DELETE AttachmentSet" in item.get("post_data", "")
             ]
             ok_delete = (
-                len(delete_requests) > 0
+                len(delete_requests) == 0
                 and max(delete_after.get("attachmentCount", 0), delete_after.get("sessionAttachmentCount", 0))
                     == max(0, max(delete_before.get("attachmentCount", 0), delete_before.get("sessionAttachmentCount", 0)) - 1)
-                and delete_after.get("isDirty") is False
                 and uploaded_key not in (delete_after.get("allAttachmentKeys", []) or [])
             )
             ensure(
                 checks,
-                "detail.attachment_delete_keeps_clean_state",
+                "detail.attachment_delete_stays_local",
                 ok_delete,
                 {
                     "before": delete_before,
@@ -513,7 +494,7 @@ def main() -> int:
                 },
             )
             if not ok_delete:
-                failures.append("detail.attachment_delete_keeps_clean_state")
+                failures.append("detail.attachment_delete_stays_local")
 
             current_step = "lock.release"
             before_release = len(matching_requests(network, "LockRelease"))

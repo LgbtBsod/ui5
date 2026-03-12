@@ -9,6 +9,7 @@ import sys
 import urllib.parse
 import urllib.request
 import uuid
+import base64
 from http.cookiejar import CookieJar
 from pathlib import Path
 from typing import Any
@@ -232,54 +233,76 @@ def main() -> int:
         save_version = int(save_body.get("version_number") or 0)
         ensure(api_checks, "save.gateway", save_status == 200 and save_version == 3, {"status": save_status, "version": save_version})
 
-        attachment_meta = {
-            "RootKey": created_root_id,
-            "FolderKey": created_root_id,
-            "CategoryKey": "GEN",
-            "FileName": "gateway-smoke.txt",
-            "MimeType": "text/plain",
-            "FileSize": len(b"gateway smoke attachment"),
-            "ClientRowId": "GW-ATT-1",
+        attachment_body = b"gateway smoke attachment"
+        attachment_save_payload = {
+            "root": {"pcct_uuid": created_root_id, "equipment": "Gateway Smoke Saved"},
+            "checks": [],
+            "barriers": [],
+            "client_version": save_version,
+            "SessionGuid": session_guid,
+            "attachments": [{
+                "Key": "GW-ATT-1",
+                "RootKey": created_root_id,
+                "ParentKey": created_root_id,
+                "FolderKey": created_root_id,
+                "CategoryKey": "GEN",
+                "Type": "GEN",
+                "FileName": "gateway-smoke.txt",
+                "Name": "gateway-smoke.txt",
+                "MimeType": "text/plain",
+                "Description": "Gateway smoke attachment",
+                "FileSize": len(attachment_body),
+                "FileSizeContent": len(attachment_body),
+                "Value": base64.b64encode(attachment_body).decode("ascii"),
+            }],
         }
-        attachment_post_status, attachment_post_data, _headers = request(opener, "POST", f"{SERVICE_ROOT}/AttachmentSet", headers={"X-CSRF-Token": token}, payload=attachment_meta)
-        attachment_key = str((((attachment_post_data or {}).get("d") or {}).get("AttachmentKey") or "")).strip()
-        attachment_put_status, _attachment_put_body, _headers = request(
+        attachment_save_status, attachment_save_data, _headers = request(
             opener,
-            "PUT",
-            f"{SERVICE_ROOT}/AttachmentSet(Key='{attachment_key}')/$value",
-            headers={
-                "X-CSRF-Token": token,
-                "Content-Type": "text/plain",
-                "Slug": "gateway-smoke.txt",
-                "X-RootKey": created_root_id,
-                "X-CategoryKey": "GEN",
-            },
-            payload=b"gateway smoke attachment",
-            expect_json=False,
+            "POST",
+            f"{SERVICE_ROOT}/SaveChanges",
+            headers={"X-CSRF-Token": token},
+            payload=attachment_save_payload,
         )
-        attachment_get_status, attachment_get_body, _headers = request(
+        attachment_saved_body = (attachment_save_data or {}).get("d") or {}
+        attachment_list_status, attachment_list_body, _headers = request(
             opener,
             "GET",
-            f"{SERVICE_ROOT}/AttachmentSet(Key='{attachment_key}')/$value",
+            f"{SERVICE_ROOT}/AttachmentSet?$filter=RootKey%20eq%20'{created_root_id}'",
             headers={"X-CSRF-Token": token},
-            expect_json=False,
         )
+        attachment_rows = (((attachment_list_body or {}).get("d") or {}).get("results")) or []
+        attachment_key = str((attachment_rows[0] if attachment_rows else {}).get("AttachmentKey") or "").strip()
+        attachment_get_status, attachment_get_payload, _headers = request(
+            opener,
+            "GET",
+            f"{SERVICE_ROOT}/AttachmentSet(AttachmentKey='{attachment_key}')",
+            headers={"X-CSRF-Token": token},
+        )
+        attachment_get_body = ((attachment_get_payload or {}).get("d") or {})
         attachment_delete_status, _attachment_delete_body, _headers = request(
             opener,
             "DELETE",
-            f"{SERVICE_ROOT}/AttachmentSet(Key='{attachment_key}')",
+            f"{SERVICE_ROOT}/AttachmentSet(AttachmentKey='{attachment_key}')",
             headers={"X-CSRF-Token": token},
             expect_json=False,
         )
         ensure(
             api_checks,
             "attachment.gateway",
-            attachment_post_status == 201 and attachment_put_status == 204 and attachment_get_status == 200 and attachment_delete_status == 204 and attachment_get_body == b"gateway smoke attachment",
+            attachment_save_status == 200
+            and int(attachment_saved_body.get("version_number") or 0) == 4
+            and attachment_list_status == 200
+            and len(attachment_rows) == 1
+            and attachment_get_status == 200
+            and attachment_get_body.get("Value") == base64.b64encode(attachment_body).decode("ascii")
+            and attachment_delete_status == 204,
             {
-                "postStatus": attachment_post_status,
-                "putStatus": attachment_put_status,
+                "saveStatus": attachment_save_status,
+                "saveVersion": attachment_saved_body.get("version_number"),
+                "listStatus": attachment_list_status,
                 "getStatus": attachment_get_status,
                 "deleteStatus": attachment_delete_status,
+                "attachmentCount": len(attachment_rows),
             },
         )
 

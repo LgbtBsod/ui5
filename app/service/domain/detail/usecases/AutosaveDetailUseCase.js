@@ -60,6 +60,12 @@ sap.ui.define([
         );
     }
 
+    function hasPendingStagedAttachments(aAttachments) {
+        return (Array.isArray(aAttachments) ? aAttachments : []).some(function (oAttachment) {
+            return !!(oAttachment && oAttachment.staged && oAttachment._file);
+        });
+    }
+
     AutosaveDetailUseCase.prototype = Object.create(UseCase.prototype);
     AutosaveDetailUseCase.prototype.constructor = AutosaveDetailUseCase;
 
@@ -103,12 +109,17 @@ sap.ui.define([
             var sAt = (oSaved && oSaved.autosavedAt) || new Date().toISOString();
             var oCurrentChecklist = readCurrentChecklist(mCtx);
             var aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
-            var oSavedSnapshot = (oSaved && oSaved.serverSnapshot) || oCurrentChecklist;
+            var oBaseSnapshot = DetailSaveSupport.readBaseSnapshot(mCtx);
+            var aSnapshotAttachments = Array.isArray((oBaseSnapshot && oBaseSnapshot.attachments) || null) ? oBaseSnapshot.attachments : [];
+            var bHasPendingAttachments = hasPendingStagedAttachments(aCurrentAttachments);
+            var oSavedSnapshot = Object.assign({}, (oSaved && oSaved.serverSnapshot) || oCurrentChecklist, {
+                attachments: bHasPendingAttachments ? aSnapshotAttachments : aCurrentAttachments
+            });
             var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aCurrentAttachments });
             return Result.ok({ autosavedAt: sAt }, [
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "SAVED"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, sAt),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, !bHasPendingAttachments),
                 Effects.modelPatch("selected", "/", oSelectedSnapshot),
                 Effects.modelPatch("selected", "/attachments", aCurrentAttachments),
                 Effects.modelPatch("snapshot", "/", oSavedSnapshot),

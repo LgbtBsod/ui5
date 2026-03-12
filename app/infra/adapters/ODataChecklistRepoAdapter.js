@@ -25,18 +25,51 @@ sap.ui.define([
         ).trim();
     }
 
-    function normalizeSavePayload(sRootId, oPayload) {
+    function normalizeAttachmentRows(aAttachments, sRootId) {
+        return (Array.isArray(aAttachments) ? aAttachments : []).map(function (oAttachment) {
+            var oRow = Object.assign({}, oAttachment || {});
+            oRow.RootKey = normalizeRootKey(oRow.RootKey || sRootId);
+            oRow.ParentKey = normalizeRootKey(oRow.ParentKey || oRow.RootKey || sRootId);
+            oRow.FolderKey = String(oRow.FolderKey || oRow.ParentKey || oRow.RootKey || sRootId || "").trim();
+            oRow.CategoryKey = String(oRow.CategoryKey || oRow.Type || "GEN").trim() || "GEN";
+            oRow.Type = String(oRow.Type || oRow.CategoryKey || "GEN").trim() || "GEN";
+            oRow.FileName = String(oRow.FileName || oRow.Name || "").trim();
+            oRow.Name = String(oRow.Name || oRow.FileName || "").trim();
+            oRow.MimeType = String(oRow.MimeType || "application/octet-stream").trim() || "application/octet-stream";
+            oRow.FileSize = Number(oRow.FileSize || oRow.FileSizeContent || 0) || 0;
+            oRow.FileSizeContent = Number(oRow.FileSizeContent || oRow.FileSize || 0) || 0;
+            oRow.Description = String(oRow.Description || "").trim();
+            oRow.Value = String(oRow.Value || "").trim();
+            return oRow;
+        }).filter(function (oRow) {
+            return !!(oRow.FileName && oRow.Value);
+        });
+    }
+
+    function normalizeSavePayload(sRootId, oPayload, aAttachments) {
         var oIn = oPayload || {};
+        var aNormalizedAttachments = normalizeAttachmentRows(aAttachments, sRootId);
         if (Object.prototype.hasOwnProperty.call(oIn, "root") || Object.prototype.hasOwnProperty.call(oIn, "checks") || Object.prototype.hasOwnProperty.call(oIn, "barriers")) {
             return Object.assign({}, oIn, {
                 root: Object.assign({}, oIn.root || {}, {
                     pcct_uuid: normalizeRootKey((oIn.root && oIn.root.pcct_uuid) || sRootId)
                 }),
+                attachments: aNormalizedAttachments,
                 client_version: Number(oIn.client_version || ((oIn.root || {}).version_number) || 0) || 0,
                 SessionGuid: oIn.SessionGuid || oIn.session_guid || null
             });
         }
-        return { RootKey: normalizeRootKey(sRootId), ClientAggChangedOn: (oIn.meta && oIn.meta.aggChangedOn) || null, FullPayload: { root: oIn.root || {}, basic: oIn.basic || {}, checks: oIn.checks || [], barriers: oIn.barriers || [] } };
+        return {
+            RootKey: normalizeRootKey(sRootId),
+            ClientAggChangedOn: (oIn.meta && oIn.meta.aggChangedOn) || null,
+            FullPayload: {
+                root: oIn.root || {},
+                basic: oIn.basic || {},
+                checks: oIn.checks || [],
+                barriers: oIn.barriers || [],
+                attachments: aNormalizedAttachments
+            }
+        };
     }
 
     function firstRow(vData) {
@@ -282,7 +315,7 @@ sap.ui.define([
                 var sRootId = rootId(mArgs);
                 var oDelta = (mArgs && mArgs.delta) || {};
                 var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-                var oRequest = normalizeSavePayload(sRootId, oDelta);
+                var oRequest = normalizeSavePayload(sRootId, oDelta, mArgs && mArgs.attachments);
                 if (sSessionGuid) {
                     oRequest.SessionGuid = sSessionGuid;
                     oRequest.session_guid = sSessionGuid;
@@ -295,7 +328,7 @@ sap.ui.define([
             },
             createChecklist: function (mArgs) {
                 var oCurrent = (mArgs && mArgs.delta) || {};
-                var oRequest = normalizeSavePayload("", oCurrent);
+                var oRequest = normalizeSavePayload("", oCurrent, mArgs && mArgs.attachments);
                 return GatewayAdapterSupport.request({ method: "POST_ENTITY", path: "CreateChecklist", body: oRequest }).then(function (oServerPayload) {
                     return enrichServerSnapshot(oServerPayload, "").then(function (oServerSnapshot) {
                         return { serverSnapshot: oServerSnapshot || {}, lastChangeSet: {}, serverResponse: oServerPayload || {} };
@@ -356,7 +389,6 @@ sap.ui.define([
                 return checkChecklistPermission(mArgs, mDeps || {});
             },
             loadAttachments: AttachmentRepoSupport.loadAttachments,
-            uploadAttachment: AttachmentRepoSupport.uploadAttachment,
             deleteAttachment: AttachmentRepoSupport.deleteAttachment
         };
     }

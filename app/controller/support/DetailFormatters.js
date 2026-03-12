@@ -14,7 +14,7 @@ sap.ui.define([
         CLOSED: "Success",
         DRAFT: "Information"
     };
-    var LOCK_OPERATION_STATES = {
+    var LOCK_STATE_SEMANTICS = {
         SUCCESS: "Success",
         ERROR: "Error"
     };
@@ -193,8 +193,8 @@ sap.ui.define([
 
         formatLockStateSemantic: function (sState, sMode) {
             var sNormalizedState = String(sState || "").toUpperCase();
-            if (LOCK_OPERATION_STATES[sNormalizedState]) {
-                return LOCK_OPERATION_STATES[sNormalizedState];
+            if (LOCK_STATE_SEMANTICS[sNormalizedState]) {
+                return LOCK_STATE_SEMANTICS[sNormalizedState];
             }
             if (LOCK_ACTIVE_STATES[sNormalizedState]) {
                 return "Success";

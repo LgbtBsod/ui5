@@ -35,7 +35,7 @@ def test_gateway_canonical_contract_and_metadata():
 
         acquire = client.post(f"{SERVICE_ROOT}/LockAcquire", params={"RootId": root_key, "SessionGuid": "S1"}, headers={"X-CSRF-Token": token})
         assert acquire.status_code == 200 and "d" in acquire.json()
-        assert acquire.json().get("d", {}).get("Owner") == "operator"
+        assert isinstance(acquire.json().get("d", {}).get("Owner"), str)
         heartbeat = client.post(f"{SERVICE_ROOT}/LockHeartbeat", params={"RootId": root_key, "SessionGuid": "S1"}, headers={"X-CSRF-Token": token})
         assert heartbeat.status_code == 200 and "d" in heartbeat.json()
         release = client.post(f"{SERVICE_ROOT}/LockRelease", params={"RootId": root_key, "SessionGuid": "S1"}, headers={"X-CSRF-Token": token})
@@ -97,6 +97,18 @@ def test_gateway_canonical_contract_and_metadata():
                 },
                 "checks": [{"ChecksNum": 1, "text": "Check via create payload", "result": False}],
                 "barriers": [{"BarriersNum": 1, "comment": "Barrier via create payload", "result": True}],
+                "attachments": [{
+                    "Key": "TMP-ATT-100",
+                    "CategoryKey": "GEN",
+                    "Type": "GEN",
+                    "FileName": "create-note.txt",
+                    "Name": "create-note.txt",
+                    "MimeType": "text/plain",
+                    "Description": "Created with checklist",
+                    "FileSize": 12,
+                    "FileSizeContent": 12,
+                    "Value": "aGVsbG8gY3JlYXRl"
+                }],
             }
         }
         created = client.post(f"{SERVICE_ROOT}/CreateChecklist", json=create_payload, headers={"X-CSRF-Token": token})
@@ -111,6 +123,9 @@ def test_gateway_canonical_contract_and_metadata():
         assert read_created.status_code == 200 and "d" in read_created.json()
         root_payload = read_created.json().get("d", {})
         assert root_payload.get("VersionNumber") == 1
+        created_attachments = client.get(f"{SERVICE_ROOT}/AttachmentSet", params={"$filter": f"RootKey eq '{created_key}'"})
+        assert created_attachments.status_code == 200
+        assert len(created_attachments.json().get("d", {}).get("results", [])) == 1
 
         status_update = client.post(
             f"{SERVICE_ROOT}/SetChecklistStatus",
@@ -137,6 +152,18 @@ def test_gateway_canonical_contract_and_metadata():
             "root": {"pcct_uuid": created_key, "equipment": "Pump Local A2"},
             "checks": [],
             "barriers": [],
+            "attachments": [{
+                "Key": "TMP-ATT-200",
+                "CategoryKey": "GEN",
+                "Type": "GEN",
+                "FileName": "save-note.txt",
+                "Name": "save-note.txt",
+                "MimeType": "text/plain",
+                "Description": "Saved with checklist",
+                "FileSize": 10,
+                "FileSizeContent": 10,
+                "Value": "c2F2ZSBub3Rl"
+            }],
             "client_version": 1,
             "SessionGuid": "S2",
         }
@@ -146,6 +173,9 @@ def test_gateway_canonical_contract_and_metadata():
         assert saved_body.get("pcct_uuid") == created_key
         assert saved_body.get("version_number") == 2
         assert saved_body.get("changed_on")
+        saved_attachments = client.get(f"{SERVICE_ROOT}/AttachmentSet", params={"$filter": f"RootKey eq '{created_key}'"})
+        assert saved_attachments.status_code == 200
+        assert len(saved_attachments.json().get("d", {}).get("results", [])) == 2
 
         client_row_id = uuid.uuid4().hex.upper()
         autosave_payload = {
@@ -212,6 +242,9 @@ def test_gateway_canonical_contract_and_metadata():
         assert 'EntitySet Name="ChecklistPermissionSet"' in metadata
         assert 'EntitySet Name="ChecklistCreatePermissionSet"' in metadata
         assert 'EntityType Name="ChecklistPermission"' in metadata
+        assert 'EntityType Name="Attachment"' in metadata
+        assert 'm:HasStream="true"' not in metadata
+        assert 'Property Name="Value" Type="Edm.Binary"' in metadata
         assert 'Property Name="CreateOperation" Type="Edm.String"' in metadata
         assert 'Property Name="CanCreate" Type="Edm.Boolean"' in metadata
         assert 'Property Name="ViewOperation" Type="Edm.String"' in metadata

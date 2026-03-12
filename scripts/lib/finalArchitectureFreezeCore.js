@@ -127,10 +127,20 @@ function validateSupportModules(issues) {
 }
 
 function validateDetailFlow(issues) {
-  if (!includesDependency('service/domain/detail/usecases/SaveDetailUseCase.js', 'get("selected", "/")')) {
+  const saveTxt = read('service/domain/detail/usecases/SaveDetailUseCase.js');
+  const autosaveTxt = read('service/domain/detail/usecases/AutosaveDetailUseCase.js');
+  const saveUsesSelected =
+    /function\s+readSelectedChecklist/.test(saveTxt) &&
+    /get\("selected",\s*"\/"\)/.test(saveTxt) &&
+    /readCurrentChecklist\(mCtx\)\s*\{\s*return\s+readSelectedChecklist\(mCtx\)\s*\|\|/.test(saveTxt.replace(/\r?\n/g, ' '));
+  const autosaveUsesSelected =
+    /function\s+readSelectedChecklist/.test(autosaveTxt) &&
+    /get\("selected",\s*"\/"\)/.test(autosaveTxt) &&
+    /readCurrentChecklist\(mCtx\)\s*\{\s*return\s+readSelectedChecklist\(mCtx\)\s*\|\|/.test(autosaveTxt.replace(/\r?\n/g, ' '));
+  if (!saveUsesSelected) {
     issues.push('SaveDetailUseCase must prefer selected snapshot as current detail source');
   }
-  if (!includesDependency('service/domain/detail/usecases/AutosaveDetailUseCase.js', 'get("selected", "/")')) {
+  if (!autosaveUsesSelected) {
     issues.push('AutosaveDetailUseCase must prefer selected snapshot as current detail source');
   }
 }

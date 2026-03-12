@@ -1,0 +1,18 @@
+html,
+body,
+#ui5_container {
+    height: 100%;
+    margin: 0;
+}
+
+body.sapUiBody {
+    background: #ffffff;
+}
+
+#ui5-bg,
+#ui5-bg .bg,
+#ui5-bg .dither,
+#ui5-bg .grain,
+#ui5-bg .paper {
+    display: block !important;
+}

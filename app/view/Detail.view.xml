@@ -429,7 +429,7 @@
                                                     enabled="{= !${view>/attachmentBusy} }"
                                                     press=".onToggleAttachmentsSection"
                                                     class="sapUiTinyMarginEnd"/>
-                                                <Text text="{i18n>saveChecklistBeforeAttachment}" visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText">
+                                                <Text text="{i18n>attachmentDraftStageHint}" visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
                                                     </layoutData>
@@ -444,22 +444,13 @@
                                                     width="12rem"
                                                     selectedKey="{view>/attachmentCategoryKey}"
                                                     visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                                                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+                                                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} }"
                                                     items="{ path: 'masterData>/attachmentTypes', templateShareable: true }">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="10rem"/>
                                                     </layoutData>
                                                     <core:Item key="{masterData>key}" text="{masterData>text}"/>
                                                 </Select>
-                                                <unified:FileUploader
-                                                    id="attachmentUploader"
-                                                    buttonOnly="true"
-                                                    sameFilenameAllowed="true"
-                                                    useMultipart="false"
-                                                    buttonText="{i18n>uploadAttachment}"
-                                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                                                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
-                                                    change=".onAttachmentUploadChange"/>
                                             </OverflowToolbar>
                                             <VBox
                                                 id="attachmentDropZone"
@@ -472,6 +463,17 @@
                                                         <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText"/>
                                                     </VBox>
                                                 </HBox>
+                                                <VBox class="detailAttachmentDropZoneActions">
+                                                    <unified:FileUploader
+                                                        id="attachmentUploader"
+                                                        buttonOnly="true"
+                                                        sameFilenameAllowed="true"
+                                                        useMultipart="false"
+                                                        buttonText="{i18n>uploadAttachment}"
+                                                        tooltip="{i18n>uploadAttachment}"
+                                                        enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} }"
+                                                        change=".onAttachmentUploadChange"/>
+                                                </VBox>
                                                 <Text
                                                     text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}"
                                                     class="modeHintText detailAttachmentDropZoneMeta"/>
@@ -529,7 +531,7 @@
                                                     <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon"/>
                                                     <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle"/>
                                                     <Text
-                                                        text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>saveChecklistBeforeAttachment} : ${i18n>detailEmptyAttachmentsText} }"
+                                                        text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>attachmentDraftStageHint} : ${i18n>detailEmptyAttachmentsText} }"
                                                         class="detailEmptyStateText"/>
                                                 </HBox>
 

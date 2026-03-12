@@ -82,6 +82,7 @@ Frontend detail hydration expects these resources:
 - `ChecklistCheckSet?$filter=RootKey eq '<ROOT_KEY>'`
 - `ChecklistBarrierSet?$filter=RootKey eq '<ROOT_KEY>'`
 - `AttachmentSet?$filter=RootKey eq '<ROOT_KEY>'`
+- `AttachmentSet(AttachmentKey='<ATTACHMENT_KEY>')` when the UI opens a stored binary through `Value`
 
 ## Detail update and save composition
 
@@ -94,24 +95,39 @@ Mutating detail flows stay on dedicated resources/functions:
 - `CopyChecklist`
 - `ChecklistRootSet('<ROOT_KEY>')` for delete
 
-## Attachment media upload seam
+## Attachment save contract
 
-- metadata create request: `POST AttachmentSet`
-- binary upload request: `PUT AttachmentSet(AttachmentKey='<ATTACHMENT_KEY>')/$value`
-- required headers:
-  - `X-CSRF-Token`
-  - `Slug`
-  - `X-RootKey`
-  - `X-CategoryKey`
-- expected behavior:
-  - metadata create returns attachment identity
-  - media upload writes binary content on the same SAP Gateway OData V2 service root
-  - productive divergence must be adapted at the Gateway adapter boundary, not by adding REST fallback paths
+- attachments are staged locally in the detail draft until explicit `CreateChecklist` or `SaveChanges`
+- no separate frontend media upload transport is used
+- attachment rows travel inside the same OData V2 payload as the rest of the save/create contract
 
-Current frontend status:
+### Expected attachment request row
 
-- attachment media upload still uses a dedicated binary PUT helper in `app/service/backend/GatewayClient.js`
-- this remains the transport-bypass candidate to remove before claiming strict `ODataModel-only` parity
+- `Key`
+- `RootKey`
+- `ParentKey`
+- `FolderKey`
+- `CategoryKey`
+- `Type`
+- `FileName`
+- `Name`
+- `MimeType`
+- `Description`
+- `FileSize`
+- `FileSizeContent`
+- `Value`
+
+### Attachment field semantics
+
+- `CategoryKey` and `Type` stay aligned to the attachment-type dictionary seam
+- `RootKey` / `ParentKey` identify the owning checklist
+- `Value` is the base64-encoded binary payload carried as OData `Edm.Binary`
+- `FileSize` and `FileSizeContent` stay aligned to the decoded binary length
+
+### Productive adaptation boundary
+
+- if productive SAP Gateway uses different attachment payload field names, adapt only at `app/infra/adapters/ODataChecklistRepoAdapter.js`
+- do not reintroduce a separate REST/media upload fallback path
 
 ## Denied and failure response behavior
 

@@ -2,13 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/DraftChecklistFactory"
-], function (UseCase, Result, Effects, UseCaseResultUtils, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, CreateSentinel, DraftChecklistFactory) {
+], function (UseCase, Result, Effects, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory) {
     "use strict";
 
     function buildLocalObjectUrl(oFile) {
@@ -60,6 +60,7 @@ sap.ui.define([
         var aSessionNext = oAttachment ? AttachmentIdentity.appendUnique(aSession, Object.assign({}, oAttachment, { _sessionUpload: true })) : (Array.isArray(aSession) ? aSession.slice() : []);
         var aEffects = AttachmentEffectSupport.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentUploaded", "success");
         aEffects.push(Effects.modelPatch("view", "/sessionAttachments", aSessionNext));
+        aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true));
         if (bLoadedAll) {
             aEffects.push(Effects.modelPatch("view", "/attachmentsLoaded", true));
         }
@@ -74,23 +75,17 @@ sap.ui.define([
     AttachmentUploadUseCase.prototype.constructor = AttachmentUploadUseCase;
 
     AttachmentUploadUseCase.prototype.execute = function (mInput, mCtx) {
-        var oRepo = mCtx && mCtx.repo;
         var sRootId = String((mInput && mInput.rootId) || "").trim();
-        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
-            return Promise.resolve(stageLocalAttachment(mInput, mCtx)).then(function (oRes) {
-                return Result.ok(
-                    oRes || {},
-                    buildUploadEffects(mCtx, (oRes && oRes.attachment) || null, "attachmentUploaded")
-                );
-            });
+        if (!sRootId && !CreateSentinel.isCreateId(sRootId)) {
+            return Promise.resolve(Result.fail({
+                message: "Attachment target root is missing",
+                code: "ATTACHMENT_TARGET_MISSING"
+            }, AttachmentEffectSupport.buildAttachmentBusyResetEffects()));
         }
-        return UseCaseResultUtils.callOrDefault(function () {
-            return oRepo && oRepo.uploadAttachment(mInput || {});
-        }, { attachment: {} }).then(function (oRes) {
-            var oAttachment = (oRes && oRes.attachment) || stageLocalAttachment(mInput, mCtx).attachment;
+        return Promise.resolve(stageLocalAttachment(mInput, mCtx)).then(function (oRes) {
             return Result.ok(
                 oRes || {},
-                buildUploadEffects(mCtx, oAttachment, "attachmentUploaded")
+                buildUploadEffects(mCtx, (oRes && oRes.attachment) || null, "attachmentUploaded")
             );
         }).catch(function (oError) {
             return Result.fail(oError, AttachmentEffectSupport.buildAttachmentBusyResetEffects());

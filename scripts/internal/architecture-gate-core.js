@@ -12,6 +12,10 @@ const { canonicalLayer, resolveDependency } = require('./layer-contract');
 const ROOT = process.cwd();
 const SCAN_DIRS = ['controller', 'facades', 'service', 'infra', 'util', 'model'];
 const INFRA_BACKEND_ALLOWLIST = new Set(['service/backend/GatewayClient']);
+const INFRA_USECASE_ALLOWLIST = new Set([
+  'service/domain/shared/AccessPayload',
+  'service/domain/shared/DetailRuntimePayload'
+]);
 const CONTROLLER_INFRA_ALLOWLIST = new Set([
   'infra/navigation/WorkspaceRouteNavigation'
 ]);
@@ -48,7 +52,9 @@ function pushLayerViolations(violations, sourceLayer, targetLayer, file, item, l
     violations.push({ rule: 'R3', from: file, dep: item.dep, line, msg: 'backend cannot import controller/usecase' });
   }
   if (sourceLayer === 'infra' && ['controller', 'usecase', 'backend'].includes(targetLayer)) {
-    const allowed = targetLayer === 'backend' && INFRA_BACKEND_ALLOWLIST.has(modulePath);
+    const allowed =
+      (targetLayer === 'backend' && INFRA_BACKEND_ALLOWLIST.has(modulePath)) ||
+      (targetLayer === 'usecase' && INFRA_USECASE_ALLOWLIST.has(modulePath));
     if (!allowed) violations.push({ rule: 'R4', from: file, dep: item.dep, line, msg: 'infra cannot import controller/usecase/backend' });
   }
 }

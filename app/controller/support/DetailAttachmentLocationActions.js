@@ -10,6 +10,19 @@ sap.ui.define([
 ], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime) {
     "use strict";
 
+    function base64ToBlob(sBase64, sMimeType) {
+        var sBinary = atob(String(sBase64 || "").trim());
+        var iLength = sBinary.length;
+        var aBytes = new Uint8Array(iLength);
+        var iIndex;
+        for (iIndex = 0; iIndex < iLength; iIndex += 1) {
+            aBytes[iIndex] = sBinary.charCodeAt(iIndex);
+        }
+        return new Blob([aBytes], {
+            type: String(sMimeType || "application/octet-stream").trim() || "application/octet-stream"
+        });
+    }
+
     function resolveAttachmentContext(oEvent) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
         return (oSource && oSource.getBindingContext && (oSource.getBindingContext("selected") || oSource.getBindingContext("view"))) || null;
@@ -58,10 +71,9 @@ sap.ui.define([
         var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
         var sLocalObjectUrl = String((oRow && oRow.localObjectUrl) || "").trim();
         var oMainService = oController && oController.getModel && oController.getModel("mainService");
-        var sBaseUrl = String((oMainService && oMainService.sServiceUrl) || "").replace(/\/+$/, "");
         var sFileName = String((oRow && oRow.FileName) || "attachment").trim() || "attachment";
         var oLink;
-        var sHref;
+        var sEntityPath;
 
         function triggerDownload(sUrl) {
             if (!sUrl) {
@@ -81,11 +93,36 @@ sap.ui.define([
         if (sLocalObjectUrl) {
             return triggerDownload(sLocalObjectUrl);
         }
-        if (!sAttachmentId || !sBaseUrl) {
-            return false;
+        if (!sAttachmentId || !oMainService || typeof oMainService.read !== "function") {
+            return Promise.resolve(false);
         }
-        sHref = sBaseUrl + "/AttachmentSet(Key='" + sAttachmentId + "')/$value";
-        return triggerDownload(sHref);
+        sEntityPath = "/AttachmentSet(AttachmentKey='" + sAttachmentId + "')";
+        return new Promise(function (resolve) {
+            oMainService.read(sEntityPath, {
+                urlParameters: {
+                    "$select": "AttachmentKey,FileName,MimeType,Value"
+                },
+                success: function (oData) {
+                    var sValue = String((oData && oData.Value) || "").trim();
+                    var oBlob;
+                    var sObjectUrl;
+                    if (!sValue) {
+                        resolve(false);
+                        return;
+                    }
+                    oBlob = base64ToBlob(sValue, oData && oData.MimeType);
+                    sObjectUrl = window.URL.createObjectURL(oBlob);
+                    triggerDownload(sObjectUrl);
+                    window.setTimeout(function () {
+                        window.URL.revokeObjectURL(sObjectUrl);
+                    }, 0);
+                    resolve(true);
+                },
+                error: function () {
+                    resolve(false);
+                }
+            });
+        });
     }
 
     return {

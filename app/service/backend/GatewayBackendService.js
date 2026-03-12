@@ -28,14 +28,8 @@ sap.ui.define([
         postToPath: function (path, payload) {
             return GatewayClient.postToPath(path, payload || {});
         },
-        createEntity: function (path, payload, mParameters) {
-            return GatewayClient.createEntity(path, payload || {}, mParameters || {});
-        },
         deletePath: function (path) {
             return GatewayClient.deletePath(path);
-        },
-        putPath: function (path, payload, mOptions) {
-            return GatewayClient.putPath(path, payload, mOptions || {});
         },
         fetchCsrfToken: function () {
             return GatewayClient.fetchCsrfToken();

@@ -1,3 +1,4 @@
+import base64
 import uuid
 import re
 import json
@@ -114,7 +115,7 @@ def _normalize_hex_key(value: str) -> str:
 
 def _entity_key(key_expr: str) -> str:
     cleaned = str(key_expr or "").strip().strip("'")
-    for prefix in ("Key=", "RootKey="):
+    for prefix in ("Key=", "RootKey=", "AttachmentKey=", "FolderKey="):
         if cleaned.startswith(prefix):
             cleaned = cleaned.split("=", 1)[1].strip().strip("'")
     return _uuid_from_hex(cleaned)
@@ -211,6 +212,92 @@ def _validate_attachment_upload(db: Session, file_name: str, content_type: str, 
     if allowed_mime and resolved_mime not in allowed_mime:
         return None, _err(415, "UPLOAD_POLICY_REJECTED", "Attachment mime type is not allowed")
     return resolved_mime, None
+
+
+def _attachment_content_base64(entry: AttachmentEntry) -> str:
+    path = Path(entry.storage_path or "")
+    if not path.exists():
+        return ""
+    return base64.b64encode(path.read_bytes()).decode("ascii")
+
+
+def _normalize_attachment_key(value: str) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return str(uuid.uuid4())
+    try:
+        return str(uuid.UUID(raw))
+    except ValueError:
+        pass
+    cleaned = raw.replace("-", "")
+    if len(cleaned) == 32:
+        try:
+            return str(uuid.UUID(hex=cleaned))
+        except ValueError:
+            pass
+    return str(uuid.uuid4())
+
+
+def _pick_attachment_text(payload: dict | None, *keys) -> str:
+    return _pick_text(payload, *keys)
+
+
+def _normalize_attachment_payload_rows(items, root_hex: str) -> list[dict]:
+    rows = items if isinstance(items, list) else []
+    normalized = []
+    for row in rows:
+        item = row if isinstance(row, dict) else {}
+        normalized.append({
+            "AttachmentKey": _pick_attachment_text(item, "AttachmentKey", "Key", "key"),
+            "RootKey": _pick_attachment_text(item, "RootKey", "ParentKey", "parent_key") or root_hex,
+            "FolderKey": _pick_attachment_text(item, "FolderKey", "folder_key", "ParentKey", "parent_key") or root_hex,
+            "CategoryKey": _pick_attachment_text(item, "CategoryKey", "category_key", "Type", "type") or "GEN",
+            "FileName": _pick_attachment_text(item, "FileName", "file_name", "Name", "name"),
+            "MimeType": _pick_attachment_text(item, "MimeType", "mime_type", "Mimetype", "mimtype") or "application/octet-stream",
+            "Description": _pick_attachment_text(item, "Description", "description", "Desc", "desc"),
+            "FileSize": _coerce_int(_pick_first_present(item, "FileSize", "file_size", "FileSizeContent", "filesize_content"), 0),
+            "Value": _pick_attachment_text(item, "Value", "value")
+        })
+    return normalized
+
+
+def _apply_save_attachments(db: Session, root: ChecklistRoot, items) -> None:
+    rows = _normalize_attachment_payload_rows(items, _hex(root.id))
+    if not rows:
+        return
+    for row in rows:
+        file_name = row.get("FileName") or ""
+        raw_value = row.get("Value") or ""
+        if not file_name or not raw_value:
+            continue
+        try:
+            payload = base64.b64decode(raw_value, validate=True)
+        except Exception:
+            raise ValueError("INVALID_ATTACHMENT_PAYLOAD")
+        resolved_mime_type, validation_error = _validate_attachment_upload(db, file_name, row.get("MimeType") or "", len(payload))
+        if validation_error:
+            raise RuntimeError(validation_error)
+        category_key = str(row.get("CategoryKey") or "GEN").strip() or "GEN"
+        category_item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key).first()
+        if not category_item:
+            category_key = "GEN"
+        attachment_id = _normalize_attachment_key(row.get("AttachmentKey") or "")
+        file_path = _UPLOAD_DIR / attachment_id
+        file_path.write_bytes(payload)
+        now = now_utc()
+        entry = AttachmentEntry(
+            id=attachment_id,
+            root_id=root.id,
+            folder_key=str(row.get("FolderKey") or _hex(root.id)).strip() or _hex(root.id),
+            category_key=category_key,
+            file_name=file_name,
+            mime_type=resolved_mime_type,
+            file_size=len(payload),
+            storage_path=str(file_path),
+            created_on=now,
+            changed_on=now,
+        )
+        db.add(entry)
 
 
 
@@ -669,7 +756,7 @@ def _attachment_matches_filter(row: AttachmentEntry, filter_expr: str | None) ->
     return True
 
 
-def _to_attachment(entry: AttachmentEntry, db: Session | None = None) -> dict:
+def _to_attachment(entry: AttachmentEntry, db: Session | None = None, include_value: bool = False) -> dict:
     entry_key = _hex(entry.id)
     category_key = str(entry.category_key or "GEN")
     category_text = category_key
@@ -677,22 +764,30 @@ def _to_attachment(entry: AttachmentEntry, db: Session | None = None) -> dict:
         item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key).first()
         if item and item.text:
             category_text = str(item.text)
-    return {
+    payload = {
         "__metadata": _entity_metadata("Attachment", "AttachmentSet", entry_key),
-        "Key": entry_key,
         "AttachmentKey": entry_key,
+        "Key": entry_key,
         "RootKey": _hex(entry.root_id),
+        "ParentKey": _hex(entry.root_id),
         "FolderKey": str(entry.folder_key or ""),
         "CategoryKey": category_key,
         "CategoryText": category_text,
+        "Type": category_key,
         "FileName": str(entry.file_name or ""),
+        "Name": str(entry.file_name or ""),
         "MimeType": str(entry.mime_type or "application/octet-stream"),
+        "Description": "",
         "FileSize": int(entry.file_size or 0),
+        "FileSizeContent": int(entry.file_size or 0),
         "ScanStatus": "OK",
         "ScannedOn": format_datetime(entry.changed_on),
         "CreatedOn": format_datetime(entry.created_on),
         "ChangedOn": format_datetime(entry.changed_on),
     }
+    if include_value:
+        payload["Value"] = _attachment_content_base64(entry)
+    return payload
 def _rate(items, pred) -> float:
     if not items:
         return 100.0
@@ -1909,6 +2004,14 @@ def create_checklist(payload: dict, response: Response, db: Session = Depends(ge
     db.add(root)
     db.flush()
     _replace_detail_rows(db, root, full.get("checks"), full.get("barriers"))
+    try:
+        _apply_save_attachments(db, root, full.get("attachments"))
+    except ValueError:
+        db.rollback()
+        return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
+    except RuntimeError as ex:
+        db.rollback()
+        return ex.args[0]
     db.commit()
     AnalyticsService.mark_dirty()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
@@ -1989,6 +2092,14 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
     _apply_save_root(root, _save_request_root(payload), db)
     _apply_save_checks(db, root, payload.get("checks"))
     _apply_save_barriers(db, root, payload.get("barriers"))
+    try:
+        _apply_save_attachments(db, root, payload.get("attachments"))
+    except ValueError:
+        db.rollback()
+        return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
+    except RuntimeError as ex:
+        db.rollback()
+        return ex.args[0]
     root.changed_by = CurrentUserService.resolve_uname(db=db) or root.changed_by or "ANON"
     root.changed_on = now_utc()
     root.version_number = int(root.version_number or 0) + 1
@@ -2221,113 +2332,13 @@ def attachment_set(filter: str | None = Query(None, alias="$filter"), expand: st
     return odata_payload(rows)
 
 
-@router.post(f"{SERVICE_ROOT}/AttachmentSet")
-def attachment_create(payload: dict, response: Response, db: Session = Depends(get_db)):
-    root_key = str(payload.get("RootKey") or payload.get("root_id") or "").strip()
-    if not root_key:
-        return _err(400, "VALIDATION_ERROR", "RootKey is required")
-    try:
-        _normalize_hex_key(root_key)
-    except ValueError:
-        return _err(400, "VALIDATION_ERROR", "RootKey must be RAW16 HEX (32 chars)")
-
-    root_uuid = _entity_key(root_key)
-    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid, ChecklistRoot.is_deleted.isnot(True)).first()
-    if not root:
-        return _err(404, "NOT_FOUND", "Checklist root not found")
-
-    category_key = str(payload.get("CategoryKey") or "GEN").strip() or "GEN"
-    category_item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key).first()
-    if not category_item:
-        category_key = "GEN"
-    attachment_id = str(uuid.uuid4())
-    now = now_utc()
-    entry = AttachmentEntry(
-        id=attachment_id,
-        root_id=root_uuid,
-        folder_key=str(payload.get("FolderKey") or root_key).strip() or root_key,
-        category_key=category_key,
-        file_name=str(payload.get("FileName") or f"{attachment_id}.bin"),
-        mime_type=str(payload.get("MimeType") or "application/octet-stream"),
-        file_size=_coerce_int(payload.get("FileSize"), 0),
-        storage_path=str(_UPLOAD_DIR / attachment_id),
-        created_on=now,
-        changed_on=now,
-    )
-    db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    response.status_code = 201
-    return odata_entity(_to_attachment(entry, db=db))
-
-
-@router.put(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})/$value")
-async def attachment_value_put(entity_key: str, request: Request, db: Session = Depends(get_db)):
-    key = _entity_key(entity_key)
-    payload = await request.body()
-    content_type = request.headers.get("content-type") or "application/octet-stream"
-    file_name = request.headers.get("Slug") or f"{key}.bin"
-    resolved_mime_type, validation_error = _validate_attachment_upload(db, file_name, content_type, len(payload))
-    root_key = request.headers.get("X-RootKey") or ""
-    category_key = str(request.headers.get("X-CategoryKey") or "GEN").strip() or "GEN"
-    root_uuid = ""
-    category_item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key).first()
-    if validation_error:
-        return validation_error
-    if not category_item:
-        category_key = "GEN"
-    if root_key:
-        try:
-            _normalize_hex_key(root_key)
-            root_uuid = _entity_key(root_key)
-        except ValueError:
-            return _err(400, "VALIDATION_ERROR", "X-RootKey must be RAW16 HEX (32 chars)")
-    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid).first()
-    if not root:
-        return _err(404, "NOT_FOUND", "Checklist root not found")
-
-    now = now_utc()
-    file_path = _UPLOAD_DIR / key
-    file_path.write_bytes(payload)
-    entry = db.query(AttachmentEntry).filter(AttachmentEntry.id == key).first()
-    if not entry:
-        entry = AttachmentEntry(
-            id=key,
-            root_id=root_uuid,
-            folder_key=request.headers.get("X-FolderKey") or "",
-            category_key=category_key,
-            file_name=file_name,
-            mime_type=resolved_mime_type,
-            file_size=len(payload),
-            storage_path=str(file_path),
-            created_on=now,
-            changed_on=now,
-        )
-        db.add(entry)
-    else:
-        entry.root_id = root_uuid
-        entry.folder_key = request.headers.get("X-FolderKey") or entry.folder_key or ""
-        entry.category_key = category_key or entry.category_key or "GEN"
-        entry.file_name = file_name
-        entry.mime_type = resolved_mime_type
-        entry.file_size = len(payload)
-        entry.storage_path = str(file_path)
-        entry.changed_on = now
-    root.changed_on = now_utc()
-    db.commit()
-    return Response(status_code=204)
-
-
-@router.get(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})/$value")
-def attachment_value_get(entity_key: str, db: Session = Depends(get_db)):
+@router.get(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})")
+def attachment_get(entity_key: str, db: Session = Depends(get_db)):
     key = _entity_key(entity_key)
     entry = db.query(AttachmentEntry).filter(AttachmentEntry.id == key).first()
     if not entry:
         return _err(404, "NOT_FOUND", "Attachment not found")
-    path = Path(entry.storage_path or "")
-    if not path.exists():
-        return _err(404, "NOT_FOUND", "Attachment content missing")
-    return Response(content=path.read_bytes(), media_type=entry.mime_type or "application/octet-stream")
+    return odata_entity(_to_attachment(entry, db=db, include_value=True))
 
 
 @router.delete(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})")

@@ -1082,6 +1082,21 @@ body.chkAppRoot.appLight .chkApp .detailAttachmentDropZone {
   align-self: center;
 }
 
+.chkApp .detailAttachmentDropZoneActions {
+  justify-self: end;
+  align-self: center;
+}
+
+.chkApp .detailAttachmentDropZoneActions .sapUiFup,
+.chkApp .detailAttachmentDropZoneActions .sapMBtn,
+.chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
+  width: 100%;
+}
+
+.chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
+  justify-content: center;
+}
+
 .chkApp .detailAttachmentActions {
   gap: 0.25rem;
 }
@@ -1945,6 +1960,10 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   min-height: 0;
 }
 
+.chkApp .detailViewportNarrow .detailAttachmentDropZoneActions {
+  justify-self: stretch;
+}
+
 .chkApp .detailViewportNarrow .detailAttachmentTable .sapMListTbl {
   min-width: 36rem;
 }
@@ -2613,6 +2632,11 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   gap: 0.62rem;
   margin-top: 0.18rem;
   padding: 0.78rem 0.88rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentDropZoneActions,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentDropZoneActions {
+  justify-self: stretch;
 }
 
 .chkApp .appLayoutSplit #detailPaneHost .detailEmptyStateCard,
