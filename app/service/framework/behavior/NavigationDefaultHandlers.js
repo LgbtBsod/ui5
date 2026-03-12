@@ -40,9 +40,6 @@ sap.ui.define([
         if (sRouteName === "analytics") {
             return "#/analytics";
         }
-        if (sRouteName === "accessDenied" && oRouteArgs.id) {
-            return "#/access-denied/" + encodeURIComponent(String(oRouteArgs.id));
-        }
         if (sRouteName === "detailLayout" && oRouteArgs.id && oRouteArgs.layout) {
             return "#/checklist/" + encodeURIComponent(String(oRouteArgs.id)) + "/" + encodeURIComponent(String(oRouteArgs.layout));
         }
@@ -144,9 +141,6 @@ sap.ui.define([
         },
         navigateToDetail: function (mContext) {
             return WorkspaceRouteNavigation.navigateToDetail(mContext.controller, mContext.rootId, mContext.layout);
-        },
-        navigateToAccessDenied: function (mContext) {
-            return WorkspaceRouteNavigation.navigateToAccessDenied(mContext.controller, mContext.rootId, mContext.options);
         },
         buildDetailHash: function (mContext) {
             return WorkspaceRouteNavigation.buildDetailHash(mContext.controller, mContext.rootId);

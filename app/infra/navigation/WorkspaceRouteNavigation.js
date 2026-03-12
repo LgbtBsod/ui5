@@ -38,12 +38,6 @@ sap.ui.define([
         if (sRouteName === "analytics") {
             return cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
         }
-        if (sRouteName === "accessDenied" && sSelectedId) {
-            return {
-                routeName: "accessDenied",
-                routeArgs: { id: sSelectedId }
-            };
-        }
         if ((sRouteName === "detailLayout" || sLayout === "MidColumnFullScreen") && sSelectedId) {
             return {
                 routeName: "detailLayout",
@@ -65,9 +59,6 @@ sap.ui.define([
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
         var oIntent = buildCurrentIntent(oStateModel);
-        if (String(oIntent.routeName || "") === "accessDenied") {
-            oIntent = buildFallbackIntent();
-        }
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
             routeName: String(oIntent.routeName || "search"),
@@ -101,9 +92,6 @@ sap.ui.define([
         if (!oIntent.routeName) {
             oIntent = buildFallbackIntent();
         }
-        if (String(oIntent.routeName || "") === "accessDenied") {
-            oIntent = buildFallbackIntent();
-        }
         if (oRouter && typeof oRouter.navTo === "function") {
             oRouter.navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
         }
@@ -131,20 +119,6 @@ sap.ui.define([
         oRouter.navTo("detail", { id: sId }, false);
     }
 
-    function navigateToAccessDenied(oController, sRootId, mOptions) {
-        var oRouter = oController && oController.getRouter && oController.getRouter();
-        var sId = String(sRootId || "").trim();
-        var bFullScreen = !!(mOptions && mOptions.fullScreen);
-
-        if (oRouter && typeof oRouter.navTo === "function" && sId) {
-            if (bFullScreen) {
-                oRouter.navTo("accessDenied", { id: sId }, false);
-                return;
-            }
-            oRouter.navTo("detail", { id: sId }, false);
-        }
-    }
-
     function buildDetailHash(oController, sRootId) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var sId = String(sRootId || "").trim();
@@ -159,7 +133,6 @@ sap.ui.define([
         buildCurrentIntent: buildCurrentIntent,
         buildDetailHash: buildDetailHash,
         navigateBackFromAnalytics: navigateBackFromAnalytics,
-        navigateToAccessDenied: navigateToAccessDenied,
         navigateToAnalytics: navigateToAnalytics,
         navigateToDetail: navigateToDetail,
         navigateToSearch: navigateToSearch,

@@ -314,9 +314,7 @@ sap.ui.define([
                 });
                 return;
             }
-            if (sRouteName !== "accessDenied") {
-                resetDetailAccessGuard();
-            }
+            resetDetailAccessGuard();
         };
         oRouter.attachBeforeRouteMatched(oComponent._fnBeforeRouteMatched, oComponent);
         oRouter.initialize();

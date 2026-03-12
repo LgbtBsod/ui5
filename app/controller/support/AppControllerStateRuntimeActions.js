@@ -143,11 +143,9 @@ sap.ui.define([
             mShellPatch["/shell/routeLabel"] = "";
             mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === "analytics"
                 ? getText(this, "shellContextAnalytics", null, "Gateway-backed workflow dashboard with operational totals and breakdowns.")
-                : (sCurrentRouteName === "accessDenied"
-                    ? getText(this, "shellContextAccessDenied", [sSelectedId], "Checklist " + sSelectedId + " is restricted for the current session.")
-                    : (!sSelectedId ? getText(this, "shellContextSearch", null, "Discover, filter, and open checklist flows.")
-                        : (CreateSentinel.isCreateId(sSelectedId) ? getText(this, "shellContextDraft", null, "Draft checklist workspace")
-                            : getText(this, "shellContextDetail", [sSelectedId], "Checklist " + sSelectedId))));
+                : (!sSelectedId ? getText(this, "shellContextSearch", null, "Discover, filter, and open checklist flows.")
+                    : (CreateSentinel.isCreateId(sSelectedId) ? getText(this, "shellContextDraft", null, "Draft checklist workspace")
+                        : getText(this, "shellContextDetail", [sSelectedId], "Checklist " + sSelectedId)));
             mShellPatch["/shell/userLabel"] = buildHeaderUserLabel(sFullName, aPermissionSheets);
             mShellPatch["/shell/userMeta"] = sFullName;
             mShellPatch["/shell/userLoginLabel"] = "";

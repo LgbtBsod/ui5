@@ -18,9 +18,6 @@ sap.ui.define([
         if (sRouteName === "analytics") {
             return "analyticsPaneHost";
         }
-        if (sRouteName === "accessDenied") {
-            return "accessDeniedPaneHost";
-        }
         return "detailPaneHost";
     }
 

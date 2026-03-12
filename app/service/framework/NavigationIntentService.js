@@ -37,14 +37,6 @@ sap.ui.define([
         });
     }
 
-    function navigateToAccessDenied(oController, sRootId, mOptions) {
-        return runOperation("navigateToAccessDenied", {
-            controller: oController,
-            rootId: sRootId,
-            options: mOptions || {}
-        });
-    }
-
     function buildDetailHash(oController, sRootId) {
         return runOperation("buildDetailHash", {
             controller: oController,
@@ -108,7 +100,6 @@ sap.ui.define([
         buildCurrentIntent: buildCurrentIntent,
         buildDetailHash: buildDetailHash,
         setAnalyticsReturnIntent: setAnalyticsReturnIntent,
-        navigateToAccessDenied: navigateToAccessDenied,
         navigateToAnalytics: navigateToAnalytics,
         navigateBackFromAnalytics: navigateBackFromAnalytics,
         navigateToDetail: navigateToDetail,

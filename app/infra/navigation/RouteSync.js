@@ -21,9 +21,6 @@ sap.ui.define([
                 ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
             );
         }
-        if (sRoute === "accessDenied" && sArgId) {
-            return sArgId;
-        }
         if ((sRoute === "detail" || sRoute === "detailLayout") && sArgId) {
             return sArgId;
         }

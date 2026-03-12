@@ -73,7 +73,6 @@
             <f:midColumnPages>
                 <mvc:XMLView id="detailPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Detail" width="100%"/>
                 <mvc:XMLView id="analyticsPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Analytics" width="100%"/>
-                <mvc:XMLView id="accessDeniedPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.AccessDenied" width="100%"/>
             </f:midColumnPages>
         </f:FlexibleColumnLayout>
     </VBox>
