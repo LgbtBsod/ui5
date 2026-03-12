@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCoordinatorRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime, FrontendConfigConstants) {
     "use strict";
 
     function reuseJsonModel(oExistingModel, fnCreateModel) {
@@ -47,6 +48,18 @@ sap.ui.define([
             return true;
         }
         return sCode === "SESSION_UNAVAILABLE" || sCode === "AUTH_REQUIRED" || /SESSION|AUTH|CSRF/.test(sMessage);
+    }
+
+    function normalizeRuntimeSettingsError(oError) {
+        var sMessage = String((oError && oError.message) || "").trim();
+        var sCode = String((oError && oError.code) || "").trim();
+        var iStatus = Number((oError && (oError.statusCode || oError.status)) || 0) || 0;
+
+        return {
+            message: sMessage,
+            code: sCode,
+            status: iStatus
+        };
     }
 
     function createFeedbackRuntime(oOptions) {
@@ -298,6 +311,14 @@ sap.ui.define([
                     });
                 }.bind(this));
                 return oRuntimeApplyQueue;
+                return this._applyFrontendRuntimeConfig({
+                    source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
+                    runtimeSettingsPayload: oRuntime || {}
+                }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
+                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
+                    fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig(FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL));
+                    return oRuntime || {};
+                });
             }.bind(this);
             this._fnUnsubscribeRuntimeSettings = SettingsManager.subscribe(function (oRuntime, mMeta) {
                 if (!mMeta || !mMeta.refreshed) {
@@ -315,10 +336,19 @@ sap.ui.define([
                 return pLoad.then(function (oRuntime) {
                     return fnApplyRuntimeSettings(oRuntime);
                 }).catch(function (oError) {
+                    var oOriginalError = normalizeRuntimeSettingsError(oError);
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
-                    fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
+                    fnEmitTelemetry("runtime.config.fallback_applied", TelemetryRuntime.runtimeConfig(
                         "RuntimeSettingsSet(GLOBAL)",
+                        "runtime_settings_fallback_applied",
+                        oOriginalError
+                    ));
+                    fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
+                        FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                         (oError && oError.message) || oError || "runtime_settings_load_failed"
+                        "RuntimeSettingsSet(GLOBAL)",
+                        oOriginalError.message || "runtime_settings_load_failed",
+                        oOriginalError
                     ));
                     throw oError || new Error("runtime_settings_load_failed");
                 });
@@ -472,4 +502,3 @@ sap.ui.define([
         runInit: runInit
     };
 });
-

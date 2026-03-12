@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
+], function (FrontendConfigConstants) {
     "use strict";
 
     return {
@@ -27,7 +29,7 @@ sap.ui.define([], function () {
             summaryText: "",
             fetchedAt: ""
         },
-        frontendVariables: {},
+        frontendVariables: Object.assign({}, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES),
         frontendConfigSource: "gateway",
         requestGroups: { save: "saveFlow", autosave: "autosave", lock: "locks", unlock: "locks", lockHeartbeat: "locks", lockStatus: "locks", functionImport: "locks" },
         readiness: {

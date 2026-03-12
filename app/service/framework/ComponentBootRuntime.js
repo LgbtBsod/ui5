@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
-], function (ModelStateRuntime, CloneUtil, WorkflowTelemetry) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
+], function (ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants) {
     "use strict";
 
     function runBootSequence(mOptions) {
@@ -82,10 +83,10 @@ sap.ui.define([
             });
             ModelStateRuntime.setManyOnModel(oStateModel, {
                 "/requiredFields": [],
-                "/frontendVariables": {},
+                "/frontendVariables": Object.assign({}, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES),
                 "/frontendConfigSource": "gateway"
             });
-            ModelStateRuntime.writeOnModel(oEnvModel, "/variables", {});
+            ModelStateRuntime.writeOnModel(oEnvModel, "/variables", Object.assign({}, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES));
             return Promise.resolve(
                 oCacheAdapter && typeof oCacheAdapter.cleanupStaleSessions === "function"
                     ? oCacheAdapter.cleanupStaleSessions(sTabSessionId)

@@ -42,12 +42,25 @@ sap.ui.define([
         };
     }
 
-    function runtimeConfig(vSource, vError) {
+    function runtimeConfig(vSource, vError, oOriginalError) {
         var mPayload = {
             source: String(vSource || "")
         };
+        var sCode = String((oOriginalError && oOriginalError.code) || "").trim();
+        var iStatus = Number((oOriginalError && (oOriginalError.statusCode || oOriginalError.status)) || 0) || 0;
+        var sReason = String((oOriginalError && oOriginalError.message) || "").trim();
+
         if (typeof vError !== "undefined" && vError !== null && vError !== "") {
             mPayload.error = String(vError);
+        }
+        if (sCode) {
+            mPayload.errorCode = sCode;
+        }
+        if (iStatus > 0) {
+            mPayload.statusCode = iStatus;
+        }
+        if (sReason) {
+            mPayload.reason = sReason;
         }
         return mPayload;
     }
