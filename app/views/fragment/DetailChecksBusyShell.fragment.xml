@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/checksBusy}">
-        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
     </VBox>
 </core:FragmentDefinition>

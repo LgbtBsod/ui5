@@ -2,165 +2,212 @@
 
 Date: 2026-03-12
 Scope: `app/`
-Goal: normalize the frontend structure into a capability-based modular layout with SRP, smart contracts, reusable behaviors, and minimal historical layering noise
+Goal: document the actual current structural map, the completed migrations, and the remaining physical normalization work
 
-## Target Structure
+## 1. Actual Current Structure
 
-### Canonical shared layers
+### Canonical active layers
 
 - `app/contracts`
-  - canonical shared contracts only
-  - examples: workflow, navigation, analytics
+  - cross-feature business contracts
 - `app/model`
-  - canonical UI state paths and model schemas only
-- `app/behaviors`
-  - reusable default and override behavior packs
-- `app/framework`
-  - generic infrastructure only
-- `app/adapters`
-  - external transport and integration adapters
+  - canonical state paths and model schemas
+- `app/controller`
+  - entry points, controller-local behaviors, controller-shared helpers
+- `app/service/domain`
+  - business use cases and domain orchestration
+- `app/service/features`
+  - feature runtimes and feature contracts
+- `app/service/framework`
+  - generic runtime infrastructure and framework contracts
+- `app/service/shared`
+  - cross-feature shared helpers
+- `app/infra/adapters`
+  - transport, platform and integration seams
 
-### Capability layers
+### Additional active normalized layers
 
-- `app/features/search`
-  - search controllers, view behaviors, use cases, state access, formatters
-- `app/features/detail`
-  - detail flows, edit/lock behavior, attachment behavior, validation behavior
-- `app/features/analytics`
-  - analytics load, refresh, export, drilldown behavior
-- `app/features/shell`
-  - shell state sync, shell overlays, shell actions
-- `app/features/shared`
-  - shared capability helpers that are not generic enough for framework
-
-### UI layers
-
+- `app/controls`
+  - custom UI5 controls
 - `app/views`
   - XML views and fragments
-- `app/controls`
-  - only real custom controls
 - `app/styles`
-  - component- and capability-scoped styles
+  - application stylesheet entry and style modules
+- `app/service/ports`
+  - interface-style boundary contracts
 
-## Current To Target Map
+### Remaining top-level folders outside the core ownership model
 
-### Keep, but normalize purpose
-
-- `app/contracts`
-  - keep
-  - becomes the only shared business contract source
-- `app/model`
-  - keep
-  - remains canonical state path/schema layer
-
-### Merge and move
-
-- `app/service/framework/behavior` -> `app/behaviors`
-  - reason: this is behavior infrastructure, not service/domain logic
-- `app/infra/adapters` -> `app/adapters`
-  - reason: adapters are already a clean concept and should be first-class
-- `app/controller/support` -> split across `app/features/*`
-  - reason: support folder is a historical catch-all and not a canonical architecture concept
-- `app/view` -> `app/views`
-  - reason: pluralized UI layer naming and clearer separation
-- `app/control` -> `app/controls`
-  - reason: same normalization as views
-- `app/css` -> `app/styles`
-  - reason: styling should align with component/capability ownership, not raw asset grouping
-
-### Shrink or eliminate
-
-- `app/service/contracts`
-  - keep temporarily as controller-safe facade only
-  - long-term target: remove once controller-layer rules allow direct canonical import or controllers move behind feature/application layer
-- `app/service/domain/shared`
-  - shrink heavily
-  - split true shared contracts vs feature-specific helpers
-- `app/util`
-  - reduce aggressively
-  - move generic runtime infra to framework
-  - move feature-specific helpers into matching capability folders
-- `app/ports`
-  - review whether it is still a live abstraction or can be merged into capability/domain folders
+- `app/assets`
+- `app/i18n`
 - `app/localService`
-  - keep only as local metadata/mock contract fixture layer
 
-## Folder-Level Decisions
+These are part of the physical tree, but they are not where the main runtime architecture is now centered.
 
-### Delete after migration
+## 2. Completed Normalization
 
-- `app/infra/contracts`
-  - already removed
-  - duplicate layer no longer needed
-
-### Deprecate and drain
+### Completed layer drainage
 
 - `app/controller/support`
-  - target state: empty then removed
-- `app/service/framework`
-  - target state: smaller and generic-only
+  - removed
 - `app/util`
-  - target state: minimal
+  - removed
+- `app/infra/contracts`
+  - removed as duplicate layer
 
-## First Migration Waves
+### Completed top-level naming normalization
 
-### Wave 1
+- `app/control` -> `app/controls`
+- `app/view` -> `app/views`
+- `app/css` -> `app/styles`
+- `app/ports` -> `app/service/ports`
 
-- keep physical structure mostly stable
-- introduce canonical contracts and token constants
-- stop adding new files to `controller/support`
-- stop adding new duplicated literals
+### Completed ownership moves
 
-### Wave 2
+- shared helpers moved into `app/service/shared`
+- feature contracts and runtime moved into `app/service/features/*`
+- business-side orchestration moved into `app/service/domain/*`
+- framework runtime consolidated into `app/service/framework`
+- adapter transport seams normalized under `app/infra/adapters`
 
-- move search-specific support modules into `features/search`
-- move detail-specific support modules into `features/detail`
-- move analytics-specific support modules into `features/analytics`
-- move shell-specific support modules into `features/shell`
+### Completed factory cleanup
 
-### Wave 3
+Collapsed stateless adapters:
 
-- move reusable behavior modules into `behaviors`
-- move adapters into `adapters`
-- trim `service/framework` to truly generic services only
+- [ClockAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/ClockAdapter.js)
+- [LockAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/LockAdapter.js)
+- [LastChangeSetAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/LastChangeSetAdapter.js)
+- [LocationLookupAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/LocationLookupAdapter.js)
+- [PersonSuggestAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/PersonSuggestAdapter.js)
+- [WorkflowAnalyticsAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/WorkflowAnalyticsAdapter.js)
 
-### Wave 4
+Retained stateful factories:
 
-- rename UI folders:
-  - `view` -> `views`
-  - `control` -> `controls`
-  - `css` -> `styles`
+- [BrowserCacheAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/BrowserCacheAdapter.js)
+- [DictAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/DictAdapter.js)
+- [ODataChecklistRepoAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/ODataChecklistRepoAdapter.js)
+- [SmartControlsAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/SmartControlsAdapter.js)
+- [TelemetryAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/TelemetryAdapter.js)
+- [Ui5StateAdapter.js](C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/Ui5StateAdapter.js)
 
-## Immediate Candidate Moves
+## 3. Ownership Rules By Folder
 
-### Search
+### `app/controller`
 
-- `controller/support/SearchControllerActions.js` -> `features/search/behavior/SearchControllerActions.js` then split further
-- `controller/support/SearchSelectionRuntime.js` -> `features/search/behavior/SearchSelectionBehavior.js`
-- `controller/support/SearchViewportRuntime.js` -> `features/search/layout/SearchViewportBehavior.js`
-- `controller/support/SearchViewRuntime.js` -> `features/search/runtime/SearchViewRuntime.js`
+Allowed:
 
-### Detail
+- event entry points
+- route handlers
+- controller-local runtime and behavior
+- controller-shared helpers in `controller/shared`
 
-- `controller/support/DetailViewRuntime.js` -> `features/detail/runtime/DetailViewRuntime.js` then split
-- `controller/support/DetailChecklistRuntime.js` -> `features/detail/behavior/DetailChecklistBehavior.js`
-- `controller/support/DetailChecklistRowActions.js` -> `features/detail/behavior/DetailRowBehavior.js`
-- `controller/support/AttachmentUploadCore.js` -> `features/detail/attachments/AttachmentUploadBehavior.js`
+Forbidden:
 
-### Analytics
+- backend transport logic
+- cross-feature dumping grounds
 
-- `controller/support/AnalyticsControllerActions.js` -> `features/analytics/behavior/AnalyticsControllerActions.js`
-- `controller/support/AnalyticsBuilderRuntime.js` -> `features/analytics/runtime/AnalyticsBuilderRuntime.js`
+### `app/service/features/*`
 
-### Shell
+Allowed:
 
-- `controller/support/AppControllerLifecycleActions.js` -> `features/shell/runtime/AppLifecycleRuntime.js`
-- `controller/support/AppControllerShellActions.js` -> `features/shell/behavior/ShellActionBehavior.js`
-- `controller/support/AppControllerStateRuntimeActions.js` -> `features/shell/state/ShellStateRuntime.js`
+- feature runtime
+- feature contracts
+- feature-local reusable behavior
 
-## Rules During Migration
+Forbidden:
 
-- no new shared literals outside canonical contracts/constants
-- no new files in deleted/deprecated folders unless they are pure temporary compatibility shims
-- move by capability, not by old layer name
-- delete dead alias layers as soon as imports are drained
+- generic framework primitives
+- backend transport integration
+
+### `app/service/domain/*`
+
+Allowed:
+
+- business use cases
+- business normalization
+- domain-side orchestration
+
+Forbidden:
+
+- DOM logic
+- transport implementation details
+
+### `app/service/framework`
+
+Allowed:
+
+- generic runtime stages
+- generic framework policies
+- framework contracts
+- scheduling, feedback, session, telemetry, navigation and effect infrastructure
+
+Forbidden:
+
+- feature business rules
+- alias-only wrapper files
+
+### `app/service/shared`
+
+Allowed:
+
+- cross-feature readers
+- identity, clone, id and delta utilities
+- shared non-framework helpers
+
+Forbidden:
+
+- feature orchestration
+- framework-only runtime primitives
+
+### `app/infra/adapters`
+
+Allowed:
+
+- integration boundaries
+- transport mapping
+- OData/platform normalization
+
+Forbidden:
+
+- controller logic
+- feature business orchestration
+
+### `app/service/ports`
+
+Allowed:
+
+- interface-style boundary contracts
+- service-facing port definitions for adapters and domain seams
+
+Forbidden:
+
+- runtime logic
+- transport implementation
+- feature orchestration
+
+## 4. Remaining Physical Normalization Work
+
+### Remaining surface normalization
+
+- keep `controls`, `views`, and `styles` as UI-surface layers only, not as new dumping grounds
+- keep `service/ports` contract-only and prevent runtime drift into it
+
+### Documentation rule
+
+Future documents must not describe:
+
+- `controller/support` as an active execution layer
+- `util` as an active owner
+- `infra/contracts` as an existing shared contract layer
+- `control`, `view`, `css`, or top-level `ports` as current active owners
+
+## 5. Current Structural Position
+
+The core target folder model is already implemented in the active runtime path.
+
+The remaining work is now:
+
+- governance enforcement against regression
+- keeping the new top-level map clean
+
+The architectural migration itself is no longer hypothetical; it is the current codebase shape.

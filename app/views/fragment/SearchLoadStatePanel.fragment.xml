@@ -30,6 +30,6 @@
             visible="{state>/loadError}"
             showIcon="true"
             class="searchLoadStateBanner searchLoadErrorBanner chkFeedbackStrip workflowMessageSurface"/>
-        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SearchLoadRetryHint" type="XML"/>
+        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SearchLoadRetryHint" type="XML"/>
     </VBox>
 </core:FragmentDefinition>

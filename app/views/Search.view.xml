@@ -86,7 +86,7 @@
                     </HBox>
                 </HBox>
 
-                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SearchLoadStatePanel" type="XML"/>
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SearchLoadStatePanel" type="XML"/>
 
                 <VBox id="searchWorkbenchDock" class="searchWorkbenchDock" renderType="Bare">
                     <VBox
@@ -102,7 +102,7 @@
                             class="searchFilterSkeletonShell"
                             renderType="Bare">
                             <core:Fragment
-                                fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonFormSection"
+                                fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonFormSection"
                                 type="XML"/>
                         </VBox>
                         <smartFilterBar:SmartFilterBar
@@ -406,7 +406,7 @@
                         </OverflowToolbar>
                         <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
                             <core:Fragment
-                                fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonList"
+                                fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonList"
                                 type="XML"/>
                         </VBox>
 
@@ -415,7 +415,7 @@
                             class="searchResultsBody workflowBusyScope">
                             <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/exportBusy}">
                                 <core:Fragment
-                                    fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay"
+                                    fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay"
                                     type="XML"/>
                             </VBox>
                             <smartTable:SmartTable

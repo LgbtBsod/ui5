@@ -102,7 +102,7 @@
         <content>
             <VBox class="appContent analyticsScreenContent workflowBusyScope" renderType="Bare">
                 <VBox class="workflowBusyOverlayShell" renderType="Bare" visible="{view>/busy}">
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
                 </VBox>
                 <VBox class="glassCard analyticsHeroCard" renderType="Bare">
                     <Text text="{i18n>analyticsScreenEyebrow}" class="workflowEyebrow"/>
@@ -125,18 +125,18 @@
                 </VBox>
 
                 <VBox class="analyticsScreenBody" renderType="Bare">
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsMessageStack" type="XML"/>
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsMessageStack" type="XML"/>
                     <VBox class="sapUiSmallMarginTop analyticsToplineSection" renderType="Bare">
                         <HBox class="analyticsToplineGrid" wrap="Wrap" renderType="Bare">
-                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsToplinePrimaryCards" type="XML"/>
-                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsToplineRateCards" type="XML"/>
+                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsToplinePrimaryCards" type="XML"/>
+                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsToplineRateCards" type="XML"/>
                         </HBox>
 
                         <HBox class="analyticsToplineMetaGrid sapUiSmallMarginTop" wrap="Wrap" renderType="Bare">
-                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowStatusMetaChips" type="XML"/>
+                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowStatusMetaChips" type="XML"/>
                         </HBox>
                     </VBox>
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
                 </VBox>
             </VBox>
         </content>

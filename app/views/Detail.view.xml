@@ -13,7 +13,7 @@
 
         <VBox class="appContent detailContent detailExperienceCanvas" renderType="Bare" fitContainer="true" width="100%">
 
-            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailAccessDeniedScene" type="XML"/>
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailAccessDeniedScene" type="XML"/>
 
             <VBox
                 id="detailControlPinnedDock"
@@ -25,7 +25,7 @@
                     class="glassCard detailControlInlineCard detailControlExperienceCard"
                     renderType="Bare"
                     width="100%">
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailControlRail" type="XML"/>
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailControlRail" type="XML"/>
                 </VBox>
             </VBox>
 
@@ -81,9 +81,9 @@
                             <uxap:ObjectPageSubSection id="ssParticipants" title="">
                                 <uxap:blocks>
                                     <VBox renderType="Bare" width="100%" class="detailMainExperienceStack">
-                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.LockKilledBanner" type="XML"/>
-                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailCreateModeBanner" type="XML"/>
-                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailInfoCardsHost" type="XML"/>
+                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.LockKilledBanner" type="XML"/>
+                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailCreateModeBanner" type="XML"/>
+                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailInfoCardsHost" type="XML"/>
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
@@ -91,7 +91,7 @@
                             <!-- Checks -->
                             <uxap:ObjectPageSubSection id="ssChecks" title="{i18n>checksTitle}">
                                 <uxap:blocks>
-                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailChecksSectionShell" type="XML"/>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecksSectionShell" type="XML"/>
                                         <t:Table
                                             visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/checks'}], formatter:'.isDesktopTableVisible'}"
                                             rows="{selected>/checks}"
@@ -188,7 +188,7 @@
                             <!-- Barriers -->
                             <uxap:ObjectPageSubSection id="ssBarriers" title="{i18n>barriersTitle}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                                 <uxap:blocks>
-                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailBarriersSectionShell" type="XML"/>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailBarriersSectionShell" type="XML"/>
                                         <t:Table
                                             visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/barriers'}], formatter:'.isDesktopTableVisible'}"
                                             rows="{selected>/barriers}"
@@ -286,11 +286,11 @@
                                 <uxap:blocks>
                                     <VBox class="glassCard detailSectionCard detailTableExperienceCard detailAttachmentsCard" width="100%">
                                         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
-                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
+                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonTableSection" type="XML"/>
                                         </VBox>
                                         <VBox id="detailAttachmentsBody" renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody workflowBusyScope workflowBusyScopeSection">
                                             <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/attachmentBusy}">
-                                                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                                                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
                                             </VBox>
                                             <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar workbenchToolbarSurface sectionToolbarSurface">
                                                 <Title text="{i18n>attachmentsTitle}"/>

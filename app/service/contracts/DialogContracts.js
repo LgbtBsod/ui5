@@ -10,11 +10,11 @@ sap.ui.define([], function () {
     });
 
     var FRAGMENTS = Object.freeze({
-        locationValueHelp: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.LocationValueHelpDialog",
-        checksExpanded: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ChecksExpandedDialog",
-        barriersExpanded: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.BarriersExpandedDialog",
-        analyticsReport: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.AnalyticsReportDialog",
-        analyticsYearPicker: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.AnalyticsYearPickerPopover"
+        locationValueHelp: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.LocationValueHelpDialog",
+        checksExpanded: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ChecksExpandedDialog",
+        barriersExpanded: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.BarriersExpandedDialog",
+        analyticsReport: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.AnalyticsReportDialog",
+        analyticsYearPicker: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.AnalyticsYearPickerPopover"
     });
 
     function getFragmentName(sDialogId) {

@@ -34,12 +34,12 @@
     "resources": {
       "css": [
         {
-          "uri": "css/app-styles.css"
+          "uri": "styles/app-styles.css"
         }
       ]
     },
     "rootView": {
-      "viewName": "PRODUCTION_CONTROL_CHECKLIST.view.App",
+      "viewName": "PRODUCTION_CONTROL_CHECKLIST.views.App",
       "type": "XML",
       "async": true,
       "id": "app"

@@ -15,9 +15,9 @@ sap.ui.define([
     var APP_VIEW_MODEL = MODELS.APP_VIEW;
 
     var SHELL_OVERLAY_FRAGMENTS = {
-        help: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellHelpPopover",
-        settings: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellSettingsPopover",
-        user: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ShellUserPopover"
+        help: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ShellHelpPopover",
+        settings: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ShellSettingsPopover",
+        user: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ShellUserPopover"
     };
 
     function openShellOverlayByKey(oController, oEvent, sKey) {

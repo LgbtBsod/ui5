@@ -1,18 +1,16 @@
 sap.ui.define([], function () {
     "use strict";
 
-    function create() {
-        return {
-            now: function () {
-                return Date.now();
-            },
-            isoNow: function () {
-                return new Date().toISOString();
-            }
-        };
+    function now() {
+        return Date.now();
+    }
+
+    function isoNow() {
+        return new Date().toISOString();
     }
 
     return {
-        create: create
+        isoNow: isoNow,
+        now: now
     };
 });

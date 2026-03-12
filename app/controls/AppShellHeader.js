@@ -67,7 +67,7 @@ sap.ui.define([
         }
     }
 
-    return Control.extend("PRODUCTION_CONTROL_CHECKLIST.control.AppShellHeader", {
+    return Control.extend("PRODUCTION_CONTROL_CHECKLIST.controls.AppShellHeader", {
         metadata: {
             properties: {
                 eyebrow: { type: "string", defaultValue: "" },

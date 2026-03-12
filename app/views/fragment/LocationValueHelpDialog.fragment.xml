@@ -10,7 +10,7 @@
         initialFocus="locationValueHelpSearchField">
         <VBox class="sapUiMediumMargin dialogContentShell governedDialogContent valueHelpDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare" fitContainer="true">
             <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/locationVhBusy}">
-                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
             </VBox>
             <SearchField
                 id="locationValueHelpSearchField"

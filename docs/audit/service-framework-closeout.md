@@ -2,50 +2,29 @@
 
 Date: 2026-03-12
 Scope: `app/service/framework`
-Goal: finalize the target architecture of the frontend framework layer after the structural refactor and define the rules that keep it stable
+Goal: document the actual current framework structure after the refactor and remove stale references to deleted historical wrappers
 
 ## Target State
 
-The `service/framework` layer is now governed by one model only:
+`service/framework` is governed by one active model:
 
 - real runtime modules
-- canonical contract modules
-- low-level orchestration helpers with explicit responsibility
-- no alias-only files
-- no duplicated token ownership
+- canonical framework contracts
+- explicit initialization and steady-state orchestration stages
+- no alias-only wrappers
+- no historical `Support` naming
+- no non-technical `Bootstrap` owners
 
-This layer is no longer allowed to behave like a historical catch-all.
+This layer must stay:
 
-It must not:
+- generic
+- SRP-oriented
+- contract-driven
+- feature-neutral
 
-- proxy other modules without adding architectural value
-- own feature-specific behavior that belongs to `service/features/*`
-- redefine state, feedback, listener, or save-guard literals locally
-- accumulate controller-only behavior
+## 1. Actual Outcome
 
-## Architectural Outcome
-
-### What changed
-
-- `ComponentInitRuntime` was reduced to a real init coordinator instead of a mixed startup blob.
-- attachment bootstrapping was split into:
-  - [ComponentAttachmentContextRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentAttachmentContextRuntime.js)
-  - [ComponentRuntimeAttachOrchestrator.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeAttachOrchestrator.js)
-- listener logic was split into:
-  - [ComponentDetailMetaSyncRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailMetaSyncRuntime.js)
-  - [ComponentListenerBindingRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerBindingRuntime.js)
-  - [ComponentListenerBootstrapRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerBootstrapRuntime.js)
-- save-guard logic was split into:
-  - [ComponentSaveGuardRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardRuntime.js)
-  - [ComponentSaveGuardPolicy.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardPolicy.js)
-- feedback handling was split into:
-  - [EffectToastRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectToastRuntime.js)
-  - [EffectDialogFeedbackRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectDialogFeedbackRuntime.js)
-  - [EffectFeedbackRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectFeedbackRuntime.js)
-
-### What was removed
-
-The following files were intentionally removed because they were alias-only or had no boundary value:
+### Removed historical or alias-only files
 
 - `ComponentLockRuntime.js`
 - `ComponentCoordinatorRuntime.js`
@@ -57,273 +36,170 @@ The following files were intentionally removed because they were alias-only or h
 - `ComponentRuntimeSupport.js`
 - `ComponentInitSaveGuardSupport.js`
 - `FrontendConfigConstants.js`
+- `ThemeRuntime.js`
 
-## Current Module Map
+### Renamed into actual runtime or init roles
 
-### 1. Entry points
+- `ComponentLockReleaseSupport` -> [ComponentLockReleaseRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentLockReleaseRuntime.js)
+- `ComponentCoreBootstrapRuntime` -> [ComponentCoreInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentCoreInitRuntime.js)
+- `ComponentFeedbackBootstrapRuntime` -> [ComponentFeedbackInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentFeedbackInitRuntime.js)
+- `ComponentListenerBootstrapRuntime` -> [ComponentListenerInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerInitRuntime.js)
+- `ComponentModelBootstrapRuntime` -> [ComponentModelInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentModelInitRuntime.js)
+- `ComponentRuntimeHandlerBootstrap` -> [ComponentRuntimeHandlerRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeHandlerRuntime.js)
+- `ComponentRuntimeSettingsBootstrap` -> [ComponentRuntimeSettingsRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeSettingsRuntime.js)
 
-- [ComponentInitRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitRuntime.js)
-  - public entry: `runInit`
-  - responsibility: coordinate init order and attach already-sliced runtime stages
-- [ComponentBootRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootRuntime.js)
-  - public entry: `runBootSequence`
-  - responsibility: boot success/error sequencing and boot completion rules
-- [EffectApplier.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectApplier.js)
-  - public entry: `applyEffects`
-  - responsibility: dispatch effects to canonical feedback/model handlers
-- [FacadeCommandRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/FacadeCommandRuntime.js)
-  - public entries: `execute*`
-  - responsibility: facade command execution against normalized context and payload builders
+## 2. Current Module Map
 
-### 2. Init composition slices
+### Stable framework entry points
 
-- [ComponentInitStageRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitStageRuntime.js)
-  - model stage and core stage composition
-- [ComponentInitCompositionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitCompositionRuntime.js)
-  - feedback, runtime settings, and pending navigation composition
-- [ComponentAttachmentContextRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentAttachmentContextRuntime.js)
-  - force-readonly, guarded-save, cross-tab, default handlers
-- [ComponentRuntimeAttachOrchestrator.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeAttachOrchestrator.js)
-  - manager, lock, and listener attachment orchestration
-- [ComponentModelBootstrapRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentModelBootstrapRuntime.js)
-  - model registration
-- [ComponentMainServiceRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentMainServiceRuntime.js)
-  - main OData service setup
-- [ComponentCoreBootstrapRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentCoreBootstrapRuntime.js)
-  - ctx/facade/action-dispatch bootstrap
-- [ComponentStateSeedRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentStateSeedRuntime.js)
-  - initial runtime state seeding
+- [ComponentInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitRuntime.js)
+  - `runInit`
+- [ComponentBootRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootRuntime.js)
+  - `runBootSequence`
+- [EffectApplier.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectApplier.js)
+  - `applyEffects`
+- [FacadeCommandRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/FacadeCommandRuntime.js)
+  - `execute*`
 
-### 3. Boot and manager runtime
+### Init composition and attachment runtime
 
-- [ComponentBootContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootContracts.js)
-- [ComponentBootStateRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootStateRuntime.js)
-- [ComponentBootStageRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootStageRuntime.js)
-- [ComponentBootStageExecutionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootStageExecutionRuntime.js)
-- [ComponentManagerOrchestrationRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentManagerOrchestrationRuntime.js)
-- [ComponentPollingRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentPollingRuntime.js)
-- [ComponentAutosaveRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentAutosaveRuntime.js)
-- [ComponentLockEventsRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentLockEventsRuntime.js)
+- [ComponentInitStageRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitStageRuntime.js)
+- [ComponentInitCompositionRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitCompositionRuntime.js)
+- [ComponentAttachmentContextRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentAttachmentContextRuntime.js)
+- [ComponentRuntimeAttachOrchestrator.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeAttachOrchestrator.js)
+- [ComponentModelInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentModelInitRuntime.js)
+- [ComponentMainServiceRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentMainServiceRuntime.js)
+- [ComponentCoreInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentCoreInitRuntime.js)
+- [ComponentStateSeedRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentStateSeedRuntime.js)
+- [ComponentRuntimeHandlerRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeHandlerRuntime.js)
+- [ComponentRuntimeSettingsRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeSettingsRuntime.js)
 
-### 4. Listener and detail-meta runtime
+### Boot, manager and lock runtime
 
-- [ComponentListenerContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerContracts.js)
-- [ComponentDetailMetaContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailMetaContracts.js)
-- [ComponentDetailMetaSyncRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailMetaSyncRuntime.js)
-- [ComponentListenerBindingRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerBindingRuntime.js)
-- [ComponentListenerBootstrapRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerBootstrapRuntime.js)
-- [ComponentInitListenersRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitListenersRuntime.js)
-- [ComponentNavigationGuardRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentNavigationGuardRuntime.js)
+- [ComponentBootContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootContracts.js)
+- [ComponentBootStateRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootStateRuntime.js)
+- [ComponentBootStageRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootStageRuntime.js)
+- [ComponentBootStageExecutionRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootStageExecutionRuntime.js)
+- [ComponentManagerOrchestrationRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentManagerOrchestrationRuntime.js)
+- [ComponentPollingRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentPollingRuntime.js)
+- [ComponentAutosaveRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentAutosaveRuntime.js)
+- [ComponentLockEventsRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentLockEventsRuntime.js)
+- [ComponentLockReleaseRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentLockReleaseRuntime.js)
+- [ComponentCrossTabRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentCrossTabRuntime.js)
 
-### 5. Feedback and effects
+### Listener, meta and navigation runtime
 
-- [EffectFeedbackContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectFeedbackContracts.js)
-- [EffectToastRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectToastRuntime.js)
-- [EffectDialogFeedbackRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectDialogFeedbackRuntime.js)
-- [EffectBannerRouter.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectBannerRouter.js)
-- [EffectDialogRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectDialogRuntime.js)
-- [EffectFeedbackRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectFeedbackRuntime.js)
-- [EffectModelRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectModelRuntime.js)
-- [EffectApplier.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectApplier.js)
+- [ComponentListenerContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerContracts.js)
+- [ComponentDetailMetaContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailMetaContracts.js)
+- [ComponentDetailMetaSyncRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailMetaSyncRuntime.js)
+- [ComponentListenerBindingRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerBindingRuntime.js)
+- [ComponentListenerInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerInitRuntime.js)
+- [ComponentInitListenersRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitListenersRuntime.js)
+- [ComponentNavigationGuardRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentNavigationGuardRuntime.js)
 
-### 6. Save guard and pending navigation
+### Feedback, save-guard and effect runtime
 
-- [ComponentSaveGuardContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardContracts.js)
-- [ComponentSaveGuardPolicy.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardPolicy.js)
-- [ComponentSaveGuardRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardRuntime.js)
-- [ComponentPendingNavigationRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentPendingNavigationRuntime.js)
-- [ComponentFeedbackBootstrapRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentFeedbackBootstrapRuntime.js)
-- [ComponentFeedbackRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentFeedbackRuntime.js)
-- [ComponentRuntimeSettingsBootstrap.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentRuntimeSettingsBootstrap.js)
+- [EffectFeedbackContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectFeedbackContracts.js)
+- [EffectToastRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectToastRuntime.js)
+- [EffectDialogFeedbackRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectDialogFeedbackRuntime.js)
+- [EffectBannerRouter.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectBannerRouter.js)
+- [EffectDialogRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectDialogRuntime.js)
+- [EffectFeedbackRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectFeedbackRuntime.js)
+- [EffectModelRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectModelRuntime.js)
+- [ComponentSaveGuardContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardContracts.js)
+- [ComponentSaveGuardPolicy.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardPolicy.js)
+- [ComponentSaveGuardRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardRuntime.js)
+- [ComponentPendingNavigationRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentPendingNavigationRuntime.js)
+- [ComponentFeedbackInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentFeedbackInitRuntime.js)
+- [ComponentFeedbackRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentFeedbackRuntime.js)
+- [FeedbackBannerRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/FeedbackBannerRuntime.js)
+- [FeedbackBannerState.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/FeedbackBannerState.js)
+- [FeedbackCoordinator.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/FeedbackCoordinator.js)
+- [FeedbackPolicy.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/FeedbackPolicy.js)
 
-### 7. Shared low-level primitives
+### Shared framework primitives
 
-- [ComponentSessionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSessionRuntime.js)
-- [ComponentFormattingRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentFormattingRuntime.js)
-- [ComponentDetailStateRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailStateRuntime.js)
-- [ModelStateRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ModelStateRuntime.js)
-- [SchedulingRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/SchedulingRuntime.js)
-- [SecurityTokenRefresh.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/SecurityTokenRefresh.js)
-- [TelemetryRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/TelemetryRuntime.js)
-- [RootIdRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/RootIdRuntime.js)
+- [ComponentSessionRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSessionRuntime.js)
+- [ComponentFormattingRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentFormattingRuntime.js)
+- [ComponentDetailStateRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailStateRuntime.js)
+- [ModelStateRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ModelStateRuntime.js)
+- [SchedulingRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/SchedulingRuntime.js)
+- [SecurityTokenRefresh.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/SecurityTokenRefresh.js)
+- [TelemetryRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/TelemetryRuntime.js)
+- [MemoryTelemetryBuffer.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/MemoryTelemetryBuffer.js)
+- [UxTelemetry.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/UxTelemetry.js)
+- [RootIdRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/RootIdRuntime.js)
+- [ThemeService.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemeService.js)
+- [ThemeDomRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemeDomRuntime.js)
+- [ThemeTokenRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemeTokenRuntime.js)
+- [ThemePhilosophy.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemePhilosophy.js)
 
-## Canonical Source Rules
+## 3. Current Rules
 
-### Boot tokens
+### Rule 1
 
-Canonical source:
-
-- [ComponentBootContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootContracts.js)
-
-Must live only there:
-
-- boot readiness statuses
-- boot stage error keys
-- boot paths and config source markers
-
-### Feedback tokens
-
-Canonical source:
-
-- [EffectFeedbackContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectFeedbackContracts.js)
-
-Must live only there:
-
-- toast classes
-- dialog classes
-- effect handler names
-- fallback text keys
-- durations
-- dialog ids and variants
-
-### Listener/detail-meta tokens
-
-Canonical sources:
-
-- [ComponentListenerContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerContracts.js)
-- [ComponentDetailMetaContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailMetaContracts.js)
-
-Must live only there:
-
-- lifecycle event names
-- full-save signal name
-- listener model names
-- listener path aliases
-- readiness/detail-meta statuses
-- validation defaults
-
-### Save-guard tokens
-
-Canonical source:
-
-- [ComponentSaveGuardContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardContracts.js)
-
-Must live only there:
-
-- save-guard telemetry names
-- banner level and text-key defaults
-- busy/save state markers
-- login/network path markers
-- timer durations
-
-## Boundary Rules
-
-### Rule 1: `service/framework` is not a feature layer
+`service/framework` is not a feature layer.
 
 Feature behavior belongs in:
 
 - `app/service/features/*`
+- `app/service/domain/*`
 - `app/controller/*`
-- domain use cases
 
-Framework is allowed to:
+### Rule 2
 
-- coordinate generic startup
-- coordinate generic effects
-- coordinate generic state/runtime listeners
-- provide low-level runtime primitives
+No new `Support` modules are allowed in framework.
 
-Framework is not allowed to:
+Use the actual role instead:
 
-- implement search/detail/analytics-specific business rules
-- own view-specific branching
-- embed feature-specific fallback text or labels
+- `Runtime`
+- `Policy`
+- `Contracts`
+- `Coordinator`
+- `Reader`
 
-### Rule 2: One file, one dominant responsibility
+### Rule 3
 
-A file may coordinate several calls only if they belong to one orchestration surface.
+No new non-technical `Bootstrap` names are allowed in framework.
 
-Valid examples:
+Use:
 
-- `ComponentInitRuntime` coordinates init order
-- `ComponentBootRuntime` coordinates boot stages
-- `EffectApplier` coordinates effect application
+- `Init` for initialization stages
+- `Runtime` for steady-state runtime modules
 
-Invalid examples:
+### Rule 4
 
-- one file that assembles attachment context, guarded save, lock attach, and listener attach
-- one file that handles toast, dialog, banner, prompt, and navigation primitives plus token ownership
+No alias-only wrappers are allowed.
 
-### Rule 3: No alias-only files
+If a file only proxies another runtime and does not stabilize a real boundary, delete it and import the canonical owner directly.
 
-A file in `service/framework` must not exist if it only:
+### Rule 5
 
-- imports 1-2 modules
-- returns their members unchanged
-- adds no stable boundary or orchestration responsibility
+Framework literals and runtime semantics must live in canonical contracts:
 
-If a file becomes that thin, delete it and move callers to the canonical runtime.
+- [ComponentBootContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentBootContracts.js)
+- [EffectFeedbackContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectFeedbackContracts.js)
+- [ComponentListenerContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentListenerContracts.js)
+- [ComponentDetailMetaContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentDetailMetaContracts.js)
+- [ComponentSaveGuardContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentSaveGuardContracts.js)
 
-### Rule 4: Entry points stay stable
+## 4. Validation Baseline
 
-The following public seams are stable and must not be renamed casually:
+Current closeout baseline:
 
-- `ComponentInitRuntime.runInit`
-- `ComponentBootRuntime.runBootSequence`
-- `EffectApplier.applyEffects`
-- `FacadeCommandRuntime.execute*`
-
-Refactor behind these seams, not through arbitrary churn at the seam.
-
-### Rule 5: New literals are banned unless truly local
-
-If a string or token is:
-
-- reused
-- semantically important
-- part of runtime policy
-- part of telemetry vocabulary
-- part of feedback or boot semantics
-
-then it must be added to a canonical contract file.
-
-Do not introduce new duplicated literals in runtime modules.
-
-## Allowed Extension Pattern
-
-When new behavior is needed:
-
-1. decide whether it is feature behavior or framework behavior
-2. if feature behavior, place it outside `service/framework`
-3. if framework behavior, decide whether it is:
-   - contract/token
-   - low-level primitive
-   - orchestration coordinator
-4. create or extend exactly one canonical source
-5. wire through stable entry points without creating alias layers
-
-## Review Checklist For Future Changes
-
-Before merging any new `service/framework` change, verify:
-
-- the file adds real behavior or orchestration
-- no existing canonical contract already owns the token
-- no feature-specific behavior leaked into framework
-- no alias-only wrapper was introduced
-- no second source of truth was created
-- the stable public entry points remain intact
-
-## Validation Baseline
-
-The final refactor was validated with:
-
-- `node scripts/architecture-gate.js --json`
 - `python -m pytest backend/mock_gateway/tests -q`
+- `node scripts/framework-token-drift-gate.js --json`
+- `node scripts/adapter-factory-boundary-gate.js --json`
 
-Expected result at closeout:
+Expected closeout state:
 
-- architecture gate passes
-- backend/mock gateway tests pass
-- alias-only framework files remain absent
+- tests pass
+- framework token drift gate passes
+- adapter factory boundary gate passes
+- no alias-only framework files return
 
-## Final Assessment
+## 5. Final Position
 
-`service/framework` is now materially closer to the intended architecture:
+`service/framework` is now a real generic runtime layer, not a historical dumping ground.
 
-- modular
-- SRP-oriented
-- contract-driven
-- no dead re-export surface
-- canonical token ownership
-
-The next engineering work in this layer should be incremental and policy-driven, not another rescue refactor.
+The remaining work in this layer is governance and incremental cleanup, not another structural rescue. The main risk is regression, not missing architectural decomposition.

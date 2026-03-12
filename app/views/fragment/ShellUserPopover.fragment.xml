@@ -51,7 +51,7 @@
 
                 <VBox class="shellUserCard shellUserContextCard workflowBusyScope" renderType="Bare">
                     <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{appView>/shell/userRefreshBusy}">
-                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
+                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
                     </VBox>
                     <HBox class="shellItemHeader" renderType="Bare" alignItems="Center">
                         <core:Icon src="sap-icon://key-user-settings" decorative="true" class="shellItemIcon"/>

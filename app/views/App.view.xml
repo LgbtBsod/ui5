@@ -5,7 +5,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns="sap.m"
-    xmlns:cc="PRODUCTION_CONTROL_CHECKLIST.control"
+    xmlns:cc="PRODUCTION_CONTROL_CHECKLIST.controls"
     xmlns:f="sap.f">
 
     <VBox
@@ -87,11 +87,11 @@
                 layout="{= ${state>/layout} || 'OneColumn' }"
                 backgroundDesign="Transparent">
                 <f:beginColumnPages>
-                    <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Search" width="100%"/>
+                    <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.views.Search" width="100%"/>
                 </f:beginColumnPages>
                 <f:midColumnPages>
-                    <mvc:XMLView id="detailPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Detail" width="100%"/>
-                    <mvc:XMLView id="analyticsPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Analytics" width="100%"/>
+                    <mvc:XMLView id="detailPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.views.Detail" width="100%"/>
+                    <mvc:XMLView id="analyticsPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.views.Analytics" width="100%"/>
                 </f:midColumnPages>
             </f:FlexibleColumnLayout>
         </VBox>
