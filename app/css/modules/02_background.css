@@ -207,11 +207,11 @@ body.chkAppRoot::after {
   filter: blur(10px) saturate(120%);
 }
 
-html.chkAppRoot.theme-switching body.chkAppRoot::after {
+html.chkAppRoot.appThemeSwitching body.chkAppRoot::after {
   animation: chkThemeFlood 980ms cubic-bezier(0.16, 0.84, 0.22, 1) both;
 }
 
-html.chkAppRoot.theme-switching body.chkAppRoot::before {
+html.chkAppRoot.appThemeSwitching body.chkAppRoot::before {
   animation:
     chkGradientDrift var(--bg-anim-gradient-drift) ease-in-out infinite alternate,
     chkSheenShift var(--bg-anim-sheen-shift) linear infinite,
@@ -399,20 +399,20 @@ body.chkAppRoot::after {
 /* Migrated from claude-hyper.css backlog: explicit background state classes. */
 .chkApp .chkBgGradient,
 .chkBgGradient {
-  animation-play-state: running !important;
+  animation-play-state: running;
 }
 
 .chkApp .chkBgSheen,
 .chkBgSheen {
-  animation-play-state: running !important;
+  animation-play-state: running;
 }
 
 .chkApp .chkBgGrain,
 .chkBgGrain {
-  animation-play-state: running !important;
+  animation-play-state: running;
 }
 
 .chkApp .chkBgDither,
 .chkBgDither {
-  animation-play-state: running !important;
+  animation-play-state: running;
 }

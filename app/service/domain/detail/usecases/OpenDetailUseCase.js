@@ -11,7 +11,7 @@ sap.ui.define([
 
     function resolveLoadedAttachments(oUiState, sRootId) {
         var sSelectedRootId = String((oUiState && oUiState.get("selected", "/root/id")) || "").trim();
-        var bAttachmentsLoaded = !!(oUiState && oUiState.get("view", "/attachmentsLoaded"));
+        var bAttachmentsLoaded = !!(oUiState && oUiState.get("view", ViewPathContracts.ATTACHMENTS_LOADED));
         var aAttachments = (oUiState && oUiState.get("selected", "/attachments")) || [];
         if (!sRootId || sSelectedRootId !== sRootId || !bAttachmentsLoaded || !Array.isArray(aAttachments)) {
             return [];
@@ -52,12 +52,12 @@ sap.ui.define([
                         Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                         Effects.modelPatch("selected", "/", {}),
                         Effects.modelPatch("snapshot", "/", {}),
-                        Effects.modelPatch("view", "/detailSkeletonBusy", false),
+                        Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false),
                         Effects.navigate("search", {}, true)
                     ]));
                 }
                 return Result.ok({ snapshot: oDraft || {} }, [
-                    Effects.modelPatch("view", "/accessState", {
+                    Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, {
                         denied: false,
                         rootId: CreateSentinel.VALUE,
                         userId: "",
@@ -86,7 +86,7 @@ sap.ui.define([
                     Effects.modelPatch("snapshot", "/", oDraft || {}),
                     Effects.modelPatch("selected", "/", oDraft || {}),
                     Effects.modelPatch("selected", "/attachments", (oDraft && oDraft.attachments) || []),
-                    Effects.modelPatch("view", "/detailSkeletonBusy", false)
+                    Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
                 ]);
             });
         }
@@ -168,7 +168,7 @@ sap.ui.define([
                 Effects.modelPatch("snapshot", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/attachments", aLoadedAttachments),
-                Effects.modelPatch("view", "/detailSkeletonBusy", false)
+                Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         }).catch(function (oError) {
             return Result.fail(oError, [
@@ -183,7 +183,7 @@ sap.ui.define([
                     lockKnown: false
                 }),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                Effects.modelPatch("view", "/detailSkeletonBusy", false)
+                Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]);
         });
     };

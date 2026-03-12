@@ -1,5 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
@@ -116,7 +117,7 @@ sap.ui.define([
 
     function contentAccessEffects(oPermission) {
         return [
-            Effects.modelPatch("view", "/accessState", buildAccessState(oPermission, false))
+            Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, buildAccessState(oPermission, false))
         ];
     }
 
@@ -134,8 +135,8 @@ sap.ui.define([
             Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
             Effects.modelPatch("selected", "/", {}),
             Effects.modelPatch("snapshot", "/", {}),
-            Effects.modelPatch("view", "/detailSkeletonBusy", false),
-            Effects.modelPatch("view", "/accessState", buildAccessState(oResolved, true)),
+            Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false),
+            Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, buildAccessState(oResolved, true)),
             Effects.toast("detailViewPermissionDenied", "warning")
         ];
     }

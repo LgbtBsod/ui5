@@ -158,7 +158,7 @@ sap.ui.define([
                 change: function () {
                     that.fireThemePress({ anchor: that._oThemeToggle });
                 }
-            }).addStyleClass("shellThemeSwitch accentSwitch"), "High");
+            }).addStyleClass("shellThemeSwitch appAccentSwitch"), "High");
 
             this._oThemeToggleDock = new HBox({
                 renderType: "Bare",

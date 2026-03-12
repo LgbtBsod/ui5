@@ -1,4 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
+], function (StatePaths, DomainStatePaths) {
     "use strict";
 
     function uiState(mCtx) {
@@ -22,7 +25,7 @@ sap.ui.define([], function () {
 
     function readRequiredFields(mCtx) {
         var oUiState = uiState(mCtx);
-        var aRequired = oUiState && oUiState.get("state", "/requiredFields");
+        var aRequired = oUiState && oUiState.get("state", DomainStatePaths.REQUIRED_FIELDS);
         return Array.isArray(aRequired) && aRequired.length ? aRequired : null;
     }
 

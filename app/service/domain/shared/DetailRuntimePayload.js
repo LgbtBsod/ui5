@@ -1,19 +1,20 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCaseInputUtils, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
+], function (UseCaseInputUtils, CreateSentinel, DomainStatePaths) {
     "use strict";
 
     function rootId(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return UseCaseInputUtils.rootId(mInput) || String((oUiState && oUiState.get("state", "/activeObjectId")) || "").trim();
+        return UseCaseInputUtils.rootId(mInput) || String((oUiState && oUiState.get("state", DomainStatePaths.ACTIVE_OBJECT_ID)) || "").trim();
     }
 
-    function sessionGuid(mInput, mCtx, StatePaths) {
+    function sessionGuid(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         return String(
             (mInput && (mInput.sessionGuid || mInput.SessionGuid))
-            || (oUiState && oUiState.get("state", StatePaths && StatePaths.SESSION_ID || "/sessionId"))
+            || (oUiState && oUiState.get("state", DomainStatePaths.SESSION_ID))
             || ""
         ).trim();
     }
@@ -34,7 +35,7 @@ sap.ui.define([
     function lockRequest(mInput, mCtx, StatePaths) {
         return {
             rootId: rootId(mInput, mCtx),
-            sessionGuid: sessionGuid(mInput, mCtx, StatePaths)
+            sessionGuid: sessionGuid(mInput, mCtx)
         };
     }
 

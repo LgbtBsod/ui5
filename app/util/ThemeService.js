@@ -9,7 +9,7 @@ sap.ui.define([
 ], function (Core, Parameters, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime) {
     "use strict";
 
-    var SWITCH_CLASS = "theme-switching";
+    var SWITCH_CLASS = "appThemeSwitching";
     var MOTION_DISABLED_CLASS = "theme-motion-disabled";
     var MOTION_ENABLED_CLASS = "theme-motion-enabled";
     var THEME_PROFILE_STORAGE_KEY = "checklist_app_theme_profile";

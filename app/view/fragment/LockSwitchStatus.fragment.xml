@@ -10,7 +10,7 @@
         customTextOn=""
         customTextOff=""
         change=".onToggleEdit"
-        class="accentSwitch accentSwitchEditMode chkRipple">
+        class="appAccentSwitch detailAccentSwitchEditMode chkRipple">
         <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
     </Switch>
     <ObjectStatus

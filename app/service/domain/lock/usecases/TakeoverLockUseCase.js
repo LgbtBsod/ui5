@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (UseCase, Result, Effects, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
+], function (UseCase, Result, Effects, StatePaths, DomainStatePaths) {
     "use strict";
 
     function TakeoverLockUseCase() {
@@ -16,7 +17,7 @@ sap.ui.define([
     TakeoverLockUseCase.prototype.execute = function (mInput, mCtx) {
         var oLock = mCtx && mCtx.lock;
         var oUiState = mCtx && mCtx.uiState;
-        var sRootId = (mInput && mInput.rootId) || (oUiState && oUiState.get("state", "/activeObjectId"));
+        var sRootId = (mInput && mInput.rootId) || (oUiState && oUiState.get("state", DomainStatePaths.ACTIVE_OBJECT_ID));
         var sSessionGuid = (oUiState && oUiState.get("state", StatePaths.SESSION_ID)) || "";
 
         if (!sRootId || !sSessionGuid || !oLock || typeof oLock.acquire !== "function") {

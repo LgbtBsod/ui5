@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
+], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DomainStatePaths) {
     "use strict";
 
     function readSessionGuid(mCtx) {
@@ -92,9 +93,9 @@ sap.ui.define([
                 return Result.ok({ selectedRootId: sRootId, intent: sIntent }, [
                     Effects.modelPatch("selected", "/", oSnapshot),
                     Effects.modelPatch("snapshot", "/", oSnapshot),
-                    Effects.modelPatch("state", "/activeObjectId", sCopiedRootId),
-                    Effects.modelPatch("state", "/selectedId", sCopiedRootId),
-                    Effects.modelPatch("state", "/postOpenHydratedRootId", sCopiedRootId),
+                    Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, sCopiedRootId),
+                    Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, sCopiedRootId),
+                    Effects.modelPatch("state", DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, sCopiedRootId),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "EDIT"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "EDIT_LOCKED"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),

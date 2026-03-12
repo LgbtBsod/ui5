@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects"
-], function (Effects) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
+], function (Effects, ViewPathContracts) {
     "use strict";
 
     function buildAttachmentBusyResetEffects() {
@@ -11,7 +12,7 @@ sap.ui.define([
         var aSafeAttachments = Array.isArray(aAttachments) ? aAttachments : [];
         var aEffects = [
             Effects.modelPatch("selected", "/attachments", aSafeAttachments),
-            Effects.modelPatch("view", "/attachmentsLoaded", true)
+            Effects.modelPatch("view", ViewPathContracts.ATTACHMENTS_LOADED, true)
         ].concat(buildAttachmentBusyResetEffects());
         if (sToastKey) {
             aEffects.push(Effects.toast(sToastKey, sToastLevel || "info"));

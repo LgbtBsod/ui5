@@ -1,9 +1,10 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/util/ClientKeyGenerator"
-], function (UseCase, Result, Effects, ClientKeyGenerator) {
+], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator) {
     "use strict";
 
     var ENTITY_CONFIG = {
@@ -91,7 +92,7 @@ sap.ui.define([
     }
 
     function markDirtyResult(sEntity, sOp) {
-        return Result.ok({ entity: sEntity, op: sOp }, [Effects.modelPatch("state", "/isDirty", true)]);
+        return Result.ok({ entity: sEntity, op: sOp }, [Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)]);
     }
 
     function createRow(aRows, oConfig) {
@@ -107,7 +108,7 @@ sap.ui.define([
         var iRowIndex;
         if (sOp === "add") {
             oUiState.set("selected", oConfig.path, aRows.concat([createRow(aRows, oConfig)]));
-            return Result.ok({ entity: sEntity, op: sOp }, [Effects.modelPatch("state", "/isDirty", true)]);
+            return Result.ok({ entity: sEntity, op: sOp }, [Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)]);
         }
         if (sOp === "delete") {
             iRowIndex = resolveRowIndexFromInput(mInput, aRows, oConfig.path);

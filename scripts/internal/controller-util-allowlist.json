@@ -35,6 +35,7 @@
   "service/framework/EffectActionRouting",
   "service/framework/EffectTextResolver",
   "service/framework/DialogOrchestrator",
+  "service/framework/DetailRuntimePolicy",
   "service/framework/FeedbackCoordinator",
   "service/framework/EffectUiHandlers",
   "service/framework/EffectDialogRuntime",

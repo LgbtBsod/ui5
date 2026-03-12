@@ -55,7 +55,7 @@ sap.ui.define([
                         permissionKnown: false,
                         lockKnown: false
                     }),
-                    Effects.modelPatch("view", "/accessState", DetailAuthorizationSupport.buildAccessState({
+                    Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, DetailAuthorizationSupport.buildAccessState({
                         rootId: "",
                         userId: "",
                         canView: true,
@@ -69,12 +69,12 @@ sap.ui.define([
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                    Effects.modelPatch("state", "/lockOperationPending", false),
+                    Effects.modelPatch("state", DomainStatePaths.LOCK_OPERATION_PENDING, false),
                     Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                    Effects.modelPatch("state", "/layout", "OneColumn"),
-                    Effects.modelPatch("state", "/activeObjectId", null),
-                    Effects.modelPatch("state", "/selectedId", null),
-                    Effects.modelPatch("state", "/searchForceRefreshOnReturn", true),
+                    Effects.modelPatch("state", DomainStatePaths.LAYOUT, "OneColumn"),
+                    Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, null),
+                    Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, null),
+                    Effects.modelPatch("state", DomainStatePaths.SEARCH_FORCE_REFRESH_ON_RETURN, true),
                     Effects.toast("checklistDeleted", "success"),
                     Effects.navigate("search", {}, true)
                 ]);

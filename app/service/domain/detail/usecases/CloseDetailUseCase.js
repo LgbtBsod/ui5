@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
-], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
+], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, DomainStatePaths) {
     "use strict";
 
     function CloseDetailUseCase() {
@@ -61,10 +62,10 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                Effects.modelPatch("state", "/lockOperationPending", false),
-                Effects.modelPatch("state", "/layout", "OneColumn"),
-                Effects.modelPatch("state", "/activeObjectId", null),
-                Effects.modelPatch("state", "/selectedId", null),
+                Effects.modelPatch("state", DomainStatePaths.LOCK_OPERATION_PENDING, false),
+                Effects.modelPatch("state", DomainStatePaths.LAYOUT, "OneColumn"),
+                Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, null),
+                Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, null),
                 Effects.navigate("search", {}, true)
             ];
             if (sRootId && !CreateSentinel.isCreateId(sRootId) && sSessionGuid && (!oReleaseResult || oReleaseResult.ok === false || oReleaseResult.released === false)) {

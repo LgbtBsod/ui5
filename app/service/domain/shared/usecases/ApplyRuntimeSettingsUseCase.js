@@ -6,8 +6,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants",
     "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendVariablesSchema"
 ], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy, FrontendConfigConstants, FrontendVariablesSchema) {
-    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
-], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy, FrontendConfigConstants) {
     "use strict";
 
     var _runtimeTimersLogDone = false;

@@ -8,8 +8,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentValueCodec"
-], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentValueCodec",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
+], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, DomainStatePaths) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -189,12 +190,12 @@ sap.ui.define([
                     ];
                     cleanupStagedAttachmentUrls(aCurrentAttachments);
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
-                        aEffects.push(Effects.modelPatch("state", "/activeObjectId", sServerRootId));
-                        aEffects.push(Effects.modelPatch("state", "/selectedId", sServerRootId));
+                        aEffects.push(Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, sServerRootId));
+                        aEffects.push(Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, sServerRootId));
                         aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
                         if (bCreate) {
                             var bLockAcquired = !!(oLockResult && oLockResult.ok);
-                            aEffects.push(Effects.modelPatch("state", "/postOpenHydratedRootId", sServerRootId));
+                            aEffects.push(Effects.modelPatch("state", DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
                             aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? "EDIT" : "READ"));
                             aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? "EDIT_LOCKED" : "READ_ONLY"));
                             aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));

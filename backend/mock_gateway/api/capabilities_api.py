@@ -1,3 +1,4 @@
+from config import ALLOW_MOCK_USER_HEADER
 from fastapi import APIRouter
 
 router = APIRouter(tags=["Capabilities"])
@@ -31,13 +32,15 @@ def capabilities():
             "maxUiContractVersion": "1.x"
         },
         "paths": {
+            "serviceRoot": "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV",
             "batch": "/$batch",
-            "saveFunctionImport": "/actions/SaveChecklist",
-            "autosaveFunctionImport": "/actions/AutoSaveChecklist",
+            "saveFunctionImport": "/SaveChanges",
+            "autosaveFunctionImport": "/AutoSave",
             "lockStatusEntity": "/LockStatusSet",
             "lockHistoryEntity": "/LockLogs",
             "referenceBundle": "/reference/bundle",
             "searchRowsEntity": "/SearchRows",
         },
+        "identityMode": "mock_header" if ALLOW_MOCK_USER_HEADER else "runtime_user_context",
         "source": "gateway_capabilities"
     }

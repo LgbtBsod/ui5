@@ -7,8 +7,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, Result, Effects, UseCaseResultUtils, UseCaseInputUtils, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
+], function (UseCase, Result, Effects, UseCaseResultUtils, UseCaseInputUtils, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, CreateSentinel, ViewPathContracts) {
     "use strict";
 
     function cleanupObjectUrl(oAttachment) {
@@ -22,14 +23,14 @@ sap.ui.define([
         UseCase.call(this, "AttachmentDeleteUseCase");
     }
 
-    function buildDeleteEffects(mCtx, sAttachmentId) {
+    function buildDeleteEffects(mCtx, sAttachmentId, oAttachment) {
         var oUiState = mCtx && mCtx.uiState;
         var aCurrentAll = DetailStateAccess.readCurrentAttachments(mCtx);
-        var aSession = (oUiState && oUiState.get("view", "/sessionAttachments")) || [];
-        var aAllNext = AttachmentIdentity.removeById(aCurrentAll, sAttachmentId);
-        var aSessionNext = AttachmentIdentity.removeById(aSession, sAttachmentId);
+        var aSession = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
+        var aAllNext = AttachmentIdentity.removeByAttachment(aCurrentAll, sAttachmentId, oAttachment);
+        var aSessionNext = AttachmentIdentity.removeByAttachment(aSession, sAttachmentId, oAttachment);
         var aEffects = AttachmentEffectSupport.buildAttachmentSyncEffects(aAllNext, "attachmentDeleted", "info");
-        aEffects.push(Effects.modelPatch("view", "/sessionAttachments", aSessionNext));
+        aEffects.push(Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext));
         return aEffects;
     }
 
@@ -45,7 +46,7 @@ sap.ui.define([
             cleanupObjectUrl(oAttachment);
             return Promise.resolve(Result.ok(
                 { deleted: true },
-                buildDeleteEffects(mCtx, sAttachmentId)
+                buildDeleteEffects(mCtx, sAttachmentId, oAttachment)
             ));
         }
         return UseCaseResultUtils.callOrDefault(function () {
@@ -53,7 +54,7 @@ sap.ui.define([
         }, { deleted: true }).then(function (oRes) {
             return Result.ok(
                 oRes || {},
-                buildDeleteEffects(mCtx, sAttachmentId)
+                buildDeleteEffects(mCtx, sAttachmentId, oAttachment)
             );
         }).catch(function (oError) {
             return Result.fail(oError, AttachmentEffectSupport.buildAttachmentBusyResetEffects());

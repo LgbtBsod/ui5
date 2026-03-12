@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from config import ALLOW_MOCK_USER_HEADER
 from models import AppUserProfile, RuntimeUserContext
 
 DEFAULT_RUNTIME_UNAME = "operator"
@@ -68,7 +69,7 @@ class CurrentUserService:
     def resolve_uname(db=None, request=None, explicit_uname: str | None = None) -> str:
         if explicit_uname:
             return _normalize_uname(explicit_uname)
-        if request is not None:
+        if ALLOW_MOCK_USER_HEADER and request is not None:
             mock_uname = request.headers.get("X-Mock-User")
             if mock_uname:
                 return _normalize_uname(mock_uname)

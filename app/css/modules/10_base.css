@@ -349,7 +349,7 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 }
 
 .chkApp .appShellHeader .sapMText:empty {
-  display: none !important;
+  display: none;
 }
 
 
@@ -435,28 +435,32 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 }
 
 /* Keep layout stable during drag-resize and FCL transitions. */
-html.chkResizing .chkApp .appRootFcl .sapFFCLColumn,
-html.chkResizing .chkApp .appRootFcl .sapFFCLColumnContent,
-html.chkResizing .chkApp *,
-html.chkResizing #ui5-bg,
-html.chkResizing #ui5-bg #bgLight,
-html.chkResizing #ui5-bg #bgDark {
-  transition-duration: 0ms !important;
-  transition: none !important;
+html.chkAppRoot.chkResizing .chkApp .appRootFcl .sapFFCLColumn,
+html.chkAppRoot.chkResizing .chkApp .appRootFcl .sapFFCLColumnContent {
+  transition-duration: 0ms;
+  transition: none;
 }
 
-html.chkResizing #ui5-bg {
-  pointer-events: none !important;
+html.chkAppRoot.chkResizing .chkApp *,
+html.chkAppRoot.chkResizing #ui5-bg,
+html.chkAppRoot.chkResizing #ui5-bg #bgLight,
+html.chkAppRoot.chkResizing #ui5-bg #bgDark {
+  transition-duration: 0ms;
+  transition: none;
+}
+
+html.chkAppRoot.chkResizing #ui5-bg {
+  pointer-events: none;
 }
 
 /* Migrated from claude-hyper.css backlog: app states and skip-link helpers. */
 .chkApp .appLayoutFull {
-  background: transparent !important;
+  background: transparent;
 }
 
 .chkApp.pageLoading .detailMainExperienceStack,
 .chkApp.pageLoading .searchResultsTable {
-  opacity: 0.55 !important;
+  opacity: 0.55;
 }
 
 @keyframes cardEnterUp {
@@ -465,48 +469,48 @@ html.chkResizing #ui5-bg {
 }
 
 .chkApp.appLoaded .kpiCard {
-  animation: cardEnterUp 260ms cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
+  animation: cardEnterUp 260ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-.chkApp.appLoaded .kpiCard:nth-child(1) { animation-delay: 0ms !important; }
-.chkApp.appLoaded .kpiCard:nth-child(2) { animation-delay: 40ms !important; }
-.chkApp.appLoaded .kpiCard:nth-child(3) { animation-delay: 80ms !important; }
-.chkApp.appLoaded .kpiCard:nth-child(4) { animation-delay: 120ms !important; }
-.chkApp.appLoaded .kpiCard:nth-child(n + 5) { animation-delay: 160ms !important; }
+.chkApp.appLoaded .kpiCard:nth-child(1) { animation-delay: 0ms; }
+.chkApp.appLoaded .kpiCard:nth-child(2) { animation-delay: 40ms; }
+.chkApp.appLoaded .kpiCard:nth-child(3) { animation-delay: 80ms; }
+.chkApp.appLoaded .kpiCard:nth-child(4) { animation-delay: 120ms; }
+.chkApp.appLoaded .kpiCard:nth-child(n + 5) { animation-delay: 160ms; }
 
 .chkApp.appLoaded .searchStageStoryCard,
 .chkApp.appLoaded .workflowStageCard {
-  animation: cardEnterUp 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both !important;
+  animation: cardEnterUp 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 .chkApp.appLoaded .searchStageStoryCard:nth-child(1),
-.chkApp.appLoaded .workflowStageCard:nth-child(1) { animation-delay: 60ms !important; }
+.chkApp.appLoaded .workflowStageCard:nth-child(1) { animation-delay: 60ms; }
 .chkApp.appLoaded .searchStageStoryCard:nth-child(2),
-.chkApp.appLoaded .workflowStageCard:nth-child(2) { animation-delay: 100ms !important; }
+.chkApp.appLoaded .workflowStageCard:nth-child(2) { animation-delay: 100ms; }
 .chkApp.appLoaded .searchStageStoryCard:nth-child(3),
-.chkApp.appLoaded .workflowStageCard:nth-child(3) { animation-delay: 140ms !important; }
+.chkApp.appLoaded .workflowStageCard:nth-child(3) { animation-delay: 140ms; }
 .chkApp.appLoaded .searchStageStoryCard:nth-child(n + 4),
-.chkApp.appLoaded .workflowStageCard:nth-child(n + 4) { animation-delay: 180ms !important; }
+.chkApp.appLoaded .workflowStageCard:nth-child(n + 4) { animation-delay: 180ms; }
 
 .chkApp .skipLink,
 .skipToMain {
-  position: absolute !important;
-  top: -100% !important;
-  left: 0.5rem !important;
-  z-index: 9999 !important;
-  background: var(--hz-accent, #0070f2) !important;
-  color: #fff !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 0 0 0.5rem 0.5rem !important;
-  font-size: 0.875rem !important;
-  font-weight: 700 !important;
-  text-decoration: none !important;
-  transition: top 120ms ease !important;
+  position: absolute;
+  top: -100%;
+  left: 0.5rem;
+  z-index: 9999;
+  background: var(--hz-accent, #0070f2);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 120ms ease;
 }
 
 .chkApp .skipLink:focus,
 .skipToMain:focus {
-  top: 0 !important;
+  top: 0;
 }
 
 /* Live region flash keeps SR announcements noticeable during async updates. */
@@ -523,42 +527,42 @@ html.chkResizing #ui5-bg {
 
 /* Baseline global scrollbar contract inherited from monolith. */
 * {
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(120, 175, 240, 0.22) transparent !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 175, 240, 0.22) transparent;
 }
 
 *::-webkit-scrollbar {
-  width: 3px !important;
-  height: 3px !important;
+  width: 3px;
+  height: 3px;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent !important;
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  border-radius: 999px !important;
-  background: rgba(120, 175, 240, 0.22) !important;
+  border-radius: 999px;
+  background: rgba(120, 175, 240, 0.22);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 155, 228, 0.44) !important;
+  background: rgba(100, 155, 228, 0.44);
 }
 
 .chkApp .kbdBadge,
 kbd.chkKbd {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 1.2rem !important;
-  height: 1.2rem !important;
-  padding: 0 0.32rem !important;
-  border-radius: 0.3rem !important;
-  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 85%, transparent) !important;
-  background: var(--theme-rail-bg) !important;
-  font-size: 0.66rem !important;
-  font-weight: 700 !important;
-  line-height: 1 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.32rem;
+  border-radius: 0.3rem;
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 85%, transparent);
+  background: var(--theme-rail-bg);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .chkApp .chkPageIn {
