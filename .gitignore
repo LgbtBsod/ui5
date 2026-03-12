@@ -47,6 +47,8 @@ docs/runtime/*.txt
 # Local media dumps
 *.mp4
 *.zip
+*.jpg
+*.png
 
 # Generated UI5 preload namespace proxies
 app/checklist/
