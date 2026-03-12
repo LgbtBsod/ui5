@@ -41,10 +41,25 @@ const detailView = read("app/view/Detail.view.xml");
 const analyticsView = read("app/view/Analytics.view.xml");
 const checksExpandedDialog = read("app/view/fragment/ChecksExpandedDialog.fragment.xml");
 const barriersExpandedDialog = read("app/view/fragment/BarriersExpandedDialog.fragment.xml");
-const workflowAnalyticsTopline = read("app/view/fragment/WorkflowAnalyticsTopline.fragment.xml");
+const workflowAnalyticsToplinePrimaryCards = read("app/view/fragment/WorkflowAnalyticsToplinePrimaryCards.fragment.xml");
+const workflowAnalyticsToplineRateCards = read("app/view/fragment/WorkflowAnalyticsToplineRateCards.fragment.xml");
+const workflowAnalyticsMessageStack = read("app/view/fragment/WorkflowAnalyticsMessageStack.fragment.xml");
+const workflowStatusMetaChips = read("app/view/fragment/WorkflowStatusMetaChips.fragment.xml");
 const workflowAnalyticsBreakdowns = read("app/view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml");
+const detailAccessDeniedScene = read("app/view/fragment/DetailAccessDeniedScene.fragment.xml");
+const detailInfoCardsHost = read("app/view/fragment/DetailInfoCardsHost.fragment.xml");
+const detailChecksBusyShell = read("app/view/fragment/DetailChecksBusyShell.fragment.xml");
+const detailBarriersBusyShell = read("app/view/fragment/DetailBarriersBusyShell.fragment.xml");
+const detailCreateModeBanner = read("app/view/fragment/DetailCreateModeBanner.fragment.xml");
+const detailChecksSectionShell = read("app/view/fragment/DetailChecksSectionShell.fragment.xml");
+const detailBarriersSectionShell = read("app/view/fragment/DetailBarriersSectionShell.fragment.xml");
+const detailChecksSectionToolbar = read("app/view/fragment/DetailChecksSectionToolbar.fragment.xml");
+const detailBarriersSectionToolbar = read("app/view/fragment/DetailBarriersSectionToolbar.fragment.xml");
+const detailChecksEmptyState = read("app/view/fragment/DetailChecksEmptyState.fragment.xml");
+const detailBarriersEmptyState = read("app/view/fragment/DetailBarriersEmptyState.fragment.xml");
 const locationValueHelpDialog = read("app/view/fragment/LocationValueHelpDialog.fragment.xml");
 const lockSwitchStatus = read("app/view/fragment/LockSwitchStatus.fragment.xml");
+const searchLoadRetryHint = read("app/view/fragment/SearchLoadRetryHint.fragment.xml");
 
 if (!/class="chkApp"/.test(appView)) {
   fail("app/view/App.view.xml must declare class=\"chkApp\" on the root view.");
@@ -64,8 +79,8 @@ if (!/id="searchSmartFilterBar"/.test(searchView) || !/visible="\{= \$\{view>\/s
   fail("Search.view.xml must keep SmartFilterBar gated by smartFilterReady and bootstrapBusy.");
 }
 
-if (!/items="\{path:'view>\/infoCards', factory: '\.infoCardFactory'\}"/.test(detailView)) {
-  fail("Detail.view.xml must use infoCardFactory for infoCards GridList.");
+if (!/items="\{path:'view>\/infoCards', factory: '\.infoCardFactory'\}"/.test(detailInfoCardsHost)) {
+  fail("DetailInfoCardsHost.fragment.xml must use infoCardFactory for infoCards GridList.");
 }
 
 if (!/<t:Table[\s\S]*rows="\{selected>\/checks\}"/.test(detailView) || !/<Table[\s\S]*items="\{selected>\/checks\}"/.test(detailView)) {
@@ -82,6 +97,24 @@ assertIncludes("app/view/fragment/BarriersExpandedDialog.fragment.xml", /workflo
 assertIncludes("app/view/fragment/LockSwitchStatus.fragment.xml", /state>\/lockOperationPending/, "Lock switch must reflect lockOperationPending state.");
 assertIncludes("app/view/Analytics.view.xml", /showNavButton="true"/, "Analytics.view.xml must keep route-level back navigation.");
 assertIncludes("app/view/Analytics.view.xml", /analyticsRefreshButton/, "Analytics.view.xml must expose the analytics refresh action.");
+assertIncludes("app/view/Analytics.view.xml", /WorkflowAnalyticsToplinePrimaryCards/, "Analytics.view.xml must compose topline KPI cards via primary fragment.");
+assertIncludes("app/view/Analytics.view.xml", /WorkflowAnalyticsToplineRateCards/, "Analytics.view.xml must compose topline KPI cards via rate fragment.");
+assertIncludes("app/view/Analytics.view.xml", /WorkflowStatusMetaChips/, "Analytics.view.xml must compose topline meta chips via shared fragment.");
+assertIncludes("app/view/Analytics.view.xml", /WorkflowAnalyticsMessageStack/, "Analytics.view.xml must compose analytics status messaging via shared fragment.");
+assertIncludes("app/view/fragment/WorkflowAnalyticsToplinePrimaryCards.fragment.xml", /kpiCardDanger/, "Analytics topline primary cards must expose semantic failed KPI styling.");
+assertIncludes("app/view/fragment/WorkflowAnalyticsToplineRateCards.fragment.xml", /kpiRate/, "Analytics topline rate cards must expose governed KPI rate styling.");
+assertIncludes("app/view/fragment/DetailChecksSectionShell.fragment.xml", /DetailChecksSectionToolbar/, "DetailChecksSectionShell.fragment.xml must compose checks toolbar via fragment.");
+assertIncludes("app/view/fragment/DetailBarriersSectionShell.fragment.xml", /DetailBarriersSectionToolbar/, "DetailBarriersSectionShell.fragment.xml must compose barriers toolbar via fragment.");
+assertIncludes("app/view/Detail.view.xml", /DetailAccessDeniedScene/, "Detail.view.xml must compose denied state via fragment.");
+assertIncludes("app/view/Detail.view.xml", /DetailCreateModeBanner/, "Detail.view.xml must compose create-mode banner via fragment.");
+assertIncludes("app/view/Detail.view.xml", /DetailInfoCardsHost/, "Detail.view.xml must compose info-card host via fragment.");
+assertIncludes("app/view/fragment/DetailChecksSectionShell.fragment.xml", /DetailChecksBusyShell/, "DetailChecksSectionShell.fragment.xml must compose checks busy shell via fragment.");
+assertIncludes("app/view/fragment/DetailBarriersSectionShell.fragment.xml", /DetailBarriersBusyShell/, "DetailBarriersSectionShell.fragment.xml must compose barriers busy shell via fragment.");
+assertIncludes("app/view/Detail.view.xml", /DetailChecksSectionShell/, "Detail.view.xml must compose checks table section shell via fragment.");
+assertIncludes("app/view/Detail.view.xml", /DetailBarriersSectionShell/, "Detail.view.xml must compose barriers table section shell via fragment.");
+assertIncludes("app/view/fragment/DetailChecksSectionShell.fragment.xml", /DetailChecksEmptyState/, "DetailChecksSectionShell.fragment.xml must compose checks empty state via fragment.");
+assertIncludes("app/view/fragment/DetailBarriersSectionShell.fragment.xml", /DetailBarriersEmptyState/, "DetailBarriersSectionShell.fragment.xml must compose barriers empty state via fragment.");
+assertIncludes("app/view/fragment/SearchLoadStatePanel.fragment.xml", /SearchLoadRetryHint/, "SearchLoadStatePanel.fragment.xml must compose retry-hint via fragment.");
 
 if (!/<t:Table[\s\S]*rows="\{selected>\/checks\}"/.test(checksExpandedDialog) || !/<Table[\s\S]*items="\{selected>\/checks\}"/.test(checksExpandedDialog)) {
   fail("ChecksExpandedDialog.fragment.xml must keep dual-table contract.");
@@ -93,12 +126,27 @@ if (!/<t:Table[\s\S]*rows="\{selected>\/barriers\}"/.test(barriersExpandedDialog
 
 assertMetrics("app/view/App.view.xml", { tags: 20, vbox: 3, hbox: 2, fragments: 0 });
 assertMetrics("app/view/Search.view.xml", { tags: 155, vbox: 28, hbox: 8, fragments: 5 });
-assertMetrics("app/view/Detail.view.xml", { tags: 275, vbox: 40, hbox: 10, fragments: 10 });
-assertMetrics("app/view/Analytics.view.xml", { tags: 50, vbox: 5, hbox: 3, fragments: 4 });
-assertMetrics("app/view/fragment/WorkflowAnalyticsTopline.fragment.xml", { tags: 32, vbox: 2, hbox: 3, fragments: 0 });
+assertMetrics("app/view/Detail.view.xml", { tags: 210, vbox: 22, hbox: 6, fragments: 9 });
+assertMetrics("app/view/Analytics.view.xml", { tags: 50, vbox: 5, hbox: 4, fragments: 6 });
+assertMetrics("app/view/fragment/WorkflowAnalyticsToplinePrimaryCards.fragment.xml", { tags: 24, vbox: 3, hbox: 3, fragments: 0 });
+assertMetrics("app/view/fragment/WorkflowAnalyticsToplineRateCards.fragment.xml", { tags: 16, vbox: 2, hbox: 2, fragments: 0 });
+assertMetrics("app/view/fragment/WorkflowAnalyticsMessageStack.fragment.xml", { tags: 4, vbox: 0, hbox: 0, fragments: 0 });
+assertMetrics("app/view/fragment/WorkflowStatusMetaChips.fragment.xml", { tags: 4, vbox: 0, hbox: 0, fragments: 0 });
 assertMetrics("app/view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml", { tags: 235, vbox: 6, hbox: 2, fragments: 0 });
+assertMetrics("app/view/fragment/DetailAccessDeniedScene.fragment.xml", { tags: 9, vbox: 0, hbox: 0, fragments: 0 });
+assertMetrics("app/view/fragment/DetailInfoCardsHost.fragment.xml", { tags: 9, vbox: 3, hbox: 0, fragments: 1 });
+assertMetrics("app/view/fragment/DetailChecksBusyShell.fragment.xml", { tags: 3, vbox: 1, hbox: 0, fragments: 1 });
+assertMetrics("app/view/fragment/DetailBarriersBusyShell.fragment.xml", { tags: 3, vbox: 1, hbox: 0, fragments: 1 });
+assertMetrics("app/view/fragment/DetailCreateModeBanner.fragment.xml", { tags: 7, vbox: 1, hbox: 1, fragments: 0 });
+assertMetrics("app/view/fragment/DetailChecksSectionShell.fragment.xml", { tags: 8, vbox: 3, hbox: 0, fragments: 4 });
+assertMetrics("app/view/fragment/DetailBarriersSectionShell.fragment.xml", { tags: 8, vbox: 3, hbox: 0, fragments: 4 });
+assertMetrics("app/view/fragment/DetailChecksSectionToolbar.fragment.xml", { tags: 10, vbox: 0, hbox: 0, fragments: 0 });
+assertMetrics("app/view/fragment/DetailBarriersSectionToolbar.fragment.xml", { tags: 10, vbox: 0, hbox: 0, fragments: 0 });
+assertMetrics("app/view/fragment/DetailChecksEmptyState.fragment.xml", { tags: 6, vbox: 1, hbox: 0, fragments: 0 });
+assertMetrics("app/view/fragment/DetailBarriersEmptyState.fragment.xml", { tags: 6, vbox: 1, hbox: 0, fragments: 0 });
 assertMetrics("app/view/fragment/DetailControlRail.fragment.xml", { tags: 95, vbox: 3, hbox: 8, fragments: 1 });
-assertMetrics("app/view/fragment/SearchLoadStatePanel.fragment.xml", { tags: 18, vbox: 3, hbox: 4, fragments: 0 });
+assertMetrics("app/view/fragment/SearchLoadStatePanel.fragment.xml", { tags: 18, vbox: 3, hbox: 4, fragments: 1 });
+assertMetrics("app/view/fragment/SearchLoadRetryHint.fragment.xml", { tags: 4, vbox: 0, hbox: 1, fragments: 0 });
 assertMetrics("app/view/fragment/ChecksExpandedDialog.fragment.xml", { tags: 55, vbox: 3, hbox: 1, fragments: 1 });
 assertMetrics("app/view/fragment/BarriersExpandedDialog.fragment.xml", { tags: 55, vbox: 3, hbox: 1, fragments: 1 });
 

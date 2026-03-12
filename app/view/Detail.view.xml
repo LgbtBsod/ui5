@@ -13,34 +13,7 @@
 
         <VBox class="appContent detailContent detailExperienceCanvas" renderType="Bare" fitContainer="true" width="100%">
 
-            <FlexBox
-                class="glassCard detailAccessDeniedScene"
-                renderType="Bare"
-                width="100%"
-                visible="{view>/accessState/denied}">
-                <FlexBox class="detailAccessDeniedSceneVisual" renderType="Bare">
-                    <Image
-                        src="{view>/accessState/illustrationSrc}"
-                        decorative="true"
-                        densityAware="false"
-                        class="detailAccessDeniedIllustration"/>
-                </FlexBox>
-                <FlexBox class="detailAccessDeniedSceneCopy" renderType="Bare">
-                    <Title text="{path:'view>/accessState/titleKey', formatter:'.formatI18nByKey'}" class="detailAccessDeniedTitle"/>
-                    <Text text="{path:'view>/accessState/messageKey', formatter:'.formatI18nByKey'}" class="detailAccessDeniedText"/>
-                    <ObjectStatus
-                        text="{view>/accessState/reasonCode}"
-                        state="Error"
-                        visible="{= !!${view>/accessState/reasonCode} }"
-                        class="detailAccessDeniedReason"/>
-                    <Button
-                        icon="sap-icon://nav-back"
-                        text="{i18n>closeButton}"
-                        type="Emphasized"
-                        press=".onCloseDetail"
-                        class="detailAccessDeniedAction"/>
-                </FlexBox>
-            </FlexBox>
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailAccessDeniedScene" type="XML"/>
 
             <VBox
                 id="detailControlPinnedDock"
@@ -109,33 +82,8 @@
                                 <uxap:blocks>
                                     <VBox renderType="Bare" width="100%" class="detailMainExperienceStack">
                                         <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.LockKilledBanner" type="XML"/>
-                                        <VBox
-                                            class="detailCreateModeBanner searchFilterHintBanner sapUiTinyMarginBottom appSkeletonReveal"
-                                            renderType="Bare"
-                                            visible="{= !${view>/detailSkeletonBusy} &amp;&amp; ${selected>/root/id} === '__CREATE' }">
-                                            <HBox class="detailCreateModeBannerTop" renderType="Bare" alignItems="Center" wrap="Wrap">
-                                                <core:Icon src="sap-icon://create-entry-time" class="detailCreateModeIcon"/>
-                                                <Title text="{i18n>detailCreateDraftTitle}" level="H6" class="detailCreateModeTitle"/>
-                                                <ObjectStatus
-                                                    class="detailCreateModeStatus"
-                                                    text="{path:'state>/isDirty', formatter:'.formatDraftStateText'}"
-                                                    state="{path:'state>/isDirty', formatter:'.formatDraftStateState'}"/>
-                                            </HBox>
-                                            <Text text="{i18n>detailCreateDraftText}" class="detailCreateModeText"/>
-                                        </VBox>
-                                        <VBox class="glassCard detailSectionCard detailInfoExperienceCard" width="100%">
-                                            <VBox visible="{view>/detailSkeletonBusy}" renderType="Bare">
-                                                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonFormSection" type="XML"/>
-                                            </VBox>
-                                            <VBox visible="{= !${view>/detailSkeletonBusy} }" renderType="Bare" class="appSkeletonReveal detailSectionBody detailInfoSectionBody">
-                                            <f:GridList id="infoCardGrid" items="{path:'view>/infoCards', factory: '.infoCardFactory'}" class="infoCardGrid" showSeparators="None">
-                                            <f:dragDropConfig>
-                                                <dnd:DragInfo sourceAggregation="items" enabled="true"/>
-                                                <dnd:DropInfo targetAggregation="items" dropPosition="Between" enabled="true" drop=".onInfoCardsDrop"/>
-                                            </f:dragDropConfig>
-                                            </f:GridList>
-                                            </VBox>
-                                        </VBox>
+                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailCreateModeBanner" type="XML"/>
+                                        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailInfoCardsHost" type="XML"/>
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
@@ -143,51 +91,7 @@
                             <!-- Checks -->
                             <uxap:ObjectPageSubSection id="ssChecks" title="{i18n>checksTitle}">
                                 <uxap:blocks>
-                                    <VBox class="glassCard detailSectionCard detailTableExperienceCard" width="100%">
-                                        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
-                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
-                                        </VBox>
-                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody workflowBusyScope workflowBusyScopeSection">
-                                        <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/checksBusy}">
-                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
-                                        </VBox>
-                                        <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
-                                            <Title text="{i18n>checksTitle}"/>
-                                            <ToolbarSpacer/>
-
-                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecks" class="sapUiTinyMarginEnd">
-                                                <layoutData>
-                                                    <OverflowToolbarLayoutData priority="Low"/>
-                                                </layoutData>
-                                            </Button>
-
-                                            <Button
-                                                text="{i18n>addRow}"
-                                        icon="sap-icon://task"
-                                                press=".onAddCheckRow"
-                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
-                                                <layoutData>
-                                                    <OverflowToolbarLayoutData priority="High"/>
-                                                </layoutData>
-                                            </Button>
-                                        </OverflowToolbar>
-
-                                        <VBox
-                                            class="detailEmptyStateCard detailChecksEmptyState"
-                                            renderType="Bare"
-                                            visible="{path:'selected>/checks', formatter:'.isEmptyRows'}">
-                                            <core:Icon src="sap-icon://complete" class="detailEmptyStateIcon"/>
-                                            <Title text="{i18n>detailEmptyChecksTitle}" level="H6" class="detailEmptyStateTitle"/>
-                                            <Text text="{i18n>detailEmptyChecksText}" class="detailEmptyStateText"/>
-                                            <Button
-                                                text="{i18n>addRow}"
-                                        icon="sap-icon://task"
-                                                type="Transparent"
-                                                press=".onAddCheckRow"
-                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                                                class="detailEmptyStateAction"/>
-                                        </VBox>
-
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailChecksSectionShell" type="XML"/>
                                         <t:Table
                                             visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/checks'}], formatter:'.isDesktopTableVisible'}"
                                             rows="{selected>/checks}"
@@ -270,59 +174,13 @@
                                                 </ColumnListItem>
                                             </items>
                                         </Table>
-                                        </VBox>
-                                    </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
 
                             <!-- Barriers -->
                             <uxap:ObjectPageSubSection id="ssBarriers" title="{i18n>barriersTitle}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
                                 <uxap:blocks>
-                                    <VBox class="glassCard detailSectionCard detailTableExperienceCard detailBarriersTableCard" width="100%" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
-                                        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
-                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
-                                        </VBox>
-                                        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody workflowBusyScope workflowBusyScopeSection">
-                                        <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/barriersBusy}">
-                                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
-                                        </VBox>
-                                        <OverflowToolbar class="toolbarTransparent detailSectionToolbar">
-                                            <Title text="{i18n>barriersTitle}"/>
-                                            <ToolbarSpacer/>
-
-                                            <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd">
-                                                <layoutData>
-                                                    <OverflowToolbarLayoutData priority="Low"/>
-                                                </layoutData>
-                                            </Button>
-
-                                            <Button
-                                                text="{i18n>addRow}"
-                                                icon="sap-icon://quality-issue"
-                                                press=".onAddBarrierRow"
-                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
-                                                <layoutData>
-                                                    <OverflowToolbarLayoutData priority="High"/>
-                                                </layoutData>
-                                            </Button>
-                                        </OverflowToolbar>
-
-                                        <VBox
-                                            class="detailEmptyStateCard detailBarriersEmptyState"
-                                            renderType="Bare"
-                                            visible="{path:'selected>/barriers', formatter:'.isEmptyRows'}">
-                                            <core:Icon src="sap-icon://alert" class="detailEmptyStateIcon"/>
-                                            <Title text="{i18n>detailEmptyBarriersTitle}" level="H6" class="detailEmptyStateTitle"/>
-                                            <Text text="{i18n>detailEmptyBarriersText}" class="detailEmptyStateText"/>
-                                            <Button
-                                                text="{i18n>addRow}"
-                                                icon="sap-icon://quality-issue"
-                                                type="Transparent"
-                                                press=".onAddBarrierRow"
-                                                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                                                class="detailEmptyStateAction"/>
-                                        </VBox>
-
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailBarriersSectionShell" type="XML"/>
                                         <t:Table
                                             visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/barriers'}], formatter:'.isDesktopTableVisible'}"
                                             rows="{selected>/barriers}"
@@ -405,8 +263,6 @@
                                                 </ColumnListItem>
                                             </items>
                                         </Table>
-                                        </VBox>
-                                    </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
 
@@ -420,7 +276,7 @@
                                             <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/attachmentBusy}">
                                                 <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
                                             </VBox>
-                                            <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar">
+                                            <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar workbenchToolbarSurface sectionToolbarSurface">
                                                 <Title text="{i18n>attachmentsTitle}"/>
                                                 <ToolbarSpacer/>
                                                 <Button
@@ -428,7 +284,7 @@
                                                     type="Transparent"
                                                     enabled="{= !${view>/attachmentBusy} }"
                                                     press=".onToggleAttachmentsSection"
-                                                    class="sapUiTinyMarginEnd"/>
+                                                    class="sapUiTinyMarginEnd actionPrioritySecondary"/>
                                                 <Text text="{i18n>attachmentDraftStageHint}" visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText">
                                                     <layoutData>
                                                         <OverflowToolbarLayoutData priority="Disappear"/>
@@ -525,14 +381,14 @@
 
                                                 <VBox id="attachmentExpandedScope" renderType="Bare" width="100%" visible="{view>/attachmentsExpanded}">
                                                 <HBox
-                                                    class="detailEmptyStateCard detailAttachmentsEmptyState"
+                                                    class="detailEmptyStateCard workflowEmptyStateCard detailAttachmentsEmptyState"
                                                     renderType="Bare"
                                                     visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
-                                                    <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon"/>
-                                                    <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle"/>
+                                                    <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
+                                                    <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
                                                     <Text
                                                         text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>attachmentDraftStageHint} : ${i18n>detailEmptyAttachmentsText} }"
-                                                        class="detailEmptyStateText"/>
+                                                        class="detailEmptyStateText workflowEmptyStateText"/>
                                                 </HBox>
 
                                                 <Table

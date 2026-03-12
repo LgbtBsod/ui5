@@ -8,9 +8,9 @@
         <items>
             <IconTabFilter key="trends" text="{i18n>analyticsTrendsTab}" icon="sap-icon://line-chart">
                 <VBox class="analyticsBreakdownSection" renderType="Bare">
-                    <Panel headerText="{i18n>analyticsComparisonChartTitle}" expandable="false" class="analyticsChartPanel">
+                    <Panel headerText="{i18n>analyticsComparisonChartTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
                         <content>
-                            <OverflowToolbar design="Transparent" class="analyticsComparisonToolbar">
+                            <OverflowToolbar design="Transparent" class="analyticsComparisonToolbar workbenchToolbarSurface">
                                 <Label text="{i18n>analyticsCompareMetricLabel}" labelFor="analyticsComparisonMetricSelect"/>
                                 <Select
                                     id="analyticsComparisonMetricSelect"
@@ -60,7 +60,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsMonthlyMatrixTitle}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsMonthlyMatrixTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <ScrollContainer width="100%" horizontal="true" vertical="false" focusable="false" class="analyticsMatrixScroller">
                                 <Table
@@ -113,7 +113,7 @@
 
             <IconTabFilter key="builder" text="{i18n>analyticsBuilderTab}" icon="sap-icon://vertical-bar-chart">
                 <VBox class="analyticsBreakdownSection" renderType="Bare">
-                    <Panel headerText="{view>/builderChartTitle}" expandable="false" class="analyticsChartPanel">
+                    <Panel headerText="{view>/builderChartTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
                         <content>
                             <MessageStrip
                                 text="{view>/builderSourceHintText}"
@@ -121,7 +121,7 @@
                                 showIcon="true"
                                 visible="{= !!${view>/builderSourceHintText} }"
                                 class="chkFeedbackStrip sapUiTinyMarginBottom"/>
-                            <OverflowToolbar design="Transparent" class="analyticsBuilderToolbar">
+                            <OverflowToolbar design="Transparent" class="analyticsBuilderToolbar workbenchToolbarSurface">
                                 <Label text="{i18n>analyticsBuilderDimensionLabel}" labelFor="analyticsBuilderDimensionSelect"/>
                                 <Select
                                     id="analyticsBuilderDimensionSelect"
@@ -173,7 +173,7 @@
 
             <IconTabFilter key="sources" text="{i18n>analyticsSourcesTab}" icon="sap-icon://compare">
                 <VBox class="analyticsBreakdownSection" renderType="Bare">
-                    <Panel headerText="{i18n>analyticsSourceBreakdown}" expandable="false" class="analyticsChartPanel">
+                    <Panel headerText="{i18n>analyticsSourceBreakdown}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
                         <content>
                             <viz:VizFrame
                                 vizType="donut"
@@ -201,7 +201,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsFailedChecksBySource}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsFailedChecksBySource}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsSource" visible="{view>/analytics/hasCharts/failedChecksBySource}">
                                 <viz:dataset>
@@ -223,7 +223,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsFailedBarriersBySource}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsFailedBarriersBySource}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsSource" visible="{view>/analytics/hasCharts/failedBarriersBySource}">
                                 <viz:dataset>
@@ -249,7 +249,7 @@
 
             <IconTabFilter key="breakdowns" text="{i18n>analyticsBreakdownsTab}" icon="sap-icon://business-objects-experience">
                 <VBox class="analyticsBreakdownSection" renderType="Bare">
-                    <Panel headerText="{i18n>analyticsFailedChecksByProfession}" expandable="false" class="analyticsChartPanel">
+                    <Panel headerText="{i18n>analyticsFailedChecksByProfession}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsProfession" visible="{view>/analytics/hasCharts/failedChecksByProfession}">
                                 <viz:dataset>
@@ -271,7 +271,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsFailedBarriersByLpc}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsFailedBarriersByLpc}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsLpc" visible="{view>/analytics/hasCharts/failedBarriersByLpc}">
                                 <viz:dataset>
@@ -293,7 +293,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsFailedChecksByLocation}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsFailedChecksByLocation}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsLocation" visible="{view>/analytics/hasCharts/failedChecksByLocation}">
                                 <viz:dataset>
@@ -315,7 +315,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsFailedChecksByBukrs}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsFailedChecksByBukrs}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/failedChecksByBukrs}">
                                 <viz:dataset>
@@ -337,7 +337,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsFailedChecksByOrgunit}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsFailedChecksByOrgunit}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/failedChecksByOrgunit}">
                                 <viz:dataset>
@@ -359,7 +359,7 @@
                         </content>
                     </Panel>
 
-                    <Panel headerText="{i18n>analyticsFailedBarriersByBarrierNumber}" expandable="false" class="analyticsChartPanel sapUiSmallMarginTop">
+                    <Panel headerText="{i18n>analyticsFailedBarriersByBarrierNumber}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                         <content>
                             <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/failedBarriersByBarrierNumber}">
                                 <viz:dataset>

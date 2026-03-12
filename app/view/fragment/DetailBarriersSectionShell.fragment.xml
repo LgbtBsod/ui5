@@ -1,0 +1,12 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox class="glassCard detailSectionCard detailTableExperienceCard detailBarriersTableCard" width="100%" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
+        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonTableSection" type="XML"/>
+        </VBox>
+        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody workflowBusyScope workflowBusyScopeSection">
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailBarriersBusyShell" type="XML"/>
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailBarriersSectionToolbar" type="XML"/>
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.DetailBarriersEmptyState" type="XML"/>
+        </VBox>
+    </VBox>
+</core:FragmentDefinition>

@@ -1,34 +1,41 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <VBox class="detailControlBar" renderType="Bare" width="100%">
 
-        <HBox class="uxStatRow detailHeroStatBoard detailHeroStatBoardCompact" wrap="Wrap" renderType="Bare">
+        <HBox
+            class="uxStatRow detailHeroStatBoard detailHeroStatBoardCompact"
+            wrap="Wrap"
+            renderType="Bare"
+            role="region"
+            ariaLabel="{i18n>detailStatsAriaLabel}">
             <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>checklistLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${selected>/basic/checklist_id} || ${selected>/root/checklist_id} || ${selected>/root/CHECKLIST_ID} || (${selected>/root/id} === '__CREATE' ? ${i18n>newChecklist} : '-') }"/>
+                <Text text="{i18n>checklistLabel}" class="sapUiTinyMarginEnd uxStatLabel"/>
+                <Text text="{= ${selected>/basic/checklist_id} || ${selected>/root/checklist_id} || ${selected>/root/CHECKLIST_ID} || (${selected>/root/id} === '__CREATE' ? ${i18n>newChecklist} : '-') }" class="uxStatValue"/>
             </HBox>
 
             <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>overallResultLabel}" class="sapUiTinyMarginEnd"/>
+                <Text text="{i18n>overallResultLabel}" class="sapUiTinyMarginEnd uxStatLabel"/>
                 <ObjectStatus
                     text="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultText'}"
-                    state="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultState'}"/>
+                    state="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultState'}"
+                    class="uxStatValue"/>
             </HBox>
 
             <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>objectStatusLabel}" class="sapUiTinyMarginEnd"/>
+                <Text text="{i18n>objectStatusLabel}" class="sapUiTinyMarginEnd uxStatLabel"/>
                 <ObjectStatus
                     text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}"
-                    state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"/>
+                    state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"
+                    class="uxStatValue"/>
             </HBox>
 
             <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>headerDateLabel}" class="sapUiTinyMarginEnd"/>
-                <Text text="{path:'selected>/basic/date', formatter:'.formatHeaderDate'}"/>
+                <Text text="{i18n>headerDateLabel}" class="sapUiTinyMarginEnd uxStatLabel"/>
+                <Text text="{path:'selected>/basic/date', formatter:'.formatHeaderDate'}" class="uxStatValue"/>
             </HBox>
 
             <HBox class="uxStatChip" renderType="Bare">
-                <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd"/>
-                <Text text="{= ${state>/workflow/detail/editMode} !== 'READ' ? ${i18n>modeEdit} : ${i18n>modeRead} }"/>
+                <Text text="{i18n>editMode}" class="sapUiTinyMarginEnd uxStatLabel"/>
+                <Text text="{= ${state>/workflow/detail/editMode} !== 'READ' ? ${i18n>modeEdit} : ${i18n>modeRead} }" class="uxStatValue"/>
             </HBox>
         </HBox>
 
@@ -37,22 +44,32 @@
             text="{path:'state>/validationSummary', formatter:'.formatValidationSummaryText'}"
             type="Error"
             showIcon="true"
-            class="sapUiTinyMarginTop sapUiTinyMarginBottom chkFeedbackStrip chkFeedbackError"
-            visible="{= ${view>/validationShown} &amp;&amp; ${state>/validationSummary/hasErrors} }">
+            class="sapUiTinyMarginTop sapUiTinyMarginBottom chkFeedbackStrip chkFeedbackError workflowMessageSurface"
+            visible="{= ${view>/validationShown} &amp;&amp; ${state>/validationSummary/hasErrors} }"
+            ariaLabelledBy="detailValidationSummaryStrip">
             <link>
                 <Link
                     text="{path:'state>/validationSummary', formatter:'.formatValidationSummaryLinkText'}"
                     tooltip="{i18n>requiredFieldHint}"
+                    ariaLabel="{i18n>requiredFieldHint}"
                     press=".onFocusFirstInvalid"/>
             </link>
         </MessageStrip>
 
         <VBox class="detailControlToolbar detailControlToolbarStack" renderType="Bare" width="100%">
-            <HBox class="detailSectionAnchorRail" renderType="Bare" wrap="Wrap" alignItems="Center">
+            <HBox
+                class="detailSectionAnchorRail"
+                renderType="Bare"
+                wrap="Wrap"
+                alignItems="Center"
+                role="navigation"
+                ariaLabel="{i18n>sectionNavAriaLabel}">
                 <Button text="{i18n>detailAnchorOverview}"
                         icon="sap-icon://overview-chart"
                         type="Transparent"
                         class="detailSectionAnchorBtn chkRipple"
+                        tooltip="{i18n>detailAnchorOverview}"
+                        ariaLabel="{i18n>detailAnchorOverview}"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssParticipants"/></customData>
                 </Button>
@@ -60,6 +77,8 @@
                         icon="sap-icon://inspection"
                         type="Transparent"
                         class="detailSectionAnchorBtn chkRipple"
+                        tooltip="{i18n>detailAnchorChecks}"
+                        ariaLabel="{i18n>detailAnchorChecks}"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssChecks"/></customData>
                 </Button>
@@ -67,6 +86,8 @@
                         icon="sap-icon://warning2"
                         type="Transparent"
                         class="detailSectionAnchorBtn chkRipple"
+                        tooltip="{i18n>detailAnchorBarriers}"
+                        ariaLabel="{i18n>detailAnchorBarriers}"
                         visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssBarriers"/></customData>
@@ -75,36 +96,44 @@
                         icon="sap-icon://attachment"
                         type="Transparent"
                         class="detailSectionAnchorBtn chkRipple"
+                        tooltip="{i18n>detailAnchorAttachments}"
+                        ariaLabel="{i18n>detailAnchorAttachments}"
                         press=".onJumpToDetailSection">
                     <customData><core:CustomData key="targetSection" value="ssAttachments"/></customData>
                 </Button>
             </HBox>
 
-            <OverflowToolbar class="detailControlRow detailControlRowTop toolbarTransparent" design="Transparent">
+            <OverflowToolbar
+                class="detailControlRow detailControlRowTop toolbarTransparent"
+                design="Transparent"
+                ariaLabel="{i18n>detailStatusRowAriaLabel}">
                 <ObjectStatus
                     icon="sap-icon://status-in-process"
                     text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}"
                     state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"
-                    class="detailRailStatusChip"/>
+                    class="detailRailStatusChip statusChipSemantic"
+                    tooltip="{i18n>objectStatusLabel}"/>
 
                 <ObjectStatus icon="sap-icon://edit"
                               text="{= ${state>/isDirty} ? ${i18n>dirtyStateDirty} : ${i18n>dirtyStateSynced} }"
                               state="{= ${state>/isDirty} ? 'Warning' : 'Success' }"
-                              class="detailRailStatusChip">
+                              class="detailRailStatusChip statusChipSemantic">
                     <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
                 </ObjectStatus>
 
                 <ObjectStatus icon="sap-icon://history"
                               text="{parts:[{path:'state>/workflow/detail/editMode'},{path:'state>/workflow/detail/lock/state'}], formatter:'.formatHeartbeatText'}"
                               state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateSemantic'}"
-                              class="detailRailStatusChip">
+                              tooltip="{i18n>heartbeatLabel}"
+                              class="detailRailStatusChip statusChipSemantic">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </ObjectStatus>
 
                 <ObjectStatus icon="sap-icon://synchronize"
                               text="{parts:[{path:'state>/workflow/detail/editMode'},{path:'state>/workflow/detail/lock/state'},{path:'state>/autosaveState'}], formatter:'.formatAutosaveText'}"
                               state="{= ${state>/workflow/detail/editMode} !== 'EDIT' || ${state>/workflow/detail/lock/state} !== 'EDIT_LOCKED' ? 'Information' : ${state>/autosaveState} === 'ERROR' ? 'Error' : ${state>/autosaveState} === 'SAVING' ? 'Warning' : ${state>/autosaveState} === 'SAVED' ? 'Success' : 'Information' }"
-                              class="detailRailStatusChip">
+                              tooltip="{i18n>autosaveLabel}"
+                              class="detailRailStatusChip statusChipSemantic">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </ObjectStatus>
 
@@ -119,21 +148,26 @@
                         visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${state>/isDirty} }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onCancelEditFromDetail"
-                        tooltip="{i18n>objectCancel}"
-                        class="chkRipple">
+                        tooltip="{i18n>objectCancelTooltip}"
+                        ariaLabel="{i18n>objectCancelTooltip}"
+                        class="actionPrioritySecondary chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
                 </Button>
 
             </OverflowToolbar>
 
-            <OverflowToolbar class="detailControlRow detailControlRowActions toolbarTransparent" design="Transparent">
+            <OverflowToolbar
+                class="detailControlRow detailControlRowActions toolbarTransparent"
+                design="Transparent"
+                ariaLabel="{i18n>detailActionsAriaLabel}">
                 <Button icon="sap-icon://nav-back"
                         text="{i18n>closeButton}"
                         type="Transparent"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onCloseDetail"
                         tooltip="{i18n>closeDetails}"
-                        class="detailRailCloseAction chkRipple">
+                        ariaLabel="{i18n>closeDetails}"
+                        class="detailRailCloseAction actionPrioritySecondary chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
                 </Button>
 
@@ -144,8 +178,9 @@
                         visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onSaveDetail"
-                        tooltip="{i18n>objectSave}"
-                        class="chkRipple">
+                        tooltip="{i18n>objectSaveTooltip}"
+                        ariaLabel="{i18n>objectSaveTooltip}"
+                        class="actionPriorityPrimary chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
                 </Button>
 
@@ -155,8 +190,9 @@
                         visible="{parts:[{path:'state>/workflow/detail/editMode'},{path:'selected>/root/id'}], formatter:'.formatDeleteChecklistVisible'}"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onArmDeleteChecklist"
-                        tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
-                        class="chkRipple">
+                        tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteTooltip} }"
+                        ariaLabel="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteTooltip} }"
+                        class="actionPriorityDanger chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                 </Button>
 
@@ -166,8 +202,9 @@
                         visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${state>/workflow/detail/editMode} === 'EDIT' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onConfirmDeleteChecklist"
-                        tooltip="{i18n>deleteConfirmButton}"
-                        class="chkRipple">
+                        tooltip="{i18n>deleteConfirmTooltip}"
+                        ariaLabel="{i18n>deleteConfirmTooltip}"
+                        class="actionPriorityDanger chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                 </Button>
 
@@ -175,8 +212,9 @@
                         type="Transparent"
                         press=".onCopyDetailLink"
                         tooltip="{i18n>detailCopyLinkTooltip}"
+                        ariaLabel="{i18n>detailCopyLinkTooltip}"
                         enabled="{= !${state>/ui/busy/detail} }"
-                        class="chkRipple"
+                        class="actionPrioritySecondary chkRipple"
                         visible="{path:'selected>/root/id', formatter:'.formatCopyLinkVisible'}">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </Button>
@@ -185,7 +223,8 @@
                         type="Transparent"
                         press=".onToggleDetailFullscreen"
                         tooltip="{i18n>detailFullscreenTooltip}"
-                        class="chkRipple">
+                        ariaLabel="{i18n>detailFullscreenTooltip}"
+                        class="actionPrioritySecondary chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                 </Button>
 
@@ -194,8 +233,9 @@
                         visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
                         enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
                         press=".onValidateChecklist"
-                        tooltip="{i18n>validateButton}"
-                        class="chkRipple">
+                        tooltip="{i18n>validateTooltip}"
+                        ariaLabel="{i18n>validateTooltip}"
+                        class="actionPrioritySecondary chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
                 </Button>
 
@@ -203,8 +243,9 @@
                         text="{i18n>statusDraft}"
                         visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
-                        tooltip="{i18n>statusDraft}"
-                        class="chkRipple">
+                        tooltip="{i18n>statusDraftTooltip}"
+                        ariaLabel="{i18n>statusDraftTooltip}"
+                        class="actionPrioritySecondary chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                     <customData><core:CustomData key="targetStatus" value="DRAFT"/></customData>
                 </Button>
@@ -213,8 +254,9 @@
                         text="{i18n>statusRegistered}"
                         visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
-                        tooltip="{i18n>statusRegistered}"
-                        class="chkRipple">
+                        tooltip="{i18n>statusRegisteredTooltip}"
+                        ariaLabel="{i18n>statusRegisteredTooltip}"
+                        class="actionPrioritySecondary chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                     <customData><core:CustomData key="targetStatus" value="REGISTERED"/></customData>
                 </Button>
@@ -223,7 +265,8 @@
                         text="{i18n>statusClosed}"
                         visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
                         press=".onChangeChecklistStatus"
-                        tooltip="{i18n>statusClosed}"
+                        tooltip="{i18n>statusClosedTooltip}"
+                        ariaLabel="{i18n>statusClosedTooltip}"
                         class="chkRipple">
                     <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
                     <customData><core:CustomData key="targetStatus" value="CLOSED"/></customData>

@@ -2292,6 +2292,8 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   min-height: min(78vh, 52rem);
   padding: clamp(1.5rem, 4vw, 3rem);
   border-radius: 2rem;
+  max-width: 70rem;
+  margin-inline: auto;
 }
 
 .chkApp .detailAccessDeniedSceneVisual,
@@ -2299,6 +2301,12 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.chkApp .detailAccessDeniedSceneCopy {
+  align-items: flex-start;
+  max-width: 32rem;
+  min-width: 0;
 }
 
 .chkApp .detailAccessDeniedIllustration {
@@ -2346,6 +2354,19 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   .chkApp .detailAccessDeniedAction {
     align-self: center;
   }
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedScene,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedScene {
+  min-height: min(34rem, calc(100vh - var(--app-shell-offset) - 3rem));
+  max-width: min(100%, 42rem);
+  padding: 1.2rem 1.25rem 1.35rem;
+  align-self: start;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedSceneCopy,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedSceneCopy {
+  max-width: 24rem;
 }
 
 /* Stabilize checklist data cards so they never overflow the detail viewport. */
@@ -3278,6 +3299,43 @@ body.chkAppRoot.appDark .chkApp .commentExpandableField .sapMTextAreaInner {
 
 .chkApp .detailAccessDeniedScene {
   margin-top: 0;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedScene,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedScene {
+  inline-size: 100%;
+  width: 100%;
+  max-width: min(100%, 46rem);
+  grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  min-height: clamp(14rem, 42vh, 21rem);
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedSceneVisual,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedSceneVisual {
+  align-self: center;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedIllustration,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedIllustration {
+  max-width: min(100%, 11rem);
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedSceneCopy,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedSceneCopy {
+  max-width: 100%;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedTitle,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedTitle {
+  font-size: 1rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedText,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedText {
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 /* Base detail visual layer */

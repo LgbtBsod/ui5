@@ -2,7 +2,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
     <VBox class="searchStatusStripStack sapUiTinyMarginBottom chkStack">
-        <VBox visible="{= ${state>/ui/busy/searchTable} &amp;&amp; !${state>/loadError} }" class="searchCustomBusyPanel sapUiTinyMarginBottom">
+        <VBox visible="{= ${state>/ui/busy/searchTable} &amp;&amp; !${state>/loadError} }" class="searchCustomBusyPanel workflowBusySurface sapUiTinyMarginBottom">
             <HBox class="searchCustomBusyHeader" alignItems="Center" justifyContent="SpaceBetween" renderType="Bare">
                 <Text id="busyPanelTitleText" text="{i18n>busyPanelTitle}" class="searchCustomBusyTitle"/>
                 <Text id="busyPanelSubtitleText" text="{i18n>busyPanelSubtitle}" class="searchCustomBusySubtitle"/>
@@ -20,29 +20,14 @@
             type="{view>/filterHintType}"
             visible="{view>/filterHintVisible}"
             showIcon="true"
-            class="searchFilterHintBanner chkFeedbackStrip"/>
+            class="searchFilterHintBanner chkFeedbackStrip workflowMessageSurface"/>
 
         <MessageStrip
             text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
             type="Error"
             visible="{state>/loadError}"
             showIcon="true"
-            class="searchLoadStateBanner searchLoadErrorBanner chkFeedbackStrip"/>
-
-        <HBox
-            class="searchLoadRetryRow sapUiTinyMarginTop"
-            alignItems="Center"
-            justifyContent="SpaceBetween"
-            renderType="Bare"
-            visible="{state>/loadError}">
-            <Text
-                text="{= ${state>/networkOnline} === false ? ${i18n>searchOfflineMessage} : ${i18n>searchTimeoutMessage} }"
-                class="modeHintText"/>
-            <Button
-                text="{i18n>searchRetryAction}"
-                type="Transparent"
-                press=".onRetrySearchLoad"
-                enabled="{= !${state>/ui/busy/searchTable} }"/>
-        </HBox>
+            class="searchLoadStateBanner searchLoadErrorBanner chkFeedbackStrip workflowMessageSurface"/>
+        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SearchLoadRetryHint" type="XML"/>
     </VBox>
 </core:FragmentDefinition>

@@ -5,15 +5,21 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:cc="PRODUCTION_CONTROL_CHECKLIST.control"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
 
-    <VBox
-        class="chkSkin appShell appLayoutSingle"
-        fitContainer="true"
-        width="100%"
-        role="application"
-        ariaLabel="{i18n>appRootAriaLabel}">
-        <VBox class="appContent appShellHeaderHost" renderType="Bare" role="banner">
+    <!-- ═══════════════════════════════════════════════════════
+         App Shell Root
+         role="application" marks the SPA boundary for AT users.
+         ═══════════════════════════════════════════════════════ -->
+    <VBox class="chkSkin appShell appLayoutSingle" fitContainer="true" width="100%"
+          role="application"
+          ariaLabel="{i18n>appRootAriaLabel}">
+
+        <!-- ── Header region ─────────────────────────────────── -->
+        <VBox class="appContent appShellHeaderHost"
+              renderType="Bare"
+              role="banner">
             <cc:AppShellHeader
                 eyebrow=""
                 productName="{appView>/shell/productName}"
@@ -35,6 +41,7 @@
                 userPress=".onOpenShellUserMenu"/>
         </VBox>
 
+        <!-- ── Global feedback banner ────────────────────────── -->
         <MessageStrip
             id="globalFeedbackBanner"
             text="{state>/ui/feedback/banner/global/text}"
@@ -52,6 +59,7 @@
             </link>
         </MessageStrip>
 
+        <!-- ── Correlation ID row (power-user / admin) ────────── -->
         <HBox
             class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop sapUiTinyMarginBottom appFeedbackCorrelation"
             alignItems="Center"
@@ -59,7 +67,10 @@
             visible="{= !!${state>/ui/feedback/banner/global/correlationId} }"
             role="region"
             ariaLabel="{i18n>correlationIdLabel}">
-            <Label text="{i18n>correlationIdLabel}" labelFor="correlationIdInput" class="sapUiTinyMarginEnd"/>
+            <Label
+                text="{i18n>correlationIdLabel}"
+                labelFor="correlationIdInput"
+                class="sapUiTinyMarginEnd"/>
             <Input
                 id="correlationIdInput"
                 value="{state>/ui/feedback/banner/global/correlationId}"
@@ -74,6 +85,7 @@
                 press=".onCopyFeedbackCorrelationId"/>
         </HBox>
 
+        <!-- ── Main content region (FCL) ─────────────────────── -->
         <f:FlexibleColumnLayout
             id="mainFcl"
             class="appRootFcl"
@@ -82,13 +94,24 @@
             role="main"
             ariaLabel="{i18n>mainContentAriaLabel}">
             <f:beginColumnPages>
-                <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Search" width="100%"/>
+                <mvc:XMLView
+                    id="searchPaneHost"
+                    class="searchPaneCenterShell"
+                    viewName="PRODUCTION_CONTROL_CHECKLIST.view.Search"
+                    width="100%"/>
             </f:beginColumnPages>
             <f:midColumnPages>
-                <mvc:XMLView id="detailPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Detail" width="100%"/>
-                <mvc:XMLView id="analyticsPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Analytics" width="100%"/>
+                <mvc:XMLView
+                    id="detailPaneHost"
+                    viewName="PRODUCTION_CONTROL_CHECKLIST.view.Detail"
+                    width="100%"/>
+                <mvc:XMLView
+                    id="analyticsPaneHost"
+                    viewName="PRODUCTION_CONTROL_CHECKLIST.view.Analytics"
+                    width="100%"/>
             </f:midColumnPages>
         </f:FlexibleColumnLayout>
+
     </VBox>
 
 </mvc:View>

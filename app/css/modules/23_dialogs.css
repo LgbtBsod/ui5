@@ -969,6 +969,18 @@ body.chkAppRoot .shellPopover .sapMDialogScroll {
   background: var(--theme-block-bg);
 }
 
+body.chkAppRoot .shellPopover.sapMPopover,
+body.chkAppRoot .shellPopover.sapMResponsivePopover,
+body.chkAppRoot .shellPopover.sapMPopup-CTX,
+body.chkAppRoot .shellPopover.sapMPopupWithPadding {
+  z-index: 1400 !important;
+}
+
+body.chkAppRoot .shellPopover .sapMPopoverCont,
+body.chkAppRoot .shellPopover .sapMDialogScrollCont {
+  overflow: visible;
+}
+
 .chkApp .shellPopover .sapMBtn .sapMBtnInner {
   border-radius: 999px;
 }

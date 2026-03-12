@@ -3757,6 +3757,7 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
   --search-filter-sticky-top: calc(var(--app-shell-offset) + 0.55rem);
   --search-action-sticky-top: calc(var(--search-filter-sticky-top) + 17.25rem);
   gap: var(--search-workbench-gap);
+  align-items: stretch;
 }
 
 .chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
@@ -3768,6 +3769,7 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
 }
 
 .chkApp .searchWorkbenchDock > .searchFilterCardDense {
+  position: sticky;
   top: var(--search-sticky-filter-top, var(--search-filter-sticky-top));
   z-index: 24;
 }
@@ -3777,6 +3779,9 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
   z-index: 23;
   margin-top: 0;
   margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   backdrop-filter: blur(16px);
   box-shadow:
     0 10px 24px rgba(18, 36, 64, 0.08),
@@ -3805,6 +3810,7 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
 .chkApp .searchWorkbenchDock > .searchResultsTable {
   border-top-left-radius: calc(var(--radius-xl) - 0.1rem);
   border-top-right-radius: calc(var(--radius-xl) - 0.1rem);
+  min-width: 0;
 }
 
 .chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMTB,
@@ -3864,4 +3870,112 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail .backendTopInput,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail .maxRowsInput {
   min-width: 5rem;
+}
+
+/* 2026-03 video bugfix pass:
+   hard-coded sticky offset for action rail causes detached toolbar/gap when
+   SmartFilterBar height changes after metadata, variant or split-layout updates.
+   Keep only the filter block sticky; action rail stays in normal flow. */
+.chkApp .searchWorkbenchDock > .searchResultsActionRail {
+  position: relative;
+  top: auto;
+  z-index: 6;
+}
+
+.chkApp .searchWorkbenchDock {
+  --search-action-sticky-top: auto;
+}
+
+.chkApp .searchWorkbenchDock > .searchFilterCardDense,
+.chkApp .searchWorkbenchDock > .searchResultsActionRail,
+.chkApp .searchWorkbenchDock > .searchResultsTable {
+  inline-size: 100%;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.chkApp .searchFilterExperienceShell,
+.chkApp .searchResultsActionRail,
+.chkApp .searchResultsExperienceShell {
+  overflow: visible;
+}
+
+.chkApp .searchResultsActionRail.sapMTBNewFlex,
+.chkApp .searchSmartToolbarRail.sapMTBNewFlex {
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  row-gap: 0.35rem;
+}
+
+.chkApp .searchResultsActionRail .sapMBarChild,
+.chkApp .searchSmartToolbarRail .sapMBarChild,
+.chkApp .searchResultsActionRail .sapMFlexItem,
+.chkApp .searchSmartToolbarRail .sapMFlexItem {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chkApp .searchResultsActionRail .sapMTBSpacer,
+.chkApp .searchSmartToolbarRail .sapMTBSpacer {
+  min-width: 0.4rem;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn,
+.chkApp .searchSmartToolbarRail .sapMBtn {
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner {
+  max-width: 100%;
+}
+
+.chkApp .searchSelectionStatusChip {
+  max-width: min(100%, 18rem);
+}
+
+.chkApp .searchSelectionStatusChip .sapMObjStatusText {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchDock > .searchFilterCardDense,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchDock > .searchFilterCardDense {
+  position: relative;
+  top: auto;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchDock,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchDock,
+.chkApp .appLayoutSingle #searchPaneHost .searchWorkbenchDock,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchWorkbenchDock {
+  overflow: visible;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB {
+  overflow-x: visible;
+  overflow-y: visible;
+  flex-wrap: wrap;
+  row-gap: 0.4rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail,
+.chkApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail {
+  padding-inline: 0.28rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchResultsShell,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsShell {
+  min-width: 0;
 }

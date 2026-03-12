@@ -12,7 +12,7 @@
         class="pageTransparent analyticsPage">
         <headerContent>
             <ObjectStatus
-                class="analyticsRefreshStatus"
+                class="analyticsRefreshStatus statusChipSemantic"
                 text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? ${i18n>analyticsRefreshRunning} : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : (${view>/refreshState/lastSuccessAt} ? (${i18n>workflowUpdatedAt} + ': ' + ${view>/refreshState/lastSuccessAt}) : ${i18n>analyticsRefreshIdle}))) }"
                 state="{= ${view>/refreshState/status} === 'ERROR' ? 'Error' : ((${view>/refreshState/status} === 'REQUESTED' || ${view>/refreshState/isRunning}) ? 'Warning' : 'Success') }"/>
             <Button
@@ -21,11 +21,11 @@
                 type="Emphasized"
                 enabled="{= !${view>/refreshBusy} &amp;&amp; !${view>/refreshState/isRunning} &amp;&amp; ${view>/refreshState/status} !== 'REQUESTED' }"
                 press=".onRefreshAnalytics"
-                class="analyticsRefreshButton"/>
+                class="analyticsRefreshButton actionPriorityPrimary"/>
         </headerContent>
 
         <subHeader>
-            <OverflowToolbar design="Transparent" class="analyticsFilterToolbar">
+            <OverflowToolbar design="Transparent" class="analyticsFilterToolbar workbenchToolbarSurface">
                 <Label text="{i18n>analyticsSourceFilterLabel}" labelFor="analyticsSourceSwitch" class="analyticsFilterLabel analyticsSourceLabel"/>
                 <SegmentedButton
                     id="analyticsSourceSwitch"
@@ -99,24 +99,17 @@
                 </VBox>
 
                 <VBox class="analyticsScreenBody" renderType="Bare">
-                    <MessageStrip
-                        text="{i18n>workflowAnalyticsBackendNote}"
-                        type="Information"
-                        showIcon="true"
-                        class="chkFeedbackStrip"/>
-                    <MessageStrip
-                        text="{view>/error}"
-                        type="Warning"
-                        showIcon="true"
-                        visible="{= !!${view>/error} }"
-                        class="chkFeedbackStrip chkFeedbackWarning"/>
-                    <MessageStrip
-                        text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? (${i18n>analyticsRefreshRunning} + ': ' + (${view>/refreshState/lastMessage} || '')) : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : '')) }"
-                        type="Information"
-                        showIcon="true"
-                        visible="{= ${view>/refreshState/status} === 'REQUESTED' || !!${view>/refreshState/isRunning} || !!${view>/refreshState/lastError} }"
-                        class="chkFeedbackStrip"/>
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsTopline" type="XML"/>
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsMessageStack" type="XML"/>
+                    <VBox class="sapUiSmallMarginTop analyticsToplineSection" renderType="Bare">
+                        <HBox class="analyticsToplineGrid" wrap="Wrap" renderType="Bare">
+                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsToplinePrimaryCards" type="XML"/>
+                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsToplineRateCards" type="XML"/>
+                        </HBox>
+
+                        <HBox class="analyticsToplineMetaGrid sapUiSmallMarginTop" wrap="Wrap" renderType="Bare">
+                            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowStatusMetaChips" type="XML"/>
+                        </HBox>
+                    </VBox>
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
                 </VBox>
             </VBox>

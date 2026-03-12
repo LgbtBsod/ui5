@@ -1,7 +1,7 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <VBox class="workflowBusyOverlayCard searchCustomBusyPanel" renderType="Bare">
+    <VBox class="workflowBusyOverlayCard workflowBusySurface searchCustomBusyPanel" renderType="Bare">
         <HBox class="workflowBusyOverlayHeader searchCustomBusyHeader" alignItems="Center" justifyContent="SpaceBetween" renderType="Bare">
             <Text text="{i18n>busyPanelTitle}" class="workflowBusyOverlayTitle searchCustomBusyTitle"/>
             <Text text="{i18n>busyPanelSubtitle}" class="workflowBusyOverlaySubtitle searchCustomBusySubtitle"/>

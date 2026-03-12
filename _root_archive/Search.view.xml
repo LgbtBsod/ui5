@@ -6,17 +6,33 @@
     xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
     xmlns:smartTable="sap.ui.comp.smarttable">
 
-    <Page
-        showHeader="false"
-        enableScrolling="true"
-        class="pageTransparent">
+    <!-- ═══════════════════════════════════════════════════════
+         Search / List Report Page
+         Landmark: role="search" wraps filter area;
+                   role="region" wraps results area.
+         ═══════════════════════════════════════════════════════ -->
+    <Page showHeader="false" enableScrolling="true" class="pageTransparent">
 
         <content>
             <VBox class="appContent searchExperienceStack">
 
-                <HBox class="workflowRail searchHeaderKpiRail searchAnalyticsRailShell" renderType="Bare" wrap="Wrap" justifyContent="Start" alignItems="Stretch" role="region" ariaLabel="{i18n>kpiRailAriaLabel}">
-                    <HBox id="searchAnalyticsRail" class="searchAnalyticsRailGrid" renderType="Bare" wrap="Wrap">
-                        <VBox class="kpiCard searchAnalyticsCard">
+                <!-- ── KPI Analytics Rail ──────────────────────────── -->
+                <HBox
+                    class="workflowRail searchHeaderKpiRail searchAnalyticsRailShell"
+                    renderType="Bare"
+                    wrap="Wrap"
+                    justifyContent="Start"
+                    alignItems="Stretch"
+                    role="region"
+                    ariaLabel="{i18n>kpiRailAriaLabel}">
+
+                    <HBox id="searchAnalyticsRail"
+                          class="searchAnalyticsRailGrid"
+                          renderType="Bare"
+                          wrap="Wrap">
+
+                        <!-- Total -->
+                        <VBox class="kpiCard searchAnalyticsCard" role="group" ariaLabel="{i18n>kpiVisible}">
                             <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
                                 <core:Icon src="sap-icon://task" class="kpiLabelIcon" decorative="true"/>
                                 <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
@@ -25,14 +41,17 @@
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
                             </VBox>
-                            <Title text="{view>/analyticsRail/total}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal kpiValue"/>
-                            <Text
-                                text="{= ${i18n>analyticsSource} + ': ' + (${view>/analyticsRail/sourceText} || '-') }"
-                                class="searchAnalyticsMeta"
-                                visible="{= !${view>/analyticsRailBusy} }"/>
+                            <Title text="{view>/analyticsRail/total}"
+                                   level="H4"
+                                   visible="{= !${view>/analyticsRailBusy} }"
+                                   class="appSkeletonReveal kpiValue"/>
+                            <Text text="{= ${i18n>analyticsSource} + ': ' + (${view>/analyticsRail/sourceText} || '-') }"
+                                  class="searchAnalyticsMeta"
+                                  visible="{= !${view>/analyticsRailBusy} }"/>
                         </VBox>
 
-                        <VBox class="kpiCard searchAnalyticsCard">
+                        <!-- Monthly -->
+                        <VBox class="kpiCard searchAnalyticsCard" role="group" ariaLabel="{i18n>kpiMonthTotal}">
                             <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
                                 <core:Icon src="sap-icon://history" class="kpiLabelIcon" decorative="true"/>
                                 <Text text="{i18n>kpiMonthTotal}" class="kpiLabel"/>
@@ -41,14 +60,17 @@
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
                             </VBox>
-                            <Title text="{view>/analyticsRail/monthly}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal kpiValue"/>
-                            <Text
-                                text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analyticsRail/refreshedAtText} || '-') }"
-                                class="searchAnalyticsMeta"
-                                visible="{= !${view>/analyticsRailBusy} }"/>
+                            <Title text="{view>/analyticsRail/monthly}"
+                                   level="H4"
+                                   visible="{= !${view>/analyticsRailBusy} }"
+                                   class="appSkeletonReveal kpiValue"/>
+                            <Text text="{= ${i18n>workflowUpdatedAt} + ': ' + (${view>/analyticsRail/refreshedAtText} || '-') }"
+                                  class="searchAnalyticsMeta"
+                                  visible="{= !${view>/analyticsRailBusy} }"/>
                         </VBox>
 
-                        <VBox class="kpiCard searchAnalyticsCard kpiCardDanger">
+                        <!-- Failed Checks -->
+                        <VBox class="kpiCard searchAnalyticsCard kpiCardDanger" role="group" ariaLabel="{i18n>kpiFailedChecks}">
                             <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
                                 <core:Icon src="sap-icon://inspection" class="kpiLabelIcon" decorative="true"/>
                                 <Text text="{i18n>kpiFailedChecks}" class="kpiLabel"/>
@@ -57,14 +79,17 @@
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
                             </VBox>
-                            <Title text="{view>/analyticsRail/failedChecks}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal kpiValue"/>
-                            <Text
-                                text="{= ${i18n>analyticsAvgChecksRate} + ': ' + (${view>/analyticsRail/avgChecksRate} || 0) + '%' }"
-                                class="searchAnalyticsMeta"
-                                visible="{= !${view>/analyticsRailBusy} }"/>
+                            <Title text="{view>/analyticsRail/failedChecks}"
+                                   level="H4"
+                                   visible="{= !${view>/analyticsRailBusy} }"
+                                   class="appSkeletonReveal kpiValue"/>
+                            <Text text="{= ${i18n>analyticsAvgChecksRate} + ': ' + (${view>/analyticsRail/avgChecksRate} || 0) + '%' }"
+                                  class="searchAnalyticsMeta"
+                                  visible="{= !${view>/analyticsRailBusy} }"/>
                         </VBox>
 
-                        <VBox class="kpiCard searchAnalyticsCard kpiCardWarning">
+                        <!-- Failed Barriers -->
+                        <VBox class="kpiCard searchAnalyticsCard kpiCardWarning" role="group" ariaLabel="{i18n>kpiFailedBarriers}">
                             <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
                                 <core:Icon src="sap-icon://alert" class="kpiLabelIcon" decorative="true"/>
                                 <Text text="{i18n>kpiFailedBarriers}" class="kpiLabel"/>
@@ -73,24 +98,33 @@
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineShort" renderType="Bare"/>
                                 <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
                             </VBox>
-                            <Title text="{view>/analyticsRail/failedBarriers}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal kpiValue"/>
-                            <Text
-                                text="{= ${i18n>analyticsAvgBarriersRate} + ': ' + (${view>/analyticsRail/avgBarriersRate} || 0) + '%' }"
-                                class="searchAnalyticsMeta"
-                                visible="{= !${view>/analyticsRailBusy} }"/>
+                            <Title text="{view>/analyticsRail/failedBarriers}"
+                                   level="H4"
+                                   visible="{= !${view>/analyticsRailBusy} }"
+                                   class="appSkeletonReveal kpiValue"/>
+                            <Text text="{= ${i18n>analyticsAvgBarriersRate} + ': ' + (${view>/analyticsRail/avgBarriersRate} || 0) + '%' }"
+                                  class="searchAnalyticsMeta"
+                                  visible="{= !${view>/analyticsRailBusy} }"/>
                         </VBox>
+
                     </HBox>
                 </HBox>
 
+                <!-- ── Load State Panel ────────────────────────────── -->
                 <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SearchLoadStatePanel" type="XML"/>
 
+                <!-- ── Search Workbench ────────────────────────────── -->
                 <VBox id="searchWorkbenchDock" class="searchWorkbenchDock" renderType="Bare">
+
+                    <!-- Filter Card -->
                     <VBox
                         id="searchFilterCard"
                         width="100%"
                         class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell"
                         role="search"
                         ariaLabel="{i18n>filtersAriaLabel}">
+
+                        <!-- Filter Skeleton -->
                         <VBox
                             visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }"
                             class="searchFilterSkeletonShell"
@@ -99,6 +133,8 @@
                                 fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonFormSection"
                                 type="XML"/>
                         </VBox>
+
+                        <!-- SmartFilterBar -->
                         <smartFilterBar:SmartFilterBar
                             id="searchSmartFilterBar"
                             visible="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} }"
@@ -168,29 +204,33 @@
                                         </VBox>
                                     </smartFilterBar:customControl>
                                 </smartFilterBar:ControlConfiguration>
-                            </smartFilterBar:controlConfiguration>
 
+                            </smartFilterBar:controlConfiguration>
                         </smartFilterBar:SmartFilterBar>
                     </VBox>
 
+                    <!-- ── Action toolbar (Create, Copy, Selection feedback) ── -->
                     <OverflowToolbar
                         id="searchResultsActionRail"
                         width="100%"
-                        class="toolbarTransparent tableActionToolbar searchActionToolbarDensity searchResultsActionRail workbenchToolbarSurface actionToolbarSurface"
+                        class="toolbarTransparent tableActionToolbar searchActionToolbarDensity searchResultsActionRail"
                         ariaLabel="{i18n>searchActionsAriaLabel}">
+
+                        <!-- Primary: Create -->
                         <Button
                             text="{i18n>createButton}"
-                            icon="sap-icon://task"
+                            icon="sap-icon://add"
                             press=".onCreate"
                             tooltip="{i18n>searchShortcutCreate}"
-                            enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }"
                             ariaLabel="{i18n>searchShortcutCreate}"
-                            class="brandActionBtn brandActionPrimary actionPriorityPrimary searchCreateActionBtn sapUiTinyMarginEnd chkRipple">
+                            enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }"
+                            class="brandActionBtn brandActionPrimary searchCreateActionBtn chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                             </layoutData>
                         </Button>
 
+                        <!-- Navigate up (scroll anchor) -->
                         <Button
                             id="searchToolbarUpButton"
                             icon="sap-icon://navigation-up-arrow"
@@ -198,14 +238,15 @@
                             type="Emphasized"
                             visible="{view>/resultsToolbarNavVisible}"
                             tooltip="{i18n>searchBackToResultsToolbarTooltip}"
-                            press=".onScrollSearchResultsToolbarAnchor"
                             ariaLabel="{i18n>searchBackToResultsToolbarTooltip}"
+                            press=".onScrollSearchResultsToolbarAnchor"
                             class="searchToolbarNavBtn searchToolbarNavBtnUp chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                             </layoutData>
                         </Button>
 
+                        <!-- Copy (single selection) -->
                         <Button
                             text="{i18n>copyButton}"
                             icon="sap-icon://copy"
@@ -213,12 +254,13 @@
                             enabled="{view>/canCopy}"
                             tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }"
                             ariaLabel="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }"
-                            class="brandActionBtn brandActionGhost actionPrioritySecondary searchCopyActionBtn sapUiTinyMarginEnd chkRipple">
+                            class="brandActionBtn brandActionGhost searchCopyActionBtn chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
+                        <!-- Select visible rows -->
                         <Button
                             text="{i18n>selectVisibleButton}"
                             icon="sap-icon://multi-select"
@@ -226,12 +268,13 @@
                             enabled="{= ${view>/hasRows} &amp;&amp; !${view>/tableBusy} }"
                             tooltip="{i18n>searchShortcutSelectVisible}"
                             ariaLabel="{i18n>searchShortcutSelectVisible}"
-                            class="brandActionBtn brandActionGhost actionPrioritySecondary searchSelectVisibleActionBtn sapUiTinyMarginEnd chkRipple">
+                            class="brandActionBtn brandActionGhost searchSelectVisibleActionBtn chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
                             </layoutData>
                         </Button>
 
+                        <!-- Clear selection -->
                         <Button
                             text="{i18n>clearSelectionButton}"
                             icon="sap-icon://sys-cancel"
@@ -239,7 +282,7 @@
                             enabled="{view>/hasSelection}"
                             tooltip="{i18n>searchShortcutClearSelection}"
                             ariaLabel="{i18n>searchShortcutClearSelection}"
-                            class="brandActionBtn brandActionGhost actionPrioritySecondary searchClearSelectionActionBtn sapUiTinyMarginEnd chkRipple">
+                            class="brandActionBtn brandActionGhost searchClearSelectionActionBtn chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
                             </layoutData>
@@ -247,16 +290,18 @@
 
                         <ToolbarSpacer/>
 
+                        <!-- Selection count chip -->
                         <ObjectStatus
                             text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }"
                             state="{= ${view>/selectionCount} ? 'Success' : 'Information' }"
-                            class="searchSelectionStatusChip statusChipSemantic"
+                            class="searchSelectionStatusChip"
                             ariaLabel="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="Disappear"/>
                             </layoutData>
                         </ObjectStatus>
 
+                        <!-- Primary ID of selected row -->
                         <Text
                             text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }"
                             visible="{view>/hasSelection}"
@@ -270,68 +315,38 @@
 
                     </OverflowToolbar>
 
+                    <!-- ── Results Table Card ──────────────────────────── -->
                     <VBox
                         id="searchResultsShell"
                         width="100%"
                         class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell"
                         role="region"
                         ariaLabel="{i18n>searchResultsAriaLabel}">
-                        <OverflowToolbar id="smartTableCustomToolbar" width="100%" class="toolbarTransparent searchSmartToolbarRail workbenchToolbarSurface sectionToolbarSurface" ariaLabel="{i18n>tableToolbarAriaLabel}">
+
+                        <!-- Table toolbar (search options, export) -->
+                        <OverflowToolbar
+                            id="smartTableCustomToolbar"
+                            width="100%"
+                            class="toolbarTransparent searchSmartToolbarRail"
+                            ariaLabel="{i18n>tableToolbarAriaLabel}">
+
+                            <!-- A11y live region labels -->
                             <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
-                            <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
-                            <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
-                            <Title text="Search" level="H6" class="searchToolbarGroupTitle">
+                            <core:InvisibleText id="searchMaxRowsA11y"    text="{i18n>searchMaxResultsLabel}"/>
+                            <core:InvisibleText id="searchModeA11y"       text="{i18n>searchModeLabel}"/>
+
+                            <Title text="{i18n>resultsLabel}" level="H5" class="searchToolbarGroupTitle">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                                 </layoutData>
                             </Title>
 
-                            <Label text="{i18n>searchBackendTopLabel}" labelFor="backendTopInput" class="searchToolbarFieldLabel">
-                                <layoutData>
-                                    <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
-                                </layoutData>
-                            </Label>
-
-                            <Input
-                                id="backendTopInput"
-                                value="{state>/searchBackendTop}"
-                                type="Number"
-                                placeholder="{i18n>searchBackendTopLabel}"
-                                width="5rem"
-                                change=".onBackendTopChange"
-                                submit=".onBackendTopChange"
-                                ariaLabelledBy="searchBackendTopA11y"
-                                class="backendTopInput">
-                                <layoutData>
-                                    <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
-                                </layoutData>
-                            </Input>
-
-                            <Label text="{i18n>searchMaxResultsLabel}" labelFor="maxRowsInput" class="searchToolbarFieldLabel">
-                                <layoutData>
-                                    <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
-                                </layoutData>
-                            </Label>
-
-                            <Input
-                                id="maxRowsInput"
-                                value="{state>/searchMaxResults}"
-                                type="Number"
-                                placeholder="{i18n>searchMaxResultsLabel}"
-                                width="5rem"
-                                change=".onMaxRowsChange"
-                                submit=".onMaxRowsChange"
-                                ariaLabelledBy="searchMaxRowsA11y"
-                                class="maxRowsInput">
-                                <layoutData>
-                                    <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
-                                </layoutData>
-                            </Input>
-
+                            <!-- Search mode toggle: Exact / Loose -->
                             <ObjectStatus
                                 text="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}"
                                 state="Information"
-                                class="searchModeStatusChip statusChipSemantic">
+                                class="searchModeStatusChip"
+                                ariaLabel="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                                 </layoutData>
@@ -342,6 +357,7 @@
                                 change=".onSearchModeToggle"
                                 customTextOn=""
                                 customTextOff=""
+                                ariaLabelledBy="searchModeA11y"
                                 class="appAccentSwitch searchModeToggleSwitch">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
@@ -350,6 +366,7 @@
 
                             <ToolbarSpacer/>
 
+                            <!-- Sort -->
                             <Button
                                 text="{i18n>searchSortButton}"
                                 icon="sap-icon://sort"
@@ -357,12 +374,13 @@
                                 press=".onOpenSearchSortDialog"
                                 tooltip="{i18n>searchSortButton}"
                                 ariaLabel="{i18n>searchSortButton}"
-                                class="brandActionGhost actionPrioritySecondary searchSortButton chkRipple">
+                                class="brandActionGhost searchSortButton chkRipple">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                                 </layoutData>
                             </Button>
 
+                            <!-- Group -->
                             <Button
                                 text="{i18n>searchGroupButton}"
                                 icon="sap-icon://group-2"
@@ -370,56 +388,51 @@
                                 press=".onOpenSearchGroupDialog"
                                 tooltip="{i18n>searchGroupButton}"
                                 ariaLabel="{i18n>searchGroupButton}"
-                                class="brandActionGhost actionPrioritySecondary searchGroupButton chkRipple">
+                                class="brandActionGhost searchGroupButton chkRipple">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                                 </layoutData>
                             </Button>
 
+                            <!-- Export menu -->
                             <MenuButton
                                 text="{i18n>exportMenuButton}"
                                 enabled="{view>/canExport}"
                                 tooltip="{i18n>searchShortcutExport}"
                                 ariaLabel="{i18n>exportMenuButton}"
-                                class="brandActionBtn brandActionGhost actionPrioritySecondary searchExportMenuBtn chkRipple"
+                                class="brandActionBtn brandActionGhost searchExportMenuBtn chkRipple"
                                 icon="sap-icon://excel-attachment">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
                                 </layoutData>
-
                                 <menu>
                                     <Menu itemSelected=".onExportMenuAction">
                                         <items>
-                                            <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view">
-                                                <customData>
-                                                    <core:CustomData key="entity" value="screen"/>
-                                                </customData>
+                                            <MenuItem text="{i18n>exportModeScreen}"    icon="sap-icon://table-view">
+                                                <customData><core:CustomData key="entity" value="screen"/></customData>
                                             </MenuItem>
                                             <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2">
-                                                <customData>
-                                                    <core:CustomData key="entity" value="barrier"/>
-                                                </customData>
+                                                <customData><core:CustomData key="entity" value="barrier"/></customData>
                                             </MenuItem>
-                                            <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection">
-                                                <customData>
-                                                    <core:CustomData key="entity" value="check"/>
-                                                </customData>
+                                            <MenuItem text="{i18n>exportChecksButton}"  icon="sap-icon://inspection">
+                                                <customData><core:CustomData key="entity" value="check"/></customData>
                                             </MenuItem>
                                         </items>
                                     </Menu>
                                 </menu>
                             </MenuButton>
+
                         </OverflowToolbar>
- </VBox>
+
+                        <!-- Skeleton list (loading) -->
                         <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
                             <core:Fragment
                                 fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonList"
                                 type="XML"/>
                         </VBox>
 
-                        <VBox
-                            renderType="Bare"
-                            class="searchResultsBody workflowBusyScope">
+                        <!-- Results body + busy overlay -->
+                        <VBox renderType="Bare" class="searchResultsBody workflowBusyScope">
                             <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/exportBusy}">
                                 <core:Fragment
                                     fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay"
@@ -444,14 +457,15 @@
                                 useExportToExcel="false"
                                 initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,DateCheck,EquipName,ChangedOn"
                                 requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal,DateCheck,EquipName,ChangedOn"
-                                class="searchSmartTableControl appSkeletonReveal">
-                            </smartTable:SmartTable>
+                                class="searchSmartTableControl appSkeletonReveal"/>
                         </VBox>
 
-                    </VBox>
-                </VBox>
+                    </VBox><!-- /searchResultsShell -->
 
-      
+                </VBox><!-- /searchWorkbenchDock -->
+
+            </VBox><!-- /searchExperienceStack -->
         </content>
     </Page>
+
 </mvc:View>
