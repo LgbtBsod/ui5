@@ -1,6 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport"
-], function (GatewayAdapterSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime"
+], function (GatewayRequestRuntime) {
     "use strict";
 
     function normalizeLockToken(mArgs) {
@@ -35,7 +35,7 @@ sap.ui.define([
     }
 
     function normalizeResult(oRawResult, sToken) {
-        var oResult = GatewayAdapterSupport.unwrap(oRawResult) || {};
+        var oResult = GatewayRequestRuntime.unwrap(oRawResult) || {};
         var bOk = !!(oResult.success || oResult.Success || oResult.Ok || oResult.lockOk || oResult.ok);
         var bKilled = !!(oResult.is_killed || oResult.IsKilled || oResult.killed);
         var bCanTakeover = !!(oResult.can_takeover || oResult.CanTakeover || oResult.locked_by_same_user);
@@ -57,50 +57,49 @@ sap.ui.define([
         return m;
     }
 
-    function create(mDeps) {
-        return {
-            acquire: function (mArgs) {
-                var sRootId = mArgs && mArgs.rootId;
-                var sSession = normalizeLockToken(mArgs);
-                return GatewayAdapterSupport.postFunction("LockAcquire", { RootId: sRootId, SessionGuid: sSession, Force: !!(mArgs && mArgs.force), StealFrom: (mArgs && mArgs.stealFrom) || (mArgs && mArgs.force ? sSession : "") }).then(function (oResult) {
-                    return normalizeResult(oResult, sSession);
-                }).catch(function (oError) {
-                    return { ok: false, code: "ERROR", killed: false, messageKey: "lockAcquireFailed", raw: oError || {} };
-                });
-            },
-            heartbeat: function (mArgs) {
-                var sRootId = mArgs && mArgs.rootId;
-                var sToken = normalizeLockToken(mArgs);
-                return GatewayAdapterSupport.postFunction("LockHeartbeat", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
-                    return normalizeResult(oResult, sToken);
-                }).catch(function (oError) {
-                    return { ok: false, code: "ERROR", killed: false, messageKey: "lockHeartbeatFailed", raw: oError || {} };
-                });
-            },
-            status: function (mArgs) {
-                var sRootId = mArgs && mArgs.rootId;
-                var sToken = normalizeLockToken(mArgs);
-                return GatewayAdapterSupport.get("LockStatusSet('" + String(sRootId || "").trim() + "')", { SessionGuid: sToken }).then(function (oResult) {
-                    return normalizeResult(oResult, sToken);
-                }).catch(function (oError) {
-                    return { ok: false, code: "ERROR", killed: false, messageKey: "lockStatusFailed", raw: oError || {} };
-                });
-            },
-            release: function (mArgs) {
-                var sRootId = mArgs && mArgs.rootId;
-                var sToken = normalizeLockToken(mArgs);
-                return GatewayAdapterSupport.postFunction("LockRelease", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
-                    var oNormalized = normalizeResult(oResult, sToken);
-                    return { ok: !!oNormalized.ok, code: oNormalized.code || "OK", released: true, killed: !!oNormalized.killed, messageKey: oNormalized.messageKey || "" };
-                }).catch(function (oError) {
-                    if (isMissingLockRelease(oError)) {
-                        return { ok: true, code: "OK", released: false, killed: false, messageKey: "" };
-                    }
-                    return { ok: false, code: "ERROR", released: false, killed: false, messageKey: "lockReleaseFailed" };
-                });
-            }
-        };
+    function acquire(mArgs) {
+        var sRootId = mArgs && mArgs.rootId;
+        var sSession = normalizeLockToken(mArgs);
+        return GatewayRequestRuntime.postFunction("LockAcquire", { RootId: sRootId, SessionGuid: sSession, Force: !!(mArgs && mArgs.force), StealFrom: (mArgs && mArgs.stealFrom) || (mArgs && mArgs.force ? sSession : "") }).then(function (oResult) {
+            return normalizeResult(oResult, sSession);
+        }).catch(function (oError) {
+            return { ok: false, code: "ERROR", killed: false, messageKey: "lockAcquireFailed", raw: oError || {} };
+        });
     }
 
-    return { create: create };
+    function heartbeat(mArgs) {
+        var sRootId = mArgs && mArgs.rootId;
+        var sToken = normalizeLockToken(mArgs);
+        return GatewayRequestRuntime.postFunction("LockHeartbeat", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
+            return normalizeResult(oResult, sToken);
+        }).catch(function (oError) {
+            return { ok: false, code: "ERROR", killed: false, messageKey: "lockHeartbeatFailed", raw: oError || {} };
+        });
+    }
+
+    function status(mArgs) {
+        var sRootId = mArgs && mArgs.rootId;
+        var sToken = normalizeLockToken(mArgs);
+        return GatewayRequestRuntime.get("LockStatusSet('" + String(sRootId || "").trim() + "')", { SessionGuid: sToken }).then(function (oResult) {
+            return normalizeResult(oResult, sToken);
+        }).catch(function (oError) {
+            return { ok: false, code: "ERROR", killed: false, messageKey: "lockStatusFailed", raw: oError || {} };
+        });
+    }
+
+    function release(mArgs) {
+        var sRootId = mArgs && mArgs.rootId;
+        var sToken = normalizeLockToken(mArgs);
+        return GatewayRequestRuntime.postFunction("LockRelease", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
+            var oNormalized = normalizeResult(oResult, sToken);
+            return { ok: !!oNormalized.ok, code: oNormalized.code || "OK", released: true, killed: !!oNormalized.killed, messageKey: oNormalized.messageKey || "" };
+        }).catch(function (oError) {
+            if (isMissingLockRelease(oError)) {
+                return { ok: true, code: "OK", released: false, killed: false, messageKey: "" };
+            }
+            return { ok: false, code: "ERROR", released: false, killed: false, messageKey: "lockReleaseFailed" };
+        });
+    }
+
+    return { acquire: acquire, heartbeat: heartbeat, status: status, release: release };
 });

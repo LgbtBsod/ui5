@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
@@ -10,7 +10,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts) {
+], function (UseCase, Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function DeleteChecklistUseCase() {
@@ -37,11 +37,11 @@ sap.ui.define([
             ]));
         }
 
-        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
-            activity: DetailAuthorizationSupport.OPERATIONS.DELETE
+        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
+            activity: DetailAuthorizationRuntime.OPERATIONS.DELETE
         }).then(function (oPermission) {
             if (!oPermission.allowed) {
-                return Result.fail({ message: "No permission to delete checklist", code: "NO_DELETE_PERMISSION" }, DetailAuthorizationSupport.deniedActionEffects(oPermission, "detailDeletePermissionDenied", [
+                return Result.fail({ message: "No permission to delete checklist", code: "NO_DELETE_PERMISSION" }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailDeletePermissionDenied", [
                     Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
                 ]));
             }
@@ -59,7 +59,7 @@ sap.ui.define([
                         permissionKnown: false,
                         lockKnown: false
                     }),
-                    Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, DetailAuthorizationSupport.buildAccessState({
+                    Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, DetailAuthorizationRuntime.buildAccessState({
                         rootId: "",
                         userId: "",
                         canView: true,

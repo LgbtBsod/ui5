@@ -2,18 +2,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFeedbackBootstrapRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFeedbackInitRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitCompositionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAttachmentContextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeAttachOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitStageRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeOptionBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeHandlerBootstrap",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeHandlerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockEventsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentManagerOrchestrationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitListenersRuntime"
-], function (ModelStateRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentFeedbackBootstrapRuntime, ComponentInitCompositionRuntime, ComponentAttachmentContextRuntime, ComponentRuntimeAttachOrchestrator, ComponentInitStageRuntime, ComponentRuntimeOptionBuilder, ComponentRuntimeHandlerBootstrap, ComponentCrossTabRuntime, ComponentLockEventsRuntime, ComponentManagerOrchestrationRuntime, ComponentInitListenersRuntime) {
+], function (ModelStateRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentFeedbackInitRuntime, ComponentInitCompositionRuntime, ComponentAttachmentContextRuntime, ComponentRuntimeAttachOrchestrator, ComponentInitStageRuntime, ComponentRuntimeOptionBuilder, ComponentRuntimeHandlerRuntime, ComponentCrossTabRuntime, ComponentLockEventsRuntime, ComponentManagerOrchestrationRuntime, ComponentInitListenersRuntime) {
     "use strict";
 
     function runInit(aInitArgs, mDeps) {
@@ -29,11 +29,11 @@ sap.ui.define([
         var DebugLogger = mDeps.DebugLogger;
         var TimeConfigService = mDeps.TimeConfigService;
         var EnsureDictLoadedUseCase = mDeps.EnsureDictLoadedUseCase;
-        var BootstrapAppUseCase = mDeps.BootstrapAppUseCase;
+        var InitializeAppUseCase = mDeps.InitializeAppUseCase;
         var DiagnosticsUseCase = mDeps.DiagnosticsUseCase;
         var ComponentSaveGuardRuntime = mDeps.ComponentSaveGuardRuntime;
         var ComponentRuntimeSupport = mDeps.ComponentRuntimeSupport;
-        var ComponentModelBootstrapRuntime = mDeps.ComponentModelBootstrapRuntime;
+        var ComponentModelInitRuntime = mDeps.ComponentModelInitRuntime;
         var TelemetryRuntime = mDeps.TelemetryRuntime;
         var LayoutStateRuntime = mDeps.LayoutStateRuntime;
         var StatePaths = mDeps.StatePaths;
@@ -70,7 +70,7 @@ sap.ui.define([
                 }
             });
 
-            ComponentModelBootstrapRuntime.registerModels(this, mModels);
+            ComponentModelInitRuntime.registerModels(this, mModels);
             var oCoreStage = ComponentInitStageRuntime.createCoreStage(this, mDeps, mModels, {
                 buildActionValidators: ComponentActionRuntime.buildActionValidators,
                 createApplyFacadeResult: ComponentActionRuntime.createApplyFacadeResult
@@ -81,13 +81,13 @@ sap.ui.define([
             var oInitContext = ComponentInitCompositionRuntime.createInitContext(this, mDeps, mModels, {
                 bundleText: fnBundleText,
                 emitTelemetry: fnEmitTelemetry,
-                feedbackBootstrap: ComponentFeedbackBootstrapRuntime,
+            feedbackBootstrap: ComponentFeedbackInitRuntime,
                 resumePendingNavigationIntent: ComponentActionRuntime.resumePendingNavigationIntent
             });
             var oAttachmentContext = ComponentAttachmentContextRuntime.createAttachmentContext(this, {
                 ActionContract: ActionContract,
                 saveGuardRuntime: ComponentSaveGuardRuntime,
-                ComponentRuntimeHandlerBootstrap: ComponentRuntimeHandlerBootstrap,
+            ComponentRuntimeHandlerRuntime: ComponentRuntimeHandlerRuntime,
                 ComponentRuntimeSupport: ComponentRuntimeSupport,
                 ModelStateRuntime: ModelStateRuntime,
                 StatePaths: StatePaths,
@@ -159,7 +159,7 @@ sap.ui.define([
                 envModel: oEnvModel,
                 cacheModel: oCacheModel,
                 cacheAdapter: this._ctx && this._ctx.cache,
-                bootstrapAppUseCase: BootstrapAppUseCase,
+                initializeAppUseCase: InitializeAppUseCase,
                 ensureDictLoadedUseCase: EnsureDictLoadedUseCase,
                 componentRuntimeSupport: ComponentRuntimeSupport,
                 loadRuntimeSettings: oAttachmentContext.runtimeSettingsRuntime.loadRuntimeSettings,

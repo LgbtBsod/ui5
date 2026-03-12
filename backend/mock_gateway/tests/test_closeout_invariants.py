@@ -72,7 +72,7 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
 def test_boot_and_runtime_source_lock_strict_success_path():
     boot_text = _read(APP_ROOT / "service" / "framework" / "ComponentBootRuntime.js")
     init_text = _read(APP_ROOT / "service" / "framework" / "ComponentInitRuntime.js")
-    feedback_bootstrap_text = _read(APP_ROOT / "service" / "framework" / "ComponentFeedbackBootstrapRuntime.js")
+    feedback_bootstrap_text = _read(APP_ROOT / "service" / "framework" / "ComponentFeedbackInitRuntime.js")
     boot_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentBootContracts.js")
     feedback_contracts = _read(APP_ROOT / "service" / "framework" / "EffectFeedbackContracts.js")
     listener_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentListenerContracts.js")
@@ -123,7 +123,7 @@ def test_open_detail_source_checks_permission_before_cache_and_backend_load():
     source = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "OpenDetailUseCase.js")
 
     non_create_branch = source[source.index("var oCacheValidation = mCtx && mCtx.cacheValidation;"):]
-    permission_idx = non_create_branch.index("DetailAuthorizationSupport.fetchPermission")
+    permission_idx = non_create_branch.index("DetailAuthorizationRuntime.fetchPermission")
     cache_idx = non_create_branch.index("oCacheValidation.execute")
     backend_idx = non_create_branch.index("oRepo.loadDetailSnapshot")
 
@@ -221,7 +221,7 @@ def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
 
 
 def test_standardized_telemetry_event_names_cover_permission_cache_lock_and_analytics_flows():
-    permission_source = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailAuthorizationSupport.js")
+    permission_source = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailAuthorizationRuntime.js")
     cache_source = _read(APP_ROOT / "service" / "domain" / "cache" / "usecases" / "CacheValidationUseCase.js")
     enter_edit_source = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "EnterEditUseCase.js")
     close_detail_source = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "CloseDetailUseCase.js")

@@ -1,7 +1,7 @@
 sap.ui.define([], function () {
     "use strict";
 
-    function bootstrapComponentRuntime(oComponent, mDeps, mModels, mOptions) {
+    function initializeComponentRuntime(oComponent, mDeps, mModels, mOptions) {
         var CtxFactory = mDeps.CtxFactory;
         var DetailFacade = mDeps.DetailFacade;
         var ActionDispatcher = mDeps.ActionDispatcher;
@@ -36,6 +36,6 @@ sap.ui.define([], function () {
     }
 
     return {
-        bootstrapComponentRuntime: bootstrapComponentRuntime
+        initializeComponentRuntime: initializeComponentRuntime
     };
 });

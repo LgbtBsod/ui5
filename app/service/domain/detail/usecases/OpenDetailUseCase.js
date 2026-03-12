@@ -2,14 +2,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, UiAssetPaths, NavigationContracts) {
+], function (UseCase, Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, UiAssetPaths, NavigationContracts) {
     "use strict";
 
     function resolveLoadedAttachments(oUiState, sRootId) {
@@ -37,11 +37,11 @@ sap.ui.define([
 
         if (CreateSentinel.isCreateId(sRootId)) {
             var oDraft = (oUiState && oUiState.get("selected", "/")) || {};
-            return DetailAuthorizationSupport.fetchPermission(mCtx || {}, "", {
-                activity: DetailAuthorizationSupport.OPERATIONS.CREATE
+        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
+            activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
             }).then(function (oPermission) {
                 if (!oPermission.allowed) {
-                    return Result.fail({ message: "No permission to create checklist", code: "NO_CREATE_PERMISSION" }, DetailAuthorizationSupport.deniedActionEffects(oPermission, "detailCreatePermissionDenied", [
+            return Result.fail({ message: "No permission to create checklist", code: "NO_CREATE_PERMISSION" }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailCreatePermissionDenied", [
                         Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                             status: "denied",
                             ready: false,
@@ -100,8 +100,8 @@ sap.ui.define([
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
-        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
-            activity: DetailAuthorizationSupport.OPERATIONS.DISPLAY
+        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
+            activity: DetailAuthorizationRuntime.OPERATIONS.DISPLAY
         }).then(function (oPermission) {
             var pValidation;
             if (!oPermission.allowed) {
@@ -116,7 +116,7 @@ sap.ui.define([
                         permissionKnown: true,
                         lockKnown: false
                     })
-                ].concat(DetailAuthorizationSupport.openDeniedEffects(oPermission)));
+            ].concat(DetailAuthorizationRuntime.openDeniedEffects(oPermission)));
             }
             pValidation = (oCacheValidation && typeof oCacheValidation.execute === "function")
                 ? Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
@@ -154,7 +154,7 @@ sap.ui.define([
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sRootId);
-            return Result.ok({ snapshot: oSnapshot || {} }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat([
+            return Result.ok({ snapshot: oSnapshot || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                     status: "ready",
                     ready: true,

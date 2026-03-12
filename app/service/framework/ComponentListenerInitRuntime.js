@@ -9,7 +9,7 @@ sap.ui.define([
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
 
-    function initializeListenerState(mOptions) {
+    function initializeListeners(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
         var oUiStateModel = mOptions.uiStateModel;
@@ -52,6 +52,6 @@ sap.ui.define([
     }
 
     return {
-        initializeListenerState: initializeListenerState
+        initializeListeners: initializeListeners
     };
 });

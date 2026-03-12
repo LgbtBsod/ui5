@@ -6,7 +6,7 @@ sap.ui.define([
     "sap/m/Button",
     "sap/ui/core/CustomData",
     "sap/m/ObjectStatus",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReadSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailRuntimeContracts",
@@ -14,7 +14,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailObserverCardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailSimpleCardRuntime"
-], function (GridListItem, VBox, HBox, Text, Button, CustomData, ObjectStatus, BindingContextReadSupport, ControlStyleRuntime, ControllerTextRuntime, DetailRuntimeContracts, ModelContracts, WorkflowContracts, DetailObserverCardRuntime, DetailSimpleCardRuntime) {
+], function (GridListItem, VBox, HBox, Text, Button, CustomData, ObjectStatus, BindingContextReader, ControlStyleRuntime, ControllerTextRuntime, DetailRuntimeContracts, ModelContracts, WorkflowContracts, DetailObserverCardRuntime, DetailSimpleCardRuntime) {
     "use strict";
 
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
@@ -177,7 +177,7 @@ sap.ui.define([
 
     return {
         buildInfoCard: function (oController, sId, oContext) {
-            var sKey = String(BindingContextReadSupport.read(oContext, "key", "") || "");
+        var sKey = String(BindingContextReader.read(oContext, "key", "") || "");
             var oItem = createInfoCardWrapper(sId, oContext);
             var oShell = withStyleClasses(new VBox({ renderType: "Bare" }), "infoCardTile mushroomCard");
             var oTitle = withStyleClasses(new Text(), "infoCardTitle");

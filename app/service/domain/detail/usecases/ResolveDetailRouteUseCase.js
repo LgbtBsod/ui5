@@ -1,10 +1,10 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (UseCase, DetailAuthorizationSupport, UseCaseValue, CreateSentinel, NavigationContracts) {
+], function (UseCase, DetailAuthorizationRuntime, UseCaseValue, CreateSentinel, NavigationContracts) {
     "use strict";
 
     function ResolveDetailRouteUseCase() {
@@ -20,8 +20,8 @@ sap.ui.define([
         var mRouteArgs = (mInput && mInput.routeArgs) || {};
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
-            return DetailAuthorizationSupport.fetchPermission(mCtx || {}, "", {
-                activity: DetailAuthorizationSupport.OPERATIONS.CREATE
+            return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
+                activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
             }).then(function (oPermission) {
                 return {
                     allowed: !!(oPermission && oPermission.allowed),
@@ -32,8 +32,8 @@ sap.ui.define([
             });
         }
 
-        return DetailAuthorizationSupport.fetchPermission(mCtx || {}, sRootId, {
-            activity: DetailAuthorizationSupport.OPERATIONS.DISPLAY
+        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
+            activity: DetailAuthorizationRuntime.OPERATIONS.DISPLAY
         }).then(function (oPermission) {
             var bAllowed = !!(oPermission && oPermission.allowed);
 

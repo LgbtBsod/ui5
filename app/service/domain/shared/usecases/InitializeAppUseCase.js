@@ -6,7 +6,7 @@ sap.ui.define([
     "use strict";
 
     /**
-     * ZERO-LEGACY bootstrap.
+     * ZERO-LEGACY initialization.
      *
      * The application must not depend on any legacy BackendAdapter/login/init flows.
      * Real SAP Gateway readiness is achieved by relying on ODataModel metadata + domain usecases.
@@ -22,7 +22,7 @@ sap.ui.define([
                 oStateModel.setProperty("/backendServiceUrl", GatewayBackendService.serviceUrl() || "");
             }
 
-            return Promise.resolve(Result.ok({ bootstrapped: true }, []));
+            return Promise.resolve(Result.ok({ initialized: true }, []));
         }
     };
 });

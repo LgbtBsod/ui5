@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
@@ -8,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (DetailPersonInputSupport, StatePaths, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap, ModelContracts) {
+], function (DetailPersonInputRuntime, StatePaths, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -183,7 +183,7 @@ sap.ui.define([
         if (sPath === "/") {
             ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
         }
-        DetailPersonInputSupport.syncDrafts(oController, oSelectedModel, sModelPath);
+        DetailPersonInputRuntime.syncDrafts(oController, oSelectedModel, sModelPath);
 
         sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""), "");
         if (shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE")) {

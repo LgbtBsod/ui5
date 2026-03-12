@@ -17,7 +17,7 @@ sap.ui.define([
         return oModel;
     }
 
-    function createModels(oComponent, mDeps) {
+    function initializeModels(oComponent, mDeps) {
         var ModelFactory = mDeps.ModelFactory;
         var JSONModel = mDeps.JSONModel;
         var Device = mDeps.Device;
@@ -57,7 +57,7 @@ sap.ui.define([
     }
 
     return {
-        createModels: createModels,
+        initializeModels: initializeModels,
         registerModels: registerModels
     };
 });

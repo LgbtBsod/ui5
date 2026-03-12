@@ -5,12 +5,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil"
-], function (UseCase, Result, Effects, UseCaseValue, StatePaths, DetailStateAccess, DetailSaveSupport, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
+], function (UseCase, Result, Effects, UseCaseValue, StatePaths, DetailStateAccess, DetailSaveRuntime, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
     "use strict";
 
     function ChangeStatusUseCase() {
@@ -32,7 +32,7 @@ sap.ui.define([
         var oSnapshot = DetailStateAccess.readDetailSnapshot(mCtx);
         var oNextChecklist;
         var oDelta;
-        var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);
+        var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
         var oValidation = ChecklistValidationService.validateRequiredFields(oChecklist, {
             requiredFields: DetailStateAccess.readRequiredFields(mCtx)
         });
@@ -74,7 +74,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")
             ]));
         }
-        if (!sSessionGuid || DetailSaveSupport.readLockState(mCtx, StatePaths) !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
+        if (!sSessionGuid || DetailSaveRuntime.readLockState(mCtx, StatePaths) !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
             return Promise.resolve(Result.fail({ message: "Active lock is required before status change", code: "LOCK_REQUIRED" }, [
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")

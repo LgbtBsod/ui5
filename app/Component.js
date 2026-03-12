@@ -12,7 +12,7 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/EnsureDictLoadedUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/BootstrapAppUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/InitializeAppUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/LoadCurrentUserUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/StartManagersUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/DiagnosticsUseCase",
@@ -22,10 +22,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentModelBootstrapRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentModelInitRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
@@ -54,7 +54,7 @@ sap.ui.define([
     TimeConfigService,
     ApplyRuntimeSettingsUseCase,
     EnsureDictLoadedUseCase,
-    BootstrapAppUseCase,
+    InitializeAppUseCase,
     LoadCurrentUserUseCase,
     StartManagersUseCase,
     DiagnosticsUseCase,
@@ -64,10 +64,10 @@ sap.ui.define([
     ComponentSessionRuntime,
     ComponentFormattingRuntime,
     ComponentDetailStateRuntime,
-    ComponentLockReleaseSupport,
+    ComponentLockReleaseRuntime,
     ComponentSaveGuardRuntime,
     ComponentInitRuntime,
-    ComponentModelBootstrapRuntime,
+    ComponentModelInitRuntime,
     TelemetryRuntime,
     LayoutStateRuntime,
     StatePaths,
@@ -129,16 +129,16 @@ sap.ui.define([
                 TimeConfigService: TimeConfigService,
                 ApplyRuntimeSettingsUseCase: ApplyRuntimeSettingsUseCase,
                 EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
-                BootstrapAppUseCase: BootstrapAppUseCase,
+                InitializeAppUseCase: InitializeAppUseCase,
                 LoadCurrentUserUseCase: LoadCurrentUserUseCase,
                 DiagnosticsUseCase: DiagnosticsUseCase,
                 CtxFactory: CtxFactory,
                 EffectApplier: EffectApplier,
                 FeedbackPolicy: FeedbackPolicy,
                 ComponentRuntimeSupport: ComponentRuntimeSupport,
-                ComponentLockReleaseSupport: ComponentLockReleaseSupport,
+                ComponentLockReleaseRuntime: ComponentLockReleaseRuntime,
                 ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
-                ComponentModelBootstrapRuntime: ComponentModelBootstrapRuntime,
+                ComponentModelInitRuntime: ComponentModelInitRuntime,
                 TelemetryRuntime: TelemetryRuntime,
                 LayoutStateRuntime: LayoutStateRuntime,
                 StatePaths: StatePaths,
@@ -234,14 +234,14 @@ sap.ui.define([
             if (this._bLeaveReleaseSent) {
                 return;
             }
-            oPayload = ComponentLockReleaseSupport.readActiveLockPayload(oStateModel);
-            sUrl = ComponentLockReleaseSupport.buildLockReleaseUrl(oStateModel);
+                oPayload = ComponentLockReleaseRuntime.readActiveLockPayload(oStateModel);
+                sUrl = ComponentLockReleaseRuntime.buildLockReleaseUrl(oStateModel);
             sToken = oMainServiceModel && oMainServiceModel.getSecurityToken ? String(oMainServiceModel.getSecurityToken() || "").trim() : "";
             if (!oPayload || !sUrl) {
                 return;
             }
             this._bLeaveReleaseSent = true;
-            ComponentLockReleaseSupport.tryBeaconLockRelease(sUrl, oPayload, sToken);
+                ComponentLockReleaseRuntime.tryBeaconLockRelease(sUrl, oPayload, sToken);
         },
         attachInteractionFxToApp: function (oDomRef) {
             if (this._oInteractionFxHandle && this._oInteractionFxHandle.destroy) {

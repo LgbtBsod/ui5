@@ -4,11 +4,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, UseCaseValue, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, CreateSentinel, ViewPathContracts) {
+], function (UseCase, Result, Effects, UseCaseValue, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, CreateSentinel, ViewPathContracts) {
     "use strict";
 
     function cleanupObjectUrl(oAttachment) {
@@ -28,7 +28,7 @@ sap.ui.define([
         var aSession = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
         var aAllNext = AttachmentIdentity.removeByAttachment(aCurrentAll, sAttachmentId, oAttachment);
         var aSessionNext = AttachmentIdentity.removeByAttachment(aSession, sAttachmentId, oAttachment);
-        var aEffects = AttachmentEffectSupport.buildAttachmentSyncEffects(aAllNext, "attachmentDeleted", "info");
+        var aEffects = AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, "attachmentDeleted", "info");
         aEffects.push(Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext));
         return aEffects;
     }
@@ -56,7 +56,7 @@ sap.ui.define([
                 buildDeleteEffects(mCtx, sAttachmentId, oAttachment)
             );
         }).catch(function (oError) {
-            return Result.fail(oError, AttachmentEffectSupport.buildAttachmentBusyResetEffects());
+            return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
         });
     };
 

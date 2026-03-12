@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/BootstrapSearchUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/InitializeSearchUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/BuildSearchFilterUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ExecuteSearchUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/RebindSearchUseCase",
@@ -9,7 +9,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/AnalyticsUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ApplyRebindPolicyUseCase"
 ], function (
-    BootstrapSearchUseCase,
+    InitializeSearchUseCase,
     BuildSearchFilterUseCase,
     ExecuteSearchUseCase,
     RebindSearchUseCase,
@@ -25,7 +25,7 @@ sap.ui.define([
         var d = mDeps || {};
         this._exportFacade = d.exportFacade || new ExportFacade({ exportUseCase: d.exportUseCase });
         this._uc = {
-            bootstrap: d.bootstrapUseCase || new BootstrapSearchUseCase(),
+        bootstrap: d.bootstrapUseCase || new InitializeSearchUseCase(),
             buildFilter: d.buildFilterUseCase || new BuildSearchFilterUseCase(),
             execute: d.executeUseCase || new ExecuteSearchUseCase(),
             rebind: d.rebindUseCase || new RebindSearchUseCase(),

@@ -1,10 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReadSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime"
-], function (BindingContextReadSupport, ControllerViewStateRuntime, ModelStateRuntime, FocusRuntime, LayoutPersonalizationRuntime) {
+], function (BindingContextReader, ControllerViewStateRuntime, ModelStateRuntime, FocusRuntime, LayoutPersonalizationRuntime) {
     "use strict";
 
     function cloneCards(aCards) {
@@ -37,7 +37,7 @@ sap.ui.define([
         var oGrid = oController.byId && oController.byId("infoCardGrid");
         var oItem = oGrid && oGrid.getItems && oGrid.getItems().find(function (oEntry) {
             var oContext = oEntry.getBindingContext && oEntry.getBindingContext("view");
-            return BindingContextReadSupport.read(oContext, "key", "") === sKey;
+        return BindingContextReader.read(oContext, "key", "") === sKey;
         });
         if (oItem) {
             FocusRuntime.focusSoon(oItem);

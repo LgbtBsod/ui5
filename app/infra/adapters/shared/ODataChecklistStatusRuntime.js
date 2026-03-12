@@ -1,15 +1,15 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
-], function (GatewayAdapterSupport, ODataAdapterUtils, ODataKeyContracts, GatewayClient) {
+], function (GatewayRequestRuntime, ODataAdapterUtils, ODataKeyContracts, GatewayClient) {
     "use strict";
 
     function setChecklistStatus(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var sStatusCode = mArgs && mArgs.statusCode;
-        return GatewayAdapterSupport.postFunction("SetChecklistStatus", {
+        return GatewayRequestRuntime.postFunction("SetChecklistStatus", {
             RootKey: mDeps.normalizeRootKey(sRootId),
             NewStatus: sStatusCode,
             ClientAggChangedOn: (mArgs && mArgs.clientAggChangedOn) || null

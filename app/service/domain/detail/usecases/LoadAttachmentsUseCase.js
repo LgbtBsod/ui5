@@ -1,10 +1,10 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (UseCase, Result, AttachmentEffectSupport, UseCaseValue, CreateSentinel) {
+], function (UseCase, Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel) {
     "use strict";
 
     function LoadAttachmentsUseCase() {
@@ -21,19 +21,19 @@ sap.ui.define([
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(Result.ok({
                 attachments: []
-            }, AttachmentEffectSupport.buildAttachmentLoadEffects([], "", "info")));
+            }, AttachmentEffectRuntime.buildAttachmentLoadEffects([], "", "info")));
         }
         if (!oRepo || typeof oRepo.loadAttachments !== "function") {
             return Promise.resolve(Result.fail({
                 message: "Attachment loader unavailable",
                 code: "ATTACHMENT_LOAD_UNAVAILABLE"
-            }, AttachmentEffectSupport.buildAttachmentBusyResetEffects()));
+            }, AttachmentEffectRuntime.buildAttachmentBusyResetEffects()));
         }
 
         return Promise.resolve(oRepo.loadAttachments({ rootId: sRootId })).then(function (oResult) {
-            return Result.ok(oResult || {}, AttachmentEffectSupport.buildAttachmentLoadEffects((oResult && oResult.attachments) || [], "", "info"));
+            return Result.ok(oResult || {}, AttachmentEffectRuntime.buildAttachmentLoadEffects((oResult && oResult.attachments) || [], "", "info"));
         }).catch(function (oError) {
-            return Result.fail(oError, AttachmentEffectSupport.buildAttachmentBusyResetEffects());
+            return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
         });
     };
 

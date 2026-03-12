@@ -1,6 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport"
-], function (GatewayAdapterSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime"
+], function (GatewayRequestRuntime) {
     "use strict";
 
     function joinNameParts(aParts) {
@@ -23,32 +23,28 @@ sap.ui.define([
         };
     }
 
-    function create() {
-        return {
-            suggest: function (mArgs) {
-                var sQuery = String((mArgs && mArgs.query) || "").toLowerCase();
-                var iLimit = Number((mArgs && mArgs.limit) || 10);
-                var sDateCheck = String((mArgs && mArgs.dateCheck) || "").trim();
-                var mParams = {
-                    "$top": Math.max(iLimit * 4, 40),
-                    Search: sQuery
-                };
-
-                if (sDateCheck) {
-                    mParams.DateCheck = sDateCheck;
-                }
-
-                return GatewayAdapterSupport.get("PersonVHSet", mParams).then(function (oData) {
-                    var aItems = GatewayAdapterSupport.asArray(oData).map(normalizePerson).filter(function (oPerson) {
-                        if (!sQuery) { return true; }
-                        return String(oPerson.fullName || "").toLowerCase().indexOf(sQuery) >= 0
-                            || String(oPerson.perner || "").toLowerCase().indexOf(sQuery) >= 0;
-                        });
-                    return { items: aItems.slice(0, iLimit) };
-                });
-            }
+    function suggest(mArgs) {
+        var sQuery = String((mArgs && mArgs.query) || "").toLowerCase();
+        var iLimit = Number((mArgs && mArgs.limit) || 10);
+        var sDateCheck = String((mArgs && mArgs.dateCheck) || "").trim();
+        var mParams = {
+            "$top": Math.max(iLimit * 4, 40),
+            Search: sQuery
         };
+
+        if (sDateCheck) {
+            mParams.DateCheck = sDateCheck;
+        }
+
+        return GatewayRequestRuntime.get("PersonVHSet", mParams).then(function (oData) {
+            var aItems = GatewayRequestRuntime.asArray(oData).map(normalizePerson).filter(function (oPerson) {
+                if (!sQuery) { return true; }
+                return String(oPerson.fullName || "").toLowerCase().indexOf(sQuery) >= 0
+                    || String(oPerson.perner || "").toLowerCase().indexOf(sQuery) >= 0;
+            });
+            return { items: aItems.slice(0, iLimit) };
+        });
     }
 
-    return { create: create };
+    return { suggest: suggest };
 });

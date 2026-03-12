@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper"
-], function (GatewayAdapterSupport, ODataChecklistPayloadMapper) {
+], function (GatewayRequestRuntime, ODataChecklistPayloadMapper) {
     "use strict";
 
     function withSessionGuid(oRequest, sSessionGuid) {
@@ -22,7 +22,7 @@ sap.ui.define([
             ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta, mArgs && mArgs.attachments),
             mArgs && mArgs.sessionGuid
         );
-        return GatewayAdapterSupport.request({
+        return GatewayRequestRuntime.request({
             method: "POST_ENTITY",
             path: "SaveChanges",
             body: oRequest
@@ -40,7 +40,7 @@ sap.ui.define([
     function createChecklist(mArgs, mDeps) {
         var oCurrent = (mArgs && mArgs.delta) || {};
         var oRequest = ODataChecklistPayloadMapper.normalizeSavePayload("", oCurrent, mArgs && mArgs.attachments);
-        return GatewayAdapterSupport.request({
+        return GatewayRequestRuntime.request({
             method: "POST_ENTITY",
             path: "CreateChecklist",
             body: oRequest
@@ -58,7 +58,7 @@ sap.ui.define([
     function copyChecklist(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-        return GatewayAdapterSupport.postFunction("CopyChecklist", {
+        return GatewayRequestRuntime.postFunction("CopyChecklist", {
             RootId: mDeps.normalizeRootKey(sRootId),
             SessionGuid: sSessionGuid
         }).then(function (oServerPayload) {
@@ -78,7 +78,7 @@ sap.ui.define([
             ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta),
             mArgs && mArgs.sessionGuid
         );
-        return GatewayAdapterSupport.request({
+        return GatewayRequestRuntime.request({
             method: "POST_ENTITY",
             path: "AutoSave",
             body: oRequest

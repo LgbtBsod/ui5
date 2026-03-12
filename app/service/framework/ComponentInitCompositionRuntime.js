@@ -10,7 +10,7 @@ sap.ui.define([], function () {
                 feedbackPolicy: mDeps.FeedbackPolicy,
                 bundleText: mOptions.bundleText
             }),
-            runtimeSettingsRuntime: mOptions.feedbackBootstrap.createRuntimeSettingsRuntime(oComponent, {
+            runtimeSettingsRuntime: mOptions.feedbackBootstrap.initializeRuntimeSettings(oComponent, {
                 stateModel: mModels.stateModel,
                 envModel: mModels.envModel,
                 masterDataModel: mModels.masterDataModel,

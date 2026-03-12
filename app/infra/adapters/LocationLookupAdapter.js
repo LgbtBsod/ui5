@@ -1,6 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport"
-], function (GatewayAdapterSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime"
+], function (GatewayRequestRuntime) {
     "use strict";
 
     function normalizeNode(oItem) {
@@ -45,39 +45,35 @@ sap.ui.define([
         return aOut;
     }
 
-    function create() {
-        return {
-            search: function (mArgs) {
-                var sQuery = String((mArgs && mArgs.query) || "").toLowerCase();
-                var iLimit = Number((mArgs && mArgs.limit) || 20);
-                var sDateCheck = String((mArgs && mArgs.dateCheck) || "").trim();
-                if (!sDateCheck) {
-                    sDateCheck = new Date().toISOString().slice(0, 10);
-                }
+    function search(mArgs) {
+        var sQuery = String((mArgs && mArgs.query) || "").toLowerCase();
+        var iLimit = Number((mArgs && mArgs.limit) || 20);
+        var sDateCheck = String((mArgs && mArgs.dateCheck) || "").trim();
+        if (!sDateCheck) {
+            sDateCheck = new Date().toISOString().slice(0, 10);
+        }
 
-                return GatewayAdapterSupport.get("GetHierarchy", { Method: "location_tree", DateCheck: sDateCheck }).then(function (oData) {
-                    var oPayload = GatewayAdapterSupport.unwrap(oData);
-                    var aNodes = Array.isArray(oPayload)
-                        ? oPayload
-                        : ((oPayload && Array.isArray(oPayload.results)) ? oPayload.results : []);
-                    var aTree = buildTree(aNodes);
-                    if (!sQuery) {
-                        return { items: aTree.slice(0, iLimit) };
-                    }
-                    var aFlat = flattenTree(aTree, []);
-                    var aFiltered = aFlat.filter(function (oItem) {
-                        if (!sQuery) { return true; }
-                        return String(oItem.location_name || "").toLowerCase().indexOf(sQuery) >= 0
-                            || String(oItem.location_code || "").toLowerCase().indexOf(sQuery) >= 0
-                            || String(oItem.location_id || "").toLowerCase().indexOf(sQuery) >= 0;
-                    }).map(function (oItem) {
-                        return Object.assign({}, oItem, { children: [] });
-                    });
-                    return { items: aFiltered.slice(0, iLimit) };
-                });
+        return GatewayRequestRuntime.get("GetHierarchy", { Method: "location_tree", DateCheck: sDateCheck }).then(function (oData) {
+            var oPayload = GatewayRequestRuntime.unwrap(oData);
+            var aNodes = Array.isArray(oPayload)
+                ? oPayload
+                : ((oPayload && Array.isArray(oPayload.results)) ? oPayload.results : []);
+            var aTree = buildTree(aNodes);
+            if (!sQuery) {
+                return { items: aTree.slice(0, iLimit) };
             }
-        };
+            var aFlat = flattenTree(aTree, []);
+            var aFiltered = aFlat.filter(function (oItem) {
+                if (!sQuery) { return true; }
+                return String(oItem.location_name || "").toLowerCase().indexOf(sQuery) >= 0
+                    || String(oItem.location_code || "").toLowerCase().indexOf(sQuery) >= 0
+                    || String(oItem.location_id || "").toLowerCase().indexOf(sQuery) >= 0;
+            }).map(function (oItem) {
+                return Object.assign({}, oItem, { children: [] });
+            });
+            return { items: aFiltered.slice(0, iLimit) };
+        });
     }
 
-    return { create: create };
+    return { search: search };
 });

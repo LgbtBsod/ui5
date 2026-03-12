@@ -1,6 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport"
-], function (GatewayAdapterSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime"
+], function (GatewayRequestRuntime) {
     "use strict";
 
     var DOMAIN_KEYS = {
@@ -44,12 +44,12 @@ sap.ui.define([
     }
 
     function loadDomain(sDomain) {
-        return GatewayAdapterSupport.get("DictionaryItemSet", {
+        return GatewayRequestRuntime.get("DictionaryItemSet", {
             "$filter": "Domain eq '" + String(sDomain || "").replace(/'/g, "''") + "'",
             "$orderby": "Key asc",
             "$top": 500
         }).then(function (oData) {
-            return normalizeRowsForDomain(GatewayAdapterSupport.asArray(oData));
+            return normalizeRowsForDomain(GatewayRequestRuntime.asArray(oData));
         });
     }
 

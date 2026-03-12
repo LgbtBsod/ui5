@@ -1,23 +1,23 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts"
-], function (GatewayAdapterSupport, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts) {
+], function (GatewayRequestRuntime, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts) {
     "use strict";
 
     function loadDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
-        var pRoot = GatewayAdapterSupport.get(ODataAdapterUtils.buildEntityPath("ChecklistRootSet", sRootId, {
+        var pRoot = GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistRootSet", sRootId, {
             type: ODataKeyContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
-        var pBasic = GatewayAdapterSupport.get("ChecklistBasicInfoSet", {
+        var pBasic = GatewayRequestRuntime.get("ChecklistBasicInfoSet", {
             "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
         });
-        var pChecks = GatewayAdapterSupport.get("ChecklistCheckSet", {
+        var pChecks = GatewayRequestRuntime.get("ChecklistCheckSet", {
             "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
         });
-        var pBarriers = GatewayAdapterSupport.get("ChecklistBarrierSet", {
+        var pBarriers = GatewayRequestRuntime.get("ChecklistBarrierSet", {
             "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
         });
         return Promise.all([pRoot, pBasic, pChecks, pBarriers]).then(function (aResult) {

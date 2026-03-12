@@ -6,14 +6,14 @@ sap.ui.define([
 ], function (UseCase, Result, Effects, StatePaths) {
     "use strict";
 
-    function BootstrapSearchUseCase() {
-        UseCase.call(this, "BootstrapSearchUseCase");
+    function InitializeSearchUseCase() {
+        UseCase.call(this, "InitializeSearchUseCase");
     }
 
-    BootstrapSearchUseCase.prototype = Object.create(UseCase.prototype);
-    BootstrapSearchUseCase.prototype.constructor = BootstrapSearchUseCase;
+    InitializeSearchUseCase.prototype = Object.create(UseCase.prototype);
+    InitializeSearchUseCase.prototype.constructor = InitializeSearchUseCase;
 
-    BootstrapSearchUseCase.prototype.execute = function (mInput, mCtx) {
+    InitializeSearchUseCase.prototype.execute = function (mInput, mCtx) {
         var sReadyAt = new Date().toISOString();
         return Promise.resolve(Result.ok({ reason: (mInput && mInput.reason) || "bootstrap" }, [
             Effects.modelPatch("state", StatePaths.WORKFLOW_SEARCH_MODE, "EXACT"),
@@ -43,5 +43,5 @@ sap.ui.define([
         });
     };
 
-    return BootstrapSearchUseCase;
+    return InitializeSearchUseCase;
 });

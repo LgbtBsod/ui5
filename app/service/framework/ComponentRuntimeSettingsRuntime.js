@@ -12,7 +12,7 @@ sap.ui.define([
         };
     }
 
-    function createRuntimeSettingsRuntime(oComponent, mOptions) {
+    function initializeRuntimeSettings(oComponent, mOptions) {
         var oStateModel = mOptions.stateModel;
         var oEnvModel = mOptions.envModel;
         var oMasterDataModel = mOptions.masterDataModel;
@@ -74,6 +74,6 @@ sap.ui.define([
     }
 
     return {
-        createRuntimeSettingsRuntime: createRuntimeSettingsRuntime
+        initializeRuntimeSettings: initializeRuntimeSettings
     };
 });

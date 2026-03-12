@@ -3,13 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (UseCase, Result, Effects, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     function buildLocalObjectUrl(oFile) {
@@ -59,7 +59,7 @@ sap.ui.define([
         var aSession = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
         var aAllNext = oAttachment ? AttachmentIdentity.appendUnique(aCurrentAll, oAttachment) : (Array.isArray(aCurrentAll) ? aCurrentAll.slice() : []);
         var aSessionNext = oAttachment ? AttachmentIdentity.appendUnique(aSession, Object.assign({}, oAttachment, { _sessionUpload: true })) : (Array.isArray(aSession) ? aSession.slice() : []);
-        var aEffects = AttachmentEffectSupport.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentUploaded", "success");
+        var aEffects = AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentUploaded", "success");
         aEffects.push(Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext));
         aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true));
         if (bLoadedAll) {
@@ -81,7 +81,7 @@ sap.ui.define([
             return Promise.resolve(Result.fail({
                 message: "Attachment target root is missing",
                 code: "ATTACHMENT_TARGET_MISSING"
-            }, AttachmentEffectSupport.buildAttachmentBusyResetEffects()));
+            }, AttachmentEffectRuntime.buildAttachmentBusyResetEffects()));
         }
         return Promise.resolve(stageLocalAttachment(mInput, mCtx)).then(function (oRes) {
             return Result.ok(
@@ -89,7 +89,7 @@ sap.ui.define([
                 buildUploadEffects(mCtx, (oRes && oRes.attachment) || null, "attachmentUploaded")
             );
         }).catch(function (oError) {
-            return Result.fail(oError, AttachmentEffectSupport.buildAttachmentBusyResetEffects());
+            return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
         });
     };
 

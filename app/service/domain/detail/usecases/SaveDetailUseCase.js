@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
@@ -11,7 +11,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, ModelPathContracts, WorkflowContracts) {
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, ModelPathContracts, WorkflowContracts) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -95,22 +95,22 @@ sap.ui.define([
     }
 
     function readCurrentChecklist(mCtx) {
-        return readSelectedChecklist(mCtx) || DetailSaveSupport.readCurrentChecklist(mCtx);
+        return readSelectedChecklist(mCtx) || DetailSaveRuntime.readCurrentChecklist(mCtx);
     }
 
     SaveDetailUseCase.prototype.execute = function (mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oUiState = mCtx && mCtx.uiState;
         var oCurrent = readCurrentChecklist(mCtx);
-        var oSnapshot = DetailSaveSupport.readBaseSnapshot(mCtx);
+        var oSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
         var oDelta = (mInput && mInput.delta) || DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oSnapshot);
         var oRepo = mCtx && mCtx.repo;
         var oLock = mCtx && mCtx.lock;
         var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var bCreate = CreateSentinel.isCreateId(sRootId) || sMode === "CREATE";
-        var iClientVersion = DetailSaveSupport.resolveVersionNumber(oCurrent, oSnapshot);
-        var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);
-        var sLockState = DetailSaveSupport.readLockState(mCtx, StatePaths);
+        var iClientVersion = DetailSaveRuntime.resolveVersionNumber(oCurrent, oSnapshot);
+        var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
+        var sLockState = DetailSaveRuntime.readLockState(mCtx, StatePaths);
         var aCurrentAttachments = Array.isArray((oCurrent && oCurrent.attachments) || null) ? oCurrent.attachments : [];
 
         if (!oRepo) {
@@ -156,7 +156,7 @@ sap.ui.define([
 
             return pSave.then(function (oSaved) {
                 var sNow = new Date().toISOString();
-                var oInitialSavedSnapshot = DetailSaveSupport.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot);
+        var oInitialSavedSnapshot = DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot);
                 var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.pcct_uuid || oInitialSavedSnapshot.RootKey || oInitialSavedSnapshot.rootKey || oInitialSavedSnapshot.Key || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
                 var pLockAcquire = Promise.resolve(null);
                 var bNeedsAttachmentReload = bCreate || aStagedPayload.length > 0;
@@ -176,7 +176,7 @@ sap.ui.define([
                 ]).then(function (aPostSave) {
                     var aSyncedAttachments = stripStagedAttachmentInternals(aPostSave[0]);
                     var oLockResult = aPostSave[1];
-                    var oSavedSnapshot = DetailSaveSupport.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
+        var oSavedSnapshot = DetailSaveRuntime.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
                     var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
                     var aEffects = [
                     Effects.toast("objectSaved", "success"),

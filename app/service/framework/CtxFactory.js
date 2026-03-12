@@ -35,9 +35,15 @@ sap.ui.define([
 ) {
     "use strict";
 
-    function safeBuild(fnFactory, mArgs) {
+    function safeBuild(vBuilder, mArgs) {
         try {
-            return fnFactory && fnFactory.create ? fnFactory.create(mArgs || {}) : null;
+            if (!vBuilder) {
+                return null;
+            }
+            if (typeof vBuilder.create === "function") {
+                return vBuilder.create(mArgs || {});
+            }
+            return vBuilder;
         } catch (e) {
             return null;
         }

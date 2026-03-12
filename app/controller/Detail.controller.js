@@ -1,7 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailControllerBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationSummarySupport",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationSummaryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionViewportBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionPinnedRailRuntime",
@@ -15,7 +15,7 @@ sap.ui.define([
 ], function (
     BaseController,
     DetailControllerBehavior,
-    DetailValidationSummarySupport,
+    DetailValidationSummaryRuntime,
     DetailActionConstants,
     DetailActionViewportBehavior,
     DetailActionPinnedRailRuntime,
@@ -42,19 +42,19 @@ sap.ui.define([
         DetailAttachmentLocationBehavior,
         {
             _computeValidationSummary: function () {
-                return DetailValidationSummarySupport.compute(this);
+            return DetailValidationSummaryRuntime.compute(this);
             },
 
             _recomputeValidationSummary: function (sSource, bShowValidation) {
-                return DetailValidationSummarySupport.recompute(this, sSource, bShowValidation, STATE_PATHS);
+            return DetailValidationSummaryRuntime.recompute(this, sSource, bShowValidation, STATE_PATHS);
             },
 
             _focusFirstInvalidField: function () {
-                return DetailValidationSummarySupport.focusFirstInvalidField(this, STATE_PATHS);
+            return DetailValidationSummaryRuntime.focusFirstInvalidField(this, STATE_PATHS);
             },
 
             _onSelectedChecklistChanged: function (oEvent) {
-                DetailValidationSummarySupport.onSelectedChecklistChanged(this, oEvent, STATE_PATHS);
+            DetailValidationSummaryRuntime.onSelectedChecklistChanged(this, oEvent, STATE_PATHS);
             }
         },
         {

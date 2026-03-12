@@ -1,8 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReadSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
     "sap/m/ProgressIndicator",
     "sap/m/Text"
-], function (BindingContextReadSupport, ProgressIndicator, Text) {
+], function (BindingContextReader, ProgressIndicator, Text) {
     "use strict";
 
     function readColumnProperty(oColumn) {
@@ -118,10 +118,10 @@ sap.ui.define([
             var nChecks, nBarriers, vChecksTotal, vBarriersTotal, nChecksTotal, nBarriersTotal, bShowChecks, bShowBarriers;
             if (oItem && typeof oItem.setType === "function" && oItem.getType && oItem.getType() !== "Active") { oItem.setType("Active"); }
             if (!oCtx || !aCells.length) { return; }
-            nChecks = toRatePercent(BindingContextReadSupport.readAny(oCtx, ["success_checks_rate", "SuccessChecksRate"], 0));
-            nBarriers = toRatePercent(BindingContextReadSupport.readAny(oCtx, ["success_barriers_rate", "barriers_rate", "SuccessBarriersRate"], 0));
-            vChecksTotal = BindingContextReadSupport.readAny(oCtx, ["checks_total", "ChecksTotal"], null);
-            vBarriersTotal = BindingContextReadSupport.readAny(oCtx, ["barriers_total", "BarriersTotal"], null);
+        nChecks = toRatePercent(BindingContextReader.readAny(oCtx, ["success_checks_rate", "SuccessChecksRate"], 0));
+        nBarriers = toRatePercent(BindingContextReader.readAny(oCtx, ["success_barriers_rate", "barriers_rate", "SuccessBarriersRate"], 0));
+        vChecksTotal = BindingContextReader.readAny(oCtx, ["checks_total", "ChecksTotal"], null);
+        vBarriersTotal = BindingContextReader.readAny(oCtx, ["barriers_total", "BarriersTotal"], null);
             nChecksTotal = vChecksTotal == null ? NaN : Number(vChecksTotal);
             nBarriersTotal = vBarriersTotal == null ? NaN : Number(vBarriersTotal);
             if (isFinite(nChecksTotal)) { bChecksTotalKnown = true; if (nChecksTotal > 0) { bHasChecks = true; } }

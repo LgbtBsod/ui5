@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity"
-], function (GatewayAdapterSupport, ChecklistIdentity) {
+], function (GatewayRequestRuntime, ChecklistIdentity) {
     "use strict";
 
     function exportSearchResults(mArgs) {
@@ -17,12 +17,12 @@ sap.ui.define([
         if (!aRootIds.length && mArgs && mArgs.searchContract) {
             oPayload.SearchContract = Object.assign({}, mArgs.searchContract);
         }
-        return GatewayAdapterSupport.request({
+        return GatewayRequestRuntime.request({
             method: "POST_ENTITY",
             path: "ReportExport",
             body: oPayload
         }).then(function (oResponse) {
-            return GatewayAdapterSupport.asArray(oResponse);
+            return GatewayRequestRuntime.asArray(oResponse);
         });
     }
 

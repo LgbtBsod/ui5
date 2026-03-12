@@ -33,7 +33,7 @@ sap.ui.define([
 
     function releaseWithTrySave(mContext) {
         var oController = mContext && mContext.controller;
-        return LockAdapter.create().release({
+        return LockAdapter.release({
             rootId: RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, "state")),
             sessionGuid: ModelStateRuntime.read(oController, "state", StatePaths.SESSION_ID, ""),
             payload: (mContext && mContext.payload) || {}

@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts"
-], function (GatewayAdapterSupport, AnalyticsContracts) {
+], function (GatewayRequestRuntime, AnalyticsContracts) {
     "use strict";
 
     function toNumber(vValue) {
@@ -10,7 +10,7 @@ sap.ui.define([
     }
 
     function normalizeSummary(oData) {
-        var oUnwrapped = GatewayAdapterSupport.unwrap(oData);
+        var oUnwrapped = GatewayRequestRuntime.unwrap(oData);
         var o = Array.isArray(oUnwrapped) ? (oUnwrapped[0] || {}) : (oUnwrapped || {});
         var aAvailableYears = [];
         try {
@@ -49,7 +49,7 @@ sap.ui.define([
     }
 
     function buildCharts(vRows) {
-        var aRows = GatewayAdapterSupport.asArray(vRows);
+        var aRows = GatewayRequestRuntime.asArray(vRows);
         var mTargetByPair = {
             PROFESSION_FAILED_CHECKS: "failedChecksByProfession",
             PROFESSION_FAILED_BARRIERS: "failedBarriersByProfession",
@@ -155,8 +155,7 @@ sap.ui.define([
         return aParts.join(" and ");
     }
 
-    function create() {
-        function readParams(mInput) {
+    function readParams(mInput) {
             var iSelectedYear = toNumber(mInput && mInput.selectedYear);
             var sSelectedSource = String(mInput && mInput.selectedSource || "").trim();
             var mParams = iSelectedYear > 0 ? { year: iSelectedYear } : {};
@@ -164,10 +163,10 @@ sap.ui.define([
                 mParams.source = sSelectedSource;
             }
             return mParams;
-        }
+    }
 
-        function normalizeRefreshState(oData) {
-            var oUnwrapped = GatewayAdapterSupport.unwrap(oData);
+    function normalizeRefreshState(oData) {
+        var oUnwrapped = GatewayRequestRuntime.unwrap(oData);
             var o = Array.isArray(oUnwrapped) ? (oUnwrapped[0] || {}) : (oUnwrapped || {});
             return {
                 taskKey: String(o.taskKey || o.TaskKey || AnalyticsContracts.REFRESH.TASK_KEY),
@@ -185,13 +184,13 @@ sap.ui.define([
             };
         }
 
-        return {
-            fetchSummary: function (mInput) {
-                return GatewayAdapterSupport.get("SimpleAnalyticalSet", readParams(mInput), {
-                    responseGuardKey: "analytics.summary"
-                }).then(normalizeSummary);
-            },
-            fetchDetailed: function (mInput) {
+    function fetchSummary(mInput) {
+        return GatewayRequestRuntime.get("SimpleAnalyticalSet", readParams(mInput), {
+            responseGuardKey: "analytics.summary"
+        }).then(normalizeSummary);
+    }
+
+    function fetchDetailed(mInput) {
                 var mParams = readParams(mInput);
                 var sBreakdownFilter = buildBreakdownFilter(mInput);
                 var iSelectedYear = toNumber(mInput && mInput.selectedYear);
@@ -205,20 +204,20 @@ sap.ui.define([
                     selectedSource: mInput && mInput.selectedSource
                 });
                 var pCompareBreakdown = iCompareYear === iSelectedYear
-                    ? GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", { "$filter": sBreakdownFilter }, {
+            ? GatewayRequestRuntime.get("WorkflowAnalyticsBreakdownSet", { "$filter": sBreakdownFilter }, {
                         responseGuardKey: "analytics.breakdown.compare"
                     })
-                    : GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", { "$filter": sCompareBreakdownFilter }, {
+            : GatewayRequestRuntime.get("WorkflowAnalyticsBreakdownSet", { "$filter": sCompareBreakdownFilter }, {
                         responseGuardKey: "analytics.breakdown.compare"
                     });
-                var pRefreshState = GatewayAdapterSupport.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
+        var pRefreshState = GatewayRequestRuntime.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
                     responseGuardKey: "analytics.refreshState"
                 }).catch(function () { return null; });
                 return Promise.all([
-                    GatewayAdapterSupport.get("SimpleAnalyticalSet", mParams, {
+            GatewayRequestRuntime.get("SimpleAnalyticalSet", mParams, {
                         responseGuardKey: "analytics.summary"
                     }),
-                    GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", { "$filter": sBreakdownFilter }, {
+            GatewayRequestRuntime.get("WorkflowAnalyticsBreakdownSet", { "$filter": sBreakdownFilter }, {
                         responseGuardKey: "analytics.breakdown.primary"
                     }),
                     pRefreshState,
@@ -231,26 +230,31 @@ sap.ui.define([
                         comparisonCharts: buildCharts(aResult[3])
                     });
                 });
-            },
-            fetchRefreshState: function () {
-                return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
-                    responseGuardKey: "analytics.refreshState"
-                })
-                    .then(normalizeRefreshState)
-                    .catch(function () { return normalizeRefreshState(null); });
-            },
-            requestRefresh: function (mInput) {
-                return GatewayAdapterSupport.postFunction("AnalyticsRefreshTrigger", {
-                    TaskKey: AnalyticsContracts.REFRESH.TASK_KEY,
-                    RequestedBy: String(mInput && mInput.requestedBy || "")
-                }).then(function () {
-                    return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
-                        responseGuardKey: "analytics.refreshState"
-                    }).catch(function () { return null; });
-                }).then(normalizeRefreshState);
-            }
-        };
     }
 
-    return { create: create };
+    function fetchRefreshState() {
+        return GatewayRequestRuntime.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
+            responseGuardKey: "analytics.refreshState"
+        })
+            .then(normalizeRefreshState)
+            .catch(function () { return normalizeRefreshState(null); });
+    }
+
+    function requestRefresh(mInput) {
+        return GatewayRequestRuntime.postFunction("AnalyticsRefreshTrigger", {
+            TaskKey: AnalyticsContracts.REFRESH.TASK_KEY,
+            RequestedBy: String(mInput && mInput.requestedBy || "")
+        }).then(function () {
+        return GatewayRequestRuntime.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
+                responseGuardKey: "analytics.refreshState"
+            }).catch(function () { return null; });
+        }).then(normalizeRefreshState);
+    }
+
+    return {
+        fetchDetailed: fetchDetailed,
+        fetchRefreshState: fetchRefreshState,
+        fetchSummary: fetchSummary,
+        requestRefresh: requestRefresh
+    };
 });

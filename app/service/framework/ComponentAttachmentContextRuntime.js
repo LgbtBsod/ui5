@@ -7,7 +7,7 @@ sap.ui.define([], function () {
         var oMainServiceModel = mModels.mainServiceModel;
         var StatePaths = mDeps.StatePaths;
 
-        var fnHandleForceReadOnly = mDeps.ComponentRuntimeHandlerBootstrap.createForceReadOnlyHandler({
+    var fnHandleForceReadOnly = mDeps.ComponentRuntimeHandlerRuntime.createForceReadOnlyHandler({
             component: oComponent,
             stateModel: oStateModel,
             uiStateModel: oUiStateModel,
@@ -27,7 +27,7 @@ sap.ui.define([], function () {
         var fnClearGlobalBanner = mInitContext.feedbackRuntime.clearGlobalBanner;
         var oPendingNavigationRuntime = mInitContext.pendingNavigationRuntime;
 
-        var fnRunGuardedSave = mDeps.ComponentRuntimeHandlerBootstrap.createGuardedSave({
+    var fnRunGuardedSave = mDeps.ComponentRuntimeHandlerRuntime.createGuardedSave({
             component: oComponent,
             stateModel: oStateModel,
             mainServiceModel: oMainServiceModel,
@@ -43,7 +43,7 @@ sap.ui.define([], function () {
             saveGuardRuntime: mDeps.saveGuardRuntime
         });
 
-        var oCrossTabRuntime = mDeps.ComponentRuntimeHandlerBootstrap.registerCrossTabRuntime({
+    var oCrossTabRuntime = mDeps.ComponentRuntimeHandlerRuntime.registerCrossTabHandlers({
             component: oComponent,
             stateModel: oStateModel,
             statePaths: StatePaths,
@@ -53,7 +53,7 @@ sap.ui.define([], function () {
             attachCrossTabRuntime: mDeps.attachCrossTabRuntime
         }).crossTabRuntime;
 
-        mDeps.ComponentRuntimeHandlerBootstrap.registerDefaultHandlers({
+    mDeps.ComponentRuntimeHandlerRuntime.registerDefaultHandlers({
             component: oComponent,
             actionContract: mDeps.ActionContract,
             runGuardedSave: fnRunGuardedSave,

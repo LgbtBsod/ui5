@@ -34,14 +34,14 @@ sap.ui.define([
         var oStateModel = mOptions.stateModel;
         var oEnvModel = mOptions.envModel;
         var oCacheModel = mOptions.cacheModel;
-        var BootstrapAppUseCase = mOptions.bootstrapAppUseCase;
+        var InitializeAppUseCase = mOptions.initializeAppUseCase;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
         var bBootCompleted = false;
         var sTabSessionId = "";
 
         ComponentBootStateRuntime.initializeBootState(oStateModel);
 
-        return BootstrapAppUseCase.execute({}, { stateModel: oStateModel }).then(function (oBootstrapResult) {
+        return InitializeAppUseCase.execute({}, { stateModel: oStateModel }).then(function (oBootstrapResult) {
             if (oBootstrapResult && oBootstrapResult.ok === false) {
                 throw ComponentBootStageRuntime.toStageError(oBootstrapResult.error && oBootstrapResult.error.message, STAGE_ERRORS.BOOTSTRAP_APP_FAILED);
             }

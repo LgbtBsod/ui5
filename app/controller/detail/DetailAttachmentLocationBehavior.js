@@ -1,14 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailValueHelpRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, DetailAttachmentRuntime, DetailValueHelpRuntime, ControllerViewStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime) {
+], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputRuntime, DetailAttachmentRuntime, DetailValueHelpRuntime, ControllerViewStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime) {
     "use strict";
 
     function createAttachmentHooks(oController) {
@@ -24,12 +24,12 @@ sap.ui.define([
         return {
             autosave: function (mInput) { return DetailCommandPolicy.autosave(oController, { rootId: oController._currentRootId(), field: mInput.field, value: mInput.value }); },
             clearSearchTimer: function () { oController._clearLocationValueHelpSearchTimer(); },
-            consumeSuggestionSelection: function (sTarget, sValue) { return DetailPersonInputSupport.consumeSuggestionSelection(oController, sTarget, sValue); },
+                consumeSuggestionSelection: function (sTarget, sValue) { return DetailPersonInputRuntime.consumeSuggestionSelection(oController, sTarget, sValue); },
             isEditMode: function () { return oController._isEditMode(); },
             personSuggest: function (mInput) { return DetailCommandPolicy.personSuggest(oController, mInput); },
-            personTargetFromSource: function (oSource) { return DetailPersonInputSupport.targetFromSource(oSource); },
+                personTargetFromSource: function (oSource) { return DetailPersonInputRuntime.targetFromSource(oSource); },
             rememberDialogReturnFocus: function (sDialogKey, oSource) { oController._rememberDialogReturnFocus(sDialogKey, oSource); },
-            rememberSuggestionSelection: function (sTarget, sValue) { DetailPersonInputSupport.rememberSuggestionSelection(oController, sTarget, sValue); },
+                rememberSuggestionSelection: function (sTarget, sValue) { DetailPersonInputRuntime.rememberSuggestionSelection(oController, sTarget, sValue); },
             restartSearchTimer: function (fnTask, iDelayMs) { oController._iLocationVhSearchTimer = SchedulingRuntime.restartTimer(0, function () { oController._iLocationVhSearchTimer = null; fnTask(); }, iDelayMs); },
             scheduleTableSync: function () { oController._scheduleLocationValueHelpTableSync(); },
             setViewFlag: function (sPath, bValue) { ControllerViewStateRuntime.setFlag(oController, sPath, bValue); },

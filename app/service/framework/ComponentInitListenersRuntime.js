@@ -1,9 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailMetaSyncRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerBindingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerBootstrapRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerInitRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentNavigationGuardRuntime"
-], function (ComponentDetailMetaSyncRuntime, ComponentListenerBindingRuntime, ComponentListenerBootstrapRuntime, ComponentNavigationGuardRuntime) {
+], function (ComponentDetailMetaSyncRuntime, ComponentListenerBindingRuntime, ComponentListenerInitRuntime, ComponentNavigationGuardRuntime) {
     "use strict";
 
     function syncDetailMeta(oStateModel, StatePaths) {
@@ -15,7 +15,7 @@ sap.ui.define([
         var StatePaths = mOptions.statePaths || {};
 
         ComponentListenerBindingRuntime.attachLifecycleBindings(mOptions);
-        ComponentListenerBootstrapRuntime.initializeListenerState(mOptions);
+        ComponentListenerInitRuntime.initializeListeners(mOptions);
         syncDetailMeta(oStateModel, StatePaths);
         ComponentNavigationGuardRuntime.attachBeforeRouteMatched({
             component: mOptions.component,

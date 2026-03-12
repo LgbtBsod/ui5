@@ -49,7 +49,7 @@ sap.ui.define([], function () {
         });
     }
 
-    function registerCrossTabRuntime(mOptions) {
+    function registerCrossTabHandlers(mOptions) {
         var oCrossTabRuntime = mOptions.attachCrossTabRuntime({
             component: mOptions.component,
             stateModel: mOptions.stateModel,
@@ -79,7 +79,7 @@ sap.ui.define([], function () {
     return {
         createForceReadOnlyHandler: createForceReadOnlyHandler,
         createGuardedSave: createGuardedSave,
-        registerCrossTabRuntime: registerCrossTabRuntime,
+        registerCrossTabHandlers: registerCrossTabHandlers,
         registerDefaultHandlers: registerDefaultHandlers
     };
 });

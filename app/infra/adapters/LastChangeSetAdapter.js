@@ -35,34 +35,30 @@ sap.ui.define([
         return parseMs(oEntry && oEntry.AggChangedOn);
     }
 
-    function create() {
-        return {
-            readAggChangedOn: function (sRootId) {
-                return GatewayODataClient.request({
-                    method: "GET",
-                    path: ODataAdapterUtils.buildEntityPath("LastChangeSet", sRootId, {
-                        name: "RootKey",
-                        type: ODataKeyContracts.TYPES.ROOT_KEY
-                    })
-                }).then(function (oRes) {
-                    return readAggChangedOn(oRes);
-                }).catch(function () {
-                    return GatewayODataClient.request({
-                        method: "GET",
-                        path: "LastChangeSet",
-                        params: {
-                            "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY),
-                            "$top": 1
-                        }
-                    }).then(function (oRes) {
-                        return readAggChangedOn(oRes);
-                    }).catch(function () {
-                        return 0;
-                    });
-                });
-            }
-        };
+    function readAggChangedOnAdapter(sRootId) {
+        return GatewayODataClient.request({
+            method: "GET",
+            path: ODataAdapterUtils.buildEntityPath("LastChangeSet", sRootId, {
+                name: "RootKey",
+                type: ODataKeyContracts.TYPES.ROOT_KEY
+            })
+        }).then(function (oRes) {
+            return readAggChangedOn(oRes);
+        }).catch(function () {
+            return GatewayODataClient.request({
+                method: "GET",
+                path: "LastChangeSet",
+                params: {
+                    "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY),
+                    "$top": 1
+                }
+            }).then(function (oRes) {
+                return readAggChangedOn(oRes);
+            }).catch(function () {
+                return 0;
+            });
+        });
     }
 
-    return { create: create };
+    return { readAggChangedOn: readAggChangedOnAdapter };
 });

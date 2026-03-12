@@ -1,10 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
-], function (GatewayAdapterSupport, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, GatewayClient) {
+], function (GatewayRequestRuntime, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, GatewayClient) {
     "use strict";
 
     function normalizeRootKey(sRootId) {
@@ -12,7 +12,7 @@ sap.ui.define([
     }
 
     function mapAttachmentResult(vData) {
-        return GatewayAdapterSupport.asArray(vData).map(ChecklistSnapshotMapper.mapAttachmentRow);
+        return GatewayRequestRuntime.asArray(vData).map(ChecklistSnapshotMapper.mapAttachmentRow);
     }
 
     function loadAttachments(mArgs) {
@@ -20,7 +20,7 @@ sap.ui.define([
         if (!sRootId) {
             return Promise.resolve({ attachments: [] });
         }
-        return GatewayAdapterSupport.get("AttachmentSet", {
+        return GatewayRequestRuntime.get("AttachmentSet", {
             "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
         }).then(function (oResult) {
             return { attachments: mapAttachmentResult(oResult) };

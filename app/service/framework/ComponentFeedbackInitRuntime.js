@@ -1,12 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFeedbackRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSettingsBootstrap",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSettingsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentPendingNavigationRuntime"
-], function (ComponentFeedbackRuntime, ComponentRuntimeSettingsBootstrap, ComponentPendingNavigationRuntime) {
+], function (ComponentFeedbackRuntime, ComponentRuntimeSettingsRuntime, ComponentPendingNavigationRuntime) {
     "use strict";
 
-    function createRuntimeSettingsRuntime(oComponent, mOptions) {
-        var oRuntime = ComponentRuntimeSettingsBootstrap.createRuntimeSettingsRuntime(oComponent, mOptions);
+    function initializeRuntimeSettings(oComponent, mOptions) {
+        var oRuntime = ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, mOptions);
 
         return {
             applyRuntimeSettings: oRuntime.applyRuntimeSettings,
@@ -21,6 +21,6 @@ sap.ui.define([
     return {
         createFeedbackRuntime: ComponentFeedbackRuntime.createFeedbackRuntime,
         createPendingNavigationRuntime: ComponentPendingNavigationRuntime.createPendingNavigationRuntime,
-        createRuntimeSettingsRuntime: createRuntimeSettingsRuntime
+            initializeRuntimeSettings: initializeRuntimeSettings
     };
 });

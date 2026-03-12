@@ -1,10 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReadSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBehaviorRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
-], function (BindingContextReadSupport, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailRowBehaviorRuntime, OperationSourceContracts) {
+], function (BindingContextReader, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailRowBehaviorRuntime, OperationSourceContracts) {
     "use strict";
 
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
@@ -19,7 +19,7 @@ sap.ui.define([
             togglePin: function (sKey) { DetailInfoCardLayoutRuntime.togglePin(oController, sKey); },
             moveCard: function (sKey, iDelta) { DetailInfoCardLayoutRuntime.moveCard(oController, sKey, iDelta); },
             focusCardByKey: function (sKey) { DetailInfoCardLayoutRuntime.focusCardByKey(oController, sKey); },
-            readContextValue: function (oContext, sKey, vFallback) { return BindingContextReadSupport.read(oContext, sKey, vFallback); },
+            readContextValue: function (oContext, sKey, vFallback) { return BindingContextReader.read(oContext, sKey, vFallback); },
             isEditMode: function () { return oController._isEditMode(); }
         };
     }

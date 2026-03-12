@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/AttachmentRepoSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/AttachmentRepoRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistReadRuntime",
@@ -11,7 +11,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistExportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (GatewayAdapterSupport, ChecklistSnapshotMapper, AttachmentRepoSupport, ODataChecklistPayloadMapper, ODataChecklistSnapshotRuntime, ODataChecklistReadRuntime, ODataChecklistStatusRuntime, ODataChecklistPermissionRuntime, ODataChecklistMutationRuntime, ODataChecklistExportRuntime, DetailRuntimePayload, CreateSentinel) {
+], function (GatewayRequestRuntime, ChecklistSnapshotMapper, AttachmentRepoRuntime, ODataChecklistPayloadMapper, ODataChecklistSnapshotRuntime, ODataChecklistReadRuntime, ODataChecklistStatusRuntime, ODataChecklistPermissionRuntime, ODataChecklistMutationRuntime, ODataChecklistExportRuntime, DetailRuntimePayload, CreateSentinel) {
     "use strict";
     function rootId(mArgs) { return DetailRuntimePayload.rootId(mArgs); }
     function normalizeRootKey(sRootId) { return ODataChecklistPayloadMapper.normalizeRootKey(sRootId); }
@@ -67,8 +67,8 @@ sap.ui.define([
                     rootId: rootId
                 });
             },
-            loadAttachments: AttachmentRepoSupport.loadAttachments,
-            deleteAttachment: AttachmentRepoSupport.deleteAttachment
+            loadAttachments: AttachmentRepoRuntime.loadAttachments,
+            deleteAttachment: AttachmentRepoRuntime.deleteAttachment
         };
     }
     return { create: create };
