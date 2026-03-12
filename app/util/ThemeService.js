@@ -20,17 +20,7 @@ sap.ui.define([
     var DEFAULT_ANIMATION_ENABLED = true;
     var MODE_TO_THEME = {
         morning: "sap_horizon",
-        night: "sap_horizon_dark"
-    };
-    var NIGHT_MODE_ALIASES = {
-        night: true,
-        sap_fiori_3_dark: true,
-        sap_horizon_dark: true
-    };
-    var MORNING_MODE_ALIASES = {
-        morning: true,
-        sap_fiori_3: true,
-        sap_horizon: true
+        night: "sap_horizon"
     };
     var SWITCH_DURATION_MS = 220;
     var iSwitchTimer = 0;
@@ -38,13 +28,6 @@ sap.ui.define([
     var sPendingMode = "";
 
     function normalizeMode(sModeOrTheme) {
-        var sValue = String(sModeOrTheme || "").toLowerCase();
-        if (NIGHT_MODE_ALIASES[sValue]) {
-            return "night";
-        }
-        if (MORNING_MODE_ALIASES[sValue]) {
-            return "morning";
-        }
         return DEFAULT_MODE;
     }
 
@@ -120,7 +103,7 @@ sap.ui.define([
     }
 
     function syncBackgroundRuntime(oProfile) {
-        var sRuntimeTheme = normalizeMode(oProfile && oProfile.mode) === "night" ? "dark" : "light";
+        var sRuntimeTheme = "light";
         var bEnabled = normalizeAnimationEnabled(oProfile && oProfile.animationEnabled);
 
         ThemeDomRuntime.setBodyAttribute("data-theme", sRuntimeTheme);
@@ -169,8 +152,6 @@ sap.ui.define([
     }
 
     function applyBodyClasses(sTheme) {
-        var sMode = modeForTheme(sTheme);
-        var bNight = sMode === "night";
         var oBody = document && document.body;
         var oRoot = document && document.documentElement;
         var oMeta = ThemePhilosophy.getMeta(sTheme);
@@ -180,10 +161,10 @@ sap.ui.define([
         }
         syncDocumentRootClasses();
         aBodyNodes = [oBody];
-        ThemeDomRuntime.toggleClass(aBodyNodes, "appLight", !bNight);
-        ThemeDomRuntime.toggleClass(aBodyNodes, "appDark", bNight);
-        ThemeDomRuntime.toggleClass(aBodyNodes, "lightMode", !bNight);
-        ThemeDomRuntime.toggleClass([oRoot], "light-mode", !bNight);
+        ThemeDomRuntime.addClass(aBodyNodes, "appLight");
+        ThemeDomRuntime.removeClass(aBodyNodes, "appDark");
+        ThemeDomRuntime.addClass(aBodyNodes, "lightMode");
+        ThemeDomRuntime.addClass([oRoot], "light-mode");
         [
             "themeLifestyleClarity",
             "themeLifestyleNightOps",
@@ -254,13 +235,13 @@ sap.ui.define([
             sMode || oStoredProfile.mode,
             Object.prototype.hasOwnProperty.call(mOptions, "animationEnabled") ? mOptions.animationEnabled : oStoredProfile.animationEnabled
         );
-        var sResolvedMode = oRequestedProfile.mode;
+        var sResolvedMode = DEFAULT_MODE;
         var sTheme = themeForMode(sResolvedMode);
         var sCurrentTheme = Core && typeof Core.getConfiguration === "function" && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? Core.getConfiguration().getTheme()
             : "";
-        var sCurrentMode = modeForTheme(sCurrentTheme);
-        var bAlreadyApplied = (sPendingMode || sCurrentMode) === sResolvedMode;
+        var sCurrentMode = DEFAULT_MODE;
+        var bAlreadyApplied = (sPendingMode || sCurrentMode) === sResolvedMode && sCurrentTheme === sTheme;
 
         if (mOptions.persist !== false) {
             setThemeProfile(oRequestedProfile);
@@ -282,7 +263,7 @@ sap.ui.define([
         return {
             mode: sResolvedMode,
             theme: sTheme,
-            isDark: sResolvedMode === "night",
+            isDark: false,
             animationEnabled: oRequestedProfile.animationEnabled
         };
     }

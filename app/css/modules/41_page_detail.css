@@ -2714,6 +2714,13 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 }
 
 /* 2026-03 production readability pass */
+
+.chkApp .detailAccessDeniedScene .detailAccessDeniedIllustration,
+.chkApp .detailAccessDeniedScene .sapMImg,
+.chkApp .detailAccessDeniedScene img {
+  width: min(100%, 21.875rem);
+  max-width: min(100%, 21.875rem);
+}
 .chkApp .detailHeroCard,
 .chkApp .detailControlInlineCard,
 .chkApp .detailSectionCard,

@@ -383,9 +383,7 @@
                                 ariaLabel="{i18n>exportMenuButton}"
                                 class="brandActionBtn brandActionGhost actionPrioritySecondary searchExportMenuBtn chkRipple"
                                 icon="sap-icon://excel-attachment">
-                                <layoutData>
-                                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
-                                </layoutData>
+   
 
                                 <menu>
                                     <Menu itemSelected=".onExportMenuAction">

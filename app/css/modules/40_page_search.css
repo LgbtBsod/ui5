@@ -4134,3 +4134,92 @@ body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblRow .sapMListTbl
 body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
   background: color-mix(in srgb, rgba(255, 255, 255, 0.82) 72%, transparent);
 }
+
+/* 2026-03 product hardening pass:
+   single visual profile, deterministic sticky stack, centered busy-wave loader. */
+.chkApp .searchCustomBusyHeader.searchCustomBusyHeaderCentered {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 0.9rem;
+}
+
+.chkApp .searchCustomBusyHeader.searchCustomBusyHeaderCentered .sapMText {
+  text-align: center;
+}
+
+.chkApp .searchCustomBusyPictogramRow {
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 0.72rem;
+  column-gap: 0.78rem;
+}
+
+.chkApp .searchBusyPictogram {
+  min-width: 3.2rem;
+  width: 3.2rem;
+  height: 3.2rem;
+}
+
+.chkApp .searchBusyPictogramFive {
+  color: var(--ui-accent-label-10);
+  background: color-mix(in srgb, var(--ui-accent-bg-10) 72%, transparent);
+  animation-delay: 0.56s, 0.56s;
+}
+
+.chkApp .searchBusyPictogramSix {
+  color: var(--ui-accent-label-5);
+  background: color-mix(in srgb, var(--ui-accent-bg-5) 72%, transparent);
+  animation-delay: 0.7s, 0.7s;
+}
+
+.chkApp .searchBusyPictogramSeven {
+  color: var(--ui-accent-label-3);
+  background: color-mix(in srgb, var(--ui-accent-bg-3) 72%, transparent);
+  animation-delay: 0.84s, 0.84s;
+}
+
+.chkApp .searchCustomBusyPictogramRow .searchBusyPictogramOne,
+.chkApp .searchCustomBusyPictogramRow .searchBusyPictogramThree,
+.chkApp .searchCustomBusyPictogramRow .searchBusyPictogramFive,
+.chkApp .searchCustomBusyPictogramRow .searchBusyPictogramSeven {
+  transform: translateY(-0.22rem);
+}
+
+.chkApp .searchCustomBusyPictogramRow .searchBusyPictogramTwo,
+.chkApp .searchCustomBusyPictogramRow .searchBusyPictogramFour,
+.chkApp .searchCustomBusyPictogramRow .searchBusyPictogramSix {
+  transform: translateY(0.22rem);
+}
+
+.chkApp .searchWorkbenchDock > .searchFilterCardDense {
+  position: sticky !important;
+  top: var(--search-sticky-filter-top, calc(var(--app-shell-offset) + 0.38rem)) !important;
+  z-index: 34 !important;
+}
+
+.chkApp .searchWorkbenchDock > .searchResultsActionRail {
+  position: sticky !important;
+  top: var(--search-sticky-action-top, calc(var(--search-sticky-filter-top, calc(var(--app-shell-offset) + 0.38rem)) + 0.42rem)) !important;
+  z-index: 33 !important;
+}
+
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMTB,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMIBar {
+  position: sticky !important;
+  top: var(--search-results-toolbar-sticky-top, calc(var(--search-sticky-action-top, calc(var(--search-sticky-filter-top, calc(var(--app-shell-offset) + 0.38rem)) + 0.42rem)) + 0.42rem)) !important;
+  z-index: 32 !important;
+}
+
+.chkApp .searchResultsActionRail,
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  background: color-mix(in srgb, var(--theme-block-bg) 72%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 42%, transparent) !important;
+}
+
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  margin-top: 0 !important;
+}

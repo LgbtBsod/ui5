@@ -1,13 +1,13 @@
 sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime"], function (ThemeRuntime) {
     "use strict";
 
-    var DEFAULT_MODE = ThemeRuntime.DEFAULT_MODE;
+    var DEFAULT_MODE = "morning";
     var DEFAULT_ANIMATION_ENABLED = ThemeRuntime.DEFAULT_ANIMATION_ENABLED;
 
     function readThemeProfile() {
         var oProfile = ThemeRuntime.getThemeProfile ? ThemeRuntime.getThemeProfile() : null;
         return {
-            mode: (oProfile && oProfile.mode) || DEFAULT_MODE,
+            mode: DEFAULT_MODE,
             animationEnabled: oProfile && typeof oProfile.animationEnabled === "boolean" ? oProfile.animationEnabled : DEFAULT_ANIMATION_ENABLED
         };
     }
@@ -18,9 +18,9 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime"], f
             return ThemeRuntime.themeForMode(oProfile.mode);
         },
         getCurrentThemeMode: function () {
-            return readThemeProfile().mode;
+            return DEFAULT_MODE;
         },
-        isDarkThemeEnabled: function () { return this.getCurrentThemeMode() === "night"; },
+        isDarkThemeEnabled: function () { return false; },
         isThemeAnimationEnabled: function () {
             return !!readThemeProfile().animationEnabled;
         },
@@ -36,9 +36,8 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime"], f
         },
         setThemeMode: function (sMode, oClickXY) {
             var oProfile = readThemeProfile();
-            var sTarget = String(sMode || DEFAULT_MODE).toLowerCase() === "night" ? "night" : "morning";
             this._ensureThemeSyncListener();
-            return ThemeRuntime.applyThemeMode(sTarget, oClickXY || null, {
+            return ThemeRuntime.applyThemeMode(DEFAULT_MODE, oClickXY || null, {
                 animationEnabled: oProfile.animationEnabled
             });
         },
@@ -51,9 +50,8 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime"], f
         },
         toggleTheme: function (oClickXY) {
             var oProfile = readThemeProfile();
-            var sNextMode = this.isDarkThemeEnabled() ? "morning" : "night";
             this._ensureThemeSyncListener();
-            return ThemeRuntime.applyThemeMode(sNextMode, oClickXY, {
+            return ThemeRuntime.applyThemeMode(DEFAULT_MODE, oClickXY, {
                 animationEnabled: oProfile.animationEnabled
             });
         },

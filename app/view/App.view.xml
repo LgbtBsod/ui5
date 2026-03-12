@@ -27,11 +27,8 @@
                 settingsTooltip="{i18n>shellSettingsTooltip}"
                 analyticsTooltip="{i18n>workflowAnalyticsTitle}"
                 userTooltip="{appView>/shell/userTooltip}"
-                dark="{appView>/isDark}"
-                themeTooltip="{= ${appView>/isDark} ? ${i18n>themeSwitchToLight} : ${i18n>themeSwitchToDark} }"
                 settingsPress=".onOpenShellSettings"
                 analyticsPress=".onOpenShellAnalytics"
-                themePress=".onToggleTheme"
                 userPress=".onOpenShellUserMenu"/>
         </VBox>
 

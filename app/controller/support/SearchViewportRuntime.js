@@ -148,6 +148,7 @@ sap.ui.define([
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
         var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
+        var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
         var iResultsToolbarHeight = resolveResultsTableToolbarHeight(oController);
         var iFilterHeight = resolveDomHeight(oFilterCard, ".searchFilterCardDense");
         var iActionHeight = resolveDomHeight(oActionRail, ".searchResultsActionRail");
@@ -182,7 +183,8 @@ sap.ui.define([
         setSearchStickyTop(oFilterCard, iTopBase + "px");
         setSearchStickyTop(oActionRail, iActionTop + "px");
         setSearchStickyTop(oToolbarRail, iToolbarTop + "px");
-        ThemeDomRuntime.setStyleProperties([oActionRail, oToolbarRail], {
+        setSearchStickyTop(oResultsToolbarDom, iToolbarTop + "px");
+        ThemeDomRuntime.setStyleProperties([oActionRail, oToolbarRail, oResultsToolbarDom], {
             "position": "sticky",
             "overflow": "visible",
             "overflow-x": "visible",
