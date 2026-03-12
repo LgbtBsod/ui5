@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/infra/contracts/AnalyticsContracts"
 ], function (GatewayAdapterSupport, AnalyticsContracts) {
     "use strict";
 

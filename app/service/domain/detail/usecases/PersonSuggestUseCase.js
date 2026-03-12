@@ -23,7 +23,7 @@ sap.ui.define([
 
     function resolveMode(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "READ").toUpperCase();
+        return WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
     }
     function inputPathForTarget(sTarget) {
         return String(sTarget || "").toLowerCase() === "observed" ? "/observedInputValue" : "/observerInputValue";
@@ -44,7 +44,7 @@ sap.ui.define([
         var sInputPath = inputPathForTarget(sTarget);
         var sPrefix = personPrefix(sTarget);
 
-        if (sMode !== "EDIT") {
+        if (sMode !== WorkflowContracts.EDIT_MODES.EDIT) {
             return Promise.resolve(Result.ok({ skipped: true, items: [] }, [
                 Effects.modelPatch("view", sPath, []),
                 Effects.modelPatch("view", "/personSuggestHint", "")

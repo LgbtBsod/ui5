@@ -92,8 +92,6 @@ body.chkAppRoot.appLight,
   --theme-chip-bg: rgba(247, 250, 255, 0.84);
   --theme-chip-border: rgba(128, 162, 220, 0.28);
   --focus-ring: 0 0 0 0.2rem rgba(var(--accent-rgb), 0.32);
-  --radius-md: 1rem;
-  --radius-lg: 1.32rem;
   --theme-table-header-bg: linear-gradient(180deg, rgba(250, 252, 255, 0.96), rgba(240, 246, 255, 0.88));
   --theme-table-cell-bg: rgba(255, 255, 255, 0.88);
   --theme-table-cell-hover-bg: rgba(250, 252, 255, 0.96);
@@ -259,8 +257,6 @@ body.appDark,
   --theme-chip-bg: rgba(34, 52, 78, 0.82);
   --theme-chip-border: rgba(126, 156, 208, 0.28);
   --focus-ring: 0 0 0 0.22rem rgba(var(--accent-rgb), 0.26);
-  --radius-md: 1.24rem;
-  --radius-lg: 1.64rem;
   --theme-table-header-bg: linear-gradient(180deg, rgba(39, 56, 84, 0.94), rgba(25, 39, 61, 0.9));
   --theme-table-cell-bg: rgba(22, 36, 58, 0.86);
   --theme-table-cell-hover-bg: rgba(31, 49, 77, 0.94);

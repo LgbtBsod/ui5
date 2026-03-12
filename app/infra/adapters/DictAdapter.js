@@ -7,7 +7,9 @@ sap.ui.define([
         LPC: "LPC",
         PROFESSION: "PROFESSION",
         TIME_ZONE: "TIME_ZONE",
-        ATTACHMENT_TYPES: "ATF_CAT"
+        ATTACHMENT_TYPES: "ATF_CAT",
+        CHECKS_NUMBER: "CHECKS_NUMBER",
+        BARRIERS_NUMBER: "BARRIERS_NUMBER"
     };
 
     function readTypeList(oMasterDataModel, sType) {
@@ -59,13 +61,17 @@ sap.ui.define([
             loadDomain(DOMAIN_KEYS.LPC),
             loadDomain(DOMAIN_KEYS.PROFESSION),
             loadDomain(DOMAIN_KEYS.TIME_ZONE),
-            loadDomain(DOMAIN_KEYS.ATTACHMENT_TYPES)
+            loadDomain(DOMAIN_KEYS.ATTACHMENT_TYPES),
+            loadDomain(DOMAIN_KEYS.CHECKS_NUMBER),
+            loadDomain(DOMAIN_KEYS.BARRIERS_NUMBER)
         ]).then(function (aResult) {
             return {
                 LPC: aResult[0] || [],
                 PROFESSION: aResult[1] || [],
                 TIME_ZONE: aResult[2] || [],
-                ATF_CAT: aResult[3] || []
+                ATF_CAT: aResult[3] || [],
+                CHECKS_NUMBER: aResult[4] || [],
+                BARRIERS_NUMBER: aResult[5] || []
             };
         });
     }
@@ -86,15 +92,21 @@ sap.ui.define([
                     var aProf = normalizeDictRows(mGrouped.PROFESSION || []);
                     var aTz = normalizeDictRows(mGrouped.TIME_ZONE || []);
                     var aAttachmentTypes = normalizeDictRows(mGrouped.ATF_CAT || []);
+                    var aChecksNumbers = normalizeDictRows(mGrouped.CHECKS_NUMBER || []);
+                    var aBarriersNumbers = normalizeDictRows(mGrouped.BARRIERS_NUMBER || []);
                     oMasterDataModel.setProperty("/lpc", aLpc);
                     oMasterDataModel.setProperty("/professions", aProf);
                     if (aTz.length) { oMasterDataModel.setProperty("/timezones", aTz); }
                     if (aAttachmentTypes.length) { oMasterDataModel.setProperty("/attachmentTypes", aAttachmentTypes); }
+                    if (aChecksNumbers.length) { oMasterDataModel.setProperty("/checksNumbers", aChecksNumbers); }
+                    if (aBarriersNumbers.length) { oMasterDataModel.setProperty("/barriersNumbers", aBarriersNumbers); }
                     oMasterDataModel.setProperty("/dictionaries", {
                         lpc: aLpc,
                         professions: aProf,
                         timezones: aTz,
                         attachmentTypes: aAttachmentTypes,
+                        checksNumbers: aChecksNumbers,
+                        barriersNumbers: aBarriersNumbers,
                         rawByDomain: mGrouped
                     });
                     oMasterDataModel.setProperty("/dictLoaded", true);

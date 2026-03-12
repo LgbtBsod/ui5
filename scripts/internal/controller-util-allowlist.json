@@ -53,5 +53,7 @@
   "service/framework/UiDecisionCoordinator",
   "service/framework/WorkflowCoordinator",
   "util/DraftChecklistFactory",
-  "model/StatePaths"
+  "model/StatePaths",
+  "util/UiAssetPaths",
+  "util/analytics/AnalyticsExportRows"
 ]

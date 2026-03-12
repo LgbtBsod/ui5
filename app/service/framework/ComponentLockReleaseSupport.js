@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (StatePaths, CreateSentinel, GatewayBackendService, RootIdRuntime, LayoutStateRuntime, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (StatePaths, CreateSentinel, GatewayBackendService, RootIdRuntime, LayoutStateRuntime, ModelStateRuntime, WorkflowContracts) {
     "use strict";
 
     function encodeUrlParameters(mParameters) {
@@ -27,7 +28,7 @@ sap.ui.define([
         if (!sRootId || !sSessionGuid || CreateSentinel.isCreateId(sRootId)) {
             return null;
         }
-        if (sMode !== "EDIT" || sLockState !== "EDIT_LOCKED") {
+        if (sMode !== WorkflowContracts.EDIT_MODES.EDIT || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
             return null;
         }
         return {

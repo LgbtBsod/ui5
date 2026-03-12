@@ -125,6 +125,18 @@ sap.ui.define([
         });
     }
 
+    function resolveSelectChangeValue(oEvent) {
+        return String((oEvent && oEvent.getParameter && oEvent.getParameter("value")) || "").trim();
+    }
+
+    function resolveSelectChangeText(oEvent) {
+        var oSelectedItem = oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem");
+        if (oSelectedItem && typeof oSelectedItem.getText === "function") {
+            return String(oSelectedItem.getText() || "").trim();
+        }
+        return "";
+    }
+
     return {
         onAttachmentUploadChange: function (oEvent) {
             return AttachmentUploadCore.onUploaderChange(this, oEvent);
@@ -171,11 +183,27 @@ sap.ui.define([
         },
 
         onLpcChange: function (oEvent) {
-            DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "LPC_KEY", value: oEvent.getParameter("value") });
+            var sValue = resolveSelectChangeValue(oEvent);
+            ModelStateRuntime.write(this, "selected", "/basic/LPC_TEXT", resolveSelectChangeText(oEvent));
+            DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "LPC_KEY", value: sValue });
         },
 
         onProfessionChange: function (oEvent) {
-            DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "PROF_KEY", value: oEvent.getParameter("value") });
+            var sValue = resolveSelectChangeValue(oEvent);
+            ModelStateRuntime.write(this, "selected", "/basic/PROF_TEXT", resolveSelectChangeText(oEvent));
+            DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "PROF_KEY", value: sValue });
+        },
+
+        onChecksNumberChange: function (oEvent) {
+            var sValue = resolveSelectChangeValue(oEvent);
+            ModelStateRuntime.write(this, "selected", "/basic/CHECKS_NUMBER_TEXT", resolveSelectChangeText(oEvent));
+            DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "CHECKS_NUMBER", value: sValue });
+        },
+
+        onBarriersNumberChange: function (oEvent) {
+            var sValue = resolveSelectChangeValue(oEvent);
+            ModelStateRuntime.write(this, "selected", "/basic/BARRIERS_NUMBER_TEXT", resolveSelectChangeText(oEvent));
+            DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "BARRIERS_NUMBER", value: sValue });
         },
 
         onPersonSuggest: function (oEvent) {

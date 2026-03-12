@@ -30,6 +30,12 @@
                             </t:template>
                         </t:Column>
                         <t:Column>
+                            <Label text="{i18n>barriersNumberLabel}"/>
+                            <t:template>
+                                <Input value="{selected>BarriersNum}" editable="false"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column>
                             <Label text="{i18n>barrierLabel}"/>
                             <t:template>
                                 <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
@@ -65,6 +71,7 @@
                 <Table items="{selected>/barriers}" class="flatEditorTable dialogDataTable" growing="true" growingThreshold="20" visible="{appView>/isPhoneViewport}">
                     <columns>
                         <Column width="3rem"><Text text=""/></Column>
+                        <Column><Text text="{i18n>barriersNumberLabel}"/></Column>
                         <Column><Text text="{i18n>barrierLabel}"/></Column>
                         <Column><Text text="{i18n>statusLabel}"/></Column>
                         <Column><Text text="{i18n>commentLabel}"/></Column>
@@ -76,6 +83,7 @@
                         <ColumnListItem>
                             <cells>
                                 <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                <Input value="{selected>BarriersNum}" editable="false"/>
                                 <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                                     <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
                                 <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>

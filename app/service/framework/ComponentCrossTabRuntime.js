@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (ModelStateRuntime, FeedbackBannerRuntime, WorkflowContracts) {
     "use strict";
 
     function buildTabId() {
@@ -49,12 +50,12 @@ sap.ui.define([
             var sSignalType = String(oPayload.type || "").toUpperCase();
             var sSignalRootId = String(oPayload.rootId || "").trim();
             var sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "").trim();
-            var sMode = String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") || "").toUpperCase();
-            var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") || "").toUpperCase();
+            var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+            var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
             if (!sSignalType || oPayload.tabId === sThisTabId || !sSignalRootId || !sCurrentRootId || sSignalRootId !== sCurrentRootId) {
                 return;
             }
-            if (sSignalType !== "LOCK_OWNED" || sMode !== "EDIT" || sLockState !== "EDIT_LOCKED") {
+            if (sSignalType !== "LOCK_OWNED" || sMode !== WorkflowContracts.EDIT_MODES.EDIT || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                 return;
             }
             ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.TAB_CONFLICT_STATE, {

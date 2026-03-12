@@ -9,8 +9,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentValueCodec",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
-], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, DomainStatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, DomainStatePaths, WorkflowContracts) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -105,7 +106,7 @@ sap.ui.define([
         var oDelta = (mInput && mInput.delta) || DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oSnapshot);
         var oRepo = mCtx && mCtx.repo;
         var oLock = mCtx && mCtx.lock;
-        var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "").toUpperCase();
+        var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var bCreate = CreateSentinel.isCreateId(sRootId) || sMode === "CREATE";
         var iClientVersion = DetailSaveSupport.resolveVersionNumber(oCurrent, oSnapshot);
         var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);
@@ -136,7 +137,7 @@ sap.ui.define([
         if (!bCreate && oDelta && !oDelta.client_version && iClientVersion) {
             oDelta = Object.assign({}, oDelta, { client_version: iClientVersion });
         }
-        if (!bCreate && (!sSessionGuid || sLockState !== "EDIT_LOCKED")) {
+        if (!bCreate && (!sSessionGuid || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED)) {
             return Promise.resolve(Result.fail({ message: "Active lock is required before save", code: "LOCK_REQUIRED" }, [
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR")
@@ -196,8 +197,8 @@ sap.ui.define([
                         if (bCreate) {
                             var bLockAcquired = !!(oLockResult && oLockResult.ok);
                             aEffects.push(Effects.modelPatch("state", DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
-                            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? "EDIT" : "READ"));
-                            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? "EDIT_LOCKED" : "READ_ONLY"));
+                            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? WorkflowContracts.EDIT_MODES.EDIT : WorkflowContracts.EDIT_MODES.READ));
+                            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? WorkflowContracts.LOCK_STATES.EDIT_LOCKED : WorkflowContracts.LOCK_STATES.READ_ONLY));
                             aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));
                             aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
                         }

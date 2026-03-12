@@ -1,0 +1,15 @@
+# Default ownership
+* @sap-lead-architects
+
+# Runtime and domain layers
+/app/service/ @sap-runtime-team
+/app/infra/ @sap-runtime-team
+
+# UI and controllers
+/app/controller/ @sap-ui-team
+/app/view/ @sap-ui-team
+/app/css/ @sap-ui-team
+
+# CI/Gates
+/scripts/ @sap-qa-governance
+/docs/ @sap-qa-governance

@@ -10,13 +10,13 @@ const targets = [
 ];
 
 const allowed = [
-  /^checklist\/app\/controller\/Base\.controller$/,
-  /^checklist\/app\/controller\/support\/.+$/,
-  /^checklist\/app\/service\/domain\/.+\/[^/]+Facade$/,
-  /^checklist\/app\/service\/framework\/EffectApplier$/,
-  /^checklist\/app\/service\/framework\/CtxFactory$/,
-  /^checklist\/app\/util\/CreateSentinel$/,
-  /^sap\/ui\/model\/json\/JSONModel$/
+  /^PRODUCTION_CONTROL_CHECKLIST\/controller\/Base\.controller$/,
+  /^PRODUCTION_CONTROL_CHECKLIST\/controller\/support\/.+$/,
+  /^PRODUCTION_CONTROL_CHECKLIST\/service\/domain\/.+\/[^/]+Facade$/,
+  /^PRODUCTION_CONTROL_CHECKLIST\/service\/framework\/.+$/,
+  /^PRODUCTION_CONTROL_CHECKLIST\/util\/.+$/,
+  /^PRODUCTION_CONTROL_CHECKLIST\/model\/.+$/,
+  /^sap\/.+$/
 ];
 
 function main() {

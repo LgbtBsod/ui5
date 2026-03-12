@@ -13,8 +13,8 @@ sap.ui.define([
         var oPayload = Object.assign({
             sessionId: "",
             activeObjectId: "",
-            mode: "READ",
-            lockState: "IDLE",
+            mode: WorkflowContracts.EDIT_MODES.READ,
+            lockState: WorkflowContracts.LOCK_STATES.IDLE,
             timestamp: new Date().toISOString()
         }, TelemetryRuntime.workflowContextFromStateModel(oStateModel), oOptions.payload || {});
 

@@ -498,8 +498,8 @@ html.chkAppRoot.chkResizing #ui5-bg {
   top: -100%;
   left: 0.5rem;
   z-index: 9999;
-  background: var(--hz-accent, #0070f2);
-  color: #fff;
+  background: var(--hz-accent);
+  color: var(--color-white);
   padding: 0.5rem 1rem;
   border-radius: 0 0 0.5rem 0.5rem;
   font-size: 0.875rem;

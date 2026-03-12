@@ -278,9 +278,9 @@ body.chkAppRoot.appDark .chkApp .detailControlRowActions .sapMBtnTransparent .sa
 }
 
 .chkApp .detailControlRowActions .sapMBtnEmphasized .sapMBtnInner {
-  background: var(--hz-accent, #0070F2);
-  border-color: var(--hz-accent, #0070F2);
-  color: #fff;
+  background: var(--hz-accent);
+  border-color: var(--hz-accent);
+  color: var(--color-white);
   box-shadow: 0 2px 8px rgba(var(--hz-accent-rgb, 0,112,242), 0.30);
 }
 
@@ -358,14 +358,14 @@ body.chkAppRoot.appDark .chkApp .detailAccentSwitchEditMode.sapMSwt {
 }
 
 body.chkAppRoot.appLight .chkApp .detailAccentSwitchEditMode.sapMSwtOn {
-  background: var(--hz-accent, #0070F2);
-  border-color: var(--hz-accent, #0070F2);
+  background: var(--hz-accent);
+  border-color: var(--hz-accent);
   box-shadow: 0 0 0 3px rgba(0, 112, 242, 0.18);
 }
 
 body.chkAppRoot.appDark .chkApp .detailAccentSwitchEditMode.sapMSwtOn {
-  background: var(--hz-accent, #4DB1FF);
-  border-color: var(--hz-accent, #4DB1FF);
+  background: var(--hz-accent-soft);
+  border-color: var(--hz-accent-soft);
   box-shadow: 0 0 0 3px rgba(77, 177, 255, 0.18);
 }
 
@@ -373,7 +373,7 @@ body.chkAppRoot.appDark .chkApp .detailAccentSwitchEditMode.sapMSwtOn {
   width: 1.3rem;
   height: 1.3rem;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 1px 4px rgba(0, 0, 20, 0.20);
   transition: left 200ms cubic-bezier(0.34,1.56,0.64,1);
 }
@@ -3144,12 +3144,12 @@ body.chkAppRoot.appDark .chkApp .sapMTLI::before {
 }
 
 body.chkAppRoot.appLight .chkApp .sapMTLIIcon {
-  background: var(--hz-accent, #0070f2);
+  background: var(--hz-accent);
   opacity: 0.55;
 }
 
 body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
-  background: var(--hz-accent, #4db1ff);
+  background: var(--hz-accent-soft);
   opacity: 0.55;
 }
 
@@ -3294,7 +3294,7 @@ body.chkAppRoot.appDark .chkApp .commentExpandableField .sapMTextAreaInner {
 }
 
 .chkApp .commentExpandableField .sapMTextAreaInner:focus {
-  border-color: var(--hz-accent, #0070f2);
+  border-color: var(--hz-accent);
   box-shadow: 0 0 0 2px rgba(0, 112, 242, 0.12);
 }
 

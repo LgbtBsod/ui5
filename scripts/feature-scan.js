@@ -130,6 +130,28 @@ function collectTodoTriggers() {
     return findings;
 }
 
+
+function readNavigationRouteMap() {
+    var navigationContracts = path.join(ROOT, RUNTIME_ROOT, "service/contracts/NavigationContracts.js");
+    var text;
+    var map = {};
+    var routesBlock;
+    var match;
+    if (!fs.existsSync(navigationContracts)) {
+        return map;
+    }
+    text = read(navigationContracts);
+    routesBlock = text.match(/var\s+ROUTES\s*=\s*Object\.freeze\(\{([\s\S]*?)\}\);/);
+    if (!routesBlock) {
+        return map;
+    }
+    var re = /([A-Z_]+)\s*:\s*"([a-zA-Z0-9_]+)"/g;
+    while ((match = re.exec(routesBlock[1])) !== null) {
+        map[match[1]] = match[2];
+    }
+    return map;
+}
+
 function collectUnreachableRoutes() {
     const manifestPath = path.join(ROOT, RUNTIME_ROOT, "manifest.json");
     if (!fs.existsSync(manifestPath)) {
@@ -148,12 +170,19 @@ function collectUnreachableRoutes() {
     }).map((file) => path.join(ROOT, file));
     const used = new Set();
     const usageRegex = /(navTo|getRoute|attachPatternMatched|attachRouteMatched)\s*\(\s*["']([^"']+)["']/g;
+    const routeMap = readNavigationRouteMap();
+    Object.keys(routeMap).forEach((key) => used.add(routeMap[key]));
     jsFiles.forEach((file) => {
         const src = read(file);
         let match;
         while ((match = usageRegex.exec(src)) !== null) {
             used.add(match[2]);
         }
+        Object.keys(routeMap).forEach((routeKey) => {
+            if (src.includes('NavigationContracts.ROUTES.' + routeKey) || src.includes('infra/contracts/NavigationContracts') && src.includes('NavigationContracts.ROUTES.' + routeKey)) {
+                used.add(routeMap[routeKey]);
+            }
+        });
     });
     return routes
         .filter((route) => route.name)

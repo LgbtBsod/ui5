@@ -890,7 +890,7 @@ body.chkAppRoot.appDark .chkApp .workflowChip {
 
 .chkApp .sapMBtnSuccess .sapMBtnInner,
 .chkApp .btnSuccess .sapMBtnInner {
-  background: var(--hz-success, #1a7c40);
+  background: var(--hz-success);
 }
 
 .chkApp .statusChip {
@@ -911,9 +911,9 @@ body.chkAppRoot.appDark .chkApp .workflowChip {
   font-size: 0.6rem;
   font-weight: 820;
   font-variant-numeric: tabular-nums;
-  background: var(--sp-red, #cc0000);
-  color: #fff;
-  border: 2px solid var(--surface-3, #fff);
+  background: var(--sp-red);
+  color: var(--color-white);
+  border: 2px solid var(--surface-3);
 }
 
 .chkApp .sapMOTBOverflowButton .sapMBtnInner,
@@ -1137,7 +1137,7 @@ body.chkAppRoot.appDark .chkApp .sapMSwt:not(.sapMSwtOn) {
 .chkApp .sapMSwtHandle,
 .chkApp .sapMSwt .sapMSwtHandle {
   border-radius: 999px;
-  background: linear-gradient(180deg, #fff 0%, rgba(238, 246, 255, 0.95) 100%);
+  background: linear-gradient(180deg, var(--color-white) 0%, rgba(238, 246, 255, 0.95) 100%);
   box-shadow:
     0 1px 4px rgba(4, 12, 26, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
@@ -1206,7 +1206,7 @@ body.chkAppRoot.appDark .chkApp .sapMSwtHandle {
 }
 
 .chkApp .detailGridTable .sapMSwtOn {
-  background: var(--hz-accent,#0070F2); border-color: var(--hz-accent,#0070F2);
+  background: var(--hz-accent); border-color: var(--hz-accent);
 }
 
 .chkApp .detailGridTable .sapMSwt {
@@ -1222,11 +1222,11 @@ body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwt {
 }
 
 body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwtOn {
-  background: var(--hz-accent,#4DB1FF); border-color: var(--hz-accent,#4DB1FF);
+  background: var(--hz-accent-soft); border-color: var(--hz-accent-soft);
 }
 
 .chkApp .flatEditorTable .sapMSwtHandle {
-  width: 1.05rem; height: 1.05rem; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,20,0.16); transition: left 100ms cubic-bezier(0.34,1.56,0.64,1);
+  width: 1.05rem; height: 1.05rem; background: var(--color-white); border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,20,0.16); transition: left 100ms cubic-bezier(0.34,1.56,0.64,1);
 }
 
 .chkApp .flatEditorTable .sapMSwt {
@@ -1254,8 +1254,8 @@ body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwtOn {
    Keep only a11y/fallback/typography utilities that do not fight live runtime styles. */
 
 .chkApp *:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color) !important;
-  outline-offset: var(--focus-ring-offset) !important;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
   border-radius: var(--radius-xs);
 }
 
@@ -1286,7 +1286,7 @@ body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwtOn {
   }
 }
 
-.kpiCard {
+.chkApp .kpiCard {
   padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
   min-width: 10rem;
@@ -1294,7 +1294,7 @@ body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwtOn {
   transition: box-shadow 180ms ease, transform 160ms ease;
 }
 
-.kpiCard:hover {
+.chkApp .kpiCard:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-float);
 }
@@ -1318,17 +1318,17 @@ body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwtOn {
 }
 
 .kpiValue {
-  font-size: var(--kpi-value-size) !important;
-  font-weight: 700 !important;
-  line-height: 1.1 !important;
-  color: var(--text-main) !important;
+  font-size: var(--kpi-value-size);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-main);
 }
 
-.kpiCardDanger {
+.chkApp .kpiCardDanger {
   background: var(--kpi-danger-bg-light);
 }
 
-.kpiCardWarning {
+.chkApp .kpiCardWarning {
   background: var(--kpi-warning-bg-light);
 }
 
@@ -1340,15 +1340,15 @@ body.chkAppRoot.appDark .kpiCardWarning {
   background: var(--kpi-warning-bg-dark);
 }
 
-.kpiCardDanger .kpiValue {
-  color: var(--semantic-danger) !important;
+.chkApp .kpiCardDanger .kpiValue {
+  color: var(--semantic-danger);
 }
 
-.kpiCardWarning .kpiValue {
-  color: var(--ui-sem-critical-label) !important;
+.chkApp .kpiCardWarning .kpiValue {
+  color: var(--ui-sem-critical-label);
 }
 
-.uxStatChip {
+.chkApp .uxStatChip {
   padding: 0.3rem 0.75rem;
   border-radius: var(--radius-sm);
   background: var(--surface-2-fallback);
@@ -1386,11 +1386,11 @@ body.chkAppRoot.appDark .kpiCardWarning {
   }
 }
 
-.detailAutosaveChip {
+.chkApp .detailAutosaveChip {
   transition: opacity 200ms ease;
 }
 
-.detailAutosaveChip.is-saving .sapUiIcon {
+.chkApp .detailAutosaveChip.is-saving .sapUiIcon {
   animation: chkSpinSync var(--autosave-spin-duration) linear infinite;
   display: inline-block;
 }
@@ -1485,10 +1485,10 @@ body.chkAppRoot.appDark .kpiCardWarning {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kpiCard,
-  .uxStatChip,
-  .detailAutosaveChip .sapUiIcon {
-    animation: none !important;
-    transition: none !important;
+  .chkApp .kpiCard,
+  .chkApp .uxStatChip,
+  .chkApp .detailAutosaveChip .sapUiIcon {
+    animation: none;
+    transition: none;
   }
 }

@@ -2,29 +2,29 @@
 
 ## Keep
 
-- `C:\Users\lgbtb\Desktop\ui5\app\model\StatePaths.js`
+- `app/model/StatePaths.js`
   - Canonical source for state-model paths.
-- `C:\Users\lgbtb\Desktop\ui5\app\service\domain\shared\ViewPathContracts.js`
+- `app/service/domain/shared/ViewPathContracts.js`
   - Canonical source for view-model paths.
-- `C:\Users\lgbtb\Desktop\ui5\app\util\runtime\FrontendConfigConstants.js`
+- `app/util/runtime/FrontendConfigConstants.js`
   - Canonical source for normalized runtime/config values.
-- `C:\Users\lgbtb\Desktop\ui5\app\controller\support\DetailActionConstants.js`
+- `app/controller/support/DetailActionConstants.js`
   - Keep as detail-local feature constants.
-- `C:\Users\lgbtb\Desktop\ui5\app\service\framework\UiBehaviorConstants.js`
+- `app/service/framework/UiBehaviorConstants.js`
   - Keep as behavior-operation contract.
-- `C:\Users\lgbtb\Desktop\ui5\app\service\framework\DetailRuntimeConstants.js`
+- `app/service/framework/DetailRuntimeConstants.js`
   - Keep as detail-runtime semantic contract.
 
 ## Merge
 
-- `C:\Users\lgbtb\Desktop\ui5\app\service\domain\shared\ModelPathContracts.js`
+- `app/service/domain/shared/ModelPathContracts.js`
   - Merge into `StatePaths` by reference; stop duplicating path literals.
 - Navigation route/layout/page ids
-  - Canonical source: `C:\Users\lgbtb\Desktop\ui5\app\service\contracts\NavigationContracts.js`
+  - Canonical source: `app/service/contracts/NavigationContracts.js`
 - Dialog ids and fragment names
-  - Canonical source: `C:\Users\lgbtb\Desktop\ui5\app\service\contracts\DialogContracts.js`
+  - Canonical source: `app/service/contracts/DialogContracts.js`
 - Analytics presets/source/status/builder text-key maps
-  - Canonical source: `C:\Users\lgbtb\Desktop\ui5\app\service\contracts\AnalyticsContracts.js`
+  - Canonical source: `app/service/contracts/AnalyticsContracts.js`
 
 ## Drop
 

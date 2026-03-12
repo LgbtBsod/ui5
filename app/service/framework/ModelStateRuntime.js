@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (CloneUtil, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (CloneUtil, StatePaths, WorkflowContracts) {
     "use strict";
 
     function model(oController, sModelName) {
@@ -80,9 +81,9 @@ sap.ui.define([
 
     function resetDetailWorkflowState(oController, mPatch) {
         return setMany(oController, "state", Object.assign({
-            [StatePaths.WORKFLOW_DETAIL_EDIT_MODE]: "READ",
-            [StatePaths.WORKFLOW_DETAIL_LOCK_STATE]: "IDLE",
-            "/autosaveState": "IDLE",
+            [StatePaths.WORKFLOW_DETAIL_EDIT_MODE]: WorkflowContracts.EDIT_MODES.READ,
+            [StatePaths.WORKFLOW_DETAIL_LOCK_STATE]: WorkflowContracts.LOCK_STATES.IDLE,
+            "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.IDLE,
             "/autosaveAt": null,
             "/autosaveEnabled": false,
             "/isDirty": false,

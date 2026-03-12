@@ -186,7 +186,7 @@ sap.ui.define([
             if (sTextValue) {
                 return sTextValue;
             }
-            return String(sMode || "").toUpperCase() === "EDIT"
+            return WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT
                 ? text(this, "modeEdit", "Edit")
                 : text(this, "modeRead", "Read");
         },
@@ -205,7 +205,7 @@ sap.ui.define([
             if (LOCK_TRANSITION_STATES[sNormalizedState]) {
                 return "Warning";
             }
-            return String(sMode || "").toUpperCase() === "EDIT" ? "Warning" : "Information";
+            return WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT ? "Warning" : "Information";
         },
 
         formatI18nByKey: function (sKey) {
@@ -214,7 +214,7 @@ sap.ui.define([
 
         formatHeartbeatText: function (sMode, sLockState) {
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
-            if (String(sMode || "").toUpperCase() === "EDIT" && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
+            if (WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
                 return text(this, "heartbeatLockedActive");
             }
             if (sNormalizedLockState === "ACQUIRING_LOCK") {
@@ -233,7 +233,7 @@ sap.ui.define([
         },
 
         formatAutosaveText: function (sMode, sLockState, sAutosaveState) {
-            var sState = String(sAutosaveState || "IDLE").toUpperCase();
+            var sState = WorkflowContracts.normalizeAutosaveState(sAutosaveState);
             var mKeyByState = {
                 IDLE: "autosaveWaiting",
                 SAVING: "autosaveSaving",
@@ -242,7 +242,7 @@ sap.ui.define([
             };
             var sNormalizedMode = String(sMode || "").toUpperCase();
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
-            if (sNormalizedMode !== "EDIT" || !LOCK_ACTIVE_STATES[sNormalizedLockState]) {
+            if (sNormalizedMode !== WorkflowContracts.EDIT_MODES.EDIT || !LOCK_ACTIVE_STATES[sNormalizedLockState]) {
                 return text(this, "autosaveDisabled");
             }
             return text(this, mKeyByState[sState] || "autosaveWaiting");
@@ -312,7 +312,7 @@ sap.ui.define([
         },
 
         formatDeleteChecklistVisible: function (sMode, sActiveObjectId) {
-            return String(sMode || "").toUpperCase() === "EDIT" &&
+            return WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT &&
                 !!sActiveObjectId &&
                 !CreateSentinel.isCreateId(sActiveObjectId);
         }

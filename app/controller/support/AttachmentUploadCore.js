@@ -53,8 +53,8 @@ sap.ui.define([
 
     function canUploadAttachments(oController) {
         var sRootId = oController._currentRootId && oController._currentRootId();
-        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"), "READ");
-        return !!sRootId && sMode !== "READ";
+        var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ), WorkflowContracts.EDIT_MODES.READ);
+        return !!sRootId && sMode !== WorkflowContracts.EDIT_MODES.READ;
     }
 
     function clearAttachmentUploader(oUploader) {

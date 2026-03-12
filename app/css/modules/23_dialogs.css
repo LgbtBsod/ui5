@@ -750,13 +750,13 @@ body.chkAppRoot.appDark body.chkAppRoot .sapMMessageToast.glassToast {
 body.chkAppRoot.appLight .sapMSelectListItemSelected,
 body.chkAppRoot.appLight .sapMSLISelected {
   background: rgba(0, 112, 242, 0.1);
-  color: var(--accent, #0070f2);
+  color: var(--accent);
 }
 
 body.chkAppRoot.appDark .sapMSelectListItemSelected,
 body.chkAppRoot.appDark .sapMSLISelected {
   background: rgba(77, 177, 255, 0.13);
-  color: var(--accent, #4db1ff);
+  color: var(--accent-soft);
 }
 
 body.chkAppRoot.appLight .chkApp .shellPopoverList .sapMSLI:hover {
@@ -783,7 +783,7 @@ body.chkAppRoot.appDark .chkApp .shellNotificationItem.sapMSLIUnread {
 }
 
 .chkApp .shellNotificationStatus.statusRead { background: rgba(120, 175, 240, 0.35); }
-.chkApp .shellNotificationStatus.statusUnread { background: var(--accent, #0070f2); }
+.chkApp .shellNotificationStatus.statusUnread { background: var(--accent); }
 .chkApp .shellNotificationStatus.statusSuccess { background: rgba(10, 130, 40, 0.8); }
 .chkApp .shellNotificationStatus.statusError { background: rgba(200, 10, 10, 0.8); }
 
@@ -889,13 +889,13 @@ body.chkAppRoot .sapMMessageToast.toastWarning {
 }
 
 .chkApp .shellPopover .sapMBtn.shellLogoutBtn .sapMBtnInner {
-  color: var(--hz-danger, #cc0000);
+  color: var(--hz-danger);
   opacity: 0.85;
 }
 
 .chkApp .shellPopover .sapMBtn.shellLogoutBtn:hover .sapMBtnInner {
   background: rgba(204, 0, 0, 0.07);
-  color: var(--hz-danger, #cc0000);
+  color: var(--hz-danger);
   opacity: 1;
 }
 
@@ -973,7 +973,7 @@ body.chkAppRoot .shellPopover.sapMPopover,
 body.chkAppRoot .shellPopover.sapMResponsivePopover,
 body.chkAppRoot .shellPopover.sapMPopup-CTX,
 body.chkAppRoot .shellPopover.sapMPopupWithPadding {
-  z-index: 1400 !important;
+  z-index: 1400;
 }
 
 body.chkAppRoot .shellPopover .sapMPopoverCont,
@@ -1334,11 +1334,11 @@ body.chkAppRoot .shellPopover .shellNotificationItem:hover {
 }
 
 body.chkAppRoot.appLight .chkApp .shellPopover .sapMBtn:hover .sapMBtnInner {
-  background: rgba(var(--hz-accent-rgb, 0,112,242), 0.07); color: var(--hz-accent, #0070F2);
+  background: rgba(var(--hz-accent-rgb, 0,112,242), 0.07); color: var(--hz-accent);
 }
 
 body.chkAppRoot.appDark .chkApp .shellPopover .sapMBtn:hover .sapMBtnInner {
-  background: rgba(var(--hz-accent-rgb, 77,177,255), 0.09); color: var(--hz-accent, #4DB1FF);
+  background: rgba(var(--hz-accent-rgb, 77,177,255), 0.09); color: var(--hz-accent-soft);
 }
 
 body.chkAppRoot.appLight .chkApp .shellPopoverIntro {
@@ -1382,7 +1382,7 @@ body.chkAppRoot.appLight .chkApp .shellUserCard {
 }
 
 .chkApp .shellUserActionBtn.sapMBtn .sapMBtnInner {
-  border-radius: 999px; background: var(--hz-accent,#0070F2); border-color: var(--hz-accent,#0070F2); color: #fff; min-height: 1.9rem; padding: 0 0.88rem; font-size: 0.76rem; font-weight: 680;
+  border-radius: 999px; background: var(--hz-accent); border-color: var(--hz-accent); color: var(--color-white); min-height: 1.9rem; padding: 0 0.88rem; font-size: 0.76rem; font-weight: 680;
 }
 
 body.chkAppRoot.appLight .chkApp .shellSettingRow {

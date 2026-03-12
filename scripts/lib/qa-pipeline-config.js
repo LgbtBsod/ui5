@@ -42,7 +42,8 @@ const validators = [
   { name: 'edit-requires-lock-gate', file: 'ci/edit-requires-lock-gate.js' },
   { name: 'autosave-input-contract-gate', file: 'ci/autosave-input-contract-gate.js' },
   { name: 'dead-code-gate', file: 'ci/dead-code-gate.js', mode: 'advisory' },
-  { name: 'dependency-drift-gate', file: 'ci/dependency-drift-gate.js', mode: 'advisory' }
+  { name: 'dependency-drift-gate', file: 'ci/dependency-drift-gate.js', mode: 'advisory' },
+  { name: 'license-sbom-gate', file: 'ci/license-sbom-gate.js' }
 ];
 
 function getOptionalValidators(env) {

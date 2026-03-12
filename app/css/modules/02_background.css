@@ -109,11 +109,11 @@ body.chkAppRoot::before {
 @media (prefers-reduced-motion: reduce) {
   .ui5BgDither,
   .ui5BgGrain {
-    animation: none !important;
+    animation: none;
   }
 }
 
 body.chkAppRoot[data-bg-enabled="false"] .ui5BgDither,
 body.chkAppRoot[data-bg-enabled="false"] .ui5BgGrain {
-  animation: none !important;
+  animation: none;
 }
