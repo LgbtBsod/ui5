@@ -3660,3 +3660,43 @@ body.chkAppRoot.appDark .chkApp .searchOpenActionBtn .sapMBtnInner {
   top: auto !important;
   z-index: 1 !important;
 }
+
+/* 2026-03 search workbench recovery:
+   keep SmartFilterBar and SmartTable toolbars inside the pane, but do not clip
+   action groups or field clusters. Clipping was hiding buttons/inputs on the right. */
+.chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+.chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapMBarRight,
+.chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapMBarMiddle,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapMBarRight,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapMBarMiddle,
+.chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar .sapMBarRight,
+.chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar .sapMBarMiddle,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar .sapMBarRight,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar .sapMBarMiddle {
+  overflow: visible !important;
+  flex-wrap: wrap !important;
+  row-gap: 0.35rem;
+}
+
+.chkApp .appLayoutSingle #searchPaneHost .searchFilterExperienceShell .sapMBarChild,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchFilterExperienceShell .sapMBarChild,
+.chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar .sapMBarChild,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar .sapMBarChild {
+  max-width: 100% !important;
+}
+
+.chkApp .appLayoutSingle #searchPaneHost .searchSmartToolbarRail .backendTopInput,
+.chkApp .appLayoutSingle #searchPaneHost .searchSmartToolbarRail .maxRowsInput,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail .backendTopInput,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail .maxRowsInput {
+  min-width: 5rem;
+}

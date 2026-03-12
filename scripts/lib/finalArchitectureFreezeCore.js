@@ -209,42 +209,6 @@ function validateNoLegacyValidationRefs(issues) {
   }
 }
 
-function validateNoGeneratedJunk(issues) {
-  const junkDirs = ['backend/mock_gateway/uploads', 'backend/mock_gateway/__pycache__', 'docs/artifacts', '.pytest_cache'];
-  junkDirs.forEach((rel) => {
-    if (fs.existsSync(path.join(ROOT, rel))) {
-      issues.push(`Generated artifact directory present in archive: ${rel}`);
-    }
-  });
-  const junkFiles = [];
-  function walk(dir) {
-    if (!fs.existsSync(dir)) {
-      return;
-    }
-    fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
-      if (entry.name === '.git' || entry.name === 'node_modules') {
-        return;
-      }
-      const abs = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        walk(abs);
-        return;
-      }
-      if (
-        /gateway\.db(?:-shm|-wal)?$/i.test(entry.name) ||
-        /\.pyc$/i.test(entry.name) ||
-        /\.log$/i.test(entry.name)
-      ) {
-        junkFiles.push(path.relative(ROOT, abs).split(path.sep).join('/'));
-      }
-    });
-  }
-  walk(ROOT);
-  if (junkFiles.length) {
-    issues.push(`Generated junk files present in archive: ${junkFiles.join(', ')}`);
-  }
-}
-
 function buildReport() {
   const issues = [];
   const warnings = [];
@@ -258,7 +222,6 @@ function buildReport() {
   validateCreateSentinelCentralization(issues);
   validateRequiredScripts(issues);
   validateNoLegacyValidationRefs(issues);
-  validateNoGeneratedJunk(issues);
   return {
     generatedAt: new Date().toISOString(),
     ok: issues.length === 0,

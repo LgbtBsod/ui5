@@ -2,9 +2,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
-], function (Effects, AccessPayload, StatePaths, CreateSentinel, WorkflowTelemetry) {
+], function (Effects, AccessPayload, StatePaths, WorkflowTelemetry) {
     "use strict";
 
     var DENIED_ILLUSTRATION = "assets/illustrations/detail-access-denied.svg";
@@ -125,7 +124,7 @@ sap.ui.define([
         var oResolved = normalizePermission(oPermission, (oPermission && oPermission.rootId) || "", {
             activity: OPERATIONS.DISPLAY
         });
-        var aEffects = [
+        return [
             Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY"),
@@ -139,10 +138,6 @@ sap.ui.define([
             Effects.modelPatch("view", "/accessState", buildAccessState(oResolved, true)),
             Effects.toast("detailViewPermissionDenied", "warning")
         ];
-        if (oResolved.rootId && !CreateSentinel.isCreateId(oResolved.rootId)) {
-            aEffects.push(Effects.navigate("accessDenied", { id: oResolved.rootId }, true));
-        }
-        return aEffects;
     }
 
     function deniedActionEffects(oPermission, sTextKey, aExtraEffects) {

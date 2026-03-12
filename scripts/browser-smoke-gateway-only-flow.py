@@ -93,6 +93,31 @@ def wait_for_detail_ready(page, root_id: str) -> None:
     page.wait_for_timeout(1500)
 
 
+def wait_for_edit_detail_ready(page, root_id: str) -> None:
+    page.wait_for_function(
+        """
+        (expectedRootId) => {
+          const core = sap.ui.getCore();
+          const detail = core.byId('checklist_app_comp---app--detailPaneHost');
+          const state = detail && detail.getModel && detail.getModel('state');
+          const selected = detail && detail.getModel && detail.getModel('selected');
+          const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+          return !!detail
+            && !!state
+            && rootId === expectedRootId
+            && state.getProperty('/currentRouteName') === 'detail'
+            && state.getProperty('/workflow/detail/editMode') === 'EDIT'
+            && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED'
+            && state.getProperty('/ui/busy/detail') === false
+            && state.getProperty('/saveInFlight') === false;
+        }
+        """,
+        arg=root_id,
+        timeout=15000,
+    )
+    page.wait_for_timeout(900)
+
+
 def wait_for_analytics_ready(page) -> None:
     page.wait_for_function(
         """
@@ -315,6 +340,20 @@ def ensure_attachments_expanded(page) -> None:
         timeout=30000,
     )
     page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").wait_for(timeout=10000)
+    page.wait_for_function(
+        """
+        () => {
+          const control = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const state = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost')?.getModel?.('state');
+          return !!control
+            && control.getEnabled && control.getEnabled()
+            && !!state
+            && state.getProperty('/workflow/detail/editMode') === 'EDIT'
+            && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED';
+        }
+        """,
+        timeout=10000,
+    )
     page.wait_for_timeout(1200)
 def main() -> int:
     if not ROOT_ID:
@@ -450,12 +489,34 @@ def main() -> int:
                 failures.append("detail.save.gateway")
 
             current_step = "detail.autosave"
+            page.wait_for_function(
+                """
+                () => {
+                  const core = sap.ui.getCore();
+                  const app = core && core.byId('checklist_app_comp---app');
+                  const detail = core && core.byId('checklist_app_comp---app--detailPaneHost');
+                  const state = detail && detail.getModel && detail.getModel('state');
+                  const selected = detail && detail.getModel && detail.getModel('selected');
+                  return !!app
+                    && !!detail
+                    && !!selected
+                    && !!state
+                    && state.getProperty('/currentRouteName') === 'detail'
+                    && state.getProperty('/workflow/detail/editMode') === 'EDIT'
+                    && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED'
+                    && state.getProperty('/ui/busy/detail') === false
+                    && state.getProperty('/saveInFlight') === false;
+                }
+                """,
+                timeout=10000,
+            )
             autosave_before = detail_state(page)
             autosave_request_count_before = len(matching_requests(network, "AutoSave"))
-            autosave_call = safe_evaluate(
+            autosave_expected_equipment = "Gateway browser autosave " + str(int(time.time() * 1000))
+            safe_evaluate(
                 page,
                 """
-                () => new Promise((resolve, reject) => {
+                (expectedEquipment) => {
                   sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder'], function (DeltaPayloadBuilder) {
                     const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                     const controller = view && view.getController && view.getController();
@@ -463,28 +524,31 @@ def main() -> int:
                     const uiState = view && view.getModel && view.getModel('uiState');
                     const state = view && view.getModel && view.getModel('state');
                     if (!controller || !selected || !uiState || !state) {
-                      reject(new Error('detail controller/models unavailable'));
+                      window.__gatewaySmokeAutosave = { started: false, ok: false, error: 'detail controller/models unavailable' };
                       return;
                     }
                     const sRootId = String(selected.getProperty('/root/id') || '').trim();
-                    const sValue = 'Gateway browser autosave ' + Date.now();
+                    const sValue = String(expectedEquipment || ('Gateway browser autosave ' + Date.now()));
                     selected.setProperty('/basic/equipment', sValue);
                     state.setProperty('/isDirty', true);
                     const current = selected.getProperty('/') || {};
                     const snapshot = uiState.getProperty('/_detailSnapshot') || {};
                     const delta = DeltaPayloadBuilder.buildDeltaPayload(current, snapshot);
                     if (!delta) {
-                      reject(new Error('autosave delta is empty'));
+                      window.__gatewaySmokeAutosave = { started: false, ok: false, equipment: sValue, error: 'autosave delta is empty' };
                       return;
                     }
-                    window.__gatewaySmokeAutosave = { started: true, ok: false, equipment: sValue, deltaKeys: Object.keys(delta) };
-                    Promise.resolve(controller._run('autosave', { rootId: sRootId, delta: delta }))
+                    window.__gatewaySmokeAutosave = { started: true, ok: false, equipment: sValue, deltaKeys: Object.keys(delta), rootId: sRootId };
+                    Promise.resolve(controller.executeFacadeMethod(controller._facade, 'autosave', { rootId: sRootId, delta: delta }, controller._ctx || {}))
                       .then(function () { window.__gatewaySmokeAutosave = { started: true, ok: true, equipment: sValue, deltaKeys: Object.keys(delta) }; })
                       .catch(function (err) { window.__gatewaySmokeAutosave = { started: true, ok: false, equipment: sValue, deltaKeys: Object.keys(delta), error: String((err && err.message) || err || 'autosave failed') }; });
-                    resolve({ equipment: sValue, deltaKeys: Object.keys(delta) });
-                  }, reject);
-                })
-                """
+                  }, function (err) {
+                    window.__gatewaySmokeAutosave = { started: false, ok: false, error: String((err && err.message) || err || 'module load failed') };
+                  });
+                  return true;
+                }
+                """,
+                autosave_expected_equipment
             )
             page.wait_for_function(
                 """
@@ -509,8 +573,8 @@ def main() -> int:
             last_state = autosave_after
             autosave_requests = matching_requests(network, "AutoSave")
             autosave_status = safe_evaluate(page, "() => window.__gatewaySmokeAutosave || {}")
-            ok_autosave = len(autosave_requests) > autosave_request_count_before and autosave_after.get("version", 0) > autosave_before.get("version", 0) and autosave_after.get("autosaveState") == "SAVED" and autosave_after.get("equipment") == autosave_call.get("equipment") and bool(autosave_status.get("ok"))
-            ensure(checks, "detail.autosave.gateway", ok_autosave, {"before": autosave_before, "after": autosave_after, "requestCount": len(autosave_requests), "deltaKeys": sorted((autosave_call.get("deltaKeys") or [])), "autosaveStatus": autosave_status, "transport": transport_snapshot(network, "AutoSave")})
+            ok_autosave = len(autosave_requests) > autosave_request_count_before and autosave_after.get("version", 0) > autosave_before.get("version", 0) and autosave_after.get("autosaveState") == "SAVED" and autosave_after.get("equipment") == autosave_expected_equipment and bool(autosave_status.get("ok"))
+            ensure(checks, "detail.autosave.gateway", ok_autosave, {"before": autosave_before, "after": autosave_after, "requestCount": len(autosave_requests), "expectedEquipment": autosave_expected_equipment, "deltaKeys": sorted((autosave_status.get("deltaKeys") or [])), "autosaveStatus": autosave_status, "transport": transport_snapshot(network, "AutoSave")})
             if not ok_autosave:
                 failures.append("detail.autosave.gateway")
 
@@ -552,13 +616,65 @@ def main() -> int:
             current_step = "analytics.close"
             invoke_view_controller_method(page, "checklist_app_comp---app--analyticsPaneHost", "onCloseAnalytics")
             wait_for_detail_ready(page, ROOT_ID)
+            wait_for_edit_detail_ready(page, ROOT_ID)
 
             current_step = "attachments.expand"
             ensure_attachments_expanded(page)
             current_step = "attachments.upload"
+            attachment_before = safe_evaluate(
+                page,
+                """
+                () => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
+                  const selected = view && view.getModel && view.getModel('selected');
+                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                  return {
+                    attachmentCount: Array.isArray(attachments) ? attachments.length : 0,
+                    busy: !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'))
+                  };
+                }
+                """
+            )
             before_upload = len([item for item in network if "AttachmentSet" in item["url"] or "AttachmentSet" in item.get("post_data", "")])
             page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
-            page.wait_for_timeout(3200)
+            page.wait_for_function(
+                """
+                (prevCount) => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
+                  const selected = view && view.getModel && view.getModel('selected');
+                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                  const busy = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'));
+                  return busy
+                    || (Array.isArray(attachments) && attachments.length > Number(prevCount || 0))
+                    || (Array.isArray(sessionAttachments) && sessionAttachments.length > Number(prevCount || 0));
+                }
+                """,
+                arg=attachment_before.get("attachmentCount") or 0,
+                timeout=10000,
+            )
+            page.wait_for_function(
+                """
+                (prevCount) => {
+                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
+                  const selected = view && view.getModel && view.getModel('selected');
+                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                  const nextCount = Math.max(
+                    Array.isArray(attachments) ? attachments.length : 0,
+                    Array.isArray(sessionAttachments) ? sessionAttachments.length : 0
+                  );
+                  return nextCount > Number(prevCount || 0)
+                    && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy') === false);
+                }
+                """,
+                arg=attachment_before.get("attachmentCount") or 0,
+                timeout=30000,
+            )
+            page.wait_for_timeout(1200)
             attachment_requests = [
                 item
                 for item in network[before_upload:]

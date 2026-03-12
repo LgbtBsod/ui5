@@ -160,7 +160,7 @@
         {
           "pattern": "access-denied/{id}",
           "name": "accessDenied",
-          "layout": "MidColumnFullScreen"
+          "layout": "TwoColumnsMidExpanded"
         },
         {
           "pattern": "checklist/{id}",

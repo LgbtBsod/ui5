@@ -26,7 +26,7 @@ sap.ui.define([], function () {
             return "MidColumnFullScreen";
         }
         if (sRouteName === "accessDenied") {
-            return "MidColumnFullScreen";
+            return "TwoColumnsMidExpanded";
         }
         if (sRouteName === "detail") {
             return "TwoColumnsMidExpanded";

@@ -38,7 +38,7 @@ sap.ui.define([
 
             return {
                 allowed: bAllowed,
-                routeName: bAllowed ? sRouteName : "accessDenied",
+                routeName: bAllowed ? sRouteName : "detail",
                 routeArgs: bAllowed ? mRouteArgs : { id: sRootId },
                 permission: oPermission || {}
             };

@@ -46,6 +46,12 @@ powershell -ExecutionPolicy Bypass -File scripts/stop-local-env.ps1
 ## Backend-only smoke commands
 
 ```powershell
+python scripts/gateway-only-smoke-pack.py http://127.0.0.1:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV
+```
+
+Aggregate smoke runner:
+
+```powershell
 node scripts/gateway-live-smoke-runner.js
 ```
 
@@ -91,11 +97,11 @@ python -m pytest backend/mock_gateway/tests/test_gateway_contract_frontend_alias
 ### Partially failing
 
 - `scripts/browser-smoke-gateway-only-flow.py`
-  - current failing step: `detail.autosave`
-  - current reason: page/context lifecycle bug
+  - current failing step: `analytics.close`
+  - current reason: detail route does not return to a stable `EDIT` + `EDIT_LOCKED` state within the current smoke contract after closing analytics
 - `scripts/browser-smoke-detail-attachment-dirty-invariant.py`
   - current failing step: `attachments.upload`
-  - current reason: readiness/wait bug
+  - current reason: upload transport completes, but attachment projection does not become observable in `selected>/attachments` or `view>/sessionAttachments` within the current smoke contract
 
 ### Not executed
 
@@ -161,3 +167,14 @@ These files are generated locally and must not be committed.
    - all-found export uses `SearchContract`, including `filterLocationKey`
 6. Analytics:
    - analytics loads only on the analytics route
+
+## Known unstable step handling
+
+- If `scripts/browser-smoke-detail-attachment-dirty-invariant.py` fails at `attachments.upload`:
+  - inspect `docs/artifacts/gateway-browser-attachment-dirty-report.json`
+  - confirm whether `AttachmentSet` POST/PUT requests completed
+  - compare `selected>/attachments` and `view>/sessionAttachments` against the transport result
+- If `scripts/browser-smoke-gateway-only-flow.py` fails at `analytics.close`:
+  - inspect `docs/artifacts/gateway-browser-smoke-report.json`
+  - verify whether the app returned to the detail route with `EDIT` + `EDIT_LOCKED`
+  - treat route-return instability separately from autosave/save transport, which should already be green before this step

@@ -123,16 +123,25 @@ def detail_state(page) -> dict[str, Any]:
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const selected = view && view.getModel && view.getModel('selected');
           const state = view && view.getModel && view.getModel('state');
+          const viewModel = view && view.getModel && view.getModel('view');
           const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+          const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+          const selectedKeys = Array.isArray(attachments)
+            ? attachments.map((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim()).filter(Boolean)
+            : [];
+          const sessionKeys = Array.isArray(sessionAttachments)
+            ? sessionAttachments.map((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim()).filter(Boolean)
+            : [];
           return {
             rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
             mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
             lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '',
             isDirty: !!(state && state.getProperty && state.getProperty('/isDirty')),
             attachmentCount: Array.isArray(attachments) ? attachments.length : 0,
-            attachmentKeys: Array.isArray(attachments)
-              ? attachments.map((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim()).filter(Boolean)
-              : []
+            sessionAttachmentCount: Array.isArray(sessionAttachments) ? sessionAttachments.length : 0,
+            attachmentKeys: selectedKeys,
+            sessionAttachmentKeys: sessionKeys,
+            allAttachmentKeys: selectedKeys.concat(sessionKeys.filter((key) => selectedKeys.indexOf(key) < 0))
           };
         }
         """
@@ -263,6 +272,20 @@ def ensure_attachments_expanded(page) -> None:
         timeout=30000,
     )
     page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").wait_for(timeout=10000)
+    page.wait_for_function(
+        """
+        () => {
+          const control = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const state = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost')?.getModel?.('state');
+          return !!control
+            && control.getEnabled && control.getEnabled()
+            && !!state
+            && state.getProperty('/workflow/detail/editMode') === 'EDIT'
+            && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED';
+        }
+        """,
+        timeout=10000,
+    )
     page.wait_for_timeout(1200)
 def main() -> int:
     if not ROOT_ID:
@@ -337,23 +360,35 @@ def main() -> int:
             page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(attachment_file.resolve()))
             page.wait_for_function(
                 """
-                () => {
+                (prevCount) => {
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const viewModel = view && view.getModel && view.getModel('view');
-                  return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'));
+                  const selected = view && view.getModel && view.getModel('selected');
+                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                  const busy = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'));
+                  return busy
+                    || (Array.isArray(attachments) && attachments.length > Number(prevCount || 0))
+                    || (Array.isArray(sessionAttachments) && sessionAttachments.length > Number(prevCount || 0));
                 }
                 """,
+                arg=upload_before.get("attachmentCount") or 0,
                 timeout=10000,
             )
             page.wait_for_function(
                 """
                 (prevCount) => {
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const viewModel = view && view.getModel && view.getModel('view');
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
-                  return Array.isArray(attachments)
-                    && attachments.length > Number(prevCount || 0)
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                  const nextCount = Math.max(
+                    Array.isArray(attachments) ? attachments.length : 0,
+                    Array.isArray(sessionAttachments) ? sessionAttachments.length : 0
+                  );
+                  return nextCount > Number(prevCount || 0)
                     && !!(state && state.getProperty && state.getProperty('/isDirty') === false);
                 }
                 """,
@@ -392,12 +427,13 @@ def main() -> int:
                 and "/$value" in item["url"]
                 for item in upload_requests
             )
-            uploaded_keys = [key for key in upload_after.get("attachmentKeys", []) if key not in (upload_before.get("attachmentKeys", []) or [])]
+            uploaded_keys = [key for key in upload_after.get("allAttachmentKeys", []) if key not in (upload_before.get("allAttachmentKeys", []) or [])]
             uploaded_key = uploaded_keys[-1] if uploaded_keys else ""
             ok_upload = (
                 has_upload_post
                 and has_upload_put
-                and upload_after.get("attachmentCount", 0) == upload_before.get("attachmentCount", 0) + 1
+                and max(upload_after.get("attachmentCount", 0), upload_after.get("sessionAttachmentCount", 0))
+                    == max(upload_before.get("attachmentCount", 0), upload_before.get("sessionAttachmentCount", 0)) + 1
                 and upload_after.get("isDirty") is False
                 and bool(uploaded_key)
             )
@@ -429,16 +465,24 @@ def main() -> int:
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
+                  const viewModel = view && view.getModel && view.getModel('view');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
-                  const attachmentGone = Array.isArray(attachments)
-                    && !attachments.some((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim() === String(payload.key || ''));
-                  return Array.isArray(attachments)
-                    && attachments.length < Number(payload.prevCount || 0)
+                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                  const combined = (Array.isArray(attachments) ? attachments : []).concat(
+                    (Array.isArray(sessionAttachments) ? sessionAttachments : []).filter((item) => {
+                      const sKey = String((item && (item.AttachmentKey || item.Key)) || '').trim();
+                      return !(Array.isArray(attachments) && attachments.some((entry) => String((entry && (entry.AttachmentKey || entry.Key)) || '').trim() === sKey));
+                    })
+                  );
+                  const attachmentGone = Array.isArray(combined)
+                    && !combined.some((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim() === String(payload.key || ''));
+                  return Array.isArray(combined)
+                    && combined.length < Number(payload.prevCount || 0)
                     && attachmentGone
                     && !!(state && state.getProperty && state.getProperty('/isDirty') === false);
                 }
                 """,
-                arg={"prevCount": delete_before.get("attachmentCount") or 0, "key": uploaded_key},
+                arg={"prevCount": max(delete_before.get("attachmentCount") or 0, delete_before.get("sessionAttachmentCount") or 0), "key": uploaded_key},
                 timeout=30000,
             )
             page.wait_for_timeout(1500)
@@ -451,9 +495,10 @@ def main() -> int:
             ]
             ok_delete = (
                 len(delete_requests) > 0
-                and delete_after.get("attachmentCount", 0) == max(0, delete_before.get("attachmentCount", 0) - 1)
+                and max(delete_after.get("attachmentCount", 0), delete_after.get("sessionAttachmentCount", 0))
+                    == max(0, max(delete_before.get("attachmentCount", 0), delete_before.get("sessionAttachmentCount", 0)) - 1)
                 and delete_after.get("isDirty") is False
-                and uploaded_key not in (delete_after.get("attachmentKeys", []) or [])
+                and uploaded_key not in (delete_after.get("allAttachmentKeys", []) or [])
             )
             ensure(
                 checks,
