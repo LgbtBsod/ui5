@@ -283,25 +283,33 @@ sap.ui.define([
                     return oResult;
                 });
             }.bind(this);
+            var fnApplyRuntimeSettings = function (oRuntime) {
+                return this._applyFrontendRuntimeConfig({
+                    source: "RuntimeSettingsSet(GLOBAL)",
+                    runtimeSettingsPayload: oRuntime || {}
+                }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
+                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
+                    fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
+                    return oRuntime || {};
+                });
+            }.bind(this);
+            this._fnUnsubscribeRuntimeSettings = SettingsManager.subscribe(function (oRuntime) {
+                fnApplyRuntimeSettings(oRuntime).catch(function () {
+                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
+                });
+            });
             var fnLoadRuntimeSettings = function () {
                 return SettingsManager.load(GatewayBackendService).then(function (oRuntime) {
-                    return this._applyFrontendRuntimeConfig({
-                        source: "RuntimeSettingsSet(GLOBAL)",
-                        runtimeSettingsPayload: oRuntime || {}
-                    }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
-                        ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
-                        fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
-                        return oRuntime || {};
-                    });
-                }.bind(this)).catch(function (oError) {
+                    return fnApplyRuntimeSettings(oRuntime);
+                }).catch(function (oError) {
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
                     fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
                         "RuntimeSettingsSet(GLOBAL)",
                         (oError && oError.message) || oError || "runtime_settings_load_failed"
                     ));
                     throw oError || new Error("runtime_settings_load_failed");
-                }.bind(this));
-            }.bind(this);
+                });
+            };
             var fnResolveCorrelationId = oFeedbackRuntime.resolveCorrelationId;
             var fnIsSessionExpiredError = oFeedbackRuntime.isSessionExpiredError;
             var fnSetGlobalBanner = oFeedbackRuntime.setGlobalBanner;
