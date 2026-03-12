@@ -41,6 +41,18 @@ def safe_evaluate(page, script: str, arg: Any = None, retries: int = 3):
     raise last_error
 
 
+def wait_for_ui5_bootstrap(page) -> None:
+    page.wait_for_function(
+        """
+        () => typeof window !== 'undefined'
+          && typeof window.sap !== 'undefined'
+          && !!sap.ui
+          && typeof sap.ui.getCore === 'function'
+        """,
+        timeout=60000,
+    )
+
+
 def flush_report(report: dict[str, Any]) -> int:
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -79,6 +91,7 @@ def batch_operation_requests(network: list[dict[str, Any]], method: str, marker:
 
 
 def wait_for_detail_ready(page, root_id: str) -> None:
+    wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
         (expectedRootId) => {
@@ -97,6 +110,7 @@ def wait_for_detail_ready(page, root_id: str) -> None:
 
 
 def wait_for_search_ready(page) -> None:
+    wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
         () => {
@@ -217,21 +231,36 @@ def invoke_delete(page, attachment_key: str) -> None:
           const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
           const controller = view && view.getController && view.getController();
           const selected = view && view.getModel && view.getModel('selected');
+          const sessionModel = view && view.getModel && view.getModel('view');
           const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
-          const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '').trim() : '';
-          const attachment = attachments.find((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim() === attachmentKey);
-          if (!controller || typeof controller._run !== 'function') {
-            reject(new Error('detail controller unavailable'));
+          const sessionAttachments = sessionModel && sessionModel.getProperty ? (sessionModel.getProperty('/sessionAttachments') || []) : [];
+          const allAttachments = []
+            .concat(Array.isArray(attachments) ? attachments : [])
+            .concat(Array.isArray(sessionAttachments) ? sessionAttachments : []);
+          const attachment = allAttachments.find((item) => String((item && (item.AttachmentKey || item.Key)) || '').trim() === attachmentKey);
+          if (!controller || typeof controller.onDeleteAttachment !== 'function') {
+            reject(new Error('detail controller delete handler unavailable'));
             return;
           }
-          if (!attachment || !rootId) {
+          if (!attachment) {
             reject(new Error('attachment to delete not found'));
             return;
           }
-          Promise.resolve(controller._run('attachmentDelete', {
-            rootId,
-            attachmentId: attachmentKey,
-            attachment
+          Promise.resolve(controller.onDeleteAttachment({
+            getSource: function () {
+              return {
+                getBindingContext: function (modelName) {
+                  if (modelName !== 'selected' && modelName !== 'view') {
+                    return null;
+                  }
+                  return {
+                    getObject: function () {
+                      return attachment;
+                    }
+                  };
+                }
+              };
+            }
           })).then(() => resolve(true)).catch(reject);
         })
         """,
@@ -321,7 +350,7 @@ def main() -> int:
             page.on("request", on_request)
 
             current_step = "route.open.detail"
-            page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="networkidle", timeout=90000)
+            page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="domcontentloaded", timeout=90000)
             wait_for_detail_ready(page, ROOT_ID)
 
             current_step = "lock.acquire"

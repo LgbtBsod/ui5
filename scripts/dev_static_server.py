@@ -25,7 +25,9 @@ def is_client_disconnect_error(exc: BaseException) -> bool:
     return False
 
 BACKEND_BASE = os.environ.get("UI5_BACKEND_BASE", "http://127.0.0.1:8000")
+UI5_RESOURCES_BASE = os.environ.get("UI5_RESOURCES_BASE", "").rstrip("/")
 PROXY_PREFIXES = ("/sap/",)
+UI5_PROXY_PREFIXES = ("/resources/", "/test-resources/")
 
 
 class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -64,13 +66,16 @@ class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
     def _should_proxy(self) -> bool:
         return any(self.path.startswith(prefix) for prefix in PROXY_PREFIXES)
 
-    def _proxy(self) -> None:
+    def _should_proxy_ui5(self) -> bool:
+        return bool(UI5_RESOURCES_BASE) and any(self.path.startswith(prefix) for prefix in UI5_PROXY_PREFIXES)
+
+    def _proxy(self, target_base: str) -> None:
         body = None
         if self.command not in {"GET", "HEAD"}:
             length = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(length) if length > 0 else b""
 
-        target = f"{BACKEND_BASE}{self.path}"
+        target = f"{target_base}{self.path}"
         req = urllib.request.Request(target, data=body, method=self.command)
 
         for key, value in self.headers.items():
@@ -115,37 +120,51 @@ class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):  # noqa: N802
         if self._should_proxy():
-            return self._proxy()
+            return self._proxy(BACKEND_BASE)
+        if self._should_proxy_ui5():
+            return self._proxy(UI5_RESOURCES_BASE)
         return super().do_GET()
 
     def do_HEAD(self):  # noqa: N802
         if self._should_proxy():
-            return self._proxy()
+            return self._proxy(BACKEND_BASE)
+        if self._should_proxy_ui5():
+            return self._proxy(UI5_RESOURCES_BASE)
         return super().do_HEAD()
 
     def do_POST(self):  # noqa: N802
         if self._should_proxy():
-            return self._proxy()
+            return self._proxy(BACKEND_BASE)
+        if self._should_proxy_ui5():
+            return self._proxy(UI5_RESOURCES_BASE)
         return super().do_POST()
 
     def do_PUT(self):  # noqa: N802
         if self._should_proxy():
-            return self._proxy()
+            return self._proxy(BACKEND_BASE)
+        if self._should_proxy_ui5():
+            return self._proxy(UI5_RESOURCES_BASE)
         return super().do_PUT()
 
     def do_PATCH(self):  # noqa: N802
         if self._should_proxy():
-            return self._proxy()
+            return self._proxy(BACKEND_BASE)
+        if self._should_proxy_ui5():
+            return self._proxy(UI5_RESOURCES_BASE)
         return super().do_PATCH()
 
     def do_DELETE(self):  # noqa: N802
         if self._should_proxy():
-            return self._proxy()
+            return self._proxy(BACKEND_BASE)
+        if self._should_proxy_ui5():
+            return self._proxy(UI5_RESOURCES_BASE)
         return super().do_DELETE()
 
     def do_OPTIONS(self):  # noqa: N802
         if self._should_proxy():
-            return self._proxy()
+            return self._proxy(BACKEND_BASE)
+        if self._should_proxy_ui5():
+            return self._proxy(UI5_RESOURCES_BASE)
         return super().do_OPTIONS()
 
     def copyfile(self, source, outputfile):
@@ -176,7 +195,8 @@ def main() -> None:
             return super().handle_error(request, client_address)
 
     with ReusableTCPServer(("", port), lambda *a, **kw: ODataStaticRequestHandler(*a, directory=str(root), **kw)) as httpd:
-        print(f"Serving {root} on http://0.0.0.0:{port} (proxy backend: {BACKEND_BASE})")
+        ui5_part = f", proxy ui5 resources: {UI5_RESOURCES_BASE}" if UI5_RESOURCES_BASE else ""
+        print(f"Serving {root} on http://0.0.0.0:{port} (proxy backend: {BACKEND_BASE}{ui5_part})")
         httpd.serve_forever()
 
 

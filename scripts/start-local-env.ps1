@@ -2,6 +2,7 @@ param(
     [int]$BackendPort = 8000,
     [int]$UiPort = 8080,
     [string]$GatewayBaseUrl = "",
+    [string]$Ui5ResourcesBaseUrl = "",
     [switch]$BindToParentShell
 )
 
@@ -181,7 +182,11 @@ if ($isRealGateway) {
 }
 
 $prevUiBackendBase = $env:UI5_BACKEND_BASE
+$prevUi5ResourcesBase = $env:UI5_RESOURCES_BASE
 $env:UI5_BACKEND_BASE = $uiBackendBase
+if (-not [string]::IsNullOrWhiteSpace($Ui5ResourcesBaseUrl)) {
+    $env:UI5_RESOURCES_BASE = $Ui5ResourcesBaseUrl.TrimEnd("/")
+}
 try {
     $uiProcess = Start-Process `
         -FilePath $pythonCommand.FilePath `
@@ -196,6 +201,11 @@ try {
         Remove-Item Env:UI5_BACKEND_BASE -ErrorAction SilentlyContinue
     } else {
         $env:UI5_BACKEND_BASE = $prevUiBackendBase
+    }
+    if ($null -eq $prevUi5ResourcesBase) {
+        Remove-Item Env:UI5_RESOURCES_BASE -ErrorAction SilentlyContinue
+    } else {
+        $env:UI5_RESOURCES_BASE = $prevUi5ResourcesBase
     }
 }
 
@@ -238,4 +248,9 @@ if ($isRealGateway) {
 }
 Write-Host "Python: $($pythonCommand.FilePath) $($pythonCommand.PrefixArgs -join ' ') [$($pythonCommand.Source)]"
 Write-Host "UI: http://127.0.0.1:$UiPort/index.html ($uiStatus)"
+if (-not [string]::IsNullOrWhiteSpace($Ui5ResourcesBaseUrl)) {
+    Write-Host "UI5 resources proxy: $($Ui5ResourcesBaseUrl.TrimEnd('/'))"
+} else {
+    Write-Host "UI5 resources proxy: not configured (browser smoke requires local app/resources or -Ui5ResourcesBaseUrl)"
+}
 Write-Host "Logs: $pidDir"

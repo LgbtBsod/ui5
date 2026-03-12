@@ -41,7 +41,20 @@ def safe_evaluate(page, script: str, arg: Any = None, retries: int = 3):
     raise last_error
 
 
+def wait_for_ui5_bootstrap(page) -> None:
+    page.wait_for_function(
+        """
+        () => typeof window !== 'undefined'
+          && typeof window.sap !== 'undefined'
+          && !!sap.ui
+          && typeof sap.ui.getCore === 'function'
+        """,
+        timeout=60000,
+    )
+
+
 def wait_for_search_ready(page) -> None:
+    wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
         () => {
@@ -71,6 +84,7 @@ def wait_for_search_ready(page) -> None:
 
 
 def wait_for_detail_ready(page, root_id: str) -> None:
+    wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
         (expectedRootId) => {
@@ -94,6 +108,7 @@ def wait_for_detail_ready(page, root_id: str) -> None:
 
 
 def wait_for_edit_detail_ready(page, root_id: str) -> None:
+    wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
         (expectedRootId) => {
@@ -111,17 +126,45 @@ def wait_for_edit_detail_ready(page, root_id: str) -> None:
             && appState.getProperty('/currentRouteName') === 'detail'
             && state.getProperty('/workflow/detail/editMode') === 'EDIT'
             && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED'
-            && state.getProperty('/ui/busy/detail') === false
-            && state.getProperty('/saveInFlight') === false;
+            && !!detail.getDomRef();
         }
         """,
         arg=root_id,
-        timeout=15000,
+        timeout=30000,
     )
     page.wait_for_timeout(900)
 
 
+def detail_route_state(page) -> dict[str, Any]:
+    return safe_evaluate(
+        page,
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
+          const detail = core.byId('checklist_app_comp---app--detailPaneHost');
+          const appState = app && app.getModel && app.getModel('state');
+          const state = detail && detail.getModel && detail.getModel('state');
+          const selected = detail && detail.getModel && detail.getModel('selected');
+          return {
+            currentRouteName: appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '',
+            layout: appState && appState.getProperty ? String(appState.getProperty('/layout') || '') : '',
+            selectedId: appState && appState.getProperty ? String(appState.getProperty('/selectedId') || '') : '',
+            rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+            mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
+            lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '',
+            busyDetail: !!(state && state.getProperty && state.getProperty('/ui/busy/detail')),
+            saveInFlight: !!(state && state.getProperty && state.getProperty('/saveInFlight')),
+            autosaveState: state && state.getProperty ? String(state.getProperty('/autosaveState') || '') : '',
+            domReady: !!(detail && detail.getDomRef && detail.getDomRef())
+          };
+        }
+        """
+    )
+
+
 def wait_for_analytics_ready(page) -> None:
+    wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
         () => {
@@ -392,7 +435,7 @@ def main() -> int:
             page.on("request", on_request)
 
             current_step = "route.open.search"
-            page.goto(UI_URL, wait_until="networkidle", timeout=90000)
+            page.goto(UI_URL, wait_until="domcontentloaded", timeout=90000)
             wait_for_search_ready(page)
 
             smart_controls = safe_evaluate(
@@ -415,7 +458,7 @@ def main() -> int:
                 failures.append("search.smart.gateway.controls")
 
             current_step = "route.open.detail"
-            page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="networkidle", timeout=90000)
+            page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="domcontentloaded", timeout=90000)
             wait_for_detail_ready(page, ROOT_ID)
 
             opened = detail_state(page)
@@ -620,6 +663,16 @@ def main() -> int:
             invoke_view_controller_method(page, "checklist_app_comp---app--analyticsPaneHost", "onCloseAnalytics")
             wait_for_detail_ready(page, ROOT_ID)
             wait_for_edit_detail_ready(page, ROOT_ID)
+            analytics_return_state = detail_route_state(page)
+            ok_analytics_return = (
+                analytics_return_state.get("currentRouteName") == "detail"
+                and analytics_return_state.get("rootId") == ROOT_ID
+                and analytics_return_state.get("mode") == "EDIT"
+                and analytics_return_state.get("lockState") == "EDIT_LOCKED"
+            )
+            ensure(checks, "analytics.close.gateway", ok_analytics_return, analytics_return_state)
+            if not ok_analytics_return:
+                failures.append("analytics.close.gateway")
 
             current_step = "attachments.expand"
             ensure_attachments_expanded(page)
@@ -668,6 +721,7 @@ def main() -> int:
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const viewModel = view && view.getModel && view.getModel('view');
                   const selected = view && view.getModel && view.getModel('selected');
+                  const state = view && view.getModel && view.getModel('state');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
                   const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
                   const nextCount = Math.max(

@@ -38,7 +38,20 @@ def safe_evaluate(page, script: str, retries: int = 3):
     raise last_error
 
 
+def wait_for_ui5_bootstrap(page) -> None:
+    page.wait_for_function(
+        """
+        () => typeof window !== 'undefined'
+          && typeof window.sap !== 'undefined'
+          && !!sap.ui
+          && typeof sap.ui.getCore === 'function'
+        """,
+        timeout=60000,
+    )
+
+
 def wait_for_ui_ready(page) -> None:
+    wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
         () => {
@@ -66,7 +79,7 @@ def main() -> int:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page(viewport={"width": 1440, "height": 900})
-            page.goto(UI_URL, wait_until="networkidle", timeout=90000)
+            page.goto(UI_URL, wait_until="domcontentloaded", timeout=90000)
             wait_for_ui_ready(page)
 
             result = safe_evaluate(

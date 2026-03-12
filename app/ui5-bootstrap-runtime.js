@@ -2,7 +2,7 @@
 (function () {
     "use strict";
 
-    var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "./resources/sap-ui-core.js";
+    var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "https://ui5.sap.com/1.71.70/resources/sap-ui-core.js";
 
     function splitClassNames(sClassNames) {
         return String(sClassNames || "").split(/\s+/).map(function (sName) {

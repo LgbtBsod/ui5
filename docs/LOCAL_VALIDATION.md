@@ -6,10 +6,14 @@ This repository supports local validation against either the bundled mock Gatewa
 
 - Windows PowerShell.
 - Python 3.
+- UI5 bootstrap is pinned to `https://ui5.sap.com/1.71.70/resources/sap-ui-core.js`.
 - `fastapi` and `uvicorn` in the selected Python interpreter when using the bundled mock backend.
 - `playwright` in the selected Python interpreter for browser smoke.
 - Node.js for JS gates and smoke orchestration.
 - Installed Playwright browser binaries for browser smoke.
+- UI5 runtime resources available either:
+  - under local `app/resources` or `resources`, or
+  - through `-Ui5ResourcesBaseUrl` pointing to an on-prem/local SAP UI5 resources host.
 
 ## Python fallback order
 
@@ -34,7 +38,13 @@ powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1
 External SAP Gateway:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1 -GatewayBaseUrl "https://<gateway-host>"
+powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1 -GatewayBaseUrl "https://<gateway-host>" -Ui5ResourcesBaseUrl "https://<ui5-resources-host>"
+```
+
+Bundled mock Gateway with external/local UI5 resources:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1 -Ui5ResourcesBaseUrl "https://<ui5-resources-host>"
 ```
 
 Stop the local environment:
@@ -102,8 +112,8 @@ python -m pytest backend/mock_gateway/tests/test_gateway_contract_frontend_alias
   - current failing step: `analytics.close`
   - current reason: detail route does not return to a stable `EDIT` + `EDIT_LOCKED` state within the current smoke contract after closing analytics
 - `scripts/browser-smoke-detail-attachment-dirty-invariant.py`
-  - current failing step: `attachments.upload`
-  - current reason: staged attachment does not satisfy the local projection or dirty-state contract expected by the smoke script before explicit save
+  - current failing step: `attachments.delete`
+  - current reason: staged-attachment delete path still hangs in browser smoke after local draft upload, even though upload staging itself is now green
 
 ### Not executed
 
@@ -149,6 +159,8 @@ These files are generated locally and must not be committed.
   - browser smoke scripts fail before scenario execution
 - missing browser binaries:
   - browser smoke fails during Playwright launch
+- missing UI5 resources:
+  - browser smoke cannot bootstrap UI5 because `/resources/sap-ui-core.js` resolves to 404
 - wrong external Gateway URL:
   - metadata/startup probe fails during `start-local-env.ps1`
 
