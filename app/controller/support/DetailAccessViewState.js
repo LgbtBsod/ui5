@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths"
+], function (UiAssetPaths) {
     "use strict";
 
     function createDefaultState(sRootId) {
@@ -12,7 +14,7 @@ sap.ui.define([], function () {
             reasonCode: "AUTHORIZED",
             titleKey: "",
             messageKey: "",
-            illustrationSrc: "assets/illustrations/detail-access-denied.svg"
+            illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
         };
     }
 

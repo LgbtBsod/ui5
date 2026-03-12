@@ -1252,13 +1252,14 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 }
 
 .chkApp .searchWorkbenchDock {
-  position: static;
-  top: auto;
-  z-index: auto;
+  --search-workbench-gap: 0.5rem;
+  --search-filter-sticky-top: calc(var(--app-shell-offset) + 0.6rem);
+  --search-action-sticky-top: calc(var(--search-filter-sticky-top) + 17.5rem);
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
-  gap: 0.5rem;
+  gap: var(--search-workbench-gap);
   overflow-x: hidden;
   overflow-y: visible;
 }
@@ -1278,32 +1279,80 @@ body.chkAppRoot.appLight .chkApp .searchActionToolbarDensity {
 
 .chkApp .searchWorkbenchDock > .searchFilterCardDense {
   position: sticky;
-  top: var(--search-sticky-filter-top, var(--app-shell-offset));
-  z-index: 22;
+  top: var(--search-sticky-filter-top, var(--search-filter-sticky-top));
+  z-index: 24;
 }
 
 .chkApp .searchWorkbenchDock > .searchResultsActionRail {
-  margin-top: 0.1rem;
-  margin-bottom: 0.28rem;
+  margin-top: 0;
+  margin-bottom: 0;
   position: sticky;
-  top: var(--search-sticky-action-top, calc(var(--app-shell-offset) + 9rem));
-  z-index: 21;
+  top: var(--search-sticky-action-top, var(--search-action-sticky-top));
+  z-index: 23;
 }
 
 .chkApp .searchWorkbenchDock > .searchSmartToolbarRail {
   margin-top: 0;
   margin-bottom: 0.34rem;
-  position: sticky;
-  top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 12rem));
-  z-index: 20;
+  position: relative;
+  top: auto;
+  z-index: auto;
 }
 
 .chkApp .searchResultsExperienceShell > .searchSmartToolbarRail {
   margin-top: 0;
   margin-bottom: 0.34rem;
-  position: sticky;
-  top: var(--search-sticky-toolbar-top, calc(var(--app-shell-offset) + 12rem));
-  z-index: 20;
+  position: relative;
+  top: auto;
+  z-index: auto;
+}
+
+.chkApp .searchWorkbenchDock > .searchResultsTable {
+  padding-top: 0;
+}
+
+.chkApp .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB {
+  position: relative;
+  top: auto;
+  z-index: auto;
+}
+
+.chkApp .searchResultsActionRail.sapMTB,
+.chkApp .searchResultsActionRail.sapMOTB,
+.chkApp .searchSmartToolbarRail.sapMTB,
+.chkApp .searchSmartToolbarRail.sapMOTB {
+  width: 100%;
+  max-width: 100%;
+}
+
+.chkApp .searchResultsActionRail {
+  backdrop-filter: blur(16px);
+}
+
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  position: relative;
+  top: auto;
+  z-index: 1;
+}
+
+@media (max-width: 90rem) {
+  .chkApp .searchWorkbenchDock {
+    --search-action-sticky-top: calc(var(--search-filter-sticky-top) + 19rem);
+  }
+}
+
+@media (max-width: 72rem) {
+  .chkApp .searchWorkbenchDock {
+    --search-action-sticky-top: calc(var(--search-filter-sticky-top) + 21.5rem);
+  }
+}
+
+@media (max-width: 56rem) {
+  .chkApp .searchWorkbenchDock {
+    --search-filter-sticky-top: calc(var(--app-shell-offset) + 0.35rem);
+    --search-action-sticky-top: calc(var(--search-filter-sticky-top) + 23.5rem);
+  }
 }
 
 .chkApp .searchWorkbenchDock > .searchResultsTable {

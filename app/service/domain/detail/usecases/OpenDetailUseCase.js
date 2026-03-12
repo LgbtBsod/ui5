@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseInputUtils, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths"
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseInputUtils, StatePaths, CreateSentinel, UiAssetPaths) {
     "use strict";
 
     function resolveLoadedAttachments(oUiState, sRootId) {
@@ -68,7 +69,7 @@ sap.ui.define([
                         reasonCode: "CREATE_DRAFT",
                         titleKey: "",
                         messageKey: "",
-                        illustrationSrc: "assets/illustrations/detail-access-denied.svg"
+                        illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
                     }),
                     Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                         status: "ready",

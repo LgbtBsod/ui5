@@ -3,11 +3,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
-], function (Effects, AccessPayload, StatePaths, WorkflowTelemetry) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths"
+], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, UiAssetPaths) {
     "use strict";
 
-    var DENIED_ILLUSTRATION = "assets/illustrations/detail-access-denied.svg";
     var OPERATIONS = {
         CREATE: "01",
         CHANGE: "02",
@@ -111,7 +111,7 @@ sap.ui.define([
             message: oResolved.message,
             titleKey: bDenied ? "detailAccessDeniedTitle" : "",
             messageKey: bDenied ? "detailAccessDeniedText" : "",
-            illustrationSrc: DENIED_ILLUSTRATION
+            illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
         };
     }
 

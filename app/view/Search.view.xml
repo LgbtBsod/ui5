@@ -390,6 +390,7 @@
                                 </menu>
                             </MenuButton>
                         </OverflowToolbar>
+
                         <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
                             <core:Fragment
                                 fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonList"

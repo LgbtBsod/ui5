@@ -1,7 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
+], function (FrontendConfigConstants) {
     "use strict";
 
-    return {
-        SETTINGS_CACHE_TTL_MS: 5 * 60 * 1000
-    };
+    return FrontendConfigConstants;
 });
