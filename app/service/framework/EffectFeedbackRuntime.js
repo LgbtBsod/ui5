@@ -3,16 +3,20 @@ sap.ui.define([
     "sap/m/MessageBox",
     "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectBannerRouter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectActionRouting",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectDialogRuntime"
-], function (MessageToast, MessageBox, DebugLogger, EffectTextResolver, EffectBannerRouter, EffectActionRouting, EffectDialogRuntime) {
+], function (MessageToast, MessageBox, DebugLogger, EffectTextResolver, EffectFeedbackContracts, EffectBannerRouter, EffectActionRouting, EffectDialogRuntime) {
     "use strict";
 
-    var DIALOG_CLASS = "glassDialog";
-    var TOAST_CLASS = "glassToast";
-    var TOAST_LEVEL_CLASS_PREFIX = "glassToast--";
-    var TOAST_DEDUPE_MS = 2500;
+    var CLASSES = EffectFeedbackContracts.CLASSES;
+    var DURATIONS = EffectFeedbackContracts.DURATIONS;
+    var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
+    var HANDLER_NAMES = EffectFeedbackContracts.EFFECT_HANDLER_NAMES;
+    var IDS = EffectFeedbackContracts.IDS;
+    var LEVELS = EffectFeedbackContracts.LEVELS;
+    var VARIANTS = EffectFeedbackContracts.VARIANTS;
     var DIALOG_VARIANT_HANDLERS = {
         warning: MessageBox.warning,
         information: MessageBox.information
@@ -49,26 +53,26 @@ sap.ui.define([
         var sToastKey = String((oEffect && (oEffect.correlationKey || oEffect.textKey || sText)) || "").trim();
         var iNow = Date.now();
         var iLastShownAt = Number(mToastTimeline[sToastKey] || 0);
-        if (sToastKey && Number.isFinite(iLastShownAt) && (iNow - iLastShownAt) < TOAST_DEDUPE_MS) {
+        if (sToastKey && Number.isFinite(iLastShownAt) && (iNow - iLastShownAt) < DURATIONS.TOAST_DEDUPE_MS) {
             return;
         }
         if (sToastKey) {
             mToastTimeline[sToastKey] = iNow;
         }
         if (sText) {
-            var sLevel = String((oEffect && oEffect.level) || "info").toLowerCase();
-            var sClassName = [TOAST_CLASS, TOAST_LEVEL_CLASS_PREFIX + sLevel].join(" ");
+            var sLevel = String((oEffect && oEffect.level) || LEVELS.INFO).toLowerCase();
+            var sClassName = [CLASSES.TOAST, CLASSES.TOAST_LEVEL_PREFIX + sLevel].join(" ");
             MessageToast.show(String(sText), {
                 className: sClassName,
-                duration: 2200
+                duration: DURATIONS.TOAST_SHOW_MS
             });
         }
     }
 
     function banner(oController, oEffect, oOptions) {
-        return withOptionalHandler(oController, oEffect, oOptions, "banner", function () {
+        return withOptionalHandler(oController, oEffect, oOptions, HANDLER_NAMES.BANNER, function () {
             return EffectBannerRouter.handleEffect(oController, oEffect, oOptions, {
-                fallbackTextKey: "loadErrorMessage",
+                fallbackTextKey: FALLBACK_TEXT_KEYS.LOAD_ERROR,
                 resolveTextKey: function (sTextKey) {
                     return resolveTextKey(oController, { textKey: sTextKey }, oOptions, "");
                 }
@@ -78,22 +82,22 @@ sap.ui.define([
 
     function showDialog(oController, oEffect, oOptions) {
         var sVariant = String((oEffect && oEffect.variant) || "").toLowerCase();
-        var sFallbackKey = oEffect && oEffect.id === "conflict" ? "conflictDialogText" : "";
+        var sFallbackKey = oEffect && oEffect.id === IDS.CONFLICT ? FALLBACK_TEXT_KEYS.CONFLICT_DIALOG : "";
         var fnShow;
         var sText = resolveTextKey(oController, oEffect, oOptions, sFallbackKey);
         if (!sText) {
             return null;
         }
-        if (oEffect && oEffect.id === "conflict") {
-            sVariant = "warning";
+        if (oEffect && oEffect.id === IDS.CONFLICT) {
+            sVariant = VARIANTS.WARNING;
         }
         fnShow = DIALOG_VARIANT_HANDLERS[sVariant] || MessageBox.show;
-        fnShow(String(sText), { styleClass: DIALOG_CLASS });
+        fnShow(String(sText), { styleClass: CLASSES.DIALOG });
         return null;
     }
 
     function dialog(oController, oEffect, oOptions) {
-        return withOptionalHandler(oController, oEffect, oOptions, "dialog", function () {
+        return withOptionalHandler(oController, oEffect, oOptions, HANDLER_NAMES.DIALOG, function () {
             return Promise.resolve(EffectDialogRuntime.runDialogEffect(oController, oEffect, oOptions)).then(function (vHandled) {
                 if (vHandled === false) {
                     return showDialog(oController, oEffect, oOptions);
@@ -111,7 +115,7 @@ sap.ui.define([
         MessageBox.confirm(String(sText || ""), {
             actions: [sConfirm, sCancel],
             emphasizedAction: sConfirm,
-            styleClass: DIALOG_CLASS,
+            styleClass: CLASSES.DIALOG,
             onClose: function (sAction) {
                 var sYes = oPayload.confirmAction;
                 var sNo = oPayload.cancelAction;
@@ -138,7 +142,7 @@ sap.ui.define([
             MessageBox[sKind](String(sText || ""), {
                 actions: aActions || [MessageBox.Action.OK],
                 emphasizedAction: sEmphasized,
-                styleClass: DIALOG_CLASS,
+                styleClass: CLASSES.DIALOG,
                 onClose: resolve
             });
         });
@@ -153,7 +157,7 @@ sap.ui.define([
     }
 
     function promptError(sText) {
-        MessageBox.error(String(sText || ""), { styleClass: DIALOG_CLASS });
+        MessageBox.error(String(sText || ""), { styleClass: CLASSES.DIALOG });
     }
 
     return {

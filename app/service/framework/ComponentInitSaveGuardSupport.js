@@ -5,25 +5,33 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (ActionContract, SecurityTokenRefresh, FeedbackBannerRuntime, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts"
+], function (ActionContract, SecurityTokenRefresh, FeedbackBannerRuntime, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts) {
     "use strict";
 
-    var SAVE_WORKING_BANNER_DELAY_MS = 2000;
+    var AUTOSAVE_STATE = ComponentSaveGuardContracts.AUTOSAVE_STATE;
+    var BANNER_DETAIL = ComponentSaveGuardContracts.BANNER_DETAIL;
+    var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
+    var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
+    var DELAY_MS = ComponentSaveGuardContracts.DELAY_MS;
+    var ERROR_MESSAGE = ComponentSaveGuardContracts.ERROR_MESSAGE;
+    var PATHS = ComponentSaveGuardContracts.PATHS;
+    var TELEMETRY_EVENT = ComponentSaveGuardContracts.TELEMETRY_EVENT;
 
     function buildSaveBannerPayload(oStateModel, mOptions) {
         var bSessionExpired = !!mOptions.sessionExpired;
-        var bOffline = ModelStateRuntime.readOnModel(oStateModel, "/networkOnline", true) === false;
-        var sDetail = String(mOptions.detail || "save_failed");
+        var bOffline = ModelStateRuntime.readOnModel(oStateModel, PATHS.NETWORK_ONLINE, true) === false;
+        var sDetail = String(mOptions.detail || BANNER_DETAIL.SAVE_FAILED);
         return FeedbackBannerRuntime.createRetryBannerInput(
-            bSessionExpired ? "error" : (bOffline ? "warning" : "error"),
-            bSessionExpired ? "sessionExpiredBanner" : (bOffline ? "networkUnavailable" : "objectSaveFailed"),
+            bSessionExpired ? BANNER_LEVEL.ERROR : (bOffline ? BANNER_LEVEL.WARNING : BANNER_LEVEL.ERROR),
+            bSessionExpired ? BANNER_TEXT_KEY.SESSION_EXPIRED : (bOffline ? BANNER_TEXT_KEY.NETWORK_UNAVAILABLE : BANNER_TEXT_KEY.OBJECT_SAVE_FAILED),
             {
                 textArgs: bSessionExpired ? [] : [sDetail],
                 details: sDetail,
                 correlationId: String(mOptions.correlationId || ""),
                 retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                retryTextKey: "retryNowButton"
+                retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
             }
         );
     }
@@ -56,32 +64,32 @@ sap.ui.define([
                 var m = {};
                 m[oStatePaths.SAVE_IN_FLIGHT] = true;
                 m[oStatePaths.UI_BUSY_DETAIL] = true;
-                m["/autosaveState"] = "SAVING";
+                m["/autosaveState"] = AUTOSAVE_STATE.SAVING;
                 return m;
             }()));
             oComponent._iSaveWorkingTimer = SchedulingRuntime.restartTimer(oComponent._iSaveWorkingTimer, function () {
                 if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
-                    fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("info", "workingMessageLong", {
+                    fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.INFO, BANNER_TEXT_KEY.WORKING_LONG, {
                         retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                        retryTextKey: "retryNowButton"
+                        retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
                     }));
                 }
-            }, SAVE_WORKING_BANNER_DELAY_MS);
+            }, DELAY_MS.SAVE_WORKING_BANNER);
             oComponent._pGuardedSavePromise = oDetailFacade.save({ rootId: sRootId }, fnBuildLatestCtx()).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 if (!oResult || oResult.ok === false) {
-                    return Promise.reject((oResult && oResult.error) || new Error("Save failed"));
+                    return Promise.reject((oResult && oResult.error) || new Error(ERROR_MESSAGE.SAVE_FAILED));
                 }
                 fnClearGlobalBanner();
-                fnEmitTelemetry("detail.save.guarded.success", { rootId: sRootId });
+                fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_SUCCESS, { rootId: sRootId });
                 fnResumePendingNavigationIntent();
                 return true;
             }).catch(function (oError) {
-                var sDetail = String((oError && oError.message) || "save_failed");
+                var sDetail = String((oError && oError.message) || BANNER_DETAIL.SAVE_FAILED);
                 var sCorrelationId = fnResolveCorrelationId(oError);
                 var bSessionExpired = fnIsSessionExpiredError(oError);
                 if (bSessionExpired) {
-                    ModelStateRuntime.writeOnModel(oStateModel, "/requiresUserLogin", true);
+                    ModelStateRuntime.writeOnModel(oStateModel, PATHS.REQUIRES_USER_LOGIN, true);
                     if (!oComponent._bSessionRefreshInFlight) {
                         oComponent._bSessionRefreshInFlight = true;
                         if (!oMainServiceModel) {
@@ -98,7 +106,7 @@ sap.ui.define([
                     detail: sDetail,
                     correlationId: sCorrelationId
                 }));
-                fnEmitTelemetry("detail.save.guarded.failed", TelemetryRuntime.saveFailure(sRootId, oError, sCorrelationId));
+                fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_FAILED, TelemetryRuntime.saveFailure(sRootId, oError, sCorrelationId));
                 return false;
             }).finally(function () {
                 oComponent._iSaveWorkingTimer = SchedulingRuntime.clearTimer(oComponent._iSaveWorkingTimer);
