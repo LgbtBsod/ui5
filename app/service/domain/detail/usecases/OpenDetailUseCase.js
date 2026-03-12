@@ -3,10 +3,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, UseCaseInputUtils, StatePaths, CreateSentinel) {
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseInputUtils, StatePaths, CreateSentinel) {
     "use strict";
 
     function resolveLoadedAttachments(oUiState, sRootId) {

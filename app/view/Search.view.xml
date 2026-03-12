@@ -316,7 +316,6 @@
                             <ObjectStatus
                                 text="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}"
                                 state="Information"
-                                ariaLabelledBy="searchModeA11y"
                                 class="searchModeStatusChip">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
