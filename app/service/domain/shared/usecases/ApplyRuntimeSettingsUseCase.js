@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
-    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy"
-], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
+], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy, FrontendConfigConstants) {
     "use strict";
 
     var _runtimeTimersLogDone = false;
@@ -46,7 +47,7 @@ sap.ui.define([
             oStateModel.setProperty("/timers", mTimers);
             oStateModel.setProperty("/requiredFields", aRequiredFields);
             oStateModel.setProperty("/frontendVariables", mFrontendVariables);
-            oEnvModel.setProperty("/source", oConfig.source || "RuntimeSettingsSet(GLOBAL)");
+            oEnvModel.setProperty("/source", oConfig.source || FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL);
             oEnvModel.setProperty("/loadedAt", new Date().toISOString());
             oEnvModel.setProperty("/timers", mTimers);
             oEnvModel.setProperty("/variables", mFrontendVariables);
@@ -57,9 +58,9 @@ sap.ui.define([
                 oMasterDataModel.setProperty("/runtime/uploadPolicy", oUploadPolicy);
             }
 
-            if (DebugLogger.isEnabled() && !_runtimeTimersLogDone && oConfig.source === "RuntimeSettingsSet(GLOBAL)") {
+            if (DebugLogger.isEnabled() && !_runtimeTimersLogDone && oConfig.source === FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL) {
                 _runtimeTimersLogDone = true;
-                DebugLogger.info("RUNTIME_TIMERS_APPLIED", "[RUNTIME_TIMERS_APPLIED]", { source: "RuntimeSettingsSet(GLOBAL)", timers: mTimers, loadedAt: new Date().toISOString() });
+                DebugLogger.info("RUNTIME_TIMERS_APPLIED", "[RUNTIME_TIMERS_APPLIED]", { source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL, timers: mTimers, loadedAt: new Date().toISOString() });
             }
 
             return Promise.resolve(Result.ok({

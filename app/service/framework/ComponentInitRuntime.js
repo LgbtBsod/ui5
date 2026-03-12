@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCoordinatorRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime, FrontendConfigConstants) {
     "use strict";
 
     function reuseJsonModel(oExistingModel, fnCreateModel) {
@@ -285,11 +286,11 @@ sap.ui.define([
             }.bind(this);
             var fnApplyRuntimeSettings = function (oRuntime) {
                 return this._applyFrontendRuntimeConfig({
-                    source: "RuntimeSettingsSet(GLOBAL)",
+                    source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                     runtimeSettingsPayload: oRuntime || {}
                 }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
-                    fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
+                    fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig(FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL));
                     return oRuntime || {};
                 });
             }.bind(this);
@@ -304,7 +305,7 @@ sap.ui.define([
                 }).catch(function (oError) {
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
                     fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
-                        "RuntimeSettingsSet(GLOBAL)",
+                        FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                         (oError && oError.message) || oError || "runtime_settings_load_failed"
                     ));
                     throw oError || new Error("runtime_settings_load_failed");

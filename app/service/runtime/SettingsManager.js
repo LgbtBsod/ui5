@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger"
-], function (DebugLogger) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
+], function (DebugLogger, FrontendConfigConstants) {
     "use strict";
 
     var _loaded = false;
@@ -61,7 +62,7 @@ sap.ui.define([
                 _loaded = true;
                 _notify(_runtimeCache);
                 _logSummary({
-                    source: "RuntimeSettingsSet(GLOBAL)",
+                    source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                     ok: true,
                     durationMs: Date.now() - iStartedAt,
                     applied: true,
@@ -72,7 +73,7 @@ sap.ui.define([
             }).catch(function (oError) {
                 _loadingPromise = null;
                 _logSummary({
-                    source: "RuntimeSettingsSet(GLOBAL)",
+                    source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                     ok: false,
                     durationMs: Date.now() - iStartedAt,
                     applied: false,
