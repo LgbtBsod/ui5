@@ -1,0 +1,104 @@
+.chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
+  background: transparent;
+  border-color: rgba(var(--hz-accent-rgb, 0,112,242), 0.50);
+  color: var(--hz-accent);
+  box-shadow: none;
+}
+
+body.chkAppRoot.appDark .chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
+  border-color: rgba(77, 177, 255, 0.40);
+  color: rgba(130, 200, 255, 0.92);
+}
+
+.chkApp .brandActionBtn.brandActionGhost:hover .sapMBtnInner {
+  background: rgba(var(--hz-accent-rgb, 0,112,242), 0.07);
+  border-color: rgba(var(--hz-accent-rgb, 0,112,242), 0.65);
+  transform: translateY(-1px);
+}
+
+.chkApp .brandActionBtn.brandActionGhost:active .sapMBtnInner {
+  transform: translateY(0) scale(0.97);
+}
+
+.chkApp .tableActionToolbar.sapMTB,
+.chkApp .tableActionToolbar.sapMOTB {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding-block: 0.35rem;
+  min-height: 2.75rem;
+}
+
+.chkApp .searchCopyActionBtn .sapMBtnInner,
+.chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+.chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  background: transparent;
+}
+
+body.chkAppRoot.appLight .chkApp .searchCopyActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  border-color: rgba(140, 185, 235, 0.50);
+  color: rgba(48, 88, 155, 0.82);
+}
+
+body.chkAppRoot.appDark .chkApp .searchCopyActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchSelectVisibleActionBtn .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
+  border-color: rgba(48, 82, 148, 0.42);
+  color: rgba(130, 185, 245, 0.82);
+}
+
+.chkApp .searchResultsActionRail {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  padding:
+    calc(0.28rem * var(--theme-density-scale))
+    calc(0.34rem * var(--theme-density-scale))
+    calc(0.3rem * var(--theme-density-scale));
+  border-radius: calc(var(--radius-lg) - 0.15rem);
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
+  background: var(--theme-rail-bg);
+  box-shadow: none;
+  overflow-x: hidden;
+  overflow-y: visible;
+  isolation: isolate;
+  position: relative;
+  top: auto;
+  z-index: auto;
+}
+
+.chkApp .searchResultsActionRail > .sapMBarChild:first-child {
+  margin-inline-start: 0;
+}
+
+.chkApp .searchResultsActionRail .sapMOTBOverflowButton .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnInner,
+.chkApp .searchFilterExperienceShell .sapMOTBOverflowButton .sapMBtnInner {
+  min-width: 2.4rem;
+  padding-inline: 0.65rem;
+  border-radius: 999px;
+}
+
+.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
+.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent {
+  font-size: 0;
+}
+
+.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
+.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after {
+  content: "...";
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.chkApp .searchResultsActionRail .sapMFlexItem,
+.chkApp .searchSmartToolbarRail .sapMFlexItem,
+.chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled .sapMBtnInner,
+.chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled:hover .sapMBtnInner {
+  min-width: 0;
+}

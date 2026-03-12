@@ -25,7 +25,7 @@ Rating model:
 
 - Severity: `P1`
 - Area: `UI5 / FLP integration`
-- Evidence: `app/manifest.json:176`, `app/view/App.view.xml:23` to `app/view/App.view.xml:38`
+- Evidence: `app/manifest.json:176`, `app/views/App.view.xml:23` to `app/views/App.view.xml:38`
 - Evidence: targeted search across `app` found zero matches for `sap.ushell` or `CrossApplicationNavigation`
 - Impact: the app does not demonstrate FLP-native navigation or key-user adaptation readiness and currently replaces platform shell responsibilities with a custom header control.
 - SAP criterion violated: FLP integration, adaptation enablement, key-user extensibility
@@ -85,7 +85,7 @@ Rating model:
 
 - Severity: `P2`
 - Area: `UI5 / Architecture`
-- Evidence: `app/controller/support/SearchControllerActions.js` is `32821` bytes, `app/controller/support/AnalyticsControllerActions.js` is `31863` bytes, `app/controller/support/DetailViewRuntime.js` is `22530` bytes, `app/service/framework/ComponentInitRuntime.js` is `25425` bytes
+- Evidence: `app/controller/search/SearchControllerBehavior.js`, `app/controller/analytics/AnalyticsControllerBehavior.js`, `app/controller/detail/DetailViewBehavior.js`, and `app/service/framework/ComponentInitRuntime.js` remain the highest current orchestration-weight frontend modules
 - Evidence: the top-weight files are concentrated in `controller/support` and `service/framework`, despite the presence of multiple architectural layers and facades
 - Impact: the project looks layered on paper, but significant behavioral ownership is concentrated in large orchestration files. This increases onboarding cost, regression risk, and duplication probability when features evolve.
 - SAP criterion violated: maintainable UI architecture, clear separation of concerns, supportable extension model
@@ -182,7 +182,7 @@ Rating model:
 
 - Severity: `P2`
 - Area: `UI5 / State management`
-- Evidence: `app/controller/support/AppControllerStateRuntimeActions.js` contains the highest concentration of state-path usage in the scan
+- Evidence: `app/controller/app/AppStateBehavior.js` contains one of the highest current concentrations of state-path usage in the scan
 - Evidence: `app/model/StatePaths.js` and `app/service/domain/shared/DomainStatePaths.js` both exist and carry overlapping responsibility for path centralization
 - Impact: the codebase has partially centralized state paths, but runtime logic still relies on multiple state-path abstractions and repeated direct path usage. This makes refactoring state shape or debugging binding defects harder than necessary.
 - SAP criterion violated: stable view-model design, maintainable application state handling
@@ -194,7 +194,7 @@ Rating model:
 - Severity: `P2`
 - Area: `UI5 / Integration architecture`
 - Evidence: high concentrations of `normalize`, `resolve`, `build`, `map`, and primitive coercion patterns appear in `AnalyticsPayloadNormalizer.js`, `WorkflowAnalyticsAdapter.js`, `ODataChecklistRepoAdapter.js`, `ChecklistSnapshotMapper.js`, `SaveDetailUseCase.js`, and multiple controller support files
-- Evidence: `app/controller/support/SearchControllerActions.js:61` to `app/controller/support/SearchControllerActions.js:83` and `app/infra/adapters/ODataChecklistRepoAdapter.js:13` to `app/infra/adapters/ODataChecklistRepoAdapter.js:73` both perform alias-heavy response normalization and request shaping
+- Evidence: `app/controller/search/SearchControllerBehavior.js` and `app/infra/adapters/ODataChecklistRepoAdapter.js` both still contain contract-shaping and normalization pressure points
 - Impact: mapping, normalization, and fallback rules are not confined to one adapter boundary. This raises the risk of frontend/backend contract drift and inconsistent behavior between search, detail, analytics, and save flows.
 - SAP criterion violated: single integration boundary, predictable contract handling
 - Required remediation: move all payload normalization and alias compatibility logic into a small number of adapter/mapper modules and keep controller/support code free of transport-shape knowledge.
@@ -206,7 +206,7 @@ Rating model:
 
 - Severity: `P3`
 - Area: `UI5 / UX supportability`
-- Evidence: `app/view/App.view.xml:23` to `app/view/App.view.xml:38`
+- Evidence: `app/views/App.view.xml:23` to `app/views/App.view.xml:38`
 - Evidence: `app/ui5-bootstrap-runtime.js:23` to `app/ui5-bootstrap-runtime.js:68`
 - Impact: theme mode persistence, theme prefetching, and custom shell chrome create extra maintenance surface that FLP and standard UI5 theming already cover in many enterprise scenarios.
 - SAP criterion violated: simplicity, maintainability, UX consistency
@@ -217,9 +217,9 @@ Rating model:
 
 - Severity: `P3`
 - Area: `UX / UI implementation`
-- Evidence: `app/control/AppShellHeader.js:122` to `app/control/AppShellHeader.js:218` manually assembles and synchronizes shell header content
-- Evidence: `app/util/ThemeService.js:145` to `app/util/ThemeService.js:219` directly manipulates document classes, storage, and theme transitions
-- Evidence: `app/controller/support/SearchControllerActions.js:125` to `app/controller/support/SearchControllerActions.js:151` manually synchronizes SmartFilterBar state and analytics drilldown behavior
+- Evidence: `app/controls/AppShellHeader.js:122` to `app/controls/AppShellHeader.js:218` manually assembles and synchronizes shell header content
+- Evidence: `app/service/framework/ThemeService.js:145` to `app/service/framework/ThemeService.js:219` directly manipulates document classes, storage, and theme transitions
+- Evidence: `app/controller/search/SearchControllerBehavior.js` still manually synchronizes parts of SmartFilterBar state and analytics drilldown behavior
 - Impact: key UX behavior is implemented through custom runtime code instead of narrowly-scoped reusable patterns. This creates uneven interaction quality, harder accessibility verification, and higher regression risk during visual changes.
 - SAP criterion violated: UX consistency, accessible behavior reuse, maintainable interaction model
 - Required remediation: identify the 5-10 core UX interaction patterns and formalize them as reusable components/services with clear contracts, instead of continuing to grow hand-coded behavior in support files.

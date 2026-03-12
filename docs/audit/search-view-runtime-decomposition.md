@@ -1,12 +1,12 @@
 # SearchViewRuntime Decomposition
 
 Date: 2026-03-12
-Source module: `app/controller/support/SearchViewRuntime.js`
+Source module: `app/controller/search/SearchViewBehavior.js`
 Goal: decompose the current search runtime into capability-oriented modules with explicit ownership boundaries
 
 ## Current Mixed Responsibilities
 
-`SearchViewRuntime` currently mixes at least five concerns:
+`SearchViewBehavior` currently mixes at least five concerns:
 
 1. startup performance markers
 2. search loading feedback and pending-load settlement
@@ -38,7 +38,7 @@ This is why the file could not be moved cleanly as a whole. Its imports span con
 
 ### Remaining controller-facing facade
 
-- `app/controller/support/SearchViewRuntime.js`
+- `app/controller/search/SearchViewBehavior.js`
   - temporary thin facade only
   - delegates to capability runtime modules
   - should become empty then removable after controller layer is normalized
@@ -79,4 +79,4 @@ Current extracted modules:
 
 Remaining cuts:
 1. route/startup readiness markers
-2. final facade thinning and relocation strategy for `SearchViewRuntime`
+2. final facade thinning and relocation strategy for `SearchViewBehavior`

@@ -1,0 +1,66 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar">
+    <VBox id="searchFilterCard" width="100%" class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell">
+        <customData>
+            <core:CustomData key="role" value="search" writeToDom="true"/>
+            <core:CustomData key="aria-label" value="{i18n>filtersAriaLabel}" writeToDom="true"/>
+        </customData>
+        <VBox visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }" class="searchFilterSkeletonShell" renderType="Bare">
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonFormSection" type="XML"/>
+        </VBox>
+        <smartFilterBar:SmartFilterBar
+            id="searchSmartFilterBar"
+            visible="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} }"
+            class="searchSmartFilterWorkbench"
+            entitySet="ChecklistSearchSet"
+            persistencyKey="{view>/smartFilterPersistencyKey}"
+            useToolbar="true"
+            showGoOnFB="true"
+            showClearOnFB="true"
+            searchEnabled="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} &amp;&amp; !${view>/searchActionBusy} }"
+            liveMode="false"
+            enableBasicSearch="false"
+            useDateRangeType="true"
+            initialise=".onSmartFilterInitialise"
+            search=".onSmartSearch"
+            filterChange=".onSmartFilterChanged">
+            <smartFilterBar:controlConfiguration>
+                <smartFilterBar:ControlConfiguration key="Id" visibleInAdvancedArea="true" hasTypeAhead="true"/>
+                <smartFilterBar:ControlConfiguration key="DateCheck" visibleInAdvancedArea="true"/>
+                <smartFilterBar:ControlConfiguration key="Lpc" visibleInAdvancedArea="true"/>
+                <smartFilterBar:ControlConfiguration key="ProfessionText" visibleInAdvancedArea="true"/>
+                <smartFilterBar:ControlConfiguration key="Status" visibleInAdvancedArea="true"/>
+                <smartFilterBar:ControlConfiguration key="FailChecksSegmentControl" label="{i18n>filterFailSegmentLabel}" visibleInAdvancedArea="true">
+                    <smartFilterBar:customControl>
+                        <VBox class="searchCustomFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                            <Label text="{i18n>filterFailSegmentLabel}" labelFor="FailChecksSegmentControl" class="sapUiTinyMarginBottom"/>
+                            <SegmentedButton id="FailChecksSegmentControl" selectedKey="{state>/search/checksFailSegment}" selectionChange=".onChecksFailSegmentChange" class="resultSegmentControl">
+                                <items>
+                                    <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
+                                    <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
+                                    <SegmentedButtonItem key="SUCCESS" text="{i18n>filterFailSegmentSuccess}"/>
+                                </items>
+                            </SegmentedButton>
+                        </VBox>
+                    </smartFilterBar:customControl>
+                </smartFilterBar:ControlConfiguration>
+                <smartFilterBar:ControlConfiguration key="FailBarriersSegmentControl" label="{i18n>filterBarrierSegmentLabel}" visibleInAdvancedArea="true">
+                    <smartFilterBar:customControl>
+                        <VBox class="searchCustomFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                            <Label text="{i18n>filterBarrierSegmentLabel}" labelFor="FailBarriersSegmentControl" class="sapUiTinyMarginBottom"/>
+                            <SegmentedButton id="FailBarriersSegmentControl" selectedKey="{state>/search/barriersFailSegment}" selectionChange=".onBarriersFailSegmentChange" class="resultSegmentControl">
+                                <items>
+                                    <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
+                                    <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
+                                    <SegmentedButtonItem key="SUCCESS" text="{i18n>filterFailSegmentSuccess}"/>
+                                </items>
+                            </SegmentedButton>
+                        </VBox>
+                    </smartFilterBar:customControl>
+                </smartFilterBar:ControlConfiguration>
+            </smartFilterBar:controlConfiguration>
+        </smartFilterBar:SmartFilterBar>
+    </VBox>
+</core:FragmentDefinition>

@@ -54,8 +54,8 @@ Readiness consequence:
 ### 2. Frontend architecture is not yet sufficiently normalized
 
 Evidence:
-- Large orchestration modules remain concentrated in [app/controller/support/SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js), [app/controller/support/AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AnalyticsControllerActions.js), [app/controller/support/DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailViewRuntime.js), [app/service/framework/ComponentInitRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitRuntime.js).
-- State ownership is split across [app/model/StatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/model/StatePaths.js) and [app/service/domain/shared/DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/DomainStatePaths.js).
+- Large orchestration modules remain concentrated in [SearchControllerBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js), [AnalyticsControllerBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/analytics/AnalyticsControllerBehavior.js), [DetailViewBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailViewBehavior.js), and [ComponentInitRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitRuntime.js).
+- State ownership is split across [StatePaths.js](C:/Users/lgbtb/Desktop/ui5/app/model/StatePaths.js) and [ModelPathContracts.js](C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js).
 - Duplicate-governance scan reports same-root duplicate clusters in scripts.
 
 Impact:
@@ -84,10 +84,10 @@ Readiness consequence:
 ### 4. UX/UI is functional, but too much behavior is hand-coded
 
 Evidence:
-- [app/view/App.view.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/App.view.xml#L23) uses a custom shell header control.
-- [app/control/AppShellHeader.js](/C:/Users/lgbtb/Desktop/ui5/app/control/AppShellHeader.js#L71) implements custom shell metadata and actions.
-- [app/util/ThemeService.js](/C:/Users/lgbtb/Desktop/ui5/app/util/ThemeService.js#L15) persists and manipulates theme behavior directly via local storage and DOM classes.
-- Largest CSS modules are very large, especially [app/css/modules/40_page_search.css](/C:/Users/lgbtb/Desktop/ui5/app/css/modules/40_page_search.css) and [app/css/modules/41_page_detail.css](/C:/Users/lgbtb/Desktop/ui5/app/css/modules/41_page_detail.css).
+- [App.view.xml](C:/Users/lgbtb/Desktop/ui5/app/views/App.view.xml#L23) uses a custom shell header control.
+- [AppShellHeader.js](C:/Users/lgbtb/Desktop/ui5/app/controls/AppShellHeader.js#L71) implements custom shell metadata and actions.
+- [ThemeService.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemeService.js#L15) persists and manipulates theme behavior directly via local storage and DOM classes.
+- Largest CSS modules are very large, especially [40_page_search.css](C:/Users/lgbtb/Desktop/ui5/app/styles/modules/40_page_search.css) and [41_page_detail.css](C:/Users/lgbtb/Desktop/ui5/app/styles/modules/41_page_detail.css).
 
 Impact:
 - UI consistency depends on custom runtime behavior rather than on stable UI5/FLP patterns.

@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts"
+], function (ShellPaneContracts) {
     "use strict";
 
     var ROUTES = Object.freeze({
@@ -16,8 +18,8 @@ sap.ui.define([], function () {
     });
 
     var MID_COLUMN_PAGE_IDS = Object.freeze({
-        ANALYTICS: "analyticsPaneHost",
-        DETAIL: "detailPaneHost"
+        ANALYTICS: ShellPaneContracts.HOST_IDS.ANALYTICS,
+        DETAIL: ShellPaneContracts.HOST_IDS.DETAIL
     });
 
     function isDetailRoute(sRouteName) {

@@ -87,11 +87,11 @@ Should defer:
 - heavy result decoration not needed for initial selection
 
 Likely code owners:
-- [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js)
-- [SearchViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchViewportRuntime.js)
-- [SearchSelectionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchSelectionRuntime.js)
-- [SearchViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchViewRuntime.js)
-- [Search.view.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/Search.view.xml)
+- [SearchControllerBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js)
+- [SearchViewportRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchViewportRuntime.js)
+- [SearchSelectionRuntime.js](C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchSelectionRuntime.js)
+- [SearchViewBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchViewBehavior.js)
+- [Search.view.xml](C:/Users/lgbtb/Desktop/ui5/app/views/Search.view.xml)
 
 ### Segment 3: Detail readiness
 
@@ -112,11 +112,11 @@ Should defer:
 - non-critical decoration
 
 Likely code owners:
-- [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailViewRuntime.js)
-- [DetailChecklistRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailChecklistRuntime.js)
-- [DetailChecklistRowActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailChecklistRowActions.js)
-- [DetailActionViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailActionViewportRuntime.js)
-- [Detail.view.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/Detail.view.xml)
+- [DetailViewBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailViewBehavior.js)
+- [DetailChecklistBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailChecklistBehavior.js)
+- [DetailChecklistRowBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailChecklistRowBehavior.js)
+- [DetailActionViewportBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailActionViewportBehavior.js)
+- [Detail.view.xml](C:/Users/lgbtb/Desktop/ui5/app/views/Detail.view.xml)
 
 ### Segment 4: Attachments and secondary workflow capabilities
 
@@ -134,8 +134,8 @@ Should defer:
 - background metadata enrichment
 
 Likely code owners:
-- [AttachmentUploadCore.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AttachmentUploadCore.js)
-- [DetailControlRail.fragment.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/fragment/DetailControlRail.fragment.xml)
+- [AttachmentUploadCore.js](C:/Users/lgbtb/Desktop/ui5/app/controller/detail/AttachmentUploadCore.js)
+- [DetailControlRail.fragment.xml](C:/Users/lgbtb/Desktop/ui5/app/views/fragment/DetailControlRail.fragment.xml)
 - [ODataChecklistRepoAdapter.js](/C:/Users/lgbtb/Desktop/ui5/app/infra/adapters/ODataChecklistRepoAdapter.js)
 
 ### Segment 5: Analytics and export
@@ -155,9 +155,9 @@ Should always be deferred until:
 - current detail context is stable if analytics depends on it
 
 Likely code owners:
-- [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AnalyticsControllerActions.js)
+- [AnalyticsControllerBehavior.js](C:/Users/lgbtb/Desktop/ui5/app/controller/analytics/AnalyticsControllerBehavior.js)
 - [AnalyticsPayloadNormalizer.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/analytics/AnalyticsPayloadNormalizer.js)
-- [WorkflowAnalyticsBreakdowns.fragment.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml)
+- [WorkflowAnalyticsBreakdowns.fragment.xml](C:/Users/lgbtb/Desktop/ui5/app/views/fragment/WorkflowAnalyticsBreakdowns.fragment.xml)
 
 ### Segment 6: Background and cosmetic enrichment
 
@@ -172,7 +172,7 @@ Should include:
 - low-priority compatibility requests
 
 Likely code owners:
-- [ThemeService.js](/C:/Users/lgbtb/Desktop/ui5/app/util/ThemeService.js)
+- [ThemeService.js](C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemeService.js)
 - [SettingsManager.js](/C:/Users/lgbtb/Desktop/ui5/app/service/runtime/SettingsManager.js)
 - component runtime modules
 
@@ -192,8 +192,8 @@ Do not wait for:
 - theme prefetch completion
 
 Current candidates:
-- [App.view.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/App.view.xml)
-- [AppShellHeader.js](/C:/Users/lgbtb/Desktop/ui5/app/control/AppShellHeader.js)
+- [App.view.xml](C:/Users/lgbtb/Desktop/ui5/app/views/App.view.xml)
+- [AppShellHeader.js](C:/Users/lgbtb/Desktop/ui5/app/controls/AppShellHeader.js)
 
 ### Block B: Search pane
 
@@ -208,7 +208,7 @@ Use:
 - non-blocking filter enhancement
 
 Current candidates:
-- [Search.view.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/Search.view.xml)
+- [Search.view.xml](C:/Users/lgbtb/Desktop/ui5/app/views/Search.view.xml)
 - search controller support files
 
 ### Block C: Detail pane
@@ -224,7 +224,7 @@ Use:
 - delayed mounting of optional rail content
 
 Current candidates:
-- [Detail.view.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/Detail.view.xml)
+- [Detail.view.xml](C:/Users/lgbtb/Desktop/ui5/app/views/Detail.view.xml)
 - detail controller support files
 
 ### Block D: Analytics region
@@ -237,7 +237,7 @@ Use:
 - stale-while-refresh display if prior snapshot exists
 
 Current candidates:
-- [WorkflowAnalyticsBreakdowns.fragment.xml](/C:/Users/lgbtb/Desktop/ui5/app/view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml)
+- [WorkflowAnalyticsBreakdowns.fragment.xml](C:/Users/lgbtb/Desktop/ui5/app/views/fragment/WorkflowAnalyticsBreakdowns.fragment.xml)
 - analytics controller support files
 
 ### Block E: Dialogs and optional overlays
@@ -288,15 +288,15 @@ Not recommended:
 Reason:
 - startup orchestration is centralized here and can be split into priority bands
 
-2. [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js)
+2. [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js)
 Reason:
 - likely mixes initial search readiness, actions, and post-load behavior
 
-3. [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailViewRuntime.js)
+3. [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailViewBehavior.js)
 Reason:
 - detail readiness should be separated into core detail, secondary panels, and deferred enrichments
 
-4. [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AnalyticsControllerActions.js)
+4. [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/analytics/AnalyticsControllerBehavior.js)
 Reason:
 - analytics should become a strictly deferred branch
 
@@ -306,11 +306,11 @@ Reason:
 
 ### Second-wave candidates
 
-1. [SearchViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchViewportRuntime.js)
-2. [SearchSelectionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchSelectionRuntime.js)
-3. [DetailChecklistRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailChecklistRuntime.js)
-4. [AttachmentUploadCore.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AttachmentUploadCore.js)
-5. [ThemeService.js](/C:/Users/lgbtb/Desktop/ui5/app/util/ThemeService.js)
+1. [SearchViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchViewportRuntime.js)
+2. [SearchSelectionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchSelectionRuntime.js)
+3. [DetailChecklistRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailChecklistBehavior.js)
+4. [AttachmentUploadCore.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/AttachmentUploadCore.js)
+5. [ThemeService.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemeService.js)
 
 ## Suggested Technical Design
 

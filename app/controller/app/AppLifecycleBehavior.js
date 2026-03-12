@@ -1,13 +1,16 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellLayoutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellPaneRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellViewportRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, ShellLayoutRuntime, ShellViewportRuntime, Device) {
+], function (ControllerResourceCleanup, ShellPaneContracts, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, Device) {
     "use strict";
 
     function markStartupReady() {
@@ -31,10 +34,12 @@ sap.ui.define([
             this._ensureAppViewDefaults();
             this._bindLayoutSync();
             this._bindShellStateSync();
+            this._bindShellPaneRouting();
             this._fnViewportResize = this._syncResponsiveViewport.bind(this);
             Device.resize.attachHandler(this._fnViewportResize);
             this._syncResponsiveViewport();
             this._syncShellState();
+            ShellPaneRuntime.writePaneLoaded(this, ShellPaneContracts.PANES.SEARCH, true);
         },
         onAfterRendering: function () {
             var oOwner = this.getOwnerComponent && this.getOwnerComponent();
@@ -72,6 +77,9 @@ sap.ui.define([
             if (this._fnViewportResize) {
                 Device.resize.detachHandler(this._fnViewportResize);
             }
+            if (this._oRouter && this._fnShellPaneRouteGuard && this._oRouter.detachBeforeRouteMatched) {
+                this._oRouter.detachBeforeRouteMatched(this._fnShellPaneRouteGuard, this);
+            }
             ControllerResourceCleanup.destroyMapEntries(this._mShellOverlays);
             this._mShellOverlays = null;
             this._mShellOverlayTriggers = null;
@@ -83,8 +91,25 @@ sap.ui.define([
             this._fnShellStateChange = null;
             this._fnShellLayoutChange = null;
             this._fnViewportResize = null;
+            this._fnShellPaneRouteGuard = null;
+            this._oRouter = null;
             this._fnLayoutSync = null;
             AppShellCoordinator.onExit(this);
+        },
+        _bindShellPaneRouting: function () {
+            var oRouter = this.getRouter && this.getRouter();
+            if (!oRouter || !oRouter.attachBeforeRouteMatched || this._fnShellPaneRouteGuard) {
+                return;
+            }
+            this._oRouter = oRouter;
+            this._fnShellPaneRouteGuard = function (oEvent) {
+                var sRouteName = String(oEvent && oEvent.getParameter && oEvent.getParameter("name") || "").trim();
+                if (!sRouteName) {
+                    return;
+                }
+                ShellPaneRuntime.ensurePaneForRoute(this, sRouteName, NavigationContracts);
+            }.bind(this);
+            oRouter.attachBeforeRouteMatched(this._fnShellPaneRouteGuard, this);
         },
         _bindLayoutSync: function () {
             var oState = this._getStateModel();

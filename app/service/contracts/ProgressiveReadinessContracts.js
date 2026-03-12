@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts"
+], function (NavigationContracts, ShellPaneContracts) {
     "use strict";
 
     return Object.freeze({
@@ -17,6 +18,11 @@ sap.ui.define([
                 ANALYTICS_STARTED: "analyticsStartedLogged",
                 FIRST_ROUTE_READY: "firstRouteReadyLogged"
             })
+        }),
+        PANES: Object.freeze({
+            SEARCH_LOADED_PATH: ShellPaneContracts.READINESS_PATHS.SEARCH,
+            DETAIL_LOADED_PATH: ShellPaneContracts.READINESS_PATHS.DETAIL,
+            ANALYTICS_LOADED_PATH: ShellPaneContracts.READINESS_PATHS.ANALYTICS
         }),
         LAYOUTS: NavigationContracts.LAYOUTS
     });

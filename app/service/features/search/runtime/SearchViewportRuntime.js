@@ -1,137 +1,29 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchScrollRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/SearchUiContracts"
-], function (SearchSelectionRuntime, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, SearchUiContracts) {
+], function (SearchScrollRuntime, SearchStickyLayoutRuntime, SchedulingRuntime, SearchUiContracts) {
     "use strict";
 
     var SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS = SearchUiContracts.VIEWPORT.LAYOUT_DEBOUNCE_MS;
-    var SEARCH_STICKY_STACK_GAP_PX = SearchUiContracts.VIEWPORT.STICKY_STACK_GAP_PX;
-    var SEARCH_MIN_HEADER_OFFSET_PX = SearchUiContracts.VIEWPORT.MIN_HEADER_OFFSET_PX;
-    var SEARCH_HEADER_OFFSET_PADDING_PX = SearchUiContracts.VIEWPORT.HEADER_OFFSET_PADDING_PX;
-    var SEARCH_ANCHOR_SCROLL_MARGIN_PX = SearchUiContracts.VIEWPORT.ANCHOR_SCROLL_MARGIN_PX;
-    var SEARCH_SCROLL_NAV_TOP_PX = SearchUiContracts.VIEWPORT.SCROLL_NAV_TOP_PX;
-    var SEARCH_RESULTS_NAV_EXTRA_PX = SearchUiContracts.VIEWPORT.RESULTS_NAV_EXTRA_PX;
-    var SEARCH_POST_ANCHOR_SYNC_DELAY_MS = SearchUiContracts.VIEWPORT.POST_ANCHOR_SYNC_DELAY_MS;
-
-    function setSearchViewportCssVar(oController, sName, sValue) {
-        var oViewDom = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
-        ThemeDomRuntime.setStyleProperty([oViewDom], sName, sValue);
-    }
-
-    function resolveSearchScrollHost(oController) {
-        var oDomRef = oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
-        var aCandidates;
-        var oNode = oDomRef && oDomRef.parentElement;
-        var oDocumentScrollHost;
-        if (oDomRef && oDomRef.querySelectorAll) {
-            aCandidates = Array.prototype.slice.call(oDomRef.querySelectorAll(".sapMPageEnableScrolling, .sapMPageScroll, .sapMPageEnableScrolling > div"));
-            oNode = aCandidates.find(function (oCandidate) {
-                return oCandidate && oCandidate.scrollHeight > oCandidate.clientHeight + 4;
-            }) || oNode;
-            if (oNode && oNode.scrollHeight > oNode.clientHeight + 4) {
-                return oNode;
-            }
-        }
-        while (oNode && oNode !== document.body) {
-            if (oNode.scrollHeight > oNode.clientHeight + 4) {
-                return oNode;
-            }
-            oNode = oNode.parentElement;
-        }
-        oDocumentScrollHost = document.scrollingElement || document.documentElement || document.body;
-        if (oDocumentScrollHost && oDocumentScrollHost.scrollHeight > oDocumentScrollHost.clientHeight + 4) {
-            return oDocumentScrollHost;
-        }
-        return oDocumentScrollHost || null;
-    }
-
-    function resolveOuterHeight(oControl) {
-        var oDomRef = oControl && oControl.getDomRef && oControl.getDomRef();
-        if (!oDomRef || !oDomRef.getBoundingClientRect) {
-            return 0;
-        }
-        return Math.max(0, Math.ceil(oDomRef.getBoundingClientRect().height || 0));
-    }
-
-    function resolveDomHeight(vControlOrDom, sSelectorFallback) {
-        var oDomRef = vControlOrDom && vControlOrDom.nodeType ? vControlOrDom : (vControlOrDom && vControlOrDom.getDomRef && vControlOrDom.getDomRef());
-        if ((!oDomRef || !oDomRef.getBoundingClientRect) && typeof document !== "undefined" && sSelectorFallback) {
-            oDomRef = document.querySelector(sSelectorFallback);
-        }
-        if (!oDomRef || !oDomRef.getBoundingClientRect) {
-            return 0;
-        }
-        return Math.max(0, Math.ceil(oDomRef.getBoundingClientRect().height || 0));
-    }
-
-    function resolveSearchTableToolbarDom(oController) {
-        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
-        var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
-        return oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null;
-    }
-
-    function setSearchStickyTop(vControlOrDom, sTop) {
-        var oDomRef = vControlOrDom && vControlOrDom.nodeType ? vControlOrDom : (vControlOrDom && vControlOrDom.getDomRef && vControlOrDom.getDomRef());
-        ThemeDomRuntime.setStyleProperty([oDomRef], "top", sTop);
-        ThemeDomRuntime.setStyleProperty([oDomRef], "position", "sticky");
-    }
-
-    function resolveShellHeaderOffset(oController, oScrollHost) {
-        var oShellHeader = typeof document !== "undefined" ? document.querySelector(".appShellHeader") : null;
-        var iShellBottom = 0;
-        var iHostTop = 0;
-        if (oShellHeader && oShellHeader.getBoundingClientRect) {
-            iShellBottom = Math.ceil(oShellHeader.getBoundingClientRect().bottom || 0);
-        }
-        if (oScrollHost && oScrollHost.getBoundingClientRect) {
-            iHostTop = Math.ceil(oScrollHost.getBoundingClientRect().top || 0);
-        }
-        return Math.max(SEARCH_MIN_HEADER_OFFSET_PX, iShellBottom - iHostTop + SEARCH_HEADER_OFFSET_PADDING_PX);
-    }
 
     function clearSearchViewportSyncTimer(oController) {
         oController._iSearchViewportSyncTimer = SchedulingRuntime.clearTimer(oController._iSearchViewportSyncTimer);
     }
 
-    function schedulePostAnchorSync(oController) {
-        oController._iSearchAnchorSyncTimer = SchedulingRuntime.restartTimer(
-            oController._iSearchAnchorSyncTimer,
-            function () {
-                syncSearchViewportLayout(oController);
-                syncSearchScrollAffordances(oController);
-            },
-            SEARCH_POST_ANCHOR_SYNC_DELAY_MS
+    function syncSearchViewportLayout(oController) {
+        SearchStickyLayoutRuntime.syncSearchViewportLayout(
+            oController,
+            SearchScrollRuntime.resolveSearchScrollHost(oController)
         );
     }
 
-    function syncSearchViewportLayout(oController) {
-        var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
-        SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, false);
-        syncSearchStickyOffsets(oController);
-    }
-
     function syncSearchScrollAffordances(oController) {
-        var oScrollHost = resolveSearchScrollHost(oController);
-        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
-        var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
-        var iTop = oScrollHost ? Number(oScrollHost.scrollTop || 0) : 0;
-        var oResultsToolbarDom = oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null;
-        var oHostRect;
-        var oAnchorRect;
-        var iAnchorTop = 0;
-        var oAnchorDom = oResultsShellDom || oResultsToolbarDom;
-        ControllerViewStateRuntime.set(oController, "/scrollNavVisible", iTop > SEARCH_SCROLL_NAV_TOP_PX);
-        if (oScrollHost && oAnchorDom && oScrollHost.getBoundingClientRect && oAnchorDom.getBoundingClientRect) {
-            oHostRect = oScrollHost.getBoundingClientRect();
-            oAnchorRect = oAnchorDom.getBoundingClientRect();
-            iAnchorTop = iTop + (oAnchorRect.top - oHostRect.top);
-        }
-        ControllerViewStateRuntime.set(oController, "/resultsToolbarNavVisible", !!oAnchorDom && iTop > (iAnchorTop + SEARCH_RESULTS_NAV_EXTRA_PX));
+        SearchScrollRuntime.syncSearchScrollAffordances(
+            oController,
+            SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController)
+        );
     }
 
     function flushSearchViewportSync(oController) {
@@ -140,64 +32,6 @@ sap.ui.define([
             syncSearchViewportLayout(oController);
             syncSearchScrollAffordances(oController);
         });
-    }
-
-    function resolveSearchWorkbenchDock(oController) {
-        return oController.byId && oController.byId("searchWorkbenchDock");
-    }
-
-    function resolveResultsTableToolbarHeight(oController) {
-        return resolveDomHeight(resolveSearchTableToolbarDom(oController));
-    }
-
-    function syncSearchStickyOffsets(oController) {
-        var oScrollHost = resolveSearchScrollHost(oController);
-        var oWorkbenchDock = resolveSearchWorkbenchDock(oController);
-        var oFilterCard = oController.byId && oController.byId("searchFilterCard");
-        var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
-        var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
-        var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
-        var iResultsToolbarHeight = resolveResultsTableToolbarHeight(oController);
-        var iFilterHeight = resolveDomHeight(oFilterCard, ".searchFilterCardDense");
-        var iActionHeight = resolveDomHeight(oActionRail, ".searchResultsActionRail");
-        var iToolbarHeight = resolveDomHeight(oToolbarRail, ".searchSmartToolbarRail");
-        var iDockHeight = resolveOuterHeight(oWorkbenchDock);
-        var iTopBase = resolveShellHeaderOffset(oController, oScrollHost);
-        var iStackGap = SEARCH_STICKY_STACK_GAP_PX;
-        var iActionTop;
-        var iToolbarTop;
-        if (!iDockHeight) {
-            iDockHeight = iFilterHeight + iActionHeight + iToolbarHeight;
-            if (iFilterHeight && iActionHeight) {
-                iDockHeight += iStackGap;
-            }
-            if ((iFilterHeight || iActionHeight) && iToolbarHeight) {
-                iDockHeight += iStackGap;
-            }
-        }
-        iActionTop = iTopBase + iFilterHeight + (iFilterHeight && iActionHeight ? iStackGap : 0);
-        iToolbarTop = iActionTop + iActionHeight + (iActionHeight && iToolbarHeight ? iStackGap : 0);
-        setSearchViewportCssVar(oController, "--search-sticky-dock-top", iTopBase + "px");
-        setSearchViewportCssVar(
-            oController,
-            "--search-workbench-toolbar-stack-height",
-            (iActionHeight + iToolbarHeight + ((iActionHeight && iToolbarHeight) ? iStackGap : 0)) + "px"
-        );
-        setSearchViewportCssVar(oController, "--search-sticky-filter-top", iTopBase + "px");
-        setSearchViewportCssVar(oController, "--search-sticky-action-top", iActionTop + "px");
-        setSearchViewportCssVar(oController, "--search-sticky-toolbar-top", iToolbarTop + "px");
-        setSearchViewportCssVar(oController, "--search-results-toolbar-sticky-top", iToolbarTop + "px");
-        setSearchViewportCssVar(oController, "--search-smarttable-toolbar-height", iResultsToolbarHeight + "px");
-        setSearchStickyTop(oFilterCard, iTopBase + "px");
-        setSearchStickyTop(oActionRail, iActionTop + "px");
-        setSearchStickyTop(oToolbarRail, iToolbarTop + "px");
-        setSearchStickyTop(oResultsToolbarDom, iToolbarTop + "px");
-        ThemeDomRuntime.setStyleProperties([oActionRail, oToolbarRail, oResultsToolbarDom], {
-            "position": "sticky",
-            "overflow": "visible",
-            "overflow-x": "visible",
-            "overflow-y": "visible"
-        }, "important");
     }
 
     function scheduleSearchViewportSync(oController, bImmediate) {
@@ -212,30 +46,6 @@ sap.ui.define([
         }, SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS);
     }
 
-    function resolveSearchViewportObserverTargets(oController, oScrollHost) {
-        var aTargets = [];
-        var oViewDom = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
-        var oWorkbenchDock = resolveSearchWorkbenchDock(oController);
-        var oWorkbenchDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
-        var oFilterCard = oController.byId && oController.byId("searchFilterCard");
-        var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
-        var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
-        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
-        var oShellHeader = typeof document !== "undefined" ? document.querySelector(".appShellHeader") : null;
-        [oViewDom, oScrollHost, oWorkbenchDom, oShellHeader,
-            oFilterCard && oFilterCard.getDomRef && oFilterCard.getDomRef(),
-            oActionRail && oActionRail.getDomRef && oActionRail.getDomRef(),
-            oToolbarRail && oToolbarRail.getDomRef && oToolbarRail.getDomRef(),
-            oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef(),
-            resolveSearchTableToolbarDom(oController)
-        ].forEach(function (oTarget) {
-            if (oTarget && aTargets.indexOf(oTarget) < 0) {
-                aTargets.push(oTarget);
-            }
-        });
-        return aTargets;
-    }
-
     function bindSearchViewportObservers(oController, oScrollHost) {
         var aPrevTargets;
         var aNextTargets;
@@ -248,7 +58,7 @@ sap.ui.define([
             });
         }
         aPrevTargets = oController._aSearchViewportObserverTargets || [];
-        aNextTargets = resolveSearchViewportObserverTargets(oController, oScrollHost);
+        aNextTargets = SearchStickyLayoutRuntime.resolveSearchViewportObserverTargets(oController, oScrollHost);
         aPrevTargets.forEach(function (oTarget) {
             if (aNextTargets.indexOf(oTarget) < 0) {
                 oController._oSearchViewportResizeObserver.unobserve(oTarget);
@@ -278,7 +88,7 @@ sap.ui.define([
 
     function bindSearchViewportRuntime(oController) {
         var oView = oController && oController.getView && oController.getView();
-        var oScrollHost = resolveSearchScrollHost(oController);
+        var oScrollHost = SearchScrollRuntime.resolveSearchScrollHost(oController);
         if (!oView) {
             return;
         }
@@ -345,85 +155,60 @@ sap.ui.define([
     }
 
     function captureSearchScrollPosition(oController) {
-        var oScrollHost = resolveSearchScrollHost(oController);
-        if (!ControllerModelRuntime.state(oController)) {
-            return;
-        }
-        ModelStateRuntime.write(oController, "state", "/searchScrollState", {
-            hostTop: oScrollHost ? oScrollHost.scrollTop : 0
-        });
+        SearchScrollRuntime.captureSearchScrollPosition(oController);
     }
 
     function restoreSearchScrollPosition(oController) {
-        var oScrollState = ModelStateRuntime.read(oController, "state", "/searchScrollState");
-        var iTargetTop = Number(oScrollState && oScrollState.hostTop);
-        if (!oScrollState) {
-            return;
-        }
-        SchedulingRuntime.nextDoubleFrame(function () {
-            var oScrollHost = resolveSearchScrollHost(oController);
-            var iMaxTop;
-            if (!oScrollHost || !Number.isFinite(iTargetTop)) {
-                return;
+        SearchScrollRuntime.restoreSearchScrollPosition(oController, {
+            resolveToolbarDom: function () {
+                return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
+            },
+            syncViewportLayout: function () {
+                syncSearchViewportLayout(oController);
             }
-            iMaxTop = Math.max(0, oScrollHost.scrollHeight - oScrollHost.clientHeight);
-            oScrollHost.scrollTop = Math.max(0, Math.min(iTargetTop, iMaxTop));
-            ModelStateRuntime.write(oController, "state", "/searchScrollState", null);
-            syncSearchViewportLayout(oController);
-            syncSearchScrollAffordances(oController);
         });
     }
 
     function scrollToSearchFilters(oController) {
-        var oScrollHost = resolveSearchScrollHost(oController);
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oFilterDom = oFilterCard && oFilterCard.getDomRef && oFilterCard.getDomRef();
-        var oHostRect;
-        var oFilterRect;
-        var iTargetTop;
-        var iStickyOffset = resolveShellHeaderOffset(oController, oScrollHost);
-        if (!oScrollHost || !oFilterDom || !oScrollHost.getBoundingClientRect || !oFilterDom.getBoundingClientRect) {
-            if (oFilterDom && oFilterDom.scrollIntoView) {
-                oFilterDom.scrollIntoView({ block: "start", behavior: "smooth" });
+        return SearchScrollRuntime.scrollToTarget(
+            oController,
+            oFilterDom,
+            SearchStickyLayoutRuntime.resolveShellHeaderOffset(oController, SearchScrollRuntime.resolveSearchScrollHost(oController)),
+            {
+                resolveToolbarDom: function () {
+                    return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
+                },
+                syncViewportLayout: function () {
+                    syncSearchViewportLayout(oController);
+                }
             }
-            return Promise.resolve(false);
-        }
-        oHostRect = oScrollHost.getBoundingClientRect();
-        oFilterRect = oFilterDom.getBoundingClientRect();
-        iTargetTop = (oScrollHost.scrollTop || 0) + (oFilterRect.top - oHostRect.top) - iStickyOffset - SEARCH_ANCHOR_SCROLL_MARGIN_PX;
-        oScrollHost.scrollTop = Math.max(0, iTargetTop);
-        syncSearchScrollAffordances(oController);
-        schedulePostAnchorSync(oController);
-        return Promise.resolve(true);
+        );
     }
 
     function scrollToSearchResultsToolbar(oController) {
-        var oScrollHost = resolveSearchScrollHost(oController);
+        var oFallbackToolbar = oController.byId && oController.byId("smartTableCustomToolbar");
         var oResultsShell = oController.byId && oController.byId("searchResultsShell");
         var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
-        var oFallbackToolbar = oController.byId && oController.byId("smartTableCustomToolbar");
-        var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
+        var oResultsToolbarDom = SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
         var oToolbarDom = oResultsShellDom || oResultsToolbarDom;
-        var oHostRect;
-        var oToolbarRect;
-        var iTargetTop;
-        var iStickyOffset = resolveShellHeaderOffset(oController, oScrollHost);
         if (!oToolbarDom) {
             oToolbarDom = oFallbackToolbar && oFallbackToolbar.getDomRef && oFallbackToolbar.getDomRef();
         }
-        if (!oScrollHost || !oToolbarDom || !oScrollHost.getBoundingClientRect || !oToolbarDom.getBoundingClientRect) {
-            if (oToolbarDom && oToolbarDom.scrollIntoView) {
-                oToolbarDom.scrollIntoView({ block: "start", behavior: "smooth" });
+        return SearchScrollRuntime.scrollToTarget(
+            oController,
+            oToolbarDom,
+            SearchStickyLayoutRuntime.resolveShellHeaderOffset(oController, SearchScrollRuntime.resolveSearchScrollHost(oController)),
+            {
+                resolveToolbarDom: function () {
+                    return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
+                },
+                syncViewportLayout: function () {
+                    syncSearchViewportLayout(oController);
+                }
             }
-            return Promise.resolve(false);
-        }
-        oHostRect = oScrollHost.getBoundingClientRect();
-        oToolbarRect = oToolbarDom.getBoundingClientRect();
-        iTargetTop = (oScrollHost.scrollTop || 0) + (oToolbarRect.top - oHostRect.top) - iStickyOffset - SEARCH_ANCHOR_SCROLL_MARGIN_PX;
-        oScrollHost.scrollTop = Math.max(0, iTargetTop);
-        syncSearchScrollAffordances(oController);
-        schedulePostAnchorSync(oController);
-        return Promise.resolve(true);
+        );
     }
 
     return {

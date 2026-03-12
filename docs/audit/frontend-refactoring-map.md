@@ -125,12 +125,12 @@ Use exactly one canonical source per constant family:
 - domain-facing state path bridge:
   - [app/service/domain/shared/ModelPathContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js)
 - deprecated compatibility alias:
-  - [app/service/domain/shared/DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/DomainStatePaths.js)
+  - [app/service/domain/shared/ModelPathContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js)
   - alias only, no own literals
 - shared model names and generic UI tokens:
   - [app/service/contracts/ModelContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/contracts/ModelContracts.js)
 - frontend runtime config:
-  - [app/util/runtime/FrontendConfigConstants.js](/C:/Users/lgbtb/Desktop/ui5/app/util/runtime/FrontendConfigConstants.js)
+  - [app/service/contracts/FrontendConfigConstants.js](/C:/Users/lgbtb/Desktop/ui5/app/service/contracts/FrontendConfigConstants.js)
   - [app/service/framework/FrontendConfigConstants.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/FrontendConfigConstants.js) remains alias-only
 
 ## Current Structural Errors
@@ -147,13 +147,13 @@ Required change:
 ### Error B: Support files behave like feature engines
 
 Affected files:
-- [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js)
-- [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AnalyticsControllerActions.js)
-- [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailViewRuntime.js)
-- [SearchViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchViewportRuntime.js)
-- [SearchSelectionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchSelectionRuntime.js)
-- [SearchViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchViewRuntime.js)
-- [DetailChecklistRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailChecklistRuntime.js)
+- [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js)
+- [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/analytics/AnalyticsControllerBehavior.js)
+- [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailViewBehavior.js)
+- [SearchViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchViewportRuntime.js)
+- [SearchSelectionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchSelectionRuntime.js)
+- [SearchViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchViewBehavior.js)
+- [DetailChecklistRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailChecklistBehavior.js)
 
 Required change:
 - split by intent
@@ -163,7 +163,7 @@ Required change:
 
 Affected files:
 - [StatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/model/StatePaths.js)
-- [DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/DomainStatePaths.js)
+- [DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js)
 - [ModelPathContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js)
 
 Required change:
@@ -201,7 +201,7 @@ Actions:
 Status:
 - `[not_started]` full enforcement
 
-### 1.2 [app/service/domain/shared/DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/DomainStatePaths.js)
+### 1.2 [app/service/domain/shared/ModelPathContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js)
 
 Current role:
 - parallel path authority
@@ -252,7 +252,7 @@ Status:
 
 ## 2. Thick Support Modules To Cut First
 
-### 2.1 [app/controller/support/SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js)
+### 2.1 [app/controller/search/SearchControllerBehavior.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js)
 
 Problem:
 - too many concerns in one module
@@ -281,7 +281,7 @@ What to move where:
 Status:
 - `[pending]`
 
-### 2.2 [app/controller/support/AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AnalyticsControllerActions.js)
+### 2.2 [app/controller/analytics/AnalyticsControllerBehavior.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/analytics/AnalyticsControllerBehavior.js)
 
 Problem:
 - analytics orchestration is too broad and likely coupled to general page logic
@@ -300,7 +300,7 @@ What to move where:
 Status:
 - `[pending]`
 
-### 2.3 [app/controller/support/DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailViewRuntime.js)
+### 2.3 [app/controller/detail/DetailViewBehavior.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailViewBehavior.js)
 
 Problem:
 - detail runtime is too central
@@ -320,7 +320,7 @@ What to move where:
 Status:
 - `[pending]`
 
-### 2.4 [app/controller/support/SearchViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchViewportRuntime.js)
+### 2.4 [app/service/features/search/runtime/SearchViewportRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchViewportRuntime.js)
 
 Problem:
 - viewport and readiness logic are likely mixed
@@ -332,7 +332,7 @@ Target split:
 Status:
 - `[pending]`
 
-### 2.5 [app/controller/support/SearchSelectionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchSelectionRuntime.js)
+### 2.5 [app/service/features/search/runtime/SearchSelectionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchSelectionRuntime.js)
 
 Problem:
 - selection rules are reusable behavior and should not live as one-off support runtime
@@ -344,7 +344,7 @@ Target split:
 Status:
 - `[pending]`
 
-### 2.6 [app/controller/support/DetailChecklistRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailChecklistRuntime.js)
+### 2.6 [app/controller/detail/DetailChecklistBehavior.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailChecklistBehavior.js)
 
 Problem:
 - core detail interaction and secondary rendering likely share one file
@@ -450,7 +450,7 @@ Status:
 
 ## 6. UX/UI Ownership Cleanup
 
-### 6.1 [app/control/AppShellHeader.js](/C:/Users/lgbtb/Desktop/ui5/app/control/AppShellHeader.js)
+### 6.1 [app/controls/AppShellHeader.js](/C:/Users/lgbtb/Desktop/ui5/app/controls/AppShellHeader.js)
 
 Target:
 - isolated product shell module
@@ -463,7 +463,7 @@ Actions:
 Status:
 - `[pending]`
 
-### 6.2 [app/util/ThemeService.js](/C:/Users/lgbtb/Desktop/ui5/app/util/ThemeService.js)
+### 6.2 [app/service/framework/ThemeService.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ThemeService.js)
 
 Target:
 - split into:
@@ -489,9 +489,9 @@ Must introduce:
 
 Primary implementation files:
 - [ComponentInitRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitRuntime.js)
-- [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js)
-- [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailViewRuntime.js)
-- [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AnalyticsControllerActions.js)
+- [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js)
+- [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailViewBehavior.js)
+- [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/analytics/AnalyticsControllerBehavior.js)
 
 Status:
 - `[pending]`
@@ -564,13 +564,13 @@ Completion marker:
 - `2026-03-12`: central constant rule added to architecture plan
 - `2026-03-12`: added [ModelContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/contracts/ModelContracts.js) for canonical model names and shared tokens
 - `2026-03-12`: migrated first-wave heavy modules to use centralized model/token contracts:
-  - [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js)
-  - [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AnalyticsControllerActions.js)
-  - [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/DetailViewRuntime.js)
-- `2026-03-12`: marked [DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/DomainStatePaths.js) as deprecated compatibility surface
+  - [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js)
+  - [AnalyticsControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/analytics/AnalyticsControllerBehavior.js)
+  - [DetailViewRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailViewBehavior.js)
+- `2026-03-12`: marked [DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js) as deprecated compatibility surface
 - `2026-03-12`: moved `AnalyticsContracts`, `NavigationContracts`, and `WorkflowContracts` to neutral canonical files under [app/contracts](/C:/Users/lgbtb/Desktop/ui5/app/contracts/AnalyticsContracts.js)
 - `2026-03-12`: converted service and infra contract copies into alias-only entry points
-- `2026-03-12`: removed literal duplication from [DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/DomainStatePaths.js) by aliasing canonical state contracts
+- `2026-03-12`: removed literal duplication from [DomainStatePaths.js](/C:/Users/lgbtb/Desktop/ui5/app/service/domain/shared/ModelPathContracts.js) by aliasing canonical state contracts
 - `2026-03-12`: added [target-folder-map.md](/C:/Users/lgbtb/Desktop/ui5/docs/audit/target-folder-map.md) to formalize capability-based target structure and folder merge/delete strategy
 - `2026-03-12`: added [OperationSourceContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/contracts/OperationSourceContracts.js) for canonical action/source labels
 - `2026-03-12`: migrated shared model-name usage in:
@@ -578,10 +578,10 @@ Completion marker:
   - [ComponentInitRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/ComponentInitRuntime.js)
   - [EffectApplier.js](/C:/Users/lgbtb/Desktop/ui5/app/service/framework/EffectApplier.js)
 - `2026-03-12`: migrated shell/runtime model keys in:
-  - [AppControllerDomActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AppControllerDomActions.js)
-  - [AppControllerShellActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AppControllerShellActions.js)
-  - [AppControllerLifecycleActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/AppControllerLifecycleActions.js)
-- `2026-03-12`: fully drained local `source: "..."` labels from [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/support/SearchControllerActions.js)
+  - [AppControllerDomActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/app/AppDomBehavior.js)
+  - [AppControllerShellActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/app/AppShellBehavior.js)
+  - [AppControllerLifecycleActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/app/AppLifecycleBehavior.js)
+- `2026-03-12`: fully drained local `source: "..."` labels from [SearchControllerActions.js](/C:/Users/lgbtb/Desktop/ui5/app/controller/search/SearchControllerBehavior.js)
 - `2026-03-12`: created [search-view-runtime-decomposition.md](/C:/Users/lgbtb/Desktop/ui5/docs/audit/search-view-runtime-decomposition.md) with target cut map for `SearchViewRuntime`
 - `2026-03-12`: completed first real `SearchViewRuntime` decomposition slice by extracting analytics rail scheduling into [SearchAnalyticsRailRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchAnalyticsRailRuntime.js)
 - `2026-03-12`: established clean controller-to-capability boundary for search analytics runtime via injected runner, instead of direct controller-layer imports

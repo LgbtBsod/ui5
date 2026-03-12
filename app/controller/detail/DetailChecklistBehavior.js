@@ -91,6 +91,7 @@ sap.ui.define([
                     DetailInfoCardLayoutRuntime.writeCards(this, aCards);
                 }.bind(this)
             });
+            this._bDetailInitialRouteHandled = true;
 
             if (sApplyMode === "layoutOnly") {
                 return;

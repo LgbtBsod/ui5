@@ -38,6 +38,7 @@ sap.ui.define([
     return {
         onInit: function () {
             this._facade = new AnalyticsFacade();
+            this._bAnalyticsInitialRouteHandled = false;
             ControllerViewStateRuntime.initModel(this, function () {
                 return AnalyticsBuilderRuntime.createInitialViewState(REFRESH_STATE_TASK_KEY);
             });
@@ -45,6 +46,13 @@ sap.ui.define([
             ControllerRouteRuntime.attachMatched(this, [
                 { name: NavigationContracts.ROUTES.ANALYTICS, handler: this._onAnalyticsMatched }
             ]);
+        },
+
+        onAfterRendering: function () {
+            var sCurrentRouteName = String(this.getModel(ModelContracts.MODELS.STATE).getProperty("/currentRouteName") || "").trim();
+            if (!this._bAnalyticsInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS) {
+                this._onAnalyticsMatched();
+            }
         },
 
         onExit: function () {
@@ -60,6 +68,7 @@ sap.ui.define([
             this._oAnalyticsReportDialog = null;
             this._pAnalyticsReportDialog = null;
             this._facade = null;
+            this._bAnalyticsInitialRouteHandled = null;
         },
 
         _applyComparisonMetricSelection: function () {
@@ -116,6 +125,7 @@ sap.ui.define([
         },
 
         _onAnalyticsMatched: function () {
+            this._bAnalyticsInitialRouteHandled = true;
             return this._loadAnalytics("routeMatched");
         },
 

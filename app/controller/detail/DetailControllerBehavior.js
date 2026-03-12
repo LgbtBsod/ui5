@@ -122,6 +122,7 @@ sap.ui.define([
     return {
         onInit: function () {
             this._facade = new DetailFacade();
+            this._bDetailInitialRouteHandled = false;
             this._mLazyDialogs = {};
             this._mDialogReturnFocus = {};
             this._iAttachmentDropZoneBindTimer = null;
@@ -175,6 +176,7 @@ sap.ui.define([
             this._fnAdaptiveViewportSync = null;
             this._oStateValidationModel = null;
             this._fnStateValidationChange = null;
+            this._bDetailInitialRouteHandled = null;
         },
 
         _replayInitialDetailRouteIfNeeded: function () {
@@ -182,9 +184,10 @@ sap.ui.define([
             var sCurrentRouteName = String(ModelStateRuntime.read(this, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
             var sLoadedRootId = String(ModelStateRuntime.read(this, SELECTED_MODEL, "/root/id", "") || "").trim();
 
-            if (!oParsedRoute || !oParsedRoute.id || sLoadedRootId || sCurrentRouteName !== NavigationContracts.ROUTES.SEARCH) {
+            if (!oParsedRoute || !oParsedRoute.id || sLoadedRootId || !NavigationContracts.isDetailRoute(sCurrentRouteName) || this._bDetailInitialRouteHandled) {
                 return;
             }
+            this._bDetailInitialRouteHandled = true;
             this._onDetailMatched({
                 getParameter: function (sName) {
                     if (sName === "arguments") {

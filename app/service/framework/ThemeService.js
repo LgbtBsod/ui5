@@ -1,28 +1,31 @@
 sap.ui.define([
     "sap/ui/core/Core",
     "sap/ui/core/theming/Parameters",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemePhilosophy",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ValueTokenParser",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeTokenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (Core, Parameters, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime) {
+], function (Core, Parameters, JsRuntimeContracts, ThemeContracts, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime) {
     "use strict";
 
-    var SWITCH_CLASS = "appThemeSwitching";
-    var MOTION_DISABLED_CLASS = "theme-motion-disabled";
-    var MOTION_ENABLED_CLASS = "theme-motion-enabled";
-    var THEME_PROFILE_STORAGE_KEY = "checklist_app_theme_profile";
-    var LEGACY_THEME_PROFILE_STORAGE_KEY = "sap_ui5_theme_profile";
-    var LEGACY_THEME_STORAGE_KEY = "sap_ui5_theme";
-    var THEME_PROFILE_RECOVERY_KEY = "checklist_app_theme_profile_recovery_20260305";
-    var DEFAULT_MODE = "morning";
-    var DEFAULT_ANIMATION_ENABLED = true;
+    var TYPE_FUNCTION = JsRuntimeContracts.TYPEOF.FUNCTION;
+    var SWITCH_CLASS = ThemeContracts.CLASSES.SWITCHING;
+    var MOTION_DISABLED_CLASS = ThemeContracts.CLASSES.MOTION_DISABLED;
+    var MOTION_ENABLED_CLASS = ThemeContracts.CLASSES.MOTION_ENABLED;
+    var THEME_PROFILE_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.PROFILE;
+    var LEGACY_THEME_PROFILE_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.LEGACY_PROFILE;
+    var LEGACY_THEME_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.LEGACY_THEME;
+    var THEME_PROFILE_RECOVERY_KEY = ThemeContracts.STORAGE_KEYS.PROFILE_RECOVERY;
+    var DEFAULT_MODE = ThemeContracts.MODES.DEFAULT;
+    var DEFAULT_ANIMATION_ENABLED = ThemeContracts.DEFAULTS.ANIMATION_ENABLED;
     var MODE_TO_THEME = {
-        morning: "sap_horizon",
-        night: "sap_horizon_dark"
+        morning: ThemeContracts.THEMES.MORNING,
+        night: ThemeContracts.THEMES.NIGHT
     };
-    var SWITCH_DURATION_MS = 220;
+    var SWITCH_DURATION_MS = ThemeContracts.DURATIONS.SWITCH_MS;
     var iSwitchTimer = 0;
     var fnThemeChangedCleanup = null;
     var sPendingMode = "";
@@ -93,7 +96,7 @@ sap.ui.define([
         var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled);
         try {
             window.localStorage.setItem(THEME_PROFILE_STORAGE_KEY, JSON.stringify(oNormalized));
-            window.localStorage.setItem("checklist_app_theme", oNormalized.mode);
+            window.localStorage.setItem(ThemeContracts.STORAGE_KEYS.APP_THEME, oNormalized.mode);
         } catch (e) {
             // Best-effort persistence.
         }
@@ -232,7 +235,7 @@ sap.ui.define([
         }
         iSwitchTimer = SchedulingRuntime.restartTimer(iSwitchTimer, function () {
             clearSwitching();
-        }, bAwaitThemeChanged ? Math.max(SWITCH_DURATION_MS, 520) : SWITCH_DURATION_MS);
+        }, bAwaitThemeChanged ? Math.max(SWITCH_DURATION_MS, ThemeContracts.DURATIONS.SWITCH_THEME_CHANGED_MIN_MS) : SWITCH_DURATION_MS);
     }
 
     function syncTokensFromUI5() {
@@ -248,7 +251,7 @@ sap.ui.define([
         );
         var sResolvedMode = normalizeMode(oRequestedProfile.mode);
         var sTheme = themeForMode(sResolvedMode);
-        var sCurrentTheme = Core && typeof Core.getConfiguration === "function" && Core.getConfiguration() && Core.getConfiguration().getTheme
+        var sCurrentTheme = Core && typeof Core.getConfiguration === TYPE_FUNCTION && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? Core.getConfiguration().getTheme()
             : "";
         var sCurrentMode = modeForTheme(sCurrentTheme);
