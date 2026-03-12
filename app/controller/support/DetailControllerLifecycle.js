@@ -9,7 +9,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
 ], function (
     ControllerResourceCleanup,
     DetailFacade,
@@ -21,7 +22,8 @@ sap.ui.define([
     ControllerModelRuntime,
     ControllerViewStateRuntime,
     ModelStateRuntime,
-    SchedulingRuntime
+    SchedulingRuntime,
+    NavigationContracts
 ) {
     "use strict";
 
@@ -118,8 +120,8 @@ sap.ui.define([
             this._oAdaptiveViewportResizeObserver = null;
             this._fnAdaptiveViewportSync = null;
             ControllerRouteRuntime.attachMatched(this, [
-                { name: "detail", handler: this._onDetailMatched },
-                { name: "detailLayout", handler: this._onDetailMatched }
+                { name: NavigationContracts.ROUTES.DETAIL, handler: this._onDetailMatched },
+                { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: this._onDetailMatched }
             ]);
 
             ControllerViewStateRuntime.initModel(this, buildInitialViewState.bind(null, this));
@@ -164,10 +166,10 @@ sap.ui.define([
 
         _replayInitialDetailRouteIfNeeded: function () {
             var oParsedRoute = parseInitialDetailHash();
-            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
+            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
             var sLoadedRootId = String(ModelStateRuntime.read(this, "selected", "/root/id", "") || "").trim();
 
-            if (!oParsedRoute || !oParsedRoute.id || sLoadedRootId || sCurrentRouteName !== "search") {
+            if (!oParsedRoute || !oParsedRoute.id || sLoadedRootId || sCurrentRouteName !== NavigationContracts.ROUTES.SEARCH) {
                 return;
             }
             this._onDetailMatched({
@@ -179,7 +181,7 @@ sap.ui.define([
                         };
                     }
                     if (sName === "name") {
-                        return oParsedRoute.layout ? "detailLayout" : "detail";
+                        return oParsedRoute.layout ? NavigationContracts.ROUTES.DETAIL_LAYOUT : NavigationContracts.ROUTES.DETAIL;
                     }
                     return null;
                 }

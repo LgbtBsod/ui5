@@ -10,8 +10,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, StatePaths, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (DetailActionConstants, DetailCommandPolicy, ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, StatePaths, CreateSentinel, NavigationContracts) {
     "use strict";
 
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
@@ -67,7 +68,7 @@ sap.ui.define([
             }
             if (sDecision === "DISCARD") {
                 ModelStateRuntime.resetDetailWorkflowState(oController, {
-                    "/layout": "OneColumn",
+                    "/layout": NavigationContracts.LAYOUTS.ONE_COLUMN,
                     "/selectedId": "",
                     "/activeObjectId": ""
                 });
@@ -152,8 +153,8 @@ sap.ui.define([
             if (!oState || !oState.getProperty || !oState.setProperty) {
                 return;
             }
-            var sLayout = LayoutStateRuntime.readLayout(oState, "TwoColumnsMidExpanded");
-            var sNextLayout = sLayout === "MidColumnFullScreen" ? "TwoColumnsMidExpanded" : "MidColumnFullScreen";
+            var sLayout = LayoutStateRuntime.readLayout(oState, NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED);
+            var sNextLayout = sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN ? NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED : NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
             this._applyLayoutState(sNextLayout);
         },
 

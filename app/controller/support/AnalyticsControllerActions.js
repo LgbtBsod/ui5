@@ -10,14 +10,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "sap/ui/core/Fragment"
-], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderRuntime, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime, ModelStateRuntime, StatePaths, Fragment) {
+    "sap/ui/core/Fragment",
+    "PRODUCTION_CONTROL_CHECKLIST/util/ExcelExport",
+    "PRODUCTION_CONTROL_CHECKLIST/util/analytics/AnalyticsExportRows",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderRuntime, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime, ModelStateRuntime, StatePaths, Fragment, ExcelExport, AnalyticsExportRows, FeedbackCoordinator, AnalyticsContracts, DialogContracts, NavigationContracts) {
     "use strict";
 
     var getText = ControllerTextRuntime.getText;
-    var REFRESH_STATE_TASK_KEY = "ANALYTICS_REFRESH";
-    var REFRESH_POLL_DELAY_MS = 1800;
-    var REFRESH_POLL_MAX_ATTEMPTS = 12;
+    var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
+    var REFRESH_POLL_DELAY_MS = AnalyticsContracts.REFRESH.POLL_DELAY_MS;
+    var REFRESH_POLL_MAX_ATTEMPTS = AnalyticsContracts.REFRESH.POLL_MAX_ATTEMPTS;
 
     function isValidYearString(sYear) {
         return /^\d{4}$/.test(String(sYear || "").trim());
@@ -128,7 +134,7 @@ sap.ui.define([
         }
         oController._pAnalyticsYearPicker = Fragment.load({
             id: oController.getView().getId(),
-            name: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.AnalyticsYearPickerPopover",
+            name: DialogContracts.getFragmentName(DialogContracts.IDS.ANALYTICS_YEAR_PICKER),
             controller: oController
         }).then(function (oPopover) {
             oController.getView().addDependent(oPopover);
@@ -154,18 +160,18 @@ sap.ui.define([
 
     function applyYearPreset(oController, sPreset) {
         var iCurrentYear = new Date().getFullYear();
-        var iSelectedYear = sPreset === "PREVIOUS" ? (iCurrentYear - 1) : iCurrentYear;
+        var iSelectedYear = sPreset === AnalyticsContracts.YEAR_PRESETS.PREVIOUS ? (iCurrentYear - 1) : iCurrentYear;
         var sSelectedYear = String(iSelectedYear);
         syncCompareYearDefaults(oController, sSelectedYear);
         ControllerViewStateRuntime.setMany(oController, {
             "/selectedYear": sSelectedYear,
-            "/activeYearPreset": sPreset || "CURRENT"
+            "/activeYearPreset": sPreset || AnalyticsContracts.YEAR_PRESETS.CURRENT
         });
         return oController._loadAnalytics("yearPresetChanged");
     }
 
     function readSelectedSource(oController) {
-        return String(ControllerViewStateRuntime.get(oController, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
+        return String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
     }
 
     function buildSearchDrilldownIntent(sFilterKey, sFilterValue, oController, mExtras) {
@@ -199,11 +205,35 @@ sap.ui.define([
 
     function isRefreshQueued(oRefreshState) {
         var sStatus = String(oRefreshState && oRefreshState.status || "").trim().toUpperCase();
-        return !!(oRefreshState && oRefreshState.isRunning) || sStatus === "REQUESTED" || sStatus === "RUNNING";
+        return !!(oRefreshState && oRefreshState.isRunning) ||
+            sStatus === AnalyticsContracts.REFRESH.STATUSES.REQUESTED ||
+            sStatus === AnalyticsContracts.REFRESH.STATUSES.RUNNING;
     }
 
     function buildCtx(oController) {
         return CtxFactory.buildCtx(oController, {});
+    }
+
+    function ensureAnalyticsReportDialog(oController) {
+        if (oController._pAnalyticsReportDialog) {
+            return oController._pAnalyticsReportDialog;
+        }
+        oController._pAnalyticsReportDialog = Fragment.load({
+            id: oController.getView().getId(),
+            name: DialogContracts.getFragmentName(DialogContracts.IDS.ANALYTICS_REPORT),
+            controller: oController
+        }).then(function (oDialog) {
+            oController.getView().addDependent(oDialog);
+            oController._oAnalyticsReportDialog = oDialog;
+            return oDialog;
+        });
+        return oController._pAnalyticsReportDialog;
+    }
+
+    function buildAnalyticsExportFileName(oController) {
+        var sSource = readSelectedSource(oController).toLowerCase();
+        var sYear = String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "").trim();
+        return ["analytics", sSource || "all", sYear || "scope"].join("_");
     }
 
     return {
@@ -214,7 +244,7 @@ sap.ui.define([
             });
             AnalyticsBuilderRuntime.applyBuilderSelection(this);
             ControllerRouteRuntime.attachMatched(this, [
-                { name: "analytics", handler: this._onAnalyticsMatched }
+                { name: NavigationContracts.ROUTES.ANALYTICS, handler: this._onAnalyticsMatched }
             ]);
         },
 
@@ -223,8 +253,13 @@ sap.ui.define([
             if (this._oAnalyticsYearPicker && typeof this._oAnalyticsYearPicker.destroy === "function") {
                 this._oAnalyticsYearPicker.destroy();
             }
+            if (this._oAnalyticsReportDialog && typeof this._oAnalyticsReportDialog.destroy === "function") {
+                this._oAnalyticsReportDialog.destroy();
+            }
             this._oAnalyticsYearPicker = null;
             this._pAnalyticsYearPicker = null;
+            this._oAnalyticsReportDialog = null;
+            this._pAnalyticsReportDialog = null;
             this._facade = null;
         },
 
@@ -250,7 +285,7 @@ sap.ui.define([
         _loadAnalytics: function (sReason) {
             var sSelectedYear = String(ControllerViewStateRuntime.get(this, "/selectedYear", "") || "").trim();
             var sCompareYear = String(ControllerViewStateRuntime.get(this, "/compareYear", "") || "").trim();
-            var sSelectedSource = String(ControllerViewStateRuntime.get(this, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
+            var sSelectedSource = String(ControllerViewStateRuntime.get(this, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
             ModelStateRuntime.write(this, "state", StatePaths.UI_BUSY_ANALYTICS, true);
             ModelStateRuntime.write(this, "state", StatePaths.READINESS_ANALYTICS, {
                 status: "loading",
@@ -308,7 +343,9 @@ sap.ui.define([
             return Promise.resolve(oCtx && oCtx.analytics && oCtx.analytics.fetchRefreshState ? oCtx.analytics.fetchRefreshState() : null).then(function (oState) {
                 var oRefreshState = oState || {};
                 var sStatus = String(oRefreshState.status || "").toUpperCase();
-                var bActive = !!oRefreshState.isRunning || sStatus === "REQUESTED" || sStatus === "RUNNING";
+                var bActive = !!oRefreshState.isRunning ||
+                    sStatus === AnalyticsContracts.REFRESH.STATUSES.REQUESTED ||
+                    sStatus === AnalyticsContracts.REFRESH.STATUSES.RUNNING;
                 ControllerViewStateRuntime.set(this, "/refreshState", oRefreshState);
                 if (!bActive || iRemaining <= 0) {
                     return oRefreshState;
@@ -343,7 +380,7 @@ sap.ui.define([
                 "/error": ""
             });
             return Promise.resolve(oCtx && oCtx.analytics && oCtx.analytics.requestRefresh ? oCtx.analytics.requestRefresh({
-                requestedBy: "WEB"
+                requestedBy: AnalyticsContracts.REFRESH.REQUESTED_BY_WEB
             }) : null).then(function (oState) {
                 if (oState) {
                     ControllerViewStateRuntime.set(this, "/refreshState", oState);
@@ -540,7 +577,7 @@ sap.ui.define([
         },
 
         onDrilldownAnalyticsBuilder: function (oEvent) {
-            var sDimension = String(ControllerViewStateRuntime.get(this, "/builderDimension", "MONTH") || "MONTH").trim().toUpperCase();
+            var sDimension = String(ControllerViewStateRuntime.get(this, "/builderDimension", AnalyticsContracts.BUILDER.FALLBACK_DIMENSION) || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase();
             var oPoint = extractDrilldownPayload(oEvent);
             var sLabel = String((oPoint && (oPoint.Dimension || oPoint.label || oPoint.labelShort)) || "").trim();
             var mMap = {
@@ -561,29 +598,57 @@ sap.ui.define([
                 return Promise.resolve(false);
             }
             return queueAnalyticsDrilldown(this, "Source", sSource, {
-                dimension: "SOURCE"
+                dimension: AnalyticsContracts.DIMENSIONS.SOURCE
             });
         },
 
         onDrilldownAnalyticsProfession: function (oEvent) {
             var oPoint = extractDrilldownPayload(oEvent);
             return queueAnalyticsDrilldown(this, "ProfessionText", String((oPoint && oPoint.Profession) || "").trim(), {
-                dimension: "PROFESSION"
+                dimension: AnalyticsContracts.DIMENSIONS.PROFESSION
             });
         },
 
         onDrilldownAnalyticsLpc: function (oEvent) {
             var oPoint = extractDrilldownPayload(oEvent);
             return queueAnalyticsDrilldown(this, "Lpc", String((oPoint && oPoint.LPC) || "").trim(), {
-                dimension: "LPC"
+                dimension: AnalyticsContracts.DIMENSIONS.LPC
             });
         },
 
         onDrilldownAnalyticsLocation: function (oEvent) {
             var oPoint = extractDrilldownPayload(oEvent);
             return queueAnalyticsDrilldown(this, "LocationKey", String((oPoint && oPoint.Location) || "").trim(), {
-                dimension: "LOCATION"
+                dimension: AnalyticsContracts.DIMENSIONS.LOCATION
             });
+        },
+
+        onOpenAnalyticsReportDialog: function () {
+            return ensureAnalyticsReportDialog(this).then(function (oDialog) {
+                oDialog.open();
+            });
+        },
+
+        onCloseAnalyticsReportDialog: function () {
+            if (this._oAnalyticsReportDialog) {
+                this._oAnalyticsReportDialog.close();
+            }
+        },
+
+        onExportAnalyticsReport: function () {
+            var oBundle = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+            var oViewState = ControllerViewStateRuntime.get(this, "/", {});
+            var aRows = AnalyticsExportRows.buildRows(oViewState, oBundle);
+            if (!aRows.length) {
+                return FeedbackCoordinator.showToast(this, "nothingToExport", [], "warning");
+            }
+            try {
+                ExcelExport.download(buildAnalyticsExportFileName(this), aRows);
+                FeedbackCoordinator.showToast(this, "searchExportSuccess", [], "info");
+            } catch (_oError) {
+                FeedbackCoordinator.showToast(this, "exportFailed", ["analytics"], "error");
+            }
+            return Promise.resolve(true);
         },
 
         onCloseAnalytics: function () {

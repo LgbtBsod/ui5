@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
     <Dialog
-        class="glassDialog"
+        class="glassDialog governedDialog"
         id="checksExpandedDialog"
         title="{i18n>checksExpandedTitle}"
         contentWidth="72rem"
@@ -10,7 +10,7 @@
         stretchOnPhone="true"
         initialFocus="checksExpandedCloseButton">
         <content>
-            <VBox class="expandedDialogContent dialogContentShell tableDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare">
+            <VBox class="expandedDialogContent dialogContentShell governedDialogContent tableDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare">
                 <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/checksExpandedBusy}">
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
                 </VBox>

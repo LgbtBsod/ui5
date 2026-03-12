@@ -76,23 +76,25 @@
                 press=".onCopyFeedbackCorrelationId"/>
         </HBox>
 
-        <f:FlexibleColumnLayout
-            id="mainFcl"
-            class="appRootFcl"
-            layout="{= ${state>/layout} || 'OneColumn' }"
-            backgroundDesign="Transparent">
+        <VBox renderType="Bare" fitContainer="true">
             <customData>
                 <core:CustomData key="role" value="main" writeToDom="true"/>
                 <core:CustomData key="aria-label" value="{i18n>mainContentAriaLabel}" writeToDom="true"/>
             </customData>
-            <f:beginColumnPages>
-                <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Search" width="100%"/>
-            </f:beginColumnPages>
-            <f:midColumnPages>
-                <mvc:XMLView id="detailPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Detail" width="100%"/>
-                <mvc:XMLView id="analyticsPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Analytics" width="100%"/>
-            </f:midColumnPages>
-        </f:FlexibleColumnLayout>
+            <f:FlexibleColumnLayout
+                id="mainFcl"
+                class="appRootFcl"
+                layout="{= ${state>/layout} || 'OneColumn' }"
+                backgroundDesign="Transparent">
+                <f:beginColumnPages>
+                    <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Search" width="100%"/>
+                </f:beginColumnPages>
+                <f:midColumnPages>
+                    <mvc:XMLView id="detailPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Detail" width="100%"/>
+                    <mvc:XMLView id="analyticsPaneHost" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Analytics" width="100%"/>
+                </f:midColumnPages>
+            </f:FlexibleColumnLayout>
+        </VBox>
     </VBox>
 
 </mvc:View>

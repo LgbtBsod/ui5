@@ -1,34 +1,30 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsPayloadNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime"
-], function (ControllerTextRuntime, AnalyticsPayloadNormalizer, ControllerViewStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts"
+], function (ControllerTextRuntime, AnalyticsPayloadNormalizer, ControllerViewStateRuntime, AnalyticsContracts) {
     "use strict";
 
     var getText = ControllerTextRuntime.getText;
-    var BUILDER_DIMENSION_RULES = {
-        MONTH: { vizType: "column", metricKeys: ["TOTAL", "FAILED_CHECKS", "FAILED_BARRIERS", "FAILED_CHECKLISTS", "FAILED_BARRIER_CHECKLISTS"], chartKeyByMetric: { TOTAL: "monthlyTotal", FAILED_CHECKS: "monthlyFailedChecks", FAILED_BARRIERS: "monthlyFailedBarriers", FAILED_CHECKLISTS: "monthlyFailedChecklists", FAILED_BARRIER_CHECKLISTS: "monthlyFailedBarrierChecklists" } },
-        SOURCE: { vizType: "bar", metricKeys: ["TOTAL", "FAILED_CHECKS", "FAILED_BARRIERS"], chartKeyByMetric: { TOTAL: "totalBySource", FAILED_CHECKS: "failedChecksBySource", FAILED_BARRIERS: "failedBarriersBySource" } },
-        PROFESSION: { vizType: "bar", metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"], chartKeyByMetric: { FAILED_CHECKS: "failedChecksByProfession", FAILED_BARRIERS: "failedBarriersByProfession" } },
-        LPC: { vizType: "bar", metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"], chartKeyByMetric: { FAILED_CHECKS: "failedChecksByLpc", FAILED_BARRIERS: "failedBarriersByLpc" } },
-        LOCATION: { vizType: "bar", metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"], chartKeyByMetric: { FAILED_CHECKS: "failedChecksByLocation", FAILED_BARRIERS: "failedBarriersByLocation" } },
-        BUKRS: { vizType: "bar", metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"], chartKeyByMetric: { FAILED_CHECKS: "failedChecksByBukrs", FAILED_BARRIERS: "failedBarriersByBukrs" } },
-        ORGUNIT: { vizType: "bar", metricKeys: ["FAILED_CHECKS", "FAILED_BARRIERS"], chartKeyByMetric: { FAILED_CHECKS: "failedChecksByOrgunit", FAILED_BARRIERS: "failedBarriersByOrgunit" } },
-        BARRIER_NUMBER: { vizType: "bar", metricKeys: ["TOTAL", "FAILED_BARRIERS"], chartKeyByMetric: { TOTAL: "totalBarriersByBarrierNumber", FAILED_BARRIERS: "failedBarriersByBarrierNumber" } }
-    };
-    var BUILDER_DIMENSION_TEXT_KEY_MAP = { MONTH: "analyticsDimensionMonth", SOURCE: "analyticsDimensionSource", PROFESSION: "analyticsDimensionProfession", LPC: "analyticsDimensionLpc", LOCATION: "analyticsDimensionLocation", BUKRS: "analyticsDimensionBukrs", ORGUNIT: "analyticsDimensionOrgunit", BARRIER_NUMBER: "analyticsDimensionBarrierNumber" };
-    var BUILDER_METRIC_TEXT_KEY_MAP = { TOTAL: "analyticsMetricTotal", FAILED_CHECKS: "analyticsMetricFailedChecks", FAILED_BARRIERS: "analyticsMetricFailedBarriers", FAILED_CHECKLISTS: "analyticsMetricFailedChecklistCount", FAILED_BARRIER_CHECKLISTS: "analyticsMetricFailedBarrierChecklistCount" };
+    var BUILDER_DIMENSION_RULES = AnalyticsContracts.BUILDER.DIMENSION_RULES;
+    var BUILDER_DIMENSION_TEXT_KEY_MAP = AnalyticsContracts.BUILDER.DIMENSION_TEXT_KEYS;
+    var BUILDER_METRIC_TEXT_KEY_MAP = AnalyticsContracts.BUILDER.METRIC_TEXT_KEYS;
+    var FALLBACK_DIMENSION = AnalyticsContracts.BUILDER.FALLBACK_DIMENSION;
+    var FALLBACK_METRIC = AnalyticsContracts.BUILDER.FALLBACK_COMPARISON_METRIC;
+    var ALL_SOURCE = AnalyticsContracts.SOURCES.ALL;
+    var INTEGRATION_SOURCE = AnalyticsContracts.SOURCES.INTEGRATION;
 
     function normalizeBuilderDimension(sDimension) {
         var sResolved = String(sDimension || "").trim().toUpperCase();
-        return BUILDER_DIMENSION_RULES[sResolved] ? sResolved : "MONTH";
+        return BUILDER_DIMENSION_RULES[sResolved] ? sResolved : FALLBACK_DIMENSION;
     }
 
     function normalizeBuilderDimensionForSource(sDimension, sSource) {
         var sResolvedDimension = normalizeBuilderDimension(sDimension);
-        var sResolvedSource = String(sSource || "ALL").trim().toUpperCase();
-        if (sResolvedSource === "INTEGRATION" && ["LOCATION", "BUKRS", "ORGUNIT"].indexOf(sResolvedDimension) >= 0) {
-            return "MONTH";
+        var sResolvedSource = String(sSource || ALL_SOURCE).trim().toUpperCase();
+        if (sResolvedSource === INTEGRATION_SOURCE && AnalyticsContracts.BUILDER.SOURCE_RESTRICTED_DIMENSIONS.indexOf(sResolvedDimension) >= 0) {
+            return FALLBACK_DIMENSION;
         }
         return sResolvedDimension;
     }
@@ -41,10 +37,10 @@ sap.ui.define([
     }
 
     function buildBuilderDimensionOptions(oController, sSource) {
-        var sResolvedSource = String(sSource || "ALL").trim().toUpperCase();
-        var aDimensionKeys = ["MONTH", "SOURCE", "PROFESSION", "LPC", "BARRIER_NUMBER"];
-        if (sResolvedSource !== "INTEGRATION") {
-            aDimensionKeys = aDimensionKeys.concat(["LOCATION", "BUKRS", "ORGUNIT"]);
+        var sResolvedSource = String(sSource || ALL_SOURCE).trim().toUpperCase();
+        var aDimensionKeys = AnalyticsContracts.BUILDER.DIMENSION_OPTIONS_BASE.slice();
+        if (sResolvedSource !== INTEGRATION_SOURCE) {
+            aDimensionKeys = aDimensionKeys.concat(AnalyticsContracts.BUILDER.SOURCE_RESTRICTED_DIMENSIONS);
         }
         return aDimensionKeys.map(function (sDimensionKey) {
             return { key: sDimensionKey, text: getText(oController, BUILDER_DIMENSION_TEXT_KEY_MAP[sDimensionKey], null, sDimensionKey) };
@@ -70,13 +66,13 @@ sap.ui.define([
         var iCurrentYear = new Date().getFullYear();
         return {
             busy: false, error: "", refreshBusy: false, selectedYear: String(iCurrentYear), compareYear: String(iCurrentYear - 1),
-            compareYearValueState: "None", compareYearValueStateText: "", comparisonMetric: "FAILED_CHECKLISTS",
-            builderDimension: "MONTH", builderMetric: "FAILED_CHECKLISTS", builderDimensionOptions: [], builderMetricOptions: [],
+            compareYearValueState: "None", compareYearValueStateText: "", comparisonMetric: FALLBACK_METRIC,
+            builderDimension: FALLBACK_DIMENSION, builderMetric: FALLBACK_METRIC, builderDimensionOptions: [], builderMetricOptions: [],
             builderChartRows: [], builderChartTitle: "", builderVizType: "column", builderChartHasData: false,
             builderSourceHintText: "", compareYearHasData: true, compareYearHintText: "",
             yearPicker: { targetField: "selectedYear", rangeStart: iCurrentYear - 9, rangeEnd: iCurrentYear + 10, rangeLabel: "", items: [] },
-            availableYears: [{ key: String(iCurrentYear), text: String(iCurrentYear) }], selectedSource: "ALL",
-            refreshState: { taskKey: sTaskKey || "ANALYTICS_REFRESH", taskName: "Analytics Refresh", status: "IDLE", isRunning: false, requestedAt: "", requestedBy: "", startedAt: "", finishedAt: "", lastSuccessAt: "", lastError: "", lastMessage: "", activeRunId: "" },
+            availableYears: [{ key: String(iCurrentYear), text: String(iCurrentYear) }], selectedSource: ALL_SOURCE,
+            refreshState: { taskKey: sTaskKey || AnalyticsContracts.REFRESH.TASK_KEY, taskName: AnalyticsContracts.REFRESH.TASK_NAME, status: AnalyticsContracts.REFRESH.STATUSES.IDLE, isRunning: false, requestedAt: "", requestedBy: "", startedAt: "", finishedAt: "", lastSuccessAt: "", lastError: "", lastMessage: "", activeRunId: "" },
             analytics: AnalyticsPayloadNormalizer.createEmptyDashboard()
         };
     }
@@ -91,7 +87,7 @@ sap.ui.define([
     }
 
     function applyComparisonMetricSelection(oController) {
-        var sMetric = String(ControllerViewStateRuntime.get(oController, "/comparisonMetric", "FAILED_CHECKLISTS") || "FAILED_CHECKLISTS").trim().toUpperCase();
+        var sMetric = String(ControllerViewStateRuntime.get(oController, "/comparisonMetric", FALLBACK_METRIC) || FALLBACK_METRIC).trim().toUpperCase();
         var oAnalytics = ControllerViewStateRuntime.get(oController, "/analytics", {}) || {};
         var aRows = Array.isArray((oAnalytics.comparisonMetricSeries || {})[sMetric]) ? (oAnalytics.comparisonMetricSeries || {})[sMetric] : [];
         ControllerViewStateRuntime.set(oController, "/analytics/comparisonChartRows", aRows);
@@ -100,9 +96,9 @@ sap.ui.define([
 
     function applyBuilderSelection(oController, mOverrides) {
         var oAnalytics = ControllerViewStateRuntime.get(oController, "/analytics", {}) || {};
-        var sSelectedSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
-        var sDimension = normalizeBuilderDimensionForSource((mOverrides && mOverrides.dimension) || ControllerViewStateRuntime.get(oController, "/builderDimension", "MONTH"), sSelectedSource);
-        var sMetric = normalizeBuilderMetric(sDimension, (mOverrides && mOverrides.metric) || ControllerViewStateRuntime.get(oController, "/builderMetric", "FAILED_CHECKLISTS"));
+        var sSelectedSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", ALL_SOURCE) || ALL_SOURCE).trim().toUpperCase();
+        var sDimension = normalizeBuilderDimensionForSource((mOverrides && mOverrides.dimension) || ControllerViewStateRuntime.get(oController, "/builderDimension", FALLBACK_DIMENSION), sSelectedSource);
+        var sMetric = normalizeBuilderMetric(sDimension, (mOverrides && mOverrides.metric) || ControllerViewStateRuntime.get(oController, "/builderMetric", FALLBACK_METRIC));
         var aRows = resolveBuilderChartRows(oAnalytics, sDimension, sMetric);
         var sMetricText = getText(oController, BUILDER_METRIC_TEXT_KEY_MAP[sMetric], null, sMetric);
         var sDimensionText = getText(oController, BUILDER_DIMENSION_TEXT_KEY_MAP[sDimension], null, sDimension);
@@ -120,16 +116,16 @@ sap.ui.define([
 
     function syncAnalyticsContextHints(oController) {
         var oAnalytics = ControllerViewStateRuntime.get(oController, "/analytics", {}) || {};
-        var sSelectedSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", "ALL") || "ALL").trim().toUpperCase();
-        var sBuilderDimension = String(ControllerViewStateRuntime.get(oController, "/builderDimension", "MONTH") || "MONTH").trim().toUpperCase();
+        var sSelectedSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", ALL_SOURCE) || ALL_SOURCE).trim().toUpperCase();
+        var sBuilderDimension = String(ControllerViewStateRuntime.get(oController, "/builderDimension", FALLBACK_DIMENSION) || FALLBACK_DIMENSION).trim().toUpperCase();
         var iSelectedYear = Number(oAnalytics.selectedYear || 0);
         var iCompareYear = Number(ControllerViewStateRuntime.get(oController, "/compareYear", 0) || 0);
         var bCompareYearHasData = iSelectedYear === iCompareYear || !!oAnalytics.compareYearHasData;
         var sCompareYearHintText = bCompareYearHasData ? "" : getText(oController, "analyticsCompareYearNoData", [String(iCompareYear || "")], "No aggregated data for compare year " + String(iCompareYear || ""));
         var sBuilderSourceHintText = "";
-        if (sSelectedSource === "INTEGRATION") {
+        if (sSelectedSource === INTEGRATION_SOURCE) {
             sBuilderSourceHintText = getText(oController, "analyticsIntegrationDimensionsNote", [], "Integration data can be analysed by month, LPC, profession, source and barrier number until enrichment fills BUKRS, location and observer org unit.");
-        } else if (sSelectedSource === "ALL" && ["LOCATION", "BUKRS", "ORGUNIT"].indexOf(sBuilderDimension) >= 0) {
+        } else if (sSelectedSource === ALL_SOURCE && AnalyticsContracts.BUILDER.SOURCE_RESTRICTED_DIMENSIONS.indexOf(sBuilderDimension) >= 0) {
             sBuilderSourceHintText = getText(oController, "analyticsWebEnrichedDimensionsNote", [], "Web-enriched dimensions exclude incomplete integration records until enrichment fills BUKRS, location and observer org unit.");
         }
         ControllerViewStateRuntime.setMany(oController, {

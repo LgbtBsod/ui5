@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "sap/ui/core/routing/HashChanger"
-], function (WorkspaceRouteNavigation, BehaviorRegistry, ModelStateRuntime, HashChanger) {
+    "sap/ui/core/routing/HashChanger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (WorkspaceRouteNavigation, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts) {
     "use strict";
 
     var NAVIGATION_SCOPE = "navigation";
@@ -34,16 +35,16 @@ sap.ui.define([
             }
             return sUrl.charAt(0) === "/" ? "#" + sUrl : "#/" + sUrl;
         }
-        if (sRouteName === "search") {
+        if (sRouteName === NavigationContracts.ROUTES.SEARCH) {
             return "#";
         }
-        if (sRouteName === "analytics") {
-            return "#/analytics";
+        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
+            return "#/" + NavigationContracts.ROUTES.ANALYTICS;
         }
-        if (sRouteName === "detailLayout" && oRouteArgs.id && oRouteArgs.layout) {
+        if (sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT && oRouteArgs.id && oRouteArgs.layout) {
             return "#/checklist/" + encodeURIComponent(String(oRouteArgs.id)) + "/" + encodeURIComponent(String(oRouteArgs.layout));
         }
-        if (sRouteName === "detail" && oRouteArgs.id) {
+        if (sRouteName === NavigationContracts.ROUTES.DETAIL && oRouteArgs.id) {
             return "#/checklist/" + encodeURIComponent(String(oRouteArgs.id));
         }
         return "";

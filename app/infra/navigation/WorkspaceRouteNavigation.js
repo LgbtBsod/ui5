@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts) {
     "use strict";
 
     function cloneArgs(oArgs) {
@@ -26,31 +27,31 @@ sap.ui.define([
 
     function buildFallbackIntent() {
         return {
-            routeName: "search",
+            routeName: NavigationContracts.ROUTES.SEARCH,
             routeArgs: {}
         };
     }
 
     function buildCurrentIntent(oStateModel) {
-        var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "search") || "search").trim() || "search";
+        var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         var sSelectedId = readSelectedId(oStateModel);
-        var sLayout = LayoutStateRuntime.readLayout(oStateModel, "OneColumn");
+        var sLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
 
-        if (sRouteName === "analytics") {
+        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             return cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
         }
-        if ((sRouteName === "detailLayout" || sLayout === "MidColumnFullScreen") && sSelectedId) {
+        if ((sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT || sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) && sSelectedId) {
             return {
-                routeName: "detailLayout",
+                routeName: NavigationContracts.ROUTES.DETAIL_LAYOUT,
                 routeArgs: {
                     id: sSelectedId,
-                    layout: "MidColumnFullScreen"
+                    layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
                 }
             };
         }
-        if ((sRouteName === "detail" || sSelectedId) && sSelectedId) {
+        if ((sRouteName === NavigationContracts.ROUTES.DETAIL || sSelectedId) && sSelectedId) {
             return {
-                routeName: "detail",
+                routeName: NavigationContracts.ROUTES.DETAIL,
                 routeArgs: { id: sSelectedId }
             };
         }
@@ -66,7 +67,7 @@ sap.ui.define([
         var bRestoreEdit = !!(sRootId && sMode === "EDIT" && sLockState === "EDIT_LOCKED");
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
-            routeName: String(oIntent.routeName || "search"),
+            routeName: String(oIntent.routeName || NavigationContracts.ROUTES.SEARCH),
             routeArgs: cloneArgs(oIntent.routeArgs),
             rootId: sRootId,
             restoreEdit: bRestoreEdit
@@ -78,16 +79,18 @@ sap.ui.define([
     function navigateToAnalytics(oController) {
         var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
-        var sCurrentRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "search") || "search").trim() || "search";
+        var sCurrentRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
 
-        if (sCurrentRouteName === "analytics") {
+        if (sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             navigateToSearch(oController);
             return;
         }
 
         setAnalyticsReturnIntent(oController);
+        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.ANALYTICS);
+        ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
         if (oRouter && typeof oRouter.navTo === "function") {
-            oRouter.navTo("analytics", {}, false);
+            oRouter.navTo(NavigationContracts.ROUTES.ANALYTICS, {}, false);
         }
     }
 
@@ -109,19 +112,33 @@ sap.ui.define([
         } else {
             ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", null);
         }
+        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", oIntent.routeName || NavigationContracts.ROUTES.SEARCH);
+        ModelStateRuntime.writeOnModel(
+            oStateModel,
+            "/layout",
+            oIntent.routeName === NavigationContracts.ROUTES.ANALYTICS
+                ? NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
+                : (oIntent.routeName === NavigationContracts.ROUTES.SEARCH
+                    ? NavigationContracts.LAYOUTS.ONE_COLUMN
+                    : LayoutStateRuntime.normalizeLayout((oIntent.routeArgs && oIntent.routeArgs.layout) || NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED))
+        );
         if (oRouter && typeof oRouter.navTo === "function") {
             oRouter.navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
         }
     }
 
     function navigateToSearch(oController) {
+        var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
+        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH);
+        ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
         if (oRouter && typeof oRouter.navTo === "function") {
-            oRouter.navTo("search", {}, false);
+            oRouter.navTo(NavigationContracts.ROUTES.SEARCH, {}, false);
         }
     }
 
     function navigateToDetail(oController, sRootId, sLayout) {
+        var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var sId = String(sRootId || "").trim();
         var sResolvedLayout = LayoutStateRuntime.normalizeLayout(sLayout);
@@ -129,11 +146,16 @@ sap.ui.define([
         if (!oRouter || typeof oRouter.navTo !== "function" || !sId) {
             return;
         }
-        if (sResolvedLayout === "MidColumnFullScreen") {
-            oRouter.navTo("detailLayout", { id: sId, layout: "MidColumnFullScreen" }, false);
+        ModelStateRuntime.writeOnModel(oStateModel, "/selectedId", sId);
+        if (sResolvedLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
+            ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.DETAIL_LAYOUT);
+            ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
+            oRouter.navTo(NavigationContracts.ROUTES.DETAIL_LAYOUT, { id: sId, layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN }, false);
             return;
         }
-        oRouter.navTo("detail", { id: sId }, false);
+        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.DETAIL);
+        ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED);
+        oRouter.navTo(NavigationContracts.ROUTES.DETAIL, { id: sId }, false);
     }
 
     function buildDetailHash(oController, sRootId) {
@@ -143,7 +165,7 @@ sap.ui.define([
         if (!oRouter || typeof oRouter.getURL !== "function" || !sId) {
             return "";
         }
-        return String(oRouter.getURL("detail", { id: sId }) || "");
+        return String(oRouter.getURL(NavigationContracts.ROUTES.DETAIL, { id: sId }) || "");
     }
 
     return {

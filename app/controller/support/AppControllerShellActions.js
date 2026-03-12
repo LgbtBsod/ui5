@@ -8,8 +8,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator"
-], function (ActionContract, AppShellActionRuntime, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, AppShellCoordinator, NavigationIntentService, ModelStateRuntime, UiDecisionCoordinator) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (ActionContract, AppShellActionRuntime, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, AppShellCoordinator, NavigationIntentService, ModelStateRuntime, UiDecisionCoordinator, NavigationContracts) {
     "use strict";
 
     return {
@@ -36,7 +37,20 @@ sap.ui.define([
         },
 
         onOpenShellAnalytics: function (oEvent) {
+            var oLayout = this.byId && this.byId("mainFcl");
+            var oAnalyticsPage = this.byId && this.byId(NavigationContracts.MID_COLUMN_PAGE_IDS.ANALYTICS);
+            ModelStateRuntime.write(this, "state", "/currentRouteName", NavigationContracts.ROUTES.ANALYTICS);
+            ModelStateRuntime.write(this, "state", "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
+            if (oLayout && oAnalyticsPage && typeof oLayout.toMidColumnPage === "function") {
+                oLayout.toMidColumnPage(oAnalyticsPage);
+                if (typeof oLayout.setLayout === "function") {
+                    oLayout.setLayout(NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
+                }
+            }
             NavigationIntentService.navigateToAnalytics(this);
+            if (typeof this._syncLayoutState === "function") {
+                this._syncLayoutState();
+            }
             return Promise.resolve();
         },
 

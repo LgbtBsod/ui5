@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport"
-], function (ComponentRuntimeSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts"
+], function (ComponentRuntimeSupport, AnalyticsContracts) {
     "use strict";
 
     function toNumber(vValue) {
@@ -214,9 +215,9 @@ sap.ui.define([
     function normalizeRefreshState(oRefreshState) {
         var o = oRefreshState || {};
         return {
-            taskKey: String(o.taskKey || "ANALYTICS_REFRESH"),
-            taskName: String(o.taskName || "Analytics Refresh"),
-            status: String(o.status || "IDLE"),
+            taskKey: String(o.taskKey || AnalyticsContracts.REFRESH.TASK_KEY),
+            taskName: String(o.taskName || AnalyticsContracts.REFRESH.TASK_NAME),
+            status: String(o.status || AnalyticsContracts.REFRESH.STATUSES.IDLE),
             isRunning: !!o.isRunning,
             requestedAt: formatAnalyticsDateTime(o.requestedAt || ""),
             requestedBy: String(o.requestedBy || ""),
@@ -282,7 +283,7 @@ sap.ui.define([
             avgChecksRate: toNumber(o.avgChecksRate || o.AvgChecksRate),
             avgBarriersRate: toNumber(o.avgBarriersRate || o.AvgBarriersRate),
             refreshedAt: formatAnalyticsDateTime(o.refreshedAt || o.RefreshedAt || ""),
-            source: String(o.source || o.Source || "ALL"),
+            source: String(o.source || o.Source || AnalyticsContracts.SOURCES.ALL),
             sourceText: String(o.sourceText || o.SourceText || o.source || o.Source || "All"),
             compareYearHasData: hasAnyChartValue(o.comparisonCharts && o.comparisonCharts.monthlyTotal),
             refreshState: normalizeRefreshState(o.refreshState),
@@ -350,7 +351,7 @@ sap.ui.define([
             avgChecksRate: toNumber(o.avgChecksRate || o.AvgChecksRate),
             avgBarriersRate: toNumber(o.avgBarriersRate || o.AvgBarriersRate),
             refreshedAtText: formatAnalyticsDateTime(o.refreshedAt || o.RefreshedAt || ""),
-            sourceKey: String(o.source || o.Source || "ALL"),
+            sourceKey: String(o.source || o.Source || AnalyticsContracts.SOURCES.ALL),
             sourceText: String(o.sourceText || o.SourceText || o.source || o.Source || "All")
         };
     }

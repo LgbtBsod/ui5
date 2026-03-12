@@ -127,7 +127,7 @@ if (!/<t:Table[\s\S]*rows="\{selected>\/barriers\}"/.test(barriersExpandedDialog
 assertMetrics("app/view/App.view.xml", { tags: 30, vbox: 3, hbox: 2, fragments: 0 });
 assertMetrics("app/view/Search.view.xml", { tags: 156, vbox: 28, hbox: 8, fragments: 5 });
 assertMetrics("app/view/Detail.view.xml", { tags: 210, vbox: 22, hbox: 6, fragments: 9 });
-assertMetrics("app/view/Analytics.view.xml", { tags: 52, vbox: 5, hbox: 5, fragments: 6 });
+assertMetrics("app/view/Analytics.view.xml", { tags: 54, vbox: 5, hbox: 5, fragments: 6 });
 assertMetrics("app/view/fragment/WorkflowAnalyticsToplinePrimaryCards.fragment.xml", { tags: 24, vbox: 3, hbox: 3, fragments: 0 });
 assertMetrics("app/view/fragment/WorkflowAnalyticsToplineRateCards.fragment.xml", { tags: 16, vbox: 2, hbox: 2, fragments: 0 });
 assertMetrics("app/view/fragment/WorkflowAnalyticsMessageStack.fragment.xml", { tags: 4, vbox: 0, hbox: 0, fragments: 0 });

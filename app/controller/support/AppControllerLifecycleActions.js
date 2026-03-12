@@ -7,18 +7,34 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime",
-    "sap/ui/Device"
-], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device) {
+    "sap/ui/Device",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device, NavigationContracts) {
     "use strict";
 
     var PHONE_MAX_WIDTH = 720;
     var TABLET_MAX_WIDTH = 1080;
 
     function resolveMidColumnPageId(sRouteName) {
-        if (sRouteName === "analytics") {
-            return "analyticsPaneHost";
+        return NavigationContracts.resolveMidColumnPageId(sRouteName);
+    }
+
+    function resolveRouteNameFromHash() {
+        var sHash;
+        if (typeof window === "undefined" || !window.location) {
+            return "";
         }
-        return "detailPaneHost";
+        sHash = String(window.location.hash || "").trim();
+        if (/^#\/analytics(?:$|\?)/.test(sHash)) {
+            return NavigationContracts.ROUTES.ANALYTICS;
+        }
+        if (/^#\/checklist\/[^/]+\/MidColumnFullScreen(?:$|\?)/.test(sHash)) {
+            return NavigationContracts.ROUTES.DETAIL_LAYOUT;
+        }
+        if (/^#\/checklist\/[^/]+(?:$|\?)/.test(sHash)) {
+            return NavigationContracts.ROUTES.DETAIL;
+        }
+        return NavigationContracts.ROUTES.SEARCH;
     }
 
     function syncMidColumnPage(oController, sRouteName) {
@@ -131,17 +147,29 @@ sap.ui.define([
 
         _syncLayoutState: function () {
             var oState = this._getStateModel();
-            var sLayoutRaw = ModelStateRuntime.read(this, "state", "/layout", "OneColumn");
+            var sLayoutRaw = ModelStateRuntime.read(this, "state", "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
             var sLayout = LayoutStateRuntime.normalizeLayout(sLayoutRaw);
-            var sRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
+            var sRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+            var sHashRouteName = resolveRouteNameFromHash();
             var sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
-            var bSingle = sLayout === "OneColumn";
-            var bDetailOnly = sLayout === "MidColumnFullScreen";
+            var bSingle = sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN;
+            var bDetailOnly = sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
             var oRoot = this.getView && this.getView().getDomRef && this.getView().getDomRef();
             var oClassHost = (oRoot && oRoot.querySelector && oRoot.querySelector(".chkSkin")) || oRoot;
             var oLayout = this.byId && this.byId("mainFcl");
-            if (!sSelectedId && sLayout !== "OneColumn" && sRouteName !== "analytics") {
-                sLayout = "OneColumn";
+            if (sHashRouteName && sHashRouteName !== sRouteName) {
+                sRouteName = sHashRouteName;
+                if (oState && oState.setProperty) {
+                    ModelStateRuntime.writeOnModel(oState, "/currentRouteName", sRouteName);
+                }
+            }
+            if (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout !== NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
+                sLayout = NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
+                bSingle = false;
+                bDetailOnly = true;
+            }
+            if (!sSelectedId && sLayout !== NavigationContracts.LAYOUTS.ONE_COLUMN && sRouteName !== NavigationContracts.ROUTES.ANALYTICS) {
+                sLayout = NavigationContracts.LAYOUTS.ONE_COLUMN;
                 bSingle = true;
                 bDetailOnly = false;
             }

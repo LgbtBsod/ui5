@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, DetailAuthorizationSupport, UseCaseInputUtils, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (UseCase, DetailAuthorizationSupport, UseCaseInputUtils, CreateSentinel, NavigationContracts) {
     "use strict";
 
     function ResolveDetailRouteUseCase() {
@@ -15,7 +16,7 @@ sap.ui.define([
 
     ResolveDetailRouteUseCase.prototype.execute = function (mInput, mCtx) {
         var sRootId = UseCaseInputUtils.rootId(mInput);
-        var sRouteName = String((mInput && mInput.routeName) || "detail").trim() || "detail";
+        var sRouteName = String((mInput && mInput.routeName) || NavigationContracts.ROUTES.DETAIL).trim() || NavigationContracts.ROUTES.DETAIL;
         var mRouteArgs = (mInput && mInput.routeArgs) || {};
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
@@ -24,7 +25,7 @@ sap.ui.define([
             }).then(function (oPermission) {
                 return {
                     allowed: !!(oPermission && oPermission.allowed),
-                    routeName: oPermission && oPermission.allowed ? sRouteName : "search",
+                    routeName: oPermission && oPermission.allowed ? sRouteName : NavigationContracts.ROUTES.SEARCH,
                     routeArgs: oPermission && oPermission.allowed ? mRouteArgs : {},
                     permission: oPermission || {}
                 };
@@ -38,7 +39,7 @@ sap.ui.define([
 
             return {
                 allowed: bAllowed,
-                routeName: bAllowed ? sRouteName : "detail",
+                routeName: bAllowed ? sRouteName : NavigationContracts.ROUTES.DETAIL,
                 routeArgs: bAllowed ? mRouteArgs : { id: sRootId },
                 permission: oPermission || {}
             };

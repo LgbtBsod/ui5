@@ -45,6 +45,9 @@ sap.ui.define([
 
     return {
         initModel: initModel,
+        viewState: function (oController) {
+            return ControllerModelRuntime.viewState(oController);
+        },
         get: get,
         set: set,
         setMany: setMany,

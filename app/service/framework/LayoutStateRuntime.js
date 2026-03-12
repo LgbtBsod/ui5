@@ -1,26 +1,27 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (ModelStateRuntime, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (ModelStateRuntime, StatePaths, NavigationContracts) {
     "use strict";
 
     function normalizeLayout(vLayout) {
         var sLayout = String(vLayout || "").trim();
-        if (sLayout === "MidColumnFullScreen") {
-            return "MidColumnFullScreen";
+        if (sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
+            return NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
         }
-        if (sLayout === "TwoColumnsMidExpanded" || sLayout === "TwoColumnsBeginExpanded") {
-            return "TwoColumnsMidExpanded";
+        if (sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED || sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED) {
+            return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
         }
-        return "OneColumn";
+        return NavigationContracts.LAYOUTS.ONE_COLUMN;
     }
 
     function toLayoutKind(vLayout) {
         var sLayout = normalizeLayout(vLayout);
-        if (sLayout === "MidColumnFullScreen") {
+        if (sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
             return "detailOnly";
         }
-        if (sLayout === "OneColumn") {
+        if (sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN) {
             return "single";
         }
         return "split";
@@ -36,7 +37,7 @@ sap.ui.define([
 
     function readLayout(oStateModel, sFallback) {
         return normalizeLayout(
-            ModelStateRuntime.readOnModel(oStateModel, "/layout", sFallback || "OneColumn")
+            ModelStateRuntime.readOnModel(oStateModel, "/layout", sFallback || NavigationContracts.LAYOUTS.ONE_COLUMN)
         );
     }
 

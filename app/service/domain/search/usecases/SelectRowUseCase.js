@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
-], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DomainStatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DomainStatePaths, NavigationContracts) {
     "use strict";
 
     function readSessionGuid(mCtx) {
@@ -39,7 +40,7 @@ sap.ui.define([
         var sRootId = String((mInput && mInput.rootId) || (oSmart && oSmart.getSelectedRowKey && oSmart.getSelectedRowKey()) || "").trim();
 
         if (sIntent === "create") {
-            return Promise.resolve(Result.ok({ mode: "create" }, [Effects.navigate("detail", { id: CreateSentinel.toRouteId() }, false)]));
+            return Promise.resolve(Result.ok({ mode: "create" }, [Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: CreateSentinel.toRouteId() }, false)]));
         }
 
         if (!sRootId) {
@@ -101,7 +102,7 @@ sap.ui.define([
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
                     Effects.toast("checklistCopied", "success"),
-                    Effects.navigate("detail", { id: sCopiedRootId }, false)
+                    Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sCopiedRootId }, false)
                 ]);
             }).catch(function (oError) {
                 return Result.fail(oError);
@@ -109,7 +110,7 @@ sap.ui.define([
         }
 
         return Promise.resolve(Result.ok({ selectedRootId: sRootId, intent: sIntent }, [
-            Effects.navigate("detail", { id: sRootId }, false)
+            Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sRootId }, false)
         ]));
     };
 

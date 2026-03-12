@@ -1,15 +1,17 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (StatePaths) {
     "use strict";
 
     return Object.freeze({
-        UI_BUSY_GLOBAL: "/ui/busy/global",
-        UI_BUSY_SEARCH_TABLE: "/ui/busy/searchTable",
-        UI_BUSY_DETAIL: "/ui/busy/detail",
-        WORKFLOW_DETAIL_EDIT_MODE: "/workflow/detail/editMode",
-        WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lock/state",
-        WORKFLOW_DETAIL_AUTOSAVE_STATE: "/workflow/detail/autosave/state",
-        WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT: "/workflow/detail/autosave/lastSavedAt",
-        WORKFLOW_SEARCH_MODE: "/workflow/search/mode",
-        WORKFLOW_SEARCH_SEGMENTS: "/workflow/search/segments"
+        UI_BUSY_GLOBAL: StatePaths.UI_BUSY_GLOBAL,
+        UI_BUSY_SEARCH_TABLE: StatePaths.UI_BUSY_SEARCH_TABLE,
+        UI_BUSY_DETAIL: StatePaths.UI_BUSY_DETAIL,
+        WORKFLOW_DETAIL_EDIT_MODE: StatePaths.WORKFLOW_DETAIL_EDIT_MODE,
+        WORKFLOW_DETAIL_LOCK_STATE: StatePaths.WORKFLOW_DETAIL_LOCK_STATE,
+        WORKFLOW_DETAIL_AUTOSAVE_STATE: StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE,
+        WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT: StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT,
+        WORKFLOW_SEARCH_MODE: StatePaths.WORKFLOW_SEARCH_MODE,
+        WORKFLOW_SEARCH_SEGMENTS: StatePaths.WORKFLOW_SEARCH_SEGMENTS
     });
 });

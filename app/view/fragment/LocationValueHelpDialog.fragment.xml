@@ -1,14 +1,14 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
     <Dialog
         id="locationValueHelpDialog"
-        class="glassDialog valueHelpDialog"
+        class="glassDialog valueHelpDialog governedDialog"
         title="{i18n>locationValueHelpTitle}"
         contentWidth="40rem"
         contentHeight="22rem"
         draggable="true"
         resizable="true"
         initialFocus="locationValueHelpSearchField">
-        <VBox class="sapUiMediumMargin dialogContentShell valueHelpDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare" fitContainer="true">
+        <VBox class="sapUiMediumMargin dialogContentShell governedDialogContent valueHelpDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare" fitContainer="true">
             <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/locationVhBusy}">
                 <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.WorkflowBusyOverlay" type="XML"/>
             </VBox>

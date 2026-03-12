@@ -14,15 +14,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DomainStatePaths, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DomainStatePaths, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts) {
     "use strict";
-
-    var EFFECT_DIALOG_FRAGMENTS = {
-        locationValueHelp: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.LocationValueHelpDialog",
-        checksExpanded: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.ChecksExpandedDialog",
-        barriersExpanded: "PRODUCTION_CONTROL_CHECKLIST.view.fragment.BarriersExpandedDialog"
-    };
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
 
     function isDirtyTrackMode(oController) {
@@ -154,7 +150,7 @@ sap.ui.define([
 
     return {
         ensureEffectDialog: function (sId) {
-            var sFragment = EFFECT_DIALOG_FRAGMENTS[sId];
+            var sFragment = DialogContracts.getFragmentName(sId);
             if (!sFragment) {
                 return Promise.resolve(null);
             }
@@ -195,12 +191,12 @@ sap.ui.define([
 
         _onDetailMatched: function (oEvent) {
             var mArgs = oEvent.getParameter("arguments") || {};
-            var sRouteName = String((oEvent.getParameter("name") || (mArgs.layout ? "detailLayout" : "detail")) || "detail").trim() || "detail";
+            var sRouteName = String((oEvent.getParameter("name") || (mArgs.layout ? NavigationContracts.ROUTES.DETAIL_LAYOUT : NavigationContracts.ROUTES.DETAIL)) || NavigationContracts.ROUTES.DETAIL).trim() || NavigationContracts.ROUTES.DETAIL;
             var sId = mArgs.id;
             var sLayoutArg = String(mArgs.layout || "").toLowerCase();
             var bCreate = CreateSentinel.isCreateId(sId);
-            var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? "MidColumnFullScreen" : "TwoColumnsMidExpanded";
-            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", DomainStatePaths.CURRENT_ROUTE_NAME, "search") || "search").trim() || "search";
+            var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN : NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
+            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", DomainStatePaths.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
             var sCurrentRootId = String(ModelStateRuntime.read(this, "state", DomainStatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
             var mStatePatch = {
                 [DomainStatePaths.ACTIVE_OBJECT_ID]: bCreate ? CreateSentinel.VALUE : sId,
@@ -228,8 +224,8 @@ sap.ui.define([
             var bLayoutOnlyTransition = !bCreate &&
                 sCurrentRootId === sId &&
                 sSelectedRootId === sId &&
-                ["detail", "detailLayout"].indexOf(sCurrentRouteName) >= 0 &&
-                ["detail", "detailLayout"].indexOf(sRouteName) >= 0;
+                NavigationContracts.isDetailRoute(sCurrentRouteName) &&
+                NavigationContracts.isDetailRoute(sRouteName);
 
             if (bLayoutOnlyTransition) {
                 ModelStateRuntime.setMany(this, "state", mStatePatch);

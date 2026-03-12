@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (LayoutStateRuntime, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (LayoutStateRuntime, ModelStateRuntime, NavigationContracts) {
     "use strict";
 
     function normalizeId(vId) {
@@ -12,16 +13,16 @@ sap.ui.define([
     function resolveSelectedId(sLayout, sRouteName, mArgs, oStateModel) {
         var sRoute = String(sRouteName || "");
         var sArgId = normalizeId(mArgs && mArgs.id);
-        if (sLayout === "OneColumn" || sRoute === "search") {
+        if (sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN || sRoute === NavigationContracts.ROUTES.SEARCH) {
             return null;
         }
-        if (sRoute === "analytics") {
+        if (sRoute === NavigationContracts.ROUTES.ANALYTICS) {
             return normalizeId(
                 ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "") ||
                 ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
             );
         }
-        if ((sRoute === "detail" || sRoute === "detailLayout") && sArgId) {
+        if (NavigationContracts.isDetailRoute(sRoute) && sArgId) {
             return sArgId;
         }
         return normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
@@ -42,11 +43,11 @@ sap.ui.define([
         if (!sLayout) {
             return null;
         }
-        sPrevLayout = LayoutStateRuntime.readLayout(oStateModel, "OneColumn");
+        sPrevLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
         sPrevSelectedId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
-        sPrevRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "search") || "search").trim() || "search";
+        sPrevRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         sNextSelectedId = resolveSelectedId(sLayout, sRouteName, mArgs, oStateModel);
-        sNextRouteName = String(sRouteName || "search").trim() || "search";
+        sNextRouteName = String(sRouteName || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
 
         if (sPrevRouteName !== sNextRouteName) {
             ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", sNextRouteName);

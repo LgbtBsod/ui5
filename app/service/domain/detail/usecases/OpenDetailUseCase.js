@@ -7,8 +7,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseInputUtils, StatePaths, CreateSentinel, UiAssetPaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseInputUtils, StatePaths, CreateSentinel, UiAssetPaths, NavigationContracts) {
     "use strict";
 
     function resolveLoadedAttachments(oUiState, sRootId) {
@@ -55,7 +56,7 @@ sap.ui.define([
                         Effects.modelPatch("selected", "/", {}),
                         Effects.modelPatch("snapshot", "/", {}),
                         Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false),
-                        Effects.navigate("search", {}, true)
+                        Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
                     ]));
                 }
                 return Result.ok({ snapshot: oDraft || {} }, [

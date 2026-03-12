@@ -1,34 +1,36 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (NavigationContracts) {
     "use strict";
 
     function normalizeDetailLayout(vLayout) {
         var sLayout = String(vLayout || "").trim();
         var sLower = sLayout.toLowerCase();
-        if (sLayout === "MidColumnFullScreen" || sLower === "midcolumnfullscreen") {
-            return "MidColumnFullScreen";
+        if (sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN || sLower === "midcolumnfullscreen") {
+            return NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
         }
         if (
-            sLayout === "TwoColumnsBeginExpanded" ||
+            sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED ||
             sLower === "twocolumnsbeginexpanded" ||
-            sLayout === "TwoColumnsMidExpanded" ||
+            sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED ||
             sLower === "twocolumnsmidexpanded"
         ) {
-            return "TwoColumnsMidExpanded";
+            return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
         }
-        return "TwoColumnsMidExpanded";
+        return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
     }
 
     function resolveLayoutFromRoute(sRouteName, mArgs) {
-        if (sRouteName === "search") {
-            return "OneColumn";
+        if (sRouteName === NavigationContracts.ROUTES.SEARCH) {
+            return NavigationContracts.LAYOUTS.ONE_COLUMN;
         }
-        if (sRouteName === "analytics") {
-            return "MidColumnFullScreen";
+        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
+            return NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
         }
-        if (sRouteName === "detail") {
-            return "TwoColumnsMidExpanded";
+        if (sRouteName === NavigationContracts.ROUTES.DETAIL) {
+            return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
         }
-        if (sRouteName === "detailLayout") {
+        if (sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT) {
             return normalizeDetailLayout(mArgs && mArgs.layout);
         }
         return null;

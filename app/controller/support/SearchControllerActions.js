@@ -17,8 +17,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewStateRuntime",
     "sap/ui/core/Item",
     "sap/m/ViewSettingsDialog",
-    "sap/m/ViewSettingsItem"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item, ViewSettingsDialog, ViewSettingsItem) {
+    "sap/m/ViewSettingsItem",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item, ViewSettingsDialog, ViewSettingsItem, NavigationContracts) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
@@ -177,9 +178,9 @@ sap.ui.define([
                 ModelStateRuntime.write(this, "state", "/searchGroupDescending", false);
             }
             ControllerRouteRuntime.attachMatched(this, [
-                { name: "search", handler: this._onSearchMatched },
-                { name: "detail", handler: this._onDetailSearchContextMatched },
-                { name: "detailLayout", handler: this._onDetailSearchContextMatched }
+                { name: NavigationContracts.ROUTES.SEARCH, handler: this._onSearchMatched },
+                { name: NavigationContracts.ROUTES.DETAIL, handler: this._onDetailSearchContextMatched },
+                { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: this._onDetailSearchContextMatched }
             ]);
             SearchViewRuntime.bindAnalyticsRefreshTimer(this);
             SearchViewRuntime.syncSmartControlAvailability(this);
@@ -249,7 +250,7 @@ sap.ui.define([
         _onDetailSearchContextMatched: function (oEvent) {
             var oArgs = oEvent && oEvent.getParameter && oEvent.getParameter("arguments");
             var sLayout = String((oArgs && oArgs.layout) || "");
-            if (sLayout === "MidColumnFullScreen") {
+            if (sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
                 return;
             }
             SearchViewRuntime.syncSearchContextForDetailRoute(this);
@@ -516,6 +517,9 @@ sap.ui.define([
             var sSelectedKey = String(ModelStateRuntime.read(this, "state", "/searchSortKey", "DateCheck") || "DateCheck");
             var bSelectedDescending = !!ModelStateRuntime.read(this, "state", "/searchSortDescending", true);
             var oBundle = this.getResourceBundle && this.getResourceBundle();
+            if (this._oSearchGroupDialog && this._oSearchGroupDialog.isOpen && this._oSearchGroupDialog.isOpen()) {
+                this._oSearchGroupDialog.close();
+            }
             if (!this._oSearchSortDialog) {
                 this._oSearchSortDialog = new ViewSettingsDialog({
                     title: oBundle && oBundle.getText("searchSortDialogTitle") || "Sort",
@@ -544,6 +548,9 @@ sap.ui.define([
             var sSelectedKey = String(ModelStateRuntime.read(this, "state", "/searchGroupKey", "") || "__NONE__");
             var bSelectedDescending = !!ModelStateRuntime.read(this, "state", "/searchGroupDescending", false);
             var oBundle = this.getResourceBundle && this.getResourceBundle();
+            if (this._oSearchSortDialog && this._oSearchSortDialog.isOpen && this._oSearchSortDialog.isOpen()) {
+                this._oSearchSortDialog.close();
+            }
             if (!this._oSearchGroupDialog) {
                 this._oSearchGroupDialog = new ViewSettingsDialog({
                     title: oBundle && oBundle.getText("searchGroupDialogTitle") || "Group",

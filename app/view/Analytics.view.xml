@@ -11,6 +11,18 @@
         enableScrolling="true"
         class="pageTransparent analyticsPage">
         <headerContent>
+            <Button
+                text="{i18n>analyticsReportButton}"
+                icon="sap-icon://business-objects-experience"
+                type="Transparent"
+                press=".onOpenAnalyticsReportDialog"
+                class="analyticsReportButton actionPrioritySecondary"/>
+            <Button
+                text="{i18n>analyticsExportButton}"
+                icon="sap-icon://excel-attachment"
+                type="Transparent"
+                press=".onExportAnalyticsReport"
+                class="analyticsExportButton actionPrioritySecondary"/>
             <ObjectStatus
                 class="analyticsRefreshStatus statusChipSemantic"
                 text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? ${i18n>analyticsRefreshRunning} : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : (${view>/refreshState/lastSuccessAt} ? (${i18n>workflowUpdatedAt} + ': ' + ${view>/refreshState/lastSuccessAt}) : ${i18n>analyticsRefreshIdle}))) }"

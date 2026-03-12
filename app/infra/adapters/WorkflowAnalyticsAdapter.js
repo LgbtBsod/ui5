@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport"
-], function (GatewayAdapterSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts"
+], function (GatewayAdapterSupport, AnalyticsContracts) {
     "use strict";
 
     function toNumber(vValue) {
@@ -169,9 +170,9 @@ sap.ui.define([
             var oUnwrapped = GatewayAdapterSupport.unwrap(oData);
             var o = Array.isArray(oUnwrapped) ? (oUnwrapped[0] || {}) : (oUnwrapped || {});
             return {
-                taskKey: String(o.taskKey || o.TaskKey || "ANALYTICS_REFRESH"),
-                taskName: String(o.taskName || o.TaskName || "Analytics Refresh"),
-                status: String(o.status || o.Status || "IDLE"),
+                taskKey: String(o.taskKey || o.TaskKey || AnalyticsContracts.REFRESH.TASK_KEY),
+                taskName: String(o.taskName || o.TaskName || AnalyticsContracts.REFRESH.TASK_NAME),
+                status: String(o.status || o.Status || AnalyticsContracts.REFRESH.STATUSES.IDLE),
                 isRunning: !!(o.isRunning || o.IsRunning),
                 requestedAt: String(o.requestedAt || o.RequestedAt || ""),
                 requestedBy: String(o.requestedBy || o.RequestedBy || ""),
@@ -210,7 +211,7 @@ sap.ui.define([
                     : GatewayAdapterSupport.get("WorkflowAnalyticsBreakdownSet", { "$filter": sCompareBreakdownFilter }, {
                         responseGuardKey: "analytics.breakdown.compare"
                     });
-                var pRefreshState = GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')", {}, {
+                var pRefreshState = GatewayAdapterSupport.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
                     responseGuardKey: "analytics.refreshState"
                 }).catch(function () { return null; });
                 return Promise.all([
@@ -232,7 +233,7 @@ sap.ui.define([
                 });
             },
             fetchRefreshState: function () {
-                return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')", {}, {
+                return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
                     responseGuardKey: "analytics.refreshState"
                 })
                     .then(normalizeRefreshState)
@@ -240,10 +241,10 @@ sap.ui.define([
             },
             requestRefresh: function (mInput) {
                 return GatewayAdapterSupport.postFunction("AnalyticsRefreshTrigger", {
-                    TaskKey: "ANALYTICS_REFRESH",
+                    TaskKey: AnalyticsContracts.REFRESH.TASK_KEY,
                     RequestedBy: String(mInput && mInput.requestedBy || "")
                 }).then(function () {
-                    return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('ANALYTICS_REFRESH')", {}, {
+                    return GatewayAdapterSupport.get("AnalyticsRefreshStateSet('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
                         responseGuardKey: "analytics.refreshState"
                     }).catch(function () { return null; });
                 }).then(normalizeRefreshState);

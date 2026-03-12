@@ -540,6 +540,73 @@ body.chkAppRoot.appDark .chkApp .workflowStageCount {
   gap: 0.55rem;
 }
 
+.chkApp .governedDialog .sapMDialogSection,
+.chkApp .governedDialog .sapMDialogScrollCont,
+.chkApp .governedDialog .sapMDialogScroll {
+  background: transparent;
+}
+
+.chkApp .governedDialogContent {
+  gap: 0.9rem;
+  padding: 0.9rem 1rem;
+}
+
+.chkApp .analyticsReportDialog .sapMDialogSection {
+  background: color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+}
+
+.chkApp .analyticsReportHero {
+  gap: 0.28rem;
+  text-align: center;
+}
+
+.chkApp .analyticsReportTitle.sapMTitle,
+.chkApp .analyticsReportSubtitle.sapMText {
+  color: var(--text-main);
+}
+
+.chkApp .analyticsReportSubtitle.sapMText {
+  color: var(--text-subtle);
+}
+
+.chkApp .analyticsReportScopeCard,
+.chkApp .analyticsReportSummaryCard {
+  padding: 0.95rem 1rem;
+}
+
+.chkApp .analyticsReportScopeRail {
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.chkApp .analyticsReportSummaryList.sapMList {
+  background: transparent;
+}
+
+.chkApp .analyticsReportSummaryList .sapMLIB {
+  padding-inline: 0;
+  background: transparent;
+  border: 0;
+}
+
+.chkApp .analyticsReportSummaryRow {
+  padding: 0.22rem 0;
+}
+
+.chkApp .analyticsReportSummaryKey.sapMText {
+  color: var(--text-subtle);
+}
+
+.chkApp .analyticsReportSummaryValue .sapMObjectNumberText,
+.chkApp .analyticsReportSummaryValue .sapMObjStatusText {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.chkApp .analyticsReportHintStrip {
+  margin-top: 0.45rem;
+}
+
 .chkApp .analyticsHeroContextRail {
   gap: 0.5rem;
   margin-top: 0.2rem;
