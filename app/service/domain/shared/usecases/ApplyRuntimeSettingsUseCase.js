@@ -2,8 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
-    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy"
-], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendVariablesSchema"
+], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy, FrontendConfigConstants, FrontendVariablesSchema) {
     "use strict";
 
     var _runtimeTimersLogDone = false;
@@ -39,7 +41,9 @@ sap.ui.define([
             var aRequiredFields = parseJsonArray(oRuntimePayload.RequiredFieldsJson).map(function (sValue) {
                 return String(sValue || "").trim();
             }).filter(Boolean);
-            var mFrontendVariables = parseJsonObject(oRuntimePayload.FrontendVariablesJson, {});
+            var mFrontendVariables = FrontendVariablesSchema.sanitize(
+                parseJsonObject(oRuntimePayload.FrontendVariablesJson, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES)
+            );
             var oUploadPolicy = AttachmentUploadPolicy.normalizeUploadPolicy(
                 parseJsonObject(oRuntimePayload.UploadPolicyJson, {})
             );
