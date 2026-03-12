@@ -38,6 +38,8 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/util/delta/DeltaDateCodec"], functi
     assignIfPresent(oRoot, "location_key", pickValue(oBasicChanges, ["LOCATION_KEY", "LocationKey"]));
     assignIfPresent(oRoot, "location_name", pickValue(oBasicChanges, ["LOCATION_NAME", "LocationName"]));
     assignIfPresent(oRoot, "location_text", pickValue(oBasicChanges, ["LOCATION_TEXT", "LocationText", "LOCATION_NAME", "LocationName"]));
+    assignIfPresent(oRoot, "checks_number", pickValue(oBasicChanges, ["CHECKS_NUMBER", "ChecksNumber", "checks_number"]));
+    assignIfPresent(oRoot, "barriers_number", pickValue(oBasicChanges, ["BARRIERS_NUMBER", "BarriersNumber", "barriers_number"]));
     assignIfPresent(oRoot, "observer_fullname", pickValue(oBasicChanges, ["OBSERVER_FULLNAME", "ObserverFullname"]));
     assignIfPresent(oRoot, "observer_perner", pickValue(oBasicChanges, ["OBSERVER_PERNER", "ObserverPernr"]));
     assignIfPresent(oRoot, "observer_position", pickValue(oBasicChanges, ["OBSERVER_POSITION", "ObserverPosition"]));

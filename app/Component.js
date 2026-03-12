@@ -35,7 +35,8 @@ sap.ui.define([
     "sap/ui/Device",
     "PRODUCTION_CONTROL_CHECKLIST/util/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
 ], function (
     UIComponent,
     ModelFactory,
@@ -73,7 +74,8 @@ sap.ui.define([
     Device,
     InteractionFX,
     ThemeRuntime,
-    SchedulingRuntime
+    SchedulingRuntime,
+    WorkflowContracts
 ) {
     "use strict";
 
@@ -153,8 +155,8 @@ sap.ui.define([
             };
         },
         _isLockRuntimeActive: function (oStateModel) {
-            return oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) === "EDIT"
-                && oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_LOCK_STATE) === "EDIT_LOCKED";
+            return oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) === WorkflowContracts.EDIT_MODES.EDIT
+                && oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_LOCK_STATE) === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
         },
         _syncLockScopedManagers: function (oStateModel) {
             var bActive = this._isLockRuntimeActive(oStateModel);

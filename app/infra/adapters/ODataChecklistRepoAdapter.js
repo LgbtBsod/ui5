@@ -139,7 +139,11 @@ sap.ui.define([
             LPC_KEY: o.Lpc || o.LPC_KEY || "",
             LPC_TEXT: o.LpcText || o.LPC_TEXT || o.Lpc || "",
             PROF_KEY: o.Profession || o.PROF_KEY || "",
-            PROF_TEXT: o.ProfessionText || o.PROF_TEXT || o.Profession || ""
+            PROF_TEXT: o.ProfessionText || o.PROF_TEXT || o.Profession || "",
+            CHECKS_NUMBER: o.ChecksNumber || o.CHECKS_NUMBER || o.checks_number || "",
+            CHECKS_NUMBER_TEXT: o.ChecksNumberText || o.CHECKS_NUMBER_TEXT || o.checks_number_text || "",
+            BARRIERS_NUMBER: o.BarriersNumber || o.BARRIERS_NUMBER || o.barriers_number || "",
+            BARRIERS_NUMBER_TEXT: o.BarriersNumberText || o.BARRIERS_NUMBER_TEXT || o.barriers_number_text || ""
         };
     }
     function mapResult(oRoot, oBasic, oChecks, oBarriers) {

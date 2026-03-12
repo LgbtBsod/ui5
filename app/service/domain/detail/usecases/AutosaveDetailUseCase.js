@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder"
-], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, WorkflowContracts) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -15,7 +16,12 @@ sap.ui.define([
     }
 
     function mapFieldDelta(mInput, oCurrent) {
-        var mFieldMap = { LPC_KEY: "Lpc", PROF_KEY: "Profession" };
+        var mFieldMap = {
+            LPC_KEY: "Lpc",
+            PROF_KEY: "Profession",
+            CHECKS_NUMBER: "ChecksNumber",
+            BARRIERS_NUMBER: "BarriersNumber"
+        };
         var sField = String((mInput && mInput.field) || "");
         if (!mFieldMap[sField]) { return null; }
         var oDraft = Object.assign({}, oCurrent || {});
@@ -45,10 +51,10 @@ sap.ui.define([
 
     function isAutosaveAllowed(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        var sEditMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "").toUpperCase();
-        var sLockStatus = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE)) || "").toUpperCase();
+        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        var sLockStatus = WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
         var bDirty = !!(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DIRTY));
-        return sEditMode === "EDIT" && sLockStatus === "EDIT_LOCKED" && bDirty;
+        return WorkflowContracts.isEditLocked(sEditMode, sLockStatus) && bDirty;
     }
 
     function resolveClientVersion(oDelta, mCtx) {

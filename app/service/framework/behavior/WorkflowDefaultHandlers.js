@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (LockAdapter, DialogOrchestrator, StatePaths, FeedbackCoordinator, RootIdRuntime, ModelStateRuntime, BehaviorRegistry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (LockAdapter, DialogOrchestrator, StatePaths, FeedbackCoordinator, RootIdRuntime, ModelStateRuntime, BehaviorRegistry, WorkflowContracts) {
     "use strict";
 
     var WORKFLOW_SCOPE = "workflow";
@@ -55,7 +56,7 @@ sap.ui.define([
         if (sAction === DialogOrchestrator.actions.NO) {
             return releaseWithTrySave(mContext).then(function () {
                 ModelStateRuntime.resetDetailWorkflowState(oController, {
-                    [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE") || "IDLE",
+                    [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE) || WorkflowContracts.AUTOSAVE_STATES.IDLE,
                     [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                     [StatePaths.WORKFLOW_AUTOSAVE_ENABLED]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false) === true,
                     "/activeObjectId": ModelStateRuntime.read(oController, "state", "/activeObjectId", "") || ""

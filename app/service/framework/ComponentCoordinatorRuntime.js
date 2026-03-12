@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil"
-], function (ModelStateRuntime, FeedbackBannerRuntime, CloneUtil) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (ModelStateRuntime, FeedbackBannerRuntime, CloneUtil, WorkflowContracts) {
     "use strict";
 
     function attachLockRuntime(mOptions) {
@@ -132,8 +133,8 @@ sap.ui.define([
         oComponent._oHeartbeat = new mManagers.HeartbeatManager({
             intervalMs: Number(mTimerDefaults.heartbeatMs),
             heartbeatFn: function () {
-                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== "EDIT" ||
-                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") !== "EDIT_LOCKED") {
+                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== WorkflowContracts.EDIT_MODES.EDIT ||
+                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     return Promise.resolve({ success: true, is_killed: false, skipped: true });
                 }
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.heartbeat !== "function") {
@@ -152,16 +153,16 @@ sap.ui.define([
             intervalMs: Number(mTimerDefaults.autoSaveIntervalMs),
             debounceMs: Number(mTimerDefaults.autoSaveDebounceMs),
             lockGuardFn: function () {
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === "EDIT_LOCKED";
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
             },
             guardFn: function () {
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === "EDIT" &&
-                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === "EDIT_LOCKED" &&
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
+                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
             },
             shouldSave: function () {
-                var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === "EDIT_LOCKED";
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === "EDIT" &&
+                var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
                     bIsLocked &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
                     !!ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
@@ -194,20 +195,20 @@ sap.ui.define([
             }
         });
         oComponent._oAutoSave.attachEvent("autosaveStart", function () {
-            var mStart = { "/autosaveState": "SAVING" };
+            var mStart = { "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.SAVING };
             mStart[StatePaths.SAVE_IN_FLIGHT] = true;
             ModelStateRuntime.setManyOnModel(oStateModel, mStart);
             DebugLogger.info("Component", "autosave start", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
             fnEmitTelemetry("autosave.triggered", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveDone", function () {
-            var mDone = { "/autosaveState": "SAVED", "/autosaveAt": new Date().toISOString() };
+            var mDone = { "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.SAVED, "/autosaveAt": new Date().toISOString() };
             mDone[StatePaths.SAVE_IN_FLIGHT] = false;
             ModelStateRuntime.setManyOnModel(oStateModel, mDone);
             DebugLogger.info("Component", "autosave done", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveError", function (oEvent) {
-            var mErr = { "/autosaveState": "ERROR" };
+            var mErr = { "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.FAILED };
             mErr[StatePaths.SAVE_IN_FLIGHT] = false;
             ModelStateRuntime.setManyOnModel(oStateModel, mErr);
             fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("error", "objectSaveFailed", {
@@ -221,8 +222,8 @@ sap.ui.define([
         oComponent._oLockStatus = new mManagers.LockStatusMonitor({
             intervalMs: Number(mTimerDefaults.lockStatusMs),
             checkFn: function () {
-                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== "EDIT" ||
-                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") !== "EDIT_LOCKED") {
+                if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== WorkflowContracts.EDIT_MODES.EDIT ||
+                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     return Promise.resolve({ success: true, is_killed: false, skipped: true });
                 }
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.status !== "function") {

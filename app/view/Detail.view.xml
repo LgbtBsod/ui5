@@ -108,6 +108,12 @@
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
+                                                    <Label text="{i18n>checksNumberLabel}"/>
+                                                    <t:template>
+                                                        <Input value="{selected>ChecksNum}" editable="false"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column>
                                                     <Label text="{i18n>checkLabel}"/>
                                                     <t:template>
                                                         <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
@@ -149,6 +155,7 @@
                                             noDataText="{i18n>noChecksData}">
                                             <columns>
                                                 <Column width="3rem"><Text text=""/></Column>
+                                                <Column><Text text="{i18n>checksNumberLabel}"/></Column>
                                                 <Column><Text text="{i18n>checkLabel}"/></Column>
                                                 <Column><Text text="{i18n>statusLabel}"/></Column>
                                                 <Column><Text text="{i18n>commentLabel}"/></Column>
@@ -160,6 +167,7 @@
                                                 <ColumnListItem>
                                                     <cells>
                                                         <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                                        <Input value="{selected>ChecksNum}" editable="false"/>
                                                         <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                                                         <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
                                                         <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
@@ -194,6 +202,12 @@
                                                     <Label text=""/>
                                                     <t:template>
                                                         <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                                    </t:template>
+                                                </t:Column>
+                                                <t:Column>
+                                                    <Label text="{i18n>barriersNumberLabel}"/>
+                                                    <t:template>
+                                                        <Input value="{selected>BarriersNum}" editable="false"/>
                                                     </t:template>
                                                 </t:Column>
                                                 <t:Column>
@@ -238,6 +252,7 @@
                                             noDataText="{i18n>noBarriersData}">
                                             <columns>
                                                 <Column width="3rem"><Text text=""/></Column>
+                                                <Column><Text text="{i18n>barriersNumberLabel}"/></Column>
                                                 <Column><Text text="{i18n>barrierLabel}"/></Column>
                                                 <Column><Text text="{i18n>statusLabel}"/></Column>
                                                 <Column><Text text="{i18n>commentLabel}"/></Column>
@@ -249,6 +264,7 @@
                                                 <ColumnListItem>
                                                     <cells>
                                                         <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                                        <Input value="{selected>BarriersNum}" editable="false"/>
                                                         <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
                                                         <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
                                                         <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>

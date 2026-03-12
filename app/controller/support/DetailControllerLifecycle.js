@@ -77,6 +77,7 @@ sap.ui.define([
                 { key: "observed", title: fnText("observedLabel", "Observed"), pinned: true },
                 { key: "equipment", title: fnText("equipmentLabel", "Equipment"), pinned: false },
                 { key: "location", title: fnText("locationLabel", "Location"), pinned: false },
+                { key: "criteriaNumbers", title: fnText("criteriaNumbersLabel", "Checks/Barriers criteria"), pinned: false },
                 { key: "lpc", title: fnText("lpcLabel", "LPC"), pinned: false },
                 { key: "profession", title: fnText("professionLabel", "Profession"), pinned: false }
             ])

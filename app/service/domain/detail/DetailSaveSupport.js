@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (WorkflowContracts) {
     "use strict";
 
     function isFilled(vValue) {
@@ -56,7 +58,7 @@ sap.ui.define([], function () {
 
     function readLockState(mCtx, StatePaths) {
         var oUiState = mCtx && mCtx.uiState;
-        return String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE)) || "").toUpperCase();
+        return WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
     }
 
     return {

@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/contracts/WorkflowContracts"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function cloneArgs(oArgs) {
@@ -61,10 +62,10 @@ sap.ui.define([
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
         var oIntent = buildCurrentIntent(oStateModel);
-        var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
-        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
+        var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+        var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
         var sRootId = readSelectedId(oStateModel);
-        var bRestoreEdit = !!(sRootId && sMode === "EDIT" && sLockState === "EDIT_LOCKED");
+        var bRestoreEdit = !!(sRootId && WorkflowContracts.isEditLocked(sMode, sLockState));
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
             routeName: String(oIntent.routeName || NavigationContracts.ROUTES.SEARCH),

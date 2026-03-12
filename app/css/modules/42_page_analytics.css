@@ -383,13 +383,13 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
 }
 
 .chkApp .kpiTrendPositive {
-  color: var(--hz-success, #1a7c40);
+  color: var(--hz-success);
   font-size: var(--t-xs);
   font-weight: var(--fw-bold);
 }
 
 .chkApp .kpiTrendNegative {
-  color: var(--hz-danger, #cc0000);
+  color: var(--hz-danger);
   font-size: var(--t-xs);
   font-weight: var(--fw-bold);
 }
@@ -399,19 +399,19 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
 }
 
 .chkApp .kpiCard.kpiFailed::before {
-  background: linear-gradient(90deg, var(--sp-red, #c01e1e) 0%, transparent 100%);
+  background: linear-gradient(90deg, var(--sp-red) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiPassed::before {
-  background: linear-gradient(90deg, var(--sp-green, #187a3c) 0%, transparent 100%);
+  background: linear-gradient(90deg, var(--sp-green) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiRate::before {
-  background: linear-gradient(90deg, var(--sp-teal, #0797a4) 0%, transparent 100%);
+  background: linear-gradient(90deg, var(--sp-teal) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiBarriers::before {
-  background: linear-gradient(90deg, var(--sp-amber, #b65a00) 0%, transparent 100%);
+  background: linear-gradient(90deg, var(--sp-amber) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiUpdated {
@@ -437,7 +437,7 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
   height: 1.1rem;
   border-radius: 999px;
   background: var(--hz-accent, var(--accent));
-  color: #fff;
+  color: var(--color-white);
   font-size: 0.6rem;
   font-weight: 800;
   display: flex;

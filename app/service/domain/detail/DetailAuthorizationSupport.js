@@ -127,9 +127,9 @@ sap.ui.define([
         });
         return [
             Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY"),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),

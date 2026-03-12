@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (ModelStateRuntime, StatePaths, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (ModelStateRuntime, StatePaths, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function normalizeLayout(vLayout) {
@@ -28,7 +29,7 @@ sap.ui.define([
     }
 
     function normalizeMode(vMode, sFallback) {
-        return String(vMode || sFallback || "READ").toUpperCase();
+        return String(vMode || sFallback || WorkflowContracts.EDIT_MODES.READ).toUpperCase();
     }
 
     function normalizeState(vValue, sFallback) {
@@ -44,21 +45,21 @@ sap.ui.define([
     function readMode(oStateModel, sFallback) {
         return normalizeMode(
             ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""),
-            sFallback || "READ"
+            sFallback || WorkflowContracts.EDIT_MODES.READ
         );
     }
 
     function readLockState(oStateModel, sFallback) {
         return normalizeState(
             ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, ""),
-            sFallback || "READ_ONLY"
+            sFallback || WorkflowContracts.LOCK_STATES.READ_ONLY
         );
     }
 
     function readAutosaveState(oStateModel, sFallback) {
         return normalizeState(
             ModelStateRuntime.readOnModel(oStateModel, "/autosaveState", ""),
-            sFallback || "IDLE"
+            sFallback || WorkflowContracts.AUTOSAVE_STATES.IDLE
         );
     }
 

@@ -7,8 +7,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/CurrentUserProfile",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, CurrentUserProfile, PermissionPresentation, CreateSentinel, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, CurrentUserProfile, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     var getText = ControllerTextRuntime.getText;
@@ -118,8 +120,8 @@ sap.ui.define([
 
             this._ensureAppViewDefaults();
             sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
-            sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
-            sMode = LayoutStateRuntime.readMode(oState, "READ");
+            sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+            sMode = LayoutStateRuntime.readMode(oState, WorkflowContracts.EDIT_MODES.READ);
             oCurrentUser = ModelStateRuntime.read(this, "state", "/currentUser", {}) || {};
             sFullName = String(oCurrentUser.fullName || getText(this, "shellUserMissing", null, "Session profile unavailable"));
             aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
@@ -134,13 +136,13 @@ sap.ui.define([
             );
             bRuntimeManagedUser = true;
             bSearchWorkspace = !sSelectedId;
-            bEditWorkspace = !bSearchWorkspace && sMode === "EDIT";
+            bEditWorkspace = !bSearchWorkspace && sMode === WorkflowContracts.EDIT_MODES.EDIT;
 
-            mShellPatch["/shell/productName"] = sCurrentRouteName === "analytics"
+            mShellPatch["/shell/productName"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
                 ? getText(this, "shellProductNameAnalytics", null, "Аналитика чек-листов производственного контроля")
                 : getText(this, "shellProductNameSearch", null, "Чек-листы производственного контроля");
             mShellPatch["/shell/routeLabel"] = "";
-            mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === "analytics"
+            mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
                 ? getText(this, "shellContextAnalytics", null, "Gateway-backed workflow dashboard with operational totals and breakdowns.")
                 : (!sSelectedId ? getText(this, "shellContextSearch", null, "Discover, filter, and open checklist flows.")
                     : (CreateSentinel.isCreateId(sSelectedId) ? getText(this, "shellContextDraft", null, "Draft checklist workspace")

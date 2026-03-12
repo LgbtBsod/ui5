@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
-], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, DomainStatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, DomainStatePaths, WorkflowContracts) {
     "use strict";
 
     function ForceReadOnlyUseCase() {
@@ -19,31 +20,30 @@ sap.ui.define([
 
     function isLockLostReason(sReason) {
         var sNormalized = String(sReason || "").toUpperCase();
-        return sNormalized === "KILLED" || sNormalized === "EXPIRED" || sNormalized === "LOCK_EXPIRED" || sNormalized === "LOST";
+        return sNormalized === WorkflowContracts.REASONS.KILLED || sNormalized === WorkflowContracts.REASONS.EXPIRED || sNormalized === WorkflowContracts.REASONS.LOCK_EXPIRED || sNormalized === WorkflowContracts.REASONS.LOST;
     }
 
     function isIdleTimeoutReason(sReason) {
-        return String(sReason || "").toUpperCase() === "IDLE_TIMEOUT";
+        return String(sReason || "").toUpperCase() === WorkflowContracts.REASONS.IDLE_TIMEOUT;
     }
 
     ForceReadOnlyUseCase.prototype.execute = function (mInput, mCtx) {
-        var sReason = String((mInput && mInput.reason) || "READ_ONLY").trim() || "READ_ONLY";
+        var sReason = String((mInput && mInput.reason) || WorkflowContracts.REASONS.READ_ONLY).trim() || WorkflowContracts.REASONS.READ_ONLY;
         var sMessageKey = String((mInput && mInput.messageKey) || "").trim();
         var bPreserveDirty = !!(mInput && mInput.preserveDirty);
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
-        var sMode = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE)) || "").toUpperCase();
-        var sLockState = String((oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE)) || "").toUpperCase();
+        var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
         var oStateModel = mCtx && mCtx.stateModel;
         var sTransitionState = isIdleTimeoutReason(sReason) ? "IDLE_TIMEOUT_GRACE" : (isLockLostReason(sReason) ? "LOCK_LOST" : "FORCED_READ_ONLY");
         var bShouldRelease = !!(
             sRootId &&
             sSessionGuid &&
             !CreateSentinel.isCreateId(sRootId) &&
-            sMode === "EDIT" &&
-            sLockState === "EDIT_LOCKED" &&
+            WorkflowContracts.isEditLocked(sMode, sLockState) &&
             oLockPort &&
             typeof oLockPort.release === "function"
         );
@@ -59,17 +59,17 @@ sap.ui.define([
 
         return pRelease.then(function (oReleaseResult) {
             aEffects = [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, sTransitionState),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
                 Effects.modelPatch("state", DomainStatePaths.LOCK_EXPIRES, null),
                 Effects.modelPatch("uiState", "/lock", {
                     ok: false,
                     reason: sReason,
-                    isKilled: String(sReason || "").toUpperCase() === "KILLED"
+                    isKilled: String(sReason || "").toUpperCase() === WorkflowContracts.REASONS.KILLED
                 })
             ];
 

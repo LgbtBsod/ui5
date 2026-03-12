@@ -76,12 +76,19 @@ function includesDependency(file, dep) {
   return read(file).includes(dep);
 }
 
+function resolveStyleEntryFile() {
+  if (exists('css/claude-hyper.css')) {
+    return 'css/claude-hyper.css';
+  }
+  return 'css/app-styles.css';
+}
+
 function collectMetrics() {
   return {
     searchControllerLines: countLines('controller/Search.controller.js'),
     detailControllerLines: countLines('controller/Detail.controller.js'),
     componentLines: countLines('Component.js'),
-    styleLines: countLines('css/claude-hyper.css')
+    styleLines: countLines(resolveStyleEntryFile())
   };
 }
 

@@ -67,7 +67,11 @@ sap.ui.define([
             LPC_TEXT: o.LPC_TEXT || "",
             PROF_TEXT: o.PROF_TEXT || "",
             LPC_KEY: o.LPC_KEY || "",
-            PROF_KEY: o.PROF_KEY || ""
+            PROF_KEY: o.PROF_KEY || "",
+            CHECKS_NUMBER: o.CHECKS_NUMBER || "",
+            CHECKS_NUMBER_TEXT: o.CHECKS_NUMBER_TEXT || "",
+            BARRIERS_NUMBER: o.BARRIERS_NUMBER || "",
+            BARRIERS_NUMBER_TEXT: o.BARRIERS_NUMBER_TEXT || ""
         });
     }
 

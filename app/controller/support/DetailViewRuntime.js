@@ -29,6 +29,7 @@ sap.ui.define([
         observer: ["basic.OBSERVER_FULLNAME"],
         observed: ["basic.OBSERVED_FULLNAME"],
         location: ["basic.LOCATION_KEY"],
+        criteriaNumbers: ["basic.CHECKS_NUMBER", "basic.BARRIERS_NUMBER"],
         lpc: ["basic.LPC_KEY"],
         profession: ["basic.PROF_KEY"]
     };
@@ -377,6 +378,32 @@ sap.ui.define([
                 path: "selected>/basic/PROF_TEXT",
                 formatter: function (sValue) { return sValue || "-"; }
             });
+        } else if (sKey === "criteriaNumbers") {
+            oEditBox.addItem(wrapEditableField(oController, bindSelectItems(withStyleClasses(new Select({
+                selectedKey: "{selected>/basic/CHECKS_NUMBER}",
+                change: [oController.onChecksNumberChange, oController],
+                forceSelection: false
+            }), "detailDictionarySelect"), "masterData>/checksNumbers"), "basic.CHECKS_NUMBER"));
+            oEditBox.addItem(withStyleClasses(createPrefixedStatus(oController, "checksNumberLabel", "selected>/basic/CHECKS_NUMBER"), "sapUiTinyMarginTop"));
+            oEditBox.addItem(wrapEditableField(oController, bindSelectItems(withStyleClasses(new Select({
+                selectedKey: "{selected>/basic/BARRIERS_NUMBER}",
+                change: [oController.onBarriersNumberChange, oController],
+                forceSelection: false
+            }), "detailDictionarySelect"), "masterData>/barriersNumbers"), "basic.BARRIERS_NUMBER"));
+            oEditBox.addItem(withStyleClasses(createPrefixedStatus(oController, "barriersNumberLabel", "selected>/basic/BARRIERS_NUMBER"), "sapUiTinyMarginTop"));
+            oReadText.bindProperty("text", {
+                parts: [
+                    { path: "selected>/basic/CHECKS_NUMBER_TEXT" },
+                    { path: "selected>/basic/CHECKS_NUMBER" },
+                    { path: "selected>/basic/BARRIERS_NUMBER_TEXT" },
+                    { path: "selected>/basic/BARRIERS_NUMBER" }
+                ],
+                formatter: function (sChecksText, sChecksCode, sBarriersText, sBarriersCode) {
+                    var sChecks = sChecksText || sChecksCode || "-";
+                    var sBarriers = sBarriersText || sBarriersCode || "-";
+                    return sChecks + " | " + sBarriers;
+                }
+            });
         }
 
         return [oReadText, oEditBox];
@@ -485,4 +512,3 @@ sap.ui.define([
         buildInfoCard: buildInfoCard
     };
 });
-

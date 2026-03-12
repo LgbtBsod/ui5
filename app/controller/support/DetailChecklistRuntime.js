@@ -22,8 +22,8 @@ sap.ui.define([
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
 
     function isDirtyTrackMode(oController) {
-        var sMode = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
-        return sMode === "EDIT" || sMode === "CREATE";
+        var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+        return WorkflowContracts.isEditableMode(sMode);
     }
 
     function readAnalyticsReturnRestore(oController) {
@@ -35,9 +35,9 @@ sap.ui.define([
     }
 
     function isEditLockedState(oController) {
-        var sMode = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
-        var sLockState = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
-        return sMode === "EDIT" && sLockState === "EDIT_LOCKED";
+        var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+        var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
+        return WorkflowContracts.isEditLocked(sMode, sLockState);
     }
 
     function buildEditToggleEvent() {
@@ -178,7 +178,7 @@ sap.ui.define([
         },
 
         _isEditMode: function () {
-            return ModelStateRuntime.read(this, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE) === "EDIT";
+            return WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(this, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ)) === WorkflowContracts.EDIT_MODES.EDIT;
         },
 
         _showToast: function (sTextKey) {
@@ -234,8 +234,8 @@ sap.ui.define([
             }
 
             if (bCreate) {
-                mStatePatch[StatePaths.WORKFLOW_DETAIL_EDIT_MODE] = "CREATE";
-                mStatePatch[StatePaths.WORKFLOW_DETAIL_LOCK_STATE] = "IDLE";
+                mStatePatch[StatePaths.WORKFLOW_DETAIL_EDIT_MODE] = WorkflowContracts.EDIT_MODES.CREATE;
+                mStatePatch[StatePaths.WORKFLOW_DETAIL_LOCK_STATE] = WorkflowContracts.LOCK_STATES.IDLE;
                 mStatePatch[DomainStatePaths.AUTOSAVE_ENABLED] = false;
                 mStatePatch[DomainStatePaths.IS_DIRTY] = false;
             }

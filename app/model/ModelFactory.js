@@ -26,6 +26,8 @@ sap.ui.define([
             persons: [],
             lpc: [],
             professions: [],
+            checksNumbers: [],
+            barriersNumbers: [],
             statuses: ["SUCCESS", "WARNING", "CRITICAL"],
             resultTypes: ["PASS", "FAIL"],
             types: [],

@@ -20,7 +20,7 @@ sap.ui.define([
     var DEFAULT_ANIMATION_ENABLED = true;
     var MODE_TO_THEME = {
         morning: "sap_horizon",
-        night: "sap_horizon"
+        night: "sap_horizon_dark"
     };
     var SWITCH_DURATION_MS = 220;
     var iSwitchTimer = 0;
@@ -28,6 +28,16 @@ sap.ui.define([
     var sPendingMode = "";
 
     function normalizeMode(sModeOrTheme) {
+        var sValue = String(sModeOrTheme || "").trim().toLowerCase();
+        if (!sValue) {
+            return DEFAULT_MODE;
+        }
+        if (sValue === "night" || sValue === "dark" || sValue === "sap_horizon_dark" || sValue === "sap_fiori_3_dark") {
+            return "night";
+        }
+        if (sValue === "morning" || sValue === "light" || sValue === "sap_horizon" || sValue === "sap_fiori_3") {
+            return "morning";
+        }
         return DEFAULT_MODE;
     }
 
@@ -103,7 +113,8 @@ sap.ui.define([
     }
 
     function syncBackgroundRuntime(oProfile) {
-        var sRuntimeTheme = "light";
+        var sMode = normalizeMode(oProfile && oProfile.mode);
+        var sRuntimeTheme = sMode === "night" ? "dark" : "light";
         var bEnabled = normalizeAnimationEnabled(oProfile && oProfile.animationEnabled);
 
         ThemeDomRuntime.setBodyAttribute("data-theme", sRuntimeTheme);
@@ -235,12 +246,12 @@ sap.ui.define([
             sMode || oStoredProfile.mode,
             Object.prototype.hasOwnProperty.call(mOptions, "animationEnabled") ? mOptions.animationEnabled : oStoredProfile.animationEnabled
         );
-        var sResolvedMode = DEFAULT_MODE;
+        var sResolvedMode = normalizeMode(oRequestedProfile.mode);
         var sTheme = themeForMode(sResolvedMode);
         var sCurrentTheme = Core && typeof Core.getConfiguration === "function" && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? Core.getConfiguration().getTheme()
             : "";
-        var sCurrentMode = DEFAULT_MODE;
+        var sCurrentMode = modeForTheme(sCurrentTheme);
         var bAlreadyApplied = (sPendingMode || sCurrentMode) === sResolvedMode && sCurrentTheme === sTheme;
 
         if (mOptions.persist !== false) {
@@ -263,7 +274,7 @@ sap.ui.define([
         return {
             mode: sResolvedMode,
             theme: sTheme,
-            isDark: false,
+            isDark: sResolvedMode === "night",
             animationEnabled: oRequestedProfile.animationEnabled
         };
     }

@@ -52,4 +52,9 @@
   --border-soft-fallback: rgba(137, 154, 176, 0.34);
   --border-strong-fallback: rgba(0, 112, 242, 0.46);
   --surface-2-fallback: rgba(246, 249, 252, 0.96);
+  --color-white: rgb(255, 255, 255);
+  --color-light-soft: rgb(238, 244, 255);
+  --color-ink-900: rgb(34, 52, 76);
+  --hz-accent-soft: rgb(77, 177, 255);
+  --accent-soft: rgb(77, 177, 255);
 }

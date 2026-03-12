@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (ModelStateRuntime, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (ModelStateRuntime, StatePaths, WorkflowContracts) {
     "use strict";
 
     function stateRead(oStateModel, sPath, vFallback) {
@@ -69,8 +70,8 @@ sap.ui.define([
         return {
             sessionId: String(stateRead(oStateModel, "/sessionId", "")),
             activeObjectId: String(stateRead(oStateModel, "/activeObjectId", "")),
-            mode: String(stateRead(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ")),
-            lockState: String(stateRead(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY"))
+            mode: String(stateRead(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ)),
+            lockState: String(stateRead(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY))
         };
     }
 

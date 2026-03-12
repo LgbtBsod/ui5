@@ -25,8 +25,8 @@ sap.ui.define([
 
     function readOnlyEffects() {
         return [
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ"),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY"),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
             Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
         ];
     }
@@ -60,13 +60,13 @@ sap.ui.define([
                         }
                     );
                 }
-                return Result.ok({ code: "READ" }, readOnlyEffects());
+                return Result.ok({ code: WorkflowContracts.EDIT_MODES.READ }, readOnlyEffects());
             });
         }
         if (bCreateDraft) {
             return Promise.resolve(Result.ok({ code: "CREATE_DRAFT" }, [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "CREATE"),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "IDLE"),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.CREATE),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
             ]));
         }
@@ -121,8 +121,8 @@ sap.ui.define([
                     }
                 });
                 return Result.ok({ code: "OK", lock: oLock }, DetailAuthorizationSupport.contentAccessEffects(oPermission).concat([
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "EDIT"),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "EDIT_LOCKED"),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.EDIT),
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.EDIT_LOCKED),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
                 ]));
             }

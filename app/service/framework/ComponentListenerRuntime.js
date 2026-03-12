@@ -1,6 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (ModelStateRuntime, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function normalizeRouteName(vRouteName) {
@@ -12,7 +14,7 @@ sap.ui.define([
     }
 
     function isDetailRoute(sRouteName) {
-        return sRouteName === "detail" || sRouteName === "detailLayout";
+        return sRouteName === NavigationContracts.ROUTES.DETAIL || sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT;
     }
 
     function resolveCurrentRootId(oStateModel) {
@@ -53,21 +55,21 @@ sap.ui.define([
         return true;
     }
 
-    function shouldReleaseDetailLock(oStateModel, oRouteEvent) {
-        var sMode = normalizeRouteName(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/editMode", "READ")).toUpperCase();
-        var sLockState = normalizeRouteName(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/lock/state", "READ_ONLY")).toUpperCase();
+    function shouldReleaseDetailLock(oStateModel, oRouteEvent, StatePaths) {
+        var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+        var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
 
         if (!shouldGuardDetailNavigation(oStateModel, oRouteEvent)) {
             return false;
         }
-        return sMode === "EDIT" || sLockState === "EDIT_LOCKED";
+        return WorkflowContracts.isEditableMode(sMode) || sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
     }
 
     function syncDetailMeta(oStateModel, StatePaths) {
         var oReadiness = ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_DETAIL, {}) || {};
-        var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
-        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").toUpperCase();
-        var sAutosaveState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "IDLE") || "IDLE").toUpperCase();
+        var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+        var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
+        var sAutosaveState = WorkflowContracts.normalizeAutosaveState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE));
         var sValidationSource = String((ModelStateRuntime.readOnModel(oStateModel, StatePaths.VALIDATION_SUMMARY, {}) || {}).source || "idle");
         var bDirty = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
         var bPermissionKnown = !!oReadiness.permissionKnown;
@@ -181,10 +183,10 @@ sap.ui.define([
                 var sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "").trim();
                 var sCurrentMode = mOptions.layoutStateRuntime.readMode(oStateModel, "");
                 var sCurrentLockState = mOptions.layoutStateRuntime.readLockState(oStateModel, "");
-                if (sCurrentRootId && sCurrentMode === "EDIT" && sCurrentLockState === "EDIT_LOCKED") {
+                if (sCurrentRootId && sCurrentMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
                     fnPublishTabSignal("LOCK_OWNED", { rootId: sCurrentRootId });
-                } else if (sCurrentRootId && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sCurrentMode !== "EDIT") {
+                } else if (sCurrentRootId && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sCurrentMode !== WorkflowContracts.EDIT_MODES.EDIT) {
                     fnPublishTabSignal("LOCK_RELEASED", { rootId: sCurrentRootId });
                 }
             }
@@ -214,8 +216,8 @@ sap.ui.define([
         oComponent.setModel(oMasterDataModel, "masterData");
         oComponent.setModel(oEnvModel, "env");
         oComponent._fnBeforeUnload = function (oEvent) {
-            var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").toUpperCase();
-            var bHasUnsaved = (sMode === "EDIT" || sMode === "CREATE") &&
+            var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+            var bHasUnsaved = WorkflowContracts.isEditableMode(sMode) &&
                 ModelStateRuntime.readOnModel(oStateModel, "/isDirty", false);
             if (!bHasUnsaved) {
                 return;
@@ -303,7 +305,7 @@ sap.ui.define([
                 });
                 return;
             }
-            if (shouldReleaseDetailLock(oStateModel, oEvent)) {
+            if (shouldReleaseDetailLock(oStateModel, oEvent, StatePaths)) {
                 oEvent.preventDefault();
                 fnQueuePendingNavigationIntent(oEvent);
                 FlowCoordinator.releaseWithTrySave({

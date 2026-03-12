@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (BindingContextReadSupport, DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutRuntime, ModelStateRuntime, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (BindingContextReadSupport, DetailCommandPolicy, ControllerViewStateRuntime, DetailInfoCardLayoutRuntime, ModelStateRuntime, StatePaths, WorkflowContracts) {
     "use strict";
 
     var ROW_ENTITY_CONFIG = {
@@ -24,8 +25,8 @@ sap.ui.define([
     function runRowOperation(oController, sEntity, sOp, mInput) {
         var oConfig = ROW_ENTITY_CONFIG[sEntity] || {};
         var sBusyPath = (sOp === "expand" || sOp === "collapse") ? oConfig.dialogBusyPath : oConfig.rowBusyPath;
-        var sBeforeMode = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
-        var sBeforeLockState = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
+        var sBeforeMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+        var sBeforeLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
         if (!sBusyPath) {
             return Promise.resolve();
         }
@@ -37,12 +38,12 @@ sap.ui.define([
             if (sOp !== "expand" && sOp !== "collapse") {
                 return vResult;
             }
-            sCurrentMode = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
-            sCurrentLockState = String(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
-            if ((sBeforeMode === "EDIT" || sBeforeMode === "CREATE") &&
-                sCurrentMode === "READ" &&
-                ((sBeforeMode === "EDIT" && sCurrentLockState === "EDIT_LOCKED" && sBeforeLockState === "EDIT_LOCKED") ||
-                    sBeforeMode === "CREATE")) {
+            sCurrentMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+            sCurrentLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
+            if (WorkflowContracts.isEditableMode(sBeforeMode) &&
+                sCurrentMode === WorkflowContracts.EDIT_MODES.READ &&
+                ((sBeforeMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED && sBeforeLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) ||
+                    sBeforeMode === WorkflowContracts.EDIT_MODES.CREATE)) {
                 ModelStateRuntime.write(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, sBeforeMode);
             }
             return vResult;
