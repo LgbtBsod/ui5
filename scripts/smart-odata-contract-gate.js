@@ -29,8 +29,8 @@ function collectControllerMethodSet() {
     const src = readText(ROOT, file);
     [...src.matchAll(/([A-Za-z0-9_]+)\s*:\s*function\s*\(/g)].forEach((m) => methods.add(m[1]));
     extractUi5Dependencies(src).forEach(({ dep }) => {
-      if (!dep.startsWith('checklist/app/controller/support/')) return;
-      const depFile = dep.replace(/^checklist\/app\//, '') + '.js';
+      if (!dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/controller/support/')) return;
+      const depFile = dep.replace(/^PRODUCTION_CONTROL_CHECKLIST\//, '') + '.js';
       if (!visited.has(depFile)) queue.push(depFile);
     });
   }

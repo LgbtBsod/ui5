@@ -81,6 +81,7 @@ Frontend detail hydration expects these resources:
 - `ChecklistBasicInfoSet?$filter=RootKey eq '<ROOT_KEY>'`
 - `ChecklistCheckSet?$filter=RootKey eq '<ROOT_KEY>'`
 - `ChecklistBarrierSet?$filter=RootKey eq '<ROOT_KEY>'`
+- `AttachmentSet?$filter=RootKey eq '<ROOT_KEY>'`
 
 ## Detail update and save composition
 
@@ -92,6 +93,25 @@ Mutating detail flows stay on dedicated resources/functions:
 - `SetChecklistStatus`
 - `CopyChecklist`
 - `ChecklistRootSet('<ROOT_KEY>')` for delete
+
+## Attachment media upload seam
+
+- metadata create request: `POST AttachmentSet`
+- binary upload request: `PUT AttachmentSet(AttachmentKey='<ATTACHMENT_KEY>')/$value`
+- required headers:
+  - `X-CSRF-Token`
+  - `Slug`
+  - `X-RootKey`
+  - `X-CategoryKey`
+- expected behavior:
+  - metadata create returns attachment identity
+  - media upload writes binary content on the same SAP Gateway OData V2 service root
+  - productive divergence must be adapted at the Gateway adapter boundary, not by adding REST fallback paths
+
+Current frontend status:
+
+- attachment media upload still uses a dedicated binary PUT helper in `app/service/backend/GatewayClient.js`
+- this remains the transport-bypass candidate to remove before claiming strict `ODataModel-only` parity
 
 ## Denied and failure response behavior
 

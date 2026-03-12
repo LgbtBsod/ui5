@@ -41,7 +41,7 @@ function normalizeRuntimeRelative(runtimeRoot, relPath) {
 
 function stripKnownPrefix(dep) {
   const value = String(dep || '').trim().replace(/^\//, '');
-  if (value.startsWith('checklist/app/')) return value.slice('checklist/app/'.length);
+  if (value.startsWith('PRODUCTION_CONTROL_CHECKLIST/')) return value.slice('PRODUCTION_CONTROL_CHECKLIST/'.length);
   if (value.startsWith('app/')) return value.slice('app/'.length);
   if (value.startsWith('webapp/')) return value.slice('webapp/'.length);
   return value;

@@ -93,6 +93,7 @@ python -m pytest backend/mock_gateway/tests/test_gateway_contract_frontend_alias
 - `scripts/gates/lock-state-enum-gate.js`
 - `scripts/gates/autosave-lock-guard-gate.js`
 - contract/invariant pytest tests
+- `scripts/sap-gateway-only-gate.js`
 
 ### Partially failing
 
@@ -102,6 +103,9 @@ python -m pytest backend/mock_gateway/tests/test_gateway_contract_frontend_alias
 - `scripts/browser-smoke-detail-attachment-dirty-invariant.py`
   - current failing step: `attachments.upload`
   - current reason: upload transport completes, but attachment projection does not become observable in `selected>/attachments` or `view>/sessionAttachments` within the current smoke contract
+- `scripts/runtime-settings-gate.js`
+  - current failing step: runtime transport scan
+  - current reason: `app/service/backend/GatewayClient.js` still uses `XMLHttpRequest` for `PUT AttachmentSet(...)/$value`
 
 ### Not executed
 

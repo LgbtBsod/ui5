@@ -38,8 +38,8 @@ function collectControllerSupportFiles(ctrlPath) {
     visited.add(file);
     const src = read(file);
     extractDefineDeps(file).forEach((dep) => {
-      if (!dep.startsWith('checklist/app/controller/support/')) return;
-      const depFile = dep.replace(/^checklist\/app\//, '') + '.js';
+      if (!dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/controller/support/')) return;
+      const depFile = dep.replace(/^PRODUCTION_CONTROL_CHECKLIST\//, '') + '.js';
       if (exists(depFile) && !visited.has(depFile)) queue.push(depFile);
     });
   }
@@ -63,7 +63,7 @@ check('XML handlers exist in owning controllers', () => {
     const xml = read(file);
     const mCtrl = xml.match(/controllerName\s*=\s*"([^"]+)"/);
     if (!mCtrl) continue;
-    const ctrlPath = mCtrl[1].replace(/^checklist\.app\./,'').replace(/\./g,'/') + '.controller.js';
+    const ctrlPath = mCtrl[1].replace(/^PRODUCTION_CONTROL_CHECKLIST\./,'').replace(/\./g,'/') + '.controller.js';
     if (!exists(ctrlPath)) { missing.push(`${file}: missing controller ${ctrlPath}`); continue; }
     const methods = collectControllerMethodSet(ctrlPath);
     const rx = new RegExp(`\\s(?:${eventAttrs.join('|')})\\s*=\\s*"\\.?([A-Za-z0-9_]+)"`, 'g');
@@ -91,7 +91,7 @@ check('Routing integrity (manifest routes + used route names)', () => {
   return { ok: unknown.length===0, detail: unknown.join(', ') };
 });
 
-check('Module resolution for local checklist.app dependencies', () => {
+check('Module resolution for local PRODUCTION_CONTROL_CHECKLIST dependencies', () => {
   const jsFiles = [...getFiles(['controller','util','infra','service'], ['.js']), 'Component.js'];
   const missing = [];
   for (const f of jsFiles) {
@@ -100,8 +100,8 @@ check('Module resolution for local checklist.app dependencies', () => {
     if (!mm) continue;
     const deps = [...mm[1].matchAll(/["']([^"']+)["']/g)].map(x=>x[1]);
     for (const d of deps) {
-      if (!d.startsWith('checklist/app/')) continue;
-      const rel = d.replace(/^checklist\/app\//,'') + '.js';
+      if (!d.startsWith('PRODUCTION_CONTROL_CHECKLIST/')) continue;
+      const rel = d.replace(/^PRODUCTION_CONTROL_CHECKLIST\//,'') + '.js';
       if (!exists(rel)) missing.push(`${f}: ${d}`);
     }
   }
@@ -114,7 +114,7 @@ check('No fallback REST/dataset anti-patterns on UI runtime path', () => {
   let hasDatasetFallback = false;
   for (const f of files) {
     const s = read(f);
-    if (/\/[Cc]hecklist(\b|\?|'|"|`)/.test(s) && !/pattern\s*:\s*"checklist\//.test(s)) hasChecklistRest = true;
+    if (/(^|[^#])\/checklist(?:\/|\?|["'`]|$)/i.test(s) && !/pattern\s*:\s*"checklist\//.test(s)) hasChecklistRest = true;
     if (/setModel\s*\(\s*new\s+sap\.ui\.model\.json\.JSONModel\s*\(\s*\[/.test(s)) hasDatasetFallback = true;
   }
   return { ok: !hasChecklistRest && !hasDatasetFallback, detail: `checklistRest=${hasChecklistRest}, datasetFallback=${hasDatasetFallback}` };

@@ -43,8 +43,8 @@ function parseDeps(source) {
 
 function resolveDep(file, dep, rootDir) {
   const dir = path.dirname(path.resolve(rootDir, file));
-  if (dep.startsWith('checklist/app/')) {
-    const mapped = dep.replace(/^checklist\/app\//, '');
+  if (dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/')) {
+    const mapped = dep.replace(/^PRODUCTION_CONTROL_CHECKLIST\//, '');
     return toPosix(mapped.endsWith('.js') ? mapped : `${mapped}.js`);
   }
   if (dep.startsWith('.')) {

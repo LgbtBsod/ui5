@@ -91,7 +91,7 @@ STATIC_CHECKS: dict[str, list[tuple[str, str]]] = {
         ("view/App.view.xml", "onCopyFeedbackCorrelationId"),
     ],
     "L1": [
-        ("manifest.json", "\"bundleName\": \"checklist.app.i18n.i18n\""),
+        ("manifest.json", "\"bundleName\": \"PRODUCTION_CONTROL_CHECKLIST.i18n.i18n\""),
         ("view/Search.view.xml", "{i18n>"),
         ("view/Detail.view.xml", "{i18n>"),
     ],

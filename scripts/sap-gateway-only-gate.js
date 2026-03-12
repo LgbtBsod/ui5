@@ -15,10 +15,10 @@ function detectGatewayTransportImports(files, violations) {
       if (sDep === 'sap/ui/thirdparty/jquery') {
         runtimeGate.pushPipeViolation(violations, file, qa.lineFromIndex(source, dep.index), 'jQuery transport import is forbidden in Gateway-only runtime');
       }
-      if (sDep === 'checklist/app/service/backend/GatewayODataTransport') {
+      if (sDep === 'PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayODataTransport') {
         runtimeGate.pushPipeViolation(violations, file, qa.lineFromIndex(source, dep.index), 'GatewayODataTransport import is forbidden in Gateway-only runtime');
       }
-      if (sDep === 'checklist/app/service/backend/GatewayDirectHttp') {
+      if (sDep === 'PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayDirectHttp') {
         runtimeGate.pushPipeViolation(violations, file, qa.lineFromIndex(source, dep.index), 'GatewayDirectHttp is forbidden in Gateway-only runtime');
       }
       if (sDep === 'sap/ui/model/odata/v2/ODataModel' && file !== 'Component.js') {
