@@ -70,6 +70,7 @@ sap.ui.define([
     function setSearchStickyTop(vControlOrDom, sTop) {
         var oDomRef = vControlOrDom && vControlOrDom.nodeType ? vControlOrDom : (vControlOrDom && vControlOrDom.getDomRef && vControlOrDom.getDomRef());
         ThemeDomRuntime.setStyleProperty([oDomRef], "top", sTop);
+        ThemeDomRuntime.setStyleProperty([oDomRef], "position", "sticky");
     }
 
     function resolveShellHeaderOffset(oController, oScrollHost) {
@@ -176,11 +177,13 @@ sap.ui.define([
         setSearchViewportCssVar(oController, "--search-sticky-filter-top", iTopBase + "px");
         setSearchViewportCssVar(oController, "--search-sticky-action-top", iActionTop + "px");
         setSearchViewportCssVar(oController, "--search-sticky-toolbar-top", iToolbarTop + "px");
+        setSearchViewportCssVar(oController, "--search-results-toolbar-sticky-top", iToolbarTop + "px");
         setSearchViewportCssVar(oController, "--search-smarttable-toolbar-height", iResultsToolbarHeight + "px");
         setSearchStickyTop(oFilterCard, iTopBase + "px");
         setSearchStickyTop(oActionRail, iActionTop + "px");
         setSearchStickyTop(oToolbarRail, iToolbarTop + "px");
         ThemeDomRuntime.setStyleProperties([oActionRail, oToolbarRail], {
+            "position": "sticky",
             "overflow": "visible",
             "overflow-x": "visible",
             "overflow-y": "visible"
