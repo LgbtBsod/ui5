@@ -15,15 +15,22 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/analytics/AnalyticsExportRows",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderRuntime, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime, ModelStateRuntime, StatePaths, Fragment, ExcelExport, AnalyticsExportRows, FeedbackCoordinator, AnalyticsContracts, DialogContracts, NavigationContracts) {
+], function (ControllerTextRuntime, AnalyticsFacade, AnalyticsBuilderRuntime, NavigationIntentService, CtxFactory, FacadeCommandRuntime, ControllerRouteRuntime, ControllerViewStateRuntime, SchedulingRuntime, ModelStateRuntime, StatePaths, Fragment, ExcelExport, AnalyticsExportRows, FeedbackCoordinator, AnalyticsContracts, ModelContracts, DialogContracts, NavigationContracts) {
     "use strict";
 
     var getText = ControllerTextRuntime.getText;
     var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
     var REFRESH_POLL_DELAY_MS = AnalyticsContracts.REFRESH.POLL_DELAY_MS;
     var REFRESH_POLL_MAX_ATTEMPTS = AnalyticsContracts.REFRESH.POLL_MAX_ATTEMPTS;
+    var MODELS = ModelContracts.MODELS;
+    var TOKENS = ModelContracts.TOKENS;
+    var STATE_MODEL = MODELS.STATE;
+    var ANALYTICS_DRILLDOWN_INTENT_PATH = "/analyticsDrilldownIntent";
+    var SELECTED_YEAR_PATH = "/selectedYear";
+    var COMPARE_YEAR_PATH = "/compareYear";
 
     function isValidYearString(sYear) {
         return /^\d{4}$/.test(String(sYear || "").trim());
@@ -61,8 +68,8 @@ sap.ui.define([
         (ControllerViewStateRuntime.get(oController, "/availableYears", []) || []).forEach(function (oYear) {
             pushYear((oYear && (oYear.key || oYear.text)) || "");
         });
-        pushYear(ControllerViewStateRuntime.get(oController, "/selectedYear", ""));
-        pushYear(ControllerViewStateRuntime.get(oController, "/compareYear", ""));
+        pushYear(ControllerViewStateRuntime.get(oController, SELECTED_YEAR_PATH, ""));
+        pushYear(ControllerViewStateRuntime.get(oController, COMPARE_YEAR_PATH, ""));
         for (; iEndYear >= iStartYear; iEndYear -= 1) {
             pushYear(iEndYear);
         }
@@ -74,7 +81,7 @@ sap.ui.define([
 
     function buildCompareYearOptions(oController) {
         var aOptions = buildYearOptions(oController);
-        var sDefaultCompareYear = normalizeYearString(Number(ControllerViewStateRuntime.get(oController, "/selectedYear", 0)) - 1);
+        var sDefaultCompareYear = normalizeYearString(Number(ControllerViewStateRuntime.get(oController, SELECTED_YEAR_PATH, 0)) - 1);
         if (sDefaultCompareYear && !aOptions.some(function (oYear) { return oYear && oYear.key === sDefaultCompareYear; })) {
             aOptions.push({
                 key: sDefaultCompareYear,
@@ -176,11 +183,11 @@ sap.ui.define([
 
     function buildSearchDrilldownIntent(sFilterKey, sFilterValue, oController, mExtras) {
         return {
-            source: "analytics",
+            source: TOKENS.ANALYTICS,
             filterKey: String(sFilterKey || "").trim(),
             filterValue: String(sFilterValue || "").trim(),
-            selectedYear: String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "").trim(),
-            compareYear: String(ControllerViewStateRuntime.get(oController, "/compareYear", "") || "").trim(),
+            selectedYear: String(ControllerViewStateRuntime.get(oController, SELECTED_YEAR_PATH, "") || "").trim(),
+            compareYear: String(ControllerViewStateRuntime.get(oController, COMPARE_YEAR_PATH, "") || "").trim(),
             analyticsSource: readSelectedSource(oController),
             extras: Object.assign({}, mExtras || {})
         };
@@ -198,7 +205,7 @@ sap.ui.define([
         if (!sFilterKey || !sValue) {
             return Promise.resolve(false);
         }
-        ModelStateRuntime.write(oController, "state", "/analyticsDrilldownIntent", buildSearchDrilldownIntent(sFilterKey, sValue, oController, mExtras));
+        ModelStateRuntime.write(oController, STATE_MODEL, ANALYTICS_DRILLDOWN_INTENT_PATH, buildSearchDrilldownIntent(sFilterKey, sValue, oController, mExtras));
         NavigationIntentService.navigateToSearch(oController);
         return Promise.resolve(true);
     }

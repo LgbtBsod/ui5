@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "sap/ui/core/routing/HashChanger",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
 ], function (WorkspaceRouteNavigation, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts) {
     "use strict";
 

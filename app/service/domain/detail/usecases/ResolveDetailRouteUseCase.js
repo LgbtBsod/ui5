@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
 ], function (UseCase, DetailAuthorizationSupport, UseCaseInputUtils, CreateSentinel, NavigationContracts) {
     "use strict";
 

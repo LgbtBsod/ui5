@@ -1,4 +1,3 @@
-/* Infra-local workflow contract mirror to keep infra independent from service/usecase imports. */
 sap.ui.define([], function () {
     "use strict";
 
@@ -16,6 +15,23 @@ sap.ui.define([], function () {
         LOCK_LOST: "LOCK_LOST",
         IDLE_TIMEOUT_GRACE: "IDLE_TIMEOUT_GRACE",
         FORCED_READ_ONLY: "FORCED_READ_ONLY"
+    });
+
+    var AUTOSAVE_STATES = Object.freeze({
+        IDLE: "IDLE",
+        SAVING: "SAVING",
+        SAVED: "SAVED",
+        FAILED: "FAILED"
+    });
+
+    var REASONS = Object.freeze({
+        READ_ONLY: "READ_ONLY",
+        IDLE_TIMEOUT: "IDLE_TIMEOUT",
+        KILLED: "KILLED",
+        EXPIRED: "EXPIRED",
+        LOCK_EXPIRED: "LOCK_EXPIRED",
+        LOST: "LOST",
+        OWNED_BY_YOU: "OWNED_BY_YOU"
     });
 
     function normalizeEditMode(vMode) {
@@ -37,16 +53,36 @@ sap.ui.define([], function () {
         return LOCK_STATES.READ_ONLY;
     }
 
+    function normalizeAutosaveState(vState) {
+        var sState = String(vState || "").trim().toUpperCase();
+        if (!sState) {
+            return AUTOSAVE_STATES.IDLE;
+        }
+        if (Object.keys(AUTOSAVE_STATES).some(function (sKey) { return AUTOSAVE_STATES[sKey] === sState; })) {
+            return sState;
+        }
+        return AUTOSAVE_STATES.IDLE;
+    }
+
+    function isEditableMode(vMode) {
+        var sMode = normalizeEditMode(vMode);
+        return sMode === EDIT_MODES.EDIT || sMode === EDIT_MODES.CREATE;
+    }
+
     function isEditLocked(vMode, vLockState) {
-        return normalizeEditMode(vMode) === EDIT_MODES.EDIT && normalizeLockState(vLockState) === LOCK_STATES.EDIT_LOCKED;
+        return normalizeEditMode(vMode) === EDIT_MODES.EDIT
+            && normalizeLockState(vLockState) === LOCK_STATES.EDIT_LOCKED;
     }
 
     return Object.freeze({
-        INFRA_CONTRACT_SCOPE: "infra",
         EDIT_MODES: EDIT_MODES,
         LOCK_STATES: LOCK_STATES,
+        AUTOSAVE_STATES: AUTOSAVE_STATES,
+        REASONS: REASONS,
         normalizeEditMode: normalizeEditMode,
         normalizeLockState: normalizeLockState,
+        normalizeAutosaveState: normalizeAutosaveState,
+        isEditableMode: isEditableMode,
         isEditLocked: isEditLocked
     });
 });

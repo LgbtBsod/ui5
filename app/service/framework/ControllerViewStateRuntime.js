@@ -1,26 +1,29 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
-], function (JSONModel, ModelStateRuntime, ControllerModelRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (JSONModel, ModelStateRuntime, ControllerModelRuntime, ModelContracts) {
     "use strict";
+
+    var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function initModel(oController, vState) {
         var vData = typeof vState === "function" ? vState() : vState;
-        oController.setModel(new JSONModel(vData || {}), "view");
+        oController.setModel(new JSONModel(vData || {}), VIEW_MODEL);
         return ControllerModelRuntime.viewState(oController);
     }
 
     function get(oController, sPath, vFallback) {
-        return ModelStateRuntime.read(oController, "view", sPath, vFallback);
+        return ModelStateRuntime.read(oController, VIEW_MODEL, sPath, vFallback);
     }
 
     function set(oController, sPath, vValue) {
-        return ModelStateRuntime.write(oController, "view", sPath, vValue);
+        return ModelStateRuntime.write(oController, VIEW_MODEL, sPath, vValue);
     }
 
     function setMany(oController, mValues) {
-        return ModelStateRuntime.setMany(oController, "view", mValues);
+        return ModelStateRuntime.setMany(oController, VIEW_MODEL, mValues);
     }
 
     function replace(oController, vState) {
@@ -40,7 +43,7 @@ sap.ui.define([
     }
 
     function withFlag(oController, sPath, fnWork, vBegin, vEnd) {
-        return ModelStateRuntime.withFlag(oController, "view", sPath, fnWork, vBegin, vEnd);
+        return ModelStateRuntime.withFlag(oController, VIEW_MODEL, sPath, fnWork, vBegin, vEnd);
     }
 
     return {

@@ -1,20 +1,23 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
-], function (UseCaseInputUtils, CreateSentinel, DomainStatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (UseCaseInputUtils, CreateSentinel, ModelContracts, ModelPathContracts) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function rootId(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return UseCaseInputUtils.rootId(mInput) || String((oUiState && oUiState.get("state", DomainStatePaths.ACTIVE_OBJECT_ID)) || "").trim();
+        return UseCaseInputUtils.rootId(mInput) || String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
     }
 
     function sessionGuid(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         return String(
             (mInput && (mInput.sessionGuid || mInput.SessionGuid))
-            || (oUiState && oUiState.get("state", DomainStatePaths.SESSION_ID))
+            || (oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.SESSION_ID))
             || ""
         ).trim();
     }

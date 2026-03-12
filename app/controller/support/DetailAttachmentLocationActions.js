@@ -6,9 +6,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
+], function (AttachmentUploadCore, DetailCommandPolicy, DetailPersonInputSupport, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, SchedulingRuntime, ModelContracts, OperationSourceContracts) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var VIEW_MODEL = MODELS.VIEW;
+    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
 
     function base64ToBlob(sBase64, sMimeType) {
         var sBinary = atob(String(sBase64 || "").trim());
@@ -25,7 +32,7 @@ sap.ui.define([
 
     function resolveAttachmentContext(oEvent) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-        return (oSource && oSource.getBindingContext && (oSource.getBindingContext("selected") || oSource.getBindingContext("view"))) || null;
+        return (oSource && oSource.getBindingContext && (oSource.getBindingContext(SELECTED_MODEL) || oSource.getBindingContext(VIEW_MODEL))) || null;
     }
 
     function deleteAttachment(oController, oEvent) {
@@ -35,7 +42,7 @@ sap.ui.define([
         if (!sAttachmentId) {
             return Promise.resolve(false);
         }
-        return ModelStateRuntime.withFlag(oController, "view", "/attachmentBusy", function () {
+        return ModelStateRuntime.withFlag(oController, VIEW_MODEL, "/attachmentBusy", function () {
             return DetailCommandPolicy.attachmentDelete(oController, RootIdRuntime.withCurrentRootId(oController, {
                 attachmentId: sAttachmentId,
                 attachment: oRow || null
@@ -44,23 +51,23 @@ sap.ui.define([
     }
 
     function toggleAttachmentsSection(oController) {
-        var bExpanded = !!ModelStateRuntime.read(oController, "view", "/attachmentsExpanded", false);
-        var bLoaded = !!ModelStateRuntime.read(oController, "view", "/attachmentsLoaded", false);
+        var bExpanded = !!ModelStateRuntime.read(oController, VIEW_MODEL, "/attachmentsExpanded", false);
+        var bLoaded = !!ModelStateRuntime.read(oController, VIEW_MODEL, "/attachmentsLoaded", false);
         if (bExpanded) {
-            ModelStateRuntime.write(oController, "view", "/attachmentsExpanded", false);
+            ModelStateRuntime.write(oController, VIEW_MODEL, "/attachmentsExpanded", false);
             if (oController && typeof oController._unbindAttachmentDropZone === "function") {
                 oController._unbindAttachmentDropZone();
             }
             return Promise.resolve({ collapsed: true });
         }
-        ModelStateRuntime.write(oController, "view", "/attachmentsExpanded", true);
+        ModelStateRuntime.write(oController, VIEW_MODEL, "/attachmentsExpanded", true);
         if (oController && typeof oController._scheduleAttachmentDropZoneBind === "function") {
             oController._scheduleAttachmentDropZoneBind();
         }
         if (bLoaded) {
             return Promise.resolve({ expanded: true, loaded: true });
         }
-        return ModelStateRuntime.withFlag(oController, "view", "/attachmentBusy", function () {
+        return ModelStateRuntime.withFlag(oController, VIEW_MODEL, "/attachmentBusy", function () {
             return DetailCommandPolicy.attachmentLoad(oController, RootIdRuntime.withCurrentRootId(oController));
         });
     }
@@ -162,7 +169,7 @@ sap.ui.define([
             this._clearLocationValueHelpSearchTimer();
             this._rememberDialogReturnFocus("locationValueHelp", oEvent && oEvent.getSource && oEvent.getSource());
             return this._withViewFlag("/locationVhBusy", function () {
-                return DetailCommandPolicy.valueHelpLocation(this, { intent: "open" });
+                return DetailCommandPolicy.valueHelpLocation(this, { intent: DETAIL_SOURCES.OPEN });
             }.bind(this)).then(function (oResult) {
                 this._scheduleLocationValueHelpTableSync();
                 return oResult;
@@ -171,38 +178,38 @@ sap.ui.define([
 
         onCloseLocationValueHelp: function () {
             this._clearLocationValueHelpSearchTimer();
-            return DetailCommandPolicy.valueHelpLocation(this, { intent: "close" }).finally(function () {
+            return DetailCommandPolicy.valueHelpLocation(this, { intent: DETAIL_SOURCES.CLOSE }).finally(function () {
                 ControllerViewStateRuntime.setFlag(this, "/locationVhBusy", false);
             }.bind(this));
         },
 
         onConfirmLocationValueHelp: function () {
             return this._withViewFlag("/locationVhBusy", function () {
-                return DetailCommandPolicy.valueHelpLocation(this, { intent: "confirm" });
+                return DetailCommandPolicy.valueHelpLocation(this, { intent: DETAIL_SOURCES.CONFIRM });
             }.bind(this));
         },
 
         onLpcChange: function (oEvent) {
             var sValue = resolveSelectChangeValue(oEvent);
-            ModelStateRuntime.write(this, "selected", "/basic/LPC_TEXT", resolveSelectChangeText(oEvent));
+            ModelStateRuntime.write(this, SELECTED_MODEL, "/basic/LPC_TEXT", resolveSelectChangeText(oEvent));
             DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "LPC_KEY", value: sValue });
         },
 
         onProfessionChange: function (oEvent) {
             var sValue = resolveSelectChangeValue(oEvent);
-            ModelStateRuntime.write(this, "selected", "/basic/PROF_TEXT", resolveSelectChangeText(oEvent));
+            ModelStateRuntime.write(this, SELECTED_MODEL, "/basic/PROF_TEXT", resolveSelectChangeText(oEvent));
             DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "PROF_KEY", value: sValue });
         },
 
         onChecksNumberChange: function (oEvent) {
             var sValue = resolveSelectChangeValue(oEvent);
-            ModelStateRuntime.write(this, "selected", "/basic/CHECKS_NUMBER_TEXT", resolveSelectChangeText(oEvent));
+            ModelStateRuntime.write(this, SELECTED_MODEL, "/basic/CHECKS_NUMBER_TEXT", resolveSelectChangeText(oEvent));
             DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "CHECKS_NUMBER", value: sValue });
         },
 
         onBarriersNumberChange: function (oEvent) {
             var sValue = resolveSelectChangeValue(oEvent);
-            ModelStateRuntime.write(this, "selected", "/basic/BARRIERS_NUMBER_TEXT", resolveSelectChangeText(oEvent));
+            ModelStateRuntime.write(this, SELECTED_MODEL, "/basic/BARRIERS_NUMBER_TEXT", resolveSelectChangeText(oEvent));
             DetailCommandPolicy.autosave(this, { rootId: this._currentRootId(), field: "BARRIERS_NUMBER", value: sValue });
         },
 
@@ -230,7 +237,7 @@ sap.ui.define([
             }
             DetailPersonInputSupport.rememberSuggestionSelection(this, sTarget, sSelectedValue);
             DetailCommandPolicy.personSuggest(this, {
-                intent: "selected",
+                intent: DETAIL_SOURCES.SELECTED,
                 item: oSelectedItem,
                 target: sTarget
             });
@@ -248,7 +255,7 @@ sap.ui.define([
                 return;
             }
             DetailCommandPolicy.personSuggest(this, {
-                intent: "manualChange",
+                intent: DETAIL_SOURCES.MANUAL_CHANGE,
                 value: sValue,
                 target: sTarget
             });
@@ -260,7 +267,7 @@ sap.ui.define([
             this._iLocationVhSearchTimer = SchedulingRuntime.restartTimer(0, function () {
                 this._iLocationVhSearchTimer = null;
                 this._withViewFlag("/locationVhBusy", function () {
-                    return DetailCommandPolicy.valueHelpLocation(this, { intent: "search", value: sValue });
+                    return DetailCommandPolicy.valueHelpLocation(this, { intent: DETAIL_SOURCES.SEARCH, value: sValue });
                 }.bind(this)).then(function () {
                     this._scheduleLocationValueHelpTableSync();
                 }.bind(this));
@@ -271,14 +278,14 @@ sap.ui.define([
             var sQuery = oEvent.getParameter("query");
             this._clearLocationValueHelpSearchTimer();
             return this._withViewFlag("/locationVhBusy", function () {
-                return DetailCommandPolicy.valueHelpLocation(this, { intent: "search", value: sQuery });
+                return DetailCommandPolicy.valueHelpLocation(this, { intent: DETAIL_SOURCES.SEARCH, value: sQuery });
             }.bind(this)).then(function () {
                 this._scheduleLocationValueHelpTableSync();
             }.bind(this));
         },
 
         onLocationTreeSelectionChange: function (oEvent) {
-            DetailCommandPolicy.valueHelpLocation(this, { intent: "treeSelection", event: oEvent });
+            DetailCommandPolicy.valueHelpLocation(this, { intent: DETAIL_SOURCES.TREE_SELECTION, event: oEvent });
         }
     };
 });

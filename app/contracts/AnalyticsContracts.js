@@ -1,8 +1,5 @@
-/* Infra-local contract mirror to keep infra layer independent from usecase/service contracts. */
 sap.ui.define([], function () {
     "use strict";
-
-    var INFRA_CONTRACT_SCOPE = "infra";
 
     var SOURCES = Object.freeze({
         ALL: "ALL",
@@ -93,7 +90,6 @@ sap.ui.define([], function () {
     });
 
     return Object.freeze({
-        INFRA_CONTRACT_SCOPE: INFRA_CONTRACT_SCOPE,
         SOURCES: SOURCES,
         YEAR_PRESETS: YEAR_PRESETS,
         REFRESH: REFRESH,

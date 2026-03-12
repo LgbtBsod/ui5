@@ -15,15 +15,27 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
     "sap/ui/core/Item",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, Item, ViewSettingsDialog, ViewSettingsItem, NavigationContracts) {
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewRuntime, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, ModelContracts, OperationSourceContracts, Item, ViewSettingsDialog, ViewSettingsItem, NavigationContracts) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = "100";
     var DEFAULT_SEARCH_VISIBLE_ROWS = "100";
+    var MODELS = ModelContracts.MODELS;
+    var TOKENS = ModelContracts.TOKENS;
+    var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
+    var STATE_MODEL = MODELS.STATE;
+    var VIEW_MODEL = MODELS.VIEW;
+    var ANALYTICS_DRILLDOWN_INTENT_PATH = "/analyticsDrilldownIntent";
+    var SEARCH_SORT_KEY_PATH = "/searchSortKey";
+    var SEARCH_SORT_DESCENDING_PATH = "/searchSortDescending";
+    var SEARCH_GROUP_KEY_PATH = "/searchGroupKey";
+    var SEARCH_GROUP_DESCENDING_PATH = "/searchGroupDescending";
 
     function normalizeRequestValue(sNormalizedValue, sFallbackValue) {
         var sSafeFallback = String(sFallbackValue || "").trim();
@@ -35,11 +47,11 @@ sap.ui.define([
     }
 
     function readAnalyticsDrilldownIntent(oController) {
-        return ModelStateRuntime.read(oController, "state", "/analyticsDrilldownIntent", null);
+        return ModelStateRuntime.read(oController, STATE_MODEL, ANALYTICS_DRILLDOWN_INTENT_PATH, null);
     }
 
     function clearAnalyticsDrilldownIntent(oController) {
-        ModelStateRuntime.write(oController, "state", "/analyticsDrilldownIntent", null);
+        ModelStateRuntime.write(oController, STATE_MODEL, ANALYTICS_DRILLDOWN_INTENT_PATH, null);
     }
 
     function applyFilterValue(oControl, sValue) {
@@ -100,25 +112,25 @@ sap.ui.define([
     }
 
     function applySearchSortSettings(oController, mSettings) {
-        var sSortKey = String((mSettings && mSettings.sortKey) || "").trim() || "DateCheck";
+        var sSortKey = String((mSettings && mSettings.sortKey) || "").trim() || TOKENS.DATE_CHECK;
         var bSortDescending = !!(mSettings && mSettings.sortDescending);
-        ModelStateRuntime.write(oController, "state", "/searchSortKey", sSortKey);
-        ModelStateRuntime.write(oController, "state", "/searchSortDescending", bSortDescending);
+        ModelStateRuntime.write(oController, STATE_MODEL, SEARCH_SORT_KEY_PATH, sSortKey);
+        ModelStateRuntime.write(oController, STATE_MODEL, SEARCH_SORT_DESCENDING_PATH, bSortDescending);
         if (shouldRebindSearch(oController)) {
-            SearchCommandPolicy.rebind(oController, { source: "searchSortSettings" });
+            SearchCommandPolicy.rebind(oController, { source: SEARCH_SOURCES.SEARCH_SORT_SETTINGS });
         }
     }
 
     function applySearchGroupSettings(oController, mSettings) {
         var sGroupKey = String((mSettings && mSettings.groupKey) || "").trim();
         var bGroupDescending = !!(mSettings && mSettings.groupDescending);
-        if (sGroupKey === "__NONE__") {
+        if (sGroupKey === TOKENS.GROUP_NONE) {
             sGroupKey = "";
         }
-        ModelStateRuntime.write(oController, "state", "/searchGroupKey", sGroupKey);
-        ModelStateRuntime.write(oController, "state", "/searchGroupDescending", bGroupDescending);
+        ModelStateRuntime.write(oController, STATE_MODEL, SEARCH_GROUP_KEY_PATH, sGroupKey);
+        ModelStateRuntime.write(oController, STATE_MODEL, SEARCH_GROUP_DESCENDING_PATH, bGroupDescending);
         if (shouldRebindSearch(oController)) {
-            SearchCommandPolicy.rebind(oController, { source: "searchGroupSettings" });
+            SearchCommandPolicy.rebind(oController, { source: SEARCH_SOURCES.SEARCH_GROUP_SETTINGS });
         }
     }
 
@@ -144,9 +156,9 @@ sap.ui.define([
             oSmartFilterBar.setFilterData(mFilterData, true);
         }
         clearAnalyticsDrilldownIntent(oController);
-        SearchCommandPolicy.buildFilter(oController, { source: "analyticsDrilldown" });
+        SearchCommandPolicy.buildFilter(oController, { source: SEARCH_SOURCES.ANALYTICS_DRILLDOWN });
         if (ControllerViewStateRuntime.get(oController, "/smartTableReady")) {
-            SearchCommandPolicy.rebind(oController, { source: "analyticsDrilldown" });
+            SearchCommandPolicy.rebind(oController, { source: SEARCH_SOURCES.ANALYTICS_DRILLDOWN });
         }
         return true;
     }
@@ -164,18 +176,18 @@ sap.ui.define([
             this._sLocationSuggestNeedle = "";
             this._searchRateProgress = SearchRateProgress;
             this._sSearchUiSessionKey = SearchViewStateRuntime.resolveSearchUiSessionKey();
-            this.setModel(SearchViewStateRuntime.createViewModel(this._sSearchUiSessionKey), "view");
-            if (!String(ModelStateRuntime.read(this, "state", "/searchSortKey", "")).trim()) {
-                ModelStateRuntime.write(this, "state", "/searchSortKey", "DateCheck");
+            this.setModel(SearchViewStateRuntime.createViewModel(this._sSearchUiSessionKey), VIEW_MODEL);
+            if (!String(ModelStateRuntime.read(this, STATE_MODEL, SEARCH_SORT_KEY_PATH, "")).trim()) {
+                ModelStateRuntime.write(this, STATE_MODEL, SEARCH_SORT_KEY_PATH, TOKENS.DATE_CHECK);
             }
-            if (typeof ModelStateRuntime.read(this, "state", "/searchSortDescending", undefined) !== "boolean") {
-                ModelStateRuntime.write(this, "state", "/searchSortDescending", true);
+            if (typeof ModelStateRuntime.read(this, STATE_MODEL, SEARCH_SORT_DESCENDING_PATH, undefined) !== "boolean") {
+                ModelStateRuntime.write(this, STATE_MODEL, SEARCH_SORT_DESCENDING_PATH, true);
             }
-            if (!String(ModelStateRuntime.read(this, "state", "/searchGroupKey", "")).trim()) {
-                ModelStateRuntime.write(this, "state", "/searchGroupKey", "");
+            if (!String(ModelStateRuntime.read(this, STATE_MODEL, SEARCH_GROUP_KEY_PATH, "")).trim()) {
+                ModelStateRuntime.write(this, STATE_MODEL, SEARCH_GROUP_KEY_PATH, "");
             }
-            if (typeof ModelStateRuntime.read(this, "state", "/searchGroupDescending", undefined) !== "boolean") {
-                ModelStateRuntime.write(this, "state", "/searchGroupDescending", false);
+            if (typeof ModelStateRuntime.read(this, STATE_MODEL, SEARCH_GROUP_DESCENDING_PATH, undefined) !== "boolean") {
+                ModelStateRuntime.write(this, STATE_MODEL, SEARCH_GROUP_DESCENDING_PATH, false);
             }
             ControllerRouteRuntime.attachMatched(this, [
                 { name: NavigationContracts.ROUTES.SEARCH, handler: this._onSearchMatched },
@@ -259,7 +271,7 @@ sap.ui.define([
         onSmartFilterInitialise: function () {
             ControllerViewStateRuntime.set(this, "/smartFilterReady", true);
             this._bindLocationSuggest();
-            SearchCommandPolicy.buildFilter(this, { source: "smartFilterInit" });
+            SearchCommandPolicy.buildFilter(this, { source: SEARCH_SOURCES.SMART_FILTER_INIT });
             applyAnalyticsDrilldownIntent(this);
         },
 
@@ -356,7 +368,7 @@ sap.ui.define([
                 return;
             }
             this._bindLocationSuggest();
-            SearchCommandPolicy.buildFilter(this, { source: "smartFilterChanged" });
+            SearchCommandPolicy.buildFilter(this, { source: SEARCH_SOURCES.SMART_FILTER_CHANGED });
         },
 
         onSmartTableInitialise: function () {
@@ -376,7 +388,7 @@ sap.ui.define([
             SearchLoadRuntime.markLoading(this);
             SearchViewRuntime.beginSearchLoadingFeedback(this);
             return this._withActionBusy("/searchActionBusy", function () {
-                return SearchCommandPolicy.executeSearch(this, { source: "smartSearch" });
+                return SearchCommandPolicy.executeSearch(this, { source: SEARCH_SOURCES.SMART_SEARCH });
             }.bind(this), function (bBusy) {
                 SearchViewRuntime.setSearchActionBusy(this, bBusy);
             }.bind(this));
@@ -385,7 +397,7 @@ sap.ui.define([
         onRetrySearchLoad: function () {
             SearchLoadRuntime.markLoading(this);
             SearchViewRuntime.beginSearchLoadingFeedback(this);
-            return SearchCommandPolicy.rebind(this, { source: "searchRetry" }).finally(function () {
+            return SearchCommandPolicy.rebind(this, { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
                 SearchLoadRuntime.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
             }.bind(this)).catch(function (oError) {
                 SearchLoadRuntime.applyLoadError(this, String((oError && oError.message) || "Search request failed"));
@@ -473,7 +485,7 @@ sap.ui.define([
             SearchViewStateRuntime.syncSearchTableRequestWindow(this);
             if (ControllerViewStateRuntime.get(this, "/hasSearched") &&
                 ControllerViewStateRuntime.get(this, "/smartTableReady")) {
-                SearchCommandPolicy.rebind(this, { source: "backendTopChange" });
+                SearchCommandPolicy.rebind(this, { source: SEARCH_SOURCES.BACKEND_TOP_CHANGE });
             }
         },
 
@@ -598,7 +610,7 @@ sap.ui.define([
                 selectedRowId: sSelectedRowId,
                 selectedRowDisplayId: sSelectedRowDisplayId,
                 selectedRowIds: aSelectedRowIds,
-                source: "tableSelection"
+                source: SEARCH_SOURCES.TABLE_SELECTION
             });
         },
 
@@ -611,7 +623,7 @@ sap.ui.define([
             return SearchCommandPolicy.selectRow(this, {
                 intent: "open",
                 rootId: sRootId,
-                source: "tableItemPress"
+                source: SEARCH_SOURCES.TABLE_ITEM_PRESS
             });
         },
 

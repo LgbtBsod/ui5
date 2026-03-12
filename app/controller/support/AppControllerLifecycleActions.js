@@ -8,10 +8,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime",
     "sap/ui/Device",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ControllerResourceCleanup, AppShellCoordinator, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, ModelStateRuntime, SchedulingRuntime, ThemeDomRuntime, Device, NavigationContracts, ModelContracts) {
     "use strict";
 
+    var MODELS = ModelContracts.MODELS;
+    var STATE_MODEL = MODELS.STATE;
     var PHONE_MAX_WIDTH = 720;
     var TABLET_MAX_WIDTH = 1080;
 
@@ -147,9 +150,9 @@ sap.ui.define([
 
         _syncLayoutState: function () {
             var oState = this._getStateModel();
-            var sLayoutRaw = ModelStateRuntime.read(this, "state", "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
+            var sLayoutRaw = ModelStateRuntime.read(this, STATE_MODEL, "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
             var sLayout = LayoutStateRuntime.normalizeLayout(sLayoutRaw);
-            var sRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+            var sRouteName = String(ModelStateRuntime.read(this, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
             var sHashRouteName = resolveRouteNameFromHash();
             var sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
             var bSingle = sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN;

@@ -7,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, DomainStatePaths, WorkflowContracts) {
     "use strict";
 

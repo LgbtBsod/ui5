@@ -1,8 +1,13 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths"
-], function (StatePaths, DomainStatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (ModelContracts, ModelPathContracts) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var SELECTED_MODEL = MODELS.SELECTED;
+    var SNAPSHOT_MODEL = "snapshot";
+    var STATE_MODEL = MODELS.STATE;
 
     function uiState(mCtx) {
         return mCtx && mCtx.uiState;
@@ -10,7 +15,7 @@ sap.ui.define([
 
     function readCurrentChecklist(mCtx) {
         var oUiState = uiState(mCtx);
-        return (oUiState && oUiState.get("selected", "/")) || {};
+        return (oUiState && oUiState.get(SELECTED_MODEL, "/")) || {};
     }
 
     function readCurrentAttachments(mCtx) {
@@ -20,12 +25,12 @@ sap.ui.define([
 
     function readDetailSnapshot(mCtx) {
         var oUiState = uiState(mCtx);
-        return (oUiState && oUiState.get("snapshot", "/")) || {};
+        return (oUiState && oUiState.get(SNAPSHOT_MODEL, "/")) || {};
     }
 
     function readRequiredFields(mCtx) {
         var oUiState = uiState(mCtx);
-        var aRequired = oUiState && oUiState.get("state", DomainStatePaths.REQUIRED_FIELDS);
+        var aRequired = oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.REQUIRED_FIELDS);
         return Array.isArray(aRequired) && aRequired.length ? aRequired : null;
     }
 

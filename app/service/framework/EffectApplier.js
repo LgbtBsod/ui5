@@ -9,10 +9,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectActionRouting",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil"
-], function (MessageToast, MessageBox, DebugLogger, Ui5StyleAdapter, StyleTokens, EffectTextResolver, EffectBannerRouter, EffectActionRouting, EffectDialogRuntime, ModelStateRuntime, CloneUtil) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (MessageToast, MessageBox, DebugLogger, Ui5StyleAdapter, StyleTokens, EffectTextResolver, EffectBannerRouter, EffectActionRouting, EffectDialogRuntime, ModelStateRuntime, CloneUtil, ModelContracts) {
     "use strict";
 
+    var MODELS = ModelContracts.MODELS;
     var DIALOG_CLASS = "glassDialog";
     var TOAST_CLASS = "glassToast";
     var TOAST_LEVEL_CLASS_PREFIX = "glassToast--";
@@ -129,7 +131,7 @@ sap.ui.define([
     }
     function inlineValidation(oController, oEffect) {
         return patchModel(oController, {
-            modelName: oEffect.modelName || "state",
+            modelName: oEffect.modelName || MODELS.STATE,
             path: oEffect.path || "/ui/feedback/inlineErrors",
             value: oEffect.value || {}
         });
@@ -159,10 +161,10 @@ sap.ui.define([
         );
     }
     function styleTokenEnable(oController, oEffect) {
-        return Ui5StyleAdapter.enable(oController, StyleTokens.resolveClassName(oEffect.token), oEffect.target || "view");
+        return Ui5StyleAdapter.enable(oController, StyleTokens.resolveClassName(oEffect.token), oEffect.target || MODELS.VIEW);
     }
     function styleTokenDisable(oController, oEffect) {
-        return Ui5StyleAdapter.disable(oController, StyleTokens.resolveClassName(oEffect.token), oEffect.target || "view");
+        return Ui5StyleAdapter.disable(oController, StyleTokens.resolveClassName(oEffect.token), oEffect.target || MODELS.VIEW);
     }
     var mEffectHandlers = {
         toast: function (oController, oEffect, oOptions) { return toast(oController, oEffect, oOptions); },

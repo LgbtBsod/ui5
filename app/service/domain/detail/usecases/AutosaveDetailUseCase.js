@@ -7,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, WorkflowContracts) {
     "use strict";
 

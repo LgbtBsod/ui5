@@ -2,11 +2,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, StatePaths, DomainStatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (UseCase, Result, Effects, ModelContracts, StatePaths, ModelPathContracts, WorkflowContracts) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function TakeoverLockUseCase() {
         UseCase.call(this, "TakeoverLockUseCase");
@@ -18,8 +21,8 @@ sap.ui.define([
     TakeoverLockUseCase.prototype.execute = function (mInput, mCtx) {
         var oLock = mCtx && mCtx.lock;
         var oUiState = mCtx && mCtx.uiState;
-        var sRootId = (mInput && mInput.rootId) || (oUiState && oUiState.get("state", DomainStatePaths.ACTIVE_OBJECT_ID));
-        var sSessionGuid = (oUiState && oUiState.get("state", StatePaths.SESSION_ID)) || "";
+        var sRootId = (mInput && mInput.rootId) || (oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
+        var sSessionGuid = (oUiState && oUiState.get(STATE_MODEL, StatePaths.SESSION_ID)) || "";
 
         if (!sRootId || !sSessionGuid || !oLock || typeof oLock.acquire !== "function") {
             return Promise.resolve(Result.fail({ code: "TAKEOVER_UNAVAILABLE" }));

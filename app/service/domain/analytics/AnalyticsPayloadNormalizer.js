@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts"
 ], function (ComponentRuntimeSupport, AnalyticsContracts) {
     "use strict";
 

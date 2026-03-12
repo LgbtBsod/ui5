@@ -1,5 +1,9 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ModelContracts) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
 
     function resolveView(oController) {
         return oController && oController.getView ? oController.getView() : null;
@@ -36,28 +40,28 @@ sap.ui.define([], function () {
         named: resolveNamedModel,
         defaultModel: resolveDefaultModel,
         state: function (oController) {
-            return resolveNamedModel(oController, "state", true);
+            return resolveNamedModel(oController, MODELS.STATE, true);
         },
         layout: function (oController) {
             return resolveNamedModel(oController, "layout", true);
         },
         appView: function (oController) {
-            return resolveNamedModel(oController, "appView", false);
+            return resolveNamedModel(oController, MODELS.APP_VIEW, false);
         },
         viewState: function (oController) {
-            return resolveNamedModel(oController, "view", false);
+            return resolveNamedModel(oController, MODELS.VIEW, false);
         },
         uiState: function (oController) {
             return resolveNamedModel(oController, "uiState", true);
         },
         selected: function (oController) {
-            return resolveNamedModel(oController, "selected", true);
+            return resolveNamedModel(oController, MODELS.SELECTED, true);
         },
         snapshot: function (oController) {
             return resolveNamedModel(oController, "snapshot", true);
         },
         masterData: function (oController) {
-            return resolveNamedModel(oController, "masterData", true);
+            return resolveNamedModel(oController, MODELS.MASTER_DATA, true);
         },
         env: function (oController) {
             return resolveNamedModel(oController, "env", true);

@@ -36,7 +36,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (
     UIComponent,
     ModelFactory,

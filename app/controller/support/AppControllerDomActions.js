@@ -1,10 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (ModelStateRuntime, ThemeDomRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ModelStateRuntime, ThemeDomRuntime, SchedulingRuntime, ModelContracts) {
     "use strict";
 
+    var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var APP_VIEW_MODEL = MODELS.APP_VIEW;
     var _iResizeRafId = 0;
     var _iResizeEndTimer = 0;
     var _iResizeSafetyTimer = 0;
@@ -83,7 +87,7 @@ sap.ui.define([
         },
 
         _applyCompactDensityClass: function () {
-            var bCompact = !!ModelStateRuntime.read(this, "appView", "/compactDensity", false);
+            var bCompact = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_COMPACT_DENSITY, false);
             var oRoot = document && document.documentElement;
             var oBody = document && document.body;
             var oContainer = document && document.getElementById && document.getElementById("ui5_container");
@@ -96,7 +100,7 @@ sap.ui.define([
             var oBody = document && document.body;
             var oContainer = document && document.getElementById && document.getElementById("ui5_container");
             var oAppDom = this.getView && this.getView().getDomRef && this.getView().getDomRef();
-            ModelStateRuntime.write(this, "appView", "/invertedBlockScheme", false);
+            ModelStateRuntime.write(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
             ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appInvertedBlockScheme", false);
         },
 

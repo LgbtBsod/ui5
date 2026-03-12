@@ -8,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
 ], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseInputUtils, StatePaths, CreateSentinel, UiAssetPaths, NavigationContracts) {
     "use strict";
 

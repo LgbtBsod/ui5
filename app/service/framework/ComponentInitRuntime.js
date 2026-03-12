@@ -7,9 +7,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCoordinatorRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiBehaviorPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime, UiBehaviorPolicy, FrontendConfigConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime, UiBehaviorPolicy, FrontendConfigConstants, ModelContracts) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
 
     function reuseJsonModel(oExistingModel, fnCreateModel) {
         var oModel = oExistingModel || fnCreateModel();
@@ -176,12 +179,12 @@ sap.ui.define([
             var sMainServiceUri = this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/";
             var oDataModel = reuseJsonModel(this.getModel("data"), ModelFactory.createDataModel);
             var oMplModel = reuseJsonModel(this.getModel("mpl"), ModelFactory.createMplModel);
-            var oStateModel = reuseJsonModel(this.getModel("state"), ModelFactory.createStateModel);
+            var oStateModel = reuseJsonModel(this.getModel(MODELS.STATE), ModelFactory.createStateModel);
             var oUiStateModel = reuseJsonModel(this.getModel("uiState"), ModelFactory.createUiStateModel);
-            var oViewModel = reuseJsonModel(this.getModel("view"), ModelFactory.createViewModel);
-            var oSelectedModel = reuseJsonModel(this.getModel("selected"), function () { return new JSONModel({}); });
+            var oViewModel = reuseJsonModel(this.getModel(MODELS.VIEW), ModelFactory.createViewModel);
+            var oSelectedModel = reuseJsonModel(this.getModel(MODELS.SELECTED), function () { return new JSONModel({}); });
             var oSnapshotModel = reuseJsonModel(this.getModel("snapshot"), ModelFactory.createSnapshotModel);
-            var oMasterDataModel = reuseJsonModel(this.getModel("masterData"), ModelFactory.createMasterDataModel);
+            var oMasterDataModel = reuseJsonModel(this.getModel(MODELS.MASTER_DATA), ModelFactory.createMasterDataModel);
             var oDeviceModel = new JSONModel(Device);
             var oMainServiceModel = this.getModel("mainService") || new ODataModel(sMainServiceUri, {
                 useBatch: true,
@@ -223,13 +226,13 @@ sap.ui.define([
 
             this.setModel(oDataModel, "data");
             this.setModel(oMplModel, "mpl");
-            this.setModel(oSelectedModel, "selected");
+            this.setModel(oSelectedModel, MODELS.SELECTED);
             this.setModel(oSnapshotModel, "snapshot");
-            this.setModel(oStateModel, "state");
+            this.setModel(oStateModel, MODELS.STATE);
             this.setModel(oUiStateModel, "uiState");
-            this.setModel(oViewModel, "view");
-            this.setModel(oViewModel, "appView");
-            this.setModel(oMasterDataModel, "masterData");
+            this.setModel(oViewModel, MODELS.VIEW);
+            this.setModel(oViewModel, MODELS.APP_VIEW);
+            this.setModel(oMasterDataModel, MODELS.MASTER_DATA);
             oDeviceModel.setDefaultBindingMode("OneWay");
             this.setModel(oDeviceModel, "device");
             this._oInteractionFX = InteractionFX;

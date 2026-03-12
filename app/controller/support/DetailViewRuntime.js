@@ -19,9 +19,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CoreListItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ControllerModelRuntime, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (GridListItem, VBox, HBox, Text, Input, DatePicker, TimePicker, Select, ObjectStatus, Button, CoreItem, CoreListItem, CustomData, BindingContextReadSupport, ControlStyleRuntime, LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerTextRuntime, ControllerModelRuntime, ModelStateRuntime, ModelContracts) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var STATE_MODEL = MODELS.STATE;
+    var VIEW_MODEL = MODELS.VIEW;
 
     var CARD_REQUIRED_KEYS = {
         datetime: ["basic.date", "basic.time", "basic.timezone"],
@@ -92,7 +97,7 @@ sap.ui.define([
             return oControl;
         }
         oControl.bindProperty("required", {
-            path: "state>/requiredFields",
+            path: STATE_MODEL + ">/requiredFields",
             formatter: function (aRequiredFields) {
                 return isRequiredValidationKey(aRequiredFields, sValidationKey);
             }
@@ -211,13 +216,13 @@ sap.ui.define([
             customData: [
                 new CustomData({
                     key: "cardkey",
-                    value: "{view>key}",
+                    value: "{" + VIEW_MODEL + ">key}",
                     writeToDom: true
                 })
             ]
         });
         withStyleClasses(oItem, "infoCardGridItem");
-        oItem.setBindingContext(oContext, "view");
+        oItem.setBindingContext(oContext, VIEW_MODEL);
         oItem.addEventDelegate({
             onAfterRendering: function () {
                 var oDomRef = oItem.getDomRef();

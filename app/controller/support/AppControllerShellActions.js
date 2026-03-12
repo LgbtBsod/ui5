@@ -9,9 +9,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (ActionContract, AppShellActionRuntime, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, AppShellCoordinator, NavigationIntentService, ModelStateRuntime, UiDecisionCoordinator, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ActionContract, AppShellActionRuntime, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, AppShellCoordinator, NavigationIntentService, ModelStateRuntime, UiDecisionCoordinator, NavigationContracts, ModelContracts) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var STATE_MODEL = MODELS.STATE;
+    var APP_VIEW_MODEL = MODELS.APP_VIEW;
 
     return {
         onToggleTheme: function (oEvent) {
@@ -39,8 +45,8 @@ sap.ui.define([
         onOpenShellAnalytics: function (oEvent) {
             var oLayout = this.byId && this.byId("mainFcl");
             var oAnalyticsPage = this.byId && this.byId(NavigationContracts.MID_COLUMN_PAGE_IDS.ANALYTICS);
-            ModelStateRuntime.write(this, "state", "/currentRouteName", NavigationContracts.ROUTES.ANALYTICS);
-            ModelStateRuntime.write(this, "state", "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
+            ModelStateRuntime.write(this, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.ANALYTICS);
+            ModelStateRuntime.write(this, STATE_MODEL, "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
             if (oLayout && oAnalyticsPage && typeof oLayout.toMidColumnPage === "function") {
                 oLayout.toMidColumnPage(oAnalyticsPage);
                 if (typeof oLayout.setLayout === "function") {
@@ -84,8 +90,8 @@ sap.ui.define([
         onToggleCompactDensity: function (oEvent) {
             var bState = ModelStateRuntime.writeBoolean(
                 this,
-                "appView",
-                "/compactDensity",
+                APP_VIEW_MODEL,
+                MODEL_PATHS.APP_VIEW_COMPACT_DENSITY,
                 oEvent && oEvent.getParameter && oEvent.getParameter("state")
             );
             this._applyCompactDensityClass();
@@ -95,8 +101,8 @@ sap.ui.define([
         onToggleThemeAnimation: function (oEvent) {
             var bState = ModelStateRuntime.writeBoolean(
                 this,
-                "appView",
-                "/animationEnabled",
+                APP_VIEW_MODEL,
+                MODEL_PATHS.APP_VIEW_ANIMATION_ENABLED,
                 oEvent && oEvent.getParameter && oEvent.getParameter("state")
             );
             AppShellCoordinator.onToggleThemeAnimation(this, bState);
@@ -104,7 +110,7 @@ sap.ui.define([
         },
 
         onToggleInvertedBlockScheme: function (oEvent) {
-            var bState = ModelStateRuntime.writeBoolean(this, "appView", "/invertedBlockScheme", false);
+            var bState = ModelStateRuntime.writeBoolean(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
             this._applyInvertedBlockSchemeClass();
             return bState;
         },
@@ -114,7 +120,7 @@ sap.ui.define([
         },
 
         onShellUserPrimaryAction: function (oEvent) {
-            var sActionKind = String(ModelStateRuntime.read(this, "appView", "/shell/userActionKind", "") || "").trim();
+            var sActionKind = String(ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_SHELL_USER_ACTION_KIND, "") || "").trim();
             if (ActionContract.normalizeShellUserAction(sActionKind) === ActionContract.SHELL_USER_ACTIONS.REFRESH_CONTEXT) {
                 return Promise.resolve(this._refreshShellUserContext());
             }

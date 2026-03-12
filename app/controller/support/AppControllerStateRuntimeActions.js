@@ -9,10 +9,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
-], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, CurrentUserProfile, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ControllerTextRuntime, ActionContract, LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, CurrentUserProfile, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts) {
     "use strict";
 
+    var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var STATE_MODEL = MODELS.STATE;
+    var APP_VIEW_MODEL = MODELS.APP_VIEW;
     var getText = ControllerTextRuntime.getText;
     var PERMISSION_TEXT_KEY_MAP = {
         "01": "shellPermissionCreate",
@@ -63,13 +68,13 @@ sap.ui.define([
             if (!ControllerModelRuntime.appView(this)) {
                 return;
             }
-            mPatch["/compactDensity"] = !!ModelStateRuntime.read(this, "appView", "/compactDensity", false);
-            mPatch["/animationEnabled"] = ModelStateRuntime.read(this, "appView", "/animationEnabled", true) !== false;
-            mPatch["/invertedBlockScheme"] = !!ModelStateRuntime.read(this, "appView", "/invertedBlockScheme", false);
-            mPatch["/isPhoneViewport"] = !!ModelStateRuntime.read(this, "appView", "/isPhoneViewport", false);
-            mPatch["/isTabletViewport"] = !!ModelStateRuntime.read(this, "appView", "/isTabletViewport", false);
-            if (!ModelStateRuntime.read(this, "appView", "/shell", null)) {
-                mPatch["/shell"] = {
+            mPatch[MODEL_PATHS.APP_VIEW_COMPACT_DENSITY] = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_COMPACT_DENSITY, false);
+            mPatch[MODEL_PATHS.APP_VIEW_ANIMATION_ENABLED] = ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_ANIMATION_ENABLED, true) !== false;
+            mPatch[MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME] = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
+            mPatch[MODEL_PATHS.APP_VIEW_IS_PHONE_VIEWPORT] = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_PHONE_VIEWPORT, false);
+            mPatch[MODEL_PATHS.APP_VIEW_IS_TABLET_VIEWPORT] = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_TABLET_VIEWPORT, false);
+            if (!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_SHELL, null)) {
+                mPatch[MODEL_PATHS.APP_VIEW_SHELL] = {
                     productName: "",
                     routeLabel: "",
                     contextSubtitle: "",
@@ -93,7 +98,7 @@ sap.ui.define([
                     userRefreshBusy: false
                 };
             }
-            ModelStateRuntime.setMany(this, "appView", mPatch);
+            ModelStateRuntime.setMany(this, APP_VIEW_MODEL, mPatch);
         },
 
         _syncShellState: function () {
@@ -120,9 +125,9 @@ sap.ui.define([
 
             this._ensureAppViewDefaults();
             sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
-            sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+            sCurrentRouteName = String(ModelStateRuntime.read(this, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
             sMode = LayoutStateRuntime.readMode(oState, WorkflowContracts.EDIT_MODES.READ);
-            oCurrentUser = ModelStateRuntime.read(this, "state", "/currentUser", {}) || {};
+            oCurrentUser = ModelStateRuntime.read(this, STATE_MODEL, "/currentUser", {}) || {};
             sFullName = String(oCurrentUser.fullName || getText(this, "shellUserMissing", null, "Session profile unavailable"));
             aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
             aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
@@ -130,8 +135,8 @@ sap.ui.define([
             sUserSummaryText = buildUserSummaryText(this, aPermissionSheets, oCurrentUser.summaryText);
             bShowHints = !!ModelStateRuntime.read(this, "layout", "/personalization/showHints", false);
             sFrontendSource = String(
-                ModelStateRuntime.read(this, "state", "/frontendConfigSource", "")
-                || ModelStateRuntime.read(this, "state", "/backendMode", "")
+                ModelStateRuntime.read(this, STATE_MODEL, "/frontendConfigSource", "")
+                || ModelStateRuntime.read(this, STATE_MODEL, "/backendMode", "")
                 || "gateway_runtime"
             );
             bRuntimeManagedUser = true;
@@ -167,7 +172,7 @@ sap.ui.define([
             mShellPatch["/shell/userTooltip"] = sUserSummaryText || getText(this, "shellUserTooltipStandalone", null, "Open user session controls");
             mShellPatch["/shell/userIcon"] = "sap-icon://employee";
             mShellPatch["/shell/showHints"] = bShowHints;
-            ModelStateRuntime.setMany(this, "appView", mShellPatch);
+            ModelStateRuntime.setMany(this, APP_VIEW_MODEL, mShellPatch);
             if (typeof this._markStartupReady === "function") {
                 this._markStartupReady();
             }

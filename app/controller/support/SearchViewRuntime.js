@@ -14,7 +14,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/SearchShortcutRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadingFeedbackRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartTableRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchActionRuntime"
 ], function (
     SearchLoadRuntime,
     SearchRateProgress,
@@ -31,13 +37,19 @@ sap.ui.define([
     SearchViewportRuntime,
     SearchSelectionRuntime,
     SearchShortcutRuntime,
-    StatePaths
+    StatePaths,
+    ModelContracts,
+    OperationSourceContracts,
+    SearchAnalyticsRailRuntime,
+    SearchLoadingFeedbackRuntime,
+    SearchSmartTableRuntime,
+    SearchActionRuntime
 ) {
     "use strict";
 
-    var SEARCH_WORKING_HINT_MS = 2000;
-    var SEARCH_INITIAL_ANALYTICS_DELAY_MS = 400;
-
+    var MODELS = ModelContracts.MODELS;
+    var STATE_MODEL = MODELS.STATE;
+    var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     function resolveStartupPerf(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
         if (!oOwner) {
@@ -79,35 +91,6 @@ sap.ui.define([
         }
     }
 
-    function clearSearchWorkingHintTimer(oController) {
-        oController._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(oController._iSearchWorkingHintTimer);
-    }
-
-    function clearPendingSearchLoad(oController) {
-        oController._iPendingSearchLoadTimer = SchedulingRuntime.clearTimer(oController._iPendingSearchLoadTimer);
-        oController._oPendingSearchLoad = null;
-    }
-
-    function isSearchBindingSettled(oInnerTable) {
-        var oBinding = oInnerTable && oInnerTable.getBinding && oInnerTable.getBinding("items");
-        if (!oInnerTable || !oBinding) {
-            return false;
-        }
-        if (typeof oInnerTable.getBusy === "function" && oInnerTable.getBusy()) {
-            return false;
-        }
-        if (typeof oBinding.isPending === "function" && oBinding.isPending()) {
-            return false;
-        }
-        if (oBinding.bPendingRequest || oBinding.bPendingRefresh) {
-            return false;
-        }
-        if (typeof oBinding.isLengthFinal === "function") {
-            return !!oBinding.isLengthFinal();
-        }
-        return true;
-    }
-
     function readSearchRows(oController, oInnerTable) {
         var aRows = [];
         var oCtx = oController._ctx && oController._ctx();
@@ -118,90 +101,6 @@ sap.ui.define([
             aRows = oInnerTable.getItems ? (oInnerTable.getItems() || []) : [];
         }
         return aRows;
-    }
-
-    function settlePendingSearchLoad(oController, oOptions) {
-        var oPending = oController._oPendingSearchLoad;
-        var oInnerTable = oOptions && oOptions.innerTable;
-        var oError = oOptions && oOptions.error;
-        var sErrorMessage;
-        if (!oPending || oPending.settled) {
-            return;
-        }
-        oPending.settled = true;
-        clearPendingSearchLoad(oController);
-        hideSearchWorkingHint(oController);
-        if (oError) {
-            sErrorMessage = String((oError && (oError.message || oError.statusText)) || "Search request failed").trim();
-            SearchLoadRuntime.applyLoadError(oController, sErrorMessage);
-            return;
-        }
-        SearchLoadRuntime.applyLoadSuccess(oController, readSearchRows(oController, oInnerTable));
-        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
-        SearchViewportRuntime.bindSearchViewportRuntime(oController);
-        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
-    }
-
-    function bindPendingSearchLoad(oController, oInnerTable) {
-        var iStartedAt = Date.now();
-        var fnPoll;
-        clearPendingSearchLoad(oController);
-        oController._oPendingSearchLoad = { settled: false };
-        if (!oInnerTable || typeof oInnerTable.attachEventOnce !== "function") {
-            return;
-        }
-        oInnerTable.attachEventOnce("updateFinished", function () {
-            settlePendingSearchLoad(oController, { innerTable: oInnerTable });
-        });
-        fnPoll = function () {
-            if (!oController._oPendingSearchLoad || oController._oPendingSearchLoad.settled) {
-                return;
-            }
-            if (isSearchBindingSettled(oInnerTable) || (Date.now() - iStartedAt) >= 8000) {
-                settlePendingSearchLoad(oController, { innerTable: oInnerTable });
-                return;
-            }
-            oController._iPendingSearchLoadTimer = SchedulingRuntime.restartTimer(
-                oController._iPendingSearchLoadTimer,
-                fnPoll,
-                250
-            );
-        };
-        oController._iPendingSearchLoadTimer = SchedulingRuntime.restartTimer(0, fnPoll, 250);
-    }
-
-    function hideSearchWorkingHint(oController) {
-        clearSearchWorkingHintTimer(oController);
-        ControllerViewStateRuntime.set(oController, "/filterHintVisible", false);
-        ControllerViewStateRuntime.set(oController, "/filterHintText", "");
-    }
-
-    function isSearchLoading(oController) {
-        return !!(
-            ControllerViewStateRuntime.get(oController, "/tableBusy", false)
-            || ControllerViewStateRuntime.get(oController, "/searchActionBusy", false)
-            || ModelStateRuntime.read(oController, "state", StatePaths.UI_BUSY_SEARCH_TABLE, false)
-        );
-    }
-
-    function scheduleSearchWorkingHint(oController) {
-        clearSearchWorkingHintTimer(oController);
-        oController._iSearchWorkingHintTimer = SchedulingRuntime.restartTimer(0, function () {
-            if (!isSearchLoading(oController)) {
-                return;
-            }
-            ControllerViewStateRuntime.set(oController, "/filterHintVisible", true);
-            ControllerViewStateRuntime.set(oController, "/filterHintType", "Information");
-            ControllerViewStateRuntime.set(
-                oController,
-                "/filterHintText",
-                ControllerTextRuntime.getText(oController, "workingMessageLong", [], "Working...")
-            );
-        }, SEARCH_WORKING_HINT_MS);
-    }
-
-    function beginSearchLoadingFeedback(oController) {
-        scheduleSearchWorkingHint(oController);
     }
 
     function setSearchActionBusy(oController, bBusy) {
@@ -219,85 +118,18 @@ sap.ui.define([
         }
     }
 
-    function clearAnalyticsRefreshTimer(oController) {
-        oController._iAnalyticsRefreshTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRefreshTimer);
-    }
-
-    function clearInitialAnalyticsSchedule(oController) {
-        oController._iInitialAnalyticsTimer = SchedulingRuntime.clearTimer(oController._iInitialAnalyticsTimer);
-        if (oController._iInitialAnalyticsIdleId && window.cancelIdleCallback) {
-            window.cancelIdleCallback(oController._iInitialAnalyticsIdleId);
-            oController._iInitialAnalyticsIdleId = null;
-        }
-    }
-
-    function resolveAnalyticsRefreshMs(oController) {
-        var oStateModel = ControllerModelRuntime.state(oController);
-        var iMs = Number(TimeConfigService.read(oStateModel, "analyticsRefreshMs"));
-        return Number.isFinite(iMs) && iMs >= 1000 ? iMs : 300000;
-    }
-
-    function pulseAnalyticsRailUpdate(oController) {
-        var oRail = oController.byId("searchAnalyticsRail");
-        if (!oRail) {
-            return;
-        }
-        oController._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRailPulseTimer);
-        ControlStyleRuntime.restart(oRail, "searchAnalyticsRailPulse");
-        oController._iAnalyticsRailPulseTimer = SchedulingRuntime.restartTimer(0, function () {
-            ControlStyleRuntime.disable(oRail, "searchAnalyticsRailPulse");
-            oController._iAnalyticsRailPulseTimer = null;
-        }, 520);
-    }
-
-    function refreshAnalyticsRail(oController, mOptions) {
-        var bSilent = !!(mOptions && mOptions.silent);
-        if (!bSilent) {
-            ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);
-            ControllerViewStateRuntime.set(oController, "/analyticsError", "");
-        }
-        return SearchCommandPolicy.analytics(oController, { intent: "refreshRail", silent: bSilent }).then(function (vResult) {
-            if (bSilent) {
-                pulseAnalyticsRailUpdate(oController);
-            }
-            return vResult;
-        });
-    }
-
-    function scheduleAnalyticsRefresh(oController) {
-        clearAnalyticsRefreshTimer(oController);
-        oController._iAnalyticsRefreshTimer = SchedulingRuntime.restartTimer(0, function () {
-            refreshAnalyticsRail(oController, { silent: true });
-            scheduleAnalyticsRefresh(oController);
-        }, resolveAnalyticsRefreshMs(oController));
-    }
-
-    function bindAnalyticsRefreshTimer(oController) {
-        var oStateModel = ControllerModelRuntime.state(oController);
-        if (!oStateModel || oController._oAnalyticsRefreshBinding) {
-            return;
-        }
-        if (!oController._fnAnalyticsRefreshChanged) {
-            oController._fnAnalyticsRefreshChanged = function () {
-                scheduleAnalyticsRefresh(oController);
-            };
-        }
-        oController._oAnalyticsRefreshBinding = oStateModel.bindProperty("/timers/analyticsRefreshMs");
-        oController._oAnalyticsRefreshBinding.attachChange(oController._fnAnalyticsRefreshChanged);
-    }
-
     function syncSmartControlAvailability(oController) {
         SearchSelectionRuntime.syncSearchTableRuntimeState(oController, SearchSelectionRuntime.resolveSearchInnerTable(oController));
         ControllerViewStateRuntime.set(oController, "/tableBusy", false);
     }
 
     function shouldRefreshSearchOnReturn(oController) {
-        return !!ModelStateRuntime.read(oController, "state", "/searchForceRefreshOnReturn", false)
+        return !!ModelStateRuntime.read(oController, STATE_MODEL, "/searchForceRefreshOnReturn", false)
             && !!ControllerViewStateRuntime.get(oController, "/hasSearched", false);
     }
 
     function clearSearchRefreshFlag(oController) {
-        ModelStateRuntime.write(oController, "state", "/searchForceRefreshOnReturn", false);
+        ModelStateRuntime.write(oController, STATE_MODEL, "/searchForceRefreshOnReturn", false);
     }
 
     function refreshSearchTableIfNeeded(oController, sSource) {
@@ -305,7 +137,7 @@ sap.ui.define([
             return;
         }
         clearSearchRefreshFlag(oController);
-        SearchCommandPolicy.rebind(oController, { source: sSource || "searchReturn" });
+        SearchCommandPolicy.rebind(oController, { source: sSource || SEARCH_SOURCES.SEARCH_RETRY });
     }
 
     function onSearchMatched(oController) {
@@ -316,25 +148,20 @@ sap.ui.define([
         ControllerViewStateRuntime.set(oController, "/analyticsBusy", false);
         ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);
         ControllerViewStateRuntime.set(oController, "/analyticsError", "");
-        clearInitialAnalyticsSchedule(oController);
+        oController._runSearchAnalytics = function (mInput) {
+            return SearchCommandPolicy.analytics(oController, mInput);
+        };
+        oController._resolveSearchWorkingText = function () {
+            return ControllerTextRuntime.getText(oController, "workingMessageLong", [], "Working...");
+        };
+        SearchAnalyticsRailRuntime.clearInitialAnalyticsSchedule(oController);
         Promise.resolve(SearchCommandPolicy.bootstrap(oController, { reason: "routeMatched" }))
             .catch(function () {
                 return null;
             })
-            .finally(function () {
-                var fnStartAnalytics = function () {
-                    oController._iInitialAnalyticsIdleId = null;
-                    oController._iInitialAnalyticsTimer = null;
-                    logStartupMetric(oController, "analyticsStarted");
-                    refreshAnalyticsRail(oController, { silent: false });
-                    scheduleAnalyticsRefresh(oController);
-                };
-                if (window.requestIdleCallback) {
-                    oController._iInitialAnalyticsIdleId = window.requestIdleCallback(fnStartAnalytics, { timeout: 800 });
-                    return;
-                }
-                oController._iInitialAnalyticsTimer = SchedulingRuntime.restartTimer(0, fnStartAnalytics, SEARCH_INITIAL_ANALYTICS_DELAY_MS);
-            });
+            .finally(SearchAnalyticsRailRuntime.scheduleInitialAnalytics(oController, function () {
+                logStartupMetric(oController, "analyticsStarted");
+            }));
         SearchViewportRuntime.restoreSearchScrollPosition(oController);
         refreshSearchTableIfNeeded(oController, "routeMatchedReturn");
     }
@@ -346,102 +173,133 @@ sap.ui.define([
     }
 
     function onSmartTableInitialise(oController) {
-        var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
-        ControllerViewStateRuntime.set(oController, "/smartTableReady", true);
-        if (!oInnerTable) {
-            return;
-        }
-        SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, true);
-        SearchSelectionRuntime.bindSearchTableRuntime(oController, oInnerTable, function () {
-            SearchViewportRuntime.bindSearchViewportRuntime(oController);
-            SearchViewportRuntime.scheduleSearchViewportSync(oController, false);
+        return SearchSmartTableRuntime.onSmartTableInitialise(oController, {
+            bindTableRuntime: function (oInnerTable, fnAfterBind) {
+                SearchSelectionRuntime.bindSearchTableRuntime(oController, oInnerTable, fnAfterBind);
+            },
+            bindViewportRuntime: function () {
+                SearchViewportRuntime.bindSearchViewportRuntime(oController);
+            },
+            configureResultTable: function (oInnerTable, bForce) {
+                SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, bForce);
+            },
+            onItemPress: oController.onSearchTableItemPress,
+            onSelectionChange: oController.onSearchTableSelectionChange,
+            refreshTableIfNeeded: function (sSource) {
+                refreshSearchTableIfNeeded(oController, sSource);
+            },
+            resolveInnerTable: function () {
+                return SearchSelectionRuntime.resolveSearchInnerTable(oController);
+            },
+            scheduleViewportSync: function (bImmediate) {
+                SearchViewportRuntime.scheduleSearchViewportSync(oController, bImmediate);
+            },
+            syncRequestWindow: function () {
+                SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
+            },
+            wireRateProgress: function (oInnerTable) {
+                SearchRateProgress.wireTable(oController, oInnerTable);
+            }
         });
-        if (oInnerTable.removeSelections) {
-            oInnerTable.removeSelections(true);
-        }
-        if (oInnerTable.attachSelectionChange) {
-            oInnerTable.attachSelectionChange(oController.onSearchTableSelectionChange, oController);
-        }
-        if (oInnerTable.attachItemPress) {
-            oInnerTable.attachItemPress(oController.onSearchTableItemPress, oController);
-        }
-        SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
-        SearchRateProgress.wireTable(oController, oInnerTable);
-        SearchViewportRuntime.bindSearchViewportRuntime(oController);
-        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
-        refreshSearchTableIfNeeded(oController, "smartTableInitialise");
     }
 
     function onBeforeSmartTableRebind(oController, oEvent) {
-        var oBindingParams = oEvent && oEvent.getParameter && oEvent.getParameter("bindingParams");
-        var oStateModel = ControllerModelRuntime.state(oController);
-        var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
-        SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, true);
-        SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
-        ControllerViewStateRuntime.set(oController, "/tableBusy", true);
-        scheduleSearchWorkingHint(oController);
-        SearchViewportRuntime.scheduleSearchViewportSync(oController, false);
-        bindPendingSearchLoad(oController, oInnerTable);
-        SearchCommandPolicy.applyRebindPolicy(oController, {
-            source: "beforeRebind",
-            bindingParams: oBindingParams || {},
-            state: (oStateModel && oStateModel.getData && oStateModel.getData()) || {},
-            onDataReceived: function (oDataEvent) {
-                var oError = oDataEvent && oDataEvent.getParameter
-                    && (oDataEvent.getParameter("error") || oDataEvent.getParameter("data") && oDataEvent.getParameter("data").error);
-                settlePendingSearchLoad(oController, {
+        return SearchSmartTableRuntime.onBeforeSmartTableRebind(oController, oEvent, {
+            applyRebindPolicy: function (mInput) {
+                return SearchCommandPolicy.applyRebindPolicy(oController, mInput);
+            },
+            beginSearchLoadingFeedback: function () {
+                SearchLoadingFeedbackRuntime.beginSearchLoadingFeedback(oController);
+            },
+            bindPendingSearchLoad: function (oInnerTable) {
+                SearchLoadingFeedbackRuntime.bindPendingSearchLoad(oController, oInnerTable, {
+                    applyLoadError: function (sErrorMessage) {
+                        SearchLoadRuntime.applyLoadError(oController, sErrorMessage);
+                    },
+                    applyLoadSuccess: function (aRows) {
+                        SearchLoadRuntime.applyLoadSuccess(oController, aRows);
+                    },
+                    readRows: function () {
+                        return readSearchRows(oController, oInnerTable);
+                    },
+                    afterSuccess: function () {
+                        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
+                        SearchViewportRuntime.bindSearchViewportRuntime(oController);
+                        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+                    }
+                });
+            },
+            configureResultTable: function (oInnerTable, bForce) {
+                SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, bForce);
+            },
+            resolveInnerTable: function () {
+                return SearchSelectionRuntime.resolveSearchInnerTable(oController);
+            },
+            scheduleViewportSync: function (bImmediate) {
+                SearchViewportRuntime.scheduleSearchViewportSync(oController, bImmediate);
+            },
+            settlePendingSearchLoad: function (oInnerTable, oError) {
+                SearchLoadingFeedbackRuntime.settlePendingSearchLoad(oController, {
                     innerTable: oInnerTable,
                     error: oError
+                }, {
+                    applyLoadError: function (sErrorMessage) {
+                        SearchLoadRuntime.applyLoadError(oController, sErrorMessage);
+                    },
+                    applyLoadSuccess: function (aRows) {
+                        SearchLoadRuntime.applyLoadSuccess(oController, aRows);
+                    },
+                    readRows: function () {
+                        return readSearchRows(oController, oInnerTable);
+                    },
+                    afterSuccess: function () {
+                        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
+                        SearchViewportRuntime.bindSearchViewportRuntime(oController);
+                        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+                    }
                 });
+            },
+            syncRequestWindow: function () {
+                SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
             }
-        }).catch(function (oError) {
-            settlePendingSearchLoad(oController, {
-                innerTable: oInnerTable,
-                error: oError
-            });
-            return Promise.reject(oError);
-        });
-    }
-
-    function openWorkflowAnalytics(oController) {
-        NavigationIntentService.navigateToAnalytics(oController);
-        return Promise.resolve();
-    }
-
-    function closeWorkflowAnalytics(oController) {
-        NavigationIntentService.navigateBackFromAnalytics(oController);
-    }
-
-    function runExport(oController, sEntity) {
-        var aSelectedRowIds = ControllerViewStateRuntime.get(oController, "/selectedRowIds", []) || [];
-        ControllerViewStateRuntime.set(oController, "/exportBusy", true);
-        ModelStateRuntime.write(oController, "state", StatePaths.UI_BUSY_EXPORT, true);
-        return SearchCommandPolicy.exportFlow(oController, {
-            entity: sEntity || "screen",
-            selectedRowIds: Array.isArray(aSelectedRowIds) ? aSelectedRowIds.slice(0) : []
-        }).finally(function () {
-            ControllerViewStateRuntime.set(oController, "/exportBusy", false);
-            ModelStateRuntime.write(oController, "state", StatePaths.UI_BUSY_EXPORT, false);
         });
     }
 
     return {
-        bindAnalyticsRefreshTimer: bindAnalyticsRefreshTimer,
+        bindAnalyticsRefreshTimer: SearchAnalyticsRailRuntime.bindAnalyticsRefreshTimer,
         bindPowerUserShortcuts: SearchShortcutRuntime.bindPowerUserShortcuts,
         bindSearchViewportRuntime: SearchViewportRuntime.bindSearchViewportRuntime,
-        beginSearchLoadingFeedback: beginSearchLoadingFeedback,
+        beginSearchLoadingFeedback: SearchLoadingFeedbackRuntime.beginSearchLoadingFeedback,
         captureSearchScrollPosition: SearchViewportRuntime.captureSearchScrollPosition,
         clearSelection: SearchSelectionRuntime.clearSelection,
-        clearAnalyticsRefreshTimer: clearAnalyticsRefreshTimer,
-        closeWorkflowAnalytics: closeWorkflowAnalytics,
+        clearAnalyticsRefreshTimer: SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer,
+        closeWorkflowAnalytics: function (oController) {
+            return SearchActionRuntime.closeWorkflowAnalytics(oController, {
+                navigateBackFromAnalytics: function () {
+                    NavigationIntentService.navigateBackFromAnalytics(oController);
+                }
+            });
+        },
         focusSearchResults: SearchSelectionRuntime.focusSearchResults,
         focusSearchToolbar: SearchSelectionRuntime.focusSearchToolbar,
         onBeforeSmartTableRebind: onBeforeSmartTableRebind,
         syncSearchContextForDetailRoute: syncSearchContextForDetailRoute,
         onSearchMatched: onSearchMatched,
         onSmartTableInitialise: onSmartTableInitialise,
-        openWorkflowAnalytics: openWorkflowAnalytics,
-        runExport: runExport,
+        openWorkflowAnalytics: function (oController) {
+            return SearchActionRuntime.openWorkflowAnalytics(oController, {
+                navigateToAnalytics: function () {
+                    NavigationIntentService.navigateToAnalytics(oController);
+                }
+            });
+        },
+        runExport: function (oController, sEntity) {
+            return SearchActionRuntime.runExport(oController, sEntity, {
+                exportFlow: function (mInput) {
+                    return SearchCommandPolicy.exportFlow(oController, mInput);
+                }
+            });
+        },
         scrollToSearchResultsToolbar: SearchViewportRuntime.scrollToSearchResultsToolbar,
         scrollToSearchFilters: SearchViewportRuntime.scrollToSearchFilters,
         selectVisibleRows: SearchSelectionRuntime.selectVisibleRows,
