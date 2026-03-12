@@ -89,17 +89,6 @@ sap.ui.define([
             return bState;
         },
 
-        onToggleBackgroundInteraction: function (oEvent) {
-            var bState = ModelStateRuntime.writeBoolean(
-                this,
-                "appView",
-                "/backgroundInteractive",
-                oEvent && oEvent.getParameter && oEvent.getParameter("state")
-            );
-            AppShellCoordinator.onToggleBackgroundInteractive(this, bState);
-            return bState;
-        },
-
         onToggleInvertedBlockScheme: function (oEvent) {
             var bState = ModelStateRuntime.writeBoolean(this, "appView", "/invertedBlockScheme", false);
             this._applyInvertedBlockSchemeClass();

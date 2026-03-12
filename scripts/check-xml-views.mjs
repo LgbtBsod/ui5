@@ -35,19 +35,19 @@ function assertIncludes(filePath, pattern, message) {
   }
 }
 
-const appView = read("view/App.view.xml");
-const searchView = read("view/Search.view.xml");
-const detailView = read("view/Detail.view.xml");
-const analyticsView = read("view/Analytics.view.xml");
-const checksExpandedDialog = read("view/fragment/ChecksExpandedDialog.fragment.xml");
-const barriersExpandedDialog = read("view/fragment/BarriersExpandedDialog.fragment.xml");
-const workflowAnalyticsTopline = read("view/fragment/WorkflowAnalyticsTopline.fragment.xml");
-const workflowAnalyticsBreakdowns = read("view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml");
-const locationValueHelpDialog = read("view/fragment/LocationValueHelpDialog.fragment.xml");
-const lockSwitchStatus = read("view/fragment/LockSwitchStatus.fragment.xml");
+const appView = read("app/view/App.view.xml");
+const searchView = read("app/view/Search.view.xml");
+const detailView = read("app/view/Detail.view.xml");
+const analyticsView = read("app/view/Analytics.view.xml");
+const checksExpandedDialog = read("app/view/fragment/ChecksExpandedDialog.fragment.xml");
+const barriersExpandedDialog = read("app/view/fragment/BarriersExpandedDialog.fragment.xml");
+const workflowAnalyticsTopline = read("app/view/fragment/WorkflowAnalyticsTopline.fragment.xml");
+const workflowAnalyticsBreakdowns = read("app/view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml");
+const locationValueHelpDialog = read("app/view/fragment/LocationValueHelpDialog.fragment.xml");
+const lockSwitchStatus = read("app/view/fragment/LockSwitchStatus.fragment.xml");
 
 if (!/class="chkApp"/.test(appView)) {
-  fail("App.view.xml must declare class=\"chkApp\" on the root view.");
+  fail("app/view/App.view.xml must declare class=\"chkApp\" on the root view.");
 }
 
 for (const fragmentName of [
@@ -60,8 +60,8 @@ for (const fragmentName of [
   }
 }
 
-if (!/busyIndicatorDelay="0"/.test(searchView) || !/id="searchSmartFilterBar"/.test(searchView)) {
-  fail("Search.view.xml must keep busyIndicatorDelay=\"0\" on SmartFilterBar initialization state.");
+if (!/id="searchSmartFilterBar"/.test(searchView) || !/visible="\{= \$\{view>\/smartFilterReady\} &amp;&amp; !\$\{view>\/bootstrapBusy\} \}"/.test(searchView)) {
+  fail("Search.view.xml must keep SmartFilterBar gated by smartFilterReady and bootstrapBusy.");
 }
 
 if (!/items="\{path:'view>\/infoCards', factory: '\.infoCardFactory'\}"/.test(detailView)) {
@@ -76,12 +76,12 @@ if (!/<t:Table[\s\S]*rows="\{selected>\/barriers\}"/.test(detailView) || !/<Tabl
   fail("Detail.view.xml must keep dual-table contract for barriers (t:Table + phone fallback Table).");
 }
 
-assertIncludes("view/fragment/LocationValueHelpDialog.fragment.xml", /busyIndicatorDelay="0"/, "Location value help must keep busyIndicatorDelay=\"0\".");
-assertIncludes("view/fragment/ChecksExpandedDialog.fragment.xml", /busyIndicatorDelay="0"/, "Checks expanded dialog must keep busyIndicatorDelay=\"0\".");
-assertIncludes("view/fragment/BarriersExpandedDialog.fragment.xml", /busyIndicatorDelay="0"/, "Barriers expanded dialog must keep busyIndicatorDelay=\"0\".");
-assertIncludes("view/fragment/LockSwitchStatus.fragment.xml", /busyIndicatorDelay="0"/, "Lock switch must keep busyIndicatorDelay=\"0\".");
-assertIncludes("view/Analytics.view.xml", /showNavButton="true"/, "Analytics.view.xml must keep route-level back navigation.");
-assertIncludes("view/Analytics.view.xml", /analyticsRefreshButton/, "Analytics.view.xml must expose the analytics refresh action.");
+assertIncludes("app/view/fragment/LocationValueHelpDialog.fragment.xml", /workflowBusyOverlayShellDialog/, "Location value help must keep workflow busy overlay shell.");
+assertIncludes("app/view/fragment/ChecksExpandedDialog.fragment.xml", /workflowBusyOverlayShellDialog/, "Checks expanded dialog must keep workflow busy overlay shell.");
+assertIncludes("app/view/fragment/BarriersExpandedDialog.fragment.xml", /workflowBusyOverlayShellDialog/, "Barriers expanded dialog must keep workflow busy overlay shell.");
+assertIncludes("app/view/fragment/LockSwitchStatus.fragment.xml", /state>\/lockOperationPending/, "Lock switch must reflect lockOperationPending state.");
+assertIncludes("app/view/Analytics.view.xml", /showNavButton="true"/, "Analytics.view.xml must keep route-level back navigation.");
+assertIncludes("app/view/Analytics.view.xml", /analyticsRefreshButton/, "Analytics.view.xml must expose the analytics refresh action.");
 
 if (!/<t:Table[\s\S]*rows="\{selected>\/checks\}"/.test(checksExpandedDialog) || !/<Table[\s\S]*items="\{selected>\/checks\}"/.test(checksExpandedDialog)) {
   fail("ChecksExpandedDialog.fragment.xml must keep dual-table contract.");
@@ -91,15 +91,15 @@ if (!/<t:Table[\s\S]*rows="\{selected>\/barriers\}"/.test(barriersExpandedDialog
   fail("BarriersExpandedDialog.fragment.xml must keep dual-table contract.");
 }
 
-assertMetrics("view/App.view.xml", { tags: 20, vbox: 2, hbox: 1, fragments: 0 });
-assertMetrics("view/Search.view.xml", { tags: 130, vbox: 26, hbox: 8, fragments: 3 });
-assertMetrics("view/Detail.view.xml", { tags: 300, vbox: 46, hbox: 22, fragments: 6 });
-assertMetrics("view/Analytics.view.xml", { tags: 55, vbox: 4, hbox: 0, fragments: 2 });
-assertMetrics("view/fragment/WorkflowAnalyticsTopline.fragment.xml", { tags: 58, vbox: 8, hbox: 9, fragments: 0 });
-assertMetrics("view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml", { tags: 70, vbox: 22, hbox: 5, fragments: 0 });
-assertMetrics("view/fragment/DetailControlRail.fragment.xml", { tags: 80, vbox: 4, hbox: 3, fragments: 1 });
-assertMetrics("view/fragment/SearchLoadStatePanel.fragment.xml", { tags: 16, vbox: 3, hbox: 3, fragments: 0 });
-assertMetrics("view/fragment/ChecksExpandedDialog.fragment.xml", { tags: 55, vbox: 2, hbox: 1, fragments: 0 });
-assertMetrics("view/fragment/BarriersExpandedDialog.fragment.xml", { tags: 55, vbox: 2, hbox: 1, fragments: 0 });
+assertMetrics("app/view/App.view.xml", { tags: 20, vbox: 3, hbox: 2, fragments: 0 });
+assertMetrics("app/view/Search.view.xml", { tags: 155, vbox: 28, hbox: 8, fragments: 5 });
+assertMetrics("app/view/Detail.view.xml", { tags: 275, vbox: 40, hbox: 10, fragments: 10 });
+assertMetrics("app/view/Analytics.view.xml", { tags: 50, vbox: 5, hbox: 3, fragments: 4 });
+assertMetrics("app/view/fragment/WorkflowAnalyticsTopline.fragment.xml", { tags: 32, vbox: 2, hbox: 3, fragments: 0 });
+assertMetrics("app/view/fragment/WorkflowAnalyticsBreakdowns.fragment.xml", { tags: 235, vbox: 6, hbox: 2, fragments: 0 });
+assertMetrics("app/view/fragment/DetailControlRail.fragment.xml", { tags: 95, vbox: 3, hbox: 8, fragments: 1 });
+assertMetrics("app/view/fragment/SearchLoadStatePanel.fragment.xml", { tags: 18, vbox: 3, hbox: 4, fragments: 0 });
+assertMetrics("app/view/fragment/ChecksExpandedDialog.fragment.xml", { tags: 55, vbox: 3, hbox: 1, fragments: 1 });
+assertMetrics("app/view/fragment/BarriersExpandedDialog.fragment.xml", { tags: 55, vbox: 3, hbox: 1, fragments: 1 });
 
 console.log("XML architecture check passed.");

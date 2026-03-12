@@ -4,7 +4,7 @@ const path = require('path');
 const { createGateResult, finalizeAndExit } = require('../lib/gate-result');
 
 const root = path.resolve(__dirname, '../..');
-const dir = path.join(root, 'controller');
+const dir = path.join(root, 'app', 'controller');
 const bad = [];
 
 for (const name of fs.readdirSync(dir)) {
@@ -21,7 +21,7 @@ for (const name of fs.readdirSync(dir)) {
 
 const result = createGateResult(
   'controller-only-facade-gate',
-  bad.map((entry) => ({ file: `controller/${entry.split(' -> ')[0]}`, message: entry })),
+  bad.map((entry) => ({ file: `app/controller/${entry.split(' -> ')[0]}`, message: entry })),
   { filesScanned: fs.readdirSync(dir).filter((name) => name.endsWith('.js')).length }
 );
 finalizeAndExit(result, { asJson: process.argv.includes('--json') });

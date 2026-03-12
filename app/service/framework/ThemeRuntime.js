@@ -6,7 +6,6 @@ sap.ui.define([
     return {
         DEFAULT_MODE: ThemeService.DEFAULT_MODE,
         DEFAULT_ANIMATION_ENABLED: ThemeService.DEFAULT_ANIMATION_ENABLED,
-        DEFAULT_BACKGROUND_INTERACTIVE: ThemeService.DEFAULT_BACKGROUND_INTERACTIVE,
         modeForTheme: function (sTheme) {
             return ThemeService.modeForTheme(sTheme);
         },
@@ -24,9 +23,6 @@ sap.ui.define([
         },
         setThemeAnimationEnabled: function (bEnabled) {
             return ThemeService.setThemeAnimationEnabled(bEnabled);
-        },
-        setThemeBackgroundInteractive: function (bEnabled) {
-            return ThemeService.setThemeBackgroundInteractive(bEnabled);
         },
         applyThemeMode: function (sMode, oClickXY, mOptions) {
             return ThemeService.applyThemeMode(sMode, oClickXY, mOptions);

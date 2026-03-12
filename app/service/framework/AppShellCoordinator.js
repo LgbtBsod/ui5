@@ -25,13 +25,11 @@ sap.ui.define([
         var sStoredTheme = oController.getCurrentTheme();
         var bIsDark = !!(oThemeResult && oThemeResult.isDark);
         var bAnimationEnabled = !oThemeResult || oThemeResult.animationEnabled !== false;
-        var bBackgroundInteractive = !oThemeResult || oThemeResult.backgroundInteractive !== false;
         if (oAppView) {
             ModelStateRuntime.setManyOnModel(oAppView, {
                 "/isDark": bIsDark,
                 "/themeMode": bIsDark ? "night" : "morning",
-                "/animationEnabled": bAnimationEnabled,
-                "/backgroundInteractive": bBackgroundInteractive
+                "/animationEnabled": bAnimationEnabled
             });
         }
         DebugLogger.info("theme", "sync", {
@@ -40,7 +38,6 @@ sap.ui.define([
             appliedTheme: oThemeResult && oThemeResult.theme,
             isDark: bIsDark,
             animationEnabled: bAnimationEnabled,
-            backgroundInteractive: bBackgroundInteractive,
             expectedIcon: bIsDark ? "sun" : "moon"
         });
     }
@@ -74,7 +71,6 @@ sap.ui.define([
                 isDark: !!(oApplied && oApplied.isDark),
                 themeMode: (oApplied && oApplied.mode) || "morning",
                 animationEnabled: !oApplied || oApplied.animationEnabled !== false,
-                backgroundInteractive: !oApplied || oApplied.backgroundInteractive !== false,
                 invertedBlockScheme: false
             }), "appView");
             syncThemeState(oController, "init", oApplied);
@@ -96,9 +92,6 @@ sap.ui.define([
         },
         onToggleThemeAnimation: function (oController, bEnabled) {
             syncThemeState(oController, "animation", oController.setThemeAnimationEnabled(!!bEnabled));
-        },
-        onToggleBackgroundInteractive: function (oController, bEnabled) {
-            syncThemeState(oController, "background-interactive", oController.setThemeBackgroundInteractive(!!bEnabled));
         },
         onExit: function (oController) {
             if (oController._oRouteModeCoordinator) {

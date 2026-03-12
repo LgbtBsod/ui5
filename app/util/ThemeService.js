@@ -16,10 +16,8 @@ sap.ui.define([
     var LEGACY_THEME_PROFILE_STORAGE_KEY = "sap_ui5_theme_profile";
     var LEGACY_THEME_STORAGE_KEY = "sap_ui5_theme";
     var THEME_PROFILE_RECOVERY_KEY = "checklist_app_theme_profile_recovery_20260305";
-    var THEME_BG_INTERACTIVE_MIGRATION_KEY = "checklist_app_theme_bg_interactive_off_20260310";
     var DEFAULT_MODE = "morning";
     var DEFAULT_ANIMATION_ENABLED = true;
-    var DEFAULT_BACKGROUND_INTERACTIVE = false;
     var MODE_TO_THEME = {
         morning: "sap_horizon",
         night: "sap_horizon_dark"
@@ -54,33 +52,21 @@ sap.ui.define([
         return ValueTokenParser.parseBooleanToken(vEnabled, DEFAULT_ANIMATION_ENABLED);
     }
 
-    function normalizeBackgroundInteractive(vEnabled) {
-        return ValueTokenParser.parseBooleanToken(vEnabled, DEFAULT_BACKGROUND_INTERACTIVE);
-    }
-
-    function buildThemeProfile(sMode, bAnimationEnabled, bBackgroundInteractive) {
+    function buildThemeProfile(sMode, bAnimationEnabled) {
         return {
             mode: normalizeMode(sMode),
-            animationEnabled: normalizeAnimationEnabled(bAnimationEnabled),
-            backgroundInteractive: normalizeBackgroundInteractive(bBackgroundInteractive)
+            animationEnabled: normalizeAnimationEnabled(bAnimationEnabled)
         };
     }
 
     function recoverLegacyProfileDefaults(oProfile) {
-        var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled, oProfile && oProfile.backgroundInteractive);
+        var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled);
         var sRecoveredFlag;
-        var sBgMigrationFlag;
         try {
             sRecoveredFlag = window.localStorage.getItem(THEME_PROFILE_RECOVERY_KEY);
             if (!sRecoveredFlag) {
                 setThemeProfile(oNormalized);
                 window.localStorage.setItem(THEME_PROFILE_RECOVERY_KEY, "done");
-            }
-            sBgMigrationFlag = window.localStorage.getItem(THEME_BG_INTERACTIVE_MIGRATION_KEY);
-            if (!sBgMigrationFlag && oNormalized.backgroundInteractive !== false) {
-                oNormalized.backgroundInteractive = false;
-                setThemeProfile(oNormalized);
-                window.localStorage.setItem(THEME_BG_INTERACTIVE_MIGRATION_KEY, "done");
             }
         } catch (e) {
             // Best-effort recovery only.
@@ -107,11 +93,11 @@ sap.ui.define([
         } catch (e2) {
             sLegacyMode = DEFAULT_MODE;
         }
-        return buildThemeProfile(sLegacyMode || DEFAULT_MODE, DEFAULT_ANIMATION_ENABLED, DEFAULT_BACKGROUND_INTERACTIVE);
+        return buildThemeProfile(sLegacyMode || DEFAULT_MODE, DEFAULT_ANIMATION_ENABLED);
     }
 
     function setThemeProfile(oProfile) {
-        var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled, oProfile && oProfile.backgroundInteractive);
+        var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled);
         try {
             window.localStorage.setItem(THEME_PROFILE_STORAGE_KEY, JSON.stringify(oNormalized));
             window.localStorage.setItem("checklist_app_theme", oNormalized.mode);
@@ -133,35 +119,12 @@ sap.ui.define([
         return setThemeProfile(oProfile);
     }
 
-    function setThemeBackgroundInteractive(bEnabled) {
-        var oProfile = getThemeProfile();
-        oProfile.backgroundInteractive = normalizeBackgroundInteractive(bEnabled);
-        return setThemeProfile(oProfile);
-    }
-
     function syncBackgroundRuntime(oProfile) {
-        var oRuntime = window && window.Ui5Bg;
         var sRuntimeTheme = normalizeMode(oProfile && oProfile.mode) === "night" ? "dark" : "light";
         var bEnabled = normalizeAnimationEnabled(oProfile && oProfile.animationEnabled);
-        var bInteractive = bEnabled && normalizeBackgroundInteractive(oProfile && oProfile.backgroundInteractive);
 
         ThemeDomRuntime.setBodyAttribute("data-theme", sRuntimeTheme);
         ThemeDomRuntime.setBodyAttribute("data-bg-enabled", bEnabled ? "true" : "false");
-        ThemeDomRuntime.setBodyAttribute("data-bg-interactive", bInteractive ? "true" : "false");
-
-        if (!oRuntime) {
-            return;
-        }
-
-        if (typeof oRuntime.setTheme === "function") {
-            oRuntime.setTheme(sRuntimeTheme);
-        }
-        if (typeof oRuntime.setEnabled === "function") {
-            oRuntime.setEnabled(bEnabled);
-        }
-        if (typeof oRuntime.setInteractive === "function") {
-            oRuntime.setInteractive(bInteractive);
-        }
     }
 
     function themeForMode(sMode) {
@@ -289,8 +252,7 @@ sap.ui.define([
         var oStoredProfile = getThemeProfile();
         var oRequestedProfile = buildThemeProfile(
             sMode || oStoredProfile.mode,
-            Object.prototype.hasOwnProperty.call(mOptions, "animationEnabled") ? mOptions.animationEnabled : oStoredProfile.animationEnabled,
-            Object.prototype.hasOwnProperty.call(mOptions, "backgroundInteractive") ? mOptions.backgroundInteractive : oStoredProfile.backgroundInteractive
+            Object.prototype.hasOwnProperty.call(mOptions, "animationEnabled") ? mOptions.animationEnabled : oStoredProfile.animationEnabled
         );
         var sResolvedMode = oRequestedProfile.mode;
         var sTheme = themeForMode(sResolvedMode);
@@ -321,8 +283,7 @@ sap.ui.define([
             mode: sResolvedMode,
             theme: sTheme,
             isDark: sResolvedMode === "night",
-            animationEnabled: oRequestedProfile.animationEnabled,
-            backgroundInteractive: oRequestedProfile.backgroundInteractive
+            animationEnabled: oRequestedProfile.animationEnabled
         };
     }
 
@@ -333,14 +294,11 @@ sap.ui.define([
     return {
         DEFAULT_MODE: DEFAULT_MODE,
         DEFAULT_ANIMATION_ENABLED: DEFAULT_ANIMATION_ENABLED,
-        DEFAULT_BACKGROUND_INTERACTIVE: DEFAULT_BACKGROUND_INTERACTIVE,
         getThemeProfile: getThemeProfile,
         setThemeProfile: setThemeProfile,
         setThemeMode: setThemeMode,
         setThemeAnimationEnabled: setThemeAnimationEnabled,
-        setThemeBackgroundInteractive: setThemeBackgroundInteractive,
         normalizeAnimationEnabled: normalizeAnimationEnabled,
-        normalizeBackgroundInteractive: normalizeBackgroundInteractive,
         applyTheme: applyTheme,
         applyThemeMode: applyThemeMode,
         modeForTheme: modeForTheme,
