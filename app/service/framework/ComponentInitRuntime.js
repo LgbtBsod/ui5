@@ -283,23 +283,36 @@ sap.ui.define([
                     return oResult;
                 });
             }.bind(this);
+            var oRuntimeApplyQueue = Promise.resolve();
             var fnApplyRuntimeSettings = function (oRuntime) {
-                return this._applyFrontendRuntimeConfig({
-                    source: "RuntimeSettingsSet(GLOBAL)",
-                    runtimeSettingsPayload: oRuntime || {}
-                }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
-                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
-                    fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
-                    return oRuntime || {};
-                });
+                oRuntimeApplyQueue = oRuntimeApplyQueue.catch(function () {
+                    return null;
+                }).then(function () {
+                    return this._applyFrontendRuntimeConfig({
+                        source: "RuntimeSettingsSet(GLOBAL)",
+                        runtimeSettingsPayload: oRuntime || {}
+                    }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
+                        ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
+                        fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
+                        return oRuntime || {};
+                    });
+                }.bind(this));
+                return oRuntimeApplyQueue;
             }.bind(this);
-            this._fnUnsubscribeRuntimeSettings = SettingsManager.subscribe(function (oRuntime) {
+            this._fnUnsubscribeRuntimeSettings = SettingsManager.subscribe(function (oRuntime, mMeta) {
+                if (!mMeta || !mMeta.refreshed) {
+                    return;
+                }
                 fnApplyRuntimeSettings(oRuntime).catch(function () {
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
                 });
             });
-            var fnLoadRuntimeSettings = function () {
-                return SettingsManager.load(GatewayBackendService).then(function (oRuntime) {
+            var fnLoadRuntimeSettings = function (mOptions) {
+                var bForce = !!(mOptions && mOptions.force);
+                var pLoad = bForce
+                    ? SettingsManager.reload(GatewayBackendService)
+                    : SettingsManager.load(GatewayBackendService, mOptions);
+                return pLoad.then(function (oRuntime) {
                     return fnApplyRuntimeSettings(oRuntime);
                 }).catch(function (oError) {
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");

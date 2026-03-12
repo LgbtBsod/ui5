@@ -1,9 +1,12 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger"
-], function (DebugLogger) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FrontendConfigConstants"
+], function (DebugLogger, FrontendConfigConstants) {
     "use strict";
 
+    var SETTINGS_CACHE_TTL_MS = Number(FrontendConfigConstants && FrontendConfigConstants.SETTINGS_CACHE_TTL_MS) || (5 * 60 * 1000);
     var _loaded = false;
+    var _loadedAt = 0;
     var _loadingPromise = null;
     var _runtimeCache = {};
     var _subscribers = [];
@@ -27,10 +30,27 @@ sap.ui.define([
         DebugLogger.info("SETTINGS_LOAD_SUMMARY", "[SETTINGS_LOAD_SUMMARY]", mData);
     }
 
-    function _notify(oRuntime) {
+    function _notify(oRuntime, mMeta) {
         _subscribers.forEach(function (fn) {
-            try { fn(oRuntime || {}); } catch (e) { /* noop */ }
+            try { fn(oRuntime || {}, mMeta || {}); } catch (e) { /* noop */ }
         });
+    }
+
+    function _isTtlExpired() {
+        if (!_loaded || !_loadedAt) {
+            return true;
+        }
+        return (Date.now() - _loadedAt) >= SETTINGS_CACHE_TTL_MS;
+    }
+
+    function _resolveLoadReason(bForce) {
+        if (!_loaded) {
+            return "initial";
+        }
+        if (bForce) {
+            return "force";
+        }
+        return "ttl_expired";
     }
 
     return {
@@ -47,27 +67,39 @@ sap.ui.define([
             };
         },
 
-        load: function (gatewayClient) {
-            if (_loaded) {
+        load: function (gatewayClient, mOptions) {
+            var bForce = !!(mOptions && mOptions.force);
+            var bExpired = _isTtlExpired();
+
+            if (_loaded && !bForce && !bExpired) {
                 return Promise.resolve(_runtimeCache);
             }
             if (_loadingPromise) {
                 return _loadingPromise;
             }
 
+            var sReason = _resolveLoadReason(bForce);
             var iStartedAt = Date.now();
             _loadingPromise = gatewayClient.readEntity("RuntimeSettingsSet", "Key='GLOBAL'", {}).then(function (oData) {
                 _runtimeCache = oData || {};
                 _loaded = true;
-                _notify(_runtimeCache);
+                _loadedAt = Date.now();
+                _notify(_runtimeCache, {
+                    loadedAt: _loadedAt,
+                    reason: sReason,
+                    refreshed: sReason !== "initial"
+                });
                 _logSummary({
                     source: "RuntimeSettingsSet(GLOBAL)",
                     ok: true,
                     durationMs: Date.now() - iStartedAt,
                     applied: true,
                     error: "",
-                    loadedAtIso: new Date().toISOString()
+                    loadedAtIso: new Date(_loadedAt).toISOString(),
+                    cacheTtlMs: SETTINGS_CACHE_TTL_MS,
+                    reason: sReason
                 });
+                _loadingPromise = null;
                 return _runtimeCache;
             }).catch(function (oError) {
                 _loadingPromise = null;
@@ -77,12 +109,22 @@ sap.ui.define([
                     durationMs: Date.now() - iStartedAt,
                     applied: false,
                     error: _safeError(oError),
-                    loadedAtIso: new Date().toISOString()
+                    loadedAtIso: _loadedAt ? new Date(_loadedAt).toISOString() : "",
+                    cacheTtlMs: SETTINGS_CACHE_TTL_MS,
+                    reason: sReason
                 });
                 throw oError;
             });
 
             return _loadingPromise;
+        },
+
+        reload: function (gatewayClient) {
+            return this.load(gatewayClient, { force: true });
+        },
+
+        getLoadedAt: function () {
+            return _loadedAt;
         }
     };
 });
