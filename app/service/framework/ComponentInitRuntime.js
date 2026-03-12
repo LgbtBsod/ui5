@@ -50,6 +50,18 @@ sap.ui.define([
         return sCode === "SESSION_UNAVAILABLE" || sCode === "AUTH_REQUIRED" || /SESSION|AUTH|CSRF/.test(sMessage);
     }
 
+    function normalizeRuntimeSettingsError(oError) {
+        var sMessage = String((oError && oError.message) || "").trim();
+        var sCode = String((oError && oError.code) || "").trim();
+        var iStatus = Number((oError && (oError.statusCode || oError.status)) || 0) || 0;
+
+        return {
+            message: sMessage,
+            code: sCode,
+            status: iStatus
+        };
+    }
+
     function createFeedbackRuntime(oOptions) {
         var oStateModel = oOptions.stateModel;
         var FeedbackPolicy = oOptions.feedbackPolicy;
@@ -303,10 +315,19 @@ sap.ui.define([
                 return SettingsManager.load(GatewayBackendService).then(function (oRuntime) {
                     return fnApplyRuntimeSettings(oRuntime);
                 }).catch(function (oError) {
+                    var oOriginalError = normalizeRuntimeSettingsError(oError);
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
+                    fnEmitTelemetry("runtime.config.fallback_applied", TelemetryRuntime.runtimeConfig(
+                        "RuntimeSettingsSet(GLOBAL)",
+                        "runtime_settings_fallback_applied",
+                        oOriginalError
+                    ));
                     fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
                         FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                         (oError && oError.message) || oError || "runtime_settings_load_failed"
+                        "RuntimeSettingsSet(GLOBAL)",
+                        oOriginalError.message || "runtime_settings_load_failed",
+                        oOriginalError
                     ));
                     throw oError || new Error("runtime_settings_load_failed");
                 });
@@ -460,4 +481,3 @@ sap.ui.define([
         runInit: runInit
     };
 });
-
