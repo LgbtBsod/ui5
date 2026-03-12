@@ -264,6 +264,9 @@ sap.ui.define([
             if (this._fnOnFullSave) {
                 window.removeEventListener("pcct:fullSave", this._fnOnFullSave);
             }
+            if (typeof this._fnUnsubscribeRuntimeSettings === "function") {
+                this._fnUnsubscribeRuntimeSettings();
+            }
             this._iSaveWorkingTimer = SchedulingRuntime.clearTimer(this._iSaveWorkingTimer);
             this._fnCrossTabStorage = null;
             this._oCrossTabChannel = null;
@@ -277,6 +280,7 @@ sap.ui.define([
             this._fnStateModelPropertyChange = null;
             this._fnSelectedModelPropertyChange = null;
             this._detachInitRuntimeListeners = null;
+            this._fnUnsubscribeRuntimeSettings = null;
         }
     });
 });

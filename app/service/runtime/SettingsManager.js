@@ -35,9 +35,16 @@ sap.ui.define([
 
     return {
         subscribe: function (fnHandler) {
-            if (typeof fnHandler === "function") {
+            if (typeof fnHandler === "function" && _subscribers.indexOf(fnHandler) === -1) {
                 _subscribers.push(fnHandler);
             }
+
+            return function unsubscribe() {
+                var iIndex = _subscribers.indexOf(fnHandler);
+                if (iIndex > -1) {
+                    _subscribers.splice(iIndex, 1);
+                }
+            };
         },
 
         load: function (gatewayClient) {
