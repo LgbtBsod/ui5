@@ -14,7 +14,11 @@
         <content>
             <VBox class="appContent searchExperienceStack">
 
-                <HBox class="workflowRail searchHeaderKpiRail searchAnalyticsRailShell" renderType="Bare" wrap="Wrap" justifyContent="Start" alignItems="Stretch" role="region" ariaLabel="{i18n>kpiRailAriaLabel}">
+                <HBox class="workflowRail searchHeaderKpiRail searchAnalyticsRailShell" renderType="Bare" wrap="Wrap" justifyContent="Start" alignItems="Stretch">
+                    <customData>
+                        <core:CustomData key="role" value="region" writeToDom="true"/>
+                        <core:CustomData key="aria-label" value="{i18n>kpiRailAriaLabel}" writeToDom="true"/>
+                    </customData>
                     <HBox id="searchAnalyticsRail" class="searchAnalyticsRailGrid" renderType="Bare" wrap="Wrap">
                         <VBox class="kpiCard searchAnalyticsCard">
                             <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">
@@ -88,9 +92,11 @@
                     <VBox
                         id="searchFilterCard"
                         width="100%"
-                        class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell"
-                        role="search"
-                        ariaLabel="{i18n>filtersAriaLabel}">
+                        class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell">
+                        <customData>
+                            <core:CustomData key="role" value="search" writeToDom="true"/>
+                            <core:CustomData key="aria-label" value="{i18n>filtersAriaLabel}" writeToDom="true"/>
+                        </customData>
                         <VBox
                             visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }"
                             class="searchFilterSkeletonShell"
@@ -134,8 +140,7 @@
                                                 id="FailChecksSegmentControl"
                                                 selectedKey="{state>/search/checksFailSegment}"
                                                 selectionChange=".onChecksFailSegmentChange"
-                                                class="resultSegmentControl"
-                                                ariaLabel="{i18n>filterFailSegmentLabel}">
+                                                class="resultSegmentControl">
                                                 <items>
                                                     <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
                                                     <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
@@ -157,8 +162,7 @@
                                                 id="FailBarriersSegmentControl"
                                                 selectedKey="{state>/search/barriersFailSegment}"
                                                 selectionChange=".onBarriersFailSegmentChange"
-                                                class="resultSegmentControl"
-                                                ariaLabel="{i18n>filterBarrierSegmentLabel}">
+                                                class="resultSegmentControl">
                                                 <items>
                                                     <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
                                                     <SegmentedButtonItem key="FAILED" text="{i18n>filterFailSegmentFailed}"/>
@@ -176,15 +180,13 @@
                     <OverflowToolbar
                         id="searchResultsActionRail"
                         width="100%"
-                        class="toolbarTransparent tableActionToolbar searchActionToolbarDensity searchResultsActionRail workbenchToolbarSurface actionToolbarSurface"
-                        ariaLabel="{i18n>searchActionsAriaLabel}">
+                        class="toolbarTransparent tableActionToolbar searchActionToolbarDensity searchResultsActionRail workbenchToolbarSurface actionToolbarSurface">
                         <Button
                             text="{i18n>createButton}"
                             icon="sap-icon://task"
                             press=".onCreate"
                             tooltip="{i18n>searchShortcutCreate}"
                             enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }"
-                            ariaLabel="{i18n>searchShortcutCreate}"
                             class="brandActionBtn brandActionPrimary actionPriorityPrimary searchCreateActionBtn sapUiTinyMarginEnd chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
@@ -199,7 +201,6 @@
                             visible="{view>/resultsToolbarNavVisible}"
                             tooltip="{i18n>searchBackToResultsToolbarTooltip}"
                             press=".onScrollSearchResultsToolbarAnchor"
-                            ariaLabel="{i18n>searchBackToResultsToolbarTooltip}"
                             class="searchToolbarNavBtn searchToolbarNavBtnUp chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
@@ -212,7 +213,6 @@
                             press=".onCopy"
                             enabled="{view>/canCopy}"
                             tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }"
-                            ariaLabel="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }"
                             class="brandActionBtn brandActionGhost actionPrioritySecondary searchCopyActionBtn sapUiTinyMarginEnd chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/>
@@ -225,7 +225,6 @@
                             press=".onSelectVisibleRows"
                             enabled="{= ${view>/hasRows} &amp;&amp; !${view>/tableBusy} }"
                             tooltip="{i18n>searchShortcutSelectVisible}"
-                            ariaLabel="{i18n>searchShortcutSelectVisible}"
                             class="brandActionBtn brandActionGhost actionPrioritySecondary searchSelectVisibleActionBtn sapUiTinyMarginEnd chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
@@ -238,7 +237,6 @@
                             press=".onClearSelection"
                             enabled="{view>/hasSelection}"
                             tooltip="{i18n>searchShortcutClearSelection}"
-                            ariaLabel="{i18n>searchShortcutClearSelection}"
                             class="brandActionBtn brandActionGhost actionPrioritySecondary searchClearSelectionActionBtn sapUiTinyMarginEnd chkRipple">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/>
@@ -250,8 +248,7 @@
                         <ObjectStatus
                             text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }"
                             state="{= ${view>/selectionCount} ? 'Success' : 'Information' }"
-                            class="searchSelectionStatusChip statusChipSemantic"
-                            ariaLabel="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }">
+                            class="searchSelectionStatusChip statusChipSemantic">
                             <layoutData>
                                 <OverflowToolbarLayoutData priority="Disappear"/>
                             </layoutData>
@@ -273,10 +270,12 @@
                     <VBox
                         id="searchResultsShell"
                         width="100%"
-                        class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell"
-                        role="region"
-                        ariaLabel="{i18n>searchResultsAriaLabel}">
-                        <OverflowToolbar id="smartTableCustomToolbar" width="100%" class="toolbarTransparent searchSmartToolbarRail workbenchToolbarSurface sectionToolbarSurface" ariaLabel="{i18n>tableToolbarAriaLabel}">
+                        class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
+                        <customData>
+                            <core:CustomData key="role" value="region" writeToDom="true"/>
+                            <core:CustomData key="aria-label" value="{i18n>searchResultsAriaLabel}" writeToDom="true"/>
+                        </customData>
+                        <OverflowToolbar id="smartTableCustomToolbar" width="100%" class="toolbarTransparent searchSmartToolbarRail workbenchToolbarSurface sectionToolbarSurface">
                             <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
                             <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
                             <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
@@ -356,7 +355,6 @@
                                 type="Transparent"
                                 press=".onOpenSearchSortDialog"
                                 tooltip="{i18n>searchSortButton}"
-                                ariaLabel="{i18n>searchSortButton}"
                                 class="brandActionGhost actionPrioritySecondary searchSortButton chkRipple">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
@@ -369,7 +367,6 @@
                                 type="Transparent"
                                 press=".onOpenSearchGroupDialog"
                                 tooltip="{i18n>searchGroupButton}"
-                                ariaLabel="{i18n>searchGroupButton}"
                                 class="brandActionGhost actionPrioritySecondary searchGroupButton chkRipple">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
@@ -380,7 +377,6 @@
                                 text="{i18n>exportMenuButton}"
                                 enabled="{view>/canExport}"
                                 tooltip="{i18n>searchShortcutExport}"
-                                ariaLabel="{i18n>exportMenuButton}"
                                 class="brandActionBtn brandActionGhost actionPrioritySecondary searchExportMenuBtn chkRipple"
                                 icon="sap-icon://excel-attachment">
    
@@ -408,7 +404,6 @@
                                 </menu>
                             </MenuButton>
                         </OverflowToolbar>
- </VBox>
                         <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
                             <core:Fragment
                                 fragmentName="PRODUCTION_CONTROL_CHECKLIST.view.fragment.SkeletonList"
@@ -445,9 +440,9 @@
                                 class="searchSmartTableControl appSkeletonReveal">
                             </smartTable:SmartTable>
                         </VBox>
-
                     </VBox>
                 </VBox>
+            </VBox>
 
       
         </content>

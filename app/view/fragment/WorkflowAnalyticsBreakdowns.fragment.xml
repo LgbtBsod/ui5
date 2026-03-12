@@ -10,7 +10,7 @@
                 <VBox class="analyticsBreakdownSection" renderType="Bare">
                     <Panel headerText="{i18n>analyticsComparisonChartTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
                         <content>
-                            <OverflowToolbar design="Transparent" class="analyticsComparisonToolbar workbenchToolbarSurface">
+                            <OverflowToolbar design="Transparent" class="analyticsComparisonToolbar workbenchToolbarSurface analyticsControlToolbar">
                                 <Label text="{i18n>analyticsCompareMetricLabel}" labelFor="analyticsComparisonMetricSelect"/>
                                 <Select
                                     id="analyticsComparisonMetricSelect"
@@ -121,7 +121,7 @@
                                 showIcon="true"
                                 visible="{= !!${view>/builderSourceHintText} }"
                                 class="chkFeedbackStrip sapUiTinyMarginBottom"/>
-                            <OverflowToolbar design="Transparent" class="analyticsBuilderToolbar workbenchToolbarSurface">
+                            <OverflowToolbar design="Transparent" class="analyticsBuilderToolbar workbenchToolbarSurface analyticsControlToolbar">
                                 <Label text="{i18n>analyticsBuilderDimensionLabel}" labelFor="analyticsBuilderDimensionSelect"/>
                                 <Select
                                     id="analyticsBuilderDimensionSelect"

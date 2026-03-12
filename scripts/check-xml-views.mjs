@@ -124,10 +124,10 @@ if (!/<t:Table[\s\S]*rows="\{selected>\/barriers\}"/.test(barriersExpandedDialog
   fail("BarriersExpandedDialog.fragment.xml must keep dual-table contract.");
 }
 
-assertMetrics("app/view/App.view.xml", { tags: 20, vbox: 3, hbox: 2, fragments: 0 });
-assertMetrics("app/view/Search.view.xml", { tags: 155, vbox: 28, hbox: 8, fragments: 5 });
+assertMetrics("app/view/App.view.xml", { tags: 30, vbox: 3, hbox: 2, fragments: 0 });
+assertMetrics("app/view/Search.view.xml", { tags: 156, vbox: 28, hbox: 8, fragments: 5 });
 assertMetrics("app/view/Detail.view.xml", { tags: 210, vbox: 22, hbox: 6, fragments: 9 });
-assertMetrics("app/view/Analytics.view.xml", { tags: 50, vbox: 5, hbox: 4, fragments: 6 });
+assertMetrics("app/view/Analytics.view.xml", { tags: 52, vbox: 5, hbox: 5, fragments: 6 });
 assertMetrics("app/view/fragment/WorkflowAnalyticsToplinePrimaryCards.fragment.xml", { tags: 24, vbox: 3, hbox: 3, fragments: 0 });
 assertMetrics("app/view/fragment/WorkflowAnalyticsToplineRateCards.fragment.xml", { tags: 16, vbox: 2, hbox: 2, fragments: 0 });
 assertMetrics("app/view/fragment/WorkflowAnalyticsMessageStack.fragment.xml", { tags: 4, vbox: 0, hbox: 0, fragments: 0 });
@@ -144,7 +144,7 @@ assertMetrics("app/view/fragment/DetailChecksSectionToolbar.fragment.xml", { tag
 assertMetrics("app/view/fragment/DetailBarriersSectionToolbar.fragment.xml", { tags: 10, vbox: 0, hbox: 0, fragments: 0 });
 assertMetrics("app/view/fragment/DetailChecksEmptyState.fragment.xml", { tags: 6, vbox: 1, hbox: 0, fragments: 0 });
 assertMetrics("app/view/fragment/DetailBarriersEmptyState.fragment.xml", { tags: 6, vbox: 1, hbox: 0, fragments: 0 });
-assertMetrics("app/view/fragment/DetailControlRail.fragment.xml", { tags: 95, vbox: 3, hbox: 8, fragments: 1 });
+assertMetrics("app/view/fragment/DetailControlRail.fragment.xml", { tags: 98, vbox: 3, hbox: 8, fragments: 1 });
 assertMetrics("app/view/fragment/SearchLoadStatePanel.fragment.xml", { tags: 18, vbox: 3, hbox: 4, fragments: 1 });
 assertMetrics("app/view/fragment/SearchLoadRetryHint.fragment.xml", { tags: 4, vbox: 0, hbox: 1, fragments: 0 });
 assertMetrics("app/view/fragment/ChecksExpandedDialog.fragment.xml", { tags: 55, vbox: 3, hbox: 1, fragments: 1 });

@@ -3,6 +3,7 @@
     displayBlock="true"
     class="chkApp"
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
     xmlns="sap.m"
     xmlns:cc="PRODUCTION_CONTROL_CHECKLIST.control"
     xmlns:f="sap.f">
@@ -10,10 +11,15 @@
     <VBox
         class="chkSkin appShell appLayoutSingle"
         fitContainer="true"
-        width="100%"
-        role="application"
-        ariaLabel="{i18n>appRootAriaLabel}">
-        <VBox class="appContent appShellHeaderHost" renderType="Bare" role="banner">
+        width="100%">
+        <customData>
+            <core:CustomData key="role" value="application" writeToDom="true"/>
+            <core:CustomData key="aria-label" value="{i18n>appRootAriaLabel}" writeToDom="true"/>
+        </customData>
+        <VBox class="appContent appShellHeaderHost" renderType="Bare">
+            <customData>
+                <core:CustomData key="role" value="banner" writeToDom="true"/>
+            </customData>
             <cc:AppShellHeader
                 eyebrow=""
                 productName="{appView>/shell/productName}"
@@ -38,13 +44,11 @@
             type="{path:'state>/ui/feedback/banner/global/severity', formatter:'.formatGlobalBannerType'}"
             showIcon="true"
             visible="{state>/ui/feedback/banner/global/visible}"
-            class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop appFeedbackBanner chkFeedbackStrip"
-            ariaLabelledBy="globalFeedbackBanner">
+            class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop appFeedbackBanner chkFeedbackStrip">
             <link>
                 <Link
                     text="{i18n>retryNowButton}"
                     visible="{= !!${state>/ui/feedback/banner/global/retryAction} }"
-                    ariaLabel="{i18n>retryNowButton}"
                     press=".onGlobalBannerRetry"/>
             </link>
         </MessageStrip>
@@ -53,9 +57,11 @@
             class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop sapUiTinyMarginBottom appFeedbackCorrelation"
             alignItems="Center"
             renderType="Bare"
-            visible="{= !!${state>/ui/feedback/banner/global/correlationId} }"
-            role="region"
-            ariaLabel="{i18n>correlationIdLabel}">
+            visible="{= !!${state>/ui/feedback/banner/global/correlationId} }">
+            <customData>
+                <core:CustomData key="role" value="region" writeToDom="true"/>
+                <core:CustomData key="aria-label" value="{i18n>correlationIdLabel}" writeToDom="true"/>
+            </customData>
             <Label text="{i18n>correlationIdLabel}" labelFor="correlationIdInput" class="sapUiTinyMarginEnd"/>
             <Input
                 id="correlationIdInput"
@@ -67,7 +73,6 @@
                 text="{i18n>copyButton}"
                 type="Transparent"
                 tooltip="{i18n>copyCorrelationIdTooltip}"
-                ariaLabel="{i18n>copyCorrelationIdTooltip}"
                 press=".onCopyFeedbackCorrelationId"/>
         </HBox>
 
@@ -75,9 +80,11 @@
             id="mainFcl"
             class="appRootFcl"
             layout="{= ${state>/layout} || 'OneColumn' }"
-            backgroundDesign="Transparent"
-            role="main"
-            ariaLabel="{i18n>mainContentAriaLabel}">
+            backgroundDesign="Transparent">
+            <customData>
+                <core:CustomData key="role" value="main" writeToDom="true"/>
+                <core:CustomData key="aria-label" value="{i18n>mainContentAriaLabel}" writeToDom="true"/>
+            </customData>
             <f:beginColumnPages>
                 <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.view.Search" width="100%"/>
             </f:beginColumnPages>

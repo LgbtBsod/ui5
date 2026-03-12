@@ -533,3 +533,91 @@ body.chkAppRoot.appDark .chkApp .workflowStageCount {
 .chkApp .analyticsTabBar .sapMITBSelected::after {
   background: var(--accent);
 }
+
+/* 2026-03 licensable analytics hardening:
+   strengthen context, make toolbars resilient, and align chart empty states with product surfaces. */
+.chkApp .analyticsHeroCard {
+  gap: 0.55rem;
+}
+
+.chkApp .analyticsHeroContextRail {
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.chkApp .analyticsHeroContextChip {
+  min-height: 1.9rem;
+}
+
+.chkApp .analyticsControlToolbar.sapMTB,
+.chkApp .analyticsControlToolbar.sapMOTB {
+  flex-wrap: wrap;
+  row-gap: 0.45rem;
+  column-gap: 0.45rem;
+  align-items: center;
+  padding: 0.18rem 0.2rem 0.24rem;
+  border-radius: calc(var(--radius-lg) - 0.18rem);
+  background: color-mix(in srgb, var(--theme-rail-bg) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 42%, transparent);
+}
+
+.chkApp .analyticsControlToolbar .sapMBarChild,
+.chkApp .analyticsControlToolbar .sapMFlexItem {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chkApp .analyticsControlToolbar .sapMTBSpacer {
+  min-width: 0.4rem;
+}
+
+.chkApp .analyticsControlToolbar .sapMLabel,
+.chkApp .analyticsControlToolbar .sapMBtn,
+.chkApp .analyticsControlToolbar .sapMSlt,
+.chkApp .analyticsControlToolbar .sapMInputBase {
+  flex: 0 1 auto;
+}
+
+.chkApp .analyticsChartEmpty.sapMText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 9rem;
+  margin: 0.2rem 0 0;
+  padding: 1.2rem 1rem;
+  border-radius: calc(var(--radius-lg) - 0.18rem);
+  border: 1px dashed color-mix(in srgb, var(--theme-rail-border) 48%, transparent);
+  background: color-mix(in srgb, var(--theme-block-bg) 94%, transparent);
+  color: var(--text-subtle);
+  font-size: 0.84rem;
+  text-align: center;
+  opacity: 0.92;
+}
+
+.chkApp .analyticsMatrixScroller {
+  border-radius: calc(var(--radius-lg) - 0.18rem);
+}
+
+.chkApp .analyticsMatrixTable {
+  border-radius: calc(var(--radius-lg) - 0.18rem);
+  overflow: hidden;
+}
+
+.chkApp .analyticsMatrixTable .sapMListTbl {
+  border-collapse: separate;
+  border-spacing: 0 0.36rem;
+}
+
+.chkApp .analyticsMatrixTable .sapMListTblCell {
+  background: color-mix(in srgb, var(--theme-table-cell-bg) 70%, transparent);
+}
+
+.chkApp .analyticsMatrixTable .sapMListTblCell:first-child {
+  border-top-left-radius: var(--theme-table-row-radius);
+  border-bottom-left-radius: var(--theme-table-row-radius);
+}
+
+.chkApp .analyticsMatrixTable .sapMListTblCell:last-child {
+  border-top-right-radius: var(--theme-table-row-radius);
+  border-bottom-right-radius: var(--theme-table-row-radius);
+}
