@@ -14,6 +14,7 @@ from sqlalchemy import inspect, text
 from api.analytics_api import router as analytics_router
 from api.batch_api import router as batch_router
 from api.gateway_canonical_api import router as gateway_canonical_router
+from api.capabilities_api import router as capabilities_router
 from config import CORS_ALLOWED_ORIGINS, FRONTEND_TIMER_TEST_PROFILE, LOCK_CLEANUP_INTERVAL_SECONDS, METADATA_REFRESH_INTERVAL_SECONDS
 from database import Base, SessionLocal, engine
 from services.db_seed import seed_reference_data
@@ -512,6 +513,7 @@ app.add_middleware(
 )
 
 app.include_router(gateway_canonical_router)
+app.include_router(capabilities_router, prefix=SERVICE_ROOT)
 app.include_router(analytics_router)
 app.include_router(batch_router)
 app.include_router(analytics_router, prefix=SERVICE_ROOT)

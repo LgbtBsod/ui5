@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCoordinatorRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiBehaviorPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime, FrontendConfigConstants) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime, UiBehaviorPolicy, FrontendConfigConstants) {
     "use strict";
 
     function reuseJsonModel(oExistingModel, fnCreateModel) {
@@ -68,25 +69,18 @@ sap.ui.define([
         var fnBundleText = oOptions.bundleText || function (sKey) {
             return sKey;
         };
-
-        function setGlobalBanner(mBannerInput) {
-            var mInput = mBannerInput || {};
-            FeedbackBannerRuntime.setBanner(oStateModel, "global", mInput, {
-                resolveText: fnBundleText
-            });
-        }
-
-        function clearGlobalBanner() {
-            FeedbackBannerRuntime.clearBanner(oStateModel, "global");
-        }
+        var oUiBehavior = UiBehaviorPolicy.create({
+            stateModel: oStateModel,
+            resolveText: fnBundleText
+        });
 
         return {
             resolveCorrelationId: function (oError) {
                 return resolveCorrelationId(oError, FeedbackPolicy);
             },
             isSessionExpiredError: isSessionExpiredError,
-            setGlobalBanner: setGlobalBanner,
-            clearGlobalBanner: clearGlobalBanner
+            setGlobalBanner: oUiBehavior.setGlobalBanner,
+            clearGlobalBanner: oUiBehavior.clearGlobalBanner
         };
     }
 
@@ -302,24 +296,17 @@ sap.ui.define([
                     return null;
                 }).then(function () {
                     return this._applyFrontendRuntimeConfig({
-                        source: "RuntimeSettingsSet(GLOBAL)",
+                        source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                         runtimeSettingsPayload: oRuntime || {}
                     }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
                         ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
-                        fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig("RuntimeSettingsSet(GLOBAL)"));
+                        fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig(FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL));
                         return oRuntime || {};
                     });
                 }.bind(this));
                 return oRuntimeApplyQueue;
-                return this._applyFrontendRuntimeConfig({
-                    source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
-                    runtimeSettingsPayload: oRuntime || {}
-                }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
-                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
-                    fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig(FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL));
-                    return oRuntime || {};
-                });
             }.bind(this);
+
             this._fnUnsubscribeRuntimeSettings = SettingsManager.subscribe(function (oRuntime, mMeta) {
                 if (!mMeta || !mMeta.refreshed) {
                     return;
@@ -328,25 +315,25 @@ sap.ui.define([
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
                 });
             });
+
             var fnLoadRuntimeSettings = function (mOptions) {
                 var bForce = !!(mOptions && mOptions.force);
                 var pLoad = bForce
                     ? SettingsManager.reload(GatewayBackendService)
-                    : SettingsManager.load(GatewayBackendService, mOptions);
+                    : SettingsManager.load(GatewayBackendService);
+
                 return pLoad.then(function (oRuntime) {
                     return fnApplyRuntimeSettings(oRuntime);
                 }).catch(function (oError) {
                     var oOriginalError = normalizeRuntimeSettingsError(oError);
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
                     fnEmitTelemetry("runtime.config.fallback_applied", TelemetryRuntime.runtimeConfig(
-                        "RuntimeSettingsSet(GLOBAL)",
+                        FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                         "runtime_settings_fallback_applied",
                         oOriginalError
                     ));
                     fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
                         FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
-                        (oError && oError.message) || oError || "runtime_settings_load_failed"
-                        "RuntimeSettingsSet(GLOBAL)",
                         oOriginalError.message || "runtime_settings_load_failed",
                         oOriginalError
                     ));

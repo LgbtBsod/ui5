@@ -6,13 +6,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailInfoCardLayoutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, CreateSentinel) {
+], function (DialogOrchestrator, DraftChecklistFactory, DetailViewRuntime, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DomainStatePaths, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel) {
     "use strict";
 
     var EFFECT_DIALOG_FRAGMENTS = {
@@ -28,11 +31,11 @@ sap.ui.define([
     }
 
     function readAnalyticsReturnRestore(oController) {
-        return ModelStateRuntime.read(oController, "state", "/analyticsReturnRestoreEdit", null) || null;
+        return ModelStateRuntime.read(oController, "state", DomainStatePaths.ANALYTICS_RETURN_RESTORE_EDIT, null) || null;
     }
 
     function clearAnalyticsReturnRestore(oController) {
-        ModelStateRuntime.write(oController, "state", "/analyticsReturnRestoreEdit", null);
+        ModelStateRuntime.write(oController, "state", DomainStatePaths.ANALYTICS_RETURN_RESTORE_EDIT, null);
     }
 
     function isEditLockedState(oController) {
@@ -67,6 +70,7 @@ sap.ui.define([
         var oRestore = readAnalyticsReturnRestore(oController);
         var sRestoreRootId = String((oRestore && oRestore.rootId) || "").trim();
         var iAttempts;
+        var oRestorePlan;
 
         if (!sRootId || !sRestoreRootId || sRestoreRootId !== sRootId) {
             return Promise.resolve(false);
@@ -78,12 +82,17 @@ sap.ui.define([
         }
 
         iAttempts = Number((oRestore && oRestore.attempts) || 0);
-        if (iAttempts >= 2) {
+        oRestorePlan = DetailRuntimePolicy.analyticsEditRestorePlan({
+            controller: oController,
+            rootId: sRootId,
+            restoreState: oRestore
+        });
+        if (iAttempts >= oRestorePlan.maxAttempts) {
             clearAnalyticsReturnRestore(oController);
             return Promise.resolve(false);
         }
 
-        ModelStateRuntime.write(oController, "state", "/analyticsReturnRestoreEdit", {
+        ModelStateRuntime.write(oController, "state", DomainStatePaths.ANALYTICS_RETURN_RESTORE_EDIT, {
             rootId: sRestoreRootId,
             requestedAt: oRestore && oRestore.requestedAt ? oRestore.requestedAt : new Date().toISOString(),
             attempts: iAttempts + 1
@@ -109,7 +118,7 @@ sap.ui.define([
                             .catch(function () {
                                 resolve(false);
                             });
-                    }, 0);
+                    }, oRestorePlan.retryDelayMs);
                 });
             })
             .catch(function () {
@@ -191,28 +200,28 @@ sap.ui.define([
             var sLayoutArg = String(mArgs.layout || "").toLowerCase();
             var bCreate = CreateSentinel.isCreateId(sId);
             var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? "MidColumnFullScreen" : "TwoColumnsMidExpanded";
-            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", "/currentRouteName", "search") || "search").trim() || "search";
-            var sCurrentRootId = String(ModelStateRuntime.read(this, "state", "/activeObjectId", "") || "").trim();
+            var sCurrentRouteName = String(ModelStateRuntime.read(this, "state", DomainStatePaths.CURRENT_ROUTE_NAME, "search") || "search").trim() || "search";
+            var sCurrentRootId = String(ModelStateRuntime.read(this, "state", DomainStatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
             var mStatePatch = {
-                "/activeObjectId": bCreate ? CreateSentinel.VALUE : sId,
-                "/selectedId": bCreate ? CreateSentinel.VALUE : sId,
-                "/currentRouteName": sRouteName
+                [DomainStatePaths.ACTIVE_OBJECT_ID]: bCreate ? CreateSentinel.VALUE : sId,
+                [DomainStatePaths.SELECTED_ID]: bCreate ? CreateSentinel.VALUE : sId,
+                [DomainStatePaths.CURRENT_ROUTE_NAME]: sRouteName
             };
             var mViewPatch = {
-                "/detailSkeletonBusy": !bCreate,
-                "/validationShown": false,
-                "/validationMissing": {},
+                [ViewPathContracts.DETAIL_SKELETON_BUSY]: !bCreate,
+                [ViewPathContracts.VALIDATION_SHOWN]: false,
+                [ViewPathContracts.VALIDATION_MISSING]: {},
                 "/deleteChecklistConfirmArmed": false,
                 "/attachmentsExpanded": false,
-                "/attachmentsLoaded": false,
-                "/sessionAttachments": [],
+                [ViewPathContracts.ATTACHMENTS_LOADED]: false,
+                [ViewPathContracts.SESSION_ATTACHMENTS]: [],
                 "/attachmentBusy": false,
                 "/observerSuggestions": [],
                 "/observedSuggestions": [],
                 "/personSuggestHint": "",
-                "/accessState": DetailAccessViewState.createDefaultState(sId)
+                [ViewPathContracts.ACCESS_STATE]: DetailAccessViewState.createDefaultState(sId)
             };
-            var sPostOpenHydratedRootId = String(ModelStateRuntime.read(this, "state", "/postOpenHydratedRootId", "") || "").trim();
+            var sPostOpenHydratedRootId = String(ModelStateRuntime.read(this, "state", DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
             var oSelected = this.getModel("selected");
             var oSelectedData = (oSelected && oSelected.getData && oSelected.getData()) || {};
             var sSelectedRootId = String((oSelectedData && oSelectedData.root && oSelectedData.root.id) || "").trim();
@@ -231,8 +240,8 @@ sap.ui.define([
             if (bCreate) {
                 mStatePatch[StatePaths.WORKFLOW_DETAIL_EDIT_MODE] = "CREATE";
                 mStatePatch[StatePaths.WORKFLOW_DETAIL_LOCK_STATE] = "IDLE";
-                mStatePatch["/autosaveEnabled"] = false;
-                mStatePatch["/isDirty"] = false;
+                mStatePatch[DomainStatePaths.AUTOSAVE_ENABLED] = false;
+                mStatePatch[DomainStatePaths.IS_DIRTY] = false;
             }
             ModelStateRuntime.setMany(this, "state", mStatePatch);
             this._applyLayoutState(sRouteLayout, { syncRoute: false });
@@ -257,12 +266,12 @@ sap.ui.define([
                 return;
             }
             if (sPostOpenHydratedRootId && sPostOpenHydratedRootId === sId && sSelectedRootId === sId) {
-                ModelStateRuntime.write(this, "state", "/postOpenHydratedRootId", "");
-                ControllerViewStateRuntime.set(this, "/detailSkeletonBusy", false);
+                ModelStateRuntime.write(this, "state", DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, "");
+                ControllerViewStateRuntime.set(this, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
                 restoreAnalyticsEditIfNeeded(this, sId);
                 return;
             }
-            ModelStateRuntime.write(this, "state", "/activeObjectId", sId);
+            ModelStateRuntime.write(this, "state", DomainStatePaths.ACTIVE_OBJECT_ID, sId);
             DetailCommandPolicy.open(this, { id: sId, rootId: sId }).then(function (oResult) {
                 var oAccessState;
                 if (oResult && oResult.ok === false) {
@@ -291,8 +300,8 @@ sap.ui.define([
         },
 
         _currentRootId: function () {
-            return ModelStateRuntime.read(this, "state", "/activeObjectId", "")
-                || ModelStateRuntime.read(this, "state", "/selectedId", "")
+            return ModelStateRuntime.read(this, "state", DomainStatePaths.ACTIVE_OBJECT_ID, "")
+                || ModelStateRuntime.read(this, "state", DomainStatePaths.SELECTED_ID, "")
                 || "";
         },
 
@@ -310,7 +319,7 @@ sap.ui.define([
                 return false;
             }
             ModelStateRuntime.write(this, "selected", sPath, vValue);
-            ModelStateRuntime.write(this, "state", "/isDirty", true);
+            ModelStateRuntime.write(this, "state", DomainStatePaths.IS_DIRTY, true);
             return true;
         },
 

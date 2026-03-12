@@ -390,18 +390,18 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentDropZone {
 }
 
 /* Suspend expensive glass effects while UI5 swaps theme CSS. */
-html.chkAppRoot.theme-switching .chkApp .appShellHeader,
-html.chkAppRoot.theme-switching .chkApp .glassCard,
-html.chkAppRoot.theme-switching .chkApp .detailSectionCard,
-html.chkAppRoot.theme-switching .chkApp .detailControlInlineCard,
-html.chkAppRoot.theme-switching .chkApp .infoCardTile,
-html.chkAppRoot.theme-switching .chkApp .searchFilterCardDense,
-html.chkAppRoot.theme-switching .chkApp .searchResultsTable,
-html.chkAppRoot.theme-switching .chkApp .searchAnalyticsCard,
-html.chkAppRoot.theme-switching .chkApp .searchStatusStripStack,
-html.chkAppRoot.theme-switching .chkApp .detailAttachmentDropZone,
-html.chkAppRoot.theme-switching .chkApp .shellUserCard,
-html.chkAppRoot.theme-switching .chkApp .shellSettingRow {
+html.chkAppRoot.appThemeSwitching .chkApp .appShellHeader,
+html.chkAppRoot.appThemeSwitching .chkApp .glassCard,
+html.chkAppRoot.appThemeSwitching .chkApp .detailSectionCard,
+html.chkAppRoot.appThemeSwitching .chkApp .detailControlInlineCard,
+html.chkAppRoot.appThemeSwitching .chkApp .infoCardTile,
+html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense,
+html.chkAppRoot.appThemeSwitching .chkApp .searchResultsTable,
+html.chkAppRoot.appThemeSwitching .chkApp .searchAnalyticsCard,
+html.chkAppRoot.appThemeSwitching .chkApp .searchStatusStripStack,
+html.chkAppRoot.appThemeSwitching .chkApp .detailAttachmentDropZone,
+html.chkAppRoot.appThemeSwitching .chkApp .shellUserCard,
+html.chkAppRoot.appThemeSwitching .chkApp .shellSettingRow {
   transition: none;
   animation: none;
   backdrop-filter: none;
@@ -411,51 +411,51 @@ html.chkAppRoot.theme-switching .chkApp .shellSettingRow {
 /* 2026-03 shell final alignment pass:
    keep header width tied to the same appContent host as search content. */
 .chkApp .appShellHeaderHost {
-  width: min(calc(100% - 1rem), 110rem) !important;
-  max-width: 110rem !important;
-  margin-inline: auto !important;
+  width: min(calc(100% - 1rem), 110rem);
+  max-width: 110rem;
+  margin-inline: auto;
 }
 
 .chkApp .appShellHeaderHost .appShellHeader,
 .chkApp .appShellHeaderHost .appShellHeader.sapMHBox,
 .chkApp .appShellHeaderHost .appShellHeader.sapMVBox {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .chkApp .appShellHeader .shellContextSubtitle {
-  display: none !important;
+  display: none;
 }
 
 @media (max-width: 61.25rem) {
   .chkApp .appShellHeaderHost {
-    width: calc(100% - 1.5rem) !important;
-    max-width: calc(100% - 1.5rem) !important;
+    width: calc(100% - 1.5rem);
+    max-width: calc(100% - 1.5rem);
   }
 }
 
 /* Migrated from claude-hyper.css */
 .chkApp .appFeedbackBanner {
-  border-radius: 0.65rem !important;
-  padding: 0.5rem 0.875rem !important;
-  font-size: 0.80rem !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-  min-height: 2.4rem !important;
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.80rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.4rem;
 }
 
 body.chkAppRoot.appLight .chkApp .appFeedbackBanner {
-  background: rgba(0, 112, 242, 0.06) !important;
-  border: 1px solid rgba(0, 112, 242, 0.20) !important;
-  color: rgba(0, 56, 180, 0.88) !important;
+  background: rgba(0, 112, 242, 0.06);
+  border: 1px solid rgba(0, 112, 242, 0.20);
+  color: rgba(0, 56, 180, 0.88);
 }
 
 body.chkAppRoot.appDark .chkApp .appFeedbackBanner {
-  background: rgba(77, 177, 255, 0.08) !important;
-  border: 1px solid rgba(77, 177, 255, 0.20) !important;
-  color: rgba(130, 200, 255, 0.90) !important;
+  background: rgba(77, 177, 255, 0.08);
+  border: 1px solid rgba(77, 177, 255, 0.20);
+  color: rgba(130, 200, 255, 0.90);
 }
 
 .chkApp .appFeedbackCorrelation .sapMInputBaseContentWrapper {
@@ -486,20 +486,20 @@ body.chkAppRoot.appDark .chkApp .appFeedbackBanner {
 }
 
 .chkApp .appShellActions {
-  gap: 0.25rem !important;
-  align-items: center !important;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .chkApp .appShellHeader.shellPinned {
   box-shadow:
     0 16px 34px rgba(12, 28, 52, 0.18),
-    0 0 0 1px color-mix(in srgb, var(--shell-border) 90%, transparent) !important;
+    0 0 0 1px color-mix(in srgb, var(--shell-border) 90%, transparent);
 }
 
 body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
   box-shadow:
     0 18px 40px rgba(1, 6, 16, 0.36),
-    0 0 0 1px rgba(126, 156, 208, 0.22) !important;
+    0 0 0 1px rgba(126, 156, 208, 0.22);
 }
 
 .chkApp .heroCard,
@@ -510,14 +510,14 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
 }
 
 .chkApp .mushroomCard {
-  border-radius: calc(var(--radius-lg) - 0.12rem) !important;
-  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 80%, transparent) !important;
-  background: var(--theme-block-bg) !important;
-  transition: transform 80ms ease, opacity 80ms ease !important;
+  border-radius: calc(var(--radius-lg) - 0.12rem);
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 80%, transparent);
+  background: var(--theme-block-bg);
+  transition: transform 80ms ease, opacity 80ms ease;
 }
 
 .chkApp .mushroomGrid {
-  gap: 0.5rem !important;
+  gap: 0.5rem;
 }
 
 .chkApp .infoCardGridItem {
@@ -565,9 +565,9 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
 .chkApp .appShellHeader .sapMFlexItem,
 .chkApp .appShellHeader .appShellActions,
 .chkApp .appShellHeader .shellContextActions {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .chkApp .appShellHeader .shellTitle,
@@ -575,13 +575,13 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
 .chkApp .appShellHeader .sapMText,
 .chkApp .appShellHeader .sapMLabel,
 .chkApp .appShellHeader .sapMBtnContent {
-  min-width: 0 !important;
-  max-width: 100% !important;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Global pseudo-element backdrop reset carried from monolith hardening. */
 *::before,
 *::after {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

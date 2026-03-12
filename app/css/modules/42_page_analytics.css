@@ -234,7 +234,7 @@
 body.chkAppRoot .analyticsYearPickerPopover,
 body.chkAppRoot .analyticsYearPickerPopover .sapMPopoverCont,
 body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
-  border-radius: 1rem !important;
+  border-radius: 1rem;
 }
 
 .chkApp .analyticsYearPickerBody {
@@ -257,58 +257,58 @@ body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
 .chkApp .analyticsChartPanel svg,
 .chkApp .analyticsChartPanel .sapVizFrame,
 .chkApp .analyticsChartPanel .sapVizKitViewport {
-  background: transparent !important;
-  background-image: none !important;
+  background: transparent;
+  background-image: none;
 }
 
 .chkApp .analyticsChartPanel .sapMPanelContent {
-  border-top: 0 !important;
+  border-top: 0;
 }
 
 body.chkAppRoot.appLight .chkApp .analyticsChartPanel.sapMPanel,
 body.chkAppRoot.appLight .chkApp .analyticsChartPanel .sapMPanelContent {
-  background-color: rgba(248, 252, 255, 0.04) !important;
+  background-color: rgba(248, 252, 255, 0.04);
 }
 
 body.chkAppRoot.appDark .chkApp .analyticsChartPanel.sapMPanel,
 body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
-  background-color: rgba(10, 20, 40, 0.22) !important;
+  background-color: rgba(10, 20, 40, 0.22);
 }
 
 /* Migrated from claude-hyper.css */
 .chkApp .analyticsChartEmpty.sapMText {
-  display: block !important;
-  text-align: center !important;
-  padding: 2rem 1rem !important;
-  font-size: 0.84rem !important;
-  opacity: 0.50 !important;
+  display: block;
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.84rem;
+  opacity: 0.50;
 }
 
 /* Migrated from claude-hyper.css backlog: analytics KPI/legend/rate helpers. */
-.chkApp .analyticsChartCard .sapMText,
+.chkApp .searchAnalyticsChartCard .sapMText,
 .chkApp .analyticsValue {
-  font-variant-numeric: tabular-nums !important;
-  font-feature-settings: "tnum" 1 !important;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 .chkApp .analyticsLegendItem {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0.3rem !important;
-  font-size: var(--t-xs) !important;
-  font-weight: var(--fw-medium) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--t-xs);
+  font-weight: var(--fw-medium);
 }
 
 .chkApp .analyticsRateBar {
-  border-radius: 999px !important;
-  overflow: hidden !important;
-  height: 6px !important;
+  border-radius: 999px;
+  overflow: hidden;
+  height: 6px;
 }
 
 .chkApp .analyticsRateFill {
-  border-radius: 999px !important;
-  height: 100% !important;
-  transition: width 600ms cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  border-radius: 999px;
+  height: 100%;
+  transition: width 600ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .chkApp .kpiValue,
@@ -316,52 +316,52 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
 .chkApp .kpiMainValue,
 .chkApp .kpiCard .sapMObjectNumberText,
 .chkApp .searchAnalyticsCard .sapMObjectNumberText {
-  font-size: clamp(1.6rem, 2.4vw, 2.1rem) !important;
-  font-weight: 860 !important;
-  line-height: 1 !important;
-  letter-spacing: -0.04em !important;
-  font-variant-numeric: tabular-nums !important;
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  font-weight: 860;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 .chkApp .kpiTrend {
-  font-size: 0.74rem !important;
-  color: var(--tx3) !important;
+  font-size: 0.74rem;
+  color: var(--tx3);
 }
 
 .chkApp .kpiTrendPositive {
-  color: var(--hz-success, #1a7c40) !important;
-  font-size: var(--t-xs) !important;
-  font-weight: var(--fw-bold) !important;
+  color: var(--hz-success, #1a7c40);
+  font-size: var(--t-xs);
+  font-weight: var(--fw-bold);
 }
 
 .chkApp .kpiTrendNegative {
-  color: var(--hz-danger, #cc0000) !important;
-  font-size: var(--t-xs) !important;
-  font-weight: var(--fw-bold) !important;
+  color: var(--hz-danger, #cc0000);
+  font-size: var(--t-xs);
+  font-weight: var(--fw-bold);
 }
 
 .chkApp .kpiCard.kpiTotal::before {
-  background: var(--sp-blue) !important;
+  background: var(--sp-blue);
 }
 
 .chkApp .kpiCard.kpiFailed::before {
-  background: linear-gradient(90deg, var(--sp-red, #c01e1e) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, var(--sp-red, #c01e1e) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiPassed::before {
-  background: linear-gradient(90deg, var(--sp-green, #187a3c) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, var(--sp-green, #187a3c) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiRate::before {
-  background: linear-gradient(90deg, var(--sp-teal, #0797a4) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, var(--sp-teal, #0797a4) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiBarriers::before {
-  background: linear-gradient(90deg, var(--sp-amber, #b65a00) 0%, transparent 100%) !important;
+  background: linear-gradient(90deg, var(--sp-amber, #b65a00) 0%, transparent 100%);
 }
 
 .chkApp .kpiCard.kpiUpdated {
-  animation: _kpiUpdate 700ms ease both !important;
+  animation: _kpiUpdate 700ms ease both;
 }
 
 @keyframes _kpiUpdate {
@@ -376,53 +376,53 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
 }
 
 .chkApp .workflowStageCard .stageBadge {
-  position: absolute !important;
-  top: -0.45rem !important;
-  right: 0.65rem !important;
-  min-width: 1.1rem !important;
-  height: 1.1rem !important;
-  border-radius: 999px !important;
-  background: var(--hz-accent, var(--accent)) !important;
-  color: #fff !important;
-  font-size: 0.6rem !important;
-  font-weight: 800 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 0.22rem !important;
-  border: 2px solid !important;
+  position: absolute;
+  top: -0.45rem;
+  right: 0.65rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: var(--hz-accent, var(--accent));
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.22rem;
+  border: 2px solid;
 }
 
 body.chkAppRoot.appLight .chkApp .workflowStageCard .stageBadge {
-  border-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.95);
 }
 
 body.chkAppRoot.appDark .chkApp .workflowStageCard .stageBadge {
-  border-color: rgba(16, 28, 52, 0.95) !important;
+  border-color: rgba(16, 28, 52, 0.95);
 }
 
 .chkApp .workflowStageCount {
-  font-size: 0.7rem !important;
-  font-weight: 720 !important;
-  font-variant-numeric: tabular-nums !important;
-  border-radius: 999px !important;
-  padding: 0.1rem 0.5rem !important;
+  font-size: 0.7rem;
+  font-weight: 720;
+  font-variant-numeric: tabular-nums;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
 }
 
 body.chkAppRoot.appLight .chkApp .workflowStageCount {
-  background: rgba(0, 80, 200, 0.09) !important;
-  color: rgba(0, 48, 164, 0.75) !important;
+  background: rgba(0, 80, 200, 0.09);
+  color: rgba(0, 48, 164, 0.75);
 }
 
 body.chkAppRoot.appDark .chkApp .workflowStageCount {
-  background: rgba(77, 177, 255, 0.12) !important;
-  color: rgba(110, 186, 255, 0.82) !important;
+  background: rgba(77, 177, 255, 0.12);
+  color: rgba(110, 186, 255, 0.82);
 }
 
 .chkApp .rateBar,
 .chkApp [class*="rateBar"] {
-  border-radius: 999px !important;
-  overflow: hidden !important;
+  border-radius: 999px;
+  overflow: hidden;
 }
 
 /* 2026-03 gap shortlist pass: analytics parity selectors (exact). */

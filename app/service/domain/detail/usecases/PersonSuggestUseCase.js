@@ -62,7 +62,7 @@ sap.ui.define([
                 Effects.modelPatch("selected", "/basic/" + sPrefix + "_PERNER", oItem.perner || ""),
                 Effects.modelPatch("selected", "/basic/" + sPrefix + "_POSITION", oItem.position || ""),
                 Effects.modelPatch("selected", "/basic/" + sPrefix + "_ORGUNIT", oItem.orgUnit || ""),
-                Effects.modelPatch("state", "/isDirty", true)
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)
             ];
             return Promise.resolve(Result.ok({ selected: true }, aEffects));
         }
@@ -76,7 +76,7 @@ sap.ui.define([
                 Effects.modelPatch("selected", "/basic/" + sPrefix + "_PERNER", ""),
                 Effects.modelPatch("selected", "/basic/" + sPrefix + "_POSITION", ""),
                 Effects.modelPatch("selected", "/basic/" + sPrefix + "_ORGUNIT", ""),
-                Effects.modelPatch("state", "/isDirty", true)
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)
             ]));
         }
 

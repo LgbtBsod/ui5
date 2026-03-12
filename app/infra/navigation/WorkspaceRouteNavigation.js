@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths) {
     "use strict";
 
     function cloneArgs(oArgs) {
@@ -59,8 +60,8 @@ sap.ui.define([
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
         var oIntent = buildCurrentIntent(oStateModel);
-        var sMode = String(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/editMode", "READ") || "READ").trim().toUpperCase();
-        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/lock/state", "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
+        var sMode = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "READ") || "READ").trim().toUpperCase();
+        var sLockState = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "READ_ONLY") || "READ_ONLY").trim().toUpperCase();
         var sRootId = readSelectedId(oStateModel);
         var bRestoreEdit = !!(sRootId && sMode === "EDIT" && sLockState === "EDIT_LOCKED");
 

@@ -126,7 +126,7 @@
                                     label="{i18n>filterFailSegmentLabel}"
                                     visibleInAdvancedArea="true">
                                     <smartFilterBar:customControl>
-                                        <VBox class="customFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                                        <VBox class="searchCustomFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
                                             <SegmentedButton
                                                 id="FailChecksSegmentControl"
                                                 selectedKey="{state>/search/checksFailSegment}"
@@ -147,7 +147,7 @@
                                     label="{i18n>filterBarrierSegmentLabel}"
                                     visibleInAdvancedArea="true">
                                     <smartFilterBar:customControl>
-                                        <VBox class="customFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                                        <VBox class="searchCustomFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
                                             <SegmentedButton
                                                 id="FailBarriersSegmentControl"
                                                 selectedKey="{state>/search/barriersFailSegment}"
@@ -328,7 +328,7 @@
                                 change=".onSearchModeToggle"
                                 customTextOn=""
                                 customTextOff=""
-                                class="accentSwitch searchModeToggleSwitch">
+                                class="appAccentSwitch searchModeToggleSwitch">
                                 <layoutData>
                                     <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                                 </layoutData>

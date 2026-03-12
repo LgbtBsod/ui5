@@ -1,11 +1,13 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ChecklistValidationService"
-], function (UseCase, Result, Effects, DetailStateAccess, ValidationPathMap, ChecklistValidationService) {
+    "PRODUCTION_CONTROL_CHECKLIST/util/ChecklistValidationService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
+], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, ValidationPathMap, ChecklistValidationService, ViewPathContracts) {
     "use strict";
 
     function ValidateChecklistUseCase() {
@@ -26,9 +28,9 @@ sap.ui.define([
                 message: "Validation rules are not loaded yet",
                 code: "REQUIRED_FIELDS_UNAVAILABLE"
             }, [
-                Effects.modelPatch("view", "/validationShown", false),
-                Effects.modelPatch("view", "/validationMissing", {}),
-                Effects.modelPatch("state", "/validationSummary", {
+                Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, false),
+                Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, {}),
+                Effects.modelPatch("state", StatePaths.VALIDATION_SUMMARY, {
                     hasErrors: false,
                     missingPaths: [],
                     missingKeys: [],
@@ -46,9 +48,9 @@ sap.ui.define([
             valid: !!oValidation.valid,
             missingPaths: oValidation.missingPaths || []
         }, [
-            Effects.modelPatch("view", "/validationShown", true),
-            Effects.modelPatch("view", "/validationMissing", mMissing),
-            Effects.modelPatch("state", "/validationSummary", {
+            Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, true),
+            Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, mMissing),
+            Effects.modelPatch("state", StatePaths.VALIDATION_SUMMARY, {
                 hasErrors: !oValidation.valid,
                 missingPaths: oValidation.missingPaths || [],
                 missingKeys: aMissingKeys,

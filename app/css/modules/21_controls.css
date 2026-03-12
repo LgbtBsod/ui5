@@ -234,22 +234,22 @@ body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
 .chkApp .shellSettingsSwitch .sapMSwtLabel,
 .chkApp .detailResultSwitch .sapMSwtText,
 .chkApp .detailResultSwitch .sapMSwtLabel {
-  display: none !important;
+  display: none;
 }
 
 .chkApp .shellThemeSwitch .sapMSwtInner,
 .chkApp .searchModeToggleSwitch .sapMSwtInner,
 .chkApp .shellSettingsSwitch .sapMSwtInner,
 .chkApp .detailResultSwitch .sapMSwtInner {
-  padding-inline: 0 !important;
+  padding-inline: 0;
 }
 
 .chkApp .shellThemeSwitch.sapMSwtCont,
 .chkApp .shellSettingsSwitch.sapMSwtCont,
 .chkApp .detailResultSwitch.sapMSwtCont {
-  min-height: 2rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .chkApp .detailResultSwitch.sapMSwtCont {
@@ -483,19 +483,19 @@ html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgS
   filter: saturate(1.04);
 }
 
-.chkApp .accentSwitch.sapMSwt {
+.chkApp .appAccentSwitch.sapMSwt {
   --accent-switch-bg: linear-gradient(180deg, var(--surface-2), var(--surface-3));
   --accent-switch-border: var(--theme-workbench-control-border);
   border-color: var(--accent-switch-border);
 }
 
-.chkApp .accentSwitch.sapMSwt.sapMSwtOn {
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn {
   --accent-switch-bg: var(--control-primary-bg);
   --accent-switch-border: var(--control-primary-border);
   box-shadow: var(--control-primary-shadow);
 }
 
-.chkApp .accentSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle {
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle {
   box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.24);
 }
 
@@ -506,7 +506,7 @@ html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgS
 .chkApp .chkSkin .sapMSegB,
 .chkApp .chkSkin .sapUiTable,
 .chkApp .chkSkin .sapMTable {
-  border-radius: var(--radius-md) !important;
+  border-radius: var(--radius-md);
 }
 
 .chkApp .chkSkin .sapMBtn:focus .sapMBtnInner,
@@ -514,21 +514,20 @@ html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgS
 .chkApp .chkSkin .sapMInputBaseContentWrapper:focus-within,
 .chkApp .chkSkin .sapMSlt:focus-within,
 .chkApp .chkSkin .sapMSegBBtn.sapMBtnFocused .sapMSegBBtnInner {
-  outline: none !important;
-  box-shadow: var(--focus-ring) !important;
+  box-shadow: var(--focus-ring);
 }
 
-.chkApp .chkSkin .sapMSwt.accentSwitch,
-.chkApp .chkSkin .accentSwitch.sapMSwt {
-  min-width: 3.2rem !important;
-  border-radius: 999px !important;
-  border-color: var(--accent-switch-border, var(--theme-workbench-control-border)) !important;
-  background: var(--accent-switch-bg, linear-gradient(180deg, var(--surface-2), var(--surface-3))) !important;
+.chkApp .chkSkin .sapMSwt.appAccentSwitch,
+.chkApp .chkSkin .appAccentSwitch.sapMSwt {
+  min-width: 3.2rem;
+  border-radius: 999px;
+  border-color: var(--accent-switch-border, var(--theme-workbench-control-border));
+  background: var(--accent-switch-bg, linear-gradient(180deg, var(--surface-2), var(--surface-3)));
 }
 
-.chkApp .chkSkin .accentSwitch.sapMSwt .sapMSwtHandle {
-  border-radius: 50% !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(235, 242, 255, 0.92)) !important;
+.chkApp .chkSkin .appAccentSwitch.sapMSwt .sapMSwtHandle {
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(235, 242, 255, 0.92));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -800,30 +799,30 @@ body.chkAppRoot.appDark .chkApp .tableActionHeaderLabel {
 
 /* Migrated from claude-hyper.css backlog: compact chip size variants. */
 .chkApp .chipSm {
-  padding: 0.12rem 0.45rem !important;
-  font-size: 0.64rem !important;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.64rem;
 }
 
 .chkApp .chipLg {
-  padding: 0.32rem 0.88rem !important;
-  font-size: 0.82rem !important;
+  padding: 0.32rem 0.88rem;
+  font-size: 0.82rem;
 }
 
 .chkApp .chipSep {
-  width: 0.2rem !important;
-  height: 0.2rem !important;
-  border-radius: 50% !important;
-  display: inline-block !important;
-  flex-shrink: 0 !important;
-  align-self: center !important;
+  width: 0.2rem;
+  height: 0.2rem;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 body.chkAppRoot.appLight .chkApp .chipSep {
-  background: rgba(100, 140, 200, 0.4) !important;
+  background: rgba(100, 140, 200, 0.4);
 }
 
 body.chkAppRoot.appDark .chkApp .chipSep {
-  background: rgba(100, 150, 210, 0.38) !important;
+  background: rgba(100, 150, 210, 0.38);
 }
 
 /* Migrated from claude-hyper.css backlog: chip/runtime semantic classes. */
@@ -835,110 +834,110 @@ body.chkAppRoot.appDark .chkApp .chipSep {
 
 .chkApp .chipLive,
 .chkApp .chipActive {
-  animation: _chipLivePulse 2.5s ease-in-out infinite !important;
+  animation: _chipLivePulse 2.5s ease-in-out infinite;
 }
 
 .chkApp .workflowChip {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0.28rem !important;
-  border-radius: 999px !important;
-  padding: 0.14rem 0.62rem 0.14rem 0.52rem !important;
-  font-size: 0.71rem !important;
-  font-weight: 680 !important;
-  border: 1px solid var(--ac-bd, var(--theme-chip-border)) !important;
-  background: var(--ac-bg, var(--theme-chip-bg)) !important;
-  white-space: nowrap !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border-radius: 999px;
+  padding: 0.14rem 0.62rem 0.14rem 0.52rem;
+  font-size: 0.71rem;
+  font-weight: 680;
+  border: 1px solid var(--ac-bd, var(--theme-chip-border));
+  background: var(--ac-bg, var(--theme-chip-bg));
+  white-space: nowrap;
 }
 
 body.chkAppRoot.appLight .chkApp .workflowChip {
-  color: rgba(0, 44, 156, 0.84) !important;
+  color: rgba(0, 44, 156, 0.84);
 }
 
 body.chkAppRoot.appDark .chkApp .workflowChip {
-  color: rgba(112, 188, 255, 0.88) !important;
+  color: rgba(112, 188, 255, 0.88);
 }
 
 .chkApp .statusChipPositive {
-  border-color: rgba(16, 122, 44, 0.28) !important;
-  background: rgba(16, 122, 44, 0.1) !important;
-  color: rgba(8, 86, 28, 0.88) !important;
+  border-color: rgba(16, 122, 44, 0.28);
+  background: rgba(16, 122, 44, 0.1);
+  color: rgba(8, 86, 28, 0.88);
 }
 
 .chkApp .statusChipNegative {
-  border-color: rgba(196, 16, 16, 0.28) !important;
-  background: rgba(196, 16, 16, 0.1) !important;
-  color: rgba(152, 0, 0, 0.88) !important;
+  border-color: rgba(196, 16, 16, 0.28);
+  background: rgba(196, 16, 16, 0.1);
+  color: rgba(152, 0, 0, 0.88);
 }
 
 .chkApp .statusChipWarning {
-  border-color: rgba(176, 76, 0, 0.28) !important;
-  background: rgba(176, 76, 0, 0.1) !important;
-  color: rgba(136, 56, 0, 0.88) !important;
+  border-color: rgba(176, 76, 0, 0.28);
+  background: rgba(176, 76, 0, 0.1);
+  color: rgba(136, 56, 0, 0.88);
 }
 
 .chkApp .statusChipInformative {
-  border-color: rgba(0, 108, 238, 0.28) !important;
-  background: rgba(0, 108, 238, 0.1) !important;
-  color: rgba(0, 50, 168, 0.88) !important;
+  border-color: rgba(0, 108, 238, 0.28);
+  background: rgba(0, 108, 238, 0.1);
+  color: rgba(0, 50, 168, 0.88);
 }
 
 .chkApp .statusChipNeutral {
-  border-color: rgba(96, 118, 178, 0.26) !important;
-  background: rgba(96, 118, 178, 0.1) !important;
-  color: rgba(60, 84, 148, 0.8) !important;
+  border-color: rgba(96, 118, 178, 0.26);
+  background: rgba(96, 118, 178, 0.1);
+  color: rgba(60, 84, 148, 0.8);
 }
 
 .chkApp .sapMBtnSuccess .sapMBtnInner,
 .chkApp .btnSuccess .sapMBtnInner {
-  background: var(--hz-success, #1a7c40) !important;
+  background: var(--hz-success, #1a7c40);
 }
 
 .chkApp .statusChip {
-  border-radius: 999px !important;
-  border: 1px solid var(--theme-chip-border) !important;
-  background: var(--theme-chip-bg) !important;
-  padding: 0.2rem 0.6rem !important;
-  font-size: 0.72rem !important;
-  font-weight: 650 !important;
+  border-radius: 999px;
+  border: 1px solid var(--theme-chip-border);
+  background: var(--theme-chip-bg);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 650;
 }
 
 .chkApp .shellNotificationBadge,
 .chkApp .notifBadge {
-  border-radius: 999px !important;
-  min-width: 1.1rem !important;
-  height: 1.1rem !important;
-  padding: 0 0.3rem !important;
-  font-size: 0.6rem !important;
-  font-weight: 820 !important;
-  font-variant-numeric: tabular-nums !important;
-  background: var(--sp-red, #cc0000) !important;
-  color: #fff !important;
-  border: 2px solid var(--surface-3, #fff) !important;
+  border-radius: 999px;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.3rem;
+  font-size: 0.6rem;
+  font-weight: 820;
+  font-variant-numeric: tabular-nums;
+  background: var(--sp-red, #cc0000);
+  color: #fff;
+  border: 2px solid var(--surface-3, #fff);
 }
 
 .chkApp .sapMOTBOverflowButton .sapMBtnInner,
 .chkApp .sapMBtn.overflowMenuBtn .sapMBtnInner {
-  background: transparent !important;
-  border-radius: 999px !important;
-  width: 2rem !important;
-  height: 2rem !important;
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  background: transparent;
+  border-radius: 999px;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 body.chkAppRoot.appLight .chkApp .sapMOTBOverflowButton .sapMBtnInner,
 body.chkAppRoot.appLight .chkApp .sapMBtn.overflowMenuBtn .sapMBtnInner {
-  border: 1.5px solid rgba(118, 162, 218, 0.45) !important;
-  color: rgba(0, 64, 160, 0.75) !important;
+  border: 1.5px solid rgba(118, 162, 218, 0.45);
+  color: rgba(0, 64, 160, 0.75);
 }
 
 body.chkAppRoot.appDark .chkApp .sapMOTBOverflowButton .sapMBtnInner,
 body.chkAppRoot.appDark .chkApp .sapMBtn.overflowMenuBtn .sapMBtnInner {
-  border: 1.5px solid rgba(77, 177, 255, 0.3) !important;
-  color: rgba(120, 196, 255, 0.8) !important;
+  border: 1.5px solid rgba(77, 177, 255, 0.3);
+  color: rgba(120, 196, 255, 0.8);
 }
 
 @keyframes _iconAttention {
@@ -957,23 +956,23 @@ body.chkAppRoot.appDark .chkApp .sapMBtn.overflowMenuBtn .sapMBtnInner {
 
 .chkApp .shellActionBtn.active .sapMBtnInner,
 .chkApp .shellActionBtn[aria-pressed="true"] .sapMBtnInner {
-  background: rgba(var(--accent-rgb), 0.1) !important;
-  border-color: rgba(var(--accent-rgb), 0.32) !important;
+  background: rgba(var(--accent-rgb), 0.1);
+  border-color: rgba(var(--accent-rgb), 0.32);
 }
 
 .chkApp .toolbarDivider {
-  width: 1px !important;
-  align-self: stretch !important;
-  margin: 0.22rem 0.4rem !important;
-  flex-shrink: 0 !important;
+  width: 1px;
+  align-self: stretch;
+  margin: 0.22rem 0.4rem;
+  flex-shrink: 0;
 }
 
 body.chkAppRoot.appLight .chkApp .toolbarDivider {
-  background: rgba(118, 162, 218, 0.32) !important;
+  background: rgba(118, 162, 218, 0.32);
 }
 
 body.chkAppRoot.appDark .chkApp .toolbarDivider {
-  background: rgba(77, 177, 255, 0.18) !important;
+  background: rgba(77, 177, 255, 0.18);
 }
 
 /* 2026-03 recovery pass: missing theme dock switch classes from restored style.css */
@@ -1120,62 +1119,62 @@ body.chkAppRoot .chkApp .shellThemeToggle .themeDockSwitch.isDark .themeDockSwit
 
 /* 2026-03 parity pass: switches residual non-1:1 selectors from claude-hyper.css. */
 body.chkAppRoot.appLight .chkApp .sapMSwt:not(.sapMSwtOn) {
-  background: var(--hz-sw-off-bg, rgba(218, 230, 248, 0.82)) !important;
-  border-color: var(--hz-sw-off-border, rgba(120, 162, 216, 0.52)) !important;
+  background: var(--hz-sw-off-bg, rgba(218, 230, 248, 0.82));
+  border-color: var(--hz-sw-off-border, rgba(120, 162, 216, 0.52));
 }
 
 body.chkAppRoot.appDark .chkApp .sapMSwt:not(.sapMSwtOn) {
-  background: var(--hz-sw-off-bg, rgba(16, 28, 50, 0.88)) !important;
-  border-color: var(--hz-sw-off-border, rgba(77, 177, 255, 0.18)) !important;
+  background: var(--hz-sw-off-bg, rgba(16, 28, 50, 0.88));
+  border-color: var(--hz-sw-off-border, rgba(77, 177, 255, 0.18));
 }
 
 .chkApp .sapMSwt.sapMSwtOn {
-  background: var(--hz-sw-on-bg, var(--hz-accent)) !important;
-  border-color: rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.44) !important;
-  box-shadow: 0 2px 8px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.26) !important;
+  background: var(--hz-sw-on-bg, var(--hz-accent));
+  border-color: rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.44);
+  box-shadow: 0 2px 8px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.26);
 }
 
 .chkApp .sapMSwtHandle,
 .chkApp .sapMSwt .sapMSwtHandle {
-  border-radius: 999px !important;
-  background: linear-gradient(180deg, #fff 0%, rgba(238, 246, 255, 0.95) 100%) !important;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff 0%, rgba(238, 246, 255, 0.95) 100%);
   box-shadow:
     0 1px 4px rgba(4, 12, 26, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-  transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .chkApp .sapMSwt.sapMSwtOn .sapMSwtHandle {
-  box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.24) !important;
+  box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.24);
 }
 
 .chkApp .sapMSwt:not(.sapMSwtDisabled):hover {
-  box-shadow: 0 0 0 3px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.13) !important;
+  box-shadow: 0 0 0 3px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.13);
 }
 
 .chkApp .sapMSwtText {
-  font-size: 0.64rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.06em !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 body.chkAppRoot.appLight .chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtText {
-  color: rgba(80, 110, 158, 0.6) !important;
+  color: rgba(80, 110, 158, 0.6);
 }
 
 body.chkAppRoot.appDark .chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtText {
-  color: rgba(var(--hz-accent-rgb, 77, 177, 255), 0.4) !important;
+  color: rgba(var(--hz-accent-rgb, 77, 177, 255), 0.4);
 }
 
 .chkApp .sapMSwt.sapMSwtOn .sapMSwtText {
-  color: rgba(255, 255, 255, 0.92) !important;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 /* 2026-03 parity transfer: remaining switches selectors from claude-hyper.css */
-html.chkAppRoot.theme-switching .chkApp .searchFilterCardDense {
-  transition: none !important; animation: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense {
+  transition: none; animation: none; backdrop-filter: none; -webkit-backdrop-filter: none;
 }
 
 .chkApp .detailSectionToolbar .sapMSwt {
@@ -1183,59 +1182,59 @@ html.chkAppRoot.theme-switching .chkApp .searchFilterCardDense {
 }
 
 .chkApp .sapMSwt:not(.sapMSwtOn) {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--theme-workbench-control-bg) 100%, transparent), color-mix(in srgb, var(--surface-3) 80%, transparent)) !important; border-color: var(--border-soft) !important; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--theme-workbench-control-bg) 100%, transparent), color-mix(in srgb, var(--surface-3) 80%, transparent)); border-color: var(--border-soft); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .chkApp .sapMSwt.sapMSwtOn .sapMSwtLabelOn {
-  color: rgba(255, 255, 255, 0.94) !important;
+  color: rgba(255, 255, 255, 0.94);
 }
 
 .chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff {
-  color: var(--text-muted) !important;
+  color: var(--text-muted);
 }
 
 .chkApp .sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover {
-  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.38), 0 0 0 3px rgba(var(--accent-rgb), 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.38), 0 0 0 3px rgba(var(--accent-rgb), 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 body.chkAppRoot.appDark .chkApp .sapMSwtHandle {
-  background: linear-gradient(180deg, rgba(200, 218, 242, 0.98), rgba(168, 196, 230, 0.9)) !important;
+  background: linear-gradient(180deg, rgba(200, 218, 242, 0.98), rgba(168, 196, 230, 0.9));
 }
 
 .chkApp .sapMSwtDisabled {
-  cursor: not-allowed !important; pointer-events: none !important;
+  cursor: not-allowed; pointer-events: none;
 }
 
 .chkApp .detailGridTable .sapMSwtOn {
-  background: var(--hz-accent,#0070F2) !important; border-color: var(--hz-accent,#0070F2) !important;
+  background: var(--hz-accent,#0070F2); border-color: var(--hz-accent,#0070F2);
 }
 
 .chkApp .detailGridTable .sapMSwt {
-  border-radius: 999px !important; height: 1.5rem !important; min-width: 2.5rem !important; border: 1.5px solid !important;
+  border-radius: 999px; height: 1.5rem; min-width: 2.5rem; border: 1.5px solid;
 }
 
 body.chkAppRoot.appLight .chkApp .flatEditorTable .sapMSwt {
-  background: rgba(232,244,255,0.90) !important; border-color: rgba(136,178,232,0.48) !important;
+  background: rgba(232,244,255,0.90); border-color: rgba(136,178,232,0.48);
 }
 
 body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwt {
-  background: rgba(11,20,46,0.88) !important; border-color: rgba(46,86,158,0.42) !important;
+  background: rgba(11,20,46,0.88); border-color: rgba(46,86,158,0.42);
 }
 
 body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMSwtOn {
-  background: var(--hz-accent,#4DB1FF) !important; border-color: var(--hz-accent,#4DB1FF) !important;
+  background: var(--hz-accent,#4DB1FF); border-color: var(--hz-accent,#4DB1FF);
 }
 
 .chkApp .flatEditorTable .sapMSwtHandle {
-  width: 1.05rem !important; height: 1.05rem !important; background: #fff !important; border-radius: 50% !important; box-shadow: 0 1px 3px rgba(0,0,20,0.16) !important; transition: left 100ms cubic-bezier(0.34,1.56,0.64,1) !important;
+  width: 1.05rem; height: 1.05rem; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,20,0.16); transition: left 100ms cubic-bezier(0.34,1.56,0.64,1);
 }
 
 .chkApp .flatEditorTable .sapMSwt {
-  border: none !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.10) !important;
+  border: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.10);
 }
 
 .chkApp .flatEditorTable .sapMSwtOn {
-  box-shadow: 0 1px 4px rgba(0,112,242,0.28) !important;
+  box-shadow: 0 1px 4px rgba(0,112,242,0.28);
 }
 
 @media (max-width: 560px) {

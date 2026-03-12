@@ -45,8 +45,8 @@ sap.ui.define([
                 message: "Status validation rules are not loaded yet",
                 code: "REQUIRED_FIELDS_UNAVAILABLE"
             }, [
-                Effects.modelPatch("view", "/validationShown", false),
-                Effects.modelPatch("view", "/validationMissing", {}),
+                Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, false),
+                Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, {}),
                 Effects.toast("statusChangeValidationUnavailableToast", "warning")
             ]));
         }
@@ -56,8 +56,8 @@ sap.ui.define([
                 status: sStatus,
                 missingPaths: oValidation.missingPaths || []
             }, [
-                Effects.modelPatch("view", "/validationShown", true),
-                Effects.modelPatch("view", "/validationMissing", ValidationPathMap.toMissingMap(oValidation.missingPaths)),
+                Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, true),
+                Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, ValidationPathMap.toMissingMap(oValidation.missingPaths)),
                 Effects.toast("checklistValidationFailedToast", "warning")
             ]));
         }

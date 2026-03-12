@@ -54,15 +54,15 @@ sap.ui.define([
     function buildUploadEffects(mCtx, oAttachment, sToastKey) {
         var aCurrentAll = DetailStateAccess.readCurrentAttachments(mCtx);
         var oUiState = mCtx && mCtx.uiState;
-        var bLoadedAll = !!(oUiState && oUiState.get("view", "/attachmentsLoaded"));
-        var aSession = (oUiState && oUiState.get("view", "/sessionAttachments")) || [];
+        var bLoadedAll = !!(oUiState && oUiState.get("view", ViewPathContracts.ATTACHMENTS_LOADED));
+        var aSession = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
         var aAllNext = oAttachment ? AttachmentIdentity.appendUnique(aCurrentAll, oAttachment) : (Array.isArray(aCurrentAll) ? aCurrentAll.slice() : []);
         var aSessionNext = oAttachment ? AttachmentIdentity.appendUnique(aSession, Object.assign({}, oAttachment, { _sessionUpload: true })) : (Array.isArray(aSession) ? aSession.slice() : []);
         var aEffects = AttachmentEffectSupport.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentUploaded", "success");
-        aEffects.push(Effects.modelPatch("view", "/sessionAttachments", aSessionNext));
+        aEffects.push(Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext));
         aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true));
         if (bLoadedAll) {
-            aEffects.push(Effects.modelPatch("view", "/attachmentsLoaded", true));
+            aEffects.push(Effects.modelPatch("view", ViewPathContracts.ATTACHMENTS_LOADED, true));
         }
         return aEffects;
     }

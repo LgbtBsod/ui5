@@ -1,10 +1,11 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils"
-], function (UseCase, Result, Effects, DetailStateAccess, UseCaseResultUtils) {
+], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, UseCaseResultUtils) {
     "use strict";
 
     function ValueHelpLocationUseCase() {
@@ -52,7 +53,7 @@ sap.ui.define([
                 Effects.modelPatch("selected", "/basic/LOCATION_NAME", (oSelected && oSelected.location_name) || ""),
                 Effects.modelPatch("selected", "/basic/LOCATION_TEXT", (oSelected && (oSelected.location_text || oSelected.location_name)) || ""),
                 Effects.modelPatch("selected", "/basic/LOCATION_KEY", (oSelected && (oSelected.location_code || oSelected.location_id)) || ""),
-                Effects.modelPatch("state", "/isDirty", !!oSelected),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, !!oSelected),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
                 Effects.dialog("locationValueHelp", "close", {})
             ]));
