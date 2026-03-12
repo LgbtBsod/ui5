@@ -1,26 +1,26 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerLifecycleActions",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerOverlayActions",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerShellActions",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerStateRuntimeActions",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AppControllerDomActions"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/app/AppLifecycleBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/app/AppOverlayBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/app/AppShellBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/app/AppStateBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/app/AppDomBehavior"
 ], function (
     BaseController,
-    AppControllerLifecycleActions,
-    AppControllerOverlayActions,
-    AppControllerShellActions,
-    AppControllerStateRuntimeActions,
-    AppControllerDomActions
+    AppLifecycleBehavior,
+    AppOverlayBehavior,
+    AppShellBehavior,
+    AppStateBehavior,
+    AppDomBehavior
 ) {
     "use strict";
 
     return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.App", Object.assign(
         {},
-        AppControllerLifecycleActions,
-        AppControllerOverlayActions,
-        AppControllerShellActions,
-        AppControllerStateRuntimeActions,
-        AppControllerDomActions
+        AppLifecycleBehavior,
+        AppOverlayBehavior,
+        AppShellBehavior,
+        AppStateBehavior,
+        AppDomBehavior
     ));
 });

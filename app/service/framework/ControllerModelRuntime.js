@@ -43,7 +43,7 @@ sap.ui.define([
             return resolveNamedModel(oController, MODELS.STATE, true);
         },
         layout: function (oController) {
-            return resolveNamedModel(oController, "layout", true);
+            return resolveNamedModel(oController, MODELS.LAYOUT, true);
         },
         appView: function (oController) {
             return resolveNamedModel(oController, MODELS.APP_VIEW, false);

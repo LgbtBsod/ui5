@@ -72,9 +72,10 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
 def test_boot_and_runtime_source_lock_strict_success_path():
     boot_text = _read(APP_ROOT / "service" / "framework" / "ComponentBootRuntime.js")
     init_text = _read(APP_ROOT / "service" / "framework" / "ComponentInitRuntime.js")
+    feedback_bootstrap_text = _read(APP_ROOT / "service" / "framework" / "ComponentFeedbackBootstrapRuntime.js")
     cache_text = _read(APP_ROOT / "infra" / "adapters" / "BrowserCacheAdapter.js")
     runtime_support = _read(APP_ROOT / "service" / "framework" / "ComponentRuntimeSupport.js")
-    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentListenerRuntime.js")
+    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentInitListenersRuntime.js")
 
     assert 'var bBootCompleted = false;' in boot_text
     assert 'resolveSettledStageError(aStageResults[0], "load_current_user_failed")' in boot_text
@@ -87,7 +88,7 @@ def test_boot_and_runtime_source_lock_strict_success_path():
 
     assert 'return runBootSequence({' in init_text
     assert 'cacheAdapter: this._ctx && this._ctx.cache,' in init_text
-    assert 'throw oError || new Error("runtime_settings_load_failed");' in init_text
+    assert 'throw oError || new Error("runtime_settings_load_failed");' in feedback_bootstrap_text
     assert 'return mDeps.LoadCurrentUserUseCase && mDeps.LoadCurrentUserUseCase.refresh' in init_text
 
     assert 'clearCurrentTab: function () {' in cache_text
@@ -165,7 +166,7 @@ def test_telemetry_uses_canonical_lock_state_vocabulary():
 
 
 def test_search_request_window_supports_legacy_search_max_results_shape():
-    source = _read(APP_ROOT / "controller" / "support" / "SearchViewStateRuntime.js")
+    source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewStateRuntime.js")
     util_source = _read(APP_ROOT / "util" / "search" / "SearchMaxResults.js")
 
     assert 'typeof SearchMaxResults.resolveGrowingPageSize === "function"' in source
@@ -175,7 +176,7 @@ def test_search_request_window_supports_legacy_search_max_results_shape():
 
 def test_sticky_runtime_is_route_scoped_without_global_body_observer():
     legacy_path = APP_ROOT / "search-toolbar-sticky-runtime.js"
-    source = _read(APP_ROOT / "controller" / "support" / "SearchViewportRuntime.js")
+    source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewportRuntime.js")
 
     assert not legacy_path.exists()
     assert "MutationObserver" not in source
@@ -189,7 +190,7 @@ def test_sticky_runtime_is_route_scoped_without_global_body_observer():
 def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
     state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
     workflow_schema = _read(APP_ROOT / "model" / "schema" / "workflowSchema.js")
-    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentListenerRuntime.js")
+    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentInitListenersRuntime.js")
 
     assert 'DETAIL_META: "/detailMeta",' in state_paths
     assert 'detailMeta:' in workflow_schema

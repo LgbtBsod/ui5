@@ -65,7 +65,18 @@ Reason:
 
 ## Next Cuts After This One
 
-1. search loading feedback
-2. smart table runtime wiring
-3. export flow runtime
-4. route/startup readiness markers
+Completed:
+- [x] analytics rail refresh and scheduling
+- [x] search loading feedback and pending-load settlement
+- [x] smart table runtime wiring and before-rebind orchestration
+- [x] export and navigation runtime
+
+Current extracted modules:
+- [SearchAnalyticsRailRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchAnalyticsRailRuntime.js)
+- [SearchLoadingFeedbackRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchLoadingFeedbackRuntime.js)
+- [SearchSmartTableRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchSmartTableRuntime.js)
+- [SearchActionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchActionRuntime.js)
+
+Remaining cuts:
+1. route/startup readiness markers
+2. final facade thinning and relocation strategy for `SearchViewRuntime`

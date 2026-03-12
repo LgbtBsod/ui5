@@ -5,6 +5,7 @@ sap.ui.define([], function () {
         MODELS: Object.freeze({
             APP_VIEW: "appView",
             I18N: "i18n",
+            LAYOUT: "layout",
             MASTER_DATA: "masterData",
             SELECTED: "selected",
             STATE: "state",

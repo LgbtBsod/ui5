@@ -1,0 +1,107 @@
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts) {
+    "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
+
+    function resolveStartupPerf(oController) {
+        var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
+        if (!oOwner) {
+            return null;
+        }
+        oOwner._startupPerf = oOwner._startupPerf || {
+            t0: (window.performance && typeof window.performance.now === "function") ? window.performance.now() : Date.now(),
+            firstRouteReadyLogged: false,
+            analyticsStartedLogged: false
+        };
+        return oOwner._startupPerf;
+    }
+
+    function nowMs() {
+        return (window.performance && typeof window.performance.now === "function") ? window.performance.now() : Date.now();
+    }
+
+    function logStartupMetric(oController, sEvent) {
+        var oPerf = resolveStartupPerf(oController);
+        var iDelta;
+        if (!oPerf || !oPerf.t0) {
+            return;
+        }
+        if (sEvent === "firstRouteReady" && oPerf.firstRouteReadyLogged) {
+            return;
+        }
+        if (sEvent === "analyticsStarted" && oPerf.analyticsStartedLogged) {
+            return;
+        }
+        iDelta = Math.max(0, Math.round(nowMs() - oPerf.t0));
+        if (sEvent === "firstRouteReady") {
+            oPerf.firstRouteReadyLogged = true;
+            console.info("[Startup] first route ready:", iDelta + "ms");
+            return;
+        }
+        if (sEvent === "analyticsStarted") {
+            oPerf.analyticsStartedLogged = true;
+            console.info("[Startup] analytics started:", iDelta + "ms");
+        }
+    }
+
+    function shouldRefreshSearchOnReturn(oController) {
+        return !!ModelStateRuntime.read(oController, STATE_MODEL, "/searchForceRefreshOnReturn", false)
+            && !!ControllerViewStateRuntime.get(oController, "/hasSearched", false);
+    }
+
+    function clearSearchRefreshFlag(oController) {
+        ModelStateRuntime.write(oController, STATE_MODEL, "/searchForceRefreshOnReturn", false);
+    }
+
+    function refreshSearchTableIfNeeded(oController, sSource, mHooks) {
+        if (!shouldRefreshSearchOnReturn(oController) || !ControllerViewStateRuntime.get(oController, "/smartTableReady", false)) {
+            return;
+        }
+        clearSearchRefreshFlag(oController);
+        mHooks.rebind({
+            source: sSource || SEARCH_SOURCES.SEARCH_RETRY
+        });
+    }
+
+    function onSearchMatched(oController, mHooks) {
+        mHooks.syncSmartControlAvailability();
+        mHooks.bindSearchViewportRuntime();
+        logStartupMetric(oController, "firstRouteReady");
+        ControllerViewStateRuntime.set(oController, "/bootstrapBusy", true);
+        ControllerViewStateRuntime.set(oController, "/analyticsBusy", false);
+        ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);
+        ControllerViewStateRuntime.set(oController, "/analyticsError", "");
+        mHooks.bindSearchAnalytics();
+        mHooks.bindSearchWorkingText();
+        mHooks.clearInitialAnalyticsSchedule();
+        Promise.resolve(mHooks.bootstrap({ reason: "routeMatched" }))
+            .catch(function () {
+                return null;
+            })
+            .finally(mHooks.scheduleInitialAnalytics(function () {
+                logStartupMetric(oController, "analyticsStarted");
+            }));
+        mHooks.restoreSearchScrollPosition();
+        refreshSearchTableIfNeeded(oController, "routeMatchedReturn", {
+            rebind: mHooks.rebind
+        });
+    }
+
+    function syncSearchContextForDetailRoute(_oController, mHooks) {
+        mHooks.syncSmartControlAvailability();
+        mHooks.bindSearchViewportRuntime();
+        mHooks.scheduleSearchViewportSync(false);
+    }
+
+    return {
+        onSearchMatched: onSearchMatched,
+        refreshSearchTableIfNeeded: refreshSearchTableIfNeeded,
+        syncSearchContextForDetailRoute: syncSearchContextForDetailRoute
+    };
+});

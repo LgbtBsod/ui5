@@ -1,29 +1,29 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailControllerLifecycle",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailValidationSummarySupport",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionViewportRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionPinnedRailRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailActionDialogRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailChecklistRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailChecklistStateActions",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailChecklistRowActions",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailAttachmentLocationActions",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/DetailFormatters",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/support/AttachmentUploadCore"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailControllerBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationSummarySupport",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionViewportBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionPinnedRailRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionDialogRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistStateBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistRowBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAttachmentLocationBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFormatters",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore"
 ], function (
     BaseController,
-    DetailControllerLifecycle,
+    DetailControllerBehavior,
     DetailValidationSummarySupport,
     DetailActionConstants,
-    DetailActionViewportRuntime,
+    DetailActionViewportBehavior,
     DetailActionPinnedRailRuntime,
     DetailActionDialogRuntime,
-    DetailChecklistRuntime,
-    DetailChecklistStateActions,
-    DetailChecklistRowActions,
-    DetailAttachmentLocationActions,
+    DetailChecklistBehavior,
+    DetailChecklistStateBehavior,
+    DetailChecklistRowBehavior,
+    DetailAttachmentLocationBehavior,
     DetailFormatters,
     AttachmentUploadCore
 ) {
@@ -32,14 +32,14 @@ sap.ui.define([
 
     var mControllerDefinition = Object.assign(
         {},
-        DetailControllerLifecycle,
-        DetailActionViewportRuntime,
+        DetailControllerBehavior,
+        DetailActionViewportBehavior,
         DetailActionPinnedRailRuntime,
         DetailActionDialogRuntime,
-        DetailChecklistRuntime,
-        DetailChecklistStateActions,
-        DetailChecklistRowActions,
-        DetailAttachmentLocationActions,
+        DetailChecklistBehavior,
+        DetailChecklistStateBehavior,
+        DetailChecklistRowBehavior,
+        DetailAttachmentLocationBehavior,
         {
             _computeValidationSummary: function () {
                 return DetailValidationSummarySupport.compute(this);

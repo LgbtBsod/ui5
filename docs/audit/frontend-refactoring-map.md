@@ -9,14 +9,40 @@ Goal: define a detailed migration path from the current mixed frontend architect
 - `[done]` Step 0. Create the refactoring map and execution ledger
 - `[done]` Step 1. Normalize constants and token ownership in the highest-risk frontend modules
 - `[pending]` Step 2. Consolidate state-path authority
-- `[pending]` Step 3. Decompose thick controller/support orchestration
-- `[pending]` Step 4. Move repeated interaction behavior into behavior packs
+- `[done]` Step 3. Decompose thick controller/support orchestration
+- `[done]` Step 4. Move repeated interaction behavior into behavior packs
 - `[pending]` Step 5. Centralize contract mapping and normalization
 - `[pending]` Step 6. Introduce progressive readiness contracts
 - `[pending]` Step 7. Simplify shell and theme ownership
 - `[pending]` Step 8. Split large CSS surfaces by local ownership
 - `[pending]` Step 9. Add architecture guardrails to keep the target model enforceable
-- `[in_progress]` Step 10. Drain repeated model keys and operation source labels from support/framework modules
+- `[done]` Step 10. Drain repeated model keys and operation source labels from support/framework modules
+
+## Completed Wave: App And Detail Support Drain
+
+- `AppControllerDomActions` physically drained into `controller/app/AppDomBehavior.js`.
+- `AppControllerOverlayActions` physically drained into `controller/app/AppOverlayBehavior.js`.
+- `AppShellActionRuntime` physically drained into `controller/app/AppShellActionRuntime.js`.
+- `AttachmentUploadCore` physically drained into `controller/detail/AttachmentUploadCore.js`.
+- `DetailValidationSummarySupport` physically drained into `controller/detail/DetailValidationSummarySupport.js`.
+- Controller imports and dependent support modules now reference the capability-based app/detail paths.
+
+## Completed Wave: Detail Viewport And Shared Helper Normalization
+
+- `AttachmentDropZoneRuntime` physically drained into `controller/detail/AttachmentDropZoneRuntime.js`.
+- `DetailActionViewportRuntime` physically drained into `controller/detail/DetailActionViewportBehavior.js`.
+- `DetailPersonInputSupport` physically drained into `controller/detail/DetailPersonInputSupport.js`.
+- `BindingContextReadSupport` was rehomed to `service/shared/BindingContextReadSupport.js` as a neutral shared helper instead of a controller-support artifact.
+- Detail and search consumers were switched to the new detail/shared locations.
+
+## Completed Wave: Analytics Capability Split
+
+- `AnalyticsControllerActions` physically drained into `controller/analytics/AnalyticsControllerBehavior.js`.
+- `AnalyticsYearRuntime.js` now owns year normalization, compare-year defaults, preset application, and year-picker dialog behavior.
+- `AnalyticsLoadRuntime.js` now owns analytics load orchestration.
+- `AnalyticsRefreshRuntime.js` now owns refresh polling semantics.
+- `AnalyticsDrilldownRuntime.js` now owns drilldown intent creation and navigation handoff.
+- `AnalyticsExportRuntime.js` now owns export/report dialog behavior.
 
 ## Governing Rules
 
@@ -504,6 +530,36 @@ Completion marker:
 
 ## Progress Log
 
+- 2026-03-12 shell decomposition wave started
+  - extracted `ShellLayoutRuntime` to `app/service/features/shell/runtime/ShellLayoutRuntime.js`
+  - extracted `ShellViewportRuntime` to `app/service/features/shell/runtime/ShellViewportRuntime.js`
+  - extracted `ShellStateRuntime` to `app/service/features/shell/runtime/ShellStateRuntime.js`
+  - reduced `AppControllerLifecycleActions.js` to a controller-facing facade over shell feature runtime
+  - reduced `AppControllerStateRuntimeActions.js` to a controller-facing facade over shell feature runtime
+  - normalized `layout` into canonical `ModelContracts.MODELS.LAYOUT`
+  - normalized remaining `appView` shell reads through `ModelContracts`
+  - physically drained shell controller facades into:
+    - `app/controller/app/AppLifecycleBehavior.js`
+    - `app/controller/app/AppStateBehavior.js`
+    - `app/controller/app/AppShellBehavior.js`
+- 2026-03-12 detail behavior wave started
+  - extracted reusable row/info-card behavior to `app/service/features/detail/runtime/DetailRowBehaviorRuntime.js`
+  - reduced `DetailChecklistRowActions.js` to a controller-facing facade over detail row behavior
+  - normalized detail operation intents through `OperationSourceContracts.DETAIL`
+  - normalized `state` and `selected` model usage in `DetailChecklistRuntime.js`
+  - extracted detail matched/open/layout/state patching to `app/service/features/detail/runtime/DetailMatchedRuntime.js`
+  - centralized detail info-card text tokens and defaults in `app/service/contracts/DetailRuntimeContracts.js`
+  - centralized person-input targets and paths in `app/service/contracts/DetailPersonContracts.js`
+  - normalized `selected/state/view` model usage in person and validation support
+  - extracted attachments behavior to `app/service/features/detail/runtime/DetailAttachmentRuntime.js`
+  - extracted location/person value-help behavior to `app/service/features/detail/runtime/DetailValueHelpRuntime.js`
+  - centralized detail autosave/value-help field tokens in `app/service/contracts/DetailFieldContracts.js`
+  - physically drained `DetailChecklistRowActions.js` into `app/controller/detail/DetailChecklistRowBehavior.js`
+  - physically drained `DetailAttachmentLocationActions.js` into `app/controller/detail/DetailAttachmentLocationBehavior.js`
+  - extracted analytics edit restore flow to `app/service/features/detail/runtime/DetailEditRestoreRuntime.js`
+  - extracted selected-field and row-context helpers to `app/service/features/detail/runtime/DetailSelectedFieldRuntime.js`
+  - extracted search startup/context orchestration to `app/service/features/search/runtime/SearchStartupRuntime.js`
+
 - `2026-03-12`: map created
 - `2026-03-12`: central constant rule added to architecture plan
 - `2026-03-12`: added [ModelContracts.js](/C:/Users/lgbtb/Desktop/ui5/app/service/contracts/ModelContracts.js) for canonical model names and shared tokens
@@ -529,3 +585,37 @@ Completion marker:
 - `2026-03-12`: created [search-view-runtime-decomposition.md](/C:/Users/lgbtb/Desktop/ui5/docs/audit/search-view-runtime-decomposition.md) with target cut map for `SearchViewRuntime`
 - `2026-03-12`: completed first real `SearchViewRuntime` decomposition slice by extracting analytics rail scheduling into [SearchAnalyticsRailRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchAnalyticsRailRuntime.js)
 - `2026-03-12`: established clean controller-to-capability boundary for search analytics runtime via injected runner, instead of direct controller-layer imports
+- `2026-03-12`: extracted search loading feedback and pending-load settlement into [SearchLoadingFeedbackRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchLoadingFeedbackRuntime.js)
+- `2026-03-12`: extracted smart table initialize and before-rebind orchestration into [SearchSmartTableRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchSmartTableRuntime.js)
+- `2026-03-12`: extracted export and analytics navigation actions into [SearchActionRuntime.js](/C:/Users/lgbtb/Desktop/ui5/app/service/features/search/runtime/SearchActionRuntime.js)
+- `2026-03-12`: `SearchViewRuntime` is now a thinner orchestration facade over capability runtimes instead of a single mixed-responsibility module
+## Completed Wave: Search And Detail Facade Drain
+
+- `SearchControllerActions` physically drained into `controller/search/SearchControllerBehavior.js`.
+- `SearchViewRuntime` physically drained into `controller/search/SearchViewBehavior.js` after runtime decomposition.
+- `DetailChecklistStateActions` physically drained into `controller/detail/DetailChecklistStateBehavior.js`.
+- `DetailViewBehavior` reduced to a thin facade over `DetailLayoutRuntime` and `DetailInfoCardFactory`.
+- Extracted `DetailObserverCardRuntime` and `DetailSimpleCardRuntime` to standardize repeated info-card behavior.
+- Added `SearchRuntimeContracts.js` as the canonical source for search defaults, persistency prefixes, analytics source token, and search mode tokens.
+- `SearchViewStateRuntime.js` now consumes canonical search runtime contracts instead of owning raw persistency and analytics source literals.
+- Controller entry points now bind directly to capability-based search/detail behaviors instead of legacy support facades.
+- `2026-03-12`: physically drained the remaining feature-specific `controller/support` modules into target capability folders:
+  - `app/controller/analytics/AnalyticsBuilderRuntime.js`
+  - `app/controller/detail/DetailAccessViewState.js`
+  - `app/controller/detail/DetailActionConstants.js`
+  - `app/controller/detail/DetailActionDialogRuntime.js`
+  - `app/controller/detail/DetailActionPinnedRailRuntime.js`
+  - `app/controller/detail/DetailCommandPolicy.js`
+  - `app/controller/detail/DetailFormatters.js`
+  - `app/controller/detail/DetailInfoCardLayoutRuntime.js`
+  - `app/controller/search/SearchCommandPolicy.js`
+  - `app/controller/search/SearchLoadRuntime.js`
+  - `app/controller/search/SearchRateProgress.js`
+  - `app/controller/search/SearchSelectionRuntime.js`
+  - `app/controller/search/SearchShortcutRuntime.js`
+  - `app/controller/search/SearchViewportRuntime.js`
+  - `app/controller/search/SearchViewStateRuntime.js`
+- `2026-03-12`: moved controller-neutral helpers into `app/controller/shared`:
+  - `app/controller/shared/ControllerResourceCleanup.js`
+  - `app/controller/shared/ControllerReturnFocusRuntime.js`
+- `2026-03-12`: `app/controller/support` is fully drained and no longer acts as a live architectural layer.

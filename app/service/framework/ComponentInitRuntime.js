@@ -3,28 +3,21 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentModelBootstrapRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentMainServiceRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCoreBootstrapRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentStateSeedRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFeedbackBootstrapRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitCompositionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeAttachmentBootstrap",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCrossTabRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCoordinatorRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiBehaviorPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLifecycleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentCrossTabRuntime, ComponentCoordinatorRuntime, ComponentListenerRuntime, UiBehaviorPolicy, FrontendConfigConstants, ModelContracts) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentModelBootstrapRuntime, ComponentMainServiceRuntime, ComponentCoreBootstrapRuntime, ComponentStateSeedRuntime, ComponentFeedbackBootstrapRuntime, ComponentInitCompositionRuntime, ComponentRuntimeAttachmentBootstrap, ComponentCrossTabRuntime, ComponentLockRuntime, ComponentLifecycleRuntime, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-
-    function reuseJsonModel(oExistingModel, fnCreateModel) {
-        var oModel = oExistingModel || fnCreateModel();
-        var oSeedModel;
-
-        if (oExistingModel && typeof oExistingModel.setData === "function") {
-            oSeedModel = fnCreateModel();
-            oExistingModel.setData(oSeedModel && oSeedModel.getData ? oSeedModel.getData() : {}, false);
-        }
-
-        return oModel;
-    }
 
     function buildActionValidators(ActionContract) {
         return ComponentActionRuntime.buildActionValidators(ActionContract);
@@ -34,73 +27,12 @@ sap.ui.define([
         return ComponentActionRuntime.registerDefaultHandlers(mOptions);
     }
 
-    function resolveCorrelationId(oError, FeedbackPolicy) {
-        var oNormalizedError = FeedbackPolicy && FeedbackPolicy.normalize ? FeedbackPolicy.normalize(oError || {}) : null;
-        var oParams = oNormalizedError && oNormalizedError.params;
-        return String(
-            (oParams && (oParams.correlationId || oParams.correlation_id || oParams.requestId || oParams.request_id)) ||
-            (oError && (oError.correlationId || oError.correlation_id || oError.requestId || oError.request_id)) ||
-            ""
-        ).trim();
-    }
-
-    function isSessionExpiredError(oError) {
-        var iStatus = Number((oError && (oError.statusCode || oError.status)) || 0);
-        var sCode = String((oError && oError.code) || "").toUpperCase();
-        var sMessage = String((oError && oError.message) || "").toUpperCase();
-        if (iStatus === 401 || iStatus === 403) {
-            return true;
-        }
-        return sCode === "SESSION_UNAVAILABLE" || sCode === "AUTH_REQUIRED" || /SESSION|AUTH|CSRF/.test(sMessage);
-    }
-
-    function normalizeRuntimeSettingsError(oError) {
-        var sMessage = String((oError && oError.message) || "").trim();
-        var sCode = String((oError && oError.code) || "").trim();
-        var iStatus = Number((oError && (oError.statusCode || oError.status)) || 0) || 0;
-
-        return {
-            message: sMessage,
-            code: sCode,
-            status: iStatus
-        };
-    }
-
-    function createFeedbackRuntime(oOptions) {
-        var oStateModel = oOptions.stateModel;
-        var FeedbackPolicy = oOptions.feedbackPolicy;
-        var fnBundleText = oOptions.bundleText || function (sKey) {
-            return sKey;
-        };
-        var oUiBehavior = UiBehaviorPolicy.create({
-            stateModel: oStateModel,
-            resolveText: fnBundleText
-        });
-
-        return {
-            resolveCorrelationId: function (oError) {
-                return resolveCorrelationId(oError, FeedbackPolicy);
-            },
-            isSessionExpiredError: isSessionExpiredError,
-            setGlobalBanner: oUiBehavior.setGlobalBanner,
-            clearGlobalBanner: oUiBehavior.clearGlobalBanner
-        };
-    }
-
     function createBundleText(component) {
         return ComponentActionRuntime.createBundleText(component);
     }
 
     function createApplyFacadeResult(mOptions) {
         return ComponentActionRuntime.createApplyFacadeResult(mOptions);
-    }
-
-    function queuePendingNavigationIntent(oStateModel, StatePaths, oRouteEvent) {
-        ComponentActionRuntime.queuePendingNavigationIntent(oStateModel, StatePaths, oRouteEvent);
-    }
-
-    function clearPendingNavigationIntent(oStateModel, StatePaths) {
-        ComponentActionRuntime.clearPendingNavigationIntent(oStateModel, StatePaths);
     }
 
     function resumePendingNavigationIntent(component, oStateModel, StatePaths) {
@@ -116,20 +48,19 @@ sap.ui.define([
     }
 
     function attachInitListeners(mOptions) {
-        return ComponentListenerRuntime.attachInitListeners(mOptions);
+        return ComponentLifecycleRuntime.attachInitListeners(mOptions);
     }
 
     function attachLockRuntime(mOptions) {
-        return ComponentCoordinatorRuntime.attachLockRuntime(mOptions);
+        return ComponentLockRuntime.attachLockRuntime(mOptions);
     }
 
     function attachManagerRuntime(mOptions) {
-        return ComponentCoordinatorRuntime.attachManagerRuntime(mOptions);
+        return ComponentLockRuntime.attachManagerRuntime(mOptions);
     }
 
     function runInit(aInitArgs, mDeps) {
         var UIComponent = mDeps.UIComponent;
-        var ModelFactory = mDeps.ModelFactory;
         var SmartSearchAdapter = mDeps.SmartSearchAdapter;
         var Managers = mDeps.Managers || {};
         var HeartbeatManager = Managers.HeartbeatManager || mDeps.HeartbeatManager;
@@ -137,7 +68,6 @@ sap.ui.define([
         var ActivityMonitor = Managers.ActivityMonitor || mDeps.ActivityMonitor;
         var AutoSaveCoordinator = Managers.AutoSaveCoordinator || mDeps.AutoSaveCoordinator;
         var LockStatusMonitor = Managers.LockStatusMonitor || mDeps.LockStatusMonitor;
-        var JSONModel = mDeps.JSONModel;
         var FlowCoordinator = mDeps.FlowCoordinator;
         var DeltaPayloadBuilder = mDeps.DeltaPayloadBuilder;
         var GatewayBackendService = mDeps.GatewayBackendService;
@@ -149,7 +79,6 @@ sap.ui.define([
         var EnsureDictLoadedUseCase = mDeps.EnsureDictLoadedUseCase;
         var BootstrapAppUseCase = mDeps.BootstrapAppUseCase;
         var DiagnosticsUseCase = mDeps.DiagnosticsUseCase;
-        var CtxFactory = mDeps.CtxFactory;
         var EffectApplier = mDeps.EffectApplier;
         var FeedbackPolicy = mDeps.FeedbackPolicy;
         var ComponentInitSaveGuardSupport = mDeps.ComponentInitSaveGuardSupport;
@@ -157,10 +86,7 @@ sap.ui.define([
         var TelemetryRuntime = mDeps.TelemetryRuntime;
         var LayoutStateRuntime = mDeps.LayoutStateRuntime;
         var StatePaths = mDeps.StatePaths;
-        var DetailFacade = mDeps.DetailFacade;
-        var ActionDispatcher = mDeps.ActionDispatcher;
         var ActionContract = mDeps.ActionContract;
-        var ODataModel = mDeps.ODataModel;
         var WorkflowTelemetry = mDeps.WorkflowTelemetry;
         var CreateSentinel = mDeps.CreateSentinel;
         var Device = mDeps.Device;
@@ -177,43 +103,17 @@ sap.ui.define([
             var sConfiguredMode = this.getManifestEntry("/sap.ui5/config/backendMode") || "real";
             var sUiContractVersion = this.getManifestEntry("/sap.ui5/config/uiContractVersion") || "1.0.0";
             var sMainServiceUri = this.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/";
-            var oDataModel = reuseJsonModel(this.getModel("data"), ModelFactory.createDataModel);
-            var oMplModel = reuseJsonModel(this.getModel("mpl"), ModelFactory.createMplModel);
-            var oStateModel = reuseJsonModel(this.getModel(MODELS.STATE), ModelFactory.createStateModel);
-            var oUiStateModel = reuseJsonModel(this.getModel("uiState"), ModelFactory.createUiStateModel);
-            var oViewModel = reuseJsonModel(this.getModel(MODELS.VIEW), ModelFactory.createViewModel);
-            var oSelectedModel = reuseJsonModel(this.getModel(MODELS.SELECTED), function () { return new JSONModel({}); });
-            var oSnapshotModel = reuseJsonModel(this.getModel("snapshot"), ModelFactory.createSnapshotModel);
-            var oMasterDataModel = reuseJsonModel(this.getModel(MODELS.MASTER_DATA), ModelFactory.createMasterDataModel);
-            var oDeviceModel = new JSONModel(Device);
-            var oMainServiceModel = this.getModel("mainService") || new ODataModel(sMainServiceUri, {
-                useBatch: true,
-                tokenHandling: true,
-                defaultBindingMode: "TwoWay",
-                defaultCountMode: "Inline",
-                refreshAfterChange: false
-            });
-            oMainServiceModel.setDeferredGroups(["changes", "autosave", "saveFlow", "locks"]);
-            oMainServiceModel.setChangeGroups({
-                "*": {
-                    groupId: "changes",
-                    changeSetId: "ChecklistSave",
-                    single: false
-                },
-                "LockAcquireType": { groupId: "locks", single: true },
-                "LockHeartbeatType": { groupId: "locks", single: true },
-                "LockReleaseType": { groupId: "locks", single: true }
-            });
-            this.setModel(oMainServiceModel, "mainService");
-            this.setModel(oMainServiceModel);
-            GatewayBackendService.setModel(oMainServiceModel, { serviceUrl: sMainServiceUri });
+            var mModels = ComponentModelBootstrapRuntime.createModels(this, mDeps);
+            var oStateModel = mModels.stateModel;
+            var oUiStateModel = mModels.uiStateModel;
+            var oSelectedModel = mModels.selectedModel;
+            var oSnapshotModel = mModels.snapshotModel;
+            var oMasterDataModel = mModels.masterDataModel;
+            var oLayoutModel = mModels.layoutModel;
+            var oCacheModel = mModels.cacheModel;
+            var oEnvModel = mModels.envModel;
+            var oMainServiceModel = ComponentMainServiceRuntime.createMainServiceModel(this, mDeps, sMainServiceUri);
             var fnBundleText = createBundleText(this);
-            var oFeedbackRuntime = createFeedbackRuntime({
-                stateModel: oStateModel,
-                statePaths: StatePaths,
-                feedbackPolicy: FeedbackPolicy,
-                bundleText: fnBundleText
-            });
             // ZERO-LEGACY: BackendAdapter has been removed. UI5 ODataModel is the single transport.
             DiagnosticsUseCase.execute({}, {
                 mainServiceModel: oMainServiceModel,
@@ -224,150 +124,56 @@ sap.ui.define([
                 }
             });
 
-            this.setModel(oDataModel, "data");
-            this.setModel(oMplModel, "mpl");
-            this.setModel(oSelectedModel, MODELS.SELECTED);
-            this.setModel(oSnapshotModel, "snapshot");
-            this.setModel(oStateModel, MODELS.STATE);
-            this.setModel(oUiStateModel, "uiState");
-            this.setModel(oViewModel, MODELS.VIEW);
-            this.setModel(oViewModel, MODELS.APP_VIEW);
-            this.setModel(oMasterDataModel, MODELS.MASTER_DATA);
-            oDeviceModel.setDefaultBindingMode("OneWay");
-            this.setModel(oDeviceModel, "device");
-            this._oInteractionFX = InteractionFX;
-            // Build a Gateway-first context (ports/adapters) for this component.
-            this._ctx = CtxFactory.buildCtx(this, {});
-            this._detailFacade = new DetailFacade();
-            this._actionDispatcher = new ActionDispatcher();
-            this._actionDispatcher.setValidators(buildActionValidators(ActionContract));
-            var oLayoutModel = reuseJsonModel(this.getModel("layout"), ModelFactory.createLayoutModel);
-            var oCacheModel = reuseJsonModel(this.getModel("cache"), ModelFactory.createCacheModel);
-            var oEnvModel = ModelFactory.createEnvModel();
-            var mTimerDefaults = TimeConfigService.buildDefaultTimerMap();
-            var mInitState = { "/timers": mTimerDefaults };
-            mInitState[StatePaths.SAVE_IN_FLIGHT] = false;
-            mInitState[StatePaths.PENDING_NAVIGATION_INTENT] = null;
-            mInitState[StatePaths.TAB_CONFLICT_STATE] = { active: false, source: "", at: "" };
-            mInitState["/networkOnline"] = true;
-            mInitState["/networkGraceMode"] = false;
-            mInitState["/networkGraceExpiresAt"] = null;
-            ModelStateRuntime.setManyOnModel(oStateModel, mInitState);
+            ComponentModelBootstrapRuntime.registerModels(this, mModels);
+            var oCoreRuntime = ComponentCoreBootstrapRuntime.bootstrapComponentRuntime(this, mDeps, mModels, {
+                buildActionValidators: buildActionValidators,
+                createApplyFacadeResult: createApplyFacadeResult
+            });
+            var mTimerDefaults = ComponentStateSeedRuntime.seedInitialState(oStateModel, StatePaths, TimeConfigService);
             var fnEmitTelemetry = function (sEventName, oPayload) {
                 return WorkflowTelemetry.emit(sEventName, {
                     stateModel: oStateModel,
                     payload: oPayload || {}
                 });
             };
-            var fnResolveDetailCurrent = function () {
-                return ComponentRuntimeSupport.resolveDetailCurrent(oSelectedModel);
-            };
-            var fnApplyFacadeResult = createApplyFacadeResult({
+            var oInitContext = ComponentInitCompositionRuntime.createInitContext(this, mDeps, mModels, {
+                bundleText: fnBundleText,
+                emitTelemetry: fnEmitTelemetry,
+                feedbackBootstrap: ComponentFeedbackBootstrapRuntime,
+                resumePendingNavigationIntent: resumePendingNavigationIntent
+            });
+            var fnResolveDetailCurrent = oCoreRuntime.resolveDetailCurrent;
+            var fnApplyFacadeResult = oCoreRuntime.applyFacadeResult;
+            var fnBuildLatestCtx = oCoreRuntime.buildLatestCtx;
+            var fnHandleForceReadOnly = ComponentRuntimeAttachmentBootstrap.createForceReadOnlyHandler({
                 component: this,
-                effectApplier: EffectApplier,
-                actionDispatcher: this._actionDispatcher,
-                selectedModel: oSelectedModel,
+                stateModel: oStateModel,
                 uiStateModel: oUiStateModel,
-                componentRuntimeSupport: ComponentRuntimeSupport
-            });
-            var fnBuildLatestCtx = function () {
-                this._ctx = CtxFactory.buildCtx(this, {});
-                return this._ctx;
-            }.bind(this);
-            var fnHandleForceReadOnly = function (mInput) {
-                var mForceInput = Object.assign({}, mInput || {});
-                if (!Object.prototype.hasOwnProperty.call(mForceInput, "preserveDirty")) {
-                    mForceInput.preserveDirty = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
+                statePaths: StatePaths,
+                componentRuntimeSupport: ComponentRuntimeSupport,
+                telemetryRuntime: TelemetryRuntime,
+                applyFacadeResult: fnApplyFacadeResult,
+                emitTelemetry: fnEmitTelemetry,
+                readDirty: function () {
+                    return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
                 }
-                this._oHeartbeat.stop();
-                this._oLockStatus.stop();
-                this._oAutoSave.stop();
-                this._oGcd.destroyManager();
-                return this._detailFacade.forceReadOnly(mForceInput, this._ctx).then(function (oResult) {
-                    fnApplyFacadeResult(oResult);
-                    ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
-                    fnEmitTelemetry("lock.lost.detected", TelemetryRuntime.lockLost(
-                        mForceInput && mForceInput.reason,
-                        mForceInput && mForceInput.source
-                    ));
-                    return oResult;
-                });
-            }.bind(this);
-            var oRuntimeApplyQueue = Promise.resolve();
-            var fnApplyRuntimeSettings = function (oRuntime) {
-                oRuntimeApplyQueue = oRuntimeApplyQueue.catch(function () {
-                    return null;
-                }).then(function () {
-                    return this._applyFrontendRuntimeConfig({
-                        source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
-                        runtimeSettingsPayload: oRuntime || {}
-                    }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
-                        ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
-                        fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig(FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL));
-                        return oRuntime || {};
-                    });
-                }.bind(this));
-                return oRuntimeApplyQueue;
-            }.bind(this);
-
-            this._fnUnsubscribeRuntimeSettings = SettingsManager.subscribe(function (oRuntime, mMeta) {
-                if (!mMeta || !mMeta.refreshed) {
-                    return;
-                }
-                fnApplyRuntimeSettings(oRuntime).catch(function () {
-                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
-                });
             });
-
-            var fnLoadRuntimeSettings = function (mOptions) {
-                var bForce = !!(mOptions && mOptions.force);
-                var pLoad = bForce
-                    ? SettingsManager.reload(GatewayBackendService)
-                    : SettingsManager.load(GatewayBackendService);
-
-                return pLoad.then(function (oRuntime) {
-                    return fnApplyRuntimeSettings(oRuntime);
-                }).catch(function (oError) {
-                    var oOriginalError = normalizeRuntimeSettingsError(oError);
-                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
-                    fnEmitTelemetry("runtime.config.fallback_applied", TelemetryRuntime.runtimeConfig(
-                        FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
-                        "runtime_settings_fallback_applied",
-                        oOriginalError
-                    ));
-                    fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
-                        FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
-                        oOriginalError.message || "runtime_settings_load_failed",
-                        oOriginalError
-                    ));
-                    throw oError || new Error("runtime_settings_load_failed");
-                });
-            };
-            var fnResolveCorrelationId = oFeedbackRuntime.resolveCorrelationId;
-            var fnIsSessionExpiredError = oFeedbackRuntime.isSessionExpiredError;
-            var fnSetGlobalBanner = oFeedbackRuntime.setGlobalBanner;
-            var fnClearGlobalBanner = oFeedbackRuntime.clearGlobalBanner;
-            var fnQueuePendingNavigationIntent = function (oRouteEvent) {
-                return queuePendingNavigationIntent(this, oStateModel, StatePaths, oRouteEvent);
-            }.bind(this);
-            var fnClearPendingNavigationIntent = function () {
-                return clearPendingNavigationIntent(oStateModel, StatePaths);
-            };
-            var fnRevertPendingNavigationIntent = function () {
-                return ComponentActionRuntime.revertPendingNavigationIntent(this, oStateModel, StatePaths);
-            }.bind(this);
-            var fnResumePendingNavigationIntent = function () {
-                return resumePendingNavigationIntent(this, oStateModel, StatePaths);
-            }.bind(this);
-            var fnRestorePendingNavigationIntent = function () {
-                return ComponentActionRuntime.restorePendingNavigationIntent(this, oStateModel, StatePaths);
-            }.bind(this);
-            var fnRunGuardedSave = ComponentInitSaveGuardSupport.createRunGuardedSave({
+            var oRuntimeSettingsRuntime = oInitContext.runtimeSettingsRuntime;
+            var fnResolveCorrelationId = oInitContext.feedbackRuntime.resolveCorrelationId;
+            var fnIsSessionExpiredError = oInitContext.feedbackRuntime.isSessionExpiredError;
+            var fnSetGlobalBanner = oInitContext.feedbackRuntime.setGlobalBanner;
+            var fnClearGlobalBanner = oInitContext.feedbackRuntime.clearGlobalBanner;
+            var oPendingNavigationRuntime = oInitContext.pendingNavigationRuntime;
+            var fnQueuePendingNavigationIntent = oPendingNavigationRuntime.queuePendingNavigationIntent;
+            var fnClearPendingNavigationIntent = oPendingNavigationRuntime.clearPendingNavigationIntent;
+            var fnRevertPendingNavigationIntent = oPendingNavigationRuntime.revertPendingNavigationIntent;
+            var fnResumePendingNavigationIntent = oPendingNavigationRuntime.resumePendingNavigationIntent;
+            var fnRestorePendingNavigationIntent = oPendingNavigationRuntime.restorePendingNavigationIntent;
+            var fnRunGuardedSave = ComponentRuntimeAttachmentBootstrap.createGuardedSave({
                 component: this,
                 stateModel: oStateModel,
                 mainServiceModel: oMainServiceModel,
                 statePaths: StatePaths,
-                detailFacade: this._detailFacade,
                 buildLatestCtx: fnBuildLatestCtx,
                 applyFacadeResult: fnApplyFacadeResult,
                 emitTelemetry: fnEmitTelemetry,
@@ -375,27 +181,28 @@ sap.ui.define([
                 resolveCorrelationId: fnResolveCorrelationId,
                 isSessionExpiredError: fnIsSessionExpiredError,
                 setGlobalBanner: fnSetGlobalBanner,
-                clearGlobalBanner: fnClearGlobalBanner
+                clearGlobalBanner: fnClearGlobalBanner,
+                saveGuardSupport: ComponentInitSaveGuardSupport
             });
-            var oCrossTabRuntime = attachCrossTabRuntime({
+            var oCrossTabRuntime = ComponentRuntimeAttachmentBootstrap.registerCrossTabRuntime({
                 component: this,
                 stateModel: oStateModel,
                 statePaths: StatePaths,
                 bundleText: fnBundleText,
                 setGlobalBanner: fnSetGlobalBanner,
-                handleForceReadOnly: fnHandleForceReadOnly
-            });
+                handleForceReadOnly: fnHandleForceReadOnly,
+                attachCrossTabRuntime: attachCrossTabRuntime
+            }).crossTabRuntime;
             var fnPublishTabSignal = oCrossTabRuntime.publishTabSignal;
-            registerDefaultHandlers({
-                actionDispatcher: this._actionDispatcher,
+            ComponentRuntimeAttachmentBootstrap.registerDefaultHandlers({
+                component: this,
                 actionContract: ActionContract,
-                detailFacade: this._detailFacade,
                 runGuardedSave: fnRunGuardedSave,
                 buildLatestCtx: fnBuildLatestCtx,
                 applyFacadeResult: fnApplyFacadeResult,
-                getCtx: function () { return this._ctx; }.bind(this)
+                registerDefaultHandlers: registerDefaultHandlers
             });
-                        attachManagerRuntime({
+            attachManagerRuntime(ComponentRuntimeAttachmentBootstrap.buildManagerRuntimeOptions({
                 component: this,
                 stateModel: oStateModel,
                 uiStateModel: oUiStateModel,
@@ -419,8 +226,8 @@ sap.ui.define([
                 bundleText: fnBundleText,
                 componentRuntimeSupport: ComponentRuntimeSupport,
                 telemetryRuntime: TelemetryRuntime
-            });
-            attachLockRuntime({
+            }));
+            attachLockRuntime(ComponentRuntimeAttachmentBootstrap.buildLockRuntimeOptions({
                 component: this,
                 mainServiceModel: oMainServiceModel,
                 stateModel: oStateModel,
@@ -436,8 +243,8 @@ sap.ui.define([
                 handleForceReadOnly: fnHandleForceReadOnly,
                 applyFacadeResult: fnApplyFacadeResult,
                 telemetryRuntime: TelemetryRuntime
-            });
-            attachInitListeners({
+            }));
+            attachInitListeners(ComponentRuntimeAttachmentBootstrap.buildListenerRuntimeOptions({
                 component: this,
                 stateModel: oStateModel,
                 uiStateModel: oUiStateModel,
@@ -466,7 +273,7 @@ sap.ui.define([
                 telemetryRuntime: TelemetryRuntime,
                 layoutStateRuntime: LayoutStateRuntime,
                 actionContract: ActionContract
-            });
+            }));
 
             return runBootSequence({
                 component: this,
@@ -477,7 +284,7 @@ sap.ui.define([
                 bootstrapAppUseCase: BootstrapAppUseCase,
                 ensureDictLoadedUseCase: EnsureDictLoadedUseCase,
                 componentRuntimeSupport: ComponentRuntimeSupport,
-                loadRuntimeSettings: fnLoadRuntimeSettings,
+                loadRuntimeSettings: oRuntimeSettingsRuntime.loadRuntimeSettings,
                 loadCurrentUser: function () {
                     return mDeps.LoadCurrentUserUseCase && mDeps.LoadCurrentUserUseCase.refresh
                         ? mDeps.LoadCurrentUserUseCase.refresh({ stateModel: oStateModel })
