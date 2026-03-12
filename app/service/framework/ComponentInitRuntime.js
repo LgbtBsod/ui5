@@ -4,7 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFeedbackBootstrapRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitCompositionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitAttachmentStageRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAttachmentContextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeAttachOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitStageRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeOptionBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeHandlerBootstrap",
@@ -12,48 +13,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockEventsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentManagerOrchestrationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitListenersRuntime"
-], function (ModelStateRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentFeedbackBootstrapRuntime, ComponentInitCompositionRuntime, ComponentInitAttachmentStageRuntime, ComponentInitStageRuntime, ComponentRuntimeOptionBuilder, ComponentRuntimeHandlerBootstrap, ComponentCrossTabRuntime, ComponentLockEventsRuntime, ComponentManagerOrchestrationRuntime, ComponentInitListenersRuntime) {
+], function (ModelStateRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentFeedbackBootstrapRuntime, ComponentInitCompositionRuntime, ComponentAttachmentContextRuntime, ComponentRuntimeAttachOrchestrator, ComponentInitStageRuntime, ComponentRuntimeOptionBuilder, ComponentRuntimeHandlerBootstrap, ComponentCrossTabRuntime, ComponentLockEventsRuntime, ComponentManagerOrchestrationRuntime, ComponentInitListenersRuntime) {
     "use strict";
-
-    function buildActionValidators(ActionContract) {
-        return ComponentActionRuntime.buildActionValidators(ActionContract);
-    }
-
-    function registerDefaultHandlers(mOptions) {
-        return ComponentActionRuntime.registerDefaultHandlers(mOptions);
-    }
-
-    function createBundleText(component) {
-        return ComponentActionRuntime.createBundleText(component);
-    }
-
-    function createApplyFacadeResult(mOptions) {
-        return ComponentActionRuntime.createApplyFacadeResult(mOptions);
-    }
-
-    function resumePendingNavigationIntent(component, oStateModel, StatePaths) {
-        return ComponentActionRuntime.resumePendingNavigationIntent(component, oStateModel, StatePaths);
-    }
-
-    function runBootSequence(mOptions) {
-        return ComponentBootRuntime.runBootSequence(mOptions);
-    }
-
-    function attachCrossTabRuntime(mOptions) {
-        return ComponentCrossTabRuntime.attachCrossTabRuntime(mOptions);
-    }
-
-    function attachInitListeners(mOptions) {
-        return ComponentInitListenersRuntime.attachInitListeners(mOptions);
-    }
-
-    function attachLockRuntime(mOptions) {
-        return ComponentLockEventsRuntime.attachLockRuntime(mOptions);
-    }
-
-    function attachManagerRuntime(mOptions) {
-        return ComponentManagerOrchestrationRuntime.attachManagerRuntime(mOptions);
-    }
 
     function runInit(aInitArgs, mDeps) {
         var UIComponent = mDeps.UIComponent;
@@ -70,13 +31,15 @@ sap.ui.define([
         var EnsureDictLoadedUseCase = mDeps.EnsureDictLoadedUseCase;
         var BootstrapAppUseCase = mDeps.BootstrapAppUseCase;
         var DiagnosticsUseCase = mDeps.DiagnosticsUseCase;
-        var ComponentInitSaveGuardSupport = mDeps.ComponentInitSaveGuardSupport;
+        var ComponentSaveGuardRuntime = mDeps.ComponentSaveGuardRuntime;
         var ComponentRuntimeSupport = mDeps.ComponentRuntimeSupport;
+        var ComponentModelBootstrapRuntime = mDeps.ComponentModelBootstrapRuntime;
         var TelemetryRuntime = mDeps.TelemetryRuntime;
         var LayoutStateRuntime = mDeps.LayoutStateRuntime;
         var StatePaths = mDeps.StatePaths;
         var ActionContract = mDeps.ActionContract;
         var ThemeRuntime = mDeps.ThemeRuntime;
+        var FlowCoordinator = mDeps.FlowCoordinator;
 
             UIComponent.prototype.init.apply(this, aInitArgs || []);
             this._startupPerf = this._startupPerf || {
@@ -96,7 +59,7 @@ sap.ui.define([
             var oCacheModel = mModels.cacheModel;
             var oEnvModel = mModels.envModel;
             var oMainServiceModel = oModelStage.mainServiceModel;
-            var fnBundleText = createBundleText(this);
+            var fnBundleText = ComponentActionRuntime.createBundleText(this);
             // ZERO-LEGACY: BackendAdapter has been removed. UI5 ODataModel is the single transport.
             DiagnosticsUseCase.execute({}, {
                 mainServiceModel: oMainServiceModel,
@@ -109,8 +72,8 @@ sap.ui.define([
 
             ComponentModelBootstrapRuntime.registerModels(this, mModels);
             var oCoreStage = ComponentInitStageRuntime.createCoreStage(this, mDeps, mModels, {
-                buildActionValidators: buildActionValidators,
-                createApplyFacadeResult: createApplyFacadeResult
+                buildActionValidators: ComponentActionRuntime.buildActionValidators,
+                createApplyFacadeResult: ComponentActionRuntime.createApplyFacadeResult
             });
             var oCoreRuntime = oCoreStage.coreRuntime;
             var mTimerDefaults = oCoreStage.timerDefaults;
@@ -119,18 +82,18 @@ sap.ui.define([
                 bundleText: fnBundleText,
                 emitTelemetry: fnEmitTelemetry,
                 feedbackBootstrap: ComponentFeedbackBootstrapRuntime,
-                resumePendingNavigationIntent: resumePendingNavigationIntent
+                resumePendingNavigationIntent: ComponentActionRuntime.resumePendingNavigationIntent
             });
-            var oAttachmentContext = ComponentInitAttachmentStageRuntime.createAttachmentContext(this, {
+            var oAttachmentContext = ComponentAttachmentContextRuntime.createAttachmentContext(this, {
                 ActionContract: ActionContract,
-                ComponentInitSaveGuardSupport: ComponentInitSaveGuardSupport,
+                saveGuardRuntime: ComponentSaveGuardRuntime,
                 ComponentRuntimeHandlerBootstrap: ComponentRuntimeHandlerBootstrap,
                 ComponentRuntimeSupport: ComponentRuntimeSupport,
                 ModelStateRuntime: ModelStateRuntime,
                 StatePaths: StatePaths,
                 TelemetryRuntime: TelemetryRuntime,
-                attachCrossTabRuntime: attachCrossTabRuntime,
-                registerDefaultHandlers: registerDefaultHandlers
+                attachCrossTabRuntime: ComponentCrossTabRuntime.attachCrossTabRuntime,
+                registerDefaultHandlers: ComponentActionRuntime.registerDefaultHandlers
             }, {
                 cacheModel: oCacheModel,
                 envModel: oEnvModel,
@@ -149,7 +112,7 @@ sap.ui.define([
                 resolveDetailCurrent: oCoreRuntime.resolveDetailCurrent,
                 timerDefaults: mTimerDefaults
             }, oInitContext);
-            ComponentInitAttachmentStageRuntime.attachRuntimeStages(this, {
+            ComponentRuntimeAttachOrchestrator.attachRuntimeStages(this, {
                 ActionContract: ActionContract,
                 ComponentRuntimeOptionBuilder: ComponentRuntimeOptionBuilder,
                 ComponentRuntimeSupport: ComponentRuntimeSupport,
@@ -161,9 +124,9 @@ sap.ui.define([
                 StatePaths: StatePaths,
                 TelemetryRuntime: TelemetryRuntime,
                 TimeConfigService: TimeConfigService,
-                attachInitListeners: attachInitListeners,
-                attachLockRuntime: attachLockRuntime,
-                attachManagerRuntime: attachManagerRuntime,
+                attachInitListeners: ComponentInitListenersRuntime.attachInitListeners,
+                attachLockRuntime: ComponentLockEventsRuntime.attachLockRuntime,
+                attachManagerRuntime: ComponentManagerOrchestrationRuntime.attachManagerRuntime,
                 managers: {
                     HeartbeatManager: HeartbeatManager,
                     GCDManager: GCDManager,
@@ -190,7 +153,7 @@ sap.ui.define([
                 timerDefaults: mTimerDefaults
             }, oAttachmentContext);
 
-            return runBootSequence({
+            return ComponentBootRuntime.runBootSequence({
                 component: this,
                 stateModel: oStateModel,
                 envModel: oEnvModel,

@@ -1,19 +1,21 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailMetaSyncRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerBindingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerBootstrapRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentNavigationGuardRuntime"
-], function (ComponentListenerStateRuntime, ComponentNavigationGuardRuntime) {
+], function (ComponentDetailMetaSyncRuntime, ComponentListenerBindingRuntime, ComponentListenerBootstrapRuntime, ComponentNavigationGuardRuntime) {
     "use strict";
 
     function syncDetailMeta(oStateModel, StatePaths) {
-        return ComponentListenerStateRuntime.syncDetailMeta(oStateModel, StatePaths);
+        return ComponentDetailMetaSyncRuntime.syncDetailMeta(oStateModel, StatePaths);
     }
 
     function attachInitListeners(mOptions) {
         var oStateModel = mOptions.stateModel;
         var StatePaths = mOptions.statePaths || {};
 
-        ComponentListenerStateRuntime.attachLifecycleBindings(mOptions);
-        ComponentListenerStateRuntime.initializeListenerState(mOptions);
+        ComponentListenerBindingRuntime.attachLifecycleBindings(mOptions);
+        ComponentListenerBootstrapRuntime.initializeListenerState(mOptions);
         syncDetailMeta(oStateModel, StatePaths);
         ComponentNavigationGuardRuntime.attachBeforeRouteMatched({
             component: mOptions.component,
@@ -26,8 +28,8 @@ sap.ui.define([
             revertPendingNavigationIntent: mOptions.revertPendingNavigationIntent,
             resumePendingNavigationIntent: mOptions.resumePendingNavigationIntent,
             restorePendingNavigationIntent: mOptions.restorePendingNavigationIntent,
-            resetDetailAccessGuard: ComponentListenerStateRuntime.resetDetailAccessGuard,
-            resetDetailNavigationState: ComponentListenerStateRuntime.resetDetailNavigationState
+            resetDetailAccessGuard: ComponentDetailMetaSyncRuntime.resetDetailAccessGuard,
+            resetDetailNavigationState: ComponentDetailMetaSyncRuntime.resetDetailNavigationState
         });
     }
 

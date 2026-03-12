@@ -1,16 +1,16 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (ComponentRuntimeSupport, ControllerViewStateRuntime, ModelStateRuntime, StatePaths) {
+], function (ComponentFormattingRuntime, ControllerViewStateRuntime, ModelStateRuntime, StatePaths) {
     "use strict";
 
     function formatSearchDateTime(vDate) {
         if (vDate === null || vDate === undefined || vDate === "") {
             return "-";
         }
-        return ComponentRuntimeSupport.formatHumanDateTime(vDate);
+        return ComponentFormattingRuntime.formatHumanDateTime(vDate);
     }
 
     function setSettledViewState(oController, bCanExport, sWorkflowStage) {

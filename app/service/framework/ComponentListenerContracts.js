@@ -29,6 +29,10 @@ sap.ui.define([
             ONE_COLUMN: "OneColumn",
             SAVE: "SAVE",
             UNSAVED_CHANGES_MESSAGE: "You have unsaved changes"
+        }),
+        TELEMETRY_EVENT: Object.freeze({
+            LOCK_STATE_CHANGED: "lock.state.changed",
+            WORKFLOW_MODE_CHANGED: "workflow.mode.changed"
         })
     });
 });

@@ -1,8 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerState",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (FeedbackBannerState, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts"
+], function (FeedbackBannerState, ModelStateRuntime, ComponentSaveGuardContracts) {
     "use strict";
+
+    var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
+    var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
 
     function bannerPath(sId) {
         return "/ui/feedback/banner/" + String(sId || "global");
@@ -45,7 +49,7 @@ sap.ui.define([
     }
 
     function createNetworkRetryBannerInput(sRetryAction, sRetryTextKey, sDetails) {
-        return createRetryBannerInput("warning", "networkUnavailable", {
+        return createRetryBannerInput(BANNER_LEVEL.WARNING, BANNER_TEXT_KEY.NETWORK_UNAVAILABLE, {
             details: String(sDetails || ""),
             retryAction: String(sRetryAction || ""),
             retryTextKey: String(sRetryTextKey || "")

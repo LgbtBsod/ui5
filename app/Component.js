@@ -19,10 +19,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSessionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitSaveGuardSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentModelBootstrapRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
@@ -58,10 +61,13 @@ sap.ui.define([
     CtxFactory,
     EffectApplier,
     FeedbackPolicy,
-    ComponentRuntimeSupport,
+    ComponentSessionRuntime,
+    ComponentFormattingRuntime,
+    ComponentDetailStateRuntime,
     ComponentLockReleaseSupport,
-    ComponentInitSaveGuardSupport,
+    ComponentSaveGuardRuntime,
     ComponentInitRuntime,
+    ComponentModelBootstrapRuntime,
     TelemetryRuntime,
     LayoutStateRuntime,
     StatePaths,
@@ -78,6 +84,19 @@ sap.ui.define([
     WorkflowContracts
 ) {
     "use strict";
+
+    var ComponentRuntimeSupport = {
+        resolveBootDetailId: ComponentDetailStateRuntime.resolveBootDetailId,
+        isCreateBootHash: ComponentDetailStateRuntime.isCreateBootHash,
+        ensureSessionId: ComponentSessionRuntime.ensureSessionId,
+        ensureTabSessionId: ComponentSessionRuntime.ensureTabSessionId,
+        formatHumanDateTime: ComponentFormattingRuntime.formatHumanDateTime,
+        eventPayload: ComponentFormattingRuntime.eventPayload,
+        applyLockProbeState: ComponentDetailStateRuntime.applyLockProbeState,
+        syncUiStateMode: ComponentDetailStateRuntime.syncUiStateMode,
+        syncDetailCurrentFromSelected: ComponentDetailStateRuntime.syncDetailCurrentFromSelected,
+        resolveDetailCurrent: ComponentDetailStateRuntime.resolveDetailCurrent
+    };
 
     // Polyfill: Promise.prototype.finally (not available in IE11 / older SAP WebAS Chromium)
     if (typeof Promise === "function" && typeof Promise.prototype.finally !== "function") {
@@ -118,7 +137,8 @@ sap.ui.define([
                 FeedbackPolicy: FeedbackPolicy,
                 ComponentRuntimeSupport: ComponentRuntimeSupport,
                 ComponentLockReleaseSupport: ComponentLockReleaseSupport,
-                ComponentInitSaveGuardSupport: ComponentInitSaveGuardSupport,
+                ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
+                ComponentModelBootstrapRuntime: ComponentModelBootstrapRuntime,
                 TelemetryRuntime: TelemetryRuntime,
                 LayoutStateRuntime: LayoutStateRuntime,
                 StatePaths: StatePaths,

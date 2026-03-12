@@ -73,9 +73,24 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     boot_text = _read(APP_ROOT / "service" / "framework" / "ComponentBootRuntime.js")
     init_text = _read(APP_ROOT / "service" / "framework" / "ComponentInitRuntime.js")
     feedback_bootstrap_text = _read(APP_ROOT / "service" / "framework" / "ComponentFeedbackBootstrapRuntime.js")
+    boot_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentBootContracts.js")
+    feedback_contracts = _read(APP_ROOT / "service" / "framework" / "EffectFeedbackContracts.js")
+    listener_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentListenerContracts.js")
+    save_guard_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentSaveGuardContracts.js")
     cache_text = _read(APP_ROOT / "infra" / "adapters" / "BrowserCacheAdapter.js")
-    runtime_support = _read(APP_ROOT / "service" / "framework" / "ComponentRuntimeSupport.js")
-    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentInitListenersRuntime.js")
+    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentListenerBindingRuntime.js")
+
+    removed_framework_aliases = [
+        APP_ROOT / "service" / "framework" / "ComponentLockRuntime.js",
+        APP_ROOT / "service" / "framework" / "ComponentCoordinatorRuntime.js",
+        APP_ROOT / "service" / "framework" / "ComponentLifecycleRuntime.js",
+        APP_ROOT / "service" / "framework" / "ComponentRuntimeAttachmentBootstrap.js",
+        APP_ROOT / "service" / "framework" / "ComponentListenerRuntime.js",
+        APP_ROOT / "service" / "framework" / "ComponentListenerStateRuntime.js",
+        APP_ROOT / "service" / "framework" / "ComponentInitAttachmentStageRuntime.js",
+        APP_ROOT / "service" / "framework" / "FrontendConfigConstants.js",
+        APP_ROOT / "service" / "framework" / "ComponentRuntimeSupport.js",
+    ]
 
     assert 'var bBootCompleted = false;' in boot_text
     assert 'resolveSettledStageError(aStageResults[0], "load_current_user_failed")' in boot_text
@@ -86,16 +101,22 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     assert boot_text.index('if (bBootCompleted) {') < boot_text.index('oComponent._startCoreManagers();')
     assert 'ModelStateRuntime.writeOnModel(oStateModel, "/readiness/app", {' in boot_text
 
-    assert 'return runBootSequence({' in init_text
+    assert 'return ComponentBootRuntime.runBootSequence({' in init_text
     assert 'cacheAdapter: this._ctx && this._ctx.cache,' in init_text
     assert 'throw oError || new Error("runtime_settings_load_failed");' in feedback_bootstrap_text
     assert 'return mDeps.LoadCurrentUserUseCase && mDeps.LoadCurrentUserUseCase.refresh' in init_text
+    assert 'READINESS_STATUS' in boot_contracts
+    assert 'STAGE_ERRORS' in boot_contracts
+    assert 'TOAST_SHOW_MS' in feedback_contracts
+    assert 'WORKFLOW_MODE_CHANGED' in listener_contracts
+    assert 'GUARDED_FAILED' in save_guard_contracts
 
     assert 'clearCurrentTab: function () {' in cache_text
     assert 'clearByTabSessionId: clearByTabSessionId,' in cache_text
     assert 'cleanupStaleSessions: cleanupStaleSessions,' in cache_text
-    assert 'StatePaths.UI_BUSY_GLOBAL' not in runtime_support
     assert 'StatePaths.UI_BUSY_GLOBAL' not in listener_runtime
+    for path in removed_framework_aliases:
+        assert not path.exists(), f"alias-only framework file still present: {path}"
 
 
 def test_open_detail_source_checks_permission_before_cache_and_backend_load():
@@ -190,11 +211,11 @@ def test_sticky_runtime_is_route_scoped_without_global_body_observer():
 def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
     state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
     workflow_schema = _read(APP_ROOT / "model" / "schema" / "workflowSchema.js")
-    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentInitListenersRuntime.js")
+    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentDetailMetaSyncRuntime.js")
 
     assert 'DETAIL_META: "/detailMeta",' in state_paths
     assert 'detailMeta:' in workflow_schema
-    assert 'syncDetailMeta(oStateModel, StatePaths);' in listener_runtime
+    assert 'ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {' in listener_runtime
 
 
 def test_standardized_telemetry_event_names_cover_permission_cache_lock_and_analytics_flows():

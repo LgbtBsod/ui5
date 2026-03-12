@@ -1,12 +1,12 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/SearchRuntimeContracts"
-], function (JSONModel, ComponentRuntimeSupport, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts) {
+], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -180,7 +180,7 @@ sap.ui.define([
         resolveSearchUiSessionKey: resolveSearchUiSessionKey,
         isSmartControlsReady: isSmartControlsReady,
         syncSearchTableRequestWindow: syncSearchTableRequestWindow,
-        formatHumanDateTime: ComponentRuntimeSupport.formatHumanDateTime,
+        formatHumanDateTime: ComponentFormattingRuntime.formatHumanDateTime,
         formatWorkflowStageText: formatWorkflowStageText,
         formatWorkflowStageState: formatWorkflowStageState
     };

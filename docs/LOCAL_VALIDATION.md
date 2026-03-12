@@ -30,6 +30,18 @@ Architecture gate:
 node scripts/architecture-gate.js --json
 ```
 
+Framework alias gate:
+
+```powershell
+node scripts/framework-alias-gate.js --json
+```
+
+Framework token drift gate:
+
+```powershell
+node scripts/framework-token-drift-gate.js --json
+```
+
 Gateway-only readiness gate:
 
 ```powershell

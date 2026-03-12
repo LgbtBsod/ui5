@@ -1,10 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, CloneUtil, WorkflowContracts) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, WorkflowContracts) {
     "use strict";
+
+    var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
+    var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
 
     function createAutoSaveManager(mOptions) {
         var oComponent = mOptions.component;
@@ -84,10 +88,10 @@ sap.ui.define([
             var mErr = { "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.FAILED };
             mErr[StatePaths.SAVE_IN_FLIGHT] = false;
             ModelStateRuntime.setManyOnModel(oStateModel, mErr);
-            fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput("error", "objectSaveFailed", {
+            fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.ERROR, BANNER_TEXT_KEY.OBJECT_SAVE_FAILED, {
                 textArgs: [fnBundleText("autosaveError")],
                 retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                retryTextKey: "retryNowButton"
+                retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
             }));
             DebugLogger.info("Component", "autosave error", oEvent && oEvent.getParameters ? oEvent.getParameters() : {});
             fnEmitTelemetry("autosave.failed", ComponentRuntimeSupport.eventPayload(oEvent));

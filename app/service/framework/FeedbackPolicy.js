@@ -1,8 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NormalizedError"
-], function (Effects, NormalizedError) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NormalizedError",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts"
+], function (Effects, NormalizedError, ComponentSaveGuardContracts, EffectFeedbackContracts) {
     "use strict";
+
+    var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
+    var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
 
     function buildNormalizedError(mInput) {
         return NormalizedError.create(mInput || {});
@@ -36,13 +41,13 @@ sap.ui.define([
             {
                 match: function () { return /network|timeout/i.test(sMessage) || iStatusCode === 0 || iStatusCode === 408; },
                 map: function () {
-                    return { kind: NormalizedError.KINDS.NETWORK, code: sCode, messageKey: "networkUnavailable", retriable: true, severity: "warning", params: { correlationId: sCorrelationId } };
+                    return { kind: NormalizedError.KINDS.NETWORK, code: sCode, messageKey: BANNER_TEXT_KEY.NETWORK_UNAVAILABLE, retriable: true, severity: "warning", params: { correlationId: sCorrelationId } };
                 }
             },
             {
                 match: function () { return iStatusCode === 401 || iStatusCode === 403 || /SESSION|AUTH/.test(String(sCode || "").toUpperCase()); },
                 map: function () {
-                    return { kind: NormalizedError.KINDS.BACKEND, code: sCode || "AUTH_REQUIRED", messageKey: "sessionExpiredBanner", retriable: false, severity: "error", params: { correlationId: sCorrelationId } };
+                    return { kind: NormalizedError.KINDS.BACKEND, code: sCode || "AUTH_REQUIRED", messageKey: BANNER_TEXT_KEY.SESSION_EXPIRED, retriable: false, severity: "error", params: { correlationId: sCorrelationId } };
                 }
             },
             {
@@ -54,7 +59,7 @@ sap.ui.define([
             {
                 match: function () { return iStatusCode >= 400; },
                 map: function () {
-                    return { kind: NormalizedError.KINDS.BACKEND, code: sCode, messageKey: "loadErrorMessage", retriable: true, severity: "error", params: { correlationId: sCorrelationId } };
+                    return { kind: NormalizedError.KINDS.BACKEND, code: sCode, messageKey: FALLBACK_TEXT_KEYS.LOAD_ERROR, retriable: true, severity: "error", params: { correlationId: sCorrelationId } };
                 }
             }
         ];

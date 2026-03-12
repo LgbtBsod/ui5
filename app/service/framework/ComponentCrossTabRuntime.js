@@ -1,9 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, WorkflowContracts) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentListenerContracts, WorkflowContracts) {
     "use strict";
+
+    var VALUES = ComponentListenerContracts.VALUES;
 
     function buildTabId() {
         var sTabId = "";
@@ -55,7 +58,7 @@ sap.ui.define([
             if (!sSignalType || oPayload.tabId === sThisTabId || !sSignalRootId || !sCurrentRootId || sSignalRootId !== sCurrentRootId) {
                 return;
             }
-            if (sSignalType !== "LOCK_OWNED" || sMode !== WorkflowContracts.EDIT_MODES.EDIT || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
+            if (sSignalType !== VALUES.LOCK_OWNED || sMode !== WorkflowContracts.EDIT_MODES.EDIT || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                 return;
             }
             ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.TAB_CONFLICT_STATE, {

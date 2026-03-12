@@ -3,13 +3,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts"
-], function (ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, ComponentBootContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts"
+], function (ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, ComponentBootContracts, EffectFeedbackContracts) {
     "use strict";
 
     var PATHS = ComponentBootContracts.PATHS;
     var READINESS_STATUS = ComponentBootContracts.READINESS_STATUS;
     var CONFIG_SOURCE = ComponentBootContracts.FRONTEND_CONFIG_SOURCE;
+    var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
 
     function initializeBootState(oStateModel) {
         ModelStateRuntime.setManyOnModel(oStateModel, {
@@ -80,7 +82,7 @@ sap.ui.define([
     function finalizeBootError(oStateModel, sErrorMessage, fnBundleText, sTabSessionId) {
         ModelStateRuntime.setManyOnModel(oStateModel, {
             "/loadError": true,
-            "/loadErrorMessage": fnBundleText("loadErrorMessage") + ": " + sErrorMessage
+            "/loadErrorMessage": fnBundleText(FALLBACK_TEXT_KEYS.LOAD_ERROR) + ": " + sErrorMessage
         });
         ModelStateRuntime.writeOnModel(oStateModel, PATHS.READINESS_APP, {
             status: READINESS_STATUS.ERROR,

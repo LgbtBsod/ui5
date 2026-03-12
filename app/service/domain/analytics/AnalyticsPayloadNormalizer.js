@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentRuntimeSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts"
-], function (ComponentRuntimeSupport, AnalyticsContracts) {
+], function (ComponentFormattingRuntime, AnalyticsContracts) {
     "use strict";
 
     function toNumber(vValue) {
@@ -13,7 +13,7 @@ sap.ui.define([
         if (vDate === null || vDate === undefined || vDate === "" || vDate === "-") {
             return "-";
         }
-        return ComponentRuntimeSupport.formatHumanDateTime(vDate);
+        return ComponentFormattingRuntime.formatHumanDateTime(vDate);
     }
 
     function normalizeChartRows(aRows) {

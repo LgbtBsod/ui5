@@ -1,40 +1,20 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts"
-], function (ActionContract, SecurityTokenRefresh, FeedbackBannerRuntime, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardPolicy"
+], function (SecurityTokenRefresh, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy) {
     "use strict";
 
     var AUTOSAVE_STATE = ComponentSaveGuardContracts.AUTOSAVE_STATE;
     var BANNER_DETAIL = ComponentSaveGuardContracts.BANNER_DETAIL;
-    var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
-    var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
     var DELAY_MS = ComponentSaveGuardContracts.DELAY_MS;
     var ERROR_MESSAGE = ComponentSaveGuardContracts.ERROR_MESSAGE;
     var PATHS = ComponentSaveGuardContracts.PATHS;
     var TELEMETRY_EVENT = ComponentSaveGuardContracts.TELEMETRY_EVENT;
-
-    function buildSaveBannerPayload(oStateModel, mOptions) {
-        var bSessionExpired = !!mOptions.sessionExpired;
-        var bOffline = ModelStateRuntime.readOnModel(oStateModel, PATHS.NETWORK_ONLINE, true) === false;
-        var sDetail = String(mOptions.detail || BANNER_DETAIL.SAVE_FAILED);
-        return FeedbackBannerRuntime.createRetryBannerInput(
-            bSessionExpired ? BANNER_LEVEL.ERROR : (bOffline ? BANNER_LEVEL.WARNING : BANNER_LEVEL.ERROR),
-            bSessionExpired ? BANNER_TEXT_KEY.SESSION_EXPIRED : (bOffline ? BANNER_TEXT_KEY.NETWORK_UNAVAILABLE : BANNER_TEXT_KEY.OBJECT_SAVE_FAILED),
-            {
-                textArgs: bSessionExpired ? [] : [sDetail],
-                details: sDetail,
-                correlationId: String(mOptions.correlationId || ""),
-                retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
-            }
-        );
-    }
 
     function createRunGuardedSave(mOptions) {
         var oComponent = mOptions.component;
@@ -69,10 +49,7 @@ sap.ui.define([
             }()));
             oComponent._iSaveWorkingTimer = SchedulingRuntime.restartTimer(oComponent._iSaveWorkingTimer, function () {
                 if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
-                    fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.INFO, BANNER_TEXT_KEY.WORKING_LONG, {
-                        retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                        retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
-                    }));
+                    fnSetGlobalBanner(ComponentSaveGuardPolicy.buildWorkingBannerPayload());
                 }
             }, DELAY_MS.SAVE_WORKING_BANNER);
             oComponent._pGuardedSavePromise = oDetailFacade.save({ rootId: sRootId }, fnBuildLatestCtx()).then(function (oResult) {
@@ -101,7 +78,7 @@ sap.ui.define([
                         }
                     }
                 }
-                fnSetGlobalBanner(buildSaveBannerPayload(oStateModel, {
+                fnSetGlobalBanner(ComponentSaveGuardPolicy.buildSaveBannerPayload(oStateModel, {
                     sessionExpired: bSessionExpired,
                     detail: sDetail,
                     correlationId: sCorrelationId
