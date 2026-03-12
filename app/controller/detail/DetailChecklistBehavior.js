@@ -8,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailMatchedRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailSelectedFieldRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
@@ -16,13 +16,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
-], function (DialogOrchestrator, DetailViewBehavior, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailMatchedRuntime, DetailSelectedFieldRuntime, DomainStatePaths, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+], function (DialogOrchestrator, DetailViewBehavior, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailMatchedRuntime, DetailSelectedFieldRuntime, ModelPathContracts, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -106,7 +106,7 @@ sap.ui.define([
             }
 
             if (mContext.sPostOpenHydratedRootId && mContext.sPostOpenHydratedRootId === mContext.sId && mContext.sSelectedRootId === mContext.sId) {
-                ModelStateRuntime.write(this, STATE_MODEL, DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, "");
+                ModelStateRuntime.write(this, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "");
                 ControllerViewStateRuntime.set(this, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
                 DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(this, mContext.sId, {
                     enterEdit: function (mInput) {
@@ -117,7 +117,7 @@ sap.ui.define([
                 return;
             }
 
-            ModelStateRuntime.write(this, STATE_MODEL, DomainStatePaths.ACTIVE_OBJECT_ID, mContext.sId);
+            ModelStateRuntime.write(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, mContext.sId);
             DetailCommandPolicy.open(this, { id: mContext.sId, rootId: mContext.sId }).then(function (oResult) {
                 var oAccessState;
                 if (oResult && oResult.ok === false) {
@@ -151,8 +151,8 @@ sap.ui.define([
         },
 
         _currentRootId: function () {
-            return ModelStateRuntime.read(this, STATE_MODEL, DomainStatePaths.ACTIVE_OBJECT_ID, "")
-                || ModelStateRuntime.read(this, STATE_MODEL, DomainStatePaths.SELECTED_ID, "")
+            return ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+                || ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.SELECTED_ID, "")
                 || "";
         },
 

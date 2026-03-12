@@ -3,11 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, StatePaths, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts"
+], function (ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, StatePaths, ModelContracts, ProgressiveReadinessContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
     var SEARCH_WORKING_HINT_MS = 2000;
 
     function clearSearchWorkingHintTimer(oController) {
@@ -120,7 +122,7 @@ sap.ui.define([
         clearPendingSearchLoad(oController);
         hideSearchWorkingHint(oController);
         if (oError) {
-            sErrorMessage = String((oError && (oError.message || oError.statusText)) || "Search request failed").trim();
+            sErrorMessage = String((oError && (oError.message || oError.statusText)) || SEARCH_READINESS.LOAD_ERROR_MESSAGE).trim();
             if (typeof fnApplyLoadError === "function") {
                 fnApplyLoadError(sErrorMessage);
             }

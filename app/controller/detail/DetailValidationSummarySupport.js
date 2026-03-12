@@ -6,7 +6,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
 ], function (DetailPersonInputSupport, StatePaths, FocusRuntime, ControllerViewStateRuntime, LayoutStateRuntime, ModelStateRuntime, SchedulingRuntime, ValidationPathMap, ModelContracts) {
     "use strict";

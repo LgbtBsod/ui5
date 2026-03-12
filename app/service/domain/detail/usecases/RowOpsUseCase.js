@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ClientKeyGenerator"
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator"
 ], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator) {
     "use strict";
 

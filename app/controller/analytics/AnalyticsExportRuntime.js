@@ -4,8 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ExcelExport",
-    "PRODUCTION_CONTROL_CHECKLIST/util/analytics/AnalyticsExportRows"
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/ExcelExport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows"
 ], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ExcelExport, AnalyticsExportRows) {
     "use strict";
 

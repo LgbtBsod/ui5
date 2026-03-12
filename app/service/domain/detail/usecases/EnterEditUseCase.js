@@ -4,12 +4,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry) {
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry) {
     "use strict";
 
     function EnterEditUseCase() {
@@ -34,7 +34,7 @@ sap.ui.define([
     EnterEditUseCase.prototype.execute = function (mInput, mCtx) {
         var bEdit = !!(mInput && mInput.state);
         var oLockPort = mCtx && mCtx.lock;
-        var sRootId = UseCaseInputUtils.rootId(mInput);
+        var sRootId = UseCaseValue.rootId(mInput);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var bCreateDraft = CreateSentinel.isCreateId(sRootId);
         var bShouldRelease = !!(sRootId && !CreateSentinel.isCreateId(sRootId) && oLockPort && typeof oLockPort.release === "function" && sSessionGuid);

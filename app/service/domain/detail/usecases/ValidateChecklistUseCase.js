@@ -4,8 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ChecklistValidationService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
 ], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, ValidationPathMap, ChecklistValidationService, ViewPathContracts) {
     "use strict";

@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
 ], function (EffectTextResolver, CreateSentinel) {
     "use strict";
 

@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (ModelContracts, NavigationContracts) {
     "use strict";
 
     return Object.freeze({
@@ -26,7 +27,7 @@ sap.ui.define([
             LOCK_OWNED: "LOCK_OWNED",
             LOCK_RELEASED: "LOCK_RELEASED",
             NO_CHANGES: "NO_CHANGES",
-            ONE_COLUMN: "OneColumn",
+            ONE_COLUMN: NavigationContracts.LAYOUTS.ONE_COLUMN,
             SAVE: "SAVE",
             UNSAVED_CHANGES_MESSAGE: "You have unsaved changes"
         }),

@@ -4,14 +4,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentValueCodec",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, DomainStatePaths, WorkflowContracts) {
+], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, ModelPathContracts, WorkflowContracts) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -99,7 +99,7 @@ sap.ui.define([
     }
 
     SaveDetailUseCase.prototype.execute = function (mInput, mCtx) {
-        var sRootId = UseCaseInputUtils.rootId(mInput);
+        var sRootId = UseCaseValue.rootId(mInput);
         var oUiState = mCtx && mCtx.uiState;
         var oCurrent = readCurrentChecklist(mCtx);
         var oSnapshot = DetailSaveSupport.readBaseSnapshot(mCtx);
@@ -191,12 +191,12 @@ sap.ui.define([
                     ];
                     cleanupStagedAttachmentUrls(aCurrentAttachments);
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
-                        aEffects.push(Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, sServerRootId));
-                        aEffects.push(Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, sServerRootId));
+                        aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
+                        aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));
                         aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
                         if (bCreate) {
                             var bLockAcquired = !!(oLockResult && oLockResult.ok);
-                            aEffects.push(Effects.modelPatch("state", DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
+                            aEffects.push(Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
                             aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? WorkflowContracts.EDIT_MODES.EDIT : WorkflowContracts.EDIT_MODES.READ));
                             aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? WorkflowContracts.LOCK_STATES.EDIT_LOCKED : WorkflowContracts.LOCK_STATES.READ_ONLY));
                             aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));

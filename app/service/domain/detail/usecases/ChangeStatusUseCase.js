@@ -2,15 +2,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ValidationPathMap",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ChecklistValidationService",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil"
-], function (UseCase, Result, Effects, UseCaseInputUtils, StatePaths, DetailStateAccess, DetailSaveSupport, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil"
+], function (UseCase, Result, Effects, UseCaseValue, StatePaths, DetailStateAccess, DetailSaveSupport, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
     "use strict";
 
     function ChangeStatusUseCase() {
@@ -25,8 +25,8 @@ sap.ui.define([
     }
 
     ChangeStatusUseCase.prototype.execute = function (mInput, mCtx) {
-        var sRootId = UseCaseInputUtils.rootId(mInput);
-        var sStatus = UseCaseInputUtils.text(mInput && mInput.status).toUpperCase();
+        var sRootId = UseCaseValue.rootId(mInput);
+        var sStatus = UseCaseValue.text(mInput && mInput.status).toUpperCase();
         var oRepo = mCtx && mCtx.repo;
         var oChecklist = DetailStateAccess.readCurrentChecklist(mCtx);
         var oSnapshot = DetailStateAccess.readDetailSnapshot(mCtx);

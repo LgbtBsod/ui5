@@ -1,8 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (DomainStatePaths, ModelStateRuntime, ModelContracts) {
+], function (ModelPathContracts, ModelStateRuntime, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -49,7 +49,7 @@ sap.ui.define([
             return false;
         }
         ModelStateRuntime.write(oController, SELECTED_MODEL, sPath, vValue);
-        ModelStateRuntime.write(oController, STATE_MODEL, DomainStatePaths.IS_DIRTY, true);
+        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.IS_DIRTY, true);
         return true;
     }
 

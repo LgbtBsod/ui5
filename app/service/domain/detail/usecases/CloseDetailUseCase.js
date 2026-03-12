@@ -4,12 +4,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, DomainStatePaths, NavigationContracts, WorkflowContracts) {
+], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function CloseDetailUseCase() {
@@ -64,10 +64,10 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                Effects.modelPatch("state", DomainStatePaths.LOCK_OPERATION_PENDING, false),
-                Effects.modelPatch("state", DomainStatePaths.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
-                Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, null),
-                Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, null),
+                Effects.modelPatch("state", ModelPathContracts.LOCK_OPERATION_PENDING, false),
+                Effects.modelPatch("state", ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
+                Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, null),
+                Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, null),
                 Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
             ];
             if (sRootId && !CreateSentinel.isCreateId(sRootId) && sSessionGuid && (!oReleaseResult || oReleaseResult.ok === false || oReleaseResult.released === false)) {

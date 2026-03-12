@@ -2,12 +2,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts"
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
+    var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
 
     function resolveStartupPerf(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
@@ -32,31 +34,31 @@ sap.ui.define([
         if (!oPerf || !oPerf.t0) {
             return;
         }
-        if (sEvent === "firstRouteReady" && oPerf.firstRouteReadyLogged) {
+        if (sEvent === SEARCH_READINESS.STARTUP_EVENTS.FIRST_ROUTE_READY && oPerf[SEARCH_READINESS.STARTUP_LOG_KEYS.FIRST_ROUTE_READY]) {
             return;
         }
-        if (sEvent === "analyticsStarted" && oPerf.analyticsStartedLogged) {
+        if (sEvent === SEARCH_READINESS.STARTUP_EVENTS.ANALYTICS_STARTED && oPerf[SEARCH_READINESS.STARTUP_LOG_KEYS.ANALYTICS_STARTED]) {
             return;
         }
         iDelta = Math.max(0, Math.round(nowMs() - oPerf.t0));
-        if (sEvent === "firstRouteReady") {
-            oPerf.firstRouteReadyLogged = true;
+        if (sEvent === SEARCH_READINESS.STARTUP_EVENTS.FIRST_ROUTE_READY) {
+            oPerf[SEARCH_READINESS.STARTUP_LOG_KEYS.FIRST_ROUTE_READY] = true;
             console.info("[Startup] first route ready:", iDelta + "ms");
             return;
         }
-        if (sEvent === "analyticsStarted") {
-            oPerf.analyticsStartedLogged = true;
+        if (sEvent === SEARCH_READINESS.STARTUP_EVENTS.ANALYTICS_STARTED) {
+            oPerf[SEARCH_READINESS.STARTUP_LOG_KEYS.ANALYTICS_STARTED] = true;
             console.info("[Startup] analytics started:", iDelta + "ms");
         }
     }
 
     function shouldRefreshSearchOnReturn(oController) {
-        return !!ModelStateRuntime.read(oController, STATE_MODEL, "/searchForceRefreshOnReturn", false)
+        return !!ModelStateRuntime.read(oController, STATE_MODEL, SEARCH_READINESS.FLAGS.FORCE_REFRESH_ON_RETURN, false)
             && !!ControllerViewStateRuntime.get(oController, "/hasSearched", false);
     }
 
     function clearSearchRefreshFlag(oController) {
-        ModelStateRuntime.write(oController, STATE_MODEL, "/searchForceRefreshOnReturn", false);
+        ModelStateRuntime.write(oController, STATE_MODEL, SEARCH_READINESS.FLAGS.FORCE_REFRESH_ON_RETURN, false);
     }
 
     function refreshSearchTableIfNeeded(oController, sSource, mHooks) {
@@ -72,7 +74,7 @@ sap.ui.define([
     function onSearchMatched(oController, mHooks) {
         mHooks.syncSmartControlAvailability();
         mHooks.bindSearchViewportRuntime();
-        logStartupMetric(oController, "firstRouteReady");
+        logStartupMetric(oController, SEARCH_READINESS.STARTUP_EVENTS.FIRST_ROUTE_READY);
         ControllerViewStateRuntime.set(oController, "/bootstrapBusy", true);
         ControllerViewStateRuntime.set(oController, "/analyticsBusy", false);
         ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);
@@ -85,7 +87,7 @@ sap.ui.define([
                 return null;
             })
             .finally(mHooks.scheduleInitialAnalytics(function () {
-                logStartupMetric(oController, "analyticsStarted");
+                logStartupMetric(oController, SEARCH_READINESS.STARTUP_EVENTS.ANALYTICS_STARTED);
             }));
         mHooks.restoreSearchScrollPosition();
         refreshSearchTableIfNeeded(oController, "routeMatchedReturn", {

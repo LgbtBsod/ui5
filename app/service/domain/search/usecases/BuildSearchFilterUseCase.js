@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchFilterBuilder"
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchFilterBuilder"
 ], function (UseCase, Result, Effects, StatePaths, SearchFilterBuilder) {
     "use strict";
 

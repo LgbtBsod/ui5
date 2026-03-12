@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/SearchUiContracts"
-], function (FocusRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, SearchUiContracts) {
+], function (FocusRuntime, ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, ChecklistIdentity, SearchUiContracts) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = SearchUiContracts.COLUMN_RULES;
@@ -206,41 +207,16 @@ sap.ui.define([
         syncSearchTableRuntimeState(oController, oInnerTable);
     }
 
-    function normalizeChecklistIds(aIds) {
-        var mSeen = {};
-        return (aIds || []).reduce(function (aAcc, sId) {
-            var sNorm = String(sId || "").trim();
-            if (!sNorm || mSeen[sNorm]) {
-                return aAcc;
-            }
-            mSeen[sNorm] = true;
-            aAcc.push(sNorm);
-            return aAcc;
-        }, []);
-    }
-
-    function extractChecklistIdFromObject(oObject) {
-        return String(
-            (oObject && (oObject.Key || oObject.key || oObject.Id || oObject.id || oObject.RequestId || oObject.checklist_id)) || ""
-        ).trim();
-    }
-
-    function extractChecklistDisplayIdFromObject(oObject) {
-        return String(
-            (oObject && (oObject.Id || oObject.id || oObject.ChecklistId || oObject.checklist_id || oObject.Key || oObject.key)) || ""
-        ).trim();
-    }
-
     function extractChecklistIdFromListItem(oListItem) {
         var oCtx = oListItem && oListItem.getBindingContext && oListItem.getBindingContext();
         var oObject = oCtx && oCtx.getObject && oCtx.getObject();
-        return extractChecklistIdFromObject(oObject);
+        return ChecklistIdentity.extractChecklistId(oObject);
     }
 
     function extractChecklistDisplayIdFromListItem(oListItem) {
         var oCtx = oListItem && oListItem.getBindingContext && oListItem.getBindingContext();
         var oObject = oCtx && oCtx.getObject && oCtx.getObject();
-        return extractChecklistDisplayIdFromObject(oObject);
+        return ChecklistIdentity.extractChecklistDisplayId(oObject);
     }
 
     function extractSelectedRowIds(oEvent, oTable) {
@@ -268,15 +244,15 @@ sap.ui.define([
         }
         aIds = (aListItems || []).map(extractChecklistIdFromListItem);
         aIds = aIds.concat((aSelectedContexts || []).map(function (oCtx) {
-            return extractChecklistIdFromObject(oCtx && oCtx.getObject && oCtx.getObject());
+            return ChecklistIdentity.extractChecklistId(oCtx && oCtx.getObject && oCtx.getObject());
         }));
         aIds = aIds.concat((aRowContexts || []).map(function (oCtx) {
-            return extractChecklistIdFromObject(oCtx && oCtx.getObject && oCtx.getObject());
+            return ChecklistIdentity.extractChecklistId(oCtx && oCtx.getObject && oCtx.getObject());
         }));
         aIds = aIds.concat(
             ((oTable && oTable.getSelectedItems && oTable.getSelectedItems()) || []).map(extractChecklistIdFromListItem)
         );
-        return normalizeChecklistIds(aIds);
+        return ChecklistIdentity.normalizeChecklistIds(aIds);
     }
 
     function extractSelectedRowId(oEvent, oTable) {
@@ -298,7 +274,7 @@ sap.ui.define([
 
     function resolveSelectedRowIdsFromInnerTable(oInnerTable) {
         var aSelectedItems = oInnerTable && oInnerTable.getSelectedItems ? (oInnerTable.getSelectedItems() || []) : [];
-        return normalizeChecklistIds(aSelectedItems.map(extractChecklistIdFromListItem));
+        return ChecklistIdentity.normalizeChecklistIds(aSelectedItems.map(extractChecklistIdFromListItem));
     }
 
     function resolveSelectedRowDisplayIdFromInnerTable(oInnerTable) {
@@ -307,7 +283,7 @@ sap.ui.define([
     }
 
     function applySelectionState(oController, aSelectedRowIds, sSelectedRowDisplayId, sSource, fnSelectionChanged) {
-        var aIds = normalizeChecklistIds(aSelectedRowIds);
+        var aIds = ChecklistIdentity.normalizeChecklistIds(aSelectedRowIds);
         if (typeof fnSelectionChanged !== "function") {
             return Promise.resolve();
         }

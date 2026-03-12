@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",

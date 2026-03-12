@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectToastRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectBannerRouter",

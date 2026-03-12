@@ -1,11 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (DomainStatePaths, StatePaths, ModelStateRuntime, DetailRuntimePolicy, WorkflowContracts, ModelContracts) {
+], function (ModelPathContracts, StatePaths, ModelStateRuntime, DetailRuntimePolicy, WorkflowContracts, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -25,11 +25,11 @@ sap.ui.define([
     }
 
     function readAnalyticsReturnRestore(oController) {
-        return ModelStateRuntime.read(oController, STATE_MODEL, DomainStatePaths.ANALYTICS_RETURN_RESTORE_EDIT, null) || null;
+        return ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, null) || null;
     }
 
     function clearAnalyticsReturnRestore(oController) {
-        ModelStateRuntime.write(oController, STATE_MODEL, DomainStatePaths.ANALYTICS_RETURN_RESTORE_EDIT, null);
+        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, null);
     }
 
     function requestAnalyticsEditRestore(oController, sRootId, mHooks) {
@@ -69,7 +69,7 @@ sap.ui.define([
             clearAnalyticsReturnRestore(oController);
             return Promise.resolve(false);
         }
-        ModelStateRuntime.write(oController, STATE_MODEL, DomainStatePaths.ANALYTICS_RETURN_RESTORE_EDIT, {
+        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, {
             rootId: sRestoreRootId,
             requestedAt: oRestore && oRestore.requestedAt ? oRestore.requestedAt : new Date().toISOString(),
             attempts: iAttempts + 1

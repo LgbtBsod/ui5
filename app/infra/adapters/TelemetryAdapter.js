@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
 ], function (WorkflowTelemetry) {
     "use strict";
 

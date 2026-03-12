@@ -1,8 +1,8 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/model/StateSchema",
-    "PRODUCTION_CONTROL_CHECKLIST/util/AttachmentUploadPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/AttachmentUploadPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime"
 ], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime) {
     "use strict";

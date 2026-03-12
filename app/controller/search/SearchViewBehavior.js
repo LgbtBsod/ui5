@@ -7,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",

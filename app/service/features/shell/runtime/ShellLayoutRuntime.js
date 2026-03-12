@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ThemeDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
 ], function (LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, ThemeDomRuntime, NavigationContracts, ModelContracts) {

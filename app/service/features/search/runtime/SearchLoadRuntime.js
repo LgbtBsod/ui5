@@ -2,9 +2,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (ComponentFormattingRuntime, ControllerViewStateRuntime, ModelStateRuntime, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts"
+], function (ComponentFormattingRuntime, ControllerViewStateRuntime, ModelStateRuntime, StatePaths, ProgressiveReadinessContracts) {
     "use strict";
+
+    var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
 
     function formatSearchDateTime(vDate) {
         if (vDate === null || vDate === undefined || vDate === "") {
@@ -28,7 +31,7 @@ sap.ui.define([
         var oStatus = mStatus || {};
         var mState = {
             "/loadError": !!oStatus.loadError,
-            "/loadErrorMessage": oStatus.loadError ? String(oStatus.loadErrorMessage || "Search request failed") : ""
+            "/loadErrorMessage": oStatus.loadError ? String(oStatus.loadErrorMessage || SEARCH_READINESS.LOAD_ERROR_MESSAGE) : ""
         };
         mState[StatePaths.UI_BUSY_SEARCH_TABLE] = !!oStatus.isBusy;
         ModelStateRuntime.setMany(oController, "state", mState);

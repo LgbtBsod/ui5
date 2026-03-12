@@ -1,7 +1,10 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayAdapterSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper"
-], function (GatewayAdapterSupport, ChecklistSnapshotMapper) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
+], function (GatewayAdapterSupport, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, GatewayClient) {
     "use strict";
 
     function normalizeRootKey(sRootId) {
@@ -17,7 +20,9 @@ sap.ui.define([
         if (!sRootId) {
             return Promise.resolve({ attachments: [] });
         }
-        return GatewayAdapterSupport.get("AttachmentSet", { "$filter": "RootKey eq '" + sRootId + "'" }).then(function (oResult) {
+        return GatewayAdapterSupport.get("AttachmentSet", {
+            "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
+        }).then(function (oResult) {
             return { attachments: mapAttachmentResult(oResult) };
         });
     }
@@ -28,7 +33,10 @@ sap.ui.define([
         if (!sAttachmentId) {
             return Promise.resolve({ deleted: true });
         }
-        return GatewayClient.deletePath("/AttachmentSet(AttachmentKey='" + sAttachmentId + "')").then(function () {
+        return GatewayClient.deletePath(ODataAdapterUtils.buildEntityPath("AttachmentSet", sAttachmentId, {
+            name: "AttachmentKey",
+            type: ODataKeyContracts.TYPES.ATTACHMENT_KEY
+        })).then(function () {
             return { deleted: true };
         });
     }

@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",

@@ -36,8 +36,8 @@ sap.ui.define([
         /^GetHierarchy$/i
     ];
     var DIRECT_DELETE_ALLOWLIST = [
-        /^\/ChecklistRootSet\('[^']+'\)$/i,
-        /^\/AttachmentSet\(AttachmentKey='[^']+'\)$/i
+        /^\/ChecklistRootSet\((?:[^)]+)\)$/i,
+        /^\/AttachmentSet\((?:AttachmentKey=)?[^)]+\)$/i
     ];
 
     function ensureModel() {

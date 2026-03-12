@@ -1,8 +1,10 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (NavigationContracts) {
     "use strict";
 
     return {
-        layout: "OneColumn",
+        layout: NavigationContracts.LAYOUTS.ONE_COLUMN,
         currentRouteName: "search",
         selectedId: null,
         sessionId: null,

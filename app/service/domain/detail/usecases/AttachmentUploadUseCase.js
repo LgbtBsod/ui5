@@ -6,9 +6,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DraftChecklistFactory"
-], function (UseCase, Result, Effects, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
+], function (UseCase, Result, Effects, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     function buildLocalObjectUrl(oFile) {

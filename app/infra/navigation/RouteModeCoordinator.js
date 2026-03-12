@@ -1,11 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeRules",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteSync",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (DebugLogger, RouteModeRules, RouteSync, LayoutStateRuntime, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (DebugLogger, RouteModeRules, RouteSync, LayoutStateRuntime, ModelStateRuntime, NavigationContracts) {
     "use strict";
+
+    var LAYOUTS = NavigationContracts.LAYOUTS;
 
     function debugLog(sEvent, oPayload) {
         DebugLogger.info("RouteModeCoordinator", sEvent, oPayload || {});
@@ -19,7 +22,7 @@ sap.ui.define([
     }
 
     RouteModeCoordinator.prototype._applyLayoutFromState = function () {
-        var sLayout = LayoutStateRuntime.readLayout(this._oStateModel, "OneColumn");
+        var sLayout = LayoutStateRuntime.readLayout(this._oStateModel, LAYOUTS.ONE_COLUMN);
         if (this._oFcl && typeof this._oFcl.getLayout === "function" && typeof this._oFcl.setLayout === "function" && this._oFcl.getLayout() !== sLayout) {
             this._oFcl.setLayout(sLayout);
         }
@@ -32,7 +35,7 @@ sap.ui.define([
         this._oRouter.attachRoutePatternMatched(this._fnRouteMatched);
         this._applyLayoutFromState();
         debugLog("start", {
-            layout: LayoutStateRuntime.readLayout(this._oStateModel, "OneColumn")
+            layout: LayoutStateRuntime.readLayout(this._oStateModel, LAYOUTS.ONE_COLUMN)
         });
     };
 
@@ -52,7 +55,7 @@ sap.ui.define([
             this._applyLayoutFromState();
             debugLog("routeMatched", {
                 route: sRouteName,
-                layout: LayoutStateRuntime.readLayout(this._oStateModel, "OneColumn"),
+                layout: LayoutStateRuntime.readLayout(this._oStateModel, LAYOUTS.ONE_COLUMN),
                 selectedId: ModelStateRuntime.readOnModel(this._oStateModel, "/selectedId", null)
             });
         }

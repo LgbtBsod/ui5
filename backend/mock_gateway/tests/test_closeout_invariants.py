@@ -142,10 +142,12 @@ def test_export_source_separates_selected_and_all_found_contracts():
 
 
 def test_create_permission_contract_is_current_identity_only():
-    source = _read(APP_ROOT / "infra" / "adapters" / "ODataChecklistRepoAdapter.js")
+    source = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistPermissionRuntime.js")
+    key_contracts = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataKeyContracts.js")
     readme = _read(BACKEND_ROOT / "README_ODATA.md")
 
-    assert "ChecklistCreatePermissionSet('CURRENT')" in source
+    assert 'buildEntityPath("ChecklistCreatePermissionSet", "CURRENT"' in source
+    assert 'CURRENT_ALIAS_KEY: "Edm.String"' in key_contracts
     assert "Productive create-permission seam rules:" in readme
     assert "response entity identity also stays `RootKey='CURRENT'`" in readme
     assert "normalizePermissionResponse()" in readme
@@ -176,7 +178,7 @@ def test_start_local_env_supports_python_fallback_and_external_gateway_mode():
 
 def test_telemetry_uses_canonical_lock_state_vocabulary():
     telemetry_runtime = _read(APP_ROOT / "service" / "framework" / "TelemetryRuntime.js")
-    workflow_telemetry = _read(APP_ROOT / "util" / "WorkflowTelemetry.js")
+    workflow_telemetry = _read(APP_ROOT / "service" / "framework" / "WorkflowTelemetry.js")
     lock_gate = _read(REPO_ROOT / "scripts" / "gates" / "lock-state-enum-gate.js")
 
     assert "lockState:" in telemetry_runtime
@@ -188,7 +190,7 @@ def test_telemetry_uses_canonical_lock_state_vocabulary():
 
 def test_search_request_window_supports_legacy_search_max_results_shape():
     source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewStateRuntime.js")
-    util_source = _read(APP_ROOT / "util" / "search" / "SearchMaxResults.js")
+    util_source = _read(APP_ROOT / "service" / "features" / "search" / "contracts" / "SearchMaxResults.js")
 
     assert 'typeof SearchMaxResults.resolveGrowingPageSize === "function"' in source
     assert 'typeof SearchMaxResults.resolveMaxResults === "function"' in source

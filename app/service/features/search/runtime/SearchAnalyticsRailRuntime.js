@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService"
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService"
 ], function (ControllerViewStateRuntime, ControllerModelRuntime, SchedulingRuntime, ControlStyleRuntime, TimeConfigService) {
     "use strict";
 

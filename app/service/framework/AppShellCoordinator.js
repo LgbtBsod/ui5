@@ -1,14 +1,17 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService",
-    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/TimerDefaults",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (JSONModel, RouteModeCoordinator, DebugLogger, ControllerModelRuntime, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime) {
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+], function (JSONModel, RouteModeCoordinator, DebugLogger, ControllerModelRuntime, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime, NavigationContracts) {
     "use strict";
+
+    var LAYOUTS = NavigationContracts.LAYOUTS;
 
     function resolveStateModel(oController) {
         return ControllerModelRuntime.state(oController);
@@ -78,7 +81,7 @@ sap.ui.define([
             ensureControllerStateModel(oController, oState);
             if (oState) {
                 ModelStateRuntime.setManyOnModel(oState, {
-                    "/layout": ModelStateRuntime.readOnModel(oState, "/layout", "OneColumn") || "OneColumn",
+                    "/layout": ModelStateRuntime.readOnModel(oState, "/layout", LAYOUTS.ONE_COLUMN) || LAYOUTS.ONE_COLUMN,
                     "/selectedId": typeof ModelStateRuntime.readOnModel(oState, "/selectedId", undefined) === "undefined" ? null : ModelStateRuntime.readOnModel(oState, "/selectedId", null)
                 });
             }

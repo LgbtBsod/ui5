@@ -2,10 +2,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/util/ExcelExport",
-    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
-], function (UseCase, Result, Effects, ExcelExport, SearchMaxResults, WorkflowTelemetry) {
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/ExcelExport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
+], function (UseCase, Result, Effects, ExcelExport, ChecklistIdentity, SearchMaxResults, WorkflowTelemetry) {
     "use strict";
 
     function ExportSearchUseCase() {
@@ -17,19 +18,6 @@ sap.ui.define([
 
     function pick(v, fallback) {
         return v === undefined || v === null ? fallback : v;
-    }
-
-    function normalizeChecklistIds(aIds) {
-        var mSeen = {};
-        return (aIds || []).reduce(function (aAcc, sId) {
-            var sNormalized = String(sId || "").trim();
-            if (!sNormalized || mSeen[sNormalized]) {
-                return aAcc;
-            }
-            mSeen[sNormalized] = true;
-            aAcc.push(sNormalized);
-            return aAcc;
-        }, []);
     }
 
     function pickFilterValue(vValue) {
@@ -141,7 +129,7 @@ sap.ui.define([
     function resolveExportRows(mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
         var oStateModel = mCtx && mCtx.stateModel;
-        var aSelectedIds = normalizeChecklistIds(mInput && mInput.selectedRowIds);
+        var aSelectedIds = ChecklistIdentity.normalizeChecklistIds(mInput && mInput.selectedRowIds);
         var mState = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
         var iExportLimit = SearchMaxResults.resolveExportLimit(mState);
         var oRequest;
@@ -180,7 +168,7 @@ sap.ui.define([
         var sEntity = (mInput && mInput.entity) || "screen";
         return resolveExportRows(mInput || {}, mCtx || {}).then(function (aRows) {
             var aNormalized = normalizeRows(aRows, sEntity);
-            var aSelectedIds = normalizeChecklistIds(mInput && mInput.selectedRowIds);
+            var aSelectedIds = ChecklistIdentity.normalizeChecklistIds(mInput && mInput.selectedRowIds);
             var sMode = aSelectedIds.length ? "selected" : "all";
             if (!aNormalized.length) {
                 return Result.fail({ message: "No export data", code: "NO_EXPORT_DATA" }, [Effects.toast("nothingToExport", "warning")]);

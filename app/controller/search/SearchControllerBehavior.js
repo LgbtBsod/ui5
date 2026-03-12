@@ -12,17 +12,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/search/SearchMaxResults",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/SearchRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts",
     "sap/ui/core/Item",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewBehavior, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, ModelContracts, OperationSourceContracts, SearchRuntimeContracts, Item, ViewSettingsDialog, ViewSettingsItem, NavigationContracts) {
+], function (ControllerResourceCleanup, SearchFacade, ControllerRouteRuntime, ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, SearchLoadRuntime, SearchRateProgress, SearchViewBehavior, SchedulingRuntime, UiDecisionCoordinator, NavigationIntentService, CreateSentinel, SearchMaxResults, SearchViewStateRuntime, ModelContracts, OperationSourceContracts, SearchRuntimeContracts, ProgressiveReadinessContracts, Item, ViewSettingsDialog, ViewSettingsItem, NavigationContracts) {
     "use strict";
 
     var DEFAULT_SEARCH_BACKEND_TOP = SearchRuntimeContracts.DEFAULTS.SEARCH_BACKEND_TOP;
@@ -31,6 +32,7 @@ sap.ui.define([
     var MODELS = ModelContracts.MODELS;
     var TOKENS = ModelContracts.TOKENS;
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
+    var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
     var ANALYTICS_DRILLDOWN_INTENT_PATH = "/analyticsDrilldownIntent";
@@ -400,9 +402,9 @@ sap.ui.define([
             SearchLoadRuntime.markLoading(this);
             SearchViewBehavior.beginSearchLoadingFeedback(this);
             return SearchCommandPolicy.rebind(this, { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
-                SearchLoadRuntime.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
-            }.bind(this)).catch(function (oError) {
-                SearchLoadRuntime.applyLoadError(this, String((oError && oError.message) || "Search request failed"));
+            SearchLoadRuntime.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
+        }.bind(this)).catch(function (oError) {
+                SearchLoadRuntime.applyLoadError(this, String((oError && oError.message) || SEARCH_READINESS.LOAD_ERROR_MESSAGE));
                 return Promise.reject(oError);
             });
         },

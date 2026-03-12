@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootStageRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts"
 ], function (WorkflowTelemetry, ComponentBootStageRuntime, ComponentBootContracts) {

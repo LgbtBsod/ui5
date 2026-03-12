@@ -42,6 +42,24 @@ Framework token drift gate:
 node scripts/framework-token-drift-gate.js --json
 ```
 
+Feature token drift gate:
+
+```powershell
+node scripts/feature-token-drift-gate.js --json
+```
+
+Duplicate responsibility gate:
+
+```powershell
+node scripts/duplicate-responsibility-gate.js --json
+```
+
+Forbidden literals gate:
+
+```powershell
+node scripts/forbidden-literals-gate.js --json
+```
+
 Gateway-only readiness gate:
 
 ```powershell

@@ -4,8 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils"
-], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, UseCaseResultUtils) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue"
+], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, UseCaseValue) {
     "use strict";
 
     function ValueHelpLocationUseCase() {
@@ -70,7 +70,7 @@ sap.ui.define([
                     Effects.dialog("locationValueHelp", "open", {})
                 ]));
             }
-            return UseCaseResultUtils.callOrDefault(function () {
+            return UseCaseValue.callOrDefault(function () {
                 return oLookup && oLookup.search({ query: "", limit: 200, dateCheck: DetailStateAccess.resolveDateCheck(mCtx) });
             }, { items: [] }).then(function (oFound) {
                 var aItems = (oFound && oFound.items) || [];
@@ -107,7 +107,7 @@ sap.ui.define([
                 Effects.modelPatch("view", "/locationVhHint", aFiltered.length ? "" : "locationValueHelpNoDataHint")
             ]));
         }
-        return UseCaseResultUtils.callOrDefault(function () {
+        return UseCaseValue.callOrDefault(function () {
             return oLookup && oLookup.search({ query: sQuery, limit: 200, dateCheck: DetailStateAccess.resolveDateCheck(mCtx) });
         }, { items: [] }).then(function (oFound) {
             var aItems = (oFound && oFound.items) || [];

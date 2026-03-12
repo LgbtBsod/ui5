@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",

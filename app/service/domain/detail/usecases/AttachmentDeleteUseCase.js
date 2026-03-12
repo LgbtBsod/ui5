@@ -2,14 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, UseCaseResultUtils, UseCaseInputUtils, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, CreateSentinel, ViewPathContracts) {
+], function (UseCase, Result, Effects, UseCaseValue, AttachmentIdentity, AttachmentEffectSupport, DetailStateAccess, CreateSentinel, ViewPathContracts) {
     "use strict";
 
     function cleanupObjectUrl(oAttachment) {
@@ -39,7 +38,7 @@ sap.ui.define([
 
     AttachmentDeleteUseCase.prototype.execute = function (mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
-        var sRootId = UseCaseInputUtils.rootId(mInput);
+        var sRootId = UseCaseValue.rootId(mInput);
         var oAttachment = (mInput && mInput.attachment) || null;
         var sAttachmentId = String((mInput && mInput.attachmentId) || "").trim();
         if (!sRootId || CreateSentinel.isCreateId(sRootId) || (oAttachment && oAttachment.staged)) {
@@ -49,7 +48,7 @@ sap.ui.define([
                 buildDeleteEffects(mCtx, sAttachmentId, oAttachment)
             ));
         }
-        return UseCaseResultUtils.callOrDefault(function () {
+        return UseCaseValue.callOrDefault(function () {
             return oRepo && oRepo.deleteAttachment(mInput || {});
         }, { deleted: true }).then(function (oRes) {
             return Result.ok(

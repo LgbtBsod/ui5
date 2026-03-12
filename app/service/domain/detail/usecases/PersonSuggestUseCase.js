@@ -4,8 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseResultUtils"
-], function (UseCase, Result, Effects, DetailStateAccess, StatePaths, UseCaseResultUtils) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue"
+], function (UseCase, Result, Effects, DetailStateAccess, StatePaths, UseCaseValue) {
     "use strict";
 
     function PersonSuggestUseCase() {
@@ -90,7 +90,7 @@ sap.ui.define([
             ]));
         }
 
-        return UseCaseResultUtils.callOrDefault(function () {
+        return UseCaseValue.callOrDefault(function () {
             return oSuggest && oSuggest.suggest({ query: sTerm, limit: 12, dateCheck: DetailStateAccess.resolveDateCheck(mCtx) });
         }, { items: [] }).then(function (oRes) {
             var aItems = (oRes && oRes.items) || [];

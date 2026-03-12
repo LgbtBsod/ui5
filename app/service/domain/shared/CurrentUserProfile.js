@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/GatewayTextNormalizer"
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/GatewayTextNormalizer"
 ], function (GatewayTextNormalizer) {
     "use strict";
 

@@ -3,8 +3,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths"
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/UiAssetPaths"
 ], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, UiAssetPaths) {
     "use strict";
 

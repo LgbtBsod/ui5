@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (CloneUtil, StatePaths, WorkflowContracts) {

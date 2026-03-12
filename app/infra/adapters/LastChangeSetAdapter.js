@@ -1,6 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient"
-], function (GatewayODataClient) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts"
+], function (GatewayODataClient, ODataAdapterUtils, ODataKeyContracts) {
     "use strict";
 
     function parseMs(v) {
@@ -10,10 +12,6 @@ sap.ui.define([
         }
         var n = Date.parse(s);
         return Number.isFinite(n) ? n : 0;
-    }
-
-    function escapeKey(sValue) {
-        return String(sValue || "").replace(/'/g, "''");
     }
 
     function firstResult(oRes) {
@@ -40,10 +38,12 @@ sap.ui.define([
     function create() {
         return {
             readAggChangedOn: function (sRootId) {
-                var sRootKey = escapeKey(sRootId);
                 return GatewayODataClient.request({
                     method: "GET",
-                    path: "LastChangeSet('" + sRootKey + "')"
+                    path: ODataAdapterUtils.buildEntityPath("LastChangeSet", sRootId, {
+                        name: "RootKey",
+                        type: ODataKeyContracts.TYPES.ROOT_KEY
+                    })
                 }).then(function (oRes) {
                     return readAggChangedOn(oRes);
                 }).catch(function () {
@@ -51,7 +51,7 @@ sap.ui.define([
                         method: "GET",
                         path: "LastChangeSet",
                         params: {
-                            "$filter": "RootKey eq '" + sRootKey + "'",
+                            "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY),
                             "$top": 1
                         }
                     }).then(function (oRes) {

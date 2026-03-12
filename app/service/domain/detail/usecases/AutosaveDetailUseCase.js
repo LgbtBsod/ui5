@@ -4,11 +4,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseInputUtils, StatePaths, DeltaPayloadBuilder, WorkflowContracts) {
+], function (UseCase, Result, Effects, DetailSaveSupport, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, WorkflowContracts) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -76,7 +76,7 @@ sap.ui.define([
     AutosaveDetailUseCase.prototype.constructor = AutosaveDetailUseCase;
 
     AutosaveDetailUseCase.prototype.execute = function (mInput, mCtx) {
-        var sRootId = UseCaseInputUtils.rootId(mInput);
+        var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oDelta;
         var sSessionGuid = DetailSaveSupport.readSessionGuid(mCtx, StatePaths);

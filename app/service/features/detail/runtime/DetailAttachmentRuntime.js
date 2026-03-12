@@ -1,8 +1,10 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailFieldContracts"
-], function (ModelStateRuntime, ModelContracts, DetailFieldContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailFieldContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts"
+], function (ModelStateRuntime, ModelContracts, DetailFieldContracts, ODataAdapterUtils, ODataKeyContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -92,7 +94,10 @@ sap.ui.define([
         if (!sAttachmentId || !oMainService || typeof oMainService.read !== "function") {
             return Promise.resolve(false);
         }
-        sEntityPath = "/AttachmentSet(AttachmentKey='" + sAttachmentId + "')";
+        sEntityPath = ODataAdapterUtils.buildEntityPath("AttachmentSet", sAttachmentId, {
+            name: "AttachmentKey",
+            type: ODataKeyContracts.TYPES.ATTACHMENT_KEY
+        });
         return new Promise(function (resolve) {
             oMainService.read(sEntityPath, {
                 urlParameters: {

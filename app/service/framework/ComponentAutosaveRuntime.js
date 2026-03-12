@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, WorkflowContracts) {
     "use strict";

@@ -5,12 +5,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, DomainStatePaths, NavigationContracts, WorkflowContracts) {
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function DeleteChecklistUseCase() {
@@ -73,12 +73,12 @@ sap.ui.define([
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                    Effects.modelPatch("state", DomainStatePaths.LOCK_OPERATION_PENDING, false),
+                    Effects.modelPatch("state", ModelPathContracts.LOCK_OPERATION_PENDING, false),
                     Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                    Effects.modelPatch("state", DomainStatePaths.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
-                    Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, null),
-                    Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, null),
-                    Effects.modelPatch("state", DomainStatePaths.SEARCH_FORCE_REFRESH_ON_RETURN, true),
+                    Effects.modelPatch("state", ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
+                    Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, null),
+                    Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, null),
+                    Effects.modelPatch("state", ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN, true),
                     Effects.toast("checklistDeleted", "success"),
                     Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
                 ]);

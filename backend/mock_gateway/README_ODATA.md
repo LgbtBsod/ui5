@@ -42,9 +42,16 @@ This document defines the frontend adapter-boundary contract for the mock Gatewa
 - incompatible permission payloads are adapted only at `normalizePermissionResponse()`
 - app workflows must not grow fallback branches for Gateway divergence
 
+## Binary key policy
+
+- `RootKey`, `ParentKey`, and any DB checklist key are treated as RAW16/`Edm.Binary`
+- frontend path builders must serialize these keys through the OData typed-literal helper, never by manual string concatenation
+- `AttachmentKey` stays a string key and must not be mixed with checklist binary keys
+- productive SAP Gateway and mock Gateway must expose the same binary-key typing in metadata
+
 ## LastChangeSet
 
-- resource: `LastChangeSet('<ROOT_KEY>')`
+- resource: `LastChangeSet(RootKey=<BINARY_LITERAL>)`
 - purpose: cache freshness and conflict validation
 - expected behavior: return the latest aggregate change marker for the requested root key
 
@@ -77,11 +84,11 @@ This document defines the frontend adapter-boundary contract for the mock Gatewa
 
 Frontend detail hydration expects these resources:
 
-- `ChecklistRootSet('<ROOT_KEY>')`
-- `ChecklistBasicInfoSet?$filter=RootKey eq '<ROOT_KEY>'`
-- `ChecklistCheckSet?$filter=RootKey eq '<ROOT_KEY>'`
-- `ChecklistBarrierSet?$filter=RootKey eq '<ROOT_KEY>'`
-- `AttachmentSet?$filter=RootKey eq '<ROOT_KEY>'`
+- `ChecklistRootSet(<BINARY_LITERAL>)`
+- `ChecklistBasicInfoSet?$filter=RootKey eq <BINARY_LITERAL>`
+- `ChecklistCheckSet?$filter=RootKey eq <BINARY_LITERAL>`
+- `ChecklistBarrierSet?$filter=RootKey eq <BINARY_LITERAL>`
+- `AttachmentSet?$filter=RootKey eq <BINARY_LITERAL>`
 - `AttachmentSet(AttachmentKey='<ATTACHMENT_KEY>')` when the UI opens a stored binary through `Value`
 
 ## Detail update and save composition
@@ -93,7 +100,7 @@ Mutating detail flows stay on dedicated resources/functions:
 - `AutoSave`
 - `SetChecklistStatus`
 - `CopyChecklist`
-- `ChecklistRootSet('<ROOT_KEY>')` for delete
+- `ChecklistRootSet(<BINARY_LITERAL>)` for delete
 
 ## Attachment save contract
 
@@ -120,7 +127,7 @@ Mutating detail flows stay on dedicated resources/functions:
 ### Attachment field semantics
 
 - `CategoryKey` and `Type` stay aligned to the attachment-type dictionary seam
-- `RootKey` / `ParentKey` identify the owning checklist
+- `RootKey` / `ParentKey` identify the owning checklist and stay `Edm.Binary`
 - `Value` is the base64-encoded binary payload carried as OData `Edm.Binary`
 - `FileSize` and `FileSizeContent` stay aligned to the decoded binary length
 

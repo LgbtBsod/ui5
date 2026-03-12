@@ -4,12 +4,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseInputUtils, StatePaths, CreateSentinel, UiAssetPaths, NavigationContracts) {
+], function (UseCase, Result, Effects, DetailAuthorizationSupport, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, UiAssetPaths, NavigationContracts) {
     "use strict";
 
     function resolveLoadedAttachments(oUiState, sRootId) {
@@ -30,7 +30,7 @@ sap.ui.define([
     OpenDetailUseCase.prototype.constructor = OpenDetailUseCase;
 
     OpenDetailUseCase.prototype.execute = function (mInput, mCtx) {
-        var sRootId = UseCaseInputUtils.rootId(mInput);
+        var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
         var sReadyAt = new Date().toISOString();

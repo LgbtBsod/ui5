@@ -4,7 +4,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsPayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry"
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
 ], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry) {
     "use strict";
 

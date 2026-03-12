@@ -1,16 +1,16 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/DraftChecklistFactory",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
-], function (DraftChecklistFactory, DomainStatePaths, ViewPathContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, CreateSentinel, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+], function (DraftChecklistFactory, ModelPathContracts, ViewPathContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, CreateSentinel, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -21,14 +21,14 @@ sap.ui.define([
     function createMatchedStatePatch(sId, sRouteName, bCreate) {
         var mStatePatch = {};
 
-        mStatePatch[DomainStatePaths.ACTIVE_OBJECT_ID] = bCreate ? CreateSentinel.VALUE : sId;
-        mStatePatch[DomainStatePaths.SELECTED_ID] = bCreate ? CreateSentinel.VALUE : sId;
-        mStatePatch[DomainStatePaths.CURRENT_ROUTE_NAME] = sRouteName;
+        mStatePatch[ModelPathContracts.ACTIVE_OBJECT_ID] = bCreate ? CreateSentinel.VALUE : sId;
+        mStatePatch[ModelPathContracts.SELECTED_ID] = bCreate ? CreateSentinel.VALUE : sId;
+        mStatePatch[ModelPathContracts.CURRENT_ROUTE_NAME] = sRouteName;
         if (bCreate) {
             mStatePatch[StatePaths.WORKFLOW_DETAIL_EDIT_MODE] = WorkflowContracts.EDIT_MODES.CREATE;
             mStatePatch[StatePaths.WORKFLOW_DETAIL_LOCK_STATE] = WorkflowContracts.LOCK_STATES.IDLE;
-            mStatePatch[DomainStatePaths.AUTOSAVE_ENABLED] = false;
-            mStatePatch[DomainStatePaths.IS_DIRTY] = false;
+            mStatePatch[ModelPathContracts.AUTOSAVE_ENABLED] = false;
+            mStatePatch[ModelPathContracts.IS_DIRTY] = false;
         }
         return mStatePatch;
     }
@@ -77,9 +77,9 @@ sap.ui.define([
         var sLayoutArg = String(mArgs.layout || "").toLowerCase();
         var bCreate = CreateSentinel.isCreateId(sId);
         var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN : NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
-        var sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, DomainStatePaths.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sCurrentRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, DomainStatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
-        var sPostOpenHydratedRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
+        var sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+        var sCurrentRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sPostOpenHydratedRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
         var oSelected = oController.getModel(SELECTED_MODEL);
         var oSelectedData = (oSelected && oSelected.getData && oSelected.getData()) || {};
         var sSelectedRootId = String((oSelectedData && oSelectedData.root && oSelectedData.root.id) || "").trim();

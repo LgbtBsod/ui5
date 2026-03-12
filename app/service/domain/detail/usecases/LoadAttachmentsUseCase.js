@@ -2,9 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel"
-], function (UseCase, Result, AttachmentEffectSupport, UseCaseInputUtils, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+], function (UseCase, Result, AttachmentEffectSupport, UseCaseValue, CreateSentinel) {
     "use strict";
 
     function LoadAttachmentsUseCase() {
@@ -15,7 +15,7 @@ sap.ui.define([
     LoadAttachmentsUseCase.prototype.constructor = LoadAttachmentsUseCase;
 
     LoadAttachmentsUseCase.prototype.execute = function (mInput, mCtx) {
-        var sRootId = UseCaseInputUtils.rootId(mInput);
+        var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {

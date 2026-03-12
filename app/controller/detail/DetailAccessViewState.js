@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/util/UiAssetPaths"
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/UiAssetPaths"
 ], function (UiAssetPaths) {
     "use strict";
 

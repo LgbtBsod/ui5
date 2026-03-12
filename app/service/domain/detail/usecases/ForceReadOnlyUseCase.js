@@ -5,10 +5,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, DomainStatePaths, WorkflowContracts) {
+], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts) {
     "use strict";
 
     function ForceReadOnlyUseCase() {
@@ -65,7 +65,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
-                Effects.modelPatch("state", DomainStatePaths.LOCK_EXPIRES, null),
+                Effects.modelPatch("state", ModelPathContracts.LOCK_EXPIRES, null),
                 Effects.modelPatch("uiState", "/lock", {
                     ok: false,
                     reason: sReason,

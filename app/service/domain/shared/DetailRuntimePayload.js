@@ -1,16 +1,16 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseInputUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (UseCaseInputUtils, CreateSentinel, ModelContracts, ModelPathContracts) {
+], function (UseCaseValue, CreateSentinel, ModelContracts, ModelPathContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function rootId(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return UseCaseInputUtils.rootId(mInput) || String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
+        return UseCaseValue.rootId(mInput) || String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
     }
 
     function sessionGuid(mInput, mCtx) {
@@ -28,7 +28,7 @@ sap.ui.define([
 
     function saveRequest(mInput) {
         return {
-            rootId: UseCaseInputUtils.rootId(mInput),
+            rootId: UseCaseValue.rootId(mInput),
             sessionGuid: String((mInput && mInput.sessionGuid) || "").trim(),
             delta: (mInput && mInput.delta) || {},
             attachments: (mInput && mInput.attachments) || []

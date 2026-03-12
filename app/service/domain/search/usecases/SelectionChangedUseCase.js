@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/util/SearchSmartControlCoordinator"
-], function (UseCase, Result, Effects, SearchSmartControlCoordinator) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
+"PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartControlCoordinator"
+], function (UseCase, Result, Effects, ChecklistIdentity, SearchSmartControlCoordinator) {
     "use strict";
 
     function SelectionChangedUseCase() {
@@ -12,19 +13,6 @@ sap.ui.define([
 
     SelectionChangedUseCase.prototype = Object.create(UseCase.prototype);
     SelectionChangedUseCase.prototype.constructor = SelectionChangedUseCase;
-
-    function normalizeChecklistIds(aIds) {
-        var mSeen = {};
-        return (aIds || []).reduce(function (aAcc, sId) {
-            var sNorm = String(sId || "").trim();
-            if (!sNorm || mSeen[sNorm]) {
-                return aAcc;
-            }
-            mSeen[sNorm] = true;
-            aAcc.push(sNorm);
-            return aAcc;
-        }, []);
-    }
 
     SelectionChangedUseCase.prototype.execute = function (mInput) {
         var aSelectedRowIds = [];
@@ -43,7 +31,7 @@ sap.ui.define([
         if (sSelectedRowId) {
             aSelectedRowIds.unshift(sSelectedRowId);
         }
-        aSelectedRowIds = normalizeChecklistIds(aSelectedRowIds);
+        aSelectedRowIds = ChecklistIdentity.normalizeChecklistIds(aSelectedRowIds);
         sSelectedRowId = aSelectedRowIds[0] || "";
         sSelectedRowDisplayId = String((mInput && mInput.selectedRowDisplayId) || "").trim() || sSelectedRowId;
         iSelectionCount = aSelectedRowIds.length;

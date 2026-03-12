@@ -3,11 +3,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DomainStatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DomainStatePaths, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, ModelPathContracts, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function readSessionGuid(mCtx) {
@@ -94,9 +95,9 @@ sap.ui.define([
                 return Result.ok({ selectedRootId: sRootId, intent: sIntent }, [
                     Effects.modelPatch("selected", "/", oSnapshot),
                     Effects.modelPatch("snapshot", "/", oSnapshot),
-                    Effects.modelPatch("state", DomainStatePaths.ACTIVE_OBJECT_ID, sCopiedRootId),
-                    Effects.modelPatch("state", DomainStatePaths.SELECTED_ID, sCopiedRootId),
-                    Effects.modelPatch("state", DomainStatePaths.POST_OPEN_HYDRATED_ROOT_ID, sCopiedRootId),
+                    Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sCopiedRootId),
+                    Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sCopiedRootId),
+                    Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCopiedRootId),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.EDIT),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.EDIT_LOCKED),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),

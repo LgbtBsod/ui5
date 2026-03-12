@@ -4,12 +4,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/SmartSearchAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ManagerFacade",
     "sap/ui/model/json/JSONModel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/FlowCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
-    "PRODUCTION_CONTROL_CHECKLIST/util/DebugLogger",
-    "PRODUCTION_CONTROL_CHECKLIST/util/RuntimeTimerSanitizer",
-    "PRODUCTION_CONTROL_CHECKLIST/util/TimeConfigService",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/EnsureDictLoadedUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/BootstrapAppUseCase",
@@ -33,11 +33,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionDispatcher",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
     "sap/ui/model/odata/v2/ODataModel",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "sap/ui/Device",
-    "PRODUCTION_CONTROL_CHECKLIST/util/InteractionFX",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeRuntime",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (
@@ -46,7 +46,7 @@ sap.ui.define([
     SmartSearchAdapter,
     ManagerFacade,
     JSONModel,
-    FlowCoordinator,
+    WorkflowCoordinator,
     DeltaPayloadBuilder,
     GatewayBackendService,
     DebugLogger,
@@ -79,7 +79,7 @@ sap.ui.define([
     CreateSentinel,
     Device,
     InteractionFX,
-    ThemeRuntime,
+    ThemeService,
     SchedulingRuntime,
     WorkflowContracts
 ) {
@@ -121,7 +121,7 @@ sap.ui.define([
                 SmartSearchAdapter: SmartSearchAdapter,
                 Managers: ManagerFacade,
                 JSONModel: JSONModel,
-                FlowCoordinator: FlowCoordinator,
+        FlowCoordinator: WorkflowCoordinator,
                 DeltaPayloadBuilder: DeltaPayloadBuilder,
                 GatewayBackendService: GatewayBackendService,
                 DebugLogger: DebugLogger,
@@ -150,7 +150,7 @@ sap.ui.define([
                 CreateSentinel: CreateSentinel,
                 Device: Device,
                 InteractionFX: InteractionFX,
-                ThemeRuntime: ThemeRuntime
+                ThemeRuntime: ThemeService
             });
         },
         _startCoreManagers: function () {

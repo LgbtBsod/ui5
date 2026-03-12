@@ -1,8 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/util/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/util/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/util/runtime/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
+"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/FrontendConfigConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts"
 ], function (ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, ComponentBootContracts, EffectFeedbackContracts) {
