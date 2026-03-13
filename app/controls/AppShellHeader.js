@@ -33,6 +33,7 @@ sap.ui.define([
     }
 
     function syncHeaderContent(oControl) {
+        var oToolbar;
         if (!oControl) {
             return;
         }
@@ -64,9 +65,44 @@ sap.ui.define([
             oControl._oUserButton.setText(oControl.getUserLabel());
             oControl._oUserButton.setTooltip(oControl.getUserTooltip());
             oControl._oUserButton.setIcon(oControl.getUserIcon());
-            if (oControl._oUserButton.getDomRef && oControl._oUserButton.getDomRef()) {
-                oControl._oUserButton.invalidate();
+            syncUserButtonDom(oControl);
+            if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+                window.requestAnimationFrame(function () {
+                    syncUserButtonDom(oControl);
+                });
+            } else if (typeof setTimeout === "function") {
+                setTimeout(function () {
+                    syncUserButtonDom(oControl);
+                }, 0);
             }
+            if (oControl.getAggregation && typeof oControl.getAggregation === "function") {
+                oToolbar = oControl.getAggregation("_toolbar");
+                if (oToolbar && !oControl._oUserButton.getDomRef() && oToolbar.getDomRef && oToolbar.getDomRef() && typeof oToolbar.rerender === "function") {
+                    oToolbar.rerender();
+                }
+            }
+        }
+    }
+
+    function syncUserButtonDom(oControl) {
+        var oButtonDomRef;
+        var oTextNode;
+        var oTooltipNode;
+        if (!oControl || !oControl._oUserButton) {
+            return;
+        }
+        oButtonDomRef = oControl._oUserButton.getDomRef && oControl._oUserButton.getDomRef();
+        if (!oButtonDomRef) {
+            return;
+        }
+        oButtonDomRef.setAttribute("title", oControl.getUserTooltip() || "");
+        oTextNode = oButtonDomRef.querySelector(".sapMBtnContent bdi");
+        if (oTextNode) {
+            oTextNode.textContent = oControl.getUserLabel() || "";
+        }
+        oTooltipNode = oButtonDomRef.querySelector(".sapUiInvisibleText");
+        if (oTooltipNode) {
+            oTooltipNode.textContent = oControl.getUserTooltip() || "";
         }
     }
 
@@ -210,6 +246,10 @@ sap.ui.define([
         },
 
         onBeforeRendering: function () {
+            syncHeaderContent(this);
+        },
+
+        onAfterRendering: function () {
             syncHeaderContent(this);
         },
 

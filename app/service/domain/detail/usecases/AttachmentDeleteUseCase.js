@@ -2,18 +2,21 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, UseCaseValue, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, CreateSentinel, ViewPathContracts) {
+], function (UseCase, Result, Effects, JsRuntimeContracts, UseCaseValue, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, CreateSentinel, ViewPathContracts) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntimeContracts.TYPEOF.FUNCTION;
 
     function cleanupObjectUrl(oAttachment) {
         var sUrl = oAttachment && oAttachment.localObjectUrl;
-        if (sUrl && typeof window !== "undefined" && window.URL && typeof window.URL.revokeObjectURL === "function") {
+        if (sUrl && typeof window !== "undefined" && window.URL && typeof window.URL.revokeObjectURL === TYPE_FUNCTION) {
             window.URL.revokeObjectURL(sUrl);
         }
     }

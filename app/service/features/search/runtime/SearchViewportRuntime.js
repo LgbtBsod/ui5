@@ -15,7 +15,7 @@ sap.ui.define([
                 return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
             },
             syncViewportLayout: function () {
-                syncSearchViewportLayout(oController);
+                SearchViewportBindingRuntime.syncSearchViewportLayout(oController);
             }
         });
     }
@@ -32,7 +32,7 @@ sap.ui.define([
                     return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
                 },
                 syncViewportLayout: function () {
-                    syncSearchViewportLayout(oController);
+                    SearchViewportBindingRuntime.syncSearchViewportLayout(oController);
                 }
             }
         );
@@ -56,7 +56,7 @@ sap.ui.define([
                     return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
                 },
                 syncViewportLayout: function () {
-                    syncSearchViewportLayout(oController);
+                    SearchViewportBindingRuntime.syncSearchViewportLayout(oController);
                 }
             }
         );

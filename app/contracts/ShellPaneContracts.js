@@ -40,6 +40,11 @@ sap.ui.define([], function () {
         analytics: "/readiness/panes/analytics/loaded"
     });
 
+    var PREWARM_DELAYS_MS = Object.freeze({
+        detail: 80,
+        analytics: 140
+    });
+
     var LAZY_PANES = Object.freeze([
         PANES.DETAIL,
         PANES.ANALYTICS
@@ -53,6 +58,7 @@ sap.ui.define([], function () {
         STYLE_IDS: STYLE_IDS,
         STYLE_MODULES: STYLE_MODULES,
         READINESS_PATHS: READINESS_PATHS,
+        PREWARM_DELAYS_MS: PREWARM_DELAYS_MS,
         LAZY_PANES: LAZY_PANES
     });
 });

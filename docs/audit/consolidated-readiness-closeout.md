@@ -5,7 +5,7 @@
 - Structural architecture readiness: `97/100`
 - SAP Gateway cutover readiness: `78/100`
 - SAP licensing/certification-style readiness: `72/100`
-- Performance/progressive-readiness readiness: `84/100`
+- Performance/progressive-readiness readiness: `89/100`
 
 ## What Is Now Finished
 - `app/controller/support` drained and removed as active owner.
@@ -66,8 +66,12 @@
 - Live browser smoke is documented in `docs/audit/frontend-manual-smoke-report.md`
 - verified manually on live app:
   - startup shell without theme glitch
+  - shell user/profile render drift on fresh startup was reproduced and fixed; the visible header button now matches the resolved current-user profile on isolated cold starts
+  - isolated-origin startup stays stable after introducing background lazy-pane prewarm
   - search route renders and remains interactive
   - search sticky stack remains pinned under deep-scroll on a 101-row result set
+  - first detail open from live search row on isolated contour is about `1084ms`
+  - analytics route open from live shell on isolated contour is about `407ms`
   - direct detail route renders
   - detail edit mode acquires lock and updates heartbeat/autosave state
   - turning edit mode off stops heartbeat/autosave managers correctly
@@ -77,6 +81,7 @@
   - create draft save replaces `#/checklist/__CREATE` with the real checklist hash
   - closing detail after create-save returns browser hash and route state to search correctly
   - attachment create is confirmed live through unified `SaveChanges` delta payload with explicit `attachments[].edit_mode = C`
+  - persisted attachment delete is confirmed live through the sanctioned separate backend delete path `DELETE AttachmentSet(AttachmentKey='...')`
   - analytics route renders and remains interactive
 
 ## Remaining Structural Debt
@@ -85,7 +90,6 @@
 - `Component.js` is smaller and cleaner, but still remains a composition-heavy entry shell rather than a near-empty bootstrap facade.
 - `GatewayClient.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned public transport shell.
 - `AnalyticsPayloadNormalizer.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned analytics composition shell.
-- frontend user/session shell sync is improved, but remains a live-product polish item on some fresh startup contours.
 
 ## SAP Readiness Impact
 - Frontend structure is no longer a primary blocker for SAP best-practice review.
@@ -103,6 +107,7 @@
 
 ## Performance Readiness
 - Search/detail/analytics panes are segmented and lazy-mounted.
+- detail and analytics pane views are now background-prewarmed after shell-ready without blocking search critical path.
 - readiness telemetry is now explicit in runtime state under `state>/readiness/metrics/stages/*`
 - Search view and page CSS are modularized enough to support future bundle partitioning.
 - Detail view and page CSS are also modularized enough to support page-level and fragment-level bundle partitioning.

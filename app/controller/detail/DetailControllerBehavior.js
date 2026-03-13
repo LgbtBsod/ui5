@@ -119,6 +119,24 @@ sap.ui.define([
         oController._oStateValidationModel.attachPropertyChange(oController._fnStateValidationChange, oController);
     }
 
+    function currentHash() {
+        return String((typeof window !== "undefined" && window.location && window.location.hash) || "");
+    }
+
+    function toggleCloseFallbackListeners(oDomRef, fnHandler, bAttach) {
+        var aEvents = ["click", "pointerup", "mouseup", "touchend"];
+        if (!oDomRef || !fnHandler) {
+            return;
+        }
+        aEvents.forEach(function (sEventName) {
+            if (bAttach) {
+                oDomRef.addEventListener(sEventName, fnHandler, true);
+                return;
+            }
+            oDomRef.removeEventListener(sEventName, fnHandler, true);
+        });
+    }
+
     return {
         onInit: function () {
             this._facade = new DetailFacade();
@@ -150,6 +168,7 @@ sap.ui.define([
         onAfterRendering: function () {
             this._scheduleAttachmentDropZoneBind();
             this._bindDetailEditSwitchKeyboardFallback();
+            this._bindDetailCloseButtonFallback();
             this._bindAdaptiveDetailViewport();
             this._bindViewportPinnedControlRail();
             this._replayInitialDetailRouteIfNeeded();
@@ -164,8 +183,10 @@ sap.ui.define([
             }
             ControllerRouteRuntime.detachAllMatched(this);
             this._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(this._iAttachmentDropZoneBindTimer);
+            this._iDetailCloseFallbackTimer = SchedulingRuntime.clearTimer(this._iDetailCloseFallbackTimer);
             this._clearLocationValueHelpSearchTimer();
             this._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(this._iLocationVhTableSyncTimer);
+            this._unbindDetailCloseButtonFallback();
             this._unbindViewportPinnedControlRail();
             this._unbindAttachmentDropZone();
             ControllerResourceCleanup.destroyMapEntries(this._mLazyDialogs);
@@ -177,6 +198,42 @@ sap.ui.define([
             this._oStateValidationModel = null;
             this._fnStateValidationChange = null;
             this._bDetailInitialRouteHandled = null;
+        },
+
+        _bindDetailCloseButtonFallback: function () {
+            var oView = this.getView && this.getView();
+            var oViewDom = oView && oView.getDomRef && oView.getDomRef();
+            if (!oViewDom) {
+                return;
+            }
+            this._unbindDetailCloseButtonFallback();
+            this._fnDetailCloseBrowserClick = function (oEvent) {
+                var oTarget = oEvent && oEvent.target;
+                var sHashBefore = currentHash();
+                var sRouteBefore = String(ModelStateRuntime.read(this, STATE_MODEL, "/currentRouteName", "") || "");
+                if (!oTarget || !oTarget.closest || !oTarget.closest(".detailRailCloseAction")) {
+                    return;
+                }
+                this._iDetailCloseFallbackTimer = SchedulingRuntime.restartTimer(this._iDetailCloseFallbackTimer, function () {
+                    var sHashAfter = currentHash();
+                    var sRouteAfter = String(ModelStateRuntime.read(this, STATE_MODEL, "/currentRouteName", "") || "");
+                    this._iDetailCloseFallbackTimer = null;
+                    if (sHashAfter !== sHashBefore || sRouteAfter !== sRouteBefore || !NavigationContracts.isDetailRoute(sRouteAfter)) {
+                        return;
+                    }
+                    this.onCloseDetail();
+                }.bind(this), 0);
+            }.bind(this);
+            this._oDetailCloseButtonDom = oViewDom;
+            toggleCloseFallbackListeners(oViewDom, this._fnDetailCloseBrowserClick, true);
+        },
+
+        _unbindDetailCloseButtonFallback: function () {
+            if (this._oDetailCloseButtonDom && this._fnDetailCloseBrowserClick) {
+                toggleCloseFallbackListeners(this._oDetailCloseButtonDom, this._fnDetailCloseBrowserClick, false);
+            }
+            this._oDetailCloseButtonDom = null;
+            this._fnDetailCloseBrowserClick = null;
         },
 
         _replayInitialDetailRouteIfNeeded: function () {
