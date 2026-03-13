@@ -6,7 +6,7 @@ sap.ui.define([
 ], function (GatewayRequestRuntime, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts) {
     "use strict";
 
-    function loadDetailSnapshot(mArgs, mDeps) {
+    function fetchDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var pRoot = GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistRootSet", sRootId, {
             type: ODataKeyContracts.TYPES.ROOT_KEY
@@ -32,7 +32,7 @@ sap.ui.define([
         if (!sResolvedRootId || mDeps.isCreateId(sResolvedRootId)) {
             return Promise.resolve(oServerPayload || {});
         }
-        return loadDetailSnapshot({ rootId: sResolvedRootId }, mDeps).then(function (oSnapshot) {
+        return fetchDetailSnapshot({ rootId: sResolvedRootId }, mDeps).then(function (oSnapshot) {
             var oResolvedSnapshot = oSnapshot || {};
             var oMeta = Object.assign({}, oResolvedSnapshot.meta || {});
             var oRoot = Object.assign({}, oResolvedSnapshot.root || {});
@@ -60,6 +60,6 @@ sap.ui.define([
 
     return {
         enrichServerSnapshot: enrichServerSnapshot,
-        loadDetailSnapshot: loadDetailSnapshot
+        loadDetailSnapshot: fetchDetailSnapshot
     };
 });

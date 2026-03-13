@@ -1,0 +1,370 @@
+.chkApp .detailContent,
+.chkApp .detailContent .sapUxAPObjectPageLayout,
+.chkApp .detailContent .sapUxAPObjectPageWrapper,
+.chkApp .detailContent .sapUxAPObjectPageContainer,
+.chkApp .detailContent .sapUxAPObjectPageScroll,
+.chkApp .detailContent .sapFDynamicPage,
+.chkApp .detailContent .sapFDynamicPageContent,
+.chkApp .detailContent .sapFDynamicPageContentFitContainer,
+.chkApp .detailContent .sapFDynamicPageContentWrapper,
+.chkApp .detailContent .sapFDynamicPageHeader,
+.chkApp .detailContent .sapFDynamicPageHeaderWithContent,
+.chkApp .detailContent .sapFDynamicPageHeaderContent,
+.chkApp .detailContent .sapFDynamicPageHeaderContentWrapper,
+.chkApp .detailContent .sapUxAPObjectPageHeader,
+.chkApp .detailContent .sapUxAPObjectPageHeaderContent,
+.chkApp .detailContent .sapUxAPObjectPageHeaderContentFlexBox,
+.chkApp .detailContent .sapUxAPObjectPageHeaderContentItem,
+.chkApp .detailContent .sapUxAPObjectPageHeaderContentItemWrapper,
+.chkApp .detailContent .sapUxAPObjectPageHeaderIdentifier,
+.chkApp .detailContent .sapUxAPObjectPageHeaderIdentifierContainer,
+.chkApp .detailContent .sapUxAPObjectPageHeaderDetailsContainer,
+.chkApp .detailContent .sapUxAPObjectPageSection,
+.chkApp .detailContent .sapUxAPObjectPageSectionContainer,
+.chkApp .detailContent .sapUxAPObjectPageSubSection,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionFitContainer,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionHeader,
+.chkApp .detailContent .sapUxAPBlockContainer,
+.chkApp .detailContent .sapUxAPAnchorBar,
+.chkApp .detailContent .sapUxAPAnchorBarScrollContainer,
+.chkApp .detailContent [id$="detailObjectPage-spacer"],
+.chkApp .detailContent [id*="detailObjectPage-spacer"],
+.chkApp .detailContent .sapFDynamicPageContentWrapper::before,
+.chkApp .detailContent .sapFDynamicPageContentWrapper::after,
+.chkApp .detailContent .sapFDynamicPageHeader::before,
+.chkApp .detailContent .sapFDynamicPageHeader::after {
+  background: transparent;
+}
+
+.chkApp .detailContent,
+.chkApp .detailContent .sapUxAPObjectPageLayout,
+.chkApp .detailContent .sapUxAPObjectPageWrapper,
+.chkApp .detailContent .sapUxAPObjectPageContainer,
+.chkApp .detailContent .sapUxAPObjectPageScroll {
+  overflow-x: clip;
+}
+
+.chkApp .detailContent {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderTitle,
+.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContent,
+.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContentFlexBox,
+.chkApp .detailContent .sapUxAPObjectPageHeaderDetails,
+.chkApp .detailContent .sapUxAPObjectPageHeaderDetailsDesign-Light,
+.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageSectionHeader {
+  display: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.chkApp .detailMainExperienceStack,
+.chkApp .detailContent .sapUxAPBlockContainer,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionFitContainer {
+  overflow: visible;
+}
+
+.chkApp .detailMainExperienceStack {
+  gap: 0.92rem;
+}
+
+.chkApp .detailContent .sapUxAPObjectPageSubSection {
+  scroll-margin-top: calc(var(--app-shell-offset) + 5.25rem);
+}
+
+.chkApp .detailContent .sapUxAPAnchorBar .sapMITBFilter,
+.chkApp .detailContent .sapUxAPAnchorBar .sapMITBTextOnly .sapMITBText {
+  color: var(--text-subtle);
+}
+
+.chkApp .detailContent .sapUxAPAnchorBar .sapMITBSelected .sapMITBText {
+  color: var(--text-main);
+}
+
+.chkApp .detailContent .sapUxAPObjectPageSubSection,
+.chkApp .detailContent .sapUxAPObjectPageSubSectionHeader,
+.chkApp .detailContent .sapUxAPBlockContainer,
+.chkApp .detailContent .sapUxAPBlockContainerDesktop,
+.chkApp .detailContent .sapUxAPBlockContainerTablet,
+.chkApp .detailContent .sapUxAPBlockContainerPhone,
+.chkApp .detailContent .sapUxAPSubSectionContent {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 53.75rem) {
+  .chkApp .detailContent .sapUxAPObjectPageSubSection {
+    scroll-margin-top: calc(var(--app-shell-offset) + 3.75rem);
+  }
+}
+
+body.chkAppRoot.appDark .chkApp .detailHeroCard,
+body.chkAppRoot.appDark .chkApp .detailControlInlineCard,
+body.chkAppRoot.appDark .chkApp .detailSectionCard,
+body.chkAppRoot.appDark .chkApp .detailContent .infoCardGrid .infoCardTile {
+  background: var(--theme-block-bg);
+  border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
+  box-shadow: none;
+}
+
+body.chkAppRoot.appLight .chkApp .detailHeroCard,
+body.chkAppRoot.appLight .chkApp .detailControlInlineCard,
+body.chkAppRoot.appLight .chkApp .detailSectionCard,
+body.chkAppRoot.appLight .chkApp .detailContent .infoCardGrid .infoCardTile {
+  background:
+    radial-gradient(circle at top right, rgba(111, 182, 255, 0.08), transparent 34%),
+    color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+}
+
+body.chkAppRoot.appDark .chkApp .detailHeroCard,
+body.chkAppRoot.appDark .chkApp .detailWorkflowChip,
+body.chkAppRoot.appDark .chkApp .uxStatChip {
+  background: color-mix(in srgb, var(--theme-rail-bg) 92%, transparent);
+  border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
+}
+
+body.chkAppRoot.appDark .chkApp .detailContent .sapUxAPObjectPageHeaderDetails,
+body.chkAppRoot.appDark .chkApp .detailContent .sapUxAPObjectPageHeaderDetailsDesign-Light {
+  background: color-mix(in srgb, var(--theme-rail-bg) 84%, transparent);
+  border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
+  box-shadow: none;
+}
+
+body.chkAppRoot.appDark .chkApp .detailHeroSurface::before,
+body.chkAppRoot.appDark .chkApp .detailAttachmentsCard::before {
+  opacity: 0;
+}
+
+body.chkAppRoot.appDark .chkApp .detailHeroCard:hover {
+  transform: none;
+  box-shadow: 0 16px 32px rgba(2, 8, 18, 0.28);
+}
+
+.chkApp .detailHeroCard,
+.chkApp .detailWorkflowRail,
+.chkApp .detailAttachmentsCard {
+  width: 100%;
+}
+
+.chkApp .detailHeroCard {
+  position: relative;
+  padding: 1rem;
+  overflow: hidden;
+  background: var(--theme-block-bg);
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .detailHeroCard .sapMText,
+.chkApp .detailHeroCard .sapMTitle,
+.chkApp .detailWorkflowRail .sapMObjStatusText {
+  color: var(--text-main);
+}
+
+.chkApp .detailHeroCard:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardGrid {
+  margin-top: 0;
+  gap: 0.74rem;
+  align-items: start;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI {
+  min-width: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.chkApp .detailContent .infoCardGrid .infoCardTile:hover {
+  transform: translateY(-2px);
+}
+
+.chkApp .detailContent .infoCardGrid .infoCardValue,
+.chkApp .detailContent .infoCardGrid .sapMText,
+.chkApp .detailContent .infoCardGrid .sapMObjectStatusText,
+.chkApp .detailContent .infoCardGrid .sapMObjStatusText {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardHeaderRow {
+  gap: 0.4rem;
+  margin-bottom: 0.18rem;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardHeaderRow .infoCardTitle {
+  margin-bottom: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardPinBtn .sapMBtnInner {
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 999px;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--theme-rail-bg) 82%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailHeroCard,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroCard {
+  padding-block: 0.92rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailHeroHeader,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroHeader {
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailHeroIntro.sapMFlexBox,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroIntro.sapMFlexBox {
+  max-width: none;
+  gap: 0.16rem;
+  padding-inline-end: 0;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailHeroStatBoard,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailHeroStatBoard {
+  grid-template-columns: repeat(auto-fit, minmax(9.2rem, 1fr));
+  gap: 0.48rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard {
+  min-width: 0;
+  padding:
+    calc(0.72rem * var(--theme-density-scale))
+    calc(0.76rem * var(--theme-density-scale))
+    calc(0.76rem * var(--theme-density-scale));
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .infoCardGrid,
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .sapFGridList,
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .sapFGridListDefault,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .infoCardGrid,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .sapFGridList,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .sapFGridListDefault {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  margin-top: 0.16rem;
+  gap: 0.72rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .sapFGLI,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .sapFGLI {
+  grid-column: span 1;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .infoCardTile,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .infoCardTile {
+  padding: 0.84rem 0.88rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .infoCardTitle,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .infoCardTitle {
+  font-size: 0.7rem;
+}
+
+.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .infoCardValue,
+.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .infoCardValue {
+  font-size: 0.82rem;
+}
+
+.chkApp .detailAccessDeniedScene .detailAccessDeniedIllustration,
+.chkApp .detailAccessDeniedScene .sapMImg,
+.chkApp .detailAccessDeniedScene img {
+  width: min(100%, 21.875rem);
+  max-width: min(100%, 21.875rem);
+}
+
+.chkApp .detailHeroCard,
+.chkApp .detailInfoExperienceCard {
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 82%, transparent);
+  background: var(--theme-block-bg);
+  box-shadow: var(--theme-block-shadow);
+}
+
+.chkApp .detailContent .infoCardGrid .infoCardTile:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardPinBtn:hover .sapMBtnInner {
+  transform: none;
+  border-color: color-mix(in srgb, var(--border-strong) 60%, transparent);
+}
+
+.chkApp .detailInfoExperienceCard .infoCardTile {
+  border-color: transparent;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="datetime"] .infoCardTile {
+  min-height: 7.4rem;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observer"] .infoCardTile,
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="observed"] .infoCardTile {
+  min-height: 8.8rem;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI[data-cardkey="equipment"] .infoCardTile,
+.chkApp .detailContent .sapFGLI[data-cardkey="lpc"] .infoCardTile,
+.chkApp .detailContent .sapFGLI[data-cardkey="profession"] .infoCardTile {
+  min-height: 6.8rem;
+}
+.chkApp .detailHeroStatBoard.detailHeroStatBoardCompact {
+  gap: 0.35rem;
+}
+
+.chkApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip {
+  gap: 0.24rem;
+  min-height: 1.72rem;
+  padding: 0.2rem 0.62rem;
+}
+
+.chkApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip .sapMText:first-child {
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chkApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip .sapMText:last-child,
+.chkApp .detailHeroStatBoard.detailHeroStatBoardCompact .uxStatChip .sapMObjStatusText {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.chkApp .detailContent .infoCardGrid .infoCardTitle {
+  margin-bottom: 0.28rem;
+  font-size: 0.7rem;
+}
+
+.chkApp .detailChecksEmptyState,
+.chkApp .detailBarriersEmptyState {
+  border-radius: var(--radius-lg);
+}
+
+.chkApp .detailInfoSectionBody {
+  padding: 0.25rem;
+}
+
+.chkApp .modeHintText.sapMText {
+  font-size: 0.76rem;
+  font-style: italic;
+  opacity: 0.55;
+  line-height: 1.5;
+}

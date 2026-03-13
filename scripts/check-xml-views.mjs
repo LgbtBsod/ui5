@@ -92,8 +92,8 @@ assertMetrics(analyticsViewPath, { tags: 60, vbox: 6, hbox: 6, fragments: 8 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), { tags: 5, vbox: 0, hbox: 0, fragments: 3 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "DetailControlRail.fragment.xml"), { tags: 12, vbox: 2, hbox: 0, fragments: 4 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "DetailHeroStats.fragment.xml"), { tags: 24, vbox: 0, hbox: 6, fragments: 0 });
-assertMetrics(path.join(FRAGMENTS_ROOT, "DetailControlStatusRow.fragment.xml"), { tags: 10, vbox: 0, hbox: 0, fragments: 0 });
-assertMetrics(path.join(FRAGMENTS_ROOT, "DetailControlActionRow.fragment.xml"), { tags: 16, vbox: 0, hbox: 0, fragments: 1 });
+assertMetrics(path.join(FRAGMENTS_ROOT, "DetailControlStatusRow.fragment.xml"), { tags: 20, vbox: 0, hbox: 0, fragments: 0 });
+assertMetrics(path.join(FRAGMENTS_ROOT, "DetailControlActionRow.fragment.xml"), { tags: 44, vbox: 0, hbox: 0, fragments: 1 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "DetailChecksTables.fragment.xml"), { tags: 60, vbox: 0, hbox: 0, fragments: 0 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "DetailBarriersTables.fragment.xml"), { tags: 60, vbox: 0, hbox: 0, fragments: 0 });
 
