@@ -1,0 +1,48 @@
+.chkRipple {
+  position: relative;
+  overflow: hidden;
+}
+
+.chkRipple::after {
+  content: "";
+  position: absolute;
+  left: var(--mx, 50%);
+  top: var(--my, 50%);
+  width: 0;
+  height: 0;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.34), transparent 68%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chkRipple.is-rippling::after {
+  width: 18rem;
+  height: 18rem;
+  opacity: 1;
+  transition: width 620ms ease, height 620ms ease, opacity 620ms ease;
+}
+
+.detailDateTimeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+}
+
+.detailSemanticMetaBlock {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.detailSectionAnchorRail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.detailPersonSuggestInput,
+.detailDictionarySelect,
+.detailLocationInput {
+  width: 100%;
+}

@@ -1,0 +1,36 @@
+body.chkAppRoot .shellPopover,
+body.chkAppRoot .shellPopover.sapMPopover,
+body.chkAppRoot .shellPopover.sapMResponsivePopover,
+body.chkAppRoot .shellPopover .sapMPopoverCont,
+body.chkAppRoot .shellPopover .sapMDialogScrollCont,
+body.chkAppRoot .shellPopover .sapMDialogScroll {
+  max-width: min(92vw, 26rem);
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--shell-chip-bg) 28%, transparent), transparent 42%),
+    var(--shell-surface);
+  border-color: var(--shell-border);
+  box-shadow: var(--shell-shadow);
+  color: var(--text-main);
+}
+
+body.chkAppRoot .shellPopover,
+body.chkAppRoot .shellPopover.sapMPopover,
+body.chkAppRoot .shellPopover.sapMResponsivePopover {
+  width: min(92vw, 26rem);
+  min-width: min(22rem, 92vw);
+  max-width: min(92vw, 26rem);
+  box-sizing: border-box;
+  overflow: hidden;
+  contain: none;
+}
+
+body.chkAppRoot .shellPopover .sapMPopoverCont,
+body.chkAppRoot .shellPopover .sapMDialogScrollCont {
+  max-height: min(88vh, 42rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.chkApp .shellPopover {
+  contain: layout style;
+}
