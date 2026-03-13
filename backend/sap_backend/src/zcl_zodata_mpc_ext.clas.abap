@@ -47,11 +47,11 @@ CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
     " ── Root payload ─────────────────────────────────────────────
     " Maps to ZSTR_PCCT_SAVECHANGES_RQ (DDIC structure)
     " Contains:
-    "   root     : ZSTR_PCCT_ROOT_DELTA   (single root record delta)
+    "   root     : ZSTR_PCCT_ROOT_DELTA   (single root record delta with EDIT_MODE)
     "   checks   : ZTAB_PCCT_CHECK_DELTA  (table of check items)
     "   barriers : ZTAB_PCCT_BARRIER_DELTA(table of barrier items)
-    "   participants : ZTAB_PCCT_PART_DELTA
-    "   attachments  : ZTAB_PCCT_ATTACH_DELTA
+    "   participants : ZTAB_PCCT_PART_DELTA  (row delta with EDIT_MODE)
+    "   attachments  : ZTAB_PCCT_ATTACH_DELTA(row delta with EDIT_MODE)
     "   client_version : INT4 (optimistic concurrency)
 
     model->create_complex_type(

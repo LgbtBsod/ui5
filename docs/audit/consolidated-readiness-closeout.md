@@ -62,12 +62,24 @@
 - `node scripts/duplicate-responsibility-gate.js --json` -> `ok: true`
 - `node scripts/adapter-factory-boundary-gate.js --json` -> `ok: true`
 
+## Manual Frontend Smoke
+- Live browser smoke is documented in `docs/audit/frontend-manual-smoke-report.md`
+- verified manually on live app:
+  - startup shell without theme glitch
+  - shell user profile visible in header DOM
+  - search route renders and remains interactive
+  - direct detail route renders
+  - detail edit mode acquires lock and updates heartbeat/autosave state
+  - status validation works through ordinary save semantics
+  - analytics route renders and remains interactive
+
 ## Remaining Structural Debt
 - `search` still has remaining thick owners in sticky/view orchestration, though controller lifecycle/filter/toolbar glue is now separated.
 - `analytics` controller is now largely facade-shaped, but compare-year and drilldown-event glue can still be reduced further if the project wants stricter controller minimalism.
 - `Component.js` is smaller and cleaner, but still remains a composition-heavy entry shell rather than a near-empty bootstrap facade.
 - `GatewayClient.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned public transport shell.
 - `AnalyticsPayloadNormalizer.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned analytics composition shell.
+- frontend user/session shell sync is no longer tracked as active debt; the live DOM and route startup now receive the resolved current-user profile correctly.
 
 ## SAP Readiness Impact
 - Frontend structure is no longer a primary blocker for SAP best-practice review.

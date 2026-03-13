@@ -52,6 +52,7 @@ sap.ui.define([
             this._syncLayoutState();
             this._applyCompactDensityClass();
             this._applyInvertedBlockSchemeClass();
+            this._syncShellState();
             this._syncShellMetrics();
             this._syncShellFlexAllocation();
             this._syncLayoutViewportGeometry();
@@ -174,7 +175,7 @@ sap.ui.define([
                 this._fnShellStateChange = this._syncShellState.bind(this);
                 this._oShellStateModel = oState;
                 oState.attachPropertyChange(this._fnShellStateChange, this);
-                this._oShellUserBinding = oState.bindProperty("/currentUser/fetchedAt");
+                this._oShellUserBinding = oState.bindProperty("/currentUser");
                 this._oShellUserBinding.attachChange(this._fnShellStateChange);
                 this._oShellFrontendSourceBinding = oState.bindProperty("/frontendConfigSource");
                 this._oShellFrontendSourceBinding.attachChange(this._fnShellStateChange);

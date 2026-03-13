@@ -2,6 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
@@ -9,7 +10,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (UseCase, Result, Effects, AttachmentValueCodec, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     function buildLocalObjectUrl(oFile) {
@@ -26,30 +27,33 @@ sap.ui.define([
         var oMeta = (mInput && mInput.fileMeta) || {};
         var sRootKey = String((((oSnapshot || {}).root || {}).id) || (((oSnapshot || {}).root || {}).Key) || "").trim() || DraftChecklistFactory.createTempKey();
         var sAttachmentKey = DraftChecklistFactory.createTempKey();
-        var oAttachment = {
-            AttachmentKey: sAttachmentKey,
-            Key: sAttachmentKey,
-            client_row_id: sAttachmentKey,
-            RootKey: sRootKey,
-            FolderKey: sRootKey,
-            FileName: oMeta.fileName || (oFile && oFile.name) || "",
-            fileName: oMeta.fileName || (oFile && oFile.name) || "",
-            MimeType: oMeta.mimeType || (oFile && oFile.type) || "application/octet-stream",
-            mimeType: oMeta.mimeType || (oFile && oFile.type) || "application/octet-stream",
-            FileSize: Number(oMeta.fileSize || (oFile && oFile.size) || 0) || 0,
-            fileSize: Number(oMeta.fileSize || (oFile && oFile.size) || 0) || 0,
-            CategoryKey: String(oMeta.categoryKey || "GEN").trim() || "GEN",
-            categoryKey: String(oMeta.categoryKey || "GEN").trim() || "GEN",
-            CreatedOn: new Date().toISOString(),
-            ChangedOn: new Date().toISOString(),
-            staged: true,
-            localObjectUrl: buildLocalObjectUrl(oFile),
-            _file: oFile || null
-        };
-        return {
-            attachment: oAttachment,
-            attachments: aCurrent.concat([oAttachment])
-        };
+        return AttachmentValueCodec.fileToBase64(oFile).then(function (sFileBase64) {
+            var oAttachment = {
+                AttachmentKey: sAttachmentKey,
+                Key: sAttachmentKey,
+                client_row_id: sAttachmentKey,
+                RootKey: sRootKey,
+                FolderKey: sRootKey,
+                FileName: oMeta.fileName || (oFile && oFile.name) || "",
+                fileName: oMeta.fileName || (oFile && oFile.name) || "",
+                MimeType: oMeta.mimeType || (oFile && oFile.type) || "application/octet-stream",
+                mimeType: oMeta.mimeType || (oFile && oFile.type) || "application/octet-stream",
+                FileSize: Number(oMeta.fileSize || (oFile && oFile.size) || 0) || 0,
+                fileSize: Number(oMeta.fileSize || (oFile && oFile.size) || 0) || 0,
+                CategoryKey: String(oMeta.categoryKey || "GEN").trim() || "GEN",
+                categoryKey: String(oMeta.categoryKey || "GEN").trim() || "GEN",
+                CreatedOn: new Date().toISOString(),
+                ChangedOn: new Date().toISOString(),
+                staged: true,
+                localObjectUrl: buildLocalObjectUrl(oFile),
+                _file: oFile || null,
+                _fileBase64: sFileBase64 || ""
+            };
+            return {
+                attachment: oAttachment,
+                attachments: aCurrent.concat([oAttachment])
+            };
+        });
     }
 
     function buildUploadEffects(mCtx, oAttachment, sToastKey) {

@@ -5,10 +5,38 @@ sap.ui.define([], function () {
         return String(sValue || "").replace(/^data:.*?;base64,/i, "").trim();
     }
 
+    function isBlobLike(oValue) {
+        return typeof Blob !== "undefined" && oValue instanceof Blob;
+    }
+
+    function tryReadEmbeddedBase64(oValue) {
+        if (!oValue || typeof oValue !== "object") {
+            return "";
+        }
+        return stripDataUrlPrefix(
+            oValue._fileBase64 ||
+            oValue.fileBase64 ||
+            oValue.base64 ||
+            oValue.value ||
+            oValue.content ||
+            oValue.dataUrl ||
+            ""
+        );
+    }
+
     function fileToBase64(oFile) {
         return new Promise(function (resolve, reject) {
             var oReader;
+            var sEmbeddedBase64 = tryReadEmbeddedBase64(oFile);
+            if (sEmbeddedBase64) {
+                resolve(sEmbeddedBase64);
+                return;
+            }
             if (!oFile || typeof FileReader === "undefined") {
+                resolve("");
+                return;
+            }
+            if (!isBlobLike(oFile)) {
                 resolve("");
                 return;
             }

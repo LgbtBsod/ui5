@@ -51,9 +51,6 @@ sap.ui.define([
             autosaveChecklist: function (mArgs) {
                 return ODataChecklistMutationRuntime.autosaveChecklist(mArgs, mutationDeps());
             },
-            setChecklistStatus: function (mArgs) {
-                return ODataChecklistStatusRuntime.setChecklistStatus(mArgs, mutationDeps());
-            },
             deleteChecklist: function (mArgs) {
                 return ODataChecklistStatusRuntime.deleteChecklist(mArgs, mutationDeps());
             },

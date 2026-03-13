@@ -25,9 +25,23 @@ sap.ui.define([
         ).trim();
     }
 
+    function withActionBusy(oController, sPath, fnAction) {
+        var vResult;
+        ControllerViewStateRuntime.setFlag(oController, sPath, true);
+        try {
+            vResult = fnAction();
+        } catch (oError) {
+            ControllerViewStateRuntime.setFlag(oController, sPath, false);
+            throw oError;
+        }
+        return Promise.resolve(vResult).finally(function () {
+            ControllerViewStateRuntime.setFlag(oController, sPath, false);
+        });
+    }
+
     function onCreate(oController) {
         SearchViewBehavior.captureSearchScrollPosition(oController);
-        return oController._withActionBusy("/createActionBusy", function () {
+        return withActionBusy(oController, "/createActionBusy", function () {
             NavigationIntentService.navigateToDetail(oController, CreateSentinel.toRouteId());
             return Promise.resolve(true);
         });

@@ -61,6 +61,13 @@ def test_gateway_canonical_contract_and_metadata():
         assert permission_body.get("CanEdit") is True
         assert permission_body.get("CanDelete") is True
 
+        binary_permission = client.get(
+            f"{SERVICE_ROOT}/ChecklistPermissionSet(binary'{root_key}')",
+            headers=_as_user("demoUser")
+        )
+        assert binary_permission.status_code == 200 and "d" in binary_permission.json()
+        assert binary_permission.json().get("d", {}).get("RootKey") == root_key
+
         current_user = client.get(f"{SERVICE_ROOT}/CurrentUserSet('CURRENT')", headers=_as_user("demoUser"))
         assert current_user.status_code == 200 and "d" in current_user.json()
         current_user_body = current_user.json().get("d", {})
@@ -428,6 +435,17 @@ def test_checklist_permission_set_supports_view_edit_delete_deny_patterns():
         assert no_delete.get("CanEdit") is True
         assert no_delete.get("CanDelete") is False
         assert no_delete.get("ReasonCode") == "NO_DELETE_AUTH"
+
+
+def test_last_change_entity_supports_binary_root_key_literal():
+    with TestClient(app) as client:
+        root_key = _sample_root(client)
+
+        response = client.get(f"{SERVICE_ROOT}/LastChangeSet(RootKey=binary'{root_key}')")
+        assert response.status_code == 200
+        payload = response.json().get("d", {})
+        assert payload.get("RootKey") == root_key
+        assert payload.get("AggChangedOn")
 
 
 def test_odata_x_http_method_override_delete_is_supported():

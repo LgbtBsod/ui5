@@ -71,6 +71,10 @@ INTERFACE zif_zodata_bopf_mapper PUBLIC.
   " High-level helper: given a structured SaveChanges request,
   " build the full tt_change list by iterating all delta tables.
   " The mapper owns node-config, so callers don't need BOPF constants.
+  " Expected deep contract:
+  "   - root/checks/barriers/participants/attachments form one delta payload
+  "   - mutable rows carry explicit edit_mode = C|U|D
+  "   - root-edit_mode is temporarily backward-compatible and may default to U
   METHODS build_change_list
     IMPORTING
       !is_request        TYPE zstr_pcct_savechanges_rq

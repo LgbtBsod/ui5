@@ -64,6 +64,9 @@ sap.ui.define([
             oControl._oUserButton.setText(oControl.getUserLabel());
             oControl._oUserButton.setTooltip(oControl.getUserTooltip());
             oControl._oUserButton.setIcon(oControl.getUserIcon());
+            if (oControl._oUserButton.getDomRef && oControl._oUserButton.getDomRef()) {
+                oControl._oUserButton.invalidate();
+            }
         }
     }
 

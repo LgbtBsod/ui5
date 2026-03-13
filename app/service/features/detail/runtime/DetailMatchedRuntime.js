@@ -120,7 +120,7 @@ sap.ui.define([
             mContext.oSelected.setData(DraftChecklistFactory.createEmptyDraft());
             ModelStateRuntime.writeOnModel(mContext.oSelected, "/attachments", []);
         }
-        mHooks.openChecklist({ id: CreateSentinel.VALUE, rootId: CreateSentinel.VALUE });
+        return mHooks.openChecklist({ id: CreateSentinel.VALUE, rootId: CreateSentinel.VALUE });
     }
 
     return {

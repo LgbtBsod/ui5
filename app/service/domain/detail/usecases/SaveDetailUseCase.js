@@ -7,12 +7,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, ModelPathContracts, WorkflowContracts, DeltaContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, ModelPathContracts, WorkflowContracts) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -21,104 +20,6 @@ sap.ui.define([
 
     SaveDetailUseCase.prototype = Object.create(UseCase.prototype);
     SaveDetailUseCase.prototype.constructor = SaveDetailUseCase;
-
-    function stagedAttachments(oChecklist) {
-        return ((oChecklist && oChecklist.attachments) || []).filter(function (oAttachment) {
-            return !!(oAttachment && oAttachment.staged && oAttachment._file);
-        });
-    }
-
-    function revokeLocalUrl(oAttachment) {
-        var sUrl = oAttachment && oAttachment.localObjectUrl;
-        if (sUrl && typeof window !== "undefined" && window.URL && typeof window.URL.revokeObjectURL === "function") {
-            window.URL.revokeObjectURL(sUrl);
-        }
-    }
-
-    function buildStagedAttachmentPayload(oAttachment, sRootId) {
-        return AttachmentValueCodec.fileToBase64(oAttachment && oAttachment._file).then(function (sValue) {
-            return {
-                Key: String((oAttachment && (oAttachment.client_row_id || oAttachment.AttachmentKey || oAttachment.Key)) || "").trim(),
-                ParentKey: String((oAttachment && (oAttachment.RootKey || oAttachment.rootKey)) || sRootId || "").trim(),
-                RootKey: String(sRootId || "").trim(),
-                FolderKey: String((oAttachment && (oAttachment.FolderKey || oAttachment.folderKey)) || sRootId || "").trim(),
-                CategoryKey: String((oAttachment && (oAttachment.CategoryKey || oAttachment.categoryKey)) || "GEN").trim() || "GEN",
-                Type: String((oAttachment && (oAttachment.CategoryKey || oAttachment.categoryKey)) || "GEN").trim() || "GEN",
-                FileName: String((oAttachment && (oAttachment.FileName || oAttachment.fileName)) || "").trim(),
-                Name: String((oAttachment && (oAttachment.FileName || oAttachment.fileName)) || "").trim(),
-                MimeType: String((oAttachment && (oAttachment.MimeType || oAttachment.mimeType)) || "application/octet-stream").trim() || "application/octet-stream",
-                Description: String((oAttachment && (oAttachment.Description || oAttachment.description || oAttachment.Desc || oAttachment.desc)) || "").trim(),
-                FileSize: Number((oAttachment && (oAttachment.FileSize || oAttachment.fileSize)) || 0) || 0,
-                FileSizeContent: Number((oAttachment && (oAttachment.FileSize || oAttachment.fileSize)) || 0) || 0,
-                Value: sValue,
-                edit_mode: DeltaContracts.EDIT_MODE.CREATE
-            };
-        });
-    }
-
-    function serializeStagedAttachments(aAttachments, sRootId) {
-        var aPending = stagedAttachments({ attachments: aAttachments });
-        if (!aPending.length) {
-            return Promise.resolve([]);
-        }
-        return Promise.all(aPending.map(function (oAttachment) {
-            return buildStagedAttachmentPayload(oAttachment, sRootId);
-        }));
-    }
-
-    function refreshAttachments(oRepo, sRootId, aCurrentAttachments, bForceReload) {
-        if (!sRootId || !oRepo || typeof oRepo.loadAttachments !== "function" || !bForceReload) {
-            return Promise.resolve(Array.isArray(aCurrentAttachments) ? aCurrentAttachments : []);
-        }
-        return oRepo.loadAttachments({ rootId: sRootId }).then(function (oLoaded) {
-            return (oLoaded && oLoaded.attachments) || [];
-        }).catch(function () {
-            return Array.isArray(aCurrentAttachments) ? aCurrentAttachments : [];
-        });
-    }
-
-    function mergeDeltaAttachments(oDelta, aAttachmentRows) {
-        var oPayload = Object.assign({}, oDelta || {});
-        var mByKey = {};
-        var aAnonymous = [];
-
-        (Array.isArray(oPayload.attachments) ? oPayload.attachments : []).forEach(function (oRow) {
-            var sKey = String((oRow && (oRow.client_row_id || oRow.AttachmentKey || oRow.attach_uuid || oRow.Key)) || "").trim();
-            if (sKey) {
-                mByKey[sKey] = Object.assign({}, oRow);
-                return;
-            }
-            aAnonymous.push(Object.assign({}, oRow));
-        });
-
-        (Array.isArray(aAttachmentRows) ? aAttachmentRows : []).forEach(function (oRow) {
-            var sKey = String((oRow && (oRow.client_row_id || oRow.AttachmentKey || oRow.attach_uuid || oRow.Key)) || "").trim();
-            if (sKey) {
-                mByKey[sKey] = Object.assign({}, mByKey[sKey] || {}, oRow);
-                return;
-            }
-            aAnonymous.push(Object.assign({}, oRow));
-        });
-
-        oPayload.attachments = Object.keys(mByKey).map(function (sKey) {
-            return mByKey[sKey];
-        }).concat(aAnonymous);
-        return oPayload;
-    }
-
-    function cleanupStagedAttachmentUrls(aAttachments) {
-        (Array.isArray(aAttachments) ? aAttachments : []).forEach(revokeLocalUrl);
-    }
-
-    function stripStagedAttachmentInternals(aAttachments) {
-        return (Array.isArray(aAttachments) ? aAttachments : []).map(function (oAttachment) {
-            var oClean = Object.assign({}, oAttachment || {});
-            delete oClean._file;
-            delete oClean.localObjectUrl;
-            delete oClean.staged;
-            return oClean;
-        });
-    }
 
     function readSelectedChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
@@ -175,8 +76,8 @@ sap.ui.define([
             ]));
         }
 
-        return serializeStagedAttachments(aCurrentAttachments, bCreate ? "" : sRootId).then(function (aStagedPayload) {
-            var oUnifiedDelta = mergeDeltaAttachments(oDelta, aStagedPayload);
+        return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, bCreate ? "" : sRootId).then(function (aStagedPayload) {
+            var oUnifiedDelta = DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aStagedPayload);
             var pSave = bCreate
                 ? Promise.resolve(oRepo.createChecklist({ delta: oUnifiedDelta }))
                 : Promise.resolve(oRepo.saveChecklist(DetailRuntimePayload.saveRequest({
@@ -203,10 +104,10 @@ sap.ui.define([
                 }
 
                 return Promise.all([
-                    refreshAttachments(oRepo, sServerRootId || sRootId, aCurrentAttachments, bNeedsAttachmentReload),
+                    DetailAttachmentDeltaRuntime.refreshAttachments(oRepo, sServerRootId || sRootId, aCurrentAttachments, bNeedsAttachmentReload),
                     pLockAcquire
                 ]).then(function (aPostSave) {
-                    var aSyncedAttachments = stripStagedAttachmentInternals(aPostSave[0]);
+                    var aSyncedAttachments = DetailAttachmentDeltaRuntime.stripStagedAttachmentInternals(aPostSave[0]);
                     var oLockResult = aPostSave[1];
         var oSavedSnapshot = DetailSaveRuntime.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
                     var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
@@ -221,7 +122,7 @@ sap.ui.define([
                     Effects.modelPatch("selected", "/", oSelectedSnapshot),
                     Effects.modelPatch("selected", "/attachments", aSyncedAttachments)
                     ];
-                    cleanupStagedAttachmentUrls(aCurrentAttachments);
+                    DetailAttachmentDeltaRuntime.cleanupStagedAttachmentUrls(aCurrentAttachments);
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
                         aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
                         aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));

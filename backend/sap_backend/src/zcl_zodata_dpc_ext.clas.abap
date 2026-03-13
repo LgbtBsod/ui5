@@ -54,6 +54,12 @@ CLASS zcl_zodata_dpc_ext DEFINITION
         /iwbep/cx_mgw_busi_exception
         zcx_zodata_error.
 
+    METHODS validate_save_request
+      IMPORTING
+        is_request TYPE zstr_pcct_savechanges_rq
+      RAISING
+        /iwbep/cx_mgw_busi_exception.
+
     "-- Build a business exception from a text (with message container)
     METHODS raise_busi_exception
       IMPORTING
@@ -366,10 +372,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
           lt_failed TYPE /bobf/t_frw_key,
           lt_msg    TYPE /bobf/t_frw_message_k.
 
-    " ── Validate root UUID ──────────────────────────────────────
-    IF is_request-root-pcct_uuid IS INITIAL.
-      raise_busi_exception( 'SaveChanges: root.pcct_uuid is required.' ).
-    ENDIF.
+    validate_save_request( is_request ).
 
     " ── Build change list from deep payload ─────────────────────
     " Mapper resolves all node configs, allocates internal refs,
@@ -417,6 +420,63 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       APPEND VALUE #(
         msg_type = <ls_msg>-message->if_message~get_message_attributes( )-msg_type
         msg_text = lv_msg_text ) TO rs_response-messages.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD validate_save_request.
+    IF is_request-root-pcct_uuid IS INITIAL.
+      raise_busi_exception( 'SaveChanges: root.pcct_uuid is required.' ).
+    ENDIF.
+
+    IF is_request-root-edit_mode IS NOT INITIAL
+       AND is_request-root-edit_mode <> 'C'
+       AND is_request-root-edit_mode <> 'U'
+       AND is_request-root-edit_mode <> 'D'.
+      raise_busi_exception( 'SaveChanges: root.edit_mode must be C, U or D.' ).
+    ENDIF.
+
+    LOOP AT is_request-checks ASSIGNING FIELD-SYMBOL(<ls_check>).
+      IF <ls_check>-edit_mode IS INITIAL.
+        raise_busi_exception( 'SaveChanges: checks[].edit_mode is required.' ).
+      ENDIF.
+      IF <ls_check>-edit_mode <> 'C'
+         AND <ls_check>-edit_mode <> 'U'
+         AND <ls_check>-edit_mode <> 'D'.
+        raise_busi_exception( 'SaveChanges: checks[].edit_mode must be C, U or D.' ).
+      ENDIF.
+    ENDLOOP.
+
+    LOOP AT is_request-barriers ASSIGNING FIELD-SYMBOL(<ls_barrier>).
+      IF <ls_barrier>-edit_mode IS INITIAL.
+        raise_busi_exception( 'SaveChanges: barriers[].edit_mode is required.' ).
+      ENDIF.
+      IF <ls_barrier>-edit_mode <> 'C'
+         AND <ls_barrier>-edit_mode <> 'U'
+         AND <ls_barrier>-edit_mode <> 'D'.
+        raise_busi_exception( 'SaveChanges: barriers[].edit_mode must be C, U or D.' ).
+      ENDIF.
+    ENDLOOP.
+
+    LOOP AT is_request-participants ASSIGNING FIELD-SYMBOL(<ls_participant>).
+      IF <ls_participant>-edit_mode IS INITIAL.
+        raise_busi_exception( 'SaveChanges: participants[].edit_mode is required.' ).
+      ENDIF.
+      IF <ls_participant>-edit_mode <> 'C'
+         AND <ls_participant>-edit_mode <> 'U'
+         AND <ls_participant>-edit_mode <> 'D'.
+        raise_busi_exception( 'SaveChanges: participants[].edit_mode must be C, U or D.' ).
+      ENDIF.
+    ENDLOOP.
+
+    LOOP AT is_request-attachments ASSIGNING FIELD-SYMBOL(<ls_attachment>).
+      IF <ls_attachment>-edit_mode IS INITIAL.
+        raise_busi_exception( 'SaveChanges: attachments[].edit_mode is required.' ).
+      ENDIF.
+      IF <ls_attachment>-edit_mode <> 'C'
+         AND <ls_attachment>-edit_mode <> 'U'
+         AND <ls_attachment>-edit_mode <> 'D'.
+        raise_busi_exception( 'SaveChanges: attachments[].edit_mode must be C, U or D.' ).
+      ENDIF.
     ENDLOOP.
   ENDMETHOD.
 

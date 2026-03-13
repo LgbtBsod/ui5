@@ -16,8 +16,7 @@ sap.ui.define([], function () {
             /^LockHeartbeat$/i,
             /^LockRelease$/i,
             /^CopyChecklist$/i,
-            /^AnalyticsRefreshTrigger$/i,
-            /^SetChecklistStatus$/i
+            /^AnalyticsRefreshTrigger$/i
         ],
         DIRECT_GET_FUNCTION_ALLOWLIST: [
             /^GetHierarchy$/i

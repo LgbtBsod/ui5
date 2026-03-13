@@ -108,11 +108,11 @@ sap.ui.define([
             }
 
             if (mContext.bCreate) {
-                DetailMatchedRuntime.openCreateDraft(this, mContext, {
+                Promise.resolve(DetailMatchedRuntime.openCreateDraft(this, mContext, {
                     openChecklist: function (mInput) {
                         return DetailCommandPolicy.open(this, mInput);
                     }.bind(this)
-                }).then(function (oResult) {
+                })).then(function (oResult) {
                     markDetailReady(this, {
                         mode: "create",
                         rootId: mContext.sId

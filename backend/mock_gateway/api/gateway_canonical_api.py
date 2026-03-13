@@ -109,15 +109,25 @@ def _uuid_from_hex(value: str) -> str:
         return str(value or "")
 
 
+def _strip_odata_binary_literal(value: str) -> str:
+    raw = str(value or "").strip()
+    match = re.fullmatch(r"binary'([^']+)'", raw, flags=re.IGNORECASE)
+    if match:
+        return str(match.group(1) or "").strip()
+    return raw
+
+
 def _normalize_hex_key(value: str) -> str:
-    return normalize_raw16_hex(value)
+    return normalize_raw16_hex(_strip_odata_binary_literal(value))
 
 
 def _entity_key(key_expr: str) -> str:
-    cleaned = str(key_expr or "").strip().strip("'")
+    cleaned = str(key_expr or "").strip()
     for prefix in ("Key=", "RootKey=", "AttachmentKey=", "FolderKey="):
         if cleaned.startswith(prefix):
-            cleaned = cleaned.split("=", 1)[1].strip().strip("'")
+            cleaned = cleaned.split("=", 1)[1].strip()
+    cleaned = _strip_odata_binary_literal(cleaned)
+    cleaned = cleaned.strip("'")
     return _uuid_from_hex(cleaned)
 
 
@@ -1189,7 +1199,7 @@ def _optimistic_check(client_agg: str | None, root: ChecklistRoot):
 
 def _load_root_or_error(db: Session, root_key: str):
     try:
-        _normalize_hex_key(root_key)
+        _entity_key(root_key)
     except ValueError:
         return None, _err(400, "VALIDATION_ERROR", "RootKey must be RAW16 HEX (32 chars)")
     root = db.query(ChecklistRoot).filter(

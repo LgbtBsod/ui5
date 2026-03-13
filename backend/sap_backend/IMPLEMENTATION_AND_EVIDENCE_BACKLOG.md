@@ -44,6 +44,16 @@ Repo-side owners:
 - `app/service/shared/delta/DeltaFieldMappers.js`
 - `app/infra/adapters/shared/ODataChecklistPayloadMapper.js`
 - `backend/sap_backend/src/zcl_zodata_bopf_mapper.clas.abap`
+- `backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap`
+
+Repo-side hardening completed:
+- DPC validates deep delta contract before BOPF mapping:
+  - `root.pcct_uuid` required
+  - `checks[].edit_mode` required
+  - `barriers[].edit_mode` required
+  - `participants[].edit_mode` required
+  - `attachments[].edit_mode` required
+- MPC documentation now explicitly states that root, participant, and attachment DDIC delta structures are expected to expose `EDIT_MODE`
 
 ## ABAP Code Work Still Required
 

@@ -16,7 +16,7 @@ FRONTEND_TIMER_TEST_PROFILE = {
     "heartbeat_ms": 3000,
     "lock_status_ms": 2000,
     "gcd_ms": 5000,
-    "idle_ms": 15000,
+    "idle_ms": 600000,
     "autosave_interval_ms": 4000,
     "autosave_debounce_ms": 400,
     "network_grace_ms": 4000,

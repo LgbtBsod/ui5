@@ -174,6 +174,7 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     save_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "SaveDetailUseCase.js")
     autosave_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "AutosaveDetailUseCase.js")
     abap_mapper = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_bopf_mapper.clas.abap")
+    abap_dpc = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_dpc_ext.clas.abap")
 
     assert 'CREATE: "C"' in delta_contracts
     assert 'UPDATE: "U"' in delta_contracts
@@ -191,6 +192,11 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "mergeDeltaAttachments" in save_usecase
     assert "mergeDeltaAttachments" in autosave_usecase
     assert "is_root-edit_mode IS NOT INITIAL" in abap_mapper
+    assert "METHOD validate_save_request." in abap_dpc
+    assert "checks[].edit_mode is required." in abap_dpc
+    assert "barriers[].edit_mode is required." in abap_dpc
+    assert "participants[].edit_mode is required." in abap_dpc
+    assert "attachments[].edit_mode is required." in abap_dpc
 
 
 def test_start_local_env_supports_python_fallback_and_external_gateway_mode():
@@ -226,15 +232,17 @@ def test_search_request_window_supports_legacy_search_max_results_shape():
 
 def test_sticky_runtime_is_route_scoped_without_global_body_observer():
     legacy_path = APP_ROOT / "search-toolbar-sticky-runtime.js"
-    source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewportRuntime.js")
+    runtime_source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewportRuntime.js")
+    binding_source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewportBindingRuntime.js")
 
     assert not legacy_path.exists()
-    assert "MutationObserver" not in source
-    assert 'new window.ResizeObserver(function () {' in source
-    assert 'window.addEventListener("resize", oController._fnSearchViewportResize);' in source
-    assert 'window.removeEventListener("resize", oController._fnSearchViewportResize);' in source
-    assert 'oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });' in source
-    assert 'oObserver.disconnect();' in source
+    assert "MutationObserver" not in runtime_source
+    assert "MutationObserver" not in binding_source
+    assert 'new window.ResizeObserver(function () {' in binding_source
+    assert 'window.addEventListener("resize", oController._fnSearchViewportResize);' in binding_source
+    assert 'window.removeEventListener("resize", oController._fnSearchViewportResize);' in binding_source
+    assert 'oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });' in binding_source
+    assert 'oObserver.disconnect();' in binding_source
 
 
 def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():

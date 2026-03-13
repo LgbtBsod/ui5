@@ -184,56 +184,7 @@ sap.ui.define([
             }
         },
         exit: function () {
-            if (this._oLifecycleRouter && this._fnBeforeRouteMatched && this._oLifecycleRouter.detachBeforeRouteMatched) {
-                this._oLifecycleRouter.detachBeforeRouteMatched(this._fnBeforeRouteMatched, this);
-            }
-            if (this._oDirtyStateBinding && this._fnDirtyStateBindingChange) {
-                this._oDirtyStateBinding.detachChange(this._fnDirtyStateBindingChange);
-                this._oDirtyStateBinding.destroy();
-            }
-            (this._aLockScopedStateBindings || []).forEach(function (oEntry) {
-                if (oEntry && oEntry.binding && oEntry.handler) {
-                    oEntry.binding.detachChange(oEntry.handler);
-                    oEntry.binding.destroy();
-                }
-            });
-            if (typeof this._detachInitRuntimeListeners === "function") {
-                this._detachInitRuntimeListeners();
-            }
-            if (this._oInteractionFxHandle && this._oInteractionFxHandle.destroy) {
-                this._oInteractionFxHandle.destroy();
-                this._oInteractionFxHandle = null;
-            }
-            this._stopAllManagers();
-            if (this._fnUnregisterBeacon) {
-                this._fnUnregisterBeacon();
-            }
-            if (this._fnCrossTabStorage) {
-                window.removeEventListener("storage", this._fnCrossTabStorage);
-            }
-            if (this._oCrossTabChannel && typeof this._oCrossTabChannel.close === "function") {
-                this._oCrossTabChannel.close();
-            }
-            if (this._fnOnFullSave) {
-                window.removeEventListener("pcct:fullSave", this._fnOnFullSave);
-            }
-            if (typeof this._fnUnsubscribeRuntimeSettings === "function") {
-                this._fnUnsubscribeRuntimeSettings();
-            }
-            ComponentAppRuntime.clearComponentTimers(this);
-            this._fnCrossTabStorage = null;
-            this._oCrossTabChannel = null;
-            this._oLifecycleRouter = null;
-            this._fnBeforeRouteMatched = null;
-            this._oDirtyStateBinding = null;
-            this._fnDirtyStateBindingChange = null;
-            this._aLockScopedStateBindings = null;
-            this._oStateLifecycleModel = null;
-            this._oSelectedLifecycleModel = null;
-            this._fnStateModelPropertyChange = null;
-            this._fnSelectedModelPropertyChange = null;
-            this._detachInitRuntimeListeners = null;
-            this._fnUnsubscribeRuntimeSettings = null;
+            ComponentAppRuntime.destroyComponentRuntime(this);
         }
     });
 });

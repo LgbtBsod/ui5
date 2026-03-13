@@ -1,31 +1,26 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFilterSegmentBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFormatterBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFilterLifecycleBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLocationSuggestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchToolbarDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchToolbarBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchInteractionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchAnalyticsIntentBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "sap/ui/core/Item"
-], function (ControllerViewStateRuntime, SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchCommandPolicy, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchAnalyticsIntentBehavior, SearchLoadRuntime, SearchViewBehavior, SearchToolbarContracts, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, Item) {
+], function (SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchInteractionBehavior, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerViewStateRuntime, SearchToolbarContracts, ModelContracts, OperationSourceContracts, Item) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
-    var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
     var STATE_MODEL = MODELS.STATE;
     var PATHS = SearchToolbarContracts.PATHS;
 
@@ -38,29 +33,31 @@ sap.ui.define([
         });
     }
 
+    function withActionBusy(oController, sPath, fnAction) {
+        var vResult;
+        ControllerViewStateRuntime.setFlag(oController, sPath, true);
+        try {
+            vResult = fnAction();
+        } catch (oError) {
+            ControllerViewStateRuntime.setFlag(oController, sPath, false);
+            throw oError;
+        }
+        return Promise.resolve(vResult).finally(function () {
+            ControllerViewStateRuntime.setFlag(oController, sPath, false);
+        });
+    }
+
     return {
+        _withActionBusy: function (sPath, fnAction) {
+            return withActionBusy(this, sPath, fnAction);
+        },
+
         onInit: function () {
             SearchLifecycleBehavior.onInit(this);
         },
 
         onExit: function () {
             SearchLifecycleBehavior.onExit(this);
-        },
-
-        _withActionBusy: function (sViewBusyPath, fnAction, fnSyncControlBusy) {
-            if (typeof fnSyncControlBusy === "function") {
-                fnSyncControlBusy(true);
-            }
-            return ControllerViewStateRuntime.withFlag(this, sViewBusyPath, function () {
-                if (typeof fnAction === "function") {
-                    return fnAction();
-                }
-                return undefined;
-            }).finally(function () {
-                if (typeof fnSyncControlBusy === "function") {
-                    fnSyncControlBusy(false);
-                }
-            });
         },
 
         _onSearchMatched: function () {
@@ -97,26 +94,11 @@ sap.ui.define([
         },
 
         onSmartSearch: function () {
-            ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SEARCH_INTERACTION_READY, {
-                action: "smartSearch"
-            });
-            SearchViewBehavior.beginSearchLoadingFeedback(this);
-            return SearchFilterLifecycleBehavior.onSmartSearch(this, function (sBusyPath, fnAction) {
-                return this._withActionBusy(sBusyPath, fnAction, function (bBusy) {
-                    SearchViewBehavior.setSearchActionBusy(this, bBusy);
-                }.bind(this));
-            }.bind(this));
+            return SearchInteractionBehavior.onSmartSearch(this);
         },
 
         onRetrySearchLoad: function () {
-            SearchLoadRuntime.markLoading(this);
-            SearchViewBehavior.beginSearchLoadingFeedback(this);
-            return SearchCommandPolicy.rebind(this, { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
-            SearchLoadRuntime.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
-        }.bind(this)).catch(function (oError) {
-                SearchLoadRuntime.applyLoadError(this, String((oError && oError.message) || SEARCH_READINESS.LOAD_ERROR_MESSAGE));
-                return Promise.reject(oError);
-            });
+            return SearchInteractionBehavior.onRetrySearchLoad(this);
         },
 
         onCreate: function () {

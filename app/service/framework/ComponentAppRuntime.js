@@ -113,12 +113,66 @@ sap.ui.define([
         oComponent._iSaveWorkingTimer = SchedulingRuntime.clearTimer(oComponent._iSaveWorkingTimer);
     }
 
+    function destroyComponentRuntime(oComponent) {
+        if (oComponent._oLifecycleRouter && oComponent._fnBeforeRouteMatched && oComponent._oLifecycleRouter.detachBeforeRouteMatched) {
+            oComponent._oLifecycleRouter.detachBeforeRouteMatched(oComponent._fnBeforeRouteMatched, oComponent);
+        }
+        if (oComponent._oDirtyStateBinding && oComponent._fnDirtyStateBindingChange) {
+            oComponent._oDirtyStateBinding.detachChange(oComponent._fnDirtyStateBindingChange);
+            oComponent._oDirtyStateBinding.destroy();
+        }
+        (oComponent._aLockScopedStateBindings || []).forEach(function (oEntry) {
+            if (oEntry && oEntry.binding && oEntry.handler) {
+                oEntry.binding.detachChange(oEntry.handler);
+                oEntry.binding.destroy();
+            }
+        });
+        if (typeof oComponent._detachInitRuntimeListeners === "function") {
+            oComponent._detachInitRuntimeListeners();
+        }
+        if (oComponent._oInteractionFxHandle && oComponent._oInteractionFxHandle.destroy) {
+            oComponent._oInteractionFxHandle.destroy();
+            oComponent._oInteractionFxHandle = null;
+        }
+        oComponent._stopAllManagers();
+        if (oComponent._fnUnregisterBeacon) {
+            oComponent._fnUnregisterBeacon();
+        }
+        if (oComponent._fnCrossTabStorage) {
+            window.removeEventListener("storage", oComponent._fnCrossTabStorage);
+        }
+        if (oComponent._oCrossTabChannel && typeof oComponent._oCrossTabChannel.close === "function") {
+            oComponent._oCrossTabChannel.close();
+        }
+        if (oComponent._fnOnFullSave) {
+            window.removeEventListener("pcct:fullSave", oComponent._fnOnFullSave);
+        }
+        if (typeof oComponent._fnUnsubscribeRuntimeSettings === "function") {
+            oComponent._fnUnsubscribeRuntimeSettings();
+        }
+        clearComponentTimers(oComponent);
+        oComponent._fnCrossTabStorage = null;
+        oComponent._oCrossTabChannel = null;
+        oComponent._oLifecycleRouter = null;
+        oComponent._fnBeforeRouteMatched = null;
+        oComponent._oDirtyStateBinding = null;
+        oComponent._fnDirtyStateBindingChange = null;
+        oComponent._aLockScopedStateBindings = null;
+        oComponent._oStateLifecycleModel = null;
+        oComponent._oSelectedLifecycleModel = null;
+        oComponent._fnStateModelPropertyChange = null;
+        oComponent._fnSelectedModelPropertyChange = null;
+        oComponent._detachInitRuntimeListeners = null;
+        oComponent._fnUnsubscribeRuntimeSettings = null;
+    }
+
     return {
         applyFrontendRuntimeConfig: applyFrontendRuntimeConfig,
         applyManagersTimerConfig: applyManagersTimerConfig,
         buildComponentRuntimeSupport: buildComponentRuntimeSupport,
         clearComponentTimers: clearComponentTimers,
         collectManagers: collectManagers,
+        destroyComponentRuntime: destroyComponentRuntime,
         isLockRuntimeActive: isLockRuntimeActive,
         registerLockReleaseBeacon: registerLockReleaseBeacon,
         releaseActiveLockOnLeave: releaseActiveLockOnLeave,

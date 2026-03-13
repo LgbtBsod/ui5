@@ -30,13 +30,6 @@ sap.ui.define([], function () {
          */
         createChecklist: function (mArgs) {},
 
-
-        /**
-         * @param {{rootId:string,statusCode:string}} mArgs
-         * @returns {Promise<{statusCode:string}>}
-         */
-        setChecklistStatus: function (mArgs) {},
-
         /**
          * @param {{rootId:string}} mArgs
          * @returns {Promise<{deleted:true,rootId:string}>}
