@@ -4,8 +4,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectToastRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectBannerRouter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectActionRouting",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectDialogFeedbackRuntime"
-], function (DebugLogger, EffectFeedbackContracts, EffectToastRuntime, EffectBannerRouter, EffectActionRouting, EffectDialogFeedbackRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectDialogFeedbackRuntime",
+    "sap/ui/core/routing/HashChanger",
+    "sap/ui/core/Component"
+], function (DebugLogger, EffectFeedbackContracts, EffectToastRuntime, EffectBannerRouter, EffectActionRouting, EffectDialogFeedbackRuntime, HashChanger, UIComponent) {
     "use strict";
 
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
@@ -23,8 +25,69 @@ sap.ui.define([
         });
     }
 
+    function resolveRouter(oController) {
+        var oOwnerComponent = oController && typeof oController.getOwnerComponent === "function" ? oController.getOwnerComponent() : null;
+        var oRouter = oController && typeof oController.getRouter === "function" ? oController.getRouter() : null;
+        var oComponentOwner;
+        var oAppView;
+
+        if (oRouter && typeof oRouter.navTo === "function") {
+            return oRouter;
+        }
+        if (oOwnerComponent && typeof oOwnerComponent.getRouter === "function") {
+            oRouter = oOwnerComponent.getRouter();
+            if (oRouter && typeof oRouter.navTo === "function") {
+                return oRouter;
+            }
+        }
+        if (UIComponent && typeof UIComponent.getOwnerComponentFor === "function") {
+            oComponentOwner = UIComponent.getOwnerComponentFor(oController && typeof oController.getView === "function" ? oController.getView() : null);
+            if (oComponentOwner && typeof oComponentOwner.getRouter === "function") {
+                oRouter = oComponentOwner.getRouter();
+                if (oRouter && typeof oRouter.navTo === "function") {
+                    return oRouter;
+                }
+            }
+        }
+        if (typeof sap !== "undefined" && sap.ui && typeof sap.ui.component === "function") {
+            oOwnerComponent = sap.ui.component("checklist_app_comp");
+            if (oOwnerComponent && typeof oOwnerComponent.getRouter === "function") {
+                oRouter = oOwnerComponent.getRouter();
+                if (oRouter && typeof oRouter.navTo === "function") {
+                    return oRouter;
+                }
+            }
+        }
+        if (typeof sap !== "undefined" && sap.ui && sap.ui.getCore && typeof sap.ui.getCore().byId === "function") {
+            oAppView = sap.ui.getCore().byId("checklist_app_comp---app");
+            if (oAppView && typeof oAppView.getController === "function") {
+                oRouter = oAppView.getController() && typeof oAppView.getController().getRouter === "function"
+                    ? oAppView.getController().getRouter()
+                    : null;
+                if (oRouter && typeof oRouter.navTo === "function") {
+                    return oRouter;
+                }
+            }
+        }
+        return null;
+    }
+
     function navigate(oController, oEffect) {
-        var oRouter = oController && oController.getRouter ? oController.getRouter() : null;
+        var oRouter = resolveRouter(oController);
+        var oHashChanger;
+        var sUrl;
+        if (oRouter && oEffect && oEffect.replace && typeof oRouter.getURL === "function") {
+            sUrl = String(oRouter.getURL(oEffect.route, oEffect.params || {}) || "");
+            oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
+            if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
+                oHashChanger.replaceHash(String(sUrl || "").replace(/^\/?/, ""));
+                return;
+            }
+            if (typeof window !== "undefined" && window.location) {
+                window.location.hash = sUrl ? "#/" + String(sUrl || "").replace(/^\/+/, "") : "";
+                return;
+            }
+        }
         if (oRouter && oRouter.navTo) {
             oRouter.navTo(oEffect.route, oEffect.params || {}, !!oEffect.replace);
         }

@@ -34,6 +34,10 @@ not client-side architecture collapse. The main remaining frontend-local risks a
   - desktop single-column sticky works
   - desktop split-column sticky works
   - mobile/narrow viewport uses compact sticky policy instead of pinning the whole filter shell
+  - live deep-scroll DOM measurement on a 101-row result set confirms the sticky stack remains pinned:
+    - filter rail top stays at `315.36`
+    - action rail top stays at `630.59`
+    - table toolbar top stays at `699.91`
 
 ### Detail route
 
@@ -42,13 +46,18 @@ not client-side architecture collapse. The main remaining frontend-local risks a
   - heartbeat switches to locked-active state
   - autosave switches to waiting / saved state
   - Save / Delete / Validate / status buttons appear
+- Turning edit mode off now stops edit-lifecycle timers correctly:
+  - heartbeat manager stops
+  - autosave manager stops
+  - no false `lockReleaseFailed` warning is shown when leaving detail after manually switching back to `READ`
 - Status change remains ordinary save semantics:
   - clicking `Registered` on incomplete data triggers validation instead of a dedicated transport command
   - required field hints appear on mandatory cards and fields
 - Editing a field and blurring it triggers autosave state transition to `autosaveSaved`.
 - Attachment create/delete live flow now works through the unified save contract:
   - staged attachment save no longer crashes on non-Blob `_file` values
-  - deleting an attachment moves the page into dirty state and persists through ordinary `Save`
+  - live `SaveChanges` trace confirms attachment create is emitted through unified delta with `attachments[].edit_mode = C`
+  - deleting a temporary staged attachment without a persisted server key remains a local-only action until a real attachment key exists; this is currently treated as accepted semantics, not a backend delete regression
 - Explicit save vs autosave wire trace is confirmed live:
   - `SaveChanges` sends root-only unified delta when only root data changes
   - `AutoSave` sends the same unified delta shape through `AutoSave`
@@ -59,6 +68,13 @@ not client-side architecture collapse. The main remaining frontend-local risks a
     - `participants`
     - `attachments`
     - `client_version`
+- Create-draft autosave guard is confirmed live:
+  - before the first successful create-save, no `AutoSave` request is emitted for `#/checklist/__CREATE`
+  - autosave only becomes active after a real object id exists and edit lock is active
+- Create-route navigation is now synchronized correctly:
+  - after the first create-save, browser hash is replaced with the real checklist id
+  - after switching edit mode off, heartbeat and autosave managers stop
+  - after closing the card, browser hash returns to the search route and detail state is cleared cleanly
 
 ### Analytics
 

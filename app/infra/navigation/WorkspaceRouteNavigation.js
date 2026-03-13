@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "sap/ui/core/routing/HashChanger"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger) {
     "use strict";
 
     function cloneArgs(oArgs) {
@@ -131,8 +132,17 @@ sap.ui.define([
     function navigateToSearch(oController) {
         var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
+        var oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
         ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH);
         ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
+        if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
+            oHashChanger.replaceHash("");
+            return;
+        }
+        if (typeof window !== "undefined" && window.location) {
+            window.location.hash = "";
+            return;
+        }
         if (oRouter && typeof oRouter.navTo === "function") {
             oRouter.navTo(NavigationContracts.ROUTES.SEARCH, {}, false);
         }

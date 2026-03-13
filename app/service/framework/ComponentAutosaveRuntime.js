@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, WorkflowContracts) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
@@ -39,16 +40,18 @@ sap.ui.define([
             },
             shouldSave: function () {
                 var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+                var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "").trim();
                 return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
                     bIsLocked &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
-                    !!ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
+                    !!sActiveId &&
+                    !CreateSentinel.isCreateId(sActiveId);
             },
             buildPayload: function () {
                 var sId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
                 var oCurrent = fnResolveDetailCurrent();
                 var oBase = ModelStateRuntime.readOnModel(oSnapshotModel, "/", {}) || {};
-                if (!sId || !oCurrent || !oCurrent.root || oCurrent.root.id !== sId) {
+                if (!sId || CreateSentinel.isCreateId(sId) || !oCurrent || !oCurrent.root || oCurrent.root.id !== sId) {
                     return null;
                 }
                 var oDelta = DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oBase);

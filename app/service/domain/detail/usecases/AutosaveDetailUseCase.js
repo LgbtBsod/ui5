@@ -7,9 +7,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, WorkflowContracts, DetailAttachmentDeltaRuntime) {
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -76,6 +77,9 @@ sap.ui.define([
         var oDelta;
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
 
+        if (CreateSentinel.isCreateId(sRootId)) {
+            return Promise.resolve(Result.ok({ skipped: true, reason: "CREATE_DRAFT_PENDING" }, []));
+        }
         if (!isAutosaveAllowed(mCtx)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: "AUTOSAVE_GUARD" }, []));
         }

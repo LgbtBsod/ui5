@@ -24,17 +24,27 @@ sap.ui.define([
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
+        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && typeof oUiState.get === "function" ? oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE) : "");
+        var sLockState = WorkflowContracts.normalizeLockState(oUiState && typeof oUiState.get === "function" ? oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE) : "");
+        var bShouldRelease = !!(
+            sRootId
+            && !CreateSentinel.isCreateId(sRootId)
+            && sSessionGuid
+            && oLockPort
+            && typeof oLockPort.release === "function"
+            && WorkflowContracts.isEditLocked(sEditMode, sLockState)
+        );
         var aEffects;
 
         var pRelease = Promise.resolve();
-        if (sRootId && !CreateSentinel.isCreateId(sRootId) && sSessionGuid && oLockPort && typeof oLockPort.release === "function") {
+        if (bShouldRelease) {
             pRelease = Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () {
                 return { ok: false, code: "ERROR", released: false, messageKey: "lockReleaseFailed" };
             });
         }
 
         return pRelease.then(function (oReleaseResult) {
-            if (sRootId && !CreateSentinel.isCreateId(sRootId) && sSessionGuid) {
+            if (bShouldRelease) {
                 WorkflowTelemetry.emit(
                     oReleaseResult && oReleaseResult.ok !== false && oReleaseResult.released !== false
                         ? "lock.release.completed"
@@ -70,7 +80,7 @@ sap.ui.define([
                 Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, null),
                 Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
             ];
-            if (sRootId && !CreateSentinel.isCreateId(sRootId) && sSessionGuid && (!oReleaseResult || oReleaseResult.ok === false || oReleaseResult.released === false)) {
+            if (bShouldRelease && (!oReleaseResult || oReleaseResult.ok === false || oReleaseResult.released === false)) {
                 aEffects.push(Effects.warn((oReleaseResult && oReleaseResult.messageKey) || "lockReleaseFailed"));
             }
             return Result.ok({ reason: (mInput && mInput.intent) || "close" }, aEffects);

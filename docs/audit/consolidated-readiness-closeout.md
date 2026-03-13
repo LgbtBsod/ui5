@@ -51,7 +51,7 @@
 - final bundle ownership is documented in `docs/audit/final-bundle-ownership-map.md`
 
 ## Validation Baseline
-- `python -m pytest backend/mock_gateway/tests -q` -> `42 passed`
+- `python -m pytest backend/mock_gateway/tests -q` -> `43 passed`
 - `node scripts/check-xml-views.mjs` -> `PASS`
 - `node scripts/sap-gateway-only-gate.js --json` -> `ok: true`
 - `node scripts/enterprise-readiness-gate.js scripts/enterprise-readiness-thresholds.json --json` -> `ok: true`
@@ -66,11 +66,17 @@
 - Live browser smoke is documented in `docs/audit/frontend-manual-smoke-report.md`
 - verified manually on live app:
   - startup shell without theme glitch
-  - shell user profile visible in header DOM
   - search route renders and remains interactive
+  - search sticky stack remains pinned under deep-scroll on a 101-row result set
   - direct detail route renders
   - detail edit mode acquires lock and updates heartbeat/autosave state
+  - turning edit mode off stops heartbeat/autosave managers correctly
+  - leaving detail after switching back to `READ` no longer emits a false `lockReleaseFailed` warning
   - status validation works through ordinary save semantics
+  - create draft does not emit autosave before the first successful create-save
+  - create draft save replaces `#/checklist/__CREATE` with the real checklist hash
+  - closing detail after create-save returns browser hash and route state to search correctly
+  - attachment create is confirmed live through unified `SaveChanges` delta payload with explicit `attachments[].edit_mode = C`
   - analytics route renders and remains interactive
 
 ## Remaining Structural Debt
@@ -79,7 +85,7 @@
 - `Component.js` is smaller and cleaner, but still remains a composition-heavy entry shell rather than a near-empty bootstrap facade.
 - `GatewayClient.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned public transport shell.
 - `AnalyticsPayloadNormalizer.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned analytics composition shell.
-- frontend user/session shell sync is no longer tracked as active debt; the live DOM and route startup now receive the resolved current-user profile correctly.
+- frontend user/session shell sync is improved, but remains a live-product polish item on some fresh startup contours.
 
 ## SAP Readiness Impact
 - Frontend structure is no longer a primary blocker for SAP best-practice review.
