@@ -3,14 +3,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil"
-], function (UseCase, Result, Effects, UseCaseValue, StatePaths, DetailStateAccess, DetailSaveRuntime, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, CloneUtil) {
+], function (UseCase, Result, Effects, UseCaseValue, ViewPathContracts, StatePaths, DetailStateAccess, DetailSaveRuntime, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, WorkflowContracts, CloneUtil) {
     "use strict";
 
     function ChangeStatusUseCase() {

@@ -9,7 +9,7 @@
 }
 
 .chkApp .detailAttachmentDropZoneMeta {
-  color: var(--text-subtle);
+  color: var(--text-main);
   align-self: center;
 }
 
@@ -26,6 +26,10 @@
 
 .chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
   justify-content: center;
+}
+
+.chkApp .detailAttachmentDropZoneIcon.sapUiIcon {
+  color: var(--accent);
 }
 
 .chkApp .detailAttachmentItemRow {
@@ -166,8 +170,31 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
   gap: 0.25rem;
 }
 
+.chkApp .detailAttachmentActions .sapMBtnInner {
+  border-radius: 999px;
+}
+
 .chkApp .detailAttachmentToolbar {
   row-gap: 0.38rem;
+}
+
+.chkApp .detailAttachmentToolbar.sapMTBNewFlex {
+  flex-wrap: nowrap;
+  align-content: stretch;
+  overflow: hidden;
+}
+
+.chkApp .detailAttachmentToolbar .sapMBarChild {
+  min-width: 0;
+}
+
+.chkApp .detailAttachmentToolbar .sapMTBSpacer {
+  flex: 999 1 0%;
+  min-width: 0.5rem;
+}
+
+.chkApp .detailAttachmentToolbar .sapMOTBOverflowButton {
+  flex: 0 0 auto;
 }
 
 .chkApp .detailAttachmentsBody,
@@ -182,6 +209,38 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
   gap: 0.58rem;
   align-items: stretch;
   overflow-x: visible;
+}
+
+.chkApp .detailAttachmentsBody > * {
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chkApp .detailAttachmentsCard,
+.chkApp .detailAttachmentsCard > .sapMFlexItem,
+.chkApp .detailAttachmentsCard .sapMFlexItem,
+.chkApp .detailAttachmentsBody,
+.chkApp .detailAttachmentsBody > .sapMFlexItem,
+.chkApp .detailHeroExperienceCard,
+.chkApp .detailHeroExperienceCard > .sapMFlexItem {
+  min-height: 0;
+  height: auto;
+}
+
+.chkApp .detailAttachmentsCard,
+.chkApp .detailHeroExperienceCard {
+  height: auto;
+  min-height: 0;
+  align-self: start;
+}
+
+.chkApp .detailAttachmentsCard {
+  align-self: start;
+}
+
+.chkApp .detailAttachmentsEmptyState {
+  margin-top: 0;
 }
 
 .chkApp .detailAttachmentsBody.isAttachmentDropPrimed {
@@ -202,6 +261,15 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
 .chkApp .detailViewportNarrow .detailAttachmentDropZone {
   grid-template-columns: 1fr;
   min-height: 0;
+}
+
+.chkApp .detailViewportNarrow .detailAttachmentToolbar.sapMTBNewFlex {
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.chkApp .detailViewportNarrow .detailAttachmentToolbar .sapMTBSpacer {
+  display: block;
 }
 
 .chkApp .detailViewportNarrow .detailAttachmentDropZoneActions {
@@ -611,9 +679,19 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 }
 
 @media (max-width: 1024px) {
+  .chkApp .detailEmptyStateCard {
+    gap: 0.42rem;
+    padding: 0.88rem 0.92rem;
+    margin-top: 0.32rem;
+  }
+
   .chkApp .detailAttachmentDropZone {
     gap: 0.62rem 0.74rem;
     padding: 0.82rem 0.88rem;
+  }
+
+  .chkApp .detailAttachmentsBody {
+    gap: 0.56rem;
   }
 
   .chkApp .detailAttachmentTable {
@@ -657,6 +735,36 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
     justify-content: center;
     width: 100%;
   }
+
+  .chkApp .detailAttachmentsBody {
+    gap: 0.48rem;
+  }
+
+  .chkApp .detailEmptyStateCard {
+    justify-items: center;
+    text-align: center;
+    gap: 0.38rem;
+    padding: 0.82rem 0.8rem;
+  }
+
+  .chkApp .detailEmptyStateText {
+    max-width: 32rem;
+  }
+
+  .chkApp .detailEmptyStateAction,
+  .chkApp .detailEmptyStateAction .sapMBtnInner {
+    width: 100%;
+  }
+
+  .chkApp .detailAttachmentActions {
+    width: 100%;
+    gap: 0.3rem;
+  }
+
+  .chkApp .detailAttachmentActions .tableRowActionBtn,
+  .chkApp .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
+    width: 100%;
+  }
 }
 
 @media (max-width: 53.75rem) {
@@ -667,6 +775,10 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 
   .chkApp .detailAccessDeniedAction {
     align-self: center;
+  }
+
+  .chkApp .detailAttachmentDropZone {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -691,32 +803,20 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   margin-top: 0;
 }
 
-.chkApp .detailAttachmentDropZoneTop {
-  gap: 0.7rem;
-  align-items: flex-start;
+.chkApp .detailAttachmentItem {
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
 }
 
-.chkApp .detailAttachmentDropZoneIcon {
-  color: var(--accent);
-  font-size: 1.2rem;
+body.chkAppRoot.appLight .chkApp .detailAttachmentItem {
+  background: rgba(0, 80, 200, 0.05);
 }
 
-.chkApp .detailAttachmentDropZoneMeta {
-  color: var(--text-subtle);
-  align-self: center;
+body.chkAppRoot.appDark .chkApp .detailAttachmentItem {
+  background: rgba(50, 100, 210, 0.08);
 }
 
-.chkApp .detailAttachmentDropZoneActions {
-  justify-self: end;
-  align-self: center;
-}
-
-.chkApp .detailAttachmentDropZoneActions .sapUiFup,
-.chkApp .detailAttachmentDropZoneActions .sapMBtn,
-.chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
-  width: 100%;
-}
-
-.chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
-  justify-content: center;
+.chkApp .detailAccessDeniedReason.sapMObjStatus {
+  color: var(--text-main);
 }

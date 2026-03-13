@@ -19,7 +19,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/lock/usecases/TakeoverLockUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
 ], function (
     OpenDetailUseCase,
     EnterEditUseCase,
@@ -41,7 +42,8 @@ sap.ui.define([
     TakeoverLockUseCase,
     Effects,
     ActionContract,
-    StatePaths
+    StatePaths,
+    WorkflowContracts
 ) {
     "use strict";
 
