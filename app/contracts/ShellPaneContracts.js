@@ -8,36 +8,36 @@ sap.ui.define([], function () {
     });
 
     var HOST_IDS = Object.freeze({
-        SEARCH: "searchPaneHost",
-        DETAIL: "detailPaneHost",
-        ANALYTICS: "analyticsPaneHost"
+        search: "searchPaneHost",
+        detail: "detailPaneHost",
+        analytics: "analyticsPaneHost"
     });
 
     var VIEW_IDS = Object.freeze({
-        DETAIL: "detailPaneView",
-        ANALYTICS: "analyticsPaneView"
+        detail: "detailPaneView",
+        analytics: "analyticsPaneView"
     });
 
     var VIEW_NAMES = Object.freeze({
-        SEARCH: "PRODUCTION_CONTROL_CHECKLIST.views.Search",
-        DETAIL: "PRODUCTION_CONTROL_CHECKLIST.views.Detail",
-        ANALYTICS: "PRODUCTION_CONTROL_CHECKLIST.views.Analytics"
+        search: "PRODUCTION_CONTROL_CHECKLIST.views.Search",
+        detail: "PRODUCTION_CONTROL_CHECKLIST.views.Detail",
+        analytics: "PRODUCTION_CONTROL_CHECKLIST.views.Analytics"
     });
 
     var STYLE_IDS = Object.freeze({
-        DETAIL: "chk-detail-pane-styles",
-        ANALYTICS: "chk-analytics-pane-styles"
+        detail: "chk-detail-pane-styles",
+        analytics: "chk-analytics-pane-styles"
     });
 
     var STYLE_MODULES = Object.freeze({
-        DETAIL: "PRODUCTION_CONTROL_CHECKLIST/styles/modules/41_page_detail.css",
-        ANALYTICS: "PRODUCTION_CONTROL_CHECKLIST/styles/modules/42_page_analytics.css"
+        detail: "PRODUCTION_CONTROL_CHECKLIST/styles/modules/41_page_detail.css",
+        analytics: "PRODUCTION_CONTROL_CHECKLIST/styles/modules/42_page_analytics.css"
     });
 
     var READINESS_PATHS = Object.freeze({
-        SEARCH: "/readiness/panes/search/loaded",
-        DETAIL: "/readiness/panes/detail/loaded",
-        ANALYTICS: "/readiness/panes/analytics/loaded"
+        search: "/readiness/panes/search/loaded",
+        detail: "/readiness/panes/detail/loaded",
+        analytics: "/readiness/panes/analytics/loaded"
     });
 
     var LAZY_PANES = Object.freeze([

@@ -176,3 +176,48 @@ body.chkAppRoot.appDark .chkApp .filterCard {
   justify-content: center;
   box-sizing: border-box;
 }
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl {
+  border: 1px solid color-mix(in srgb, var(--theme-workbench-control-border) 88%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02)),
+    var(--theme-workbench-control-bg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    0 10px 24px rgba(18, 36, 64, 0.08);
+}
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn + .sapMSegBBtn {
+  border-inline-start: 1px solid color-mix(in srgb, var(--theme-workbench-control-border) 60%, transparent);
+}
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner,
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner {
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb), 0.20), rgba(var(--accent-rgb), 0.08)),
+    color-mix(in srgb, var(--theme-workbench-control-bg) 78%, rgba(var(--accent-rgb), 0.16));
+  color: var(--accent);
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 18px rgba(var(--accent-rgb), 0.14);
+}
+
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn:not(.sapMSegBBtnSel):hover .sapMSegBBtnInner {
+  background: color-mix(in srgb, rgba(var(--accent-rgb), 0.08) 70%, transparent);
+  color: var(--text-main);
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 14px 28px rgba(1, 8, 18, 0.28);
+}
+
+body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner,
+body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner {
+  color: rgba(201, 228, 255, 0.96);
+  background:
+    linear-gradient(180deg, rgba(77, 177, 255, 0.22), rgba(77, 177, 255, 0.08)),
+    rgba(16, 32, 58, 0.92);
+}

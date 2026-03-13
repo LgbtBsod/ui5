@@ -6,13 +6,15 @@ sap.ui.define([], function () {
         var oUiStateModel = mModels.uiStateModel;
         var oMainServiceModel = mModels.mainServiceModel;
         var StatePaths = mDeps.StatePaths;
+        var oComponentRuntimeSupport = mDeps.ComponentRuntimeSupport || mDeps.componentRuntimeSupport;
+        var oSaveGuardRuntime = mDeps.ComponentSaveGuardRuntime || mDeps.saveGuardRuntime;
 
     var fnHandleForceReadOnly = mDeps.ComponentRuntimeHandlerRuntime.createForceReadOnlyHandler({
             component: oComponent,
             stateModel: oStateModel,
             uiStateModel: oUiStateModel,
             statePaths: StatePaths,
-            componentRuntimeSupport: mDeps.componentRuntimeSupport,
+            componentRuntimeSupport: oComponentRuntimeSupport,
             telemetryRuntime: mDeps.TelemetryRuntime,
             applyFacadeResult: mCore.applyFacadeResult,
             emitTelemetry: mCore.emitTelemetry,
@@ -40,7 +42,7 @@ sap.ui.define([], function () {
             isSessionExpiredError: fnIsSessionExpiredError,
             setGlobalBanner: fnSetGlobalBanner,
             clearGlobalBanner: fnClearGlobalBanner,
-            saveGuardRuntime: mDeps.saveGuardRuntime
+            saveGuardRuntime: oSaveGuardRuntime
         });
 
     var oCrossTabRuntime = mDeps.ComponentRuntimeHandlerRuntime.registerCrossTabHandlers({

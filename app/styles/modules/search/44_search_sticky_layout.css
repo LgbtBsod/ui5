@@ -113,9 +113,24 @@
 .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
   background: color-mix(in srgb, var(--theme-block-bg) 58%, transparent);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 46%, transparent);
-  box-shadow: none;
+  box-shadow:
+    0 14px 28px rgba(18, 36, 64, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
+}
+
+.chkApp .searchWorkbenchDock > .searchFilterCardDense,
+.chkApp .searchWorkbenchDock > .searchResultsActionRail,
+.chkApp .searchSmartToolbarRail,
+.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.chkApp .searchWorkbenchDock > .searchFilterCardDense {
+  box-shadow:
+    0 18px 34px rgba(18, 36, 64, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .chkApp .searchResultsActionRail {
@@ -214,6 +229,15 @@
 
 .chkApp .searchResultsActionRail .searchToolbarNavBtnUp {
   flex: 0 0 auto;
+}
+
+body.chkAppRoot.appDark .chkApp .searchWorkbenchDock > .searchFilterCardDense,
+body.chkAppRoot.appDark .chkApp .searchWorkbenchDock > .searchResultsActionRail,
+body.chkAppRoot.appDark .chkApp .searchSmartToolbarRail,
+body.chkAppRoot.appDark .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+  box-shadow:
+    0 18px 34px rgba(1, 8, 18, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 @media (min-width: 72rem) {

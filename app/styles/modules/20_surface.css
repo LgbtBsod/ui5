@@ -4,7 +4,7 @@ body.chkAppRoot.platformPrecisionEnterprise .glassCard,
 body.chkAppRoot.platformPrecisionEnterprise .detailSectionCard,
 body.chkAppRoot.platformPrecisionEnterprise .detailControlInlineCard,
 body.chkAppRoot.platformPrecisionEnterprise .infoCardTile {
-  box-shadow: none;
+  box-shadow: var(--theme-block-shadow);
 }
 
 body.chkAppRoot.platformCalmModern .glassCard,

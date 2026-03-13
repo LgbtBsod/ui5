@@ -125,7 +125,22 @@ sap.ui.define([
             this._oRouteNameBinding.attachChange(this._fnLayoutSync);
         },
         _syncLayoutState: function () {
-            ShellLayoutRuntime.syncLayoutState(this, this._getStateModel());
+            var oStateModel = this._getStateModel();
+            var sRouteName;
+            var oTargetPane;
+            var oLayout;
+            ShellLayoutRuntime.syncLayoutState(this, oStateModel);
+            sRouteName = String(ModelStateRuntime.readOnModel(
+                oStateModel,
+                "/currentRouteName",
+                NavigationContracts.ROUTES.SEARCH
+            ) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+            oTargetPane = ShellPaneRuntime.ensurePaneForRoute(this, sRouteName, NavigationContracts);
+            ShellLayoutRuntime.syncLayoutState(this, oStateModel);
+            oLayout = this.byId && this.byId("mainFcl");
+            if (oLayout && oTargetPane && NavigationContracts.ROUTES.SEARCH !== sRouteName && typeof oLayout.toMidColumnPage === "function") {
+                oLayout.toMidColumnPage(oTargetPane.getParent && oTargetPane.getParent() ? oTargetPane.getParent() : oTargetPane);
+            }
         },
         _markStartupReady: function () {
             var oStateModel;

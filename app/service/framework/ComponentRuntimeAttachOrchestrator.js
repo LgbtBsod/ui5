@@ -2,6 +2,7 @@ sap.ui.define([], function () {
     "use strict";
 
     function attachRuntimeStages(oComponent, mDeps, mModels, mCore, mAttachments) {
+        var oComponentRuntimeSupport = mDeps.ComponentRuntimeSupport || mDeps.componentRuntimeSupport;
         mDeps.attachManagerRuntime(mDeps.ComponentRuntimeOptionBuilder.buildManagerRuntimeOptions({
             component: oComponent,
             stateModel: mModels.stateModel,
@@ -18,7 +19,7 @@ sap.ui.define([], function () {
             debugLogger: mDeps.DebugLogger,
             actionContract: mDeps.ActionContract,
             bundleText: mCore.bundleText,
-            componentRuntimeSupport: mDeps.componentRuntimeSupport,
+            componentRuntimeSupport: oComponentRuntimeSupport,
             telemetryRuntime: mDeps.TelemetryRuntime
         }));
         mDeps.attachLockRuntime(mDeps.ComponentRuntimeOptionBuilder.buildLockRuntimeOptions({
@@ -28,7 +29,7 @@ sap.ui.define([], function () {
             uiStateModel: mModels.uiStateModel,
             cacheModel: mModels.cacheModel,
             statePaths: mDeps.StatePaths,
-            componentRuntimeSupport: mDeps.componentRuntimeSupport,
+            componentRuntimeSupport: oComponentRuntimeSupport,
             timeConfigService: mDeps.TimeConfigService,
             debugLogger: mDeps.DebugLogger,
             bundleText: mCore.bundleText,
@@ -49,7 +50,7 @@ sap.ui.define([], function () {
             envModel: mModels.envModel,
             statePaths: mDeps.StatePaths,
             smartSearchAdapter: mDeps.SmartSearchAdapter,
-            componentRuntimeSupport: mDeps.componentRuntimeSupport,
+            componentRuntimeSupport: oComponentRuntimeSupport,
             timeConfigService: mDeps.TimeConfigService,
             flowCoordinator: mDeps.FlowCoordinator,
             bundleText: mCore.bundleText,

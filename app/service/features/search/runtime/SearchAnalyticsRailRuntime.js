@@ -48,7 +48,10 @@ sap.ui.define([
             ControllerViewStateRuntime.set(oController, "/analyticsError", "");
         }
         if (typeof fnAnalytics !== "function") {
-            return Promise.reject(new Error("search_analytics_runner_missing"));
+            if (!bSilent) {
+                ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", false);
+            }
+            return Promise.resolve(false);
         }
         return Promise.resolve(fnAnalytics({ intent: "refreshRail", silent: bSilent })).then(function (vResult) {
             if (bSilent) {

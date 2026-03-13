@@ -67,7 +67,10 @@ sap.ui.define([
             bSingle = false;
             bDetailOnly = true;
         }
-        if (!sSelectedId && sLayout !== NavigationContracts.LAYOUTS.ONE_COLUMN && sRouteName !== NavigationContracts.ROUTES.ANALYTICS) {
+        if (!sSelectedId
+            && sLayout !== NavigationContracts.LAYOUTS.ONE_COLUMN
+            && sRouteName !== NavigationContracts.ROUTES.ANALYTICS
+            && !NavigationContracts.isDetailRoute(sRouteName)) {
             sLayout = NavigationContracts.LAYOUTS.ONE_COLUMN;
             bSingle = true;
             bDetailOnly = false;

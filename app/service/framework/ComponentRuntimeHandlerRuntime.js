@@ -32,7 +32,8 @@ sap.ui.define([], function () {
     }
 
     function createGuardedSave(mOptions) {
-        return mOptions.saveGuardSupport.createRunGuardedSave({
+        var oSaveGuardRuntime = mOptions.saveGuardRuntime || mOptions.saveGuardSupport;
+        return oSaveGuardRuntime.createRunGuardedSave({
             component: mOptions.component,
             stateModel: mOptions.stateModel,
             mainServiceModel: mOptions.mainServiceModel,

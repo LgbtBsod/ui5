@@ -62,13 +62,21 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   border-radius: calc(var(--radius-lg) - 0.15rem);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
   background: var(--theme-rail-bg);
-  box-shadow: none;
+  box-shadow:
+    0 12px 26px rgba(18, 36, 64, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
   overflow-x: hidden;
   overflow-y: visible;
   isolation: isolate;
   position: relative;
   top: auto;
   z-index: auto;
+}
+
+body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
+  box-shadow:
+    0 16px 30px rgba(1, 8, 18, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .chkApp .searchResultsActionRail > .sapMBarChild:first-child {

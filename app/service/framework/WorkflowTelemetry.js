@@ -4,7 +4,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/MemoryTelemetryBuffer",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/DebugTelemetryAdapter",
-    "PRODUCTION_CONTROL_CHECKLIST/app/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (CorrelationId, ModelStateRuntime, TelemetryRuntime, MemoryTelemetryBuffer, DebugTelemetryAdapter, WorkflowContracts) {
     "use strict";
 

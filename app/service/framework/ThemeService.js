@@ -170,15 +170,17 @@ sap.ui.define([
         var oRoot = document && document.documentElement;
         var oMeta = ThemePhilosophy.getMeta(sTheme);
         var aBodyNodes;
+        var bNightTheme;
         if (!oBody || !oRoot) {
             return;
         }
+        bNightTheme = modeForTheme(sTheme) === ThemeContracts.MODES.NIGHT;
         syncDocumentRootClasses();
         aBodyNodes = [oBody];
-        ThemeDomRuntime.addClass(aBodyNodes, "appLight");
-        ThemeDomRuntime.removeClass(aBodyNodes, "appDark");
-        ThemeDomRuntime.addClass(aBodyNodes, "lightMode");
-        ThemeDomRuntime.addClass([oRoot], "light-mode");
+        ThemeDomRuntime.toggleClass(aBodyNodes, "appLight", !bNightTheme);
+        ThemeDomRuntime.toggleClass(aBodyNodes, "appDark", bNightTheme);
+        ThemeDomRuntime.toggleClass(aBodyNodes, "lightMode", !bNightTheme);
+        ThemeDomRuntime.toggleClass([oRoot], "light-mode", !bNightTheme);
         [
             "themeLifestyleClarity",
             "themeLifestyleNightOps",
