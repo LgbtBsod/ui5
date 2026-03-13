@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (EffectTextResolver, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+], function (EffectTextResolver, CreateSentinel, WorkflowContracts) {
     "use strict";
 
     var LIFECYCLE_TEXT_KEYS = {
