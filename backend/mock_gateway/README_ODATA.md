@@ -4,6 +4,15 @@ This document defines the frontend adapter-boundary contract for the mock Gatewa
 
 ## Productive create-permission seam rules:
 
+## Mock contour hardening rules
+
+- `PCCT_PROFILE=local` is the only profile where mock identity and startup seeding are allowed by default.
+- Any non-local profile must treat the backend as a hardened parity contour:
+  - `ALLOW_MOCK_USER_HEADER = False`
+  - `AUTO_MUTATE_SCHEMA_ON_STARTUP = False`
+  - `AUTO_SEED_STARTUP_DATA = False`
+- request body logging is disabled by default and must only be re-enabled explicitly with `PCCT_LOG_REQUEST_BODIES=1` for short-lived local diagnostics.
+
 - resource: `ChecklistCreatePermissionSet('CURRENT')`
 - request identity semantics: the frontend always asks for `CURRENT`
 - response entity identity also stays `RootKey='CURRENT'`

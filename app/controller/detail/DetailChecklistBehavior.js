@@ -21,8 +21,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
-], function (DialogOrchestrator, DetailViewBehavior, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailMatchedRuntime, DetailSelectedFieldRuntime, ModelPathContracts, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime"
+], function (DialogOrchestrator, DetailViewBehavior, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailMatchedRuntime, DetailSelectedFieldRuntime, ModelPathContracts, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -30,6 +32,10 @@ sap.ui.define([
     var SELECTED_MODEL = MODELS.SELECTED;
     var APP_SOURCES = OperationSourceContracts.APP;
     var STATE_PATHS = DetailActionConstants.STATE_PATHS;
+
+    function markDetailReady(oController, mDetails) {
+        ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DETAIL_READY, mDetails);
+    }
 
     function isDirtyTrackMode(oController) {
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
@@ -94,6 +100,10 @@ sap.ui.define([
             this._bDetailInitialRouteHandled = true;
 
             if (sApplyMode === "layoutOnly") {
+                markDetailReady(this, {
+                    mode: "layoutOnly",
+                    rootId: mContext.sId
+                });
                 return;
             }
 
@@ -102,13 +112,23 @@ sap.ui.define([
                     openChecklist: function (mInput) {
                         return DetailCommandPolicy.open(this, mInput);
                     }.bind(this)
-                });
+                }).then(function (oResult) {
+                    markDetailReady(this, {
+                        mode: "create",
+                        rootId: mContext.sId
+                    });
+                    return oResult;
+                }.bind(this));
                 return;
             }
 
-            if (mContext.sPostOpenHydratedRootId && mContext.sPostOpenHydratedRootId === mContext.sId && mContext.sSelectedRootId === mContext.sId) {
+                if (mContext.sPostOpenHydratedRootId && mContext.sPostOpenHydratedRootId === mContext.sId && mContext.sSelectedRootId === mContext.sId) {
                 ModelStateRuntime.write(this, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "");
                 ControllerViewStateRuntime.set(this, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
+                markDetailReady(this, {
+                    mode: "hydratedReturn",
+                    rootId: mContext.sId
+                });
                 DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(this, mContext.sId, {
                     enterEdit: function (mInput) {
                         return DetailCommandPolicy.enterEdit(this, mInput);
@@ -146,8 +166,12 @@ sap.ui.define([
                     }.bind(this),
                     onToggleEdit: this.onToggleEdit && this.onToggleEdit.bind(this)
                 }).then(function () {
+                    markDetailReady(this, {
+                        mode: "open",
+                        rootId: mContext.sId
+                    });
                     return oResult;
-                });
+                }.bind(this));
             }.bind(this));
         },
 

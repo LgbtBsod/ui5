@@ -10,8 +10,9 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, ModelPathContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts"
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, AttachmentValueCodec, ModelPathContracts, WorkflowContracts, DeltaContracts) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -49,7 +50,8 @@ sap.ui.define([
                 Description: String((oAttachment && (oAttachment.Description || oAttachment.description || oAttachment.Desc || oAttachment.desc)) || "").trim(),
                 FileSize: Number((oAttachment && (oAttachment.FileSize || oAttachment.fileSize)) || 0) || 0,
                 FileSizeContent: Number((oAttachment && (oAttachment.FileSize || oAttachment.fileSize)) || 0) || 0,
-                Value: sValue
+                Value: sValue,
+                edit_mode: DeltaContracts.EDIT_MODE.CREATE
             };
         });
     }
@@ -73,6 +75,35 @@ sap.ui.define([
         }).catch(function () {
             return Array.isArray(aCurrentAttachments) ? aCurrentAttachments : [];
         });
+    }
+
+    function mergeDeltaAttachments(oDelta, aAttachmentRows) {
+        var oPayload = Object.assign({}, oDelta || {});
+        var mByKey = {};
+        var aAnonymous = [];
+
+        (Array.isArray(oPayload.attachments) ? oPayload.attachments : []).forEach(function (oRow) {
+            var sKey = String((oRow && (oRow.client_row_id || oRow.AttachmentKey || oRow.attach_uuid || oRow.Key)) || "").trim();
+            if (sKey) {
+                mByKey[sKey] = Object.assign({}, oRow);
+                return;
+            }
+            aAnonymous.push(Object.assign({}, oRow));
+        });
+
+        (Array.isArray(aAttachmentRows) ? aAttachmentRows : []).forEach(function (oRow) {
+            var sKey = String((oRow && (oRow.client_row_id || oRow.AttachmentKey || oRow.attach_uuid || oRow.Key)) || "").trim();
+            if (sKey) {
+                mByKey[sKey] = Object.assign({}, mByKey[sKey] || {}, oRow);
+                return;
+            }
+            aAnonymous.push(Object.assign({}, oRow));
+        });
+
+        oPayload.attachments = Object.keys(mByKey).map(function (sKey) {
+            return mByKey[sKey];
+        }).concat(aAnonymous);
+        return oPayload;
     }
 
     function cleanupStagedAttachmentUrls(aAttachments) {
@@ -103,11 +134,11 @@ sap.ui.define([
         var oUiState = mCtx && mCtx.uiState;
         var oCurrent = readCurrentChecklist(mCtx);
         var oSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
-        var oDelta = (mInput && mInput.delta) || DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oSnapshot);
         var oRepo = mCtx && mCtx.repo;
         var oLock = mCtx && mCtx.lock;
         var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var bCreate = CreateSentinel.isCreateId(sRootId) || sMode === "CREATE";
+        var oDelta = (mInput && mInput.delta) || (bCreate ? DeltaPayloadBuilder.buildCreatePayload(oCurrent) : DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oSnapshot));
         var iClientVersion = DetailSaveRuntime.resolveVersionNumber(oCurrent, oSnapshot);
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
         var sLockState = DetailSaveRuntime.readLockState(mCtx, StatePaths);
@@ -145,13 +176,14 @@ sap.ui.define([
         }
 
         return serializeStagedAttachments(aCurrentAttachments, bCreate ? "" : sRootId).then(function (aStagedPayload) {
+            var oUnifiedDelta = mergeDeltaAttachments(oDelta, aStagedPayload);
             var pSave = bCreate
-                ? Promise.resolve(oRepo.createChecklist({ delta: oCurrent, attachments: aStagedPayload }))
+                ? Promise.resolve(oRepo.createChecklist({ delta: oUnifiedDelta }))
                 : Promise.resolve(oRepo.saveChecklist(DetailRuntimePayload.saveRequest({
                     rootId: sRootId,
-                    delta: oDelta,
+                    delta: oUnifiedDelta,
                     sessionGuid: sSessionGuid,
-                    attachments: aStagedPayload
+                    attachments: []
                 })));
 
             return pSave.then(function (oSaved) {

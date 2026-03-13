@@ -7,8 +7,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts"
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, WorkflowContracts, AttachmentValueCodec, DeltaContracts) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -72,6 +74,65 @@ sap.ui.define([
         });
     }
 
+    function buildStagedAttachmentPayload(oAttachment, sRootId) {
+        return AttachmentValueCodec.fileToBase64(oAttachment && oAttachment._file).then(function (sValue) {
+            return {
+                client_row_id: String((oAttachment && (oAttachment.client_row_id || oAttachment.AttachmentKey || oAttachment.Key)) || "").trim(),
+                root_key: String((oAttachment && (oAttachment.RootKey || oAttachment.rootKey)) || sRootId || "").trim(),
+                parent_key: String((oAttachment && (oAttachment.RootKey || oAttachment.rootKey)) || sRootId || "").trim(),
+                folder_key: String((oAttachment && (oAttachment.FolderKey || oAttachment.folderKey)) || sRootId || "").trim(),
+                category_key: String((oAttachment && (oAttachment.CategoryKey || oAttachment.categoryKey)) || "GEN").trim() || "GEN",
+                file_name: String((oAttachment && (oAttachment.FileName || oAttachment.fileName)) || "").trim(),
+                mime_type: String((oAttachment && (oAttachment.MimeType || oAttachment.mimeType)) || "application/octet-stream").trim() || "application/octet-stream",
+                description: String((oAttachment && (oAttachment.Description || oAttachment.description || oAttachment.Desc || oAttachment.desc)) || "").trim(),
+                file_size: Number((oAttachment && (oAttachment.FileSize || oAttachment.fileSize)) || 0) || 0,
+                value: sValue,
+                edit_mode: DeltaContracts.EDIT_MODE.CREATE
+            };
+        });
+    }
+
+    function serializeStagedAttachments(aAttachments, sRootId) {
+        var aPending = (Array.isArray(aAttachments) ? aAttachments : []).filter(function (oAttachment) {
+            return !!(oAttachment && oAttachment.staged && oAttachment._file);
+        });
+        if (!aPending.length) {
+            return Promise.resolve([]);
+        }
+        return Promise.all(aPending.map(function (oAttachment) {
+            return buildStagedAttachmentPayload(oAttachment, sRootId);
+        }));
+    }
+
+    function mergeDeltaAttachments(oDelta, aAttachmentRows) {
+        var oPayload = Object.assign({}, oDelta || {});
+        var mByKey = {};
+        var aAnonymous = [];
+
+        (Array.isArray(oPayload.attachments) ? oPayload.attachments : []).forEach(function (oRow) {
+            var sKey = String((oRow && (oRow.client_row_id || oRow.AttachmentKey || oRow.attach_uuid || oRow.Key)) || "").trim();
+            if (sKey) {
+                mByKey[sKey] = Object.assign({}, oRow);
+                return;
+            }
+            aAnonymous.push(Object.assign({}, oRow));
+        });
+
+        (Array.isArray(aAttachmentRows) ? aAttachmentRows : []).forEach(function (oRow) {
+            var sKey = String((oRow && (oRow.client_row_id || oRow.AttachmentKey || oRow.attach_uuid || oRow.Key)) || "").trim();
+            if (sKey) {
+                mByKey[sKey] = Object.assign({}, mByKey[sKey] || {}, oRow);
+                return;
+            }
+            aAnonymous.push(Object.assign({}, oRow));
+        });
+
+        oPayload.attachments = Object.keys(mByKey).map(function (sKey) {
+            return mByKey[sKey];
+        }).concat(aAnonymous);
+        return oPayload;
+    }
+
     AutosaveDetailUseCase.prototype = Object.create(UseCase.prototype);
     AutosaveDetailUseCase.prototype.constructor = AutosaveDetailUseCase;
 
@@ -107,14 +168,20 @@ sap.ui.define([
             ]));
         }
 
-        return Promise.resolve(oRepo.autosaveChecklist(DetailRuntimePayload.saveRequest({
-            rootId: sRootId,
-            delta: oDelta,
-            sessionGuid: sSessionGuid
-        }))).then(function (oSaved) {
+        var oCurrentChecklist = readCurrentChecklist(mCtx);
+        var aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
+
+        return serializeStagedAttachments(aCurrentAttachments, sRootId).then(function (aStagedPayload) {
+            return Promise.resolve(oRepo.autosaveChecklist(DetailRuntimePayload.saveRequest({
+                rootId: sRootId,
+                delta: mergeDeltaAttachments(oDelta, aStagedPayload),
+                sessionGuid: sSessionGuid,
+                attachments: []
+            })));
+        }).then(function (oSaved) {
             var sAt = (oSaved && oSaved.autosavedAt) || new Date().toISOString();
-            var oCurrentChecklist = readCurrentChecklist(mCtx);
-            var aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
+            oCurrentChecklist = readCurrentChecklist(mCtx);
+            aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
         var oBaseSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
             var aSnapshotAttachments = Array.isArray((oBaseSnapshot && oBaseSnapshot.attachments) || null) ? oBaseSnapshot.attachments : [];
             var bHasPendingAttachments = hasPendingStagedAttachments(aCurrentAttachments);

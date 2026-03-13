@@ -10,7 +10,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from main import app  # noqa: E402
-from config import ALLOW_MOCK_USER_HEADER  # noqa: E402
+from config import ALLOW_MOCK_USER_HEADER, APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
 
 
@@ -29,6 +29,15 @@ def test_capabilities_identity_mode_matches_backend_flag():
     with TestClient(app) as client:
         payload = client.get(f"{SERVICE_ROOT}/capabilities").json()
     assert payload.get('identityMode') == ('mock_header' if ALLOW_MOCK_USER_HEADER else 'runtime_user_context')
+
+
+def test_capabilities_expose_profile_and_startup_mutation_policy():
+    with TestClient(app) as client:
+        payload = client.get(f"{SERVICE_ROOT}/capabilities").json()
+    assert payload.get('profile') == APP_PROFILE
+    startup_mutation = payload.get('startupMutation') or {}
+    assert startup_mutation.get('schema') is AUTO_MUTATE_SCHEMA_ON_STARTUP
+    assert startup_mutation.get('seedData') is AUTO_SEED_STARTUP_DATA
 
 
 def test_unprefixed_analytics_route_is_present_for_compatibility_mode():

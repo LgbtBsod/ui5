@@ -10,10 +10,22 @@ Default mock contour:
 powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1
 ```
 
+This launcher starts the mock backend in `PCCT_PROFILE=local`, which keeps mock identity and startup seeding enabled only for local validation.
+
 External Gateway contour:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1 -GatewayBaseUrl "https://your-gateway-host"
+```
+
+For a hardened mock contour without startup mutation or mock-header identity, start the backend manually with:
+
+```powershell
+$env:PCCT_PROFILE="preprod"
+$env:PCCT_ALLOW_MOCK_USER_HEADER="0"
+$env:PCCT_AUTO_MUTATE_SCHEMA="0"
+$env:PCCT_AUTO_SEED_STARTUP_DATA="0"
+python -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 Stop the local environment:
@@ -99,15 +111,18 @@ node scripts/gateway-live-smoke-runner.js
 1. Open a checklist from search results.
 2. Confirm the detail pane loads independently.
 3. Enter edit mode and verify lock state becomes `EDIT_LOCKED`.
-4. Change a field and confirm save or autosave feedback is visible.
-5. Exit detail and re-open to confirm state consistency.
+4. Change a root field and confirm save or autosave feedback is visible.
+5. Verify save/autosave payload contains explicit `edit_mode` markers for changed rows.
+6. Exit detail and re-open to confirm state consistency.
 
 ### Attachment flow
 
 1. Open a checklist with attachments enabled.
 2. Verify upload policy is available before upload.
 3. Upload a permitted file.
-4. Verify attachment list refreshes without blocking the rest of the screen.
+4. Verify attachment create is represented in the delta contract under `attachments[]` with `edit_mode = C`.
+5. Delete an attachment and verify delete is represented in the delta contract under `attachments[]` with `edit_mode = D`.
+6. Verify attachment list refreshes without blocking the rest of the screen.
 
 ### Analytics flow
 
@@ -128,3 +143,7 @@ node scripts/gateway-live-smoke-runner.js
 - Do not change the `sap-ui-core.js` source as part of this validation pass.
 - The target productive service root remains `/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/`.
 - Manual validation should prioritize `search`, `detail`, `EDIT_LOCKED`, export, analytics drilldown, and `filterLocationKey` continuity.
+- Readiness telemetry is written under `state>/readiness/metrics/stages/*` for `shellReady`, `searchRouteReady`, `searchInteractionReady`, `detailReady`, `analyticsReady`, and `deferredDialogReady`.
+- The sanctioned mutable payload contract is now unified and delta-first:
+  - `root/checks/barriers/participants/attachments/client_version`
+  - mutable rows must carry `edit_mode = C|U|D`

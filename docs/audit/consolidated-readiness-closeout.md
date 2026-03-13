@@ -25,6 +25,13 @@
 - `GatewayClient.js` now routes direct request wrappers through canonical request runtime owners instead of local mixed helpers.
 - `AnalyticsPayloadNormalizer.js` is now accepted as a sanctioned composition owner over split analytics normalization slices, not as an unresolved monolith.
 - `GatewayClient.js` is now accepted as the sanctioned public transport shell over canonical request/policy/runtime owners.
+- backend implementation and non-repo SAP evidence gaps are explicitly tracked in `backend/sap_backend/IMPLEMENTATION_AND_EVIDENCE_BACKLOG.md`.
+- unified `C/U/D` delta contract for `SaveChanges` and `AutoSave` is now implemented as the sanctioned mutable payload shape for:
+  - `root`
+  - `checks`
+  - `barriers`
+  - `participants`
+  - `attachments`
 
 ## Current Project Shape
 - Canonical feature owner: `app/service/features/*`
@@ -40,9 +47,11 @@
   - lazy detail view/fragments/CSS
   - lazy analytics view/drilldown fragments/CSS
   - deferred dialog-heavy UI
+- current release-candidate freeze rules are documented in `docs/audit/architecture-freeze-rules.md`
+- final bundle ownership is documented in `docs/audit/final-bundle-ownership-map.md`
 
 ## Validation Baseline
-- `python -m pytest backend/mock_gateway/tests -q` -> `40 passed`
+- `python -m pytest backend/mock_gateway/tests -q` -> `42 passed`
 - `node scripts/check-xml-views.mjs` -> `PASS`
 - `node scripts/sap-gateway-only-gate.js --json` -> `ok: true`
 - `node scripts/enterprise-readiness-gate.js scripts/enterprise-readiness-thresholds.json --json` -> `ok: true`
@@ -67,9 +76,16 @@
   - productive auth/authorization evidence
   - ABAP-side authority/save/lock evidence
   - certification-style operational evidence pack
+- ABAP/PFCG/Basis work that cannot be safely completed from the repo alone is now separated from repo code work in `backend/sap_backend/IMPLEMENTATION_AND_EVIDENCE_BACKLOG.md`.
+- save/autosave semantics are now explicit enough for ABAP RTTI/BOPF mapping:
+  - frontend emits `edit_mode = C|U|D`
+  - root delta now carries explicit `edit_mode`
+  - participant and attachment deltas are included in the unified contract
+  - ABAP mapper remains backward-compatible by falling back to `U` when `root-edit_mode` is absent
 
 ## Performance Readiness
 - Search/detail/analytics panes are segmented and lazy-mounted.
+- readiness telemetry is now explicit in runtime state under `state>/readiness/metrics/stages/*`
 - Search view and page CSS are modularized enough to support future bundle partitioning.
 - Detail view and page CSS are also modularized enough to support page-level and fragment-level bundle partitioning.
 - Analytics payload normalization and drilldown fragments are split enough to support a dedicated lazy analytics bundle without dragging unrelated search/detail owners.
@@ -97,6 +113,7 @@
 - `controls` CSS is modularized under `app/styles/modules/controls/*`.
 - `detail` CSS is modularized under `app/styles/modules/detail/*`, with no active mixed page owner left in the top page files.
 - `service/framework` remains governed by alias/token drift checks and stays on `runtime + contracts only`.
+- non-local mock contours are now hardened by profile flags so mock identity and startup mutation are local-only behaviors.
 - `SearchControllerBehavior.js` no longer owns analytics-drilldown filter-intent application locally; that bridge is split into its own behavior module.
 - `SearchControllerBehavior.js` no longer owns lifecycle/filter glue locally; that orchestration is split into `SearchLifecycleBehavior.js` and `SearchFilterLifecycleBehavior.js`.
 - `SearchControllerBehavior.js` no longer owns toolbar confirm lifecycle locally; that orchestration is split into `SearchToolbarBehavior.js`.
@@ -104,6 +121,8 @@
 - `AnalyticsControllerBehavior.js` no longer owns report dialog lifecycle locally; that orchestration is split into `AnalyticsReportBehavior.js`.
 - `SearchControllerBehavior.js` no longer carries dead smart-table contract hints or unused controller-only surface methods.
 - `Component.js` no longer carries duplicate `ComponentAppRuntime` dependency wiring or stale framework imports.
+- measurable readiness stages are now emitted for shell/search/detail/analytics/deferred dialogs.
+- `SaveChanges` and `AutoSave` now share one sanctioned delta-first payload contract instead of partial ad-hoc save shapes.
 - Current hotspot sizes after this wave:
   - `SearchControllerBehavior.js` -> `9180`
   - `AnalyticsControllerBehavior.js` -> `7884`

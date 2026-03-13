@@ -166,6 +166,33 @@ def test_local_validation_guide_matches_real_repo_assets():
     assert "filterLocationKey" in guide
 
 
+def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
+    delta_contracts = _read(APP_ROOT / "service" / "contracts" / "DeltaContracts.js")
+    payload_builder = _read(APP_ROOT / "service" / "shared" / "DeltaPayloadBuilder.js")
+    field_mappers = _read(APP_ROOT / "service" / "shared" / "delta" / "DeltaFieldMappers.js")
+    payload_mapper = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistPayloadMapper.js")
+    save_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "SaveDetailUseCase.js")
+    autosave_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "AutosaveDetailUseCase.js")
+    abap_mapper = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_bopf_mapper.clas.abap")
+
+    assert 'CREATE: "C"' in delta_contracts
+    assert 'UPDATE: "U"' in delta_contracts
+    assert 'DELETE: "D"' in delta_contracts
+    assert 'PARTICIPANTS: "participants"' in delta_contracts
+    assert 'ATTACHMENTS: "attachments"' in delta_contracts
+
+    assert "participants:" in payload_builder
+    assert "attachments:" in payload_builder
+    assert "buildCreatePayload" in payload_builder
+    assert "rootEditMode" in payload_builder
+    assert "toParticipantFields" in field_mappers
+    assert "toAttachmentFields" in field_mappers
+    assert "participants: Array.isArray(oIn.participants)" in payload_mapper
+    assert "mergeDeltaAttachments" in save_usecase
+    assert "mergeDeltaAttachments" in autosave_usecase
+    assert "is_root-edit_mode IS NOT INITIAL" in abap_mapper
+
+
 def test_start_local_env_supports_python_fallback_and_external_gateway_mode():
     source = _read(REPO_ROOT / "scripts" / "start-local-env.ps1")
 

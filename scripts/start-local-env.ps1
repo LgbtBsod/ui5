@@ -169,6 +169,8 @@ $uiBackendBase = if ($isRealGateway) { $GatewayBaseUrl.TrimEnd("/") } else { "ht
 if ($isRealGateway) {
     Remove-Item $backendPidFile -ErrorAction SilentlyContinue
 } else {
+    $prevProfile = $env:PCCT_PROFILE
+    $env:PCCT_PROFILE = "local"
     $backendProcess = Start-Process `
         -FilePath $pythonCommand.FilePath `
         -ArgumentList @($pythonCommand.PrefixArgs + @("-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "$BackendPort")) `
@@ -177,6 +179,11 @@ if ($isRealGateway) {
         -RedirectStandardError $backendErr `
         -WindowStyle Hidden `
         -PassThru
+    if ($null -eq $prevProfile) {
+        Remove-Item Env:PCCT_PROFILE -ErrorAction SilentlyContinue
+    } else {
+        $env:PCCT_PROFILE = $prevProfile
+    }
 
     $backendProcess.Id | Set-Content $backendPidFile
 }

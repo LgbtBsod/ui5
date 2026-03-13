@@ -44,12 +44,20 @@ sap.ui.define([], function () {
     function normalizeSavePayload(sRootId, oPayload, aAttachments) {
         var oIn = oPayload || {};
         var aNormalizedAttachments = normalizeAttachmentRows(aAttachments, sRootId);
-        if (Object.prototype.hasOwnProperty.call(oIn, "root") || Object.prototype.hasOwnProperty.call(oIn, "checks") || Object.prototype.hasOwnProperty.call(oIn, "barriers")) {
+        if (
+            Object.prototype.hasOwnProperty.call(oIn, "root") ||
+            Object.prototype.hasOwnProperty.call(oIn, "checks") ||
+            Object.prototype.hasOwnProperty.call(oIn, "barriers") ||
+            Object.prototype.hasOwnProperty.call(oIn, "participants") ||
+            Object.prototype.hasOwnProperty.call(oIn, "attachments")
+        ) {
+            var aUnifiedAttachments = Array.isArray(oIn.attachments) ? oIn.attachments.slice() : [];
             return Object.assign({}, oIn, {
                 root: Object.assign({}, oIn.root || {}, {
                     pcct_uuid: normalizeRootKey((oIn.root && oIn.root.pcct_uuid) || sRootId)
                 }),
-                attachments: aNormalizedAttachments,
+                participants: Array.isArray(oIn.participants) ? oIn.participants.slice() : [],
+                attachments: aUnifiedAttachments.concat(aNormalizedAttachments),
                 client_version: Number(oIn.client_version || ((oIn.root || {}).version_number) || 0) || 0,
                 SessionGuid: oIn.SessionGuid || oIn.session_guid || null
             });
@@ -62,6 +70,7 @@ sap.ui.define([], function () {
                 basic: oIn.basic || {},
                 checks: oIn.checks || [],
                 barriers: oIn.barriers || [],
+                participants: oIn.participants || [],
                 attachments: aNormalizedAttachments
             }
         };

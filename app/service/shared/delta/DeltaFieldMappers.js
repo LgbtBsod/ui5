@@ -1,4 +1,7 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec"], function (DeltaDateCodec) {
+sap.ui.define([
+  "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec",
+  "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts"
+], function (DeltaDateCodec, DeltaContracts) {
   "use strict";
 
   function assignIfPresent(oTarget, sKey, vValue) {
@@ -19,12 +22,13 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec
     return undefined;
   }
 
-  function mapRootFields(oRootDelta, oBasicDelta, sRootKey) {
+  function mapRootFields(oRootDelta, oBasicDelta, sRootKey, sEditMode) {
     var oRoot = {};
     var oRootChanges = oRootDelta || {};
     var oBasicChanges = oBasicDelta || {};
 
     assignIfPresent(oRoot, "pcct_uuid", String(sRootKey || "").trim());
+    assignIfPresent(oRoot, "edit_mode", DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE));
     assignIfPresent(oRoot, "status", pickValue(oRootChanges, ["status", "Status"]));
     assignIfPresent(oRoot, "checklist_id", pickValue(oRootChanges, ["Id", "RequestId", "id", "request_id", "checklist_id"]));
     assignIfPresent(oRoot, "lpc", pickValue(oRootChanges, ["Lpc", "lpc"]));
@@ -80,5 +84,48 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec
     };
   }
 
-  return { mapRootFields: mapRootFields, toCheckFields: toCheckFields, toBarrierFields: toBarrierFields };
+  function toParticipantFields(oRow, iIndex, sEditMode) {
+    var sKey = pickValue(oRow, ["id", "Key", "part_uuid", "participant_uuid"]);
+    var sMode = DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE);
+    var bCreate = sMode === DeltaContracts.EDIT_MODE.CREATE;
+    return {
+      part_uuid: bCreate ? "" : String(sKey || "").trim(),
+      client_row_id: String(pickValue(oRow, ["client_row_id", "id", "Key"]) || "").trim(),
+      edit_mode: sMode,
+      part_num: Number(oRow.partNum || oRow.PartNum || oRow.position || iIndex + 1),
+      role_code: String(pickValue(oRow, ["role_code", "RoleCode", "role", "Role"]) || "").trim(),
+      fullname: String(pickValue(oRow, ["fullname", "Fullname", "FULLNAME", "name", "Name"]) || "").trim(),
+      pernr: String(pickValue(oRow, ["pernr", "Pernr", "PERNR"]) || "").trim(),
+      position: String(pickValue(oRow, ["position", "Position", "POSITION"]) || "").trim(),
+      orgunit: String(pickValue(oRow, ["orgunit", "OrgUnit", "ORGUNIT"]) || "").trim()
+    };
+  }
+
+  function toAttachmentFields(oRow, iIndex, sEditMode, sRootKey) {
+    var sMode = DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE);
+    var sKey = pickValue(oRow, ["attach_uuid", "AttachmentKey", "id", "Key"]);
+    var bCreate = sMode === DeltaContracts.EDIT_MODE.CREATE;
+    return {
+      attach_uuid: bCreate ? "" : String(sKey || "").trim(),
+      client_row_id: String(pickValue(oRow, ["client_row_id", "AttachmentKey", "id", "Key"]) || "").trim(),
+      edit_mode: sMode,
+      root_key: String(pickValue(oRow, ["RootKey", "rootKey"]) || sRootKey || "").trim(),
+      parent_key: String(pickValue(oRow, ["ParentKey", "parentKey", "RootKey", "rootKey"]) || sRootKey || "").trim(),
+      folder_key: String(pickValue(oRow, ["FolderKey", "folderKey", "ParentKey", "parentKey"]) || sRootKey || "").trim(),
+      category_key: String(pickValue(oRow, ["CategoryKey", "categoryKey", "Type", "type"]) || "GEN").trim() || "GEN",
+      file_name: String(pickValue(oRow, ["FileName", "fileName", "Name", "name"]) || "").trim(),
+      mime_type: String(pickValue(oRow, ["MimeType", "mimeType"]) || "application/octet-stream").trim() || "application/octet-stream",
+      description: String(pickValue(oRow, ["Description", "description"]) || "").trim(),
+      file_size: Number(pickValue(oRow, ["FileSize", "fileSize", "FileSizeContent", "fileSizeContent"]) || 0) || 0,
+      value: String(pickValue(oRow, ["Value", "value"]) || "").trim()
+    };
+  }
+
+  return {
+    mapRootFields: mapRootFields,
+    toCheckFields: toCheckFields,
+    toBarrierFields: toBarrierFields,
+    toParticipantFields: toParticipantFields,
+    toAttachmentFields: toAttachmentFields
+  };
 });

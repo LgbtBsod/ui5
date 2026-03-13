@@ -3,8 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, FacadeCommandRuntime, StatePaths, AnalyticsContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, FacadeCommandRuntime, StatePaths, AnalyticsContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
     "use strict";
 
     return {
@@ -62,6 +64,10 @@ sap.ui.define([
                 mHooks.applyComparisonMetricSelection(oController);
                 mHooks.applyBuilderSelection(oController);
                 mHooks.syncAnalyticsContextHints(oController);
+                ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
+                    reason: sReason || "manual",
+                    source: sSelectedSource
+                });
                 return oResult;
             });
         }

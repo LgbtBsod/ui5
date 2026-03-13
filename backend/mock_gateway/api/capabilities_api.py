@@ -1,4 +1,4 @@
-from config import ALLOW_MOCK_USER_HEADER
+from config import ALLOW_MOCK_USER_HEADER, APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA
 from fastapi import APIRouter
 
 router = APIRouter(tags=["Capabilities"])
@@ -42,5 +42,10 @@ def capabilities():
             "searchRowsEntity": "/SearchRows",
         },
         "identityMode": "mock_header" if ALLOW_MOCK_USER_HEADER else "runtime_user_context",
+        "profile": APP_PROFILE,
+        "startupMutation": {
+            "schema": AUTO_MUTATE_SCHEMA_ON_STARTUP,
+            "seedData": AUTO_SEED_STARTUP_DATA,
+        },
         "source": "gateway_capabilities"
     }

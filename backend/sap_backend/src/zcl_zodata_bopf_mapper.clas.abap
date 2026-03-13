@@ -315,7 +315,7 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
     lr_int = create_internal_ref( ls_config-int_struct_type ).
 
     APPEND VALUE #(
-      edit_mode = 'U'
+      edit_mode = COND #( WHEN is_root-edit_mode IS NOT INITIAL THEN is_root-edit_mode ELSE 'U' )
       node_key  = zif_i_bo_c=>sc_node-root
       key       = iv_root_key
       external  = REF #( is_root )

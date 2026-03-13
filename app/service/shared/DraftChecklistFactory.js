@@ -82,6 +82,7 @@ sap.ui.define([
             basic: basicNode({}, sRootKey),
             checks: [],
             barriers: [],
+            participants: [],
             attachments: [],
             meta: {
                 aggChangedOn: "",

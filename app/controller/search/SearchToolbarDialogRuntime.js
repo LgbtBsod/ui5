@@ -4,9 +4,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem"
-], function (JsRuntimeContracts, SearchToolbarContracts, ModelStateRuntime, OperationSourceContracts, ModelContracts, ViewSettingsDialog, ViewSettingsItem) {
+], function (JsRuntimeContracts, SearchToolbarContracts, ModelStateRuntime, OperationSourceContracts, ModelContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ViewSettingsDialog, ViewSettingsItem) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntimeContracts.TYPEOF.FUNCTION;
@@ -87,6 +89,9 @@ sap.ui.define([
         oDialog.setSelectedSortItem(String(ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_SORT_KEY, SearchToolbarContracts.DEFAULTS.SORT_KEY) || SearchToolbarContracts.DEFAULTS.SORT_KEY));
         oDialog.setSortDescending(!!ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_SORT_DESCENDING, true));
         oDialog.open("sort");
+        ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DEFERRED_DIALOG_READY, {
+            dialog: "searchSort"
+        });
     }
 
     function openGroupDialog(oController) {
@@ -105,6 +110,9 @@ sap.ui.define([
         oDialog.setSelectedGroupItem(String(ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_GROUP_KEY, "") || SearchToolbarContracts.DEFAULTS.GROUP_KEY));
         oDialog.setGroupDescending(!!ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_GROUP_DESCENDING, false));
         oDialog.open("group");
+        ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DEFERRED_DIALOG_READY, {
+            dialog: "searchGroup"
+        });
     }
 
     return {

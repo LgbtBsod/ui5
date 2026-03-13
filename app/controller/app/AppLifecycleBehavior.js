@@ -6,11 +6,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellPaneRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellViewportRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, ShellPaneContracts, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, Device) {
+], function (ControllerResourceCleanup, ShellPaneContracts, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, Device) {
     "use strict";
 
     function markStartupReady() {
@@ -156,6 +158,9 @@ sap.ui.define([
                 return;
             }
             this._bStartupReadyMarked = true;
+            ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SHELL_READY, {
+                route: String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "") || "").trim()
+            });
             if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
                 SchedulingRuntime.nextFrame(markStartupReady);
                 return;

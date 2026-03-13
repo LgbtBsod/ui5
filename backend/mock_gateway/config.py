@@ -1,7 +1,17 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
+
+def _env_flag(name: str, default: bool) -> bool:
+    raw_value = str(os.getenv(name, "") or "").strip().lower()
+    if not raw_value:
+        return default
+    return raw_value in {"1", "true", "yes", "on"}
+
 DATABASE_URL = "sqlite:///" + str((Path(__file__).resolve().parent / "gateway.db").as_posix())
+APP_PROFILE = str(os.getenv("PCCT_PROFILE", "local") or "local").strip().lower()
+IS_LOCAL_PROFILE = APP_PROFILE == "local"
 FRONTEND_TIMER_TEST_PROFILE = {
     "heartbeat_ms": 3000,
     "lock_status_ms": 2000,
@@ -29,4 +39,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 EXPOSE_NON_CANONICAL_ROUTES = False
-ALLOW_MOCK_USER_HEADER = True
+ALLOW_MOCK_USER_HEADER = IS_LOCAL_PROFILE and _env_flag("PCCT_ALLOW_MOCK_USER_HEADER", True)
+AUTO_MUTATE_SCHEMA_ON_STARTUP = IS_LOCAL_PROFILE and _env_flag("PCCT_AUTO_MUTATE_SCHEMA", True)
+AUTO_SEED_STARTUP_DATA = IS_LOCAL_PROFILE and _env_flag("PCCT_AUTO_SEED_STARTUP_DATA", True)
+LOG_REQUEST_BODIES = _env_flag("PCCT_LOG_REQUEST_BODIES", False)

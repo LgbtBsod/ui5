@@ -3,8 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -75,6 +77,9 @@ sap.ui.define([
         mHooks.syncSmartControlAvailability();
         mHooks.bindSearchViewportRuntime();
         logStartupMetric(oController, SEARCH_READINESS.STARTUP_EVENTS.FIRST_ROUTE_READY);
+        ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.SEARCH_ROUTE_READY, {
+            reason: "routeMatched"
+        });
         ControllerViewStateRuntime.set(oController, "/bootstrapBusy", true);
         ControllerViewStateRuntime.set(oController, "/analyticsBusy", false);
         ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);

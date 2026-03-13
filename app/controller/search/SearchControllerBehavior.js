@@ -17,8 +17,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "sap/ui/core/Item"
-], function (ControllerViewStateRuntime, SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchCommandPolicy, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchAnalyticsIntentBehavior, SearchLoadRuntime, SearchViewBehavior, SearchToolbarContracts, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, Item) {
+], function (ControllerViewStateRuntime, SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchCommandPolicy, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchAnalyticsIntentBehavior, SearchLoadRuntime, SearchViewBehavior, SearchToolbarContracts, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, Item) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -95,6 +97,9 @@ sap.ui.define([
         },
 
         onSmartSearch: function () {
+            ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SEARCH_INTERACTION_READY, {
+                action: "smartSearch"
+            });
             SearchViewBehavior.beginSearchLoadingFeedback(this);
             return SearchFilterLifecycleBehavior.onSmartSearch(this, function (sBusyPath, fnAction) {
                 return this._withActionBusy(sBusyPath, fnAction, function (bBusy) {

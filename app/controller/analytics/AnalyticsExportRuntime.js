@@ -4,9 +4,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/ExcelExport",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows"
-], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ExcelExport, AnalyticsExportRows) {
+], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ExcelExport, AnalyticsExportRows) {
     "use strict";
 
     function ensureAnalyticsReportDialog(oController) {
@@ -20,6 +22,9 @@ sap.ui.define([
         }).then(function (oDialog) {
             oController.getView().addDependent(oDialog);
             oController._oAnalyticsReportDialog = oDialog;
+            ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DEFERRED_DIALOG_READY, {
+                dialog: "analyticsReport"
+            });
             return oDialog;
         });
         return oController._pAnalyticsReportDialog;

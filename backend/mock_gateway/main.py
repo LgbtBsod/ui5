@@ -15,7 +15,16 @@ from api.analytics_api import router as analytics_router
 from api.batch_api import router as batch_router
 from api.gateway_canonical_api import router as gateway_canonical_router
 from api.capabilities_api import router as capabilities_router
-from config import CORS_ALLOWED_ORIGINS, FRONTEND_TIMER_TEST_PROFILE, LOCK_CLEANUP_INTERVAL_SECONDS, METADATA_REFRESH_INTERVAL_SECONDS
+from config import (
+    APP_PROFILE,
+    AUTO_MUTATE_SCHEMA_ON_STARTUP,
+    AUTO_SEED_STARTUP_DATA,
+    CORS_ALLOWED_ORIGINS,
+    FRONTEND_TIMER_TEST_PROFILE,
+    LOCK_CLEANUP_INTERVAL_SECONDS,
+    LOG_REQUEST_BODIES,
+    METADATA_REFRESH_INTERVAL_SECONDS,
+)
 from database import Base, SessionLocal, engine
 from services.db_seed import seed_reference_data
 from services.analytics_service import AnalyticsService
@@ -322,39 +331,46 @@ async def analytics_refresh_job() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    ensure_schema_compatibility()
+    if AUTO_MUTATE_SCHEMA_ON_STARTUP:
+        Base.metadata.create_all(bind=engine)
+        ensure_schema_compatibility()
 
     db = SessionLocal()
     try:
-        seed_reference_data(db)
-        _seed_checklist_roots_if_needed(db, minimum_rows=100)
-        _ensure_integration_samples(db)
+        if AUTO_SEED_STARTUP_DATA:
+            seed_reference_data(db)
+            _seed_checklist_roots_if_needed(db, minimum_rows=100)
+            _ensure_integration_samples(db)
         oSettings = db.query(FrontendRuntimeSettings).first()
         if not oSettings:
-            db.add(FrontendRuntimeSettings(
-                environment="default",
-                required_fields_json=json.dumps(DEFAULT_REQUIRED_FIELDS),
-                upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY),
-                **FRONTEND_TIMER_TEST_PROFILE
-            ))
-            db.commit()
+            if AUTO_SEED_STARTUP_DATA:
+                db.add(FrontendRuntimeSettings(
+                    environment="default",
+                    required_fields_json=json.dumps(DEFAULT_REQUIRED_FIELDS),
+                    upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY),
+                    **FRONTEND_TIMER_TEST_PROFILE
+                ))
+                db.commit()
+            else:
+                logger.warning("Frontend runtime settings are absent and startup seeding is disabled for profile=%s", APP_PROFILE)
         else:
             bChanged = False
-            for sKey, vValue in FRONTEND_TIMER_TEST_PROFILE.items():
-                if int(getattr(oSettings, sKey, 0) or 0) == int(vValue):
-                    continue
-                setattr(oSettings, sKey, int(vValue))
-                bChanged = True
-            if not str(getattr(oSettings, "required_fields_json", "") or "").strip():
-                oSettings.required_fields_json = json.dumps(DEFAULT_REQUIRED_FIELDS)
-                bChanged = True
-            if not str(getattr(oSettings, "upload_policy_json", "") or "").strip():
-                oSettings.upload_policy_json = json.dumps(DEFAULT_UPLOAD_POLICY)
-                bChanged = True
+            if AUTO_SEED_STARTUP_DATA:
+                for sKey, vValue in FRONTEND_TIMER_TEST_PROFILE.items():
+                    if int(getattr(oSettings, sKey, 0) or 0) == int(vValue):
+                        continue
+                    setattr(oSettings, sKey, int(vValue))
+                    bChanged = True
+                if not str(getattr(oSettings, "required_fields_json", "") or "").strip():
+                    oSettings.required_fields_json = json.dumps(DEFAULT_REQUIRED_FIELDS)
+                    bChanged = True
+                if not str(getattr(oSettings, "upload_policy_json", "") or "").strip():
+                    oSettings.upload_policy_json = json.dumps(DEFAULT_UPLOAD_POLICY)
+                    bChanged = True
             if bChanged:
                 db.commit()
-        AnalyticsService.refresh_cache(db, trigger="startup")
+        if AUTO_SEED_STARTUP_DATA:
+            AnalyticsService.refresh_cache(db, trigger="startup")
     finally:
         db.close()
 
@@ -436,7 +452,7 @@ async def request_response_logging(request: Request, call_next):
         request.scope["method"] = s_effective_method
 
     s_content_type = str(request.headers.get("content-type") or "").lower()
-    b_method_with_body = s_effective_method in _LOG_BODY_METHODS
+    b_method_with_body = LOG_REQUEST_BODIES and s_effective_method in _LOG_BODY_METHODS
     b_supported_content_type = any(s_item in s_content_type for s_item in _LOG_BODY_CONTENT_TYPES)
     b_read_body = b_method_with_body and b_supported_content_type
 
