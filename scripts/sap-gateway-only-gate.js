@@ -92,18 +92,21 @@ function detectManifestContract(violations) {
 function detectComponentGatewayBootstrap(violations) {
   const source = [
     qa.readText(ROOT, 'Component.js'),
-    qa.readText(ROOT, 'service/framework/ComponentInitRuntime.js')
+    qa.readText(ROOT, 'service/framework/ComponentInitRuntime.js'),
+    qa.readText(ROOT, 'service/framework/ComponentMainServiceRuntime.js'),
+    qa.readText(ROOT, 'service/framework/ComponentRuntimeSettingsRuntime.js'),
+    qa.readText(ROOT, 'service/framework/ComponentBootStateRuntime.js')
   ].join('\n');
   if (!/new\s+ODataModel\s*\(\s*sMainServiceUri\s*,\s*\{[\s\S]*useBatch:\s*true[\s\S]*tokenHandling:\s*true/.test(source)) {
     runtimeGate.pushPipeViolation(violations, 'Component.js', null, 'Component bootstrap must construct ODataModel with useBatch=true and tokenHandling=true');
   }
-  if (!/SettingsManager\.load\s*\(\s*GatewayBackendService\s*\)/.test(source)) {
+  if (!/SettingsManager\.(?:load|reload)\s*\(\s*GatewayBackendService\s*\)/.test(source)) {
     runtimeGate.pushPipeViolation(violations, 'Component.js', null, 'Component bootstrap must load RuntimeSettingsSet via GatewayBackendService');
   }
-  if (!/frontendConfigSource"\s*,\s*"gateway_runtime"/.test(source)) {
+  if (!/frontendConfigSource["']?\s*,\s*["']gateway_runtime["']/.test(source)) {
     runtimeGate.pushPipeViolation(violations, 'Component.js', null, 'Component must mark runtime config source as gateway_runtime on success');
   }
-  if (!/frontendConfigSource"\s*,\s*"gateway_runtime_error"/.test(source)) {
+  if (!/frontendConfigSource["']?\s*,\s*["']gateway_runtime_error["']/.test(source)) {
     runtimeGate.pushPipeViolation(violations, 'Component.js', null, 'Component must mark runtime config failures as gateway_runtime_error');
   }
 }
