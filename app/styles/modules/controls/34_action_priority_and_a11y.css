@@ -1,0 +1,40 @@
+.chkApp *:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-xs);
+}
+
+.chkApp .sapMBtn:focus-visible .sapMBtnInner,
+.chkApp .sapMBtn:focus-within .sapMBtnInner {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.chkApp .sapMBtnSuccess .sapMBtnInner,
+.chkApp .btnSuccess .sapMBtnInner {
+  background: var(--hz-success);
+}
+
+.chkApp .actionPriorityPrimary .sapMBtnInner,
+.chkApp .sapMBtn.actionPriorityPrimary .sapMBtnInner {
+  border-color: var(--control-primary-border);
+  background: var(--control-primary-bg);
+  box-shadow: var(--control-primary-shadow);
+  color: var(--control-primary-text);
+}
+
+.chkApp .actionPrioritySecondary .sapMBtnInner,
+.chkApp .sapMBtn.actionPrioritySecondary .sapMBtnInner {
+  border-color: var(--theme-workbench-control-border);
+  background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
+  box-shadow: none;
+  color: var(--text-main);
+}
+
+.chkApp .actionPriorityDanger .sapMBtnInner,
+.chkApp .sapMBtn.actionPriorityDanger .sapMBtnInner {
+  border-color: var(--control-danger-border);
+  background: var(--control-danger-bg);
+  box-shadow: var(--control-danger-shadow);
+  color: var(--control-danger-text);
+}

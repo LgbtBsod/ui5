@@ -8,8 +8,9 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/EnsureDictLoadedUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/InitializeAppUseCase",
@@ -87,7 +88,8 @@ sap.ui.define([
     InteractionFX,
     ThemeService,
     SchedulingRuntime,
-    WorkflowContracts
+    WorkflowContracts,
+    ComponentAppRuntime
 ) {
     "use strict";
 
@@ -175,82 +177,25 @@ sap.ui.define([
             this._stopLockScopedManagers();
         },
         _collectManagers: function () {
-            return {
-                heartbeat: this._oHeartbeat,
-                activity: this._oActivity,
-                autosave: this._oAutoSave,
-                lockStatus: this._oLockStatus,
-                gcd: this._oGcd
-            };
+            return ComponentAppRuntime.collectManagers(this);
         },
         _isLockRuntimeActive: function (oStateModel) {
-            return oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) === WorkflowContracts.EDIT_MODES.EDIT
-                && oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_LOCK_STATE) === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+            return ComponentAppRuntime.isLockRuntimeActive(oStateModel);
         },
         _syncLockScopedManagers: function (oStateModel) {
-            var bActive = this._isLockRuntimeActive(oStateModel);
-            if (bActive) {
-                this._startLockScopedManagers();
-                return;
-            }
-            this._stopLockScopedManagers();
+            return ComponentAppRuntime.syncLockScopedManagers(this, oStateModel);
         },
         _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel) {
-            RuntimeTimerSanitizer.sanitizeTimers((oFrontendConfig && oFrontendConfig.runtimeSettingsPayload) || {}, oStateModel.getProperty("/timers") || {});
-            oStateModel.setProperty("/timers", TimeConfigService.normalize((oFrontendConfig && oFrontendConfig.runtimeSettingsPayload) || {}, oStateModel.getProperty("/timers") || {}));
-            return ApplyRuntimeSettingsUseCase.execute({ frontendConfig: oFrontendConfig || {} }, {
-                stateModel: oStateModel,
-                envModel: oEnvModel,
-                masterDataModel: oMasterDataModel
-            }).then(function () {
-                this._applyManagersTimerConfig(oStateModel.getProperty("/timers") || {});
-            }.bind(this));
+            return ComponentAppRuntime.applyFrontendRuntimeConfig(this, oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel, ApplyRuntimeSettingsUseCase);
         },
         _applyManagersTimerConfig: function (mTimers) {
-            if (this._oHeartbeat && this._oHeartbeat.setIntervalMs) {
-                this._oHeartbeat.setIntervalMs(mTimers.heartbeatMs);
-            }
-            if (this._oLockStatus && this._oLockStatus.setIntervalMs) {
-                this._oLockStatus.setIntervalMs(mTimers.lockStatusMs);
-            }
-            if (this._oGcd && this._oGcd.setIntervalMs) {
-                this._oGcd.setIntervalMs(mTimers.gcdMs);
-            }
-            if (this._oActivity && this._oActivity.setIdleMs) {
-                this._oActivity.setIdleMs(mTimers.idleMs);
-            }
-            if (this._oAutoSave && this._oAutoSave.setIntervals) {
-                this._oAutoSave.setIntervals({
-                    intervalMs: mTimers.autoSaveIntervalMs,
-                    debounceMs: mTimers.autoSaveDebounceMs
-                });
-            }
+            return ComponentAppRuntime.applyManagersTimerConfig(this, mTimers);
         },
         _registerLockReleaseBeacon: function (oStateModel, oMainServiceModel) {
-            var that = this;
-            var fnPageHide = function () {
-                that._releaseActiveLockOnLeave(oStateModel, oMainServiceModel);
-            };
-            window.addEventListener("pagehide", fnPageHide);
-            return function () {
-                window.removeEventListener("pagehide", fnPageHide);
-            };
+            return ComponentAppRuntime.registerLockReleaseBeacon(this, oStateModel, oMainServiceModel);
         },
         _releaseActiveLockOnLeave: function (oStateModel, oMainServiceModel) {
-            var oPayload;
-            var sUrl;
-            var sToken;
-            if (this._bLeaveReleaseSent) {
-                return;
-            }
-                oPayload = ComponentLockReleaseRuntime.readActiveLockPayload(oStateModel);
-                sUrl = ComponentLockReleaseRuntime.buildLockReleaseUrl(oStateModel);
-            sToken = oMainServiceModel && oMainServiceModel.getSecurityToken ? String(oMainServiceModel.getSecurityToken() || "").trim() : "";
-            if (!oPayload || !sUrl) {
-                return;
-            }
-            this._bLeaveReleaseSent = true;
-                ComponentLockReleaseRuntime.tryBeaconLockRelease(sUrl, oPayload, sToken);
+            return ComponentAppRuntime.releaseActiveLockOnLeave(this, oStateModel, oMainServiceModel);
         },
         attachInteractionFxToApp: function (oDomRef) {
             if (this._oInteractionFxHandle && this._oInteractionFxHandle.destroy) {
@@ -298,7 +243,7 @@ sap.ui.define([
             if (typeof this._fnUnsubscribeRuntimeSettings === "function") {
                 this._fnUnsubscribeRuntimeSettings();
             }
-            this._iSaveWorkingTimer = SchedulingRuntime.clearTimer(this._iSaveWorkingTimer);
+            ComponentAppRuntime.clearComponentTimers(this);
             this._fnCrossTabStorage = null;
             this._oCrossTabChannel = null;
             this._oLifecycleRouter = null;

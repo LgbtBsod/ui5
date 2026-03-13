@@ -1,0 +1,24 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox class="glassCard detailSectionCard detailTableExperienceCard detailAttachmentsCard" width="100%">
+        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonTableSection" type="XML"/>
+        </VBox>
+        <VBox id="detailAttachmentsBody" renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody detailAttachmentsBody workflowBusyScope workflowBusyScopeSection">
+            <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{view>/attachmentBusy}">
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
+            </VBox>
+            <OverflowToolbar class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar workbenchToolbarSurface sectionToolbarSurface">
+                <Title text="{i18n>attachmentsTitle}"/>
+                <ToolbarSpacer/>
+                <Button text="{= ${view>/attachmentsExpanded} ? ${i18n>hideAttachmentsSection} : ${i18n>showAttachmentsSection} }" type="Transparent" enabled="{= !${view>/attachmentBusy} }" press=".onToggleAttachmentsSection" class="sapUiTinyMarginEnd actionPrioritySecondary"/>
+                <Text text="{i18n>attachmentDraftStageHint}" visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; ${selected>/root/id} === '__CREATE' }" class="sapUiTinyMarginEnd modeHintText"><layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData></Text>
+                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="sapUiTinyMarginEnd" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"><layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData></Label>
+                <Select id="attachmentCategorySelect" width="12rem" selectedKey="{view>/attachmentCategoryKey}" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} }" items="{ path: 'masterData>/attachmentTypes', templateShareable: true }">
+                    <layoutData><OverflowToolbarLayoutData priority="Disappear" shrinkable="true" minWidth="10rem"/></layoutData>
+                    <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                </Select>
+            </OverflowToolbar>
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailAttachmentsBody" type="XML"/>
+        </VBox>
+    </VBox>
+</core:FragmentDefinition>
