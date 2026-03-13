@@ -19,6 +19,7 @@ sap.ui.define([
             createActionBusy: false,
             hasSearched: false,
             hasRows: false,
+            resultCount: 0,
             canExport: false,
             smartFilterReady: false,
             smartTableReady: false,

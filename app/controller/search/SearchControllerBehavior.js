@@ -293,6 +293,14 @@ sap.ui.define([
             return SearchFormatterBehavior.formatSearchModeChipText(this, sMode);
         },
 
+        formatSearchResultsCompactText: function (iResultCount, bHasRows) {
+            return SearchFormatterBehavior.formatSearchResultsCompactText(this, iResultCount, bHasRows);
+        },
+
+        formatSearchSelectionSummary: function (iSelectionCount, sSelectedRowDisplayId) {
+            return SearchFormatterBehavior.formatSearchSelectionSummary(this, iSelectionCount, sSelectedRowDisplayId);
+        },
+
         onOpenSearchSortDialog: function () {
             SearchToolbarDialogRuntime.openSortDialog(this);
         },

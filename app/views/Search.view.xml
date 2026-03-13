@@ -17,7 +17,7 @@
                 <VBox id="searchWorkbenchDock" class="searchWorkbenchDock" renderType="Bare">
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SearchFilterWorkbench" type="XML"/>
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SearchActionRail" type="XML"/>
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SearchResultsToolbar" type="XML"/>
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SearchResultsSummaryRail" type="XML"/>
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SearchResultsShell" type="XML"/>
                 </VBox>
             </VBox>

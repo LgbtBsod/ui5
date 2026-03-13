@@ -16,12 +16,13 @@ sap.ui.define([
         return ComponentFormattingRuntime.formatHumanDateTime(vDate);
     }
 
-    function setSettledViewState(oController, bCanExport, sWorkflowStage) {
+    function setSettledViewState(oController, bCanExport, sWorkflowStage, iResultCount) {
         ControllerViewStateRuntime.setMany(oController, {
             "/busy": false,
             "/tableBusy": false,
             "/canExport": !!bCanExport,
             "/hasRows": !!bCanExport,
+            "/resultCount": Math.max(0, Number(iResultCount || 0)),
             "/workflowStage": String(sWorkflowStage || "DISCOVER"),
             "/lastUpdatedAt": formatSearchDateTime(new Date())
         });
@@ -46,7 +47,7 @@ sap.ui.define([
     }
 
     function applyLoadError(oController, sErrorMessage) {
-        setSettledViewState(oController, false, "REVIEW");
+        setSettledViewState(oController, false, "REVIEW", 0);
         setLoadStatus(oController, {
             isBusy: false,
             loadError: true,
@@ -56,7 +57,7 @@ sap.ui.define([
 
     function applyLoadSuccess(oController, aRows) {
         var iCount = Array.isArray(aRows) ? aRows.length : 0;
-        setSettledViewState(oController, iCount > 0, iCount > 0 ? "ANALYZE" : "DISCOVER");
+        setSettledViewState(oController, iCount > 0, iCount > 0 ? "ANALYZE" : "DISCOVER", iCount);
         setLoadStatus(oController, {
             isBusy: false,
             loadError: false

@@ -27,8 +27,32 @@ sap.ui.define([
         return SearchViewStateRuntime.formatWorkflowStageState(sStage);
     }
 
+    function formatSearchResultsCompactText(oController, iResultCount, bHasRows) {
+        var oBundle = oController.getResourceBundle && oController.getResourceBundle();
+        var iSafeCount = Math.max(0, Number(iResultCount || 0));
+        if (!bHasRows || !iSafeCount) {
+            return (oBundle && oBundle.getText("resultsLabel")) || "Results";
+        }
+        return ((oBundle && oBundle.getText("resultsLabel")) || "Results") + ": " + iSafeCount;
+    }
+
+    function formatSearchSelectionSummary(oController, iSelectionCount, sSelectedRowDisplayId) {
+        var oBundle = oController.getResourceBundle && oController.getResourceBundle();
+        var iSafeCount = Math.max(0, Number(iSelectionCount || 0));
+        var sPrimaryId = String(sSelectedRowDisplayId || "").trim();
+        if (!iSafeCount) {
+            return (oBundle && oBundle.getText("searchSelectionNone")) || "No selection";
+        }
+        if (iSafeCount === 1 && sPrimaryId) {
+            return ((oBundle && oBundle.getText("searchSelectionPrimaryPrefix")) || "Primary") + ": " + sPrimaryId;
+        }
+        return iSafeCount + " " + ((oBundle && oBundle.getText("searchSelectionUnits")) || "selected");
+    }
+
     return {
         formatSearchModeChipText: formatSearchModeChipText,
+        formatSearchResultsCompactText: formatSearchResultsCompactText,
+        formatSearchSelectionSummary: formatSearchSelectionSummary,
         formatWorkflowStageText: formatWorkflowStageText,
         formatWorkflowStageState: formatWorkflowStageState
     };

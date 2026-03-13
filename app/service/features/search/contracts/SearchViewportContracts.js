@@ -12,7 +12,10 @@ sap.ui.define([
         }),
         VIEW_PATHS: Object.freeze({
             SCROLL_NAV_VISIBLE: "/scrollNavVisible",
-            RESULTS_TOOLBAR_NAV_VISIBLE: "/resultsToolbarNavVisible"
+            RESULTS_TOOLBAR_NAV_VISIBLE: "/resultsToolbarNavVisible",
+            RESULT_COUNT: "/resultCount",
+            SELECTION_COUNT: "/selectionCount",
+            SELECTED_ROW_DISPLAY_ID: "/selectedRowDisplayId"
         })
     });
 });

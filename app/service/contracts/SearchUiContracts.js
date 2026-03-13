@@ -27,8 +27,10 @@ sap.ui.define([], function () {
         },
         VIEWPORT: {
             COMPACT_REM_MAX: 45,
+            MOBILE_STICKY_BREAKPOINT_PX: 700,
             LAYOUT_DEBOUNCE_MS: 96,
             STICKY_STACK_GAP_PX: 6,
+            SUMMARY_RAIL_GAP_PX: 6,
             MIN_HEADER_OFFSET_PX: 8,
             HEADER_OFFSET_PADDING_PX: 2,
             ANCHOR_SCROLL_MARGIN_PX: 10,

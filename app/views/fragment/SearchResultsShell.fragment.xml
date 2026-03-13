@@ -31,8 +31,8 @@
                 beforeRebindTable=".onBeforeSmartTableRebind"
                 initialise=".onSmartTableInitialise"
                 useExportToExcel="false"
-                initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,DateCheck,EquipName,ChangedOn"
-                requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal,DateCheck,EquipName,ChangedOn"
+                initiallyVisibleFields="Id,LpcText,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,DateCheck"
+                requestAtLeastFields="Key,Id,Lpc,LpcText,Profession,ProfessionText,LocationKey,Status,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal,DateCheck"
                 class="searchSmartTableControl appSkeletonReveal">
             </smartTable:SmartTable>
         </VBox>
