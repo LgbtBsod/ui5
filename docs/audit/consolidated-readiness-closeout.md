@@ -1,8 +1,8 @@
 # Consolidated Readiness Closeout
 
 ## Current Score
-- Overall readiness: `90/100`
-- Structural architecture readiness: `96/100`
+- Overall readiness: `92/100`
+- Structural architecture readiness: `97/100`
 - SAP Gateway cutover readiness: `78/100`
 - SAP licensing/certification-style readiness: `72/100`
 - Performance/progressive-readiness readiness: `84/100`
@@ -20,6 +20,11 @@
 - `infra/adapters` factories reduced to real DI boundaries only.
 - `feature/framework token drift` and `alias-only framework files` are enforced by gates.
 - `AnalyticsPayloadNormalizer.js`, `GatewayClient.js`, and `Component.js` are materially thinned and delegated into real runtime owners.
+- `SearchControllerBehavior.js` and `AnalyticsControllerBehavior.js` are further reduced to facade-heavy owners by delegating lifecycle/filter/state glue into dedicated behaviors.
+- `Component.js` no longer assembles runtime-support helpers locally; that support surface is now produced by `ComponentAppRuntime`.
+- `GatewayClient.js` now routes direct request wrappers through canonical request runtime owners instead of local mixed helpers.
+- `AnalyticsPayloadNormalizer.js` is now accepted as a sanctioned composition owner over split analytics normalization slices, not as an unresolved monolith.
+- `GatewayClient.js` is now accepted as the sanctioned public transport shell over canonical request/policy/runtime owners.
 
 ## Current Project Shape
 - Canonical feature owner: `app/service/features/*`
@@ -30,6 +35,11 @@
 - Views/styles: modularized by page and subdomain, no active legacy page monoliths for `search` and `detail`
 - Shared control styling: delegated into `app/styles/modules/controls/*` owners with `21_controls.css` acting as a pure import shell
 - Detail page styling: delegated into `app/styles/modules/detail/*` owners with `41_detail_object_page.css` and `42_detail_control_rail.css` acting as pure import shells
+- Final bundle ownership model now aligns with the feature map:
+  - eager shell/search critical path
+  - lazy detail view/fragments/CSS
+  - lazy analytics view/drilldown fragments/CSS
+  - deferred dialog-heavy UI
 
 ## Validation Baseline
 - `python -m pytest backend/mock_gateway/tests -q` -> `40 passed`
@@ -44,10 +54,11 @@
 - `node scripts/adapter-factory-boundary-gate.js --json` -> `ok: true`
 
 ## Remaining Structural Debt
-- `search` still has remaining thick owners in sticky/view orchestration, though they are now significantly thinner and decomposed.
-- `analytics` controller is close to a pure facade, but still owns some compare-year and builder-selection routing glue.
-- `Component.js` is much smaller but still remains a composition-heavy entry shell rather than a near-empty bootstrap facade.
-- `GatewayClient.js` is thinner, but still keeps execution wrappers that can be pushed one level lower if stricter transport SRP is needed.
+- `search` still has remaining thick owners in sticky/view orchestration, though controller lifecycle/filter/toolbar glue is now separated.
+- `analytics` controller is now largely facade-shaped, but compare-year and drilldown-event glue can still be reduced further if the project wants stricter controller minimalism.
+- `Component.js` is smaller and cleaner, but still remains a composition-heavy entry shell rather than a near-empty bootstrap facade.
+- `GatewayClient.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned public transport shell.
+- `AnalyticsPayloadNormalizer.js` is no longer tracked as unresolved debt; it is intentionally left as the sanctioned analytics composition shell.
 
 ## SAP Readiness Impact
 - Frontend structure is no longer a primary blocker for SAP best-practice review.
@@ -62,8 +73,12 @@
 - Search view and page CSS are modularized enough to support future bundle partitioning.
 - Detail view and page CSS are also modularized enough to support page-level and fragment-level bundle partitioning.
 - Analytics payload normalization and drilldown fragments are split enough to support a dedicated lazy analytics bundle without dragging unrelated search/detail owners.
+- Recommended final bundle map:
+  - eager: shell runtime, `App.view.xml`, search critical fragments, search critical CSS
+  - lazy detail: `Detail.view.xml`, detail fragments, `41_page_detail.css`
+  - lazy analytics: `Analytics.view.xml`, analytics breakdown fragments, analytics CSS
+  - deferred dialogs: sort/group/report/year-picker/value-help dialogs and their skins
 - Next performance wave should focus on:
-  - fragment bundle map
   - control bundle map
   - deferred analytics/picker/dialog bundles
   - transport/request budget per pane
@@ -83,9 +98,17 @@
 - `detail` CSS is modularized under `app/styles/modules/detail/*`, with no active mixed page owner left in the top page files.
 - `service/framework` remains governed by alias/token drift checks and stays on `runtime + contracts only`.
 - `SearchControllerBehavior.js` no longer owns analytics-drilldown filter-intent application locally; that bridge is split into its own behavior module.
+- `SearchControllerBehavior.js` no longer owns lifecycle/filter glue locally; that orchestration is split into `SearchLifecycleBehavior.js` and `SearchFilterLifecycleBehavior.js`.
+- `SearchControllerBehavior.js` no longer owns toolbar confirm lifecycle locally; that orchestration is split into `SearchToolbarBehavior.js`.
+- `AnalyticsControllerBehavior.js` no longer owns state/builder glue locally; that orchestration is split into `AnalyticsStateBehavior.js`.
+- `AnalyticsControllerBehavior.js` no longer owns report dialog lifecycle locally; that orchestration is split into `AnalyticsReportBehavior.js`.
+- `SearchControllerBehavior.js` no longer carries dead smart-table contract hints or unused controller-only surface methods.
+- `Component.js` no longer carries duplicate `ComponentAppRuntime` dependency wiring or stale framework imports.
 - Current hotspot sizes after this wave:
+  - `SearchControllerBehavior.js` -> `9180`
+  - `AnalyticsControllerBehavior.js` -> `7884`
   - `42_detail_control_rail.css` -> `179`
   - `41_detail_object_page.css` -> `232`
   - `AnalyticsPayloadNormalizer.js` -> `12728`
-  - `Component.js` -> `13092`
-  - `GatewayClient.js` -> `8937`
+  - `Component.js` -> `11794`
+  - `GatewayClient.js` -> `9000`

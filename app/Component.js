@@ -7,10 +7,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/EnsureDictLoadedUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/InitializeAppUseCase",
@@ -20,9 +19,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSessionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitRuntime",
@@ -42,8 +38,7 @@ sap.ui.define([
     "sap/ui/Device",
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime"
 ], function (
     UIComponent,
     ModelFactory,
@@ -65,9 +60,6 @@ sap.ui.define([
     CtxFactory,
     EffectApplier,
     FeedbackPolicy,
-    ComponentSessionRuntime,
-    ComponentFormattingRuntime,
-    ComponentDetailStateRuntime,
     ComponentLockReleaseRuntime,
     ComponentSaveGuardRuntime,
     ComponentInitRuntime,
@@ -87,24 +79,9 @@ sap.ui.define([
     Device,
     InteractionFX,
     ThemeService,
-    SchedulingRuntime,
-    WorkflowContracts,
     ComponentAppRuntime
 ) {
     "use strict";
-
-    var ComponentRuntimeSupport = {
-        resolveBootDetailId: ComponentDetailStateRuntime.resolveBootDetailId,
-        isCreateBootHash: ComponentDetailStateRuntime.isCreateBootHash,
-        ensureSessionId: ComponentSessionRuntime.ensureSessionId,
-        ensureTabSessionId: ComponentSessionRuntime.ensureTabSessionId,
-        formatHumanDateTime: ComponentFormattingRuntime.formatHumanDateTime,
-        eventPayload: ComponentFormattingRuntime.eventPayload,
-        applyLockProbeState: ComponentDetailStateRuntime.applyLockProbeState,
-        syncUiStateMode: ComponentDetailStateRuntime.syncUiStateMode,
-        syncDetailCurrentFromSelected: ComponentDetailStateRuntime.syncDetailCurrentFromSelected,
-        resolveDetailCurrent: ComponentDetailStateRuntime.resolveDetailCurrent
-    };
 
     // Polyfill: Promise.prototype.finally (not available in IE11 / older SAP WebAS Chromium)
     if (typeof Promise === "function" && typeof Promise.prototype.finally !== "function") {
@@ -143,7 +120,7 @@ sap.ui.define([
                 CtxFactory: CtxFactory,
                 EffectApplier: EffectApplier,
                 FeedbackPolicy: FeedbackPolicy,
-                ComponentRuntimeSupport: ComponentRuntimeSupport,
+                ComponentRuntimeSupport: ComponentAppRuntime.buildComponentRuntimeSupport(),
                 ComponentLockReleaseRuntime: ComponentLockReleaseRuntime,
                 ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
                 ComponentModelInitRuntime: ComponentModelInitRuntime,

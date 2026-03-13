@@ -1,19 +1,16 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsYearBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsSelectionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLifecycleBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior"
-], function (AnalyticsFacade, AnalyticsBuilderRuntime, CtxFactory, ControllerRouteRuntime, ControllerViewStateRuntime, AnalyticsContracts, ModelContracts, NavigationContracts, AnalyticsYearBehavior, AnalyticsDrilldownBehavior, AnalyticsSelectionBehavior, AnalyticsRefreshBehavior, AnalyticsLifecycleBehavior, AnalyticsLoadBehavior) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsStateBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsReportBehavior"
+], function (AnalyticsFacade, CtxFactory, AnalyticsContracts, AnalyticsYearBehavior, AnalyticsDrilldownBehavior, AnalyticsSelectionBehavior, AnalyticsRefreshBehavior, AnalyticsLifecycleBehavior, AnalyticsLoadBehavior, AnalyticsStateBehavior, AnalyticsReportBehavior) {
     "use strict";
     var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
     var SELECTED_YEAR_PATH = "/selectedYear";
@@ -37,22 +34,19 @@ sap.ui.define([
         },
 
         _applyComparisonMetricSelection: function () {
-            AnalyticsBuilderRuntime.applyComparisonMetricSelection(this);
+            AnalyticsStateBehavior.applyComparisonMetricSelection(this);
         },
 
         _applyBuilderSelection: function (mOverrides) {
-            AnalyticsBuilderRuntime.applyBuilderSelection(this, mOverrides || {});
+            AnalyticsStateBehavior.applyBuilderSelection(this, mOverrides);
         },
 
         _syncAnalyticsContextHints: function () {
-            AnalyticsBuilderRuntime.syncAnalyticsContextHints(this);
+            AnalyticsStateBehavior.syncAnalyticsContextHints(this);
         },
 
         _setCompareYearValidation: function (sState, sText) {
-            ControllerViewStateRuntime.setMany(this, {
-                "/compareYearValueState": sState || "None",
-                "/compareYearValueStateText": sText || ""
-            });
+            AnalyticsStateBehavior.setCompareYearValidation(this, sState, sText);
         },
 
         _loadAnalytics: function (sReason) {
@@ -143,8 +137,8 @@ sap.ui.define([
             return AnalyticsDrilldownBehavior.onDrilldownAnalyticsBuilder(
                 this,
                 oEvent,
-                String(ControllerViewStateRuntime.get(this, "/builderDimension", AnalyticsContracts.BUILDER.FALLBACK_DIMENSION) || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase(),
-                String(ControllerViewStateRuntime.get(this, "/builderMetric", "") || "").trim().toUpperCase()
+                String(this.getModel("view").getProperty("/builderDimension") || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase(),
+                String(this.getModel("view").getProperty("/builderMetric") || "").trim().toUpperCase()
             );
         },
 
@@ -165,19 +159,19 @@ sap.ui.define([
         },
 
         onOpenAnalyticsReportDialog: function () {
-            return AnalyticsDrilldownBehavior.onOpenAnalyticsReportDialog(this);
+            return AnalyticsReportBehavior.onOpenAnalyticsReportDialog(this);
         },
 
         onCloseAnalyticsReportDialog: function () {
-            AnalyticsDrilldownBehavior.onCloseAnalyticsReportDialog(this);
+            AnalyticsReportBehavior.onCloseAnalyticsReportDialog(this);
         },
 
         onExportAnalyticsReport: function () {
-            return AnalyticsDrilldownBehavior.onExportAnalyticsReport(this);
+            return AnalyticsReportBehavior.onExportAnalyticsReport(this);
         },
 
         onCloseAnalytics: function () {
-            AnalyticsDrilldownBehavior.onCloseAnalytics(this);
+            AnalyticsReportBehavior.onCloseAnalytics(this);
         }
     };
 });

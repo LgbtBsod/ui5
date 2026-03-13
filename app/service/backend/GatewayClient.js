@@ -85,7 +85,7 @@ sap.ui.define([
             return this.rawRead("/" + entitySet + "(" + key + ")", mParams || {}, mOptions || {});
         },
         rawRead: function (path, mParams, mOptions) {
-            var sPath = assertCanonicalPath(normalizePath(path));
+            var sPath = GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path));
             var oOptions = mOptions || {};
             return executeRequest({
                 method: "GET",
@@ -115,7 +115,7 @@ sap.ui.define([
                 correlationId: oOptions.correlationId,
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectFunctionImportRequest(name, oPayload || {}, buildHeaders(oOptions.headers, sCorrelationId));
+                    return withDirectFunctionImportRequest(name, oPayload || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
                 }
             });
         },

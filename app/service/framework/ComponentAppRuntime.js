@@ -3,10 +3,28 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSessionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, StatePaths, WorkflowContracts) {
+], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, StatePaths, WorkflowContracts) {
     "use strict";
+
+    function buildComponentRuntimeSupport() {
+        return {
+            resolveBootDetailId: ComponentDetailStateRuntime.resolveBootDetailId,
+            isCreateBootHash: ComponentDetailStateRuntime.isCreateBootHash,
+            ensureSessionId: ComponentSessionRuntime.ensureSessionId,
+            ensureTabSessionId: ComponentSessionRuntime.ensureTabSessionId,
+            formatHumanDateTime: ComponentFormattingRuntime.formatHumanDateTime,
+            eventPayload: ComponentFormattingRuntime.eventPayload,
+            applyLockProbeState: ComponentDetailStateRuntime.applyLockProbeState,
+            syncUiStateMode: ComponentDetailStateRuntime.syncUiStateMode,
+            syncDetailCurrentFromSelected: ComponentDetailStateRuntime.syncDetailCurrentFromSelected,
+            resolveDetailCurrent: ComponentDetailStateRuntime.resolveDetailCurrent
+        };
+    }
 
     function collectManagers(oComponent) {
         return {
@@ -98,6 +116,7 @@ sap.ui.define([
     return {
         applyFrontendRuntimeConfig: applyFrontendRuntimeConfig,
         applyManagersTimerConfig: applyManagersTimerConfig,
+        buildComponentRuntimeSupport: buildComponentRuntimeSupport,
         clearComponentTimers: clearComponentTimers,
         collectManagers: collectManagers,
         isLockRuntimeActive: isLockRuntimeActive,
