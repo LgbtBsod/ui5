@@ -29,7 +29,6 @@
         <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
         <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
         <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
-        <Title text="Search" level="H6" class="searchToolbarGroupTitle"><layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData></Title>
         <Label text="{i18n>searchBackendTopLabel}" labelFor="backendTopInput" class="searchToolbarFieldLabel"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/></layoutData></Label>
         <Input id="backendTopInput" value="{state>/searchBackendTop}" type="Number" placeholder="{i18n>searchBackendTopLabel}" width="5rem" change=".onBackendTopChange" submit=".onBackendTopChange" ariaLabelledBy="searchBackendTopA11y" class="backendTopInput"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/></layoutData></Input>
         <Label text="{i18n>searchMaxResultsLabel}" labelFor="maxRowsInput" class="searchToolbarFieldLabel"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/></layoutData></Label>

@@ -73,6 +73,62 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   z-index: auto;
 }
 
+.chkApp .searchResultsActionRail.sapMTBNewFlex,
+.chkApp .searchResultsActionRail.sapMTB {
+  align-items: center;
+  align-content: center;
+  row-gap: 0.34rem;
+}
+
+.chkApp .searchResultsActionRail .sapMBarChild {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--theme-workbench-control-height);
+}
+
+.chkApp .searchResultsActionRail .sapMLabel,
+.chkApp .searchResultsActionRail .sapMText,
+.chkApp .searchResultsActionRail .sapMObjStatus,
+.chkApp .searchResultsActionRail .sapMBtn,
+.chkApp .searchResultsActionRail .sapMMenuBtn,
+.chkApp .searchResultsActionRail .sapMSwt,
+.chkApp .searchResultsActionRail .sapMInputBase,
+.chkApp .searchResultsActionRail .sapMFlexItem {
+  align-self: center;
+}
+
+.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .sapMMenuBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .sapMInputBaseContentWrapper,
+.chkApp .searchResultsActionRail .sapMSwtCont,
+.chkApp .searchResultsActionRail .searchSelectionStatusChip {
+  min-height: var(--theme-workbench-control-height);
+}
+
+.chkApp .searchResultsActionRail .searchSelectionStatusChip {
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0;
+}
+
+.chkApp .searchResultsActionRail .sapMInputBase {
+  width: auto;
+}
+
+.chkApp .searchResultsActionRail .backendTopInput,
+.chkApp .searchResultsActionRail .maxRowsInput {
+  min-width: 5rem;
+}
+
+.chkApp .searchResultsActionRail .sapMSwt {
+  height: var(--theme-workbench-control-height);
+}
+
+.chkApp .searchResultsActionRail .sapMSwtCont {
+  display: inline-flex;
+  align-items: center;
+}
+
 body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
   box-shadow:
     0 16px 30px rgba(1, 8, 18, 0.28),
