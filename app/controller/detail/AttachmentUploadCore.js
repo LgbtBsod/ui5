@@ -180,12 +180,30 @@ sap.ui.define([
         );
     }
 
+    function formatUploadHintSafe(oController, aExtensions, iMaxSizeMb) {
+        var sTypes = (Array.isArray(aExtensions) ? aExtensions : []).map(function (sExtension) {
+            return String(sExtension || "").trim().toUpperCase();
+        }).filter(Boolean).join(", ");
+        var sSize = String(Number(iMaxSizeMb || 0) || 0);
+        var sFallbackText;
+        if (!sTypes && sSize === "0") {
+            return "";
+        }
+        sFallbackText = [sTypes, sSize ? sSize + " MB" : ""].filter(Boolean).join(" - ");
+        return ControllerTextRuntime.getText(
+            oController,
+            "attachmentUploadHint",
+            [sTypes || "-", sSize],
+            sFallbackText
+        );
+    }
+
     return {
         canUploadAttachments: canUploadAttachments,
         syncUploaderPolicy: syncUploaderPolicy,
         uploadFiles: uploadFiles,
         onUploaderChange: onUploaderChange,
-        formatUploadHint: formatUploadHint
+        formatUploadHint: formatUploadHintSafe
     };
 });
 

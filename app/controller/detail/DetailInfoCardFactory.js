@@ -19,6 +19,11 @@ sap.ui.define([
 
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
     var CARD_REQUIRED_KEYS = DetailRuntimeContracts.CARD_REQUIRED_KEYS;
+    var LABEL_FALLBACKS = {
+        locationCodeLabel: "Location code",
+        checksNumberLabel: "Checks number",
+        barriersNumberLabel: "Barriers number"
+    };
 
     function withStyleClasses(oControl, sClassNames) {
         return ControlStyleRuntime.enable(oControl, sClassNames);
@@ -121,7 +126,7 @@ sap.ui.define([
     }
 
     function createPrefixedStatus(oController, sLabelKey, sValuePath) {
-        var sLabel = ControllerTextRuntime.getText(oController, sLabelKey, [], sLabelKey);
+        var sLabel = ControllerTextRuntime.getText(oController, sLabelKey, [], LABEL_FALLBACKS[sLabelKey] || sLabelKey);
         var oStatus = new ObjectStatus({ state: "Information" });
         oStatus.bindProperty("text", {
             path: sValuePath,

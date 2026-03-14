@@ -1,24 +1,36 @@
 sap.ui.define([], function () {
     "use strict";
 
+    function resolveCoreBundle() {
+        try {
+            return sap.ui.getCore() &&
+                sap.ui.getCore().getModel &&
+                sap.ui.getCore().getModel("i18n") &&
+                sap.ui.getCore().getModel("i18n").getResourceBundle &&
+                sap.ui.getCore().getModel("i18n").getResourceBundle();
+        } catch (_e) {
+            return null;
+        }
+    }
+
     function resolveBundle(oController) {
         if (!oController) {
-            return null;
+            return resolveCoreBundle();
         }
         if (typeof oController.getResourceBundle === "function") {
             try {
-                return oController.getResourceBundle();
+                return oController.getResourceBundle() || resolveCoreBundle();
             } catch (_e) {
-                return null;
+                return resolveCoreBundle();
             }
         }
         if (typeof oController.getModel !== "function") {
-            return null;
+            return resolveCoreBundle();
         }
         try {
-            return oController.getModel("i18n") && oController.getModel("i18n").getResourceBundle && oController.getModel("i18n").getResourceBundle();
+            return (oController.getModel("i18n") && oController.getModel("i18n").getResourceBundle && oController.getModel("i18n").getResourceBundle()) || resolveCoreBundle();
         } catch (_e2) {
-            return null;
+            return resolveCoreBundle();
         }
     }
 

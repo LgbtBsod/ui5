@@ -26,6 +26,13 @@ sap.ui.define([
         ACQUIRING_LOCK: true,
         IDLE_TIMEOUT_GRACE: true
     };
+    var AUTOSAVE_TEXT_FALLBACKS = {
+        autosaveWaiting: "Autosave waiting",
+        autosaveSaving: "Saving...",
+        autosaveSaved: "All changes synced",
+        autosaveError: "Autosave error",
+        autosaveDisabled: "Autosave disabled (read-only mode)"
+    };
 
     function text(oController, sKey, vArgs, vFallback) {
         var aArgs = [];
@@ -216,7 +223,7 @@ sap.ui.define([
         formatHeartbeatText: function (sMode, sLockState) {
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
             if (WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
-                return text(this, "heartbeatLockedActive");
+                return text(this, "heartbeatLockedActive", "Heartbeat active");
             }
             if (sNormalizedLockState === "ACQUIRING_LOCK") {
                 return text(this, "autosaveSaving", "Saving...");
@@ -230,7 +237,7 @@ sap.ui.define([
             if (sNormalizedLockState === "FORCED_READ_ONLY") {
                 return text(this, "detailForcedReadOnlyTitle", "Read-only enforced");
             }
-            return text(this, "heartbeatInactive");
+            return text(this, "heartbeatInactive", "Heartbeat paused (read-only mode)");
         },
 
         formatAutosaveText: function (sMode, sLockState, sAutosaveState) {
@@ -244,9 +251,9 @@ sap.ui.define([
             var sNormalizedMode = String(sMode || "").toUpperCase();
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
             if (sNormalizedMode !== WorkflowContracts.EDIT_MODES.EDIT || !LOCK_ACTIVE_STATES[sNormalizedLockState]) {
-                return text(this, "autosaveDisabled");
+                return text(this, "autosaveDisabled", "Autosave disabled (read-only mode)");
             }
-            return text(this, mKeyByState[sState] || "autosaveWaiting");
+            return text(this, mKeyByState[sState] || "autosaveWaiting", AUTOSAVE_TEXT_FALLBACKS[mKeyByState[sState] || "autosaveWaiting"] || "Autosave waiting");
         },
 
         formatPassedTotal: function (aRows) {
