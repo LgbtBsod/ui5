@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";var e={NETWORK:"NETWORK",LOCK:"LOCK",CONFLICT:"CONFLICT",VALIDATION:"VALIDATION",BACKEND:"BACKEND",UNKNOWN:"UNKNOWN"};function r(r){var N=r||{};return{kind:N.kind||e.UNKNOWN,code:N.code||"UNKNOWN",messageKey:N.messageKey||"unexpectedError",params:N.params||{},severity:N.severity||"error",retriable:!!N.retriable}}return{KINDS:e,create:r}});
+//# sourceMappingURL=NormalizedError.js.map

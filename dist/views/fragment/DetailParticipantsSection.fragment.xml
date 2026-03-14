@@ -1,0 +1,7 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox renderType="Bare" width="100%" class="detailMainExperienceStack">
+        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.LockKilledBanner" type="XML"/>
+        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailCreateModeBanner" type="XML"/>
+        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailInfoCardsHost" type="XML"/>
+    </VBox>
+</core:FragmentDefinition>

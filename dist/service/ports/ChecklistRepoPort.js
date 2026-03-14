@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";return{loadDetailSnapshot:function(t){},saveChecklist:function(t){},autosaveChecklist:function(t){},createChecklist:function(t){},deleteChecklist:function(t){},loadAttachments:function(t){},deleteAttachment:function(t){}}});
+//# sourceMappingURL=ChecklistRepoPort.js.map

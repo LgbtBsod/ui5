@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"],function(e){"use strict";function t(t){e.info("telemetry",t&&t.event||"event",t||{});return t||{}}return{emit:t}});
+//# sourceMappingURL=DebugTelemetryAdapter.js.map

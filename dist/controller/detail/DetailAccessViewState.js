@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/contracts/UiAssetPaths"],function(e){"use strict";function t(t){return{denied:false,rootId:String(t||"").trim(),userId:"",canView:true,canEdit:true,canDelete:true,reasonCode:"AUTHORIZED",titleKey:"",messageKey:"",illustrationSrc:e.resolveDetailAccessDeniedIllustration()}}return{createDefaultState:t}});
+//# sourceMappingURL=DetailAccessViewState.js.map

@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";return Object.freeze({READINESS_STATUS:Object.freeze({DENIED:"denied",ERROR:"error",IDLE:"idle"}),VALIDATION_STATE:Object.freeze({IDLE:"idle"})})});
+//# sourceMappingURL=ComponentDetailMetaContracts.js.map

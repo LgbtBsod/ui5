@@ -1,0 +1,60 @@
+.chkApp .glassDialog .sapMDialogTitle,
+.chkApp .glassDialog .sapMBar,
+.chkApp .chkSkin .sapMDialog.sapMSelectDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMActionSheetDialog.sapMDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMDialog.sapMBusyDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMDialog.sapMViewSettingsDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMDialog.sapMP13nDialog .sapMDialogTitle,
+.chkApp .chkSkin .sapMDialog.sapUiCompValueHelpDialog .sapMDialogTitle {
+  padding-inline: 1.15rem;
+  min-height: 3.4rem;
+}
+
+.chkApp .glassDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMDialog.sapMSelectDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMActionSheetDialog.sapMDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMDialog.sapMBusyDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMDialog.sapMViewSettingsDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMDialog.sapMP13nDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMDialog.sapUiCompValueHelpDialog .sapMDialogSection,
+.chkApp .chkSkin .sapMPopoverCont,
+.chkApp .chkSkin .sapMResponsivePopover .sapMPopoverCont {
+  padding: 0;
+}
+
+.chkApp .glassDialog .sapMDialogFooter,
+.chkApp .chkSkin .sapMDialog.sapMSelectDialog .sapMDialogFooter,
+.chkApp .chkSkin .sapMActionSheetDialog.sapMDialog .sapMDialogFooter,
+.chkApp .chkSkin .sapMDialog.sapMBusyDialog .sapMDialogFooter,
+.chkApp .chkSkin .sapMDialog.sapMViewSettingsDialog .sapMDialogFooter,
+.chkApp .chkSkin .sapMDialog.sapMP13nDialog .sapMDialogFooter,
+.chkApp .chkSkin .sapMDialog.sapUiCompValueHelpDialog .sapMDialogFooter {
+  padding: 0.35rem 0.7rem;
+}
+
+.chkApp .chkSkin .sapMDialog.sapMSelectDialog,
+.chkApp .chkSkin .sapMActionSheetDialog.sapMDialog,
+.chkApp .chkSkin .sapMDialog.sapMBusyDialog,
+.chkApp .chkSkin .sapMDialog.sapMViewSettingsDialog,
+.chkApp .chkSkin .sapMDialog.sapMP13nDialog,
+.chkApp .chkSkin .sapMDialog.sapUiCompValueHelpDialog,
+.chkApp .chkSkin .sapMPopover,
+.chkApp .chkSkin .sapMResponsivePopover {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--theme-block-shadow);
+}
+
+.chkApp .chkSkin .sapMDialog.glassDialog,
+.chkApp .chkSkin .sapMDialog.sapMSelectDialog,
+.chkApp .chkSkin .sapMActionSheetDialog.sapMDialog,
+.chkApp .chkSkin .sapMDialog.sapMBusyDialog,
+.chkApp .chkSkin .sapMPopover,
+.chkApp .chkSkin .sapMResponsivePopover,
+.chkApp .chkSkin .sapMDialog.sapMMessageDialog {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 88%, transparent);
+  backdrop-filter: blur(var(--glass-blur)) saturate(132%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(132%);
+  box-shadow: var(--theme-block-shadow);
+}

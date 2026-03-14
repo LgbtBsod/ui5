@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";var t={SHELL_COMPACT:"pcctStyleShellCompact",SKELETON_SOFT:"pcctStyleSkeletonSoft",MOTION_SOFT:"pcctStyleMotionSoft",LABEL_ALIGN_ENTERPRISE:"pcctStyleLabelAlignEnterprise"};function e(e){return Object.prototype.hasOwnProperty.call(t,String(e||""))}function n(n){return e(n)?t[n]:""}return{TOKENS:t,isAllowed:e,resolveClassName:n}});
+//# sourceMappingURL=StyleTokens.js.map

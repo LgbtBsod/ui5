@@ -1,0 +1,37 @@
+sap.ui.define([], function () {
+    "use strict";
+
+    return Object.freeze({
+        PATHS: Object.freeze({
+            CACHE_VALIDATION_AT: "/cacheValidationAt",
+            CURRENT_USER: "/currentUser",
+            FRONTEND_CONFIG_SOURCE: "/frontendConfigSource",
+            FRONTEND_VARIABLES: "/frontendVariables",
+            IS_LOADING: "/isLoading",
+            LOAD_ERROR: "/loadError",
+            LOAD_ERROR_MESSAGE: "/loadErrorMessage",
+            LOCATIONS_LOADING: "/locationsLoading",
+            MASTER_DATA_LOADING: "/masterDataLoading",
+            READINESS_APP: "/readiness/app",
+            REQUIRED_FIELDS: "/requiredFields"
+        }),
+        READINESS_STATUS: Object.freeze({
+            ERROR: "error",
+            LOADING: "loading",
+            READY: "ready"
+        }),
+        FRONTEND_CONFIG_SOURCE: Object.freeze({
+            GATEWAY: "gateway",
+            GATEWAY_RUNTIME: "gateway_runtime",
+            GATEWAY_RUNTIME_ERROR: "gateway_runtime_error"
+        }),
+        STAGE_ERRORS: Object.freeze({
+            BOOT_FAILED: "boot_failed",
+            BOOTSTRAP_APP_FAILED: "bootstrap_app_failed",
+            BOOTSTRAP_INIT_BUNDLE_FAILED: "bootstrap_init_bundle_failed",
+            LOAD_CURRENT_USER_FAILED: "load_current_user_failed",
+            LOAD_RUNTIME_SETTINGS_FAILED: "load_runtime_settings_failed",
+            RUNTIME_SETTINGS_LOAD_FAILED: "runtime_settings_load_failed"
+        })
+    });
+});

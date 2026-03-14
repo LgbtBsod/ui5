@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller","PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsControllerBehavior"],function(e,n){"use strict";return e.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Analytics",Object.assign({},n))});
+//# sourceMappingURL=Analytics.controller.js.map

@@ -1,0 +1,20 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <VBox class="appSkeletonFormSection appSkeletonFormSectionInline" renderType="Bare">
+        <HBox class="appSkeletonTableHeader" renderType="Bare" alignItems="Center">
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColMain" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColStatus" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColComment" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColMeta" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColMain" renderType="Bare"/>
+        </HBox>
+        <HBox class="appSkeletonTableRow" renderType="Bare" alignItems="Center">
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColMain" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColStatus" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColComment" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColMeta" renderType="Bare"/>
+            <VBox class="appSkeleton appSkeletonLine appSkeletonColMain" renderType="Bare"/>
+        </HBox>
+    </VBox>
+</core:FragmentDefinition>

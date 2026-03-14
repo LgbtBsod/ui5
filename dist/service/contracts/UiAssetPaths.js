@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";var t="assets/illustrations/detail-access-denied-light.svg";var e="assets/illustrations/detail-access-denied-dark.svg";function s(){var t=document&&document.body;var e=t&&typeof t.getAttribute==="function"?String(t.getAttribute("data-theme")||"").trim().toLowerCase():"";return e==="dark"}function i(){return s()?e:t}return{DETAIL_ACCESS_DENIED_DARK:e,DETAIL_ACCESS_DENIED_LIGHT:t,resolveDetailAccessDeniedIllustration:i}});
+//# sourceMappingURL=UiAssetPaths.js.map

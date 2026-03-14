@@ -1,0 +1,18 @@
+sap.ui.define([], function () {
+    "use strict";
+
+    return {
+        DEFAULTS: {
+            SEARCH_BACKEND_TOP: "100",
+            SEARCH_VISIBLE_ROWS: "100"
+        },
+        PERSISTENCY_PREFIXES: {
+            SMART_FILTER_SESSION: "pcctSmartFilterSession_",
+            SMART_TABLE_SESSION: "pcctSmartTableSession_"
+        },
+        SEARCH_MODE: {
+            EXACT: "EXACT",
+            LOOSE: "LOOSE"
+        }
+    };
+});

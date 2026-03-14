@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function e(e){return typeof window!=="undefined"&&Number(window.innerWidth||0)>0&&Number(window.innerWidth||0)<=e}function t(e,t,n){var i=typeof document!=="undefined"?document.querySelector(".appShellHeader"):null;var o=0;var r=0;if(i&&i.getBoundingClientRect){o=Math.ceil(i.getBoundingClientRect().bottom||0)}if(n&&n.getBoundingClientRect){r=Math.ceil(n.getBoundingClientRect().top||0)}return Math.max(e,o-r+t)}return{isCompactStickyViewport:e,resolveShellHeaderOffset:t}});
+//# sourceMappingURL=SearchStickyOffsetRuntime.js.map

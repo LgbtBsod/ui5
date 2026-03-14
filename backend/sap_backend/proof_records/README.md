@@ -8,6 +8,7 @@ This folder is the execution pack entry point for landscape-only evidence.
 - `EV-004_LOCK_LIFECYCLE.md`
 - `EV-005_OPTIMISTIC_CONCURRENCY.md`
 - `EV-006_FLP_LAUNCH.md`
+- `EV-010_ACCESSIBILITY_KEYBOARD_FOCUS.md`
 
 ## How To Use
 

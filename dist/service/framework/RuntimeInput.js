@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function n(n){return n&&typeof n==="object"&&!Array.isArray(n)?n:{}}function r(n,r){var t=typeof r==="string"?r:"";if(n===null||typeof n==="undefined"){return t}return String(n)}function t(n,r){if(typeof n==="boolean"){return n}return!!r}return{asObject:n,asString:r,asBoolean:t}});
+//# sourceMappingURL=RuntimeInput.js.map

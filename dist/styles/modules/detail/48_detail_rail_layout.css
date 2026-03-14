@@ -1,0 +1,68 @@
+.chkApp .detailHeroHeader,
+.chkApp .detailControlToolbarStack,
+.chkApp .detailControlRow,
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions,
+.chkApp .detailControlSkeletonRow,
+.chkApp .detailControlSkeletonButtons {
+  gap: 0.46rem;
+}
+
+.chkApp .uxStatRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.chkApp .detailControlSkeletonButton {
+  width: 5.5rem;
+  height: 2.1rem;
+  border-radius: 999px;
+}
+
+.chkApp .detailHeroHeader {
+  display: grid;
+  grid-template-columns: minmax(13.5rem, 0.7fr) minmax(0, 1.45fr);
+  gap: 0.68rem 0.86rem;
+  align-items: start;
+}
+
+.chkApp .detailHeroStatBoard,
+.chkApp .detailSectionAnchorRail,
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions {
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+
+.chkApp .detailControlRowTop .sapMBarChild,
+.chkApp .detailControlRowActions .sapMBarChild,
+.chkApp .detailControlRow .sapMBarChild,
+.chkApp .detailControlRow .sapMBtn,
+.chkApp .detailControlRow .sapMTBSpacer {
+  min-width: 0;
+}
+
+.chkApp .detailControlRowTop .sapMOTBOverflowButton,
+.chkApp .detailControlRowActions .sapMOTBOverflowButton {
+  flex: 0 0 auto;
+}
+
+.chkApp .detailSectionAnchorBtn .sapMBtnInner,
+.chkApp .detailControlRow .sapMBtn .sapMBtnInner {
+  min-height: calc(var(--theme-workbench-control-height) - 0.1rem);
+}
+
+.chkApp .detailSectionAnchorBtn .sapMBtnInner {
+  padding-inline: 0.88rem;
+}
+
+.chkApp .detailControlRowActions .sapMBtnInner,
+.chkApp .detailControlRowTop .sapMBtnInner {
+  min-width: 0;
+  padding-inline: 0.85rem;
+}
+
+.chkApp .detailControlRowActions .sapMBtn {
+  min-width: 0;
+}

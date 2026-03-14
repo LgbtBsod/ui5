@@ -1,0 +1,1 @@
+{"version":3,"file":"DetailRuntimeConstants.js","names":["sap","ui","define","Object","freeze","SCOPE","OP_ANALYTICS_EDIT_RESTORE"],"sources":["DetailRuntimeConstants-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAEA,OAAOC,OAAOC,OAAO,CACjBC,MAAO,gBACPC,0BAA2B,wBAEnC","ignoreList":[]}

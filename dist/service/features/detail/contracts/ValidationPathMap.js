@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function r(r){return String(r||"").replace(/^\//,"").replace(/\//g,".")}function n(n){return(Array.isArray(n)?n:[]).reduce(function(n,e){n[r(e)]=true;return n},{})}return{toMissingMap:n,toValidationKey:r}});
+//# sourceMappingURL=ValidationPathMap.js.map

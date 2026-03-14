@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory"],function(r){"use strict";function t(t){return r.buildCtx(t,{})}function e(t){return r.buildCtx(t,{smartFilterBar:t&&t.byId&&t.byId("searchSmartFilterBar"),smartTable:t&&t.byId&&t.byId("searchSmartTable")})}return{buildDefaultCtx:t,buildSearchCtx:e}});
+//# sourceMappingURL=FacadeCommandContextRuntime.js.map

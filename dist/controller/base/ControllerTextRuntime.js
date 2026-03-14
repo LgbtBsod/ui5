@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver"],function(e){"use strict";function t(t){return e.resolveBundle(t)}function r(t,r,n,u){return e.getText(t,r,n,u)}return{resolveBundle:t,getText:r}});
+//# sourceMappingURL=ControllerTextRuntime.js.map

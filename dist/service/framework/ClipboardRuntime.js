@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function t(t){var r=String(t||"");if(!r||!navigator||!navigator.clipboard||typeof navigator.clipboard.writeText!=="function"){return Promise.resolve(false)}return navigator.clipboard.writeText(r).then(function(){return true}).catch(function(){return false})}return{writeText:t}});
+//# sourceMappingURL=ClipboardRuntime.js.map

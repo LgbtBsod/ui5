@@ -1,0 +1,1 @@
+{"version":3,"file":"LockPort.js","names":["sap","ui","define","acquire","mArgs","heartbeat","status","release"],"sources":["LockPort-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAKA,MAAO,CAEHC,QAAS,SAAUC,GAAQ,EAE3BC,UAAW,SAAUD,GAAQ,EAE7BE,OAAQ,SAAUF,GAAQ,EAE1BG,QAAS,SAAUH,GAAQ,EAEnC","ignoreList":[]}

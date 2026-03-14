@@ -1,0 +1,1 @@
+{"version":3,"file":"NavigationPort.js","names":["sap","ui","define","navTo","sRoute","oParams","bReplace"],"sources":["NavigationPort-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAMA,MAAO,CAEHC,MAAO,SAAUC,EAAQC,EAASC,GAAW,EAErD","ignoreList":[]}

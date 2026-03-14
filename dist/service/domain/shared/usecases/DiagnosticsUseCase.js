@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/Result","PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ComponentStartupDiagnosticsUseCase"],function(e,a){"use strict";return{execute:function(t,i){var s=a.createCapabilitySync({stateModel:i.stateModel,getBackendMode:i.getBackendMode});a.wireMetadataEvents({mainServiceModel:i.mainServiceModel,stateModel:i.stateModel,syncCapability:s,onMetadataFailed:i&&i.onMetadataFailed||t&&t.onMetadataFailed});return Promise.resolve(e.ok({wired:true},[]))}}});
+//# sourceMappingURL=DiagnosticsUseCase.js.map

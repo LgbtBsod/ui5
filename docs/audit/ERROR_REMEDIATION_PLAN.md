@@ -17,6 +17,7 @@ Purpose: convert the audit findings into a practical implementation sequence wit
 
 ## P2
 
+- Status in repo: `CLOSED_IN_REPO`
 - Sticky UX hardening:
   execute `STICKY_KEYBOARD_MOBILE_CHECKLIST.md` and fix overlap/focus issues found on desktop and mobile widths.
 - Smart control semantics:
@@ -26,6 +27,7 @@ Purpose: convert the audit findings into a practical implementation sequence wit
 
 ## P3
 
+- Status in repo: `CLOSED_IN_REPO`
 - Theme system refinement:
   keep the current light theme, adopt the `oil-slick-bg-dev` dark background profile, and later decide whether dark mode is exposed in product UX or kept as controlled runtime capability.
 - Qualification depth:
