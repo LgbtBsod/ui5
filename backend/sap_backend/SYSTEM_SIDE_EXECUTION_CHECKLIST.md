@@ -9,6 +9,7 @@ This file is the operational companion to:
 - `backend/sap_backend/EVIDENCE_ACCEPTANCE_MATRIX.md`
 - `backend/sap_backend/TRACE_INVENTORY_EV003_EV006.md`
 - `backend/sap_backend/SYSTEM_PROOF_REGISTER_TEMPLATE.md`
+- `backend/sap_backend/SAP_EVIDENCE_RUNBOOK.md`
 - `docs/audit/sap-readiness-evidence-request-pack.md`
 - `docs/audit/commercial-certification-readiness-dossier.md`
 

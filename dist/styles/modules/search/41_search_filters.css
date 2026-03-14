@@ -215,3 +215,36 @@ body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentContr
     linear-gradient(180deg, rgba(77, 177, 255, 0.22), rgba(77, 177, 255, 0.08)),
     rgba(16, 32, 58, 0.92);
 }
+
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell {
+  padding:
+    calc(0.6rem * var(--theme-density-scale))
+    calc(0.68rem * var(--theme-density-scale))
+    calc(0.58rem * var(--theme-density-scale));
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompSmartFilterBar .sapMTB {
+  gap: 0.32rem;
+  padding:
+    calc(0.24rem * var(--theme-density-scale))
+    calc(0.3rem * var(--theme-density-scale));
+  margin-bottom: 0.34rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .resultSegmentControl.sapMSegB,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .resultSegmentControl.sapMSegB {
+  min-width: 9.5rem;
+  width: min(100%, 10.8rem);
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
+  min-height: 2.18rem;
+  height: 2.18rem;
+  padding-inline: 0.58rem;
+  font-size: 0.74rem;
+}

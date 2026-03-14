@@ -4,29 +4,29 @@
 }
 
 .chkApp .detailGridTable {
-  min-height: 18rem;
+  min-height: 14.5rem;
 }
 
 .chkApp .detailBarriersGridTable {
-  min-height: 18.9rem;
+  min-height: 15.2rem;
 }
 
 .chkApp .detailTableExperienceCard {
   padding:
-    calc(0.76rem * var(--theme-density-scale))
-    calc(0.86rem * var(--theme-density-scale))
-    calc(0.8rem * var(--theme-density-scale));
+    calc(0.62rem * var(--theme-density-scale))
+    calc(0.72rem * var(--theme-density-scale))
+    calc(0.68rem * var(--theme-density-scale));
   border-radius: var(--radius-xl);
 }
 
 .chkApp .detailBarriersTableCard {
-  min-height: 23.6rem;
+  min-height: 18.4rem;
 }
 
 .chkApp .detailSectionBody {
   display: flex;
   flex-direction: column;
-  gap: 0.58rem;
+  gap: 0.42rem;
   align-content: start;
   align-items: start;
   justify-content: start;
@@ -41,7 +41,7 @@
 
 .chkApp .detailSectionBody > * {
   flex: 0 0 auto;
-  align-self: start;
+  align-self: stretch;
   min-width: 0;
   max-width: 100%;
 }
@@ -62,7 +62,7 @@
 .chkApp .flatEditorTable .sapMListTbl,
 .chkApp .detailAttachmentTable .sapMListTbl {
   border-collapse: separate;
-  border-spacing: 0 0.74rem;
+  border-spacing: 0 0.42rem;
 }
 
 .chkApp .detailGridTable .sapUiTableCell,
@@ -98,6 +98,19 @@
   border-bottom-color: rgba(var(--accent-rgb), 0.12);
   font-size: var(--theme-table-body-size);
   line-height: var(--theme-table-body-line-height);
+}
+
+.chkApp .detailGridTable .sapUiTableColCell,
+.chkApp .flatEditorTable .sapMListTblHeaderCell {
+  padding-top: 0.54rem;
+  padding-bottom: 0.54rem;
+}
+
+.chkApp .detailGridTable .sapUiTableCell,
+.chkApp .flatEditorTable .sapMListTblCell,
+.chkApp .detailAttachmentTable .sapMListTblCell {
+  padding-top: calc(var(--theme-table-cell-padding-block) - 0.12rem);
+  padding-bottom: calc(var(--theme-table-cell-padding-block) - 0.12rem);
 }
 
 .chkApp .detailBarriersGridTable .sapUiTableDataCell {
@@ -187,9 +200,9 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailTableExperienceCard {
   min-width: 0;
   padding:
-    calc(0.72rem * var(--theme-density-scale))
-    calc(0.76rem * var(--theme-density-scale))
-    calc(0.76rem * var(--theme-density-scale));
+    calc(0.56rem * var(--theme-density-scale))
+    calc(0.62rem * var(--theme-density-scale))
+    calc(0.62rem * var(--theme-density-scale));
 }
 
 .chkApp .detailGridTable .sapUiTableColCell,
@@ -291,7 +304,7 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 
 .chkApp .detailGridTable {
   width: 100%;
-  min-height: 18rem;
+  min-height: 14.5rem;
 }
 
 .chkApp .flatEditorTable {
@@ -382,9 +395,9 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 @media (max-width: 1024px) {
   .chkApp .detailTableExperienceCard {
     padding:
-      calc(0.76rem * var(--theme-density-scale))
-      calc(0.82rem * var(--theme-density-scale))
-      calc(0.82rem * var(--theme-density-scale));
+      calc(0.64rem * var(--theme-density-scale))
+      calc(0.7rem * var(--theme-density-scale))
+      calc(0.72rem * var(--theme-density-scale));
   }
 
   .chkApp .detailSectionBody {
@@ -407,9 +420,9 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 @media (max-width: 768px) {
   .chkApp .detailTableExperienceCard {
     padding:
-      calc(0.7rem * var(--theme-density-scale))
-      calc(0.74rem * var(--theme-density-scale))
-      calc(0.76rem * var(--theme-density-scale));
+      calc(0.58rem * var(--theme-density-scale))
+      calc(0.62rem * var(--theme-density-scale))
+      calc(0.66rem * var(--theme-density-scale));
   }
 
   .chkApp .detailSectionBody {

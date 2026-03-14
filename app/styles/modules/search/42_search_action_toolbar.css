@@ -71,6 +71,7 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   position: relative;
   top: auto;
   z-index: auto;
+  min-height: 2.7rem;
 }
 
 .chkApp .searchResultsActionRail.sapMTBNewFlex,
@@ -78,6 +79,7 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   align-items: center;
   align-content: center;
   row-gap: 0.34rem;
+  column-gap: 0.32rem;
 }
 
 .chkApp .searchResultsActionRail .sapMBarChild {
@@ -103,6 +105,11 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
 .chkApp .searchResultsActionRail .sapMSwtCont,
 .chkApp .searchResultsActionRail .searchSelectionStatusChip {
   min-height: var(--theme-workbench-control-height);
+}
+
+.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .sapMMenuBtn .sapMBtnInner {
+  border-radius: 999px;
 }
 
 .chkApp .searchResultsActionRail .searchSelectionStatusChip {

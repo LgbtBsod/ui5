@@ -3,7 +3,7 @@
         id="shellUserPopover"
         class="glassDialog shellPopover shellUserPopover"
         title="{i18n>shellUserTitle}"
-        contentWidth="24rem"
+        contentWidth="30rem"
         placement="Bottom"
         horizontalScrolling="false"
         verticalScrolling="false">

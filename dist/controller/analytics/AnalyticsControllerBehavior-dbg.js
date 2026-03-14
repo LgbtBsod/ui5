@@ -143,19 +143,27 @@ sap.ui.define([
         },
 
         onDrilldownAnalyticsSource: function (oEvent) {
-            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsSource(this, oEvent);
+            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsSource(this, oEvent, AnalyticsContracts.METRICS.TOTAL);
+        },
+
+        onDrilldownAnalyticsSourceFailedChecks: function (oEvent) {
+            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsSource(this, oEvent, AnalyticsContracts.METRICS.FAILED_CHECKS);
+        },
+
+        onDrilldownAnalyticsSourceFailedBarriers: function (oEvent) {
+            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsSource(this, oEvent, AnalyticsContracts.METRICS.FAILED_BARRIERS);
         },
 
         onDrilldownAnalyticsProfession: function (oEvent) {
-            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsProfession(this, oEvent);
+            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsProfession(this, oEvent, AnalyticsContracts.METRICS.FAILED_CHECKS);
         },
 
         onDrilldownAnalyticsLpc: function (oEvent) {
-            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsLpc(this, oEvent);
+            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsLpc(this, oEvent, AnalyticsContracts.METRICS.FAILED_BARRIERS);
         },
 
         onDrilldownAnalyticsLocation: function (oEvent) {
-            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsLocation(this, oEvent);
+            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsLocation(this, oEvent, AnalyticsContracts.METRICS.FAILED_CHECKS);
         },
 
         onOpenAnalyticsReportDialog: function () {

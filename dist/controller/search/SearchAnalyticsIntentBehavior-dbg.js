@@ -5,6 +5,133 @@ sap.ui.define([
 ], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy) {
     "use strict";
 
+    var MONTH_INDEX = Object.freeze({
+        JAN: 0,
+        JANUARY: 0,
+        FEB: 1,
+        FEBRUARY: 1,
+        MAR: 2,
+        MARCH: 2,
+        APR: 3,
+        APRIL: 3,
+        MAY: 4,
+        JUN: 5,
+        JUNE: 5,
+        JUL: 6,
+        JULY: 6,
+        AUG: 7,
+        AUGUST: 7,
+        SEP: 8,
+        SEPT: 8,
+        SEPTEMBER: 8,
+        OCT: 9,
+        OCTOBER: 9,
+        NOV: 10,
+        NOVEMBER: 10,
+        DEC: 11,
+        DECEMBER: 11
+    });
+
+    function normalizeText(vValue) {
+        return String(vValue || "").trim();
+    }
+
+    function buildSelectionValue(sValue) {
+        var sText = normalizeText(sValue);
+        if (!sText) {
+            return null;
+        }
+        return {
+            items: [{
+                key: sText,
+                text: sText
+            }]
+        };
+    }
+
+    function resolveYearNumber(oIntent) {
+        var iYear = Number(normalizeText(oIntent && oIntent.selectedYear));
+        return iYear > 0 ? iYear : 0;
+    }
+
+    function resolveMonthIndex(sMonthLabel) {
+        return MONTH_INDEX[String(sMonthLabel || "").trim().toUpperCase()];
+    }
+
+    function toIsoDatePart(iYear, iMonthIndex, iDay) {
+        var sMonth = String(iMonthIndex + 1).padStart(2, "0");
+        var sDay = String(iDay).padStart(2, "0");
+        return String(iYear) + "-" + sMonth + "-" + sDay;
+    }
+
+    function buildDateRangeValue(oIntent) {
+        var iYear = resolveYearNumber(oIntent);
+        var sMonthLabel = normalizeText(oIntent && oIntent.extras && oIntent.extras.monthLabel);
+        var iMonthIndex = resolveMonthIndex(sMonthLabel);
+        var oStartDate;
+        var oEndDate;
+
+        if (!iYear) {
+            return null;
+        }
+        if (Number.isInteger(iMonthIndex)) {
+            oStartDate = new Date(iYear, iMonthIndex, 1);
+            oEndDate = new Date(iYear, iMonthIndex + 1, 0);
+        } else {
+            oStartDate = new Date(iYear, 0, 1);
+            oEndDate = new Date(iYear, 11, 31);
+        }
+        return {
+            ranges: [{
+                exclude: false,
+                keyField: "DateCheck",
+                operation: "BT",
+                value1: toIsoDatePart(oStartDate.getFullYear(), oStartDate.getMonth(), oStartDate.getDate()),
+                value2: toIsoDatePart(oEndDate.getFullYear(), oEndDate.getMonth(), oEndDate.getDate())
+            }]
+        };
+    }
+
+    function applySegmentState(oController, oIntent) {
+        var sMetric = normalizeText(oIntent && oIntent.extras && oIntent.extras.metric).toUpperCase();
+
+        ModelStateRuntime.write(oController, "state", "/search/checksFailSegment", "ALL");
+        ModelStateRuntime.write(oController, "state", "/search/barriersFailSegment", "ALL");
+
+        if (sMetric === "FAILED_CHECKS" || sMetric === "FAILED_CHECKLISTS") {
+            ModelStateRuntime.write(oController, "state", "/search/checksFailSegment", "FAILED");
+        }
+        if (sMetric === "FAILED_BARRIERS" || sMetric === "FAILED_BARRIER_CHECKLISTS") {
+            ModelStateRuntime.write(oController, "state", "/search/barriersFailSegment", "FAILED");
+        }
+    }
+
+    function mergeIntentFilterData(mFilterData, oIntent, sFilterKey, sFilterValue) {
+        var sSource = normalizeText(oIntent && oIntent.analyticsSource).toUpperCase();
+        var oDateRange = buildDateRangeValue(oIntent);
+
+        if (sSource && sSource !== "ALL") {
+            mFilterData.SourceKey = buildSelectionValue(sSource);
+        } else if (Object.prototype.hasOwnProperty.call(mFilterData, "SourceKey")) {
+            delete mFilterData.SourceKey;
+        }
+
+        if (oDateRange) {
+            mFilterData.DateCheck = oDateRange;
+        }
+
+        if (!sFilterKey || !sFilterValue) {
+            return;
+        }
+        if (sFilterKey === "DateCheck") {
+            if (oDateRange) {
+                mFilterData.DateCheck = oDateRange;
+            }
+            return;
+        }
+        mFilterData[sFilterKey] = buildSelectionValue(sFilterValue) || sFilterValue;
+    }
+
     function readAnalyticsDrilldownIntent(oController, sStateModel, sIntentPath) {
         return ModelStateRuntime.read(oController, sStateModel, sIntentPath, null);
     }
@@ -15,19 +142,21 @@ sap.ui.define([
 
     function applyAnalyticsDrilldownIntent(oController, mOptions) {
         var oIntent = readAnalyticsDrilldownIntent(oController, mOptions.stateModel, mOptions.intentPath) || {};
-        var sFilterKey = String(oIntent.filterKey || "").trim();
-        var sFilterValue = String(oIntent.filterValue || "").trim();
+        var sFilterKey = normalizeText(oIntent.filterKey);
+        var sFilterValue = normalizeText(oIntent.filterValue);
         var oSmartFilterBar = oController.byId("searchSmartFilterBar");
         var oControl;
         var mFilterData;
+        var sSource = normalizeText(oIntent.analyticsSource).toUpperCase();
+        var bHasScope = !!(sFilterKey && sFilterValue) || !!buildDateRangeValue(oIntent) || (sSource && sSource !== "ALL");
 
-        if (!sFilterKey || !sFilterValue || !oSmartFilterBar) {
+        if (!bHasScope || !oSmartFilterBar) {
             return false;
         }
         if (typeof oSmartFilterBar.isInitialised === "function" && !oSmartFilterBar.isInitialised()) {
             return false;
         }
-        oControl = typeof oSmartFilterBar.getControlByKey === "function" ? oSmartFilterBar.getControlByKey(sFilterKey) : null;
+        oControl = sFilterKey && typeof oSmartFilterBar.getControlByKey === "function" ? oSmartFilterBar.getControlByKey(sFilterKey) : null;
         if (oControl && typeof oControl.setSelectedKey === "function") {
             oControl.setSelectedKey(sFilterValue);
         }
@@ -39,9 +168,10 @@ sap.ui.define([
         }
         if (typeof oSmartFilterBar.getFilterData === "function" && typeof oSmartFilterBar.setFilterData === "function") {
             mFilterData = Object.assign({}, oSmartFilterBar.getFilterData() || {});
-            mFilterData[sFilterKey] = sFilterValue;
+            mergeIntentFilterData(mFilterData, oIntent, sFilterKey, sFilterValue);
             oSmartFilterBar.setFilterData(mFilterData, true);
         }
+        applySegmentState(oController, oIntent);
         clearAnalyticsDrilldownIntent(oController, mOptions.stateModel, mOptions.intentPath);
         SearchCommandPolicy.buildFilter(oController, { source: mOptions.source });
         if (ControllerViewStateRuntime.get(oController, mOptions.smartTableReadyPath)) {

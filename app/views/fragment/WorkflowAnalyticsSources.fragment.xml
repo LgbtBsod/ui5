@@ -25,7 +25,7 @@
             </Panel>
             <Panel headerText="{i18n>analyticsFailedChecksBySource}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                 <content>
-                    <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsSource" visible="{view>/analytics/hasCharts/failedChecksBySource}">
+                    <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsSourceFailedChecks" visible="{view>/analytics/hasCharts/failedChecksBySource}">
                         <viz:dataset><vizData:FlattenedDataset data="{view>/analytics/charts/failedChecksBySource}"><vizData:dimensions><vizData:DimensionDefinition name="Source" value="{view>label}"/></vizData:dimensions><vizData:measures><vizData:MeasureDefinition name="Failed checks" value="{view>value}"/></vizData:measures></vizData:FlattenedDataset></viz:dataset>
                         <viz:feeds><vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed checks"/><vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Source"/></viz:feeds>
                     </viz:VizFrame>
@@ -34,7 +34,7 @@
             </Panel>
             <Panel headerText="{i18n>analyticsFailedBarriersBySource}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
                 <content>
-                    <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsSource" visible="{view>/analytics/hasCharts/failedBarriersBySource}">
+                    <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsSourceFailedBarriers" visible="{view>/analytics/hasCharts/failedBarriersBySource}">
                         <viz:dataset><vizData:FlattenedDataset data="{view>/analytics/charts/failedBarriersBySource}"><vizData:dimensions><vizData:DimensionDefinition name="Source" value="{view>label}"/></vizData:dimensions><vizData:measures><vizData:MeasureDefinition name="Failed barriers" value="{view>value}"/></vizData:measures></vizData:FlattenedDataset></viz:dataset>
                         <viz:feeds><vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed barriers"/><vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Source"/></viz:feeds>
                     </viz:VizFrame>

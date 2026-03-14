@@ -29,6 +29,7 @@
             <smartFilterBar:controlConfiguration>
                 <smartFilterBar:ControlConfiguration key="Id" label="{i18n>filterChecklistIdLabel}" visibleInAdvancedArea="true" hasTypeAhead="true"/>
                 <smartFilterBar:ControlConfiguration key="DateCheck" label="{i18n>dateLabel}" visibleInAdvancedArea="true"/>
+                <smartFilterBar:ControlConfiguration key="SourceKey" label="{i18n>analyticsSourceFilterLabel}" visibleInAdvancedArea="true"/>
                 <smartFilterBar:ControlConfiguration key="Lpc" label="{i18n>filterLpcLabel}" visibleInAdvancedArea="true"/>
                 <smartFilterBar:ControlConfiguration key="ProfessionText" label="{i18n>professionLabel}" visibleInAdvancedArea="true"/>
                 <smartFilterBar:ControlConfiguration key="Status" label="{i18n>statusLabel}" visibleInAdvancedArea="true"/>

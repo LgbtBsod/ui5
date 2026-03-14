@@ -21,45 +21,52 @@ sap.ui.define([
             var oPoint = AnalyticsDrilldownRuntime.extractDrilldownPayload(oEvent);
             var sLabel = String((oPoint && (oPoint.Dimension || oPoint.label || oPoint.labelShort)) || "").trim();
             var mMap = {
+                MONTH: "DateCheck",
                 LPC: "Lpc",
                 PROFESSION: "ProfessionText",
-                LOCATION: "LocationKey"
+                LOCATION: "LocationKey",
+                SOURCE: "SourceKey"
             };
             return AnalyticsDrilldownRuntime.queueAnalyticsDrilldown(oController, mMap[sDimension], sLabel, {
                 dimension: sDimension,
-                metric: sMetric
+                metric: sMetric,
+                monthLabel: sDimension === AnalyticsContracts.DIMENSIONS.MONTH ? sLabel : ""
             });
         },
 
-        onDrilldownAnalyticsLocation: function (oController, oEvent) {
+        onDrilldownAnalyticsLocation: function (oController, oEvent, sMetric) {
             var oPoint = AnalyticsDrilldownRuntime.extractDrilldownPayload(oEvent);
             return AnalyticsDrilldownRuntime.queueAnalyticsDrilldown(oController, "LocationKey", String((oPoint && oPoint.Location) || "").trim(), {
-                dimension: AnalyticsContracts.DIMENSIONS.LOCATION
+                dimension: AnalyticsContracts.DIMENSIONS.LOCATION,
+                metric: String(sMetric || "").trim().toUpperCase()
             });
         },
 
-        onDrilldownAnalyticsLpc: function (oController, oEvent) {
+        onDrilldownAnalyticsLpc: function (oController, oEvent, sMetric) {
             var oPoint = AnalyticsDrilldownRuntime.extractDrilldownPayload(oEvent);
             return AnalyticsDrilldownRuntime.queueAnalyticsDrilldown(oController, "Lpc", String((oPoint && oPoint.LPC) || "").trim(), {
-                dimension: AnalyticsContracts.DIMENSIONS.LPC
+                dimension: AnalyticsContracts.DIMENSIONS.LPC,
+                metric: String(sMetric || "").trim().toUpperCase()
             });
         },
 
-        onDrilldownAnalyticsProfession: function (oController, oEvent) {
+        onDrilldownAnalyticsProfession: function (oController, oEvent, sMetric) {
             var oPoint = AnalyticsDrilldownRuntime.extractDrilldownPayload(oEvent);
             return AnalyticsDrilldownRuntime.queueAnalyticsDrilldown(oController, "ProfessionText", String((oPoint && oPoint.Profession) || "").trim(), {
-                dimension: AnalyticsContracts.DIMENSIONS.PROFESSION
+                dimension: AnalyticsContracts.DIMENSIONS.PROFESSION,
+                metric: String(sMetric || "").trim().toUpperCase()
             });
         },
 
-        onDrilldownAnalyticsSource: function (oController, oEvent) {
+        onDrilldownAnalyticsSource: function (oController, oEvent, sMetric) {
             var oPoint = AnalyticsDrilldownRuntime.extractDrilldownPayload(oEvent);
             var sSource = String((oPoint && oPoint.Source) || "").trim().toUpperCase();
             if (!sSource || sSource === "ALL") {
                 return Promise.resolve(false);
             }
-            return AnalyticsDrilldownRuntime.queueAnalyticsDrilldown(oController, "Source", sSource, {
-                dimension: AnalyticsContracts.DIMENSIONS.SOURCE
+            return AnalyticsDrilldownRuntime.queueAnalyticsDrilldown(oController, "SourceKey", sSource, {
+                dimension: AnalyticsContracts.DIMENSIONS.SOURCE,
+                metric: String(sMetric || oPoint && oPoint.metric || "").trim().toUpperCase()
             });
         },
 

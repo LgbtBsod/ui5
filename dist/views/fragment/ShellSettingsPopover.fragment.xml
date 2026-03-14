@@ -3,7 +3,7 @@
         id="shellSettingsPopover"
         class="glassDialog shellPopover shellSettingsPopover"
         title="{i18n>shellSettingsTitle}"
-        contentWidth="22rem"
+        contentWidth="28rem"
         placement="Bottom">
         <content>
             <VBox class="shellPopoverBody shellSettingsBody" renderType="Bare">

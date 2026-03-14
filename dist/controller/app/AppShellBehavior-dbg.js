@@ -36,16 +36,6 @@ sap.ui.define([
         onOpenShellHelp: function (oEvent) { return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "help"); },
         onOpenShellSettings: function (oEvent) { return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "settings"); },
         onOpenShellAnalytics: function () {
-            var oLayout = this.byId && this.byId("mainFcl");
-            var oAnalyticsPage = this.byId && this.byId(NavigationContracts.MID_COLUMN_PAGE_IDS.ANALYTICS);
-            ModelStateRuntime.write(this, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.ANALYTICS);
-            ModelStateRuntime.write(this, STATE_MODEL, "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
-            if (oLayout && oAnalyticsPage && typeof oLayout.toMidColumnPage === "function") {
-                oLayout.toMidColumnPage(oAnalyticsPage);
-                if (typeof oLayout.setLayout === "function") {
-                    oLayout.setLayout(NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
-                }
-            }
             NavigationIntentService.navigateToAnalytics(this);
             if (typeof this._syncLayoutState === "function") {
                 this._syncLayoutState();

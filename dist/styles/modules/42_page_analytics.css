@@ -8,10 +8,10 @@
 .chkApp .accessDeniedHeroCard {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.72rem;
   align-items: center;
   justify-content: space-between;
-  padding: 1.15rem 1.2rem;
+  padding: 0.88rem 0.96rem;
   border-radius: calc(var(--radius-lg) - 0.1rem);
   border: 0;
   background: var(--theme-block-bg);
@@ -31,7 +31,7 @@
 .chkApp .accessDeniedHeroActions {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 0.45rem;
   align-items: center;
   justify-content: flex-end;
 }
@@ -74,7 +74,7 @@
 }
 
 .chkApp .workbenchToolbarSurface {
-  padding: 0.35rem 0.42rem;
+  padding: 0.22rem 0.28rem;
   border-radius: calc(var(--radius-lg) - 0.22rem);
   border: 0;
   background: var(--theme-block-bg);
@@ -84,19 +84,19 @@
 .chkApp .analyticsToplineGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.85rem;
+  gap: 0.55rem;
 }
 
 .chkApp .analyticsTile {
-  min-width: 13rem;
-  flex: 1 1 13rem;
+  min-width: 11.5rem;
+  flex: 1 1 11.5rem;
 }
 
 .chkApp .analyticsToplineCard {
   position: relative;
-  min-width: 13rem;
-  flex: 1 1 13rem;
-  gap: 0.34rem;
+  min-width: 11.5rem;
+  flex: 1 1 11.5rem;
+  gap: 0.24rem;
   overflow: hidden;
 }
 
@@ -485,6 +485,24 @@ body.chkAppRoot.appDark .chkApp .workflowStageCount {
   background: transparent;
 }
 
+.chkApp .analyticsTabBar .sapMITBHead {
+  gap: 0.28rem;
+}
+
+.chkApp .analyticsTabBar .sapMITBFilter {
+  min-height: 2.16rem;
+  padding: 0.18rem 0.34rem 0.16rem;
+  border-radius: 0.8rem;
+}
+
+.chkApp .analyticsTabBar .sapMITBFilter .sapMITBText {
+  font-size: 0.68rem;
+}
+
+.chkApp .analyticsTabBar .sapMITBFilter .sapUiIcon {
+  font-size: 0.9rem;
+}
+
 .chkApp .analyticsTabBar.sapMITB::-webkit-scrollbar,
 .chkApp .analyticsMatrixScroller::-webkit-scrollbar {
   height: 0.48rem;
@@ -619,10 +637,10 @@ body.chkAppRoot.appDark .chkApp .workflowStageCount {
 .chkApp .analyticsControlToolbar.sapMTB,
 .chkApp .analyticsControlToolbar.sapMOTB {
   flex-wrap: wrap;
-  row-gap: 0.45rem;
-  column-gap: 0.45rem;
+  row-gap: 0.32rem;
+  column-gap: 0.32rem;
   align-items: center;
-  padding: 0.18rem 0.2rem 0.24rem;
+  padding: 0.12rem 0.14rem 0.16rem;
   border-radius: calc(var(--radius-lg) - 0.18rem);
   background: color-mix(in srgb, var(--theme-rail-bg) 72%, transparent);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 42%, transparent);
@@ -645,18 +663,31 @@ body.chkAppRoot.appDark .chkApp .workflowStageCount {
   flex: 0 1 auto;
 }
 
+.chkApp .analyticsControlToolbar .sapMBtn .sapMBtnInner,
+.chkApp .analyticsControlToolbar .sapMMenuBtn .sapMBtnInner,
+.chkApp .analyticsControlToolbar .sapMInputBaseContentWrapper {
+  min-height: 2.08rem;
+}
+
+.chkApp .analyticsComparisonToolbar .sapMObjStatus,
+.chkApp .analyticsBuilderToolbar .sapMObjStatus {
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+}
+
 .chkApp .analyticsChartEmpty.sapMText {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 9rem;
+  min-height: 7.2rem;
   margin: 0.2rem 0 0;
-  padding: 1.2rem 1rem;
+  padding: 0.9rem 0.95rem;
   border-radius: calc(var(--radius-lg) - 0.18rem);
   border: 1px dashed color-mix(in srgb, var(--theme-rail-border) 48%, transparent);
   background: color-mix(in srgb, var(--theme-block-bg) 94%, transparent);
   color: var(--text-subtle);
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   text-align: center;
   opacity: 0.92;
 }
@@ -687,4 +718,74 @@ body.chkAppRoot.appDark .chkApp .workflowStageCount {
 .chkApp .analyticsMatrixTable .sapMListTblCell:last-child {
   border-top-right-radius: var(--theme-table-row-radius);
   border-bottom-right-radius: var(--theme-table-row-radius);
+}
+
+.chkApp .searchAnalyticsRailShell {
+  margin-bottom: 0.1rem;
+}
+
+.chkApp .searchAnalyticsRailGrid {
+  width: 100%;
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
+.chkApp .searchAnalyticsCard {
+  min-width: 11.5rem;
+  flex: 1 1 11.5rem;
+  padding: 0.72rem 0.8rem 0.68rem;
+  border-radius: calc(var(--radius-lg) - 0.12rem);
+}
+
+.chkApp .searchAnalyticsCard .kpiLabelRow {
+  gap: 0.28rem;
+  margin-bottom: 0.14rem;
+}
+
+.chkApp .searchAnalyticsCard .kpiLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+}
+
+.chkApp .searchAnalyticsCard .kpiLabelIcon {
+  font-size: 0.72rem;
+}
+
+.chkApp .searchAnalyticsCard .kpiValue {
+  font-size: clamp(1.38rem, 2vw, 1.82rem);
+  line-height: 0.98;
+}
+
+.chkApp .searchAnalyticsCard .searchAnalyticsMeta {
+  margin-top: 0.08rem;
+  font-size: 0.68rem;
+  line-height: 1.28;
+  color: var(--text-subtle);
+}
+
+@media (max-width: 72rem) {
+  .chkApp .searchAnalyticsRailGrid {
+    gap: 0.45rem;
+  }
+
+  .chkApp .searchAnalyticsCard {
+    min-width: 10.5rem;
+    flex-basis: 10.5rem;
+    padding: 0.66rem 0.72rem 0.62rem;
+  }
+}
+
+@media (max-width: 56rem) {
+  .chkApp .searchAnalyticsRailShell {
+    margin-bottom: 0;
+  }
+
+  .chkApp .searchAnalyticsRailGrid {
+    gap: 0.38rem;
+  }
+
+  .chkApp .searchAnalyticsCard {
+    min-width: calc(50% - 0.2rem);
+    flex-basis: calc(50% - 0.2rem);
+  }
 }

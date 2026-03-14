@@ -114,6 +114,7 @@ sap.ui.define([
         } else {
             ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", null);
         }
+        ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", null);
         ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", oIntent.routeName || NavigationContracts.ROUTES.SEARCH);
         ModelStateRuntime.writeOnModel(
             oStateModel,
@@ -124,6 +125,10 @@ sap.ui.define([
                     ? NavigationContracts.LAYOUTS.ONE_COLUMN
                     : LayoutStateRuntime.normalizeLayout((oIntent.routeArgs && oIntent.routeArgs.layout) || NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED))
         );
+        if ((oIntent.routeName || NavigationContracts.ROUTES.SEARCH) === NavigationContracts.ROUTES.SEARCH) {
+            navigateToSearch(oController);
+            return;
+        }
         if (oRouter && typeof oRouter.navTo === "function") {
             oRouter.navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
         }

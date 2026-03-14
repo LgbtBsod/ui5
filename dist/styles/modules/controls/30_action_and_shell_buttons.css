@@ -33,7 +33,7 @@
 .chkApp .shellActionBtn .sapMBtnInner,
 .chkApp .shellUserBtn .sapMBtnInner {
   border-radius: 999px;
-  min-height: var(--theme-shell-action-min-height);
+  min-height: calc(var(--theme-shell-action-min-height) - 0.2rem);
   border-color: var(--theme-shell-action-border);
   background: var(--theme-shell-action-bg);
   box-shadow: var(--theme-shell-action-shadow);
@@ -41,11 +41,11 @@
 }
 
 .chkApp .shellUserBtn .sapMBtnInner {
-  padding-inline: calc(var(--theme-shell-action-padding-inline) + 0.08rem);
+  padding-inline: calc(var(--theme-shell-action-padding-inline) - 0.02rem);
 }
 
 .chkApp .shellActionBtn .sapMBtnInner {
-  padding-inline: var(--theme-shell-action-padding-inline);
+  padding-inline: calc(var(--theme-shell-action-padding-inline) - 0.06rem);
 }
 
 .chkApp .shellActionBtn .sapMBtnContent,
@@ -54,7 +54,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--theme-shell-action-label-size);
+  font-size: calc(var(--theme-shell-action-label-size) - 0.04rem);
   font-weight: var(--theme-shell-action-label-weight);
   letter-spacing: 0.01em;
 }

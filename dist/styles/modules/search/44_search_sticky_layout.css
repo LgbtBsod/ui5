@@ -30,7 +30,7 @@
 
 .chkApp .searchWorkbenchDock > .searchResultsActionRail {
   margin-top: 0;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.22rem;
   position: sticky;
   top: var(--search-sticky-action-top, var(--search-action-sticky-top));
   z-index: 23;
@@ -104,7 +104,7 @@
 
 .chkApp .searchWorkbenchDock > .searchResultsTable {
   padding-top: 0;
-  margin-top: 0;
+  margin-top: -0.08rem;
   position: relative;
   z-index: 1;
   border-top-left-radius: calc(var(--radius-xl) - 0.1rem);
@@ -150,6 +150,8 @@
   box-shadow:
     0 6px 14px rgba(18, 36, 64, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border-bottom-left-radius: calc(var(--radius-md) - 0.1rem);
+  border-bottom-right-radius: calc(var(--radius-md) - 0.1rem);
 }
 
 .chkApp .searchResultsActionRail,

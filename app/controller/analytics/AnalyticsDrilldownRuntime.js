@@ -12,20 +12,55 @@ sap.ui.define([
     var ANALYTICS_DRILLDOWN_INTENT_PATH = "/analyticsDrilldownIntent";
     var SELECTED_YEAR_PATH = "/selectedYear";
     var COMPARE_YEAR_PATH = "/compareYear";
+    var MONTH_INDEX = Object.freeze({
+        JAN: 0,
+        JANUARY: 0,
+        FEB: 1,
+        FEBRUARY: 1,
+        MAR: 2,
+        MARCH: 2,
+        APR: 3,
+        APRIL: 3,
+        MAY: 4,
+        JUN: 5,
+        JUNE: 5,
+        JUL: 6,
+        JULY: 6,
+        AUG: 7,
+        AUGUST: 7,
+        SEP: 8,
+        SEPT: 8,
+        SEPTEMBER: 8,
+        OCT: 9,
+        OCTOBER: 9,
+        NOV: 10,
+        NOVEMBER: 10,
+        DEC: 11,
+        DECEMBER: 11
+    });
 
     function readSelectedSource(oController) {
         return String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
     }
 
     function buildSearchDrilldownIntent(sFilterKey, sFilterValue, oController, mExtras) {
+        var sSelectedYear = String(ControllerViewStateRuntime.get(oController, SELECTED_YEAR_PATH, "") || "").trim();
+        var sCompareYear = String(ControllerViewStateRuntime.get(oController, COMPARE_YEAR_PATH, "") || "").trim();
+        var sAnalyticsSource = readSelectedSource(oController);
+        var sMonthLabel = String((mExtras && mExtras.monthLabel) || "").trim();
         return {
             source: TOKENS.ANALYTICS,
             filterKey: String(sFilterKey || "").trim(),
             filterValue: String(sFilterValue || "").trim(),
-            selectedYear: String(ControllerViewStateRuntime.get(oController, SELECTED_YEAR_PATH, "") || "").trim(),
-            compareYear: String(ControllerViewStateRuntime.get(oController, COMPARE_YEAR_PATH, "") || "").trim(),
-            analyticsSource: readSelectedSource(oController),
-            extras: Object.assign({}, mExtras || {})
+            selectedYear: sSelectedYear,
+            compareYear: sCompareYear,
+            analyticsSource: sAnalyticsSource,
+            extras: Object.assign({}, mExtras || {}, {
+                analyticsSource: sAnalyticsSource,
+                selectedYear: sSelectedYear,
+                compareYear: sCompareYear,
+                monthLabel: sMonthLabel
+            })
         };
     }
 
@@ -37,17 +72,25 @@ sap.ui.define([
     }
 
     function queueAnalyticsDrilldown(oController, sFilterKey, sFilterValue, mExtras) {
+        var mResolvedExtras = Object.assign({}, mExtras || {});
         var sValue = String(sFilterValue || "").trim();
-        if (!sFilterKey || !sValue) {
+        var sFilter = String(sFilterKey || "").trim();
+        var sSelectedYear = String(ControllerViewStateRuntime.get(oController, SELECTED_YEAR_PATH, "") || "").trim();
+        var sAnalyticsSource = readSelectedSource(oController);
+        if (mResolvedExtras.dimension === AnalyticsContracts.DIMENSIONS.MONTH) {
+            mResolvedExtras.monthLabel = sValue;
+        }
+        if ((!sFilter || !sValue) && !sSelectedYear && (!sAnalyticsSource || sAnalyticsSource === AnalyticsContracts.SOURCES.ALL)) {
             return Promise.resolve(false);
         }
-        ModelStateRuntime.write(oController, STATE_MODEL, ANALYTICS_DRILLDOWN_INTENT_PATH, buildSearchDrilldownIntent(sFilterKey, sValue, oController, mExtras));
+        ModelStateRuntime.write(oController, STATE_MODEL, ANALYTICS_DRILLDOWN_INTENT_PATH, buildSearchDrilldownIntent(sFilter, sValue, oController, mResolvedExtras));
         NavigationIntentService.navigateToSearch(oController);
         return Promise.resolve(true);
     }
 
     return {
         extractDrilldownPayload: extractDrilldownPayload,
-        queueAnalyticsDrilldown: queueAnalyticsDrilldown
+        queueAnalyticsDrilldown: queueAnalyticsDrilldown,
+        MONTH_INDEX: MONTH_INDEX
     };
 });

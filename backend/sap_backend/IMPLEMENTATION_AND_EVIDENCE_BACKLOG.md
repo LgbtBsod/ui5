@@ -9,6 +9,7 @@ Purpose: capture the backend work that is still required for productive SAP roll
 Companion execution artifacts:
 - `backend/sap_backend/EVIDENCE_ACCEPTANCE_MATRIX.md`
 - `backend/sap_backend/SYSTEM_PROOF_REGISTER_TEMPLATE.md`
+- `backend/sap_backend/SAP_EVIDENCE_RUNBOOK.md`
 
 ## Already Implemented In Repo
 

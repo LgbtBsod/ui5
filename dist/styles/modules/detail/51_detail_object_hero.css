@@ -6,14 +6,14 @@
 
 .chkApp .detailHeroExperienceCard {
   padding:
-    calc(0.9rem * var(--theme-density-scale))
-    calc(0.96rem * var(--theme-density-scale));
+    calc(0.74rem * var(--theme-density-scale))
+    calc(0.84rem * var(--theme-density-scale));
   border-radius: var(--radius-xl);
 }
 
 .chkApp .detailHeroCard {
   position: relative;
-  padding: 1rem;
+  padding: 0.82rem 0.9rem;
   overflow: hidden;
   background: var(--theme-block-bg);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 72%, transparent);

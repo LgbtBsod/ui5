@@ -141,12 +141,12 @@ body.chkAppRoot.appDark .chkApp .infoCardTile:hover::before {
   flex-wrap: wrap;
   align-items: center;
   column-gap: clamp(0.45rem, 1vw, 0.8rem);
-  row-gap: 0.55rem;
+  row-gap: 0.38rem;
   flex: 0 0 auto;
   margin: 0.78rem clamp(0.85rem, 2vw, 1.5rem) 0;
   max-width: calc(100% - (2 * clamp(1rem, 2vw, 1.75rem)));
   height: auto;
-  min-height: var(--theme-shell-min-height);
+  min-height: calc(var(--theme-shell-min-height) - 0.28rem);
   padding:
     var(--theme-shell-padding-block-start)
     var(--theme-shell-padding-inline)
@@ -208,7 +208,7 @@ body.chkAppRoot.appDark .chkApp .infoCardTile:hover::before {
 }
 
 .chkApp .shellContextChip {
-  padding: 0.2rem 0.7rem;
+  padding: 0.14rem 0.56rem;
   border-radius: 999px;
   border: 1px solid var(--shell-chip-border);
   background: var(--shell-chip-bg);
@@ -219,6 +219,7 @@ body.chkAppRoot.appDark .chkApp .infoCardTile:hover::before {
 .chkApp .shellContextChip .sapUiIcon {
   color: var(--text-main);
   font-weight: 600;
+  font-size: 0.72rem;
 }
 
 .appDensityCompact .chkApp .appContent {

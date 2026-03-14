@@ -399,16 +399,31 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   padding-right: 0.2rem;
 }
 
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin,
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
+  flex: 0 0 clamp(25.5rem, 32vw, 32rem);
+  width: clamp(25.5rem, 32vw, 32rem);
+  max-width: clamp(25.5rem, 32vw, 32rem);
+}
+
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnMid,
+.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .chkApp .appLayoutSplit #searchPaneHost .appContent,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .appContent {
-  padding-left: 0.78rem;
-  padding-right: 0.62rem;
+  padding-left: 0.58rem;
+  padding-right: 0.38rem;
 }
 
 .chkApp .appLayoutSplit #detailPaneHost .appContent,
 .chkApp .appLayoutSplit [id$="-detailPaneHost"] .appContent {
-  padding-left: 0.58rem;
-  padding-right: 0.42rem;
+  padding-left: 0.34rem;
+  padding-right: 0.24rem;
+  width: min(calc(100% - 0.4rem), 78rem);
+  max-width: 78rem;
 }
 
 /* Keep the FCL separator interactive in split mode. */
@@ -432,6 +447,15 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 .chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnSeparator {
   width: 1px;
   opacity: 1;
+}
+
+@media (max-width: 1180px) {
+  .chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin,
+  .chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
+    flex-basis: clamp(23rem, 38vw, 27rem);
+    width: clamp(23rem, 38vw, 27rem);
+    max-width: clamp(23rem, 38vw, 27rem);
+  }
 }
 
 /* Keep layout stable during drag-resize and FCL transitions. */
