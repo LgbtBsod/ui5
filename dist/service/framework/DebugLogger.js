@@ -1,2 +1,0 @@
-sap.ui.define(["sap/base/Log"],function(n){"use strict";function r(){return window.__DEBUG_UI5__===true}function i(i,e,t){if(!r()){return}var u="["+String(i||"UI5")+"] "+String(e||"");var f=t||{};n.info(u,JSON.stringify(f),"PRODUCTION_CONTROL_CHECKLIST.service.framework.DebugLogger")}return{isEnabled:r,info:i}});
-//# sourceMappingURL=DebugLogger.js.map

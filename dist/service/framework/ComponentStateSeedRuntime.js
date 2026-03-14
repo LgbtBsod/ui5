@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"],function(e){"use strict";function t(t,r,n){var a=n.buildDefaultTimerMap();var i={"/timers":a};i[r.SAVE_IN_FLIGHT]=false;i[r.PENDING_NAVIGATION_INTENT]=null;i[r.TAB_CONFLICT_STATE]={active:false,source:"",at:""};i["/networkOnline"]=true;i["/networkGraceMode"]=false;i["/networkGraceExpiresAt"]=null;e.setManyOnModel(t,i);return a}return{seedInitialState:t}});
-//# sourceMappingURL=ComponentStateSeedRuntime.js.map

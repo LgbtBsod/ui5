@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils","PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts","PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"],function(t,e,a){"use strict";function r(r,n){var i=n.normalizeRootKey(n.rootId(r));return a.deletePath(t.buildEntityPath("ChecklistRootSet",i,{type:e.TYPES.ROOT_KEY})).then(function(){return{deleted:true,rootId:i}})}return{deleteChecklist:r}});
-//# sourceMappingURL=ODataChecklistStatusRuntime.js.map

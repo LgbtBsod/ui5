@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller","PRODUCTION_CONTROL_CHECKLIST/controller/app/AppLifecycleBehavior","PRODUCTION_CONTROL_CHECKLIST/controller/app/AppOverlayBehavior","PRODUCTION_CONTROL_CHECKLIST/controller/app/AppShellBehavior","PRODUCTION_CONTROL_CHECKLIST/controller/app/AppStateBehavior","PRODUCTION_CONTROL_CHECKLIST/controller/app/AppDomBehavior"],function(O,C,e,r,o,p){"use strict";return O.extend("PRODUCTION_CONTROL_CHECKLIST.controller.App",Object.assign({},C,e,r,o,p))});
-//# sourceMappingURL=App.controller.js.map

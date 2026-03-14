@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";var r={true:true,1:true,on:true};var e={false:true,0:true,off:true};function t(t,u){var n;if(typeof t==="boolean"){return t}if(typeof t==="number"){return t!==0}if(typeof t!=="string"){return u}n=t.trim().toLowerCase();if(r[n]){return true}if(e[n]){return false}return u}return{parseBooleanToken:t}});
-//# sourceMappingURL=ValueTokenParser.js.map

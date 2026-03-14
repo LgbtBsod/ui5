@@ -1,1 +1,0 @@
-{"version":3,"file":"UiStatePort.js","names":["sap","ui","define","get","sModelName","sPath","set","vValue","merge","oPartial"],"sources":["UiStatePort-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAKA,MAAO,CAEHC,IAAK,SAAUC,EAAYC,GAAQ,EAEnCC,IAAK,SAAUF,EAAYC,EAAOE,GAAS,EAE3CC,MAAO,SAAUJ,EAAYC,EAAOI,GAAW,EAEvD","ignoreList":[]}

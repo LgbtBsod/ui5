@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimeConstants","PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"],function(e,r){"use strict";return{ensureRegistered:function(){return true},register:function(i,t){return r.registerOverride(e.SCOPE,i,t)},unregister:function(i){return r.unregisterOverride(e.SCOPE,i)},clear:function(){return r.clearOverrides(e.SCOPE)}}});
-//# sourceMappingURL=DetailRuntimeOverrideHandlers.js.map

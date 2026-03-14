@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownBehavior"],function(n){"use strict";return{onCloseAnalytics:function(o){n.onCloseAnalytics(o)},onCloseAnalyticsReportDialog:function(o){n.onCloseAnalyticsReportDialog(o)},onExportAnalyticsReport:function(o){return n.onExportAnalyticsReport(o)},onOpenAnalyticsReportDialog:function(o){return n.onOpenAnalyticsReportDialog(o)}}});
-//# sourceMappingURL=AnalyticsReportBehavior.js.map

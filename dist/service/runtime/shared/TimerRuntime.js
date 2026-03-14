@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function e(e,r){var t=Number(e);var n=Number(r||0);return Number.isFinite(t)&&t>=n}function r(e,r){if(e){r(e)}return null}function t(e,t,n){r(e,clearTimeout);return setTimeout(t,n)}function n(e,t,n){r(e,clearInterval);return setInterval(t,n)}return{clearTimer:r,isValidDelay:e,restartInterval:n,restartTimeout:t}});
-//# sourceMappingURL=TimerRuntime.js.map

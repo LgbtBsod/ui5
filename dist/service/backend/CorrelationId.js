@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function t(t){var n=String(t||"req").trim()||"req";return[n,Date.now().toString(36),Math.random().toString(36).slice(2,10)].join("-")}return{next:t}});
-//# sourceMappingURL=CorrelationId.js.map

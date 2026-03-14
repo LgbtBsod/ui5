@@ -1,1 +1,0 @@
-{"version":3,"file":"DictPort.js","names":["sap","ui","define","ensureLoaded","getItem","mArgs","listByType"],"sources":["DictPort-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAKA,MAAO,CAEHC,aAAc,WAAa,EAE3BC,QAAS,SAAUC,GAAQ,EAE3BC,WAAY,SAAUD,GAAQ,EAEtC","ignoreList":[]}

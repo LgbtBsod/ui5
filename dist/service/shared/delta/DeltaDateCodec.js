@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function t(t){if(!t){return null}if(typeof t==="string"){var e=t.match(/^\/Date\((-?\d+)(?:[+-]\d+)?\)\/$/);if(e){return Number(e[1])}}var r=new Date(t).getTime();return Number.isNaN(r)?null:r}function e(e){var r=t(e);if(r===null){return null}return"/Date("+r+")/"}return{parseODataDateMillis:t,formatODataDate:e}});
-//# sourceMappingURL=DeltaDateCodec.js.map

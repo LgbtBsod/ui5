@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/Result"],function(r){"use strict";function e(r){return String(r&&(r.rootId||r.id)||"").trim()}function t(r){return String(r||"").trim()}function n(r){return!!r}function o(e,t){return Promise.resolve(r.ok(e,t||[]))}function i(e,t){return Promise.resolve(r.fail(e,t||[]))}function u(r,e){if(typeof r!=="function"){return Promise.resolve(e)}return Promise.resolve(r())}return{bool:n,callOrDefault:u,fail:i,ok:o,rootId:e,text:t}});
-//# sourceMappingURL=UseCaseValue.js.map

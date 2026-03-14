@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"],function(e){"use strict";function t(t){var o=t&&t.stateModel;return{track:function(t){return e.emit(t&&t.event||"telemetry.event",{stateModel:o,payload:Object.assign({outcome:"tracked"},t&&t.payload||{})})},snapshot:function(t){return Promise.resolve(e.emit("telemetry.snapshot",{stateModel:o,payload:{context:t&&t.context||{},outcome:"snapshot"}}))}}}return{create:t}});
-//# sourceMappingURL=TelemetryAdapter.js.map

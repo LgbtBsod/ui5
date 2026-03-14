@@ -1,1 +1,0 @@
-{"version":3,"file":"Search.controller.js","names":["sap","ui","define","BaseController","SearchControllerBehavior","extend","Object","assign"],"sources":["Search-dbg.controller.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,CACV,0DACA,2EACD,SAAUC,EAAgBC,GACzB,aAEA,OAAOD,EAAeE,OAAO,iDAAkDC,OAAOC,OAAO,CAAC,EAAGH,GACrG","ignoreList":[]}

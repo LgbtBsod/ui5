@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function n(n,e){try{return JSON.parse(JSON.stringify(typeof n==="undefined"?e:n))}catch(n){return typeof e==="undefined"?null:e}}return{clone:n}});
-//# sourceMappingURL=CloneUtil.js.map

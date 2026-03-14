@@ -1,1 +1,0 @@
-{"version":3,"file":"TelemetryPort.js","names":["sap","ui","define","track","mArgs","snapshot"],"sources":["TelemetryPort-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAKA,MAAO,CAEHC,MAAO,SAAUC,GAAQ,EAEzBC,SAAU,SAAUD,GAAQ,EAEpC","ignoreList":[]}

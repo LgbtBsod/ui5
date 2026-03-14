@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function e(){}e.prototype.read=function(){return Promise.resolve(null)};e.prototype.write=function(){return Promise.resolve()};e.prototype.clear=function(){return Promise.resolve()};return e});
-//# sourceMappingURL=BrowserCachePort.js.map

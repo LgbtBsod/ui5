@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";var n={};function e(n){return String(n||"").trim()}function r(r){return n[e(r)]||null}function t(r,t){var u=e(r);if(!u){return t||null}n[u]=t||null;return n[u]}function u(r,t){var u=e(r);if(!u){return}if(typeof t==="undefined"||n[u]===t){delete n[u]}}function i(){n={}}return{get:r,set:t,remove:u,clear:i}});
-//# sourceMappingURL=InFlightRegistry.js.map

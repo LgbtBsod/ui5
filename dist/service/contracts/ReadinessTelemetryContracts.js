@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";return Object.freeze({ROOT_PATH:"/readiness/metrics",STARTED_AT_PATH:"/readiness/metrics/startedAtMs",LAST_STAGE_PATH:"/readiness/metrics/lastStage",STAGES:Object.freeze({SHELL_READY:"shellReady",SEARCH_ROUTE_READY:"searchRouteReady",SEARCH_INTERACTION_READY:"searchInteractionReady",DETAIL_READY:"detailReady",ANALYTICS_READY:"analyticsReady",DEFERRED_DIALOG_READY:"deferredDialogReady"})})});
-//# sourceMappingURL=ReadinessTelemetryContracts.js.map
