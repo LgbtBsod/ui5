@@ -1,8 +1,42 @@
 from utils.odata import ODATA_NS
 
+LABEL_REPLACEMENTS = {
+    '<Property Name="Id" Type="Edm.String"/>': '<Property Name="Id" Type="Edm.String" sap:label="Checklist ID"/>',
+    '<Property Name="DateCheck" Type="Edm.DateTime"/>': '<Property Name="DateCheck" Type="Edm.DateTime" sap:label="Inspection date"/>',
+    '<Property Name="TimeCheck" Type="Edm.String"/>': '<Property Name="TimeCheck" Type="Edm.String" sap:label="Inspection time"/>',
+    '<Property Name="TimeZone" Type="Edm.String"/>': '<Property Name="TimeZone" Type="Edm.String" sap:label="Time zone"/>',
+    '<Property Name="LocationKey" Type="Edm.String"/>': '<Property Name="LocationKey" Type="Edm.String" sap:label="Location"/>',
+    '<Property Name="Bukrs" Type="Edm.String"/>': '<Property Name="Bukrs" Type="Edm.String" sap:label="Company code"/>',
+    '<Property Name="Lpc" Type="Edm.String"/>': '<Property Name="Lpc" Type="Edm.String" sap:label="LPC level"/>',
+    '<Property Name="LpcText" Type="Edm.String"/>': '<Property Name="LpcText" Type="Edm.String" sap:label="LPC description"/>',
+    '<Property Name="Profession" Type="Edm.String"/>': '<Property Name="Profession" Type="Edm.String" sap:label="Profession code"/>',
+    '<Property Name="ProfessionText" Type="Edm.String"/>': '<Property Name="ProfessionText" Type="Edm.String" sap:label="Profession"/>',
+    '<Property Name="EquipName" Type="Edm.String"/>': '<Property Name="EquipName" Type="Edm.String" sap:label="Equipment"/>',
+    '<Property Name="Status" Type="Edm.String"/>': '<Property Name="Status" Type="Edm.String" sap:label="Status"/>',
+    '<Property Name="ChangedOn" Type="Edm.DateTime"/>': '<Property Name="ChangedOn" Type="Edm.DateTime" sap:label="Changed on"/>',
+    '<Property Name="CreatedOn" Type="Edm.DateTime"/>': '<Property Name="CreatedOn" Type="Edm.DateTime" sap:label="Created on"/>',
+    '<Property Name="SuccessChecksRate" Type="Edm.Double"/>': '<Property Name="SuccessChecksRate" Type="Edm.Double" sap:label="Checks success rate"/>',
+    '<Property Name="SuccessBarriersRate" Type="Edm.Double"/>': '<Property Name="SuccessBarriersRate" Type="Edm.Double" sap:label="Barriers success rate"/>',
+    '<Property Name="ChecksTotal" Type="Edm.Int32"/>': '<Property Name="ChecksTotal" Type="Edm.Int32" sap:label="Checks total"/>',
+    '<Property Name="BarriersTotal" Type="Edm.Int32"/>': '<Property Name="BarriersTotal" Type="Edm.Int32" sap:label="Barriers total"/>',
+    '<Property Name="ObserverFullname" Type="Edm.String"/>': '<Property Name="ObserverFullname" Type="Edm.String" sap:label="Inspector"/>',
+    '<Property Name="ObserverPosition" Type="Edm.String"/>': '<Property Name="ObserverPosition" Type="Edm.String" sap:label="Inspector position"/>',
+    '<Property Name="ObserverOrgUnit" Type="Edm.String"/>': '<Property Name="ObserverOrgUnit" Type="Edm.String" sap:label="Inspector org unit"/>',
+    '<Property Name="ObservedFullname" Type="Edm.String"/>': '<Property Name="ObservedFullname" Type="Edm.String" sap:label="Inspected person"/>',
+    '<Property Name="ObservedPosition" Type="Edm.String"/>': '<Property Name="ObservedPosition" Type="Edm.String" sap:label="Inspected position"/>',
+    '<Property Name="ObservedOrgUnit" Type="Edm.String"/>': '<Property Name="ObservedOrgUnit" Type="Edm.String" sap:label="Inspected org unit"/>'
+}
+
+
+def apply_labels(metadata: str) -> str:
+    result = str(metadata or "")
+    for source, target in LABEL_REPLACEMENTS.items():
+        result = result.replace(source, target)
+    return result
+
 
 def build_metadata() -> str:
-    return f'''<?xml version="1.0" encoding="utf-8"?>
+    metadata = f'''<?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
  <edmx:DataServices m:DataServiceVersion="2.0" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
   <Schema Namespace="{ODATA_NS}" xmlns="http://schemas.microsoft.com/ado/2008/09/edm" xmlns:sap="http://www.sap.com/Protocols/SAPData">
@@ -61,3 +95,4 @@ def build_metadata() -> str:
   </Schema>
  </edmx:DataServices>
 </edmx:Edmx>'''
+    return apply_labels(metadata)

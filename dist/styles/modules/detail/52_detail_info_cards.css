@@ -1,0 +1,45 @@
+.chkApp .detailInfoExperienceCard .infoCardGrid {
+  margin-top: 0;
+  gap: 0.74rem;
+  align-items: start;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI {
+  min-width: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardGrid,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapMListUl,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapMListItems,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapFGLIWrapper {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardPinBtn {
+  flex: 0 0 auto;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI:active {
+  cursor: grabbing;
+}
+
+.chkApp .detailContent .infoCardGrid .sapFGLI:focus .infoCardTile,
+.chkApp .detailContent .infoCardGrid .sapFGLI:focus-within .infoCardTile {
+  border-color: color-mix(in srgb, var(--accent) 44%, transparent);
+  box-shadow:
+    0 0 0 0.14rem color-mix(in srgb, rgba(var(--accent-rgb), 0.16) 80%, transparent),
+    0 14px 30px rgba(18, 36, 64, 0.1);
+}
+
+.chkApp .detailContent .infoCardGrid .infoCardTile:hover {
+  transform: translateY(-2px);
+}

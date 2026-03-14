@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";return{rebindSearchTable:function(){},getSmartFilterData:function(){},getSelectedRowKey:function(){},getVisibleRows:function(){},setTableBusy:function(e){}}});
+//# sourceMappingURL=SmartControlsPort.js.map

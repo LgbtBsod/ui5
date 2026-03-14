@@ -6,6 +6,9 @@ Purpose: convert the remaining SAP-system-side readiness work into an execution-
 
 This file is the operational companion to:
 - `backend/sap_backend/IMPLEMENTATION_AND_EVIDENCE_BACKLOG.md`
+- `backend/sap_backend/EVIDENCE_ACCEPTANCE_MATRIX.md`
+- `backend/sap_backend/TRACE_INVENTORY_EV003_EV006.md`
+- `backend/sap_backend/SYSTEM_PROOF_REGISTER_TEMPLATE.md`
 - `docs/audit/sap-readiness-evidence-request-pack.md`
 - `docs/audit/commercial-certification-readiness-dossier.md`
 
@@ -247,3 +250,9 @@ The project should only be treated as release-ready for SAP-compatible enterpris
 - support/ops/legal evidence pack is complete
 
 The project should only be treated as SAP-certified / SAP-branded when the above is true and formal SAP partner/certification/branding approval is also complete.
+
+## Execution Discipline
+
+- Every completed workstream must produce at least one filled proof record based on `SYSTEM_PROOF_REGISTER_TEMPLATE.md`.
+- Every proof record must map to an `Evidence ID` from `EVIDENCE_ACCEPTANCE_MATRIX.md`.
+- Screenshot-only evidence is insufficient for auth, lock, concurrency, or payload-contract claims unless traces or payload captures are also attached.

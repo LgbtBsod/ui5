@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry","PRODUCTION_CONTROL_CHECKLIST/service/framework/UiBehaviorConstants"],function(e,r){"use strict";return{ensureRegistered:function(){return true},register:function(i,n){return e.registerOverride(r.SCOPE,i,n)},unregister:function(i){return e.unregisterOverride(r.SCOPE,i)},clear:function(){return e.clearOverrides(r.SCOPE)}}});
+//# sourceMappingURL=UiBehaviorOverrideHandlers.js.map

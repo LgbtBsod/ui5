@@ -1,0 +1,22 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <BusyIndicator visible="{state>/lockOperationPending}" size="1rem" class="sapUiTinyMarginEnd">
+        <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+    </BusyIndicator>
+    <Switch
+        id="detailEditSwitch"
+        visible="{= ${state>/workflow/detail/editMode} !== 'CREATE' }"
+        state="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
+        enabled="{= ${state>/workflow/detail/editMode} !== 'CREATE' &amp;&amp; !${state>/lockOperationPending} }"
+        customTextOn=""
+        customTextOff=""
+        change=".onToggleEdit"
+        class="appAccentSwitch detailAccentSwitchEditMode chkRipple">
+        <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+    </Switch>
+    <ObjectStatus
+        text="{parts:[{path:'state>/lockStateText'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateText'}"
+        state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateSemantic'}"
+        class="sapUiTinyMarginBegin detailRailStatusChip">
+        <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+    </ObjectStatus>
+</core:FragmentDefinition>

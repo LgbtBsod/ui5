@@ -1,0 +1,108 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
+    <Dialog
+        class="glassDialog governedDialog"
+        id="checksExpandedDialog"
+        title="{i18n>checksExpandedTitle}"
+        contentWidth="72rem"
+        contentHeight="30rem"
+        draggable="true"
+        resizable="true"
+        stretchOnPhone="true"
+        initialFocus="checksExpandedCloseButton">
+        <content>
+            <VBox class="expandedDialogContent dialogContentShell governedDialogContent tableDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare">
+                <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/checksExpandedBusy}">
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
+                </VBox>
+                <t:Table
+                    class="dialogDataTable detailGridTable"
+                    visible="{= !${appView>/isPhoneViewport} }"
+                    rows="{selected>/checks}"
+                    selectionMode="None"
+                    visibleRowCountMode="Auto"
+                    minAutoRowCount="6"
+                    rowHeight="48">
+                    <t:columns>
+                        <t:Column width="3rem">
+                            <Label text=""/>
+                            <t:template>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column>
+                            <Label text="{i18n>checksNumberLabel}"/>
+                            <t:template>
+                                <Input value="{selected>ChecksNum}" editable="false"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column>
+                            <Label text="{i18n>checkLabel}"/>
+                            <t:template>
+                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="8rem">
+                            <Label text="{i18n>statusLabel}"/>
+                            <t:template>
+                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column>
+                            <Label text="{i18n>commentLabel}"/>
+                            <t:template>
+                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
+                            <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                            <t:template>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>rowActionDelete}"
+                                    width="100%"
+                                    type="Transparent"
+                                    press=".onDeleteCheckRow"
+                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </t:template>
+                        </t:Column>
+                    </t:columns>
+                </t:Table>
+
+                <Table items="{selected>/checks}" class="flatEditorTable dialogDataTable" growing="true" growingThreshold="20" visible="{appView>/isPhoneViewport}">
+                    <columns>
+                        <Column width="3rem"><Text text=""/></Column>
+                        <Column><Text text="{i18n>checksNumberLabel}"/></Column>
+                        <Column><Text text="{i18n>checkLabel}"/></Column>
+                        <Column><Text text="{i18n>statusLabel}"/></Column>
+                        <Column><Text text="{i18n>commentLabel}"/></Column>
+                        <Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
+                            <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                <Input value="{selected>ChecksNum}" editable="false"/>
+                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailChecksResultSwitch"/>
+                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>rowActionDelete}"
+                                    width="100%"
+                                    type="Transparent"
+                                    press=".onDeleteCheckRow"
+                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button id="checksExpandedCloseButton" text="{i18n>closeButton}" icon="sap-icon://nav-back" press=".onCloseChecksExpanded"/>
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

@@ -1,0 +1,23 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <OverflowToolbar class="toolbarTransparent detailSectionToolbar workbenchToolbarSurface sectionToolbarSurface">
+        <Title text="{i18n>barriersTitle}"/>
+        <ToolbarSpacer/>
+
+        <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd actionPrioritySecondary">
+            <layoutData>
+                <OverflowToolbarLayoutData priority="Low"/>
+            </layoutData>
+        </Button>
+
+        <Button
+            text="{i18n>addRow}"
+            icon="sap-icon://quality-issue"
+            press=".onAddBarrierRow"
+            visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+            class="actionPriorityPrimary">
+            <layoutData>
+                <OverflowToolbarLayoutData priority="High"/>
+            </layoutData>
+        </Button>
+    </OverflowToolbar>
+</core:FragmentDefinition>

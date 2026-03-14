@@ -1,0 +1,12 @@
+specVersion: "3.0"
+metadata:
+  name: production-control-checklist
+type: application
+resources:
+  configuration:
+    paths:
+      webapp: app
+builder:
+  resources:
+    excludes:
+      - "/test/**"

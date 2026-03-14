@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ExportSearchUseCase"],function(e){"use strict";function t(t){var s=t||{};this._useCase=s.exportUseCase||new e}t.prototype.exportFlow=function(e,t){return this._useCase.execute(e||{},t||{})};t.prototype.exportEntity=function(e,t){return this.exportFlow({entity:e||"screen"},t||{})};return t});
+//# sourceMappingURL=ExportFacade.js.map

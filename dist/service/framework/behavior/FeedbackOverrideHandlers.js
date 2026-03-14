@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"],function(e){"use strict";var r="feedback";return{ensureRegistered:function(){return true},register:function(i,n){return e.registerOverride(r,i,n)},unregister:function(i){return e.unregisterOverride(r,i)},clear:function(){return e.clearOverrides(r)}}});
+//# sourceMappingURL=FeedbackOverrideHandlers.js.map

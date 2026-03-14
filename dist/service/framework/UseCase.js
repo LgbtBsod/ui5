@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function e(e){this.name=e||"UseCase"}e.prototype.getName=function(){return this.name};e.prototype.execute=function(){throw new Error("UseCase.execute(input, ctx) must be implemented by subclasses.")};return e});
+//# sourceMappingURL=UseCase.js.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"ClockAdapter.js","names":["sap","ui","define","now","Date","isoNow","toISOString"],"sources":["ClockAdapter-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAEA,SAASC,IACL,OAAOC,KAAKD,KAChB,CAEA,SAASE,IACL,OAAO,IAAID,MAAOE,aACtB,CAEA,MAAO,CACHD,OAAQA,EACRF,IAAKA,EAEb","ignoreList":[]}

@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function n(n,e,i){n.apply(e,i||[])}function e(n,e){return Number(n&&n[e])}return{initEventProvider:n,readNumberOption:e}});
+//# sourceMappingURL=ManagerRuntime.js.map

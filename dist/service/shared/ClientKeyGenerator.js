@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function n(){return Math.floor(Math.random()*4294967296)}function t(){if(typeof window!=="undefined"&&window.crypto&&typeof window.crypto.getRandomValues==="function"){var t=new Uint32Array(4);window.crypto.getRandomValues(t);return Array.prototype.slice.call(t)}return[n(),n(),n(),n()]}function r(n){return(n||[]).map(function(n){var t=(Number(n)>>>0).toString(16);while(t.length<8){t="0"+t}return t}).join("").slice(0,32).toUpperCase()}function e(){return r(t())}return{createHex32:e}});
+//# sourceMappingURL=ClientKeyGenerator.js.map

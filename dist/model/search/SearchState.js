@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";return{applyDefaults:function(e){if(!e.getProperty("/search")||typeof e.getProperty("/search")!=="object"){e.setProperty("/search",{})}if(!e.getProperty("/search/checksFailSegment")){e.setProperty("/search/checksFailSegment","ALL")}if(!e.getProperty("/search/barriersFailSegment")){e.setProperty("/search/barriersFailSegment","ALL")}if(!e.getProperty("/search/modeSwitch")){e.setProperty("/search/modeSwitch",e.getProperty("/searchMode")||"EXACT")}}}});
+//# sourceMappingURL=SearchState.js.map

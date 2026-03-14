@@ -1,0 +1,1 @@
+{"version":3,"file":"Analytics.controller.js","names":["sap","ui","define","BaseController","AnalyticsControllerBehavior","extend","Object","assign"],"sources":["Analytics-dbg.controller.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,CACV,0DACA,iFACD,SAAUC,EAAgBC,GACzB,aAEA,OAAOD,EAAeE,OAAO,oDAAqDC,OAAOC,OAAO,CAAC,EAAGH,GACxG","ignoreList":[]}

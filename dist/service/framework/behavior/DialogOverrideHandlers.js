@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"],function(r){"use strict";var e="dialog";function i(){return true}function n(i,n){return r.registerOverride(e,i,n)}function t(i){return r.unregisterOverride(e,i)}function u(){return r.clearOverrides(e)}return{ensureRegistered:i,register:n,unregister:t,clear:u}});
+//# sourceMappingURL=DialogOverrideHandlers.js.map

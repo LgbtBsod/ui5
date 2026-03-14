@@ -1,0 +1,1 @@
+{"version":3,"file":"DetailActionConstants.js","names":["sap","ui","define","DETAIL_NARROW_VIEWPORT_REM","DETAIL_FIXED_PIN_MIN_SPLIT_REM","STATE_PATHS","SAVE_IN_FLIGHT","VALIDATION_SUMMARY"],"sources":["DetailActionConstants-dbg.js"],"mappings":"AAAAA,IAAIC,GAAGC,OAAO,GAAI,WACd,aAEA,MAAO,CACHC,2BAA4B,GAC5BC,+BAAgC,GAChCC,YAAa,CACTC,eAAgB,gBAChBC,mBAAoB,sBAGhC","ignoreList":[]}

@@ -1,0 +1,2 @@
+sap.ui.define([],function(){"use strict";function e(e){if(!e||typeof e.refreshSecurityToken!=="function"){return Promise.resolve(false)}return new Promise(function(r){e.refreshSecurityToken(function(){r(true)},function(){r(false)},true)})}return{refresh:e}});
+//# sourceMappingURL=SecurityTokenRefresh.js.map

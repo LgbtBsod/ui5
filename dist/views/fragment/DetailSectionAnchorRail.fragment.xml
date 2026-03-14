@@ -1,0 +1,12 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <HBox class="detailSectionAnchorRail" renderType="Bare" wrap="Wrap" alignItems="Center">
+        <customData>
+            <core:CustomData key="role" value="navigation" writeToDom="true"/>
+            <core:CustomData key="aria-label" value="{i18n>sectionNavAriaLabel}" writeToDom="true"/>
+        </customData>
+        <Button text="{i18n>detailAnchorOverview}" icon="sap-icon://overview-chart" type="Transparent" class="detailSectionAnchorBtn chkRipple" tooltip="{i18n>detailAnchorOverview}" press=".onJumpToDetailSection"><customData><core:CustomData key="targetSection" value="ssParticipants"/></customData></Button>
+        <Button text="{i18n>detailAnchorChecks}" icon="sap-icon://inspection" type="Transparent" class="detailSectionAnchorBtn chkRipple" tooltip="{i18n>detailAnchorChecks}" press=".onJumpToDetailSection"><customData><core:CustomData key="targetSection" value="ssChecks"/></customData></Button>
+        <Button text="{i18n>detailAnchorBarriers}" icon="sap-icon://warning2" type="Transparent" class="detailSectionAnchorBtn chkRipple" tooltip="{i18n>detailAnchorBarriers}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}" press=".onJumpToDetailSection"><customData><core:CustomData key="targetSection" value="ssBarriers"/></customData></Button>
+        <Button text="{i18n>detailAnchorAttachments}" icon="sap-icon://attachment" type="Transparent" class="detailSectionAnchorBtn chkRipple" tooltip="{i18n>detailAnchorAttachments}" press=".onJumpToDetailSection"><customData><core:CustomData key="targetSection" value="ssAttachments"/></customData></Button>
+    </HBox>
+</core:FragmentDefinition>

@@ -6,6 +6,10 @@ Purpose: capture the backend work that is still required for productive SAP roll
 - code-level work that can safely be implemented in repo-backed ABAP/Python assets
 - system-level work that cannot be completed without a real SAP landscape
 
+Companion execution artifacts:
+- `backend/sap_backend/EVIDENCE_ACCEPTANCE_MATRIX.md`
+- `backend/sap_backend/SYSTEM_PROOF_REGISTER_TEMPLATE.md`
+
 ## Already Implemented In Repo
 
 ### Python mock contour hardening

@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimeConstants","PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"],function(e,r){"use strict";var t=false;function i(){return{maxAttempts:3,retryDelayMs:220}}var n={};n[e.OP_ANALYTICS_EDIT_RESTORE]=i;function s(){if(t){return}Object.keys(n).forEach(function(t){r.registerDefault(e.SCOPE,t,n[t])});t=true}return{handlers:n,ensureRegistered:s}});
+//# sourceMappingURL=DetailRuntimeDefaultHandlers.js.map

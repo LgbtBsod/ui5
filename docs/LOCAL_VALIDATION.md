@@ -36,61 +36,55 @@ powershell -ExecutionPolicy Bypass -File scripts/stop-local-env.ps1
 
 ## Automated Checks
 
-Architecture gate:
+Install the frontend toolchain:
 
 ```powershell
-node scripts/architecture-gate.js --json
+npm install
 ```
 
-Framework alias gate:
+Set the bootstrap source for local development:
 
 ```powershell
-node scripts/framework-alias-gate.js --json
+powershell -ExecutionPolicy Bypass -File scripts/set-ui5-bootstrap.ps1 -Mode cdn
 ```
 
-Framework token drift gate:
+Build the UI5 artifact:
 
 ```powershell
-node scripts/framework-token-drift-gate.js --json
+npm run build
 ```
 
-Feature token drift gate:
+Run the unit-test entry point:
 
 ```powershell
-node scripts/feature-token-drift-gate.js --json
+npm run test:unit
 ```
 
-Duplicate responsibility gate:
+Run the OPA smoke entry point:
 
 ```powershell
-node scripts/duplicate-responsibility-gate.js --json
+npm run test:opa
 ```
 
-Forbidden literals gate:
+Run the repo-side release readiness gate:
 
 ```powershell
-node scripts/forbidden-literals-gate.js --json
+npm run gate:release
 ```
 
-Gateway-only readiness gate:
+Run the local launch smoke once the environment is up:
 
 ```powershell
-node scripts/sap-gateway-only-gate.js --json
+npm run smoke:local
 ```
 
-Enterprise readiness gate:
-
-```powershell
-node scripts/enterprise-readiness-gate.js scripts/enterprise-readiness-thresholds.json --json
-```
-
-Python backend tests:
+Run Python backend tests:
 
 ```powershell
 python -m pytest backend/mock_gateway/tests -q
 ```
 
-Gateway live smoke runner:
+Run the live Gateway smoke helper when validating against a real SAP system:
 
 ```powershell
 node scripts/gateway-live-smoke-runner.js
@@ -140,10 +134,17 @@ node scripts/gateway-live-smoke-runner.js
 
 ## Notes
 
-- Do not change the `sap-ui-core.js` source as part of this validation pass.
+- The current local contour intentionally uses `https://ui5.sap.com/1.71.70/resources/sap-ui-core.js` for the app and QUnit/OPA pages.
+- The default local launch path is now:
+  - `powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1`
+  - `npm run smoke:local`
+- Before deployment to the real SAP Gateway or FLP runtime, switch bootstrap back to the system runtime and remove the public CDN dependency.
+- The supported switch procedure is documented in [UI5_BOOTSTRAP_SWITCH.md](/C:/Users/lgbtb/Desktop/ui5/docs/runtime/UI5_BOOTSTRAP_SWITCH.md).
+- The controlled QA/dev dark-mode override is documented in [DARK_THEME_OVERRIDE.md](/C:/Users/lgbtb/Desktop/ui5/docs/runtime/DARK_THEME_OVERRIDE.md).
 - The target productive service root remains `/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/`.
 - Manual validation should prioritize `search`, `detail`, `EDIT_LOCKED`, export, analytics drilldown, and `filterLocationKey` continuity.
 - Readiness telemetry is written under `state>/readiness/metrics/stages/*` for `shellReady`, `searchRouteReady`, `searchInteractionReady`, `detailReady`, `analyticsReady`, and `deferredDialogReady`.
 - The sanctioned mutable payload contract is now unified and delta-first:
   - `root/checks/barriers/participants/attachments/client_version`
   - mutable rows must carry `edit_mode = C|U|D`
+- Legacy architecture and QA gates are retained as supplementary diagnostics only. They are not the release source of truth for SAP sale-readiness.

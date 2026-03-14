@@ -1,0 +1,2 @@
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy","PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"],function(e,t){"use strict";var n=t.SEARCH;function r(t,r){e.buildFilter(t,{intent:n.CHECKS_SEGMENT,key:r.getParameter("key")})}function i(t,r){e.buildFilter(t,{intent:n.BARRIERS_SEGMENT,key:r.getParameter("key")})}return{onChecksFailSegmentChange:r,onBarriersFailSegmentChange:i}});
+//# sourceMappingURL=SearchFilterSegmentBehavior.js.map

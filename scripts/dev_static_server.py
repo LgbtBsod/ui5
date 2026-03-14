@@ -25,7 +25,7 @@ def is_client_disconnect_error(exc: BaseException) -> bool:
     return False
 
 BACKEND_BASE = os.environ.get("UI5_BACKEND_BASE", "http://127.0.0.1:8000")
-UI5_RESOURCES_BASE = os.environ.get("UI5_RESOURCES_BASE", "").rstrip("/")
+UI5_RESOURCES_BASE = os.environ.get("UI5_RESOURCES_BASE", "https://ui5.sap.com/1.71.70").rstrip("/")
 PROXY_PREFIXES = ("/sap/",)
 UI5_PROXY_PREFIXES = ("/resources/", "/test-resources/")
 

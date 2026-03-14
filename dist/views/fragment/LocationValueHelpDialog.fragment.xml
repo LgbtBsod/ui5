@@ -1,0 +1,64 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
+    <Dialog
+        id="locationValueHelpDialog"
+        class="glassDialog valueHelpDialog governedDialog"
+        title="{i18n>locationValueHelpTitle}"
+        contentWidth="40rem"
+        contentHeight="22rem"
+        draggable="true"
+        resizable="true"
+        initialFocus="locationValueHelpSearchField">
+        <VBox class="sapUiMediumMargin dialogContentShell governedDialogContent valueHelpDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare" fitContainer="true">
+            <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/locationVhBusy}">
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
+            </VBox>
+            <SearchField
+                id="locationValueHelpSearchField"
+                width="100%"
+                liveChange=".onLocationValueHelpSearch"
+                search=".onLocationValueHelpSearchSubmit"
+                placeholder="{i18n>locationValueHelpSearchPlaceholder}"
+                class="dialogSearchField"/>
+            <Text
+                text="{path:'view>/locationVhHint', formatter:'.formatI18nByKey'}"
+                visible="{= !!${view>/locationVhHint} }"
+                class="dialogInlineHint"/>
+            <VBox class="valueHelpTreeTableHost" renderType="Bare" fitContainer="true">
+                <layoutData>
+                    <FlexItemData growFactor="1" shrinkFactor="1" baseSize="0%"/>
+                </layoutData>
+                <t:TreeTable
+                    id="locationValueHelpTreeTable"
+                    class="dialogDataTable valueHelpTreeTable"
+                    selectionMode="Single"
+                    selectionBehavior="RowOnly"
+                    enableColumnReordering="false"
+                    visibleRowCountMode="Auto"
+                    minAutoRowCount="6"
+                    rowSelectionChange=".onLocationTreeSelectionChange"
+                    rows="{path:'view>/locationVhTree', parameters:{arrayNames:['children']}}">
+                    <t:columns>
+                        <t:Column width="24rem">
+                            <Label text="{i18n>locationLabel}"/>
+                            <t:template>
+                                <Text text="{view>location_name}" wrapping="false"/>
+                            </t:template>
+                        </t:Column>
+                        <t:Column width="12rem">
+                            <Label text="{i18n>locationIdLabel}"/>
+                            <t:template>
+                                <Text text="{view>location_id}" wrapping="false"/>
+                            </t:template>
+                        </t:Column>
+                    </t:columns>
+                </t:TreeTable>
+            </VBox>
+        </VBox>
+        <beginButton>
+            <Button text="{i18n>okButton}" icon="sap-icon://accept" type="Emphasized" press=".onConfirmLocationValueHelp" visible="{view>/locationVhHasSelection}"/>
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>closeButton}" icon="sap-icon://nav-back" press=".onCloseLocationValueHelp"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
