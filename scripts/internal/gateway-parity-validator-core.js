@@ -28,7 +28,7 @@ function readManifestSafe(fails, ruleId) {
 }
 
 function getRuntimeFiles() {
-  const files = collectFilesByExtensions(ROOT, ['controller', 'service', 'infra', 'util', 'view'], ['.js', '.json', '.xml']);
+  const files = collectFilesByExtensions(ROOT, ['controller', 'service', 'infra', 'util', 'views'], ['.js', '.json', '.xml']);
 
   for (const file of ['Component.js', 'manifest.json']) {
     if (fileExists(ROOT, file)) {
@@ -37,6 +37,48 @@ function getRuntimeFiles() {
   }
 
   return [...new Set(files)].sort();
+}
+
+function fragmentNameToFile(fragmentName) {
+  if (!fragmentName) return '';
+  return fragmentName.replace(/^PRODUCTION_CONTROL_CHECKLIST\./, '').replace(/\./g, '/') + '.fragment.xml';
+}
+
+function collectCompositeXml(entryFile, visited) {
+  const seen = visited || new Set();
+  if (!entryFile || seen.has(entryFile) || !fileExists(ROOT, entryFile)) {
+    return [];
+  }
+  seen.add(entryFile);
+  const xml = readText(ROOT, entryFile);
+  const out = [{ file: entryFile, xml }];
+  [...xml.matchAll(/fragmentName\s*=\s*"([^"]+)"/g)].forEach((match) => {
+    collectCompositeXml(fragmentNameToFile(match[1]), seen).forEach((entry) => out.push(entry));
+  });
+  return out;
+}
+
+function collectControllerFiles(entryFile) {
+  const visited = new Set();
+  const queue = [entryFile];
+  while (queue.length) {
+    const file = queue.shift();
+    if (!file || visited.has(file) || !fileExists(ROOT, file)) {
+      continue;
+    }
+    visited.add(file);
+    const src = readText(ROOT, file);
+    [...src.matchAll(/sap\.ui\.define\s*\(\s*\[([\s\S]*?)\]/g)].forEach((block) => {
+      [...block[1].matchAll(/["']([^"']+)["']/g)].forEach((depMatch) => {
+        const dep = depMatch[1];
+        if (!dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/controller/')) {
+          return;
+        }
+        queue.push(dep.replace(/^PRODUCTION_CONTROL_CHECKLIST\//, '') + '.js');
+      });
+    });
+  }
+  return [...visited];
 }
 
 function addIssue(target, rule, file, hint, line) {
@@ -147,23 +189,23 @@ function checkODataV2AndUseBatch(fails) {
 }
 
 function findSearchViewFile() {
-  const preferred = 'view/Search.view.xml';
+  const preferred = 'views/Search.view.xml';
   if (fileExists(ROOT, preferred)) {
     return preferred;
   }
 
-  const viewFiles = collectFilesByExtensions(ROOT, ['view'], ['.xml']);
-  return viewFiles.find((file) => /searchSmartTable/.test(readText(ROOT, file))) || null;
+  const viewFiles = collectFilesByExtensions(ROOT, ['views'], ['.xml']);
+  return viewFiles.find((file) => /searchSmartTable|searchSmartFilterBar/.test(readText(ROOT, file))) || null;
 }
 
 function checkSearchViewContract(fails) {
   const viewFile = findSearchViewFile();
   if (!viewFile) {
-    addIssue(fails, 'F', 'view/', 'Search view not found (expected SmartTable contract)');
+    addIssue(fails, 'F', 'views/', 'Search view not found (expected SmartTable contract)');
     return;
   }
 
-  const source = readText(ROOT, viewFile);
+  const source = collectCompositeXml(viewFile).map((entry) => entry.xml).join('\n');
   const requiredPatterns = [
     { regex: /id="searchSmartFilterBar"/, hint: 'Missing id="searchSmartFilterBar"' },
     { regex: /id="searchSmartTable"/, hint: 'Missing id="searchSmartTable"' },
@@ -180,10 +222,16 @@ function checkSearchViewContract(fails) {
 }
 
 function checkSegmentFiltersContract(fails) {
-  const files = [
-    'controller/Search.controller.js',
-    'util/search/SearchFilterBuilder.js'
-  ].filter((file) => fileExists(ROOT, file));
+  const files = collectControllerFiles('controller/Search.controller.js');
+  [
+    'service/features/search/contracts/SearchFilterBuilder.js',
+    'views/fragment/SearchFilterWorkbench.fragment.xml',
+    'localService/metadata.xml'
+  ].forEach((file) => {
+    if (fileExists(ROOT, file)) {
+      files.push(file);
+    }
+  });
 
   if (!files.length) {
     addIssue(fails, 'G', 'controller/Search.controller.js', 'Search contract files not found');
@@ -206,12 +254,20 @@ function checkSegmentFiltersContract(fails) {
 }
 
 function checkCreateModeContract(fails, warnings) {
-  if (!fileExists(ROOT, COMPONENT_PATH)) {
-    addIssue(warnings, 'H', COMPONENT_PATH, 'Component.js not found to validate __create contract');
+  const contractFiles = [
+    COMPONENT_PATH,
+    'service/shared/CreateSentinel.js',
+    'service/domain/detail/usecases/OpenDetailUseCase.js',
+    'service/domain/detail/usecases/ResolveDetailRouteUseCase.js',
+    'service/features/detail/runtime/DetailMatchedRuntime.js'
+  ].filter((file) => fileExists(ROOT, file));
+
+  if (!contractFiles.length) {
+    addIssue(warnings, 'H', COMPONENT_PATH, 'Create-mode contract files not found');
     return;
   }
 
-  const source = readText(ROOT, COMPONENT_PATH);
+  const source = contractFiles.map((file) => readText(ROOT, file)).join('\n');
   const hasCreate = source.includes('__create');
   const hasReplaceHashWithCreate = /__create[\s\S]{0,400}replaceHash|replaceHash[\s\S]{0,400}__create/i.test(source);
 
@@ -219,7 +275,10 @@ function checkCreateModeContract(fails, warnings) {
     addIssue(fails, 'H', COMPONENT_PATH, 'Forbidden __create hash reset/replaceHash logic detected');
   }
 
-  const hasSkipRead = /__create[\s\S]{0,300}(skip|read|no\s*read)|selectedId\s*={2,3}\s*["']__create["']/i.test(source);
+  const hasSkipRead = /__create[\s\S]{0,300}(skip|read|no\s*read)|selectedId\s*={2,3}\s*["']__create["']/i.test(source)
+    || /CreateSentinel\.isCreateId\s*\(/.test(source)
+    || /rootId:\s*CreateSentinel\.VALUE/.test(source)
+    || /Effects\.navigate\([^\n]+CreateSentinel\.toRouteId\(\)/.test(source);
   if (!hasSkipRead) {
     addIssue(warnings, 'H', COMPONENT_PATH, 'No explicit __create skip-read rule detected');
   }

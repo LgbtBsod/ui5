@@ -11,6 +11,6 @@
                 text="{path:'state>/isDirty', formatter:'.formatDraftStateText'}"
                 state="{path:'state>/isDirty', formatter:'.formatDraftStateState'}"/>
         </HBox>
-        <Text text="{i18n>detailCreateDraftText}" class="detailCreateModeText"/>
+        <Text text="{i18n>detailCreateDraftShortText}" class="detailCreateModeText"/>
     </VBox>
 </core:FragmentDefinition>

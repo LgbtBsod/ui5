@@ -12,7 +12,7 @@ const LAYER_NAMES = {
   util: 'Util',
   other: 'Other'
 };
-const PREFIX_LAYER_TABLE = 'controller/:controller,facades/:facade,service/backend/:backend,service/domain/:usecase,service/framework/:util,service/:usecase,infra/:infra,util/:util,model/:util';
+const PREFIX_LAYER_TABLE = 'controller/:controller,facades/:facade,contracts/:util,service/backend/:backend,service/domain/:usecase,service/framework/:util,service/contracts/:util,service/shared/:util,service/features/:util,service/:usecase,infra/:infra,util/:util,model/:util';
 const PREFIX_ORDER = PREFIX_LAYER_TABLE.split(',').map((entry) => entry.split(':')[0]);
 const LAYER_BY_PREFIX = PREFIX_LAYER_TABLE.split(',').reduce((acc, entry) => {
   const parts = entry.split(':');

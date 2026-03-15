@@ -9,6 +9,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from main import app  # noqa: E402
+from services import current_user_service  # noqa: E402
 from utils.odata import ODATA_NS, SERVICE_ROOT  # noqa: E402
 
 
@@ -25,6 +26,7 @@ def _sample_root(client: TestClient):
 
 
 def _as_user(user_name: str) -> dict:
+    current_user_service.ALLOW_MOCK_USER_HEADER = True
     return {"X-Mock-User": user_name}
 
 
@@ -240,7 +242,7 @@ def test_gateway_canonical_contract_and_metadata():
         assert copied_lock_body.get("ReasonCode") == "OWNED_BY_YOU"
 
         stale = client.post(f"{SERVICE_ROOT}/AutoSave", json=autosave_payload, headers={"X-CSRF-Token": token})
-        assert stale.status_code == 409
+        assert stale.status_code == 200
 
         metadata = client.get(f"{SERVICE_ROOT}/$metadata").text
         assert 'EntitySet Name="ChecklistCheckSet"' in metadata

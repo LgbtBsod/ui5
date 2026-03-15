@@ -94,7 +94,8 @@ function detectRuntimeSettingsLoad(violations) {
 
   const componentSource = [
     readText(ROOT, 'Component.js'),
-    readText(ROOT, 'service/framework/ComponentInitRuntime.js')
+    readText(ROOT, 'service/framework/ComponentInitRuntime.js'),
+    readText(ROOT, 'service/framework/ComponentRuntimeSettingsRuntime.js')
   ].join('\n');
   if (!/SettingsManager\.load\(/.test(componentSource)) {
     pushPipeViolation(violations, 'Component.js', null, 'Component startup does not call SettingsManager.load(...)');
@@ -102,15 +103,16 @@ function detectRuntimeSettingsLoad(violations) {
 }
 
 function detectSanitizationBeforeApply(violations) {
-  const component = readText(ROOT, 'Component.js');
-  const applyPos = component.indexOf('_applyFrontendRuntimeConfig: function');
+  const runtimeFile = 'service/framework/ComponentAppRuntime.js';
+  const component = readText(ROOT, runtimeFile);
+  const applyPos = component.indexOf('function applyFrontendRuntimeConfig');
   if (applyPos < 0) {
-    pushPipeViolation(violations, 'Component.js', null, '_applyFrontendRuntimeConfig was not found');
+    pushPipeViolation(violations, runtimeFile, null, 'applyFrontendRuntimeConfig was not found');
     return;
   }
   const slice = component.slice(applyPos, applyPos + 3500);
   if (!/RuntimeTimerSanitizer\.sanitizeTimers\(/.test(slice)) {
-    pushPipeViolation(violations, 'Component.js', lineFromIndex(component, applyPos), 'sanitizeTimers missing before applying timers');
+    pushPipeViolation(violations, runtimeFile, lineFromIndex(component, applyPos), 'sanitizeTimers missing before applying timers');
   }
 }
 

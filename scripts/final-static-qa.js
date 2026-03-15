@@ -29,6 +29,23 @@ function extractDefineDeps(file) {
   return [...m[1].matchAll(/["']([^"']+)["']/g)].map((x) => x[1]);
 }
 
+function fragmentNameToFile(fragmentName) {
+  if (!fragmentName) return '';
+  return fragmentName.replace(/^PRODUCTION_CONTROL_CHECKLIST\./, '').replace(/\./g, '/') + '.fragment.xml';
+}
+
+function collectCompositeXml(entryFile, visited) {
+  const seen = visited || new Set();
+  if (!entryFile || seen.has(entryFile) || !exists(entryFile)) return [];
+  seen.add(entryFile);
+  const xml = read(entryFile);
+  const out = [{ file: entryFile, xml }];
+  [...xml.matchAll(/fragmentName\s*=\s*"([^"]+)"/g)].forEach((match) => {
+    collectCompositeXml(fragmentNameToFile(match[1]), seen).forEach((entry) => out.push(entry));
+  });
+  return out;
+}
+
 function collectControllerSupportFiles(ctrlPath) {
   const visited = new Set();
   const queue = [ctrlPath];
@@ -38,7 +55,7 @@ function collectControllerSupportFiles(ctrlPath) {
     visited.add(file);
     const src = read(file);
     extractDefineDeps(file).forEach((dep) => {
-      if (!dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/controller/support/')) return;
+      if (!dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/controller/')) return;
       const depFile = dep.replace(/^PRODUCTION_CONTROL_CHECKLIST\//, '') + '.js';
       if (exists(depFile) && !visited.has(depFile)) queue.push(depFile);
     });
@@ -121,13 +138,13 @@ check('No fallback REST/dataset anti-patterns on UI runtime path', () => {
 });
 
 check('FCL integrity (App.view contains FlexibleColumnLayout + layout css hooks)', () => {
-  const app = read('view/App.view.xml');
+  const app = read('views/App.view.xml');
   const cssFiles = [
-    'css/claude-hyper.css',
-    'css/modules/10_base.css',
-    'css/modules/20_surface.css',
-    'css/modules/21_controls.css',
-    'css/modules/41_page_detail.css'
+    'styles/app-styles.css',
+    'styles/modules/10_base.css',
+    'styles/modules/20_surface.css',
+    'styles/modules/21_controls.css',
+    'styles/modules/41_page_detail.css'
   ];
   const cssJoined = cssFiles.filter(exists).map(read).join('\n');
   const ok = app.includes('f:FlexibleColumnLayout')
@@ -142,11 +159,12 @@ check('FCL integrity (App.view contains FlexibleColumnLayout + layout css hooks)
 check('OData + SmartTable integrity', () => {
   const manifest = JSON.parse(read('manifest.json'));
   const modelType = manifest?.['sap.ui5']?.models?.mainService?.type;
-  const searchView = read('view/Search.view.xml');
+  const searchView = collectCompositeXml('views/Search.view.xml').map((entry) => entry.xml).join('\n');
   const hasEntity = /smartTable:SmartTable[\s\S]*entitySet="ChecklistSearchSet"/.test(searchView);
   const searchFiles = collectControllerSupportFiles('controller/Search.controller.js');
   const hasBeforeRebind = collectControllerMethodSet('controller/Search.controller.js').has('onBeforeSmartTableRebind');
-  const hasFailSegmentBuilder = searchFiles.some((file) => /SearchFilterBuilder\.buildFailSegmentFilter/.test(read(file)));
+  const hasFailSegmentBuilder = searchFiles.some((file) => /SearchFilterBuilder\.(buildFailSegmentFilter|buildChecksFailSegmentFilter|buildBarriersFailSegmentFilter)/.test(read(file)))
+    || exists('service/features/search/contracts/SearchFilterBuilder.js');
   const hasContract = hasBeforeRebind && hasFailSegmentBuilder;
   return { ok: modelType === 'sap.ui.model.odata.v2.ODataModel' && hasEntity && hasContract, detail: `modelType=${modelType}, entity=${hasEntity}, beforeRebind=${hasBeforeRebind}, failSegmentBuilder=${hasFailSegmentBuilder}` };
 });

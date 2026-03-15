@@ -17,6 +17,25 @@ function hasAttrContaining(block, name, value) {
   return new RegExp(`${name}="[^"]*${value}[^"]*"`).test(block);
 }
 
+function fragmentNameToFile(fragmentName) {
+  if (!fragmentName) return '';
+  return fragmentName.replace(/^PRODUCTION_CONTROL_CHECKLIST\./, '').replace(/\./g, '/') + '.fragment.xml';
+}
+
+function collectCompositeXml(entryFile, visited) {
+  const seen = visited || new Set();
+  if (!entryFile || seen.has(entryFile) || !fileExists(ROOT, entryFile)) {
+    return [];
+  }
+  seen.add(entryFile);
+  const xml = readText(ROOT, entryFile);
+  const out = [{ file: entryFile, xml }];
+  [...xml.matchAll(/fragmentName\s*=\s*"([^"]+)"/g)].forEach((match) => {
+    collectCompositeXml(fragmentNameToFile(match[1]), seen).forEach((entry) => out.push(entry));
+  });
+  return out;
+}
+
 function collectControllerMethodSet() {
   const methods = new Set();
   const visited = new Set();
@@ -29,7 +48,7 @@ function collectControllerMethodSet() {
     const src = readText(ROOT, file);
     [...src.matchAll(/([A-Za-z0-9_]+)\s*:\s*function\s*\(/g)].forEach((m) => methods.add(m[1]));
     extractUi5Dependencies(src).forEach(({ dep }) => {
-      if (!dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/controller/support/')) return;
+      if (!dep.startsWith('PRODUCTION_CONTROL_CHECKLIST/controller/')) return;
       const depFile = dep.replace(/^PRODUCTION_CONTROL_CHECKLIST\//, '') + '.js';
       if (!visited.has(depFile)) queue.push(depFile);
     });
@@ -41,7 +60,7 @@ function main() {
   const violations = [];
   const manifest = JSON.parse(readText(ROOT, 'manifest.json'));
   const sapUi5 = (manifest && manifest['sap.ui5']) || {};
-  const searchView = readText(ROOT, 'view/Search.view.xml');
+  const searchView = collectCompositeXml('views/Search.view.xml').map((entry) => entry.xml).join('\n');
   const searchController = readText(ROOT, 'controller/Search.controller.js');
 
   const libs = (((sapUi5.dependencies || {}).libs) || {});
@@ -120,7 +139,7 @@ function main() {
   exitWithMappedIssues(
     'smart-odata-contract-gate',
     violations,
-    function (line) { return { file: 'view/Search.view.xml', message: String(line) }; },
+    function (line) { return { file: 'views/Search.view.xml', message: String(line) }; },
     { checks: violations.length },
     { asJson: process.argv.includes('--json') }
   );

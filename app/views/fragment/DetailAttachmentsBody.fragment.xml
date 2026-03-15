@@ -1,14 +1,18 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:unified="sap.ui.unified">
     <VBox id="attachmentDropZone" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailAttachmentDropZone">
-        <HBox alignItems="Center" class="detailAttachmentDropZoneTop">
-            <core:Icon src="sap-icon://upload" class="detailAttachmentDropZoneIcon"/>
-            <VBox class="sapUiTinyMarginBegin">
-                <Title level="H6" text="{i18n>attachmentDropZoneTitle}"/>
-                <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText"/>
-            </VBox>
-        </HBox>
         <VBox class="detailAttachmentDropZoneActions">
-            <unified:FileUploader id="attachmentUploader" buttonOnly="true" sameFilenameAllowed="true" useMultipart="false" buttonText="{i18n>uploadAttachment}" tooltip="{i18n>uploadAttachment}" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${selected>/root/id} }" change=".onAttachmentUploadChange"/>
+            <HBox renderType="Bare" class="detailAttachmentPickerRow">
+                <Title level="H6" text="{i18n>attachmentDropZoneTitle}" class="detailAttachmentPickerTitle"/>
+                <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText detailAttachmentPickerText"/>
+                <Link text="{i18n>uploadAttachment}" press=".onOpenAttachmentPicker" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }" class="detailAttachmentPickerLink"/>
+            </HBox>
+            <HBox renderType="Bare" class="detailAttachmentMetaRow" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
+                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="detailAttachmentMetaLabel"/>
+                <Select id="attachmentCategorySelect" width="12rem" selectedKey="{view>/attachmentCategoryKey}" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }" items="{ path: 'masterData>/attachmentTypes', templateShareable: true }" class="detailAttachmentCategorySelect">
+                    <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                </Select>
+            </HBox>
+            <unified:FileUploader id="attachmentUploader" buttonOnly="true" sameFilenameAllowed="true" useMultipart="false" buttonText="{i18n>uploadAttachment}" tooltip="{i18n>uploadAttachment}" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }" change=".onAttachmentUploadChange" class="detailAttachmentUploaderHidden"/>
         </VBox>
         <Text text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}" class="modeHintText detailAttachmentDropZoneMeta"/>
     </VBox>

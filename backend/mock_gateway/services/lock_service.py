@@ -1,4 +1,5 @@
 from datetime import timezone
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from config import LOCK_KILLED_RETENTION, LOCK_TTL
@@ -15,6 +16,34 @@ def _as_utc(dt):
 
 
 class LockService:
+    @staticmethod
+    def _lock_payload(success: bool, action: str, owner: str, owner_session: str, lock_expires, is_killed_flag: bool = False) -> dict:
+        return {
+            "success": bool(success),
+            "action": str(action or "").strip(),
+            "owner": str(owner or "").strip(),
+            "owner_session": str(owner_session or "").strip(),
+            "lock_expires": lock_expires,
+            "is_killed_flag": bool(is_killed_flag),
+        }
+
+    @staticmethod
+    def _create_active_lock(db: Session, object_uuid: str, session_guid: str, uname: str, current_time) -> LockEntry:
+        lock = LockEntry(
+            pcct_uuid=object_uuid,
+            user_id=uname,
+            session_guid=session_guid,
+            locked_at=current_time,
+            last_heartbeat=current_time,
+            expires_at=current_time + LOCK_TTL,
+        )
+        db.add(lock)
+        db.flush()
+        db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="ACQUIRED"))
+        db.commit()
+        db.refresh(lock)
+        return lock
+
     @staticmethod
     def _active_lock(db: Session, object_uuid: str) -> LockEntry | None:
         current_time = now_utc()
@@ -42,39 +71,21 @@ class LockService:
         existing = LockService._active_lock(db, object_uuid)
 
         if not existing:
-            lock = LockEntry(
-                pcct_uuid=object_uuid,
-                user_id=uname,
-                session_guid=session_guid,
-                locked_at=current_time,
-                last_heartbeat=current_time,
-                expires_at=current_time + LOCK_TTL,
-            )
-            db.add(lock)
-            db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="ACQUIRED"))
-            db.commit()
-            return {
-                "success": True,
-                "action": "ACQUIRED",
-                "owner": uname,
-                "owner_session": session_guid,
-                "lock_expires": lock.expires_at,
-                "is_killed_flag": False,
-            }
+            try:
+                lock = LockService._create_active_lock(db, object_uuid, session_guid, uname, current_time)
+                return LockService._lock_payload(True, "ACQUIRED", uname, session_guid, lock.expires_at, False)
+            except IntegrityError:
+                db.rollback()
+                existing = LockService._active_lock(db, object_uuid)
+                if not existing:
+                    raise
 
         if existing.session_guid == session_guid:
             existing.last_heartbeat = current_time
             existing.expires_at = current_time + LOCK_TTL
             db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="REFRESHED"))
             db.commit()
-            return {
-                "success": True,
-                "action": "REFRESHED",
-                "owner": existing.user_id,
-                "owner_session": existing.session_guid,
-                "lock_expires": existing.expires_at,
-                "is_killed_flag": False,
-            }
+            return LockService._lock_payload(True, "REFRESHED", existing.user_id, existing.session_guid, existing.expires_at, False)
 
         if existing.user_id == uname and steal_from and steal_from == existing.session_guid:
             existing.is_killed = True
@@ -91,23 +102,9 @@ class LockService:
             db.add(new_lock)
             db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="STEAL_OWN_SESSION"))
             db.commit()
-            return {
-                "success": True,
-                "action": "STEAL_OWN_SESSION",
-                "owner": uname,
-                "owner_session": session_guid,
-                "lock_expires": new_lock.expires_at,
-                "is_killed_flag": True,
-            }
+            return LockService._lock_payload(True, "STEAL_OWN_SESSION", uname, session_guid, new_lock.expires_at, True)
 
-        return {
-            "success": False,
-            "action": "LOCKED",
-            "owner": existing.user_id,
-            "owner_session": existing.session_guid,
-            "lock_expires": existing.expires_at,
-            "is_killed_flag": False,
-        }
+        return LockService._lock_payload(False, "LOCKED", existing.user_id, existing.session_guid, existing.expires_at, False)
 
     @staticmethod
     def status(db: Session, object_uuid: str, session_guid: str) -> dict:
@@ -199,10 +196,20 @@ class LockService:
         if not lock:
             return {"released": False, "save_status": "N"}
 
+        s_save_status = "N"
+        if try_save and isinstance(payload, dict):
+            try:
+                from services.checklist_service import ChecklistService
+                ChecklistService.save_via_import(db, object_uuid, lock.user_id, payload, is_autosave=False, force=True, session_guid=session_guid)
+                s_save_status = "S"
+            except Exception:
+                db.rollback()
+                s_save_status = "E"
+
         lock.is_killed = True
         db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
         db.commit()
-        return {"released": True, "save_status": "N"}
+        return {"released": True, "save_status": s_save_status}
 
     @staticmethod
     def cleanup(db: Session) -> int:

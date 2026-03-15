@@ -30,3 +30,43 @@
   transform: none;
   box-shadow: none;
 }
+
+.chkApp .detailHeroStatBoard {
+  gap: 0.45rem;
+}
+
+.chkApp .detailHeroStatBoardCompact .uxStatChip {
+  padding: 0.36rem 0.82rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(245, 249, 255, 0.18)),
+    var(--theme-chip-bg);
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 70%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 8px 16px rgba(63, 94, 138, 0.06);
+}
+
+.chkApp .detailHeroStatBoardCompact .uxStatLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.chkApp .detailHeroStatBoardCompact .uxStatValue {
+  font-weight: 600;
+}
+
+.chkApp .detailCreateModeBanner {
+  gap: 0.55rem;
+}
+
+.chkApp .detailCreateModeBannerTop {
+  gap: 0.45rem;
+}
+
+.chkApp .detailCreateModeText {
+  max-width: 52rem;
+  font-size: 0.92rem;
+  opacity: 0.8;
+}

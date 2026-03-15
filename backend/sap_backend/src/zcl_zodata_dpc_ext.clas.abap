@@ -165,6 +165,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD lockacquire_create_entity.
     DATA ls_req    TYPE zstr_pcct_lock_acquire_rq.
     DATA ls_result TYPE zstr_pcct_lock_acquire_rs.
+    DATA lv_now_ts TYPE timestampl.
+    DATA lv_exp_ts TYPE timestampl.
 
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
@@ -187,9 +189,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
         ls_result-owner_session  = ls_req-session_guid.
         ls_result-tab_session_id = ls_req-tab_session_id.
         ls_result-object_uuid    = ls_req-object_uuid.
-        " Lock expiry = now + configured heartbeat window (read from config)
-        ls_result-lock_expires   = cl_abap_context_info=>get_system_date( ) &&
-                                   cl_abap_context_info=>get_system_time( ).
+        GET TIME STAMP FIELD lv_now_ts.
+        lv_exp_ts = cl_abap_tstmp=>add( tstmp = lv_now_ts secs = 15 ).
+        ls_result-lock_expires   = lv_exp_ts.
 
         copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
 
@@ -371,8 +373,24 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
           lt_mod    TYPE /bobf/t_frw_modification,
           lt_failed TYPE /bobf/t_frw_key,
           lt_msg    TYPE /bobf/t_frw_message_k.
+    DATA ls_lock_hb TYPE zstr_pcct_lock_heartbeat_rs.
 
     validate_save_request( is_request ).
+
+    CALL FUNCTION 'Z_PCCT_LOCK_HEARTBEAT'
+      EXPORTING
+        iv_object_uuid  = is_request-root-pcct_uuid
+        iv_session_guid = is_request-session_guid
+      IMPORTING
+        es_result       = ls_lock_hb
+      EXCEPTIONS
+        heartbeat_failed = 1
+        lock_not_held    = 2
+        OTHERS           = 3.
+
+    IF sy-subrc <> 0.
+      raise_busi_exception( 'SaveChanges: active lock for SessionGuid is required.' ).
+    ENDIF.
 
     " ── Build change list from deep payload ─────────────────────
     " Mapper resolves all node configs, allocates internal refs,
@@ -383,7 +401,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       " Nothing to save (empty delta payload) — return current state
       rs_response-pcct_uuid      = is_request-root-pcct_uuid.
       rs_response-changed_on     = sy-datum && sy-uzeit.
-      rs_response-version_number = is_request-client_version.
+      rs_response-version_number = 0.
       rs_response-no_changes     = abap_true.
       RETURN.
     ENDIF.
@@ -410,7 +428,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     " ── Build response ──────────────────────────────────────────
     rs_response-pcct_uuid      = is_request-root-pcct_uuid.
     rs_response-changed_on     = sy-datum && sy-uzeit.
-    rs_response-version_number = is_request-client_version + 1.
+    rs_response-version_number = 0.
     rs_response-is_autosave    = iv_is_autosave.
     rs_response-no_changes     = abap_false.
 
@@ -426,6 +444,10 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD validate_save_request.
     IF is_request-root-pcct_uuid IS INITIAL.
       raise_busi_exception( 'SaveChanges: root.pcct_uuid is required.' ).
+    ENDIF.
+
+    IF is_request-session_guid IS INITIAL.
+      raise_busi_exception( 'SaveChanges: SessionGuid is required.' ).
     ENDIF.
 
     IF is_request-root-edit_mode IS NOT INITIAL

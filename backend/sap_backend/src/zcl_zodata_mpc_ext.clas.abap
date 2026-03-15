@@ -52,7 +52,8 @@ CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
     "   barriers : ZTAB_PCCT_BARRIER_DELTA(table of barrier items)
     "   participants : ZTAB_PCCT_PART_DELTA  (row delta with EDIT_MODE)
     "   attachments  : ZTAB_PCCT_ATTACH_DELTA(row delta with EDIT_MODE)
-    "   client_version : INT4 (optimistic concurrency)
+    "   session_guid   : active frontend edit session identifier
+    "   client_version : optional client echo field, not used as save gate
 
     model->create_complex_type(
       iv_complex_type_name   = 'SaveChangesRequest'

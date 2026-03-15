@@ -239,7 +239,7 @@ class ChecklistService:
 
 
     @staticmethod
-    def save_via_import(db: Session, root_id: str, user_id: str, payload: dict, is_autosave: bool = False, force: bool = False, request_guid: str | None = None):
+    def save_via_import(db: Session, root_id: str, user_id: str, payload: dict, is_autosave: bool = False, force: bool = False, request_guid: str | None = None, session_guid: str | None = None):
         operation = "AUTOSAVE" if is_autosave else "SAVE"
         if request_guid:
             existing = db.query(SaveRequestLedger).filter(
@@ -251,10 +251,13 @@ class ChecklistService:
             if existing:
                 try:
                     return json.loads(existing.response_payload)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    raise ValueError("REQUEST_LEDGER_CORRUPT") from exc
 
-        LockService.validate_lock(db, root_id, user_id)
+        if session_guid:
+            LockService.validate_session_lock(db, root_id, session_guid)
+        else:
+            LockService.validate_lock(db, root_id, user_id)
 
         root = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,

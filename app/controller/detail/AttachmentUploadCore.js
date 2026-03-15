@@ -1,5 +1,4 @@
 sap.ui.define([
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/AttachmentUploadPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
@@ -10,7 +9,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailRuntimeContracts"
-], function (CreateSentinel, AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
+], function (AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -71,6 +70,29 @@ sap.ui.define([
         }
     }
 
+    function normalizeUploaderFiles(vFiles) {
+        if (Array.isArray(vFiles)) {
+            return vFiles.filter(Boolean);
+        }
+        if (vFiles && typeof vFiles.length === "number") {
+            return Array.prototype.slice.call(vFiles).filter(Boolean);
+        }
+        return [];
+    }
+
+    function readUploaderFiles(oUploader) {
+        if (oUploader && typeof oUploader.getFocusDomRef === "function") {
+            var oFocusDomRef = oUploader.getFocusDomRef();
+            if (oFocusDomRef && oFocusDomRef.files && oFocusDomRef.files.length) {
+                return normalizeUploaderFiles(oFocusDomRef.files);
+            }
+        }
+        if (oUploader && oUploader.FUEl && oUploader.FUEl.files && oUploader.FUEl.files.length) {
+            return normalizeUploaderFiles(oUploader.FUEl.files);
+        }
+        return [];
+    }
+
     function validateAttachmentFile(oController, oFile) {
         var oPolicy = getUploadPolicy(oController);
         var aAllowedMime = Array.isArray(oPolicy.allowedMime) ? oPolicy.allowedMime : [];
@@ -118,6 +140,29 @@ sap.ui.define([
         }
     }
 
+    function openNativeFilePicker(oController) {
+        var oUploader = oController.byId("attachmentUploader");
+        var oDomRef;
+
+        if (!oUploader) {
+            return Promise.resolve(false);
+        }
+        if (!canUploadAttachments(oController)) {
+            oController._showToast("attachmentUploadDisabled");
+            return Promise.resolve(false);
+        }
+        oDomRef = typeof oUploader.getFocusDomRef === "function" ? oUploader.getFocusDomRef() : null;
+        if (oDomRef && typeof oDomRef.click === "function") {
+            oDomRef.click();
+            return Promise.resolve(true);
+        }
+        if (oUploader.FUEl && typeof oUploader.FUEl.click === "function") {
+            oUploader.FUEl.click();
+            return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+    }
+
     function uploadFiles(oController, aFiles, oUploader) {
         var sRootId = oController._currentRootId && oController._currentRootId();
         var aUploadFiles = (Array.isArray(aFiles) ? aFiles : []).filter(Boolean);
@@ -157,11 +202,16 @@ sap.ui.define([
 
     function onUploaderChange(oController, oEvent) {
         var oUploader = (oEvent && oEvent.getSource && oEvent.getSource()) || oController.byId("attachmentUploader");
-        var aFiles = oEvent && oEvent.getParameter && oEvent.getParameter("files");
-        var oFile = (aFiles && aFiles[0]) || (oUploader && oUploader.FUEl && oUploader.FUEl.files && oUploader.FUEl.files[0]);
-        if (oFile) {
-            uploadFiles(oController, [oFile], oUploader);
+        var aFiles = normalizeUploaderFiles(oEvent && oEvent.getParameter && oEvent.getParameter("files"));
+
+        if (!aFiles.length) {
+            aFiles = readUploaderFiles(oUploader);
         }
+        if (aFiles.length) {
+            return uploadFiles(oController, aFiles, oUploader);
+        }
+        clearAttachmentUploader(oUploader);
+        return Promise.resolve();
     }
 
     function formatUploadHint(oController, aExtensions, iMaxSizeMb) {
@@ -201,6 +251,7 @@ sap.ui.define([
     return {
         canUploadAttachments: canUploadAttachments,
         syncUploaderPolicy: syncUploaderPolicy,
+        openNativeFilePicker: openNativeFilePicker,
         uploadFiles: uploadFiles,
         onUploaderChange: onUploaderChange,
         formatUploadHint: formatUploadHintSafe

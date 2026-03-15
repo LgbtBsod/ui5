@@ -39,6 +39,7 @@ sap.ui.define([
     }
 
     return {
+        onOpenAttachmentPicker: function () { return AttachmentUploadCore.openNativeFilePicker(this); },
         onAttachmentUploadChange: function (oEvent) { return AttachmentUploadCore.onUploaderChange(this, oEvent); },
         onDeleteAttachment: function (oEvent) { return DetailAttachmentRuntime.deleteAttachment(this, oEvent, createAttachmentHooks(this)); },
         onToggleAttachmentsSection: function () { return DetailAttachmentRuntime.toggleAttachmentsSection(this, createAttachmentHooks(this)); },

@@ -7,6 +7,25 @@ from models import ChecklistRoot
 from utils.filter_parser import FilterParser
 
 router = APIRouter(tags=["SearchRows"])
+SEARCH_ROWS_MAX_TOP = max(DEFAULT_PAGE_SIZE, 200)
+
+
+def _normalize_top(value: int) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return DEFAULT_PAGE_SIZE
+    if parsed <= 0:
+        return DEFAULT_PAGE_SIZE
+    return min(parsed, SEARCH_ROWS_MAX_TOP)
+
+
+def _normalize_skip(value: int) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return 0
+    return max(parsed, 0)
 
 
 def _map_row(item: ChecklistRoot):
@@ -30,12 +49,14 @@ def search_rows(
     inlinecount: str | None = Query(default=None, alias="$inlinecount"),
     db: Session = Depends(get_db),
 ):
+    top = _normalize_top(top)
+    skip = _normalize_skip(skip)
     query = db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True))
     expression = FilterParser.parse(ChecklistRoot, filter)
     if expression is not None:
         query = query.filter(expression)
 
-    total = query.count()
+    total = query.count() if inlinecount == "allpages" else None
     rows = query.offset(skip).limit(top).all()
 
     payload = {"d": {"results": [_map_row(x) for x in rows]}}

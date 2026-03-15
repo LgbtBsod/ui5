@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Index, String, Text, text
 from sqlalchemy.dialects.sqlite import INTEGER
 from sqlalchemy.orm import relationship
 
@@ -110,6 +110,14 @@ class AttachmentEntry(Base):
 
 class LockEntry(Base):
     __tablename__ = "lock_entry"
+    __table_args__ = (
+        Index(
+            "ux_lock_entry_active_pcct_uuid",
+            "pcct_uuid",
+            unique=True,
+            sqlite_where=text("is_killed = 0")
+        ),
+    )
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     pcct_uuid = Column(String, nullable=False)

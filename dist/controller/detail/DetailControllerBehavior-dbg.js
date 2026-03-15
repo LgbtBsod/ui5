@@ -85,13 +85,13 @@ sap.ui.define([
             validationMissing: {},
             infoCards: DetailInfoCardLayoutRuntime.resolveCards(oController, [
                 { key: INFO_CARD_KEYS.DATETIME, title: fnText(INFO_CARD_TEXT_KEYS.DATETIME, INFO_CARD_TEXT_FALLBACKS.DATETIME), pinned: true },
+                { key: INFO_CARD_KEYS.LOCATION, title: fnText(INFO_CARD_TEXT_KEYS.LOCATION, INFO_CARD_TEXT_FALLBACKS.LOCATION), pinned: true },
+                { key: INFO_CARD_KEYS.EQUIPMENT, title: fnText(INFO_CARD_TEXT_KEYS.EQUIPMENT, INFO_CARD_TEXT_FALLBACKS.EQUIPMENT), pinned: true },
                 { key: INFO_CARD_KEYS.OBSERVER, title: fnText(INFO_CARD_TEXT_KEYS.OBSERVER, INFO_CARD_TEXT_FALLBACKS.OBSERVER), pinned: true },
                 { key: INFO_CARD_KEYS.OBSERVED, title: fnText(INFO_CARD_TEXT_KEYS.OBSERVED, INFO_CARD_TEXT_FALLBACKS.OBSERVED), pinned: true },
-                { key: INFO_CARD_KEYS.EQUIPMENT, title: fnText(INFO_CARD_TEXT_KEYS.EQUIPMENT, INFO_CARD_TEXT_FALLBACKS.EQUIPMENT), pinned: false },
-                { key: INFO_CARD_KEYS.LOCATION, title: fnText(INFO_CARD_TEXT_KEYS.LOCATION, INFO_CARD_TEXT_FALLBACKS.LOCATION), pinned: false },
-                { key: INFO_CARD_KEYS.CRITERIA_NUMBERS, title: fnText(INFO_CARD_TEXT_KEYS.CRITERIA_NUMBERS, INFO_CARD_TEXT_FALLBACKS.CRITERIA_NUMBERS), pinned: false },
+                { key: INFO_CARD_KEYS.PROFESSION, title: fnText(INFO_CARD_TEXT_KEYS.PROFESSION, INFO_CARD_TEXT_FALLBACKS.PROFESSION), pinned: false },
                 { key: INFO_CARD_KEYS.LPC, title: fnText(INFO_CARD_TEXT_KEYS.LPC, INFO_CARD_TEXT_FALLBACKS.LPC), pinned: false },
-                { key: INFO_CARD_KEYS.PROFESSION, title: fnText(INFO_CARD_TEXT_KEYS.PROFESSION, INFO_CARD_TEXT_FALLBACKS.PROFESSION), pinned: false }
+                { key: INFO_CARD_KEYS.CRITERIA_NUMBERS, title: fnText(INFO_CARD_TEXT_KEYS.CRITERIA_NUMBERS, INFO_CARD_TEXT_FALLBACKS.CRITERIA_NUMBERS), pinned: false }
             ])
         };
     }

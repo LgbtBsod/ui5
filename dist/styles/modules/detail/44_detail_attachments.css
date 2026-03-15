@@ -1,21 +1,75 @@
-.chkApp .detailAttachmentDropZoneTop {
-  gap: 0.7rem;
-  align-items: flex-start;
-}
-
-.chkApp .detailAttachmentDropZoneIcon {
-  color: var(--accent);
-  font-size: 1.2rem;
-}
-
 .chkApp .detailAttachmentDropZoneMeta {
   color: var(--text-main);
   align-self: center;
+  text-align: center;
 }
 
 .chkApp .detailAttachmentDropZoneActions {
-  justify-self: end;
+  justify-self: stretch;
   align-self: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.chkApp .detailAttachmentPickerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem 0.45rem;
+  width: 100%;
+  text-align: center;
+}
+
+.chkApp .detailAttachmentPickerTitle {
+  margin: 0;
+}
+
+.chkApp .detailAttachmentPickerText {
+  color: var(--text-subtle);
+  font-size: 0.95rem;
+}
+
+.chkApp .detailAttachmentPickerLink.sapMLnk {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.14rem;
+}
+
+.chkApp .detailAttachmentMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+  width: 100%;
+}
+
+.chkApp .detailAttachmentMetaLabel {
+  margin: 0;
+  color: var(--text-subtle);
+}
+
+.chkApp .detailAttachmentCategorySelect {
+  min-width: 11rem;
+}
+
+.chkApp .detailAttachmentUploaderHidden.sapUiFup {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chkApp .detailAttachmentUploaderHidden .sapMBtn,
+.chkApp .detailAttachmentUploaderHidden .sapUiFupInputMask,
+.chkApp .detailAttachmentUploaderHidden .sapUiFupButtonOnly,
+.chkApp .detailAttachmentUploaderHidden .sapMBtnInner {
+  display: none !important;
 }
 
 .chkApp .detailAttachmentDropZoneActions .sapUiFup,
@@ -26,10 +80,6 @@
 
 .chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
   justify-content: center;
-}
-
-.chkApp .detailAttachmentDropZoneIcon.sapUiIcon {
-  color: var(--accent);
 }
 
 .chkApp .detailAttachmentItemRow {
@@ -128,13 +178,14 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
 }
 
 .chkApp .detailAttachmentDropZone {
-  display: grid;
-  grid-template-columns: minmax(18rem, 1fr) minmax(14rem, 0.9fr);
-  gap: 0.78rem 0.92rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.78rem;
   align-items: center;
   margin-top: 0.1rem;
   margin-bottom: 1rem;
-  min-height: 7.75rem;
+  min-height: 6.5rem;
   padding: 1rem 1.05rem;
   border-radius: calc(var(--radius-lg) - 0.16rem);
   background:
@@ -149,12 +200,12 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
 }
 
 .chkApp .detailAttachmentDropZone.isAttachmentDropPrimed {
-  min-height: 10.25rem;
+  min-height: 7rem;
   border-color: rgba(var(--accent-rgb), 0.28);
 }
 
 .chkApp .detailAttachmentDropZone.isAttachmentDropActive {
-  min-height: 13rem;
+  min-height: 7.5rem;
   transform: translateY(-1px);
   border-color: rgba(var(--accent-rgb), 0.36);
   box-shadow:
@@ -253,13 +304,7 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
   outline-style: solid;
 }
 
-.chkApp .detailAttachmentDropZone {
-  display: grid;
-  grid-template-columns: minmax(18rem, 1fr) minmax(14rem, 0.9fr);
-}
-
 .chkApp .detailViewportNarrow .detailAttachmentDropZone {
-  grid-template-columns: 1fr;
   min-height: 0;
 }
 
@@ -274,6 +319,10 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
 
 .chkApp .detailViewportNarrow .detailAttachmentDropZoneActions {
   justify-self: stretch;
+}
+
+.chkApp .detailViewportNarrow .detailAttachmentPickerRow {
+  justify-content: center;
 }
 
 .chkApp .detailViewportNarrow .detailAttachmentTable .sapMListTbl {
@@ -368,6 +417,12 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
 .chkApp .detailCreateModeText {
   color: var(--text-subtle);
   line-height: 1.45;
+}
+
+.chkApp .detailParticipantsFlowHint {
+  margin: 0 0 0.7rem;
+  padding-inline: 0.1rem;
+  color: var(--text-subtle);
 }
 
 .chkApp .detailEmptyStateCard {
@@ -539,7 +594,6 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
 
 .chkApp .appLayoutSplit #detailPaneHost .detailAttachmentDropZone,
 .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentDropZone {
-  grid-template-columns: 1fr;
   min-height: 0;
   gap: 0.62rem;
   margin-top: 0.18rem;
@@ -777,9 +831,6 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
     align-self: center;
   }
 
-  .chkApp .detailAttachmentDropZone {
-    grid-template-columns: 1fr;
-  }
 }
 
 .chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedScene,

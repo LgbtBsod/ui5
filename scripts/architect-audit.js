@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const cp = require('child_process');
 const path = require('path');
 const { runJsonMarkdownAudit } = require('./lib/auditRunner');
 const { countLinesFromRoot, readJsonSafe, readTextSafe } = require('./lib/auditInput');
@@ -25,17 +26,34 @@ function computeReadinessScore(qaOk, architectureHealth, styleScore, freezeScore
   );
 }
 
+function readQaStatus() {
+  const qa = readJsonSafe(path.join(ROOT, 'docs', 'qa-report-latest.json'), null);
+  if (qa && typeof qa.ok === 'boolean') {
+    return qa;
+  }
+  const result = cp.spawnSync(process.execPath, ['scripts/final-static-qa.js'], {
+    cwd: ROOT,
+    encoding: 'utf8'
+  });
+  return {
+    ok: result.status === 0,
+    stats: {
+      source: 'live-final-static-qa'
+    }
+  };
+}
+
 function buildReport() {
-  const qa = readJsonSafe(path.join(ROOT, 'docs', 'qa-report-latest.json'), { ok: false, stats: {} });
+  const qa = readQaStatus();
   const style = readJsonSafe(path.join(ROOT, 'docs', 'artifacts', 'style-system-audit.json'), null);
   const freeze = readJsonSafe(path.join(ROOT, 'docs', 'artifacts', 'final-architecture-freeze.json'), null);
   const udos = readJsonSafe(path.join(ROOT, 'udos', 'reports', 'analysis-report.json'), null);
   const architectureHealth = parseArchitectureHealth();
   const metrics = {
-    searchControllerLines: countLinesFromRoot(ROOT, 'controller/Search.controller.js'),
-    detailControllerLines: countLinesFromRoot(ROOT, 'controller/Detail.controller.js'),
-    componentLines: countLinesFromRoot(ROOT, 'Component.js'),
-    styleLines: countLinesFromRoot(ROOT, 'css/claude-hyper.css')
+    searchControllerLines: countLinesFromRoot(ROOT, 'app/controller/Search.controller.js'),
+    detailControllerLines: countLinesFromRoot(ROOT, 'app/controller/Detail.controller.js'),
+    componentLines: countLinesFromRoot(ROOT, 'app/Component.js'),
+    styleLines: countLinesFromRoot(ROOT, 'app/styles/app-styles.css')
   };
   const zonesOfGrowth = [];
 

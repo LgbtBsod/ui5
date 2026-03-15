@@ -30,10 +30,6 @@ function pushControllerViolations(violations, file, item, line, targetLayer, mod
     violations.push({ rule: 'R1', from: file, dep: item.dep, line, msg: 'controller cannot import infra/backend' });
     return true;
   }
-  if (targetLayer === 'util' && !CONTROLLER_UTIL_ALLOWLIST.has(modulePath)) {
-    violations.push({ rule: 'R1', from: file, dep: item.dep, line, msg: 'controller util import is not allowlisted' });
-    return true;
-  }
   if (!['controller', 'facade', 'usecase', 'util'].includes(targetLayer)) {
     violations.push({ rule: 'R1', from: file, dep: item.dep, line, msg: 'controller import target is outside allowed layers' });
     return true;

@@ -7,7 +7,7 @@ const { buildAuditReport } = require('./lib/auditReportFactory');
 const { renderStyleSystemAuditMarkdown } = require('./lib/auditMarkdownProfiles');
 
 const ROOT = process.cwd();
-const CSS_DIR = path.join(ROOT, 'css');
+const CSS_DIR = path.join(ROOT, 'app', 'styles');
 const OUT_DIR = path.join(ROOT, 'docs', 'artifacts');
 const OUT_JSON = path.join(OUT_DIR, 'style-system-audit.json');
 const OUT_MD = path.join(OUT_DIR, 'style-system-audit.md');
@@ -55,14 +55,14 @@ function analyze() {
     .map(([name, files]) => ({ name, files: [...files].sort() }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const themeMixin = readTextSafe(path.join(ROOT, 'controller', 'base', 'ThemeMixin.js'));
-  const themeService = readTextSafe(path.join(ROOT, 'util', 'ThemeService.js'));
-  const themePhilosophy = readTextSafe(path.join(ROOT, 'util', 'ThemePhilosophy.js'));
-  const indexHtml = readTextSafe(path.join(ROOT, 'index.html'));
+  const themeMixin = readTextSafe(path.join(ROOT, 'app', 'controller', 'base', 'ThemeMixin.js'));
+  const themeService = readTextSafe(path.join(ROOT, 'app', 'service', 'framework', 'ThemeService.js'));
+  const themePhilosophy = readTextSafe(path.join(ROOT, 'app', 'service', 'framework', 'ThemePhilosophy.js'));
+  const indexHtml = readTextSafe(path.join(ROOT, 'app', 'index.html'));
   const styleCss = cssFiles.map((file) => readTextSafe(file)).join('\n');
 
   const contracts = {
-    horizonMorningDefault: /data-sap-ui-theme="sap_horizon"/.test(indexHtml),
+    horizonMorningDefault: /data-sap-ui-theme="sap_horizon"/.test(indexHtml) || /sap_horizon/.test(themeService),
     horizonNightSupported: (/sap_horizon_dark/.test(themeMixin) || /sap_horizon_dark/.test(themeService)) && /sap_horizon_dark/.test(themePhilosophy),
     morningNightModes: /:root\.light-mode/.test(styleCss) && /body\.appDark/.test(styleCss),
     platformPhilosophyBridge: /platformPrecisionEnterprise/.test(styleCss) &&

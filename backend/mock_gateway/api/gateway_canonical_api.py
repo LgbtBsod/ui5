@@ -1965,12 +1965,9 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
         return _err(400, "VALIDATION_ERROR", "SessionGuid is required")
     try:
         LockService.validate_session_lock(db, root.id, session_guid)
-        _check_client_version(payload, root)
     except ValueError as ex:
         if str(ex) == "NO_VALID_LOCK":
             return _err(409, "LOCK_REQUIRED", "Active lock for session is required")
-        if str(ex) == "VALIDATION_ERROR":
-            return _err(400, "VALIDATION_ERROR", "client_version is required")
         return _err(409, "CONFLICT", "Version conflict")
 
     _apply_save_root(root, _save_request_root(payload), db)
@@ -2091,12 +2088,9 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
         return _err(400, "VALIDATION_ERROR", "SessionGuid is required")
     try:
         LockService.validate_session_lock(db, root.id, session_guid)
-        _check_client_version(payload, root)
     except ValueError as ex:
         if str(ex) == "NO_VALID_LOCK":
             return _err(409, "LOCK_REQUIRED", "Active lock for session is required")
-        if str(ex) == "VALIDATION_ERROR":
-            return _err(400, "VALIDATION_ERROR", "client_version is required")
         return _err(409, "CONFLICT", "Version conflict")
 
     _apply_save_root(root, _save_request_root(payload), db)
