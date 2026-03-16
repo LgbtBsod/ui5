@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";var E={CREATE:"C",UPDATE:"U",DELETE:"D"};var r={ROOT:"root",CHECKS:"checks",BARRIERS:"barriers",PARTICIPANTS:"participants",ATTACHMENTS:"attachments"};function t(r,t){var T=String(r||"").trim().toUpperCase();if(T===E.CREATE||T===E.UPDATE||T===E.DELETE){return T}return t||E.UPDATE}return{EDIT_MODE:E,NODES:r,normalizeEditMode:t}});
-//# sourceMappingURL=DeltaContracts.js.map

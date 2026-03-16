@@ -1,8 +1,0 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox renderType="Bare" width="100%" class="detailMainExperienceStack">
-        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.LockKilledBanner" type="XML"/>
-        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailCreateModeBanner" type="XML"/>
-        <Text text="{i18n>detailParticipantsFlowHint}" visible="{= !${view>/detailSkeletonBusy} &amp;&amp; ${state>/workflow/detail/editMode} !== 'READ' }" class="detailParticipantsFlowHint modeHintText"/>
-        <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailInfoCardsHost" type="XML"/>
-    </VBox>
-</core:FragmentDefinition>

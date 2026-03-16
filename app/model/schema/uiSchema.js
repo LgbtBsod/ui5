@@ -22,6 +22,20 @@ sap.ui.define([], function () {
         autosaveState: "IDLE",
         autosaveAt: null,
         autosaveEnabled: false,
+        persistence: {
+            state: "idle",
+            messageKey: "persistenceIdle",
+            lastSavedAt: null,
+            lastSaveError: null,
+            taxonomy: "",
+            currentWriteRequestId: "",
+            isManualSaveInFlight: false,
+            isAutoSaveInFlight: false,
+            hasValidLock: false,
+            lockOwnerSessionMatches: false,
+            lastLockRefreshAt: null,
+            nextHeartbeatAt: null
+        },
         validationSummary: {
             hasErrors: false,
             missingPaths: [],

@@ -33,6 +33,16 @@ sap.ui.define([
         autosaveError: "Autosave error",
         autosaveDisabled: "Autosave disabled (read-only mode)"
     };
+    var PERSISTENCE_SEMANTICS = {
+        saving: "Warning",
+        autosaving: "Warning",
+        saved: "Success",
+        dirty: "Warning",
+        error: "Error",
+        lockLost: "Error",
+        conflict: "Error",
+        idle: "Information"
+    };
 
     function text(oController, sKey, vArgs, vFallback) {
         var aArgs = [];
@@ -254,6 +264,25 @@ sap.ui.define([
                 return text(this, "autosaveDisabled", "Autosave disabled (read-only mode)");
             }
             return text(this, mKeyByState[sState] || "autosaveWaiting", AUTOSAVE_TEXT_FALLBACKS[mKeyByState[sState] || "autosaveWaiting"] || "Autosave waiting");
+        },
+
+        formatPersistenceText: function (sMessageKey, sPersistenceState, sLastSavedAt) {
+            if (sMessageKey) {
+                if (sMessageKey === "persistenceSaved" || sMessageKey === "persistenceAutosaveSaved") {
+                    if (sLastSavedAt) {
+                        return text(this, "persistenceSavedAt", [formatAutosaveTime(sLastSavedAt)], "Saved");
+                    }
+                }
+                return text(this, sMessageKey, sMessageKey);
+            }
+            if (sPersistenceState === "saved" && sLastSavedAt) {
+                return text(this, "persistenceSavedAt", [formatAutosaveTime(sLastSavedAt)], "Saved");
+            }
+            return text(this, "persistenceIdle", "No pending changes");
+        },
+
+        formatPersistenceState: function (sPersistenceState) {
+            return PERSISTENCE_SEMANTICS[String(sPersistenceState || "").trim()] || "Information";
         },
 
         formatPassedTotal: function (aRows) {

@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts","sap/ui/dom/includeStylesheet"],function(e,r){"use strict";var t=Object.create(null);function n(e){return sap.ui.require.toUrl(e)}function u(u){var a=e.STYLE_MODULES[u];var i=e.STYLE_IDS[u];if(!a||!i||t[u]){return false}r(n(a),i);t[u]=true;return true}return{ensurePaneStyles:u}});
-//# sourceMappingURL=ShellStyleRuntime.js.map

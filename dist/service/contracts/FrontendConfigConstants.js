@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/contracts/FrontendVariablesSchema"],function(e){"use strict";return{SETTINGS_CACHE_TTL_MS:5*60*1e3,FALLBACKS:{FRONTEND_VARIABLES:e.buildDefaults()},SOURCES:{RUNTIME_SETTINGS_GLOBAL:"RuntimeSettingsSet(GLOBAL)"}}});
-//# sourceMappingURL=FrontendConfigConstants.js.map

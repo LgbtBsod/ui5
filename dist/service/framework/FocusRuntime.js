@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"],function(e){"use strict";function n(n){if(!n||typeof n.focus!=="function"){return false}e.restartTimer(0,function(){n.focus()},0);return true}return{focusSoon:n}});
-//# sourceMappingURL=FocusRuntime.js.map

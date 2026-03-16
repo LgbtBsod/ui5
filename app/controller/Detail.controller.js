@@ -90,6 +90,8 @@ sap.ui.define([
         formatI18nByKey: DetailFormatters.formatI18nByKey,
         formatHeartbeatText: DetailFormatters.formatHeartbeatText,
         formatAutosaveAt: DetailFormatters.formatAutosaveAt,
+        formatPersistenceState: DetailFormatters.formatPersistenceState,
+        formatPersistenceText: DetailFormatters.formatPersistenceText,
         formatCopyLinkVisible: DetailFormatters.formatCopyLinkVisible,
         formatDeleteChecklistVisible: DetailFormatters.formatDeleteChecklistVisible,
         formatAutosaveText: DetailFormatters.formatAutosaveText

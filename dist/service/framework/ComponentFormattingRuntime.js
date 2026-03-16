@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function e(e){var t=e instanceof Date?e:new Date(e||Date.now());if(Number.isNaN(t.getTime())){t=new Date}return t.toLocaleString(undefined,{year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit"})}function t(e){return e&&typeof e.getParameters==="function"&&e.getParameters()||{}}return{formatHumanDateTime:e,eventPayload:t}});
-//# sourceMappingURL=ComponentFormattingRuntime.js.map

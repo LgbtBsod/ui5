@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
@@ -26,6 +27,20 @@ sap.ui.define([
         var ActionContract = mOptions.actionContract;
         var fnBundleText = mOptions.bundleText;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
+        function rescheduleHeartbeat() {
+            var iIntervalMs;
+            var sNextHeartbeatAt;
+            if (!oComponent._oHeartbeat || typeof oComponent._oHeartbeat.start !== "function") {
+                return;
+            }
+            oComponent._oHeartbeat.start();
+            iIntervalMs = Number(oComponent._oHeartbeat._iIntervalMs || 0) || 0;
+            if (iIntervalMs < 1000) {
+                return;
+            }
+            sNextHeartbeatAt = new Date(Date.now() + iIntervalMs).toISOString();
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, sNextHeartbeatAt);
+        }
 
         oComponent._oAutoSave = new mOptions.managers.AutoSaveCoordinator({
             intervalMs: Number(mTimerDefaults.autoSaveIntervalMs),
@@ -36,7 +51,8 @@ sap.ui.define([
             guardFn: function () {
                 return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
                     ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED &&
-                    !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
+                    !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
+                    !ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false);
             },
             shouldSave: function () {
                 var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
@@ -45,7 +61,8 @@ sap.ui.define([
                     bIsLocked &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
                     !!sActiveId &&
-                    !CreateSentinel.isCreateId(sActiveId);
+                    !CreateSentinel.isCreateId(sActiveId) &&
+                    !ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false);
             },
             buildPayload: function () {
                 var sId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
@@ -75,27 +92,32 @@ sap.ui.define([
             }
         });
         oComponent._oAutoSave.attachEvent("autosaveStart", function () {
-            var mStart = { "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.SAVING };
-            mStart[StatePaths.SAVE_IN_FLIGHT] = true;
+            var mStart = {};
+            DetailPersistenceRuntime.startEffects("auto").forEach(function (oEffect) {
+                if (oEffect && oEffect.type === "modelPatch" && oEffect.modelName === "state") {
+                    mStart[oEffect.path] = oEffect.value;
+                }
+            });
             ModelStateRuntime.setManyOnModel(oStateModel, mStart);
             DebugLogger.info("Component", "autosave start", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
             fnEmitTelemetry("autosave.triggered", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveDone", function () {
-            var mDone = { "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.SAVED, "/autosaveAt": new Date().toISOString() };
-            mDone[StatePaths.SAVE_IN_FLIGHT] = false;
-            ModelStateRuntime.setManyOnModel(oStateModel, mDone);
+            ModelStateRuntime.writeOnModel(oStateModel, "/autosaveAt", new Date().toISOString());
+            if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
+                ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
+                rescheduleHeartbeat();
+            }
             DebugLogger.info("Component", "autosave done", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveError", function (oEvent) {
-            var mErr = { "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.FAILED };
-            mErr[StatePaths.SAVE_IN_FLIGHT] = false;
-            ModelStateRuntime.setManyOnModel(oStateModel, mErr);
-            fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.ERROR, BANNER_TEXT_KEY.OBJECT_SAVE_FAILED, {
-                textArgs: [fnBundleText("autosaveError")],
-                retryAction: ActionContract.RETRY_ACTIONS.SAVE,
-                retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
-            }));
+            if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_STATE, "") !== DetailPersistenceRuntime.STATES.LOCK_LOST) {
+                fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.ERROR, BANNER_TEXT_KEY.OBJECT_SAVE_FAILED, {
+                    textArgs: [fnBundleText("autosaveError")],
+                    retryAction: ActionContract.RETRY_ACTIONS.SAVE,
+                    retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
+                }));
+            }
             DebugLogger.info("Component", "autosave error", oEvent && oEvent.getParameters ? oEvent.getParameters() : {});
             fnEmitTelemetry("autosave.failed", ComponentRuntimeSupport.eventPayload(oEvent));
         });

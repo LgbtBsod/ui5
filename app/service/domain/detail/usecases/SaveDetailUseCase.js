@@ -10,8 +10,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, ModelPathContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -56,9 +57,13 @@ sap.ui.define([
         }
         if (!bCreate && !oDelta) {
             return Promise.resolve(Result.ok({ saved: false, skipped: true, reason: "NO_CHANGES" }, [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "SAVED"),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
-            ]));
+            ].concat(DetailPersistenceRuntime.dirtyEffects(false, {
+                messageKey: "persistenceNoChanges",
+                isManualSaveInFlight: false,
+                isAutoSaveInFlight: false,
+                currentWriteRequestId: ""
+            }))));
         }
         if (!bCreate && (!oDelta || !oDelta.client_version) && !iClientVersion) {
             return Promise.resolve(Result.fail({ message: "Detail snapshot is stale; reload required", code: "MISSING_CLIENT_VERSION" }, [
@@ -112,16 +117,18 @@ sap.ui.define([
         var oSavedSnapshot = DetailSaveRuntime.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
                     var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
                     var aEffects = [
-                    Effects.toast("objectSaved", "success"),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "SAVED"),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, sNow),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-                    Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
-                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                    Effects.modelPatch("snapshot", "/", oSavedSnapshot),
-                    Effects.modelPatch("selected", "/", oSelectedSnapshot),
-                    Effects.modelPatch("selected", "/attachments", aSyncedAttachments)
+                        Effects.toast("objectSaved", "success"),
+                        Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
+                        Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
+                        Effects.modelPatch("snapshot", "/", oSavedSnapshot),
+                        Effects.modelPatch("selected", "/", oSelectedSnapshot),
+                        Effects.modelPatch("selected", "/attachments", aSyncedAttachments)
                     ];
+                    aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
+                        hasValidLock: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
+                        lockOwnerSessionMatches: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
+                        lastLockRefreshAt: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT ? sNow : null
+                    }));
                     DetailAttachmentDeltaRuntime.cleanupStagedAttachmentUrls(aCurrentAttachments);
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
                         aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
@@ -136,14 +143,18 @@ sap.ui.define([
                             aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
                         }
                     }
-                    return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
+                return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
                 });
             }).catch(function (oError) {
+                var oClassification = DetailPersistenceRuntime.classifyError(oError);
+                var oFailure = DetailPersistenceRuntime.failureEffects("manual", oError, {
+                    hasValidLock: !DetailPersistenceRuntime.isLockFailure(oClassification.taxonomy) && sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED,
+                    lockOwnerSessionMatches: !DetailPersistenceRuntime.isLockFailure(oClassification.taxonomy)
+                });
                 return Result.fail(oError, [
                     Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, "ERROR"),
                     Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
-                ]);
+                ].concat(oFailure.effects));
             });
         });
     };

@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackPolicy"],function(e){"use strict";function r(e){return Array.isArray(e)?e:[]}function t(e,t){return{ok:true,data:e,effects:r(t)}}function n(t,n){var f=e.normalize(t);return{ok:false,error:f,effects:r(n&&n.length?n:e.toEffects(t))}}return{ok:t,fail:n}});
-//# sourceMappingURL=Result.js.map

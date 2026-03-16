@@ -5,11 +5,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardPolicy"
-], function (SecurityTokenRefresh, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (SecurityTokenRefresh, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, DetailPersistenceRuntime, WorkflowContracts) {
     "use strict";
 
-    var AUTOSAVE_STATE = ComponentSaveGuardContracts.AUTOSAVE_STATE;
     var BANNER_DETAIL = ComponentSaveGuardContracts.BANNER_DETAIL;
     var DELAY_MS = ComponentSaveGuardContracts.DELAY_MS;
     var ERROR_MESSAGE = ComponentSaveGuardContracts.ERROR_MESSAGE;
@@ -30,6 +31,20 @@ sap.ui.define([
         var fnIsSessionExpiredError = mOptions.isSessionExpiredError;
         var fnSetGlobalBanner = mOptions.setGlobalBanner;
         var fnClearGlobalBanner = mOptions.clearGlobalBanner;
+        function rescheduleHeartbeat() {
+            var iIntervalMs;
+            var sNextHeartbeatAt;
+            if (!oComponent._oHeartbeat || typeof oComponent._oHeartbeat.start !== "function") {
+                return;
+            }
+            oComponent._oHeartbeat.start();
+            iIntervalMs = Number(oComponent._oHeartbeat._iIntervalMs || 0) || 0;
+            if (iIntervalMs < 1000) {
+                return;
+            }
+            sNextHeartbeatAt = new Date(Date.now() + iIntervalMs).toISOString();
+            ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, sNextHeartbeatAt);
+        }
 
         return function () {
             var sRootId;
@@ -44,8 +59,17 @@ sap.ui.define([
                 var m = {};
                 m[oStatePaths.SAVE_IN_FLIGHT] = true;
                 m[oStatePaths.UI_BUSY_DETAIL] = true;
-                m["/autosaveState"] = AUTOSAVE_STATE.SAVING;
                 return m;
+            }()));
+            ModelStateRuntime.setManyOnModel(oStateModel, (function () {
+                var aEffects = DetailPersistenceRuntime.startEffects("manual");
+                var mPatch = {};
+                aEffects.forEach(function (oEffect) {
+                    if (oEffect && oEffect.type === "modelPatch" && oEffect.modelName === "state") {
+                        mPatch[oEffect.path] = oEffect.value;
+                    }
+                });
+                return mPatch;
             }()));
             oComponent._iSaveWorkingTimer = SchedulingRuntime.restartTimer(oComponent._iSaveWorkingTimer, function () {
                 if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
@@ -58,6 +82,10 @@ sap.ui.define([
                     return Promise.reject((oResult && oResult.error) || new Error(ERROR_MESSAGE.SAVE_FAILED));
                 }
                 fnClearGlobalBanner();
+                if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
+                    ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
+                    rescheduleHeartbeat();
+                }
                 fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_SUCCESS, { rootId: sRootId });
                 fnResumePendingNavigationIntent();
                 return true;

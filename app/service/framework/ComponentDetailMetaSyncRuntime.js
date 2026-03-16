@@ -16,6 +16,7 @@ sap.ui.define([
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
         var sAutosaveState = WorkflowContracts.normalizeAutosaveState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE));
+        var oPersistence = ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE, {}) || {};
         var sValidationSource = String((ModelStateRuntime.readOnModel(oStateModel, StatePaths.VALIDATION_SUMMARY, {}) || {}).source || VALIDATION_STATE.IDLE);
         var bDirty = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
         var bPermissionKnown = !!oReadiness.permissionKnown;
@@ -29,7 +30,11 @@ sap.ui.define([
             lock: { state: sLockState, known: !!oReadiness.lockKnown },
             dirty: bDirty,
             permission: { known: bPermissionKnown, allowed: bAllowed },
-            save: { state: sAutosaveState, lastSavedAt: ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null) },
+            save: {
+                state: String(oPersistence.state || sAutosaveState || "").trim() || sAutosaveState,
+                messageKey: String(oPersistence.messageKey || "").trim(),
+                lastSavedAt: oPersistence.lastSavedAt || ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null)
+            },
             validation: { state: sValidationSource || VALIDATION_STATE.IDLE }
         });
     }

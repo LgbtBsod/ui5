@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function e(e){Object.keys(e||{}).forEach(function(n){var t=e[n];if(t&&t.destroy){t.destroy()}})}function n(e,n,t){if(!e){return null}if(n&&e.detachChange){e.detachChange(n,t)}if(e.destroy){e.destroy()}return null}return{destroyBinding:n,destroyMapEntries:e}});
-//# sourceMappingURL=ControllerResourceCleanup.js.map

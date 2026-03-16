@@ -7,8 +7,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
+], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     function ForceReadOnlyUseCase() {
@@ -62,7 +63,6 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, sTransitionState),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
                 Effects.modelPatch("state", ModelPathContracts.LOCK_EXPIRES, null),
@@ -71,7 +71,18 @@ sap.ui.define([
                     reason: sReason,
                     isKilled: String(sReason || "").toUpperCase() === WorkflowContracts.REASONS.KILLED
                 })
-            ];
+            ].concat(DetailPersistenceRuntime.failureEffects("manual", {
+                code: sReason,
+                message: sReason
+            }, {
+                state: DetailPersistenceRuntime.STATES.LOCK_LOST,
+                messageKey: "persistenceLockLost",
+                hasValidLock: false,
+                lockOwnerSessionMatches: false,
+                isManualSaveInFlight: false,
+                isAutoSaveInFlight: false,
+                currentWriteRequestId: ""
+            }).effects);
 
             if (sMessageKey) {
                 aEffects.push(Effects.warn(sMessageKey));

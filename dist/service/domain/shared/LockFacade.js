@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter"],function(e){"use strict";function r(r,n){if(!r||!n){return Promise.resolve()}return e.release({rootId:r,sessionGuid:n}).catch(function(){return null})}return{release:r}});
-//# sourceMappingURL=LockFacade.js.map

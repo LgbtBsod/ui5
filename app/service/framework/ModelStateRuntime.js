@@ -87,7 +87,21 @@ sap.ui.define([
             "/autosaveAt": null,
             "/autosaveEnabled": false,
             "/isDirty": false,
-            "/activeObjectId": ""
+            "/activeObjectId": "",
+            "/persistence": {
+                state: "idle",
+                messageKey: "persistenceIdle",
+                lastSavedAt: null,
+                lastSaveError: null,
+                taxonomy: "",
+                currentWriteRequestId: "",
+                isManualSaveInFlight: false,
+                isAutoSaveInFlight: false,
+                hasValidLock: false,
+                lockOwnerSessionMatches: false,
+                lastLockRefreshAt: null,
+                nextHeartbeatAt: null
+            }
         }, mPatch || {}));
     }
 

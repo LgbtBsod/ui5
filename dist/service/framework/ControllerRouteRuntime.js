@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function t(t,e){if(!t||typeof t.attachRouteMatched!=="function"||!Array.isArray(e)){return 0}e.forEach(function(e){if(!e||!e.name||typeof e.handler!=="function"){return}t.attachRouteMatched(String(e.name),e.handler)});return e.length}function e(t){if(!t||typeof t.detachAllRouteMatched!=="function"){return false}t.detachAllRouteMatched();return true}return{attachMatched:t,detachAllMatched:e}});
-//# sourceMappingURL=ControllerRouteRuntime.js.map

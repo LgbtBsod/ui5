@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";var t="__CREATE";function r(t){var r=String(t||"").trim();return r?r.toUpperCase():""}function n(n){var e=r(n);return e===t||e==="__CREATE"||e==="__CREATE__"||e==="NEW"}function e(){return t}function u(){return t}return{VALUE:t,normalize:r,isCreateId:n,toRouteId:e,toStateId:u}});
-//# sourceMappingURL=CreateSentinel.js.map

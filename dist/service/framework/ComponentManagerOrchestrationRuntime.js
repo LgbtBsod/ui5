@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAutosaveRuntime","PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentPollingRuntime"],function(e,a){"use strict";function t(t){a.createHeartbeatManager(t);a.createSupportManagers(t);e.createAutoSaveManager(t);a.createLockStatusManager(t)}return{attachManagerRuntime:t}});
-//# sourceMappingURL=ComponentManagerOrchestrationRuntime.js.map

@@ -1,2 +1,0 @@
-sap.ui.define([],function(){"use strict";function r(r,e,t){if(!r||typeof r.getProperty!=="function"){return t}return r.getProperty(e)}function e(r,e,t){var n;var u;if(!r||!Array.isArray(e)||!e.length||typeof r.getProperty!=="function"){return t}for(n=0;n<e.length;n+=1){u=r.getProperty(e[n]);if(u!==undefined&&u!==null&&u!==""){return u}}return t}return{read:r,readAny:e}});
-//# sourceMappingURL=BindingContextReader.js.map

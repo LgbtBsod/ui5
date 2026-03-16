@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/usecases/LoadAnalyticsDashboardUseCase"],function(e){"use strict";function a(a){var s=a||{};this._uc={load:s.loadUseCase||new e}}a.prototype.load=function(e,a){return this._uc.load.execute(e||{},a||{})};return a});
-//# sourceMappingURL=AnalyticsFacade.js.map

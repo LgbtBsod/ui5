@@ -53,6 +53,9 @@ sap.ui.define([
 
         function applyOwnedLockState(oLockState, bResetConflict) {
             ModelStateRuntime.writeOnModel(oStateModel, "/lockExpires", oLockState.lockExpires);
+            ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_HAS_VALID_LOCK, true);
+            ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, true);
+            ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_LAST_LOCK_REFRESH_AT, new Date().toISOString());
             ModelStateRuntime.writeOnModel(oUiStateModel, "/lock", { ok: true, reason: "OWNED_BY_YOU", isKilled: false });
             if (bResetConflict) {
                 ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", false);
