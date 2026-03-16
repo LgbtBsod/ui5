@@ -6,8 +6,8 @@ This guide is the single local validation entry point for the current repo.
 
 Default mock contour:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1
+```bat
+start.bat
 ```
 
 This launcher starts the mock backend in `PCCT_PROFILE=local`, which keeps mock identity and startup seeding enabled only for local validation.
@@ -30,8 +30,15 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8000
 
 Stop the local environment:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/stop-local-env.ps1
+```bat
+start.bat stop
+```
+
+Check status or clean derived local artifacts:
+
+```bat
+start.bat status
+start.bat clean
 ```
 
 ## Automated Checks
@@ -136,7 +143,7 @@ node scripts/gateway-live-smoke-runner.js
 
 - The current local contour intentionally uses `https://ui5.sap.com/1.71.70/resources/sap-ui-core.js` for the app and QUnit/OPA pages.
 - The default local launch path is now:
-  - `powershell -ExecutionPolicy Bypass -File scripts/start-local-env.ps1`
+  - `start.bat`
   - `npm run smoke:local`
 - Before deployment to the real SAP Gateway or FLP runtime, switch bootstrap back to the system runtime and remove the public CDN dependency.
 - The supported switch procedure is documented in [UI5_BOOTSTRAP_SWITCH.md](/C:/Users/lgbtb/Desktop/ui5/docs/runtime/UI5_BOOTSTRAP_SWITCH.md).

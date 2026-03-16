@@ -80,9 +80,9 @@ function writeReport(file, qaResult, changedDeps) {
   lines.push('');
 
   lines.push('## Documentation links', '');
-  lines.push('- `docs/architecture-map.md`');
-  lines.push('- `docs/dependency-graph.json`');
-  lines.push('- `docs/feature-dependency-map.md`');
+  lines.push('- `docs/LOCAL_VALIDATION.md`');
+  lines.push('- `docs/generated-artifacts.md`');
+  lines.push('- `docs/SAP_SALE_READINESS_STATUS.md`');
 
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, lines.join('\n'));
