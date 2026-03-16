@@ -265,6 +265,10 @@ sap.ui.define([
             }).length + "/" + aRows.length;
         },
 
+        formatRowCount: function (aRows) {
+            return Array.isArray(aRows) ? String(aRows.length) : "0";
+        },
+
         formatHeaderDate: function (sDate) {
             return formatHumanDate(sDate) || sDate || "-";
         },

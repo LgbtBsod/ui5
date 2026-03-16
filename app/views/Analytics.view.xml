@@ -9,7 +9,8 @@
         showNavButton="true"
         navButtonPress=".onCloseAnalytics"
         enableScrolling="true"
-        class="pageTransparent analyticsPage">
+        class="pageTransparent analyticsPage"
+        titleAlignment="Start">
         <headerContent>
             <Button
                 text="{i18n>analyticsReportButton}"
@@ -25,7 +26,7 @@
                 class="analyticsExportButton actionPrioritySecondary"/>
             <ObjectStatus
                 class="analyticsRefreshStatus statusChipSemantic"
-                text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? ${i18n>analyticsRefreshRunning} : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : (${view>/refreshState/lastSuccessAt} ? (${i18n>workflowUpdatedAt} + ': ' + ${view>/refreshState/lastSuccessAt}) : ${i18n>analyticsRefreshIdle}))) }"
+                text="{parts: [{path: 'view>/refreshState/status'}, {path: 'view>/refreshState/isRunning'}, {path: 'view>/refreshState/lastError'}, {path: 'view>/refreshState/lastSuccessAt'}, {path: 'i18n>analyticsRefreshQueued'}, {path: 'i18n>analyticsRefreshRunning'}, {path: 'i18n>workflowUpdatedAt'}, {path: 'i18n>analyticsRefreshIdle'}], formatter: '.formatRefreshStatusText'}"
                 state="{= ${view>/refreshState/status} === 'ERROR' ? 'Error' : ((${view>/refreshState/status} === 'REQUESTED' || ${view>/refreshState/isRunning}) ? 'Warning' : 'Success') }"/>
             <Button
                 text="{i18n>analyticsRefreshButton}"

@@ -52,23 +52,16 @@
                 useIconTabBar="false"
                 showAnchorBar="false"
                 upperCaseAnchorBar="false"
-                enableLazyLoading="true"
+                enableLazyLoading="false"
                 alwaysShowContentHeader="false"
-                showTitleInHeaderContent="true"
+                showTitleInHeaderContent="false"
                 showHeaderContent="false">
                 <uxap:layoutData>
                     <FlexItemData growFactor="1" shrinkFactor="1" baseSize="0%"/>
                 </uxap:layoutData>
 
                 <uxap:headerTitle>
-                    <uxap:ObjectPageDynamicHeaderTitle>
-                        <uxap:expandedHeading>
-                            <Title text="{i18n>detailPageTitle}" visible="false"/>
-                        </uxap:expandedHeading>
-                        <uxap:snappedHeading>
-                            <Title text="{i18n>detailPageTitle}" visible="false"/>
-                        </uxap:snappedHeading>
-                    </uxap:ObjectPageDynamicHeaderTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle/>
                 </uxap:headerTitle>
 
                 <uxap:sections>

@@ -18,9 +18,9 @@
     </Button>
     <ToolbarSpacer/>
     <ObjectStatus text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }" state="{= ${view>/selectionCount} ? 'Success' : 'Information' }" class="searchSelectionStatusChip statusChipSemantic">
-        <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+        <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="false"/></layoutData>
     </ObjectStatus>
-    <Text text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }" visible="{view>/hasSelection}" tooltip="{view>/selectedRowDisplayId}" class="searchSelectionPrimaryId" wrapping="false">
-        <layoutData><OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/></layoutData>
+    <Text text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }" visible="{= ${view>/hasSelection} &amp;&amp; !!${view>/selectedRowDisplayId} }" tooltip="{view>/selectedRowDisplayId}" class="searchSelectionPrimaryId" wrapping="false">
+        <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData>
     </Text>
 </core:FragmentDefinition>

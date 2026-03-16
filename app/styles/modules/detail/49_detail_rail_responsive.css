@@ -45,7 +45,7 @@
   }
 }
 
-@media (max-width: 53.75rem) {
+@media (max-width: 860px) {
   .chkApp .detailSectionAnchorRail,
   .chkApp .detailControlRowTop,
   .chkApp .detailControlRowActions {

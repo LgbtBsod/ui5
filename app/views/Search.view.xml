@@ -6,7 +6,7 @@
 
     <Page
         showHeader="false"
-        enableScrolling="true"
+        enableScrolling="false"
         class="pageTransparent">
 
         <content>

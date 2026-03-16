@@ -212,18 +212,6 @@
   min-width: 0.3rem;
 }
 
-@media (max-width: 90rem) {
-  .chkApp .searchWorkbenchDock {
-    --search-action-sticky-top: calc(var(--search-filter-sticky-top) + 0.5rem);
-  }
-}
-
-@media (max-width: 72rem) {
-  .chkApp .searchWorkbenchDock {
-    --search-action-sticky-top: calc(var(--search-filter-sticky-top) + 0.5rem);
-  }
-}
-
 @media (max-width: 56rem) {
   .chkApp .searchWorkbenchDock {
     --search-filter-sticky-top: calc(var(--app-shell-offset) + 0.3rem);

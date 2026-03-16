@@ -1,6 +1,12 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <OverflowToolbar class="toolbarTransparent detailSectionToolbar workbenchToolbarSurface sectionToolbarSurface">
         <Title text="{i18n>barriersTitle}"/>
+        <ObjectStatus
+            text="{path:'selected>/barriers', formatter:'.formatRowCount'}"
+            state="None"
+            class="chipSm statusChip detailSectionCountChip">
+            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
+        </ObjectStatus>
         <ToolbarSpacer/>
 
         <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandBarriers" class="sapUiTinyMarginEnd actionPrioritySecondary">

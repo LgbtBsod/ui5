@@ -7,7 +7,7 @@
             text="{path:'state>/validationSummary', formatter:'.formatValidationSummaryText'}"
             type="Error"
             showIcon="true"
-            class="sapUiTinyMarginTop sapUiTinyMarginBottom chkFeedbackStrip chkFeedbackError workflowMessageSurface"
+            class="chkFeedbackStrip chkFeedbackError workflowMessageSurface"
             visible="{= ${view>/validationShown} &amp;&amp; ${state>/validationSummary/hasErrors} }">
             <link>
                 <Link

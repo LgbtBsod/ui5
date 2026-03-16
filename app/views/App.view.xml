@@ -55,7 +55,7 @@
         </MessageStrip>
 
         <HBox
-            class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop sapUiTinyMarginBottom appFeedbackCorrelation"
+            class="appFeedbackCorrelation"
             alignItems="Center"
             renderType="Bare"
             visible="{= !!${state>/ui/feedback/banner/global/correlationId} }">

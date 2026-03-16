@@ -71,6 +71,7 @@ sap.ui.define([
         formatLockStateText: DetailFormatters.formatLockStateText,
         formatLockStateSemantic: DetailFormatters.formatLockStateSemantic,
         formatPassedTotal: DetailFormatters.formatPassedTotal,
+        formatRowCount: DetailFormatters.formatRowCount,
         formatAttachmentCategoryText: DetailFormatters.formatAttachmentCategoryText,
         hasRows: function (a) { return Array.isArray(a) && a.length > 0; },
         isEmptyRows: function (a) { return !Array.isArray(a) || a.length === 0; },

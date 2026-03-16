@@ -20,6 +20,10 @@ sap.ui.define([
         return CtxFactory.buildCtx(oController, {});
     }
 
+    function coerceText(vValue) {
+        return String(vValue || "").trim();
+    }
+
     return {
         onInit: function () {
             AnalyticsLifecycleBehavior.onInit(this, new AnalyticsFacade(), REFRESH_STATE_TASK_KEY);
@@ -180,6 +184,25 @@ sap.ui.define([
 
         onCloseAnalytics: function () {
             AnalyticsReportBehavior.onCloseAnalytics(this);
+        },
+
+        formatRefreshStatusText: function (sStatus, bIsRunning, sLastError, sLastSuccessAt, sQueuedText, sRunningText, sUpdatedText, sIdleText) {
+            var sNormalizedStatus = coerceText(sStatus).toUpperCase();
+            var sResolvedError = coerceText(sLastError);
+            var sResolvedSuccessAt = coerceText(sLastSuccessAt);
+            if (sNormalizedStatus === "REQUESTED") {
+                return coerceText(sQueuedText);
+            }
+            if (bIsRunning) {
+                return coerceText(sRunningText);
+            }
+            if (sResolvedError) {
+                return sResolvedError;
+            }
+            if (sResolvedSuccessAt) {
+                return coerceText(sUpdatedText) + ": " + sResolvedSuccessAt;
+            }
+            return coerceText(sIdleText);
         }
     };
 });
