@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime","PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"],function(e,t){"use strict";var n=e.getText;return{_ensureAppViewDefaults:function(){t.ensureAppViewDefaults(this)},_syncShellState:function(){t.syncShellState(this,{getText:n})}}});
-//# sourceMappingURL=AppStateBehavior.js.map

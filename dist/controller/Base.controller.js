@@ -1,2 +1,0 @@
-sap.ui.define(["sap/ui/core/mvc/Controller","PRODUCTION_CONTROL_CHECKLIST/controller/base/RouterMixin","PRODUCTION_CONTROL_CHECKLIST/controller/base/ModelAccessMixin","PRODUCTION_CONTROL_CHECKLIST/controller/base/EffectMixin","PRODUCTION_CONTROL_CHECKLIST/controller/base/ThemeMixin"],function(e,C,O,r,n){"use strict";return e.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Base",Object.assign({},C,O,r,n))});
-//# sourceMappingURL=Base.controller.js.map

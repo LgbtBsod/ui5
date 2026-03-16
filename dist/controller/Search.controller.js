@@ -1,2 +1,0 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller","PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchControllerBehavior"],function(e,r){"use strict";return e.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Search",Object.assign({},r))});
-//# sourceMappingURL=Search.controller.js.map
