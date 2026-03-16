@@ -18,12 +18,18 @@ sap.ui.define([
 
         mOptions.componentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
         ComponentDetailMetaSyncRuntime.syncDetailMeta(oStateModel, mOptions.statePaths || {});
+        if (oComponent._fnOnFullSave) {
+            window.removeEventListener(VALUES.FULL_SAVE_EVENT, oComponent._fnOnFullSave);
+        }
         oComponent._fnOnFullSave = function () { oComponent._oGcd.resetOnFullSave(); };
         window.addEventListener(VALUES.FULL_SAVE_EVENT, oComponent._fnOnFullSave);
         oComponent.setModel(mOptions.layoutModel, ComponentListenerContracts.MODEL_NAMES.LAYOUT);
         oComponent.setModel(mOptions.cacheModel, ComponentListenerContracts.MODEL_NAMES.CACHE);
         oComponent.setModel(mOptions.masterDataModel, ComponentListenerContracts.MODEL_NAMES.MASTER_DATA);
         oComponent.setModel(mOptions.envModel, ComponentListenerContracts.MODEL_NAMES.ENV);
+        if (oComponent._fnBeforeUnload) {
+            window.removeEventListener("beforeunload", oComponent._fnBeforeUnload);
+        }
         oComponent._fnBeforeUnload = function (oEvent) {
             var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, mOptions.statePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
             var bHasUnsaved = WorkflowContracts.isEditableMode(sMode) && ModelStateRuntime.readOnModel(oStateModel, PATHS.IS_DIRTY, false);

@@ -48,7 +48,7 @@ function collectControllers() {
 
 function collectViews() {
     return listFiles(ROOT, {
-        include: ["view/**/*.xml"]
+        include: ["views/**/*.xml"]
     }).map((file) => path.join(ROOT, file));
 }
 
@@ -132,7 +132,7 @@ function collectTodoTriggers() {
 
 
 function readNavigationRouteMap() {
-    var navigationContracts = path.join(ROOT, RUNTIME_ROOT, "service/contracts/NavigationContracts.js");
+    var navigationContracts = path.join(ROOT, RUNTIME_ROOT, "contracts/NavigationContracts.js");
     var text;
     var map = {};
     var routesBlock;
@@ -194,7 +194,7 @@ function collectUnreachableRoutes() {
 function collectUnreachableDialogs() {
     const findings = [];
     const dialogFragments = listFiles(ROOT, {
-        include: ["view/fragment/**/*Dialog.fragment.xml"]
+        include: ["views/fragment/**/*Dialog.fragment.xml"]
     }).map((file) => path.join(ROOT, file));
     const jsFiles = listFiles(ROOT, {
         include: ["controller/**/*.js", "service/**/*.js"]

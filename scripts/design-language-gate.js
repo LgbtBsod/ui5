@@ -11,16 +11,18 @@ function read(file) {
 }
 
 const styleCss = [
-  read('css/app-styles.css'),
-  read('css/modules/01_theme-modes.css'),
-  read('css/modules/20_surface.css'),
-  read('css/modules/21_controls.css'),
-  read('css/modules/23_dialogs.css'),
-  read('css/modules/90_ui5_patches.css')
+  read('styles/app-styles.css'),
+  read('styles/modules/01_theme-modes.css'),
+  read('styles/modules/20_surface.css'),
+  read('styles/modules/21_controls.css'),
+  read('styles/modules/23_dialogs.css'),
+  read('styles/modules/90_ui5_patches.css'),
+  read('styles/modules/controls/24_switches_and_toggles.css'),
+  read('styles/modules/dialogs/23_dialog_shell.css')
 ].join('\n');
 const themeMixin = read('controller/base/ThemeMixin.js');
-const themeService = read('util/ThemeService.js');
-const themePhilosophy = read('util/ThemePhilosophy.js');
+const themeService = read('service/framework/ThemeService.js');
+const themePhilosophy = read('service/framework/ThemePhilosophy.js');
 const indexHtml = read('index.html');
 const bootstrapRuntime = read('ui5-bootstrap-runtime.js');
 
@@ -39,7 +41,7 @@ if (!/:root\.light-mode/.test(styleCss) || !/body\.appDark/.test(styleCss)) {
 if (!/platformPrecisionEnterprise/.test(styleCss) || !/platformCalmModern/.test(styleCss) || !/platformPrecisionEnterprise/.test(themePhilosophy) || !/platformCalmModern/.test(themePhilosophy)) {
   fail('Theme philosophy bridge is missing distinct platform contracts.');
 }
-if (!/\.sapMSwt\b/.test(styleCss) || !/\.sapMInputBaseContentWrapper\b/.test(styleCss) || !/\.sapMDialog\b/.test(styleCss)) {
+if (!/\.sapMSwt\b|\.sapMSwtCont\b|\.sapMSwtInner\b/.test(styleCss) || !/\.sapMInputBaseContentWrapper\b/.test(styleCss) || !/\.sapMDialog\b|\.sapMDialogScrollCont\b/.test(styleCss)) {
   fail('Core control styling coverage missing for switch/input/dialog.');
 }
 if (!/backdrop-filter\s*:/.test(styleCss)) {
@@ -50,7 +52,7 @@ if (issues.length) {
   exitWithMappedIssues(
     'design-language-gate',
     issues,
-    (issue) => ({ file: 'css/app-styles.css', message: issue }),
+    (issue) => ({ file: 'styles/app-styles.css', message: issue }),
     { checks: issues.length },
     { asJson: process.argv.includes('--json') }
   );

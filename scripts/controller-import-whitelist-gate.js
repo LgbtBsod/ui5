@@ -11,8 +11,9 @@ const targets = [
 
 const allowed = [
   /^PRODUCTION_CONTROL_CHECKLIST\/controller\/Base\.controller$/,
-  /^PRODUCTION_CONTROL_CHECKLIST\/controller\/support\/.+$/,
+  /^PRODUCTION_CONTROL_CHECKLIST\/controller\/(support|shared|base|app|search|detail|analytics)\/.+$/,
   /^PRODUCTION_CONTROL_CHECKLIST\/service\/domain\/.+\/[^/]+Facade$/,
+  /^PRODUCTION_CONTROL_CHECKLIST\/service\/features\/.+\/runtime\/.+$/,
   /^PRODUCTION_CONTROL_CHECKLIST\/service\/framework\/.+$/,
   /^PRODUCTION_CONTROL_CHECKLIST\/util\/.+$/,
   /^PRODUCTION_CONTROL_CHECKLIST\/model\/.+$/,

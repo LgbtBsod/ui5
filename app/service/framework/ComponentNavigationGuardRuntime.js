@@ -55,12 +55,15 @@ sap.ui.define([
         return WorkflowContracts.isEditableMode(sMode) || sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
     }
 
-    function attachBeforeRouteMatched(mOptions) {
+    function bindBeforeRouteMatched(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
         var StatePaths = mOptions.statePaths || {};
         var oRouter = oComponent.getRouter();
 
+        if (oComponent._oLifecycleRouter && oComponent._fnBeforeRouteMatched && oComponent._oLifecycleRouter.detachBeforeRouteMatched) {
+            oComponent._oLifecycleRouter.detachBeforeRouteMatched(oComponent._fnBeforeRouteMatched, oComponent);
+        }
         oComponent._oLifecycleRouter = oRouter;
         oComponent._fnBeforeRouteMatched = function (oEvent) {
             if (ModelStateRuntime.readOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, false)) {
@@ -127,6 +130,6 @@ sap.ui.define([
     }
 
     return {
-        attachBeforeRouteMatched: attachBeforeRouteMatched
+        attachBeforeRouteMatched: bindBeforeRouteMatched
     };
 });

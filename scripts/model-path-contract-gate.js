@@ -19,19 +19,26 @@ const requiredPaths = [
   '/workflow/search/segments'
 ];
 
-function collectDomainFiles(dir) {
+function collectJsFiles(dir) {
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
+    return [];
+  }
   return fs.readdirSync(dir).flatMap((name) => {
     const p = path.join(dir, name);
     const st = fs.statSync(p);
     if (st.isDirectory()) {
-      return collectDomainFiles(p);
+      return collectJsFiles(p);
     }
     return p.endsWith('.js') ? [p] : [];
   });
 }
 
 (function main() {
-  const files = collectDomainFiles(path.join(root, runtimeRoot, 'service/domain'));
+  const files = [
+    ...collectJsFiles(path.join(root, runtimeRoot, 'service/domain')),
+    ...collectJsFiles(path.join(root, runtimeRoot, 'service/framework')),
+    ...collectJsFiles(path.join(root, runtimeRoot, 'model'))
+  ];
   const text = files.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
 
   requiredPaths.forEach((contractPath) => {
