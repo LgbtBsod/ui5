@@ -11,10 +11,12 @@ const verbose = process.argv.includes('--verbose');
 const rootDir = path.resolve(__dirname, '..');
 
 function runValidator(validator, index, total) {
-  const scriptPath = path.join(__dirname, validator.file);
+  const fileSpec = String(validator.file || '').trim();
+  const firstToken = fileSpec.split(/\s+/)[0] || '';
+  const scriptPath = path.join(__dirname, firstToken);
   if (!fs.existsSync(scriptPath)) return { status: 1, output: `Missing validator script: ${scriptPath}` };
   console.log(`\n[${index + 1}/${total}] ${validator.name}`);
-  const result = runNodeScript(rootDir, `scripts/${validator.file}`);
+  const result = runNodeScript(rootDir, `scripts/${fileSpec}`);
   if (result.status !== 0) {
     const advisory = validator.mode === 'advisory';
     console.log(advisory ? 'WARN' : 'FAIL');

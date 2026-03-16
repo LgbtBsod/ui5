@@ -14,6 +14,27 @@ function ensureDocs(docsDir) {
   fs.mkdirSync(docsDir, { recursive: true });
 }
 
+function fragmentNameToFile(fragmentName) {
+  if (!fragmentName) {
+    return '';
+  }
+  return fragmentName.replace(/^PRODUCTION_CONTROL_CHECKLIST\./, '').replace(/\./g, '/') + '.fragment.xml';
+}
+
+function collectCompositeXml(rootDir, entryFile, visited) {
+  const seen = visited || new Set();
+  if (!entryFile || seen.has(entryFile)) {
+    return [];
+  }
+  seen.add(entryFile);
+  const xml = readText(rootDir, entryFile);
+  const out = [xml];
+  [...xml.matchAll(/fragmentName\s*=\s*"([^"]+)"/g)].forEach((match) => {
+    collectCompositeXml(rootDir, fragmentNameToFile(match[1]), seen).forEach((item) => out.push(item));
+  });
+  return out;
+}
+
 function collectRuntimeFiles(rootDir) {
   const roots = ['controller', 'service', 'infra', 'util', 'manager'];
   const files = ['Component.js', 'manifest.json'];
@@ -108,8 +129,8 @@ function collectIntents(rootDir) {
   const runtimeRoot = detectRuntimeRoot(rootDir);
   const component = readText(rootDir, 'Component.js');
   const manifest = JSON.parse(readText(rootDir, 'manifest.json'));
-  const searchView = readText(rootDir, 'view/Search.view.xml');
-  const searchControllerActions = readText(rootDir, 'controller/support/SearchControllerActions.js');
+  const searchView = collectCompositeXml(rootDir, 'views/Search.view.xml').join('\n');
+  const searchControllerActions = readText(rootDir, 'controller/search/SearchSmartTableBehavior.js');
 
   const odataRoot = '/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/';
   const useBatch = /new\s+sap\.ui\.model\.odata\.v2\.ODataModel\([^\)]*useBatch\s*:\s*true/s.test(component)
@@ -117,11 +138,11 @@ function collectIntents(rootDir) {
 
   const hasSmartTable = /smartTable:SmartTable[\s\S]*entitySet="ChecklistSearchSet"/.test(searchView);
   const hasSfb = /smartFilterBar:SmartFilterBar/.test(searchView);
-  const hasBeforeRebind = /onBeforeSmartTableRebind\s*:\s*function\s*\(/.test(searchControllerActions);
+  const hasBeforeRebind = /function\s+onBeforeSmartTableRebind\s*\(|onBeforeSmartTableRebind\s*:\s*function\s*\(/.test(searchControllerActions);
   const forbiddenHits = scanForbiddenPatterns(rootDir);
 
   const { Filter, FilterOperator } = buildFilterStubs();
-  const builder = loadSapModule(path.join(rootDir, runtimeRoot, 'util/search/SearchFilterBuilder.js'), {
+  const builder = loadSapModule(path.join(rootDir, runtimeRoot, 'service/features/search/contracts/SearchFilterBuilder.js'), {
     'sap/ui/model/Filter': Filter,
     'sap/ui/model/FilterOperator': FilterOperator
   });

@@ -3,7 +3,14 @@
 const { runGate } = require('./lib/gateRunner');
 const { scanPatterns } = require('./lib/patternScan');
 
-const EFFECT_ALLOW = new Set(['service/framework/EffectApplier.js', 'app/service/framework/EffectApplier.js']);
+const FEEDBACK_UI_ALLOW = new Set([
+  'service/framework/EffectApplier.js',
+  'app/service/framework/EffectApplier.js',
+  'service/framework/EffectDialogFeedbackRuntime.js',
+  'app/service/framework/EffectDialogFeedbackRuntime.js',
+  'service/framework/EffectToastRuntime.js',
+  'app/service/framework/EffectToastRuntime.js'
+]);
 const POLICY_ALLOW = new Set([
   'service/framework/FeedbackPolicy.js',
   'app/service/framework/FeedbackPolicy.js',
@@ -18,9 +25,9 @@ runGate({
   include: ['controller/**/*.js', 'service/**/*.js', 'infra/**/*.js', 'util/**/*.js', 'model/**/*.js', 'ports/**/*.js'],
   check: ({ file, text }) => {
     const violations = [];
-    if (!EFFECT_ALLOW.has(file)) {
+    if (!FEEDBACK_UI_ALLOW.has(file)) {
       violations.push(...scanPatterns(file, text, [
-        { id: 'feedback', regex: /MessageBox|MessageToast/, message: 'UI feedback allowed only in EffectApplier' }
+        { id: 'feedback', regex: /MessageBox|MessageToast/, message: 'UI feedback allowed only in sanctioned effect feedback boundary' }
       ]));
     }
     if (!POLICY_ALLOW.has(file)) {

@@ -73,7 +73,7 @@ function collectControllerMethodSet(ctrlPath) {
 }
 
 check('XML handlers exist in owning controllers', () => {
-  const xmlFiles = getFiles(['view'], ['.xml']);
+  const xmlFiles = getFiles(['views'], ['.xml']);
   const eventAttrs = ['press','change','liveChange','search','selectionChange','itemPress','confirm','cancel','close','initialise','filterChange','beforeRebindTable','dataReceived'];
   const missing = [];
   for (const file of xmlFiles) {
@@ -126,7 +126,7 @@ check('Module resolution for local PRODUCTION_CONTROL_CHECKLIST dependencies', (
 });
 
 check('No fallback REST/dataset anti-patterns on UI runtime path', () => {
-  const files = getFiles(['controller','util','service'], ['.js']).concat(getFiles(['view'], ['.xml']));
+  const files = getFiles(['controller','util','service'], ['.js']).concat(getFiles(['views'], ['.xml']));
   let hasChecklistRest = false;
   let hasDatasetFallback = false;
   for (const f of files) {
@@ -170,13 +170,12 @@ check('OData + SmartTable integrity', () => {
 });
 
 [
-  ['Gateway parity validator', 'gateway-parity-validator.js'],
+  ['Gateway parity validator', 'run-gate.js gateway-parity-validator'],
   ['SAP Gateway only gate', 'sap-gateway-only-gate.js'],
   ['Smart OData contract gate', 'smart-odata-contract-gate.js'],
-  ['Architecture gate', 'architecture-gate.js'],
+  ['Architecture gate', 'run-gate.js architecture-gate'],
   ['Runtime settings gate', 'runtime-settings-gate.js'],
   ['Forbidden pattern scanner', 'forbidden-patterns.js'],
-  ['Layer map generator', 'layer-map.js']
 ].forEach(([title, script]) => {
   check(title, () => runValidatorScript(script));
 });

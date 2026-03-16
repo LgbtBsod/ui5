@@ -144,8 +144,11 @@ function extractUi5Dependencies(source) {
 
 function runNodeScript(rootDir, scriptRelPath, args) {
   const cp = require('child_process');
+  const commandParts = Array.isArray(scriptRelPath)
+    ? scriptRelPath.slice()
+    : String(scriptRelPath || '').trim().split(/\s+/).filter(Boolean);
   const scriptArgs = Array.isArray(args) ? args : [];
-  const result = cp.spawnSync(process.execPath, [scriptRelPath, ...scriptArgs], {
+  const result = cp.spawnSync(process.execPath, [...commandParts, ...scriptArgs], {
     cwd: rootDir,
     encoding: 'utf8'
   });
