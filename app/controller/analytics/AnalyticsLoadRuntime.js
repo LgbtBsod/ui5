@@ -82,10 +82,7 @@ sap.ui.define([
                 return oResult;
             }).catch(function (oError) {
                 var sErrorMessage = String((oError && oError.message) || "Analytics load failed");
-                ControllerViewStateRuntime.setMany(oController, {
-                    "/error": sErrorMessage,
-                    "/busy": false
-                });
+                ControllerViewStateRuntime.set(oController, "/error", sErrorMessage);
                 ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
                     status: "error",
                     ready: false,

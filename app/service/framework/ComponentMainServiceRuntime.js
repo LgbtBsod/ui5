@@ -2,17 +2,12 @@ sap.ui.define([], function () {
     "use strict";
 
     function createMainServiceModel(oComponent, mDeps, sMainServiceUri) {
-        var ODataModel = mDeps.ODataModel;
         var GatewayBackendService = mDeps.GatewayBackendService;
-        var oMainServiceModel = oComponent.getModel("mainService") || new ODataModel(sMainServiceUri, {
-            useBatch: true,
-            tokenHandling: true,
-            defaultBindingMode: "OneWay",
-            defaultCountMode: "Inline",
-            refreshAfterChange: false,
-            defaultOperationMode: "Server",
-            updateMethod: "MERGE"
-        });
+        var oMainServiceModel = oComponent.getModel("mainService");
+
+        if (!oMainServiceModel) {
+            throw new Error("Manifest-driven mainService model is missing. Check sap.ui5/models/mainService in manifest.json.");
+        }
 
         oMainServiceModel.setDefaultBindingMode("OneWay");
         oMainServiceModel.setDeferredGroups(["changes", "autosave", "saveFlow", "locks"]);

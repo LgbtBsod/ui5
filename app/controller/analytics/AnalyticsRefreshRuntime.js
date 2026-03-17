@@ -18,6 +18,9 @@ sap.ui.define([
     function pollRefreshStateUntilSettled(oController, iAttemptsLeft, fnFetchRefreshState) {
         var iRemaining = Number(iAttemptsLeft);
         var iPollToken = Number(oController && oController._iAnalyticsRefreshPollToken || 0);
+        if (!isFinite(iRemaining) || iRemaining <= 0) {
+            return Promise.resolve({});
+        }
         return Promise.resolve(fnFetchRefreshState()).then(function (oState) {
             var oRefreshState = oState || {};
             var sStatus = String(oRefreshState.status || "").toUpperCase();

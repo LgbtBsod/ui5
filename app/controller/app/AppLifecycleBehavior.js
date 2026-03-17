@@ -147,17 +147,19 @@ sap.ui.define([
             ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SHELL_READY, {
                 route: String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "") || "").trim()
             });
+            if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+                SchedulingRuntime.nextFrame(function () {
+                    if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === "function") {
+                        this._bShellStatePostStartupSyncScheduled = true;
+                        this._syncShellState();
+                    }
+                    markStartupReady();
+                }.bind(this));
+                return;
+            }
             if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === "function") {
                 this._bShellStatePostStartupSyncScheduled = true;
-                if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
-                    window.requestAnimationFrame(function () {
-                        this._syncShellState();
-                    }.bind(this));
-                }
-            }
-            if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
-                SchedulingRuntime.nextFrame(markStartupReady);
-                return;
+                this._syncShellState();
             }
             markStartupReady();
         },

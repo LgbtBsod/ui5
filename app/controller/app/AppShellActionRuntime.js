@@ -69,17 +69,23 @@ sap.ui.define([
 
     function refreshShellUserContext(oController) {
         var oModel = ControllerModelRuntime.defaultModel(oController);
-        function finalize() {
-            oController._closeShellOverlay("user");
+        function syncShellUi() {
             oController._syncShellState();
             oController._syncShellMetrics();
         }
         return SecurityTokenRefresh.refresh(oModel).then(function () {
             return refreshCurrentUser(oController);
+        }).then(function (bRefreshed) {
+            if (bRefreshed) {
+                oController._closeShellOverlay("user");
+            }
+            syncShellUi();
+            return bRefreshed;
         }).catch(function (oError) {
             UiDecisionCoordinator.notifyShellRefreshFailure({ controller: oController, error: oError });
+            syncShellUi();
             throw oError;
-        }).finally(finalize);
+        });
     }
 
     return {

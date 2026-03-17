@@ -30,7 +30,7 @@ sap.ui.define([
             return oController._pAnalyticsReportDialog;
         }
         oController._pAnalyticsReportDialog = Fragment.load({
-            id: oController.getView().getId(),
+            id: oController.getView().createId("analyticsReportDialog"),
             name: DialogContracts.getFragmentName(DialogContracts.IDS.ANALYTICS_REPORT),
             controller: oController
         }).then(function (oDialog) {

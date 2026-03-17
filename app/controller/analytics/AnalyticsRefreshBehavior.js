@@ -10,7 +10,7 @@ sap.ui.define([
         var oRefreshState = ControllerViewStateRuntime.get(oController, "/refreshState", {}) || {};
         if (AnalyticsRefreshRuntime.isRefreshQueued(oRefreshState)) {
             ControllerViewStateRuntime.set(oController, "/refreshBusy", true);
-            return Promise.resolve(fnPollRefreshStateUntilSettled(oController, AnalyticsRefreshRuntime.REFRESH_POLL_MAX_ATTEMPTS)).then(function () {
+            return fnPollRefreshStateUntilSettled(oController, AnalyticsRefreshRuntime.REFRESH_POLL_MAX_ATTEMPTS).then(function () {
                 return fnLoadAnalytics(oController, "pollRefresh");
             }).finally(function () {
                 ControllerViewStateRuntime.set(oController, "/refreshBusy", false);

@@ -50,7 +50,7 @@ sap.ui.define([
         if (oController._pAnalyticsBreakdownsContent) {
             return oController._pAnalyticsBreakdownsContent;
         }
-        oController._pAnalyticsBreakdownsContent = Promise.resolve(Core.loadLibrary("sap.viz")).then(function () {
+        oController._pAnalyticsBreakdownsContent = Core.loadLibrary("sap.viz", { async: true }).then(function () {
             return Fragment.load({
                 id: oController.getView().createId("analyticsBreakdownsFragment"),
                 name: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsBreakdowns",

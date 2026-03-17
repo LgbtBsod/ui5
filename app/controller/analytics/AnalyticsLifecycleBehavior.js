@@ -23,6 +23,11 @@ sap.ui.define([
             || 900000;
         clearRefreshTimer(oController);
         oController._iAnalyticsRouteRefreshTimer = setInterval(function () {
+            var oView = oController && oController.getView && oController.getView();
+            if (!oController || oController.bIsDestroyed || (oView && oView.bIsDestroyed)) {
+                clearRefreshTimer(oController);
+                return;
+            }
             if (typeof oController._loadAnalytics === "function") {
                 oController._loadAnalytics("routeTimer");
             }

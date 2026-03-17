@@ -37,7 +37,6 @@ sap.ui.define([
         onOpenShellSettings: function (oEvent) { return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "settings"); },
         onOpenShellAnalytics: function () {
             NavigationIntentService.navigateToAnalytics(this);
-            return Promise.resolve();
         },
         onOpenShellUserMenu: function (oEvent) { return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "user"); },
         onGlobalBannerRetry: function () { return AppShellActionRuntime.runGlobalBannerRetry(this); },
@@ -78,9 +77,9 @@ sap.ui.define([
         onShellUserPrimaryAction: function () {
             var sActionKind = String(ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_SHELL_USER_ACTION_KIND, "") || "").trim();
             if (ActionContract.normalizeShellUserAction(sActionKind) === ActionContract.SHELL_USER_ACTIONS.REFRESH_CONTEXT) {
-                return Promise.resolve(this._refreshShellUserContext());
+                return this._refreshShellUserContext();
             }
-            return Promise.resolve();
+            return undefined;
         },
         onRefreshShellUser: function () { return AppShellActionRuntime.refreshCurrentUser(this); },
         _refreshShellUserContext: function () { return AppShellActionRuntime.refreshShellUserContext(this); },
