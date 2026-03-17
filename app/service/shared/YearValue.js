@@ -2,7 +2,7 @@ sap.ui.define([], function () {
     "use strict";
 
     function toTrimmedString(vValue) {
-        return String(vValue || "").trim();
+        return String(vValue == null ? "" : vValue).trim();
     }
 
     function sanitizeYearInput(vValue) {
@@ -17,7 +17,7 @@ sap.ui.define([], function () {
             return "";
         }
         iYear = Number(sYear);
-        return Number.isFinite(iYear) && iYear > 0 ? String(iYear) : "";
+        return isFinite(iYear) && iYear > 0 ? String(iYear) : "";
     }
 
     function parseYearOrNull(vValue) {

@@ -8,7 +8,10 @@ sap.ui.define([], function () {
             BUSY: "/busy",
             COMPARE_YEAR: "/compareYear",
             COMPARE_YEAR_OPTIONS: "/compareYearOptions",
+            COMPARE_YEAR_VALUE_STATE: "/compareYearValueState",
+            COMPARE_YEAR_VALUE_STATE_TEXT: "/compareYearValueStateText",
             ERROR: "/error",
+            REFRESH_BUSY: "/refreshBusy",
             REFRESH_STATE: "/refreshState",
             SELECTED_SOURCE: "/selectedSource",
             SELECTED_YEAR: "/selectedYear",
@@ -36,7 +39,6 @@ sap.ui.define([], function () {
             COMPARE_YEAR_CHANGED: "compareYearChanged",
             COMPARE_YEAR_PICKED: "compareYearPicked",
             MANUAL: "manual",
-            MANUAL_REFRESH: "manualRefresh",
             ROUTE_MATCHED: "routeMatched",
             SOURCE_CHANGED: "sourceChanged",
             YEAR_CHANGED: "yearChanged",
@@ -45,6 +47,7 @@ sap.ui.define([], function () {
         }),
         MESSAGES: Object.freeze({
             ANALYTICS_LOAD_FAILED: "Analytics load failed",
+            ANALYTICS_UNAVAILABLE: "Analytics unavailable",
             INVALID_YEAR: "Analytics year is invalid"
         })
     });
