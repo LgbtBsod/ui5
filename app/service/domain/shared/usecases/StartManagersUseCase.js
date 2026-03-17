@@ -1,39 +1,21 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result"
-], function (Result) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime"
+], function (Result, EditSessionRuntime) {
     "use strict";
-
-    function startIf(oMgr, fnGuard) {
-        if (!oMgr) { return; }
-        if (fnGuard && !fnGuard(oMgr)) { return; }
-        oMgr.start();
-    }
-
-    function stopIf(oMgr, sMethod) {
-        var sStopMethod = sMethod || "stop";
-        if (oMgr && typeof oMgr[sStopMethod] === "function") {
-            oMgr[sStopMethod]();
-        }
-    }
 
     return {
         execute: function (input, ctx) {
             var m = ctx.managers || {};
             var bLockActive = !!(input && input.lockRuntimeActive);
             if (input && input.scope === "core") {
-                if (m.gcd && m.gcd.resetOnFullSave) {
-                    m.gcd.resetOnFullSave();
-                }
+                EditSessionRuntime.resetAfterWrite(m);
             }
             if (input && input.scope === "lock") {
                 if (bLockActive) {
-                    startIf(m.heartbeat, function (o) { return !o.isRunning || !o.isRunning(); });
-                    startIf(m.autosave);
-                    startIf(m.lockStatus);
-                    startIf(m.gcd, function (o) { return !o.isRunning || !o.isRunning(); });
-                    startIf(m.activity);
+                    EditSessionRuntime.startLockScoped(m);
                 } else {
-                    [m.heartbeat, m.autosave, m.lockStatus, m.activity, m.gcd].forEach(function (o) { stopIf(o); });
+                    EditSessionRuntime.stopLockScoped(m);
                 }
             }
             return Promise.resolve(Result.ok({ started: true }, []));

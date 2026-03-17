@@ -9,6 +9,8 @@ sap.ui.define([
             EventProvider.apply(this, arguments);
             this._iIdleMs = Number(mOptions && mOptions.idleMs);
             this._iTimer = null;
+            this._iThrottleMs = Math.max(250, Number(mOptions && mOptions.throttleMs) || 750);
+            this._iLastActivityAt = 0;
             this._fnActivityHandler = this._reset.bind(this);
             this._aEvents = ["click", "keydown", "input", "change", "scroll", "touchstart"];
         },
@@ -19,12 +21,17 @@ sap.ui.define([
             }
             this.stop();
             this._aEvents.forEach(function (sEvt) {
-                window.addEventListener(sEvt, this._fnActivityHandler, { passive: sEvt === "scroll" });
+                window.addEventListener(sEvt, this._fnActivityHandler, { passive: sEvt === "scroll" || sEvt === "touchstart" });
             }.bind(this));
             this._reset();
         },
 
         _reset: function () {
+            var iNow = Date.now();
+            if (this._iLastActivityAt && iNow - this._iLastActivityAt < this._iThrottleMs) {
+                return;
+            }
+            this._iLastActivityAt = iNow;
             this.fireEvent("activity", { at: new Date().toISOString() });
             this._iTimer = TimerRuntime.restartTimeout(this._iTimer, function () {
                 this.fireEvent("idleTimeout");
@@ -44,6 +51,7 @@ sap.ui.define([
         },
         stop: function () {
             this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearTimeout);
+            this._iLastActivityAt = 0;
 
             this._aEvents.forEach(function (sEvt) {
                 window.removeEventListener(sEvt, this._fnActivityHandler);

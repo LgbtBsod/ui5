@@ -38,7 +38,8 @@ sap.ui.define([
     "sap/ui/Device",
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime"
 ], function (
     UIComponent,
     ModelFactory,
@@ -79,7 +80,8 @@ sap.ui.define([
     Device,
     InteractionFX,
     ThemeService,
-    ComponentAppRuntime
+    ComponentAppRuntime,
+    EditSessionRuntime
 ) {
     "use strict";
 
@@ -152,20 +154,7 @@ sap.ui.define([
             return StartManagersUseCase.execute({ scope: "lock", lockRuntimeActive: true }, { managers: this._collectManagers() });
         },
         _stopAllManagers: function () {
-            var mManagers = this._collectManagers();
-            [mManagers.heartbeat, mManagers.autosave, mManagers.lockStatus, mManagers.activity].forEach(function (oManager) {
-                if (oManager && typeof oManager.stop === "function") {
-                    oManager.stop();
-                }
-            });
-            if (mManagers.gcd) {
-                if (typeof mManagers.gcd.stop === "function") {
-                    mManagers.gcd.stop();
-                }
-                if (typeof mManagers.gcd.destroyManager === "function") {
-                    mManagers.gcd.destroyManager();
-                }
-            }
+            EditSessionRuntime.stopAll(this._collectManagers());
         },
         _collectManagers: function () {
             return ComponentAppRuntime.collectManagers(this);

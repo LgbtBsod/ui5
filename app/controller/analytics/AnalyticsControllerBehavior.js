@@ -62,9 +62,14 @@ sap.ui.define([
         },
 
         _onAnalyticsMatched: function () {
+            AnalyticsLifecycleBehavior.onRouteEnter(this);
             return AnalyticsLoadBehavior.onAnalyticsMatched(this, function (oController, sReason) {
                 return oController._loadAnalytics(sReason);
             });
+        },
+
+        _onAnalyticsRouteLeave: function () {
+            AnalyticsLifecycleBehavior.onRouteLeave(this);
         },
 
         _startAnalyticsRefreshTimer: function () {

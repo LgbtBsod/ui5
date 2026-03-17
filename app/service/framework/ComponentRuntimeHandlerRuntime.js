@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime"
+], function (EditSessionRuntime) {
     "use strict";
 
     function createForceReadOnlyHandler(mOptions) {
@@ -15,11 +17,7 @@ sap.ui.define([], function () {
             if (!Object.prototype.hasOwnProperty.call(mForceInput, "preserveDirty")) {
                 mForceInput.preserveDirty = false;
             }
-            oComponent._oHeartbeat.stop();
-            oComponent._oLockStatus.stop();
-            oComponent._oAutoSave.stop();
-            oComponent._oActivity.stop();
-            oComponent._oGcd.stop();
+            EditSessionRuntime.stopLockScoped(oComponent._collectManagers());
             return oComponent._detailFacade.forceReadOnly(mForceInput, oComponent._ctx).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);

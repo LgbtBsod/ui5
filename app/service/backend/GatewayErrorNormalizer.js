@@ -36,10 +36,16 @@ sap.ui.define([
     }
 
     function extractTopLevelFields(oPayload) {
+        var sCode = String(
+            (oPayload && (oPayload.code || oPayload.Code || oPayload.reason_code || oPayload.ReasonCode)) ||
+            ""
+        ).trim();
         return {
+            code: sCode,
             lockRefreshed: !!(oPayload && oPayload.lock_refreshed),
             lockExpiresAt: String((oPayload && (oPayload.lock_expires_at || oPayload.lock_expires)) || "").trim(),
             serverNow: String((oPayload && oPayload.server_now) || "").trim(),
+            requestId: String((oPayload && (oPayload.request_id || oPayload.requestId)) || "").trim(),
             ownerSessionMatch: oPayload && Object.prototype.hasOwnProperty.call(oPayload, "owner_session_match")
                 ? !!oPayload.owner_session_match
                 : null
@@ -84,6 +90,7 @@ sap.ui.define([
             correlationId: String(
                 mHeaders["x-correlation-id"]
                 || mHeaders["x-request-id"]
+                || extractTopLevelFields(oPayload).requestId
                 || (oError && (oError.correlationId || oError.requestId))
                 || ""
             ).trim()

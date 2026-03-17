@@ -47,6 +47,8 @@ sap.ui.define([
 
     function onInit(oController) {
         oController._facade = new SearchFacade();
+        oController._bSearchInitialRouteHandled = false;
+        oController._bSearchRouteActive = false;
         oController._iAnalyticsRefreshTimer = null;
         oController._iAnalyticsRailPulseTimer = null;
         oController._iSearchWorkingHintTimer = null;
@@ -62,12 +64,34 @@ sap.ui.define([
         ControllerRouteRuntime.attachMatched(oController, [
             { name: NavigationContracts.ROUTES.SEARCH, handler: oController._onSearchMatched },
             { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onDetailSearchContextMatched },
-            { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: oController._onDetailSearchContextMatched }
+            { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: oController._onDetailSearchContextMatched },
+            { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
         ]);
         SearchViewBehavior.bindAnalyticsRefreshTimer(oController);
         SearchViewBehavior.syncSmartControlAvailability(oController);
         SearchViewBehavior.bindPowerUserShortcuts(oController);
         SearchViewBehavior.bindSearchViewportRuntime(oController);
+    }
+
+    function onAfterRendering(oController) {
+        var oStateModel = oController.getModel && oController.getModel(STATE_MODEL);
+        var sCurrentRouteName = String(oStateModel && oStateModel.getProperty("/currentRouteName") || "").trim();
+        var sLayout = String(oStateModel && oStateModel.getProperty("/layout") || "").trim();
+        if (!oController._bSearchInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.SEARCH) {
+            oController._bSearchInitialRouteHandled = true;
+            oController._onSearchMatched();
+            return;
+        }
+        if (sCurrentRouteName === NavigationContracts.ROUTES.DETAIL || sCurrentRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT) {
+            oController._onDetailSearchContextMatched({
+                getParameter: function (sName) {
+                    if (sName === "arguments") {
+                        return { layout: sLayout };
+                    }
+                    return null;
+                }
+            });
+        }
     }
 
     function onExit(oController) {
@@ -98,9 +122,12 @@ sap.ui.define([
             oController._oSearchGroupDialog.destroy();
             oController._oSearchGroupDialog = null;
         }
+        oController._bSearchInitialRouteHandled = null;
+        oController._bSearchRouteActive = null;
     }
 
     function onSearchMatched(oController, fnApplyAnalyticsDrilldownIntent) {
+        oController._bSearchRouteActive = true;
         SearchViewBehavior.onSearchMatched(oController);
         fnApplyAnalyticsDrilldownIntent();
     }
@@ -111,10 +138,21 @@ sap.ui.define([
         if (sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
             return;
         }
+        oController._bSearchRouteActive = false;
+        SearchViewBehavior.clearAnalyticsRefreshTimer(oController);
+        SearchViewBehavior.captureSearchScrollPosition(oController);
         SearchViewBehavior.syncSearchContextForDetailRoute(oController);
     }
 
+    function onAnalyticsMatched(oController) {
+        oController._bSearchRouteActive = false;
+        SearchViewBehavior.clearAnalyticsRefreshTimer(oController);
+        SearchViewBehavior.captureSearchScrollPosition(oController);
+    }
+
     return {
+        onAfterRendering: onAfterRendering,
+        onAnalyticsMatched: onAnalyticsMatched,
         onDetailSearchContextMatched: onDetailSearchContextMatched,
         onExit: onExit,
         onInit: onInit,

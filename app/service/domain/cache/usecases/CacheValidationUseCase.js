@@ -23,6 +23,10 @@ sap.ui.define([
             || "";
     }
 
+    function stampDeltaMs(iServerStamp, iCacheStamp) {
+        return Math.abs(Number(iServerStamp || 0) - Number(iCacheStamp || 0));
+    }
+
     function CacheValidationUseCase() { UseCase.call(this, "CacheValidationUseCase"); }
     CacheValidationUseCase.prototype = Object.create(UseCase.prototype);
     CacheValidationUseCase.prototype.constructor = CacheValidationUseCase;
@@ -55,7 +59,8 @@ sap.ui.define([
             var iSrv = Number(a[1] || 0);
             var iCli = toMs((oEntry && oEntry.lastChangeSet) || readSnapshotStamp(oSnap));
             var bHasSnapshot = !!oSnap;
-            var bValid = bHasSnapshot && Math.abs(iSrv - iCli) <= iTolerance;
+            var iStampDeltaMs = stampDeltaMs(iSrv, iCli);
+            var bValid = bHasSnapshot && iStampDeltaMs <= iTolerance;
             var bInvalidate = bHasSnapshot && !bValid;
             var pInvalidate = (bInvalidate && typeof oCache.clear === "function")
                 ? Promise.resolve(oCache.clear(sRootId, sEntityKind)).catch(function () { return null; })
@@ -77,13 +82,22 @@ sap.ui.define([
                         payload: { rootId: sRootId, entityKind: sEntityKind }
                     });
                 }
-                emit(mCtx, { rootId: sRootId, valid: bValid, invalidated: bInvalidate, serverStamp: iSrv, cacheStamp: iCli });
+                emit(mCtx, {
+                    rootId: sRootId,
+                    valid: bValid,
+                    invalidated: bInvalidate,
+                    serverStamp: iSrv,
+                    cacheStamp: iCli,
+                    stampDeltaMs: iStampDeltaMs,
+                    toleranceMs: iTolerance
+                });
                 return Result.ok({
                     cacheEntry: oEntry,
                     valid: bValid,
                     invalidated: bInvalidate,
                     serverStamp: iSrv,
                     cacheStamp: iCli,
+                    stampDeltaMs: iStampDeltaMs,
                     snapshot: bValid ? oSnap : null
                 });
             });

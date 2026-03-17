@@ -28,10 +28,12 @@ CLASS zcl_zodata_contract_service DEFINITION
         iv_version_number TYPE int4
         iv_is_autosave    TYPE abap_bool
         iv_no_changes     TYPE abap_bool
+        iv_code           TYPE string DEFAULT 'LOCK_OK'
         iv_reason_code    TYPE string DEFAULT 'SAVED'
         iv_lock_refreshed TYPE abap_bool DEFAULT abap_true
         iv_lock_expires   TYPE timestampl OPTIONAL
         iv_server_now     TYPE timestampl OPTIONAL
+        iv_request_id     TYPE string OPTIONAL
       CHANGING
         cs_result         TYPE any.
 
@@ -170,10 +172,12 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
       <lv_version_number> TYPE any,
       <lv_is_autosave>    TYPE any,
       <lv_no_changes>     TYPE any,
+      <lv_code>           TYPE any,
       <lv_reason_code>    TYPE any,
       <lv_lock_refreshed> TYPE any,
       <lv_lock_expires>   TYPE any,
-      <lv_server_now>     TYPE any.
+      <lv_server_now>     TYPE any,
+      <lv_request_id>     TYPE any.
 
     ASSIGN COMPONENT 'PCCT_UUID' OF STRUCTURE cs_result TO <lv_pcct_uuid>.
     IF <lv_pcct_uuid> IS ASSIGNED.
@@ -200,6 +204,11 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
       <lv_no_changes> = iv_no_changes.
     ENDIF.
 
+    ASSIGN COMPONENT 'CODE' OF STRUCTURE cs_result TO <lv_code>.
+    IF <lv_code> IS ASSIGNED.
+      <lv_code> = iv_code.
+    ENDIF.
+
     ASSIGN COMPONENT 'REASON_CODE' OF STRUCTURE cs_result TO <lv_reason_code>.
     IF <lv_reason_code> IS ASSIGNED.
       <lv_reason_code> = iv_reason_code.
@@ -218,6 +227,11 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
     ASSIGN COMPONENT 'SERVER_NOW' OF STRUCTURE cs_result TO <lv_server_now>.
     IF <lv_server_now> IS ASSIGNED AND iv_server_now IS NOT INITIAL.
       <lv_server_now> = iv_server_now.
+    ENDIF.
+
+    ASSIGN COMPONENT 'REQUEST_ID' OF STRUCTURE cs_result TO <lv_request_id>.
+    IF <lv_request_id> IS ASSIGNED AND iv_request_id IS NOT INITIAL.
+      <lv_request_id> = iv_request_id.
     ENDIF.
   ENDMETHOD.
 

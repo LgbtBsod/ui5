@@ -28,12 +28,16 @@ sap.ui.define([
     function onInit(oController, oFacade, sRefreshTaskKey) {
         oController._facade = oFacade;
         oController._bAnalyticsInitialRouteHandled = false;
+        oController._bAnalyticsRouteActive = false;
         ControllerViewStateRuntime.initModel(oController, function () {
             return AnalyticsBuilderRuntime.createInitialViewState(sRefreshTaskKey);
         });
         AnalyticsBuilderRuntime.applyBuilderSelection(oController);
         ControllerRouteRuntime.attachMatched(oController, [
-            { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
+            { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched },
+            { name: NavigationContracts.ROUTES.SEARCH, handler: oController._onAnalyticsRouteLeave },
+            { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onAnalyticsRouteLeave },
+            { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: oController._onAnalyticsRouteLeave }
         ]);
     }
 
@@ -62,7 +66,17 @@ sap.ui.define([
         oController._pAnalyticsReportDialog = null;
         oController._facade = null;
         oController._bAnalyticsInitialRouteHandled = null;
+        oController._bAnalyticsRouteActive = null;
         oController._iAnalyticsRouteRefreshTimer = null;
+    }
+
+    function onRouteEnter(oController) {
+        oController._bAnalyticsRouteActive = true;
+    }
+
+    function onRouteLeave(oController) {
+        oController._bAnalyticsRouteActive = false;
+        clearRefreshTimer(oController);
     }
 
     return {
@@ -70,6 +84,8 @@ sap.ui.define([
         onExit: onExit,
         onInit: onInit,
         clearRefreshTimer: clearRefreshTimer,
+        onRouteEnter: onRouteEnter,
+        onRouteLeave: onRouteLeave,
         startRefreshTimer: startRefreshTimer
     };
 });

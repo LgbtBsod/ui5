@@ -35,9 +35,11 @@ sap.ui.define([
     function extractSignal(oError) {
         var aSignals = [];
         var aDetails = Array.isArray(oError && oError.details) ? oError.details : [];
+        var oBackend = oError && oError.backend;
         aSignals.push(upper(oError && oError.code));
         aSignals.push(upper(oError && oError.kind));
         aSignals.push(upper(oError && oError.message));
+        aSignals.push(upper(oBackend && oBackend.code));
         aDetails.forEach(function (oDetail) {
             aSignals.push(upper(oDetail && oDetail.code));
             aSignals.push(upper(oDetail && oDetail.message));
@@ -61,6 +63,35 @@ sap.ui.define([
     function classifyError(oError) {
         var sSignal = extractSignal(oError);
         var iStatus = Number((oError && (oError.statusCode || oError.status)) || 0) || 0;
+        var sBackendCode = upper(oError && oError.backend && oError.backend.code);
+        if (sBackendCode === TAXONOMY.LOCK_EXPIRED) {
+            return {
+                taxonomy: TAXONOMY.LOCK_EXPIRED,
+                persistenceState: STATES.LOCK_LOST,
+                messageKey: "persistenceLockExpired"
+            };
+        }
+        if (sBackendCode === TAXONOMY.LOCK_STOLEN) {
+            return {
+                taxonomy: TAXONOMY.LOCK_STOLEN,
+                persistenceState: STATES.LOCK_LOST,
+                messageKey: "persistenceLockStolen"
+            };
+        }
+        if (sBackendCode === TAXONOMY.LOCK_NOT_OWNED_BY_SESSION) {
+            return {
+                taxonomy: TAXONOMY.LOCK_NOT_OWNED_BY_SESSION,
+                persistenceState: STATES.LOCK_LOST,
+                messageKey: "persistenceLockNotOwned"
+            };
+        }
+        if (sBackendCode === TAXONOMY.LOCK_MISSING) {
+            return {
+                taxonomy: TAXONOMY.LOCK_MISSING,
+                persistenceState: STATES.LOCK_LOST,
+                messageKey: "persistenceLockMissing"
+            };
+        }
         if (iStatus === 401 || iStatus === 403 || hasAny(sSignal, ["PERMISSION", "AUTH", "SESSION_EXPIRED"])) {
             return {
                 taxonomy: TAXONOMY.PERMISSION_DENIED,

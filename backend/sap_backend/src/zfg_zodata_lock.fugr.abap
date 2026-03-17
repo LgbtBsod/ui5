@@ -47,7 +47,7 @@ FUNCTION zodata_lock_control.
 
       " Productive persistence truth:
       " - one row per BO/object
-      " - last_refresh_at defines validity
+      " - physical column last_touch_at acts as canonical last_refresh_at timestamp
       " - owner/session fields define ownership
       UPDATE ztodata_hdr
          SET lock_owner      = iv_owner
@@ -102,7 +102,7 @@ FUNCTION zodata_lock_control.
     WHEN 'S' OR 'V'. " status / validate
       " Canonical runtime truth must be checked against:
       " 1. lock row exists
-      " 2. last_touch_at + TTL > now
+      " 2. physical last_touch_at/lock_expires_at represent the last_refresh_at truth
       " 3. session_guid matches active owner for validate
       SELECT SINGLE last_touch_at
                     lock_expires_at

@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime"
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime) {
     "use strict";
 
     function attachLockRuntime(mOptions) {
@@ -22,11 +23,7 @@ sap.ui.define([
 
         oComponent._handleKilledLock = function (oPayload) {
             var bHadUnsavedChanges = !!ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DIRTY, false);
-            oComponent._oHeartbeat.stop();
-            oComponent._oLockStatus.stop();
-            oComponent._oAutoSave.stop();
-            oComponent._oActivity.stop();
-            oComponent._oGcd.stop();
+            EditSessionRuntime.stopLockScoped(oComponent._collectManagers());
             if (bHadUnsavedChanges) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createBannerInput({
                     severity: "warning",

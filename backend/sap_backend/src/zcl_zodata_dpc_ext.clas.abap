@@ -274,7 +274,20 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
           |Объект заблокирован пользователем { lx_lock->user_fullname } (Таб.№ { lx_lock->pernr }).| ).
 
       CATCH zcx_zodata_error INTO DATA(lx_map).
+        ROLLBACK WORK.
+        TRY.
+            mo_lock_manager->unlock( ls_key ).
+          CATCH zcx_lock_error.
+        ENDTRY.
         raise_busi_exception( lx_map->get_text( ) ).
+
+      CATCH cx_root INTO DATA(lx_unexpected).
+        ROLLBACK WORK.
+        TRY.
+            mo_lock_manager->unlock( ls_key ).
+          CATCH zcx_lock_error.
+        ENDTRY.
+        raise_busi_exception( lx_unexpected->get_text( ) ).
     ENDTRY.
   ENDMETHOD.
 
@@ -617,7 +630,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
           lt_failed TYPE /bobf/t_frw_key,
           lt_msg    TYPE /bobf/t_frw_message_k.
     DATA ls_lock_hb TYPE zstr_pcct_lock_heartbeat_rs.
+    DATA ls_root    TYPE ty_root_row.
     DATA lv_now_ts  TYPE timestampl.
+    DATA lv_request_id TYPE string.
 
     validate_save_request( is_request ).
 
@@ -644,16 +659,21 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     IF lt_change IS INITIAL.
       " Nothing to save (empty delta payload) — return current state
       GET TIME STAMP FIELD lv_now_ts.
+      ls_root = read_root_row( is_request-root-pcct_uuid ).
+      lv_request_id = |SAVE-{ sy-datum }{ sy-uzeit }|.
       mo_contract->fill_save_response(
         EXPORTING
           iv_pcct_uuid      = is_request-root-pcct_uuid
-          iv_changed_on     = lv_now_ts
-          iv_version_number = 0
+          iv_changed_on     = COND #( WHEN ls_root-changed_on IS INITIAL THEN lv_now_ts ELSE ls_root-changed_on )
+          iv_version_number = ls_root-version_number
           iv_is_autosave    = iv_is_autosave
           iv_no_changes     = abap_true
+          iv_code           = zcl_zodata_contract_constants=>c_code_lock_ok
           iv_reason_code    = 'NO_CHANGES'
           iv_lock_refreshed = abap_true
+          iv_lock_expires   = ls_root-lock_expires_at
           iv_server_now     = lv_now_ts
+          iv_request_id     = lv_request_id
         CHANGING
           cs_result         = rs_response ).
       RETURN.
@@ -680,16 +700,21 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
 
     " ── Build response ──────────────────────────────────────────
     GET TIME STAMP FIELD lv_now_ts.
+    ls_root = read_root_row( is_request-root-pcct_uuid ).
+    lv_request_id = |SAVE-{ sy-datum }{ sy-uzeit }|.
     mo_contract->fill_save_response(
       EXPORTING
         iv_pcct_uuid      = is_request-root-pcct_uuid
-        iv_changed_on     = lv_now_ts
-        iv_version_number = 0
+        iv_changed_on     = COND #( WHEN ls_root-changed_on IS INITIAL THEN lv_now_ts ELSE ls_root-changed_on )
+        iv_version_number = ls_root-version_number
         iv_is_autosave    = iv_is_autosave
         iv_no_changes     = abap_false
+        iv_code           = zcl_zodata_contract_constants=>c_code_lock_ok
         iv_reason_code    = 'SAVED'
         iv_lock_refreshed = abap_true
+        iv_lock_expires   = ls_root-lock_expires_at
         iv_server_now     = lv_now_ts
+        iv_request_id     = lv_request_id
       CHANGING
         cs_result         = rs_response ).
 

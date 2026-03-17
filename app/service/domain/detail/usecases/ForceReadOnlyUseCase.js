@@ -39,6 +39,7 @@ sap.ui.define([
         var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
         var oStateModel = mCtx && mCtx.stateModel;
+        var oSnapshotState = (oUiState && typeof oUiState.get === "function" && oUiState.get("snapshot", "/")) || {};
         var sTransitionState = isIdleTimeoutReason(sReason) ? "IDLE_TIMEOUT_GRACE" : (isLockLostReason(sReason) ? "LOCK_LOST" : "FORCED_READ_ONLY");
         var bShouldRelease = !!(
             sRootId &&
@@ -65,8 +66,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
-                Effects.modelPatch("snapshot", "/", {}),
-                Effects.modelPatch("selected", "/", {}),
+                Effects.modelPatch("selected", "/", oSnapshotState),
                 Effects.modelPatch("state", ModelPathContracts.LOCK_EXPIRES, null),
                 Effects.modelPatch("uiState", "/lock", {
                     ok: false,

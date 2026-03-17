@@ -136,12 +136,14 @@ The frontend save path expects:
 - `pcct_uuid`
 - `changed_on`
 - `version_number`
+- `code`
 - `is_autosave`
 - `no_changes`
 - `messages`
 - `lock_refreshed`
 - `lock_expires_at`
 - `server_now`
+- `request_id`
 - `reason_code`
 
 Save and autosave must:
@@ -149,7 +151,14 @@ Save and autosave must:
 1. validate active lock ownership by `session_guid`
 2. reject stale or stolen sessions before any modify
 3. commit immediately
-4. return the authoritative new version/timestamp
+4. return the authoritative persisted version/timestamp from `ZTODATA_HDR`
+5. emit `code=LOCK_OK`, `lock_refreshed=true`, `request_id`, `server_now`
+
+Delete must:
+
+1. rollback on modify failure
+2. best-effort unlock on exception path
+3. avoid stranding lock ownership until TTL expiry
 
 ### Permission contract
 
@@ -204,6 +213,8 @@ The frontend runtime expects:
 - `GcdIntervalMs=30000`
 - `NetworkGraceMs=15000`
 - `CacheToleranceMs=5500`
+
+Profile selection remains environment-driven; no end-user runtime toggle is part of the productive contract.
 
 ## 3. Required DDIC Objects
 

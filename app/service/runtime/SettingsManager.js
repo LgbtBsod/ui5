@@ -125,6 +125,14 @@ sap.ui.define([
 
         getLoadedAt: function () {
             return _loadedAt;
+        },
+
+        reset: function () {
+            _loaded = false;
+            _loadedAt = 0;
+            _loadingPromise = null;
+            _runtimeCache = {};
+            _summaryLogged = false;
         }
     };
 });

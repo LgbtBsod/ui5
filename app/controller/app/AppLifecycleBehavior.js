@@ -139,7 +139,6 @@ sap.ui.define([
                 NavigationContracts.ROUTES.SEARCH
             ) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
             oTargetPane = ShellPaneRuntime.ensurePaneForRoute(this, sRouteName, NavigationContracts);
-            ShellLayoutRuntime.syncLayoutState(this, oStateModel);
             oLayout = this.byId && this.byId("mainFcl");
             if (oLayout && oTargetPane && NavigationContracts.ROUTES.SEARCH !== sRouteName && typeof oLayout.toMidColumnPage === "function") {
                 oLayout.toMidColumnPage(oTargetPane.getParent && oTargetPane.getParent() ? oTargetPane.getParent() : oTargetPane);

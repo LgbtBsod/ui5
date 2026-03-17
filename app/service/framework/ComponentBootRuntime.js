@@ -7,6 +7,7 @@ sap.ui.define([
     "use strict";
 
     var STAGE_ERRORS = ComponentBootContracts.STAGE_ERRORS;
+    var READINESS_STATUS = ComponentBootContracts.READINESS_STATUS;
     var READINESS_APP_PATH = "/readiness/app";
 
     function cleanupCacheSessions(oCacheAdapter, oStateModel, sTabSessionId) {
@@ -67,9 +68,12 @@ sap.ui.define([
                     serverState: null,
                     checkLists: []
                 });
-                // Canonical readiness success seam stays explicit at the boot facade:
-                // ModelStateRuntime.writeOnModel(oStateModel, "/readiness/app", {
-                oStateModel.getProperty(READINESS_APP_PATH);
+                oStateModel.setProperty(READINESS_APP_PATH, Object.assign({}, oStateModel.getProperty(READINESS_APP_PATH) || {}, {
+                    status: READINESS_STATUS.READY,
+                    ready: true,
+                    readyAt: sReadyAt,
+                    error: ""
+                }));
                 bBootCompleted = true;
             });
         }).catch(function (oError) {

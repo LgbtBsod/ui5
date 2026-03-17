@@ -67,6 +67,16 @@ sap.ui.define([
         });
     }
 
+    function waitBeforeRetry(iDelayMs) {
+        var iResolvedDelay = Math.max(0, Number(iDelayMs) || 0);
+        if (!iResolvedDelay) {
+            return Promise.resolve();
+        }
+        return new Promise(function (resolve) {
+            window.setTimeout(resolve, iResolvedDelay);
+        });
+    }
+
     function execute(mRequest) {
         var oRequest = mRequest || {};
         var sMethod = String(oRequest.method || "GET").trim().toUpperCase() || "GET";
@@ -117,7 +127,14 @@ sap.ui.define([
                 }
                 var oPolicy = RequestResiliencePolicy.classify(sMethod, oResolvedError);
                 if (iAttempt < iRetryLimit && oPolicy.retryable) {
-                    return runAttempt(iAttempt + 1);
+                    return waitBeforeRetry(RequestResiliencePolicy.resolveRetryDelayMs(
+                        sMethod,
+                        iAttempt,
+                        oRequest.retryBaseDelayMs,
+                        oRequest.retryMaxDelayMs
+                    )).then(function () {
+                        return runAttempt(iAttempt + 1);
+                    });
                 }
                 throw oResolvedError;
             });

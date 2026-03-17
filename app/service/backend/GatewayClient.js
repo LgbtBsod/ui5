@@ -67,6 +67,10 @@ sap.ui.define([
             _oModel = oModel || null;
             _sServiceUrl = String((mOptions && mOptions.serviceUrl) || (oModel && oModel.sServiceUrl) || "").replace(/\/+$/, "");
         },
+        reset: function () {
+            _oModel = null;
+            _sServiceUrl = "";
+        },
         setHeader: function (sName, sValue) {
             var oModel = ensureModel();
             var mHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});

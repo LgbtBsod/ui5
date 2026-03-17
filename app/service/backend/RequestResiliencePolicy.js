@@ -4,6 +4,8 @@ sap.ui.define([], function () {
     var DEFAULT_SAFE_TIMEOUT_MS = 15000;
     var DEFAULT_MUTATE_TIMEOUT_MS = 45000;
     var DEFAULT_SAFE_RETRY_COUNT = 1;
+    var DEFAULT_RETRY_BASE_DELAY_MS = 400;
+    var DEFAULT_RETRY_MAX_DELAY_MS = 2500;
 
     function normalizeMethod(vMethod) {
         return String(vMethod || "GET").trim().toUpperCase() || "GET";
@@ -98,6 +100,22 @@ sap.ui.define([], function () {
         return isSafeRead(vMethod) ? DEFAULT_SAFE_RETRY_COUNT : 0;
     }
 
+    function resolveRetryDelayMs(vMethod, iAttemptIndex, iBaseDelayMs, iMaxDelayMs) {
+        var iBase = Number(iBaseDelayMs);
+        var iMax = Number(iMaxDelayMs);
+        var iAttempt = Math.max(0, Number(iAttemptIndex) || 0);
+        if (!isSafeRead(vMethod)) {
+            return 0;
+        }
+        if (!Number.isFinite(iBase) || iBase < 50) {
+            iBase = DEFAULT_RETRY_BASE_DELAY_MS;
+        }
+        if (!Number.isFinite(iMax) || iMax < iBase) {
+            iMax = DEFAULT_RETRY_MAX_DELAY_MS;
+        }
+        return Math.min(iMax, iBase * Math.pow(2, iAttempt));
+    }
+
     function matrix() {
         return {
             safeRead: {
@@ -127,6 +145,7 @@ sap.ui.define([], function () {
         isSafeRead: isSafeRead,
         isTimeoutError: isTimeoutError,
         matrix: matrix,
+        resolveRetryDelayMs: resolveRetryDelayMs,
         resolveRetryCount: resolveRetryCount,
         resolveTimeoutMs: resolveTimeoutMs
     };

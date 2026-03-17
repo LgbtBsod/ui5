@@ -153,7 +153,9 @@ sap.ui.define([
             this._fnAdaptiveViewportSync = null;
             ControllerRouteRuntime.attachMatched(this, [
                 { name: NavigationContracts.ROUTES.DETAIL, handler: this._onDetailMatched },
-                { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: this._onDetailMatched }
+                { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: this._onDetailMatched },
+                { name: NavigationContracts.ROUTES.SEARCH, handler: this._onDetailRouteLeave },
+                { name: NavigationContracts.ROUTES.ANALYTICS, handler: this._onDetailRouteLeave }
             ]);
 
             ControllerViewStateRuntime.initModel(this, buildInitialViewState.bind(null, this));
@@ -259,6 +261,29 @@ sap.ui.define([
                     return null;
                 }
             });
+        },
+
+        _onDetailRouteLeave: function () {
+            var oOwner = this.getOwnerComponent && this.getOwnerComponent();
+            var oStateModel = ControllerModelRuntime.state(this);
+            if (oOwner && typeof oOwner._stopLockScopedManagers === "function") {
+                oOwner._stopLockScopedManagers();
+            }
+            if (oOwner && typeof oOwner._releaseActiveLockOnLeave === "function") {
+                oOwner._releaseActiveLockOnLeave(oStateModel, this.getModel && this.getModel());
+            }
+            if (this._mLazyDialogs) {
+                Object.keys(this._mLazyDialogs).forEach(function (sKey) {
+                    var oDialog = this._mLazyDialogs[sKey];
+                    if (oDialog && typeof oDialog.close === "function") {
+                        oDialog.close();
+                    }
+                }, this);
+            }
+            this._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(this._iAttachmentDropZoneBindTimer);
+            this._iDetailCloseFallbackTimer = SchedulingRuntime.clearTimer(this._iDetailCloseFallbackTimer);
+            this._clearLocationValueHelpSearchTimer();
+            this._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(this._iLocationVhTableSyncTimer);
         }
     };
 });

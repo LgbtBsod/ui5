@@ -56,6 +56,10 @@ sap.ui.define([
             SearchLifecycleBehavior.onInit(this);
         },
 
+        onAfterRendering: function () {
+            SearchLifecycleBehavior.onAfterRendering(this);
+        },
+
         onExit: function () {
             SearchLifecycleBehavior.onExit(this);
         },
@@ -66,6 +70,10 @@ sap.ui.define([
 
         _onDetailSearchContextMatched: function (oEvent) {
             SearchLifecycleBehavior.onDetailSearchContextMatched(this, oEvent);
+        },
+
+        _onAnalyticsMatched: function () {
+            SearchLifecycleBehavior.onAnalyticsMatched(this);
         },
 
         onSmartFilterInitialise: function () {

@@ -79,8 +79,8 @@ sap.ui.define([
     }
 
     function navigateToAnalytics(oController) {
-        var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
+        var oStateModel = readStateModel(oController);
         var sCurrentRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
 
         if (sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS) {
@@ -89,8 +89,6 @@ sap.ui.define([
         }
 
         setAnalyticsReturnIntent(oController);
-        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.ANALYTICS);
-        ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
         if (oRouter && typeof oRouter.navTo === "function") {
             oRouter.navTo(NavigationContracts.ROUTES.ANALYTICS, {}, false);
         }
@@ -115,16 +113,6 @@ sap.ui.define([
             ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", null);
         }
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", null);
-        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", oIntent.routeName || NavigationContracts.ROUTES.SEARCH);
-        ModelStateRuntime.writeOnModel(
-            oStateModel,
-            "/layout",
-            oIntent.routeName === NavigationContracts.ROUTES.ANALYTICS
-                ? NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
-                : (oIntent.routeName === NavigationContracts.ROUTES.SEARCH
-                    ? NavigationContracts.LAYOUTS.ONE_COLUMN
-                    : LayoutStateRuntime.normalizeLayout((oIntent.routeArgs && oIntent.routeArgs.layout) || NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED))
-        );
         if ((oIntent.routeName || NavigationContracts.ROUTES.SEARCH) === NavigationContracts.ROUTES.SEARCH) {
             navigateToSearch(oController);
             return;
@@ -135,11 +123,8 @@ sap.ui.define([
     }
 
     function navigateToSearch(oController) {
-        var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
-        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH);
-        ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
         if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
             oHashChanger.replaceHash("");
             return;
@@ -154,7 +139,6 @@ sap.ui.define([
     }
 
     function navigateToDetail(oController, sRootId, sLayout) {
-        var oStateModel = readStateModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var sId = String(sRootId || "").trim();
         var sResolvedLayout = LayoutStateRuntime.normalizeLayout(sLayout);
@@ -162,15 +146,10 @@ sap.ui.define([
         if (!oRouter || typeof oRouter.navTo !== "function" || !sId) {
             return;
         }
-        ModelStateRuntime.writeOnModel(oStateModel, "/selectedId", sId);
         if (sResolvedLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
-            ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.DETAIL_LAYOUT);
-            ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN);
             oRouter.navTo(NavigationContracts.ROUTES.DETAIL_LAYOUT, { id: sId, layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN }, false);
             return;
         }
-        ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.DETAIL);
-        ModelStateRuntime.writeOnModel(oStateModel, "/layout", NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED);
         oRouter.navTo(NavigationContracts.ROUTES.DETAIL, { id: sId }, false);
     }
 

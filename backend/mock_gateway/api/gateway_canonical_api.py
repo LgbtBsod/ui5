@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
-from config import DEFAULT_PAGE_SIZE
+from config import DEFAULT_PAGE_SIZE, LOCK_TTL
 from database import get_db
 from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem, FrontendRuntimeSettings, LockEntry, Person
 from services.authorization_service import AuthorizationService
@@ -1973,17 +1973,29 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
     _apply_save_root(root, _save_request_root(payload), db)
     _apply_save_checks(db, root, payload.get("checks"))
     _apply_save_barriers(db, root, payload.get("barriers"))
+    active_lock = LockService._active_lock(db, root.id)
+    lock_refreshed_at = now_utc()
+    if active_lock and str(active_lock.session_guid or "").strip() == str(session_guid or "").strip():
+        active_lock.last_refresh_at = lock_refreshed_at
+        active_lock.expires_at = lock_refreshed_at + LOCK_TTL
     root.changed_by = CurrentUserService.resolve_uname(db=db) or root.changed_by or "ANON"
     root.changed_on = now_utc()
     root.version_number = int(root.version_number or 0) + 1
     db.commit()
     AnalyticsService.mark_dirty()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
+    active_lock = LockService._active_lock(db, root.id)
+    request_id = str(uuid.uuid4())
     response.headers["sap-message"] = build_sap_message("Autosave completed", "success", code="SAVED")
     return odata_entity({
         "pcct_uuid": _hex(root.id),
         "changed_on": format_datetime(root.changed_on),
-        "version_number": int(root.version_number or 0)
+        "version_number": int(root.version_number or 0),
+        "code": "LOCK_OK",
+        "lock_refreshed": True,
+        "lock_expires_at": format_datetime(LockService._lock_expires_at(active_lock)) if active_lock else "",
+        "server_now": format_datetime(now_utc()),
+        "request_id": request_id
     })
 
 
@@ -2104,17 +2116,29 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
     except RuntimeError as ex:
         db.rollback()
         return ex.args[0]
+    active_lock = LockService._active_lock(db, root.id)
+    lock_refreshed_at = now_utc()
+    if active_lock and str(active_lock.session_guid or "").strip() == str(session_guid or "").strip():
+        active_lock.last_refresh_at = lock_refreshed_at
+        active_lock.expires_at = lock_refreshed_at + LOCK_TTL
     root.changed_by = CurrentUserService.resolve_uname(db=db) or root.changed_by or "ANON"
     root.changed_on = now_utc()
     root.version_number = int(root.version_number or 0) + 1
     db.commit()
     AnalyticsService.mark_dirty()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
+    active_lock = LockService._active_lock(db, root.id)
+    request_id = str(uuid.uuid4())
     response.headers["sap-message"] = build_sap_message("Checklist updated", "success", code="SAVED")
     return odata_entity({
         "pcct_uuid": _hex(root.id),
         "changed_on": format_datetime(root.changed_on),
-        "version_number": int(root.version_number or 0)
+        "version_number": int(root.version_number or 0),
+        "code": "LOCK_OK",
+        "lock_refreshed": True,
+        "lock_expires_at": format_datetime(LockService._lock_expires_at(active_lock)) if active_lock else "",
+        "server_now": format_datetime(now_utc()),
+        "request_id": request_id
     })
 
 

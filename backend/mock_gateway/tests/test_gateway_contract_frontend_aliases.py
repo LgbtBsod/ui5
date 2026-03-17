@@ -190,6 +190,11 @@ def test_gateway_canonical_contract_and_metadata():
         assert saved_body.get("pcct_uuid") == created_key
         assert saved_body.get("version_number") == 2
         assert saved_body.get("changed_on")
+        assert saved_body.get("code") == "LOCK_OK"
+        assert saved_body.get("lock_refreshed") is True
+        assert saved_body.get("lock_expires_at")
+        assert saved_body.get("server_now")
+        assert saved_body.get("request_id")
         saved_attachments = client.get(f"{SERVICE_ROOT}/AttachmentSet", params={"$filter": f"RootKey eq '{created_key}'"})
         assert saved_attachments.status_code == 200
         assert len(saved_attachments.json().get("d", {}).get("results", [])) == 2
@@ -215,6 +220,11 @@ def test_gateway_canonical_contract_and_metadata():
         assert autosaved_body.get("pcct_uuid") == created_key
         assert autosaved_body.get("version_number") == 3
         assert autosaved_body.get("changed_on")
+        assert autosaved_body.get("code") == "LOCK_OK"
+        assert autosaved_body.get("lock_refreshed") is True
+        assert autosaved_body.get("lock_expires_at")
+        assert autosaved_body.get("server_now")
+        assert autosaved_body.get("request_id")
 
         read_checks = client.get(f"{SERVICE_ROOT}/ChecklistCheckSet", params={"$filter": f"RootKey eq '{created_key}'"})
         assert read_checks.status_code == 200
@@ -270,6 +280,11 @@ def test_gateway_canonical_contract_and_metadata():
         assert 'Property Name="GrantedOperations" Type="Edm.String"' in metadata
         assert 'Property Name="Uname"' not in metadata
         assert 'EntityType Name="SaveChangesResponse"' in metadata
+        assert 'Property Name="code" Type="Edm.String"' in metadata
+        assert 'Property Name="lock_refreshed" Type="Edm.Boolean"' in metadata
+        assert 'Property Name="lock_expires_at" Type="Edm.DateTime"' in metadata
+        assert 'Property Name="server_now" Type="Edm.DateTime"' in metadata
+        assert 'Property Name="request_id" Type="Edm.String"' in metadata
         assert 'FunctionImport Name="AutoSave" ReturnType="' + ODATA_NS + '.SaveChangesResponse"' in metadata
         assert 'FunctionImport Name="SaveChanges" ReturnType="' + ODATA_NS + '.SaveChangesResponse"' in metadata
         for name in ["CreateChecklist", "CopyChecklist", "AutoSave", "SaveChanges", "SetChecklistStatus", "LockAcquire", "LockHeartbeat", "LockRelease"]:

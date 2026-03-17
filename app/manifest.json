@@ -167,50 +167,25 @@
         {
           "pattern": "",
           "name": "search",
-          "layout": "OneColumn",
-          "target": "search"
+          "layout": "OneColumn"
         },
         {
           "pattern": "analytics",
           "name": "analytics",
-          "layout": "MidColumnFullScreen",
-          "target": "analytics"
+          "layout": "MidColumnFullScreen"
         },
         {
           "pattern": "checklist/{id}",
           "name": "detail",
-          "layout": "TwoColumnsMidExpanded",
-          "target": "detail"
+          "layout": "TwoColumnsMidExpanded"
         },
         {
           "pattern": "checklist/{id}/{layout}",
           "name": "detailLayout",
-          "layout": "TwoColumnsMidExpanded",
-          "target": "detailLayout"
+          "layout": "TwoColumnsMidExpanded"
         }
       ],
-      "targets": {
-        "search": {
-          "viewName": "Search",
-          "viewLevel": 1,
-          "controlAggregation": "beginColumnPages"
-        },
-        "analytics": {
-          "viewName": "Analytics",
-          "viewLevel": 2,
-          "controlAggregation": "midColumnPages"
-        },
-        "detail": {
-          "viewName": "Detail",
-          "viewLevel": 2,
-          "controlAggregation": "midColumnPages"
-        },
-        "detailLayout": {
-          "viewName": "Detail",
-          "viewLevel": 2,
-          "controlAggregation": "midColumnPages"
-        }
-      }
+      "targets": {}
     },
     "config": {
       "backendMode": "real",

@@ -7,7 +7,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchScrollRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchStickyOffsetRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentLockReleaseRuntime.qunit",
-    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailPersistenceRuntime.qunit"
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailPersistenceRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/CacheValidationUseCase.qunit"
 ], function () {
     "use strict";
 });
