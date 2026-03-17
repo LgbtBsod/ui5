@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT_DIR"
+
+node scripts/unit-smoke.js --json
+node scripts/enterprise-readiness-gate.js
+node scripts/backend-contract-drift-gate.js
+node scripts/backend-semver-policy-gate.js
+
+node scripts/ux-state-coverage-gate.js
+node scripts/a11y-gate.js
+node scripts/message-taxonomy-gate.js
+node scripts/ux-slo-report.js

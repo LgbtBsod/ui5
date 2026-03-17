@@ -1,0 +1,265 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="280" viewBox="0 0 360 280" fill="none">
+  <defs>
+    <linearGradient id="panelStroke" x1="90" y1="78" x2="303" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9DB3C8"/>
+      <stop offset="0.5" stop-color="#728AA8"/>
+      <stop offset="1" stop-color="#556D8A"/>
+    </linearGradient>
+    <linearGradient id="panelFill" x1="196" y1="78" x2="196" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FBFDFF"/>
+      <stop offset="0.5" stop-color="#E7EFF8"/>
+      <stop offset="1" stop-color="#D4E0EE"/>
+    </linearGradient>
+    <linearGradient id="panelHeader" x1="102" y1="91" x2="286" y2="91" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EEF5FC"/>
+      <stop offset="1" stop-color="#D0DCEA"/>
+    </linearGradient>
+    <linearGradient id="glassGloss" x1="116" y1="92" x2="266" y2="210" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.25" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.72" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cardFill" x1="109" y1="119" x2="109" y2="214" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#CDD9E6"/>
+      <stop offset="1" stop-color="#D2DEEB"/>
+    </linearGradient>
+    <linearGradient id="rowFill" x1="144" y1="125" x2="278" y2="196" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#DEEAF6"/>
+      <stop offset="1" stop-color="#D3DEEA"/>
+    </linearGradient>
+    <linearGradient id="rowMetric" x1="250" y1="127" x2="250" y2="195" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C6D4E4"/>
+      <stop offset="1" stop-color="#B6C7D9"/>
+    </linearGradient>
+    <radialGradient id="blueAura" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(181 170) rotate(90) scale(96 92)">
+      <stop offset="0" stop-color="#EEF5FF" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#E4EEFD" stop-opacity="0.46"/>
+      <stop offset="1" stop-color="#DBE7F9" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rimFill" x1="124" y1="98" x2="236" y2="242" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.42" stop-color="#EEF4FD"/>
+      <stop offset="1" stop-color="#D7E5F7"/>
+    </linearGradient>
+    <linearGradient id="shieldBase" x1="131" y1="110" x2="226" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FBFDFF"/>
+      <stop offset="0.48" stop-color="#EEF4FC"/>
+      <stop offset="1" stop-color="#DDE9F9"/>
+    </linearGradient>
+    <linearGradient id="shieldBlue" x1="180" y1="112" x2="230" y2="229" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#DCEEFF"/>
+      <stop offset="0.25" stop-color="#C2DCF9"/>
+      <stop offset="0.62" stop-color="#8DBBF1"/>
+      <stop offset="1" stop-color="#5E97D9"/>
+    </linearGradient>
+    <linearGradient id="shieldDeep" x1="185" y1="145" x2="226" y2="227" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6EA4E4" stop-opacity="0"/>
+      <stop offset="1" stop-color="#3F7FCC" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="shieldHotspot" x1="150" y1="118" x2="200" y2="188" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.42" stop-color="#FFFFFF" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="eyeWhite" x1="148" y1="158" x2="208" y2="179" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F4F8FD"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(181 170) rotate(135) scale(17 16)">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.58" stop-color="#EEF4FD"/>
+      <stop offset="1" stop-color="#DCE7F6"/>
+    </radialGradient>
+    <linearGradient id="warningFill" x1="0" y1="0" x2="0" y2="56">
+      <stop offset="0" stop-color="#FFE58D"/>
+      <stop offset="0.58" stop-color="#FFD95E"/>
+      <stop offset="1" stop-color="#FFC947"/>
+    </linearGradient>
+    <linearGradient id="warningGloss" x1="0" y1="0" x2="26" y2="26">
+      <stop offset="0" stop-color="#FFF8D8" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#FFF8D8" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="panelShadow" x="58" y="68" width="258" height="178" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#B7C7DA" flood-opacity="0.44"/>
+    </filter>
+    <filter id="sheetShadow" x="78" y="78" width="240" height="170" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#BDCDDE" flood-opacity="0.30"/>
+    </filter>
+    <filter id="shieldShadow" x="91" y="85" width="176" height="182" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#B0C3D8" flood-opacity="0.48"/>
+    </filter>
+    <filter id="warningShadow" x="67" y="44" width="74" height="74" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#B7C8DB" flood-opacity="0.40"/>
+    </filter>
+    <filter id="softGlow" x="82" y="79" width="196" height="194" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <clipPath id="shieldClip">
+      <path d="M180 104L236 120.6C238.9 121.4 240.8 124.1 240.8 127.2V168C240.8 196.2 225 222 200 234.6L183.6 242.9C181.3 244.1 178.7 244.1 176.4 242.9L160 234.6C135 222 119.2 196.2 119.2 168V127.2C119.2 124.1 121.1 121.4 124 120.6L180 104Z"/>
+    </clipPath>
+    <style>
+      .navy{stroke:#203654;stroke-width:5.2;stroke-linecap:round;stroke-linejoin:round}
+      .navyThin{stroke:#203654;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round}
+      .paleLine{stroke:#B5C4D6;stroke-width:2.35;stroke-linecap:round}
+      .micro{fill:#B1C1D4}
+      .microStroke{stroke:#B9C9DB;stroke-width:1.6}
+    </style>
+  </defs>
+
+  <!-- micro floating marks -->
+  <g opacity="0.95">
+    <circle class="micro" cx="51" cy="155" r="2.1"/>
+    <circle class="micro" cx="58" cy="137" r="2.3"/>
+    <circle class="micro" cx="70" cy="120" r="2.1"/>
+    <circle class="micro" cx="88" cy="106" r="2.2"/>
+    <circle class="micro" cx="113" cy="95" r="2"/>
+    <circle class="micro" cx="139" cy="89" r="2"/>
+    <circle class="micro" cx="166" cy="86" r="2"/>
+    <circle class="micro" cx="194" cy="87" r="2"/>
+    <circle class="micro" cx="221" cy="92" r="2"/>
+    <circle class="micro" cx="246" cy="101" r="2"/>
+    <circle class="micro" cx="269" cy="115" r="2.1"/>
+    <circle class="micro" cx="288" cy="132" r="2.1"/>
+    <circle class="micro" cx="300" cy="152" r="2"/>
+    <circle class="micro" cx="304" cy="208" r="4"/>
+    <circle class="micro" cx="304" cy="192" r="4"/>
+    <circle class="micro" cx="304" cy="118" r="4"/>
+    <circle class="micro" cx="304" cy="134" r="4"/>
+    <circle cx="42" cy="181" r="9.5" class="microStroke"/>
+  </g>
+
+  <!-- floor -->
+  <ellipse cx="190" cy="257" rx="114" ry="10.5" fill="#BDCADA" opacity="0.68"/>
+  <ellipse cx="190" cy="259" rx="86" ry="4.8" fill="#F4F8FD" opacity="0.98"/>
+
+  <!-- layered sheets -->
+  <g filter="url(#sheetShadow)" opacity="0.82">
+    <rect x="95" y="89" width="200" height="136" rx="18" fill="#FCFDFF" stroke="#B8C8D9" stroke-width="2.4"/>
+    <rect x="101" y="95" width="188" height="124" rx="16" fill="#FFFFFF" stroke="#C9D6E6" stroke-width="1.5"/>
+  </g>
+
+  <!-- main panel -->
+  <g filter="url(#panelShadow)">
+    <rect x="84" y="79" width="214" height="150" rx="20" fill="url(#panelFill)" stroke="url(#panelStroke)" stroke-width="5"/>
+    <path d="M102 81.5H280C289.1 81.5 296.5 88.9 296.5 98V110H85.5V98C85.5 88.9 92.9 81.5 102 81.5Z" fill="url(#panelHeader)"/>
+    <path d="M94.5 110H287.5" stroke="#7F93AD" stroke-width="4"/>
+    <path d="M98.5 110H283.5" stroke="#FFFFFF" stroke-width="1.35" opacity="0.96"/>
+
+    <!-- browser chrome -->
+    <path d="M102 93H112" stroke="#A9B8CB" stroke-width="6" stroke-linecap="round"/>
+    <path d="M119 93H129" stroke="#A9B8CB" stroke-width="6" stroke-linecap="round"/>
+    <path d="M136 93H146" stroke="#A9B8CB" stroke-width="6" stroke-linecap="round"/>
+    <path d="M160 93H266" stroke="#7E96B2" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- left data cards -->
+    <rect x="100" y="124" width="31" height="27" rx="5.5" fill="url(#cardFill)" stroke="#B4C4D6"/>
+    <rect x="100" y="157" width="31" height="27" rx="5.5" fill="url(#cardFill)" stroke="#B4C4D6"/>
+    <rect x="100" y="190" width="31" height="27" rx="5.5" fill="url(#cardFill)" stroke="#B4C4D6"/>
+    <path d="M108 133H122" class="paleLine"/>
+    <path d="M108 140H118" class="paleLine"/>
+    <path d="M108 166H122" class="paleLine"/>
+    <path d="M108 173H118" class="paleLine"/>
+    <path d="M108 199H122" class="paleLine"/>
+    <path d="M108 206H118" class="paleLine"/>
+
+    <!-- table rows -->
+    <g>
+      <rect x="142" y="125" width="135" height="18" rx="5" fill="url(#rowFill)"/>
+      <rect x="142" y="152" width="135" height="18" rx="5" fill="url(#rowFill)"/>
+      <rect x="142" y="179" width="135" height="18" rx="5" fill="url(#rowFill)"/>
+      <rect x="142" y="206" width="116" height="10" rx="3" fill="#CCD8E5"/>
+      <path d="M142 129H270" stroke="#FFFFFF" stroke-width="2.1" opacity="0.82"/>
+      <path d="M142 156H270" stroke="#FFFFFF" stroke-width="2.1" opacity="0.82"/>
+      <path d="M142 183H270" stroke="#FFFFFF" stroke-width="2.1" opacity="0.82"/>
+    </g>
+    <path d="M154 133H219" class="paleLine"/>
+    <path d="M154 160H229" class="paleLine"/>
+    <path d="M154 187H238" class="paleLine"/>
+    <path d="M154 210H215" class="paleLine"/>
+
+    <!-- metrics -->
+    <rect x="263" y="128" width="8" height="12" rx="4" fill="url(#rowMetric)"/>
+    <rect x="263" y="155" width="8" height="12" rx="4" fill="url(#rowMetric)"/>
+    <rect x="263" y="182" width="8" height="12" rx="4" fill="url(#rowMetric)"/>
+    <rect x="281" y="125" width="9" height="92" rx="4.5" fill="#B8C8D9"/>
+
+    <!-- explicit grid semantics -->
+    <path d="M167 125V197" stroke="#CDD9E6" stroke-width="1.4"/>
+    <path d="M198 125V197" stroke="#CDD9E6" stroke-width="1.4"/>
+    <path d="M229 125V197" stroke="#CDD9E6" stroke-width="1.4"/>
+    <path d="M145 145H273" stroke="#C6D3E1" stroke-width="1.2"/>
+    <path d="M145 172H273" stroke="#C6D3E1" stroke-width="1.2"/>
+
+    <!-- glossy overlay -->
+    <path d="M95 118C129 110 223 110 286 118V219C252 226 132 226 95 219V118Z" fill="url(#glassGloss)" opacity="0.48"/>
+  </g>
+
+  <!-- subtle right ornaments -->
+  <g opacity="0.92" transform="translate(-4 -2)">
+    <path d="M306 107V89" class="paleLine"/>
+    <path d="M315 114V93" class="paleLine"/>
+    <path d="M324 108V97" class="paleLine"/>
+    <path d="M307 142H324" class="paleLine"/>
+    <path d="M308 156C311 150.5 314 150.5 317 156C320 161.5 323 161.5 326 156" stroke="#B1C2D5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M302 69L306 79L316 83L306 87L302 97L298 87L288 83L298 79L302 69Z" fill="#C8D4E3"/>
+    <path d="M298 170C309 160 326 159 337 168C347 177 346 197 334 210" stroke="#C4D0DE" stroke-width="2" opacity="0.8"/>
+  </g>
+
+  <!-- warning badge -->
+  <g filter="url(#warningShadow)">
+    <g transform="translate(78 54)">
+      <path d="M31 0C33.9 0 36.5 1.5 38 4L60.2 43.8C61.6 46.4 61.6 49.4 60.1 51.9C58.6 54.4 55.9 56 53 56H9C6.1 56 3.4 54.4 1.9 51.9C0.4 49.4 0.4 46.4 1.8 43.8L24 4C25.5 1.5 28.1 0 31 0Z" fill="url(#warningFill)"/>
+      <path d="M11 11C21 5.5 39 6.4 48 15" stroke="url(#warningGloss)" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M31 0C33.9 0 36.5 1.5 38 4L60.2 43.8C61.6 46.4 61.6 49.4 60.1 51.9C58.6 54.4 55.9 56 53 56H9C6.1 56 3.4 54.4 1.9 51.9C0.4 49.4 0.4 46.4 1.8 43.8L24 4C25.5 1.5 28.1 0 31 0Z" fill="none" class="navyThin"/>
+      <path d="M31 16V31" class="navyThin"/>
+      <circle cx="31" cy="41" r="2.8" fill="#203654"/>
+    </g>
+  </g>
+
+  <g transform="translate(10 0)">
+  <!-- shield glow -->
+  <g>
+    <ellipse cx="181" cy="171" rx="92" ry="88" fill="url(#blueAura)"/>
+    <ellipse cx="181" cy="171" rx="74" ry="72" fill="#EEF5FC" opacity="0.22" filter="url(#softGlow)"/>
+  </g>
+
+  <!-- shield -->
+  <g filter="url(#shieldShadow)">
+    <path d="M180 104L236 120.6C238.9 121.4 240.8 124.1 240.8 127.2V168C240.8 196.2 225 222 200 234.6L183.6 242.9C181.3 244.1 178.7 244.1 176.4 242.9L160 234.6C135 222 119.2 196.2 119.2 168V127.2C119.2 124.1 121.1 121.4 124 120.6L180 104Z" fill="#FFFFFF"/>
+    <path d="M180 111L230.5 126.4V165.3C230.5 188.9 217.2 210.7 196.2 221.3L180 229.6L163.8 221.3C142.8 210.7 129.5 188.9 129.5 165.3V126.4L180 111Z" fill="url(#shieldBase)"/>
+    <path d="M180 111L230.5 126.4V165.3C230.5 188.9 217.2 210.7 196.2 221.3L180 229.6V111Z" fill="url(#shieldBlue)"/>
+    <path d="M180 152L230.5 126.4V165.3C230.5 188.9 217.2 210.7 196.2 221.3L180 229.6V152Z" fill="url(#shieldDeep)"/>
+
+    <g clip-path="url(#shieldClip)">
+      <path d="M180 112V230" stroke="#EAF2FA" stroke-width="2.6"/>
+      <path d="M132 165H228" stroke="#EAF2FA" stroke-width="2.6"/>
+      <path d="M147 132L212 151" stroke="#EAF2FA" stroke-width="2.6"/>
+      <path d="M147 206L212 186" stroke="#EAF2FA" stroke-width="2.6"/>
+      <path d="M126 129C157 121 205 121 231 128.7" stroke="#FFFFFF" stroke-width="3" opacity="0.56"/>
+      <path d="M146 121C169 129 184 145 188 167C192 188 179 211 155 224" stroke="url(#shieldHotspot)" stroke-width="15" stroke-linecap="round" opacity="0.85"/>
+      <path d="M188 130C202 135 215 145 223 157" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.45"/>
+      <path d="M198 176C207 173 214 170 222 166" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.68"/>
+      <path d="M163 197C174 194 187 190 199 185" stroke="#FFFFFF" stroke-width="3.8" stroke-linecap="round" opacity="0.78"/>
+    </g>
+
+    <path d="M180 104L236 120.6C238.9 121.4 240.8 124.1 240.8 127.2V168C240.8 196.2 225 222 200 234.6L183.6 242.9C181.3 244.1 178.7 244.1 176.4 242.9L160 234.6C135 222 119.2 196.2 119.2 168V127.2C119.2 124.1 121.1 121.4 124 120.6L180 104Z" fill="none" stroke="url(#rimFill)" stroke-width="6.4"/>
+    <path d="M180 111L230.5 126.4V165.3C230.5 188.9 217.2 210.7 196.2 221.3L180 229.6L163.8 221.3C142.8 210.7 129.5 188.9 129.5 165.3V126.4L180 111Z" class="navy"/>
+  </g>
+
+  <!-- eye off -->
+  <g>
+    <path d="M147 170C156 158.6 167.4 152 180 152C192.6 152 204 158.6 213 170C204 181.4 192.6 188 180 188C167.4 188 156 181.4 147 170Z" fill="url(#eyeWhite)" class="navy"/>
+    <ellipse cx="180" cy="170" rx="18.2" ry="13.8" fill="#FFFFFF" opacity="0.42"/>
+    <circle cx="180" cy="170" r="10.4" fill="url(#iris)" class="navy"/>
+    <circle cx="180" cy="170" r="3" fill="#203654"/>
+    <path d="M172.5 162.7C174.5 160.7 177 159.6 180 159.6C185.9 159.6 190.6 164.3 190.6 170.1" stroke="#203654" stroke-width="3.1" stroke-linecap="round"/>
+    <circle cx="176.7" cy="166.4" r="1.65" fill="#FFFFFF" opacity="0.98"/>
+    <path d="M153 190L207 150" class="navy"/>
+  </g>
+
+  <!-- base strokes -->
+  <path d="M94 230C128 241.5 239 242.5 279 230" stroke="#D3DDE8" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M88 235C131 247 241 247 286 235" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.94"/>
+  </g>
+</svg>

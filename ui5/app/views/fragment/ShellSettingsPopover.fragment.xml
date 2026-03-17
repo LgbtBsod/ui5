@@ -1,0 +1,32 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <ResponsivePopover
+        id="shellSettingsPopover"
+        class="glassDialog shellPopover shellSettingsPopover"
+        title="{i18n>shellSettingsTitle}"
+        contentWidth="28rem"
+        placement="Bottom">
+        <content>
+            <VBox class="shellPopoverBody shellSettingsBody" renderType="Bare">
+                <Text text="{i18n>shellSettingsSubtitle}" class="shellPopoverIntro"/>
+                <MessageStrip
+                    text="{i18n>shellThemeLockedMessage}"
+                    type="Information"
+                    showIcon="true"
+                    class="chkFeedbackStrip workflowMessageSurface"/>
+                <List
+                    showSeparators="None"
+                    class="sapUiTinyMarginTop shellSettingsFactList">
+                    <StandardListItem
+                        title="{i18n>shellSettingsFactThemeTitle}"
+                        description="{i18n>shellSettingsFactThemeDescription}"/>
+                    <StandardListItem
+                        title="{i18n>shellSettingsFactVariantsTitle}"
+                        description="{i18n>shellSettingsFactVariantsDescription}"/>
+                    <StandardListItem
+                        title="{i18n>shellSettingsFactBootstrapTitle}"
+                        description="{i18n>shellSettingsFactBootstrapDescription}"/>
+                </List>
+            </VBox>
+        </content>
+    </ResponsivePopover>
+</core:FragmentDefinition>

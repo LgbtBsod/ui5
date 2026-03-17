@@ -25,13 +25,13 @@
                 class="analyticsExportButton actionPrioritySecondary"/>
             <ObjectStatus
                 class="analyticsRefreshStatus statusChipSemantic"
-                text="{parts: [{path: 'view>/refreshState/status'}, {path: 'view>/refreshState/isRunning'}, {path: 'view>/refreshState/lastError'}, {path: 'view>/refreshState/lastSuccessAt'}, {path: 'i18n>analyticsRefreshQueued'}, {path: 'i18n>analyticsRefreshRunning'}, {path: 'i18n>workflowUpdatedAt'}, {path: 'i18n>analyticsRefreshIdle'}], formatter: '.formatRefreshStatusText'}"
-                state="{parts: [{path: 'view>/refreshState/status'}, {path: 'view>/refreshState/isRunning'}], formatter: '.formatRefreshStatusState'}"/>
+                text="{path: 'view>/refreshState', formatter: '.formatRefreshStatusText'}"
+                state="{path: 'view>/refreshState', formatter: '.formatRefreshStatusState'}"/>
             <Button
                 text="{i18n>analyticsRefreshButton}"
                 icon="sap-icon://refresh"
                 type="Emphasized"
-                enabled="{parts: [{path: 'view>/refreshBusy'}, {path: 'view>/refreshState/isRunning'}, {path: 'view>/refreshState/status'}], formatter: '.formatRefreshEnabled'}"
+                enabled="{parts: [{path: 'view>/refreshBusy'}, {path: 'view>/refreshState'}], formatter: '.formatRefreshEnabled'}"
                 press=".onRefreshAnalytics"
                 class="analyticsRefreshButton actionPriorityPrimary"/>
         </headerContent>
@@ -86,13 +86,17 @@
                     <layoutData>
                         <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                     </layoutData>
-                    <customData><core:CustomData key="preset" value="CURRENT"/></customData>
+                    <customData>
+                        <core:CustomData key="preset" value="CURRENT"/>
+                    </customData>
                 </Button>
                 <Button text="{i18n>analyticsPresetPrevious}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetPrevious">
                     <layoutData>
                         <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
                     </layoutData>
-                    <customData><core:CustomData key="preset" value="PREVIOUS"/></customData>
+                    <customData>
+                        <core:CustomData key="preset" value="PREVIOUS"/>
+                    </customData>
                 </Button>
                 <Label text="{i18n>analyticsCompareYearLabel}" labelFor="analyticsCompareYearInput" class="analyticsFilterLabel analyticsCompareYearLabel">
                     <layoutData>
@@ -134,7 +138,7 @@
                     <Text text="{i18n>analyticsScreenSubtitle}" class="analyticsScreenSubtitle"/>
                     <HBox class="analyticsHeroContextRail" wrap="Wrap" renderType="Bare">
                         <ObjectStatus
-                            text="{= ${i18n>analyticsSourceFilterLabel} + ': ' + (${view>/selectedSource} === 'WEB' ? ${i18n>analyticsSourceWeb} : (${view>/selectedSource} === 'INTEGRATION' ? ${i18n>analyticsSourceIntegration} : ${i18n>analyticsSourceAll})) }"
+                            text="{path: 'view>/selectedSource', formatter: '.formatAnalyticsSourceContext'}"
                             state="Information"
                             class="analyticsHeroContextChip statusChipSemantic"/>
                         <ObjectStatus
@@ -160,6 +164,7 @@
                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowStatusMetaChips" type="XML"/>
                         </HBox>
                     </VBox>
+
                     <VBox id="analyticsBreakdownsHost" renderType="Bare"/>
                 </VBox>
             </VBox>

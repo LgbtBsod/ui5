@@ -1,0 +1,38 @@
+sap.ui.define([], function () {
+    "use strict";
+
+    return Object.freeze({
+        AUTOSAVE_STATE: Object.freeze({
+            SAVING: "SAVING"
+        }),
+        BANNER_DETAIL: Object.freeze({
+            SAVE_FAILED: "save_failed"
+        }),
+        BANNER_LEVEL: Object.freeze({
+            ERROR: "error",
+            INFO: "info",
+            WARNING: "warning"
+        }),
+        BANNER_TEXT_KEY: Object.freeze({
+            NETWORK_UNAVAILABLE: "networkUnavailable",
+            OBJECT_SAVE_FAILED: "objectSaveFailed",
+            RETRY_NOW: "retryNowButton",
+            SESSION_EXPIRED: "sessionExpiredBanner",
+            WORKING_LONG: "workingMessageLong"
+        }),
+        DELAY_MS: Object.freeze({
+            SAVE_WORKING_BANNER: 2000
+        }),
+        ERROR_MESSAGE: Object.freeze({
+            SAVE_FAILED: "Save failed"
+        }),
+        PATHS: Object.freeze({
+            NETWORK_ONLINE: "/networkOnline",
+            REQUIRES_USER_LOGIN: "/requiresUserLogin"
+        }),
+        TELEMETRY_EVENT: Object.freeze({
+            GUARDED_FAILED: "detail.save.guarded.failed",
+            GUARDED_SUCCESS: "detail.save.guarded.success"
+        })
+    });
+});

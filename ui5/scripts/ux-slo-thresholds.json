@@ -1,0 +1,5 @@
+{
+  "search.execute": { "warnP95Ms": 1000, "failP95Ms": 1200 },
+  "detail.save": { "warnP95Ms": 1200, "failP95Ms": 1500 },
+  "dialog.workflowAnalytics.open": { "warnP95Ms": 300, "failP95Ms": 400 }
+}

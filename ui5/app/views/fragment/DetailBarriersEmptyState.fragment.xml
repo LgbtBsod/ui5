@@ -1,0 +1,17 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox
+        class="detailEmptyStateCard workflowEmptyStateCard detailBarriersEmptyState"
+        renderType="Bare"
+        visible="{path:'selected>/barriers', formatter:'.isEmptyRows'}">
+        <core:Icon src="sap-icon://alert" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
+        <Title text="{i18n>detailEmptyBarriersTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
+        <Text text="{i18n>detailEmptyBarriersText}" class="detailEmptyStateText workflowEmptyStateText"/>
+        <Button
+            text="{i18n>addRow}"
+            icon="sap-icon://quality-issue"
+            type="Transparent"
+            press=".onAddBarrierRow"
+            visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+            class="detailEmptyStateAction workflowEmptyStateAction"/>
+    </VBox>
+</core:FragmentDefinition>

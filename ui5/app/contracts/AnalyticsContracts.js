@@ -1,0 +1,100 @@
+sap.ui.define([], function () {
+    "use strict";
+
+    var SOURCES = Object.freeze({
+        ALL: "ALL",
+        WEB: "WEB",
+        INTEGRATION: "INTEGRATION"
+    });
+
+    var YEAR_PRESETS = Object.freeze({
+        CURRENT: "CURRENT",
+        PREVIOUS: "PREVIOUS"
+    });
+
+    var REFRESH = Object.freeze({
+        TASK_KEY: "ANALYTICS_REFRESH",
+        TASK_NAME: "Analytics Refresh",
+        REQUESTED_BY_WEB: SOURCES.WEB,
+        POLL_DELAY_MS: 1800,
+        POLL_MAX_ATTEMPTS: 12,
+        STATUSES: Object.freeze({
+            IDLE: "IDLE",
+            REQUESTED: "REQUESTED",
+            RUNNING: "RUNNING"
+        })
+    });
+
+    var DIMENSIONS = Object.freeze({
+        MONTH: "MONTH",
+        SOURCE: "SOURCE",
+        PROFESSION: "PROFESSION",
+        LPC: "LPC",
+        LOCATION: "LOCATION",
+        BUKRS: "BUKRS",
+        ORGUNIT: "ORGUNIT",
+        BARRIER_NUMBER: "BARRIER_NUMBER"
+    });
+
+    var METRICS = Object.freeze({
+        TOTAL: "TOTAL",
+        FAILED_CHECKS: "FAILED_CHECKS",
+        FAILED_BARRIERS: "FAILED_BARRIERS",
+        FAILED_CHECKLISTS: "FAILED_CHECKLISTS",
+        FAILED_BARRIER_CHECKLISTS: "FAILED_BARRIER_CHECKLISTS"
+    });
+
+    var BUILDER = Object.freeze({
+        FALLBACK_DIMENSION: DIMENSIONS.MONTH,
+        FALLBACK_COMPARISON_METRIC: METRICS.FAILED_CHECKLISTS,
+        FALLBACK_SOURCE: SOURCES.ALL,
+        DIMENSION_OPTIONS_BASE: Object.freeze([
+            DIMENSIONS.MONTH,
+            DIMENSIONS.SOURCE,
+            DIMENSIONS.PROFESSION,
+            DIMENSIONS.LPC,
+            DIMENSIONS.BARRIER_NUMBER
+        ]),
+        SOURCE_RESTRICTED_DIMENSIONS: Object.freeze([
+            DIMENSIONS.LOCATION,
+            DIMENSIONS.BUKRS,
+            DIMENSIONS.ORGUNIT
+        ]),
+        DIMENSION_RULES: Object.freeze({
+            MONTH: Object.freeze({ vizType: "column", metricKeys: Object.freeze([METRICS.TOTAL, METRICS.FAILED_CHECKS, METRICS.FAILED_BARRIERS, METRICS.FAILED_CHECKLISTS, METRICS.FAILED_BARRIER_CHECKLISTS]), chartKeyByMetric: Object.freeze({ TOTAL: "monthlyTotal", FAILED_CHECKS: "monthlyFailedChecks", FAILED_BARRIERS: "monthlyFailedBarriers", FAILED_CHECKLISTS: "monthlyFailedChecklists", FAILED_BARRIER_CHECKLISTS: "monthlyFailedBarrierChecklists" }) }),
+            SOURCE: Object.freeze({ vizType: "bar", metricKeys: Object.freeze([METRICS.TOTAL, METRICS.FAILED_CHECKS, METRICS.FAILED_BARRIERS]), chartKeyByMetric: Object.freeze({ TOTAL: "totalBySource", FAILED_CHECKS: "failedChecksBySource", FAILED_BARRIERS: "failedBarriersBySource" }) }),
+            PROFESSION: Object.freeze({ vizType: "bar", metricKeys: Object.freeze([METRICS.FAILED_CHECKS, METRICS.FAILED_BARRIERS]), chartKeyByMetric: Object.freeze({ FAILED_CHECKS: "failedChecksByProfession", FAILED_BARRIERS: "failedBarriersByProfession" }) }),
+            LPC: Object.freeze({ vizType: "bar", metricKeys: Object.freeze([METRICS.FAILED_CHECKS, METRICS.FAILED_BARRIERS]), chartKeyByMetric: Object.freeze({ FAILED_CHECKS: "failedChecksByLpc", FAILED_BARRIERS: "failedBarriersByLpc" }) }),
+            LOCATION: Object.freeze({ vizType: "bar", metricKeys: Object.freeze([METRICS.FAILED_CHECKS, METRICS.FAILED_BARRIERS]), chartKeyByMetric: Object.freeze({ FAILED_CHECKS: "failedChecksByLocation", FAILED_BARRIERS: "failedBarriersByLocation" }) }),
+            BUKRS: Object.freeze({ vizType: "bar", metricKeys: Object.freeze([METRICS.FAILED_CHECKS, METRICS.FAILED_BARRIERS]), chartKeyByMetric: Object.freeze({ FAILED_CHECKS: "failedChecksByBukrs", FAILED_BARRIERS: "failedBarriersByBukrs" }) }),
+            ORGUNIT: Object.freeze({ vizType: "bar", metricKeys: Object.freeze([METRICS.FAILED_CHECKS, METRICS.FAILED_BARRIERS]), chartKeyByMetric: Object.freeze({ FAILED_CHECKS: "failedChecksByOrgunit", FAILED_BARRIERS: "failedBarriersByOrgunit" }) }),
+            BARRIER_NUMBER: Object.freeze({ vizType: "bar", metricKeys: Object.freeze([METRICS.TOTAL, METRICS.FAILED_BARRIERS]), chartKeyByMetric: Object.freeze({ TOTAL: "totalBarriersByBarrierNumber", FAILED_BARRIERS: "failedBarriersByBarrierNumber" }) })
+        }),
+        DIMENSION_TEXT_KEYS: Object.freeze({
+            MONTH: "analyticsDimensionMonth",
+            SOURCE: "analyticsDimensionSource",
+            PROFESSION: "analyticsDimensionProfession",
+            LPC: "analyticsDimensionLpc",
+            LOCATION: "analyticsDimensionLocation",
+            BUKRS: "analyticsDimensionBukrs",
+            ORGUNIT: "analyticsDimensionOrgunit",
+            BARRIER_NUMBER: "analyticsDimensionBarrierNumber"
+        }),
+        METRIC_TEXT_KEYS: Object.freeze({
+            TOTAL: "analyticsMetricTotal",
+            FAILED_CHECKS: "analyticsMetricFailedChecks",
+            FAILED_BARRIERS: "analyticsMetricFailedBarriers",
+            FAILED_CHECKLISTS: "analyticsMetricFailedChecklistCount",
+            FAILED_BARRIER_CHECKLISTS: "analyticsMetricFailedBarrierChecklistCount"
+        })
+    });
+
+    return Object.freeze({
+        SOURCES: SOURCES,
+        YEAR_PRESETS: YEAR_PRESETS,
+        REFRESH: REFRESH,
+        DIMENSIONS: DIMENSIONS,
+        METRICS: METRICS,
+        BUILDER: BUILDER
+    });
+});

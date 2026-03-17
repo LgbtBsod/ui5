@@ -4,117 +4,120 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsUiContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, FacadeCommandRuntime, StatePaths, AnalyticsContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
+], function (
+    ControllerViewStateRuntime,
+    ModelStateRuntime,
+    FacadeCommandRuntime,
+    StatePaths,
+    AnalyticsContracts,
+    AnalyticsUiContracts,
+    ReadinessTelemetryContracts,
+    ReadinessTelemetryRuntime,
+    ModelContracts,
+    YearValue
+) {
     "use strict";
 
+    var LOAD_REASONS = AnalyticsUiContracts.LOAD_REASONS;
+    var MESSAGES = AnalyticsUiContracts.MESSAGES;
+    var PATHS = AnalyticsUiContracts.PATHS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var INVALID_YEAR_MESSAGE = "Analytics year is invalid";
 
-    function parseYearOrNull(vValue) {
-        var iYear = Number(String(vValue || "").trim());
-        if (!isFinite(iYear) || iYear <= 0) {
-            return null;
+    function setReadinessState(oController, sStatus, bReady, sReadyAt, sError) {
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
+            status: sStatus,
+            ready: bReady,
+            readyAt: sReadyAt || "",
+            error: sError || ""
+        });
+    }
+
+    function setControllerBusy(oController, bBusy, sErrorMessage) {
+        var oPatch = {};
+        oPatch[PATHS.BUSY] = !!bBusy;
+        if (typeof sErrorMessage === "string") {
+            oPatch[PATHS.ERROR] = sErrorMessage;
         }
-        return iYear;
+        ControllerViewStateRuntime.setMany(oController, oPatch);
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, !!bBusy);
     }
 
     return {
         loadAnalytics: function (oController, sReason, mHooks) {
-            var sSelectedYear = String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "").trim();
-            var sCompareYear = String(ControllerViewStateRuntime.get(oController, "/compareYear", "") || "").trim();
-            var sSelectedSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
-            var iSelectedYear = parseYearOrNull(sSelectedYear);
-            var iCompareYear = parseYearOrNull(sCompareYear);
+            var sSelectedYear = String(ControllerViewStateRuntime.get(oController, PATHS.SELECTED_YEAR, "") || "").trim();
+            var sCompareYear = String(ControllerViewStateRuntime.get(oController, PATHS.COMPARE_YEAR, "") || "").trim();
+            var sSelectedSource = String(ControllerViewStateRuntime.get(oController, PATHS.SELECTED_SOURCE, AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
+            var iSelectedYear = YearValue.parseYearOrNull(sSelectedYear);
+            var iCompareYear = YearValue.parseYearOrNull(sCompareYear);
             var sReadyAt = "";
+            var sResolvedReason = String(sReason || LOAD_REASONS.MANUAL || "manual");
 
             if (iSelectedYear === null) {
-                ControllerViewStateRuntime.set(oController, "/error", INVALID_YEAR_MESSAGE);
-                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
-                    status: "error",
-                    ready: false,
-                    readyAt: "",
-                    error: INVALID_YEAR_MESSAGE
-                });
+                ControllerViewStateRuntime.set(oController, PATHS.ERROR, MESSAGES.INVALID_YEAR);
+                setReadinessState(oController, "error", false, "", MESSAGES.INVALID_YEAR);
                 return Promise.resolve(false);
             }
 
-            ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, true);
-            ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
-                status: "loading",
-                ready: false,
-                readyAt: "",
-                error: ""
-            });
-            ControllerViewStateRuntime.setMany(oController, {
-                "/busy": true,
-                "/error": ""
-            });
+            setReadinessState(oController, "loading", false, "", "");
+            setControllerBusy(oController, true, "");
 
             return FacadeCommandRuntime.executeRaw(
                 oController,
                 oController._facade,
                 "load",
                 {
-                    reason: sReason || "manual",
+                    reason: sResolvedReason,
                     selectedYear: iSelectedYear,
                     compareYear: iCompareYear,
                     selectedSource: sSelectedSource
                 },
                 mHooks.buildCtx(oController)
             ).then(function (oResult) {
-                var oAnalytics = ControllerViewStateRuntime.get(oController, "/analytics", {}) || {};
+                var oAnalytics = ControllerViewStateRuntime.get(oController, PATHS.ANALYTICS, {}) || {};
                 sReadyAt = new Date().toISOString();
 
                 if (Array.isArray(oAnalytics.availableYears) && oAnalytics.availableYears.length) {
-                    ControllerViewStateRuntime.set(oController, "/availableYears", oAnalytics.availableYears);
+                    ControllerViewStateRuntime.set(oController, PATHS.AVAILABLE_YEARS, oAnalytics.availableYears);
                 }
                 if (oAnalytics.selectedYear) {
-                    ControllerViewStateRuntime.set(oController, "/selectedYear", String(oAnalytics.selectedYear));
+                    ControllerViewStateRuntime.set(oController, PATHS.SELECTED_YEAR, String(oAnalytics.selectedYear));
                 }
                 if (oAnalytics.compareYear) {
-                    ControllerViewStateRuntime.set(oController, "/compareYear", String(oAnalytics.compareYear));
+                    ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR, String(oAnalytics.compareYear));
                 } else if (oAnalytics.selectedYear) {
                     mHooks.syncCompareYearDefaults(oController, String(oAnalytics.selectedYear));
                 }
                 if (oAnalytics.source) {
-                    ControllerViewStateRuntime.set(oController, "/selectedSource", String(oAnalytics.source));
+                    ControllerViewStateRuntime.set(oController, PATHS.SELECTED_SOURCE, String(oAnalytics.source));
                 }
                 if (oAnalytics.refreshState) {
-                    ControllerViewStateRuntime.set(oController, "/refreshState", oAnalytics.refreshState);
+                    ControllerViewStateRuntime.set(oController, PATHS.REFRESH_STATE, oAnalytics.refreshState);
                 }
-                ControllerViewStateRuntime.set(oController, "/availableYears", mHooks.buildYearOptions(oController));
-                ControllerViewStateRuntime.set(oController, "/compareYearOptions", mHooks.buildCompareYearOptions(oController));
-                mHooks.setCompareYearValidation(oController, "None", "");
+
+                ControllerViewStateRuntime.set(oController, PATHS.AVAILABLE_YEARS, mHooks.buildYearOptions(oController));
+                ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR_OPTIONS, mHooks.buildCompareYearOptions(oController));
+                mHooks.setCompareYearValidation(oController, AnalyticsUiContracts.VALIDATION_STATES.NONE, "");
                 mHooks.applyComparisonMetricSelection(oController);
                 mHooks.applyBuilderSelection(oController);
                 mHooks.syncAnalyticsContextHints(oController);
-                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
-                    status: "ready",
-                    ready: true,
-                    readyAt: sReadyAt,
-                    error: ""
-                });
+                setReadinessState(oController, "ready", true, sReadyAt, "");
                 ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
-                    reason: sReason || "manual",
+                    reason: sResolvedReason,
                     source: sSelectedSource
                 });
                 return oResult;
             }).catch(function (oError) {
-                var sErrorMessage = String((oError && oError.message) || "Analytics load failed");
-                ControllerViewStateRuntime.set(oController, "/error", sErrorMessage);
-                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
-                    status: "error",
-                    ready: false,
-                    readyAt: "",
-                    error: sErrorMessage
-                });
+                var sErrorMessage = String((oError && oError.message) || MESSAGES.ANALYTICS_LOAD_FAILED);
+                ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
+                setReadinessState(oController, "error", false, "", sErrorMessage);
                 throw oError;
             }).finally(function () {
-                ControllerViewStateRuntime.set(oController, "/busy", false);
-                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, false);
+                setControllerBusy(oController, false);
             });
         }
     };

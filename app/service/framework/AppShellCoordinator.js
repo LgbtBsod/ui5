@@ -1,17 +1,31 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
-], function (JSONModel, RouteModeCoordinator, DebugLogger, ControllerModelRuntime, ModelStateRuntime, TimeConfigService, TimerDefaults, SchedulingRuntime, NavigationContracts) {
+], function (
+    JSONModel,
+    RouteModeCoordinator,
+    DebugLogger,
+    ControllerModelRuntime,
+    ModelStateRuntime,
+    ThemeContracts,
+    TimeConfigService,
+    TimerDefaults,
+    SchedulingRuntime,
+    NavigationContracts
+) {
     "use strict";
 
+    var APP_VIEW_PATHS = ThemeContracts.APP_VIEW_PATHS;
     var LAYOUTS = NavigationContracts.LAYOUTS;
+    var SYNC_SOURCES = ThemeContracts.SYNC_SOURCES;
 
     function resolveStateModel(oController) {
         return ControllerModelRuntime.state(oController);
@@ -23,41 +37,51 @@ sap.ui.define([
         }
     }
 
+    function buildAppViewModelData(oThemeResult) {
+        return {
+            animationEnabled: !oThemeResult || oThemeResult.animationEnabled !== false,
+            invertedBlockScheme: false,
+            isDark: false,
+            themeMode: String((oThemeResult && oThemeResult.mode) || ThemeContracts.MODES.MORNING).trim().toLowerCase() || ThemeContracts.MODES.MORNING
+        };
+    }
+
     function syncThemeState(oController, sSource, oThemeResult) {
         var oAppView = ControllerModelRuntime.appView(oController);
+        var oAppViewPatch = buildAppViewModelData(oThemeResult);
+        var oModelPatch = {};
         var sStoredTheme = oController.getCurrentTheme();
-        var sMode = String((oThemeResult && oThemeResult.mode) || "morning").trim().toLowerCase() || "morning";
-        var bIsDark = false;
-        var bAnimationEnabled = !oThemeResult || oThemeResult.animationEnabled !== false;
+
+        oModelPatch[APP_VIEW_PATHS.IS_DARK] = oAppViewPatch.isDark;
+        oModelPatch[APP_VIEW_PATHS.THEME_MODE] = oAppViewPatch.themeMode;
+        oModelPatch[APP_VIEW_PATHS.ANIMATION_ENABLED] = oAppViewPatch.animationEnabled;
         if (oAppView) {
-            ModelStateRuntime.setManyOnModel(oAppView, {
-                "/isDark": bIsDark,
-                "/themeMode": sMode,
-                "/animationEnabled": bAnimationEnabled
-            });
+            ModelStateRuntime.setManyOnModel(oAppView, oModelPatch);
         }
         DebugLogger.info("theme", "sync", {
-            source: sSource || "unknown",
-            storedTheme: sStoredTheme,
+            animationEnabled: oAppViewPatch.animationEnabled,
             appliedTheme: oThemeResult && oThemeResult.theme,
-            isDark: bIsDark,
-            animationEnabled: bAnimationEnabled,
-            expectedIcon: "sun"
+            source: sSource || SYNC_SOURCES.INIT,
+            storedTheme: sStoredTheme,
+            themeMode: oAppViewPatch.themeMode
         });
     }
 
     function initStateBoundUi(oController, oStateModel) {
+        var oResolvedState;
+        var iBootstrapRetryMs;
+
         if (oController._oRouteModeCoordinator) {
             return;
         }
-        var oResolvedState = oStateModel || resolveStateModel(oController);
+        oResolvedState = oStateModel || resolveStateModel(oController);
         if (!oResolvedState) {
             SchedulingRuntime.restartTimer(0, function () {
                 initStateBoundUi(oController);
             }, Number((TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50));
             return;
         }
-        var iBootstrapRetryMs = Number(TimeConfigService.read(oResolvedState, "bootstrapRetryMs") || (TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50);
+        iBootstrapRetryMs = Number(TimeConfigService.read(oResolvedState, "bootstrapRetryMs") || (TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50);
         ensureControllerStateModel(oController, oResolvedState);
         oController._oRouteModeCoordinator = new RouteModeCoordinator({
             router: oController.getRouter(),
@@ -71,31 +95,30 @@ sap.ui.define([
     return {
         onInit: function (oController) {
             var oApplied = oController.applyStoredTheme();
-            oController.setModel(new JSONModel({
-                isDark: !!(oApplied && oApplied.isDark),
-                themeMode: (oApplied && oApplied.mode) || "morning",
-                animationEnabled: !oApplied || oApplied.animationEnabled !== false,
-                invertedBlockScheme: false
-            }), "appView");
-            syncThemeState(oController, "init", oApplied);
+            var oAppViewData = buildAppViewModelData(oApplied);
             var oState = resolveStateModel(oController);
+
+            oController.setModel(new JSONModel(oAppViewData), "appView");
+            syncThemeState(oController, SYNC_SOURCES.INIT, oApplied);
             ensureControllerStateModel(oController, oState);
             if (oState) {
                 ModelStateRuntime.setManyOnModel(oState, {
                     "/layout": ModelStateRuntime.readOnModel(oState, "/layout", LAYOUTS.ONE_COLUMN) || LAYOUTS.ONE_COLUMN,
-                    "/selectedId": typeof ModelStateRuntime.readOnModel(oState, "/selectedId", undefined) === "undefined" ? null : ModelStateRuntime.readOnModel(oState, "/selectedId", null)
+                    "/selectedId": typeof ModelStateRuntime.readOnModel(oState, "/selectedId", undefined) === "undefined"
+                        ? null
+                        : ModelStateRuntime.readOnModel(oState, "/selectedId", null)
                 });
             }
             initStateBoundUi(oController, oState);
         },
         onSetThemeMode: function (oController, sMode) {
-            syncThemeState(oController, "settings-theme-mode", oController.setThemeMode(sMode));
+            syncThemeState(oController, SYNC_SOURCES.SETTINGS, oController.setThemeMode(sMode));
         },
         onToggleTheme: function (oController, oClickXY) {
-            syncThemeState(oController, "toggle", oController.toggleTheme(oClickXY));
+            syncThemeState(oController, SYNC_SOURCES.TOGGLE, oController.toggleTheme(oClickXY));
         },
         onToggleThemeAnimation: function (oController, bEnabled) {
-            syncThemeState(oController, "animation", oController.setThemeAnimationEnabled(!!bEnabled));
+            syncThemeState(oController, SYNC_SOURCES.ANIMATION, oController.setThemeAnimationEnabled(!!bEnabled));
         },
         onExit: function (oController) {
             if (oController._oRouteModeCoordinator) {

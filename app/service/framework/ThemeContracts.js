@@ -1,23 +1,26 @@
 sap.ui.define([], function () {
     "use strict";
 
+    var MODES = Object.freeze({
+        DEFAULT: "morning",
+        MORNING: "morning"
+    });
+
     return Object.freeze({
         CLASSES: Object.freeze({
-            SWITCHING: "appThemeSwitching",
             MOTION_DISABLED: "theme-motion-disabled",
-            MOTION_ENABLED: "theme-motion-enabled"
+            MOTION_ENABLED: "theme-motion-enabled",
+            SWITCHING: "appThemeSwitching"
         }),
         STORAGE_KEYS: Object.freeze({
-            PROFILE: "checklist_app_theme_profile",
+            APP_THEME: "checklist_app_theme",
+            DEV_OVERRIDE: "checklist_app_theme_dev_override",
             LEGACY_PROFILE: "sap_ui5_theme_profile",
             LEGACY_THEME: "sap_ui5_theme",
-            PROFILE_RECOVERY: "checklist_app_theme_profile_recovery_20260305",
-            APP_THEME: "checklist_app_theme"
+            PROFILE: "checklist_app_theme_profile",
+            PROFILE_RECOVERY: "checklist_app_theme_profile_recovery_20260305"
         }),
-        MODES: Object.freeze({
-            DEFAULT: "morning",
-            MORNING: "morning"
-        }),
+        MODES: MODES,
         THEMES: Object.freeze({
             MORNING: "sap_fiori_3"
         }),
@@ -27,6 +30,22 @@ sap.ui.define([], function () {
         }),
         DEFAULTS: Object.freeze({
             ANIMATION_ENABLED: true
+        }),
+        APP_VIEW_PATHS: Object.freeze({
+            ANIMATION_ENABLED: "/animationEnabled",
+            INVERTED_BLOCK_SCHEME: "/invertedBlockScheme",
+            IS_DARK: "/isDark",
+            THEME_MODE: "/themeMode"
+        }),
+        SYNC_SOURCES: Object.freeze({
+            ANIMATION: "animation",
+            INIT: "init",
+            SETTINGS: "settings-theme-mode",
+            TOGGLE: "toggle"
+        }),
+        DEV_OVERRIDE_MODES: Object.freeze({
+            CLEAR: Object.freeze(["clear", "off"]),
+            MORNING: Object.freeze(["dark", "light", "morning", "night"])
         })
     });
 });

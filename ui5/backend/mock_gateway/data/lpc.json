@@ -1,0 +1,7 @@
+{
+  "lpc": [
+    { "key": "L1", "text": "Low" },
+    { "key": "L2", "text": "Medium" },
+    { "key": "L3", "text": "High" }
+  ]
+}

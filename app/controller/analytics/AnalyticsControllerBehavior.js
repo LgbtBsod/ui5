@@ -31,9 +31,9 @@ sap.ui.define([
 ) {
     "use strict";
 
+    var COMPARE_YEAR_PATH = "/compareYear";
     var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
     var SELECTED_YEAR_PATH = "/selectedYear";
-    var COMPARE_YEAR_PATH = "/compareYear";
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function buildCtx(oController) {
@@ -42,6 +42,18 @@ sap.ui.define([
 
     function coerceText(vValue) {
         return String(vValue || "").trim();
+    }
+
+    function getBundleText(oController, sKey, aArgs, sFallback) {
+        var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
+        try {
+            if (oBundle && oBundle.getText) {
+                return String(oBundle.getText(sKey, aArgs || []) || sFallback || sKey);
+            }
+        } catch (_bundleError) {
+            // Fall back to the provided static text below.
+        }
+        return String(sFallback || sKey || "");
     }
 
     function ensureVizContentLoaded(oController) {
@@ -228,8 +240,21 @@ sap.ui.define([
             AnalyticsDrilldownBehavior.onCloseAnalytics(this);
         },
 
-        formatRefreshStatusState: function (sStatus, bIsRunning) {
-            var sNormalizedStatus = coerceText(sStatus).toUpperCase();
+        formatAnalyticsSourceContext: function (sSelectedSource) {
+            var sSourceKey = coerceText(sSelectedSource).toUpperCase();
+            var sResolvedSourceText = getBundleText(this, "analyticsSourceAll", [], "All");
+
+            if (sSourceKey === AnalyticsContracts.SOURCES.WEB) {
+                sResolvedSourceText = getBundleText(this, "analyticsSourceWeb", [], "Web");
+            } else if (sSourceKey === AnalyticsContracts.SOURCES.INTEGRATION) {
+                sResolvedSourceText = getBundleText(this, "analyticsSourceIntegration", [], "Integration");
+            }
+            return getBundleText(this, "analyticsSourceFilterLabel", [], "Source") + ": " + sResolvedSourceText;
+        },
+
+        formatRefreshStatusState: function (oRefreshState) {
+            var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
+            var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
             if (sNormalizedStatus === "ERROR") {
                 return "Error";
             }
@@ -239,28 +264,29 @@ sap.ui.define([
             return "Success";
         },
 
-        formatRefreshEnabled: function (bRefreshBusy, bIsRunning, sStatus) {
-            var sNormalizedStatus = coerceText(sStatus).toUpperCase();
+        formatRefreshEnabled: function (bRefreshBusy, oRefreshState) {
+            var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
+            var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
             return !bRefreshBusy && !bIsRunning && sNormalizedStatus !== "REQUESTED";
         },
 
-        formatRefreshStatusText: function (sStatus, bIsRunning, sLastError, sLastSuccessAt, sQueuedText, sRunningText, sUpdatedText, sIdleText) {
-            var sNormalizedStatus = coerceText(sStatus).toUpperCase();
-            var sResolvedError = coerceText(sLastError);
-            var sResolvedSuccessAt = coerceText(sLastSuccessAt);
+        formatRefreshStatusText: function (oRefreshState) {
+            var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
+            var sResolvedError = coerceText(oRefreshState && oRefreshState.lastError);
+            var sResolvedSuccessAt = coerceText(oRefreshState && oRefreshState.lastSuccessAt);
             if (sNormalizedStatus === "REQUESTED") {
-                return coerceText(sQueuedText);
+                return getBundleText(this, "analyticsRefreshQueued", [], "Queued");
             }
-            if (bIsRunning) {
-                return coerceText(sRunningText);
+            if (oRefreshState && oRefreshState.isRunning) {
+                return getBundleText(this, "analyticsRefreshRunning", [], "Running");
             }
             if (sResolvedError) {
                 return sResolvedError;
             }
             if (sResolvedSuccessAt) {
-                return coerceText(sUpdatedText) + ": " + sResolvedSuccessAt;
+                return getBundleText(this, "workflowUpdatedAt", [], "Updated at") + ": " + sResolvedSuccessAt;
             }
-            return coerceText(sIdleText);
+            return getBundleText(this, "analyticsRefreshIdle", [], "Idle");
         }
     };
 });

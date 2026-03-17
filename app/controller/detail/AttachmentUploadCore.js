@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/AttachmentUploadPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
@@ -9,9 +8,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailRuntimeContracts"
-], function (AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
+], function (AttachmentUploadPolicy, DetailCommandPolicy, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
     "use strict";
 
+    var ATTACHMENT_CONSTANTS = DetailRuntimeContracts.ATTACHMENTS;
     var MODELS = ModelContracts.MODELS;
     var MASTER_DATA_MODEL = MODELS.MASTER_DATA;
     var STATE_MODEL = MODELS.STATE;
@@ -101,16 +101,16 @@ sap.ui.define([
         var iFileSize = Number(oFile && oFile.size || 0) || 0;
 
         if (iMaxSizeMb > 0 && iFileSize > iMaxSizeMb * 1024 * 1024) {
-            return { ok: false, toastKey: "attachmentSizeRejected" };
+            return { ok: false, toastKey: ATTACHMENT_CONSTANTS.SIZE_REJECTED_TOAST_KEY };
         }
         if (aAllowedExtensions.length && sExtension && aAllowedExtensions.indexOf(sExtension) < 0) {
-            return { ok: false, toastKey: "attachmentMimeRejected" };
+            return { ok: false, toastKey: ATTACHMENT_CONSTANTS.MIME_REJECTED_TOAST_KEY };
         }
         if (aAllowedMime.length && (!sMimeType || sMimeType === "application/octet-stream")) {
-            return { ok: false, toastKey: "attachmentMimeRejected" };
+            return { ok: false, toastKey: ATTACHMENT_CONSTANTS.MIME_REJECTED_TOAST_KEY };
         }
         if (aAllowedMime.length && sMimeType && aAllowedMime.indexOf(sMimeType) < 0) {
-            return { ok: false, toastKey: "attachmentMimeRejected" };
+            return { ok: false, toastKey: ATTACHMENT_CONSTANTS.MIME_REJECTED_TOAST_KEY };
         }
         return { ok: true, mimeType: sMimeType };
     }
@@ -146,7 +146,7 @@ sap.ui.define([
             return Promise.resolve(false);
         }
         if (!canUploadAttachments(oController)) {
-            oController._showToast("attachmentUploadDisabled");
+            oController._showToast(ATTACHMENT_CONSTANTS.UPLOAD_DISABLED_TOAST_KEY);
             return Promise.resolve(false);
         }
         oDomRef = typeof oUploader.getFocusDomRef === "function" ? oUploader.getFocusDomRef() : null;
@@ -179,11 +179,11 @@ sap.ui.define([
         }
         if (!canUploadAttachments(oController)) {
             clearAttachmentUploader(oUploader);
-            oController._showToast("attachmentUploadDisabled");
+            oController._showToast(ATTACHMENT_CONSTANTS.UPLOAD_DISABLED_TOAST_KEY);
             return Promise.resolve();
         }
 
-        ControllerViewStateRuntime.setFlag(oController, "/attachmentBusy", true);
+        ControllerViewStateRuntime.setFlag(oController, ATTACHMENT_CONSTANTS.UPLOAD_BUSY_PATH, true);
         oSequence = aUploadFiles.reduce(function (oPromise, oFile) {
             return oPromise.then(function () {
                 var oValidation = validateAttachmentFile(oController, oFile);
@@ -201,7 +201,7 @@ sap.ui.define([
 
         return Promise.resolve(oSequence).finally(function () {
             clearAttachmentUploader(oUploader);
-            ControllerViewStateRuntime.setFlag(oController, "/attachmentBusy", false);
+            ControllerViewStateRuntime.setFlag(oController, ATTACHMENT_CONSTANTS.UPLOAD_BUSY_PATH, false);
         });
     }
 
@@ -219,36 +219,33 @@ sap.ui.define([
         return Promise.resolve();
     }
 
-    function formatUploadHint(oController, aExtensions, iMaxSizeMb) {
-        var sTypes = (Array.isArray(aExtensions) ? aExtensions : []).map(function (sExtension) {
-            return String(sExtension || "").trim().toUpperCase();
-        }).filter(Boolean).join(", ");
-        var sSize = String(Number(iMaxSizeMb || 0) || 0);
-        if (!sTypes && sSize === "0") {
-            return "";
+    function resolveTextFromBundle(oResourceBundle, sTextKey, aArgs, sFallbackText) {
+        try {
+            if (oResourceBundle && typeof oResourceBundle.getText === "function") {
+                return String(oResourceBundle.getText(sTextKey, aArgs) || sFallbackText || sTextKey);
+            }
+        } catch (_bundleError) {
+            // Fall back to the provided static text below.
         }
-        return ControllerTextRuntime.getText(
-            oController,
-            "attachmentUploadHint",
-            [sTypes || "-", sSize],
-            [sTypes, sSize ? sSize + " MB" : ""].filter(Boolean).join(" Ã‚Â· ")
-        );
+        return String(sFallbackText || sTextKey || "");
     }
 
-    function formatUploadHintSafe(oController, aExtensions, iMaxSizeMb) {
+    function formatUploadHint(oResourceBundle, aExtensions, iMaxSizeMb) {
         var sTypes = (Array.isArray(aExtensions) ? aExtensions : []).map(function (sExtension) {
             return String(sExtension || "").trim().toUpperCase();
         }).filter(Boolean).join(", ");
-        var sSize = String(Number(iMaxSizeMb || 0) || 0);
+        var iSafeMaxSize = Number(iMaxSizeMb || 0) || 0;
+        var sSize = String(iSafeMaxSize);
         var sFallbackText;
-        if (!sTypes && sSize === "0") {
+
+        if (!sTypes && iSafeMaxSize <= 0) {
             return "";
         }
-        sFallbackText = [sTypes, sSize ? sSize + " MB" : ""].filter(Boolean).join(" - ");
-        return ControllerTextRuntime.getText(
-            oController,
-            "attachmentUploadHint",
-            [sTypes || "-", sSize],
+        sFallbackText = [sTypes, iSafeMaxSize > 0 ? sSize + " MB" : ""].filter(Boolean).join(ATTACHMENT_CONSTANTS.HINT_FALLBACK_SEPARATOR);
+        return resolveTextFromBundle(
+            oResourceBundle,
+            ATTACHMENT_CONSTANTS.HINT_TEXT_KEY,
+            [sTypes || ATTACHMENT_CONSTANTS.HINT_FALLBACK_EMPTY_TOKEN, sSize],
             sFallbackText
         );
     }
@@ -259,7 +256,6 @@ sap.ui.define([
         openNativeFilePicker: openNativeFilePicker,
         uploadFiles: uploadFiles,
         onUploaderChange: onUploaderChange,
-        formatUploadHint: formatUploadHintSafe
+        formatUploadHint: formatUploadHint
     };
 });
-

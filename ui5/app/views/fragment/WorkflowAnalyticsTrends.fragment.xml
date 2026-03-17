@@ -1,0 +1,81 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:vizData="sap.viz.ui5.data"
+    xmlns:vizFeeds="sap.viz.ui5.controls.common.feeds">
+    <IconTabFilter key="trends" text="{i18n>analyticsTrendsTab}" icon="sap-icon://line-chart">
+        <VBox class="analyticsBreakdownSection" renderType="Bare">
+            <Panel headerText="{i18n>analyticsComparisonChartTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
+                <content>
+                    <OverflowToolbar design="Transparent" class="analyticsComparisonToolbar workbenchToolbarSurface analyticsControlToolbar">
+                        <Label text="{i18n>analyticsCompareMetricLabel}" labelFor="analyticsComparisonMetricSelect"/>
+                        <Select id="analyticsComparisonMetricSelect" width="16rem" selectedKey="{view>/comparisonMetric}" change=".onSelectAnalyticsMetric">
+                            <items>
+                                <core:Item key="FAILED_CHECKS" text="{i18n>analyticsMetricFailedChecks}"/>
+                                <core:Item key="FAILED_BARRIERS" text="{i18n>analyticsMetricFailedBarriers}"/>
+                                <core:Item key="FAILED_CHECKLISTS" text="{i18n>analyticsMetricFailedChecklistCount}"/>
+                                <core:Item key="FAILED_BARRIER_CHECKLISTS" text="{i18n>analyticsMetricFailedBarrierChecklistCount}"/>
+                                <core:Item key="TOTAL" text="{i18n>analyticsMetricTotal}"/>
+                            </items>
+                        </Select>
+                        <ToolbarSpacer/>
+                        <ObjectStatus text="{= ${view>/selectedYear} + ' vs ' + ${view>/compareYear} }" state="Information"/>
+                    </OverflowToolbar>
+                    <MessageStrip text="{view>/compareYearHintText}" type="Information" showIcon="true" visible="{= !${view>/compareYearHasData} &amp;&amp; !!${view>/compareYearHintText} }" class="chkFeedbackStrip sapUiTinyMarginBottom"/>
+                    <viz:VizFrame vizType="line" width="100%" height="18rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/comparisonChart}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/comparisonChartRows}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="{i18n>analyticsMonth}" value="{view>monthLabel}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="{i18n>analyticsSelectedYear}" value="{view>selectedValue}"/>
+                                    <vizData:MeasureDefinition name="{i18n>analyticsCompareYearLabel}" value="{view>compareValue}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="{= ${i18n>analyticsSelectedYear} + ',' + ${i18n>analyticsCompareYearLabel} }"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="{i18n>analyticsMonth}"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/comparisonChart} }" class="analyticsChartEmpty sapUiTinyMarginBottom"/>
+                </content>
+            </Panel>
+            <Panel headerText="{i18n>analyticsMonthlyMatrixTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <ScrollContainer width="100%" horizontal="true" vertical="false" focusable="false" class="analyticsMatrixScroller">
+                        <Table items="{view>/analytics/monthlyMatrixRows}" class="flatEditorTable detailAttachmentTable analyticsMatrixTable" noDataText="{i18n>analyticsNoData}">
+                            <columns>
+                                <Column width="13rem"><Text text="{i18n>analyticsMetricColumn}"/></Column>
+                                <Column width="6rem"><Text text="{i18n>analyticsYearColumn}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortJan}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortFeb}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortMar}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortApr}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortMay}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortJun}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortJul}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortAug}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortSep}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortOct}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortNov}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortDec}"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{= ${view>metricKey} === 'TOTAL' ? ${i18n>analyticsMetricTotal} : ${view>metricKey} === 'FAILED_CHECKS' ? ${i18n>analyticsMetricFailedChecks} : ${view>metricKey} === 'FAILED_BARRIERS' ? ${i18n>analyticsMetricFailedBarriers} : ${view>metricKey} === 'FAILED_CHECKLISTS' ? ${i18n>analyticsMetricFailedChecklistCount} : ${i18n>analyticsMetricFailedBarrierChecklistCount} }"/>
+                                        <ObjectStatus text="{view>yearLabel}" state="Information"/>
+                                        <Text text="{view>jan}"/><Text text="{view>feb}"/><Text text="{view>mar}"/><Text text="{view>apr}"/><Text text="{view>may}"/><Text text="{view>jun}"/><Text text="{view>jul}"/><Text text="{view>aug}"/><Text text="{view>sep}"/><Text text="{view>oct}"/><Text text="{view>nov}"/><Text text="{view>dec}"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </ScrollContainer>
+                </content>
+            </Panel>
+        </VBox>
+    </IconTabFilter>
+</core:FragmentDefinition>

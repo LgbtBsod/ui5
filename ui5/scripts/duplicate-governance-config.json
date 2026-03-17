@@ -1,0 +1,18 @@
+{
+  "roots": [
+    "scripts"
+  ],
+  "extensions": [
+    ".js"
+  ],
+  "excludeFiles": [
+    "scripts/unit-smoke.js"
+  ],
+  "blockLines": 6,
+  "minBlockChars": 160,
+  "maxCrossRootClusters": 5,
+  "forbidSameRootClusters": true,
+  "semanticMode": true,
+  "minNormalizedChars": 40,
+  "sampleLimit": 5
+}
