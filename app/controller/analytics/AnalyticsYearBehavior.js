@@ -4,26 +4,42 @@ sap.ui.define([
 ], function (ControllerViewStateRuntime, AnalyticsYearRuntime) {
     "use strict";
 
-    function selectAnalyticsYear(oController, oEvent, sSelectedYearPath, sCompareYearPath, fnSetCompareYearValidation, fnLoadAnalytics) {
-        var sYear = AnalyticsYearRuntime.normalizeYearString(
-            oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem") && oEvent.getParameter("selectedItem").getKey() ||
-            oEvent && oEvent.getParameter && oEvent.getParameter("value") ||
-            oEvent && oEvent.getParameter && oEvent.getParameter("selectedKey") ||
-            oEvent && oEvent.getSource && oEvent.getSource().getValue && oEvent.getSource().getValue() ||
-            oEvent && oEvent.getSource && oEvent.getSource().getSelectedKey && oEvent.getSource().getSelectedKey() ||
+    function extractYearValueFromEvent(oEvent) {
+        var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+        var oSelectedItem = oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem");
+        return AnalyticsYearRuntime.normalizeYearString(
+            (oSelectedItem && oSelectedItem.getKey && oSelectedItem.getKey()) ||
+            (oEvent && oEvent.getParameter && (oEvent.getParameter("selectedKey") || oEvent.getParameter("value"))) ||
+            (oSource && oSource.getSelectedKey && oSource.getSelectedKey()) ||
             ""
         );
+    }
+
+    function applyYearSelection(oController, sYearPath, sYear, sSelectedYearPath, sCompareYearPath, fnSetCompareYearValidation, fnLoadAnalytics, sReason) {
         if (!sYear) {
-            if (oEvent && oEvent.getSource && oEvent.getSource().setValue) {
-                oEvent.getSource().setValue(String(ControllerViewStateRuntime.get(oController, sSelectedYearPath, "") || ""));
+            return Promise.resolve();
+        }
+        ControllerViewStateRuntime.set(oController, sYearPath, sYear);
+        ControllerViewStateRuntime.set(oController, "/availableYears", AnalyticsYearRuntime.buildYearOptions(oController, sSelectedYearPath, sCompareYearPath));
+        if (sYearPath === sSelectedYearPath) {
+            AnalyticsYearRuntime.syncCompareYearDefaults(oController, sYear, sSelectedYearPath, sCompareYearPath);
+        } else {
+            ControllerViewStateRuntime.set(oController, "/compareYearOptions", AnalyticsYearRuntime.buildCompareYearOptions(oController, sSelectedYearPath, sCompareYearPath));
+        }
+        fnSetCompareYearValidation("None", "");
+        return fnLoadAnalytics(sReason);
+    }
+
+    function selectAnalyticsYear(oController, oEvent, sSelectedYearPath, sCompareYearPath, fnSetCompareYearValidation, fnLoadAnalytics) {
+        var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
+        var sYear = extractYearValueFromEvent(oEvent);
+        if (!sYear) {
+            if (oSource && oSource.setValue) {
+                oSource.setValue(String(ControllerViewStateRuntime.get(oController, sSelectedYearPath, "") || ""));
             }
             return Promise.resolve();
         }
-        ControllerViewStateRuntime.set(oController, sSelectedYearPath, sYear);
-        ControllerViewStateRuntime.set(oController, "/availableYears", AnalyticsYearRuntime.buildYearOptions(oController, sSelectedYearPath, sCompareYearPath));
-        AnalyticsYearRuntime.syncCompareYearDefaults(oController, sYear, sSelectedYearPath, sCompareYearPath);
-        fnSetCompareYearValidation("None", "");
-        return fnLoadAnalytics("yearChanged");
+        return applyYearSelection(oController, sSelectedYearPath, sYear, sSelectedYearPath, sCompareYearPath, fnSetCompareYearValidation, fnLoadAnalytics, "yearChanged");
     }
 
     return {
@@ -111,29 +127,16 @@ sap.ui.define([
             var sTargetField = String(ControllerViewStateRuntime.get(oController, "/yearPicker/targetField", "selectedYear") || "selectedYear");
             var oSource = oEvent && oEvent.getSource ? oEvent.getSource() : null;
             var sYear = AnalyticsYearRuntime.normalizeYearString(oSource && oSource.data && oSource.data("year"));
+            var sTargetPath = sTargetField === "compareYear" ? sCompareYearPath : sSelectedYearPath;
+            var sReason = sTargetField === "compareYear" ? "compareYearPicked" : "yearPicked";
             if (!sYear) {
                 return Promise.resolve();
             }
-            if (sTargetField === "compareYear") {
-                ControllerViewStateRuntime.set(oController, sCompareYearPath, sYear);
-                ControllerViewStateRuntime.set(oController, "/availableYears", AnalyticsYearRuntime.buildYearOptions(oController, sSelectedYearPath, sCompareYearPath));
-                ControllerViewStateRuntime.set(oController, "/compareYearOptions", AnalyticsYearRuntime.buildCompareYearOptions(oController, sSelectedYearPath, sCompareYearPath));
-                fnSetCompareYearValidation("None", "");
-                AnalyticsYearRuntime.syncYearPickerState(oController, sTargetField, Number(ControllerViewStateRuntime.get(oController, "/yearPicker/rangeStart", 0) || 0));
-                if (oController._oAnalyticsYearPicker) {
-                    oController._oAnalyticsYearPicker.close();
-                }
-                return fnLoadAnalytics("compareYearPicked");
-            }
-            ControllerViewStateRuntime.set(oController, sSelectedYearPath, sYear);
-            ControllerViewStateRuntime.set(oController, "/availableYears", AnalyticsYearRuntime.buildYearOptions(oController, sSelectedYearPath, sCompareYearPath));
-            AnalyticsYearRuntime.syncCompareYearDefaults(oController, sYear, sSelectedYearPath, sCompareYearPath);
-            fnSetCompareYearValidation("None", "");
             AnalyticsYearRuntime.syncYearPickerState(oController, sTargetField, Number(ControllerViewStateRuntime.get(oController, "/yearPicker/rangeStart", 0) || 0));
             if (oController._oAnalyticsYearPicker) {
                 oController._oAnalyticsYearPicker.close();
             }
-            return fnLoadAnalytics("yearPicked");
+            return applyYearSelection(oController, sTargetPath, sYear, sSelectedYearPath, sCompareYearPath, fnSetCompareYearValidation, fnLoadAnalytics, sReason);
         }
     };
 });

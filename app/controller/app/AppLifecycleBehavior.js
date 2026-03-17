@@ -93,6 +93,8 @@ sap.ui.define([
             this._fnShellPaneRouteGuard = null;
             this._oRouter = null;
             this._fnLayoutSync = null;
+            this._bStartupReadyMarked = false;
+            this._bShellStatePostStartupSyncScheduled = false;
             if (typeof this._teardownAppDomRuntime === "function") {
                 this._teardownAppDomRuntime();
             }

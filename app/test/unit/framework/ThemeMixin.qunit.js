@@ -30,15 +30,15 @@ sap.ui.define([
         assert.strictEqual(ThemeMixin.isDarkThemeEnabled(), false, "Dark mode is disabled by default");
     });
 
-    QUnit.test("supports persisted dev override for night mode", function (assert) {
+    QUnit.test("normalizes persisted dev override to morning mode", function (assert) {
         window.__DEBUG_UI5__ = true;
         window.localStorage.setItem("checklist_app_theme_dev_override", "night");
 
-        assert.strictEqual(ThemeMixin.getCurrentThemeMode(), "night", "Night mode can be enabled through dev override");
-        assert.strictEqual(ThemeMixin.isDarkThemeEnabled(), true, "Dark mode reports enabled when overridden");
+        assert.strictEqual(ThemeMixin.getCurrentThemeMode(), "morning", "Legacy night override is normalized to the productive morning mode");
+        assert.strictEqual(ThemeMixin.isDarkThemeEnabled(), false, "Dark mode stays disabled after normalization");
     });
 
-    QUnit.test("toggleTheme switches between supported modes", function (assert) {
+    QUnit.test("toggleTheme keeps the supported productive mode", function (assert) {
         var aModes = [];
         window.__DEBUG_UI5__ = true;
         ThemeService.applyThemeMode = function (sMode) {
@@ -51,6 +51,6 @@ sap.ui.define([
         window.localStorage.setItem("checklist_app_theme_dev_override", "night");
         ThemeMixin.toggleTheme();
 
-        assert.deepEqual(aModes, ["night", "morning"], "toggle resolves the next real theme mode");
+        assert.deepEqual(aModes, ["morning", "morning"], "toggle stays on the only supported productive mode");
     });
 });

@@ -75,9 +75,9 @@ sap.ui.define([
         formatAttachmentCategoryText: DetailFormatters.formatAttachmentCategoryText,
         hasRows: function (a) { return Array.isArray(a) && a.length > 0; },
         isEmptyRows: function (a) { return !Array.isArray(a) || a.length === 0; },
-        isDesktopTableVisible: function (bPhone, bNarrow, aRows) { return !bPhone && !bNarrow && this.hasRows(aRows); },
-        isPhoneTableVisible: function (bPhone, bNarrow, aRows) { return !!(bPhone || bNarrow) && this.hasRows(aRows); },
-        isBarriersRatioVisible: function (sLpcKey, aRows) { return !!sLpcKey && this.hasRows(aRows); },
+        isDesktopTableVisible: function (bPhone, bNarrow, aRows) { return !bPhone && !bNarrow && Array.isArray(aRows) && aRows.length > 0; },
+        isPhoneTableVisible: function (bPhone, bNarrow, aRows) { return !!(bPhone || bNarrow) && Array.isArray(aRows) && aRows.length > 0; },
+        isBarriersRatioVisible: function (sLpcKey, aRows) { return !!sLpcKey && Array.isArray(aRows) && aRows.length > 0; },
         isBarriersVisibleByLpc: function (sLpcKey) { return !!sLpcKey; },
         formatHeaderDate: DetailFormatters.formatHeaderDate,
         formatInfoCardValue: DetailFormatters.formatInfoCardValue,
@@ -85,6 +85,7 @@ sap.ui.define([
         formatPersonSuggestionMeta: DetailFormatters.formatPersonSuggestionMeta,
         formatAttachmentSize: DetailFormatters.formatAttachmentSize,
         formatAttachmentUploadHint: function (aExtensions, iMaxSizeMb) {
+            // Controller context is required here because the hint text is resolved via i18n.
             return AttachmentUploadCore.formatUploadHint(this, aExtensions, iMaxSizeMb);
         },
         formatI18nByKey: DetailFormatters.formatI18nByKey,

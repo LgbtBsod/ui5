@@ -64,6 +64,9 @@ sap.ui.define([
     function onExit(oController) {
         clearRefreshTimer(oController);
         ControllerRouteRuntime.detachAllMatched(oController);
+        if (oController._facade && typeof oController._facade.destroy === "function") {
+            oController._facade.destroy();
+        }
         if (oController._oAnalyticsYearPicker && typeof oController._oAnalyticsYearPicker.destroy === "function") {
             oController._oAnalyticsYearPicker.destroy();
         }

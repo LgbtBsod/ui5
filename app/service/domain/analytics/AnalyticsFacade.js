@@ -14,5 +14,16 @@ sap.ui.define([
         return this._uc.load.execute(mInput || {}, mCtx || {});
     };
 
+    AnalyticsFacade.prototype.destroy = function () {
+        if (this._uc && this._uc.load) {
+            if (typeof this._uc.load.destroy === "function") {
+                this._uc.load.destroy();
+            } else if (typeof this._uc.load.dispose === "function") {
+                this._uc.load.dispose();
+            }
+        }
+        this._uc = null;
+    };
+
     return AnalyticsFacade;
 });

@@ -11,13 +11,35 @@ sap.ui.define([
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var INVALID_YEAR_MESSAGE = "Analytics year is invalid";
+
+    function parseYearOrNull(vValue) {
+        var iYear = Number(String(vValue || "").trim());
+        if (!isFinite(iYear) || iYear <= 0) {
+            return null;
+        }
+        return iYear;
+    }
 
     return {
         loadAnalytics: function (oController, sReason, mHooks) {
             var sSelectedYear = String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "").trim();
             var sCompareYear = String(ControllerViewStateRuntime.get(oController, "/compareYear", "") || "").trim();
             var sSelectedSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
+            var iSelectedYear = parseYearOrNull(sSelectedYear);
+            var iCompareYear = parseYearOrNull(sCompareYear);
             var sReadyAt = "";
+
+            if (iSelectedYear === null) {
+                ControllerViewStateRuntime.set(oController, "/error", INVALID_YEAR_MESSAGE);
+                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
+                    status: "error",
+                    ready: false,
+                    readyAt: "",
+                    error: INVALID_YEAR_MESSAGE
+                });
+                return Promise.resolve(false);
+            }
 
             ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, true);
             ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
@@ -37,8 +59,8 @@ sap.ui.define([
                 "load",
                 {
                     reason: sReason || "manual",
-                    selectedYear: Number(sSelectedYear) || 0,
-                    compareYear: Number(sCompareYear) || 0,
+                    selectedYear: iSelectedYear,
+                    compareYear: iCompareYear,
                     selectedSource: sSelectedSource
                 },
                 mHooks.buildCtx(oController)

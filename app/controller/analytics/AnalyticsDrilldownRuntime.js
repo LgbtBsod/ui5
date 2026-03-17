@@ -30,9 +30,6 @@ sap.ui.define([
             compareYear: sCompareYear,
             analyticsSource: sAnalyticsSource,
             extras: Object.assign({}, mExtras || {}, {
-                analyticsSource: sAnalyticsSource,
-                selectedYear: sSelectedYear,
-                compareYear: sCompareYear,
                 monthLabel: sMonthLabel
             })
         };

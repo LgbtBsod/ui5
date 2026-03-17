@@ -26,12 +26,13 @@ sap.ui.define([
     function syncThemeState(oController, sSource, oThemeResult) {
         var oAppView = ControllerModelRuntime.appView(oController);
         var sStoredTheme = oController.getCurrentTheme();
-        var bIsDark = !!(oThemeResult && oThemeResult.isDark);
+        var sMode = String((oThemeResult && oThemeResult.mode) || "morning").trim().toLowerCase() || "morning";
+        var bIsDark = false;
         var bAnimationEnabled = !oThemeResult || oThemeResult.animationEnabled !== false;
         if (oAppView) {
             ModelStateRuntime.setManyOnModel(oAppView, {
                 "/isDark": bIsDark,
-                "/themeMode": bIsDark ? "night" : "morning",
+                "/themeMode": sMode,
                 "/animationEnabled": bAnimationEnabled
             });
         }
@@ -41,7 +42,7 @@ sap.ui.define([
             appliedTheme: oThemeResult && oThemeResult.theme,
             isDark: bIsDark,
             animationEnabled: bAnimationEnabled,
-            expectedIcon: bIsDark ? "sun" : "moon"
+            expectedIcon: "sun"
         });
     }
 

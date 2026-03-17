@@ -9,8 +9,8 @@ sap.ui.define([
         assert.strictEqual(ThemeService.themeForMode("morning"), "sap_fiori_3", "Morning mode maps to SAP Fiori 3");
     });
 
-    QUnit.test("night mode mapping remains available but is not the default productive mode", function (assert) {
-        assert.strictEqual(ThemeService.themeForMode("night"), "sap_fiori_3", "Night mode safely falls back to supported baseline");
+    QUnit.test("legacy night mode tokens normalize to the productive mode", function (assert) {
+        assert.strictEqual(ThemeService.themeForMode("night"), "sap_fiori_3", "Legacy night mode safely falls back to the supported baseline");
         assert.strictEqual(ThemeService.modeForTheme("sap_fiori_3"), "morning", "Productive theme mode stays morning");
     });
 });

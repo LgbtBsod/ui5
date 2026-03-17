@@ -3,29 +3,31 @@ sap.ui.define([
     "sap/ui/core/Fragment",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsYearBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsSelectionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLifecycleBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsStateBehavior"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior"
 ], function (
     Core,
     Fragment,
     AnalyticsFacade,
     CtxFactory,
+    AnalyticsBuilderRuntime,
     AnalyticsContracts,
     ModelContracts,
+    ControllerViewStateRuntime,
     AnalyticsYearBehavior,
     AnalyticsDrilldownBehavior,
     AnalyticsSelectionBehavior,
     AnalyticsRefreshBehavior,
     AnalyticsLifecycleBehavior,
-    AnalyticsLoadBehavior,
-    AnalyticsStateBehavior
+    AnalyticsLoadBehavior
 ) {
     "use strict";
 
@@ -77,20 +79,11 @@ sap.ui.define([
             AnalyticsLifecycleBehavior.onExit(this);
         },
 
-        _applyComparisonMetricSelection: function () {
-            AnalyticsStateBehavior.applyComparisonMetricSelection(this);
-        },
-
-        _applyBuilderSelection: function (mOverrides) {
-            AnalyticsStateBehavior.applyBuilderSelection(this, mOverrides);
-        },
-
-        _syncAnalyticsContextHints: function () {
-            AnalyticsStateBehavior.syncAnalyticsContextHints(this);
-        },
-
         _setCompareYearValidation: function (sState, sText) {
-            AnalyticsStateBehavior.setCompareYearValidation(this, sState, sText);
+            ControllerViewStateRuntime.setMany(this, {
+                "/compareYearValueState": sState || "None",
+                "/compareYearValueStateText": sText || ""
+            });
         },
 
         _loadAnalytics: function (sReason) {
@@ -168,19 +161,19 @@ sap.ui.define([
 
         onSelectAnalyticsMetric: function (oEvent) {
             return AnalyticsSelectionBehavior.onSelectAnalyticsMetric(this, oEvent, function (oController) {
-                oController._applyComparisonMetricSelection();
+                AnalyticsBuilderRuntime.applyComparisonMetricSelection(oController);
             });
         },
 
         onSelectAnalyticsBuilderDimension: function (oEvent) {
             return AnalyticsSelectionBehavior.onSelectAnalyticsBuilderDimension(this, oEvent, function (oController, mOverrides) {
-                oController._applyBuilderSelection(mOverrides);
+                AnalyticsBuilderRuntime.applyBuilderSelection(oController, mOverrides);
             });
         },
 
         onSelectAnalyticsBuilderMetric: function (oEvent) {
             return AnalyticsSelectionBehavior.onSelectAnalyticsBuilderMetric(this, oEvent, function (oController, mOverrides) {
-                oController._applyBuilderSelection(mOverrides);
+                AnalyticsBuilderRuntime.applyBuilderSelection(oController, mOverrides);
             });
         },
 
