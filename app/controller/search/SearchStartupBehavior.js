@@ -1,12 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStartupRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime"
-], function (SearchStartupRuntime, SearchAnalyticsRailRuntime, SearchViewportRuntime, ControllerTextRuntime, ControllerViewStateRuntime, SearchCommandPolicy, SearchSelectionRuntime) {
+], function (SearchStartupRuntime, SearchViewportRuntime, ControllerTextRuntime, ControllerViewStateRuntime, SearchCommandPolicy, SearchSelectionRuntime) {
     "use strict";
 
     function syncSmartControlAvailability(oController) {
@@ -26,9 +25,6 @@ sap.ui.define([
             },
             bootstrap: function (mInput) {
                 return SearchCommandPolicy.bootstrap(oController, mInput);
-            },
-            clearInitialAnalyticsSchedule: function () {
-                SearchAnalyticsRailRuntime.clearInitialAnalyticsSchedule(oController);
             },
             rebind: function (mInput) {
                 return SearchCommandPolicy.rebind(oController, mInput);

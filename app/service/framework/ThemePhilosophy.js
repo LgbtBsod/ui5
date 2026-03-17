@@ -7,12 +7,6 @@ sap.ui.define([], function () {
             platformClass: "platformPrecisionEnterprise",
             horizonClass: "themeHorizonMorning",
             designLanguage: "sap-fiori-3"
-        },
-        sap_fiori_3_dark: {
-            lifestyleClass: "themeLifestyleNightOps",
-            platformClass: "platformCalmModern",
-            horizonClass: "themeHorizonNight",
-            designLanguage: "sap-fiori-3-dark"
         }
     };
 

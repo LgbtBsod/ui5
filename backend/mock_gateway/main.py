@@ -1,4 +1,5 @@
 import json
+import os
 import asyncio
 import logging
 import random
@@ -662,7 +663,9 @@ def ui5_flex_settings_stub():
 
 @app.get("/checklist/app/Component-preload.js")
 def component_preload_stub():
-    return Response(content="/* preload not bundled in mock mode */", media_type="application/javascript")
+    if os.getenv("MOCK_COMPONENT_PRELOAD_STUB", "").strip().lower() not in {"1", "true", "yes", "on"}:
+        return Response(status_code=404)
+    return Response(content="/* mock preload stub enabled */", media_type="application/javascript")
 
 
 @app.exception_handler(Exception)

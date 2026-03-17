@@ -362,6 +362,12 @@ sap.ui.define([
             return WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT &&
                 !!sActiveObjectId &&
                 !CreateSentinel.isCreateId(sActiveObjectId);
+        },
+
+        formatAttachmentsEmptyStateText: function (sRootId) {
+            return CreateSentinel.isCreateId(sRootId)
+                ? text(this, "attachmentDraftStageHint")
+                : text(this, "detailEmptyAttachmentsText");
         }
     };
 });

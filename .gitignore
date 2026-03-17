@@ -67,3 +67,6 @@ docs/artifacts/**/*.png
 docs/artifacts/**/*.md
 docs/artifacts/**/*.txt
 backend/mock_gateway/uploads/
+
+# Node dependencies
+node_modules/

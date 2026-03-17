@@ -52,8 +52,6 @@ sap.ui.define([
         oController._iAnalyticsRefreshTimer = null;
         oController._iAnalyticsRailPulseTimer = null;
         oController._iSearchWorkingHintTimer = null;
-        oController._iInitialAnalyticsTimer = null;
-        oController._iInitialAnalyticsIdleId = null;
         oController._iLocationSuggestTimer = null;
         oController._aLocationSuggestCache = [];
         oController._sLocationSuggestNeedle = "";
@@ -100,12 +98,7 @@ sap.ui.define([
         SearchViewBehavior.clearAnalyticsRefreshTimer(oController);
         oController._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRailPulseTimer);
         oController._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(oController._iSearchWorkingHintTimer);
-        oController._iInitialAnalyticsTimer = SchedulingRuntime.clearTimer(oController._iInitialAnalyticsTimer);
         oController._iLocationSuggestTimer = SchedulingRuntime.clearTimer(oController._iLocationSuggestTimer);
-        if (oController._iInitialAnalyticsIdleId && window.cancelIdleCallback) {
-            window.cancelIdleCallback(oController._iInitialAnalyticsIdleId);
-            oController._iInitialAnalyticsIdleId = null;
-        }
         oController._iLocationSuggestTimer = null;
         oController._aLocationSuggestCache = [];
         oController._sLocationSuggestNeedle = "";

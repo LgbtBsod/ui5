@@ -4,24 +4,20 @@ sap.ui.define([
     "sap/m/OverflowToolbar",
     "sap/m/OverflowToolbarLayoutData",
     "sap/m/VBox",
-    "sap/m/HBox",
     "sap/m/Text",
     "sap/m/Title",
     "sap/m/ToolbarSpacer",
-    "sap/m/Button",
-    "sap/m/Switch"
+    "sap/m/Button"
 ], function (
     Control,
     Icon,
     OverflowToolbar,
     OverflowToolbarLayoutData,
     VBox,
-    HBox,
     Text,
     Title,
     ToolbarSpacer,
-    Button,
-    Switch
+    Button
 ) {
     "use strict";
 
@@ -56,13 +52,6 @@ sap.ui.define([
         if (oControl._oAnalyticsButton) {
             oControl._oAnalyticsButton.setTooltip(oControl.getAnalyticsTooltip());
         }
-        if (oControl._oThemeToggle) {
-            oControl._oThemeToggle.setState(oControl.getDark());
-            oControl._oThemeToggle.setTooltip(oControl.getThemeTooltip());
-        }
-        if (oControl._oThemeToggleDock) {
-            oControl._oThemeToggleDock.setVisible(!!oControl.getShowThemeToggle());
-        }
         if (oControl._oUserButton) {
             oControl._oUserButton.setText(oControl.getUserLabel());
             oControl._oUserButton.setTooltip(oControl.getUserTooltip());
@@ -82,10 +71,7 @@ sap.ui.define([
                 settingsTooltip: { type: "string", defaultValue: "" },
                 analyticsTooltip: { type: "string", defaultValue: "" },
                 userTooltip: { type: "string", defaultValue: "" },
-                dark: { type: "boolean", defaultValue: false },
-                themeTooltip: { type: "string", defaultValue: "" },
-                showHelp: { type: "boolean", defaultValue: false },
-                showThemeToggle: { type: "boolean", defaultValue: false }
+                showHelp: { type: "boolean", defaultValue: false }
             },
             aggregations: {
                 _toolbar: { type: "sap.m.OverflowToolbar", multiple: false, visibility: "hidden" }
@@ -102,11 +88,6 @@ sap.ui.define([
                     }
                 },
                 analyticsPress: {
-                    parameters: {
-                        anchor: { type: "sap.ui.core.Control" }
-                    }
-                },
-                themePress: {
                     parameters: {
                         anchor: { type: "sap.ui.core.Control" }
                     }
@@ -152,31 +133,6 @@ sap.ui.define([
                 }
             }).addStyleClass("shellActionBtn shellAnalyticsBtn"), "High");
 
-            this._oThemeToggle = applyPriority(new Switch({
-                customTextOn: "",
-                customTextOff: "",
-                change: function () {
-                    that.fireThemePress({ anchor: that._oThemeToggle });
-                }
-            }).addStyleClass("shellThemeSwitch appAccentSwitch"), "High");
-
-            this._oThemeToggleDock = new HBox({
-                renderType: "Bare",
-                alignItems: "Center",
-                items: [
-                    new Icon({
-                        src: "sap-icon://lightbulb"
-                    }).addStyleClass("shellThemeGlyph shellThemeGlyphSun"),
-                    this._oThemeToggle,
-                    new Icon({
-                        src: "sap-icon://moon"
-                    }).addStyleClass("shellThemeGlyph shellThemeGlyphMoon")
-                ]
-            }).addStyleClass("shellThemeToggle");
-            this._oThemeToggleDock.setLayoutData(new OverflowToolbarLayoutData({
-                priority: "High"
-            }));
-
             this._oUserButton = applyPriority(new Button({
                 type: "Transparent",
                 press: function () {
@@ -198,7 +154,6 @@ sap.ui.define([
                     this._oHelpButton,
                     this._oSettingsButton,
                     this._oAnalyticsButton,
-                    this._oThemeToggleDock,
                     this._oUserButton
                 ]
             }).addStyleClass("appShellHeader"));
@@ -223,23 +178,6 @@ sap.ui.define([
             return this;
         },
 
-        setDark: function (bDark) {
-            var bValue = !!bDark;
-            this.setProperty("dark", bValue, true);
-            if (this._oThemeToggle && this._oThemeToggle.setState) {
-                this._oThemeToggle.setState(bValue);
-            }
-            return this;
-        },
-
-        setThemeTooltip: function (sTooltip) {
-            var sValue = String(sTooltip || "");
-            this.setProperty("themeTooltip", sValue, true);
-            if (this._oThemeToggle && this._oThemeToggle.setTooltip) {
-                this._oThemeToggle.setTooltip(sValue);
-            }
-            return this;
-        },
 
         renderer: {
             apiVersion: 2,

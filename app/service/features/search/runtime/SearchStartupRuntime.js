@@ -86,7 +86,6 @@ sap.ui.define([
         ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", false);
         ControllerViewStateRuntime.set(oController, "/analyticsError", "");
         mHooks.bindSearchWorkingText();
-        mHooks.clearInitialAnalyticsSchedule();
         Promise.resolve(mHooks.bootstrap({ reason: "routeMatched" }))
             .catch(function () {
                 return null;

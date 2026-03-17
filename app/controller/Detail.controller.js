@@ -95,7 +95,8 @@ sap.ui.define([
         formatPersistenceTooltip: DetailFormatters.formatPersistenceTooltip,
         formatCopyLinkVisible: DetailFormatters.formatCopyLinkVisible,
         formatDeleteChecklistVisible: DetailFormatters.formatDeleteChecklistVisible,
-        formatAutosaveText: DetailFormatters.formatAutosaveText
+        formatAutosaveText: DetailFormatters.formatAutosaveText,
+        formatAttachmentsEmptyStateText: DetailFormatters.formatAttachmentsEmptyStateText
     });
 
     return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Detail", mControllerDefinition);

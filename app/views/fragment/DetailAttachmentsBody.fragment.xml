@@ -60,7 +60,9 @@
             <HBox class="detailEmptyStateCard workflowEmptyStateCard detailAttachmentsEmptyState" renderType="Bare" visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
                 <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
                 <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
-                <Text text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>attachmentDraftStageHint} : ${i18n>detailEmptyAttachmentsText} }" class="detailEmptyStateText workflowEmptyStateText"/>
+                <Text
+                    text="{path:'selected>/root/id', formatter:'.formatAttachmentsEmptyStateText'}"
+                    class="detailEmptyStateText workflowEmptyStateText"/>
             </HBox>
             <Table
                 items="{selected>/attachments}"
