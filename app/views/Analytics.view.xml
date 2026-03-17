@@ -26,12 +26,12 @@
             <ObjectStatus
                 class="analyticsRefreshStatus statusChipSemantic"
                 text="{parts: [{path: 'view>/refreshState/status'}, {path: 'view>/refreshState/isRunning'}, {path: 'view>/refreshState/lastError'}, {path: 'view>/refreshState/lastSuccessAt'}, {path: 'i18n>analyticsRefreshQueued'}, {path: 'i18n>analyticsRefreshRunning'}, {path: 'i18n>workflowUpdatedAt'}, {path: 'i18n>analyticsRefreshIdle'}], formatter: '.formatRefreshStatusText'}"
-                state="{= ${view>/refreshState/status} === 'ERROR' ? 'Error' : ((${view>/refreshState/status} === 'REQUESTED' || ${view>/refreshState/isRunning}) ? 'Warning' : 'Success') }"/>
+                state="{parts: [{path: 'view>/refreshState/status'}, {path: 'view>/refreshState/isRunning'}], formatter: '.formatRefreshStatusState'}"/>
             <Button
                 text="{i18n>analyticsRefreshButton}"
                 icon="sap-icon://refresh"
                 type="Emphasized"
-                enabled="{= !${view>/refreshBusy} &amp;&amp; !${view>/refreshState/isRunning} &amp;&amp; ${view>/refreshState/status} !== 'REQUESTED' }"
+                enabled="{parts: [{path: 'view>/refreshBusy'}, {path: 'view>/refreshState/isRunning'}, {path: 'view>/refreshState/status'}], formatter: '.formatRefreshEnabled'}"
                 press=".onRefreshAnalytics"
                 class="analyticsRefreshButton actionPriorityPrimary"/>
         </headerContent>

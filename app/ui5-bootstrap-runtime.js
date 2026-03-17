@@ -20,24 +20,16 @@
         return oTarget;
     }
 
-    function resolveStoredThemeMode() {
-        var sRawProfile = "";
-        var oParsedProfile = null;
-        var sMode = "morning";
+    function normalizeStoredThemeProfile() {
         try {
-            sRawProfile = window.localStorage.getItem("checklist_app_theme_profile")
-                || window.localStorage.getItem("sap_ui5_theme_profile")
-                || "";
-            if (sRawProfile) {
-                oParsedProfile = JSON.parse(sRawProfile);
-                sMode = String(oParsedProfile && oParsedProfile.mode || sMode).toLowerCase();
-            } else {
-                sMode = String(window.localStorage.getItem("sap_ui5_theme") || sMode).toLowerCase();
-            }
+            window.localStorage.setItem("checklist_app_theme_profile", JSON.stringify({
+                mode: "morning",
+                animationEnabled: true
+            }));
+            window.localStorage.setItem("checklist_app_theme", "morning");
         } catch (_e) {
-            sMode = "morning";
+            // Best-effort normalization only.
         }
-        return "morning";
     }
 
     function mountComponent() {
@@ -101,6 +93,7 @@
         oScript.setAttribute("data-sap-ui-async", "true");
         oScript.setAttribute("data-sap-ui-preload", "async");
         oScript.onload = function () {
+            normalizeStoredThemeProfile();
             if (window.sap && sap.ui && sap.ui.require) {
                 attachInit();
                 return;
@@ -112,6 +105,8 @@
         };
         document.head.appendChild(oScript);
     }
+
+    normalizeStoredThemeProfile();
 
     if (window.sap && sap.ui && sap.ui.require) {
         attachInit();

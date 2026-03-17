@@ -9,14 +9,6 @@ sap.ui.define([
         oController._iAnalyticsRefreshTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRefreshTimer);
     }
 
-    function clearInitialAnalyticsSchedule(oController) {
-        oController._iInitialAnalyticsTimer = SchedulingRuntime.clearTimer(oController._iInitialAnalyticsTimer);
-        if (oController._iInitialAnalyticsIdleId && window.cancelIdleCallback) {
-            window.cancelIdleCallback(oController._iInitialAnalyticsIdleId);
-            oController._iInitialAnalyticsIdleId = null;
-        }
-    }
-
     function pulseAnalyticsRailUpdate(oController) {
         var oRail = oController.byId("searchAnalyticsRail");
         if (!oRail) {
@@ -53,13 +45,11 @@ sap.ui.define([
 
     function bindAnalyticsRefreshTimer(oController) {
         clearAnalyticsRefreshTimer(oController);
-        clearInitialAnalyticsSchedule(oController);
     }
 
     return {
         bindAnalyticsRefreshTimer: bindAnalyticsRefreshTimer,
         clearAnalyticsRefreshTimer: clearAnalyticsRefreshTimer,
-        clearInitialAnalyticsSchedule: clearInitialAnalyticsSchedule,
         refreshAnalyticsRail: refreshAnalyticsRail
     };
 });

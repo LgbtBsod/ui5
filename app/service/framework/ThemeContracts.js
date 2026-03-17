@@ -16,12 +16,10 @@ sap.ui.define([], function () {
         }),
         MODES: Object.freeze({
             DEFAULT: "morning",
-            MORNING: "morning",
-            NIGHT: "night"
+            MORNING: "morning"
         }),
         THEMES: Object.freeze({
-            MORNING: "sap_fiori_3",
-            NIGHT: "sap_fiori_3"
+            MORNING: "sap_fiori_3"
         }),
         DURATIONS: Object.freeze({
             SWITCH_MS: 220,

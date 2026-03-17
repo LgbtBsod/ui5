@@ -235,6 +235,22 @@ sap.ui.define([
             AnalyticsDrilldownBehavior.onCloseAnalytics(this);
         },
 
+        formatRefreshStatusState: function (sStatus, bIsRunning) {
+            var sNormalizedStatus = coerceText(sStatus).toUpperCase();
+            if (sNormalizedStatus === "ERROR") {
+                return "Error";
+            }
+            if (sNormalizedStatus === "REQUESTED" || bIsRunning) {
+                return "Warning";
+            }
+            return "Success";
+        },
+
+        formatRefreshEnabled: function (bRefreshBusy, bIsRunning, sStatus) {
+            var sNormalizedStatus = coerceText(sStatus).toUpperCase();
+            return !bRefreshBusy && !bIsRunning && sNormalizedStatus !== "REQUESTED";
+        },
+
         formatRefreshStatusText: function (sStatus, bIsRunning, sLastError, sLastSuccessAt, sQueuedText, sRunningText, sUpdatedText, sIdleText) {
             var sNormalizedStatus = coerceText(sStatus).toUpperCase();
             var sResolvedError = coerceText(sLastError);

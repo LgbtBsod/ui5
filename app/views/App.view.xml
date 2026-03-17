@@ -27,7 +27,6 @@
                 userLabel="{appView>/shell/userLabel}"
                 userIcon="{appView>/shell/userIcon}"
                 showHelp="false"
-                showThemeToggle="false"
                 settingsTooltip="{i18n>shellSettingsTooltip}"
                 analyticsTooltip="{i18n>workflowAnalyticsTitle}"
                 userTooltip="{appView>/shell/userTooltip}"

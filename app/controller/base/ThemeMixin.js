@@ -34,15 +34,7 @@ sap.ui.define([
         } catch (_queryError) {
             sQuery = "";
         }
-        if (sQuery === "dark" || sQuery === "night") {
-            try {
-                window.localStorage.setItem(DEV_OVERRIDE_STORAGE_KEY, "morning");
-            } catch (_persistNightError) {
-                // Best-effort persistence only.
-            }
-            return "morning";
-        }
-        if (sQuery === "light" || sQuery === "morning") {
+        if (sQuery === "dark" || sQuery === "night" || sQuery === "light" || sQuery === "morning") {
             try {
                 window.localStorage.setItem(DEV_OVERRIDE_STORAGE_KEY, "morning");
             } catch (_persistMorningError) {
@@ -78,7 +70,7 @@ sap.ui.define([
         getCurrentThemeMode: function () {
             return readThemeProfile().mode;
         },
-        isDarkThemeEnabled: function () { return this.getCurrentThemeMode() === "night"; },
+        isDarkThemeEnabled: function () { return false; },
         isThemeAnimationEnabled: function () {
             return !!readThemeProfile().animationEnabled;
         },

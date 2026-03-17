@@ -23,8 +23,7 @@ sap.ui.define([
     var DEFAULT_MODE = ThemeContracts.MODES.DEFAULT;
     var DEFAULT_ANIMATION_ENABLED = ThemeContracts.DEFAULTS.ANIMATION_ENABLED;
     var MODE_TO_THEME = {
-        morning: ThemeContracts.THEMES.MORNING,
-        night: ThemeContracts.THEMES.NIGHT
+        morning: ThemeContracts.THEMES.MORNING
     };
     var SWITCH_DURATION_MS = ThemeContracts.DURATIONS.SWITCH_MS;
     var iSwitchTimer = 0;
@@ -90,7 +89,7 @@ sap.ui.define([
         } catch (e2) {
             sLegacyMode = DEFAULT_MODE;
         }
-        return buildThemeProfile(sLegacyMode || DEFAULT_MODE, DEFAULT_ANIMATION_ENABLED);
+        return setThemeProfile(buildThemeProfile(sLegacyMode || DEFAULT_MODE, DEFAULT_ANIMATION_ENABLED));
     }
 
     function setThemeProfile(oProfile) {
@@ -118,7 +117,7 @@ sap.ui.define([
 
     function syncBackgroundRuntime(oProfile) {
         var sMode = normalizeMode(oProfile && oProfile.mode);
-        var sRuntimeTheme = sMode === "night" ? "dark" : "light";
+        var sRuntimeTheme = "light";
         var bEnabled = normalizeAnimationEnabled(oProfile && oProfile.animationEnabled);
 
         ThemeDomRuntime.setBodyAttribute("data-theme", sRuntimeTheme);
@@ -171,17 +170,15 @@ sap.ui.define([
         var oRoot = document && document.documentElement;
         var oMeta = ThemePhilosophy.getMeta(sTheme);
         var aBodyNodes;
-        var bNightTheme;
         if (!oBody || !oRoot) {
             return;
         }
-        bNightTheme = modeForTheme(sTheme) === ThemeContracts.MODES.NIGHT;
         syncDocumentRootClasses();
         aBodyNodes = [oBody];
-        ThemeDomRuntime.toggleClass(aBodyNodes, "appLight", !bNightTheme);
-        ThemeDomRuntime.toggleClass(aBodyNodes, "appDark", bNightTheme);
-        ThemeDomRuntime.toggleClass(aBodyNodes, "lightMode", !bNightTheme);
-        ThemeDomRuntime.toggleClass([oRoot], "light-mode", !bNightTheme);
+        ThemeDomRuntime.toggleClass(aBodyNodes, "appLight", true);
+        ThemeDomRuntime.toggleClass(aBodyNodes, "appDark", false);
+        ThemeDomRuntime.toggleClass(aBodyNodes, "lightMode", true);
+        ThemeDomRuntime.toggleClass([oRoot], "light-mode", true);
         [
             "themeLifestyleClarity",
             "themeLifestyleNightOps",
@@ -280,7 +277,7 @@ sap.ui.define([
         return {
             mode: sResolvedMode,
             theme: sTheme,
-            isDark: sResolvedMode === "night",
+            isDark: false,
             animationEnabled: oRequestedProfile.animationEnabled
         };
     }
