@@ -13,18 +13,6 @@ sap.ui.define([], function () {
             platformClass: "platformCalmModern",
             horizonClass: "themeHorizonNight",
             designLanguage: "sap-fiori-3-dark"
-        },
-        sap_horizon: {
-            lifestyleClass: "themeLifestyleClarity",
-            platformClass: "platformPrecisionEnterprise",
-            horizonClass: "themeHorizonMorning",
-            designLanguage: "sap-horizon-morning"
-        },
-        sap_horizon_dark: {
-            lifestyleClass: "themeLifestyleNightOps",
-            platformClass: "platformCalmModern",
-            horizonClass: "themeHorizonNight",
-            designLanguage: "sap-horizon-night"
         }
     };
 
@@ -33,7 +21,7 @@ sap.ui.define([], function () {
     }
 
     function getMeta(sTheme) {
-        return THEMES[sTheme] || THEMES.sap_horizon;
+        return THEMES[sTheme] || THEMES.sap_fiori_3;
     }
 
     return {

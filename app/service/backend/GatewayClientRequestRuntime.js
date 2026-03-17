@@ -1,9 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh"
-], function (GatewayErrorNormalizer, GatewayClientContracts, GatewayClientSupport, SecurityTokenRefresh) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport"
+], function (GatewayErrorNormalizer, GatewayClientContracts, GatewayClientSupport) {
     "use strict";
 
     function toRequestHandle(fnExecutor) {
@@ -102,13 +101,8 @@ sap.ui.define([
         });
     }
 
-    function refreshSecurityToken(oModel) {
-        return SecurityTokenRefresh.refresh(oModel);
-    }
-
     return {
         normalizeError: normalizeError,
-        refreshSecurityToken: refreshSecurityToken,
         withDirectDeleteRequest: withDirectDeleteRequest,
         withDirectFunctionImportRequest: withDirectFunctionImportRequest,
         withDirectGetFunctionImportRequest: withDirectGetFunctionImportRequest,

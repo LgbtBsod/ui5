@@ -1,8 +1,20 @@
-﻿/* global sap */
+/* global sap */
 (function () {
     "use strict";
 
     var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "https://ui5.sap.com/1.71.70/resources/sap-ui-core.js";
+    var DEFAULT_THEME = "sap_fiori_3";
+    var DARK_THEME = "sap_fiori_3_dark";
+    var BOOT_LIBS = [
+        "sap.ui.core",
+        "sap.m",
+        "sap.f",
+        "sap.ui.layout",
+        "sap.ui.comp",
+        "sap.ui.table",
+        "sap.ui.unified",
+        "sap.uxap"
+    ];
 
     function splitClassNames(sClassNames) {
         return String(sClassNames || "").split(/\s+/).map(function (sName) {
@@ -37,7 +49,7 @@
         } catch (_e) {
             sMode = "morning";
         }
-        return sMode === "night" || sMode === "sap_horizon_dark" || sMode === "sap_fiori_3_dark"
+        return sMode === "night" || sMode === "sap_fiori_3_dark" || sMode === "sap_horizon_dark"
             ? "night"
             : "morning";
     }
@@ -47,7 +59,7 @@
         if (!sThemeRoot) {
             return;
         }
-        var sAlternateTheme = resolveStoredThemeMode() === "night" ? "sap_horizon" : "sap_horizon_dark";
+        var sAlternateTheme = resolveStoredThemeMode() === "night" ? DEFAULT_THEME : DARK_THEME;
         var aLibraries = [
             "sap/ui/core",
             "sap/m",
@@ -56,8 +68,7 @@
             "sap/ui/comp",
             "sap/uxap",
             "sap/ui/table",
-            "sap/ui/unified",
-            "sap/viz"
+            "sap/ui/unified"
         ];
         aLibraries.forEach(function (sLibraryPath) {
             var oLink = document.createElement("link");
@@ -123,13 +134,12 @@
         oScript.id = "sap-ui-bootstrap";
         oScript.src = UI5_BOOTSTRAP_SRC;
         oScript.async = true;
-        oScript.setAttribute("data-sap-ui-theme", "sap_horizon");
-        oScript.setAttribute("data-sap-ui-libs", "sap.ui.core,sap.m,sap.f,sap.ui.layout,sap.ui.comp,sap.ui.table,sap.ui.unified,sap.uxap,sap.viz");
+        oScript.setAttribute("data-sap-ui-theme", DEFAULT_THEME);
+        oScript.setAttribute("data-sap-ui-libs", BOOT_LIBS.join(","));
         oScript.setAttribute("data-sap-ui-resourceroots", "{\"PRODUCTION_CONTROL_CHECKLIST\":\"./\"}");
         oScript.setAttribute("data-sap-ui-compatVersion", "edge");
         oScript.setAttribute("data-sap-ui-async", "true");
         oScript.setAttribute("data-sap-ui-preload", "async");
-        oScript.setAttribute("data-sap-ui-xx-componentPreload", "off");
         oScript.onload = function () {
             if (window.sap && sap.ui && sap.ui.require) {
                 attachInit();

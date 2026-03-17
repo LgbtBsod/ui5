@@ -1,6 +1,5 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -13,7 +12,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ShellGlobalsRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, ShellPaneContracts, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device) {
+], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device) {
     "use strict";
 
     function markStartupReady() {
@@ -39,7 +38,6 @@ sap.ui.define([
             Device.resize.attachHandler(this._fnViewportResize);
             this._syncResponsiveViewport();
             this._syncShellState();
-            ShellPaneRuntime.ensurePaneViewAsync(this, ShellPaneContracts.PANES.SEARCH);
         },
         onAfterRendering: function () {
             var oOwner = this.getOwnerComponent && this.getOwnerComponent();
@@ -149,9 +147,6 @@ sap.ui.define([
             ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SHELL_READY, {
                 route: String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "") || "").trim()
             });
-            if (ShellPaneRuntime && typeof ShellPaneRuntime.prewarmLazyPanes === "function") {
-                ShellPaneRuntime.prewarmLazyPanes(this);
-            }
             if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === "function") {
                 this._bShellStatePostStartupSyncScheduled = true;
                 if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {

@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime"
-], function (GatewayErrorNormalizer, RequestCoordinator, GatewayClientContracts, GatewayClientSupport, GatewayClientRequestRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh"
+], function (GatewayErrorNormalizer, RequestCoordinator, GatewayClientContracts, GatewayClientSupport, GatewayClientRequestRuntime, SecurityTokenRefresh) {
     "use strict";
 
     var _oModel = null;
@@ -126,9 +127,6 @@ sap.ui.define([
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
-                csrfRefreshFactory: function () {
-                    return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel());
-                },
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
                     return withDirectFunctionImportRequest(name, oPayload || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
@@ -162,9 +160,6 @@ sap.ui.define([
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
-                csrfRefreshFactory: function () {
-                    return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel());
-                },
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
                     return withDirectPostRequest(sPath, oPayload || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
@@ -183,9 +178,6 @@ sap.ui.define([
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
-                csrfRefreshFactory: function () {
-                    return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel());
-                },
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
                     return withDirectDeleteRequest(sPath, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
@@ -206,7 +198,7 @@ sap.ui.define([
             });
         },
         fetchCsrfToken: function () {
-            return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel()).catch(function (oError) {
+            return SecurityTokenRefresh.refresh(ensureModel()).catch(function (oError) {
                 throw GatewayErrorNormalizer.normalizeError(oError);
             });
         },

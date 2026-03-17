@@ -232,7 +232,7 @@ sap.ui.define([
             oController,
             "attachmentUploadHint",
             [sTypes || "-", sSize],
-            [sTypes, sSize ? sSize + " MB" : ""].filter(Boolean).join(" Â· ")
+            [sTypes, sSize ? sSize + " MB" : ""].filter(Boolean).join(" Ã‚Â· ")
         );
     }
 

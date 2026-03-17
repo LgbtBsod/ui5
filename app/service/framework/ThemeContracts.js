@@ -20,8 +20,8 @@ sap.ui.define([], function () {
             NIGHT: "night"
         }),
         THEMES: Object.freeze({
-            MORNING: "sap_horizon",
-            NIGHT: "sap_horizon_dark"
+            MORNING: "sap_fiori_3",
+            NIGHT: "sap_fiori_3_dark"
         }),
         DURATIONS: Object.freeze({
             SWITCH_MS: 220,

@@ -19,10 +19,8 @@ sap.ui.define([
     }
 
     function runSearchRetry(mContext) {
-        var oSearchView = mContext.controller && mContext.controller.byId && mContext.controller.byId("searchPaneHost");
-        if (oSearchView && typeof oSearchView.getItems === "function") {
-            oSearchView = (oSearchView.getItems() || [])[0] || null;
-        }
+        var oFcl = mContext.controller && mContext.controller.byId && mContext.controller.byId("mainFcl");
+        var oSearchView = oFcl && oFcl.getBeginColumnPages && (oFcl.getBeginColumnPages() || [])[0];
         var oSearchController = oSearchView && oSearchView.getController && oSearchView.getController();
         if (oSearchController && typeof oSearchController.onRetrySearchLoad === "function") {
             return oSearchController.onRetrySearchLoad();

@@ -7,11 +7,14 @@ sap.ui.define([], function () {
         var oMainServiceModel = oComponent.getModel("mainService") || new ODataModel(sMainServiceUri, {
             useBatch: true,
             tokenHandling: true,
-            defaultBindingMode: "TwoWay",
+            defaultBindingMode: "OneWay",
             defaultCountMode: "Inline",
-            refreshAfterChange: false
+            refreshAfterChange: false,
+            defaultOperationMode: "Server",
+            updateMethod: "MERGE"
         });
 
+        oMainServiceModel.setDefaultBindingMode("OneWay");
         oMainServiceModel.setDeferredGroups(["changes", "autosave", "saveFlow", "locks"]);
         oMainServiceModel.setChangeGroups({
             "*": {

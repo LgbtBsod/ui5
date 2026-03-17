@@ -8,6 +8,7 @@
     "build": "ui5 build --config ui5.yaml --clean-dest --dest dist",
     "test:unit": "ui5 serve --config ui5.yaml --open test/unit/unitTests.qunit.html",
     "test:opa": "ui5 serve --config ui5.yaml --open test/integration/opaTests.qunit.html",
+    "check:eol": "node scripts/check-eol.js",
     "gate:persistence-i18n": "node scripts/persistence-i18n-gate.js",
     "gate:release": "node scripts/release-readiness-gate.js",
     "smoke:local": "powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1"

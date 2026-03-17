@@ -51,7 +51,7 @@ sap.ui.define([
         var sCurrentTheme = Core && Core.getConfiguration && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? String(Core.getConfiguration().getTheme() || "").toLowerCase()
             : "";
-        var bHorizonThemeActive = sCurrentTheme.indexOf("sap_horizon") === 0;
+        var bThemeTokensActive = sCurrentTheme.indexOf("sap_fiori_3") === 0 || sCurrentTheme.indexOf("sap_horizon") === 0;
         var sBrand = Parameters.get("sapUiBrand") || Parameters.get("sapUiHighlight");
         var sBase = Parameters.get("sapBackgroundColor");
         var sText = Parameters.get("sapTextColor");
@@ -70,7 +70,7 @@ sap.ui.define([
         if (typeof fnSyncDocumentRootClasses === "function") {
             fnSyncDocumentRootClasses();
         }
-        if (sBrand && bHorizonThemeActive) {
+        if (sBrand && bThemeTokensActive) {
             ThemeDomRuntime.setStyleProperties([oRoot], {
                 "--chk-brand": sBrand,
                 "--accent": sBrand,
@@ -86,7 +86,7 @@ sap.ui.define([
         if (sText) {
             ThemeDomRuntime.setStyleProperty([oRoot], "--chk-ui5-text", sText);
         }
-        if (bHorizonThemeActive) {
+        if (bThemeTokensActive) {
             sInfoRgb = asRgbTriplet(sInfo);
             sWarningRgb = asRgbTriplet(sWarning);
             sSuccessRgb = asRgbTriplet(sSuccess);

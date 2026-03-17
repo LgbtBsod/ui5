@@ -52,7 +52,7 @@
                 useIconTabBar="false"
                 showAnchorBar="false"
                 upperCaseAnchorBar="false"
-                enableLazyLoading="false"
+                enableLazyLoading="true"
                 alwaysShowContentHeader="false"
                 showTitleInHeaderContent="false"
                 showHeaderContent="false">

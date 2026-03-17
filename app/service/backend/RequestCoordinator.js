@@ -3,9 +3,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/InFlightRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/ResponseGuard",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (CorrelationId, InFlightRegistry, ResponseGuard, RequestResiliencePolicy, PromiseRuntime, SchedulingRuntime) {
+], function (CorrelationId, InFlightRegistry, ResponseGuard, RequestResiliencePolicy, SchedulingRuntime) {
     "use strict";
 
     function attachCorrelationId(oError, sCorrelationId) {
@@ -53,7 +52,7 @@ sap.ui.define([
 
     function withTimeout(oRequestHandle, iTimeoutMs, sCorrelationId) {
         var iTimer = 0;
-        return PromiseRuntime.withFinally(new Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
             iTimer = SchedulingRuntime.restartTimer(iTimer, function () {
                 try {
                     oRequestHandle.abort();
@@ -64,7 +63,7 @@ sap.ui.define([
             }, iTimeoutMs);
 
             oRequestHandle.promise.then(resolve, reject);
-        }), function () {
+        }).finally(function () {
             SchedulingRuntime.clearTimer(iTimer);
         });
     }
@@ -89,7 +88,7 @@ sap.ui.define([
         var oStoredEntry = null;
         var iGuardToken = 0;
 
-        function runAttempt(iAttempt, bCsrfRetried) {
+        function runAttempt(iAttempt) {
             var oFactoryResult;
             var oSupersededHandle;
             try {
@@ -126,15 +125,6 @@ sap.ui.define([
                     throw createOutdatedError(sCorrelationId, sGuardKey);
                 }
                 var oPolicy = RequestResiliencePolicy.classify(sMethod, oResolvedError);
-                if (!RequestResiliencePolicy.isSafeRead(sMethod) && !bCsrfRetried && oPolicy.kind === "CSRF" && typeof oRequest.csrfRefreshFactory === "function") {
-                    return Promise.resolve(oRequest.csrfRefreshFactory({
-                        attempt: iAttempt + 1,
-                        correlationId: sCorrelationId,
-                        error: oResolvedError
-                    })).then(function () {
-                        return runAttempt(iAttempt, true);
-                    });
-                }
                 if (iAttempt < iRetryLimit && oPolicy.retryable) {
                     return waitBeforeRetry(RequestResiliencePolicy.resolveRetryDelayMs(
                         sMethod,
@@ -142,7 +132,7 @@ sap.ui.define([
                         oRequest.retryBaseDelayMs,
                         oRequest.retryMaxDelayMs
                     )).then(function () {
-                        return runAttempt(iAttempt + 1, bCsrfRetried);
+                        return runAttempt(iAttempt + 1);
                     });
                 }
                 throw oResolvedError;
@@ -157,7 +147,7 @@ sap.ui.define([
             iGuardToken = ResponseGuard.mark(sGuardKey);
         }
 
-        var pFinal = PromiseRuntime.withFinally(runAttempt(0, false), function () {
+        var pFinal = runAttempt(0).finally(function () {
             if (sGuardKey) {
                 ResponseGuard.clearActiveHandle(sGuardKey, iGuardToken);
             }

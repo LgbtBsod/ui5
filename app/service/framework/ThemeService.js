@@ -36,10 +36,10 @@ sap.ui.define([
         if (!sValue) {
             return DEFAULT_MODE;
         }
-        if (sValue === "night" || sValue === "dark" || sValue === "sap_horizon_dark" || sValue === "sap_fiori_3_dark") {
+        if (sValue === "night" || sValue === "dark" || sValue === "sap_fiori_3_dark" || sValue === "sap_horizon_dark") {
             return "night";
         }
-        if (sValue === "morning" || sValue === "light" || sValue === "sap_horizon" || sValue === "sap_fiori_3") {
+        if (sValue === "morning" || sValue === "light" || sValue === "sap_fiori_3" || sValue === "sap_horizon") {
             return "morning";
         }
         return DEFAULT_MODE;

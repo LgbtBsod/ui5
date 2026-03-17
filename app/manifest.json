@@ -70,6 +70,7 @@
         "sap.ui.core": {},
         "sap.ui.unified": {},
         "sap.f": {},
+        "sap.ui.layout": {},
         "sap.ui.comp": {},
         "sap.ui.table": {},
         "sap.uxap": {},
@@ -86,7 +87,7 @@
         "dataSource": "mainService",
         "settings": {
           "useBatch": true,
-          "defaultBindingMode": "TwoWay",
+          "defaultBindingMode": "OneWay",
           "defaultCountMode": "Inline",
           "refreshAfterChange": false,
           "defaultOperationMode": "Server",
@@ -161,31 +162,66 @@
         "viewPath": "PRODUCTION_CONTROL_CHECKLIST.views",
         "controlId": "mainFcl",
         "controlAggregation": "beginColumnPages",
+        "transition": "slide",
         "async": true
       },
       "routes": [
         {
           "pattern": "",
           "name": "search",
+          "target": [
+            "search"
+          ],
           "layout": "OneColumn"
         },
         {
           "pattern": "analytics",
           "name": "analytics",
+          "target": [
+            "search",
+            "analytics"
+          ],
           "layout": "MidColumnFullScreen"
         },
         {
           "pattern": "checklist/{id}",
           "name": "detail",
+          "target": [
+            "search",
+            "detail"
+          ],
           "layout": "TwoColumnsMidExpanded"
         },
         {
           "pattern": "checklist/{id}/{layout}",
           "name": "detailLayout",
-          "layout": "TwoColumnsMidExpanded"
+          "target": [
+            "search",
+            "detail"
+          ],
+          "layout": "{layout}"
         }
       ],
-      "targets": {}
+      "targets": {
+        "search": {
+          "id": "searchTargetPage",
+          "viewName": "Search",
+          "controlAggregation": "beginColumnPages",
+          "viewLevel": 1
+        },
+        "detail": {
+          "id": "detailTargetPage",
+          "viewName": "Detail",
+          "controlAggregation": "midColumnPages",
+          "viewLevel": 2
+        },
+        "analytics": {
+          "id": "analyticsTargetPage",
+          "viewName": "Analytics",
+          "controlAggregation": "midColumnPages",
+          "viewLevel": 2
+        }
+      }
     },
     "config": {
       "backendMode": "real",

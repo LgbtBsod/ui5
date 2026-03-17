@@ -2,3 +2,9 @@
  * Reserved for narrowly-scoped UI5 patch overrides.
  * Keep this file intentionally small; add a short reason above each important usage.
  */
+
+/* UI5 1.71 does not support Transparent backgroundDesign on FlexibleColumnLayout. */
+.chkApp .appRootFclTransparent,
+.chkApp .appRootFclTransparent > .sapFFCLColumn {
+  background: transparent;
+}

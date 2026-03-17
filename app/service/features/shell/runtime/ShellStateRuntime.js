@@ -78,7 +78,8 @@ sap.ui.define([
         mPatch[MODEL_PATHS.APP_VIEW_IS_PHONE_VIEWPORT] = !!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_PHONE_VIEWPORT, false);
         mPatch[MODEL_PATHS.APP_VIEW_IS_TABLET_VIEWPORT] = !!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_TABLET_VIEWPORT, false);
         if (!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_SHELL, null)) {
-            mPatch[MODEL_PATHS.APP_VIEW_SHELL] = {
+                mPatch[MODEL_PATHS.APP_VIEW_SHELL] = {
+                eyebrow: "",
                 productName: "",
                 routeLabel: "",
                 contextSubtitle: "",
@@ -145,10 +146,13 @@ sap.ui.define([
         bSearchWorkspace = !sSelectedId;
         bEditWorkspace = !bSearchWorkspace && sMode === WorkflowContracts.EDIT_MODES.EDIT;
 
+        mShellPatch["/shell/eyebrow"] = bSearchWorkspace
+            ? resolveText(mHooks, oController, "appTitle", null, "Production Control Checklists")
+            : resolveText(mHooks, oController, "detailWorkspaceSectionTitle", null, "Checklist Workspace");
         mShellPatch["/shell/productName"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
             ? resolveText(mHooks, oController, "shellProductNameAnalytics", null, "Analytics")
             : resolveText(mHooks, oController, "shellProductNameSearch", null, "Production control checklists");
-        mShellPatch["/shell/routeLabel"] = "";
+        mShellPatch["/shell/routeLabel"] = sCurrentRouteName;
         mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
             ? resolveText(mHooks, oController, "shellContextAnalytics", null, "Gateway-backed workflow dashboard with operational totals and breakdowns.")
             : (!sSelectedId ? resolveText(mHooks, oController, "shellContextSearch", null, "Discover, filter, and open checklist flows.")

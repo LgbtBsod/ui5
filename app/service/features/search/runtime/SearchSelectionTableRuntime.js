@@ -32,16 +32,15 @@ sap.ui.define([
     }
 
     function resolveSearchViewportWidth(oController) {
-        var oSearchHost = oController && oController.byId && oController.byId("searchPaneHost");
-        var oSearchHostDom = oSearchHost && oSearchHost.getDomRef && oSearchHost.getDomRef();
         var oResultsShell = oController && oController.byId && oController.byId("searchResultsShell");
         var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
+        var oViewDom = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
         var iWidth = 0;
         if (oResultsShellDom && oResultsShellDom.getBoundingClientRect) {
             iWidth = Math.floor(oResultsShellDom.getBoundingClientRect().width || 0);
         }
-        if (!iWidth && oSearchHostDom && oSearchHostDom.getBoundingClientRect) {
-            iWidth = Math.floor(oSearchHostDom.getBoundingClientRect().width || 0);
+        if (!iWidth && oViewDom && oViewDom.getBoundingClientRect) {
+            iWidth = Math.floor(oViewDom.getBoundingClientRect().width || 0);
         }
         if (!iWidth && typeof window !== "undefined") {
             iWidth = Math.floor(window.innerWidth || 0);

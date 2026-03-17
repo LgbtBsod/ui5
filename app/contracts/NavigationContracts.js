@@ -18,8 +18,8 @@ sap.ui.define([
     });
 
     var MID_COLUMN_PAGE_IDS = Object.freeze({
-        ANALYTICS: ShellPaneContracts.HOST_IDS.ANALYTICS,
-        DETAIL: ShellPaneContracts.HOST_IDS.DETAIL
+        ANALYTICS: ShellPaneContracts.PAGE_IDS.ANALYTICS,
+        DETAIL: ShellPaneContracts.PAGE_IDS.DETAIL
     });
 
     function isDetailRoute(sRouteName) {
