@@ -8,9 +8,19 @@ sap.ui.define([
     var DEFAULT_ANIMATION_ENABLED = ThemeService.DEFAULT_ANIMATION_ENABLED;
     var DEV_OVERRIDE_STORAGE_KEY = "checklist_app_theme_dev_override";
 
+    function isDebugOverrideAllowed() {
+        if (typeof window === "undefined") {
+            return false;
+        }
+        return window.__DEBUG_UI5__ === true;
+    }
+
     function readDevOverrideMode() {
         var sStored = "";
         var sQuery = "";
+        if (!isDebugOverrideAllowed()) {
+            return "";
+        }
         if (typeof window === "undefined") {
             return "";
         }
@@ -53,7 +63,7 @@ sap.ui.define([
 
     function readThemeProfile() {
         var oProfile = ThemeService.getThemeProfile ? ThemeService.getThemeProfile() : null;
-        var sMode = readDevOverrideMode() || DEFAULT_MODE;
+        var sMode = readDevOverrideMode() || (oProfile && oProfile.mode) || DEFAULT_MODE;
         return {
             mode: sMode,
             animationEnabled: oProfile && typeof oProfile.animationEnabled === "boolean" ? oProfile.animationEnabled : DEFAULT_ANIMATION_ENABLED

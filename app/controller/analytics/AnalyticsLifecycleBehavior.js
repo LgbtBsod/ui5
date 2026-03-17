@@ -3,9 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime"
-], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime) {
+], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime) {
     "use strict";
 
     function clearRefreshTimer(oController) {
@@ -17,7 +18,9 @@ sap.ui.define([
 
     function startRefreshTimer(oController) {
         var oStateModel = oController.getModel(ModelContracts.MODELS.STATE);
-        var iIntervalMs = Number(oStateModel && oStateModel.getProperty("/timers/analyticsRefreshMs")) || 900000;
+        var iIntervalMs = Number(oStateModel && oStateModel.getProperty("/timers/analyticsRefreshMs"))
+            || Number((TimerDefaults.analyticsRefreshMs || {}).defaultValue)
+            || 900000;
         clearRefreshTimer(oController);
         oController._iAnalyticsRouteRefreshTimer = setInterval(function () {
             if (typeof oController._loadAnalytics === "function") {

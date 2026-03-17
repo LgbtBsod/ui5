@@ -25,9 +25,15 @@ sap.ui.define([
                 },
                 POST_FUNCTION: function () {
                     return GatewayClient.callFunctionImport(sFunctionName, m.body || {}, m);
+                },
+                DELETE: function () {
+                    return GatewayClient.deletePath(_asPath(m.path), m);
                 }
             };
-            var fn = mDispatch[sMethod] || mDispatch.POST_FUNCTION;
+            var fn = mDispatch[sMethod];
+            if (typeof fn !== "function") {
+                throw new Error("Unsupported GatewayODataClient method: " + sMethod);
+            }
             return fn();
         },
         fetchCsrfToken: function () {

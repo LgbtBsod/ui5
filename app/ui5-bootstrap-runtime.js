@@ -108,7 +108,13 @@
     }
 
     function attachInit() {
-        sap.ui.getCore().attachInit(mountComponent);
+        sap.ui.require(["sap/ui/core/Core"], function (Core) {
+            if (Core && typeof Core.ready === "function") {
+                Core.ready().then(mountComponent);
+                return;
+            }
+            mountComponent();
+        });
     }
 
     function loadBootstrapScript() {
@@ -125,7 +131,7 @@
         oScript.setAttribute("data-sap-ui-preload", "async");
         oScript.setAttribute("data-sap-ui-xx-componentPreload", "off");
         oScript.onload = function () {
-            if (window.sap && sap.ui && sap.ui.getCore) {
+            if (window.sap && sap.ui && sap.ui.require) {
                 attachInit();
                 return;
             }
@@ -137,7 +143,7 @@
         document.head.appendChild(oScript);
     }
 
-    if (window.sap && sap.ui && sap.ui.getCore) {
+    if (window.sap && sap.ui && sap.ui.require) {
         attachInit();
         return;
     }
@@ -145,4 +151,3 @@
     scheduleAlternateThemePrefetch();
     loadBootstrapScript();
 }());
-

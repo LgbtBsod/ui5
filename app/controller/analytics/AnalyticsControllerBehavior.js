@@ -2,6 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsYearBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsSelectionBehavior",
@@ -10,11 +11,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsStateBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsReportBehavior"
-], function (AnalyticsFacade, CtxFactory, AnalyticsContracts, AnalyticsYearBehavior, AnalyticsDrilldownBehavior, AnalyticsSelectionBehavior, AnalyticsRefreshBehavior, AnalyticsLifecycleBehavior, AnalyticsLoadBehavior, AnalyticsStateBehavior, AnalyticsReportBehavior) {
+], function (AnalyticsFacade, CtxFactory, AnalyticsContracts, ModelContracts, AnalyticsYearBehavior, AnalyticsDrilldownBehavior, AnalyticsSelectionBehavior, AnalyticsRefreshBehavior, AnalyticsLifecycleBehavior, AnalyticsLoadBehavior, AnalyticsStateBehavior, AnalyticsReportBehavior) {
     "use strict";
     var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
     var SELECTED_YEAR_PATH = "/selectedYear";
     var COMPARE_YEAR_PATH = "/compareYear";
+    var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function buildCtx(oController) {
         return CtxFactory.buildCtx(oController, {});
@@ -147,7 +149,7 @@ sap.ui.define([
         },
 
         onDrilldownAnalyticsBuilder: function (oEvent) {
-            var oViewModel = this.getModel && this.getModel("view");
+            var oViewModel = this.getModel && this.getModel(VIEW_MODEL);
             var sBuilderDimension = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderDimension") || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase();
             var sBuilderMetric = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderMetric") || "").trim().toUpperCase();
             return AnalyticsDrilldownBehavior.onDrilldownAnalyticsBuilder(

@@ -101,8 +101,23 @@ sap.ui.define([
         });
     }
 
+    function refreshSecurityToken(oModel) {
+        return new Promise(function (resolve, reject) {
+            if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
+                reject(new Error("security_token_refresh_unavailable"));
+                return;
+            }
+            oModel.refreshSecurityToken(function () {
+                resolve(true);
+            }, function (oError) {
+                reject(oError);
+            }, true);
+        });
+    }
+
     return {
         normalizeError: normalizeError,
+        refreshSecurityToken: refreshSecurityToken,
         withDirectDeleteRequest: withDirectDeleteRequest,
         withDirectFunctionImportRequest: withDirectFunctionImportRequest,
         withDirectGetFunctionImportRequest: withDirectGetFunctionImportRequest,

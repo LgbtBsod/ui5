@@ -57,7 +57,7 @@ sap.ui.define([], function () {
             smartSearchAdapter: mOptions.smartSearchAdapter,
             componentRuntimeSupport: mOptions.componentRuntimeSupport,
             timeConfigService: mOptions.timeConfigService,
-            flowCoordinator: mOptions.flowCoordinator,
+            workflowCoordinator: mOptions.workflowCoordinator,
             bundleText: mOptions.bundleText,
             setGlobalBanner: mOptions.setGlobalBanner,
             clearGlobalBanner: mOptions.clearGlobalBanner,

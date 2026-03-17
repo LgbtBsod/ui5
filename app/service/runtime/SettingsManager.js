@@ -4,7 +4,7 @@ sap.ui.define([
 ], function (DebugLogger, FrontendConfigConstants) {
     "use strict";
 
-    var SETTINGS_CACHE_TTL_MS = Number(FrontendConfigConstants && FrontendConfigConstants.SETTINGS_CACHE_TTL_MS) || (5 * 60 * 1000);
+    var SETTINGS_CACHE_TTL_MS = Number(FrontendConfigConstants && FrontendConfigConstants.SETTINGS_CACHE_STAMP_TOLERANCE_MS) || 5500;
     var _loaded = false;
     var _loadedAt = 0;
     var _loadingPromise = null;

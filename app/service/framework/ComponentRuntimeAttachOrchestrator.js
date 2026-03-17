@@ -52,7 +52,7 @@ sap.ui.define([], function () {
             smartSearchAdapter: mDeps.SmartSearchAdapter,
             componentRuntimeSupport: oComponentRuntimeSupport,
             timeConfigService: mDeps.TimeConfigService,
-            flowCoordinator: mDeps.FlowCoordinator,
+            workflowCoordinator: mDeps.WorkflowCoordinator,
             bundleText: mCore.bundleText,
             setGlobalBanner: mAttachments.setGlobalBanner,
             clearGlobalBanner: mAttachments.clearGlobalBanner,

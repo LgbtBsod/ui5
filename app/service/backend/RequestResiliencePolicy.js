@@ -28,6 +28,34 @@ sap.ui.define([], function () {
         return String((oError && oError.message) || "").trim().toUpperCase();
     }
 
+    function normalizeDetails(oError) {
+        return Array.isArray(oError && oError.details) ? oError.details : [];
+    }
+
+    function normalizeHeaders(oError) {
+        return oError && oError.responseHeaders && typeof oError.responseHeaders === "object" ? oError.responseHeaders : {};
+    }
+
+    function isCsrfError(oError) {
+        var iStatusCode = normalizeStatusCode(oError);
+        var sCode = normalizeCode(oError);
+        var sMessage = normalizeMessage(oError);
+        var aDetails = normalizeDetails(oError);
+        var mHeaders = normalizeHeaders(oError);
+        if (iStatusCode !== 403) {
+            return false;
+        }
+        if (/CSRF|X-CSRF-TOKEN/.test(sCode) || /CSRF|X-CSRF-TOKEN/.test(sMessage)) {
+            return true;
+        }
+        if (String(mHeaders["x-csrf-token"] || "").trim().toLowerCase() === "required") {
+            return true;
+        }
+        return aDetails.some(function (oDetail) {
+            return /CSRF|X-CSRF-TOKEN/.test(normalizeCode(oDetail)) || /CSRF|X-CSRF-TOKEN/.test(normalizeMessage(oDetail));
+        });
+    }
+
     function isTimeoutError(oError) {
         return normalizeCode(oError) === "REQUEST_TIMEOUT" || /TIMEOUT/.test(normalizeMessage(oError));
     }
@@ -67,6 +95,9 @@ sap.ui.define([], function () {
             return { kind: "AUTH", retryable: false };
         }
         if (iStatusCode === 403) {
+            if (isCsrfError(oError)) {
+                return { kind: "CSRF", retryable: false };
+            }
             return { kind: "PERMISSION", retryable: false };
         }
         if (iStatusCode === 404) {
@@ -141,6 +172,7 @@ sap.ui.define([], function () {
 
     return {
         classify: classify,
+        isCsrfError: isCsrfError,
         isNetworkError: isNetworkError,
         isSafeRead: isSafeRead,
         isTimeoutError: isTimeoutError,

@@ -95,6 +95,9 @@ sap.ui.define([
             this._fnShellPaneRouteGuard = null;
             this._oRouter = null;
             this._fnLayoutSync = null;
+            if (typeof this._teardownAppDomRuntime === "function") {
+                this._teardownAppDomRuntime();
+            }
             AppShellCoordinator.onExit(this);
         },
         _bindShellPaneRouting: function () {

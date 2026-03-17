@@ -17,23 +17,14 @@ sap.ui.define([
     function RouteModeCoordinator(mDeps) {
         this._oRouter = mDeps.router;
         this._oStateModel = mDeps.stateModel;
-        this._oFcl = mDeps.fcl;
         this._fnRouteMatched = this._onAnyRouteMatched.bind(this);
     }
-
-    RouteModeCoordinator.prototype._applyLayoutFromState = function () {
-        var sLayout = LayoutStateRuntime.readLayout(this._oStateModel, LAYOUTS.ONE_COLUMN);
-        if (this._oFcl && typeof this._oFcl.getLayout === "function" && typeof this._oFcl.setLayout === "function" && this._oFcl.getLayout() !== sLayout) {
-            this._oFcl.setLayout(sLayout);
-        }
-    };
 
     RouteModeCoordinator.prototype.start = function () {
         if (!this._oStateModel || !this._oRouter) {
             return;
         }
         this._oRouter.attachRoutePatternMatched(this._fnRouteMatched);
-        this._applyLayoutFromState();
         debugLog("start", {
             layout: LayoutStateRuntime.readLayout(this._oStateModel, LAYOUTS.ONE_COLUMN)
         });
@@ -52,7 +43,6 @@ sap.ui.define([
         var sNextLayout = RouteModeRules.resolveLayoutFromRoute(sRouteName, mArgs);
         var oRouteSync = RouteSync.syncRouteState(this._oStateModel, sNextLayout, sRouteName, mArgs);
         if (oRouteSync) {
-            this._applyLayoutFromState();
             debugLog("routeMatched", {
                 route: sRouteName,
                 layout: LayoutStateRuntime.readLayout(this._oStateModel, LAYOUTS.ONE_COLUMN),

@@ -11,13 +11,27 @@ sap.ui.define([
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var APP_VIEW_MODEL = MODELS.APP_VIEW;
-    var _iResizeRafId = 0;
-    var _iResizeEndTimer = 0;
-    var _iResizeSafetyTimer = 0;
-    var _iShellRefreshRafId = 0;
     var _RESIZE_END_DELAY_MS = 520;
     var _RESIZE_SAFETY_DELAY_MS = 1800;
     var _RESIZE_CLASS = "chkResizing";
+
+    function getDomRuntimeState(oController) {
+        if (!oController) {
+            return {
+                resizeRafId: 0,
+                resizeEndTimer: 0,
+                resizeSafetyTimer: 0,
+                shellRefreshRafId: 0
+            };
+        }
+        oController._oAppDomRuntimeState = oController._oAppDomRuntimeState || {
+            resizeRafId: 0,
+            resizeEndTimer: 0,
+            resizeSafetyTimer: 0,
+            shellRefreshRafId: 0
+        };
+        return oController._oAppDomRuntimeState;
+    }
 
     function getBackgroundRuntime() {
         return ShellGlobalsRuntime.getBackgroundRuntime();
@@ -31,29 +45,32 @@ sap.ui.define([
         return oRoot || null;
     }
 
-    function _scheduleInvalidate(oLayout) {
-        _iResizeRafId = SchedulingRuntime.requestFrameOnce(_iResizeRafId, function () {
-            _iResizeRafId = 0;
+    function _scheduleInvalidate(oController, oLayout) {
+        var oRuntimeState = getDomRuntimeState(oController);
+        oRuntimeState.resizeRafId = SchedulingRuntime.requestFrameOnce(oRuntimeState.resizeRafId, function () {
+            oRuntimeState.resizeRafId = 0;
             if (oLayout && typeof oLayout.invalidate === "function") {
                 oLayout.invalidate();
             }
         });
     }
 
-    function _beginResizing() {
+    function _beginResizing(oController) {
+        var oRuntimeState = getDomRuntimeState(oController);
         var oDoc = document && document.documentElement;
         ThemeDomRuntime.addClass([oDoc], _RESIZE_CLASS);
-        _iResizeEndTimer = SchedulingRuntime.clearTimer(_iResizeEndTimer);
-        _iResizeSafetyTimer = SchedulingRuntime.restartTimer(_iResizeSafetyTimer, function () {
-            _settleResizing();
+        oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
+        oRuntimeState.resizeSafetyTimer = SchedulingRuntime.restartTimer(oRuntimeState.resizeSafetyTimer, function () {
+            _settleResizing(oController);
         }, _RESIZE_SAFETY_DELAY_MS);
     }
 
-    function _settleResizing() {
+    function _settleResizing(oController) {
+        var oRuntimeState = getDomRuntimeState(oController);
         var oDoc = document && document.documentElement;
 
-        _iResizeEndTimer = SchedulingRuntime.clearTimer(_iResizeEndTimer);
-        _iResizeSafetyTimer = SchedulingRuntime.clearTimer(_iResizeSafetyTimer);
+        oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
+        oRuntimeState.resizeSafetyTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeSafetyTimer);
         ThemeDomRuntime.removeClass([oDoc], _RESIZE_CLASS);
         var oBackgroundRuntime = getBackgroundRuntime();
         if (oBackgroundRuntime && typeof oBackgroundRuntime.onResizeEnd === "function") {
@@ -61,9 +78,10 @@ sap.ui.define([
         }
     }
 
-    function _scheduleResizeEnd() {
-        _iResizeEndTimer = SchedulingRuntime.restartTimer(_iResizeEndTimer, function () {
-            _settleResizing();
+    function _scheduleResizeEnd(oController) {
+        var oRuntimeState = getDomRuntimeState(oController);
+        oRuntimeState.resizeEndTimer = SchedulingRuntime.restartTimer(oRuntimeState.resizeEndTimer, function () {
+            _settleResizing(oController);
         }, _RESIZE_END_DELAY_MS);
     }
 
@@ -83,13 +101,13 @@ sap.ui.define([
         _syncLayoutViewportGeometry: function () {
             var oLayout = this.byId("mainFcl");
 
-            _beginResizing();
+            _beginResizing(this);
             var oBackgroundRuntime = getBackgroundRuntime();
             if (oBackgroundRuntime && typeof oBackgroundRuntime.onResizeStart === "function") {
                 oBackgroundRuntime.onResizeStart();
             }
-            _scheduleInvalidate(oLayout);
-            _scheduleResizeEnd();
+            _scheduleInvalidate(this, oLayout);
+            _scheduleResizeEnd(this);
         },
 
         _syncStaticAreaScope: function () {
@@ -137,15 +155,26 @@ sap.ui.define([
         },
 
         _scheduleShellLayoutRefresh: function () {
+            var oRuntimeState = getDomRuntimeState(this);
             var that = this;
-            _iShellRefreshRafId = SchedulingRuntime.restartFrame(_iShellRefreshRafId, function () {
-                _iShellRefreshRafId = 0;
+            oRuntimeState.shellRefreshRafId = SchedulingRuntime.restartFrame(oRuntimeState.shellRefreshRafId, function () {
+                oRuntimeState.shellRefreshRafId = 0;
                 SchedulingRuntime.nextFrame(function () {
                     that._syncShellFlexAllocation();
                     that._syncShellMetrics();
                     that._syncLayoutViewportGeometry();
                 });
             });
+        },
+
+        _teardownAppDomRuntime: function () {
+            var oRuntimeState = getDomRuntimeState(this);
+            oRuntimeState.resizeRafId = SchedulingRuntime.clearFrame(oRuntimeState.resizeRafId);
+            oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
+            oRuntimeState.resizeSafetyTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeSafetyTimer);
+            oRuntimeState.shellRefreshRafId = SchedulingRuntime.clearFrame(oRuntimeState.shellRefreshRafId);
+            _settleResizing(this);
+            this._oAppDomRuntimeState = null;
         }
     };
 });

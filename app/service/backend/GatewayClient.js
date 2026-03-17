@@ -10,9 +10,15 @@ sap.ui.define([
     var _oModel = null;
     var _sServiceUrl = "";
 
+    function createModelError() {
+        var oError = new Error("GatewayClient model is not initialized");
+        oError.code = "GATEWAY_MODEL_NOT_INITIALIZED";
+        return oError;
+    }
+
     function ensureModel() {
         if (!_oModel) {
-            throw new Error("GatewayClient model is not initialized");
+            throw createModelError();
         }
         return _oModel;
     }
@@ -117,6 +123,9 @@ sap.ui.define([
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
+                csrfRefreshFactory: function () {
+                    return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel());
+                },
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
                     return withDirectFunctionImportRequest(name, oPayload || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
@@ -150,6 +159,9 @@ sap.ui.define([
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
+                csrfRefreshFactory: function () {
+                    return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel());
+                },
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
                     return withDirectPostRequest(sPath, oPayload || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
@@ -168,6 +180,9 @@ sap.ui.define([
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
+                csrfRefreshFactory: function () {
+                    return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel());
+                },
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
                     return withDirectDeleteRequest(sPath, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));

@@ -39,7 +39,7 @@ sap.ui.define([
         var StatePaths = mDeps.StatePaths;
         var ActionContract = mDeps.ActionContract;
         var ThemeRuntime = mDeps.ThemeRuntime;
-        var FlowCoordinator = mDeps.FlowCoordinator;
+        var WorkflowCoordinator = mDeps.WorkflowCoordinator;
 
             UIComponent.prototype.init.apply(this, aInitArgs || []);
             this._startupPerf = this._startupPerf || {
@@ -118,7 +118,7 @@ sap.ui.define([
                 ComponentRuntimeSupport: ComponentRuntimeSupport,
                 DebugLogger: DebugLogger,
                 DeltaPayloadBuilder: DeltaPayloadBuilder,
-                FlowCoordinator: FlowCoordinator,
+                WorkflowCoordinator: WorkflowCoordinator,
                 LayoutStateRuntime: LayoutStateRuntime,
                 SmartSearchAdapter: SmartSearchAdapter,
                 StatePaths: StatePaths,

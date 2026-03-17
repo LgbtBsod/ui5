@@ -85,7 +85,7 @@ sap.ui.define([
                 if (typeof mOptions.revertPendingNavigationIntent === "function") {
                     mOptions.revertPendingNavigationIntent();
                 }
-                mOptions.flowCoordinator.confirmUnsavedAndHandle({
+                mOptions.workflowCoordinator.confirmUnsavedAndHandle({
                     getModel: oComponent.getModel.bind(oComponent),
                     getResourceBundle: function () { return oComponent.getModel(ComponentListenerContracts.MODEL_NAMES.I18N).getResourceBundle(); }
                 }, function () {
@@ -118,7 +118,7 @@ sap.ui.define([
             if (shouldReleaseDetailLock(oStateModel, oEvent, StatePaths)) {
                 oEvent.preventDefault();
                 mOptions.queuePendingNavigationIntent(oEvent);
-                PromiseRuntime.withFinally(mOptions.flowCoordinator.releaseWithTrySave({ getModel: oComponent.getModel.bind(oComponent) }), function () {
+                PromiseRuntime.withFinally(mOptions.workflowCoordinator.releaseWithTrySave({ getModel: oComponent.getModel.bind(oComponent) }), function () {
                     mOptions.resetDetailNavigationState(oComponent);
                     mOptions.resumePendingNavigationIntent();
                 });

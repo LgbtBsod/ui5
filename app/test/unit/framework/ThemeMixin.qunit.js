@@ -7,6 +7,7 @@ sap.ui.define([
     QUnit.module("ThemeMixin", {
         beforeEach: function () {
             this._fnApplyThemeMode = ThemeService.applyThemeMode;
+            this._bDebugUi5 = window.__DEBUG_UI5__;
             try {
                 window.localStorage.removeItem("checklist_app_theme_dev_override");
             } catch (_error) {
@@ -15,6 +16,7 @@ sap.ui.define([
         },
         afterEach: function () {
             ThemeService.applyThemeMode = this._fnApplyThemeMode;
+            window.__DEBUG_UI5__ = this._bDebugUi5;
             try {
                 window.localStorage.removeItem("checklist_app_theme_dev_override");
             } catch (_error) {
@@ -29,6 +31,7 @@ sap.ui.define([
     });
 
     QUnit.test("supports persisted dev override for night mode", function (assert) {
+        window.__DEBUG_UI5__ = true;
         window.localStorage.setItem("checklist_app_theme_dev_override", "night");
 
         assert.strictEqual(ThemeMixin.getCurrentThemeMode(), "night", "Night mode can be enabled through dev override");
@@ -37,6 +40,7 @@ sap.ui.define([
 
     QUnit.test("toggleTheme switches between supported modes", function (assert) {
         var aModes = [];
+        window.__DEBUG_UI5__ = true;
         ThemeService.applyThemeMode = function (sMode) {
             aModes.push(sMode);
             return { mode: sMode };

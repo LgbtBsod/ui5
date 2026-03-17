@@ -1,7 +1,8 @@
 sap.ui.define([
   "sap/ui/base/EventProvider",
-  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
-], function (EventProvider, TimerRuntime) {
+  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
+  "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
+], function (EventProvider, TimerRuntime, DebugLogger) {
   "use strict";
 
   return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.AutoSaveCoordinator", {
@@ -64,9 +65,9 @@ sap.ui.define([
 
     _runIfNeeded: function () {
       if (!this._fnLockGuard()) {
-        if (typeof console !== "undefined" && console.warn) {
-          console.warn("[AutoSaveCoordinator] autosave aborted: editMode must be EDIT and workflow/detail/lock/state must be EDIT_LOCKED");
-        }
+        DebugLogger.info("AutoSaveCoordinator", "autosave_lock_guard_blocked", {
+          reason: "editMode must be EDIT and workflow/detail/lock/state must be EDIT_LOCKED"
+        });
         return Promise.resolve(null);
       }
       if (!this._fnGuard() || !this._fnShouldSave()) {

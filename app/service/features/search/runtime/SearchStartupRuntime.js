@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, PromiseRuntime, DebugLogger) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -46,12 +47,12 @@ sap.ui.define([
         iDelta = Math.max(0, Math.round(nowMs() - oPerf.t0));
         if (sEvent === SEARCH_READINESS.STARTUP_EVENTS.FIRST_ROUTE_READY) {
             oPerf[SEARCH_READINESS.STARTUP_LOG_KEYS.FIRST_ROUTE_READY] = true;
-            console.info("[Startup] first route ready:", iDelta + "ms");
+            DebugLogger.info("SearchStartupRuntime", "first_route_ready", { deltaMs: iDelta });
             return;
         }
         if (sEvent === SEARCH_READINESS.STARTUP_EVENTS.ANALYTICS_STARTED) {
             oPerf[SEARCH_READINESS.STARTUP_LOG_KEYS.ANALYTICS_STARTED] = true;
-            console.info("[Startup] analytics started:", iDelta + "ms");
+            DebugLogger.info("SearchStartupRuntime", "analytics_started", { deltaMs: iDelta });
         }
     }
 

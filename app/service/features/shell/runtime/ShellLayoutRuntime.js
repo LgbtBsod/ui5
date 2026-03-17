@@ -11,24 +11,6 @@ sap.ui.define([
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
 
-    function resolveRouteNameFromHash() {
-        var sHash;
-        if (typeof window === "undefined" || !window.location) {
-            return "";
-        }
-        sHash = String(window.location.hash || "").trim();
-        if (/^#\/analytics(?:$|\?)/.test(sHash)) {
-            return NavigationContracts.ROUTES.ANALYTICS;
-        }
-        if (/^#\/checklist\/[^/]+\/MidColumnFullScreen(?:$|\?)/.test(sHash)) {
-            return NavigationContracts.ROUTES.DETAIL_LAYOUT;
-        }
-        if (/^#\/checklist\/[^/]+(?:$|\?)/.test(sHash)) {
-            return NavigationContracts.ROUTES.DETAIL;
-        }
-        return NavigationContracts.ROUTES.SEARCH;
-    }
-
     function syncMidColumnPage(oController, sRouteName) {
         var oLayout = oController.byId && oController.byId("mainFcl");
         var oTargetPage = oController.byId && oController.byId(NavigationContracts.resolveMidColumnPageId(sRouteName));
@@ -48,7 +30,6 @@ sap.ui.define([
         var sLayoutRaw = ModelStateRuntime.read(oController, STATE_MODEL, "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
         var sLayout = LayoutStateRuntime.normalizeLayout(sLayoutRaw);
         var sRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sHashRouteName = resolveRouteNameFromHash();
         var sSelectedId = RootIdRuntime.resolveFromStateModel(oStateModel);
         var bSingle = sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN;
         var bDetailOnly = sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
@@ -56,9 +37,6 @@ sap.ui.define([
         var oClassHost = (oRoot && oRoot.querySelector && oRoot.querySelector(".chkSkin")) || oRoot;
         var oLayout = oController.byId && oController.byId("mainFcl");
 
-        if (sHashRouteName && sHashRouteName !== sRouteName) {
-            sRouteName = sHashRouteName;
-        }
         if (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout !== NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
             sLayout = NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
             bSingle = false;

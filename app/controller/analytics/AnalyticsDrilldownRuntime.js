@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, AnalyticsContracts, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, NavigationIntentService, AnalyticsContracts, ModelContracts, AnalyticsMonthRuntime) {
     "use strict";
 
     var TOKENS = ModelContracts.TOKENS;
@@ -12,33 +13,6 @@ sap.ui.define([
     var ANALYTICS_DRILLDOWN_INTENT_PATH = "/analyticsDrilldownIntent";
     var SELECTED_YEAR_PATH = "/selectedYear";
     var COMPARE_YEAR_PATH = "/compareYear";
-    var MONTH_INDEX = Object.freeze({
-        JAN: 0,
-        JANUARY: 0,
-        FEB: 1,
-        FEBRUARY: 1,
-        MAR: 2,
-        MARCH: 2,
-        APR: 3,
-        APRIL: 3,
-        MAY: 4,
-        JUN: 5,
-        JUNE: 5,
-        JUL: 6,
-        JULY: 6,
-        AUG: 7,
-        AUGUST: 7,
-        SEP: 8,
-        SEPT: 8,
-        SEPTEMBER: 8,
-        OCT: 9,
-        OCTOBER: 9,
-        NOV: 10,
-        NOVEMBER: 10,
-        DEC: 11,
-        DECEMBER: 11
-    });
-
     function readSelectedSource(oController) {
         return String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
     }
@@ -91,6 +65,6 @@ sap.ui.define([
     return {
         extractDrilldownPayload: extractDrilldownPayload,
         queueAnalyticsDrilldown: queueAnalyticsDrilldown,
-        MONTH_INDEX: MONTH_INDEX
+        MONTH_INDEX: AnalyticsMonthRuntime.MONTH_INDEX
     };
 });

@@ -96,7 +96,7 @@ sap.ui.define([
                 SmartSearchAdapter: SmartSearchAdapter,
                 Managers: ManagerFacade,
                 JSONModel: JSONModel,
-        FlowCoordinator: WorkflowCoordinator,
+                WorkflowCoordinator: WorkflowCoordinator,
                 DeltaPayloadBuilder: DeltaPayloadBuilder,
                 GatewayBackendService: GatewayBackendService,
                 DebugLogger: DebugLogger,
