@@ -19,8 +19,8 @@
                     visible="{= !${appView>/isPhoneViewport} }"
                     rows="{selected>/barriers}"
                     selectionMode="None"
-                    visibleRowCountMode="Auto"
-                    minAutoRowCount="6"
+                    visibleRowCountMode="Fixed"
+                    visibleRowCount="8"
                     rowHeight="48">
                     <t:columns>
                         <t:Column width="3rem">

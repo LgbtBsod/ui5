@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const { collectFilesByExtensions, readText, detectRuntimeRoot } = require('../qa-shared');
 const { loadSapModule } = require('../sap-module-loader');

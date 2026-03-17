@@ -125,6 +125,10 @@ sap.ui.define([
     function navigateToSearch(oController) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
+        if (oRouter && typeof oRouter.navTo === "function") {
+            oRouter.navTo(NavigationContracts.ROUTES.SEARCH, {}, false);
+            return;
+        }
         if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
             oHashChanger.replaceHash("");
             return;
@@ -132,9 +136,6 @@ sap.ui.define([
         if (typeof window !== "undefined" && window.location) {
             window.location.hash = "";
             return;
-        }
-        if (oRouter && typeof oRouter.navTo === "function") {
-            oRouter.navTo(NavigationContracts.ROUTES.SEARCH, {}, false);
         }
     }
 

@@ -38,12 +38,19 @@
 
         <subHeader>
             <OverflowToolbar design="Transparent" class="analyticsFilterToolbar workbenchToolbarSurface">
-                <Label text="{i18n>analyticsSourceFilterLabel}" labelFor="analyticsSourceSwitch" class="analyticsFilterLabel analyticsSourceLabel"/>
+                <Label text="{i18n>analyticsSourceFilterLabel}" labelFor="analyticsSourceSwitch" class="analyticsFilterLabel analyticsSourceLabel">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
+                    </layoutData>
+                </Label>
                 <SegmentedButton
                     id="analyticsSourceSwitch"
                     class="analyticsSourceSwitch"
                     selectedKey="{view>/selectedSource}"
                     selectionChange=".onSelectAnalyticsSource">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="High" moveToOverflow="true" shrinkable="true" minWidth="12rem"/>
+                    </layoutData>
                     <items>
                         <SegmentedButtonItem key="ALL" text="{i18n>analyticsSourceAll}"/>
                         <SegmentedButtonItem key="WEB" text="{i18n>analyticsSourceWeb}"/>
@@ -51,8 +58,15 @@
                     </items>
                 </SegmentedButton>
                 <ToolbarSpacer/>
-                <Label text="{i18n>analyticsYearLabel}" labelFor="analyticsYearSelect" class="analyticsFilterLabel analyticsYearLabel"/>
+                <Label text="{i18n>analyticsYearLabel}" labelFor="analyticsYearSelect" class="analyticsFilterLabel analyticsYearLabel">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
+                    </layoutData>
+                </Label>
                 <HBox class="analyticsYearField" renderType="Bare" alignItems="Center">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="High" moveToOverflow="true" shrinkable="true" minWidth="9rem"/>
+                    </layoutData>
                     <Input
                         id="analyticsYearSelect"
                         width="7rem"
@@ -69,16 +83,26 @@
                         class="analyticsYearPickerTrigger"/>
                 </HBox>
                 <Button text="{i18n>analyticsPresetCurrent}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetCurrent">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
+                    </layoutData>
                     <customData><core:CustomData key="preset" value="CURRENT"/></customData>
                 </Button>
                 <Button text="{i18n>analyticsPresetPrevious}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetPrevious">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
+                    </layoutData>
                     <customData><core:CustomData key="preset" value="PREVIOUS"/></customData>
                 </Button>
-                <Button text="{i18n>analyticsPresetYtd}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetYtd">
-                    <customData><core:CustomData key="preset" value="YTD"/></customData>
-                </Button>
-                <Label text="{i18n>analyticsCompareYearLabel}" labelFor="analyticsCompareYearInput" class="analyticsFilterLabel analyticsCompareYearLabel"/>
+                <Label text="{i18n>analyticsCompareYearLabel}" labelFor="analyticsCompareYearInput" class="analyticsFilterLabel analyticsCompareYearLabel">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
+                    </layoutData>
+                </Label>
                 <HBox class="analyticsYearField" renderType="Bare" alignItems="Center">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="High" moveToOverflow="true" shrinkable="true" minWidth="9rem"/>
+                    </layoutData>
                     <Input
                         id="analyticsCompareYearInput"
                         width="7rem"

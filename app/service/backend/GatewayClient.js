@@ -77,6 +77,9 @@ sap.ui.define([
             _oModel = null;
             _sServiceUrl = "";
         },
+        hasModel: function () {
+            return !!_oModel;
+        },
         setHeader: function (sName, sValue) {
             var oModel = ensureModel();
             var mHeaders = Object.assign({}, oModel.getHeaders ? oModel.getHeaders() : {});
@@ -203,12 +206,8 @@ sap.ui.define([
             });
         },
         fetchCsrfToken: function () {
-            return toPromise(function (resolve, reject) {
-                ensureModel().refreshSecurityToken(function () {
-                    resolve(true);
-                }, function (e) {
-                    reject(GatewayErrorNormalizer.normalizeError(e));
-                }, true);
+            return GatewayClientRequestRuntime.refreshSecurityToken(ensureModel()).catch(function (oError) {
+                throw GatewayErrorNormalizer.normalizeError(oError);
             });
         },
         refreshSecurityToken: function () {

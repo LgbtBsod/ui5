@@ -57,4 +57,6 @@
   --color-ink-900: rgb(34, 52, 76);
   --hz-accent-soft: rgb(77, 177, 255);
   --accent-soft: rgb(77, 177, 255);
+--hz-accent: var(--accent, #0070f2);
+--hz-accent-rgb: var(--accent-rgb, 0, 112, 242);
 }

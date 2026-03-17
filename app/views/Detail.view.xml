@@ -60,10 +60,6 @@
                     <FlexItemData growFactor="1" shrinkFactor="1" baseSize="0%"/>
                 </uxap:layoutData>
 
-                <uxap:headerTitle>
-                    <uxap:ObjectPageDynamicHeaderTitle/>
-                </uxap:headerTitle>
-
                 <uxap:sections>
 
                     <uxap:ObjectPageSection id="secMain" title="{i18n>detailWorkspaceSectionTitle}">

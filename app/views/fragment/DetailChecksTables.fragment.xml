@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
-    <t:Table visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/checks'}], formatter:'.isDesktopTableVisible'}" rows="{selected>/checks}" selectionMode="None" visibleRowCountMode="Auto" minAutoRowCount="6" rowHeight="48" class="flatEditorGridTable detailGridTable">
+    <t:Table visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>/checks'}], formatter:'.isDesktopTableVisible'}" rows="{selected>/checks}" selectionMode="None" visibleRowCountMode="Fixed" visibleRowCount="7" rowHeight="48" class="flatEditorGridTable detailGridTable">
         <t:columns>
             <t:Column width="3rem"><Label text=""/><t:template><CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/></t:template></t:Column>
             <t:Column><Label text="{i18n>checksNumberLabel}"/><t:template><Input value="{selected>ChecksNum}" editable="false"/></t:template></t:Column>

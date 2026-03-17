@@ -105,6 +105,7 @@ sap.ui.define([
         var oCurrentIntent;
         var oComponent = mContext && mContext.component;
         var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
+        var oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
         var sCurrentHash;
         var sTargetHash;
         if (!oIntent) {
@@ -118,7 +119,15 @@ sap.ui.define([
             return true;
         }
         sTargetHash = String(oIntent.currentHash || "").trim();
-        if (!sTargetHash || typeof window === "undefined" || !window.location) {
+        if (!sTargetHash) {
+            return false;
+        }
+        if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
+            ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
+            oHashChanger.replaceHash(sTargetHash.replace(/^#\/?/, ""));
+            return true;
+        }
+        if (typeof window === "undefined" || !window.location) {
             return false;
         }
         sCurrentHash = String(window.location.hash || "");

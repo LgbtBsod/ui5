@@ -43,21 +43,34 @@
     <EntitySet Name="AttachmentFolderSet" EntityType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.AttachmentFolder" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"/>
     <EntitySet Name="AttachmentSet" EntityType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.Attachment" sap:creatable="true" sap:updatable="true" sap:deletable="true" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"/>
     <FunctionImport Name="LockAcquire" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
-      <Parameter Name="RootKey" Type="Edm.String" Mode="In"/>
+      <Parameter Name="ObjectUuid" Type="Edm.String" Mode="In"/>
+      <Parameter Name="RootId" Type="Edm.String" Mode="In"/>
+      <Parameter Name="Uname" Type="Edm.String" Mode="In"/>
       <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
-      <Parameter Name="Force" Type="Edm.Boolean" Mode="In"/>
-      <Parameter Name="StealFrom" Type="Edm.String" Mode="In"/>
+      <Parameter Name="TabSessionId" Type="Edm.String" Mode="In"/>
     </FunctionImport>
     <FunctionImport Name="LockHeartbeat" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
-      <Parameter Name="RootKey" Type="Edm.String" Mode="In"/>
+      <Parameter Name="ObjectUuid" Type="Edm.String" Mode="In"/>
+      <Parameter Name="RootId" Type="Edm.String" Mode="In"/>
       <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
     </FunctionImport>
     <FunctionImport Name="LockRelease" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
-      <Parameter Name="RootKey" Type="Edm.String" Mode="In"/>
+      <Parameter Name="ObjectUuid" Type="Edm.String" Mode="In"/>
+      <Parameter Name="RootId" Type="Edm.String" Mode="In"/>
+      <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
+      <Parameter Name="TrySave" Type="Edm.Boolean" Mode="In"/>
+    </FunctionImport>
+    <FunctionImport Name="CreateChecklist" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
+      <Parameter Name="Root" Type="Edm.String" Mode="In"/>
+      <Parameter Name="Checks" Type="Edm.String" Mode="In"/>
+      <Parameter Name="Barriers" Type="Edm.String" Mode="In"/>
+      <Parameter Name="Attachments" Type="Edm.String" Mode="In"/>
       <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
     </FunctionImport>
-    <FunctionImport Name="CreateChecklist" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST"/>
-    <FunctionImport Name="CopyChecklist" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST"/>
+    <FunctionImport Name="CopyChecklist" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
+      <Parameter Name="RootId" Type="Edm.String" Mode="In"/>
+      <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
+    </FunctionImport>
     <FunctionImport Name="AutoSave" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.SaveChangesResponse" m:HttpMethod="POST">
       <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
       <Parameter Name="Root" Type="Edm.String" Mode="In"/>
@@ -72,10 +85,23 @@
       <Parameter Name="Barriers" Type="Edm.String" Mode="In"/>
       <Parameter Name="Attachments" Type="Edm.String" Mode="In"/>
     </FunctionImport>
-    <FunctionImport Name="SetChecklistStatus" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST"/>
-    <FunctionImport Name="AnalyticsRefreshTrigger" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST"/>
+    <FunctionImport Name="SetChecklistStatus" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
+      <Parameter Name="RootId" Type="Edm.String" Mode="In"/>
+      <Parameter Name="Status" Type="Edm.String" Mode="In"/>
+      <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
+    </FunctionImport>
+    <FunctionImport Name="AnalyticsRefreshTrigger" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
+      <Parameter Name="TaskKey" Type="Edm.String" Mode="In"/>
+      <Parameter Name="RequestedBy" Type="Edm.String" Mode="In"/>
+    </FunctionImport>
     <FunctionImport Name="GetHierarchy" ReturnType="Collection(Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.HierarchyNode)" m:HttpMethod="GET"/>
-    <FunctionImport Name="ReportExport" ReturnType="Collection(Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.ExportRow)" m:HttpMethod="POST"/>
+    <FunctionImport Name="ReportExport" ReturnType="Collection(Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.ExportRow)" m:HttpMethod="POST">
+      <Parameter Name="Entity" Type="Edm.String" Mode="In"/>
+      <Parameter Name="Limit" Type="Edm.Int32" Mode="In"/>
+      <Parameter Name="SelectionMode" Type="Edm.String" Mode="In"/>
+      <Parameter Name="RootKeys" Type="Edm.String" Mode="In"/>
+      <Parameter Name="SearchContract" Type="Edm.String" Mode="In"/>
+    </FunctionImport>
    </EntityContainer>
   </Schema>
  </edmx:DataServices>

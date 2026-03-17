@@ -33,8 +33,8 @@
                     selectionMode="Single"
                     selectionBehavior="RowOnly"
                     enableColumnReordering="false"
-                    visibleRowCountMode="Auto"
-                    minAutoRowCount="6"
+                    visibleRowCountMode="Fixed"
+                    visibleRowCount="8"
                     rowSelectionChange=".onLocationTreeSelectionChange"
                     rows="{path:'view>/locationVhTree', parameters:{arrayNames:['children']}}">
                     <t:columns>

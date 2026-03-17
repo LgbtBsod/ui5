@@ -1,6 +1,6 @@
 .chkApp .detailControlStickyBlock {
   position: sticky;
-  top: 0.35rem;
+  top: calc(var(--app-shell-offset, 6.5rem) + 0.35rem);
   z-index: 16;
 }
 

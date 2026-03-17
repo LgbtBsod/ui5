@@ -7,6 +7,9 @@ sap.ui.define([
         setModel: function (oModel, mOptions) {
             GatewayClient.setModel(oModel, mOptions || {});
         },
+        reset: function () {
+            GatewayClient.reset();
+        },
         serviceUrl: function () {
             return GatewayClient.serviceUrl();
         },

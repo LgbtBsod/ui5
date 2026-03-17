@@ -6,9 +6,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, StatePaths, WorkflowContracts) {
+], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayBackendService, StatePaths, WorkflowContracts) {
     "use strict";
 
     function buildComponentRuntimeSupport() {
@@ -139,6 +140,7 @@ sap.ui.define([
             oComponent._fnUnsubscribeRuntimeSettings();
         }
         clearComponentTimers(oComponent);
+        GatewayBackendService.reset();
         oComponent._fnCrossTabStorage = null;
         oComponent._oCrossTabChannel = null;
         oComponent._oLifecycleRouter = null;

@@ -322,7 +322,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
         ls_result-tab_session_id = ls_req-tab_session_id.
         ls_result-object_uuid    = ls_req-object_uuid.
         GET TIME STAMP FIELD lv_now_ts.
-        lv_exp_ts = cl_abap_tstmp=>add( tstmp = lv_now_ts secs = 600 ).
+        lv_exp_ts = cl_abap_tstmp=>add(
+          tstmp = lv_now_ts
+          secs  = zcl_zodata_contract_constants=>c_lock_ttl_seconds ).
         ls_result-lock_expires   = lv_exp_ts.
         mo_contract->fill_lock_result(
           EXPORTING
@@ -408,6 +410,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_req    TYPE zstr_pcct_lock_release_rq.
     DATA ls_result TYPE zstr_pcct_lock_release_rs.
     DATA lv_now_ts TYPE timestampl.
+    DATA lv_release_code TYPE string VALUE zcl_zodata_contract_constants=>c_code_lock_ok.
+    DATA lv_release_message TYPE string.
 
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
@@ -427,28 +431,38 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
         " Tolerate: lock may have expired already (beacon release race)
     ENDTRY.
 
-    " If TrySave flag is set and payload provided — perform final save before release
     IF ls_req-try_save = abap_true AND ls_req-payload IS NOT INITIAL.
       TRY.
           execute_save(
             EXPORTING is_request     = ls_req-payload
                       iv_is_autosave = abap_false ).
         CATCH /iwbep/cx_mgw_busi_exception INTO DATA(lx_busi).
-          " Don't re-raise on release — save failure is non-fatal at release time
-          " Log to application log if available
+          lv_release_code = 'RELEASE_OK_BUT_TRY_SAVE_FAILED'.
+          lv_release_message = lx_busi->get_text( ).
+          ls_result-success = abap_false.
+          ls_result-message = |Final save failed during release: { lv_release_message }|.
+          ls_result-reason_code = lv_release_code.
+        CATCH zcx_zodata_error INTO DATA(lx_save_error).
+          lv_release_code = 'RELEASE_OK_BUT_TRY_SAVE_FAILED'.
+          lv_release_message = lx_save_error->get_text( ).
+          ls_result-success = abap_false.
+          ls_result-message = |Final save failed during release: { lv_release_message }|.
+          ls_result-reason_code = lv_release_code.
       ENDTRY.
     ELSE.
       COMMIT WORK AND WAIT.
     ENDIF.
 
-    ls_result-success     = abap_true.
+    IF ls_result-success IS INITIAL AND lv_release_code = zcl_zodata_contract_constants=>c_code_lock_ok.
+      ls_result-success = abap_true.
+    ENDIF.
     ls_result-action      = 'RELEASED'.
     ls_result-object_uuid = ls_req-object_uuid.
     GET TIME STAMP FIELD lv_now_ts.
     mo_contract->fill_lock_result(
       EXPORTING
-        iv_ok                  = abap_true
-        iv_code                = zcl_zodata_contract_constants=>c_code_lock_ok
+        iv_ok                  = xsdbool( lv_release_code = zcl_zodata_contract_constants=>c_code_lock_ok )
+        iv_code                = lv_release_code
         iv_action              = zcl_zodata_contract_constants=>c_action_released
         iv_object_uuid         = ls_req-object_uuid
         iv_owner_session       = ls_req-session_guid
@@ -1079,3 +1093,4 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
 ENDCLASS.
+

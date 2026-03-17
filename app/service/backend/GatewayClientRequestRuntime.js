@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport"
-], function (GatewayErrorNormalizer, GatewayClientContracts, GatewayClientSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh"
+], function (GatewayErrorNormalizer, GatewayClientContracts, GatewayClientSupport, SecurityTokenRefresh) {
     "use strict";
 
     function toRequestHandle(fnExecutor) {
@@ -102,17 +103,7 @@ sap.ui.define([
     }
 
     function refreshSecurityToken(oModel) {
-        return new Promise(function (resolve, reject) {
-            if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
-                reject(new Error("security_token_refresh_unavailable"));
-                return;
-            }
-            oModel.refreshSecurityToken(function () {
-                resolve(true);
-            }, function (oError) {
-                reject(oError);
-            }, true);
-        });
+        return SecurityTokenRefresh.refresh(oModel);
     }
 
     return {

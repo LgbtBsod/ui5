@@ -454,7 +454,7 @@ body.chkAppRoot.appDark .chkApp .flatEditorGridTable {
 .chkApp .flatEditorGridTable .sapUiTableColCell,
 .chkApp .flatEditorGridTable .sapUiTableCol {
   font-size: 0.65rem;
-  font-weight: 820;
+  font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 0.5rem 0.875rem;
