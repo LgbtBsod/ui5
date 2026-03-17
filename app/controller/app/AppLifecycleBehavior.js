@@ -11,15 +11,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellPaneRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellViewportRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ShellGlobalsRuntime",
     "sap/ui/Device"
-], function (ControllerResourceCleanup, ShellPaneContracts, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, Device) {
+], function (ControllerResourceCleanup, ShellPaneContracts, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device) {
     "use strict";
 
     function markStartupReady() {
-        if (typeof window === "undefined" || typeof window.__ui5MarkAppReady !== "function") {
-            return;
-        }
-        window.__ui5MarkAppReady();
+        ShellGlobalsRuntime.markAppReady();
     }
 
     return {
@@ -129,20 +127,7 @@ sap.ui.define([
         },
         _syncLayoutState: function () {
             var oStateModel = this._getStateModel();
-            var sRouteName;
-            var oTargetPane;
-            var oLayout;
             ShellLayoutRuntime.syncLayoutState(this, oStateModel);
-            sRouteName = String(ModelStateRuntime.readOnModel(
-                oStateModel,
-                "/currentRouteName",
-                NavigationContracts.ROUTES.SEARCH
-            ) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-            oTargetPane = ShellPaneRuntime.ensurePaneForRoute(this, sRouteName, NavigationContracts);
-            oLayout = this.byId && this.byId("mainFcl");
-            if (oLayout && oTargetPane && NavigationContracts.ROUTES.SEARCH !== sRouteName && typeof oLayout.toMidColumnPage === "function") {
-                oLayout.toMidColumnPage(oTargetPane.getParent && oTargetPane.getParent() ? oTargetPane.getParent() : oTargetPane);
-            }
         },
         _markStartupReady: function () {
             var oStateModel;
@@ -170,11 +155,6 @@ sap.ui.define([
                     window.requestAnimationFrame(function () {
                         this._syncShellState();
                     }.bind(this));
-                }
-                if (typeof setTimeout === "function") {
-                    setTimeout(function () {
-                        this._syncShellState();
-                    }.bind(this), 300);
                 }
             }
             if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {

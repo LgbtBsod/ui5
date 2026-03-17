@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchCommandPolicy, SearchViewBehavior, SearchSelectionRuntime, OperationSourceContracts, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchCommandPolicy, SearchViewBehavior, SearchSelectionRuntime, OperationSourceContracts, CreateSentinel, PromiseRuntime) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -34,7 +35,7 @@ sap.ui.define([
             ControllerViewStateRuntime.setFlag(oController, sPath, false);
             throw oError;
         }
-        return Promise.resolve(vResult).finally(function () {
+        return PromiseRuntime.withFinally(Promise.resolve(vResult), function () {
             ControllerViewStateRuntime.setFlag(oController, sPath, false);
         });
     }

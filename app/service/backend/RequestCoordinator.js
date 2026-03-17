@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/CorrelationId",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/InFlightRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/ResponseGuard",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy"
-], function (CorrelationId, InFlightRegistry, ResponseGuard, RequestResiliencePolicy) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (CorrelationId, InFlightRegistry, ResponseGuard, RequestResiliencePolicy, PromiseRuntime) {
     "use strict";
 
     function attachCorrelationId(oError, sCorrelationId) {
@@ -51,7 +52,7 @@ sap.ui.define([
 
     function withTimeout(oRequestHandle, iTimeoutMs, sCorrelationId) {
         var iTimer = 0;
-        return new Promise(function (resolve, reject) {
+        return PromiseRuntime.withFinally(new Promise(function (resolve, reject) {
             iTimer = window.setTimeout(function () {
                 try {
                     oRequestHandle.abort();
@@ -62,7 +63,7 @@ sap.ui.define([
             }, iTimeoutMs);
 
             oRequestHandle.promise.then(resolve, reject);
-        }).finally(function () {
+        }), function () {
             window.clearTimeout(iTimer);
         });
     }
@@ -148,7 +149,7 @@ sap.ui.define([
             iGuardToken = ResponseGuard.mark(sGuardKey);
         }
 
-        var pFinal = runAttempt(0).finally(function () {
+        var pFinal = PromiseRuntime.withFinally(runAttempt(0), function () {
             if (sGuardKey) {
                 ResponseGuard.clearActiveHandle(sGuardKey, iGuardToken);
             }

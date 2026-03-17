@@ -7,8 +7,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/ExcelExport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows"
-], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ExcelExport, AnalyticsExportRows) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
+], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ExcelExport, AnalyticsExportRows, DebugLogger) {
     "use strict";
 
     function ensureAnalyticsReportDialog(oController) {
@@ -47,6 +48,12 @@ sap.ui.define([
             ExcelExport.download(buildAnalyticsExportFileName(oController), aRows);
             FeedbackCoordinator.showToast(oController, "searchExportSuccess", [], "info");
         } catch (_oError) {
+            ControllerViewStateRuntime.set(oController, "/error", String((_oError && _oError.message) || "Analytics export failed"));
+            if (DebugLogger && typeof DebugLogger.error === "function") {
+                DebugLogger.error("AnalyticsExportRuntime", "export_failed", {
+                    message: String((_oError && _oError.message) || "Analytics export failed")
+                });
+            }
             FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
         }
         return Promise.resolve(true);

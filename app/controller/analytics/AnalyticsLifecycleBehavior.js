@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime"
-], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, AnalyticsBuilderRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime"
+], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime) {
     "use strict";
 
     function clearRefreshTimer(oController) {
@@ -42,7 +43,8 @@ sap.ui.define([
     }
 
     function onAfterRendering(oController) {
-        var sCurrentRouteName = String(oController.getModel(ModelContracts.MODELS.STATE).getProperty("/currentRouteName") || "").trim();
+        var oStateModel = oController.getModel && oController.getModel(ModelContracts.MODELS.STATE);
+        var sCurrentRouteName = String(oStateModel && oStateModel.getProperty && oStateModel.getProperty("/currentRouteName") || "").trim();
         if (!oController._bAnalyticsInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             oController._onAnalyticsMatched();
         }
@@ -76,6 +78,7 @@ sap.ui.define([
 
     function onRouteLeave(oController) {
         oController._bAnalyticsRouteActive = false;
+        AnalyticsRefreshRuntime.invalidatePolls(oController);
         clearRefreshTimer(oController);
     }
 

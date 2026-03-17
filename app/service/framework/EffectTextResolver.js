@@ -1,13 +1,11 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
+], function (Ui5RuntimeFacade) {
     "use strict";
 
     function resolveCoreBundle() {
         try {
-            return sap.ui.getCore() &&
-                sap.ui.getCore().getModel &&
-                sap.ui.getCore().getModel("i18n") &&
-                sap.ui.getCore().getModel("i18n").getResourceBundle &&
-                sap.ui.getCore().getModel("i18n").getResourceBundle();
+            return Ui5RuntimeFacade.getI18nBundle();
         } catch (_e) {
             return null;
         }

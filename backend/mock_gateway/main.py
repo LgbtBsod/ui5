@@ -50,6 +50,38 @@ _LOG_BODY_CONTENT_TYPES = (
 _LOG_BODY_MAX_CHARS = 4000
 
 
+def _bootstrap_schema() -> None:
+    Base.metadata.create_all(bind=engine)
+    ensure_schema_compatibility()
+
+
+def _ensure_runtime_settings_row(db) -> FrontendRuntimeSettings:
+    settings_row = db.query(FrontendRuntimeSettings).first()
+    if settings_row:
+        return settings_row
+    settings_row = FrontendRuntimeSettings(
+        environment=APP_PROFILE or "default",
+        required_fields_json=json.dumps(DEFAULT_REQUIRED_FIELDS),
+        upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY),
+        **FRONTEND_TIMER_PROFILE
+    )
+    db.add(settings_row)
+    db.commit()
+    db.refresh(settings_row)
+    return settings_row
+
+
+def _ensure_baseline_mock_data(db) -> None:
+    has_dictionary = db.execute(text("SELECT 1 FROM dictionary_items LIMIT 1")).first() is not None
+    has_roots = db.execute(text("SELECT 1 FROM checklist_root LIMIT 1")).first() is not None
+    has_runtime_user = db.execute(text("SELECT 1 FROM runtime_user_context LIMIT 1")).first() is not None
+    if has_dictionary and has_roots and has_runtime_user:
+        return
+    seed_reference_data(db)
+    _seed_checklist_roots_if_needed(db, minimum_rows=100)
+    _ensure_integration_samples(db)
+
+
 def _split_full_name(s_full_name: str) -> tuple[str, str, str]:
     parts = [part for part in str(s_full_name or "").strip().split(" ") if part]
     if not parts:
@@ -414,9 +446,7 @@ async def analytics_refresh_job() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    if AUTO_MUTATE_SCHEMA_ON_STARTUP:
-        Base.metadata.create_all(bind=engine)
-        ensure_schema_compatibility()
+    _bootstrap_schema()
 
     db = SessionLocal()
     try:
@@ -424,35 +454,25 @@ async def lifespan(_: FastAPI):
             seed_reference_data(db)
             _seed_checklist_roots_if_needed(db, minimum_rows=100)
             _ensure_integration_samples(db)
-        _ensure_seeded_detail_payload(db)
-        oSettings = db.query(FrontendRuntimeSettings).first()
-        if not oSettings:
-            if AUTO_SEED_STARTUP_DATA:
-                db.add(FrontendRuntimeSettings(
-                    environment="default",
-                    required_fields_json=json.dumps(DEFAULT_REQUIRED_FIELDS),
-                    upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY),
-                    **FRONTEND_TIMER_PROFILE
-                ))
-                db.commit()
-            else:
-                logger.warning("Frontend runtime settings are absent and startup seeding is disabled for profile=%s", APP_PROFILE)
         else:
-            bChanged = False
-            if AUTO_SEED_STARTUP_DATA:
-                for sKey, vValue in FRONTEND_TIMER_PROFILE.items():
-                    if int(getattr(oSettings, sKey, 0) or 0) == int(vValue):
-                        continue
-                    setattr(oSettings, sKey, int(vValue))
-                    bChanged = True
-                if not str(getattr(oSettings, "required_fields_json", "") or "").strip():
-                    oSettings.required_fields_json = json.dumps(DEFAULT_REQUIRED_FIELDS)
-                    bChanged = True
-                if not str(getattr(oSettings, "upload_policy_json", "") or "").strip():
-                    oSettings.upload_policy_json = json.dumps(DEFAULT_UPLOAD_POLICY)
-                    bChanged = True
-            if bChanged:
-                db.commit()
+            _ensure_baseline_mock_data(db)
+        _ensure_seeded_detail_payload(db)
+        oSettings = _ensure_runtime_settings_row(db)
+        bChanged = False
+        if AUTO_SEED_STARTUP_DATA:
+            for sKey, vValue in FRONTEND_TIMER_PROFILE.items():
+                if int(getattr(oSettings, sKey, 0) or 0) == int(vValue):
+                    continue
+                setattr(oSettings, sKey, int(vValue))
+                bChanged = True
+            if not str(getattr(oSettings, "required_fields_json", "") or "").strip():
+                oSettings.required_fields_json = json.dumps(DEFAULT_REQUIRED_FIELDS)
+                bChanged = True
+            if not str(getattr(oSettings, "upload_policy_json", "") or "").strip():
+                oSettings.upload_policy_json = json.dumps(DEFAULT_UPLOAD_POLICY)
+                bChanged = True
+        if bChanged:
+            db.commit()
         if AUTO_SEED_STARTUP_DATA:
             AnalyticsService.refresh_cache(db, trigger="startup")
     finally:

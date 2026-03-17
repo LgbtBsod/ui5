@@ -17,17 +17,24 @@ sap.ui.define([
 
     function pollRefreshStateUntilSettled(oController, iAttemptsLeft, fnFetchRefreshState) {
         var iRemaining = Number(iAttemptsLeft);
+        var iPollToken = Number(oController && oController._iAnalyticsRefreshPollToken || 0);
         return Promise.resolve(fnFetchRefreshState()).then(function (oState) {
             var oRefreshState = oState || {};
             var sStatus = String(oRefreshState.status || "").toUpperCase();
             var bActive = !!oRefreshState.isRunning ||
                 sStatus === AnalyticsContracts.REFRESH.STATUSES.REQUESTED ||
                 sStatus === AnalyticsContracts.REFRESH.STATUSES.RUNNING;
+            if (Number(oController && oController._iAnalyticsRefreshPollToken || 0) !== iPollToken) {
+                return oRefreshState;
+            }
             ControllerViewStateRuntime.set(oController, "/refreshState", oRefreshState);
             if (!bActive || iRemaining <= 0) {
                 return oRefreshState;
             }
             return SchedulingRuntime.wait(REFRESH_POLL_DELAY_MS).then(function () {
+                if (Number(oController && oController._iAnalyticsRefreshPollToken || 0) !== iPollToken) {
+                    return oRefreshState;
+                }
                 return pollRefreshStateUntilSettled(oController, iRemaining - 1, fnFetchRefreshState);
             });
         });
@@ -36,6 +43,11 @@ sap.ui.define([
     return {
         isRefreshQueued: isRefreshQueued,
         pollRefreshStateUntilSettled: pollRefreshStateUntilSettled,
+        invalidatePolls: function (oController) {
+            if (oController) {
+                oController._iAnalyticsRefreshPollToken = Number(oController._iAnalyticsRefreshPollToken || 0) + 1;
+            }
+        },
         REFRESH_POLL_MAX_ATTEMPTS: REFRESH_POLL_MAX_ATTEMPTS
     };
 });

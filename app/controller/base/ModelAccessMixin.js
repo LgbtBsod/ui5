@@ -1,4 +1,7 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade"], function (LockFacade) {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (LockFacade, PromiseRuntime) {
     "use strict";
 
     return {
@@ -33,7 +36,7 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade"],
         runWithStateFlag: function (oStateModel, sPath, fnTask) {
             if (!oStateModel || !sPath || typeof fnTask !== "function") { return Promise.resolve(null); }
             oStateModel.setProperty(sPath, true);
-            return Promise.resolve().then(fnTask).finally(function () { oStateModel.setProperty(sPath, false); });
+            return PromiseRuntime.withFinally(Promise.resolve().then(fnTask), function () { oStateModel.setProperty(sPath, false); });
         },
         base64ToHex: function (sBase64) {
             if (!sBase64) { return ""; }

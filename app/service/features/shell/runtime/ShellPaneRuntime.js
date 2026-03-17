@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStyleRuntime",
-    "sap/ui/core/mvc/XMLView"
-], function (ShellPaneContracts, JsRuntimeContracts, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, ShellStyleRuntime, XMLView) {
+    "sap/ui/core/mvc/XMLView",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (ShellPaneContracts, JsRuntimeContracts, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, ShellStyleRuntime, XMLView, PromiseRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntimeContracts.TYPEOF.FUNCTION;
@@ -89,7 +90,7 @@ sap.ui.define([
             return mPanePromises[sPaneKey];
         }
         ShellStyleRuntime.ensurePaneStyles(sPaneKey);
-        mPanePromises[sPaneKey] = XMLView.create({
+        mPanePromises[sPaneKey] = PromiseRuntime.withFinally(XMLView.create({
             id: resolveViewId(oController, sPaneKey),
             viewName: ShellPaneContracts.VIEW_NAMES[sPaneKey],
             width: "100%",
@@ -100,7 +101,7 @@ sap.ui.define([
             }
             writePaneLoaded(oController, sPaneKey, true);
             return resolveNestedPaneView(oHost) || oCreatedView;
-        }).finally(function () {
+        }), function () {
             delete mPanePromises[sPaneKey];
         });
         return mPanePromises[sPaneKey];

@@ -37,9 +37,6 @@ sap.ui.define([
         onOpenShellSettings: function (oEvent) { return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "settings"); },
         onOpenShellAnalytics: function () {
             NavigationIntentService.navigateToAnalytics(this);
-            if (typeof this._syncLayoutState === "function") {
-                this._syncLayoutState();
-            }
             return Promise.resolve();
         },
         onOpenShellUserMenu: function (oEvent) { return AppShellActionRuntime.openShellOverlayByKey(this, oEvent, "user"); },
@@ -72,7 +69,8 @@ sap.ui.define([
             return bState;
         },
         onToggleInvertedBlockScheme: function () {
-            var bState = ModelStateRuntime.writeBoolean(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
+            var bCurrent = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
+            var bState = ModelStateRuntime.writeBoolean(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, !bCurrent);
             this._applyInvertedBlockSchemeClass();
             return bState;
         },

@@ -29,7 +29,6 @@ sap.ui.define([
         var oOwnerComponent = oController && typeof oController.getOwnerComponent === "function" ? oController.getOwnerComponent() : null;
         var oRouter = oController && typeof oController.getRouter === "function" ? oController.getRouter() : null;
         var oComponentOwner;
-        var oAppView;
 
         if (oRouter && typeof oRouter.navTo === "function") {
             return oRouter;
@@ -44,26 +43,6 @@ sap.ui.define([
             oComponentOwner = UIComponent.getOwnerComponentFor(oController && typeof oController.getView === "function" ? oController.getView() : null);
             if (oComponentOwner && typeof oComponentOwner.getRouter === "function") {
                 oRouter = oComponentOwner.getRouter();
-                if (oRouter && typeof oRouter.navTo === "function") {
-                    return oRouter;
-                }
-            }
-        }
-        if (typeof sap !== "undefined" && sap.ui && typeof sap.ui.component === "function") {
-            oOwnerComponent = sap.ui.component("checklist_app_comp");
-            if (oOwnerComponent && typeof oOwnerComponent.getRouter === "function") {
-                oRouter = oOwnerComponent.getRouter();
-                if (oRouter && typeof oRouter.navTo === "function") {
-                    return oRouter;
-                }
-            }
-        }
-        if (typeof sap !== "undefined" && sap.ui && sap.ui.getCore && typeof sap.ui.getCore().byId === "function") {
-            oAppView = sap.ui.getCore().byId("checklist_app_comp---app");
-            if (oAppView && typeof oAppView.getController === "function") {
-                oRouter = oAppView.getController() && typeof oAppView.getController().getRouter === "function"
-                    ? oAppView.getController().getRouter()
-                    : null;
                 if (oRouter && typeof oRouter.navTo === "function") {
                     return oRouter;
                 }

@@ -8,8 +8,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailRuntimeContracts"
-], function (AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts, PromiseRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -27,14 +28,7 @@ sap.ui.define([
         xls: "application/vnd.ms-excel",
         xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         txt: "text/plain",
-        csv: "text/csv",
-        mp3: "audio/mpeg",
-        wav: "audio/wav",
-        m4a: "audio/mp4",
-        ogg: "audio/ogg",
-        aac: "audio/aac",
-        flac: "audio/flac",
-        webm: "audio/webm"
+        csv: "text/csv"
     };
 
     function fileExtension(sFileName) {
@@ -81,14 +75,19 @@ sap.ui.define([
     }
 
     function readUploaderFiles(oUploader) {
+        var oFocusDomRef;
+        var oInput;
         if (oUploader && typeof oUploader.getFocusDomRef === "function") {
-            var oFocusDomRef = oUploader.getFocusDomRef();
+            oFocusDomRef = oUploader.getFocusDomRef();
             if (oFocusDomRef && oFocusDomRef.files && oFocusDomRef.files.length) {
                 return normalizeUploaderFiles(oFocusDomRef.files);
             }
-        }
-        if (oUploader && oUploader.FUEl && oUploader.FUEl.files && oUploader.FUEl.files.length) {
-            return normalizeUploaderFiles(oUploader.FUEl.files);
+            if (oFocusDomRef && oFocusDomRef.querySelector) {
+                oInput = oFocusDomRef.querySelector("input[type='file']");
+                if (oInput && oInput.files && oInput.files.length) {
+                    return normalizeUploaderFiles(oInput.files);
+                }
+            }
         }
         return [];
     }
@@ -108,10 +107,10 @@ sap.ui.define([
         if (aAllowedExtensions.length && sExtension && aAllowedExtensions.indexOf(sExtension) < 0) {
             return { ok: false, toastKey: "attachmentMimeRejected" };
         }
-        if (aAllowedMime.length && sMimeType && aAllowedMime.indexOf(sMimeType) < 0) {
+        if (aAllowedMime.length && (!sMimeType || sMimeType === "application/octet-stream")) {
             return { ok: false, toastKey: "attachmentMimeRejected" };
         }
-        if (aAllowedMime.length && !sMimeType && !aAllowedExtensions.length) {
+        if (aAllowedMime.length && sMimeType && aAllowedMime.indexOf(sMimeType) < 0) {
             return { ok: false, toastKey: "attachmentMimeRejected" };
         }
         return { ok: true, mimeType: sMimeType };
@@ -156,8 +155,15 @@ sap.ui.define([
             oDomRef.click();
             return Promise.resolve(true);
         }
-        if (oUploader.FUEl && typeof oUploader.FUEl.click === "function") {
-            oUploader.FUEl.click();
+        if (oDomRef && oDomRef.querySelector) {
+            var oInput = oDomRef.querySelector("input[type='file']");
+            if (oInput && typeof oInput.click === "function") {
+                oInput.click();
+                return Promise.resolve(true);
+            }
+        }
+        if (oUploader && typeof oUploader.openFileDialog === "function") {
+            oUploader.openFileDialog();
             return Promise.resolve(true);
         }
         return Promise.resolve(false);
@@ -194,7 +200,7 @@ sap.ui.define([
             });
         }, Promise.resolve());
 
-        return oSequence.finally(function () {
+        return PromiseRuntime.withFinally(oSequence, function () {
             clearAttachmentUploader(oUploader);
             ControllerViewStateRuntime.setFlag(oController, "/attachmentBusy", false);
         });

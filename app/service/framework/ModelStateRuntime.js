@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (CloneUtil, StatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (CloneUtil, StatePaths, WorkflowContracts, PromiseRuntime) {
     "use strict";
 
     function model(oController, sModelName) {
@@ -112,7 +113,7 @@ sap.ui.define([
 
     function withFlag(oController, sModelName, sPath, fnWork, vStart, vEnd) {
         write(oController, sModelName, sPath, typeof vStart === "undefined" ? true : vStart);
-        return Promise.resolve().then(fnWork).finally(function () {
+        return PromiseRuntime.withFinally(Promise.resolve().then(fnWork), function () {
             write(oController, sModelName, sPath, typeof vEnd === "undefined" ? false : vEnd);
         });
     }
@@ -130,7 +131,7 @@ sap.ui.define([
         aFlagPaths.forEach(function (sPath) {
             write(oController, sModelName, sPath, vStartValue);
         });
-        return Promise.resolve().then(fnWork).finally(function () {
+        return PromiseRuntime.withFinally(Promise.resolve().then(fnWork), function () {
             aFlagPaths.forEach(function (sPath) {
                 write(oController, sModelName, sPath, vEndValue);
             });

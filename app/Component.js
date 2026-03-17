@@ -85,18 +85,6 @@ sap.ui.define([
 ) {
     "use strict";
 
-    // Polyfill: Promise.prototype.finally (not available in IE11 / older SAP WebAS Chromium)
-    if (typeof Promise === "function" && typeof Promise.prototype.finally !== "function") {
-        Promise.prototype.finally = function (fnCallback) {
-            var P = this.constructor || Promise;
-            return this.then(
-                function (vValue) { return P.resolve(typeof fnCallback === "function" ? fnCallback() : undefined).then(function () { return vValue; }); },
-                function (oReason) { return P.resolve(typeof fnCallback === "function" ? fnCallback() : undefined).then(function () { throw oReason; }); }
-            );
-        };
-    }
-
-
     return UIComponent.extend("PRODUCTION_CONTROL_CHECKLIST.Component", {
         metadata: {
             manifest: "json"

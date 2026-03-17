@@ -15,8 +15,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
-    "sap/ui/core/Item"
-], function (SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchInteractionBehavior, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerViewStateRuntime, SearchToolbarContracts, ModelContracts, OperationSourceContracts, Item) {
+    "sap/ui/core/Item",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchInteractionBehavior, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerViewStateRuntime, SearchToolbarContracts, ModelContracts, OperationSourceContracts, Item, PromiseRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -42,7 +43,7 @@ sap.ui.define([
             ControllerViewStateRuntime.setFlag(oController, sPath, false);
             throw oError;
         }
-        return Promise.resolve(vResult).finally(function () {
+        return PromiseRuntime.withFinally(Promise.resolve(vResult), function () {
             ControllerViewStateRuntime.setFlag(oController, sPath, false);
         });
     }

@@ -1,4 +1,7 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService"], function (ThemeService) {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
+], function (ThemeService, Ui5RuntimeFacade) {
     "use strict";
 
     var DEFAULT_MODE = "morning";
@@ -81,8 +84,12 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService"], f
         },
         setThemeMode: function (sMode, oClickXY) {
             var oProfile = readThemeProfile();
+            var sNextMode = String(sMode || "").trim().toLowerCase();
+            if (sNextMode !== "night" && sNextMode !== "morning") {
+                sNextMode = DEFAULT_MODE;
+            }
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(DEFAULT_MODE, oClickXY || null, {
+            return ThemeService.applyThemeMode(sNextMode, oClickXY || null, {
                 animationEnabled: oProfile.animationEnabled
             });
         },
@@ -95,8 +102,9 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService"], f
         },
         toggleTheme: function (oClickXY) {
             var oProfile = readThemeProfile();
+            var sNextMode = oProfile.mode === "night" ? "morning" : "night";
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(DEFAULT_MODE, oClickXY, {
+            return ThemeService.applyThemeMode(sNextMode, oClickXY, {
                 animationEnabled: oProfile.animationEnabled
             });
         },
@@ -105,7 +113,7 @@ sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService"], f
             this._fnThemeChangedHandler = function () {
                 ThemeService.syncTokensFromUI5();
             }.bind(this);
-            sap.ui.getCore().attachThemeChanged(this._fnThemeChangedHandler);
+            Ui5RuntimeFacade.attachThemeChanged(this._fnThemeChangedHandler);
         },
         _applyTheme: function (sTheme) {
             var oProfile = readThemeProfile();

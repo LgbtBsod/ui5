@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
-], function (EffectTextResolver, CreateSentinel, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
+], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade) {
     "use strict";
 
     var LIFECYCLE_TEXT_KEYS = {
@@ -111,15 +112,10 @@ sap.ui.define([
 
     function formatAutosaveTime(vValue) {
         var oDate = parseDateLike(vValue);
-        var sLanguageTag = "";
         if (!oDate) {
             return vValue || "-";
         }
-        try {
-            sLanguageTag = sap.ui.getCore().getConfiguration().getLanguageTag().toString();
-        } catch (oError) {
-            sLanguageTag = "";
-        }
+        var sLanguageTag = Ui5RuntimeFacade.getLanguageTag();
         try {
             return oDate.toLocaleTimeString(sLanguageTag || undefined, {
                 hour: "2-digit",

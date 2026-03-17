@@ -1,10 +1,12 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ThemeMixin"
-], function (ThemeMixin) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ThemeMixin",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService"
+], function (ThemeMixin, ThemeService) {
     "use strict";
 
     QUnit.module("ThemeMixin", {
         beforeEach: function () {
+            this._fnApplyThemeMode = ThemeService.applyThemeMode;
             try {
                 window.localStorage.removeItem("checklist_app_theme_dev_override");
             } catch (_error) {
@@ -12,6 +14,7 @@ sap.ui.define([
             }
         },
         afterEach: function () {
+            ThemeService.applyThemeMode = this._fnApplyThemeMode;
             try {
                 window.localStorage.removeItem("checklist_app_theme_dev_override");
             } catch (_error) {
@@ -31,3 +34,19 @@ sap.ui.define([
         assert.strictEqual(ThemeMixin.getCurrentThemeMode(), "night", "Night mode can be enabled through dev override");
         assert.strictEqual(ThemeMixin.isDarkThemeEnabled(), true, "Dark mode reports enabled when overridden");
     });
+
+    QUnit.test("toggleTheme switches between supported modes", function (assert) {
+        var aModes = [];
+        ThemeService.applyThemeMode = function (sMode) {
+            aModes.push(sMode);
+            return { mode: sMode };
+        };
+
+        window.localStorage.setItem("checklist_app_theme_dev_override", "morning");
+        ThemeMixin.toggleTheme();
+        window.localStorage.setItem("checklist_app_theme_dev_override", "night");
+        ThemeMixin.toggleTheme();
+
+        assert.deepEqual(aModes, ["night", "morning"], "toggle resolves the next real theme mode");
+    });
+});

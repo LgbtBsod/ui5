@@ -147,11 +147,14 @@ sap.ui.define([
         },
 
         onDrilldownAnalyticsBuilder: function (oEvent) {
+            var oViewModel = this.getModel && this.getModel("view");
+            var sBuilderDimension = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderDimension") || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase();
+            var sBuilderMetric = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderMetric") || "").trim().toUpperCase();
             return AnalyticsDrilldownBehavior.onDrilldownAnalyticsBuilder(
                 this,
                 oEvent,
-                String(this.getModel("view").getProperty("/builderDimension") || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase(),
-                String(this.getModel("view").getProperty("/builderMetric") || "").trim().toUpperCase()
+                sBuilderDimension,
+                sBuilderMetric
             );
         },
 

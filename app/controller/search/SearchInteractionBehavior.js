@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
-], function (ControllerViewStateRuntime, SearchFilterLifecycleBehavior, SearchLoadRuntime, SearchViewBehavior, SearchCommandPolicy, ReadinessTelemetryRuntime, ReadinessTelemetryContracts, OperationSourceContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (ControllerViewStateRuntime, SearchFilterLifecycleBehavior, SearchLoadRuntime, SearchViewBehavior, SearchCommandPolicy, ReadinessTelemetryRuntime, ReadinessTelemetryContracts, OperationSourceContracts, PromiseRuntime) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -16,9 +17,9 @@ sap.ui.define([
         if (typeof fnSyncControlBusy === "function") {
             fnSyncControlBusy(true);
         }
-        return ControllerViewStateRuntime.withFlag(oController, sViewBusyPath, function () {
+        return PromiseRuntime.withFinally(ControllerViewStateRuntime.withFlag(oController, sViewBusyPath, function () {
             return typeof fnAction === "function" ? fnAction() : undefined;
-        }).finally(function () {
+        }), function () {
             if (typeof fnSyncControlBusy === "function") {
                 fnSyncControlBusy(false);
             }
@@ -40,7 +41,7 @@ sap.ui.define([
     function onRetrySearchLoad(oController) {
         SearchLoadRuntime.markLoading(oController);
         SearchViewBehavior.beginSearchLoadingFeedback(oController);
-        return SearchCommandPolicy.rebind(oController, { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
+        return PromiseRuntime.withFinally(SearchCommandPolicy.rebind(oController, { source: SEARCH_SOURCES.SEARCH_RETRY }), function () {
             SearchLoadRuntime.setLoadStatus(oController, { isLoading: false, isBusy: false, loadError: false });
         }).catch(function (oError) {
             SearchLoadRuntime.applyLoadError(oController, String((oError && oError.message) || "Unable to load search results."));

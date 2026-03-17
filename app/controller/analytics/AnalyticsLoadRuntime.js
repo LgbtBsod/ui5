@@ -5,18 +5,23 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, FacadeCommandRuntime, StatePaths, AnalyticsContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, FacadeCommandRuntime, StatePaths, AnalyticsContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ModelContracts, PromiseRuntime) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     return {
         loadAnalytics: function (oController, sReason, mHooks) {
             var sSelectedYear = String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "").trim();
             var sCompareYear = String(ControllerViewStateRuntime.get(oController, "/compareYear", "") || "").trim();
             var sSelectedSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
+            var sReadyAt = "";
 
-            ModelStateRuntime.write(oController, "state", StatePaths.UI_BUSY_ANALYTICS, true);
-            ModelStateRuntime.write(oController, "state", StatePaths.READINESS_ANALYTICS, {
+            ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, true);
+            ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
                 status: "loading",
                 ready: false,
                 readyAt: "",
@@ -27,7 +32,7 @@ sap.ui.define([
                 "/error": ""
             });
 
-            return FacadeCommandRuntime.executeRaw(
+            return PromiseRuntime.withFinally(FacadeCommandRuntime.executeRaw(
                 oController,
                 oController._facade,
                 "load",
@@ -40,6 +45,7 @@ sap.ui.define([
                 mHooks.buildCtx(oController)
             ).then(function (oResult) {
                 var oAnalytics = ControllerViewStateRuntime.get(oController, "/analytics", {}) || {};
+                sReadyAt = new Date().toISOString();
 
                 if (Array.isArray(oAnalytics.availableYears) && oAnalytics.availableYears.length) {
                     ControllerViewStateRuntime.set(oController, "/availableYears", oAnalytics.availableYears);
@@ -64,11 +70,33 @@ sap.ui.define([
                 mHooks.applyComparisonMetricSelection(oController);
                 mHooks.applyBuilderSelection(oController);
                 mHooks.syncAnalyticsContextHints(oController);
+                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
+                    status: "ready",
+                    ready: true,
+                    readyAt: sReadyAt,
+                    error: ""
+                });
                 ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
                     reason: sReason || "manual",
                     source: sSelectedSource
                 });
                 return oResult;
+            }).catch(function (oError) {
+                var sErrorMessage = String((oError && oError.message) || "Analytics load failed");
+                ControllerViewStateRuntime.setMany(oController, {
+                    "/error": sErrorMessage,
+                    "/busy": false
+                });
+                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
+                    status: "error",
+                    ready: false,
+                    readyAt: "",
+                    error: sErrorMessage
+                });
+                throw oError;
+            }), function () {
+                ControllerViewStateRuntime.set(oController, "/busy", false);
+                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, false);
             });
         }
     };

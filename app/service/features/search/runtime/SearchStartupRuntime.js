@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, PromiseRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -87,11 +88,10 @@ sap.ui.define([
         mHooks.bindSearchAnalytics();
         mHooks.bindSearchWorkingText();
         mHooks.clearInitialAnalyticsSchedule();
-        Promise.resolve(mHooks.bootstrap({ reason: "routeMatched" }))
+        PromiseRuntime.withFinally(Promise.resolve(mHooks.bootstrap({ reason: "routeMatched" }))
             .catch(function () {
                 return null;
-            })
-            .finally(mHooks.scheduleInitialAnalytics(function () {
+            }), mHooks.scheduleInitialAnalytics(function () {
                 logStartupMetric(oController, SEARCH_READINESS.STARTUP_EVENTS.ANALYTICS_STARTED);
             }));
         mHooks.restoreSearchScrollPosition();

@@ -58,9 +58,6 @@ sap.ui.define([
 
         if (sHashRouteName && sHashRouteName !== sRouteName) {
             sRouteName = sHashRouteName;
-            if (oStateModel && oStateModel.setProperty) {
-                ModelStateRuntime.writeOnModel(oStateModel, "/currentRouteName", sRouteName);
-            }
         }
         if (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout !== NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
             sLayout = NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
@@ -84,9 +81,6 @@ sap.ui.define([
             oLayout.setLayout(sLayout);
         }
         syncMidColumnPage(oController, sRouteName);
-        if (oStateModel && oStateModel.setProperty && sLayoutRaw !== sLayout) {
-            ModelStateRuntime.writeOnModel(oStateModel, "/layout", sLayout);
-        }
     }
 
     return {
