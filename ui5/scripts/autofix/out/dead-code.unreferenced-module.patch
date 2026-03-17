@@ -1,3 +1,0 @@
-# candidate removal patch (manual review required)
-# file: app/service/ui/StyleTokens.js
-# verify reverse deps and runtime dynamic references before delete

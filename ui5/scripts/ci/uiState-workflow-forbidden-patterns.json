@@ -1,6 +1,0 @@
-[
-  { "path": "/mode", "label": "uiState /mode mirror" },
-  { "path": "/currentRootKey", "label": "uiState /currentRootKey mirror" },
-  { "path": "/sessionGuid", "label": "uiState /sessionGuid mirror" },
-  { "path": "/busy", "label": "uiState /busy mirror" }
-]
