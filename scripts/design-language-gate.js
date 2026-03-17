@@ -29,11 +29,19 @@ const bootstrapRuntime = read('ui5-bootstrap-runtime.js');
 const issues = [];
 function fail(message) { issues.push(message); }
 
-if (!/data-sap-ui-theme="sap_horizon"/.test(indexHtml) && !/setAttribute\(\s*["']data-sap-ui-theme["']\s*,\s*["']sap_horizon["']\s*\)/.test(bootstrapRuntime)) {
-  fail('UI5 bootstrap runtime must set sap_horizon as the base theme.');
+if (!/data-sap-ui-theme="sap_fiori_3"/.test(indexHtml)
+  && !/setAttribute\(\s*["']data-sap-ui-theme["']\s*,\s*["']sap_fiori_3["']\s*\)/.test(bootstrapRuntime)
+  && !/DEFAULT_THEME\s*=\s*["']sap_fiori_3["']/.test(bootstrapRuntime)) {
+  fail('UI5 bootstrap runtime must set sap_fiori_3 as the base theme.');
 }
-if (!/sap_horizon_dark/.test(themeService) || !/sap_horizon_dark/.test(themePhilosophy)) {
-  fail('Theme layer must support sap_horizon_dark.');
+if (/sap_horizon/.test(bootstrapRuntime) || /sap_horizon/.test(indexHtml)) {
+  fail('UI5 bootstrap runtime must not request Horizon themes on the UI5 1.71 path.');
+}
+if (!/sap_fiori_3/.test(themeService) || !/sap_fiori_3/.test(themePhilosophy)) {
+  fail('Theme layer must normalize onto sap_fiori_3.');
+}
+if (/sap_fiori_3_dark/.test(themeMixin) && !/return "morning"/.test(themeMixin)) {
+  fail('Theme override layer must guard dark-mode requests on the UI5 1.71 path.');
 }
 if (!/:root\.light-mode/.test(styleCss) || !/body\.appDark/.test(styleCss)) {
   fail('App style layer must expose both Morning/Night token modes.');

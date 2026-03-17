@@ -17,21 +17,87 @@
         <Text text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}" class="modeHintText detailAttachmentDropZoneMeta"/>
     </VBox>
     <VBox id="attachmentDropScope" renderType="Bare" width="100%">
-        <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{= !${view>/attachmentsExpanded} }">
-            <Table items="{view>/sessionAttachments}" class="flatEditorTable detailAttachmentTable detailAttachmentTableSession" visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}" noDataText="{i18n>noAttachmentsData}">
-                <columns><Column><Text text="{i18n>attachmentFileName}"/></Column><Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentCategoryLabel}"/></Column><Column width="7rem" hAlign="End"><Text text="{i18n>attachmentSize}"/></Column><Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentChangedOn}"/></Column><Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center"><Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/></Column></columns>
-                <items><ColumnListItem><cells><ObjectIdentifier title="{view>FileName}" text="{view>MimeType}"/><Text text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/><Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/><Text text="{view>ChangedOn}"/><HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap"><Button icon="sap-icon://download" text="{i18n>rowActionDownload}" type="Transparent" press=".onOpenAttachment" class="tableRowActionBtn"/><Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteAttachment" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="tableRowActionBtn tableRowActionBtnDanger"/></HBox></cells></ColumnListItem></items>
-            </Table>
-        </VBox>
+    <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{= !${view>/attachmentsExpanded} }">
+        <Table
+            items="{view>/sessionAttachments}"
+            class="flatEditorTable detailAttachmentTable detailAttachmentTableSession"
+            visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}"
+            noDataText="{i18n>noAttachmentsData}">
+            <columns>
+                <Column>
+                    <Text text="{i18n>attachmentFileName}"/>
+                </Column>
+                <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                    <Text text="{i18n>attachmentCategoryLabel}"/>
+                </Column>
+                <Column width="7rem" hAlign="End">
+                    <Text text="{i18n>attachmentSize}"/>
+                </Column>
+                <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                    <Text text="{i18n>attachmentChangedOn}"/>
+                </Column>
+                <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}"/>
+                        <Text text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
+                        <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
+                        <Text text="{view>ChangedOn}"/>
+                        <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                            <Button icon="sap-icon://download" text="{i18n>rowActionDownload}" type="Transparent" press=".onOpenAttachment" class="tableRowActionBtn"/>
+                            <Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteAttachment" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="tableRowActionBtn tableRowActionBtnDanger"/>
+                        </HBox>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+    </VBox>
         <VBox id="attachmentExpandedScope" renderType="Bare" width="100%" visible="{view>/attachmentsExpanded}">
             <HBox class="detailEmptyStateCard workflowEmptyStateCard detailAttachmentsEmptyState" renderType="Bare" visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
                 <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
                 <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
                 <Text text="{= ${selected>/root/id} === '__CREATE' ? ${i18n>attachmentDraftStageHint} : ${i18n>detailEmptyAttachmentsText} }" class="detailEmptyStateText workflowEmptyStateText"/>
             </HBox>
-            <Table items="{selected>/attachments}" class="flatEditorTable detailAttachmentTable" visible="{path:'selected>/attachments', formatter:'.hasRows'}" noDataText="{i18n>noAttachmentsData}">
-                <columns><Column><Text text="{i18n>attachmentFileName}"/></Column><Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentCategoryLabel}"/></Column><Column width="7rem" hAlign="End"><Text text="{i18n>attachmentSize}"/></Column><Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }"><Text text="{i18n>attachmentChangedOn}"/></Column><Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center"><Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/></Column></columns>
-                <items><ColumnListItem><cells><ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}"/><Text text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/><Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/><Text text="{selected>ChangedOn}"/><HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap"><Button icon="sap-icon://download" text="{i18n>rowActionDownload}" type="Transparent" press=".onOpenAttachment" class="tableRowActionBtn"/><Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteAttachment" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="tableRowActionBtn tableRowActionBtnDanger"/></HBox></cells></ColumnListItem></items>
+            <Table
+                items="{selected>/attachments}"
+                class="flatEditorTable detailAttachmentTable"
+                visible="{path:'selected>/attachments', formatter:'.hasRows'}"
+                noDataText="{i18n>noAttachmentsData}">
+                <columns>
+                    <Column>
+                        <Text text="{i18n>attachmentFileName}"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                        <Text text="{i18n>attachmentCategoryLabel}"/>
+                    </Column>
+                    <Column width="7rem" hAlign="End">
+                        <Text text="{i18n>attachmentSize}"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                        <Text text="{i18n>attachmentChangedOn}"/>
+                    </Column>
+                    <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}"/>
+                            <Text text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
+                            <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
+                            <Text text="{selected>ChangedOn}"/>
+                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                <Button icon="sap-icon://download" text="{i18n>rowActionDownload}" type="Transparent" press=".onOpenAttachment" class="tableRowActionBtn"/>
+                                <Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteAttachment" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
             </Table>
         </VBox>
     </VBox>

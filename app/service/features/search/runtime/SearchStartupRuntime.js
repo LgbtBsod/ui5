@@ -6,9 +6,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ProgressiveReadinessContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, PromiseRuntime, DebugLogger) {
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, DebugLogger) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -84,17 +83,14 @@ sap.ui.define([
         });
         ControllerViewStateRuntime.set(oController, "/bootstrapBusy", true);
         ControllerViewStateRuntime.set(oController, "/analyticsBusy", false);
-        ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", true);
+        ControllerViewStateRuntime.set(oController, "/analyticsRailBusy", false);
         ControllerViewStateRuntime.set(oController, "/analyticsError", "");
-        mHooks.bindSearchAnalytics();
         mHooks.bindSearchWorkingText();
         mHooks.clearInitialAnalyticsSchedule();
-        PromiseRuntime.withFinally(Promise.resolve(mHooks.bootstrap({ reason: "routeMatched" }))
+        Promise.resolve(mHooks.bootstrap({ reason: "routeMatched" }))
             .catch(function () {
                 return null;
-            }), mHooks.scheduleInitialAnalytics(function () {
-                logStartupMetric(oController, SEARCH_READINESS.STARTUP_EVENTS.ANALYTICS_STARTED);
-            }));
+            });
         mHooks.restoreSearchScrollPosition();
         refreshSearchTableIfNeeded(oController, "routeMatchedReturn", {
             rebind: mHooks.rebind

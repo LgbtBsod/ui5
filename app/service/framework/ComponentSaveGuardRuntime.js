@@ -7,9 +7,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (SecurityTokenRefresh, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, DetailPersistenceRuntime, WorkflowContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (SecurityTokenRefresh, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, DetailPersistenceRuntime, WorkflowContracts) {
     "use strict";
 
     var BANNER_DETAIL = ComponentSaveGuardContracts.BANNER_DETAIL;
@@ -77,7 +76,7 @@ sap.ui.define([
                     fnSetGlobalBanner(ComponentSaveGuardPolicy.buildWorkingBannerPayload());
                 }
             }, DELAY_MS.SAVE_WORKING_BANNER);
-            oComponent._pGuardedSavePromise = PromiseRuntime.withFinally(oDetailFacade.save({ rootId: sRootId }, fnBuildLatestCtx()).then(function (oResult) {
+            oComponent._pGuardedSavePromise = Promise.resolve(oDetailFacade.save({ rootId: sRootId }, fnBuildLatestCtx())).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 if (!oResult || oResult.ok === false) {
                     return Promise.reject((oResult && oResult.error) || new Error(ERROR_MESSAGE.SAVE_FAILED));
@@ -111,7 +110,7 @@ sap.ui.define([
                         if (!oMainServiceModel) {
                             oComponent._bSessionRefreshInFlight = false;
                         } else {
-                            PromiseRuntime.withFinally(SecurityTokenRefresh.refresh(oMainServiceModel), function () {
+                            Promise.resolve(SecurityTokenRefresh.refresh(oMainServiceModel)).finally(function () {
                                 oComponent._bSessionRefreshInFlight = false;
                             });
                         }
@@ -124,7 +123,7 @@ sap.ui.define([
                 }));
                 fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_FAILED, TelemetryRuntime.saveFailure(sRootId, oError, sCorrelationId));
                 return false;
-            }), function () {
+            }).finally(function () {
                 oComponent._iSaveWorkingTimer = SchedulingRuntime.clearTimer(oComponent._iSaveWorkingTimer);
                 ModelStateRuntime.setManyOnModel(oStateModel, (function () {
                     var m = {};

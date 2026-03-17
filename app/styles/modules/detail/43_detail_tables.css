@@ -58,13 +58,6 @@
   background: transparent;
 }
 
-.chkApp .detailGridTable .sapUiTableCtrl,
-.chkApp .flatEditorTable .sapMListTbl,
-.chkApp .detailAttachmentTable .sapMListTbl {
-  border-collapse: separate;
-  border-spacing: 0 0.42rem;
-}
-
 .chkApp .detailGridTable .sapUiTableCell,
 .chkApp .detailGridTable .sapUiTableColCell,
 .chkApp .flatEditorTable .sapMListTblCell,
@@ -240,34 +233,11 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   box-shadow: none;
 }
 
-.chkApp .detailGridTable .sapUiTableCnt,
-.chkApp .detailGridTable .sapUiTableCtrlScr,
-.chkApp .detailGridTable .sapUiTableCtrl,
-.chkApp .detailGridTable .sapUiTableColHdrCnt,
-.chkApp .flatEditorTable,
-.chkApp .flatEditorTable .sapMListTbl,
-.chkApp .flatEditorTable .sapMListTblCnt,
-.chkApp .detailAttachmentTable .sapMListTbl,
-.chkApp .detailAttachmentTable .sapMListTblCnt {
-  background: transparent;
-}
-
 .chkApp .detailGridTable .sapUiTableCtrl,
 .chkApp .flatEditorTable .sapMListTbl,
 .chkApp .detailAttachmentTable .sapMListTbl {
   border-collapse: separate;
   border-spacing: 0 0.74rem;
-}
-
-.chkApp .detailGridTable .sapUiTableCell,
-.chkApp .detailGridTable .sapUiTableColCell,
-.chkApp .flatEditorTable .sapMListTblCell,
-.chkApp .flatEditorTable .sapMListTblHeaderCell,
-.chkApp .detailAttachmentTable .sapMListTblCell,
-.chkApp .detailAttachmentTable .sapMListTblHeaderCell {
-  vertical-align: top;
-  border-inline-color: transparent;
-  border-bottom-color: rgba(160, 184, 220, 0.18);
 }
 
 .chkApp .detailGridTable .sapUiTableCell:first-child,

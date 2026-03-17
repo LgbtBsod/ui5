@@ -12,17 +12,17 @@ BREAKPOINTS = [1440, 1080, 720]
 SCREENS = [
     {
         "id": "shell",
-        "file": "view/App.view.xml",
+        "file": "app/views/App.view.xml",
         "checks": [
             ("f:FlexibleColumnLayout", "FlexibleColumnLayout host exists"),
             ("AppShellHeader", "Shell header exists"),
-            ("searchPaneHost", "Search pane anchor exists"),
-            ("detailPaneHost", "Detail pane anchor exists")
+            ("id=\"mainFcl\"", "Main FCL id exists"),
+            ("appRootFclTransparent", "Transparent FCL shell class exists")
         ]
     },
     {
         "id": "search",
-        "file": "view/Search.view.xml",
+        "file": "app/views/Search.view.xml",
         "checks": [
             ("searchExperienceStack", "Search shell stack class exists"),
             ("smartFilterBar:SmartFilterBar", "SmartFilterBar exists"),
@@ -32,7 +32,7 @@ SCREENS = [
     },
     {
         "id": "detail",
-        "file": "view/Detail.view.xml",
+        "file": "app/views/Detail.view.xml",
         "checks": [
             ("uxap:ObjectPageLayout", "ObjectPageLayout exists"),
             ("detailControlStickyHost", "Control rail sticky host exists"),

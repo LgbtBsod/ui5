@@ -2,9 +2,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (ModelStateRuntime, NavigationContracts, WorkflowContracts, ComponentListenerContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentListenerContracts"
+], function (ModelStateRuntime, NavigationContracts, WorkflowContracts, ComponentListenerContracts) {
     "use strict";
 
     var PATHS = ComponentListenerContracts.PATHS;
@@ -118,7 +117,7 @@ sap.ui.define([
             if (shouldReleaseDetailLock(oStateModel, oEvent, StatePaths)) {
                 oEvent.preventDefault();
                 mOptions.queuePendingNavigationIntent(oEvent);
-                PromiseRuntime.withFinally(mOptions.workflowCoordinator.releaseWithTrySave({ getModel: oComponent.getModel.bind(oComponent) }), function () {
+                Promise.resolve(mOptions.workflowCoordinator.releaseWithTrySave({ getModel: oComponent.getModel.bind(oComponent) })).finally(function () {
                     mOptions.resetDetailNavigationState(oComponent);
                     mOptions.resumePendingNavigationIntent();
                 });

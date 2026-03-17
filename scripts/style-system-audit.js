@@ -62,8 +62,8 @@ function analyze() {
   const styleCss = cssFiles.map((file) => readTextSafe(file)).join('\n');
 
   const contracts = {
-    horizonMorningDefault: /data-sap-ui-theme="sap_horizon"/.test(indexHtml) || /sap_horizon/.test(themeService),
-    horizonNightSupported: (/sap_horizon_dark/.test(themeMixin) || /sap_horizon_dark/.test(themeService)) && /sap_horizon_dark/.test(themePhilosophy),
+    fiori3MorningDefault: /data-sap-ui-theme="sap_fiori_3"/.test(indexHtml) || /sap_fiori_3/.test(themeService),
+    safeNightFallback: !/sap_horizon/.test(indexHtml) && /return DEFAULT_MODE;/.test(themeService) && /sNextMode = "morning"/.test(themeMixin),
     morningNightModes: /:root\.light-mode/.test(styleCss) && /body\.appDark/.test(styleCss),
     platformPhilosophyBridge: /platformPrecisionEnterprise/.test(styleCss) &&
       /platformCalmModern/.test(styleCss) &&
@@ -76,8 +76,8 @@ function analyze() {
     0,
     100
       - Math.min(18, duplicates.length)
-      - (contracts.horizonMorningDefault ? 0 : 20)
-      - (contracts.horizonNightSupported ? 0 : 20)
+      - (contracts.fiori3MorningDefault ? 0 : 20)
+      - (contracts.safeNightFallback ? 0 : 20)
       - (contracts.morningNightModes ? 0 : 15)
       - (contracts.platformPhilosophyBridge ? 0 : 12)
       - (contracts.glassSurfaceLanguage ? 0 : 10)

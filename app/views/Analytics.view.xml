@@ -160,7 +160,7 @@
                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowStatusMetaChips" type="XML"/>
                         </HBox>
                     </VBox>
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsBreakdowns" type="XML"/>
+                    <VBox id="analyticsBreakdownsHost" renderType="Bare"/>
                 </VBox>
             </VBox>
         </content>

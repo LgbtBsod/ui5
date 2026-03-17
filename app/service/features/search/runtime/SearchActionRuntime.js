@@ -2,9 +2,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, StatePaths, ModelContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ControllerViewStateRuntime, ModelStateRuntime, StatePaths, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -29,10 +28,10 @@ sap.ui.define([
         var aSelectedRowIds = ControllerViewStateRuntime.get(oController, "/selectedRowIds", []) || [];
         ControllerViewStateRuntime.set(oController, "/exportBusy", true);
         ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_EXPORT, true);
-        return PromiseRuntime.withFinally(Promise.resolve(fnExportFlow({
+        return Promise.resolve(fnExportFlow({
             entity: sEntity || "screen",
             selectedRowIds: Array.isArray(aSelectedRowIds) ? aSelectedRowIds.slice(0) : []
-        })), function () {
+        })).finally(function () {
             ControllerViewStateRuntime.set(oController, "/exportBusy", false);
             ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_EXPORT, false);
         });

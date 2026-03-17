@@ -67,7 +67,6 @@ sap.ui.define([
             { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: oController._onDetailSearchContextMatched },
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
         ]);
-        SearchViewBehavior.bindAnalyticsRefreshTimer(oController);
         SearchViewBehavior.syncSmartControlAvailability(oController);
         SearchViewBehavior.bindPowerUserShortcuts(oController);
         SearchViewBehavior.bindSearchViewportRuntime(oController);

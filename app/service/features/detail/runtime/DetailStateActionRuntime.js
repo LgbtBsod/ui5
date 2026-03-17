@@ -10,9 +10,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, StatePaths, NavigationContracts, ModelContracts, OperationSourceContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
+], function (ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, StatePaths, NavigationContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -159,9 +158,9 @@ sap.ui.define([
             });
         },
         toggleEdit: function (oController, oEvent, mHooks) {
-            return PromiseRuntime.withFinally(Promise.resolve(mHooks.enterEdit({
+            return Promise.resolve(mHooks.enterEdit({
                 state: !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"))
-            })), function () {
+            })).finally(function () {
                 if (typeof oController._scheduleAttachmentDropZoneBind === "function") {
                     oController._scheduleAttachmentDropZoneBind();
                 }

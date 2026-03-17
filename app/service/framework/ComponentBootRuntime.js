@@ -2,9 +2,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootStageRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootStageExecutionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (ComponentBootStageRuntime, ComponentBootStageExecutionRuntime, ComponentBootStateRuntime, ComponentBootContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts"
+], function (ComponentBootStageRuntime, ComponentBootStageExecutionRuntime, ComponentBootStateRuntime, ComponentBootContracts) {
     "use strict";
 
     var STAGE_ERRORS = ComponentBootContracts.STAGE_ERRORS;
@@ -43,7 +42,7 @@ sap.ui.define([
 
         ComponentBootStateRuntime.initializeBootState(oStateModel);
 
-        return PromiseRuntime.withFinally(InitializeAppUseCase.execute({}, { stateModel: oStateModel }).then(function (oBootstrapResult) {
+        return Promise.resolve(InitializeAppUseCase.execute({}, { stateModel: oStateModel })).then(function (oBootstrapResult) {
             if (oBootstrapResult && oBootstrapResult.ok === false) {
                 throw ComponentBootStageRuntime.toStageError(oBootstrapResult.error && oBootstrapResult.error.message, STAGE_ERRORS.BOOTSTRAP_APP_FAILED);
             }
@@ -81,7 +80,7 @@ sap.ui.define([
             var sErrorMessage = String((oError && oError.message) || oError || STAGE_ERRORS.BOOT_FAILED);
             ComponentBootStateRuntime.finalizeBootError(oStateModel, sErrorMessage, mOptions.bundleText, sTabSessionId);
             return null;
-        }), function () {
+        }).finally(function () {
             if (bBootCompleted) {
                 oComponent._startCoreManagers();
                 oComponent._syncLockScopedManagers(oStateModel);

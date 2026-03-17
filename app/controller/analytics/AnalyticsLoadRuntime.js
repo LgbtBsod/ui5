@@ -6,9 +6,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, FacadeCommandRuntime, StatePaths, AnalyticsContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ModelContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (ControllerViewStateRuntime, ModelStateRuntime, FacadeCommandRuntime, StatePaths, AnalyticsContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -32,7 +31,7 @@ sap.ui.define([
                 "/error": ""
             });
 
-            return PromiseRuntime.withFinally(FacadeCommandRuntime.executeRaw(
+            return FacadeCommandRuntime.executeRaw(
                 oController,
                 oController._facade,
                 "load",
@@ -94,7 +93,7 @@ sap.ui.define([
                     error: sErrorMessage
                 });
                 throw oError;
-            }), function () {
+            }).finally(function () {
                 ControllerViewStateRuntime.set(oController, "/busy", false);
                 ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, false);
             });

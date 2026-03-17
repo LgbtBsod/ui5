@@ -149,7 +149,7 @@ check('FCL integrity (App.view contains FlexibleColumnLayout + layout css hooks)
   const cssJoined = cssFiles.filter(exists).map(read).join('\n');
   const ok = app.includes('f:FlexibleColumnLayout')
     && app.includes('id="mainFcl"')
-    && app.includes('detailPaneHost')
+    && app.includes('appRootFclTransparent')
     && cssJoined.includes('.appLayoutSingle')
     && cssJoined.includes('.appLayoutSplit')
     && cssJoined.includes('.appLayoutDetailOnly');

@@ -1,4 +1,6 @@
 sap.ui.define([
+    "sap/ui/core/Core",
+    "sap/ui/core/Fragment",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
@@ -9,10 +11,24 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsStateBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsReportBehavior"
-], function (AnalyticsFacade, CtxFactory, AnalyticsContracts, ModelContracts, AnalyticsYearBehavior, AnalyticsDrilldownBehavior, AnalyticsSelectionBehavior, AnalyticsRefreshBehavior, AnalyticsLifecycleBehavior, AnalyticsLoadBehavior, AnalyticsStateBehavior, AnalyticsReportBehavior) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsStateBehavior"
+], function (
+    Core,
+    Fragment,
+    AnalyticsFacade,
+    CtxFactory,
+    AnalyticsContracts,
+    ModelContracts,
+    AnalyticsYearBehavior,
+    AnalyticsDrilldownBehavior,
+    AnalyticsSelectionBehavior,
+    AnalyticsRefreshBehavior,
+    AnalyticsLifecycleBehavior,
+    AnalyticsLoadBehavior,
+    AnalyticsStateBehavior
+) {
     "use strict";
+
     var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
     var SELECTED_YEAR_PATH = "/selectedYear";
     var COMPARE_YEAR_PATH = "/compareYear";
@@ -24,6 +40,28 @@ sap.ui.define([
 
     function coerceText(vValue) {
         return String(vValue || "").trim();
+    }
+
+    function ensureVizContentLoaded(oController) {
+        var oHost = oController.byId && oController.byId("analyticsBreakdownsHost");
+        if (!oHost) {
+            return Promise.resolve(null);
+        }
+        if (oController._pAnalyticsBreakdownsContent) {
+            return oController._pAnalyticsBreakdownsContent;
+        }
+        oController._pAnalyticsBreakdownsContent = Promise.resolve(Core.loadLibrary("sap.viz")).then(function () {
+            return Fragment.load({
+                id: oController.getView().createId("analyticsBreakdownsFragment"),
+                name: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsBreakdowns",
+                controller: oController
+            });
+        }).then(function (oFragment) {
+            oHost.removeAllItems();
+            oHost.addItem(oFragment);
+            return oFragment;
+        });
+        return oController._pAnalyticsBreakdownsContent;
     }
 
     return {
@@ -65,9 +103,11 @@ sap.ui.define([
 
         _onAnalyticsMatched: function () {
             AnalyticsLifecycleBehavior.onRouteEnter(this);
-            return AnalyticsLoadBehavior.onAnalyticsMatched(this, function (oController, sReason) {
-                return oController._loadAnalytics(sReason);
-            });
+            return ensureVizContentLoaded(this).then(function () {
+                return AnalyticsLoadBehavior.onAnalyticsMatched(this, function (oController, sReason) {
+                    return oController._loadAnalytics(sReason);
+                });
+            }.bind(this));
         },
 
         _onAnalyticsRouteLeave: function () {
@@ -152,12 +192,7 @@ sap.ui.define([
             var oViewModel = this.getModel && this.getModel(VIEW_MODEL);
             var sBuilderDimension = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderDimension") || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase();
             var sBuilderMetric = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderMetric") || "").trim().toUpperCase();
-            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsBuilder(
-                this,
-                oEvent,
-                sBuilderDimension,
-                sBuilderMetric
-            );
+            return AnalyticsDrilldownBehavior.onDrilldownAnalyticsBuilder(this, oEvent, sBuilderDimension, sBuilderMetric);
         },
 
         onDrilldownAnalyticsSource: function (oEvent) {
@@ -185,19 +220,19 @@ sap.ui.define([
         },
 
         onOpenAnalyticsReportDialog: function () {
-            return AnalyticsReportBehavior.onOpenAnalyticsReportDialog(this);
+            return AnalyticsDrilldownBehavior.onOpenAnalyticsReportDialog(this);
         },
 
         onCloseAnalyticsReportDialog: function () {
-            AnalyticsReportBehavior.onCloseAnalyticsReportDialog(this);
+            AnalyticsDrilldownBehavior.onCloseAnalyticsReportDialog(this);
         },
 
         onExportAnalyticsReport: function () {
-            return AnalyticsReportBehavior.onExportAnalyticsReport(this);
+            return AnalyticsDrilldownBehavior.onExportAnalyticsReport(this);
         },
 
         onCloseAnalytics: function () {
-            AnalyticsReportBehavior.onCloseAnalytics(this);
+            AnalyticsDrilldownBehavior.onCloseAnalytics(this);
         },
 
         formatRefreshStatusText: function (sStatus, bIsRunning, sLastError, sLastSuccessAt, sQueuedText, sRunningText, sUpdatedText, sIdleText) {

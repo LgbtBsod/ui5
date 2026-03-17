@@ -16,11 +16,6 @@ sap.ui.define([
 
     function onSearchMatched(oController) {
         return SearchStartupRuntime.onSearchMatched(oController, {
-            bindSearchAnalytics: function () {
-                oController._runSearchAnalytics = function (mInput) {
-                    return SearchCommandPolicy.analytics(oController, mInput);
-                };
-            },
             bindSearchViewportRuntime: function () {
                 SearchViewportRuntime.bindSearchViewportRuntime(oController);
             },
@@ -40,9 +35,6 @@ sap.ui.define([
             },
             restoreSearchScrollPosition: function () {
                 SearchViewportRuntime.restoreSearchScrollPosition(oController);
-            },
-            scheduleInitialAnalytics: function (fnAfterStart) {
-                return SearchAnalyticsRailRuntime.scheduleInitialAnalytics(oController, fnAfterStart);
             },
             syncSmartControlAvailability: function () {
                 syncSmartControlAvailability(oController);

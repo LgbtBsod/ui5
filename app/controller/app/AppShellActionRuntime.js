@@ -6,9 +6,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RetryCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (LoadCurrentUserUseCase, FeedbackBannerRuntime, ControllerModelRuntime, ModelStateRuntime, RetryCoordinator, SecurityTokenRefresh, UiDecisionCoordinator, ModelContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+], function (LoadCurrentUserUseCase, FeedbackBannerRuntime, ControllerModelRuntime, ModelStateRuntime, RetryCoordinator, SecurityTokenRefresh, UiDecisionCoordinator, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -39,7 +38,7 @@ sap.ui.define([
         if (oAppView) {
             ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", true);
         }
-        return PromiseRuntime.withFinally(LoadCurrentUserUseCase.refresh({
+        return LoadCurrentUserUseCase.refresh({
             stateModel: oState
         }).then(function (oResult) {
             oController._syncShellState();
@@ -51,7 +50,7 @@ sap.ui.define([
         }).catch(function (oError) {
             UiDecisionCoordinator.notifyShellRefreshFailure({ controller: oController, error: oError });
             return false;
-        }), function () {
+        }).finally(function () {
             if (oAppView) {
                 ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", false);
             }
@@ -75,12 +74,12 @@ sap.ui.define([
             oController._syncShellState();
             oController._syncShellMetrics();
         }
-        return PromiseRuntime.withFinally(SecurityTokenRefresh.refresh(oModel).then(function () {
+        return SecurityTokenRefresh.refresh(oModel).then(function () {
             return refreshCurrentUser(oController);
         }).catch(function (oError) {
             UiDecisionCoordinator.notifyShellRefreshFailure({ controller: oController, error: oError });
             throw oError;
-        }), finalize);
+        }).finally(finalize);
     }
 
     return {

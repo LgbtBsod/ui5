@@ -2,9 +2,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailFieldContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (ModelStateRuntime, ModelContracts, OperationSourceContracts, DetailFieldContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailFieldContracts"
+], function (ModelStateRuntime, ModelContracts, OperationSourceContracts, DetailFieldContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -39,7 +38,7 @@ sap.ui.define([
     return {
         closeLocationValueHelp: function (_oController, mHooks) {
             mHooks.clearSearchTimer();
-            return PromiseRuntime.withFinally(mHooks.valueHelpLocation({ intent: DETAIL_SOURCES.CLOSE }), function () {
+            return Promise.resolve(mHooks.valueHelpLocation({ intent: DETAIL_SOURCES.CLOSE })).finally(function () {
                 mHooks.setViewFlag(VIEW_PATHS.LOCATION_VH_BUSY, false);
             });
         },

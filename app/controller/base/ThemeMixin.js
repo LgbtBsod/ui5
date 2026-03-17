@@ -36,11 +36,11 @@ sap.ui.define([
         }
         if (sQuery === "dark" || sQuery === "night") {
             try {
-                window.localStorage.setItem(DEV_OVERRIDE_STORAGE_KEY, "night");
+                window.localStorage.setItem(DEV_OVERRIDE_STORAGE_KEY, "morning");
             } catch (_persistNightError) {
                 // Best-effort persistence only.
             }
-            return "night";
+            return "morning";
         }
         if (sQuery === "light" || sQuery === "morning") {
             try {
@@ -58,7 +58,7 @@ sap.ui.define([
             }
             return "";
         }
-        return sStored === "night" ? "night" : sStored === "morning" ? "morning" : "";
+        return sStored === "morning" ? "morning" : "";
     }
 
     function readThemeProfile() {
@@ -95,9 +95,7 @@ sap.ui.define([
         setThemeMode: function (sMode, oClickXY) {
             var oProfile = readThemeProfile();
             var sNextMode = String(sMode || "").trim().toLowerCase();
-            if (sNextMode !== "night" && sNextMode !== "morning") {
-                sNextMode = DEFAULT_MODE;
-            }
+            sNextMode = "morning";
             this._ensureThemeSyncListener();
             return ThemeService.applyThemeMode(sNextMode, oClickXY || null, {
                 animationEnabled: oProfile.animationEnabled
@@ -112,7 +110,7 @@ sap.ui.define([
         },
         toggleTheme: function (oClickXY) {
             var oProfile = readThemeProfile();
-            var sNextMode = oProfile.mode === "night" ? "morning" : "night";
+            var sNextMode = "morning";
             this._ensureThemeSyncListener();
             return ThemeService.applyThemeMode(sNextMode, oClickXY, {
                 animationEnabled: oProfile.animationEnabled

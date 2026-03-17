@@ -4,18 +4,6 @@
 
     var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "https://ui5.sap.com/1.71.70/resources/sap-ui-core.js";
     var DEFAULT_THEME = "sap_fiori_3";
-    var DARK_THEME = "sap_fiori_3_dark";
-    var BOOT_LIBS = [
-        "sap.ui.core",
-        "sap.m",
-        "sap.f",
-        "sap.ui.layout",
-        "sap.ui.comp",
-        "sap.ui.table",
-        "sap.ui.unified",
-        "sap.uxap"
-    ];
-
     function splitClassNames(sClassNames) {
         return String(sClassNames || "").split(/\s+/).map(function (sName) {
             return sName.trim();
@@ -49,34 +37,7 @@
         } catch (_e) {
             sMode = "morning";
         }
-        return sMode === "night" || sMode === "sap_fiori_3_dark" || sMode === "sap_horizon_dark"
-            ? "night"
-            : "morning";
-    }
-
-    function scheduleAlternateThemePrefetch() {
-        var sThemeRoot = String(UI5_BOOTSTRAP_SRC || "").replace(/sap-ui-core\.js(?:\?.*)?$/i, "");
-        if (!sThemeRoot) {
-            return;
-        }
-        var sAlternateTheme = resolveStoredThemeMode() === "night" ? DEFAULT_THEME : DARK_THEME;
-        var aLibraries = [
-            "sap/ui/core",
-            "sap/m",
-            "sap/f",
-            "sap/ui/layout",
-            "sap/ui/comp",
-            "sap/uxap",
-            "sap/ui/table",
-            "sap/ui/unified"
-        ];
-        aLibraries.forEach(function (sLibraryPath) {
-            var oLink = document.createElement("link");
-            oLink.rel = "prefetch";
-            oLink.as = "style";
-            oLink.href = sThemeRoot + sLibraryPath + "/themes/" + sAlternateTheme + "/library.css";
-            document.head.appendChild(oLink);
-        });
+        return "morning";
     }
 
     function mountComponent() {
@@ -135,7 +96,6 @@
         oScript.src = UI5_BOOTSTRAP_SRC;
         oScript.async = true;
         oScript.setAttribute("data-sap-ui-theme", DEFAULT_THEME);
-        oScript.setAttribute("data-sap-ui-libs", BOOT_LIBS.join(","));
         oScript.setAttribute("data-sap-ui-resourceroots", "{\"PRODUCTION_CONTROL_CHECKLIST\":\"./\"}");
         oScript.setAttribute("data-sap-ui-compatVersion", "edge");
         oScript.setAttribute("data-sap-ui-async", "true");
@@ -157,7 +117,5 @@
         attachInit();
         return;
     }
-
-    scheduleAlternateThemePrefetch();
     loadBootstrapScript();
 }());

@@ -8,9 +8,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailRuntimeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/PromiseRuntime"
-], function (AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts, PromiseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailRuntimeContracts"
+], function (AttachmentUploadPolicy, DetailCommandPolicy, ControllerTextRuntime, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -200,7 +199,7 @@ sap.ui.define([
             });
         }, Promise.resolve());
 
-        return PromiseRuntime.withFinally(oSequence, function () {
+        return Promise.resolve(oSequence).finally(function () {
             clearAttachmentUploader(oUploader);
             ControllerViewStateRuntime.setFlag(oController, "/attachmentBusy", false);
         });
@@ -263,5 +262,4 @@ sap.ui.define([
         formatUploadHint: formatUploadHintSafe
     };
 });
-
 
