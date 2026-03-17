@@ -20,6 +20,9 @@ sap.ui.define([
 
     function runSearchRetry(mContext) {
         var oSearchView = mContext.controller && mContext.controller.byId && mContext.controller.byId("searchPaneHost");
+        if (oSearchView && typeof oSearchView.getItems === "function") {
+            oSearchView = (oSearchView.getItems() || [])[0] || null;
+        }
         var oSearchController = oSearchView && oSearchView.getController && oSearchView.getController();
         if (oSearchController && typeof oSearchController.onRetrySearchLoad === "function") {
             return oSearchController.onRetrySearchLoad();

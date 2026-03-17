@@ -57,13 +57,19 @@
       "permissions": [
         {
           "code": "01",
-          "scope": "bukrs",
-          "scopeValue": "3000"
+          "scope": "all"
+        },
+        {
+          "code": "03",
+          "scope": "all"
         },
         {
           "code": "02",
-          "scope": "bukrs",
-          "scopeValue": "3000"
+          "scope": "all"
+        },
+        {
+          "code": "06",
+          "scope": "all"
         }
       ]
     },

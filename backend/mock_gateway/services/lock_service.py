@@ -17,15 +17,40 @@ def _as_utc(dt):
 
 class LockService:
     @staticmethod
-    def _lock_payload(success: bool, action: str, owner: str, owner_session: str, lock_expires, is_killed_flag: bool = False) -> dict:
+    def _lock_expires_at(lock: LockEntry | None):
+        last_refresh_at = _as_utc(lock.last_refresh_at) if lock and lock.last_refresh_at else None
+        return last_refresh_at + LOCK_TTL if last_refresh_at else None
+
+    @staticmethod
+    def _is_expired(lock: LockEntry | None, current_time=None) -> bool:
+        current_time = current_time or now_utc()
+        lock_expires_at = LockService._lock_expires_at(lock)
+        return bool(lock_expires_at and lock_expires_at <= current_time)
+
+    @staticmethod
+    def _lock_payload(success: bool, code: str, owner: str, owner_session: str, lock_expires, is_killed_flag: bool = False, lock_refreshed: bool = False, owner_session_match: bool | None = None) -> dict:
         return {
+            "ok": bool(success),
             "success": bool(success),
-            "action": str(action or "").strip(),
+            "code": str(code or "").strip(),
+            "action": str(code or "").strip(),
             "owner": str(owner or "").strip(),
             "owner_session": str(owner_session or "").strip(),
+            "owner_session_match": owner_session_match,
             "lock_expires": lock_expires,
+            "lock_expires_at": lock_expires,
+            "server_now": now_utc(),
+            "lock_refreshed": bool(lock_refreshed),
             "is_killed_flag": bool(is_killed_flag),
+            "server_changed_on": None,
+            "version_number": 0,
         }
+
+    @staticmethod
+    def _with_server_state(payload: dict, db: Session, object_uuid: str) -> dict:
+        payload["server_changed_on"] = LockService._server_changed_on(db, object_uuid)
+        payload["version_number"] = LockService._version_number(db, object_uuid)
+        return payload
 
     @staticmethod
     def _create_active_lock(db: Session, object_uuid: str, session_guid: str, uname: str, current_time) -> LockEntry:
@@ -34,7 +59,7 @@ class LockService:
             user_id=uname,
             session_guid=session_guid,
             locked_at=current_time,
-            last_heartbeat=current_time,
+            last_refresh_at=current_time,
             expires_at=current_time + LOCK_TTL,
         )
         db.add(lock)
@@ -58,7 +83,7 @@ class LockService:
         if not lock:
             return None
 
-        if lock.expires_at and _as_utc(lock.expires_at) < current_time:
+        if LockService._is_expired(lock, current_time):
             lock.is_killed = True
             db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, action="EXPIRED"))
             db.commit()
@@ -73,7 +98,11 @@ class LockService:
         if not existing:
             try:
                 lock = LockService._create_active_lock(db, object_uuid, session_guid, uname, current_time)
-                return LockService._lock_payload(True, "ACQUIRED", uname, session_guid, lock.expires_at, False)
+                return LockService._with_server_state(
+                    LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(lock), False, True, True),
+                    db,
+                    object_uuid
+                )
             except IntegrityError:
                 db.rollback()
                 existing = LockService._active_lock(db, object_uuid)
@@ -81,11 +110,15 @@ class LockService:
                     raise
 
         if existing.session_guid == session_guid:
-            existing.last_heartbeat = current_time
+            existing.last_refresh_at = current_time
             existing.expires_at = current_time + LOCK_TTL
             db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="REFRESHED"))
             db.commit()
-            return LockService._lock_payload(True, "REFRESHED", existing.user_id, existing.session_guid, existing.expires_at, False)
+            return LockService._with_server_state(
+                LockService._lock_payload(True, "LOCK_OK", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, True, True),
+                db,
+                object_uuid
+            )
 
         if existing.user_id == uname and steal_from and steal_from == existing.session_guid:
             existing.is_killed = True
@@ -96,90 +129,58 @@ class LockService:
                 user_id=uname,
                 session_guid=session_guid,
                 locked_at=current_time,
-                last_heartbeat=current_time,
+                last_refresh_at=current_time,
                 expires_at=current_time + LOCK_TTL,
             )
             db.add(new_lock)
             db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="STEAL_OWN_SESSION"))
             db.commit()
-            return LockService._lock_payload(True, "STEAL_OWN_SESSION", uname, session_guid, new_lock.expires_at, True)
+            return LockService._with_server_state(
+                LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(new_lock), True, True, True),
+                db,
+                object_uuid
+            )
 
-        return LockService._lock_payload(False, "LOCKED", existing.user_id, existing.session_guid, existing.expires_at, False)
+        return LockService._with_server_state(
+            LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, False, False),
+            db,
+            object_uuid
+        )
 
     @staticmethod
     def status(db: Session, object_uuid: str, session_guid: str) -> dict:
-        lock = (
-            db.query(LockEntry)
-            .filter(LockEntry.pcct_uuid == object_uuid, LockEntry.session_guid == session_guid)
-            .first()
+        active_lock = LockService._active_lock(db, object_uuid)
+        if not active_lock:
+            raise ValueError("LOCK_MISSING")
+        if str(active_lock.session_guid or "").strip() != str(session_guid or "").strip():
+            return LockService._with_server_state(
+                LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, False),
+                db,
+                object_uuid
+            )
+        return LockService._with_server_state(
+            LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, True),
+            db,
+            object_uuid
         )
-
-        if not lock:
-            raise ValueError("NO_LOCK")
-
-        if lock.is_killed:
-            return {
-                "success": False,
-                "is_killed": True,
-                "killed_by": lock.killed_by,
-                "lock_expires": lock.expires_at,
-                "server_changed_on": LockService._server_changed_on(db, object_uuid),
-                "version_number": LockService._version_number(db, object_uuid),
-            }
-
-        if lock.expires_at and _as_utc(lock.expires_at) < now_utc():
-            lock.is_killed = True
-            db.commit()
-            raise ValueError("LOCK_EXPIRED")
-
-        return {
-            "success": True,
-            "is_killed": False,
-            "killed_by": None,
-            "lock_expires": lock.expires_at,
-            "server_changed_on": LockService._server_changed_on(db, object_uuid),
-            "version_number": LockService._version_number(db, object_uuid),
-        }
 
     @staticmethod
     def heartbeat(db: Session, object_uuid: str, session_guid: str) -> dict:
-        lock = (
-            db.query(LockEntry)
-            .filter(LockEntry.pcct_uuid == object_uuid, LockEntry.session_guid == session_guid)
-            .first()
-        )
+        active_lock = LockService._active_lock(db, object_uuid)
+        if not active_lock:
+            raise ValueError("LOCK_MISSING")
+        if str(active_lock.session_guid or "").strip() != str(session_guid or "").strip():
+            raise ValueError("LOCK_NOT_OWNED_BY_SESSION")
 
-        if not lock:
-            raise ValueError("NO_LOCK")
-
-        if lock.is_killed:
-            return {
-                "success": False,
-                "is_killed": True,
-                "killed_by": lock.killed_by,
-                "lock_expires": lock.expires_at,
-                "server_changed_on": LockService._server_changed_on(db, object_uuid),
-                "version_number": LockService._version_number(db, object_uuid),
-            }
-
-        if lock.expires_at and _as_utc(lock.expires_at) < now_utc():
-            lock.is_killed = True
-            db.commit()
-            raise ValueError("LOCK_EXPIRED")
-
-        current_time = now_utc()
-        lock.last_heartbeat = current_time
-        lock.expires_at = current_time + LOCK_TTL
+        active_lock.last_refresh_at = now_utc()
+        active_lock.expires_at = active_lock.last_refresh_at + LOCK_TTL
         db.commit()
 
-        return {
-            "success": True,
-            "is_killed": False,
-            "killed_by": None,
-            "lock_expires": lock.expires_at,
-            "server_changed_on": LockService._server_changed_on(db, object_uuid),
-            "version_number": LockService._version_number(db, object_uuid),
-        }
+        return LockService._with_server_state(
+            LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, True, True),
+            db,
+            object_uuid
+        )
 
     @staticmethod
     def release(db: Session, object_uuid: str, session_guid: str, try_save: bool = False, payload: dict | None = None) -> dict:
@@ -194,7 +195,7 @@ class LockService:
         )
 
         if not lock:
-            return {"released": False, "save_status": "N"}
+            return {"released": False, "save_status": "N", "ok": False, "code": "LOCK_MISSING"}
 
         s_save_status = "N"
         if try_save and isinstance(payload, dict):
@@ -209,7 +210,7 @@ class LockService:
         lock.is_killed = True
         db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
         db.commit()
-        return {"released": True, "save_status": s_save_status}
+        return {"released": True, "save_status": s_save_status, "ok": True, "code": "LOCK_OK"}
 
     @staticmethod
     def cleanup(db: Session) -> int:
@@ -218,7 +219,7 @@ class LockService:
             db.query(LockEntry)
             .filter(
                 LockEntry.is_killed.is_(False),
-                LockEntry.expires_at < current_time,
+                LockEntry.last_refresh_at < (current_time - LOCK_TTL),
             )
             .all()
         )
@@ -226,7 +227,7 @@ class LockService:
             db.query(LockEntry)
             .filter(
                 LockEntry.is_killed.is_(True),
-                LockEntry.last_heartbeat < (current_time - LOCK_KILLED_RETENTION),
+                LockEntry.last_refresh_at < (current_time - LOCK_KILLED_RETENTION),
             )
             .all()
         )
@@ -254,9 +255,9 @@ class LockService:
         )
 
         if not lock:
-            raise ValueError("NO_VALID_LOCK")
+            raise ValueError("LOCK_MISSING")
 
-        if lock.expires_at and _as_utc(lock.expires_at) < now_utc():
+        if LockService._is_expired(lock):
             lock.is_killed = True
             db.commit()
             raise ValueError("LOCK_EXPIRED")
@@ -266,8 +267,10 @@ class LockService:
     @staticmethod
     def validate_session_lock(db: Session, pcct_uuid: str, session_guid: str) -> bool:
         lock = LockService._active_lock(db, pcct_uuid)
-        if not lock or str(lock.session_guid or "").strip() != str(session_guid or "").strip():
-            raise ValueError("NO_VALID_LOCK")
+        if not lock:
+            raise ValueError("LOCK_MISSING")
+        if str(lock.session_guid or "").strip() != str(session_guid or "").strip():
+            raise ValueError("LOCK_NOT_OWNED_BY_SESSION")
         return True
 
     @staticmethod

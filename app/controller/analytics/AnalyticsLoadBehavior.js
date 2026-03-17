@@ -42,7 +42,12 @@ sap.ui.define([
 
     function onAnalyticsMatched(oController, fnLoadAnalytics) {
         oController._bAnalyticsInitialRouteHandled = true;
-        return fnLoadAnalytics(oController, "routeMatched");
+        return fnLoadAnalytics(oController, "routeMatched").then(function (vResult) {
+            if (typeof oController._startAnalyticsRefreshTimer === "function") {
+                oController._startAnalyticsRefreshTimer();
+            }
+            return vResult;
+        });
     }
 
     return {

@@ -35,6 +35,17 @@ sap.ui.define([
         });
     }
 
+    function extractTopLevelFields(oPayload) {
+        return {
+            lockRefreshed: !!(oPayload && oPayload.lock_refreshed),
+            lockExpiresAt: String((oPayload && (oPayload.lock_expires_at || oPayload.lock_expires)) || "").trim(),
+            serverNow: String((oPayload && oPayload.server_now) || "").trim(),
+            ownerSessionMatch: oPayload && Object.prototype.hasOwnProperty.call(oPayload, "owner_session_match")
+                ? !!oPayload.owner_session_match
+                : null
+        };
+    }
+
     function parseResponseHeaders(vHeaders) {
         if (!vHeaders) { return {}; }
         if (typeof vHeaders === "object" && !Array.isArray(vHeaders)) { return vHeaders; }
@@ -51,6 +62,7 @@ sap.ui.define([
 
     function normalizeODataError(oError) {
         var oEnvelope = pickEnvelope(oError);
+        var oPayload = (oError && oError.responseJSON) || parseJsonSafe(oError && oError.responseText) || oError || {};
         var mHeaders = parseResponseHeaders((oError && oError.responseHeaders) || {});
         var sCode = String(
             (oEnvelope && oEnvelope.code) ||
@@ -68,6 +80,7 @@ sap.ui.define([
             statusCode: Number((oError && (oError.statusCode || oError.status)) || 0) || 0,
             details: extractDetails(oEnvelope),
             responseHeaders: mHeaders,
+            backend: extractTopLevelFields(oPayload),
             correlationId: String(
                 mHeaders["x-correlation-id"]
                 || mHeaders["x-request-id"]

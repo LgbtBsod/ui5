@@ -68,27 +68,21 @@ sap.ui.define([], function () {
     }
 
     function buildMatrixRows(oViewState, oBundle) {
+        var aMonthKeys = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         return ((oViewState && oViewState.analytics && oViewState.analytics.monthlyMatrixRows) || []).map(function (oRow) {
-            return {
+            var oExportRow = {
                 Scope: oBundle.getText("analyticsMonthlyMatrixTitle"),
                 Source: normalizeSourceLabel(oViewState && oViewState.selectedSource, oBundle),
                 SelectedYear: safeValue(oViewState && oViewState.selectedYear, ""),
                 CompareYear: safeValue(oViewState && oViewState.compareYear, ""),
                 Metric: safeValue(oRow && oRow.metricKey, ""),
-                YearLabel: safeValue(oRow && oRow.yearLabel, ""),
-                Jan: safeValue(oRow && oRow.jan, ""),
-                Feb: safeValue(oRow && oRow.feb, ""),
-                Mar: safeValue(oRow && oRow.mar, ""),
-                Apr: safeValue(oRow && oRow.apr, ""),
-                May: safeValue(oRow && oRow.may, ""),
-                Jun: safeValue(oRow && oRow.jun, ""),
-                Jul: safeValue(oRow && oRow.jul, ""),
-                Aug: safeValue(oRow && oRow.aug, ""),
-                Sep: safeValue(oRow && oRow.sep, ""),
-                Oct: safeValue(oRow && oRow.oct, ""),
-                Nov: safeValue(oRow && oRow.nov, ""),
-                Dec: safeValue(oRow && oRow.dec, "")
+                YearLabel: safeValue(oRow && oRow.yearLabel, "")
             };
+            aMonthKeys.forEach(function (sMonthKey) {
+                var sPropertyKey = sMonthKey.toLowerCase();
+                oExportRow[oBundle.getText("analyticsMonthShort" + sMonthKey)] = safeValue(oRow && oRow[sPropertyKey], "");
+            });
+            return oExportRow;
         });
     }
 

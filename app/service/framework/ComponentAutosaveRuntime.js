@@ -86,7 +86,6 @@ sap.ui.define([
                     if (!oResult || oResult.ok === false) {
                         return Promise.reject((oResult && oResult.error) || new Error("Autosave usecase failed"));
                     }
-                    ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
                     return oResult.data || {};
                 });
             }
@@ -111,6 +110,16 @@ sap.ui.define([
             DebugLogger.info("Component", "autosave done", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
         oComponent._oAutoSave.attachEvent("autosaveError", function (oEvent) {
+            var oPayload = ComponentRuntimeSupport.eventPayload(oEvent);
+            var oClassification = DetailPersistenceRuntime.classifyError(oPayload && oPayload.error);
+            if (DetailPersistenceRuntime.isLockFailure(oClassification.taxonomy) && typeof oComponent._handleForceReadOnly === "function") {
+                oComponent._handleForceReadOnly({
+                    reason: oClassification.taxonomy,
+                    messageKey: oClassification.messageKey,
+                    source: "autosave"
+                });
+                return;
+            }
             if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_STATE, "") !== DetailPersistenceRuntime.STATES.LOCK_LOST) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.ERROR, BANNER_TEXT_KEY.OBJECT_SAVE_FAILED, {
                     textArgs: [fnBundleText("autosaveError")],
@@ -119,7 +128,7 @@ sap.ui.define([
                 }));
             }
             DebugLogger.info("Component", "autosave error", oEvent && oEvent.getParameters ? oEvent.getParameters() : {});
-            fnEmitTelemetry("autosave.failed", ComponentRuntimeSupport.eventPayload(oEvent));
+            fnEmitTelemetry("autosave.failed", oPayload);
         });
         return oComponent._oAutoSave;
     }

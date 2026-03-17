@@ -27,17 +27,17 @@
                         <viz:dataset>
                             <vizData:FlattenedDataset data="{view>/analytics/comparisonChartRows}">
                                 <vizData:dimensions>
-                                    <vizData:DimensionDefinition name="Month" value="{view>monthLabel}"/>
+                                    <vizData:DimensionDefinition name="{i18n>analyticsMonth}" value="{view>monthLabel}"/>
                                 </vizData:dimensions>
                                 <vizData:measures>
-                                    <vizData:MeasureDefinition name="Selected year" value="{view>selectedValue}"/>
-                                    <vizData:MeasureDefinition name="Compare year" value="{view>compareValue}"/>
+                                    <vizData:MeasureDefinition name="{i18n>analyticsSelectedYear}" value="{view>selectedValue}"/>
+                                    <vizData:MeasureDefinition name="{i18n>analyticsCompareYearLabel}" value="{view>compareValue}"/>
                                 </vizData:measures>
                             </vizData:FlattenedDataset>
                         </viz:dataset>
                         <viz:feeds>
-                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Selected year,Compare year"/>
-                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Month"/>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="{= ${i18n>analyticsSelectedYear} + ',' + ${i18n>analyticsCompareYearLabel} }"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="{i18n>analyticsMonth}"/>
                         </viz:feeds>
                     </viz:VizFrame>
                     <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/comparisonChart} }" class="analyticsChartEmpty sapUiTinyMarginBottom"/>
@@ -50,18 +50,18 @@
                             <columns>
                                 <Column width="13rem"><Text text="{i18n>analyticsMetricColumn}"/></Column>
                                 <Column width="6rem"><Text text="{i18n>analyticsYearColumn}"/></Column>
-                                <Column width="5rem"><Text text="Jan"/></Column>
-                                <Column width="5rem"><Text text="Feb"/></Column>
-                                <Column width="5rem"><Text text="Mar"/></Column>
-                                <Column width="5rem"><Text text="Apr"/></Column>
-                                <Column width="5rem"><Text text="May"/></Column>
-                                <Column width="5rem"><Text text="Jun"/></Column>
-                                <Column width="5rem"><Text text="Jul"/></Column>
-                                <Column width="5rem"><Text text="Aug"/></Column>
-                                <Column width="5rem"><Text text="Sep"/></Column>
-                                <Column width="5rem"><Text text="Oct"/></Column>
-                                <Column width="5rem"><Text text="Nov"/></Column>
-                                <Column width="5rem"><Text text="Dec"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortJan}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortFeb}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortMar}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortApr}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortMay}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortJun}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortJul}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortAug}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortSep}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortOct}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortNov}"/></Column>
+                                <Column width="5rem"><Text text="{i18n>analyticsMonthShortDec}"/></Column>
                             </columns>
                             <items>
                                 <ColumnListItem>

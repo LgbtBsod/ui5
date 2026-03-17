@@ -131,7 +131,8 @@ sap.ui.define([
         if (NavigationContracts.isDetailRoute(sRouteName)) {
             return ensurePaneView(oController, ShellPaneContracts.PANES.DETAIL);
         }
-        return ensurePaneView(oController, ShellPaneContracts.PANES.SEARCH);
+        ensurePaneViewAsync(oController, ShellPaneContracts.PANES.SEARCH);
+        return resolveHost(oController, ShellPaneContracts.PANES.SEARCH);
     }
 
     return {

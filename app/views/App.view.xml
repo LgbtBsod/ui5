@@ -88,7 +88,7 @@
                 layout="{= ${state>/layout} || 'OneColumn' }"
                 backgroundDesign="Transparent">
                 <f:beginColumnPages>
-                    <mvc:XMLView id="searchPaneHost" class="searchPaneCenterShell" viewName="PRODUCTION_CONTROL_CHECKLIST.views.Search" width="100%"/>
+                    <VBox id="searchPaneHost" class="searchPaneCenterShell" renderType="Bare" fitContainer="true" width="100%"/>
                 </f:beginColumnPages>
                 <f:midColumnPages>
                     <VBox id="detailPaneHost" renderType="Bare" fitContainer="true" width="100%"/>

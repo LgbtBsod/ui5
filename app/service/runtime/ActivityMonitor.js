@@ -10,7 +10,7 @@ sap.ui.define([
             this._iIdleMs = Number(mOptions && mOptions.idleMs);
             this._iTimer = null;
             this._fnActivityHandler = this._reset.bind(this);
-            this._aEvents = ["click", "keydown", "mousemove", "touchstart"];
+            this._aEvents = ["click", "keydown", "input", "change", "scroll", "touchstart"];
         },
 
         start: function () {
@@ -19,7 +19,7 @@ sap.ui.define([
             }
             this.stop();
             this._aEvents.forEach(function (sEvt) {
-                window.addEventListener(sEvt, this._fnActivityHandler, { passive: true });
+                window.addEventListener(sEvt, this._fnActivityHandler, { passive: sEvt === "scroll" });
             }.bind(this));
             this._reset();
         },

@@ -26,11 +26,10 @@ sap.ui.define([
 
     LockLostUseCase.prototype.execute = function (mInput, mCtx) {
         var sReason = String((mInput && mInput.reason) || "killed");
-        var bPreserveDirty = !!(mInput && mInput.preserveDirty);
         return this._forceReadOnly.execute({
             reason: sReason,
             messageKey: resolveMessageKey(sReason),
-            preserveDirty: bPreserveDirty
+            preserveDirty: false
         }, mCtx || {}).then(function (oResult) {
             if (!oResult || oResult.ok === false) {
                 return oResult;

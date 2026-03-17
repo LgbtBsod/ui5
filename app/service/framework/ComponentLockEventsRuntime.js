@@ -25,7 +25,8 @@ sap.ui.define([
             oComponent._oHeartbeat.stop();
             oComponent._oLockStatus.stop();
             oComponent._oAutoSave.stop();
-            oComponent._oGcd.destroyManager();
+            oComponent._oActivity.stop();
+            oComponent._oGcd.stop();
             if (bHadUnsavedChanges) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createBannerInput({
                     severity: "warning",
@@ -36,7 +37,7 @@ sap.ui.define([
             return oComponent._detailFacade.onLockLost({
                 rootId: ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", ""),
                 reason: (oPayload && (oPayload.code || oPayload.reason_code)) || "KILLED",
-                preserveDirty: bHadUnsavedChanges
+                preserveDirty: false
             }, oComponent._ctx).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);

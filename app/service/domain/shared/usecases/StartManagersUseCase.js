@@ -9,6 +9,13 @@ sap.ui.define([
         oMgr.start();
     }
 
+    function stopIf(oMgr, sMethod) {
+        var sStopMethod = sMethod || "stop";
+        if (oMgr && typeof oMgr[sStopMethod] === "function") {
+            oMgr[sStopMethod]();
+        }
+    }
+
     return {
         execute: function (input, ctx) {
             var m = ctx.managers || {};
@@ -23,11 +30,10 @@ sap.ui.define([
                     startIf(m.heartbeat, function (o) { return !o.isRunning || !o.isRunning(); });
                     startIf(m.autosave);
                     startIf(m.lockStatus);
-                    if (m.gcd && m.gcd.resetOnFullSave) { m.gcd.resetOnFullSave(); }
+                    startIf(m.gcd, function (o) { return !o.isRunning || !o.isRunning(); });
                     startIf(m.activity);
                 } else {
-                    [m.heartbeat, m.autosave, m.lockStatus, m.activity].forEach(function (o) { if (o && o.stop) { o.stop(); } });
-                    if (m.gcd && m.gcd.destroyManager) { m.gcd.destroyManager(); }
+                    [m.heartbeat, m.autosave, m.lockStatus, m.activity, m.gcd].forEach(function (o) { stopIf(o); });
                 }
             }
             return Promise.resolve(Result.ok({ started: true }, []));

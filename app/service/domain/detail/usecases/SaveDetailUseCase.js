@@ -127,7 +127,7 @@ sap.ui.define([
                     aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
                         hasValidLock: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
                         lockOwnerSessionMatches: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
-                        lastLockRefreshAt: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT ? sNow : null
+                        lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sNow : null
                     }));
                     DetailAttachmentDeltaRuntime.cleanupStagedAttachmentUrls(aCurrentAttachments);
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {

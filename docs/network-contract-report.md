@@ -20,3 +20,7 @@ Trace source: synthetic intent
 ## Trace artifact
 - `docs/network-trace.json`
 
+## Runtime Contract Note
+- Lock, save, and autosave responses are expected to expose canonical fields such as `ok`, `code`, `lock_expires_at`, `server_now`, and `lock_refreshed`.
+- Cache validation is stamp-based and compares backend aggregate change stamp to cached snapshot stamp with tolerance.
+- Migration to a real SAP Gateway backend should preserve these field names and timing semantics to avoid frontend drift.

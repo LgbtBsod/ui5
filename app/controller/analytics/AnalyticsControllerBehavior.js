@@ -67,6 +67,10 @@ sap.ui.define([
             });
         },
 
+        _startAnalyticsRefreshTimer: function () {
+            AnalyticsLifecycleBehavior.startRefreshTimer(this);
+        },
+
         onRefreshAnalytics: function () {
             return AnalyticsRefreshBehavior.onRefreshAnalytics(this, buildCtx, function (oController, iAttemptsLeft) {
                 return oController._pollRefreshStateUntilSettled(iAttemptsLeft);

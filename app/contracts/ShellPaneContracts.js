@@ -14,6 +14,7 @@ sap.ui.define([], function () {
     });
 
     var VIEW_IDS = Object.freeze({
+        search: "searchPaneView",
         detail: "detailPaneView",
         analytics: "analyticsPaneView"
     });
@@ -46,6 +47,7 @@ sap.ui.define([], function () {
     });
 
     var LAZY_PANES = Object.freeze([
+        PANES.SEARCH,
         PANES.DETAIL,
         PANES.ANALYTICS
     ]);

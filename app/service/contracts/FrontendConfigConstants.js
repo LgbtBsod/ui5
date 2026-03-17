@@ -4,7 +4,7 @@ sap.ui.define([
     "use strict";
 
     return {
-        SETTINGS_CACHE_TTL_MS: 5 * 60 * 1000,
+        SETTINGS_CACHE_STAMP_TOLERANCE_MS: 5 * 60 * 1000,
         FALLBACKS: {
             FRONTEND_VARIABLES: FrontendVariablesSchema.buildDefaults()
         },

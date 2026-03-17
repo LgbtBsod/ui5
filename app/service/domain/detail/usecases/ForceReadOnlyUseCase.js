@@ -31,7 +31,7 @@ sap.ui.define([
     ForceReadOnlyUseCase.prototype.execute = function (mInput, mCtx) {
         var sReason = String((mInput && mInput.reason) || WorkflowContracts.REASONS.READ_ONLY).trim() || WorkflowContracts.REASONS.READ_ONLY;
         var sMessageKey = String((mInput && mInput.messageKey) || "").trim();
-        var bPreserveDirty = !!(mInput && mInput.preserveDirty);
+        var bPreserveDirty = !!(mInput && mInput.preserveDirty) && !isLockLostReason(sReason);
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
@@ -65,6 +65,8 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
+                Effects.modelPatch("snapshot", "/", {}),
+                Effects.modelPatch("selected", "/", {}),
                 Effects.modelPatch("state", ModelPathContracts.LOCK_EXPIRES, null),
                 Effects.modelPatch("uiState", "/lock", {
                     ok: false,

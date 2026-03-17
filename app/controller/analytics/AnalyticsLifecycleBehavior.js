@@ -7,6 +7,24 @@ sap.ui.define([
 ], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, AnalyticsBuilderRuntime) {
     "use strict";
 
+    function clearRefreshTimer(oController) {
+        if (oController._iAnalyticsRouteRefreshTimer) {
+            clearInterval(oController._iAnalyticsRouteRefreshTimer);
+            oController._iAnalyticsRouteRefreshTimer = null;
+        }
+    }
+
+    function startRefreshTimer(oController) {
+        var oStateModel = oController.getModel(ModelContracts.MODELS.STATE);
+        var iIntervalMs = Number(oStateModel && oStateModel.getProperty("/timers/analyticsRefreshMs")) || 900000;
+        clearRefreshTimer(oController);
+        oController._iAnalyticsRouteRefreshTimer = setInterval(function () {
+            if (typeof oController._loadAnalytics === "function") {
+                oController._loadAnalytics("routeTimer");
+            }
+        }, iIntervalMs);
+    }
+
     function onInit(oController, oFacade, sRefreshTaskKey) {
         oController._facade = oFacade;
         oController._bAnalyticsInitialRouteHandled = false;
@@ -24,9 +42,13 @@ sap.ui.define([
         if (!oController._bAnalyticsInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             oController._onAnalyticsMatched();
         }
+        if (sCurrentRouteName !== NavigationContracts.ROUTES.ANALYTICS) {
+            clearRefreshTimer(oController);
+        }
     }
 
     function onExit(oController) {
+        clearRefreshTimer(oController);
         ControllerRouteRuntime.detachAllMatched(oController);
         if (oController._oAnalyticsYearPicker && typeof oController._oAnalyticsYearPicker.destroy === "function") {
             oController._oAnalyticsYearPicker.destroy();
@@ -40,11 +62,14 @@ sap.ui.define([
         oController._pAnalyticsReportDialog = null;
         oController._facade = null;
         oController._bAnalyticsInitialRouteHandled = null;
+        oController._iAnalyticsRouteRefreshTimer = null;
     }
 
     return {
         onAfterRendering: onAfterRendering,
         onExit: onExit,
-        onInit: onInit
+        onInit: onInit,
+        clearRefreshTimer: clearRefreshTimer,
+        startRefreshTimer: startRefreshTimer
     };
 });

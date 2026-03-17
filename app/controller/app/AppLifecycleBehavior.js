@@ -41,7 +41,7 @@ sap.ui.define([
             Device.resize.attachHandler(this._fnViewportResize);
             this._syncResponsiveViewport();
             this._syncShellState();
-            ShellPaneRuntime.writePaneLoaded(this, ShellPaneContracts.PANES.SEARCH, true);
+            ShellPaneRuntime.ensurePaneViewAsync(this, ShellPaneContracts.PANES.SEARCH);
         },
         onAfterRendering: function () {
             var oOwner = this.getOwnerComponent && this.getOwnerComponent();

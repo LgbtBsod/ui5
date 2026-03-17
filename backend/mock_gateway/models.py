@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Index
 from sqlalchemy.dialects.sqlite import INTEGER
 from sqlalchemy.orm import relationship
 
-from config import FRONTEND_TIMER_TEST_PROFILE
+from config import FRONTEND_TIMER_PROFILE
 from database import Base
 from utils.time import now_utc
 
@@ -126,7 +126,7 @@ class LockEntry(Base):
 
     expires_at = Column(DateTime(timezone=True))
     locked_at = Column(DateTime(timezone=True))
-    last_heartbeat = Column(DateTime(timezone=True))
+    last_refresh_at = Column("last_heartbeat", DateTime(timezone=True))
 
     is_killed = Column(Boolean, default=False)
     killed_by = Column(String, nullable=True)
@@ -284,16 +284,16 @@ class FrontendRuntimeSettings(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     environment = Column(String, nullable=False, default="default")
-    heartbeat_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["heartbeat_ms"])
-    lock_status_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["lock_status_ms"])
-    gcd_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["gcd_ms"])
-    idle_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["idle_ms"])
-    autosave_interval_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["autosave_interval_ms"])
-    autosave_debounce_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["autosave_debounce_ms"])
-    network_grace_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["network_grace_ms"])
-    cache_fresh_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["cache_fresh_ms"])
-    cache_stale_ok_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["cache_stale_ok_ms"])
-    analytics_refresh_ms = Column(INTEGER, default=FRONTEND_TIMER_TEST_PROFILE["analytics_refresh_ms"])
+    heartbeat_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["heartbeat_ms"])
+    lock_status_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["lock_status_ms"])
+    gcd_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["gcd_ms"])
+    idle_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["idle_ms"])
+    autosave_interval_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["autosave_interval_ms"])
+    autosave_debounce_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["autosave_debounce_ms"])
+    lock_refresh_cooldown_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["lock_refresh_cooldown_ms"])
+    network_grace_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["network_grace_ms"])
+    cache_tolerance_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["cache_tolerance_ms"])
+    analytics_refresh_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["analytics_refresh_ms"])
     required_fields_json = Column(Text, default="[]")
     upload_policy_json = Column(Text, default="{}")
     changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)

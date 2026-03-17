@@ -13,12 +13,13 @@ sap.ui.define([], function () {
         return function (mInput) {
             var mForceInput = Object.assign({}, mInput || {});
             if (!Object.prototype.hasOwnProperty.call(mForceInput, "preserveDirty")) {
-                mForceInput.preserveDirty = !!mOptions.readDirty();
+                mForceInput.preserveDirty = false;
             }
             oComponent._oHeartbeat.stop();
             oComponent._oLockStatus.stop();
             oComponent._oAutoSave.stop();
-            oComponent._oGcd.destroyManager();
+            oComponent._oActivity.stop();
+            oComponent._oGcd.stop();
             return oComponent._detailFacade.forceReadOnly(mForceInput, oComponent._ctx).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);

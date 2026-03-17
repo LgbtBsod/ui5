@@ -89,6 +89,14 @@ def test_gateway_canonical_contract_and_metadata():
         barriers = client.get(f"{SERVICE_ROOT}/ChecklistBarrierSet", params={"$filter": f"RootId eq '{root_key}'"})
         assert checks.status_code == 200 and "d" in checks.json()
         assert barriers.status_code == 200 and "d" in barriers.json()
+        seeded_basic = client.get(f"{SERVICE_ROOT}/ChecklistBasicInfoSet", params={"$filter": f"RootKey eq '{root_key}'"})
+        assert seeded_basic.status_code == 200
+        seeded_basic_rows = seeded_basic.json().get("d", {}).get("results", [])
+        assert len(seeded_basic_rows) == 1
+        assert seeded_basic_rows[0].get("DateCheck")
+        assert seeded_basic_rows[0].get("EquipName")
+        assert len(checks.json().get("d", {}).get("results", [])) >= 1
+        assert len(barriers.json().get("d", {}).get("results", [])) >= 1
 
         create_payload = {
             "FullPayload": {

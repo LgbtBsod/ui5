@@ -138,7 +138,7 @@ sap.ui.define([
                 messageKey: bHasPendingAttachments ? "persistenceAutosavePendingAttachments" : "persistenceAutosaveSaved",
                 hasValidLock: true,
                 lockOwnerSessionMatches: true,
-                lastLockRefreshAt: sAt
+                lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sAt : null
             })));
         }).catch(function (oError) {
             var oClassification = DetailPersistenceRuntime.classifyError(oError);

@@ -20,7 +20,7 @@ from config import (
     AUTO_MUTATE_SCHEMA_ON_STARTUP,
     AUTO_SEED_STARTUP_DATA,
     CORS_ALLOWED_ORIGINS,
-    FRONTEND_TIMER_TEST_PROFILE,
+    FRONTEND_TIMER_PROFILE,
     LOCK_CLEANUP_INTERVAL_SECONDS,
     LOG_REQUEST_BODIES,
     METADATA_REFRESH_INTERVAL_SECONDS,
@@ -31,7 +31,7 @@ from services.analytics_service import AnalyticsService
 from services.lock_service import LockService
 from services.metadata_cache import refresh_metadata
 from services.settings_service import DEFAULT_REQUIRED_FIELDS, DEFAULT_UPLOAD_POLICY
-from models import ChecklistRoot, FrontendRuntimeSettings
+from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, FrontendRuntimeSettings
 from utils.odata import SERVICE_ROOT, odata_error_response
 from utils.odata_batch import extract_boundary, parse_batch_request
 from utils.odata_csrf import CsrfStore
@@ -257,6 +257,89 @@ def _seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
     return to_create
 
 
+def _seed_detail_payload_for_root(root: ChecklistRoot) -> tuple[list[ChecklistCheck], list[ChecklistBarrier]]:
+    s_equipment = str(root.equipment or "Equipment").strip() or "Equipment"
+    checks = [
+        ChecklistCheck(
+            root_id=root.id,
+            text=f"Verify isolation for {s_equipment}",
+            comment="Auto-seeded for search/detail parity",
+            status="PASS",
+            position=1,
+            created_on=root.created_on,
+            changed_on=root.changed_on,
+        ),
+        ChecklistCheck(
+            root_id=root.id,
+            text=f"Confirm workplace condition around {s_equipment}",
+            comment="Auto-seeded for search/detail parity",
+            status="PASS" if bool(root.integration_flag) else "FAIL",
+            position=2,
+            created_on=root.created_on,
+            changed_on=root.changed_on,
+        ),
+        ChecklistCheck(
+            root_id=root.id,
+            text=f"Validate team briefing for {root.lpc or 'LPC'}",
+            comment="Auto-seeded for search/detail parity",
+            status="PASS",
+            position=3,
+            created_on=root.created_on,
+            changed_on=root.changed_on,
+        ),
+    ]
+    barriers = [
+        ChecklistBarrier(
+            root_id=root.id,
+            description=f"Protective barrier installed near {s_equipment}",
+            comment="Auto-seeded for search/detail parity",
+            is_active=True,
+            position=1,
+            created_on=root.created_on,
+            changed_on=root.changed_on,
+        ),
+        ChecklistBarrier(
+            root_id=root.id,
+            description="Work permit and supervisor acknowledgement confirmed",
+            comment="Auto-seeded for search/detail parity",
+            is_active=not bool(root.integration_flag),
+            position=2,
+            created_on=root.created_on,
+            changed_on=root.changed_on,
+        ),
+    ]
+    return checks, barriers
+
+
+def _ensure_seeded_detail_payload(db) -> int:
+    bind = db.get_bind() if hasattr(db, "get_bind") else engine
+    inspector = inspect(bind)
+    existing_tables = set(inspector.get_table_names())
+    required_tables = {"checklist_root", "checklist_check", "checklist_barrier"}
+    if not required_tables.issubset(existing_tables):
+        return 0
+    roots = db.query(ChecklistRoot).filter(
+        (ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))
+    ).all()
+    added = 0
+    for root in roots:
+        has_checks = db.query(ChecklistCheck.id).filter(ChecklistCheck.root_id == root.id).first() is not None
+        has_barriers = db.query(ChecklistBarrier.id).filter(ChecklistBarrier.root_id == root.id).first() is not None
+        if has_checks and has_barriers:
+            continue
+        checks, barriers = _seed_detail_payload_for_root(root)
+        if not has_checks:
+            db.add_all(checks)
+            added += len(checks)
+        if not has_barriers:
+            db.add_all(barriers)
+            added += len(barriers)
+    if added:
+        db.commit()
+        logger.info("Backfilled seeded detail payload rows: added=%s", added)
+    return added
+
+
 def _ensure_integration_samples(db, minimum_ratio: float = 0.18) -> int:
     roots = db.query(ChecklistRoot).filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))).order_by(ChecklistRoot.created_on.asc()).all()
     total = len(roots)
@@ -341,6 +424,7 @@ async def lifespan(_: FastAPI):
             seed_reference_data(db)
             _seed_checklist_roots_if_needed(db, minimum_rows=100)
             _ensure_integration_samples(db)
+        _ensure_seeded_detail_payload(db)
         oSettings = db.query(FrontendRuntimeSettings).first()
         if not oSettings:
             if AUTO_SEED_STARTUP_DATA:
@@ -348,7 +432,7 @@ async def lifespan(_: FastAPI):
                     environment="default",
                     required_fields_json=json.dumps(DEFAULT_REQUIRED_FIELDS),
                     upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY),
-                    **FRONTEND_TIMER_TEST_PROFILE
+                    **FRONTEND_TIMER_PROFILE
                 ))
                 db.commit()
             else:
@@ -356,7 +440,7 @@ async def lifespan(_: FastAPI):
         else:
             bChanged = False
             if AUTO_SEED_STARTUP_DATA:
-                for sKey, vValue in FRONTEND_TIMER_TEST_PROFILE.items():
+                for sKey, vValue in FRONTEND_TIMER_PROFILE.items():
                     if int(getattr(oSettings, sKey, 0) or 0) == int(vValue):
                         continue
                     setattr(oSettings, sKey, int(vValue))

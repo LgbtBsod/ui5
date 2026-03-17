@@ -199,10 +199,10 @@ def seed_user_profiles(db) -> None:
             ]
         elif uname == "operator":
             permissions = [
-                {"code": "01", "scope": "bukrs", "scopeValue": "3000"},
-                {"code": "02", "scope": "bukrs", "scopeValue": "3000"},
-                {"code": "03", "scope": "bukrs", "scopeValue": "3000"},
-                {"code": "06", "scope": "bukrs", "scopeValue": "3000"},
+                {"code": "01", "scope": "all"},
+                {"code": "02", "scope": "all"},
+                {"code": "03", "scope": "all"},
+                {"code": "06", "scope": "all"},
             ]
         existing = db.get(AppUserProfile, uname)
         serialized = json.dumps(list(permissions), ensure_ascii=False)

@@ -281,6 +281,16 @@ sap.ui.define([
             return text(this, "persistenceIdle", "No pending changes");
         },
 
+        formatPersistenceTooltip: function (sMessageKey, sPersistenceState, sLastSavedAt, oLastSaveError) {
+            var sPrimary = this.formatPersistenceText(sMessageKey, sPersistenceState, sLastSavedAt);
+            var sCode = String((oLastSaveError && oLastSaveError.code) || "").trim();
+            var sMessage = String((oLastSaveError && oLastSaveError.message) || "").trim();
+            if (!sCode && !sMessage) {
+                return sPrimary;
+            }
+            return text(this, "persistenceTooltipWithDetails", [sPrimary, [sCode, sMessage].filter(Boolean).join(": ")], sPrimary);
+        },
+
         formatPersistenceState: function (sPersistenceState) {
             return PERSISTENCE_SEMANTICS[String(sPersistenceState || "").trim()] || "Information";
         },

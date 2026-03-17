@@ -90,9 +90,19 @@ sap.ui.define([
                 fnResumePendingNavigationIntent();
                 return true;
             }).catch(function (oError) {
+                var oClassification = DetailPersistenceRuntime.classifyError(oError);
                 var sDetail = String((oError && oError.message) || BANNER_DETAIL.SAVE_FAILED);
                 var sCorrelationId = fnResolveCorrelationId(oError);
                 var bSessionExpired = fnIsSessionExpiredError(oError);
+                if (DetailPersistenceRuntime.isLockFailure(oClassification.taxonomy) && typeof oComponent._handleForceReadOnly === "function") {
+                    return oComponent._handleForceReadOnly({
+                        reason: oClassification.taxonomy,
+                        messageKey: oClassification.messageKey,
+                        source: "manualSave"
+                    }).then(function () {
+                        return false;
+                    });
+                }
                 if (bSessionExpired) {
                     ModelStateRuntime.writeOnModel(oStateModel, PATHS.REQUIRES_USER_LOGIN, true);
                     if (!oComponent._bSessionRefreshInFlight) {

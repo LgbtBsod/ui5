@@ -4,8 +4,7 @@ const path = require('path');
 const { listFiles } = require('./lib/fileWalker');
 
 const ROOT = process.cwd();
-const HYPER_PATH = path.join(ROOT, 'app', 'css', 'claude-hyper.css');
-const MODULES_DIR = path.join(ROOT, 'app', 'css', 'modules');
+const STYLES_DIR = path.join(ROOT, 'app', 'styles');
 
 function readUtf8(filePath) {
   return fs.readFileSync(filePath, 'utf8');
@@ -104,51 +103,33 @@ function writeList(fileName, list) {
 }
 
 function main() {
-  if (!fs.existsSync(HYPER_PATH)) {
-    console.error(`Missing monolith CSS: ${HYPER_PATH}`);
+  if (!fs.existsSync(STYLES_DIR)) {
+    console.error(`Missing styles directory: ${STYLES_DIR}`);
     process.exit(1);
   }
-  if (!fs.existsSync(MODULES_DIR)) {
-    console.error(`Missing modules directory: ${MODULES_DIR}`);
-    process.exit(1);
-  }
-
-  const hyperClasses = extractSelectorClasses(readUtf8(HYPER_PATH));
   const moduleClasses = new Set();
-
-  fs.readdirSync(MODULES_DIR)
-    .filter((name) => name.endsWith('.css'))
-    .forEach((name) => {
-      const cssPath = path.join(MODULES_DIR, name);
-      const classes = extractSelectorClasses(readUtf8(cssPath));
-      classes.forEach((cls) => moduleClasses.add(cls));
-    });
+  listFiles(ROOT, {
+    include: ['app/styles/**/*.css']
+  }).forEach((relPath) => {
+    const cssPath = path.join(ROOT, relPath);
+    const classes = extractSelectorClasses(readUtf8(cssPath));
+    classes.forEach((cls) => moduleClasses.add(cls));
+  });
 
   const usedClasses = extractUsedClasses(ROOT);
 
-  const hyperList = [...hyperClasses].sort();
   const moduleList = [...moduleClasses].sort();
   const usedList = [...usedClasses].sort();
-  const notInModules = hyperList.filter((cls) => !moduleClasses.has(cls));
-  const missingUsed = usedList.filter((cls) => hyperClasses.has(cls) && !moduleClasses.has(cls));
 
-  writeList('tmp-hyper-classes.txt', hyperList);
   writeList('tmp-module-classes.txt', moduleList);
   writeList('tmp-used-classes.txt', usedList);
-  writeList('tmp-hyper-not-in-modules.txt', notInModules);
-  writeList('tmp-hyper-missing-used-classes.txt', missingUsed);
 
   const report = {
     generatedAt: new Date().toISOString(),
     counts: {
-      hyper: hyperList.length,
       modules: moduleList.length,
-      used: usedList.length,
-      notInModules: notInModules.length,
-      missingUsed: missingUsed.length
-    },
-    notInModules,
-    missingUsed
+      used: usedList.length
+    }
   };
 
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);

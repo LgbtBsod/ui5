@@ -1102,7 +1102,7 @@ def _build_lock_status_row(db: Session, root_uuid: str, session_guid: str = "") 
         own = db.query(LockEntry).filter(
             LockEntry.pcct_uuid == root_uuid,
             LockEntry.session_guid == session_guid,
-        ).order_by(LockEntry.last_heartbeat.desc()).first() if session_guid else None
+        ).order_by(LockEntry.last_refresh_at.desc()).first() if session_guid else None
         if own:
             if own.is_killed:
                 return _row(False, "KILLED", own.user_id or "", own.expires_at)
@@ -1897,7 +1897,7 @@ def lock_control(payload: dict, db: Session):
             )
         except ValueError as exc:
             code = str(exc)
-            if code == "NO_LOCK":
+            if code == "LOCK_MISSING":
                 return _lock_entity(False, "FREE", None, False, "FREE")
             return _err(410, "LOCK_EXPIRED", "Lock expired")
     if action == "RELEASE":
@@ -1966,9 +1966,9 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
     try:
         LockService.validate_session_lock(db, root.id, session_guid)
     except ValueError as ex:
-        if str(ex) == "NO_VALID_LOCK":
-            return _err(409, "LOCK_REQUIRED", "Active lock for session is required")
-        return _err(409, "CONFLICT", "Version conflict")
+        if str(ex) in {"LOCK_MISSING", "LOCK_NOT_OWNED_BY_SESSION"}:
+            return _err(409, str(ex), "Active lock for session is required")
+        return _err(409, "LOCK_EXPIRED", "Lock expired")
 
     _apply_save_root(root, _save_request_root(payload), db)
     _apply_save_checks(db, root, payload.get("checks"))
@@ -2089,9 +2089,9 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
     try:
         LockService.validate_session_lock(db, root.id, session_guid)
     except ValueError as ex:
-        if str(ex) == "NO_VALID_LOCK":
-            return _err(409, "LOCK_REQUIRED", "Active lock for session is required")
-        return _err(409, "CONFLICT", "Version conflict")
+        if str(ex) in {"LOCK_MISSING", "LOCK_NOT_OWNED_BY_SESSION"}:
+            return _err(409, str(ex), "Active lock for session is required")
+        return _err(409, "LOCK_EXPIRED", "Lock expired")
 
     _apply_save_root(root, _save_request_root(payload), db)
     _apply_save_checks(db, root, payload.get("checks"))

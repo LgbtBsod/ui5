@@ -92,6 +92,7 @@ sap.ui.define([
         formatAutosaveAt: DetailFormatters.formatAutosaveAt,
         formatPersistenceState: DetailFormatters.formatPersistenceState,
         formatPersistenceText: DetailFormatters.formatPersistenceText,
+        formatPersistenceTooltip: DetailFormatters.formatPersistenceTooltip,
         formatCopyLinkVisible: DetailFormatters.formatCopyLinkVisible,
         formatDeleteChecklistVisible: DetailFormatters.formatDeleteChecklistVisible,
         formatAutosaveText: DetailFormatters.formatAutosaveText

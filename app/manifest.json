@@ -124,7 +124,6 @@
           "bundleName": "PRODUCTION_CONTROL_CHECKLIST.i18n.i18n",
           "supportedLocales": [
             "en",
-            "en_US",
             "ru"
           ],
           "fallbackLocale": "en"

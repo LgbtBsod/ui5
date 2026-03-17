@@ -9,8 +9,7 @@
         showNavButton="true"
         navButtonPress=".onCloseAnalytics"
         enableScrolling="true"
-        class="pageTransparent analyticsPage"
-        titleAlignment="Start">
+        class="pageTransparent analyticsPage">
         <headerContent>
             <Button
                 text="{i18n>analyticsReportButton}"

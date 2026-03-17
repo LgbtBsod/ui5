@@ -1,12 +1,21 @@
 import uuid
 
+import pytest
 from sqlalchemy.exc import IntegrityError
 
 from config import LOCK_KILLED_RETENTION, LOCK_TTL
-from database import SessionLocal
+from database import Base, SessionLocal, engine
 from models import ChecklistRoot, LockEntry
 from services import checklist_service
 from services.lock_service import LockService
+
+
+@pytest.fixture(autouse=True)
+def reset_db():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 
 def _create_root(db, root_id: str):
@@ -39,8 +48,7 @@ def test_acquire_handles_integrity_race(monkeypatch):
                     user_id="OTHER",
                     session_guid="OTHER-S",
                     locked_at=current_time,
-                    last_heartbeat=current_time,
-                    expires_at=current_time + LOCK_TTL,
+                    last_refresh_at=current_time,
                 )
                 session.add(competing)
                 session.commit()
@@ -52,7 +60,7 @@ def test_acquire_handles_integrity_race(monkeypatch):
         result = LockService.acquire(db, root_id, "S1", "USER1")
 
         assert result["success"] is False
-        assert result["action"] == "LOCKED"
+        assert result["code"] == "LOCK_NOT_OWNED_BY_SESSION"
         assert result["owner"] == "OTHER"
 
 
@@ -80,3 +88,20 @@ def test_release_try_save_reports_save_status(monkeypatch):
 
 def test_killed_lock_retention_exceeds_ttl():
     assert LOCK_KILLED_RETENTION > LOCK_TTL
+
+
+def test_status_uses_last_refresh_at_for_expiry():
+    with SessionLocal() as db:
+        root_id = str(uuid.uuid4())
+        _create_root(db, root_id)
+        LockService.acquire(db, root_id, "S1", "USER1")
+
+        lock = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_id).first()
+        lock.last_refresh_at = lock.last_refresh_at - LOCK_TTL - LOCK_TTL
+        db.commit()
+
+        try:
+            LockService.status(db, root_id, "S1")
+            assert False, "Expected LOCK_MISSING for expired active lock"
+        except ValueError as exc:
+            assert str(exc) == "LOCK_MISSING"

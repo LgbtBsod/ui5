@@ -10,6 +10,11 @@ sap.ui.define([
             ManagerRuntime.initEventProvider(EventProvider, this, arguments);
             this._iIntervalMs = ManagerRuntime.readNumberOption(mOptions, "intervalMs");
             this._iTimer = null;
+            this._bRunning = false;
+        },
+
+        start: function () {
+            this._bRunning = true;
             this.resetOnFullSave();
         },
 
@@ -29,10 +34,19 @@ sap.ui.define([
                 return;
             }
             this._iIntervalMs = iNext;
-            this.resetOnFullSave();
+            if (this._bRunning) {
+                this.resetOnFullSave();
+            }
+        },
+        stop: function () {
+            this._bRunning = false;
+            this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearTimeout);
         },
         destroyManager: function () {
-            this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearTimeout);
+            this.stop();
+        },
+        isRunning: function () {
+            return this._bRunning;
         }
     });
 });
