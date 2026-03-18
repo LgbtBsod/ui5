@@ -2,8 +2,8 @@
 (function () {
     "use strict";
 
-    // Productive baseline is UI5 1.71.28; temporary sandbox/test harnesses may still point to 1.71.70 by external contour constraint.
-    var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "https://ui5.sap.com/1.71.70/resources/sap-ui-core.js";
+    // Productive baseline is UI5 1.71.28; productive and local tooling runtimes should resolve UI5 from the platform /resources endpoint.
+    var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "/resources/sap-ui-core.js";
     var DEFAULT_THEME = "sap_fiori_3";
     function splitClassNames(sClassNames) {
         return String(sClassNames || "").split(/\s+/).map(function (sName) {

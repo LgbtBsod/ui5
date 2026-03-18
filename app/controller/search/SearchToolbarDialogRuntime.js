@@ -35,14 +35,25 @@ sap.ui.define([
             && ControllerViewStateRuntime.get(oController, "/smartTableReady"));
     }
 
+    function triggerRebind(oController, sSource, mDeps) {
+        if (!shouldRebindSearch(oController, mDeps.ControllerViewStateRuntime)) {
+            return Promise.resolve(false);
+        }
+        return Promise.resolve(mDeps.SearchCommandPolicy.rebind(oController, { source: sSource }))
+            .then(function () {
+                return true;
+            })
+            .catch(function () {
+                return false;
+            });
+    }
+
     function applySearchSortSettings(oController, mSettings, mDeps) {
         var sSortKey = String((mSettings && mSettings.sortKey) || "").trim() || TOKENS.DATE_CHECK;
         var bSortDescending = !!(mSettings && mSettings.sortDescending);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_SORT_KEY, sSortKey);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_SORT_DESCENDING, bSortDescending);
-        if (shouldRebindSearch(oController, mDeps.ControllerViewStateRuntime)) {
-            mDeps.SearchCommandPolicy.rebind(oController, { source: OperationSourceContracts.SEARCH.SEARCH_SORT_SETTINGS });
-        }
+        return triggerRebind(oController, OperationSourceContracts.SEARCH.SEARCH_SORT_SETTINGS, mDeps);
     }
 
     function applySearchGroupSettings(oController, mSettings, mDeps) {
@@ -53,9 +64,7 @@ sap.ui.define([
         }
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_GROUP_KEY, sGroupKey);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_GROUP_DESCENDING, bGroupDescending);
-        if (shouldRebindSearch(oController, mDeps.ControllerViewStateRuntime)) {
-            mDeps.SearchCommandPolicy.rebind(oController, { source: OperationSourceContracts.SEARCH.SEARCH_GROUP_SETTINGS });
-        }
+        return triggerRebind(oController, OperationSourceContracts.SEARCH.SEARCH_GROUP_SETTINGS, mDeps);
     }
 
     function ensureDialog(oController, sDialogKey, mConfig) {

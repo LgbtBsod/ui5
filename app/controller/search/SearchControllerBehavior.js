@@ -11,12 +11,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchInteractionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchAnalyticsIntentBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
     "sap/ui/core/Item"
-], function (SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchInteractionBehavior, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerViewStateRuntime, SearchToolbarContracts, ModelContracts, OperationSourceContracts, Item) {
+], function (SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchInteractionBehavior, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerActionBusyRuntime, SearchToolbarContracts, ModelContracts, OperationSourceContracts, Item) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -33,23 +33,10 @@ sap.ui.define([
         });
     }
 
-    function withActionBusy(oController, sPath, fnAction) {
-        var vResult;
-        ControllerViewStateRuntime.setFlag(oController, sPath, true);
-        try {
-            vResult = fnAction();
-        } catch (oError) {
-            ControllerViewStateRuntime.setFlag(oController, sPath, false);
-            throw oError;
-        }
-        return Promise.resolve(vResult).finally(function () {
-            ControllerViewStateRuntime.setFlag(oController, sPath, false);
-        });
-    }
 
     return {
         _withActionBusy: function (sPath, fnAction) {
-            return withActionBusy(this, sPath, fnAction);
+            return ControllerActionBusyRuntime.run(this, sPath, fnAction);
         },
 
         onInit: function () {

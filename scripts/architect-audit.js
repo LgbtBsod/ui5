@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const cp = require('child_process');
+const fs = require('fs');
 const path = require('path');
 const { runJsonMarkdownAudit } = require('./lib/auditRunner');
 const { countLinesFromRoot, readJsonSafe, readTextSafe } = require('./lib/auditInput');
@@ -26,6 +27,32 @@ function computeReadinessScore(qaOk, architectureHealth, styleScore, freezeScore
   );
 }
 
+
+function countLinesInTree(relDir) {
+  const absDir = path.join(ROOT, relDir);
+  let total = 0;
+
+  function walk(dir) {
+    fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+        return;
+      }
+      if (entry.isFile() && entry.name.endsWith('.js')) {
+        total += readTextSafe(full, '').split(/\r?\n/).filter(Boolean).length;
+      }
+    });
+  }
+
+  if (!fs.existsSync(absDir)) {
+    return 0;
+  }
+
+  walk(absDir);
+  return total;
+}
+
 function readQaStatus() {
   const qa = readJsonSafe(path.join(ROOT, 'docs', 'qa-report-latest.json'), null);
   if (qa && typeof qa.ok === 'boolean') {
@@ -50,15 +77,15 @@ function buildReport() {
   const udos = readJsonSafe(path.join(ROOT, 'udos', 'reports', 'analysis-report.json'), null);
   const architectureHealth = parseArchitectureHealth();
   const metrics = {
-    searchControllerLines: countLinesFromRoot(ROOT, 'app/controller/Search.controller.js'),
-    detailControllerLines: countLinesFromRoot(ROOT, 'app/controller/Detail.controller.js'),
+    searchSurfaceLines: countLinesInTree('app/controller/search') + countLinesFromRoot(ROOT, 'app/controller/Search.controller.js'),
+    detailSurfaceLines: countLinesInTree('app/controller/detail') + countLinesFromRoot(ROOT, 'app/controller/Detail.controller.js'),
     componentLines: countLinesFromRoot(ROOT, 'app/Component.js'),
     styleLines: countLinesFromRoot(ROOT, 'app/styles/app-styles.css')
   };
   const zonesOfGrowth = [];
 
-  if (metrics.searchControllerLines > 450) zonesOfGrowth.push('Search controller remains large and should be split by interaction zone.');
-  if (metrics.detailControllerLines > 800) zonesOfGrowth.push('Detail controller remains oversized and should keep shedding runtime orchestration.');
+  if (metrics.searchSurfaceLines > 1200) zonesOfGrowth.push('Search interaction surface remains large; continue collapsing duplicate busy/orchestration helpers.');
+  if (metrics.detailSurfaceLines > 1800) zonesOfGrowth.push('Detail interaction surface remains oversized and should keep shedding route/value-help/runtime orchestration.');
   if (metrics.componentLines > 700) zonesOfGrowth.push('Component bootstrap remains heavy and is a candidate for further startup extraction.');
   if (style && style.duplicateCustomPropertyCount > 24) zonesOfGrowth.push('CSS token duplication is still high; continue collapsing repeated custom properties.');
   if (udos && udos.memory && udos.memory.recordedEvents < 5) zonesOfGrowth.push('UDOS memory corpus is still shallow; more historical events improve adaptive governance quality.');

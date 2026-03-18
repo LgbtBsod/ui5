@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFilterLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
@@ -7,23 +7,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts"
-], function (ControllerViewStateRuntime, SearchFilterLifecycleBehavior, SearchLoadRuntime, SearchViewBehavior, SearchCommandPolicy, ReadinessTelemetryRuntime, ReadinessTelemetryContracts, OperationSourceContracts) {
+], function (ControllerActionBusyRuntime, SearchFilterLifecycleBehavior, SearchLoadRuntime, SearchViewBehavior, SearchCommandPolicy, ReadinessTelemetryRuntime, ReadinessTelemetryContracts, OperationSourceContracts) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
 
-    function withActionBusy(oController, sViewBusyPath, fnAction, fnSyncControlBusy) {
-        if (typeof fnSyncControlBusy === "function") {
-            fnSyncControlBusy(true);
-        }
-        return ControllerViewStateRuntime.withFlag(oController, sViewBusyPath, function () {
-            return typeof fnAction === "function" ? fnAction() : undefined;
-        }).finally(function () {
-            if (typeof fnSyncControlBusy === "function") {
-                fnSyncControlBusy(false);
-            }
-        });
-    }
 
     function onSmartSearch(oController) {
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.SEARCH_INTERACTION_READY, {
@@ -31,7 +19,7 @@ sap.ui.define([
         });
         SearchViewBehavior.beginSearchLoadingFeedback(oController);
         return SearchFilterLifecycleBehavior.onSmartSearch(oController, function (sBusyPath, fnAction) {
-            return withActionBusy(oController, sBusyPath, fnAction, function (bBusy) {
+            return ControllerActionBusyRuntime.run(oController, sBusyPath, fnAction, function (bBusy) {
                 SearchViewBehavior.setSearchActionBusy(oController, bBusy);
             });
         });
@@ -51,6 +39,6 @@ sap.ui.define([
     return {
         onRetrySearchLoad: onRetrySearchLoad,
         onSmartSearch: onSmartSearch,
-        withActionBusy: withActionBusy
+        withActionBusy: ControllerActionBusyRuntime.run
     };
 });

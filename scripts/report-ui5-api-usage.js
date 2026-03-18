@@ -4,7 +4,7 @@ const path = require('path');
 const { writeJsonAndMarkdown } = require('./lib/reportWriteRuntime');
 
 const ROOT = process.cwd();
-const INCLUDE_DIRS = ['view', 'controller', 'service', 'util', '.'];
+const INCLUDE_DIRS = ['app'];
 
 function walk(dir, out) {
   fs.readdirSync(dir, { withFileTypes: true }).forEach((e) => {

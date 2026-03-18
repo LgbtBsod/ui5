@@ -16,10 +16,10 @@ function renderArchitectAuditMarkdown(report) {
       {
         title: 'Metrics',
         lines: formatKeyValueLines([
-          ['Search.controller.js lines', report.metrics.searchControllerLines],
-          ['Detail.controller.js lines', report.metrics.detailControllerLines],
+          ['Search surface lines', report.metrics.searchSurfaceLines],
+          ['Detail surface lines', report.metrics.detailSurfaceLines],
           ['Component.js lines', report.metrics.componentLines],
-          ['css/claude-hyper.css lines', report.metrics.styleLines]
+          ['app/styles/app-styles.css lines', report.metrics.styleLines]
         ])
       },
       {

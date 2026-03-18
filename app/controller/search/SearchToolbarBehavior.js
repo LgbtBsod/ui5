@@ -8,7 +8,7 @@ sap.ui.define([
     function onSearchSortDialogConfirm(oController, oEvent) {
         var oSortItem = oEvent && oEvent.getParameter && oEvent.getParameter("sortItem");
         var bSortDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("sortDescending"));
-        SearchToolbarDialogRuntime.applySearchSortSettings(oController, {
+        return SearchToolbarDialogRuntime.applySearchSortSettings(oController, {
             sortKey: oSortItem && oSortItem.getKey && oSortItem.getKey(),
             sortDescending: bSortDescending
         }, {
@@ -20,7 +20,7 @@ sap.ui.define([
     function onSearchGroupDialogConfirm(oController, oEvent) {
         var oGroupItem = oEvent && oEvent.getParameter && oEvent.getParameter("groupItem");
         var bGroupDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("groupDescending"));
-        SearchToolbarDialogRuntime.applySearchGroupSettings(oController, {
+        return SearchToolbarDialogRuntime.applySearchGroupSettings(oController, {
             groupKey: oGroupItem && oGroupItem.getKey && oGroupItem.getKey(),
             groupDescending: bGroupDescending
         }, {
