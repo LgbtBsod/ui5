@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsPayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsUiContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
-], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, YearValue) {
+], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue) {
     "use strict";
 
     var TELEMETRY_EVENTS = Object.freeze({
@@ -23,9 +24,9 @@ sap.ui.define([
         VIEW: "view"
     });
     var VIEW_PATHS = Object.freeze({
-        ANALYTICS: "/analytics",
+        ANALYTICS: AnalyticsUiContracts.PATHS.ANALYTICS,
         BUSY: "/busy",
-        ERROR: "/error"
+        ERROR: AnalyticsUiContracts.PATHS.ERROR
     });
     var FALLBACK_MESSAGES = Object.freeze({
         ERROR: "Analytics unavailable",

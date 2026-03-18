@@ -1,6 +1,5 @@
 sap.ui.define([
     "sap/ui/core/Fragment",
-    "sap/ui/export/Spreadsheet",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
@@ -10,8 +9,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
-], function (Fragment, Spreadsheet, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, DebugLogger) {
+], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger) {
     "use strict";
 
     var PATHS = AnalyticsUiContracts.PATHS;
@@ -76,7 +76,6 @@ sap.ui.define([
         var oBundle = getBundle(oController);
         var oViewState = ControllerViewStateRuntime.get(oController, "/", {});
         var aRows;
-        var oSpreadsheet;
         var sErrorMessage;
         try {
             aRows = AnalyticsExportRows.buildRows(oViewState, oBundle);
@@ -93,14 +92,9 @@ sap.ui.define([
             return FeedbackCoordinator.showToast(oController, "nothingToExport", [], "warning");
         }
         try {
-            oSpreadsheet = new Spreadsheet({
-                workbook: {
-                    columns: buildSpreadsheetColumns(aRows)
-                },
-                dataSource: aRows,
-                fileName: buildAnalyticsExportFileName(oController) + ".xlsx"
-            });
-            return oSpreadsheet.build().then(function () {
+            return SpreadsheetExport.download(buildAnalyticsExportFileName(oController), aRows, {
+                workbookColumns: buildSpreadsheetColumns(aRows)
+            }).then(function () {
                 FeedbackCoordinator.showToast(oController, "searchExportSuccess", [], "info");
                 return true;
             }).catch(function (oError) {
@@ -113,10 +107,6 @@ sap.ui.define([
                 }
                 FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
                 return false;
-            }).finally(function () {
-                if (oSpreadsheet && typeof oSpreadsheet.destroy === "function") {
-                    oSpreadsheet.destroy();
-                }
             });
         } catch (oError) {
             sErrorMessage = String((oError && oError.message) || "Analytics export failed");

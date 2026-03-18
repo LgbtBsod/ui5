@@ -10,6 +10,7 @@ Run this checklist on the real Gateway / ABAP contour after deployment.
 - [ ] Attachment add/view/remove flow works end-to-end.
 - [ ] Analytics load succeeds for the default year/source selection.
 - [ ] Analytics export produces a spreadsheet file.
+- [ ] Search export produces a spreadsheet file from both selected rows and full-result mode.
 - [ ] Shell refresh of current user / permissions / runtime settings works after startup.
 - [ ] Session timeout and CSRF refresh recover gracefully.
 - [ ] Two-tab conflict scenario shows correct lock/concurrency behavior.
@@ -24,4 +25,5 @@ Run this checklist on the real Gateway / ABAP contour after deployment.
 - [ ] Lock lifecycle proof with acquire/heartbeat/release timestamps.
 - [ ] Attachment proof.
 - [ ] Analytics load + export proof.
+- [ ] Search export proof.
 - [ ] Permission visibility proof for both user roles.

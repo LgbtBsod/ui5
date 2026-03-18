@@ -1,8 +1,0 @@
-{
-  "python": {
-    "fastapi": "MIT",
-    "uvicorn": "BSD-3-Clause",
-    "sqlalchemy": "MIT",
-    "httpx": "BSD-3-Clause"
-  }
-}
