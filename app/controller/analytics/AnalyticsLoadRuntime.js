@@ -8,6 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
 ], function (
     ControllerViewStateRuntime,
@@ -19,6 +20,7 @@ sap.ui.define([
     ReadinessTelemetryContracts,
     ReadinessTelemetryRuntime,
     ModelContracts,
+    AnalyticsViewStateReader,
     YearValue
 ) {
     "use strict";
@@ -49,11 +51,9 @@ sap.ui.define([
 
     return {
         loadAnalytics: function (oController, sReason, mHooks) {
-            var sSelectedYear = String(ControllerViewStateRuntime.get(oController, PATHS.SELECTED_YEAR, "") || "").trim();
-            var sCompareYear = String(ControllerViewStateRuntime.get(oController, PATHS.COMPARE_YEAR, "") || "").trim();
-            var sSelectedSource = String(ControllerViewStateRuntime.get(oController, PATHS.SELECTED_SOURCE, AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toUpperCase();
-            var iSelectedYear = YearValue.parseYearOrNull(sSelectedYear);
-            var iCompareYear = YearValue.parseYearOrNull(sCompareYear);
+            var oSelectionState = AnalyticsViewStateReader.readSelectionState(oController);
+            var iSelectedYear = YearValue.parseYearOrNull(oSelectionState.selectedYear);
+            var iCompareYear = YearValue.parseYearOrNull(oSelectionState.compareYear);
             var sReadyAt = "";
             var sResolvedReason = String(sReason || LOAD_REASONS.MANUAL || "manual");
 
@@ -74,11 +74,12 @@ sap.ui.define([
                     reason: sResolvedReason,
                     selectedYear: iSelectedYear,
                     compareYear: iCompareYear,
-                    selectedSource: sSelectedSource
+                    selectedSource: oSelectionState.selectedSource
                 },
                 mHooks.buildCtx(oController)
             ).then(function (oResult) {
-                var oAnalytics = ControllerViewStateRuntime.get(oController, PATHS.ANALYTICS, {}) || {};
+                var oAnalytics = AnalyticsViewStateReader.readAnalyticsRoot(oController);
+
                 sReadyAt = new Date().toISOString();
 
                 if (Array.isArray(oAnalytics.availableYears) && oAnalytics.availableYears.length) {
@@ -108,7 +109,7 @@ sap.ui.define([
                 setReadinessState(oController, "ready", true, sReadyAt, "");
                 ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
                     reason: sResolvedReason,
-                    source: sSelectedSource
+                    source: oSelectionState.selectedSource
                 });
                 return oResult;
             }).catch(function (oError) {

@@ -4,6 +4,10 @@ Date: 2026-03-17
 
 Purpose: define the concrete ABAP object pack required to support the current UI5 frontend contract on a real SAP Gateway backend.
 
+Canonical service root URI: `/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/`
+Manifest model alias: `mainService`
+Productive UI5 baseline: `1.71.28`
+
 This pack complements the source files in:
 - `backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap`
 - `backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap`

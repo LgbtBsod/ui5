@@ -93,7 +93,7 @@ sap.ui.define([
         syncCompareYearDefaults(oController, sSelectedYear, sSelectedYearPath, sCompareYearPath);
         ControllerViewStateRuntime.setMany(oController, {
             "/activeYearPreset": sPreset || AnalyticsContracts.YEAR_PRESETS.CURRENT,
-            "/selectedYear": sSelectedYear
+            [PATHS.SELECTED_YEAR]: sSelectedYear
         });
         return fnLoadAnalytics(AnalyticsUiContracts.LOAD_REASONS.YEAR_PRESET_CHANGED);
     }

@@ -2,6 +2,10 @@
 
 This document defines the frontend adapter-boundary contract for the mock Gateway and the productive SAP Gateway rollout target.
 
+Canonical service root: `/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/`
+Frontend manifest alias: `mainService`
+Productive UI5 baseline target: `1.71.28`
+
 ## Productive create-permission seam rules:
 
 ## Mock contour hardening rules

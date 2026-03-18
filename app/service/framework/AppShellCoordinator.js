@@ -41,8 +41,7 @@ sap.ui.define([
         return {
             animationEnabled: !oThemeResult || oThemeResult.animationEnabled !== false,
             invertedBlockScheme: false,
-            isDark: false,
-            themeMode: String((oThemeResult && oThemeResult.mode) || ThemeContracts.MODES.MORNING).trim().toLowerCase() || ThemeContracts.MODES.MORNING
+            themeMode: ThemeContracts.MODES.MORNING
         };
     }
 
@@ -52,7 +51,6 @@ sap.ui.define([
         var oModelPatch = {};
         var sStoredTheme = oController.getCurrentTheme();
 
-        oModelPatch[APP_VIEW_PATHS.IS_DARK] = oAppViewPatch.isDark;
         oModelPatch[APP_VIEW_PATHS.THEME_MODE] = oAppViewPatch.themeMode;
         oModelPatch[APP_VIEW_PATHS.ANIMATION_ENABLED] = oAppViewPatch.animationEnabled;
         if (oAppView) {

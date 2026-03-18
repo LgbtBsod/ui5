@@ -1,15 +1,18 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime"
-], function (AnalyticsBuilderRuntime, ControllerViewStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsUiContracts"
+], function (AnalyticsBuilderRuntime, ControllerViewStateRuntime, AnalyticsUiContracts) {
     "use strict";
+
+    var PATHS = AnalyticsUiContracts.PATHS;
 
     function onSelectAnalyticsMetric(oController, oEvent, fnApplyComparisonMetricSelection) {
         var sMetric = AnalyticsBuilderRuntime.getSelectedKeyFromEvent(oEvent);
         if (!sMetric) {
             return;
         }
-        ControllerViewStateRuntime.set(oController, "/comparisonMetric", sMetric);
+        ControllerViewStateRuntime.set(oController, PATHS.COMPARISON_METRIC, sMetric);
         fnApplyComparisonMetricSelection(oController);
     }
 

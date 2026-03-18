@@ -1,4 +1,4 @@
-.chkApp .shellThemeGlyph {
+ .chkApp .shellThemeGlyph {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -9,12 +9,9 @@
   pointer-events: none;
 }
 
-.chkApp .shellThemeGlyphSun {
-  color: color-mix(in srgb, var(--accent) 82%, white 18%);
-}
-
+.chkApp .shellThemeGlyphSun,
 .chkApp .shellThemeGlyphMoon {
-  color: color-mix(in srgb, var(--text-main) 72%, var(--accent) 28%);
+  color: color-mix(in srgb, var(--accent) 82%, white 18%);
 }
 
 .chkApp .shellThemeSwitch .sapMSwtText,

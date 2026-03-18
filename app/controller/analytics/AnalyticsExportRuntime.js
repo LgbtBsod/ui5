@@ -4,13 +4,17 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsUiContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
-], function (Fragment, Spreadsheet, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, DebugLogger) {
+], function (Fragment, Spreadsheet, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, DebugLogger) {
     "use strict";
+
+    var PATHS = AnalyticsUiContracts.PATHS;
 
     function getLoggerPayload(oError, sFallbackMessage) {
         return {
@@ -45,9 +49,8 @@ sap.ui.define([
     }
 
     function buildAnalyticsExportFileName(oController) {
-        var sSource = String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL).trim().toLowerCase();
-        var sYear = String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "").trim();
-        return ["analytics", sSource || "all", sYear || "scope"].join("_");
+        var oSelectionState = AnalyticsViewStateReader.readSelectionState(oController);
+        return ["analytics", oSelectionState.selectedSource.toLowerCase() || "all", oSelectionState.selectedYear || "scope"].join("_");
     }
 
     function buildSpreadsheetColumns(aRows) {
@@ -61,6 +64,14 @@ sap.ui.define([
         });
     }
 
+    function getSelectionLogContext(oController) {
+        var oSelectionState = AnalyticsViewStateReader.readSelectionState(oController);
+        return {
+            selectedSource: oSelectionState.selectedSource || AnalyticsContracts.SOURCES.ALL,
+            selectedYear: oSelectionState.selectedYear || ""
+        };
+    }
+
     function exportAnalyticsReport(oController) {
         var oBundle = getBundle(oController);
         var oViewState = ControllerViewStateRuntime.get(oController, "/", {});
@@ -71,7 +82,7 @@ sap.ui.define([
             aRows = AnalyticsExportRows.buildRows(oViewState, oBundle);
         } catch (oError) {
             sErrorMessage = String((oError && oError.message) || "Analytics export data is unavailable");
-            ControllerViewStateRuntime.set(oController, "/error", sErrorMessage);
+            ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
             if (DebugLogger && typeof DebugLogger.error === "function") {
                 DebugLogger.error("AnalyticsExportRuntime", "build_rows_failed", getLoggerPayload(oError, sErrorMessage));
             }
@@ -94,13 +105,11 @@ sap.ui.define([
                 return true;
             }).catch(function (oError) {
                 sErrorMessage = String((oError && oError.message) || "Analytics export failed");
-                ControllerViewStateRuntime.set(oController, "/error", sErrorMessage);
+                ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
                 if (DebugLogger && typeof DebugLogger.error === "function") {
-                    DebugLogger.error("AnalyticsExportRuntime", "export_failed", {
-                        export: getLoggerPayload(oError, sErrorMessage),
-                        selectedSource: String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL),
-                        selectedYear: String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "")
-                    });
+                    DebugLogger.error("AnalyticsExportRuntime", "export_failed", Object.assign({
+                        export: getLoggerPayload(oError, sErrorMessage)
+                    }, getSelectionLogContext(oController)));
                 }
                 FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
                 return false;
@@ -111,13 +120,11 @@ sap.ui.define([
             });
         } catch (oError) {
             sErrorMessage = String((oError && oError.message) || "Analytics export failed");
-            ControllerViewStateRuntime.set(oController, "/error", sErrorMessage);
+            ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
             if (DebugLogger && typeof DebugLogger.error === "function") {
-                DebugLogger.error("AnalyticsExportRuntime", "export_failed", {
-                    export: getLoggerPayload(oError, sErrorMessage),
-                    selectedSource: String(ControllerViewStateRuntime.get(oController, "/selectedSource", AnalyticsContracts.SOURCES.ALL) || AnalyticsContracts.SOURCES.ALL),
-                    selectedYear: String(ControllerViewStateRuntime.get(oController, "/selectedYear", "") || "")
-                });
+                DebugLogger.error("AnalyticsExportRuntime", "export_failed", Object.assign({
+                    export: getLoggerPayload(oError, sErrorMessage)
+                }, getSelectionLogContext(oController)));
             }
             FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
             return Promise.resolve(false);

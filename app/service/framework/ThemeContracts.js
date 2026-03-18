@@ -34,14 +34,13 @@ sap.ui.define([], function () {
         APP_VIEW_PATHS: Object.freeze({
             ANIMATION_ENABLED: "/animationEnabled",
             INVERTED_BLOCK_SCHEME: "/invertedBlockScheme",
-            IS_DARK: "/isDark",
             THEME_MODE: "/themeMode"
         }),
         SYNC_SOURCES: Object.freeze({
             ANIMATION: "animation",
             INIT: "init",
             SETTINGS: "settings-theme-mode",
-            TOGGLE: "toggle"
+            TOGGLE: "toggle-locked-morning"
         }),
         DEV_OVERRIDE_MODES: Object.freeze({
             CLEAR: Object.freeze(["clear", "off"]),
