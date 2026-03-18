@@ -41,6 +41,7 @@ sap.ui.define([
         return {
             animationEnabled: !oThemeResult || oThemeResult.animationEnabled !== false,
             invertedBlockScheme: false,
+            // Productive UI5 1.71 landscape currently runs in safe morning-only mode.
             themeMode: ThemeContracts.MODES.MORNING
         };
     }
@@ -49,7 +50,6 @@ sap.ui.define([
         var oAppView = ControllerModelRuntime.appView(oController);
         var oAppViewPatch = buildAppViewModelData(oThemeResult);
         var oModelPatch = {};
-        var sStoredTheme = oController.getCurrentTheme();
 
         oModelPatch[APP_VIEW_PATHS.THEME_MODE] = oAppViewPatch.themeMode;
         oModelPatch[APP_VIEW_PATHS.ANIMATION_ENABLED] = oAppViewPatch.animationEnabled;
@@ -60,7 +60,6 @@ sap.ui.define([
             animationEnabled: oAppViewPatch.animationEnabled,
             appliedTheme: oThemeResult && oThemeResult.theme,
             source: sSource || SYNC_SOURCES.INIT,
-            storedTheme: sStoredTheme,
             themeMode: oAppViewPatch.themeMode
         });
     }

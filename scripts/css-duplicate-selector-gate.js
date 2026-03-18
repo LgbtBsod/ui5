@@ -48,7 +48,12 @@ async function lintFileForDuplicates(filePath) {
     }
     const result = await stylelint.lint({
         files: [path.resolve(filePath)],
-        formatter: "json"
+        formatter: "json",
+        config: {
+            rules: {
+                "no-duplicate-selectors": true
+            }
+        }
     });
     const report = Array.isArray(result.results) ? result.results[0] : null;
     if (!report || !Array.isArray(report.warnings)) {
