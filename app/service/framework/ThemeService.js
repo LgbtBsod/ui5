@@ -1,18 +1,18 @@
 sap.ui.define([
     "sap/ui/core/Core",
     "sap/ui/core/theming/Parameters",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemePhilosophy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ValueTokenParser",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ValueTokenParser",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeTokenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
-], function (Core, Parameters, JsRuntimeContracts, ThemeContracts, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime, Ui5RuntimeFacade) {
+], function (Core, Parameters, JsRuntime, ThemeContracts, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime, Ui5RuntimeFacade) {
     "use strict";
 
-    var TYPE_FUNCTION = JsRuntimeContracts.TYPEOF.FUNCTION;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var SWITCH_CLASS = ThemeContracts.CLASSES.SWITCHING;
     var MOTION_DISABLED_CLASS = ThemeContracts.CLASSES.MOTION_DISABLED;
     var MOTION_ENABLED_CLASS = ThemeContracts.CLASSES.MOTION_ENABLED;

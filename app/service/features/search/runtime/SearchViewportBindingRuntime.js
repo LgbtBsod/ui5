@@ -3,8 +3,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts"
-], function (SearchScrollRuntime, SearchStickyLayoutRuntime, SchedulingRuntime, SearchUiContracts, JsRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (SearchScrollRuntime, SearchStickyLayoutRuntime, SchedulingRuntime, SearchUiContracts, JsRuntime) {
     "use strict";
 
     var SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS = SearchUiContracts.VIEWPORT.LAYOUT_DEBOUNCE_MS;
@@ -50,7 +50,7 @@ sap.ui.define([
     function bindSearchViewportObservers(oController, oScrollHost) {
         var aPrevTargets;
         var aNextTargets;
-        if (typeof window === "undefined" || typeof window.ResizeObserver !== JsRuntimeContracts.TYPE_FUNCTION) {
+        if (typeof window === "undefined" || typeof window.ResizeObserver !== JsRuntime.TYPEOF.FUNCTION) {
             return;
         }
         if (!oController._oSearchViewportResizeObserver) {

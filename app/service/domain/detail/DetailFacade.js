@@ -114,7 +114,9 @@ sap.ui.define([
         return Promise.resolve({ ok: true, effects: [
             Effects.modelPatch("selected", "/", oSnapshot),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE)
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
+            Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, "idle"),
+            Effects.modelPatch("state", StatePaths.PERSISTENCE_MESSAGE_KEY, "persistenceIdle")
         ]});
     };
 

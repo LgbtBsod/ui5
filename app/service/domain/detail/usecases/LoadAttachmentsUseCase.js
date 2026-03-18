@@ -3,8 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (UseCase, Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
+], function (UseCase, Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
     "use strict";
 
     function LoadAttachmentsUseCase() {
@@ -17,11 +19,20 @@ sap.ui.define([
     LoadAttachmentsUseCase.prototype.execute = function (mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
+        var oUiState = mCtx && mCtx.uiState;
+        var aCurrentAttachments;
+        var aSessionAttachments;
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
+            aCurrentAttachments = DetailStateAccess.readCurrentAttachments(mCtx);
+            aSessionAttachments = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
             return Promise.resolve(Result.ok({
-                attachments: []
-            }, AttachmentEffectRuntime.buildAttachmentLoadEffects([], "", "info")));
+                attachments: aCurrentAttachments.length ? aCurrentAttachments : aSessionAttachments
+            }, AttachmentEffectRuntime.buildAttachmentLoadEffects(
+                aCurrentAttachments.length ? aCurrentAttachments : aSessionAttachments,
+                "",
+                "info"
+            )));
         }
         if (!oRepo || typeof oRepo.loadAttachments !== "function") {
             return Promise.resolve(Result.fail({

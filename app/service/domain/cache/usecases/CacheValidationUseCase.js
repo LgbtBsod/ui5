@@ -27,6 +27,33 @@ sap.ui.define([
         return Math.abs(Number(iServerStamp || 0) - Number(iCacheStamp || 0));
     }
 
+    function hasMeaningfulDetailData(oSnap) {
+        var oRoot = oSnap && oSnap.root || {};
+        var oBasic = oSnap && oSnap.basic || {};
+        var aChecks = Array.isArray(oSnap && oSnap.checks) ? oSnap.checks : [];
+        var aBarriers = Array.isArray(oSnap && oSnap.barriers) ? oSnap.barriers : [];
+        var bHasRootId = !!String(oRoot.id || oRoot.Key || oRoot.RootKey || "").trim();
+        var bCreateDraft = String(oRoot.id || "").trim() === "__CREATE";
+        var bHasBasicPayload = Object.keys(oBasic).some(function (sKey) {
+            return !!String(oBasic[sKey] || "").trim();
+        });
+        var iExpectedRows = Number(oRoot.ChecksTotal || oRoot.checks_total || 0) + Number(oRoot.BarriersTotal || oRoot.barriers_total || 0);
+
+        if (!bHasRootId) {
+            return false;
+        }
+        if (bCreateDraft) {
+            return true;
+        }
+        if (!bHasBasicPayload) {
+            return false;
+        }
+        if (iExpectedRows > 0 && !aChecks.length && !aBarriers.length) {
+            return false;
+        }
+        return true;
+    }
+
     function CacheValidationUseCase() { UseCase.call(this, "CacheValidationUseCase"); }
     CacheValidationUseCase.prototype = Object.create(UseCase.prototype);
     CacheValidationUseCase.prototype.constructor = CacheValidationUseCase;
@@ -59,8 +86,9 @@ sap.ui.define([
             var iSrv = Number(a[1] || 0);
             var iCli = toMs((oEntry && oEntry.lastChangeSet) || readSnapshotStamp(oSnap));
             var bHasSnapshot = !!oSnap;
+            var bHydratedSnapshot = bHasSnapshot && hasMeaningfulDetailData(oSnap);
             var iStampDeltaMs = stampDeltaMs(iSrv, iCli);
-            var bValid = bHasSnapshot && iStampDeltaMs <= iTolerance;
+            var bValid = bHydratedSnapshot && iStampDeltaMs <= iTolerance;
             var bInvalidate = bHasSnapshot && !bValid;
             var pInvalidate = (bInvalidate && typeof oCache.clear === "function")
                 ? Promise.resolve(oCache.clear(sRootId, sEntityKind)).catch(function () { return null; })
@@ -86,6 +114,7 @@ sap.ui.define([
                     rootId: sRootId,
                     valid: bValid,
                     invalidated: bInvalidate,
+                    hydrated: bHydratedSnapshot,
                     serverStamp: iSrv,
                     cacheStamp: iCli,
                     stampDeltaMs: iStampDeltaMs,
@@ -95,6 +124,7 @@ sap.ui.define([
                     cacheEntry: oEntry,
                     valid: bValid,
                     invalidated: bInvalidate,
+                    hydrated: bHydratedSnapshot,
                     serverStamp: iSrv,
                     cacheStamp: iCli,
                     stampDeltaMs: iStampDeltaMs,

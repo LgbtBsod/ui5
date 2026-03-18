@@ -16,6 +16,18 @@ sap.ui.define([
 ], function (ModelStateRuntime, ComponentActionRuntime, ComponentBootRuntime, ComponentFeedbackInitRuntime, ComponentInitCompositionRuntime, ComponentAttachmentContextRuntime, ComponentRuntimeAttachOrchestrator, ComponentInitStageRuntime, ComponentRuntimeOptionBuilder, ComponentRuntimeHandlerRuntime, ComponentCrossTabRuntime, ComponentLockEventsRuntime, ComponentManagerOrchestrationRuntime, ComponentInitListenersRuntime) {
     "use strict";
 
+    function initializeRouter(oComponent) {
+        var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
+        if (!oRouter || typeof oRouter.initialize !== "function") {
+            return;
+        }
+        if (oComponent._routerInitialized) {
+            return;
+        }
+        oRouter.initialize();
+        oComponent._routerInitialized = true;
+    }
+
     function runInit(aInitArgs, mDeps) {
         var UIComponent = mDeps.UIComponent;
         var SmartSearchAdapter = mDeps.SmartSearchAdapter;
@@ -152,6 +164,8 @@ sap.ui.define([
                 resolveDetailCurrent: oCoreRuntime.resolveDetailCurrent,
                 timerDefaults: mTimerDefaults
             }, oAttachmentContext);
+
+            initializeRouter(this);
 
             return ComponentBootRuntime.runBootSequence({
                 component: this,

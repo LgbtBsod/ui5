@@ -8,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/UiAssetPaths",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
 ], function (UseCase, Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts) {
     "use strict";
@@ -90,6 +90,7 @@ sap.ui.define([
                     Effects.modelPatch("snapshot", "/", oDraft || {}),
                     Effects.modelPatch("selected", "/", oDraft || {}),
                     Effects.modelPatch("selected", "/attachments", (oDraft && oDraft.attachments) || []),
+                    Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, (oDraft && oDraft.attachments) || []),
                     Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
                 ]);
             });
@@ -172,6 +173,7 @@ sap.ui.define([
                 Effects.modelPatch("snapshot", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/attachments", aLoadedAttachments),
+                Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aLoadedAttachments),
                 Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         }).catch(function (oError) {

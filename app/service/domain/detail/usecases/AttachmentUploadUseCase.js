@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
@@ -11,10 +11,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, JsRuntimeContracts, AttachmentValueCodec, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (UseCase, Result, Effects, JsRuntime, AttachmentValueCodec, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
-    var TYPE_FUNCTION = JsRuntimeContracts.TYPEOF.FUNCTION;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function buildLocalObjectUrl(oFile) {
         if (typeof window !== "undefined" && window.URL && typeof window.URL.createObjectURL === TYPE_FUNCTION && oFile) {

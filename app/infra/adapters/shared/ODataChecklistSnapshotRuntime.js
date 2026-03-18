@@ -99,6 +99,15 @@ sap.ui.define([
         if (sRootId && !oRootRow.pcct_uuid) {
             oRootRow.pcct_uuid = sRootId;
         }
+        if (!oRootRow.status) {
+            oRootRow.status = String(oRootRow.Status || "").trim();
+        }
+        if (!oRootRow.checklist_id) {
+            oRootRow.checklist_id = String(oRootRow.RequestId || oRootRow.Id || "").trim();
+        }
+        if (!oRootRow.overall_result && typeof oRootRow.HasFailedChecks === "boolean" && typeof oRootRow.HasFailedBarriers === "boolean") {
+            oRootRow.overall_result = !(oRootRow.HasFailedChecks || oRootRow.HasFailedBarriers);
+        }
         if (oMappedBasic.checklist_id && !oRootRow.checklist_id) {
             oRootRow.checklist_id = oMappedBasic.checklist_id;
         }

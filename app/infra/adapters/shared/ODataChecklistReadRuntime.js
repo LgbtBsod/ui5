@@ -6,19 +6,23 @@ sap.ui.define([
 ], function (GatewayRequestRuntime, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts) {
     "use strict";
 
+    function buildStringEqFilter(sProperty, sRootId) {
+        return ODataAdapterUtils.buildEqFilter(sProperty, sRootId);
+    }
+
     function fetchDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var pRoot = GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistRootSet", sRootId, {
             type: ODataKeyContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
         var pBasic = GatewayRequestRuntime.get("ChecklistBasicInfoSet", {
-            "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
+            "$filter": buildStringEqFilter("RootKey", sRootId)
         });
         var pChecks = GatewayRequestRuntime.get("ChecklistCheckSet", {
-            "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
+            "$filter": buildStringEqFilter("RootId", sRootId)
         });
         var pBarriers = GatewayRequestRuntime.get("ChecklistBarrierSet", {
-            "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY)
+            "$filter": buildStringEqFilter("RootId", sRootId)
         });
         return Promise.all([pRoot, pBasic, pChecks, pBarriers]).then(function (aResult) {
             var oSnapshot = ODataChecklistSnapshotRuntime.mapResult(aResult[0], aResult[1], aResult[2], aResult[3]);

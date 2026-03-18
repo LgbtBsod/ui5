@@ -168,6 +168,14 @@
       "routes": [
         {
           "pattern": "",
+          "name": "searchHome",
+          "target": [
+            "search"
+          ],
+          "layout": "OneColumn"
+        },
+        {
+          "pattern": "search",
           "name": "search",
           "target": [
             "search"

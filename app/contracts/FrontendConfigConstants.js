@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/FrontendVariablesSchema"
+    "PRODUCTION_CONTROL_CHECKLIST/model/schema/FrontendVariablesSchema"
 ], function (FrontendVariablesSchema) {
     "use strict";
 

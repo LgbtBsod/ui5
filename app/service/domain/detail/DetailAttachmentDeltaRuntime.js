@@ -1,8 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts"
-], function (AttachmentValueCodec, DeltaContracts, JsRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (AttachmentValueCodec, DeltaContracts, JsRuntime) {
     "use strict";
 
     function readAttachmentKey(oAttachment) {
@@ -71,7 +71,7 @@ sap.ui.define([
     }
 
     function refreshAttachments(oRepo, sRootId, aCurrentAttachments, bForceReload) {
-        if (!sRootId || !oRepo || typeof oRepo.loadAttachments !== JsRuntimeContracts.TYPE_FUNCTION || !bForceReload) {
+        if (!sRootId || !oRepo || typeof oRepo.loadAttachments !== JsRuntime.TYPEOF.FUNCTION || !bForceReload) {
             return Promise.resolve(Array.isArray(aCurrentAttachments) ? aCurrentAttachments : []);
         }
         return oRepo.loadAttachments({ rootId: sRootId }).then(function (oLoaded) {
@@ -83,7 +83,7 @@ sap.ui.define([
 
     function revokeLocalUrl(oAttachment) {
         var sUrl = oAttachment && oAttachment.localObjectUrl;
-        if (sUrl && typeof window !== "undefined" && window.URL && typeof window.URL.revokeObjectURL === JsRuntimeContracts.TYPE_FUNCTION) {
+        if (sUrl && typeof window !== "undefined" && window.URL && typeof window.URL.revokeObjectURL === JsRuntime.TYPEOF.FUNCTION) {
             window.URL.revokeObjectURL(sUrl);
         }
     }

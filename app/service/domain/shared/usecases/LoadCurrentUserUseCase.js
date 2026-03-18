@@ -17,6 +17,13 @@ sap.ui.define([
         });
     }
 
+    function readExistingProfile(oStateModel) {
+        if (!oStateModel || typeof oStateModel.getProperty !== "function") {
+            return null;
+        }
+        return oStateModel.getProperty("/currentUser") || null;
+    }
+
     return {
         execute: function (mInput, mDeps) {
             var sLogin = String(mInput && mInput.login || "").trim();
@@ -27,6 +34,18 @@ sap.ui.define([
                 return Result.ok({
                     user: oProfile.fullName || "",
                     profile: oProfile
+                });
+            }).catch(function (oError) {
+                var oExistingProfile = readExistingProfile(oStateModel);
+                if (!oExistingProfile || !String(oExistingProfile.fullName || "").trim()) {
+                    throw oError;
+                }
+                oExistingProfile = CurrentUserProfile.applyCurrentUserState(oStateModel, oExistingProfile);
+                oExistingProfile.permissionKeys = buildSummary(oExistingProfile);
+                return Result.ok({
+                    user: oExistingProfile.fullName || "",
+                    profile: oExistingProfile,
+                    stale: true
                 });
             });
         },

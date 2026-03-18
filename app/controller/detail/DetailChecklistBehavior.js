@@ -72,7 +72,9 @@ sap.ui.define([
         },
 
         _isEditMode: function () {
-            return WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(this, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ)) === WorkflowContracts.EDIT_MODES.EDIT;
+            return WorkflowContracts.isEditableMode(
+                ModelStateRuntime.read(this, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ)
+            );
         },
 
         _showToast: function (sTextKey) {

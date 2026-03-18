@@ -1,6 +1,6 @@
 sap.ui.define([
   "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaCore",
-  "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts"
 ], function (DeltaCore, DeltaContracts) {
   "use strict";
 

@@ -8,6 +8,20 @@ sap.ui.define([
 
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
+    var PERSISTENCE_DIRTY_SOURCE_STATES = Object.freeze({
+        idle: true,
+        saved: true,
+        dirty: true
+    });
+
+    function syncDirtyPersistence(oStateModel, bDirty) {
+        var sPersistenceState = String(ModelStateRuntime.readOnModel(oStateModel, "/persistence/state", "") || "").trim();
+        if (!PERSISTENCE_DIRTY_SOURCE_STATES[sPersistenceState]) {
+            return;
+        }
+        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/state", bDirty ? "dirty" : "idle");
+        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? "persistenceDirty" : "persistenceIdle");
+    }
 
     function initializeListeners(mOptions) {
         var oComponent = mOptions.component;
@@ -47,7 +61,11 @@ sap.ui.define([
             "/smartTable/selectionMode": SmartSearchAdapter.getSmartTableConfig().selectionMode
         });
         oComponent._oDirtyStateBinding = oStateModel.bindProperty(PATHS.IS_DIRTY);
-        oComponent._fnDirtyStateBindingChange = function () { oComponent._oAutoSave.touch(); };
+        oComponent._fnDirtyStateBindingChange = function () {
+            var bDirty = !!ModelStateRuntime.readOnModel(oStateModel, PATHS.IS_DIRTY, false);
+            syncDirtyPersistence(oStateModel, bDirty);
+            oComponent._oAutoSave.touch();
+        };
         oComponent._oDirtyStateBinding.attachChange(oComponent._fnDirtyStateBindingChange);
         oComponent._aLockScopedStateBindings = [mOptions.statePaths.WORKFLOW_DETAIL_LOCK_STATE, mOptions.statePaths.WORKFLOW_DETAIL_EDIT_MODE].map(function (sPath) {
             var oBinding = oStateModel.bindProperty(sPath);

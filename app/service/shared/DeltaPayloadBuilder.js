@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaFieldMappers",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaChildChanges",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
 ], function (DeltaCore, DeltaDateCodec, DeltaFieldMappers, DeltaChildChanges, DeltaContracts, CreateSentinel) {
   "use strict";
@@ -79,6 +79,7 @@ sap.ui.define([
     var sRootKey = resolveRootKey(oCur, {});
     return {
       root: DeltaFieldMappers.mapRootFields(oCur.root || {}, oCur.basic || {}, sRootKey, DeltaContracts.EDIT_MODE.CREATE),
+      basic: Object.assign({}, oCur.basic || {}),
       checks: (oCur.checks || []).map(function (oRow, iIndex) {
         return DeltaFieldMappers.toCheckFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sRootKey);
       }),

@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/FrontendConfigConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/FrontendConfigConstants"
 ], function (FrontendConfigConstants) {
     "use strict";
 

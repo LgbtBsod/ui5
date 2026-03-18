@@ -50,6 +50,8 @@ sap.ui.define([
         }
         ModelStateRuntime.write(oController, SELECTED_MODEL, sPath, vValue);
         ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.IS_DIRTY, true);
+        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/state", "dirty");
+        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/messageKey", "persistenceDirty");
         return true;
     }
 

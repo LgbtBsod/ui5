@@ -92,7 +92,11 @@ sap.ui.define([
     }
 
     function markDirtyResult(sEntity, sOp) {
-        return Result.ok({ entity: sEntity, op: sOp }, [Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)]);
+        return Result.ok({ entity: sEntity, op: sOp }, [
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true),
+            Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, "dirty"),
+            Effects.modelPatch("state", StatePaths.PERSISTENCE_MESSAGE_KEY, "persistenceDirty")
+        ]);
     }
 
     function createRow(aRows, oConfig) {
@@ -108,7 +112,7 @@ sap.ui.define([
         var iRowIndex;
         if (sOp === "add") {
             oUiState.set("selected", oConfig.path, aRows.concat([createRow(aRows, oConfig)]));
-            return Result.ok({ entity: sEntity, op: sOp }, [Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)]);
+            return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "delete") {
             iRowIndex = resolveRowIndexFromInput(mInput, aRows, oConfig.path);

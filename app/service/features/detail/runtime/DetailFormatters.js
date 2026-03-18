@@ -200,7 +200,7 @@ sap.ui.define([
             if (sTextValue) {
                 return sTextValue;
             }
-            return WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT
+            return WorkflowContracts.isEditableMode(sMode)
                 ? text(this, "modeEdit", "Edit")
                 : text(this, "modeRead", "Read");
         },
@@ -219,7 +219,7 @@ sap.ui.define([
             if (LOCK_TRANSITION_STATES[sNormalizedState]) {
                 return "Warning";
             }
-            return WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT ? "Warning" : "Information";
+            return WorkflowContracts.isEditableMode(sMode) ? "Warning" : "Information";
         },
 
         formatI18nByKey: function (sKey) {
@@ -228,8 +228,11 @@ sap.ui.define([
 
         formatHeartbeatText: function (sMode, sLockState) {
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
-            if (WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
+            if (WorkflowContracts.isEditableMode(sMode) && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
                 return text(this, "heartbeatLockedActive", "Heartbeat active");
+            }
+            if (WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.CREATE) {
+                return text(this, "heartbeatDraftCreate", "Draft editing active");
             }
             if (sNormalizedLockState === "ACQUIRING_LOCK") {
                 return text(this, "autosaveSaving", "Saving...");
@@ -254,8 +257,11 @@ sap.ui.define([
                 SAVED: "autosaveSaved",
                 ERROR: "autosaveError"
             };
-            var sNormalizedMode = String(sMode || "").toUpperCase();
+            var sNormalizedMode = WorkflowContracts.normalizeEditMode(sMode);
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
+            if (sNormalizedMode === WorkflowContracts.EDIT_MODES.CREATE) {
+                return text(this, "autosaveCreateDraft", "Draft changes are local until first save");
+            }
             if (sNormalizedMode !== WorkflowContracts.EDIT_MODES.EDIT || !LOCK_ACTIVE_STATES[sNormalizedLockState]) {
                 return text(this, "autosaveDisabled", "Autosave disabled (read-only mode)");
             }
@@ -359,7 +365,7 @@ sap.ui.define([
         },
 
         formatDeleteChecklistVisible: function (sMode, sActiveObjectId) {
-            return WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT &&
+            return WorkflowContracts.isEditableMode(sMode) &&
                 !!sActiveObjectId &&
                 !CreateSentinel.isCreateId(sActiveObjectId);
         },
@@ -367,7 +373,7 @@ sap.ui.define([
         formatAttachmentsEmptyStateText: function (sRootId) {
             return CreateSentinel.isCreateId(sRootId)
                 ? text(this, "attachmentDraftStageHint")
-                : text(this, "detailEmptyAttachmentsText");
+                : text(this, "detailEmptyAttachmentsSavedText", text(this, "detailEmptyAttachmentsText"));
         }
     };
 });

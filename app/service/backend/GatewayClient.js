@@ -1,11 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh"
-], function (GatewayErrorNormalizer, RequestCoordinator, GatewayClientContracts, GatewayClientSupport, GatewayClientRequestRuntime, SecurityTokenRefresh) {
+], function (GatewayErrorNormalizer, RequestCoordinator, RequestResiliencePolicy, GatewayClientContracts, GatewayClientSupport, GatewayClientRequestRuntime, SecurityTokenRefresh) {
     "use strict";
 
     var _oModel = null;
@@ -69,6 +70,40 @@ sap.ui.define([
         });
     }
 
+    function hasSecurityToken() {
+        var oModel = ensureModel();
+        var sToken = "";
+        try {
+            sToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
+        } catch (_error) {
+            sToken = "";
+        }
+        return !!sToken;
+    }
+
+    function ensureSecurityTokenReady(bForceRefresh) {
+        if (!bForceRefresh && hasSecurityToken()) {
+            return Promise.resolve(true);
+        }
+        return SecurityTokenRefresh.refresh(ensureModel());
+    }
+
+    function executeMutatingRequest(mRequest) {
+        var oRequest = mRequest || {};
+        return ensureSecurityTokenReady(false).catch(function () {
+            return ensureSecurityTokenReady(true);
+        }).then(function () {
+            return executeRequest(oRequest);
+        }).catch(function (oError) {
+            if (!RequestResiliencePolicy.isCsrfError(oError)) {
+                throw oError;
+            }
+            return ensureSecurityTokenReady(true).then(function () {
+                return executeRequest(oRequest);
+            });
+        });
+    }
+
     return {
         setModel: function (oModel, mOptions) {
             _oModel = oModel || null;
@@ -122,7 +157,7 @@ sap.ui.define([
         serviceUrl: serviceUrl,
         callFunctionImport: function (name, oPayload, mOptions) {
             var oOptions = mOptions || {};
-            return executeRequest({
+            return executeMutatingRequest({
                 method: "POST_FUNCTION",
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
@@ -155,7 +190,7 @@ sap.ui.define([
                 "POST"
             );
             var oOptions = mOptions || {};
-            return executeRequest({
+            return executeMutatingRequest({
                 method: "POST_ENTITY",
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
@@ -173,7 +208,7 @@ sap.ui.define([
                 "DELETE"
             );
             var oOptions = mOptions || {};
-            return executeRequest({
+            return executeMutatingRequest({
                 method: "DELETE",
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
@@ -185,16 +220,21 @@ sap.ui.define([
             });
         },
         batch: function (groupId) {
-            return toPromise(function (resolve, reject) {
-                ensureModel().submitChanges({
-                    groupId: groupId || undefined,
-                    success: function (oData) {
-                        resolve((oData && (oData.__batchResponses || oData.__changeResponses)) || []);
-                    },
-                    error: function (e) {
-                        reject(GatewayErrorNormalizer.normalizeError(e));
-                    }
-                });
+            return executeMutatingRequest({
+                method: "BATCH",
+                requestFactory: function () {
+                    return toPromise(function (resolve, reject) {
+                        ensureModel().submitChanges({
+                            groupId: groupId || undefined,
+                            success: function (oData) {
+                                resolve((oData && (oData.__batchResponses || oData.__changeResponses)) || []);
+                            },
+                            error: function (e) {
+                                reject(GatewayErrorNormalizer.normalizeError(e));
+                            }
+                        });
+                    });
+                }
             });
         },
         fetchCsrfToken: function () {

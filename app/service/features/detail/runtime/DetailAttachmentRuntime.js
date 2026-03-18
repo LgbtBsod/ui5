@@ -1,10 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DetailFieldContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFieldContracts",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts"
-], function (ModelStateRuntime, ModelContracts, DetailFieldContracts, ODataAdapterUtils, ODataKeyContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+], function (ModelStateRuntime, ModelContracts, DetailFieldContracts, ODataAdapterUtils, ODataKeyContracts, CreateSentinel) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -48,6 +49,8 @@ sap.ui.define([
     function toggleAttachmentsSection(oController, mHooks) {
         var bExpanded = !!ModelStateRuntime.read(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_EXPANDED, false);
         var bLoaded = !!ModelStateRuntime.read(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_LOADED, false);
+        var aSessionAttachments = ModelStateRuntime.read(oController, VIEW_MODEL, VIEW_PATHS.SESSION_ATTACHMENTS, []) || [];
+        var sRootId = String((oController && oController._currentRootId && oController._currentRootId()) || "").trim();
         if (bExpanded) {
             ModelStateRuntime.write(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_EXPANDED, false);
             mHooks.unbindAttachmentDropZone();
@@ -55,6 +58,11 @@ sap.ui.define([
         }
         ModelStateRuntime.write(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_EXPANDED, true);
         mHooks.scheduleAttachmentDropZoneBind();
+        if (CreateSentinel.isCreateId(sRootId)) {
+            ModelStateRuntime.write(oController, SELECTED_MODEL, "/attachments", aSessionAttachments);
+            ModelStateRuntime.write(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_LOADED, true);
+            return Promise.resolve({ expanded: true, staged: true });
+        }
         if (bLoaded) {
             return Promise.resolve({ expanded: true, loaded: true });
         }

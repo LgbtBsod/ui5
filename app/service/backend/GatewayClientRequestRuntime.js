@@ -41,8 +41,61 @@ sap.ui.define([
     }
 
     function withDirectPostRequest(oModel, sPath, oPayload, mHeaders) {
+        var sNormalizedPath = GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(sPath));
+        var sServiceUrl = String((oModel && oModel.sServiceUrl) || "").replace(/\/+$/, "");
+        var sSecurityToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
+        var bUseFetch = typeof window !== "undefined" && typeof window.fetch === "function" && !!sServiceUrl;
+
+        if (bUseFetch) {
+            return toRequestHandle(function (resolve, reject) {
+                var oAbortController = typeof AbortController === "function" ? new AbortController() : null;
+                var mRequestHeaders = Object.assign({
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                }, mHeaders || {});
+                if (sSecurityToken) {
+                    mRequestHeaders["X-CSRF-Token"] = sSecurityToken;
+                }
+                window.fetch(sServiceUrl + sNormalizedPath, {
+                    method: "POST",
+                    headers: mRequestHeaders,
+                    body: JSON.stringify(oPayload || {}),
+                    credentials: "same-origin",
+                    signal: oAbortController ? oAbortController.signal : undefined
+                }).then(function (oResponse) {
+                    var sContentType = String(oResponse.headers.get("content-type") || "").toLowerCase();
+                    if (!oResponse.ok) {
+                        return oResponse.text().then(function (sBody) {
+                            reject({
+                                statusCode: oResponse.status,
+                                message: sBody || oResponse.statusText || "Request failed",
+                                responseText: sBody || "",
+                                responseHeaders: {
+                                    "x-csrf-token": oResponse.headers.get("x-csrf-token") || ""
+                                }
+                            });
+                        });
+                    }
+                    if (sContentType.indexOf("application/json") >= 0) {
+                        return oResponse.json().then(function (oData) {
+                            resolve((oData && oData.d) || oData || {});
+                        });
+                    }
+                    return oResponse.text().then(function (sBody) {
+                        resolve({ value: sBody || "" });
+                    });
+                }).catch(function (oError) {
+                    reject(oError);
+                });
+                return function () {
+                    if (oAbortController) {
+                        oAbortController.abort();
+                    }
+                };
+            });
+        }
         return toRequestHandle(function (resolve, reject) {
-            return oModel.create(sPath, oPayload || {}, {
+            return oModel.create(sNormalizedPath, oPayload || {}, {
                 headers: mHeaders || {},
                 success: function (oData) { resolve(oData || {}); },
                 error: function (e) { reject(e); }

@@ -3,7 +3,7 @@ sap.ui.define([], function () {
 
     return {
         COLUMN_RULES: {
-            Id: { width: "8.5rem", minScreenWidth: "", demandPopin: false, importance: "High" },
+        Id: { width: "8.5rem", minScreenWidth: "Phone", demandPopin: false, importance: "High" },
             LpcText: { width: "6.75rem", minScreenWidth: "Tablet", demandPopin: true, importance: "High" },
             ProfessionText: { width: "10rem", minScreenWidth: "Desktop", demandPopin: true, importance: "Medium" },
             LocationKey: { width: "9.75rem", minScreenWidth: "Desktop", demandPopin: true, importance: "Medium" },

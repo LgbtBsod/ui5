@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
@@ -8,10 +8,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem"
-], function (JsRuntimeContracts, SearchToolbarContracts, ModelStateRuntime, OperationSourceContracts, ModelContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ViewSettingsDialog, ViewSettingsItem) {
+], function (JsRuntime, SearchToolbarContracts, ModelStateRuntime, OperationSourceContracts, ModelContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ViewSettingsDialog, ViewSettingsItem) {
     "use strict";
 
-    var TYPE_FUNCTION = JsRuntimeContracts.TYPEOF.FUNCTION;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var PATHS = SearchToolbarContracts.PATHS;
     var TOKENS = ModelContracts.TOKENS;

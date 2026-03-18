@@ -66,6 +66,10 @@ sap.ui.define([
         return PermissionPresentation.buildHeaderLabel(sFullName, aPermissionSheets, " - ");
     }
 
+    function hasResolvedCurrentUser(oCurrentUser) {
+        return !!String((oCurrentUser && oCurrentUser.fullName) || "").trim();
+    }
+
     function ensureAppViewDefaults(oController) {
         var mPatch = {};
 
@@ -132,7 +136,9 @@ sap.ui.define([
         sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         sMode = LayoutStateRuntime.readMode(oState, WorkflowContracts.EDIT_MODES.READ);
         oCurrentUser = ModelStateRuntime.read(oController, STATE_MODEL, "/currentUser", {}) || {};
-        sFullName = String(oCurrentUser.fullName || resolveText(mHooks, oController, "shellUserMissing", null, "Session profile unavailable"));
+        sFullName = hasResolvedCurrentUser(oCurrentUser)
+            ? String(oCurrentUser.fullName || "")
+            : resolveText(mHooks, oController, "shellUserLoading", null, "Loading session profile...");
         aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
         aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
         aPermissionSheets = buildPermissionSheets(oController, aPermissionRules, mHooks);
@@ -165,7 +171,9 @@ sap.ui.define([
         mShellPatch["/shell/userPermissions"] = aPermissionSheets;
         mShellPatch["/shell/userSummaryText"] = sUserSummaryText;
         mShellPatch["/shell/userSessionLabel"] = resolveText(mHooks, oController, "shellUserSessionManaged", null, "Live backend profile");
-        mShellPatch["/shell/userSessionState"] = aPermissionRules.length || aPermissions.length ? "Success" : "Warning";
+        mShellPatch["/shell/userSessionState"] = hasResolvedCurrentUser(oCurrentUser)
+            ? (aPermissionRules.length || aPermissions.length ? "Success" : "Warning")
+            : "Information";
         mShellPatch["/shell/userActionVisible"] = false;
         mShellPatch["/shell/userActionText"] = "";
         mShellPatch["/shell/userActionIcon"] = "sap-icon://employee";

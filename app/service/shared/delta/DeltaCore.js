@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DeltaContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts"
 ], function (CloneUtil, DeltaContracts) {
   "use strict";
 

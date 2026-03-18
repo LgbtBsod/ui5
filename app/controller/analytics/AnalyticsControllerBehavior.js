@@ -72,9 +72,14 @@ sap.ui.define([
                 controller: oController
             });
         }).then(function (oFragment) {
+            var aContent = Array.isArray(oFragment) ? oFragment : [oFragment];
             oHost.removeAllItems();
-            oHost.addItem(oFragment);
-            return oFragment;
+            aContent.forEach(function (oContent) {
+                if (oContent) {
+                    oHost.addItem(oContent);
+                }
+            });
+            return aContent[0] || null;
         });
         return oController._pAnalyticsBreakdownsContent;
     }
@@ -299,6 +304,12 @@ sap.ui.define([
                 return getBundleText(this, "analyticsRefreshIdle", [], "Idle");
             }
             return sStatus;
+        },
+
+        formatRefreshEnabled: function (bRefreshBusy, oRefreshState) {
+            var sStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
+            var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
+            return !bRefreshBusy && !bIsRunning && sStatus !== "REQUESTED";
         }
     };
 });

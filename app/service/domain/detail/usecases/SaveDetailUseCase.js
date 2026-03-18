@@ -10,9 +10,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -122,7 +123,8 @@ sap.ui.define([
                         Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                         Effects.modelPatch("snapshot", "/", oSavedSnapshot),
                         Effects.modelPatch("selected", "/", oSelectedSnapshot),
-                        Effects.modelPatch("selected", "/attachments", aSyncedAttachments)
+                        Effects.modelPatch("selected", "/attachments", aSyncedAttachments),
+                        Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSyncedAttachments)
                     ];
                     aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
                         hasValidLock: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
