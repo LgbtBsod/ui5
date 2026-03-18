@@ -13,13 +13,14 @@ sap.ui.define([
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
 
 
+
     function onSmartSearch(oController) {
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.SEARCH_INTERACTION_READY, {
             action: "smartSearch"
         });
         SearchViewBehavior.beginSearchLoadingFeedback(oController);
         return SearchFilterLifecycleBehavior.onSmartSearch(oController, function (sBusyPath, fnAction) {
-            return ControllerActionBusyRuntime.run(oController, sBusyPath, fnAction, function (bBusy) {
+            return ControllerActionBusyRuntime.withActionBusy(oController, sBusyPath, fnAction, function (bBusy) {
                 SearchViewBehavior.setSearchActionBusy(oController, bBusy);
             });
         });
@@ -39,6 +40,6 @@ sap.ui.define([
     return {
         onRetrySearchLoad: onRetrySearchLoad,
         onSmartSearch: onSmartSearch,
-        withActionBusy: ControllerActionBusyRuntime.run
+        withActionBusy: ControllerActionBusyRuntime.withActionBusy
     };
 });

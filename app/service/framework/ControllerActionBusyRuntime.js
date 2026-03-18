@@ -3,11 +3,11 @@ sap.ui.define([
 ], function (ControllerViewStateRuntime) {
     "use strict";
 
-    function run(oController, sPath, fnAction, fnSyncControlBusy) {
+    function withActionBusy(oController, sViewBusyPath, fnAction, fnSyncControlBusy) {
         if (typeof fnSyncControlBusy === "function") {
             fnSyncControlBusy(true);
         }
-        return ControllerViewStateRuntime.withFlag(oController, sPath, function () {
+        return ControllerViewStateRuntime.withFlag(oController, sViewBusyPath, function () {
             return typeof fnAction === "function" ? fnAction() : undefined;
         }).finally(function () {
             if (typeof fnSyncControlBusy === "function") {
@@ -17,6 +17,6 @@ sap.ui.define([
     }
 
     return {
-        run: run
+        withActionBusy: withActionBusy
     };
 });

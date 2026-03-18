@@ -1,40 +1,53 @@
 import fs from "fs";
 import path from "path";
 
-const styleRoot = fs.existsSync(path.join(process.cwd(), "app", "styles")) ? path.join("app", "styles") : "styles";
-const styleModuleRoot = path.join(styleRoot, "modules").replace(/\\/g, "/");
+const runtimeRoot = fs.existsSync(path.join(process.cwd(), "app", "styles")) ? "app" : "";
 const entryCandidates = [
-  path.join(styleRoot, "app-styles.css").replace(/\\/g, "/"),
-  path.join(styleRoot, "style.css").replace(/\\/g, "/")
+  path.join(runtimeRoot, "styles/app-styles.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/source-entry.css").replace(/\\/g, "/")
 ];
 const entryPath = entryCandidates.find((candidate) => fs.existsSync(candidate)) || "";
 const forbiddenLegacyFiles = [
-  path.join(styleModuleRoot, "style-core.css").replace(/\\/g, "/"),
-  path.join(styleModuleRoot, "style-components.css").replace(/\\/g, "/"),
-  path.join(styleModuleRoot, "style-overrides.css").replace(/\\/g, "/")
+  path.join(runtimeRoot, "styles/modules/style-core.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/style-components.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/style-overrides.css").replace(/\\/g, "/")
 ];
-const moduleNames = [
-  "00_tokens.css",
-  "01_theme-modes.css",
-  "02_background.css",
-  "10_base.css",
-  "20_surface.css",
-  "21_controls.css",
-  "22_skeleton.css",
-  "23_dialogs.css",
-  "40_page_search.css",
-  "41_page_detail.css",
-  "42_page_analytics.css",
-  "90_ui5_patches.css",
-  "91_ui5_layout_patches.css",
-  "92_ui5_surface_tuning.css"
+const expectedImports = [
+  '@import url("./modules/00_tokens.css");',
+  '@import url("./modules/01_theme-modes.css");',
+  '@import url("./modules/02_background.css");',
+  '@import url("./modules/10_base.css");',
+  '@import url("./modules/20_surface.css");',
+  '@import url("./modules/21_controls.css");',
+  '@import url("./modules/22_skeleton.css");',
+  '@import url("./modules/23_dialogs.css");',
+  '@import url("./modules/40_page_search.css");',
+  '@import url("./modules/41_page_detail.css");',
+  '@import url("./modules/42_page_analytics.css");',
+  '@import url("./modules/90_ui5_patches.css");',
+  '@import url("./modules/91_ui5_layout_patches.css");',
+  '@import url("./modules/92_ui5_surface_tuning.css");'
 ];
-const expectedImports = moduleNames.map((name) => `@import url("./modules/${name}");`);
-const modules = moduleNames.map((name) => path.join(styleModuleRoot, name).replace(/\\/g, "/"));
+const modules = [
+  path.join(runtimeRoot, "styles/modules/00_tokens.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/01_theme-modes.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/02_background.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/10_base.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/20_surface.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/21_controls.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/22_skeleton.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/23_dialogs.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/40_page_search.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/41_page_detail.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/42_page_analytics.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/90_ui5_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/91_ui5_layout_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/92_ui5_surface_tuning.css").replace(/\\/g, "/")
+];
 const patchFiles = new Set([
-  path.join(styleModuleRoot, "90_ui5_patches.css").replace(/\\/g, "/"),
-  path.join(styleModuleRoot, "91_ui5_layout_patches.css").replace(/\\/g, "/"),
-  path.join(styleModuleRoot, "92_ui5_surface_tuning.css").replace(/\\/g, "/")
+  path.join(runtimeRoot, "styles/modules/90_ui5_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/91_ui5_layout_patches.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/92_ui5_surface_tuning.css").replace(/\\/g, "/")
 ]);
 
 function fail(message) {
@@ -42,23 +55,16 @@ function fail(message) {
   process.exit(1);
 }
 
-function assertExists(filePath) {
-  if (!fs.existsSync(filePath)) {
-    fail(`Missing required stylesheet module: ${filePath}`);
-  }
-}
-
 function assertPatchDiscipline(filePath, css) {
   const lines = css.split(/\r?\n/);
   const importantLines = [];
-  const maxLines = filePath.endsWith("92_ui5_surface_tuning.css") ? 180 : 70;
   lines.forEach((line, index) => {
     if (line.includes("!important")) {
       importantLines.push(index);
     }
   });
-  if (lines.length > maxLines) {
-    fail(`${filePath} must stay small; expected <= ${maxLines} lines, got ${lines.length}.`);
+  if (lines.length > 70) {
+    fail(`${filePath} must stay small; expected <= 70 lines, got ${lines.length}.`);
   }
   for (const index of importantLines) {
     const current = lines[index];
@@ -88,13 +94,12 @@ for (const legacyFile of forbiddenLegacyFiles) {
 }
 
 for (const file of modules) {
-  assertExists(file);
   const css = fs.readFileSync(file, "utf8");
   const cssWithoutComments = stripCssComments(css);
   if (patchFiles.has(file)) {
     assertPatchDiscipline(file, css);
   } else if (css.includes("!important")) {
-    fail(`${file} contains !important outside patch modules.`);
+    fail(`${file} contains !important outside 90_ui5_patches.css.`);
   }
   if (/outline\s*:\s*none/i.test(css) && !patchFiles.has(file)) {
     fail(`${file} contains outline:none outside patches.`);

@@ -41,10 +41,6 @@ sap.ui.define([], function () {
             INIT: "init",
             SETTINGS: "settings-theme-mode",
             TOGGLE: "toggle-locked-morning"
-        }),
-        DEV_OVERRIDE_MODES: Object.freeze({
-            CLEAR: Object.freeze(["clear", "off"]),
-            MORNING: Object.freeze(["dark", "light", "morning", "night"])
         })
     });
 });

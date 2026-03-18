@@ -2,9 +2,11 @@
 (function () {
     "use strict";
 
-    // Productive baseline is UI5 1.71.28; productive and local tooling runtimes should resolve UI5 from the platform /resources endpoint.
     var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "/resources/sap-ui-core.js";
     var DEFAULT_THEME = "sap_fiori_3";
+    var THEME_PROFILE_KEY = "checklist_app_theme_profile";
+    var APP_THEME_KEY = "checklist_app_theme";
+
     function splitClassNames(sClassNames) {
         return String(sClassNames || "").split(/\s+/).map(function (sName) {
             return sName.trim();
@@ -21,38 +23,30 @@
         return oTarget;
     }
 
-    function normalizeStoredThemeProfile() {
+    function ensureStoredThemeProfile() {
         var oStoredProfile;
-        var sStoredTheme;
-        var sMode;
-        var bAnimationEnabled;
-        var oNormalizedProfile;
         try {
-            oStoredProfile = JSON.parse(window.localStorage.getItem("checklist_app_theme_profile") || "null");
+            oStoredProfile = JSON.parse(window.localStorage.getItem(THEME_PROFILE_KEY) || "null");
         } catch (_profileParseError) {
             oStoredProfile = null;
         }
+
+        if (!oStoredProfile || typeof oStoredProfile !== "object") {
+            try {
+                window.localStorage.setItem(THEME_PROFILE_KEY, JSON.stringify({
+                    mode: "morning",
+                    animationEnabled: true
+                }));
+            } catch (_profilePersistError) {
+                // Best-effort normalization only.
+            }
+        }
+
         try {
-            sStoredTheme = String(window.localStorage.getItem("checklist_app_theme") || "").trim();
-            sMode = oStoredProfile && typeof oStoredProfile.mode === "string" && oStoredProfile.mode.trim()
-                ? oStoredProfile.mode.trim()
-                : (sStoredTheme || "morning");
-            bAnimationEnabled = oStoredProfile && typeof oStoredProfile.animationEnabled === "boolean"
-                ? oStoredProfile.animationEnabled
-                : true;
-            oNormalizedProfile = {
-                mode: sMode,
-                animationEnabled: bAnimationEnabled
-            };
-            if (!oStoredProfile
-                || oStoredProfile.mode !== oNormalizedProfile.mode
-                || oStoredProfile.animationEnabled !== oNormalizedProfile.animationEnabled) {
-                window.localStorage.setItem("checklist_app_theme_profile", JSON.stringify(oNormalizedProfile));
+            if (!window.localStorage.getItem(APP_THEME_KEY)) {
+                window.localStorage.setItem(APP_THEME_KEY, "morning");
             }
-            if (sStoredTheme !== sMode) {
-                window.localStorage.setItem("checklist_app_theme", sMode);
-            }
-        } catch (_e) {
+        } catch (_themePersistError) {
             // Best-effort normalization only.
         }
     }
@@ -118,7 +112,7 @@
         oScript.setAttribute("data-sap-ui-async", "true");
         oScript.setAttribute("data-sap-ui-preload", "async");
         oScript.onload = function () {
-            normalizeStoredThemeProfile();
+            ensureStoredThemeProfile();
             if (window.sap && sap.ui && sap.ui.require) {
                 attachInit();
                 return;
@@ -131,7 +125,7 @@
         document.head.appendChild(oScript);
     }
 
-    normalizeStoredThemeProfile();
+    ensureStoredThemeProfile();
 
     if (window.sap && sap.ui && sap.ui.require) {
         attachInit();

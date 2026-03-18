@@ -34,9 +34,10 @@ sap.ui.define([
     }
 
 
+
     return {
         _withActionBusy: function (sPath, fnAction) {
-            return ControllerActionBusyRuntime.run(this, sPath, fnAction);
+            return ControllerActionBusyRuntime.withActionBusy(this, sPath, fnAction);
         },
 
         onInit: function () {
@@ -149,7 +150,7 @@ sap.ui.define([
         },
 
         onSearchSortDialogConfirm: function (oEvent) {
-            SearchToolbarBehavior.onSearchSortDialogConfirm(this, oEvent);
+            return SearchToolbarBehavior.onSearchSortDialogConfirm(this, oEvent);
         },
 
         onOpenSearchGroupDialog: function () {
@@ -157,7 +158,7 @@ sap.ui.define([
         },
 
         onSearchGroupDialogConfirm: function (oEvent) {
-            SearchToolbarBehavior.onSearchGroupDialogConfirm(this, oEvent);
+            return SearchToolbarBehavior.onSearchGroupDialogConfirm(this, oEvent);
         },
 
         onOpenWorkflowAnalytics: function (oEvent) {

@@ -22,8 +22,8 @@ const requiredStates = ['loading', 'empty', 'error', 'conflict', 'permission'];
   });
 });
 
-if (!baseline.visualBaselines || !baseline.visualBaselines.morning || !baseline.visualBaselines.night) {
-  fail('C1 gate failed: Morning/Night visual baseline refs are required.');
+if (!baseline.visualBaselines || !baseline.visualBaselines.morning) {
+  fail('C1 gate failed: productive morning visual baseline ref is required.');
 }
 
-console.log('C1 gate passed: WS-C plan and state coverage artifacts are present.');
+console.log('C1 gate passed: WS-C plan and productive state coverage artifacts are present.');

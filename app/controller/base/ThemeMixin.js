@@ -7,83 +7,44 @@ sap.ui.define([
 
     var DEFAULT_MODE = ThemeContracts.MODES.MORNING;
     var DEFAULT_ANIMATION_ENABLED = ThemeService.DEFAULT_ANIMATION_ENABLED;
-    var DEV_OVERRIDE_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.DEV_OVERRIDE;
-    var MORNING_OVERRIDE_VALUES = ThemeContracts.DEV_OVERRIDE_MODES.MORNING;
-    var CLEAR_OVERRIDE_VALUES = ThemeContracts.DEV_OVERRIDE_MODES.CLEAR;
-
-    function isDebugOverrideAllowed() {
-        if (typeof window === "undefined") {
-            return false;
-        }
-        return window.__DEBUG_UI5__ === true;
-    }
-
-    function persistMorningOverride() {
-        try {
-            window.localStorage.setItem(DEV_OVERRIDE_STORAGE_KEY, ThemeContracts.MODES.MORNING);
-        } catch (_persistMorningError) {
-            // Best-effort persistence only.
-        }
-    }
-
-    function clearOverrideStorage() {
-        try {
-            window.localStorage.removeItem(DEV_OVERRIDE_STORAGE_KEY);
-        } catch (_clearError) {
-            // Best-effort persistence only.
-        }
-    }
-
-    function readQueryOverride() {
-        try {
-            return String(new URLSearchParams(window.location.search).get("themeOverride") || "").trim().toLowerCase();
-        } catch (_queryError) {
-            return "";
-        }
-    }
-
-    function readDevOverrideMode() {
-        var sStored = "";
-        var sQuery = "";
-
-        if (!isDebugOverrideAllowed() || typeof window === "undefined") {
-            return "";
-        }
-
-        try {
-            sStored = String(window.localStorage.getItem(DEV_OVERRIDE_STORAGE_KEY) || "").trim().toLowerCase();
-        } catch (_storageError) {
-            sStored = "";
-        }
-
-        sQuery = readQueryOverride();
-        if (MORNING_OVERRIDE_VALUES.indexOf(sQuery) >= 0) {
-            persistMorningOverride();
-            return ThemeContracts.MODES.MORNING;
-        }
-        if (CLEAR_OVERRIDE_VALUES.indexOf(sQuery) >= 0) {
-            clearOverrideStorage();
-            return "";
-        }
-        return sStored === ThemeContracts.MODES.MORNING ? ThemeContracts.MODES.MORNING : "";
-    }
 
     function readThemeProfile() {
         var oProfile = ThemeService.getThemeProfile ? ThemeService.getThemeProfile() : null;
-        var sMode = readDevOverrideMode() || DEFAULT_MODE;
         return {
-            mode: ThemeContracts.MODES.MORNING,
-            animationEnabled: oProfile && typeof oProfile.animationEnabled === "boolean" ? oProfile.animationEnabled : DEFAULT_ANIMATION_ENABLED,
-            requestedMode: sMode
+            mode: DEFAULT_MODE,
+            animationEnabled: oProfile && typeof oProfile.animationEnabled === "boolean"
+                ? oProfile.animationEnabled
+                : DEFAULT_ANIMATION_ENABLED
         };
+    }
+
+    function ensureThemeSyncListener(oController) {
+        if (oController._fnThemeChangedHandler) {
+            return;
+        }
+        oController._fnThemeChangedHandler = function () {
+            ThemeService.syncTokensFromUI5();
+        }.bind(oController);
+        Ui5RuntimeFacade.attachThemeChanged(oController._fnThemeChangedHandler);
+    }
+
+    function applyMorningMode(oController, oClickXY, mOptions) {
+        var oProfile = readThemeProfile();
+        ensureThemeSyncListener(oController);
+        return ThemeService.applyThemeMode(DEFAULT_MODE, oClickXY || null, {
+            animationEnabled: Object.prototype.hasOwnProperty.call(mOptions || {}, "animationEnabled")
+                ? !!mOptions.animationEnabled
+                : oProfile.animationEnabled,
+            persist: !mOptions || mOptions.persist !== false
+        });
     }
 
     return {
         getCurrentTheme: function () {
-            return ThemeService.themeForMode(ThemeContracts.MODES.MORNING);
+            return ThemeService.themeForMode(DEFAULT_MODE);
         },
         getCurrentThemeMode: function () {
-            return ThemeContracts.MODES.MORNING;
+            return DEFAULT_MODE;
         },
         isDarkThemeEnabled: function () {
             return false;
@@ -92,48 +53,29 @@ sap.ui.define([
             return !!readThemeProfile().animationEnabled;
         },
         setThemeAnimationEnabled: function (bEnabled) {
-            var oProfile = ThemeService.setThemeAnimationEnabled
-                ? ThemeService.setThemeAnimationEnabled(!!bEnabled)
-                : { mode: ThemeContracts.MODES.MORNING, animationEnabled: !!bEnabled };
-            this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(ThemeContracts.MODES.MORNING, null, {
-                animationEnabled: oProfile.animationEnabled,
+            if (ThemeService.setThemeAnimationEnabled) {
+                ThemeService.setThemeAnimationEnabled(!!bEnabled);
+            }
+            return applyMorningMode(this, null, {
+                animationEnabled: !!bEnabled,
                 persist: false
             });
         },
         setThemeMode: function (_sMode, oClickXY) {
-            var oProfile = readThemeProfile();
-            this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(ThemeContracts.MODES.MORNING, oClickXY || null, {
-                animationEnabled: oProfile.animationEnabled
-            });
+            return applyMorningMode(this, oClickXY);
         },
         applyStoredTheme: function () {
-            var oProfile = readThemeProfile();
-            this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(ThemeContracts.MODES.MORNING, null, {
-                animationEnabled: oProfile.animationEnabled
-            });
+            return applyMorningMode(this, null);
         },
         toggleTheme: function (oClickXY) {
-            var oProfile = readThemeProfile();
-            this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(ThemeContracts.MODES.MORNING, oClickXY, {
-                animationEnabled: oProfile.animationEnabled
-            });
+            return applyMorningMode(this, oClickXY);
         },
         _ensureThemeSyncListener: function () {
-            if (this._fnThemeChangedHandler) {
-                return;
-            }
-            this._fnThemeChangedHandler = function () {
-                ThemeService.syncTokensFromUI5();
-            }.bind(this);
-            Ui5RuntimeFacade.attachThemeChanged(this._fnThemeChangedHandler);
+            ensureThemeSyncListener(this);
         },
         _applyTheme: function (sTheme) {
             var oProfile = readThemeProfile();
-            this._ensureThemeSyncListener();
+            ensureThemeSyncListener(this);
             return ThemeService.applyTheme(sTheme, null, {
                 animationEnabled: oProfile.animationEnabled
             });

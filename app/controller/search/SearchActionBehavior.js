@@ -1,5 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
@@ -7,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ControllerActionBusyRuntime, UiDecisionCoordinator, NavigationIntentService, SearchCommandPolicy, SearchViewBehavior, SearchSelectionRuntime, OperationSourceContracts, CreateSentinel) {
+], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchCommandPolicy, SearchViewBehavior, SearchSelectionRuntime, OperationSourceContracts, CreateSentinel) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -26,9 +27,10 @@ sap.ui.define([
     }
 
 
+
     function onCreate(oController) {
         SearchViewBehavior.captureSearchScrollPosition(oController);
-        return ControllerActionBusyRuntime.run(oController, "/createActionBusy", function () {
+        return ControllerActionBusyRuntime.withActionBusy(oController, "/createActionBusy", function () {
             NavigationIntentService.navigateToDetail(oController, CreateSentinel.toRouteId());
             return Promise.resolve(true);
         });
