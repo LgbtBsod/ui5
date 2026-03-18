@@ -22,11 +22,39 @@ sap.ui.define([
         );
     });
 
-    QUnit.test("unload beacon release stays disabled for productive Gateway compatibility", function (assert) {
+    QUnit.test("unload release queues keepalive fetch when token and payload are available", function (assert) {
+        var fnOriginalFetch = window.fetch;
+        var aCalls = [];
+
+        window.fetch = function (sUrl, mOptions) {
+            aCalls.push({ url: sUrl, options: mOptions });
+            return Promise.resolve();
+        };
+
         assert.strictEqual(
-            ComponentLockReleaseRuntime.tryBeaconLockRelease("http://example.test/LockRelease", { RootId: "1" }, "token"),
-            false,
-            "Beacon release is disabled"
+            ComponentLockReleaseRuntime.tryBeaconLockRelease("http://example.test/LockRelease", { RootId: "1", SessionGuid: "S1" }, "token"),
+            true,
+            "Keepalive release was queued"
         );
+        assert.strictEqual(aCalls.length, 1, "Fetch was called once");
+        assert.ok(aCalls[0].url.indexOf("RootId=1") >= 0, "RootId is sent as a function import parameter");
+        assert.ok(aCalls[0].url.indexOf("SessionGuid=S1") >= 0, "SessionGuid is sent as a function import parameter");
+        assert.strictEqual(aCalls[0].options.method, "POST", "Release uses POST");
+        assert.strictEqual(aCalls[0].options.keepalive, true, "Release uses keepalive transport");
+        assert.strictEqual(aCalls[0].options.headers["X-CSRF-Token"], "token", "CSRF token is forwarded");
+
+        window.fetch = fnOriginalFetch;
+    });
+
+    QUnit.test("unload release returns false when fetch transport is unavailable", function (assert) {
+        var fnOriginalFetch = window.fetch;
+
+        window.fetch = undefined;
+        assert.strictEqual(
+            ComponentLockReleaseRuntime.tryBeaconLockRelease("http://example.test/LockRelease", { RootId: "1", SessionGuid: "S1" }, "token"),
+            false,
+            "Keepalive release falls back when fetch is unavailable"
+        );
+        window.fetch = fnOriginalFetch;
     });
 });

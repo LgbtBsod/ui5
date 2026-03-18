@@ -22,12 +22,36 @@
     }
 
     function normalizeStoredThemeProfile() {
+        var oStoredProfile;
+        var sStoredTheme;
+        var sMode;
+        var bAnimationEnabled;
+        var oNormalizedProfile;
         try {
-            window.localStorage.setItem("checklist_app_theme_profile", JSON.stringify({
-                mode: "morning",
-                animationEnabled: true
-            }));
-            window.localStorage.setItem("checklist_app_theme", "morning");
+            oStoredProfile = JSON.parse(window.localStorage.getItem("checklist_app_theme_profile") || "null");
+        } catch (_profileParseError) {
+            oStoredProfile = null;
+        }
+        try {
+            sStoredTheme = String(window.localStorage.getItem("checklist_app_theme") || "").trim();
+            sMode = oStoredProfile && typeof oStoredProfile.mode === "string" && oStoredProfile.mode.trim()
+                ? oStoredProfile.mode.trim()
+                : (sStoredTheme || "morning");
+            bAnimationEnabled = oStoredProfile && typeof oStoredProfile.animationEnabled === "boolean"
+                ? oStoredProfile.animationEnabled
+                : true;
+            oNormalizedProfile = {
+                mode: sMode,
+                animationEnabled: bAnimationEnabled
+            };
+            if (!oStoredProfile
+                || oStoredProfile.mode !== oNormalizedProfile.mode
+                || oStoredProfile.animationEnabled !== oNormalizedProfile.animationEnabled) {
+                window.localStorage.setItem("checklist_app_theme_profile", JSON.stringify(oNormalizedProfile));
+            }
+            if (sStoredTheme !== sMode) {
+                window.localStorage.setItem("checklist_app_theme", sMode);
+            }
         } catch (_e) {
             // Best-effort normalization only.
         }

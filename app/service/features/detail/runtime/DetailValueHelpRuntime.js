@@ -60,10 +60,12 @@ sap.ui.define([
             var sValue = oEvent.getParameter("newValue");
             mHooks.clearSearchTimer();
             mHooks.restartSearchTimer(function () {
-                mHooks.withViewFlag(VIEW_PATHS.LOCATION_VH_BUSY, function () {
+                Promise.resolve(mHooks.withViewFlag(VIEW_PATHS.LOCATION_VH_BUSY, function () {
                     return mHooks.valueHelpLocation({ intent: DETAIL_SOURCES.SEARCH, value: sValue });
-                }).then(function () {
+                })).then(function () {
                     mHooks.scheduleTableSync();
+                }).catch(function () {
+                    return;
                 });
             }, 180);
         },

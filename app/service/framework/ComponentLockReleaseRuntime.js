@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
@@ -34,14 +34,42 @@ sap.ui.define([
         return String(sServiceUrl).replace(/\/+$/, "") + "/LockRelease";
     }
 
+    function buildRequestUrl(sUrl, oPayload) {
+        var aQueryParts = [];
+        Object.keys(oPayload || {}).forEach(function (sKey) {
+            var vValue = oPayload[sKey];
+            if (vValue === null || typeof vValue === "undefined" || String(vValue).trim() === "") {
+                return;
+            }
+            aQueryParts.push(encodeURIComponent(sKey) + "=" + encodeURIComponent(String(vValue)));
+        });
+        if (!sUrl || !aQueryParts.length) {
+            return "";
+        }
+        return sUrl + (sUrl.indexOf("?") >= 0 ? "&" : "?") + aQueryParts.join("&");
+    }
+
     function tryBeaconLockRelease(sUrl, oPayload, sToken) {
-        void sUrl;
-        void oPayload;
-        void sToken;
-        // Productive Gateway release remains a normal in-app flow with CSRF header support.
-        // Unload/pagehide release is intentionally disabled because sendBeacon cannot satisfy
-        // the productive contract reliably and caused false "released" expectations.
-        return false;
+        var sRequestUrl = buildRequestUrl(sUrl, oPayload);
+        if (!sRequestUrl || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
+            return false;
+        }
+        try {
+            Promise.resolve(window.fetch(sRequestUrl, {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "X-CSRF-Token": sToken
+                },
+                credentials: "same-origin",
+                keepalive: true
+            })).catch(function () {
+                return;
+            });
+            return true;
+        } catch (_fetchError) {
+            return false;
+        }
     }
 
     return {
