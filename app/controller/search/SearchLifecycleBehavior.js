@@ -55,6 +55,7 @@ sap.ui.define([
         oController._iLocationSuggestTimer = null;
         oController._aLocationSuggestCache = [];
         oController._sLocationSuggestNeedle = "";
+        oController._iLocationSuggestRequestVersion = 0;
         oController._searchRateProgress = SearchRateProgress;
         oController._sSearchUiSessionKey = SearchViewStateRuntime.resolveSearchUiSessionKey();
         oController.setModel(SearchViewStateRuntime.createViewModel(oController._sSearchUiSessionKey), VIEW_MODEL);
@@ -102,6 +103,7 @@ sap.ui.define([
         oController._iLocationSuggestTimer = null;
         oController._aLocationSuggestCache = [];
         oController._sLocationSuggestNeedle = "";
+        oController._iLocationSuggestRequestVersion = 0;
         if (oController._oAnalyticsRefreshBinding) {
             oController._oAnalyticsRefreshBinding = ControllerResourceCleanup.destroyBinding(oController._oAnalyticsRefreshBinding, oController._fnAnalyticsRefreshChanged);
         }
@@ -119,6 +121,7 @@ sap.ui.define([
     }
 
     function onSearchMatched(oController, fnApplyAnalyticsDrilldownIntent) {
+        oController._bSearchInitialRouteHandled = true;
         oController._bSearchRouteActive = true;
         SearchViewBehavior.onSearchMatched(oController);
         fnApplyAnalyticsDrilldownIntent();

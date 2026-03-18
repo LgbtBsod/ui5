@@ -54,7 +54,9 @@ sap.ui.define([
         var oStateModel = oController.getModel && oController.getModel(ModelContracts.MODELS.STATE);
         var sCurrentRouteName = String(oStateModel && oStateModel.getProperty && oStateModel.getProperty("/currentRouteName") || "").trim();
         if (!oController._bAnalyticsInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS) {
-            oController._onAnalyticsMatched();
+            Promise.resolve(oController._onAnalyticsMatched()).catch(function () {
+                return null;
+            });
         }
         if (sCurrentRouteName !== NavigationContracts.ROUTES.ANALYTICS) {
             clearRefreshTimer(oController);

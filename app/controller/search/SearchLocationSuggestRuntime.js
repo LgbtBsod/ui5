@@ -55,10 +55,13 @@ sap.ui.define([
         var sNeedle = sValue.toLowerCase();
         oController._iLocationSuggestTimer = SchedulingRuntime.clearTimer(oController._iLocationSuggestTimer);
         oController._iLocationSuggestTimer = SchedulingRuntime.restartTimer(0, function () {
+            var iRequestVersion;
             oController._iLocationSuggestTimer = null;
             if (!oControl) {
                 return;
             }
+            iRequestVersion = Number(oController._iLocationSuggestRequestVersion || 0) + 1;
+            oController._iLocationSuggestRequestVersion = iRequestVersion;
             if (sNeedle && Array.isArray(oController._aLocationSuggestCache) && oController._aLocationSuggestCache.length && oController._sLocationSuggestNeedle && sNeedle.indexOf(oController._sLocationSuggestNeedle) === 0) {
                 updateLocationSuggestions(oControl, oController._aLocationSuggestCache.filter(function (oItem) {
                     var sCode = String((oItem && (oItem.location_code || oItem.location_id)) || "").toLowerCase();
@@ -73,12 +76,19 @@ sap.ui.define([
             }
             Promise.resolve(oLookup.search({ query: sValue, limit: 50 }))
                 .then(function (oFound) {
-                    var aItems = (oFound && oFound.items) || [];
+                    var aItems;
+                    if (oController._iLocationSuggestRequestVersion !== iRequestVersion) {
+                        return;
+                    }
+                    aItems = (oFound && oFound.items) || [];
                     oController._aLocationSuggestCache = aItems;
                     oController._sLocationSuggestNeedle = sNeedle;
                     updateLocationSuggestions(oControl, aItems, Item);
                 })
                 .catch(function () {
+                    if (oController._iLocationSuggestRequestVersion !== iRequestVersion) {
+                        return;
+                    }
                     updateLocationSuggestions(oControl, [], Item);
                 });
         }, 180);

@@ -42,6 +42,19 @@ sap.ui.define([
         return WorkflowContracts.isEditableMode(sMode);
     }
 
+    function handleDetailRouteMatchFailure(oController, oError) {
+        DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false);
+        ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
+        if (oController && typeof oController.showI18nError === "function") {
+            oController.showI18nError("unexpectedError");
+        }
+        return {
+            ok: false,
+            error: oError
+        };
+    }
+
     return {
         ensureEffectDialog: function (sId) {
             var sFragment = DialogContracts.getFragmentName(sId);
@@ -110,18 +123,21 @@ sap.ui.define([
             }
 
             if (mContext.bCreate) {
-                Promise.resolve(DetailMatchedRuntime.openCreateDraft(this, mContext, {
+                return Promise.resolve(DetailMatchedRuntime.openCreateDraft(this, mContext, {
                     openChecklist: function (mInput) {
                         return DetailCommandPolicy.open(this, mInput);
                     }.bind(this)
                 })).then(function (oResult) {
-                    markDetailReady(this, {
-                        mode: "create",
-                        rootId: mContext.sId
-                    });
+                    if (!oResult || oResult.ok !== false) {
+                        markDetailReady(this, {
+                            mode: "create",
+                            rootId: mContext.sId
+                        });
+                    }
                     return oResult;
+                }.bind(this)).catch(function (oError) {
+                    return handleDetailRouteMatchFailure(this, oError);
                 }.bind(this));
-                return;
             }
 
                 if (mContext.sPostOpenHydratedRootId && mContext.sPostOpenHydratedRootId === mContext.sId && mContext.sSelectedRootId === mContext.sId) {
@@ -141,7 +157,7 @@ sap.ui.define([
             }
 
             ModelStateRuntime.write(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, mContext.sId);
-            DetailCommandPolicy.open(this, { id: mContext.sId, rootId: mContext.sId }).then(function (oResult) {
+            return DetailCommandPolicy.open(this, { id: mContext.sId, rootId: mContext.sId }).then(function (oResult) {
                 var oAccessState;
                 if (oResult && oResult.ok === false) {
                     if (!oResult.error || oResult.error.code !== "NO_VIEW_PERMISSION") {
@@ -174,6 +190,8 @@ sap.ui.define([
                     });
                     return oResult;
                 }.bind(this));
+            }.bind(this)).catch(function (oError) {
+                return handleDetailRouteMatchFailure(this, oError);
             }.bind(this));
         },
 

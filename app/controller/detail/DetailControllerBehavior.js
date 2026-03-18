@@ -39,6 +39,14 @@ sap.ui.define([
     var INFO_CARD_TEXT_FALLBACKS = DetailRuntimeContracts.INFO_CARD_TEXT_FALLBACKS;
     var VIEW_DEFAULTS = DetailRuntimeContracts.VIEW_DEFAULTS;
 
+    function safeDecodeRoutePart(vValue) {
+        try {
+            return decodeURIComponent(vValue || "");
+        } catch (_decodeError) {
+            return String(vValue || "");
+        }
+    }
+
     function parseInitialDetailHash() {
         var sHash = String((typeof window !== "undefined" && window.location && window.location.hash) || "").trim();
         var oMatch;
@@ -51,8 +59,8 @@ sap.ui.define([
             return null;
         }
         return {
-            id: decodeURIComponent(oMatch[1] || ""),
-            layout: decodeURIComponent(oMatch[2] || "")
+            id: safeDecodeRoutePart(oMatch[1]),
+            layout: safeDecodeRoutePart(oMatch[2])
         };
     }
 

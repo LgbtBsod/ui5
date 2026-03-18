@@ -80,6 +80,9 @@ sap.ui.define([
                 }
             });
             return aContent[0] || null;
+        }).catch(function (oError) {
+            oController._pAnalyticsBreakdownsContent = null;
+            throw oError;
         });
         return oController._pAnalyticsBreakdownsContent;
     }
@@ -118,6 +121,9 @@ sap.ui.define([
                 return AnalyticsLoadBehavior.onAnalyticsMatched(this, function (oController, sReason) {
                     return oController._loadAnalytics(sReason);
                 });
+            }.bind(this)).catch(function (oError) {
+                ControllerViewStateRuntime.set(this, PATHS.ERROR, String((oError && oError.message) || AnalyticsUiContracts.MESSAGES.ANALYTICS_LOAD_FAILED));
+                return null;
             }.bind(this));
         },
 
