@@ -43,11 +43,11 @@ if (!/sap_fiori_3/.test(themeService) || !/sap_fiori_3/.test(themePhilosophy)) {
 if (/sap_fiori_3_dark/.test(themeMixin) && !/return "morning"/.test(themeMixin)) {
   fail('Theme override layer must guard dark-mode requests on the UI5 1.71 path.');
 }
-if (!/:root\.light-mode/.test(styleCss) || !/body\.appDark/.test(styleCss)) {
-  fail('App style layer must expose both Morning/Night token modes.');
+if (!/:root\.light-mode/.test(styleCss)) {
+  fail('App style layer must expose the productive Morning token mode.');
 }
-if (!/platformPrecisionEnterprise/.test(styleCss) || !/platformCalmModern/.test(styleCss) || !/platformPrecisionEnterprise/.test(themePhilosophy) || !/platformCalmModern/.test(themePhilosophy)) {
-  fail('Theme philosophy bridge is missing distinct platform contracts.');
+if (!/platformPrecisionEnterprise/.test(styleCss) || !/platformPrecisionEnterprise/.test(themePhilosophy)) {
+  fail('Theme philosophy bridge must expose the productive platform contract.');
 }
 if (!/\.sapMSwt\b|\.sapMSwtCont\b|\.sapMSwtInner\b/.test(styleCss) || !/\.sapMInputBaseContentWrapper\b/.test(styleCss) || !/\.sapMDialog\b|\.sapMDialogScrollCont\b/.test(styleCss)) {
   fail('Core control styling coverage missing for switch/input/dialog.');

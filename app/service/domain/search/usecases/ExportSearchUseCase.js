@@ -4,9 +4,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
-], function (UseCase, Result, Effects, SpreadsheetExport, ChecklistIdentity, SearchMaxResults, WorkflowTelemetry) {
+], function (UseCase, Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry) {
     "use strict";
 
     function ExportSearchUseCase() {
@@ -19,6 +20,8 @@ sap.ui.define([
     function pick(v, fallback) {
         return v === undefined || v === null ? fallback : v;
     }
+
+    var pickFirstDefined = NullishPick.firstDefined;
 
     function pickFilterValue(vValue) {
         if (vValue == null) {
@@ -67,32 +70,45 @@ sap.ui.define([
             : {};
         var aRanges = Array.isArray(oRange.ranges) ? oRange.ranges : [];
         var oFirstRange = aRanges[0] || oRange;
-        var sFrom = pickFilterValue(oFirstRange.value1 || oFirstRange.low || vValue);
-        var sTo = pickFilterValue(oFirstRange.value2 || oFirstRange.high || sFrom);
+        var sFrom = pickFilterValue(pickFirstDefined(oFirstRange.value1, oFirstRange.low, vValue));
+        var sTo = pickFilterValue(pickFirstDefined(oFirstRange.value2, oFirstRange.high, sFrom));
         return {
             dateFrom: sFrom,
             dateTo: sTo || sFrom
         };
     }
 
+    function hasComplexDateRange(vValue) {
+        var oRange = vValue && typeof vValue === "object" && !Array.isArray(vValue) ? vValue : null;
+        var aRanges = oRange && Array.isArray(oRange.ranges) ? oRange.ranges : [];
+        var sOperation = String((oRange && oRange.operation) || "").trim();
+        if (aRanges.length > 1) {
+            return true;
+        }
+        if (aRanges.length === 1) {
+            sOperation = String((aRanges[0] && aRanges[0].operation) || sOperation).trim();
+        }
+        return !!sOperation && sOperation !== "BT";
+    }
+
     function normalizeRows(aRows, sEntity) {
         return (aRows || []).map(function (oRow) {
             var o = oRow || {};
             return {
-                RootKey: pick(o.RootKey || o.rootKey || o.Key || o.key, ""),
-                Id: pick(o.Id || o.id, ""),
-                Lpc: pick(o.LpcText || o.Lpc || o.lpc, ""),
-                Profession: pick(o.ProfessionText || o.Profession || o.profession, ""),
-                Location: pick(o.LocationKey || o.location_key, ""),
-                Status: pick(o.Status || o.status, ""),
-                DateCheck: pick(o.DateCheck || o.date_check, ""),
-                EquipName: pick(o.EquipName || o.equipment, ""),
-                ChangedOn: pick(o.ChangedOn || o.changed_on, ""),
-                ItemType: pick(o.ItemType || o.itemType, ""),
-                Num: pick(o.Num || o.num, ""),
-                Text: pick(o.Text || o.text, ""),
-                Comment: pick(o.Comment || o.comment, ""),
-                Result: pick(o.Result || o.result, "")
+                RootKey: pick(pickFirstDefined(o.RootKey, o.rootKey, o.Key, o.key), ""),
+                Id: pick(pickFirstDefined(o.Id, o.id), ""),
+                Lpc: pick(pickFirstDefined(o.LpcText, o.Lpc, o.lpc), ""),
+                Profession: pick(pickFirstDefined(o.ProfessionText, o.Profession, o.profession), ""),
+                Location: pick(pickFirstDefined(o.LocationKey, o.location_key), ""),
+                Status: pick(pickFirstDefined(o.Status, o.status), ""),
+                DateCheck: pick(pickFirstDefined(o.DateCheck, o.date_check), ""),
+                EquipName: pick(pickFirstDefined(o.EquipName, o.equipment), ""),
+                ChangedOn: pick(pickFirstDefined(o.ChangedOn, o.changed_on), ""),
+                ItemType: pick(pickFirstDefined(o.ItemType, o.itemType), ""),
+                Num: pick(pickFirstDefined(o.Num, o.num), ""),
+                Text: pick(pickFirstDefined(o.Text, o.text), ""),
+                Comment: pick(pickFirstDefined(o.Comment, o.comment), ""),
+                Result: pick(pickFirstDefined(o.Result, o.result), "")
             };
         }).filter(function (oRow) {
             if (sEntity === "check" || sEntity === "barrier") {
@@ -126,13 +142,32 @@ sap.ui.define([
         };
     }
 
+    function resolveBoundRowsForCurrentFilters(mInput, mCtx) {
+        var oSmart = mCtx && mCtx.smartControls;
+        var oStateModel = mCtx && mCtx.stateModel;
+        var mState = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
+        var iExportLimit = SearchMaxResults.resolveExportLimit(mState);
+        if (!oSmart || typeof oSmart.getBoundRows !== "function") {
+            return Promise.reject(new Error("EXPORT_FILTER_STATE_UNSUPPORTED"));
+        }
+        return Promise.resolve(oSmart.getBoundRows(iExportLimit)).then(function (aRows) {
+            return Array.isArray(aRows) ? aRows : [];
+        });
+    }
+
     function resolveExportRows(mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
         var oStateModel = mCtx && mCtx.stateModel;
+        var oSmart = mCtx && mCtx.smartControls;
         var aSelectedIds = ChecklistIdentity.normalizeChecklistIds(mInput && mInput.selectedRowIds);
         var mState = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
         var iExportLimit = SearchMaxResults.resolveExportLimit(mState);
         var oRequest;
+        var mFilterData = (mInput && mInput.filterData) || (
+            oSmart && typeof oSmart.getSmartFilterData === "function"
+                ? oSmart.getSmartFilterData()
+                : {}
+        ) || {};
 
         if (!oRepo || typeof oRepo.exportSearchResults !== "function") {
             return Promise.reject(new Error("EXPORT_HANDLER_MISSING"));
@@ -150,6 +185,9 @@ sap.ui.define([
             oRequest.rootIds = aSelectedIds;
             oRequest.selectionMode = "selected";
         } else {
+            if (hasComplexDateRange(mFilterData.DateCheck)) {
+                return resolveBoundRowsForCurrentFilters(mInput, mCtx);
+            }
             oRequest.selectionMode = "all";
             oRequest.searchContract = buildSearchContract(mInput, mCtx);
         }

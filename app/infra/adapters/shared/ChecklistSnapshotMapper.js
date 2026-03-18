@@ -1,13 +1,17 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick"
+], function (NullishPick) {
     "use strict";
+
+    var firstDefined = NullishPick.firstDefined;
 
     function mapCheckRow(oItem, iIndex) {
         var o = oItem || {};
-        var nNum = Number(o.ChecksNum || o.checksNum || o.position || (iIndex + 1)) || (iIndex + 1);
-        var sText = String(o.Text || o.text || "").trim();
-        var sComment = String(o.Comment || o.comment || "").trim();
+        var nNum = Number(firstDefined(o.ChecksNum, o.checksNum, o.position, iIndex + 1)) || (iIndex + 1);
+        var sText = String(firstDefined(o.Text, o.text, "")).trim();
+        var sComment = String(firstDefined(o.Comment, o.comment, "")).trim();
         var bResult = Object.prototype.hasOwnProperty.call(o, "Result") ? !!o.Result : !!o.result;
-        var sKey = String(o.Key || o.key || o.check_uuid || "").trim();
+        var sKey = String(firstDefined(o.Key, o.key, o.check_uuid, "")).trim();
         return Object.assign({}, o, {
             id: sKey,
             Key: sKey,
@@ -26,11 +30,11 @@ sap.ui.define([], function () {
 
     function mapBarrierRow(oItem, iIndex) {
         var o = oItem || {};
-        var nNum = Number(o.BarriersNum || o.barriersNum || o.position || (iIndex + 1)) || (iIndex + 1);
-        var sText = String(o.Text || o.text || o.Description || o.description || "").trim();
-        var sComment = String(o.Comment || o.comment || "").trim();
+        var nNum = Number(firstDefined(o.BarriersNum, o.barriersNum, o.position, iIndex + 1)) || (iIndex + 1);
+        var sText = String(firstDefined(o.Text, o.text, o.Description, o.description, "")).trim();
+        var sComment = String(firstDefined(o.Comment, o.comment, "")).trim();
         var bResult = Object.prototype.hasOwnProperty.call(o, "Result") ? !!o.Result : !!o.result;
-        var sKey = String(o.Key || o.key || o.barrier_uuid || "").trim();
+        var sKey = String(firstDefined(o.Key, o.key, o.barrier_uuid, "")).trim();
         return Object.assign({}, o, {
             id: sKey,
             Key: sKey,
@@ -51,32 +55,32 @@ sap.ui.define([], function () {
 
     function mapAttachmentRow(oItem) {
         var o = oItem || {};
-        var sKey = String(o.AttachmentKey || o.Key || o.key || "").trim();
+        var sKey = String(firstDefined(o.AttachmentKey, o.Key, o.key, "")).trim();
         return Object.assign({}, o, {
             Key: sKey,
             AttachmentKey: sKey,
-            RootKey: String(o.RootKey || o.rootKey || "").trim(),
-            ParentKey: String(o.ParentKey || o.parentKey || o.RootKey || o.rootKey || "").trim(),
-            FolderKey: String(o.FolderKey || o.folderKey || "").trim(),
-            fileName: String(o.FileName || o.fileName || "").trim(),
-            FileName: String(o.FileName || o.fileName || "").trim(),
-            mimeType: String(o.MimeType || o.mimeType || "application/octet-stream").trim(),
-            MimeType: String(o.MimeType || o.mimeType || "application/octet-stream").trim(),
-            description: String(o.Description || o.description || "").trim(),
-            Description: String(o.Description || o.description || "").trim(),
-            fileSize: Number(o.FileSize || o.fileSize || 0) || 0,
-            FileSize: Number(o.FileSize || o.fileSize || 0) || 0,
-            fileSizeContent: Number(o.FileSizeContent || o.fileSizeContent || o.FileSize || o.fileSize || 0) || 0,
-            FileSizeContent: Number(o.FileSizeContent || o.fileSizeContent || o.FileSize || o.fileSize || 0) || 0,
-            changedOn: String(o.ChangedOn || o.changedOn || "").trim(),
-            ChangedOn: String(o.ChangedOn || o.changedOn || "").trim(),
-            createdOn: String(o.CreatedOn || o.createdOn || "").trim(),
-            CreatedOn: String(o.CreatedOn || o.createdOn || "").trim(),
-            categoryKey: String(o.CategoryKey || o.categoryKey || "GEN").trim(),
-            CategoryKey: String(o.CategoryKey || o.categoryKey || "GEN").trim(),
-            categoryText: String(o.CategoryText || o.categoryText || "").trim(),
-            CategoryText: String(o.CategoryText || o.categoryText || "").trim(),
-            Value: String(o.Value || o.value || "").trim()
+            RootKey: String(firstDefined(o.RootKey, o.rootKey, "")).trim(),
+            ParentKey: String(firstDefined(o.ParentKey, o.parentKey, o.RootKey, o.rootKey, "")).trim(),
+            FolderKey: String(firstDefined(o.FolderKey, o.folderKey, "")).trim(),
+            fileName: String(firstDefined(o.FileName, o.fileName, "")).trim(),
+            FileName: String(firstDefined(o.FileName, o.fileName, "")).trim(),
+            mimeType: String(firstDefined(o.MimeType, o.mimeType, "application/octet-stream")).trim(),
+            MimeType: String(firstDefined(o.MimeType, o.mimeType, "application/octet-stream")).trim(),
+            description: String(firstDefined(o.Description, o.description, "")).trim(),
+            Description: String(firstDefined(o.Description, o.description, "")).trim(),
+            fileSize: Number(firstDefined(o.FileSize, o.fileSize, 0)) || 0,
+            FileSize: Number(firstDefined(o.FileSize, o.fileSize, 0)) || 0,
+            fileSizeContent: Number(firstDefined(o.FileSizeContent, o.fileSizeContent, o.FileSize, o.fileSize, 0)) || 0,
+            FileSizeContent: Number(firstDefined(o.FileSizeContent, o.fileSizeContent, o.FileSize, o.fileSize, 0)) || 0,
+            changedOn: String(firstDefined(o.ChangedOn, o.changedOn, "")).trim(),
+            ChangedOn: String(firstDefined(o.ChangedOn, o.changedOn, "")).trim(),
+            createdOn: String(firstDefined(o.CreatedOn, o.createdOn, "")).trim(),
+            CreatedOn: String(firstDefined(o.CreatedOn, o.createdOn, "")).trim(),
+            categoryKey: String(firstDefined(o.CategoryKey, o.categoryKey, "GEN")).trim(),
+            CategoryKey: String(firstDefined(o.CategoryKey, o.categoryKey, "GEN")).trim(),
+            categoryText: String(firstDefined(o.CategoryText, o.categoryText, "")).trim(),
+            CategoryText: String(firstDefined(o.CategoryText, o.categoryText, "")).trim(),
+            Value: String(firstDefined(o.Value, o.value, "")).trim()
         });
     }
 

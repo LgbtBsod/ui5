@@ -1,22 +1,23 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFilterSegmentBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFormatterBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFilterLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLocationSuggestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchToolbarDialogRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchToolbarBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchInteractionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchAnalyticsIntentBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
     "sap/ui/core/Item"
-], function (SearchActionBehavior, SearchFilterSegmentBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchToolbarBehavior, SearchInteractionBehavior, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerActionBusyRuntime, SearchToolbarContracts, ModelContracts, OperationSourceContracts, Item) {
+], function (SearchActionBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerActionBusyRuntime, ControllerViewStateRuntime, ReadinessTelemetryRuntime, SearchToolbarContracts, SearchLoadRuntime, ModelContracts, OperationSourceContracts, ReadinessTelemetryContracts, Item) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -90,11 +91,34 @@ sap.ui.define([
         },
 
         onSmartSearch: function () {
-            return SearchInteractionBehavior.onSmartSearch(this);
+            ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SEARCH_INTERACTION_READY, {
+                action: "smartSearch"
+            });
+            SearchViewBehavior.beginSearchLoadingFeedback(this);
+            return SearchFilterLifecycleBehavior.onSmartSearch(this, function (sBusyPath, fnAction) {
+                return ControllerActionBusyRuntime.withActionBusy(this, sBusyPath, fnAction, function (bBusy) {
+                    SearchViewBehavior.setSearchActionBusy(this, bBusy);
+                }.bind(this));
+            }.bind(this));
         },
 
         onRetrySearchLoad: function () {
-            return SearchInteractionBehavior.onRetrySearchLoad(this);
+            SearchLoadRuntime.markLoading(this);
+            SearchViewBehavior.beginSearchLoadingFeedback(this);
+            return this._facade && this._facade.rebind
+                ? this.executeFacadeMethod(this._facade, "rebind", {
+                    source: SEARCH_SOURCES.SEARCH_RETRY
+                }, {
+                    smartControls: this.getOwnerComponent()._ctx.smartControls,
+                    stateModel: this.getModel(STATE_MODEL),
+                    viewModel: this.getModel("view")
+                }).finally(function () {
+                    SearchLoadRuntime.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
+                }.bind(this)).catch(function (oError) {
+                    SearchLoadRuntime.applyLoadError(this, String((oError && oError.message) || "Unable to load search results."));
+                    return Promise.reject(oError);
+                }.bind(this))
+                : Promise.resolve();
         },
 
         onCreate: function () {
@@ -150,7 +174,23 @@ sap.ui.define([
         },
 
         onSearchSortDialogConfirm: function (oEvent) {
-            return SearchToolbarBehavior.onSearchSortDialogConfirm(this, oEvent);
+            var oSortItem = oEvent && oEvent.getParameter && oEvent.getParameter("sortItem");
+            var bSortDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("sortDescending"));
+            return SearchToolbarDialogRuntime.applySearchSortSettings(this, {
+                sortKey: oSortItem && oSortItem.getKey && oSortItem.getKey(),
+                sortDescending: bSortDescending
+            }, {
+                ControllerViewStateRuntime: ControllerViewStateRuntime,
+                SearchCommandPolicy: this._facade ? {
+                    rebind: function (oController, mInput) {
+                        return oController.executeFacadeMethod(oController._facade, "rebind", mInput || {}, {
+                            smartControls: oController.getOwnerComponent()._ctx.smartControls,
+                            stateModel: oController.getModel(STATE_MODEL),
+                            viewModel: oController.getModel("view")
+                        });
+                    }
+                } : null
+            });
         },
 
         onOpenSearchGroupDialog: function () {
@@ -158,7 +198,23 @@ sap.ui.define([
         },
 
         onSearchGroupDialogConfirm: function (oEvent) {
-            return SearchToolbarBehavior.onSearchGroupDialogConfirm(this, oEvent);
+            var oGroupItem = oEvent && oEvent.getParameter && oEvent.getParameter("groupItem");
+            var bGroupDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("groupDescending"));
+            return SearchToolbarDialogRuntime.applySearchGroupSettings(this, {
+                groupKey: oGroupItem && oGroupItem.getKey && oGroupItem.getKey(),
+                groupDescending: bGroupDescending
+            }, {
+                ControllerViewStateRuntime: ControllerViewStateRuntime,
+                SearchCommandPolicy: this._facade ? {
+                    rebind: function (oController, mInput) {
+                        return oController.executeFacadeMethod(oController._facade, "rebind", mInput || {}, {
+                            smartControls: oController.getOwnerComponent()._ctx.smartControls,
+                            stateModel: oController.getModel(STATE_MODEL),
+                            viewModel: oController.getModel("view")
+                        });
+                    }
+                } : null
+            });
         },
 
         onOpenWorkflowAnalytics: function (oEvent) {
@@ -182,11 +238,25 @@ sap.ui.define([
         },
 
         onChecksFailSegmentChange: function (oEvent) {
-            SearchFilterSegmentBehavior.onChecksFailSegmentChange(this, oEvent);
+            this.executeFacadeMethod(this._facade, "buildFilter", {
+                intent: SEARCH_SOURCES.CHECKS_SEGMENT,
+                key: oEvent.getParameter("key")
+            }, {
+                smartControls: this.getOwnerComponent()._ctx.smartControls,
+                stateModel: this.getModel(STATE_MODEL),
+                viewModel: this.getModel("view")
+            });
         },
 
         onBarriersFailSegmentChange: function (oEvent) {
-            SearchFilterSegmentBehavior.onBarriersFailSegmentChange(this, oEvent);
+            this.executeFacadeMethod(this._facade, "buildFilter", {
+                intent: SEARCH_SOURCES.BARRIERS_SEGMENT,
+                key: oEvent.getParameter("key")
+            }, {
+                smartControls: this.getOwnerComponent()._ctx.smartControls,
+                stateModel: this.getModel(STATE_MODEL),
+                viewModel: this.getModel("view")
+            });
         },
 
         onExportScreen: function () {

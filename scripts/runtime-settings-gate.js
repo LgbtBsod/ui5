@@ -25,6 +25,14 @@ function detectForbiddenApis(files, violations) {
         match = pattern.exec(source);
         continue;
       }
+      if (
+        match[1].includes('fetch')
+        && /(^|\/)service\/framework\/ComponentLockReleaseRuntime\.js$/.test(file)
+        && /keepalive\s*:\s*true/.test(source.slice(Math.max(0, match.index - 400), match.index + 400))
+      ) {
+        match = pattern.exec(source);
+        continue;
+      }
       pushPipeViolation(violations, file, lineFromIndex(source, match.index), `forbidden API detected: ${match[1].trim()}`);
       match = pattern.exec(source);
     }

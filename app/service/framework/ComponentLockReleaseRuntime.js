@@ -49,13 +49,24 @@ sap.ui.define([
         return sUrl + (sUrl.indexOf("?") >= 0 ? "&" : "?") + aQueryParts.join("&");
     }
 
-    function tryBeaconLockRelease(sUrl, oPayload, sToken) {
-        var sRequestUrl = buildRequestUrl(sUrl, oPayload);
-        if (!sRequestUrl || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
+    function isFetchResponseSuccessful(oResponse) {
+        if (!oResponse) {
             return false;
         }
+        if (typeof oResponse.ok === "boolean") {
+            return oResponse.ok;
+        }
+        return true;
+    }
+
+    function tryBeaconLockRelease(sUrl, oPayload, sToken) {
+        var sRequestUrl = buildRequestUrl(sUrl, oPayload);
+        var pRelease;
+        if (!sRequestUrl || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
+            return null;
+        }
         try {
-            Promise.resolve(window.fetch(sRequestUrl, {
+            pRelease = Promise.resolve(window.fetch(sRequestUrl, {
                 method: "POST",
                 headers: {
                     "Accept": "application/json",
@@ -63,12 +74,15 @@ sap.ui.define([
                 },
                 credentials: "same-origin",
                 keepalive: true
-            })).catch(function () {
-                return;
+            })).then(isFetchResponseSuccessful).catch(function () {
+                return false;
             });
-            return true;
+            return {
+                queued: true,
+                promise: pRelease
+            };
         } catch (_fetchError) {
-            return false;
+            return null;
         }
     }
 

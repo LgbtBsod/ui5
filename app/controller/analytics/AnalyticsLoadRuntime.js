@@ -49,17 +49,88 @@ sap.ui.define([
         ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_ANALYTICS, !!bBusy);
     }
 
+    function normalizeLoadInput(oController, sReason) {
+        var oSelectionState = AnalyticsViewStateReader.readSelectionState(oController);
+        return {
+            selectionState: oSelectionState,
+            selectedYear: YearValue.parseYearOrNull(oSelectionState.selectedYear),
+            compareYear: YearValue.parseYearOrNull(oSelectionState.compareYear),
+            resolvedReason: String(sReason || LOAD_REASONS.MANUAL || "manual")
+        };
+    }
+
+    function validateLoadInput(oController, oLoadInput) {
+        if (oLoadInput.selectedYear !== null) {
+            return true;
+        }
+        ControllerViewStateRuntime.set(oController, PATHS.ERROR, MESSAGES.INVALID_YEAR);
+        setReadinessState(oController, "error", false, "", MESSAGES.INVALID_YEAR);
+        return false;
+    }
+
+    function buildLoadPayload(oLoadInput) {
+        return {
+            reason: oLoadInput.resolvedReason,
+            selectedYear: oLoadInput.selectedYear,
+            compareYear: oLoadInput.compareYear,
+            selectedSource: oLoadInput.selectionState.selectedSource
+        };
+    }
+
+    function syncAnalyticsSelectionState(oController, mHooks, oAnalytics) {
+        if (Array.isArray(oAnalytics.availableYears) && oAnalytics.availableYears.length) {
+            ControllerViewStateRuntime.set(oController, PATHS.AVAILABLE_YEARS, oAnalytics.availableYears);
+        }
+        if (oAnalytics.selectedYear) {
+            ControllerViewStateRuntime.set(oController, PATHS.SELECTED_YEAR, String(oAnalytics.selectedYear));
+        }
+        if (oAnalytics.compareYear) {
+            ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR, String(oAnalytics.compareYear));
+        } else if (oAnalytics.selectedYear) {
+            mHooks.syncCompareYearDefaults(oController, String(oAnalytics.selectedYear));
+        }
+        if (oAnalytics.source) {
+            ControllerViewStateRuntime.set(oController, PATHS.SELECTED_SOURCE, String(oAnalytics.source));
+        }
+        if (oAnalytics.refreshState) {
+            ControllerViewStateRuntime.set(oController, PATHS.REFRESH_STATE, oAnalytics.refreshState);
+        }
+    }
+
+    function finalizeAnalyticsLoad(oController, mHooks) {
+        ControllerViewStateRuntime.set(oController, PATHS.AVAILABLE_YEARS, mHooks.buildYearOptions(oController));
+        ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR_OPTIONS, mHooks.buildCompareYearOptions(oController));
+        mHooks.setCompareYearValidation(oController, AnalyticsUiContracts.VALIDATION_STATES.NONE, "");
+        mHooks.applyComparisonMetricSelection(oController);
+        mHooks.applyBuilderSelection(oController);
+        mHooks.syncAnalyticsContextHints(oController);
+    }
+
+    function applySuccessfulLoad(oController, oLoadInput, mHooks, oResult) {
+        var oAnalytics = AnalyticsViewStateReader.readAnalyticsRoot(oController);
+        var sReadyAt = new Date().toISOString();
+        syncAnalyticsSelectionState(oController, mHooks, oAnalytics);
+        finalizeAnalyticsLoad(oController, mHooks);
+        setReadinessState(oController, "ready", true, sReadyAt, "");
+        ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
+            reason: oLoadInput.resolvedReason,
+            source: oLoadInput.selectionState.selectedSource
+        });
+        return oResult;
+    }
+
+    function handleLoadFailure(oController, oError) {
+        var sErrorMessage = String((oError && oError.message) || MESSAGES.ANALYTICS_LOAD_FAILED);
+        ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
+        setReadinessState(oController, "error", false, "", sErrorMessage);
+        throw oError;
+    }
+
     return {
         loadAnalytics: function (oController, sReason, mHooks) {
-            var oSelectionState = AnalyticsViewStateReader.readSelectionState(oController);
-            var iSelectedYear = YearValue.parseYearOrNull(oSelectionState.selectedYear);
-            var iCompareYear = YearValue.parseYearOrNull(oSelectionState.compareYear);
-            var sReadyAt = "";
-            var sResolvedReason = String(sReason || LOAD_REASONS.MANUAL || "manual");
+            var oLoadInput = normalizeLoadInput(oController, sReason);
 
-            if (iSelectedYear === null) {
-                ControllerViewStateRuntime.set(oController, PATHS.ERROR, MESSAGES.INVALID_YEAR);
-                setReadinessState(oController, "error", false, "", MESSAGES.INVALID_YEAR);
+            if (!validateLoadInput(oController, oLoadInput)) {
                 return Promise.resolve(false);
             }
 
@@ -70,53 +141,12 @@ sap.ui.define([
                 oController,
                 oController._facade,
                 "load",
-                {
-                    reason: sResolvedReason,
-                    selectedYear: iSelectedYear,
-                    compareYear: iCompareYear,
-                    selectedSource: oSelectionState.selectedSource
-                },
+                buildLoadPayload(oLoadInput),
                 mHooks.buildCtx(oController)
             ).then(function (oResult) {
-                var oAnalytics = AnalyticsViewStateReader.readAnalyticsRoot(oController);
-
-                sReadyAt = new Date().toISOString();
-
-                if (Array.isArray(oAnalytics.availableYears) && oAnalytics.availableYears.length) {
-                    ControllerViewStateRuntime.set(oController, PATHS.AVAILABLE_YEARS, oAnalytics.availableYears);
-                }
-                if (oAnalytics.selectedYear) {
-                    ControllerViewStateRuntime.set(oController, PATHS.SELECTED_YEAR, String(oAnalytics.selectedYear));
-                }
-                if (oAnalytics.compareYear) {
-                    ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR, String(oAnalytics.compareYear));
-                } else if (oAnalytics.selectedYear) {
-                    mHooks.syncCompareYearDefaults(oController, String(oAnalytics.selectedYear));
-                }
-                if (oAnalytics.source) {
-                    ControllerViewStateRuntime.set(oController, PATHS.SELECTED_SOURCE, String(oAnalytics.source));
-                }
-                if (oAnalytics.refreshState) {
-                    ControllerViewStateRuntime.set(oController, PATHS.REFRESH_STATE, oAnalytics.refreshState);
-                }
-
-                ControllerViewStateRuntime.set(oController, PATHS.AVAILABLE_YEARS, mHooks.buildYearOptions(oController));
-                ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR_OPTIONS, mHooks.buildCompareYearOptions(oController));
-                mHooks.setCompareYearValidation(oController, AnalyticsUiContracts.VALIDATION_STATES.NONE, "");
-                mHooks.applyComparisonMetricSelection(oController);
-                mHooks.applyBuilderSelection(oController);
-                mHooks.syncAnalyticsContextHints(oController);
-                setReadinessState(oController, "ready", true, sReadyAt, "");
-                ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
-                    reason: sResolvedReason,
-                    source: oSelectionState.selectedSource
-                });
-                return oResult;
+                return applySuccessfulLoad(oController, oLoadInput, mHooks, oResult);
             }).catch(function (oError) {
-                var sErrorMessage = String((oError && oError.message) || MESSAGES.ANALYTICS_LOAD_FAILED);
-                ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
-                setReadinessState(oController, "error", false, "", sErrorMessage);
-                throw oError;
+                return handleLoadFailure(oController, oError);
             }).finally(function () {
                 setControllerBusy(oController, false);
             });

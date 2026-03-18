@@ -26,10 +26,10 @@ const constRef = 'FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL';
 const settingsManager = read('app/service/runtime/SettingsManager.js');
 assertCount(settingsManager, `source: ${constRef}`, 2, 'SettingsManager success/failure summary source');
 
-const componentInit = read('app/service/framework/ComponentInitRuntime.js');
-assertIncludes(componentInit, `source: ${constRef}`, 'runtime apply source payload');
-assertIncludes(componentInit, `TelemetryRuntime.runtimeConfig(${constRef})`, 'runtime.config.loaded source');
-assertIncludes(componentInit, `TelemetryRuntime.runtimeConfig(\n                        ${constRef},`, 'runtime.config.load_failed source');
+const runtimeSettingsRuntime = read('app/service/framework/ComponentRuntimeSettingsRuntime.js');
+assertIncludes(runtimeSettingsRuntime, `source: ${constRef}`, 'runtime apply source payload');
+assertIncludes(runtimeSettingsRuntime, `TelemetryRuntime.runtimeConfig(${constRef})`, 'runtime.config.loaded source');
+assertIncludes(runtimeSettingsRuntime, `TelemetryRuntime.runtimeConfig(\n                        ${constRef},`, 'runtime.config.load_failed source');
 
 const applyRuntime = read('app/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase.js');
 assertIncludes(applyRuntime, `oConfig.source || ${constRef}`, 'fallback source');

@@ -1,13 +1,16 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts"
-], function (GatewayRequestRuntime, AnalyticsContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick"
+], function (GatewayRequestRuntime, AnalyticsContracts, NullishPick) {
     "use strict";
 
     function toNumber(vValue) {
         var nValue = Number(vValue);
         return isFinite(nValue) ? nValue : 0;
     }
+
+    var firstDefined = NullishPick.firstDefined;
 
     function normalizeSummary(oData) {
         var oUnwrapped = GatewayRequestRuntime.unwrap(oData);
@@ -19,31 +22,31 @@ sap.ui.define([
             aAvailableYears = [];
         }
         return {
-            selectedYear: toNumber(o.selectedYear || o.SelectedYear),
-            previousYear: toNumber(o.previousYear || o.PreviousYear),
+            selectedYear: toNumber(firstDefined(o.selectedYear, o.SelectedYear)),
+            previousYear: toNumber(firstDefined(o.previousYear, o.PreviousYear)),
             availableYears: Array.isArray(aAvailableYears) ? aAvailableYears : [],
-            total: toNumber(o.total || o.Total),
-            monthly: toNumber(o.monthly || o.Monthly),
-            failedChecks: toNumber(o.failedChecks || o.FailedChecks),
-            failedBarriers: toNumber(o.failedBarriers || o.FailedBarriers),
-            failedChecklistCount: toNumber(o.failedChecklistCount || o.FailedChecklistCount),
-            failedBarrierChecklistCount: toNumber(o.failedBarrierChecklistCount || o.FailedBarrierChecklistCount),
-            closedCount: toNumber(o.closedCount || o.ClosedCount),
-            registeredCount: toNumber(o.registeredCount || o.RegisteredCount),
-            avgChecksRate: toNumber(o.avgChecksRate || o.AvgChecksRate),
-            avgBarriersRate: toNumber(o.avgBarriersRate || o.AvgBarriersRate),
-            refreshedAt: String(o.refreshedAt || o.RefreshedAt || "-"),
-            source: String(o.source || o.Source || "ALL"),
-            sourceText: String(o.sourceText || o.SourceText || o.source || o.Source || "All")
+            total: toNumber(firstDefined(o.total, o.Total)),
+            monthly: toNumber(firstDefined(o.monthly, o.Monthly)),
+            failedChecks: toNumber(firstDefined(o.failedChecks, o.FailedChecks)),
+            failedBarriers: toNumber(firstDefined(o.failedBarriers, o.FailedBarriers)),
+            failedChecklistCount: toNumber(firstDefined(o.failedChecklistCount, o.FailedChecklistCount)),
+            failedBarrierChecklistCount: toNumber(firstDefined(o.failedBarrierChecklistCount, o.FailedBarrierChecklistCount)),
+            closedCount: toNumber(firstDefined(o.closedCount, o.ClosedCount)),
+            registeredCount: toNumber(firstDefined(o.registeredCount, o.RegisteredCount)),
+            avgChecksRate: toNumber(firstDefined(o.avgChecksRate, o.AvgChecksRate)),
+            avgBarriersRate: toNumber(firstDefined(o.avgBarriersRate, o.AvgBarriersRate)),
+            refreshedAt: String(firstDefined(o.refreshedAt, o.RefreshedAt, "-")),
+            source: String(firstDefined(o.source, o.Source, "ALL")),
+            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, "All"))
         };
     }
 
     function normalizeChartRows(vRows) {
         return (Array.isArray(vRows) ? vRows : []).map(function (oRow, index) {
             return {
-                label: String((oRow && (oRow.label || oRow.Label || oRow.bucket_text || oRow.bucketText)) || ""),
-                value: toNumber(oRow && (oRow.value || oRow.Value || oRow.metric_value || oRow.metricValue)),
-                order: toNumber(oRow && (oRow.order || oRow.Order || index + 1))
+                label: String(firstDefined(oRow && oRow.label, oRow && oRow.Label, oRow && oRow.bucket_text, oRow && oRow.bucketText, "")),
+                value: toNumber(firstDefined(oRow && oRow.value, oRow && oRow.Value, oRow && oRow.metric_value, oRow && oRow.metricValue)),
+                order: toNumber(firstDefined(oRow && oRow.order, oRow && oRow.Order, index + 1))
             };
         });
     }
@@ -100,9 +103,9 @@ sap.ui.define([
             var sTarget = mTargetByPair[sDimension + "_" + sMetric] || "";
             if (sTarget) {
                 grouped[sTarget].push({
-                    label: String((oRow && (oRow.Label || oRow.label)) || ""),
-                    value: toNumber(oRow && (oRow.Value || oRow.value)),
-                    order: toNumber(oRow && (oRow.Order || oRow.order))
+                    label: String(firstDefined(oRow && oRow.Label, oRow && oRow.label, "")),
+                    value: toNumber(firstDefined(oRow && oRow.Value, oRow && oRow.value)),
+                    order: toNumber(firstDefined(oRow && oRow.Order, oRow && oRow.order))
                 });
             }
         });
@@ -169,18 +172,18 @@ sap.ui.define([
         var oUnwrapped = GatewayRequestRuntime.unwrap(oData);
             var o = Array.isArray(oUnwrapped) ? (oUnwrapped[0] || {}) : (oUnwrapped || {});
             return {
-                taskKey: String(o.taskKey || o.TaskKey || AnalyticsContracts.REFRESH.TASK_KEY),
-                taskName: String(o.taskName || o.TaskName || AnalyticsContracts.REFRESH.TASK_NAME),
-                status: String(o.status || o.Status || AnalyticsContracts.REFRESH.STATUSES.IDLE),
-                isRunning: !!(o.isRunning || o.IsRunning),
-                requestedAt: String(o.requestedAt || o.RequestedAt || ""),
-                requestedBy: String(o.requestedBy || o.RequestedBy || ""),
-                startedAt: String(o.startedAt || o.StartedAt || ""),
-                finishedAt: String(o.finishedAt || o.FinishedAt || ""),
-                lastSuccessAt: String(o.lastSuccessAt || o.LastSuccessAt || ""),
-                lastError: String(o.lastError || o.LastError || ""),
-                lastMessage: String(o.lastMessage || o.LastMessage || ""),
-                activeRunId: String(o.activeRunId || o.ActiveRunId || "")
+                taskKey: String(firstDefined(o.taskKey, o.TaskKey, AnalyticsContracts.REFRESH.TASK_KEY)),
+                taskName: String(firstDefined(o.taskName, o.TaskName, AnalyticsContracts.REFRESH.TASK_NAME)),
+                status: String(firstDefined(o.status, o.Status, AnalyticsContracts.REFRESH.STATUSES.IDLE)),
+                isRunning: !!firstDefined(o.isRunning, o.IsRunning, false),
+                requestedAt: String(firstDefined(o.requestedAt, o.RequestedAt, "")),
+                requestedBy: String(firstDefined(o.requestedBy, o.RequestedBy, "")),
+                startedAt: String(firstDefined(o.startedAt, o.StartedAt, "")),
+                finishedAt: String(firstDefined(o.finishedAt, o.FinishedAt, "")),
+                lastSuccessAt: String(firstDefined(o.lastSuccessAt, o.LastSuccessAt, "")),
+                lastError: String(firstDefined(o.lastError, o.LastError, "")),
+                lastMessage: String(firstDefined(o.lastMessage, o.LastMessage, "")),
+                activeRunId: String(firstDefined(o.activeRunId, o.ActiveRunId, ""))
             };
         }
 

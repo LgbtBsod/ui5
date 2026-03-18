@@ -35,6 +35,20 @@ sap.ui.define([
     function personPrefix(sTarget) {
         return String(sTarget || "").toLowerCase() === "observed" ? "OBSERVED" : "OBSERVER";
     }
+    function requestVersionPathForTarget(sTarget) {
+        return String(sTarget || "").toLowerCase() === "observed" ? "/observedSuggestRequestVersion" : "/observerSuggestRequestVersion";
+    }
+
+    function advanceRequestVersion(oUiState, sTarget) {
+        var sPath = requestVersionPathForTarget(sTarget);
+        var iNext = Number((oUiState && oUiState.get && oUiState.get("view", sPath)) || 0) + 1;
+        oUiState && oUiState.set && oUiState.set("view", sPath, iNext);
+        return iNext;
+    }
+
+    function isCurrentRequestVersion(oUiState, sTarget, iVersion) {
+        return Number((oUiState && oUiState.get && oUiState.get("view", requestVersionPathForTarget(sTarget))) || 0) === Number(iVersion || 0);
+    }
 
     PersonSuggestUseCase.prototype.execute = function (mInput, mCtx) {
         var sIntent = String((mInput && mInput.intent) || "suggest");
@@ -46,6 +60,7 @@ sap.ui.define([
         var sPrefix = personPrefix(sTarget);
 
         if (sMode !== WorkflowContracts.EDIT_MODES.EDIT) {
+            advanceRequestVersion(oUiState, sTarget);
             return Promise.resolve(Result.ok({ skipped: true, items: [] }, [
                 Effects.modelPatch("view", sPath, []),
                 Effects.modelPatch("view", "/personSuggestHint", "")
@@ -53,6 +68,7 @@ sap.ui.define([
         }
 
         if (sIntent === "selected") {
+            advanceRequestVersion(oUiState, sTarget);
             var oItem = selectedItemPayload(mInput && mInput.item);
             if (!oItem) { return Promise.resolve(Result.ok({ selected: false }, [])); }
             var aEffects = [
@@ -68,6 +84,7 @@ sap.ui.define([
             return Promise.resolve(Result.ok({ selected: true }, aEffects));
         }
         if (sIntent === "manualChange") {
+            advanceRequestVersion(oUiState, sTarget);
             var sValue = String((mInput && mInput.value) || "");
             return Promise.resolve(Result.ok({ manualChange: true }, [
                 Effects.modelPatch("view", sInputPath, sValue),
@@ -85,16 +102,22 @@ sap.ui.define([
         var oSuggest = mCtx && mCtx.personSuggest;
 
         if (sTerm.length < 2) {
+            advanceRequestVersion(oUiState, sTarget);
             return Promise.resolve(Result.ok({ items: [] }, [
                 Effects.modelPatch("view", sPath, []),
                 Effects.modelPatch("view", "/personSuggestHint", "")
             ]));
         }
 
+        var iRequestVersion = advanceRequestVersion(oUiState, sTarget);
+
         return UseCaseValue.callOrDefault(function () {
             return oSuggest && oSuggest.suggest({ query: sTerm, limit: 12, dateCheck: DetailStateAccess.resolveDateCheck(mCtx) });
         }, { items: [] }).then(function (oRes) {
             var aItems = (oRes && oRes.items) || [];
+            if (!isCurrentRequestVersion(oUiState, sTarget, iRequestVersion)) {
+                return Result.ok({ stale: true, items: [] }, []);
+            }
             aItems = aItems.map(function (oItem) {
                 return Object.assign({}, oItem || {}, {
                     fullName: String((oItem && oItem.fullName) || "").trim(),
@@ -108,6 +131,9 @@ sap.ui.define([
                 Effects.modelPatch("view", "/personSuggestHint", aItems.length ? "" : "personSuggestNoDataHint")
             ]);
         }).catch(function (oError) {
+            if (!isCurrentRequestVersion(oUiState, sTarget, iRequestVersion)) {
+                return Result.ok({ stale: true, items: [] }, []);
+            }
             return Result.fail(oError);
         });
     };

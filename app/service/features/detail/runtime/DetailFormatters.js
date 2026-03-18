@@ -72,6 +72,7 @@ sap.ui.define([
     function parseDateLike(vValue) {
         var sValue;
         var oDate;
+        var aParts;
         if (vValue instanceof Date && !Number.isNaN(vValue.getTime())) {
             return vValue;
         }
@@ -80,7 +81,16 @@ sap.ui.define([
             return null;
         }
         if (/^\d{4}-\d{2}-\d{2}$/.test(sValue)) {
-            oDate = new Date(sValue + "T00:00:00Z");
+            aParts = sValue.split("-");
+            oDate = new Date(
+                Number(aParts[0]),
+                Number(aParts[1]) - 1,
+                Number(aParts[2]),
+                0,
+                0,
+                0,
+                0
+            );
             return Number.isNaN(oDate.getTime()) ? null : oDate;
         }
         oDate = new Date(sValue);

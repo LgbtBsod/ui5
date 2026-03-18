@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsChartValueRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsMonthlyComparisonRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsKpiDeltaRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsRefreshStateRuntime"
-], function (ComponentFormattingRuntime, AnalyticsContracts, AnalyticsChartValueRuntime, AnalyticsMonthlyComparisonRuntime, AnalyticsKpiDeltaRuntime, AnalyticsRefreshStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsRefreshStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick"
+], function (ComponentFormattingRuntime, AnalyticsContracts, AnalyticsChartValueRuntime, AnalyticsMonthlyComparisonRuntime, AnalyticsKpiDeltaRuntime, AnalyticsRefreshStateRuntime, NullishPick) {
     "use strict";
 
     function formatAnalyticsDateTime(vDate) {
@@ -14,6 +15,8 @@ sap.ui.define([
         }
         return ComponentFormattingRuntime.formatHumanDateTime(vDate);
     }
+
+    var firstDefined = NullishPick.firstDefined;
 
     function buildAvailableYears(vYears, iSelectedYear, iCompareYear, iPreviousYear) {
         var mSeen = {};
@@ -59,15 +62,15 @@ sap.ui.define([
         var aFailedBarriersBySource = AnalyticsChartValueRuntime.normalizeChartRows(o.charts && o.charts.failedBarriersBySource);
         var aTotalBarriersByBarrierNumber = AnalyticsChartValueRuntime.normalizeChartRows(o.charts && o.charts.totalBarriersByBarrierNumber);
         var aFailedBarriersByBarrierNumber = AnalyticsChartValueRuntime.normalizeChartRows(o.charts && o.charts.failedBarriersByBarrierNumber);
-        var iSelectedYear = AnalyticsChartValueRuntime.toNumber(o.selectedYear || o.SelectedYear);
-        var iCompareYear = AnalyticsChartValueRuntime.toNumber(o.compareYear || o.CompareYear || o.previousYear || o.PreviousYear);
+        var iSelectedYear = AnalyticsChartValueRuntime.toNumber(firstDefined(o.selectedYear, o.SelectedYear));
+        var iCompareYear = AnalyticsChartValueRuntime.toNumber(firstDefined(o.compareYear, o.CompareYear, o.previousYear, o.PreviousYear));
         var aMonthlyComparison = AnalyticsMonthlyComparisonRuntime.buildMonthlyComparison(o.charts || {}, o.comparisonCharts || {});
         var mKpiDeltas = AnalyticsKpiDeltaRuntime.buildKpiDeltas({
-            total: AnalyticsChartValueRuntime.toNumber(o.total || o.Total),
-            failedChecks: AnalyticsChartValueRuntime.toNumber(o.failedChecks || o.FailedChecks),
-            failedBarriers: AnalyticsChartValueRuntime.toNumber(o.failedBarriers || o.FailedBarriers),
-            failedChecklistCount: AnalyticsChartValueRuntime.toNumber(o.failedChecklistCount || o.FailedChecklistCount),
-            failedBarrierChecklistCount: AnalyticsChartValueRuntime.toNumber(o.failedBarrierChecklistCount || o.FailedBarrierChecklistCount)
+            total: AnalyticsChartValueRuntime.toNumber(firstDefined(o.total, o.Total)),
+            failedChecks: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedChecks, o.FailedChecks)),
+            failedBarriers: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedBarriers, o.FailedBarriers)),
+            failedChecklistCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedChecklistCount, o.FailedChecklistCount)),
+            failedBarrierChecklistCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedBarrierChecklistCount, o.FailedBarrierChecklistCount))
         }, aMonthlyComparison);
         var mComparisonMetricSeries = {
             TOTAL: AnalyticsMonthlyComparisonRuntime.buildMetricSeriesRows(aMonthlyComparison, "TOTAL"),
@@ -77,7 +80,7 @@ sap.ui.define([
             FAILED_BARRIER_CHECKLISTS: AnalyticsMonthlyComparisonRuntime.buildMetricSeriesRows(aMonthlyComparison, "FAILED_BARRIER_CHECKLISTS")
         };
         var aMonthlyMatrixRows = AnalyticsMonthlyComparisonRuntime.buildMonthlyMatrixRows(aMonthlyComparison, iSelectedYear, iCompareYear);
-        var iPreviousYear = AnalyticsChartValueRuntime.toNumber(o.previousYear || o.PreviousYear);
+        var iPreviousYear = AnalyticsChartValueRuntime.toNumber(firstDefined(o.previousYear, o.PreviousYear));
         var aAvailableYears = buildAvailableYears(o.availableYears, iSelectedYear, iCompareYear, iPreviousYear);
 
         return {
@@ -85,18 +88,18 @@ sap.ui.define([
             previousYear: iPreviousYear,
             compareYear: iCompareYear,
             availableYears: aAvailableYears,
-            total: AnalyticsChartValueRuntime.toNumber(o.total || o.Total),
-            failedChecks: AnalyticsChartValueRuntime.toNumber(o.failedChecks || o.FailedChecks),
-            failedBarriers: AnalyticsChartValueRuntime.toNumber(o.failedBarriers || o.FailedBarriers),
-            failedChecklistCount: AnalyticsChartValueRuntime.toNumber(o.failedChecklistCount || o.FailedChecklistCount),
-            failedBarrierChecklistCount: AnalyticsChartValueRuntime.toNumber(o.failedBarrierChecklistCount || o.FailedBarrierChecklistCount),
-            closedCount: AnalyticsChartValueRuntime.toNumber(o.closedCount || o.ClosedCount),
-            registeredCount: AnalyticsChartValueRuntime.toNumber(o.registeredCount || o.RegisteredCount),
-            avgChecksRate: AnalyticsChartValueRuntime.toNumber(o.avgChecksRate || o.AvgChecksRate),
-            avgBarriersRate: AnalyticsChartValueRuntime.toNumber(o.avgBarriersRate || o.AvgBarriersRate),
-            refreshedAt: formatAnalyticsDateTime(o.refreshedAt || o.RefreshedAt || ""),
-            source: String(o.source || o.Source || AnalyticsContracts.SOURCES.ALL),
-            sourceText: String(o.sourceText || o.SourceText || o.source || o.Source || "All"),
+            total: AnalyticsChartValueRuntime.toNumber(firstDefined(o.total, o.Total)),
+            failedChecks: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedChecks, o.FailedChecks)),
+            failedBarriers: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedBarriers, o.FailedBarriers)),
+            failedChecklistCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedChecklistCount, o.FailedChecklistCount)),
+            failedBarrierChecklistCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedBarrierChecklistCount, o.FailedBarrierChecklistCount)),
+            closedCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.closedCount, o.ClosedCount)),
+            registeredCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.registeredCount, o.RegisteredCount)),
+            avgChecksRate: AnalyticsChartValueRuntime.toNumber(firstDefined(o.avgChecksRate, o.AvgChecksRate)),
+            avgBarriersRate: AnalyticsChartValueRuntime.toNumber(firstDefined(o.avgBarriersRate, o.AvgBarriersRate)),
+            refreshedAt: formatAnalyticsDateTime(firstDefined(o.refreshedAt, o.RefreshedAt, "")),
+            source: String(firstDefined(o.source, o.Source, AnalyticsContracts.SOURCES.ALL)),
+            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, "All")),
             compareYearHasData: AnalyticsChartValueRuntime.hasAnyChartValue(o.comparisonCharts && o.comparisonCharts.monthlyTotal),
             refreshState: AnalyticsRefreshStateRuntime.normalizeRefreshState(o.refreshState, formatAnalyticsDateTime),
             monthlyComparison: aMonthlyComparison,
@@ -152,19 +155,19 @@ sap.ui.define([
         var o = oSummary || {};
 
         return {
-            selectedYear: AnalyticsChartValueRuntime.toNumber(o.selectedYear || o.SelectedYear),
-            previousYear: AnalyticsChartValueRuntime.toNumber(o.previousYear || o.PreviousYear),
-            total: AnalyticsChartValueRuntime.toNumber(o.total || o.Total),
-            monthly: AnalyticsChartValueRuntime.toNumber(o.monthly || o.Monthly),
-            failedChecks: AnalyticsChartValueRuntime.toNumber(o.failedChecks || o.FailedChecks),
-            failedBarriers: AnalyticsChartValueRuntime.toNumber(o.failedBarriers || o.FailedBarriers),
-            failedChecklistCount: AnalyticsChartValueRuntime.toNumber(o.failedChecklistCount || o.FailedChecklistCount),
-            failedBarrierChecklistCount: AnalyticsChartValueRuntime.toNumber(o.failedBarrierChecklistCount || o.FailedBarrierChecklistCount),
-            avgChecksRate: AnalyticsChartValueRuntime.toNumber(o.avgChecksRate || o.AvgChecksRate),
-            avgBarriersRate: AnalyticsChartValueRuntime.toNumber(o.avgBarriersRate || o.AvgBarriersRate),
-            refreshedAtText: formatAnalyticsDateTime(o.refreshedAt || o.RefreshedAt || ""),
-            sourceKey: String(o.source || o.Source || AnalyticsContracts.SOURCES.ALL),
-            sourceText: String(o.sourceText || o.SourceText || o.source || o.Source || "All")
+            selectedYear: AnalyticsChartValueRuntime.toNumber(firstDefined(o.selectedYear, o.SelectedYear)),
+            previousYear: AnalyticsChartValueRuntime.toNumber(firstDefined(o.previousYear, o.PreviousYear)),
+            total: AnalyticsChartValueRuntime.toNumber(firstDefined(o.total, o.Total)),
+            monthly: AnalyticsChartValueRuntime.toNumber(firstDefined(o.monthly, o.Monthly)),
+            failedChecks: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedChecks, o.FailedChecks)),
+            failedBarriers: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedBarriers, o.FailedBarriers)),
+            failedChecklistCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedChecklistCount, o.FailedChecklistCount)),
+            failedBarrierChecklistCount: AnalyticsChartValueRuntime.toNumber(firstDefined(o.failedBarrierChecklistCount, o.FailedBarrierChecklistCount)),
+            avgChecksRate: AnalyticsChartValueRuntime.toNumber(firstDefined(o.avgChecksRate, o.AvgChecksRate)),
+            avgBarriersRate: AnalyticsChartValueRuntime.toNumber(firstDefined(o.avgBarriersRate, o.AvgBarriersRate)),
+            refreshedAtText: formatAnalyticsDateTime(firstDefined(o.refreshedAt, o.RefreshedAt, "")),
+            sourceKey: String(firstDefined(o.source, o.Source, AnalyticsContracts.SOURCES.ALL)),
+            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, "All"))
         };
     }
 
