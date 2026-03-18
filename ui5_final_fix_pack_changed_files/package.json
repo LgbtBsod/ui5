@@ -1,0 +1,14 @@
+{
+  "name": "production-control-checklist",
+  "private": true,
+  "scripts": {
+    "build": "ui5 build --clean-dest --dest dist",
+    "build:dist": "ui5 build --all --clean-dest --dest dist",
+    "validate": "npm run lint:css && node scripts/check-xml-views.mjs",
+    "lint:css": "stylelint "app/**/*.css""
+  },
+  "devDependencies": {
+    "@ui5/cli": "^3.11.0",
+    "stylelint": "^16.6.1"
+  }
+}

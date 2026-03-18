@@ -1,0 +1,6 @@
+{
+  "maxControllerLines": {
+    "controller/Search.controller.js": 1200,
+    "controller/Detail.controller.js": 1500
+  }
+}

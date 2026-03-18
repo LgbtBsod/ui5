@@ -1,0 +1,108 @@
+<mvc:View
+    controllerName="PRODUCTION_CONTROL_CHECKLIST.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:dnd="sap.ui.core.dnd"
+    xmlns:t="sap.ui.table"
+    xmlns:uxap="sap.uxap"
+    xmlns:core="sap.ui.core"
+    xmlns:unified="sap.ui.unified">
+
+    <Page showHeader="false" enableScrolling="false" class="pageTransparent">
+
+        <VBox class="appContent detailContent detailExperienceCanvas" renderType="Bare" fitContainer="true" width="100%">
+
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailAccessDeniedScene" type="XML"/>
+
+            <VBox
+                id="detailControlPinnedDock"
+                class="detailControlPinnedDock detailControlStickyBlock"
+                renderType="Bare"
+                width="100%"
+                visible="{= !${view>/accessState/denied} &amp;&amp; !${view>/detailSkeletonBusy} }">
+                <VBox
+                    class="glassCard detailControlInlineCard detailControlExperienceCard"
+                    renderType="Bare"
+                    width="100%">
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailControlRail" type="XML"/>
+                </VBox>
+            </VBox>
+
+            <VBox
+                class="glassCard detailControlInlineCard detailControlSkeletonCard sapUiTinyMarginBottom"
+                width="100%"
+                visible="{= !${view>/accessState/denied} &amp;&amp; ${view>/detailSkeletonBusy} }">
+                <HBox class="detailControlSkeletonRow" renderType="Bare" alignItems="Center" wrap="Wrap">
+                    <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine appSkeletonLineLong" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
+                </HBox>
+                <HBox class="detailControlSkeletonButtons" renderType="Bare" alignItems="Center" wrap="Wrap">
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                    <VBox class="appSkeleton appSkeletonLine detailControlSkeletonButton" renderType="Bare"/>
+                </HBox>
+            </VBox>
+
+            <uxap:ObjectPageLayout
+                id="detailObjectPage"
+                visible="{= !${view>/accessState/denied} }"
+                useIconTabBar="false"
+                showAnchorBar="false"
+                upperCaseAnchorBar="false"
+                enableLazyLoading="false"
+                alwaysShowContentHeader="false"
+                showTitleInHeaderContent="false"
+                showHeaderContent="false">
+                <uxap:layoutData>
+                    <FlexItemData growFactor="1" shrinkFactor="1" baseSize="0%"/>
+                </uxap:layoutData>
+
+                <uxap:sections>
+
+                    <uxap:ObjectPageSection id="secMain" title="{i18n>detailWorkspaceSectionTitle}">
+
+                        <uxap:subSections>
+
+                            <!-- Participants -->
+                            <uxap:ObjectPageSubSection id="ssParticipants" title="{i18n>participantsTitle}">
+                                <uxap:blocks>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailParticipantsSection" type="XML"/>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <!-- Checks -->
+                            <uxap:ObjectPageSubSection id="ssChecks" title="{i18n>checksTitle}">
+                                <uxap:blocks>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecksSectionShell" type="XML"/>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecksTables" type="XML"/>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <!-- Barriers -->
+                            <uxap:ObjectPageSubSection id="ssBarriers" title="{i18n>barriersTitle}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}">
+                                <uxap:blocks>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailBarriersSectionShell" type="XML"/>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailBarriersTables" type="XML"/>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <uxap:ObjectPageSubSection id="ssAttachments" title="{i18n>attachmentsTitle}">
+                                <uxap:blocks>
+                                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailAttachmentsSection" type="XML"/>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+
+                </uxap:sections>
+
+            </uxap:ObjectPageLayout>
+
+        </VBox>
+
+    </Page>
+</mvc:View>

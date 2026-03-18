@@ -1,0 +1,519 @@
+diff -ruN ui5work/ui5/.editorconfig ui5fixed/.editorconfig
+--- ui5work/ui5/.editorconfig	1970-01-01 00:00:00.000000000 +0000
++++ ui5fixed/.editorconfig	2026-03-18 02:08:21.423719540 +0000
+@@ -0,0 +1,15 @@
++root = true
++
++[*]
++charset = utf-8
++end_of_line = lf
++insert_final_newline = true
++indent_style = space
++indent_size = 4
++trim_trailing_whitespace = true
++
++[*.md]
++trim_trailing_whitespace = false
++
++[*.{json,yaml,yml,xml,css}]
++indent_size = 2
+diff -ruN ui5work/ui5/.stylelintrc.json ui5fixed/.stylelintrc.json
+--- ui5work/ui5/.stylelintrc.json	1970-01-01 00:00:00.000000000 +0000
++++ ui5fixed/.stylelintrc.json	2026-03-18 02:08:21.423796629 +0000
+@@ -0,0 +1,15 @@
++{
++  "rules": {
++    "block-no-empty": true,
++    "color-no-invalid-hex": true,
++    "declaration-block-no-duplicate-properties": true,
++    "font-family-no-duplicate-names": true,
++    "function-calc-no-unspaced-operator": true,
++    "no-duplicate-selectors": null,
++    "no-empty-source": true,
++    "property-no-unknown": true,
++    "selector-pseudo-class-no-unknown": true,
++    "selector-pseudo-element-no-unknown": true,
++    "unit-no-unknown": true
++  }
++}
+diff -ruN ui5work/ui5/CODEX_APPLY_AND_VERIFY.txt ui5fixed/CODEX_APPLY_AND_VERIFY.txt
+--- ui5work/ui5/CODEX_APPLY_AND_VERIFY.txt	1970-01-01 00:00:00.000000000 +0000
++++ ui5fixed/CODEX_APPLY_AND_VERIFY.txt	2026-03-18 02:08:21.423945461 +0000
+@@ -0,0 +1,21 @@
++Codex apply instructions
++========================
++
++1. Replace only the files included in this patch pack.
++2. Prefer applying `ui5_final_fix_pack.patch` first; if patch application fails, replace files manually from the changed-files archive.
++3. After applying, run these checks locally:
++   - `npm install`
++   - `npm run build`
++   - `npm run build:dist`
++   - `npm run validate`
++4. Verify that these conditions are true:
++   - bootstrap/theme uses `sap_fiori_3`, not `sap_horizon`
++   - `sap.ui.export` is declared in `manifest.json`
++   - both analytics export and search export route through Spreadsheet export, not XML `.xls` generation
++   - `package.json`, `ui5.yaml`, `.editorconfig`, `.stylelintrc.json`, `README_BUILD_AND_VALIDATE.md` exist
++5. Grep checks:
++   - `grep -R "sap_horizon" -n app` should return no productive runtime references
++   - `grep -R "ExcelExport.download" -n app` should return none or only compatibility wrapper use
++   - `grep -R "new ODataModel" -n app` should not show new productive-path additions
++6. Do not change the test bootstrap core URL.
++7. If any verification fails, inspect the touched files only; do not broad-rewrite unrelated modules.
+diff -ruN ui5work/ui5/README_BUILD_AND_VALIDATE.md ui5fixed/README_BUILD_AND_VALIDATE.md
+--- ui5work/ui5/README_BUILD_AND_VALIDATE.md	1970-01-01 00:00:00.000000000 +0000
++++ ui5fixed/README_BUILD_AND_VALIDATE.md	2026-03-18 02:08:21.423870847 +0000
+@@ -0,0 +1,30 @@
++# Build and Validate
++
++## Productive baseline
++- Productive SAPUI5 target: **1.71.28**
++- Local/test bootstrap URL may still point to **1.71.70** because the test harness URL is intentionally not changed in this repository.
++- Treat **1.71.28** as the minimum supported productive baseline and regression-test critical flows on the real SAP landscape.
++
++## Local commands
++```bash
++npm install
++npm run build
++npm run build:dist
++npm run validate
++```
++
++## Expected output
++- `npm run build` and `npm run build:dist` create the `dist/` folder
++- Component preload is generated through UI5 Tooling
++- `npm run validate` runs CSS linting and XML view checks
++
++## Productive verification
++After building, verify on the real SAP stack:
++1. app startup
++2. search
++3. detail open/edit/save
++4. attachment flow
++5. analytics load and export
++6. lock acquire / heartbeat / release
++7. session timeout / CSRF refresh
++8. routing/FCL flows
+diff -ruN ui5work/ui5/app/controller/analytics/AnalyticsExportRuntime.js ui5fixed/app/controller/analytics/AnalyticsExportRuntime.js
+--- ui5work/ui5/app/controller/analytics/AnalyticsExportRuntime.js	2026-03-17 10:01:10.000000000 +0000
++++ ui5fixed/app/controller/analytics/AnalyticsExportRuntime.js	2026-03-18 02:08:21.422133955 +0000
+@@ -6,10 +6,10 @@
+     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
+     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
+-"PRODUCTION_CONTROL_CHECKLIST/service/shared/ExcelExport",
++"PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
+     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows",
+     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
+-], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ExcelExport, AnalyticsExportRows, DebugLogger) {
++], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, SpreadsheetExport, AnalyticsExportRows, DebugLogger) {
+     "use strict";
+ 
+     function getLoggerPayload(oError, sFallbackMessage) {
+@@ -30,7 +30,7 @@
+             return oController._pAnalyticsReportDialog;
+         }
+         oController._pAnalyticsReportDialog = Fragment.load({
+-            id: oController.getView().getId(),
++            id: oController.getView().createId("analyticsReportDialog"),
+             name: DialogContracts.getFragmentName(DialogContracts.IDS.ANALYTICS_REPORT),
+             controller: oController
+         }).then(function (oDialog) {
+@@ -69,10 +69,10 @@
+         if (!aRows.length) {
+             return FeedbackCoordinator.showToast(oController, "nothingToExport", [], "warning");
+         }
+-        try {
+-            ExcelExport.download(buildAnalyticsExportFileName(oController), aRows);
++        return SpreadsheetExport.download(buildAnalyticsExportFileName(oController), aRows).then(function () {
+             FeedbackCoordinator.showToast(oController, "searchExportSuccess", [], "info");
+-        } catch (oError) {
++            return true;
++        }).catch(function (oError) {
+             sErrorMessage = String((oError && oError.message) || "Analytics export failed");
+             ControllerViewStateRuntime.set(oController, "/error", sErrorMessage);
+             if (DebugLogger && typeof DebugLogger.error === "function") {
+@@ -83,9 +83,8 @@
+                 });
+             }
+             FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
+-            return Promise.resolve(false);
+-        }
+-        return Promise.resolve(true);
++            return false;
++        });
+     }
+ 
+     return {
+diff -ruN ui5work/ui5/app/manifest.json ui5fixed/app/manifest.json
+--- ui5work/ui5/app/manifest.json	2026-03-17 10:38:00.000000000 +0000
++++ ui5fixed/app/manifest.json	2026-03-18 02:08:21.417796962 +0000
+@@ -64,7 +64,7 @@
+       "id": "app"
+     },
+     "dependencies": {
+-      "minUI5Version": "1.71.70",
++      "minUI5Version": "1.71.28",
+       "libs": {
+         "sap.m": {},
+         "sap.ui.core": {},
+@@ -73,7 +73,8 @@
+         "sap.ui.comp": {},
+         "sap.ui.table": {},
+         "sap.uxap": {},
+-        "sap.viz": {}
++        "sap.viz": {},
++        "sap.ui.export": {}
+       }
+     },
+     "contentDensities": {
+diff -ruN ui5work/ui5/app/service/domain/search/usecases/ExportSearchUseCase.js ui5fixed/app/service/domain/search/usecases/ExportSearchUseCase.js
+--- ui5work/ui5/app/service/domain/search/usecases/ExportSearchUseCase.js	2026-03-12 18:58:38.000000000 +0000
++++ ui5fixed/app/service/domain/search/usecases/ExportSearchUseCase.js	2026-03-18 02:08:21.423209874 +0000
+@@ -2,11 +2,11 @@
+     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+-"PRODUCTION_CONTROL_CHECKLIST/service/shared/ExcelExport",
++"PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
+     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
+     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
+ "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
+-], function (UseCase, Result, Effects, ExcelExport, ChecklistIdentity, SearchMaxResults, WorkflowTelemetry) {
++], function (UseCase, Result, Effects, SpreadsheetExport, ChecklistIdentity, SearchMaxResults, WorkflowTelemetry) {
+     "use strict";
+ 
+     function ExportSearchUseCase() {
+@@ -173,20 +173,17 @@
+             if (!aNormalized.length) {
+                 return Result.fail({ message: "No export data", code: "NO_EXPORT_DATA" }, [Effects.toast("nothingToExport", "warning")]);
+             }
+-            try {
+-                ExcelExport.download("checklist_" + sEntity, aNormalized);
+-            } catch (_e) {
+-                return Result.fail({ message: "Export failed", code: "EXPORT_FAILED" }, [Effects.toast("exportFailed", "error")]);
+-            }
+-            emitExportTelemetry(mCtx, sMode === "selected" ? "export.selected.completed" : "export.all.completed", {
+-                entity: sEntity,
+-                rows: aNormalized.length,
+-                selectionMode: sMode
++            return SpreadsheetExport.download("checklist_" + sEntity, aNormalized).then(function () {
++                emitExportTelemetry(mCtx, sMode === "selected" ? "export.selected.completed" : "export.all.completed", {
++                    entity: sEntity,
++                    rows: aNormalized.length,
++                    selectionMode: sMode
++                });
++                return Result.ok({ entity: sEntity, exported: aNormalized.length }, [
++                    Effects.toast("searchExportSuccess", "info"),
++                    Effects.log("info", "Export completed", { entity: sEntity, rows: aNormalized.length })
++                ]);
+             });
+-            return Result.ok({ entity: sEntity, exported: aNormalized.length }, [
+-                Effects.toast("searchExportSuccess", "info"),
+-                Effects.log("info", "Export completed", { entity: sEntity, rows: aNormalized.length })
+-            ]);
+         }).catch(function (oError) {
+             var sCode = String((oError && (oError.code || oError.message)) || "").trim().toUpperCase();
+             var sMessageCode = sCode === "EXPORT_LIMIT_EXCEEDED" ? "EXPORT_LIMIT_EXCEEDED" : "EXPORT_FAILED";
+diff -ruN ui5work/ui5/app/service/framework/ThemeContracts.js ui5fixed/app/service/framework/ThemeContracts.js
+--- ui5work/ui5/app/service/framework/ThemeContracts.js	2026-03-13 02:55:34.000000000 +0000
++++ ui5fixed/app/service/framework/ThemeContracts.js	2026-03-18 02:08:21.418155558 +0000
+@@ -20,8 +20,8 @@
+             NIGHT: "night"
+         }),
+         THEMES: Object.freeze({
+-            MORNING: "sap_horizon",
+-            NIGHT: "sap_horizon_dark"
++            MORNING: "sap_fiori_3",
++            NIGHT: "sap_fiori_3"
+         }),
+         DURATIONS: Object.freeze({
+             SWITCH_MS: 220,
+diff -ruN ui5work/ui5/app/service/framework/ThemePhilosophy.js ui5fixed/app/service/framework/ThemePhilosophy.js
+--- ui5work/ui5/app/service/framework/ThemePhilosophy.js	2026-03-12 18:53:10.000000000 +0000
++++ ui5fixed/app/service/framework/ThemePhilosophy.js	2026-03-18 02:08:21.418681955 +0000
+@@ -33,7 +33,7 @@
+     }
+ 
+     function getMeta(sTheme) {
+-        return THEMES[sTheme] || THEMES.sap_horizon;
++        return THEMES[sTheme] || THEMES.sap_fiori_3;
+     }
+ 
+     return {
+diff -ruN ui5work/ui5/app/service/framework/ThemeService.js ui5fixed/app/service/framework/ThemeService.js
+--- ui5work/ui5/app/service/framework/ThemeService.js	2026-03-17 10:38:00.000000000 +0000
++++ ui5fixed/app/service/framework/ThemeService.js	2026-03-18 02:08:21.419637116 +0000
+@@ -37,7 +37,7 @@
+             return DEFAULT_MODE;
+         }
+         if (sValue === "night" || sValue === "dark" || sValue === "sap_horizon_dark" || sValue === "sap_fiori_3_dark") {
+-            return "night";
++            return DEFAULT_MODE;
+         }
+         if (sValue === "morning" || sValue === "light" || sValue === "sap_horizon" || sValue === "sap_fiori_3") {
+             return "morning";
+diff -ruN ui5work/ui5/app/service/framework/ThemeTokenRuntime.js ui5fixed/app/service/framework/ThemeTokenRuntime.js
+--- ui5work/ui5/app/service/framework/ThemeTokenRuntime.js	2026-03-12 18:53:10.000000000 +0000
++++ ui5fixed/app/service/framework/ThemeTokenRuntime.js	2026-03-18 02:08:21.420147605 +0000
+@@ -51,7 +51,7 @@
+         var sCurrentTheme = Core && Core.getConfiguration && Core.getConfiguration() && Core.getConfiguration().getTheme
+             ? String(Core.getConfiguration().getTheme() || "").toLowerCase()
+             : "";
+-        var bHorizonThemeActive = sCurrentTheme.indexOf("sap_horizon") === 0;
++        var bHorizonThemeActive = sCurrentTheme.indexOf("sap_horizon") === 0 || sCurrentTheme.indexOf("sap_fiori") === 0;
+         var sBrand = Parameters.get("sapUiBrand") || Parameters.get("sapUiHighlight");
+         var sBase = Parameters.get("sapBackgroundColor");
+         var sText = Parameters.get("sapTextColor");
+diff -ruN ui5work/ui5/app/service/shared/ExcelExport.js ui5fixed/app/service/shared/ExcelExport.js
+--- ui5work/ui5/app/service/shared/ExcelExport.js	2026-03-12 18:25:20.000000000 +0000
++++ ui5fixed/app/service/shared/ExcelExport.js	2026-03-18 02:08:21.423429723 +0000
+@@ -1,56 +1,11 @@
+-sap.ui.define([], function () {
++sap.ui.define([
++    "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport"
++], function (SpreadsheetExport) {
+     "use strict";
+ 
+-    function _escapeXml(v) {
+-        return String(v == null ? "" : v)
+-            .replace(/&/g, "&amp;")
+-            .replace(/</g, "&lt;")
+-            .replace(/>/g, "&gt;")
+-            .replace(/"/g, "&quot;")
+-            .replace(/'/g, "&apos;");
+-    }
+-
+-    function _toRowXml(aValues) {
+-        return "<Row>" + aValues.map(function (vValue) {
+-            return "<Cell><Data ss:Type=\"String\">" + _escapeXml(vValue) + "</Data></Cell>";
+-        }).join("") + "</Row>";
+-    }
+-
+-    function _buildWorkbookXml(aRows) {
+-        var aSafeRows = Array.isArray(aRows) ? aRows : [];
+-        var aColumns = aSafeRows.length ? Object.keys(aSafeRows[0]) : [];
+-        var sHeader = _toRowXml(aColumns);
+-        var sBody = aSafeRows.map(function (oRow) {
+-            return _toRowXml(aColumns.map(function (sColumn) { return oRow[sColumn]; }));
+-        }).join("");
+-
+-        return [
+-            "<?xml version=\"1.0\"?>",
+-            "<?mso-application progid=\"Excel.Sheet\"?>",
+-            "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"",
+-            " xmlns:o=\"urn:schemas-microsoft-com:office:office\"",
+-            " xmlns:x=\"urn:schemas-microsoft-com:office:excel\"",
+-            " xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">",
+-            "<Worksheet ss:Name=\"Export\"><Table>",
+-            sHeader,
+-            sBody,
+-            "</Table></Worksheet></Workbook>"
+-        ].join("");
+-    }
+-
+     return {
+-        download: function (sFileName, aRows) {
+-            var sXml = _buildWorkbookXml(aRows || []);
+-            var oBlob = new Blob([sXml], { type: "application/vnd.ms-excel;charset=utf-8" });
+-            var sUrl = URL.createObjectURL(oBlob);
+-            var oLink = document.createElement("a");
+-
+-            oLink.href = sUrl;
+-            oLink.download = (sFileName || "report") + ".xls";
+-            document.body.appendChild(oLink);
+-            oLink.click();
+-            document.body.removeChild(oLink);
+-            URL.revokeObjectURL(sUrl);
++        download: function (sFileName, aRows, mSettings) {
++            return SpreadsheetExport.download(sFileName, aRows, mSettings);
+         }
+     };
+ });
+diff -ruN ui5work/ui5/app/service/shared/SpreadsheetExport.js ui5fixed/app/service/shared/SpreadsheetExport.js
+--- ui5work/ui5/app/service/shared/SpreadsheetExport.js	1970-01-01 00:00:00.000000000 +0000
++++ ui5fixed/app/service/shared/SpreadsheetExport.js	2026-03-18 02:08:21.421418619 +0000
+@@ -0,0 +1,32 @@
++sap.ui.define([
++    "sap/ui/export/Spreadsheet"
++], function (Spreadsheet) {
++    "use strict";
++
++    function inferColumns(aRows) {
++        var oFirstRow = Array.isArray(aRows) && aRows.length ? aRows[0] : null;
++        return oFirstRow ? Object.keys(oFirstRow).map(function (sKey) {
++            return { label: sKey, property: sKey, type: "string" };
++        }) : [];
++    }
++
++    function download(sFileName, aRows, mSettings) {
++        var aSafeRows = Array.isArray(aRows) ? aRows.slice() : [];
++        var aColumns = mSettings && Array.isArray(mSettings.workbookColumns) && mSettings.workbookColumns.length
++            ? mSettings.workbookColumns
++            : inferColumns(aSafeRows);
++        var oSpreadsheet = new Spreadsheet({
++            workbook: { columns: aColumns },
++            dataSource: aSafeRows,
++            fileName: String(sFileName || "report") + ".xlsx"
++        });
++
++        return oSpreadsheet.build().finally(function () {
++            oSpreadsheet.destroy();
++        });
++    }
++
++    return {
++        download: download
++    };
++});
+diff -ruN ui5work/ui5/app/test/integration/opaTests.qunit.html ui5fixed/app/test/integration/opaTests.qunit.html
+--- ui5work/ui5/app/test/integration/opaTests.qunit.html	2026-03-14 08:36:38.000000000 +0000
++++ ui5fixed/app/test/integration/opaTests.qunit.html	2026-03-18 02:08:21.420793263 +0000
+@@ -6,7 +6,7 @@
+     <script
+         src="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js"
+         id="sap-ui-bootstrap"
+-        data-sap-ui-theme="sap_horizon"
++        data-sap-ui-theme="sap_fiori_3"
+         data-sap-ui-async="true"
+         data-sap-ui-libs="sap.ui.core,sap.m"
+         data-sap-ui-resourceroots='{"PRODUCTION_CONTROL_CHECKLIST":"../../"}'
+diff -ruN ui5work/ui5/app/test/testsuite.qunit.html ui5fixed/app/test/testsuite.qunit.html
+--- ui5work/ui5/app/test/testsuite.qunit.html	2026-03-14 08:36:38.000000000 +0000
++++ ui5fixed/app/test/testsuite.qunit.html	2026-03-18 02:08:21.420957323 +0000
+@@ -8,7 +8,7 @@
+     <script
+         src="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js"
+         id="sap-ui-bootstrap"
+-        data-sap-ui-theme="sap_horizon"
++        data-sap-ui-theme="sap_fiori_3"
+         data-sap-ui-async="true"
+         data-sap-ui-libs="sap.ui.core,sap.m"
+         data-sap-ui-resourceroots='{"PRODUCTION_CONTROL_CHECKLIST":"../"}'>
+diff -ruN ui5work/ui5/app/test/unit/framework/ThemeDefaults.qunit.js ui5fixed/app/test/unit/framework/ThemeDefaults.qunit.js
+--- ui5work/ui5/app/test/unit/framework/ThemeDefaults.qunit.js	2026-03-14 08:29:16.000000000 +0000
++++ ui5fixed/app/test/unit/framework/ThemeDefaults.qunit.js	2026-03-18 02:08:21.421298103 +0000
+@@ -5,12 +5,12 @@
+ 
+     QUnit.module("Theme defaults");
+ 
+-    QUnit.test("productive theme defaults to sap_horizon", function (assert) {
+-        assert.strictEqual(ThemeService.themeForMode("morning"), "sap_horizon", "Morning mode maps to SAP Horizon");
++    QUnit.test("productive theme defaults to sap_fiori_3", function (assert) {
++        assert.strictEqual(ThemeService.themeForMode("morning"), "sap_fiori_3", "Morning mode maps to SAP Fiori 3");
+     });
+ 
+-    QUnit.test("night mode mapping remains available but is not the default productive mode", function (assert) {
+-        assert.strictEqual(ThemeService.themeForMode("night"), "sap_horizon_dark", "Night mode still maps correctly");
+-        assert.strictEqual(ThemeService.modeForTheme("sap_horizon"), "morning", "Productive theme mode stays morning");
++    QUnit.test("night mode is normalized to the safe morning theme for UI5 1.71", function (assert) {
++        assert.strictEqual(ThemeService.themeForMode("night"), "sap_fiori_3", "Night mode falls back to SAP Fiori 3");
++        assert.strictEqual(ThemeService.modeForTheme("sap_horizon"), "morning", "Legacy Horizon theme is normalized to morning mode");
+     });
+ });
+diff -ruN ui5work/ui5/app/test/unit/unitTests.qunit.html ui5fixed/app/test/unit/unitTests.qunit.html
+--- ui5work/ui5/app/test/unit/unitTests.qunit.html	2026-03-14 08:36:38.000000000 +0000
++++ ui5fixed/app/test/unit/unitTests.qunit.html	2026-03-18 02:08:21.421144030 +0000
+@@ -6,7 +6,7 @@
+     <script
+         src="https://ui5.sap.com/1.71.70/resources/sap-ui-core.js"
+         id="sap-ui-bootstrap"
+-        data-sap-ui-theme="sap_horizon"
++        data-sap-ui-theme="sap_fiori_3"
+         data-sap-ui-async="true"
+         data-sap-ui-libs="sap.ui.core,sap.m"
+         data-sap-ui-resourceroots='{"PRODUCTION_CONTROL_CHECKLIST":"../../"}'
+diff -ruN ui5work/ui5/app/ui5-bootstrap-runtime.js ui5fixed/app/ui5-bootstrap-runtime.js
+--- ui5work/ui5/app/ui5-bootstrap-runtime.js	2026-03-17 09:01:40.000000000 +0000
++++ ui5fixed/app/ui5-bootstrap-runtime.js	2026-03-18 02:08:21.420568138 +0000
+@@ -1,4 +1,4 @@
+-﻿/* global sap */
++/* global sap */
+ (function () {
+     "use strict";
+ 
+@@ -37,9 +37,7 @@
+         } catch (_e) {
+             sMode = "morning";
+         }
+-        return sMode === "night" || sMode === "sap_horizon_dark" || sMode === "sap_fiori_3_dark"
+-            ? "night"
+-            : "morning";
++        return "morning";
+     }
+ 
+     function scheduleAlternateThemePrefetch() {
+@@ -47,7 +45,7 @@
+         if (!sThemeRoot) {
+             return;
+         }
+-        var sAlternateTheme = resolveStoredThemeMode() === "night" ? "sap_horizon" : "sap_horizon_dark";
++        var sAlternateTheme = "sap_fiori_3";
+         var aLibraries = [
+             "sap/ui/core",
+             "sap/m",
+@@ -123,13 +121,12 @@
+         oScript.id = "sap-ui-bootstrap";
+         oScript.src = UI5_BOOTSTRAP_SRC;
+         oScript.async = true;
+-        oScript.setAttribute("data-sap-ui-theme", "sap_horizon");
+-        oScript.setAttribute("data-sap-ui-libs", "sap.ui.core,sap.m,sap.f,sap.ui.layout,sap.ui.comp,sap.ui.table,sap.ui.unified,sap.uxap,sap.viz");
++        oScript.setAttribute("data-sap-ui-theme", "sap_fiori_3");
++        oScript.setAttribute("data-sap-ui-libs", "sap.ui.core,sap.m,sap.f,sap.ui.layout,sap.ui.comp,sap.ui.table,sap.ui.unified,sap.uxap");
+         oScript.setAttribute("data-sap-ui-resourceroots", "{\"PRODUCTION_CONTROL_CHECKLIST\":\"./\"}");
+         oScript.setAttribute("data-sap-ui-compatVersion", "edge");
+         oScript.setAttribute("data-sap-ui-async", "true");
+         oScript.setAttribute("data-sap-ui-preload", "async");
+-        oScript.setAttribute("data-sap-ui-xx-componentPreload", "off");
+         oScript.onload = function () {
+             if (window.sap && sap.ui && sap.ui.require) {
+                 attachInit();
+diff -ruN ui5work/ui5/package.json ui5fixed/package.json
+--- ui5work/ui5/package.json	1970-01-01 00:00:00.000000000 +0000
++++ ui5fixed/package.json	2026-03-18 02:08:21.423566526 +0000
+@@ -0,0 +1,14 @@
++{
++  "name": "production-control-checklist",
++  "private": true,
++  "scripts": {
++    "build": "ui5 build --clean-dest --dest dist",
++    "build:dist": "ui5 build --all --clean-dest --dest dist",
++    "validate": "npm run lint:css && node scripts/check-xml-views.mjs",
++    "lint:css": "stylelint "app/**/*.css""
++  },
++  "devDependencies": {
++    "@ui5/cli": "^3.11.0",
++    "stylelint": "^16.6.1"
++  }
++}
+diff -ruN ui5work/ui5/ui5.yaml ui5fixed/ui5.yaml
+--- ui5work/ui5/ui5.yaml	1970-01-01 00:00:00.000000000 +0000
++++ ui5fixed/ui5.yaml	2026-03-18 02:08:21.423643851 +0000
+@@ -0,0 +1,26 @@
++specVersion: "2.6"
++metadata:
++  name: PRODUCTION_CONTROL_CHECKLIST
++type: application
++resources:
++  configuration:
++    paths:
++      webapp: app
++builder:
++  componentPreload:
++    paths:
++      - "PRODUCTION_CONTROL_CHECKLIST/**"
++framework:
++  name: SAPUI5
++  version: "1.71.28"
++  libraries:
++    - name: sap.ui.core
++    - name: sap.m
++    - name: sap.f
++    - name: sap.ui.layout
++    - name: sap.ui.comp
++    - name: sap.ui.table
++    - name: sap.ui.unified
++    - name: sap.uxap
++    - name: sap.viz
++    - name: sap.ui.export

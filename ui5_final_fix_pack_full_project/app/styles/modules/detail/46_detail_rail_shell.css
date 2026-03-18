@@ -1,0 +1,269 @@
+.chkApp .detailControlInlineCard,
+.chkApp .detailControlInlineCard.detailControlExperienceCard,
+.chkApp .detailControlStickyBlock .detailControlInlineCard,
+.chkApp .detailControlStickyBlock.detailControlInlineCard,
+.chkApp .detailControlToolbarStack,
+.chkApp .detailSectionAnchorRail,
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions,
+.chkApp .detailWorkflowRail {
+  overflow: visible;
+}
+
+.chkApp .detailControlToolbar,
+.chkApp .detailWorkflowRail.sapMOTB,
+.chkApp .detailSectionToolbar,
+.chkApp .detailSectionCard > .sapMTB,
+.chkApp .detailSectionCard > .sapMOTB,
+.chkApp .detailControlRow.sapMTB {
+  background: transparent;
+  border: 0;
+  padding-inline: 0;
+}
+
+.chkApp .detailControlPinnedDock {
+  min-width: 0;
+  width: 100%;
+  flex: 0 0 auto;
+  align-self: stretch;
+  position: relative;
+  top: auto;
+  z-index: auto;
+  height: auto;
+  min-height: 0;
+  margin-bottom: 0.62rem;
+}
+
+.chkApp .detailControlExperienceCard {
+  flex: 0 0 auto;
+  align-self: stretch;
+  padding:
+    calc(0.96rem * var(--theme-density-scale))
+    calc(1rem * var(--theme-density-scale));
+  border-radius: var(--radius-xl);
+}
+
+.chkApp .detailControlToolbarStack {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 0;
+}
+
+.chkApp .detailRailHeader {
+  margin-bottom: 0.1rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid rgba(160, 184, 220, 0.18);
+  flex-wrap: wrap;
+  row-gap: 0.45rem;
+}
+
+.chkApp .detailSectionAnchorRail,
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions {
+  padding: var(--theme-detail-rail-padding-block) var(--theme-detail-rail-padding-inline);
+  border-radius: calc(var(--radius-lg) - 0.18rem);
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--theme-rail-bg) 84%, transparent);
+  box-shadow: none;
+}
+
+.chkApp .detailSectionAnchorRail {
+  row-gap: 0.45rem;
+  column-gap: 0.4rem;
+  margin-bottom: 0.28rem;
+  padding: 0.18rem;
+}
+
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions {
+  width: 100%;
+  max-width: 100%;
+  row-gap: 0.45rem;
+  column-gap: 0.5rem;
+  overflow: visible;
+  padding: 0.18rem 0.3rem;
+}
+
+.chkApp .detailControlRowTop.sapMTBNewFlex,
+.chkApp .detailControlRowActions.sapMTBNewFlex,
+.chkApp .detailViewportNarrow .detailSectionToolbar.sapMTBNewFlex,
+.chkApp .detailViewportNarrow .detailControlRowActions.sapMTBNewFlex {
+  flex-wrap: wrap;
+  align-content: center;
+  overflow: visible;
+  row-gap: 0.3rem;
+}
+
+.chkApp .detailViewportNarrow .detailControlRowTop.sapMTBNewFlex {
+  flex-wrap: wrap;
+  overflow: visible;
+  row-gap: 0.3rem;
+}
+
+.chkApp .detailControlRowTop .sapMBarChild,
+.chkApp .detailControlRowActions .sapMBarChild,
+.chkApp .detailControlRow .sapMBarChild,
+.chkApp .detailControlRow .sapMBtn,
+.chkApp .detailControlRow .sapMTBSpacer {
+  min-width: 0;
+}
+
+.chkApp .detailControlRowTop .sapMOTBOverflowButton,
+.chkApp .detailControlRowActions .sapMOTBOverflowButton {
+  flex: 0 0 auto;
+}
+
+.chkApp .detailControlRowTop .sapMTBSpacer,
+.chkApp .detailControlRowActions .sapMTBSpacer,
+.chkApp .detailViewportNarrow .detailSectionToolbar .sapMTBSpacer,
+.chkApp .detailViewportNarrow .detailControlRowTop .sapMTBSpacer,
+.chkApp .detailViewportNarrow .detailControlRowActions .sapMTBSpacer {
+  flex: 999 1 0%;
+  min-width: 0.5rem;
+  display: block;
+}
+
+.chkApp .detailSectionAnchorRail .sapMBtn,
+.chkApp .detailControlRowTop .sapMBtn,
+.chkApp .detailControlRowActions .sapMBtn {
+  flex: 0 1 auto;
+}
+
+.chkApp .detailControlRow .sapMBtn .sapMBtnContent,
+.chkApp .detailControlRowActions .sapMBtnContent {
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chkApp .detailControlRowActions .sapMBsyInd {
+  color: var(--accent);
+}
+
+.chkApp .detailRailActionBtn .sapMBtnInner {
+  transition: transform 50ms ease, opacity 50ms ease;
+  will-change: transform;
+}
+
+.chkApp .detailRailHint {
+  font-size: 0.74rem;
+  opacity: 0.58;
+}
+
+body.chkAppRoot.appDark .chkApp .detailSectionAnchorRail,
+body.chkAppRoot.appDark .chkApp .detailControlRowTop,
+body.chkAppRoot.appDark .chkApp .detailControlRowActions {
+  background: color-mix(in srgb, var(--theme-rail-bg) 88%, transparent);
+  border-color: color-mix(in srgb, var(--theme-rail-border) 72%, transparent);
+  box-shadow: none;
+}
+
+body.chkAppRoot.appLight .chkApp .detailSectionAnchorRail,
+body.chkAppRoot.appLight .chkApp .detailControlRowTop,
+body.chkAppRoot.appLight .chkApp .detailControlRowActions {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(242, 247, 255, 0.18));
+}
+
+@media (max-width: 1366px) {
+  .chkApp .detailControlRowActions.sapMTBNewFlex,
+  .chkApp .detailSectionToolbar.sapMTBNewFlex {
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: 0.3rem;
+  }
+
+  .chkApp .detailControlRowTop.sapMTBNewFlex {
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: 0.3rem;
+  }
+
+  .chkApp .detailControlRowTop .sapMTBSpacer,
+  .chkApp .detailControlRowActions .sapMTBSpacer,
+  .chkApp .detailSectionToolbar .sapMTBSpacer {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .chkApp .detailControlRowTop,
+  .chkApp .detailControlRowActions {
+    row-gap: 0.28rem;
+    column-gap: 0.28rem;
+  }
+
+  .chkApp .detailControlRowTop .detailRailStatusChip,
+  .chkApp .detailControlRowActions .sapMBtn,
+  .chkApp .detailControlRowActions .sapMSwt,
+  .chkApp .detailControlRowActions .sapMBusyIndicator {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .chkApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .chkApp .detailControlRowActions .sapMBtnContent,
+  .chkApp .detailControlRowTop .sapMObjStatusText {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 53.75rem) {
+  .chkApp .detailSectionAnchorRail,
+  .chkApp .detailControlRowTop,
+  .chkApp .detailControlRowActions {
+    padding-inline: clamp(0.55rem, 2.4vw, 0.78rem);
+  }
+
+  .chkApp .detailControlRowTop .detailRailStatusChip {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .chkApp .detailControlRowTop .detailRailStatusChip .sapMObjStatusText {
+    white-space: normal;
+  }
+
+  .chkApp .detailControlRowTop .sapMTBSpacer {
+    display: none;
+  }
+
+  .chkApp .detailSectionAnchorRail .sapMBtn {
+    flex: 1 1 100%;
+  }
+
+  .chkApp .detailSectionAnchorBtn .sapMBtnInner {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .chkApp .detailControlRowActions .sapMTBSpacer {
+    display: block;
+  }
+
+  .chkApp .detailControlStickyBlock {
+    position: relative;
+    top: auto;
+  }
+
+  .chkApp .detailControlStickyBlock.isViewportPinned {
+    min-height: 0;
+    transform: none;
+  }
+
+  .chkApp .detailControlStickyBlock.isViewportPinned > .detailControlExperienceCard {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,18 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <ToolbarSpacer/>
+    <Button text="{i18n>searchSortButton}" icon="sap-icon://sort" type="Transparent" press=".onOpenSearchSortDialog" tooltip="{i18n>searchSortButton}" class="brandActionGhost actionPrioritySecondary searchSortButton chkRipple"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
+    <Button text="{i18n>searchGroupButton}" icon="sap-icon://group-2" type="Transparent" press=".onOpenSearchGroupDialog" tooltip="{i18n>searchGroupButton}" class="brandActionGhost actionPrioritySecondary searchGroupButton chkRipple"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
+    <MenuButton text="{i18n>exportMenuButton}" enabled="{view>/canExport}" tooltip="{i18n>searchShortcutExport}" class="brandActionBtn brandActionGhost actionPrioritySecondary searchExportMenuBtn chkRipple" icon="sap-icon://excel-attachment">
+        <menu>
+            <Menu itemSelected=".onExportMenuAction">
+                <items>
+                    <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view"><customData><core:CustomData key="entity" value="screen"/></customData></MenuItem>
+                    <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2"><customData><core:CustomData key="entity" value="barrier"/></customData></MenuItem>
+                    <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection"><customData><core:CustomData key="entity" value="check"/></customData></MenuItem>
+                </items>
+            </Menu>
+        </menu>
+    </MenuButton>
+</core:FragmentDefinition>
