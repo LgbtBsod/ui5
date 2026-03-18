@@ -4,9 +4,22 @@ sap.ui.define([], function () {
     return Object.freeze({
         PATHS: Object.freeze({
             ANALYTICS: "/analytics",
+            ANALYTICS_DRILLDOWN_INTENT: "/analyticsDrilldownIntent",
             AVAILABLE_YEARS: "/availableYears",
+            BUILDER_CHART_HAS_DATA: "/builderChartHasData",
+            BUILDER_CHART_ROWS: "/builderChartRows",
+            BUILDER_CHART_TITLE: "/builderChartTitle",
+            BUILDER_DIMENSION: "/builderDimension",
+            BUILDER_DIMENSION_OPTIONS: "/builderDimensionOptions",
+            BUILDER_METRIC: "/builderMetric",
+            BUILDER_METRIC_OPTIONS: "/builderMetricOptions",
+            BUILDER_SOURCE_HINT_TEXT: "/builderSourceHintText",
+            BUILDER_VIZ_TYPE: "/builderVizType",
             BUSY: "/busy",
+            COMPARISON_METRIC: "/comparisonMetric",
             COMPARE_YEAR: "/compareYear",
+            COMPARE_YEAR_HAS_DATA: "/compareYearHasData",
+            COMPARE_YEAR_HINT_TEXT: "/compareYearHintText",
             COMPARE_YEAR_OPTIONS: "/compareYearOptions",
             COMPARE_YEAR_VALUE_STATE: "/compareYearValueState",
             COMPARE_YEAR_VALUE_STATE_TEXT: "/compareYearValueStateText",
@@ -47,6 +60,7 @@ sap.ui.define([], function () {
         }),
         MESSAGES: Object.freeze({
             ANALYTICS_LOAD_FAILED: "Analytics load failed",
+            ANALYTICS_REFRESH_FAILED: "Analytics refresh failed",
             ANALYTICS_UNAVAILABLE: "Analytics unavailable",
             INVALID_YEAR: "Analytics year is invalid"
         })

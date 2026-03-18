@@ -5,6 +5,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsUiContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsYearBehavior",
@@ -20,6 +21,7 @@ sap.ui.define([
     CtxFactory,
     AnalyticsBuilderRuntime,
     AnalyticsContracts,
+    AnalyticsUiContracts,
     ModelContracts,
     ControllerViewStateRuntime,
     AnalyticsYearBehavior,
@@ -31,9 +33,8 @@ sap.ui.define([
 ) {
     "use strict";
 
-    var COMPARE_YEAR_PATH = "/compareYear";
+    var PATHS = AnalyticsUiContracts.PATHS;
     var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
-    var SELECTED_YEAR_PATH = "/selectedYear";
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function buildCtx(oController) {
@@ -93,13 +94,13 @@ sap.ui.define([
 
         _setCompareYearValidation: function (sState, sText) {
             ControllerViewStateRuntime.setMany(this, {
-                "/compareYearValueState": sState || "None",
-                "/compareYearValueStateText": sText || ""
+                [PATHS.COMPARE_YEAR_VALUE_STATE]: sState || AnalyticsUiContracts.VALIDATION_STATES.NONE,
+                [PATHS.COMPARE_YEAR_VALUE_STATE_TEXT]: sText || ""
             });
         },
 
         _loadAnalytics: function (sReason) {
-            return AnalyticsLoadBehavior.loadAnalytics(this, sReason, SELECTED_YEAR_PATH, COMPARE_YEAR_PATH, buildCtx);
+            return AnalyticsLoadBehavior.loadAnalytics(this, sReason, PATHS.SELECTED_YEAR, PATHS.COMPARE_YEAR, buildCtx);
         },
 
         _pollRefreshStateUntilSettled: function (iAttemptsLeft) {
@@ -132,7 +133,7 @@ sap.ui.define([
         },
 
         onSelectAnalyticsYear: function (oEvent) {
-            return AnalyticsYearBehavior.onSelectAnalyticsYear(this, oEvent, SELECTED_YEAR_PATH, COMPARE_YEAR_PATH, this._setCompareYearValidation.bind(this), this._loadAnalytics.bind(this));
+            return AnalyticsYearBehavior.onSelectAnalyticsYear(this, oEvent, PATHS.SELECTED_YEAR, PATHS.COMPARE_YEAR, this._setCompareYearValidation.bind(this), this._loadAnalytics.bind(this));
         },
 
         onLiveChangeAnalyticsYear: function (oEvent) {
@@ -168,7 +169,7 @@ sap.ui.define([
         },
 
         onSelectAnalyticsYearFromPicker: function (oEvent) {
-            return AnalyticsYearBehavior.onSelectAnalyticsYearFromPicker(this, oEvent, SELECTED_YEAR_PATH, COMPARE_YEAR_PATH, this._setCompareYearValidation.bind(this), this._loadAnalytics.bind(this));
+            return AnalyticsYearBehavior.onSelectAnalyticsYearFromPicker(this, oEvent, PATHS.SELECTED_YEAR, PATHS.COMPARE_YEAR, this._setCompareYearValidation.bind(this), this._loadAnalytics.bind(this));
         },
 
         onSelectAnalyticsMetric: function (oEvent) {
@@ -190,13 +191,13 @@ sap.ui.define([
         },
 
         onApplyAnalyticsYearPreset: function (oEvent) {
-            return AnalyticsYearBehavior.onApplyAnalyticsYearPreset(this, oEvent, SELECTED_YEAR_PATH, COMPARE_YEAR_PATH, this._loadAnalytics.bind(this));
+            return AnalyticsYearBehavior.onApplyAnalyticsYearPreset(this, oEvent, PATHS.SELECTED_YEAR, PATHS.COMPARE_YEAR, this._loadAnalytics.bind(this));
         },
 
         onDrilldownAnalyticsBuilder: function (oEvent) {
             var oViewModel = this.getModel && this.getModel(VIEW_MODEL);
-            var sBuilderDimension = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderDimension") || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase();
-            var sBuilderMetric = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty("/builderMetric") || "").trim().toUpperCase();
+            var sBuilderDimension = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty(PATHS.BUILDER_DIMENSION) || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase();
+            var sBuilderMetric = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty(PATHS.BUILDER_METRIC) || "").trim().toUpperCase();
             return AnalyticsDrilldownBehavior.onDrilldownAnalyticsBuilder(this, oEvent, sBuilderDimension, sBuilderMetric);
         },
 
@@ -240,6 +241,27 @@ sap.ui.define([
             AnalyticsDrilldownBehavior.onCloseAnalytics(this);
         },
 
+        formatAnalyticsMatrixMetricLabel: function (sMetricKey) {
+            var sKey = coerceText(sMetricKey).toUpperCase();
+
+            if (sKey === AnalyticsContracts.METRICS.TOTAL) {
+                return getBundleText(this, "analyticsMetricTotal", [], "Total");
+            }
+            if (sKey === AnalyticsContracts.METRICS.FAILED_CHECKS) {
+                return getBundleText(this, "analyticsMetricFailedChecks", [], "Failed checks");
+            }
+            if (sKey === AnalyticsContracts.METRICS.FAILED_BARRIERS) {
+                return getBundleText(this, "analyticsMetricFailedBarriers", [], "Failed barriers");
+            }
+            if (sKey === AnalyticsContracts.METRICS.FAILED_CHECKLISTS) {
+                return getBundleText(this, "analyticsMetricFailedChecklistCount", [], "Failed checklists");
+            }
+            if (sKey === AnalyticsContracts.METRICS.FAILED_BARRIER_CHECKLISTS) {
+                return getBundleText(this, "analyticsMetricFailedBarrierChecklistCount", [], "Failed barrier checklists");
+            }
+            return sMetricKey;
+        },
+
         formatAnalyticsSourceContext: function (sSelectedSource) {
             var sSourceKey = coerceText(sSelectedSource).toUpperCase();
             var sResolvedSourceText = getBundleText(this, "analyticsSourceAll", [], "All");
@@ -258,35 +280,25 @@ sap.ui.define([
             if (sNormalizedStatus === "ERROR") {
                 return "Error";
             }
-            if (sNormalizedStatus === "REQUESTED" || bIsRunning) {
+            if (bIsRunning) {
                 return "Warning";
             }
-            return "Success";
-        },
-
-        formatRefreshEnabled: function (bRefreshBusy, oRefreshState) {
-            var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
-            var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
-            return !bRefreshBusy && !bIsRunning && sNormalizedStatus !== "REQUESTED";
+            if (sNormalizedStatus === "SUCCESS" || sNormalizedStatus === "READY") {
+                return "Success";
+            }
+            return "Information";
         },
 
         formatRefreshStatusText: function (oRefreshState) {
-            var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
-            var sResolvedError = coerceText(oRefreshState && oRefreshState.lastError);
-            var sResolvedSuccessAt = coerceText(oRefreshState && oRefreshState.lastSuccessAt);
-            if (sNormalizedStatus === "REQUESTED") {
-                return getBundleText(this, "analyticsRefreshQueued", [], "Queued");
+            var sStatus = coerceText(oRefreshState && oRefreshState.status);
+            var sMessage = coerceText(oRefreshState && (oRefreshState.lastMessage || oRefreshState.lastError));
+            if (sMessage) {
+                return sMessage;
             }
-            if (oRefreshState && oRefreshState.isRunning) {
-                return getBundleText(this, "analyticsRefreshRunning", [], "Running");
+            if (!sStatus) {
+                return getBundleText(this, "analyticsRefreshIdle", [], "Idle");
             }
-            if (sResolvedError) {
-                return sResolvedError;
-            }
-            if (sResolvedSuccessAt) {
-                return getBundleText(this, "workflowUpdatedAt", [], "Updated at") + ": " + sResolvedSuccessAt;
-            }
-            return getBundleText(this, "analyticsRefreshIdle", [], "Idle");
+            return sStatus;
         }
     };
 });

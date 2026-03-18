@@ -1,10 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts"
-], function (ControllerViewStateRuntime, SchedulingRuntime, AnalyticsContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsUiContracts"
+], function (ControllerViewStateRuntime, SchedulingRuntime, AnalyticsContracts, AnalyticsUiContracts) {
     "use strict";
 
+    var PATHS = AnalyticsUiContracts.PATHS;
     var REFRESH_POLL_DELAY_MS = AnalyticsContracts.REFRESH.POLL_DELAY_MS;
     var REFRESH_POLL_MAX_ATTEMPTS = AnalyticsContracts.REFRESH.POLL_MAX_ATTEMPTS;
 
@@ -30,7 +32,7 @@ sap.ui.define([
             if (Number(oController && oController._iAnalyticsRefreshPollToken || 0) !== iPollToken) {
                 return oRefreshState;
             }
-            ControllerViewStateRuntime.set(oController, "/refreshState", oRefreshState);
+            ControllerViewStateRuntime.set(oController, PATHS.REFRESH_STATE, oRefreshState);
             if (!bActive || iRemaining <= 0) {
                 return oRefreshState;
             }

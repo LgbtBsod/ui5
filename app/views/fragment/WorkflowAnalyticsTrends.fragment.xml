@@ -20,9 +20,16 @@
                             </items>
                         </Select>
                         <ToolbarSpacer/>
-                        <ObjectStatus text="{= ${view>/selectedYear} + ' vs ' + ${view>/compareYear} }" state="Information"/>
+                        <ObjectStatus
+                            text="{= ${view>/selectedYear} + ' vs ' + ${view>/compareYear} }"
+                            state="Information"/>
                     </OverflowToolbar>
-                    <MessageStrip text="{view>/compareYearHintText}" type="Information" showIcon="true" visible="{= !${view>/compareYearHasData} &amp;&amp; !!${view>/compareYearHintText} }" class="chkFeedbackStrip sapUiTinyMarginBottom"/>
+                    <MessageStrip
+                        text="{view>/compareYearHintText}"
+                        type="Information"
+                        showIcon="true"
+                        visible="{= !${view>/compareYearHasData} &amp;&amp; !!${view>/compareYearHintText} }"
+                        class="chkFeedbackStrip sapUiTinyMarginBottom"/>
                     <viz:VizFrame vizType="line" width="100%" height="18rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/comparisonChart}">
                         <viz:dataset>
                             <vizData:FlattenedDataset data="{view>/analytics/comparisonChartRows}">
@@ -66,9 +73,21 @@
                             <items>
                                 <ColumnListItem>
                                     <cells>
-                                        <Text text="{= ${view>metricKey} === 'TOTAL' ? ${i18n>analyticsMetricTotal} : ${view>metricKey} === 'FAILED_CHECKS' ? ${i18n>analyticsMetricFailedChecks} : ${view>metricKey} === 'FAILED_BARRIERS' ? ${i18n>analyticsMetricFailedBarriers} : ${view>metricKey} === 'FAILED_CHECKLISTS' ? ${i18n>analyticsMetricFailedChecklistCount} : ${i18n>analyticsMetricFailedBarrierChecklistCount} }"/>
+                                        <Text
+                                            text="{path: 'view>metricKey', formatter: '.formatAnalyticsMatrixMetricLabel'}"/>
                                         <ObjectStatus text="{view>yearLabel}" state="Information"/>
-                                        <Text text="{view>jan}"/><Text text="{view>feb}"/><Text text="{view>mar}"/><Text text="{view>apr}"/><Text text="{view>may}"/><Text text="{view>jun}"/><Text text="{view>jul}"/><Text text="{view>aug}"/><Text text="{view>sep}"/><Text text="{view>oct}"/><Text text="{view>nov}"/><Text text="{view>dec}"/>
+                                        <Text text="{view>jan}"/>
+                                        <Text text="{view>feb}"/>
+                                        <Text text="{view>mar}"/>
+                                        <Text text="{view>apr}"/>
+                                        <Text text="{view>may}"/>
+                                        <Text text="{view>jun}"/>
+                                        <Text text="{view>jul}"/>
+                                        <Text text="{view>aug}"/>
+                                        <Text text="{view>sep}"/>
+                                        <Text text="{view>oct}"/>
+                                        <Text text="{view>nov}"/>
+                                        <Text text="{view>dec}"/>
                                     </cells>
                                 </ColumnListItem>
                             </items>

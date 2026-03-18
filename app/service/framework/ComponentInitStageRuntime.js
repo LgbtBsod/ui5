@@ -2,8 +2,13 @@ sap.ui.define([], function () {
     "use strict";
 
     function createModelStage(oComponent, mDeps) {
-        var sMainServiceUri = oComponent.getManifestEntry("/sap.app/dataSources/mainService/uri") || "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/";
+        var sMainServiceUri = oComponent.getManifestEntry("/sap.app/dataSources/mainService/uri");
         var mModels = mDeps.ComponentModelInitRuntime.initializeModels(oComponent, mDeps);
+
+        if (!sMainServiceUri) {
+            throw new Error("Manifest-driven mainService dataSource is missing. Check sap.app/dataSources/mainService/uri in manifest.json.");
+        }
+
         return {
             models: mModels,
             mainServiceModel: mDeps.ComponentMainServiceRuntime.createMainServiceModel(oComponent, mDeps, sMainServiceUri)

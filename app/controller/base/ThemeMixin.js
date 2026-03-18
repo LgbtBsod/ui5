@@ -70,20 +70,20 @@ sap.ui.define([
 
     function readThemeProfile() {
         var oProfile = ThemeService.getThemeProfile ? ThemeService.getThemeProfile() : null;
-        var sMode = readDevOverrideMode() || (oProfile && oProfile.mode) || DEFAULT_MODE;
+        var sMode = readDevOverrideMode() || DEFAULT_MODE;
         return {
-            mode: sMode,
-            animationEnabled: oProfile && typeof oProfile.animationEnabled === "boolean" ? oProfile.animationEnabled : DEFAULT_ANIMATION_ENABLED
+            mode: ThemeContracts.MODES.MORNING,
+            animationEnabled: oProfile && typeof oProfile.animationEnabled === "boolean" ? oProfile.animationEnabled : DEFAULT_ANIMATION_ENABLED,
+            requestedMode: sMode
         };
     }
 
     return {
         getCurrentTheme: function () {
-            var oProfile = readThemeProfile();
-            return ThemeService.themeForMode(oProfile.mode);
+            return ThemeService.themeForMode(ThemeContracts.MODES.MORNING);
         },
         getCurrentThemeMode: function () {
-            return readThemeProfile().mode;
+            return ThemeContracts.MODES.MORNING;
         },
         isDarkThemeEnabled: function () {
             return false;
@@ -94,9 +94,9 @@ sap.ui.define([
         setThemeAnimationEnabled: function (bEnabled) {
             var oProfile = ThemeService.setThemeAnimationEnabled
                 ? ThemeService.setThemeAnimationEnabled(!!bEnabled)
-                : { mode: this.getCurrentThemeMode(), animationEnabled: !!bEnabled };
+                : { mode: ThemeContracts.MODES.MORNING, animationEnabled: !!bEnabled };
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(oProfile.mode, null, {
+            return ThemeService.applyThemeMode(ThemeContracts.MODES.MORNING, null, {
                 animationEnabled: oProfile.animationEnabled,
                 persist: false
             });
@@ -111,7 +111,7 @@ sap.ui.define([
         applyStoredTheme: function () {
             var oProfile = readThemeProfile();
             this._ensureThemeSyncListener();
-            return ThemeService.applyThemeMode(oProfile.mode, null, {
+            return ThemeService.applyThemeMode(ThemeContracts.MODES.MORNING, null, {
                 animationEnabled: oProfile.animationEnabled
             });
         },
