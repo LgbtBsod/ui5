@@ -6,7 +6,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RetryCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (LoadCurrentUserUseCase, FeedbackBannerRuntime, ControllerModelRuntime, ModelStateRuntime, RetryCoordinator, SecurityTokenRefresh, UiDecisionCoordinator, ModelContracts) {
     "use strict";
 

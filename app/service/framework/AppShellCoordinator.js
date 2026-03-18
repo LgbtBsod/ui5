@@ -8,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
 ], function (
     JSONModel,
     RouteModeCoordinator,

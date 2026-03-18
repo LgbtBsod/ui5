@@ -167,16 +167,6 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
   opacity: 0.44;
 }
 
-.chkApp .detailAttachmentsBody.isAttachmentDropPrimed {
-  outline: 1px dashed rgba(var(--accent-rgb), 0.34);
-  outline-offset: 0.32rem;
-  border-radius: calc(var(--radius-lg) - 0.1rem);
-}
-
-.chkApp .detailAttachmentsBody.isAttachmentDropActive {
-  outline-style: solid;
-}
-
 .chkApp .detailAttachmentDropZone {
   display: flex;
   flex-direction: column;

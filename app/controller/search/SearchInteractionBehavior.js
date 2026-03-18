@@ -5,8 +5,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts"
 ], function (ControllerViewStateRuntime, SearchFilterLifecycleBehavior, SearchLoadRuntime, SearchViewBehavior, SearchCommandPolicy, ReadinessTelemetryRuntime, ReadinessTelemetryContracts, OperationSourceContracts) {
     "use strict";
 

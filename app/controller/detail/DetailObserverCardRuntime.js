@@ -7,7 +7,7 @@ sap.ui.define([
     "sap/m/ObjectStatus",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (VBox, Text, Input, CoreListItem, CustomData, ObjectStatus, ControlStyleRuntime, ControllerTextRuntime, WorkflowContracts) {
     "use strict";
 

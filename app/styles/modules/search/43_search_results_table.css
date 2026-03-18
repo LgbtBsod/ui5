@@ -193,6 +193,25 @@
   border-bottom-color: transparent;
 }
 
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblHeaderCell,
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblCell {
+  padding-inline: clamp(0.32rem, 0.7vw, 0.54rem);
+}
+
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblSubCntRow {
+  grid-template-columns: minmax(5.8rem, auto) minmax(0, 1fr);
+}
+
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblSubCntValBlock {
+  grid-template-columns: 1fr;
+}
+
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblSubCntVal {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
 .chkApp .searchResultsTable .sapMListTblHeaderCell:first-child,
 .chkApp .searchResultsTable .sapMListTblEmptyCell:first-child,
 .chkApp .searchResultsTable .sapMListTblCell:first-child {
@@ -309,39 +328,6 @@ body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRow .sapMListTb
   padding: 0.54rem 0.56rem 0.58rem;
 }
 
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblHeaderCell,
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblCell,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblHeaderCell,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCell,
-.chkApp .appLayoutDetailOnly #searchPaneHost .searchResultsTable .sapMListTblHeaderCell,
-.chkApp .appLayoutDetailOnly #searchPaneHost .searchResultsTable .sapMListTblCell,
-.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] .searchResultsTable .sapMListTblHeaderCell,
-.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCell {
-  padding-inline: clamp(0.32rem, 0.7vw, 0.54rem);
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblSubCntRow,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblSubCntRow,
-.chkApp .appLayoutDetailOnly #searchPaneHost .searchResultsTable .sapMListTblSubCntRow,
-.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] .searchResultsTable .sapMListTblSubCntRow {
-  grid-template-columns: minmax(5.8rem, auto) minmax(0, 1fr);
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblSubCntValBlock,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblSubCntValBlock,
-.chkApp .appLayoutDetailOnly #searchPaneHost .searchResultsTable .sapMListTblSubCntValBlock,
-.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] .searchResultsTable .sapMListTblSubCntValBlock {
-  grid-template-columns: 1fr;
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblSubCntVal,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblSubCntVal,
-.chkApp .appLayoutDetailOnly #searchPaneHost .searchResultsTable .sapMListTblSubCntVal,
-.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] .searchResultsTable .sapMListTblSubCntVal {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-}
 
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblHeaderCell .sapMText,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblHeaderCell .sapMText {

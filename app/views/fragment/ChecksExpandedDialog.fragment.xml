@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
     <Dialog
-        class="glassDialog governedDialog"
+        class="glassDialog governedDialog expandedRowsDialog"
         id="checksExpandedDialog"
         title="{i18n>checksExpandedTitle}"
         contentWidth="72rem"
@@ -9,6 +9,9 @@
         resizable="true"
         stretchOnPhone="true"
         initialFocus="checksExpandedCloseButton">
+        <customData>
+            <core:CustomData key="dialogKind" value="check"/>
+        </customData>
         <content>
             <VBox class="expandedDialogContent dialogContentShell governedDialogContent tableDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare">
                 <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/checksExpandedBusy}">
@@ -61,8 +64,12 @@
                                     text="{i18n>rowActionDelete}"
                                     width="100%"
                                     type="Transparent"
-                                    press=".onDeleteCheckRow"
-                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                    press=".onDeleteExpandedRow"
+                                    class="tableRowActionBtn tableRowActionBtnDanger expandedRowDeleteAction">
+                                    <customData>
+                                        <core:CustomData key="rowKind" value="check"/>
+                                    </customData>
+                                </Button>
                             </t:template>
                         </t:Column>
                     </t:columns>
@@ -92,9 +99,13 @@
                                     text="{i18n>rowActionDelete}"
                                     width="100%"
                                     type="Transparent"
-                                    press=".onDeleteCheckRow"
+                                    press=".onDeleteExpandedRow"
                                     visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                                    class="tableRowActionBtn tableRowActionBtnDanger expandedRowDeleteAction">
+                                    <customData>
+                                        <core:CustomData key="rowKind" value="check"/>
+                                    </customData>
+                                </Button>
                             </cells>
                         </ColumnListItem>
                     </items>
@@ -102,7 +113,11 @@
             </VBox>
         </content>
         <beginButton>
-            <Button id="checksExpandedCloseButton" text="{i18n>closeButton}" icon="sap-icon://nav-back" press=".onCloseChecksExpanded"/>
+            <Button id="checksExpandedCloseButton" text="{i18n>closeButton}" icon="sap-icon://nav-back" press=".onCloseExpandedRows" class="expandedRowsCloseButton">
+                <customData>
+                    <core:CustomData key="dialogKind" value="check"/>
+                </customData>
+            </Button>
         </beginButton>
     </Dialog>
 </core:FragmentDefinition>

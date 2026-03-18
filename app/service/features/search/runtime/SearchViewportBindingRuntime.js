@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchScrollRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/SearchUiContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/contracts/JsRuntimeContracts"
 ], function (SearchScrollRuntime, SearchStickyLayoutRuntime, SchedulingRuntime, SearchUiContracts, JsRuntimeContracts) {
     "use strict";

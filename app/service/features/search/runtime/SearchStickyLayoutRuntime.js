@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/SearchUiContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyOffsetRuntime"
 ], function (SearchSelectionRuntime, ControllerViewStateRuntime, ThemeDomRuntime, SearchUiContracts, SearchStickyDomRuntime, SearchStickyOffsetRuntime) {

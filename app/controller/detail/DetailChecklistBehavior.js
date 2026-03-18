@@ -17,12 +17,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/DialogContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/DialogContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime"
 ], function (DialogOrchestrator, DetailViewBehavior, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailMatchedRuntime, DetailSelectedFieldRuntime, ModelPathContracts, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
     "use strict";

@@ -36,6 +36,13 @@ function assertIncludes(filePath, pattern, message) {
   }
 }
 
+function assertExcludes(filePath, pattern, message) {
+  const text = read(filePath);
+  if (pattern.test(text)) {
+    fail(`${filePath}: ${message}`);
+  }
+}
+
 const VIEWS_ROOT = path.join("app", "views");
 const FRAGMENTS_ROOT = path.join(VIEWS_ROOT, "fragment");
 const appViewPath = path.join(VIEWS_ROOT, "App.view.xml");
@@ -68,9 +75,11 @@ if (!/showNavButton="true"/.test(analyticsView) || !/analyticsRefreshButton/.tes
   fail("Analytics.view.xml must keep route navigation and refresh action.");
 }
 
-assertIncludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /SearchActionRailPrimary/, "SearchActionRail.fragment.xml must compose primary cluster via fragment.");
-assertIncludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /SearchActionRailRequest/, "SearchActionRail.fragment.xml must compose request cluster via fragment.");
-assertIncludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /SearchActionRailSecondary/, "SearchActionRail.fragment.xml must compose secondary cluster via fragment.");
+assertIncludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /searchResultsActionRail/, "SearchActionRail.fragment.xml must keep workbench action rail shell.");
+assertIncludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /onCreate/, "SearchActionRail.fragment.xml must expose create action.");
+assertIncludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /onBackendTopChange/, "SearchActionRail.fragment.xml must expose backend top request controls.");
+assertIncludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /onExportMenuAction/, "SearchActionRail.fragment.xml must expose export menu action.");
+assertExcludes(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), /<VBox\b|<HBox\b/, "SearchActionRail.fragment.xml must keep flat toolbar composition.");
 assertIncludes(path.join(FRAGMENTS_ROOT, "DetailControlRail.fragment.xml"), /DetailHeroStats/, "DetailControlRail.fragment.xml must compose stats via fragment.");
 assertIncludes(path.join(FRAGMENTS_ROOT, "DetailControlRail.fragment.xml"), /DetailSectionAnchorRail/, "DetailControlRail.fragment.xml must compose anchor rail via fragment.");
 assertIncludes(path.join(FRAGMENTS_ROOT, "DetailControlRail.fragment.xml"), /DetailControlStatusRow/, "DetailControlRail.fragment.xml must compose status row via fragment.");
@@ -89,7 +98,7 @@ assertMetrics(appViewPath, { tags: 30, vbox: 5, hbox: 2, fragments: 0 });
 assertMetrics(searchViewPath, { tags: 20, vbox: 2, hbox: 0, fragments: 6 });
 assertMetrics(detailViewPath, { tags: 140, vbox: 22, hbox: 6, fragments: 11 });
 assertMetrics(analyticsViewPath, { tags: 60, vbox: 6, hbox: 6, fragments: 8 });
-assertMetrics(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), { tags: 5, vbox: 0, hbox: 0, fragments: 3 });
+assertMetrics(path.join(FRAGMENTS_ROOT, "SearchActionRail.fragment.xml"), { tags: 70, vbox: 0, hbox: 0, fragments: 0 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "DetailControlRail.fragment.xml"), { tags: 12, vbox: 2, hbox: 0, fragments: 4 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "DetailHeroStats.fragment.xml"), { tags: 24, vbox: 0, hbox: 6, fragments: 0 });
 assertMetrics(path.join(FRAGMENTS_ROOT, "DetailControlStatusRow.fragment.xml"), { tags: 20, vbox: 0, hbox: 0, fragments: 0 });

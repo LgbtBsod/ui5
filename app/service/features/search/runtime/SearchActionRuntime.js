@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (ControllerViewStateRuntime, ModelStateRuntime, StatePaths, ModelContracts) {
     "use strict";
 

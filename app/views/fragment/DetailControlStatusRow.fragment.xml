@@ -1,11 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <OverflowToolbar class="detailControlRow detailControlRowTop toolbarTransparent" design="Transparent">
-        <customData>
-            <core:CustomData key="role" value="status" writeToDom="true"/>
-            <core:CustomData key="aria-live" value="polite" writeToDom="true"/>
-            <core:CustomData key="aria-label" value="{i18n>detailStatusRailAriaLabel}" writeToDom="true"/>
-        </customData>
-
         <ObjectStatus
             icon="sap-icon://status-in-process"
             text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}"

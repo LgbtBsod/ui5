@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/ui/StyleTokens",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/ModelContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (Ui5StyleAdapter, StyleTokens, ModelStateRuntime, CloneUtil, ModelContracts) {
     "use strict";
 

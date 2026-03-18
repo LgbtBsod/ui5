@@ -45,7 +45,6 @@
     <FunctionImport Name="LockAcquire" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
       <Parameter Name="ObjectUuid" Type="Edm.String" Mode="In"/>
       <Parameter Name="RootId" Type="Edm.String" Mode="In"/>
-      <Parameter Name="Uname" Type="Edm.String" Mode="In"/>
       <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
       <Parameter Name="TabSessionId" Type="Edm.String" Mode="In"/>
     </FunctionImport>

@@ -104,3 +104,8 @@
 .chkApp .dialogDataTable .sapMBtn .sapMBtnInner {
   border-radius: calc(var(--radius-sm) - 0.08rem);
 }
+
+.chkApp .expandedRowsDialog .expandedRowDeleteAction .sapMBtnInner,
+.chkApp .expandedRowsDialog .expandedRowsCloseButton .sapMBtnInner {
+  border-radius: 999px;
+}

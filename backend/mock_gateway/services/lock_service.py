@@ -120,7 +120,7 @@ class LockService:
                 object_uuid
             )
 
-        if existing.user_id == uname and steal_from and steal_from == existing.session_guid:
+        if existing.user_id == uname and (not steal_from or steal_from == existing.session_guid):
             existing.is_killed = True
             existing.killed_by = session_guid
 

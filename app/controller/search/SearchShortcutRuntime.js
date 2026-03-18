@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/SearchUiContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts"
 ], function (SearchSelectionRuntime, SearchUiContracts) {
     "use strict";
 

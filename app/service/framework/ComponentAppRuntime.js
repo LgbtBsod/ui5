@@ -12,6 +12,15 @@ sap.ui.define([
 ], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayBackendService, StatePaths, WorkflowContracts) {
     "use strict";
 
+    function releaseLockWithGatewayBackend(oPayload) {
+        return GatewayBackendService.callFunctionImport("LockRelease", oPayload).then(function (oResult) {
+            var oData = oResult && oResult.d ? oResult.d : (oResult || {});
+            return !!(oData && (oData.Ok || oData.Success || oData.ok || oData.success));
+        }).catch(function () {
+            return false;
+        });
+    }
+
     function buildComponentRuntimeSupport() {
         return {
             resolveBootDetailId: ComponentDetailStateRuntime.resolveBootDetailId,
@@ -84,18 +93,45 @@ sap.ui.define([
     }
 
     function registerLockReleaseBeacon(oComponent, oStateModel, oMainServiceModel) {
+        function tryReleaseOnPageLeave() {
+            if (oComponent && oComponent._bLeaveReleaseSent) {
+                return;
+            }
+            if (!ComponentLockReleaseRuntime.readActiveLockPayload(oStateModel)) {
+                return;
+            }
+            releaseActiveLockOnLeave(oComponent, oStateModel, oMainServiceModel);
+        }
+
+        window.addEventListener("pagehide", tryReleaseOnPageLeave);
+        window.addEventListener("beforeunload", tryReleaseOnPageLeave);
         return function () {
-            void oComponent;
-            void oStateModel;
-            void oMainServiceModel;
+            window.removeEventListener("pagehide", tryReleaseOnPageLeave);
+            window.removeEventListener("beforeunload", tryReleaseOnPageLeave);
         };
     }
 
     function releaseActiveLockOnLeave(oComponent, oStateModel, oMainServiceModel) {
-        void oComponent;
-        void oStateModel;
-        void oMainServiceModel;
-        return false;
+        var oPayload = ComponentLockReleaseRuntime.readActiveLockPayload(oStateModel);
+        var sToken;
+        if (!oPayload || (oComponent && oComponent._bLeaveReleaseSent)) {
+            return false;
+        }
+        if (oComponent) {
+            oComponent._bLeaveReleaseSent = true;
+        }
+        sToken = String((oMainServiceModel && oMainServiceModel.getSecurityToken && oMainServiceModel.getSecurityToken()) || "").trim();
+        ComponentLockReleaseRuntime.tryBeaconLockRelease(
+            ComponentLockReleaseRuntime.buildLockReleaseUrl(oStateModel),
+            oPayload,
+            sToken
+        );
+        releaseLockWithGatewayBackend(oPayload).then(function (bReleased) {
+            if (!bReleased && oComponent) {
+                oComponent._bLeaveReleaseSent = false;
+            }
+        });
+        return true;
     }
 
     function clearComponentTimers(oComponent) {

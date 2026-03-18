@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsExportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService"

@@ -30,8 +30,10 @@ DEFAULT_UPLOAD_POLICY = {
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "text/plain",
         "text/csv",
+        "audio/mpeg",
+        "audio/wav",
     ],
-    "allowedExtensions": ["jpg", "jpeg", "png", "pdf", "doc", "docx", "xls", "xlsx", "txt", "csv"],
+    "allowedExtensions": ["jpg", "jpeg", "png", "pdf", "doc", "docx", "xls", "xlsx", "txt", "csv", "mp3", "wav"],
 }
 
 DEFAULT_FRONTEND_VARIABLES = {

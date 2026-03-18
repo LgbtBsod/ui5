@@ -19,17 +19,23 @@ const TARGETS = []
     .map((p) => p.split(path.sep).join("/"));
 const STYLELINT_CONFIG_FILES = [".stylelintrc", ".stylelintrc.json", ".stylelintrc.js", "stylelint.config.js"];
 
-function finish(stats) {
+function finish(ok, stats, errors) {
     if (process.argv.includes("--json")) {
         console.log(JSON.stringify({
             name: "css-duplicate-selector-gate",
-            ok: true,
-            errors: [],
+            ok,
+            errors: errors || [],
             stats
         }, null, 2));
         return;
     }
-    console.log("css-duplicate-selector-gate PASS");
+    if (ok) {
+        console.log("css-duplicate-selector-gate PASS");
+        return;
+    }
+    console.error("css-duplicate-selector-gate FAIL");
+    (errors || []).slice(0, 80).forEach((entry) => console.error(`- ${entry}`));
+    process.exit(1);
 }
 
 function normalizeMessage(text) {
@@ -70,7 +76,7 @@ async function lintFileForDuplicates(filePath) {
 (async function main() {
     const hasStylelintConfig = STYLELINT_CONFIG_FILES.some((name) => fs.existsSync(path.resolve(name)));
     if (!hasStylelintConfig) {
-        finish({ targets: TARGETS.length, duplicateSelectorsDetected: 0, advisory: ["stylelint config missing, duplicate selector scan skipped"] });
+        finish(true, { targets: TARGETS.length, duplicateSelectorsDetected: 0, advisory: ["stylelint config missing, duplicate selector scan skipped"] }, []);
         return;
     }
 
@@ -90,19 +96,19 @@ async function lintFileForDuplicates(filePath) {
     }
 
     if (stylelintMissing) {
-        finish({
+        finish(true, {
             targets: TARGETS.length,
             duplicateSelectorsDetected: 0,
             advisory: ["stylelint module is missing, duplicate selector scan skipped"]
-        });
+        }, []);
         return;
     }
 
-    finish({
+    finish(issues.length === 0, {
         targets: TARGETS.length,
         duplicateSelectorsDetected: issues.length,
         advisory: issues.slice(0, 80)
-    });
+    }, issues.slice(0, 80));
 }()).catch((error) => {
     console.error("Duplicate selector gate failed:", error && error.message ? error.message : error);
     process.exit(1);

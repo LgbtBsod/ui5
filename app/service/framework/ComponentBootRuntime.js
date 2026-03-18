@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootStageRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootStageExecutionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts"
-], function (ComponentBootStageRuntime, ComponentBootStageExecutionRuntime, ComponentBootStateRuntime, ComponentBootContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
+], function (ComponentBootStageRuntime, ComponentBootStageExecutionRuntime, ComponentBootStateRuntime, ComponentBootContracts, ModelStateRuntime) {
     "use strict";
 
     var STAGE_ERRORS = ComponentBootContracts.STAGE_ERRORS;
@@ -68,12 +69,12 @@ sap.ui.define([
                     serverState: null,
                     checkLists: []
                 });
-                oStateModel.setProperty(READINESS_APP_PATH, Object.assign({}, oStateModel.getProperty(READINESS_APP_PATH) || {}, {
+                ModelStateRuntime.writeOnModel(oStateModel, "/readiness/app", {
                     status: READINESS_STATUS.READY,
                     ready: true,
                     readyAt: sReadyAt,
                     error: ""
-                }));
+                });
                 bBootCompleted = true;
             });
         }).catch(function (oError) {

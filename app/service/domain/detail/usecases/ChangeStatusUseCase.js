@@ -10,7 +10,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil"
 ], function (UseCase, Result, Effects, UseCaseValue, ViewPathContracts, StatePaths, DetailStateAccess, DetailSaveRuntime, ValidationPathMap, ChecklistValidationService, DeltaPayloadBuilder, WorkflowContracts, CloneUtil) {
     "use strict";

@@ -106,7 +106,7 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
 
     ASSIGN COMPONENT 'REASON_CODE' OF STRUCTURE cs_result TO <lv_reason_code>.
     IF <lv_reason_code> IS ASSIGNED.
-      <lv_reason_code> = iv_code.
+      <lv_reason_code> = COND #( WHEN iv_reason_code IS INITIAL THEN iv_code ELSE iv_reason_code ).
     ENDIF.
 
     ASSIGN COMPONENT 'ACTION' OF STRUCTURE cs_result TO <lv_action>.

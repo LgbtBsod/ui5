@@ -18,6 +18,7 @@ sap.ui.define([
       this._iDebounceTimer = null;
       this._iIntervalTimer = null;
       this._bRunning = false;
+      this._pActiveRun = null;
     },
 
     start: function () {
@@ -77,12 +78,21 @@ sap.ui.define([
       if (!oPayload) {
         return Promise.resolve(null);
       }
+      if (this._pActiveRun) {
+        DebugLogger.info("AutoSaveCoordinator", "autosave_inflight_skip", {});
+        return this._pActiveRun;
+      }
       this.fireEvent("autosaveStart", { payload: oPayload });
-      return this._fnSave(oPayload).then(function (oResult) {
+      this._pActiveRun = this._fnSave(oPayload).then(function (oResult) {
         this.fireEvent("autosaveDone", { result: oResult || null });
+        return oResult || null;
       }.bind(this)).catch(function (oError) {
         this.fireEvent("autosaveError", { error: oError });
+        throw oError;
+      }.bind(this)).finally(function () {
+        this._pActiveRun = null;
       }.bind(this));
+      return this._pActiveRun;
     }
   });
 });

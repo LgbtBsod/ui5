@@ -20,7 +20,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (
     OpenDetailUseCase,
     EnterEditUseCase,
@@ -47,6 +47,10 @@ sap.ui.define([
 ) {
     "use strict";
 
+    function executeUseCase(oUseCase, mInput, mCtx) {
+        return oUseCase.execute(mInput || {}, mCtx || {});
+    }
+
     function DetailFacade(mDeps) {
         var d = mDeps || {};
         this._uc = {
@@ -71,10 +75,10 @@ sap.ui.define([
         };
     }
 
-    DetailFacade.prototype.open = function (i, c) { return this._uc.open.execute(i || {}, c || {}); };
+    DetailFacade.prototype.open = function (i, c) { return executeUseCase(this._uc.open, i, c); };
 
     DetailFacade.prototype.enterEdit = function (i, c) {
-        return this._uc.enterEdit.execute(i || {}, c || {}).then(function (oResult) {
+        return executeUseCase(this._uc.enterEdit, i, c).then(function (oResult) {
             var sCode = (oResult && oResult.error && oResult.error.code) || (oResult && oResult.data && oResult.data.code) || "";
             var sTextKey;
             if (sCode !== "LOCKED_OWN_SESSION" && sCode !== "EXPIRED") {
@@ -93,7 +97,7 @@ sap.ui.define([
     };
 
     DetailFacade.prototype.confirmTakeover = function (i, c) {
-        return this._uc.takeoverLock.execute(i || {}, c || {});
+        return executeUseCase(this._uc.takeoverLock, i, c);
     };
 
     DetailFacade.prototype.cancelEnterEdit = function (_i, _c) {
@@ -115,30 +119,27 @@ sap.ui.define([
     };
 
     DetailFacade.prototype.onLockLost = function (i, c) {
-        return this._uc.lockLost.execute(i || {}, c || {});
+        return executeUseCase(this._uc.lockLost, i, c);
     };
 
     DetailFacade.prototype.forceReadOnly = function (i, c) {
-        return this._uc.forceReadOnly.execute(i || {}, c || {});
+        return executeUseCase(this._uc.forceReadOnly, i, c);
     };
 
-    DetailFacade.prototype.closeDetail = function (i, c) {
-        return this._uc.close.execute(i || {}, c || {});
-    };
-
-    DetailFacade.prototype.save = function (i, c) { return this._uc.save.execute(i || {}, c || {}); };
-    DetailFacade.prototype.validate = function (i, c) { return this._uc.validate.execute(i || {}, c || {}); };
-    DetailFacade.prototype.autosave = function (i, c) { return this._uc.autosave.execute(i || {}, c || {}); };
-    DetailFacade.prototype.close = function (i, c) { return this.closeDetail(i, c); };
-    DetailFacade.prototype.deleteChecklist = function (i, c) { return this._uc.deleteChecklist.execute(i || {}, c || {}); };
-    DetailFacade.prototype.changeStatus = function (i, c) { return this._uc.changeStatus.execute(i || {}, c || {}); };
-    DetailFacade.prototype.resolveConflict = function (i, c) { return this._uc.resolveConflict.execute(i || {}, c || {}); };
-    DetailFacade.prototype.attachmentLoad = function (i, c) { return this._uc.attachmentLoad.execute(i || {}, c || {}); };
-    DetailFacade.prototype.attachmentUpload = function (i, c) { return this._uc.attachmentUpload.execute(i || {}, c || {}); };
-    DetailFacade.prototype.attachmentDelete = function (i, c) { return this._uc.attachmentDelete.execute(i || {}, c || {}); };
-    DetailFacade.prototype.rowOps = function (i, c) { return this._uc.rowOps.execute(i || {}, c || {}); };
-    DetailFacade.prototype.valueHelpLocation = function (i, c) { return this._uc.valueHelpLocation.execute(i || {}, c || {}); };
-    DetailFacade.prototype.personSuggest = function (i, c) { return this._uc.personSuggest.execute(i || {}, c || {}); };
+    DetailFacade.prototype.close = function (i, c) { return executeUseCase(this._uc.close, i, c); };
+    DetailFacade.prototype.closeDetail = function (i, c) { return this.close(i, c); };
+    DetailFacade.prototype.save = function (i, c) { return executeUseCase(this._uc.save, i, c); };
+    DetailFacade.prototype.validate = function (i, c) { return executeUseCase(this._uc.validate, i, c); };
+    DetailFacade.prototype.autosave = function (i, c) { return executeUseCase(this._uc.autosave, i, c); };
+    DetailFacade.prototype.deleteChecklist = function (i, c) { return executeUseCase(this._uc.deleteChecklist, i, c); };
+    DetailFacade.prototype.changeStatus = function (i, c) { return executeUseCase(this._uc.changeStatus, i, c); };
+    DetailFacade.prototype.resolveConflict = function (i, c) { return executeUseCase(this._uc.resolveConflict, i, c); };
+    DetailFacade.prototype.attachmentLoad = function (i, c) { return executeUseCase(this._uc.attachmentLoad, i, c); };
+    DetailFacade.prototype.attachmentUpload = function (i, c) { return executeUseCase(this._uc.attachmentUpload, i, c); };
+    DetailFacade.prototype.attachmentDelete = function (i, c) { return executeUseCase(this._uc.attachmentDelete, i, c); };
+    DetailFacade.prototype.rowOps = function (i, c) { return executeUseCase(this._uc.rowOps, i, c); };
+    DetailFacade.prototype.valueHelpLocation = function (i, c) { return executeUseCase(this._uc.valueHelpLocation, i, c); };
+    DetailFacade.prototype.personSuggest = function (i, c) { return executeUseCase(this._uc.personSuggest, i, c); };
 
     return DetailFacade;
 });
