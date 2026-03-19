@@ -10,7 +10,7 @@
             <OverflowToolbar id="detailAttachmentToolbar" class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar workbenchToolbarSurface sectionToolbarSurface">
                 <Title text="{i18n>attachmentsTitle}" class="detailAttachmentToolbarTitle"/>
                 <ToolbarSpacer class="detailAttachmentToolbarSpacer"/>
-                <Button text="{= ${view>/attachmentsExpanded} ? ${i18n>hideAttachmentsSection} : ${i18n>showAttachmentsSection} }" type="Transparent" enabled="{= !${view>/attachmentBusy} }" press=".onToggleAttachmentsSection" class="sapUiTinyMarginEnd actionPrioritySecondary detailAttachmentToolbarToggle"/>
+                <Button text="{= ${view>/attachmentsExpanded} ? ${i18n>hideAttachmentsSection} : ${i18n>showAttachmentsSection} }" type="Transparent" enabled="{= !${view>/attachmentBusy} }" press=".onToggleAttachmentsSection" class="sapUiTinyMarginEnd actionPrioritySecondary detailAttachmentToolbarToggle detailAttachmentToolbarButton"/>
             </OverflowToolbar>
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailAttachmentsBody" type="XML"/>
         </VBox>

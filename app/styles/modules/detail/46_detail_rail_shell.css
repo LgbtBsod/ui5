@@ -121,9 +121,10 @@
   display: block;
 }
 
-.chkApp .detailSectionAnchorRail .sapMBtn,
-.chkApp .detailControlRowTop .sapMBtn,
-.chkApp .detailControlRowActions .sapMBtn {
+.chkApp .detailSectionAnchorBtn,
+.chkApp .detailRailActionBtn,
+.chkApp .detailControlRowActions .detailControlEditSwitch,
+.chkApp .detailControlRowActions .detailControlBusyIndicator {
   flex: 0 1 auto;
 }
 
@@ -135,7 +136,7 @@
   white-space: nowrap;
 }
 
-.chkApp .detailControlRowActions .sapMBsyInd {
+.chkApp .detailControlRowActions .detailControlBusyIndicator {
   color: var(--accent);
 }
 
@@ -192,14 +193,14 @@ body.chkAppRoot.appLight .chkApp .detailControlRowActions {
   }
 
   .chkApp .detailControlRowTop .detailRailStatusChip,
-  .chkApp .detailControlRowActions .sapMBtn,
-  .chkApp .detailControlRowActions .sapMSwt,
-  .chkApp .detailControlRowActions .sapMBusyIndicator {
+  .chkApp .detailControlRowActions .detailRailActionBtn,
+  .chkApp .detailControlRowActions .detailControlEditSwitch,
+  .chkApp .detailControlRowActions .detailControlBusyIndicator {
     flex: 1 1 auto;
     min-width: 0;
   }
 
-  .chkApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+  .chkApp .detailControlRowActions .detailRailActionBtn .sapMBtnInner {
     justify-content: flex-start;
     width: 100%;
   }
@@ -230,7 +231,7 @@ body.chkAppRoot.appLight .chkApp .detailControlRowActions {
     display: none;
   }
 
-  .chkApp .detailSectionAnchorRail .sapMBtn {
+  .chkApp .detailSectionAnchorBtn {
     flex: 1 1 100%;
   }
 

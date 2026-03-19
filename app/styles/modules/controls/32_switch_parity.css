@@ -1,11 +1,24 @@
- .chkApp .sapMSwt.sapMSwtOn {
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn,
+.chkApp .shellThemeSwitch.sapMSwt.sapMSwtOn,
+.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtOn,
+.chkApp .shellSettingsSwitch.sapMSwt.sapMSwtOn,
+.chkApp .detailResultSwitch.sapMSwt.sapMSwtOn,
+.chkApp .detailControlEditSwitch.sapMSwt.sapMSwtOn,
+.chkApp .detailGridTable .sapMSwtOn,
+.chkApp .flatEditorTable .sapMSwtOn {
   background: var(--hz-sw-on-bg, var(--hz-accent));
   border-color: rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.44);
   box-shadow: 0 2px 8px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.26);
 }
 
-.chkApp .sapMSwtHandle,
-.chkApp .sapMSwt .sapMSwtHandle {
+.chkApp .appAccentSwitch .sapMSwtHandle,
+.chkApp .shellThemeSwitch .sapMSwtHandle,
+.chkApp .searchModeToggleSwitch .sapMSwtHandle,
+.chkApp .shellSettingsSwitch .sapMSwtHandle,
+.chkApp .detailResultSwitch .sapMSwtHandle,
+.chkApp .detailControlEditSwitch .sapMSwtHandle,
+.chkApp .detailGridTable .sapMSwtHandle,
+.chkApp .flatEditorTable .sapMSwtHandle {
   border-radius: 999px;
   background: linear-gradient(180deg, var(--color-white) 0%, rgba(238, 246, 255, 0.95) 100%);
   box-shadow:
@@ -14,15 +27,31 @@
   transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.chkApp .sapMSwt.sapMSwtOn .sapMSwtHandle {
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle,
+.chkApp .shellThemeSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle,
+.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle,
+.chkApp .shellSettingsSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle,
+.chkApp .detailResultSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle,
+.chkApp .detailControlEditSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle,
+.chkApp .detailGridTable .sapMSwtOn .sapMSwtHandle,
+.chkApp .flatEditorTable .sapMSwtOn .sapMSwtHandle {
   box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.24);
 }
 
-.chkApp .sapMSwt:not(.sapMSwtDisabled):hover {
+.chkApp .appAccentSwitch.sapMSwt:not(.sapMSwtDisabled):hover,
+.chkApp .shellThemeSwitch.sapMSwt:not(.sapMSwtDisabled):hover,
+.chkApp .searchModeToggleSwitch.sapMSwt:not(.sapMSwtDisabled):hover,
+.chkApp .shellSettingsSwitch.sapMSwt:not(.sapMSwtDisabled):hover,
+.chkApp .detailResultSwitch.sapMSwt:not(.sapMSwtDisabled):hover,
+.chkApp .detailControlEditSwitch.sapMSwt:not(.sapMSwtDisabled):hover {
   box-shadow: 0 0 0 3px rgba(var(--hz-sw-on-rgb, var(--accent-rgb)), 0.13);
 }
 
-.chkApp .sapMSwtText {
+.chkApp .shellThemeSwitch .sapMSwtText,
+.chkApp .searchModeToggleSwitch .sapMSwtText,
+.chkApp .shellSettingsSwitch .sapMSwtText,
+.chkApp .detailResultSwitch .sapMSwtText,
+.chkApp .detailControlEditSwitch .sapMSwtText {
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -30,7 +59,12 @@
   line-height: 1;
 }
 
-.chkApp .sapMSwt.sapMSwtOn .sapMSwtText {
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn .sapMSwtText,
+.chkApp .shellThemeSwitch.sapMSwt.sapMSwtOn .sapMSwtText,
+.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtOn .sapMSwtText,
+.chkApp .shellSettingsSwitch.sapMSwt.sapMSwtOn .sapMSwtText,
+.chkApp .detailResultSwitch.sapMSwt.sapMSwtOn .sapMSwtText,
+.chkApp .detailControlEditSwitch.sapMSwt.sapMSwtOn .sapMSwtText {
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -41,30 +75,65 @@ html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense {
   -webkit-backdrop-filter: none;
 }
 
-.chkApp .detailSectionToolbar .sapMSwt {
+.chkApp .detailSectionToolbar .detailResultSwitch,
+.chkApp .detailSectionToolbar .detailControlEditSwitch {
   min-height: 2rem;
 }
 
-.chkApp .sapMSwt:not(.sapMSwtOn) {
+.chkApp .appAccentSwitch.sapMSwt:not(.sapMSwtOn),
+.chkApp .shellThemeSwitch.sapMSwt:not(.sapMSwtOn),
+.chkApp .searchModeToggleSwitch.sapMSwt:not(.sapMSwtOn),
+.chkApp .shellSettingsSwitch.sapMSwt:not(.sapMSwtOn),
+.chkApp .detailResultSwitch.sapMSwt:not(.sapMSwtOn),
+.chkApp .detailControlEditSwitch.sapMSwt:not(.sapMSwtOn),
+.chkApp .detailGridTable .sapMSwt:not(.sapMSwtOn),
+.chkApp .flatEditorTable .sapMSwt:not(.sapMSwtOn) {
   background: linear-gradient(135deg, color-mix(in srgb, var(--theme-workbench-control-bg) 100%, transparent), color-mix(in srgb, var(--surface-3) 80%, transparent));
   border-color: var(--border-soft);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtText,
-.chkApp .sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff {
+.chkApp .appAccentSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtText,
+.chkApp .appAccentSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff,
+.chkApp .shellThemeSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtText,
+.chkApp .shellThemeSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff,
+.chkApp .searchModeToggleSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtText,
+.chkApp .searchModeToggleSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff,
+.chkApp .shellSettingsSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtText,
+.chkApp .shellSettingsSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff,
+.chkApp .detailResultSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtText,
+.chkApp .detailResultSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff,
+.chkApp .detailControlEditSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtText,
+.chkApp .detailControlEditSwitch.sapMSwt:not(.sapMSwtOn) .sapMSwtLabelOff {
   color: var(--text-muted);
 }
 
-.chkApp .sapMSwt.sapMSwtOn .sapMSwtLabelOn {
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn .sapMSwtLabelOn,
+.chkApp .shellThemeSwitch.sapMSwt.sapMSwtOn .sapMSwtLabelOn,
+.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtOn .sapMSwtLabelOn,
+.chkApp .shellSettingsSwitch.sapMSwt.sapMSwtOn .sapMSwtLabelOn,
+.chkApp .detailResultSwitch.sapMSwt.sapMSwtOn .sapMSwtLabelOn,
+.chkApp .detailControlEditSwitch.sapMSwt.sapMSwtOn .sapMSwtLabelOn {
   color: rgba(255, 255, 255, 0.94);
 }
 
-.chkApp .sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover {
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover,
+.chkApp .shellThemeSwitch.sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover,
+.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover,
+.chkApp .shellSettingsSwitch.sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover,
+.chkApp .detailResultSwitch.sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover,
+.chkApp .detailControlEditSwitch.sapMSwt.sapMSwtOn:not(.sapMSwtDisabled):hover {
   box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.38), 0 0 0 3px rgba(var(--accent-rgb), 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
-.chkApp .sapMSwtDisabled {
+.chkApp .appAccentSwitch.sapMSwtDisabled,
+.chkApp .shellThemeSwitch.sapMSwtDisabled,
+.chkApp .searchModeToggleSwitch.sapMSwtDisabled,
+.chkApp .shellSettingsSwitch.sapMSwtDisabled,
+.chkApp .detailResultSwitch.sapMSwtDisabled,
+.chkApp .detailControlEditSwitch.sapMSwtDisabled,
+.chkApp .detailGridTable .sapMSwtDisabled,
+.chkApp .flatEditorTable .sapMSwtDisabled {
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -104,13 +173,13 @@ html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense {
 }
 
 @media (max-width: 560px) {
-  .chkApp .detailControlRowTop .sapMSwt {
+  .chkApp .detailControlRowTop .detailControlEditSwitch {
     width: 100%;
   }
 }
 
 @media (max-width: 768px) {
-  .chkApp .detailControlRowActions .sapMSwt {
+  .chkApp .detailControlRowActions .detailControlEditSwitch {
     flex: 0 1 auto;
     min-width: 0;
   }

@@ -530,8 +530,7 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
 .chkApp .shellActionBtn .sapMBtnInner,
 .chkApp .shellUserBtn .sapMBtnInner,
 .chkApp .shellThemeToggle .sapMBtnInner,
-.chkApp .shellUserActionBtn .sapMBtnInner,
-.chkApp .shellUserActionBtn.sapMBtn .sapMBtnInner {
+.chkApp .shellUserActionBtn .sapMBtnInner {
   border-radius: 999px;
 }
 

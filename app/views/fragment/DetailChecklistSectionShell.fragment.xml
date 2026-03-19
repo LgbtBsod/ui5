@@ -8,7 +8,7 @@
                 <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
             </VBox>
             <OverflowToolbar class="toolbarTransparent detailSectionToolbar workbenchToolbarSurface sectionToolbarSurface">
-                <Title text="{path:'view>titleKey', formatter:'.formatI18nByKey'}"/>
+                <Title text="{path:'view>titleKey', formatter:'.formatI18nByKey'}" class="detailSectionToolbarTitle"/>
                 <ObjectStatus
                     text="{path:'view>kind', formatter:'.formatSectionRowCount'}"
                     state="None"
@@ -50,8 +50,8 @@
                         <OverflowToolbarLayoutData priority="High"/>
                     </layoutData>
                 </ObjectStatus>
-                <ToolbarSpacer/>
-                <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecklistSection" class="sapUiTinyMarginEnd actionPrioritySecondary">
+                <ToolbarSpacer class="detailSectionToolbarSpacer"/>
+                <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecklistSection" class="sapUiTinyMarginEnd actionPrioritySecondary detailSectionToolbarButton">
                     <customData>
                         <core:CustomData key="kind" value="{view>kind}"/>
                     </customData>
@@ -64,7 +64,7 @@
                     icon="{view>actionIcon}"
                     press=".onAddChecklistSection"
                     visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                    class="actionPriorityPrimary">
+                    class="actionPriorityPrimary detailSectionToolbarButton">
                     <customData>
                         <core:CustomData key="kind" value="{view>kind}"/>
                     </customData>

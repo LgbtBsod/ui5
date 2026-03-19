@@ -35,11 +35,11 @@
   align-self: stretch;
 }
 
-.chkApp .detailControlRowTop .sapMBarChild,
-.chkApp .detailControlRowActions .sapMBarChild,
-.chkApp .detailControlRow .sapMBarChild,
-.chkApp .detailControlRow .sapMBtn,
-.chkApp .detailControlRow .sapMTBSpacer {
+.chkApp .detailControlRowTop > *,
+.chkApp .detailControlRowActions > *,
+.chkApp .detailControlRow > *,
+.chkApp .detailControlRow .detailControlRowSpacer,
+.chkApp .detailControlRow .detailSectionToolbarSpacer {
   min-width: 0;
 }
 
@@ -49,7 +49,8 @@
 }
 
 .chkApp .detailSectionAnchorBtn .sapMBtnInner,
-.chkApp .detailControlRow .sapMBtn .sapMBtnInner {
+.chkApp .detailControlRow .detailRailActionBtn .sapMBtnInner,
+.chkApp .detailControlRow .detailSectionToolbarButton .sapMBtnInner {
   min-height: calc(var(--theme-workbench-control-height) - 0.1rem);
 }
 
@@ -57,12 +58,14 @@
   padding-inline: 0.88rem;
 }
 
-.chkApp .detailControlRowActions .sapMBtnInner,
-.chkApp .detailControlRowTop .sapMBtnInner {
+.chkApp .detailControlRowActions .detailRailActionBtn .sapMBtnInner,
+.chkApp .detailControlRowTop .detailRailActionBtn .sapMBtnInner,
+.chkApp .detailControlRowTop .detailSectionToolbarButton .sapMBtnInner,
+.chkApp .detailControlRowActions .detailSectionToolbarButton .sapMBtnInner {
   min-width: 0;
   padding-inline: 0.85rem;
 }
 
-.chkApp .detailControlRowActions .sapMBtn {
+.chkApp .detailControlRowActions .detailRailActionBtn {
   min-width: 0;
 }

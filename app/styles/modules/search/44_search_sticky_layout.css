@@ -187,22 +187,22 @@
   border-radius: calc(var(--radius-lg) - 0.16rem);
 }
 
-.chkApp .searchResultsActionRail.sapMTBNewFlex,
-.chkApp .searchResultsToolbarHost.sapMTBNewFlex {
+.chkApp .searchResultsActionRail,
+.chkApp .searchResultsToolbarHost {
   flex-wrap: wrap;
   align-items: center;
   align-content: flex-start;
   row-gap: 0.32rem;
 }
 
-.chkApp .searchResultsActionRail .sapMBarChild,
-.chkApp .searchResultsToolbarHost .sapMBarChild {
+.chkApp .searchResultsActionRail > *,
+.chkApp .searchResultsToolbarHost > * {
   min-width: 0;
   max-width: 100%;
 }
 
-.chkApp .searchResultsActionRail .sapMTBSpacer,
-.chkApp .searchResultsToolbarHost .sapMTBSpacer {
+.chkApp .searchResultsActionRail .searchToolbarPrimarySpacer,
+.chkApp .searchResultsActionRail .searchToolbarSecondarySpacer {
   min-width: 0.3rem;
 }
 

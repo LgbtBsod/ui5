@@ -17,20 +17,35 @@
   letter-spacing: 0.04em;
 }
 
-.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnInner {
+.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchGroupButton .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchExportMenuBtn .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .brandActionBtn .sapMBtnInner,
+.chkApp .searchSmartToolbarRail .searchToolbarNavBtn .sapMBtnInner {
   display: inline-flex;
   align-items: center;
   gap: 0.34rem;
 }
 
-.chkApp .searchResultsActionRail .sapMBtn .sapMBtnIconLeft,
-.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnIconLeft {
+.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnIconLeft,
+.chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnIconLeft,
+.chkApp .searchResultsActionRail .searchSortButton .sapMBtnIconLeft,
+.chkApp .searchResultsActionRail .searchGroupButton .sapMBtnIconLeft,
+.chkApp .searchResultsActionRail .searchExportMenuBtn .sapMBtnIconLeft,
+.chkApp .searchSmartToolbarRail .brandActionBtn .sapMBtnIconLeft,
+.chkApp .searchSmartToolbarRail .searchToolbarNavBtn .sapMBtnIconLeft {
   margin-inline-end: 0;
 }
 
-.chkApp .searchResultsActionRail .sapMBtn .sapMBtnContent,
-.chkApp .searchSmartToolbarRail .sapMBtn .sapMBtnContent {
+.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnContent,
+.chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnContent,
+.chkApp .searchResultsActionRail .searchSortButton .sapMBtnContent,
+.chkApp .searchResultsActionRail .searchGroupButton .sapMBtnContent,
+.chkApp .searchResultsActionRail .searchExportMenuBtn .sapMBtnContent,
+.chkApp .searchSmartToolbarRail .brandActionBtn .sapMBtnContent,
+.chkApp .searchSmartToolbarRail .searchToolbarNavBtn .sapMBtnContent {
   line-height: 1.1;
 }
 

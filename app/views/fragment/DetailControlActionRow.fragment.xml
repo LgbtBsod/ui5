@@ -9,7 +9,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onCloseDetail"
             tooltip="{i18n>closeDetails}"
-            class="detailRailCloseAction actionPrioritySecondary chkRipple">
+            class="detailRailActionBtn detailRailCloseAction actionPrioritySecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="NeverOverflow"/>
             </layoutData>
@@ -25,7 +25,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onSaveDetail"
             tooltip="{i18n>objectSaveTooltip}"
-            class="actionPriorityPrimary chkRipple">
+            class="detailRailActionBtn actionPriorityPrimary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="NeverOverflow"/>
             </layoutData>
@@ -38,7 +38,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onValidateChecklist"
             tooltip="{i18n>validateTooltip}"
-            class="actionPrioritySecondary chkRipple">
+            class="detailRailActionBtn actionPrioritySecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="High"/>
             </layoutData>
@@ -54,7 +54,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onArmDeleteChecklist"
             tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteTooltip} }"
-            class="actionPriorityDanger actionPriorityReject chkRipple">
+            class="detailRailActionBtn actionPriorityDanger actionPriorityReject chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
@@ -68,7 +68,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onConfirmDeleteChecklist"
             tooltip="{i18n>deleteConfirmTooltip}"
-            class="actionPriorityDanger actionPriorityReject chkRipple">
+            class="detailRailActionBtn actionPriorityDanger actionPriorityReject chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="High"/>
             </layoutData>
@@ -80,7 +80,7 @@
             visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
             press=".onChangeChecklistStatus"
             tooltip="{i18n>statusDraftTooltip}"
-            class="actionPrioritySecondary chkRipple">
+            class="detailRailActionBtn actionPrioritySecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
@@ -95,7 +95,7 @@
             visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
             press=".onChangeChecklistStatus"
             tooltip="{i18n>statusRegisteredTooltip}"
-            class="actionPrioritySecondary chkRipple">
+            class="detailRailActionBtn actionPrioritySecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
@@ -110,7 +110,7 @@
             visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
             press=".onChangeChecklistStatus"
             tooltip="{i18n>statusClosedTooltip}"
-            class="chkRipple">
+            class="detailRailActionBtn actionPrioritySecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
@@ -126,7 +126,7 @@
             press=".onCopyDetailLink"
             tooltip="{i18n>detailCopyLinkTooltip}"
             enabled="{= !${state>/ui/busy/detail} }"
-            class="actionPrioritySecondary chkRipple"
+            class="detailRailActionBtn actionPrioritySecondary chkRipple"
             visible="{path:'selected>/root/id', formatter:'.formatCopyLinkVisible'}">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Disappear"/>
@@ -139,7 +139,7 @@
             type="Transparent"
             press=".onToggleDetailFullscreen"
             tooltip="{i18n>detailFullscreenTooltip}"
-            class="actionPrioritySecondary chkRipple">
+            class="detailRailActionBtn actionPrioritySecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Disappear"/>
             </layoutData>

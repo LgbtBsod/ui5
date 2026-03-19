@@ -140,7 +140,7 @@ body.chkAppRoot.appDark .chkApp .searchLoadErrorBanner {
   padding: 0.5rem 0;
 }
 
-.chkApp .searchLoadRetryRow .sapMBtn .sapMBtnInner {
+.chkApp .searchLoadRetryRow .searchLoadRetryButton .sapMBtnInner {
   border-radius: 999px;
   padding: 0 0.75rem;
   min-height: 1.85rem;

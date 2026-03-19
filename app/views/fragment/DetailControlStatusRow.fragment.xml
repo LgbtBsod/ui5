@@ -58,7 +58,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onCancelEditFromDetail"
             tooltip="{i18n>objectCancelTooltip}"
-            class="actionPrioritySecondary chkRipple">
+            class="detailRailActionBtn actionPrioritySecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="High"/>
             </layoutData>

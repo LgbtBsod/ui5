@@ -71,7 +71,8 @@
   gap: 0.42rem;
 }
 
-.chkApp .detailSectionToolbar .sapMTBSpacer {
+.chkApp .detailSectionToolbar .detailSectionToolbarSpacer,
+.chkApp .detailSectionToolbar .detailAttachmentToolbarSpacer {
   min-width: 0.4rem;
 }
 

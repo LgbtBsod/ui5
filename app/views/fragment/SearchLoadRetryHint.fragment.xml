@@ -12,6 +12,7 @@
             text="{i18n>searchRetryAction}"
             type="Transparent"
             press=".onRetrySearchLoad"
-            enabled="{= !${state>/ui/busy/searchTable} }"/>
+            enabled="{= !${state>/ui/busy/searchTable} }"
+            class="searchLoadRetryButton"/>
     </HBox>
 </core:FragmentDefinition>

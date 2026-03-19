@@ -20,7 +20,7 @@
   flex-shrink: 0;
 }
 
-.chkApp .detailSectionCountChip.sapMObjStatus {
+.chkApp .detailSectionCountChip {
   min-height: 1.5rem;
   padding: 0.1rem 0.52rem;
   border-radius: 999px;
@@ -55,8 +55,8 @@
   margin-top: 0.65rem;
 }
 
-.chkApp .detailControlRowActions.sapMTBNewFlex .sapMBtn,
-.chkApp .detailControlRowTop.sapMTBNewFlex .sapMBtn {
+.chkApp .detailControlRowActions .detailRailActionBtn,
+.chkApp .detailControlRowTop .detailSectionToolbarButton {
   flex-shrink: 0;
   min-width: 0;
 }

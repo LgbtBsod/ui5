@@ -125,32 +125,21 @@ Removal path:
 - Add wrapper classes around timeline item content if timeline remains custom-skinned.
 - Replace remaining `ObjectIdentifier/ObjectStatus` typography overrides with app-owned wrapper blocks only if the current visual delta still matters.
 
-### 3. Detail rail and responsive toolbar layout
+### 3. Detail rail and object shell layout
 
 Files:
 
 - `app/styles/modules/detail/46_detail_rail_shell.css`
 - `app/styles/modules/detail/48_detail_rail_layout.css`
-- `app/styles/modules/detail/49_detail_rail_responsive.css`
+- `app/styles/modules/detail/50_detail_object_shell.css`
 
-- `sapMTBSpacer`
 - `sapMSwt`
 - `sapMObjStatusText`
 
 Removal path:
 
-- Replace remaining spacer selectors with explicit spacer hook classes where UI5 does not inject anonymous wrappers.
+- Replace remaining switch/status text hooks only through control replacement or additional wrapper composition.
 - Keep `ObjectStatus` text and switch internals as accepted renderer hooks unless the controls are replaced.
-
-### 4. Search sticky layout
-
-File: `app/styles/modules/search/44_search_sticky_layout.css`
-
-- `sapMTBSpacer`
-
-Removal path:
-
-- Replace with explicit spacer hook classes on the search toolbar if sticky spacing still needs control beyond `OverflowToolbar` defaults.
 
 ## Replacement Candidates
 
@@ -240,7 +229,8 @@ Status:
 - `app/styles/modules/analytics/43_analytics_controls.css`
 - `app/styles/modules/analytics/44_analytics_panels.css`
 - `app/styles/modules/detail/46_detail_rail_shell.css`
-- `app/styles/modules/detail/49_detail_rail_responsive.css`
+- `app/styles/modules/detail/48_detail_rail_layout.css`
+- `app/styles/modules/detail/50_detail_object_shell.css`
 
 These files are no longer broad framework-wide override files, but they still contain the highest concentration of scoped renderer-hook selectors.
 
@@ -249,6 +239,9 @@ These files are no longer broad framework-wide override files, but they still co
 Do not add any new selectors using:
 
 - global `.sapM*` / `.sapUi*` without app-owned host scope
+- `sapMTBNewFlex`
+- `sapMBarChild`
+- generic `sapMTBSpacer` in search/detail rails when app-owned spacer hooks exist
 - parent-chain selectors that depend on anonymous flex wrappers
 - `[style*=...]`
 - `:has(...)`

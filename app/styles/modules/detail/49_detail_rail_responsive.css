@@ -1,20 +1,20 @@
 @media (max-width: 1366px) {
-  .chkApp .detailControlRowActions.sapMTBNewFlex,
-  .chkApp .detailSectionToolbar.sapMTBNewFlex {
+  .chkApp .detailControlRowActions,
+  .chkApp .detailSectionToolbar {
     flex-wrap: nowrap;
     overflow: visible;
     row-gap: 0;
   }
 
-  .chkApp .detailControlRowTop.sapMTBNewFlex {
+  .chkApp .detailControlRowTop {
     flex-wrap: wrap;
     overflow: visible;
     row-gap: 0.3rem;
   }
 
-  .chkApp .detailControlRowTop .sapMTBSpacer,
-  .chkApp .detailControlRowActions .sapMTBSpacer,
-  .chkApp .detailSectionToolbar .sapMTBSpacer {
+  .chkApp .detailControlRowTop .detailControlRowSpacer,
+  .chkApp .detailControlRowActions .detailControlRowSpacer,
+  .chkApp .detailSectionToolbar .detailAttachmentToolbarSpacer {
     display: block;
   }
 }
@@ -27,14 +27,14 @@
   }
 
   .chkApp .detailControlRowTop .detailRailStatusChip,
-  .chkApp .detailControlRowActions .sapMBtn,
-  .chkApp .detailControlRowActions .sapMSwt,
-  .chkApp .detailControlRowActions .sapMBusyIndicator {
+  .chkApp .detailControlRowActions .detailRailActionBtn,
+  .chkApp .detailControlRowActions .detailControlEditSwitch,
+  .chkApp .detailControlRowActions .detailControlBusyIndicator {
     flex: 0 1 auto;
     min-width: 0;
   }
 
-  .chkApp .detailControlRowActions .sapMBtn .sapMBtnInner {
+  .chkApp .detailControlRowActions .detailRailActionBtn .sapMBtnInner {
     justify-content: flex-start;
     width: auto;
   }
@@ -61,11 +61,11 @@
     white-space: normal;
   }
 
-  .chkApp .detailControlRowTop .sapMTBSpacer {
+  .chkApp .detailControlRowTop .detailControlRowSpacer {
     display: none;
   }
 
-  .chkApp .detailSectionAnchorRail .sapMBtn {
+  .chkApp .detailSectionAnchorBtn {
     flex: 1 1 100%;
   }
 
@@ -74,7 +74,7 @@
     width: 100%;
   }
 
-  .chkApp .detailControlRowActions .sapMTBSpacer {
+  .chkApp .detailControlRowActions .detailControlRowSpacer {
     display: block;
   }
 
