@@ -12,10 +12,6 @@
         class="chkSkin appShell appLayoutSingle"
         fitContainer="true"
         width="100%">
-        <Link
-            text="{i18n>skipToMainContent}"
-            press=".onSkipToMainContent"
-            class="skipLink skipToMain"/>
         <VBox id="appShellHeaderHost" class="appContent appShellHeaderHost" renderType="Bare">
             <cc:AppShellHeader
                 eyebrow="{appView>/shell/eyebrow}"

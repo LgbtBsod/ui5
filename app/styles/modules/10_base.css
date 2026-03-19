@@ -121,6 +121,19 @@ body.chkAppRoot,
   overflow: hidden;
 }
 
+.chkApp .searchPage,
+.chkApp .searchPage > .sapUiXMLView,
+.chkApp .searchPage > .sapUiXMLView > .sapMPage,
+.chkApp .searchPage > .sapUiXMLView > .sapMPage > section,
+.chkApp .searchPage .appContent {
+  min-height: 0;
+}
+
+.chkApp .searchPage > .sapUiXMLView > .sapMPage > section {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .chkApp .pageTransparent,
 .chkApp .pageTransparent > section,
 .chkApp .pageTransparent .sapMPageEnableScrolling,

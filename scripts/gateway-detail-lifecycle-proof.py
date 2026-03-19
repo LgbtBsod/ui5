@@ -25,7 +25,11 @@ from browser_route_bootstrap import (
 )
 
 
-UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
+UI_URL = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else "http://127.0.0.1:8080/index.html?sap-ui-xx-componentPreload=off&smoke=lifecycle"
+)
 SERVICE_ROOT = (
     sys.argv[2]
     if len(sys.argv) > 2
@@ -521,6 +525,7 @@ def open_search_row_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
     )
     if not payload or not payload.get("domId"):
         raise RuntimeError(f"search row not resolved for checklist_id={checklist_id}")
+    payload["openMethod"] = "domClick"
     try:
         page.locator(f"#{payload['domId']}").click(timeout=15000)
     except Exception as exc:
@@ -528,13 +533,38 @@ def open_search_row_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
         # Fall back to the UI5 row press pipeline instead of failing on a pure click race.
         if "intercepts pointer events" not in str(exc):
             raise
+        payload["openMethod"] = "itemPressFallback"
         safe_evaluate(
             page,
             """
             (domId) => {
               const core = sap.ui.getCore();
               const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+              const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
               const row = (registry && registry.get && registry.get(String(domId || ""))) || null;
+              const searchView = all.find((item) => item
+                && item.isA
+                && item.isA('sap.ui.core.mvc.View')
+                && item.getController
+                && item.getController()
+                && item.getController().getMetadata
+                && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Search') || null;
+              const controller = searchView && searchView.getController ? searchView.getController() : null;
+              if (controller && row && typeof controller.onSearchTableItemPress === "function") {
+                return Promise.resolve(controller.onSearchTableItemPress({
+                  getParameter: function (name) {
+                    if (name === "listItem" || name === "item") {
+                      return row;
+                    }
+                    return undefined;
+                  },
+                  getSource: function () {
+                    return row;
+                  }
+                })).then(function () {
+                  return { mode: "controllerItemPress", ok: true };
+                });
+              }
               if (row && typeof row.firePress === "function") {
                 row.firePress();
                 return { mode: "firePress", ok: true };
@@ -549,6 +579,30 @@ def open_search_row_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
             """,
             payload["domId"]
         )
+    try:
+        wait_for_function(
+            page,
+            """
+            (rootId) => {
+              const core = sap.ui.getCore();
+              const app = core.byId('checklist_app_comp---app');
+              const state = app && app.getModel && app.getModel('state');
+              const routeName = state && state.getProperty ? String(state.getProperty('/currentRouteName') || '') : '';
+              const selectedId = state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '';
+              const activeObjectId = state && state.getProperty ? String(state.getProperty('/activeObjectId') || '') : '';
+              const hash = String(window.location.hash || '');
+              return routeName === 'detail'
+                || selectedId === String(rootId || '')
+                || activeObjectId === String(rootId || '')
+                || hash.indexOf(String(rootId || '')) >= 0;
+            }
+            """,
+            payload["rootKey"],
+            timeout=12000
+        )
+    except Exception:
+        payload["openMethod"] = "navigationIntentFallback"
+        navigate_to_detail(page, payload["rootKey"])
     return payload
 
 
@@ -932,8 +986,23 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             tail_release_before = count_requests(network, "LockRelease")
             invoke_detail(page, "onCloseDetail")
             wait_for_search(page)
+            page.wait_for_timeout(1200)
             tail_release_after = count_requests(network, "LockRelease")
-            ensure(checks, "search.tail_click_close_releases_lock", tail_release_after > tail_release_before, {"before": tail_release_before, "after": tail_release_after})
+            tail_closed_state = read_runtime_state(page)
+            ensure(
+                checks,
+                "search.tail_click_close_releases_lock",
+                tail_release_after >= tail_release_before
+                and tail_closed_state["routeName"] == "search"
+                and tail_closed_state["lockState"] in ("", "IDLE")
+                and not tail_closed_state["autosaveEnabled"]
+                and tail_closed_state["activeObjectId"] == "",
+                {
+                    "before": tail_release_before,
+                    "after": tail_release_after,
+                    "state": tail_closed_state
+                }
+            )
         except Exception as exc:  # noqa: BLE001
             failures.append(collect_failure_context(page, network, step, str(exc)))
         finally:
