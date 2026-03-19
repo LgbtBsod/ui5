@@ -10,9 +10,6 @@ sap.ui.define([
         if (typeof atob === "function") {
             return atob(sBase64);
         }
-        if (typeof Buffer !== "undefined" && Buffer.from) {
-            return Buffer.from(sBase64, "base64").toString("binary");
-        }
         throw new Error("base64_decode_unavailable");
     }
 

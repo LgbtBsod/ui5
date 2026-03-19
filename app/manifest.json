@@ -1,5 +1,5 @@
 {
-  "_version": "1.21.0",
+  "_version": "1.12.0",
   "sap.app": {
     "id": "PRODUCTION_CONTROL_CHECKLIST",
     "i18n": "i18n/i18n.properties",
@@ -43,7 +43,7 @@
     "deviceTypes": {
       "desktop": true,
       "tablet": true,
-      "phone": true
+      "phone": false
     }
   },
   "sap.ui5": {
@@ -168,14 +168,6 @@
       "routes": [
         {
           "pattern": "",
-          "name": "searchHome",
-          "target": [
-            "search"
-          ],
-          "layout": "OneColumn"
-        },
-        {
-          "pattern": "search",
           "name": "search",
           "target": [
             "search"
@@ -235,6 +227,6 @@
       "backendMode": "real",
       "uiContractVersion": "1.0.0"
     },
-    "flexEnabled": true
+    "flexEnabled": false
   }
 }

@@ -30,7 +30,7 @@ sap.ui.define([
         return sKind === "barrier" ? "barrier" : "check";
     }
 
-    function createHooks(oController) {
+    function buildHooks(oController) {
         return {
             withViewFlag: function (sPath, fnTask) { return oController._withViewFlag(sPath, fnTask); },
             rowOps: function (mInput) { return DetailCommandPolicy.rowOps(oController, mInput); },
@@ -45,21 +45,28 @@ sap.ui.define([
         };
     }
 
+    function resolveHooks(oController) {
+        if (!oController._hooks) {
+            oController._hooks = buildHooks(oController);
+        }
+        return oController._hooks;
+    }
+
     return {
-        onAddCheckRow: function () { return DetailRowBehaviorRuntime.onAddRow(this, "check", createHooks(this)); },
-        onAddBarrierRow: function () { return DetailRowBehaviorRuntime.onAddRow(this, "barrier", createHooks(this)); },
-        onDeleteCheckRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, "check", oEvent, createHooks(this)); },
-        onDeleteBarrierRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, "barrier", oEvent, createHooks(this)); },
-        onDeleteExpandedRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, resolveRowKind(oEvent), oEvent, createHooks(this)); },
-        onExpandChecks: function (oEvent) { return DetailRowBehaviorRuntime.onExpandRows(this, "check", oEvent, createHooks(this)); },
-        onExpandBarriers: function (oEvent) { return DetailRowBehaviorRuntime.onExpandRows(this, "barrier", oEvent, createHooks(this)); },
-        onCloseChecksExpanded: function () { return DetailRowBehaviorRuntime.onCloseRowsExpanded(this, "check", createHooks(this)); },
-        onCloseBarriersExpanded: function () { return DetailRowBehaviorRuntime.onCloseRowsExpanded(this, "barrier", createHooks(this)); },
-        onCloseExpandedRows: function (oEvent) { return DetailRowBehaviorRuntime.onCloseRowsExpanded(this, resolveRowKind(oEvent), createHooks(this)); },
-        onInfoCardsDrop: function (oEvent) { DetailRowBehaviorRuntime.onInfoCardsDrop(this, oEvent, createHooks(this)); },
-        onToggleInfoCardPin: function (oEvent) { DetailRowBehaviorRuntime.onToggleInfoCardPin(this, oEvent, createHooks(this)); },
-        onInfoCardPress: function (oEvent, sCardKey, oItem) { DetailRowBehaviorRuntime.onInfoCardPress(this, oEvent, sCardKey, oItem, createHooks(this)); },
-        onInfoCardKeyDown: function (oEvent, sCardKey) { DetailRowBehaviorRuntime.onInfoCardKeyDown(this, oEvent, sCardKey, createHooks(this)); },
+        onAddCheckRow: function () { return DetailRowBehaviorRuntime.onAddRow(this, "check", resolveHooks(this)); },
+        onAddBarrierRow: function () { return DetailRowBehaviorRuntime.onAddRow(this, "barrier", resolveHooks(this)); },
+        onDeleteCheckRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, "check", oEvent, resolveHooks(this)); },
+        onDeleteBarrierRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, "barrier", oEvent, resolveHooks(this)); },
+        onDeleteExpandedRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, resolveRowKind(oEvent), oEvent, resolveHooks(this)); },
+        onExpandChecks: function (oEvent) { return DetailRowBehaviorRuntime.onExpandRows(this, "check", oEvent, resolveHooks(this)); },
+        onExpandBarriers: function (oEvent) { return DetailRowBehaviorRuntime.onExpandRows(this, "barrier", oEvent, resolveHooks(this)); },
+        onCloseChecksExpanded: function () { return DetailRowBehaviorRuntime.onCloseRowsExpanded(this, "check", resolveHooks(this)); },
+        onCloseBarriersExpanded: function () { return DetailRowBehaviorRuntime.onCloseRowsExpanded(this, "barrier", resolveHooks(this)); },
+        onCloseExpandedRows: function (oEvent) { return DetailRowBehaviorRuntime.onCloseRowsExpanded(this, resolveRowKind(oEvent), resolveHooks(this)); },
+        onInfoCardsDrop: function (oEvent) { DetailRowBehaviorRuntime.onInfoCardsDrop(this, oEvent, resolveHooks(this)); },
+        onToggleInfoCardPin: function (oEvent) { DetailRowBehaviorRuntime.onToggleInfoCardPin(this, oEvent, resolveHooks(this)); },
+        onInfoCardPress: function (oEvent, sCardKey, oItem) { DetailRowBehaviorRuntime.onInfoCardPress(this, oEvent, sCardKey, oItem, resolveHooks(this)); },
+        onInfoCardKeyDown: function (oEvent, sCardKey) { DetailRowBehaviorRuntime.onInfoCardKeyDown(this, oEvent, sCardKey, resolveHooks(this)); },
         onConfirmTestUser: function () { DetailCommandPolicy.resolveConflict(this, { intent: DETAIL_SOURCES.TEST_USER }); },
         onSelectionToggle: function () { DetailCommandPolicy.rowOps(this, { op: "selectionToggle" }); },
         onRowValueChange: function (oEvent) { this._applySelectedFieldChange(oEvent, { property: "value", parameter: "value" }); },

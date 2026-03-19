@@ -47,8 +47,12 @@ sap.ui.define([
         }
     }
 
+    function readCurrentHash() {
+        return String((window.location && window.location.hash) || "");
+    }
+
     function parseInitialDetailHash() {
-        var sHash = String((typeof window !== "undefined" && window.location && window.location.hash) || "").trim();
+        var sHash = readCurrentHash().trim();
         var oMatch;
         if (!sHash) {
             return null;
@@ -125,10 +129,6 @@ sap.ui.define([
             }
         };
         oController._oStateValidationModel.attachPropertyChange(oController._fnStateValidationChange, oController);
-    }
-
-    function currentHash() {
-        return String((typeof window !== "undefined" && window.location && window.location.hash) || "");
     }
 
     function toggleCloseFallbackListeners(oDomRef, fnHandler, bAttach) {
@@ -219,13 +219,13 @@ sap.ui.define([
             this._unbindDetailCloseButtonFallback();
             this._fnDetailCloseBrowserClick = function (oEvent) {
                 var oTarget = oEvent && oEvent.target;
-                var sHashBefore = currentHash();
+                var sHashBefore = readCurrentHash();
                 var sRouteBefore = String(ModelStateRuntime.read(this, STATE_MODEL, "/currentRouteName", "") || "");
                 if (!oTarget || !oTarget.closest || !oTarget.closest(".detailRailCloseAction")) {
                     return;
                 }
                 this._iDetailCloseFallbackTimer = SchedulingRuntime.restartTimer(this._iDetailCloseFallbackTimer, function () {
-                    var sHashAfter = currentHash();
+                    var sHashAfter = readCurrentHash();
                     var sRouteAfter = String(ModelStateRuntime.read(this, STATE_MODEL, "/currentRouteName", "") || "");
                     this._iDetailCloseFallbackTimer = null;
                     if (sHashAfter !== sHashBefore || sRouteAfter !== sRouteBefore || !NavigationContracts.isDetailRoute(sRouteAfter)) {

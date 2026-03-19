@@ -5,6 +5,8 @@ sap.ui.define([
 ], function (ThemeContracts, ThemeService, Ui5RuntimeFacade) {
     "use strict";
 
+    // Productive mode is currently locked to morning/light.
+    // Keep the public API intact because app shell and tests depend on it.
     var DEFAULT_MODE = ThemeContracts.MODES.MORNING;
     var DEFAULT_ANIMATION_ENABLED = ThemeService.DEFAULT_ANIMATION_ENABLED;
 
@@ -39,6 +41,16 @@ sap.ui.define([
         });
     }
 
+    function applySupportedMode(oController, sMode, oClickXY, mOptions) {
+        // ThemeService already normalizes unsupported modes to morning.
+        // Preserve the API contract while making the current limitation explicit.
+        var sResolvedMode = ThemeService.normalizeMode ? ThemeService.normalizeMode(sMode) : DEFAULT_MODE;
+        if (sResolvedMode !== DEFAULT_MODE) {
+            sResolvedMode = DEFAULT_MODE;
+        }
+        return applyMorningMode(oController, oClickXY, mOptions);
+    }
+
     return {
         getCurrentTheme: function () {
             return ThemeService.themeForMode(DEFAULT_MODE);
@@ -61,14 +73,14 @@ sap.ui.define([
                 persist: false
             });
         },
-        setThemeMode: function (_sMode, oClickXY) {
-            return applyMorningMode(this, oClickXY);
+        setThemeMode: function (sMode, oClickXY) {
+            return applySupportedMode(this, sMode, oClickXY);
         },
         applyStoredTheme: function () {
             return applyMorningMode(this, null);
         },
         toggleTheme: function (oClickXY) {
-            return applyMorningMode(this, oClickXY);
+            return applySupportedMode(this, DEFAULT_MODE, oClickXY);
         },
         _ensureThemeSyncListener: function () {
             ensureThemeSyncListener(this);

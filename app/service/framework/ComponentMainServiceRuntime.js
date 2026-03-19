@@ -10,7 +10,6 @@ sap.ui.define([], function () {
         }
 
         oMainServiceModel.setDefaultBindingMode("OneWay");
-        oMainServiceModel.setDeferredGroups(["changes", "autosave", "saveFlow", "locks"]);
         oMainServiceModel.setChangeGroups({
             "*": {
                 groupId: "changes",
