@@ -88,10 +88,29 @@ class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
         normalized = (self.path or "/").split("?", 1)[0].lstrip("/")
         return UI5_CACHE_ROOT / normalized
 
+    def _is_text_ui5_asset(self, cache_path: Path) -> bool:
+        normalized = str(cache_path).lower()
+        return normalized.endswith((".js", ".json", ".xml", ".properties", ".css", ".html", ".txt"))
+
+    def _is_valid_cached_ui5_payload(self, cache_path: Path, payload: bytes) -> bool:
+        if not self._is_text_ui5_asset(cache_path):
+            return True
+        try:
+            payload.decode("utf-8")
+            return True
+        except UnicodeDecodeError:
+            return False
+
     def _serve_cached_ui5_payload(self, cache_path: Path, head_only: bool = False) -> bool:
         if not cache_path.exists() or not cache_path.is_file():
             return False
         payload = cache_path.read_bytes()
+        if not self._is_valid_cached_ui5_payload(cache_path, payload):
+            try:
+                cache_path.unlink()
+            except OSError:
+                pass
+            return False
         self.send_response(200)
         self.send_header("Content-Type", self.guess_type(str(cache_path)))
         self.send_header("Content-Length", str(len(payload)))
@@ -147,6 +166,8 @@ class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
         for key, value in self.headers.items():
             lk = key.lower()
             if lk in {"host", "content-length", "connection"}:
+                continue
+            if is_ui5_proxy and lk == "accept-encoding":
                 continue
             req.add_header(key, value)
 

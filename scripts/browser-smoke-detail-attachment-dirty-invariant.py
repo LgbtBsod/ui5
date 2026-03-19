@@ -525,13 +525,19 @@ def main() -> int:
 
             browser.close()
     except Exception as exc:  # noqa: BLE001
+        bootstrap = {}
+        try:
+            if "page" in locals():
+                bootstrap = collect_bootstrap_diagnostics(page)
+        except Exception:  # noqa: BLE001
+            bootstrap = {}
         failures.append("browser.exception")
         ensure(checks, "browser.exception", False, {
             "error": str(exc),
             "lastState": last_state,
             "step": current_step,
             "classification": classify_failure(current_step, exc),
-            "bootstrap": collect_bootstrap_diagnostics(page) if "page" in locals() else {}
+            "bootstrap": bootstrap
         })
 
     report = {

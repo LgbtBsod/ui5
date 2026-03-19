@@ -362,15 +362,20 @@ def open_last_search_row(page) -> dict[str, Any]:
 
 def collect_failure_context(page, network: list[dict[str, Any]], step: str, error: str) -> dict[str, Any]:
     snapshot = {}
+    bootstrap = {}
     try:
         snapshot = read_runtime_state(page)
     except Exception:  # noqa: BLE001
         snapshot = {}
+    try:
+        bootstrap = collect_bootstrap_diagnostics(page)
+    except Exception:  # noqa: BLE001
+        bootstrap = {}
     return {
         "step": step,
         "error": error,
         "state": snapshot,
-        "bootstrap": collect_bootstrap_diagnostics(page),
+        "bootstrap": bootstrap,
         "networkTail": network[-20:]
     }
 
