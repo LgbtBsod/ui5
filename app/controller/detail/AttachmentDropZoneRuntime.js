@@ -1,58 +1,15 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime"
-], function (AttachmentUploadCore, ControlStyleRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentDropZoneEventRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentDropZoneVisualRuntime"
+], function (AttachmentDropZoneEventRuntime, AttachmentDropZoneVisualRuntime) {
     "use strict";
 
-    function setDropZoneClass(oController, sClassName, bActive) {
-        var oDropZone = oController && oController.byId && oController.byId("attachmentDropZone");
-        if (!oDropZone) {
-            return;
-        }
-        if (bActive) {
-            ControlStyleRuntime.enable(oDropZone, sClassName);
-            return;
-        }
-        ControlStyleRuntime.disable(oDropZone, sClassName);
-    }
-
     function resetVisual(oController) {
-        setDropZoneClass(oController, "isAttachmentDropActive", false);
-        setDropZoneClass(oController, "isAttachmentDropPrimed", false);
-    }
-
-    function hasFiles(oEvent) {
-        var oTransfer = oEvent && oEvent.dataTransfer;
-        var aTypes = oTransfer && oTransfer.types;
-        var aFiles = oTransfer && oTransfer.files;
-        if (aFiles && aFiles.length) {
-            return true;
-        }
-        if (!aTypes) {
-            return false;
-        }
-        return Array.prototype.indexOf.call(aTypes, "Files") >= 0
-            || Array.prototype.indexOf.call(aTypes, "application/x-moz-file") >= 0;
-    }
-
-    function isWithinDropScope(oController, oEvent) {
-        var oDropZoneDom = (oController && oController._attachmentDropScopeDom) || (oController && oController._attachmentDropZoneDom);
-        var oTarget = oEvent && oEvent.target;
-        var iX = Number(oEvent && oEvent.clientX);
-        var iY = Number(oEvent && oEvent.clientY);
-        var oRect;
-        if (oDropZoneDom && oTarget && oDropZoneDom.contains && oDropZoneDom.contains(oTarget)) {
-            return true;
-        }
-        if (!oDropZoneDom || !Number.isFinite(iX) || !Number.isFinite(iY) || !oDropZoneDom.getBoundingClientRect) {
-            return false;
-        }
-        oRect = oDropZoneDom.getBoundingClientRect();
-        return iX >= oRect.left && iX <= oRect.right && iY >= oRect.top && iY <= oRect.bottom;
+        AttachmentDropZoneVisualRuntime.resetVisual(oController);
     }
 
     function onAttachmentGlobalDragEnter(oController, oEvent) {
-        if (!hasFiles(oEvent) || !AttachmentUploadCore.canUploadAttachments(oController)) {
+        if (!AttachmentDropZoneEventRuntime.canHandleDrop(oController, oEvent)) {
             return;
         }
         oController._attachmentGlobalDragDepth = (oController._attachmentGlobalDragDepth || 0) + 1;
@@ -60,36 +17,34 @@ sap.ui.define([
 
     function onAttachmentGlobalDragOver(oController, oEvent) {
         var bAllowed;
-        if (!hasFiles(oEvent) || !oEvent || !oEvent.dataTransfer) {
+        if (!AttachmentDropZoneEventRuntime.hasFiles(oEvent) || !oEvent || !oEvent.dataTransfer) {
             return;
         }
-        bAllowed = AttachmentUploadCore.canUploadAttachments(oController) && isWithinDropScope(oController, oEvent);
+        bAllowed = AttachmentDropZoneEventRuntime.isAllowedDrop(oController, oEvent);
         oEvent.preventDefault();
         oEvent.stopPropagation();
         oEvent.dataTransfer.dropEffect = bAllowed ? "copy" : "none";
-        setDropZoneClass(oController, "isAttachmentDropPrimed", bAllowed);
-        setDropZoneClass(oController, "isAttachmentDropActive", bAllowed);
+        AttachmentDropZoneVisualRuntime.setDropZoneState(oController, bAllowed, bAllowed);
     }
 
     function onAttachmentGlobalDragLeave(oController, oEvent) {
-        if (!hasFiles(oEvent)) {
+        if (!AttachmentDropZoneEventRuntime.hasFiles(oEvent)) {
             return;
         }
         oController._attachmentGlobalDragDepth = Math.max(0, (oController._attachmentGlobalDragDepth || 1) - 1);
         if (oController._attachmentGlobalDragDepth === 0) {
-            setDropZoneClass(oController, "isAttachmentDropPrimed", false);
+            AttachmentDropZoneVisualRuntime.setDropZoneState(oController, false, false);
         }
     }
 
     function onAttachmentGlobalDrop(oController, oEvent) {
-        var aFiles = Array.prototype.slice.call((oEvent && oEvent.dataTransfer && oEvent.dataTransfer.files) || []);
-        var bAllowed = hasFiles(oEvent) && AttachmentUploadCore.canUploadAttachments(oController) && isWithinDropScope(oController, oEvent);
+        var bAllowed = AttachmentDropZoneEventRuntime.isAllowedDrop(oController, oEvent);
         if (oEvent) {
             oEvent.preventDefault();
             oEvent.stopPropagation();
         }
-        if (bAllowed && aFiles.length) {
-            AttachmentUploadCore.uploadFiles(oController, aFiles, null);
+        if (bAllowed) {
+            AttachmentDropZoneEventRuntime.dispatchUpload(oController, oEvent);
         }
         oController._attachmentGlobalDragDepth = 0;
         resetVisual(oController);
@@ -98,23 +53,21 @@ sap.ui.define([
     function onAttachmentDragEnter(oController, oEvent) {
         oEvent.preventDefault();
         oEvent.stopPropagation();
-        if (!AttachmentUploadCore.canUploadAttachments(oController)) {
+        if (!AttachmentDropZoneEventRuntime.canUpload(oController)) {
             return;
         }
         oController._attachmentDragDepth = (oController._attachmentDragDepth || 0) + 1;
-        setDropZoneClass(oController, "isAttachmentDropPrimed", true);
-        setDropZoneClass(oController, "isAttachmentDropActive", true);
+        AttachmentDropZoneVisualRuntime.setDropZoneState(oController, true, true);
     }
 
     function onAttachmentDragOver(oController, oEvent) {
         oEvent.preventDefault();
         oEvent.stopPropagation();
         if (oEvent.dataTransfer) {
-            oEvent.dataTransfer.dropEffect = AttachmentUploadCore.canUploadAttachments(oController) ? "copy" : "none";
+            oEvent.dataTransfer.dropEffect = AttachmentDropZoneEventRuntime.canUpload(oController) ? "copy" : "none";
         }
-        if (AttachmentUploadCore.canUploadAttachments(oController)) {
-            setDropZoneClass(oController, "isAttachmentDropActive", true);
-            setDropZoneClass(oController, "isAttachmentDropPrimed", true);
+        if (AttachmentDropZoneEventRuntime.canUpload(oController)) {
+            AttachmentDropZoneVisualRuntime.setDropZoneState(oController, true, true);
         }
     }
 
@@ -128,16 +81,12 @@ sap.ui.define([
     }
 
     function onAttachmentDrop(oController, oEvent) {
-        var aFiles;
         oEvent.preventDefault();
         oEvent.stopPropagation();
         oController._attachmentDragDepth = 0;
         oController._attachmentGlobalDragDepth = 0;
         resetVisual(oController);
-        aFiles = Array.prototype.slice.call((oEvent.dataTransfer && oEvent.dataTransfer.files) || []);
-        if (aFiles.length) {
-            AttachmentUploadCore.uploadFiles(oController, aFiles, null);
-        }
+        AttachmentDropZoneEventRuntime.dispatchUpload(oController, oEvent);
     }
 
     return {

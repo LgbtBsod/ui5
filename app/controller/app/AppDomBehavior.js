@@ -37,12 +37,29 @@ sap.ui.define([
         return ShellGlobalsRuntime.getBackgroundRuntime();
     }
 
+    function getGlobalDomNodes() {
+        var oNodes = ThemeDomRuntime.getNodes();
+        return {
+            root: oNodes.root || null,
+            body: oNodes.body || null,
+            container: oNodes.container || null
+        };
+    }
+
     function getAppContainerDom(oController) {
         var oRoot = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
         if (oRoot && oRoot.closest) {
             return oRoot.closest(".chkAppRoot") || oRoot;
         }
         return oRoot || null;
+    }
+
+    function getAppDomTargets(oController) {
+        var oNodes = getGlobalDomNodes();
+        var oContainer = getAppContainerDom(oController);
+        var oAppDom = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
+
+        return [oNodes.root, oNodes.body, oContainer, oAppDom];
     }
 
     function _scheduleInvalidate(oController, oLayout) {
@@ -57,7 +74,7 @@ sap.ui.define([
 
     function _beginResizing(oController) {
         var oRuntimeState = getDomRuntimeState(oController);
-        var oDoc = document && document.documentElement;
+        var oDoc = getGlobalDomNodes().root;
         ThemeDomRuntime.addClass([oDoc], _RESIZE_CLASS);
         oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
         oRuntimeState.resizeSafetyTimer = SchedulingRuntime.restartTimer(oRuntimeState.resizeSafetyTimer, function () {
@@ -67,7 +84,7 @@ sap.ui.define([
 
     function _settleResizing(oController) {
         var oRuntimeState = getDomRuntimeState(oController);
-        var oDoc = document && document.documentElement;
+        var oDoc = getGlobalDomNodes().root;
 
         oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
         oRuntimeState.resizeSafetyTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeSafetyTimer);
@@ -89,19 +106,16 @@ sap.ui.define([
         onSkipToMainContent: function (oEvent) {
             var oMainHost = this.byId("mainContentHost");
             var oMainDom = oMainHost && oMainHost.getDomRef && oMainHost.getDomRef();
-            var oLayout = this.byId("mainFcl");
-            var oLayoutDom = oLayout && oLayout.getDomRef && oLayout.getDomRef();
-            var oTarget = oLayoutDom || oMainDom;
             if (oEvent && oEvent.preventDefault) {
                 oEvent.preventDefault();
             }
-            if (!oTarget || typeof oTarget.focus !== "function") {
+            if (!oMainDom || typeof oMainDom.focus !== "function") {
                 return;
             }
-            if (!oTarget.getAttribute("tabindex")) {
-                oTarget.setAttribute("tabindex", "-1");
+            if (!oMainDom.getAttribute("tabindex")) {
+                oMainDom.setAttribute("tabindex", "-1");
             }
-            oTarget.focus();
+            oMainDom.focus();
         },
 
         _syncShellFlexAllocation: function () {
@@ -139,26 +153,18 @@ sap.ui.define([
 
         _applyCompactDensityClass: function () {
             var bCompact = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_COMPACT_DENSITY, false);
-            var oRoot = document && document.documentElement;
-            var oBody = document && document.body;
-            var oContainer = getAppContainerDom(this);
-            var oAppDom = this.getView && this.getView().getDomRef && this.getView().getDomRef();
-            ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appDensityCompact", bCompact);
+            ThemeDomRuntime.toggleClass(getAppDomTargets(this), "appDensityCompact", bCompact);
         },
 
         _applyInvertedBlockSchemeClass: function () {
-            var oRoot = document && document.documentElement;
-            var oBody = document && document.body;
-            var oContainer = getAppContainerDom(this);
-            var oAppDom = this.getView && this.getView().getDomRef && this.getView().getDomRef();
             var bEnabled = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
-            ThemeDomRuntime.toggleClass([oRoot, oBody, oContainer, oAppDom], "appInvertedBlockScheme", bEnabled);
+            ThemeDomRuntime.toggleClass(getAppDomTargets(this), "appInvertedBlockScheme", bEnabled);
         },
 
         _syncShellMetrics: function () {
             var oShellHeaderControl = this.byId("appShellHeaderHost");
             var oShellHeader = oShellHeaderControl && oShellHeaderControl.getDomRef && oShellHeaderControl.getDomRef();
-            var oDoc = document && document.documentElement;
+            var oDoc = getGlobalDomNodes().root;
             var oRect;
             var iBottom;
             if (!oDoc || !oShellHeader || !oShellHeader.getBoundingClientRect) {

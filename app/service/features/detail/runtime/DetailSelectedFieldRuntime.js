@@ -1,12 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailDirtyStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
-], function (ModelPathContracts, ModelStateRuntime, ModelContracts) {
+], function (DetailDirtyStateRuntime, ModelStateRuntime, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var STATE_MODEL = MODELS.STATE;
     var SELECTED_MODEL = MODELS.SELECTED;
 
     function resolveSelectedBindingPath(oSource, sProperty) {
@@ -49,9 +48,7 @@ sap.ui.define([
             return false;
         }
         ModelStateRuntime.write(oController, SELECTED_MODEL, sPath, vValue);
-        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.IS_DIRTY, true);
-        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/state", "dirty");
-        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/messageKey", "persistenceDirty");
+        DetailDirtyStateRuntime.markDirty(oController);
         return true;
     }
 

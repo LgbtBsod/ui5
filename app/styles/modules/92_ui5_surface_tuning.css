@@ -51,41 +51,6 @@
   min-height: 5.8rem;
 }
 
-.chkApp *:focus-visible {
-  outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, rgba(0, 112, 242, 0.72));
-  outline-offset: var(--focus-ring-offset, 2px);
-  border-radius: inherit;
-}
-
-.chkApp .sapMBtn:focus-visible .sapMBtnInner,
-.chkApp .sapMInputBase:focus-visible {
-  outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, rgba(0, 112, 242, 0.72));
-  outline-offset: var(--focus-ring-offset, 2px);
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail .sapMBtn .sapMBtnContent,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail .sapMBtn .sapMBtnContent {
-  font-size: 0;
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail .sapMBtn .sapMBtnIconLeft,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail .sapMBtn .sapMBtnIconLeft {
-  margin-inline-end: 0;
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail .sapMBtn .sapMBtnInner,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail .sapMBtn .sapMBtnInner {
-  min-width: 2.2rem;
-  padding-inline: 0.5rem;
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchCreateActionBtn .sapMBtnContent,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchCreateActionBtn .sapMBtnContent,
-.chkApp .appLayoutSplit #searchPaneHost .searchSelectionStatusChip .sapMObjStatusText,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSelectionStatusChip .sapMObjStatusText {
-  font-size: revert;
-}
-
 .chkApp .analyticsHeroContextRail {
   gap: 0.45rem;
   margin-top: 0.65rem;

@@ -1,31 +1,13 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewLoadBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartTableRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadingFeedbackRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy"
-], function (SearchSmartTableRuntime, SearchSelectionRuntime, SearchViewportRuntime, SearchViewStateRuntime, SearchLoadingFeedbackRuntime, SearchLoadRuntime, SearchRateProgress, SearchCommandPolicy) {
+], function (SearchViewLoadBehavior, SearchSmartTableRuntime, SearchSelectionRuntime, SearchViewportRuntime, SearchViewStateRuntime, SearchRateProgress, SearchCommandPolicy) {
     "use strict";
-
-    function createSearchLoadHooks(oController, oInnerTable, fnReadRows) {
-        return {
-            applyLoadError: function (sErrorMessage) {
-                SearchLoadRuntime.applyLoadError(oController, sErrorMessage);
-            },
-            applyLoadSuccess: function (aRows) {
-                SearchLoadRuntime.applyLoadSuccess(oController, aRows);
-            },
-            readRows: fnReadRows,
-            afterSuccess: function () {
-                SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
-                SearchViewportRuntime.bindSearchViewportRuntime(oController);
-                SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
-            }
-        };
-    }
 
     function onSmartTableInitialise(oController, fnReadRows) {
         return SearchSmartTableRuntime.onSmartTableInitialise(oController, {
@@ -59,21 +41,14 @@ sap.ui.define([
     }
 
     function onBeforeSmartTableRebind(oController, oEvent, fnReadRows) {
+        var mLoadHooks = SearchViewLoadBehavior.createSmartTableLoadHooks(oController, fnReadRows);
         return SearchSmartTableRuntime.onBeforeSmartTableRebind(oController, oEvent, {
             applyRebindPolicy: function (mInput) {
                 return SearchCommandPolicy.applyRebindPolicy(oController, mInput);
             },
-            beginSearchLoadingFeedback: function () {
-                SearchLoadingFeedbackRuntime.beginSearchLoadingFeedback(oController);
-            },
+            beginSearchLoadingFeedback: mLoadHooks.beginSearchLoadingFeedback,
             bindPendingSearchLoad: function (oInnerTable) {
-                SearchLoadingFeedbackRuntime.bindPendingSearchLoad(
-                    oController,
-                    oInnerTable,
-                    createSearchLoadHooks(oController, oInnerTable, function () {
-                        return fnReadRows(oInnerTable);
-                    })
-                );
+                return mLoadHooks.bindPendingSearchLoad(oInnerTable);
             },
             configureResultTable: function (oInnerTable, bForce) {
                 SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, bForce);
@@ -84,15 +59,7 @@ sap.ui.define([
             scheduleViewportSync: function (bImmediate) {
                 SearchViewportRuntime.scheduleSearchViewportSync(oController, bImmediate);
             },
-            settlePendingSearchLoad: function (oInnerTable, oError) {
-                SearchLoadingFeedbackRuntime.settlePendingSearchLoad(
-                    oController,
-                    { innerTable: oInnerTable, error: oError },
-                    createSearchLoadHooks(oController, oInnerTable, function () {
-                        return fnReadRows(oInnerTable);
-                    })
-                );
-            },
+            settlePendingSearchLoad: mLoadHooks.settlePendingSearchLoad,
             syncRequestWindow: function () {
                 SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
             }

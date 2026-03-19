@@ -1,5 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFlowBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFormatterBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFilterLifecycleBehavior",
@@ -7,17 +9,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchToolbarDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchAnalyticsIntentBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewNavigationBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchSmartTableBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
     "sap/ui/core/Item"
-], function (SearchActionBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchAnalyticsIntentBehavior, SearchViewBehavior, ControllerActionBusyRuntime, ControllerViewStateRuntime, ReadinessTelemetryRuntime, SearchToolbarContracts, SearchLoadRuntime, ModelContracts, OperationSourceContracts, ReadinessTelemetryContracts, Item) {
+], function (SearchActionBehavior, SearchCommandPolicy, SearchFlowBehavior, SearchFormatterBehavior, SearchLifecycleBehavior, SearchFilterLifecycleBehavior, SearchLocationSuggestRuntime, SearchRequestRuntime, SearchToolbarDialogRuntime, SearchAnalyticsIntentBehavior, SearchViewNavigationBehavior, SearchSmartTableBehavior, ControllerViewStateRuntime, SearchToolbarContracts, SearchViewportRuntime, ModelContracts, OperationSourceContracts, Item) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -34,34 +34,9 @@ sap.ui.define([
         });
     }
 
-    function buildFacadeContext(oController) {
-        return {
-            smartControls: oController.getOwnerComponent()._ctx.smartControls,
-            stateModel: oController.getModel(STATE_MODEL),
-            viewModel: oController.getModel("view")
-        };
-    }
-
-    function executeSearchFacade(oController, sMethod, mInput) {
-        return oController.executeFacadeMethod(oController._facade, sMethod, mInput || {}, buildFacadeContext(oController));
-    }
-
-    function buildSearchCommandPolicy(oController) {
-        if (!oController._facade) {
-            return null;
-        }
-        return {
-            rebind: function (_oController, mInput) {
-                return executeSearchFacade(oController, "rebind", mInput);
-            }
-        };
-    }
-
-
-
     return {
         _withActionBusy: function (sPath, fnAction) {
-            return ControllerActionBusyRuntime.withActionBusy(this, sPath, fnAction);
+            return SearchFlowBehavior.withActionBusy(this, sPath, fnAction);
         },
 
         onInit: function () {
@@ -105,39 +80,23 @@ sap.ui.define([
         },
 
         onSmartTableInitialise: function () {
-            SearchViewBehavior.onSmartTableInitialise(this);
+            SearchSmartTableBehavior.onSmartTableInitialise(this, this._readSearchRows.bind(this));
         },
 
         onBeforeSmartTableRebind: function (oEvent) {
             SearchRequestRuntime.syncToolbarRequestInputs(this);
-            SearchViewBehavior.onBeforeSmartTableRebind(this, oEvent);
+            SearchSmartTableBehavior.onBeforeSmartTableRebind(this, oEvent, this._readSearchRows.bind(this));
         },
 
         onSmartSearch: function () {
-            ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SEARCH_INTERACTION_READY, {
-                action: "smartSearch"
-            });
-            SearchViewBehavior.beginSearchLoadingFeedback(this);
-            return SearchFilterLifecycleBehavior.onSmartSearch(this, function (sBusyPath, fnAction) {
-                return ControllerActionBusyRuntime.withActionBusy(this, sBusyPath, fnAction, function (bBusy) {
-                    SearchViewBehavior.setSearchActionBusy(this, bBusy);
-                }.bind(this));
-            }.bind(this));
+            return SearchFlowBehavior.onSmartSearch(this);
         },
 
         onRetrySearchLoad: function () {
-            SearchLoadRuntime.markLoading(this);
-            SearchViewBehavior.beginSearchLoadingFeedback(this);
-            return this._facade && this._facade.rebind
-                ? executeSearchFacade(this, "rebind", {
-                    source: SEARCH_SOURCES.SEARCH_RETRY
-                }).finally(function () {
-                    SearchLoadRuntime.setLoadStatus(this, { isLoading: false, isBusy: false, loadError: false });
-                }.bind(this)).catch(function (oError) {
-                    SearchLoadRuntime.applyLoadError(this, String((oError && oError.message) || "Unable to load search results."));
-                    return Promise.reject(oError);
-                }.bind(this))
-                : Promise.resolve();
+            if (!this._facade || !this._facade.rebind) {
+                return Promise.resolve();
+            }
+            return SearchFlowBehavior.onRetrySearchLoad(this);
         },
 
         onCreate: function () {
@@ -157,11 +116,11 @@ sap.ui.define([
         },
 
         onScrollSearchAnchor: function () {
-            return SearchViewBehavior.scrollToSearchFilters(this);
+            return SearchViewportRuntime.scrollToSearchFilters(this);
         },
 
         onScrollSearchResultsToolbarAnchor: function () {
-            return SearchViewBehavior.scrollToSearchResultsToolbar(this);
+            return SearchViewportRuntime.scrollToSearchResultsToolbar(this);
         },
 
         onMaxRowsChange: function (oEvent) {
@@ -193,14 +152,9 @@ sap.ui.define([
         },
 
         onSearchSortDialogConfirm: function (oEvent) {
-            var oSortItem = oEvent && oEvent.getParameter && oEvent.getParameter("sortItem");
-            var bSortDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("sortDescending"));
-            return SearchToolbarDialogRuntime.applySearchSortSettings(this, {
-                sortKey: oSortItem && oSortItem.getKey && oSortItem.getKey(),
-                sortDescending: bSortDescending
-            }, {
+            return SearchToolbarDialogRuntime.applySearchSortSettings(this, SearchToolbarDialogRuntime.buildSortSettingsFromEvent(oEvent), {
                 ControllerViewStateRuntime: ControllerViewStateRuntime,
-                SearchCommandPolicy: buildSearchCommandPolicy(this)
+                SearchCommandPolicy: SearchCommandPolicy
             });
         },
 
@@ -209,19 +163,14 @@ sap.ui.define([
         },
 
         onSearchGroupDialogConfirm: function (oEvent) {
-            var oGroupItem = oEvent && oEvent.getParameter && oEvent.getParameter("groupItem");
-            var bGroupDescending = !!(oEvent && oEvent.getParameter && oEvent.getParameter("groupDescending"));
-            return SearchToolbarDialogRuntime.applySearchGroupSettings(this, {
-                groupKey: oGroupItem && oGroupItem.getKey && oGroupItem.getKey(),
-                groupDescending: bGroupDescending
-            }, {
+            return SearchToolbarDialogRuntime.applySearchGroupSettings(this, SearchToolbarDialogRuntime.buildGroupSettingsFromEvent(oEvent), {
                 ControllerViewStateRuntime: ControllerViewStateRuntime,
-                SearchCommandPolicy: buildSearchCommandPolicy(this)
+                SearchCommandPolicy: SearchCommandPolicy
             });
         },
 
         onOpenWorkflowAnalytics: function (oEvent) {
-            return SearchViewBehavior.openWorkflowAnalytics(this);
+            return SearchViewNavigationBehavior.openWorkflowAnalytics(this);
         },
 
         formatWorkflowStageText: function (sStage) {
@@ -241,14 +190,14 @@ sap.ui.define([
         },
 
         onChecksFailSegmentChange: function (oEvent) {
-            executeSearchFacade(this, "buildFilter", {
+            SearchCommandPolicy.buildFilter(this, {
                 intent: SEARCH_SOURCES.CHECKS_SEGMENT,
                 key: oEvent.getParameter("key")
             });
         },
 
         onBarriersFailSegmentChange: function (oEvent) {
-            executeSearchFacade(this, "buildFilter", {
+            SearchCommandPolicy.buildFilter(this, {
                 intent: SEARCH_SOURCES.BARRIERS_SEGMENT,
                 key: oEvent.getParameter("key")
             });
@@ -260,6 +209,18 @@ sap.ui.define([
 
         onExportMenuAction: function (oEvent) {
             return SearchActionBehavior.onExportMenuAction(this, oEvent);
+        },
+
+        _readSearchRows: function (oInnerTable) {
+            var aRows = [];
+            var oCtx = this._ctx && this._ctx();
+            if (oCtx && oCtx.smartControls && oCtx.smartControls.getVisibleRows) {
+                aRows = oCtx.smartControls.getVisibleRows() || [];
+            }
+            if (!aRows.length && oInnerTable) {
+                aRows = oInnerTable.getItems ? (oInnerTable.getItems() || []) : [];
+            }
+            return aRows;
         }
     };
 });

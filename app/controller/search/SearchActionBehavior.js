@@ -3,12 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewNavigationBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewSelectionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchCommandPolicy, SearchViewBehavior, SearchSelectionRuntime, OperationSourceContracts, CreateSentinel) {
+], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchViewNavigationBehavior, SearchViewSelectionBehavior, SearchSelectionRuntime, SearchViewportRuntime, OperationSourceContracts, CreateSentinel) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -29,7 +30,7 @@ sap.ui.define([
 
 
     function onCreate(oController) {
-        SearchViewBehavior.captureSearchScrollPosition(oController);
+        SearchViewportRuntime.captureSearchScrollPosition(oController);
         return ControllerActionBusyRuntime.withActionBusy(oController, "/createActionBusy", function () {
             NavigationIntentService.navigateToDetail(oController, CreateSentinel.toRouteId());
             return Promise.resolve(true);
@@ -42,19 +43,18 @@ sap.ui.define([
             controller: oController,
             selectionCount: iSelectionCount,
             onBlockedSelection: function () {
-                SearchViewBehavior.focusSearchToolbar(oController);
+                SearchViewSelectionBehavior.focusSearchToolbar(oController);
             }
         }).then(function (bAllowed) {
             if (!bAllowed) {
                 return false;
             }
-            SearchViewBehavior.captureSearchScrollPosition(oController);
-            return SearchCommandPolicy.selectRow(oController, { intent: SEARCH_SOURCES.COPY });
+            return SearchViewSelectionBehavior.selectRowWithScrollCapture(oController, { intent: SEARCH_SOURCES.COPY });
         });
     }
 
     function onSelectVisibleRows(oController) {
-        return SearchViewBehavior.selectVisibleRows(oController).then(function (mResult) {
+        return SearchViewSelectionBehavior.selectVisibleRows(oController).then(function (mResult) {
             if (!mResult || !mResult.count) {
                 return UiDecisionCoordinator.notifySelectVisibleEmpty({ controller: oController });
             }
@@ -63,8 +63,8 @@ sap.ui.define([
     }
 
     function onClearSelection(oController) {
-        return SearchViewBehavior.clearSelection(oController).then(function () {
-            SearchViewBehavior.focusSearchResults(oController);
+        return SearchViewSelectionBehavior.clearSelection(oController).then(function () {
+            SearchViewSelectionBehavior.focusSearchResults(oController);
             return true;
         });
     }
@@ -75,7 +75,7 @@ sap.ui.define([
         var aSelectedRowIds = SearchSelectionRuntime.extractSelectedRowIds(oEvent, oInnerTable);
         var sSelectedRowId = aSelectedRowIds[0] || "";
         var sSelectedRowDisplayId = SearchSelectionRuntime.extractSelectedRowDisplayId(oEvent, oInnerTable);
-        SearchCommandPolicy.selectionChanged(oController, {
+        SearchViewSelectionBehavior.dispatchSelectionChanged(oController, {
             event: oEvent,
             selectedRowId: sSelectedRowId,
             selectedRowDisplayId: sSelectedRowDisplayId,
@@ -89,8 +89,7 @@ sap.ui.define([
         if (!sRootId) {
             return undefined;
         }
-        SearchViewBehavior.captureSearchScrollPosition(oController);
-        return SearchCommandPolicy.selectRow(oController, {
+        return SearchViewSelectionBehavior.selectRowWithScrollCapture(oController, {
             intent: SEARCH_SOURCES.OPEN,
             rootId: sRootId,
             source: SEARCH_SOURCES.TABLE_ITEM_PRESS
@@ -98,12 +97,12 @@ sap.ui.define([
     }
 
     function onExportScreen(oController) {
-        return SearchViewBehavior.runExport(oController, "screen");
+        return SearchViewNavigationBehavior.runExport(oController, "screen");
     }
 
     function onExportMenuAction(oController, oEvent) {
         var oItem = oEvent.getParameter("item");
-        return SearchViewBehavior.runExport(oController, oItem && oItem.data("entity") || "screen");
+        return SearchViewNavigationBehavior.runExport(oController, oItem && oItem.data("entity") || "screen");
     }
 
     return {

@@ -85,35 +85,29 @@
   transform: translateY(-2px);
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailInfoExperienceCard .infoCardGrid,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoExperienceCard .infoCardGrid {
+.chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid {
   gap: 0.42rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailInfoBridgeCard,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoBridgeCard {
+.chkApp .appLayoutSplit .detailPage .detailInfoBridgeCard {
   margin-bottom: 0.12rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailInfoBridgeCard::after,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailInfoBridgeCard::after {
+.chkApp .appLayoutSplit .detailPage .detailInfoBridgeCard::after {
   left: 0.58rem;
   right: 0.58rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailContent .infoCardGrid .infoCardTile,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailContent .infoCardGrid .infoCardTile {
+.chkApp .appLayoutSplit .detailPage .detailContent .infoCardGrid .infoCardTile {
   min-height: 7rem;
   padding: 0.68rem 0.72rem 0.64rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailContent .infoCardGrid .infoCardTitle,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailContent .infoCardGrid .infoCardTitle {
+.chkApp .appLayoutSplit .detailPage .detailContent .infoCardGrid .infoCardTitle {
   font-size: 0.66rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailContent .infoCardGrid .infoCardValue,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailContent .infoCardGrid .infoCardValue {
+.chkApp .appLayoutSplit .detailPage .detailContent .infoCardGrid .infoCardValue {
   font-size: 0.8rem;
   line-height: 1.28;
 }

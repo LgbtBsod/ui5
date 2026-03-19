@@ -498,14 +498,12 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   min-width: 0;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentsBody,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentsBody {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentsBody {
   overflow-x: visible;
   gap: 0.58rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentsCard,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentsCard {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentsCard {
   min-width: 0;
   padding:
     calc(0.72rem * var(--theme-density-scale))
@@ -513,102 +511,84 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
     calc(0.76rem * var(--theme-density-scale));
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentToolbar,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentToolbar {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentToolbar {
   padding: 0 0 0.08rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentToolbar .sapMTitle,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentToolbar .sapMTitle {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentToolbar .sapMTitle {
   font-size: 0.88rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable {
   min-width: 0;
   width: 100%;
   max-width: 100%;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMListTbl,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMListTbl {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMListTbl {
   width: 100%;
   table-layout: fixed;
   border-spacing: 0 0.56rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMListTblHeaderCell,
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMListTblCell,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMListTblHeaderCell,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMListTblCell {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMListTblHeaderCell,
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMListTblCell {
   min-width: 0;
   max-width: 100%;
   padding-inline: 0.52rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMText,
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMObjectIdentifierText,
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable .sapMLnk,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMText,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMObjectIdentifierText,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable .sapMLnk {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMText,
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMObjectIdentifierText,
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMLnk {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentActions,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentActions {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentActions {
   width: 100%;
   justify-content: stretch;
   gap: 0.3rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentActions .tableRowActionBtn,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentActions .tableRowActionBtn {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentActions .tableRowActionBtn {
   flex: 1 1 calc(50% - 0.15rem);
   min-width: 0;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentActions .tableRowActionBtn .sapMBtnInner,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
   width: 100%;
   justify-content: center;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentDropZone,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentDropZone {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentDropZone {
   min-height: 0;
   gap: 0.62rem;
   margin-top: 0.18rem;
   padding: 0.78rem 0.88rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAttachmentDropZoneActions,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentDropZoneActions {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentDropZoneActions {
   justify-self: stretch;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailEmptyStateCard,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailEmptyStateCard {
+.chkApp .appLayoutSplit .detailPage .detailEmptyStateCard {
   gap: 0.38rem;
   margin-top: 0.22rem;
   padding: 0.84rem 0.92rem;
   min-width: 0;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailEmptyStateTitle,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailEmptyStateTitle {
+.chkApp .appLayoutSplit .detailPage .detailEmptyStateTitle {
   font-size: 0.88rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailEmptyStateText,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailEmptyStateText {
+.chkApp .appLayoutSplit .detailPage .detailEmptyStateText {
   font-size: 0.84rem;
   line-height: 1.42;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedScene,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedScene {
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedScene {
   inline-size: 100%;
   width: 100%;
   max-width: 100%;
@@ -620,26 +600,21 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   align-self: stretch;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedIllustration,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedIllustration {
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedIllustration {
   max-width: min(100%, 17.5rem);
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedSceneVisual,
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedSceneCopy,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedSceneVisual,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedSceneCopy {
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedSceneVisual,
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedSceneCopy {
   align-self: center;
   max-width: 100%;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedTitle,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedTitle {
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedTitle {
   font-size: 1rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedText,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedText {
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedText {
   font-size: 0.84rem;
   line-height: 1.45;
 }
@@ -709,8 +684,7 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
     min-width: 0;
   }
 
-  .chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
-  .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable {
+  .chkApp .appLayoutSplit .detailPage .detailAttachmentTable {
     min-width: 0;
   }
 }
@@ -735,8 +709,7 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
     min-width: 0;
   }
 
-  .chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
-  .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAttachmentTable {
+  .chkApp .appLayoutSplit .detailPage .detailAttachmentTable {
     min-width: 0;
   }
 }
@@ -816,16 +789,14 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedScene,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedScene {
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedScene {
   min-height: min(34rem, calc(100vh - var(--app-shell-offset) - 3rem));
   max-width: min(100%, 42rem);
   padding: 1.2rem 1.25rem 1.35rem;
   align-self: start;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailAccessDeniedSceneCopy,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailAccessDeniedSceneCopy {
+.chkApp .appLayoutSplit .detailPage .detailAccessDeniedSceneCopy {
   max-width: 24rem;
 }
 .chkApp .detailAccessDeniedScene + .detailControlPinnedDock,

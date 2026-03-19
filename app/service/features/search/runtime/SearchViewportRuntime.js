@@ -5,19 +5,23 @@ sap.ui.define([
 ], function (SearchScrollRuntime, SearchStickyLayoutRuntime, SearchViewportBindingRuntime) {
     "use strict";
 
-    function captureSearchScrollPosition(oController) {
-        SearchScrollRuntime.captureSearchScrollPosition(oController);
-    }
-
-    function restoreSearchScrollPosition(oController) {
-        SearchScrollRuntime.restoreSearchScrollPosition(oController, {
+    function createViewportHooks(oController) {
+        return {
             resolveToolbarDom: function () {
                 return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
             },
             syncViewportLayout: function () {
                 SearchViewportBindingRuntime.syncSearchViewportLayout(oController);
             }
-        });
+        };
+    }
+
+    function captureSearchScrollPosition(oController) {
+        SearchScrollRuntime.captureSearchScrollPosition(oController);
+    }
+
+    function restoreSearchScrollPosition(oController) {
+        SearchScrollRuntime.restoreSearchScrollPosition(oController, createViewportHooks(oController));
     }
 
     function scrollToSearchFilters(oController) {
@@ -27,14 +31,7 @@ sap.ui.define([
             oController,
             oFilterDom,
             SearchStickyLayoutRuntime.resolveShellHeaderOffset(oController, SearchScrollRuntime.resolveSearchScrollHost(oController)),
-            {
-                resolveToolbarDom: function () {
-                    return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
-                },
-                syncViewportLayout: function () {
-                    SearchViewportBindingRuntime.syncSearchViewportLayout(oController);
-                }
-            }
+            createViewportHooks(oController)
         );
     }
 
@@ -47,14 +44,7 @@ sap.ui.define([
             oController,
             oToolbarDom,
             SearchStickyLayoutRuntime.resolveShellHeaderOffset(oController, SearchScrollRuntime.resolveSearchScrollHost(oController)),
-            {
-                resolveToolbarDom: function () {
-                    return SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
-                },
-                syncViewportLayout: function () {
-                    SearchViewportBindingRuntime.syncSearchViewportLayout(oController);
-                }
-            }
+            createViewportHooks(oController)
         );
     }
 

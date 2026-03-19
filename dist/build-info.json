@@ -1,5 +1,0 @@
-{
-  "mode": "fallback-copy",
-  "generatedAt": "2026-03-19T04:41:53.250Z",
-  "note": "Static dist prepared without UI5 CLI build because SAPUI5 framework metadata was unavailable in the current environment."
-}

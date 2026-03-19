@@ -44,10 +44,9 @@ body.chkAppRoot,
 }
 
 .chkApp .appRootFcl,
-.chkApp #searchPaneHost,
-.chkApp #detailPaneHost,
-.chkApp [id$="-searchPaneHost"],
-.chkApp [id$="-detailPaneHost"] {
+.chkApp .searchPage,
+.chkApp .detailPage,
+.chkApp .analyticsPage {
   height: 100%;
   width: 100%;
   max-width: 100%;
@@ -92,38 +91,32 @@ body.chkAppRoot,
   box-shadow: none;
 }
 
-.chkApp .chkSkin:not(.appLayoutSplit, .appLayoutDetailOnly) #searchPaneHost,
-.chkApp .chkSkin:not(.appLayoutSplit, .appLayoutDetailOnly) [id$="-searchPaneHost"] {
+.chkApp .chkSkin:not(.appLayoutSplit, .appLayoutDetailOnly) .searchPage {
   width: min(100%, 82rem);
   max-width: 82rem;
   margin-inline: auto;
 }
 
-.chkApp .appLayoutSingle #searchPaneHost,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] {
+.chkApp .appLayoutSingle .searchPage {
   width: 100%;
   max-width: 100%;
   min-width: 0;
   margin-inline: auto;
 }
 
-.chkApp .appLayoutSplit #searchPaneHost,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"],
-.chkApp .appLayoutDetailOnly #searchPaneHost,
-.chkApp .appLayoutDetailOnly [id$="-searchPaneHost"] {
+.chkApp .appLayoutSplit .searchPage,
+.chkApp .appLayoutDetailOnly .searchPage {
   width: 100%;
   max-width: none;
   margin-inline: 0;
 }
 
-.chkApp #searchPaneHost,
-.chkApp #detailPaneHost,
-.chkApp [id$="-searchPaneHost"],
-.chkApp [id$="-detailPaneHost"],
-.chkApp #searchPaneHost > .sapUiXMLView,
-.chkApp #detailPaneHost > .sapUiXMLView,
-.chkApp [id$="-searchPaneHost"] > .sapUiXMLView,
-.chkApp [id$="-detailPaneHost"] > .sapUiXMLView {
+.chkApp .searchPage,
+.chkApp .detailPage,
+.chkApp .analyticsPage,
+.chkApp .searchPage > .sapUiXMLView,
+.chkApp .detailPage > .sapUiXMLView,
+.chkApp .analyticsPage > .sapUiXMLView {
   overflow: hidden;
 }
 
@@ -206,10 +199,8 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 }
 
 /* 2026-03 layout rebalance */
-.chkApp .appLayoutSingle #searchPaneHost .appContent,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] .appContent,
-.chkApp .appLayoutSingle #detailPaneHost .appContent,
-.chkApp .appLayoutSingle [id$="-detailPaneHost"] .appContent,
+.chkApp .appLayoutSingle .searchPage .appContent,
+.chkApp .appLayoutSingle .detailPage .appContent,
 .chkApp .appLayoutSingle .analyticsScreenContent,
 .chkApp .appLayoutSingle .accessDeniedScreenContent {
   width: min(calc(100% - 1rem), 110rem);
@@ -223,14 +214,12 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   margin: 0.78rem auto 0;
 }
 
-.chkApp .appLayoutSplit #searchPaneHost .appContent,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .appContent {
+.chkApp .appLayoutSplit .searchPage .appContent {
   padding-left: 0.58rem;
   padding-right: 0.38rem;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .appContent,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .appContent {
+.chkApp .appLayoutSplit .detailPage .appContent {
   padding-left: 0.34rem;
   padding-right: 0.24rem;
   width: min(calc(100% - 0.4rem), 78rem);

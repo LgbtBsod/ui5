@@ -5,9 +5,10 @@
     xmlns:core="sap.ui.core">
 
     <Page
+        id="searchPage"
         showHeader="false"
         enableScrolling="false"
-        class="pageTransparent">
+        class="pageTransparent searchPage">
 
         <content>
             <VBox class="appContent searchExperienceStack">

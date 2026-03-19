@@ -1,10 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewNavigationBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchShortcutRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewLoadBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
@@ -13,10 +17,14 @@ sap.ui.define([
 ], function (
     ControllerResourceCleanup,
     SearchFacade,
+    SearchViewNavigationBehavior,
     ControllerRouteRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
-    SearchViewBehavior,
+    SearchShortcutRuntime,
+    SearchViewLoadBehavior,
+    SearchViewportRuntime,
+    SearchAnalyticsRailRuntime,
     SearchRateProgress,
     SearchViewStateRuntime,
     ModelContracts,
@@ -66,9 +74,9 @@ sap.ui.define([
             { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: oController._onDetailSearchContextMatched },
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
         ]);
-        SearchViewBehavior.syncSmartControlAvailability(oController);
-        SearchViewBehavior.bindPowerUserShortcuts(oController);
-        SearchViewBehavior.bindSearchViewportRuntime(oController);
+        SearchViewNavigationBehavior.syncSmartControlAvailability(oController);
+        SearchShortcutRuntime.bindPowerUserShortcuts(oController);
+        SearchViewportRuntime.bindSearchViewportRuntime(oController);
     }
 
     function onAfterRendering(oController) {
@@ -94,9 +102,9 @@ sap.ui.define([
 
     function onExit(oController) {
         ControllerRouteRuntime.detachAllMatched(oController);
-        SearchViewBehavior.unbindPowerUserShortcuts(oController);
-        SearchViewBehavior.unbindSearchViewportRuntime(oController);
-        SearchViewBehavior.clearAnalyticsRefreshTimer(oController);
+        SearchShortcutRuntime.unbindPowerUserShortcuts(oController);
+        SearchViewportRuntime.unbindSearchViewportRuntime(oController);
+        SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer(oController);
         oController._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRailPulseTimer);
         oController._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(oController._iSearchWorkingHintTimer);
         oController._iLocationSuggestTimer = SchedulingRuntime.clearTimer(oController._iLocationSuggestTimer);
@@ -123,7 +131,7 @@ sap.ui.define([
     function onSearchMatched(oController, fnApplyAnalyticsDrilldownIntent) {
         oController._bSearchInitialRouteHandled = true;
         oController._bSearchRouteActive = true;
-        SearchViewBehavior.onSearchMatched(oController);
+        SearchViewNavigationBehavior.onSearchMatched(oController);
         fnApplyAnalyticsDrilldownIntent();
     }
 
@@ -134,16 +142,16 @@ sap.ui.define([
             return;
         }
         oController._bSearchRouteActive = false;
-        SearchViewBehavior.clearAnalyticsRefreshTimer(oController);
-        SearchViewBehavior.captureSearchScrollPosition(oController);
-        SearchViewBehavior.syncSearchContextForDetailRoute(oController);
+        SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer(oController);
+        SearchViewportRuntime.captureSearchScrollPosition(oController);
+        SearchViewNavigationBehavior.syncSearchContextForDetailRoute(oController);
     }
 
     function onAnalyticsMatched(oController) {
         oController._bSearchRouteActive = false;
-        SearchViewBehavior.clearAnalyticsRefreshTimer(oController);
-        SearchViewBehavior.captureSearchScrollPosition(oController);
-        SearchViewBehavior.resetTransientFeedback(oController);
+        SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer(oController);
+        SearchViewportRuntime.captureSearchScrollPosition(oController);
+        SearchViewLoadBehavior.resetTransientFeedback(oController);
     }
 
     return {

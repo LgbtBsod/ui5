@@ -54,39 +54,36 @@ sap.ui.define([
 
     function bindValidation(oController, oControl, sValidationKey) {
         var sKey = resolveValidationKey(sValidationKey);
+        var aValidationParts = buildValidationParts(sKey);
         oControl.bindProperty("valueState", {
-            parts: [
-                { path: "view>/validationShown" },
-                { path: "view>/validationMissing/" + sKey }
-            ],
+            parts: aValidationParts,
             formatter: oController.formatValidationState.bind(oController)
         });
         oControl.bindProperty("valueStateText", {
-            parts: [
-                { path: "view>/validationShown" },
-                { path: "view>/validationMissing/" + sKey }
-            ],
+            parts: aValidationParts,
             formatter: oController.formatValidationText.bind(oController)
         });
         return oControl;
     }
 
+    function buildValidationParts(sKey) {
+        return [
+            { path: "view>/validationShown" },
+            { path: "view>/validationMissing/" + sKey }
+        ];
+    }
+
     function bindValidationMessage(oController, oText, sValidationKey) {
         var sKey = resolveValidationKey(sValidationKey);
+        var aValidationParts = buildValidationParts(sKey);
         oText.bindProperty("visible", {
-            parts: [
-                { path: "view>/validationShown" },
-                { path: "view>/validationMissing/" + sKey }
-            ],
+            parts: aValidationParts,
             formatter: function (bShown, bMissing) {
                 return !!(bShown && bMissing);
             }
         });
         oText.bindProperty("text", {
-            parts: [
-                { path: "view>/validationShown" },
-                { path: "view>/validationMissing/" + sKey }
-            ],
+            parts: aValidationParts,
             formatter: oController.formatValidationText.bind(oController)
         });
         return oText;

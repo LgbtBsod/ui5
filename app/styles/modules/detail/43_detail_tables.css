@@ -168,8 +168,7 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   background: var(--theme-table-cell-hover-bg);
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailSectionBody,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionBody {
+.chkApp .appLayoutSplit .detailPage .detailSectionBody {
   overflow-x: visible;
   gap: 0.58rem;
 }
@@ -210,8 +209,7 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   min-width: 100%;
 }
 
-.chkApp .appLayoutSplit #detailPaneHost .detailTableExperienceCard,
-.chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailTableExperienceCard {
+.chkApp .appLayoutSplit .detailPage .detailTableExperienceCard {
   min-width: 0;
   padding:
     calc(0.56rem * var(--theme-density-scale))
@@ -366,10 +364,8 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
     min-width: 0;
   }
 
-  .chkApp .appLayoutSplit #detailPaneHost .detailGridTable,
-  .chkApp .appLayoutSplit #detailPaneHost .flatEditorTable,
-  .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailGridTable,
-  .chkApp .appLayoutSplit [id$="-detailPaneHost"] .flatEditorTable {
+  .chkApp .appLayoutSplit .detailPage .detailGridTable,
+  .chkApp .appLayoutSplit .detailPage .flatEditorTable {
     min-width: 0;
   }
 }
@@ -391,10 +387,8 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
     min-width: 0;
   }
 
-  .chkApp .appLayoutSplit #detailPaneHost .detailGridTable,
-  .chkApp .appLayoutSplit #detailPaneHost .flatEditorTable,
-  .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailGridTable,
-  .chkApp .appLayoutSplit [id$="-detailPaneHost"] .flatEditorTable {
+  .chkApp .appLayoutSplit .detailPage .detailGridTable,
+  .chkApp .appLayoutSplit .detailPage .flatEditorTable {
     min-width: 0;
   }
 }

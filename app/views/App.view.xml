@@ -12,9 +12,6 @@
         class="chkSkin appShell appLayoutSingle"
         fitContainer="true"
         width="100%">
-        <customData>
-            <core:CustomData key="aria-label" value="{i18n>appRootAriaLabel}" writeToDom="true"/>
-        </customData>
         <Link
             text="{i18n>skipToMainContent}"
             press=".onSkipToMainContent"
@@ -65,12 +62,12 @@
             class="appFeedbackCorrelation"
             alignItems="Center"
             renderType="Bare"
+            ariaLabelledBy="correlationIdLabel"
             visible="{parts:[{path:'state>/ui/feedback/banner/global/correlationId'},{path:'state>/ui/feedback/banner/global/scope'}], formatter:'.formatGlobalBannerCorrelationVisible'}">
             <customData>
                 <core:CustomData key="role" value="region" writeToDom="true"/>
-                <core:CustomData key="aria-label" value="{i18n>correlationIdLabel}" writeToDom="true"/>
             </customData>
-            <Label text="{i18n>correlationIdLabel}" labelFor="correlationIdInput" class="sapUiTinyMarginEnd"/>
+            <Label id="correlationIdLabel" text="{i18n>correlationIdLabel}" labelFor="correlationIdInput" class="sapUiTinyMarginEnd"/>
             <Input
                 id="correlationIdInput"
                 value="{state>/ui/feedback/banner/global/correlationId}"
@@ -87,7 +84,6 @@
         <VBox id="mainContentHost" renderType="Bare" fitContainer="true">
             <customData>
                 <core:CustomData key="role" value="main" writeToDom="true"/>
-                <core:CustomData key="aria-label" value="{i18n>mainContentAriaLabel}" writeToDom="true"/>
             </customData>
             <f:FlexibleColumnLayout
                 id="mainFcl"

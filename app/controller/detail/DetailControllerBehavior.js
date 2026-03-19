@@ -1,100 +1,32 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailService",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPageFlow",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailViewStateFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAccessViewState",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (
     ControllerResourceCleanup,
     DetailService,
+    DetailPageFlow,
+    DetailViewStateFactory,
     ControllerRouteRuntime,
-    ControllerTextRuntime,
-    DetailAccessViewState,
-    DetailInfoCardLayoutRuntime,
     StatePaths,
     ControllerModelRuntime,
     ControllerViewStateRuntime,
-    ModelStateRuntime,
     SchedulingRuntime,
     NavigationContracts,
-    ModelContracts,
-    DetailRuntimeContracts
+    ModelContracts
 ) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var STATE_MODEL = MODELS.STATE;
     var SELECTED_MODEL = MODELS.SELECTED;
-    var INFO_CARD_KEYS = DetailRuntimeContracts.INFO_CARD_KEYS;
-    var INFO_CARD_TEXT_KEYS = DetailRuntimeContracts.INFO_CARD_TEXT_KEYS;
-    var INFO_CARD_TEXT_FALLBACKS = DetailRuntimeContracts.INFO_CARD_TEXT_FALLBACKS;
-    var VIEW_DEFAULTS = DetailRuntimeContracts.VIEW_DEFAULTS;
-
-    function buildInitialViewState(oController) {
-        var fnText = function (sKey, sFallback) {
-            return ControllerTextRuntime.getText(oController, sKey, [], sFallback || sKey);
-        };
-        return {
-            detailSkeletonBusy: false,
-            attachmentBusy: false,
-            attachmentsExpanded: false,
-            attachmentsLoaded: false,
-            sessionAttachments: [],
-            checksBusy: false,
-            barriersBusy: false,
-            checksExpandedBusy: false,
-            barriersExpandedBusy: false,
-            locationVhBusy: false,
-            attachmentCategoryKey: VIEW_DEFAULTS.ATTACHMENT_CATEGORY_KEY,
-            observerSuggestions: [],
-            observedSuggestions: [],
-            observerInputValue: "",
-            observedInputValue: "",
-            personSuggestHint: "",
-            locationVhHint: "",
-            narrowDetailViewport: false,
-            deleteChecklistConfirmArmed: false,
-            detailSections: {
-                checks: {
-                    kind: "check",
-                    titleKey: "checksTitle",
-                    emptyTitleKey: "detailEmptyChecksTitle",
-                    emptyTextKey: "detailEmptyChecksText",
-                    actionIcon: "sap-icon://task",
-                    emptyIcon: "sap-icon://complete"
-                },
-                barriers: {
-                    kind: "barrier",
-                    titleKey: "barriersTitle",
-                    emptyTitleKey: "detailEmptyBarriersTitle",
-                    emptyTextKey: "detailEmptyBarriersText",
-                    actionIcon: "sap-icon://quality-issue",
-                    emptyIcon: "sap-icon://alert"
-                }
-            },
-            accessState: DetailAccessViewState.createDefaultState(""),
-            validationShown: false,
-            validationMissing: {},
-            infoCards: DetailInfoCardLayoutRuntime.resolveCards(oController, [
-                { key: INFO_CARD_KEYS.DATETIME, title: fnText(INFO_CARD_TEXT_KEYS.DATETIME, INFO_CARD_TEXT_FALLBACKS.DATETIME), pinned: true },
-                { key: INFO_CARD_KEYS.LOCATION, title: fnText(INFO_CARD_TEXT_KEYS.LOCATION, INFO_CARD_TEXT_FALLBACKS.LOCATION), pinned: true },
-                { key: INFO_CARD_KEYS.EQUIPMENT, title: fnText(INFO_CARD_TEXT_KEYS.EQUIPMENT, INFO_CARD_TEXT_FALLBACKS.EQUIPMENT), pinned: true },
-                { key: INFO_CARD_KEYS.OBSERVER, title: fnText(INFO_CARD_TEXT_KEYS.OBSERVER, INFO_CARD_TEXT_FALLBACKS.OBSERVER), pinned: true },
-                { key: INFO_CARD_KEYS.OBSERVED, title: fnText(INFO_CARD_TEXT_KEYS.OBSERVED, INFO_CARD_TEXT_FALLBACKS.OBSERVED), pinned: true },
-                { key: INFO_CARD_KEYS.PROFESSION, title: fnText(INFO_CARD_TEXT_KEYS.PROFESSION, INFO_CARD_TEXT_FALLBACKS.PROFESSION), pinned: false },
-                { key: INFO_CARD_KEYS.LPC, title: fnText(INFO_CARD_TEXT_KEYS.LPC, INFO_CARD_TEXT_FALLBACKS.LPC), pinned: false }
-            ])
-        };
-    }
 
     function bindStateValidationModel(oController) {
         oController._oStateValidationModel = ControllerModelRuntime.state(oController);
@@ -139,7 +71,7 @@ sap.ui.define([
                 { name: NavigationContracts.ROUTES.ANALYTICS, handler: this._onDetailRouteLeave }
             ]);
 
-            ControllerViewStateRuntime.initModel(this, buildInitialViewState.bind(null, this));
+            ControllerViewStateRuntime.initModel(this, DetailViewStateFactory.create.bind(null, this));
 
             this._oSelectedModel = ControllerModelRuntime.selected(this);
             if (this._oSelectedModel && this._oSelectedModel.attachPropertyChange) {
@@ -179,25 +111,7 @@ sap.ui.define([
         },
 
         _onDetailRouteLeave: function () {
-            var oOwner = this.getOwnerComponent && this.getOwnerComponent();
-            var oStateModel = ControllerModelRuntime.state(this);
-            if (oOwner && typeof oOwner._stopLockScopedManagers === "function") {
-                oOwner._stopLockScopedManagers();
-            }
-            if (oOwner && typeof oOwner._releaseActiveLockOnLeave === "function") {
-                oOwner._releaseActiveLockOnLeave(oStateModel, this.getModel && this.getModel());
-            }
-            if (this._mLazyDialogs) {
-                Object.keys(this._mLazyDialogs).forEach(function (sKey) {
-                    var oDialog = this._mLazyDialogs[sKey];
-                    if (oDialog && typeof oDialog.close === "function") {
-                        oDialog.close();
-                    }
-                }, this);
-            }
-            this._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(this._iAttachmentDropZoneBindTimer);
-            this._clearLocationValueHelpSearchTimer();
-            this._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(this._iLocationVhTableSyncTimer);
+            DetailPageFlow.onRouteLeave(this);
         },
 
         isDetailSectionBusy: function (sKind) {
@@ -218,6 +132,14 @@ sap.ui.define([
             var oSelectedModel = this.getModel && this.getModel(SELECTED_MODEL);
             var aRows = oSelectedModel && oSelectedModel.getProperty ? oSelectedModel.getProperty(sPath) : [];
             return this.formatRowCount(Array.isArray(aRows) ? aRows : []);
+        },
+
+        _onDetailMatched: function (oEvent) {
+            return DetailPageFlow.onMatched(this, oEvent, {
+                applyLayoutState: this._applyLayoutState.bind(this),
+                scheduleAttachmentDropZoneBind: this._scheduleAttachmentDropZoneBind.bind(this),
+                validationSummaryPath: StatePaths.VALIDATION_SUMMARY
+            });
         }
     };
 });

@@ -9,7 +9,7 @@
     xmlns:core="sap.ui.core"
     xmlns:unified="sap.ui.unified">
 
-    <Page showHeader="false" enableScrolling="false" class="pageTransparent">
+    <Page id="detailPage" showHeader="false" enableScrolling="false" class="pageTransparent detailPage">
 
         <VBox class="appContent detailContent detailExperienceCanvas" renderType="Bare" fitContainer="true" width="100%">
 

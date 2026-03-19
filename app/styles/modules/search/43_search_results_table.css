@@ -114,20 +114,20 @@
   border-bottom-color: transparent;
 }
 
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblHeaderCell,
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblCell {
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblHeaderCell,
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblCell {
   padding-inline: clamp(0.32rem, 0.7vw, 0.54rem);
 }
 
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblSubCntRow {
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblSubCntRow {
   grid-template-columns: minmax(5.8rem, auto) minmax(0, 1fr);
 }
 
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblSubCntValBlock {
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblSubCntValBlock {
   grid-template-columns: 1fr;
 }
 
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) :is(#searchPaneHost, [id$="-searchPaneHost"]) .searchResultsTable .sapMListTblSubCntVal {
+.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblSubCntVal {
   display: flex;
   justify-content: space-between;
   align-items: start;
@@ -244,33 +244,25 @@ body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRow .sapMListTb
   background: color-mix(in srgb, rgba(255, 255, 255, 0.82) 72%, transparent);
 }
 
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable {
+.chkApp .appLayoutSplit .searchPage .searchResultsTable {
   padding: 0.54rem 0.56rem 0.58rem;
 }
 
 
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblHeaderCell .sapMText,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblHeaderCell .sapMText {
+.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblHeaderCell .sapMText {
   font-size: 0.63rem;
   letter-spacing: 0.05em;
 }
 
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblRow .sapMListTblCell,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblRow .sapMListTblCell {
+.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblRow .sapMListTblCell {
   padding-block: calc(var(--theme-table-cell-padding-block) - 0.14rem);
 }
 
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblCell .sapMText,
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblCell .sapMLnk,
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapMListTblCell .sapMObjStatusText,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCell .sapMText,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCell .sapMLnk,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapMListTblCell .sapMObjStatusText {
+.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMText,
+.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
+.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
+.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMLnk,
+.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMObjStatusText {
   font-size: 0.73rem;
   line-height: 1.28;
 }

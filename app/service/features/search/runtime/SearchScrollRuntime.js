@@ -18,18 +18,8 @@ sap.ui.define([
 
     function resolveSearchScrollHost(oController) {
         var oDomRef = oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
-        var aCandidates;
         var oNode = oDomRef && oDomRef.parentElement;
         var oDocumentScrollHost;
-        if (oDomRef && oDomRef.querySelectorAll) {
-            aCandidates = Array.prototype.slice.call(oDomRef.querySelectorAll(".sapMPageEnableScrolling, .sapMPageScroll, .sapMPageEnableScrolling > div"));
-            oNode = aCandidates.find(function (oCandidate) {
-                return oCandidate && oCandidate.scrollHeight > oCandidate.clientHeight + 4;
-            }) || oNode;
-            if (oNode && oNode.scrollHeight > oNode.clientHeight + 4) {
-                return oNode;
-            }
-        }
         while (oNode && oNode !== document.body) {
             if (oNode.scrollHeight > oNode.clientHeight + 4) {
                 return oNode;
