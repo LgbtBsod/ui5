@@ -17,9 +17,6 @@
             press=".onSkipToMainContent"
             class="skipLink skipToMain"/>
         <VBox id="appShellHeaderHost" class="appContent appShellHeaderHost" renderType="Bare">
-            <customData>
-                <core:CustomData key="role" value="banner" writeToDom="true"/>
-            </customData>
             <cc:AppShellHeader
                 eyebrow="{appView>/shell/eyebrow}"
                 productName="{appView>/shell/productName}"
@@ -59,14 +56,12 @@
             class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop appFeedbackBanner chkFeedbackStrip workflowMessageSurface"/>
 
         <HBox
+            id="feedbackCorrelationRegion"
             class="appFeedbackCorrelation"
             alignItems="Center"
             renderType="Bare"
             ariaLabelledBy="correlationIdLabel"
             visible="{parts:[{path:'state>/ui/feedback/banner/global/correlationId'},{path:'state>/ui/feedback/banner/global/scope'}], formatter:'.formatGlobalBannerCorrelationVisible'}">
-            <customData>
-                <core:CustomData key="role" value="region" writeToDom="true"/>
-            </customData>
             <Label id="correlationIdLabel" text="{i18n>correlationIdLabel}" labelFor="correlationIdInput" class="sapUiTinyMarginEnd"/>
             <Input
                 id="correlationIdInput"
@@ -82,9 +77,6 @@
         </HBox>
 
         <VBox id="mainContentHost" renderType="Bare" fitContainer="true">
-            <customData>
-                <core:CustomData key="role" value="main" writeToDom="true"/>
-            </customData>
             <f:FlexibleColumnLayout
                 id="mainFcl"
                 class="appRootFcl appRootFclTransparent"

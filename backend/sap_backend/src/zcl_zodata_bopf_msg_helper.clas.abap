@@ -15,7 +15,7 @@ CLASS zcl_zodata_bopf_msg_helper DEFINITION
         !it_failed_key TYPE /bobf/t_frw_key
         !it_message    TYPE /bobf/t_frw_message_k
       RAISING
-        /iwbep/cx_mgw_busi_exception.
+        zcx_zodata_error.
 
     "-- Collect BOPF messages into a flat string table for response payloads.
     CLASS-METHODS collect_messages
@@ -46,10 +46,10 @@ CLASS zcl_zodata_bopf_msg_helper IMPLEMENTATION.
       lv_summary = lv_summary && | [{ lv_count }] { <ls_msg>-message->if_message~get_text( ) }|.
     ENDLOOP.
 
-    RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
+    RAISE EXCEPTION TYPE zcx_zodata_error
       EXPORTING
-        textid  = /iwbep/cx_mgw_busi_exception=>business_error
-        message = lv_summary.
+        iv_code = 'VALIDATION_ERROR'
+        iv_msg  = lv_summary.
   ENDMETHOD.
 
   METHOD collect_messages.

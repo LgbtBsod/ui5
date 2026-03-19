@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade"
-], function (LockFacade) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
+], function (LockFacade, ControllerModelRuntime) {
     "use strict";
 
     function decodeBase64(sBase64) {
@@ -15,13 +16,7 @@ sap.ui.define([
 
     return {
         getModel: function (sName) {
-            var oView = this.getView && this.getView();
-            var oViewModel = oView && oView.getModel ? oView.getModel(sName) : undefined;
-            if (oViewModel) {
-                return oViewModel;
-            }
-            var oOwner = this.getOwnerComponent && this.getOwnerComponent();
-            return oOwner && oOwner.getModel ? oOwner.getModel(sName) : undefined;
+            return ControllerModelRuntime.model(this, sName, true);
         },
         setModel: function (oModel, sName) { return this.getView().setModel(oModel, sName); },
         getResourceBundle: function () {

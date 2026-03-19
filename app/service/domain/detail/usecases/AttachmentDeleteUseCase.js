@@ -1,15 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, JsRuntime, UseCaseValue, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, CreateSentinel, ViewPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+], function (UseCase, Result, JsRuntime, UseCaseValue, AttachmentEffectRuntime, DetailAttachmentStateRuntime, CreateSentinel) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -26,14 +23,7 @@ sap.ui.define([
     }
 
     function buildDeleteEffects(mCtx, sAttachmentId, oAttachment) {
-        var oUiState = mCtx && mCtx.uiState;
-        var aCurrentAll = DetailStateAccess.readCurrentAttachments(mCtx);
-        var aSession = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
-        var aAllNext = AttachmentIdentity.removeByAttachment(aCurrentAll, sAttachmentId, oAttachment);
-        var aSessionNext = AttachmentIdentity.removeByAttachment(aSession, sAttachmentId, oAttachment);
-        var aEffects = AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, "attachmentDeleted", "info");
-        aEffects.push(Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext));
-        return aEffects;
+        return DetailAttachmentStateRuntime.removeAttachment(mCtx, sAttachmentId, oAttachment, "attachmentDeleted");
     }
 
     AttachmentDeleteUseCase.prototype = Object.create(UseCase.prototype);

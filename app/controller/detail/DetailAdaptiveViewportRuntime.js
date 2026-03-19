@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime"
-], function (DetailActionConstants, ControllerViewStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState"
+], function (DetailActionConstants, ControllerViewStateRuntime, DetailAttachmentViewState) {
     "use strict";
 
     function remToPx(fRem) {
@@ -21,6 +22,7 @@ sap.ui.define([
         iWidth = Math.round((oDom.getBoundingClientRect && oDom.getBoundingClientRect().width) || 0);
         bNarrow = iWidth > 0 && iWidth <= remToPx(DetailActionConstants.DETAIL_NARROW_VIEWPORT_REM);
         ControllerViewStateRuntime.setFlag(oController, "/narrowDetailViewport", bNarrow);
+        DetailAttachmentViewState.sync(oController);
         if (oView && typeof oView.toggleStyleClass === "function") {
             oView.toggleStyleClass("detailViewportNarrow", bNarrow);
         }

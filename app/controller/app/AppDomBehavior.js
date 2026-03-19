@@ -63,6 +63,20 @@ sap.ui.define([
         return [oNodes.root, oNodes.body, oContainer, oAppDom];
     }
 
+    function syncSemanticAttributes(oController) {
+        var oMainHost = oController && oController.byId && oController.byId("mainContentHost");
+        var oMainDom = oMainHost && oMainHost.getDomRef && oMainHost.getDomRef();
+        var oFeedbackRegion = oController && oController.byId && oController.byId("feedbackCorrelationRegion");
+        var oFeedbackDom = oFeedbackRegion && oFeedbackRegion.getDomRef && oFeedbackRegion.getDomRef();
+
+        if (oMainDom) {
+            oMainDom.setAttribute("role", "main");
+        }
+        if (oFeedbackDom) {
+            oFeedbackDom.setAttribute("role", "region");
+        }
+    }
+
     function _scheduleInvalidate(oController, oLayout) {
         var oRuntimeState = getDomRuntimeState(oController);
         oRuntimeState.resizeRafId = SchedulingRuntime.requestFrameOnce(oRuntimeState.resizeRafId, function () {
@@ -139,6 +153,10 @@ sap.ui.define([
 
         _syncShellMetrics: function () {
             AppShellDomRuntime.syncShellMetricVars(this, getGlobalDomNodes().root);
+        },
+
+        _syncSemanticAttributes: function () {
+            syncSemanticAttributes(this);
         },
 
         _scheduleShellLayoutRefresh: function () {

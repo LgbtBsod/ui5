@@ -85,7 +85,7 @@
     METHODS get_srv_mgr RETURNING VALUE(ro_srv_mgr) TYPE REF TO /bobf/if_tra_service_manager.
     METHODS execute_save IMPORTING is_request TYPE zstr_pcct_savechanges_rq iv_is_autosave TYPE abap_bool DEFAULT abap_false RETURNING VALUE(rs_response) TYPE zstr_pcct_savechanges_rs RAISING /iwbep/cx_mgw_busi_exception zcx_zodata_error.
     METHODS validate_save_request IMPORTING is_request TYPE zstr_pcct_savechanges_rq RAISING /iwbep/cx_mgw_busi_exception.
-    METHODS raise_busi_exception IMPORTING iv_text TYPE string RAISING /iwbep/cx_mgw_busi_exception.
+    METHODS raise_busi_exception IMPORTING iv_text TYPE string iv_code TYPE string OPTIONAL RAISING /iwbep/cx_mgw_busi_exception.
     METHODS raise_crud_not_allowed IMPORTING iv_context TYPE string RAISING /iwbep/cx_mgw_busi_exception.
     METHODS read_root_key IMPORTING it_key_tab TYPE /iwbep/t_mgw_name_value_pair RETURNING VALUE(rv_rootkey) TYPE sysuuid_x16 RAISING /iwbep/cx_mgw_busi_exception.
     METHODS read_root_row IMPORTING iv_rootkey TYPE sysuuid_x16 RETURNING VALUE(rs_root) TYPE ty_root_row RAISING /iwbep/cx_mgw_busi_exception.
@@ -123,7 +123,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     IF ls_req-object_uuid IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( zcl_zodata_contract_constants=>c_msg_lock_acquire_required ).
+      raise_busi_exception(
+        iv_text = zcl_zodata_contract_constants=>c_msg_lock_acquire_required
+        iv_code = 'VALIDATION_ERROR' ).
     ENDIF.
     TRY.
         DATA(ls_lock_key) = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = ls_req-object_uuid ).
@@ -147,9 +149,11 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
           CHANGING cs_result = ls_result ).
         copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
       CATCH zcx_zodata_error INTO DATA(lx_lock_error).
-        raise_busi_exception( lx_lock_error->get_text( ) ).
+        raise_busi_exception( iv_text = lx_lock_error->get_message_text( ) iv_code = lx_lock_error->get_code( ) ).
       CATCH zcx_lock_error INTO DATA(lx_lock).
-        raise_busi_exception( |Заблокировано: { lx_lock->user_fullname } (Таб.№ { lx_lock->pernr })| ).
+        raise_busi_exception(
+          iv_text = |Заблокировано: { lx_lock->user_fullname } (Таб.№ { lx_lock->pernr })|
+          iv_code = zcl_zodata_contract_constants=>c_code_lock_stolen ).
     ENDTRY.
   ENDMETHOD.
   METHOD lockheartbeat_create_entity.
@@ -160,7 +164,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     IF ls_req-object_uuid IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( zcl_zodata_contract_constants=>c_msg_lock_heartbeat_required ).
+      raise_busi_exception(
+        iv_text = zcl_zodata_contract_constants=>c_msg_lock_heartbeat_required
+        iv_code = 'VALIDATION_ERROR' ).
     ENDIF.
     TRY.
         mo_lock_manager->heartbeat(
@@ -175,8 +181,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
           EXPORTING iv_ok = abap_true iv_code = zcl_zodata_contract_constants=>c_code_lock_ok iv_action = zcl_zodata_contract_constants=>c_action_heartbeat iv_owner = sy-uname iv_owner_session = ls_req-session_guid iv_object_uuid = ls_req-object_uuid iv_lock_expires = lv_exp_ts iv_server_now = lv_now_ts iv_lock_refreshed = abap_true iv_owner_session_match = abap_true
           CHANGING cs_result = ls_result ).
         copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
-      CATCH zcx_zodata_error.
-        raise_busi_exception( zcl_zodata_contract_constants=>c_msg_lock_session_required ).
+      CATCH zcx_zodata_error INTO DATA(lx_heartbeat_error).
+        raise_busi_exception( iv_text = lx_heartbeat_error->get_message_text( ) iv_code = lx_heartbeat_error->get_code( ) ).
     ENDTRY.
   ENDMETHOD.
   METHOD lockrelease_create_entity.
@@ -188,7 +194,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     IF ls_req-object_uuid IS INITIAL.
-      raise_busi_exception( zcl_zodata_contract_constants=>c_msg_lock_release_required ).
+      raise_busi_exception(
+        iv_text = zcl_zodata_contract_constants=>c_msg_lock_release_required
+        iv_code = 'VALIDATION_ERROR' ).
     ENDIF.
     TRY.
         DATA(ls_lock_key) = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = ls_req-object_uuid ).
@@ -206,7 +214,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
           ls_result-reason_code = lv_release_code.
         CATCH zcx_zodata_error INTO DATA(lx_save_error).
           lv_release_code = zcl_zodata_contract_constants=>c_code_release_save_failed.
-          lv_release_message = lx_save_error->get_text( ).
+          lv_release_message = lx_save_error->get_message_text( ).
           ls_result-success = abap_false.
           ls_result-message = |{ zcl_zodata_contract_constants=>c_msg_release_save_failed_prefix } { lv_release_message }|.
           ls_result-reason_code = lv_release_code.
@@ -234,7 +242,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
         ls_resp = execute_save( EXPORTING is_request = ls_req iv_is_autosave = abap_true ).
         copy_data_to_ref( EXPORTING is_data = ls_resp CHANGING cr_data = er_entity ).
       CATCH zcx_zodata_error INTO DATA(lx_map_autosave).
-        raise_busi_exception( lx_map_autosave->get_text( ) ).
+        raise_busi_exception( iv_text = lx_map_autosave->get_message_text( ) iv_code = lx_map_autosave->get_code( ) ).
     ENDTRY.
   ENDMETHOD.
   METHOD savechanges_create_entity.
@@ -246,7 +254,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
         ls_resp = execute_save( EXPORTING is_request = ls_req iv_is_autosave = abap_false ).
         copy_data_to_ref( EXPORTING is_data = ls_resp CHANGING cr_data = er_entity ).
       CATCH zcx_zodata_error INTO DATA(lx_map_save).
-        raise_busi_exception( lx_map_save->get_text( ) ).
+        raise_busi_exception( iv_text = lx_map_save->get_message_text( ) iv_code = lx_map_save->get_code( ) ).
     ENDTRY.
   ENDMETHOD.
   METHOD mpltreeset_get_entityset.
@@ -257,7 +265,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       lv_date = <ls_filter>-select_options[ 1 ]-low.
     ENDIF.
     CALL FUNCTION 'Z_PCCT_MPL_TREE_GET' EXPORTING iv_date = lv_date TABLES et_tree = lt_tree EXCEPTIONS not_found = 1 OTHERS = 2.
-    IF sy-subrc <> 0. raise_busi_exception( |MPL tree read failed for date { lv_date }.| ). ENDIF.
+    IF sy-subrc <> 0. raise_busi_exception( iv_text = |MPL tree read failed for date { lv_date }.| iv_code = 'TECHNICAL_ERROR' ). ENDIF.
     copy_data_to_ref( EXPORTING is_data = lt_tree CHANGING cr_data = er_entityset ).
   ENDMETHOD.
   METHOD checklistrootset_get_entity.
@@ -325,10 +333,13 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     validate_save_request( is_request ).
     TRY.
         mo_lock_manager->heartbeat( EXPORTING is_key = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = is_request-root-pcct_uuid ) iv_session_guid = is_request-session_guid CHANGING cs_result = ls_lock_hb ).
-      CATCH zcx_zodata_error.
+      CATCH zcx_zodata_error INTO DATA(lx_lock_hb_error).
+        raise_busi_exception( iv_text = lx_lock_hb_error->get_message_text( ) iv_code = lx_lock_hb_error->get_code( ) ).
     ENDTRY.
     IF ls_lock_hb-success <> abap_true AND ls_lock_hb-ok <> abap_true.
-      raise_busi_exception( zcl_zodata_contract_constants=>c_msg_lock_session_required ).
+      raise_busi_exception(
+        iv_text = zcl_zodata_contract_constants=>c_msg_lock_session_required
+        iv_code = zcl_zodata_contract_constants=>c_code_lock_not_owned_by_session ).
     ENDIF.
     lt_change = mo_mapper->build_change_list( is_request ).
     IF lt_change IS INITIAL.
@@ -341,7 +352,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     lt_mod = mo_mapper->map_to_modification( lt_change ).
     get_srv_mgr( )->modify( EXPORTING it_modification = lt_mod IMPORTING et_failed_key = lt_failed et_message = lt_msg ).
     zcl_zodata_bopf_msg_helper=>raise_on_failed_keys( it_failed_key = lt_failed it_message = lt_msg ).
-    COMMIT WORK AND WAIT.
+    IF iv_is_autosave <> abap_true.
+      COMMIT WORK AND WAIT.
+    ENDIF.
     GET TIME STAMP FIELD lv_now_ts.
     ls_root = read_root_row( is_request-root-pcct_uuid ).
     lv_request_id = |{ zcl_zodata_contract_constants=>c_request_id_prefix_save }-{ sy-datum }{ sy-uzeit }|.
@@ -357,24 +370,24 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     " SaveChanges: barriers[].edit_mode is required.
     " SaveChanges: participants[].edit_mode is required.
     " SaveChanges: attachments[].edit_mode is required.
-    IF is_request-root-pcct_uuid IS INITIAL. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_root_required ). ENDIF.
-    IF is_request-session_guid IS INITIAL. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_session_required ). ENDIF.
-    IF is_request-root-edit_mode IS NOT INITIAL AND is_request-root-edit_mode <> 'C' AND is_request-root-edit_mode <> 'U' AND is_request-root-edit_mode <> 'D'. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_root_mode_invalid ). ENDIF.
+    IF is_request-root-pcct_uuid IS INITIAL. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_root_required iv_code = 'VALIDATION_ERROR' ). ENDIF.
+    IF is_request-session_guid IS INITIAL. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_session_required iv_code = 'VALIDATION_ERROR' ). ENDIF.
+    IF is_request-root-edit_mode IS NOT INITIAL AND is_request-root-edit_mode <> 'C' AND is_request-root-edit_mode <> 'U' AND is_request-root-edit_mode <> 'D'. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_root_mode_invalid iv_code = 'VALIDATION_ERROR' ). ENDIF.
     LOOP AT is_request-checks ASSIGNING FIELD-SYMBOL(<ls_check>).
-      IF <ls_check>-edit_mode IS INITIAL. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_checks_mode_required ). ENDIF.
-      IF <ls_check>-edit_mode <> 'C' AND <ls_check>-edit_mode <> 'U' AND <ls_check>-edit_mode <> 'D'. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_checks_mode_invalid ). ENDIF.
+      IF <ls_check>-edit_mode IS INITIAL. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_checks_mode_required iv_code = 'VALIDATION_ERROR' ). ENDIF.
+      IF <ls_check>-edit_mode <> 'C' AND <ls_check>-edit_mode <> 'U' AND <ls_check>-edit_mode <> 'D'. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_checks_mode_invalid iv_code = 'VALIDATION_ERROR' ). ENDIF.
     ENDLOOP.
     LOOP AT is_request-barriers ASSIGNING FIELD-SYMBOL(<ls_barrier>).
-      IF <ls_barrier>-edit_mode IS INITIAL. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_barriers_mode_required ). ENDIF.
-      IF <ls_barrier>-edit_mode <> 'C' AND <ls_barrier>-edit_mode <> 'U' AND <ls_barrier>-edit_mode <> 'D'. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_barriers_mode_invalid ). ENDIF.
+      IF <ls_barrier>-edit_mode IS INITIAL. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_barriers_mode_required iv_code = 'VALIDATION_ERROR' ). ENDIF.
+      IF <ls_barrier>-edit_mode <> 'C' AND <ls_barrier>-edit_mode <> 'U' AND <ls_barrier>-edit_mode <> 'D'. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_barriers_mode_invalid iv_code = 'VALIDATION_ERROR' ). ENDIF.
     ENDLOOP.
     LOOP AT is_request-participants ASSIGNING FIELD-SYMBOL(<ls_participant>).
-      IF <ls_participant>-edit_mode IS INITIAL. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_participants_mode_required ). ENDIF.
-      IF <ls_participant>-edit_mode <> 'C' AND <ls_participant>-edit_mode <> 'U' AND <ls_participant>-edit_mode <> 'D'. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_participants_mode_invalid ). ENDIF.
+      IF <ls_participant>-edit_mode IS INITIAL. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_participants_mode_required iv_code = 'VALIDATION_ERROR' ). ENDIF.
+      IF <ls_participant>-edit_mode <> 'C' AND <ls_participant>-edit_mode <> 'U' AND <ls_participant>-edit_mode <> 'D'. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_participants_mode_invalid iv_code = 'VALIDATION_ERROR' ). ENDIF.
     ENDLOOP.
     LOOP AT is_request-attachments ASSIGNING FIELD-SYMBOL(<ls_attachment>).
-      IF <ls_attachment>-edit_mode IS INITIAL. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_attachments_mode_required ). ENDIF.
-      IF <ls_attachment>-edit_mode <> 'C' AND <ls_attachment>-edit_mode <> 'U' AND <ls_attachment>-edit_mode <> 'D'. raise_busi_exception( zcl_zodata_contract_constants=>c_msg_save_attachments_mode_invalid ). ENDIF.
+      IF <ls_attachment>-edit_mode IS INITIAL. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_attachments_mode_required iv_code = 'VALIDATION_ERROR' ). ENDIF.
+      IF <ls_attachment>-edit_mode <> 'C' AND <ls_attachment>-edit_mode <> 'U' AND <ls_attachment>-edit_mode <> 'D'. raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_save_attachments_mode_invalid iv_code = 'VALIDATION_ERROR' ). ENDIF.
     ENDLOOP.
   ENDMETHOD.
   METHOD read_root_key.
@@ -384,13 +397,13 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
         TRY.
             rv_rootkey = zcl_zodata_odata_util=>get_uuid_from_it_key_tab( it_key_tab = it_key_tab iv_name = 'ObjectUuid' ).
           CATCH zcx_zodata_error INTO DATA(lx_rootkey).
-            raise_busi_exception( lx_rootkey->get_text( ) ).
+            raise_busi_exception( iv_text = lx_rootkey->get_message_text( ) iv_code = lx_rootkey->get_code( ) ).
         ENDTRY.
     ENDTRY.
   ENDMETHOD.
   METHOD read_root_row.
     SELECT SINGLE pcct_uuid checklist_id lpc lpc_text status integration_flag date_check time_check time_zone equipment bukrs observer_fullname observer_perner observer_position observer_orgunit observed_fullname observed_perner observed_position observed_orgunit location_key location_name location_text changed_on changed_by created_on created_by version_number lock_owner lock_session tab_session_id lock_expires_at FROM ztodata_hdr INTO CORRESPONDING FIELDS OF @rs_root WHERE pcct_uuid = @iv_rootkey.
-    IF sy-subrc <> 0. raise_busi_exception( |ChecklistRoot not found for key { iv_rootkey }.| ). ENDIF.
+    IF sy-subrc <> 0. raise_busi_exception( iv_text = |ChecklistRoot not found for key { iv_rootkey }.| iv_code = 'VALIDATION_ERROR' ). ENDIF.
     SELECT COUNT( * ) FROM zpcct_check WHERE pcct_uuid = @iv_rootkey INTO @rs_root-checks_total.
     SELECT COUNT( * ) FROM zpcct_check WHERE pcct_uuid = @iv_rootkey AND result = @abap_true INTO @rs_root-checks_success.
     SELECT COUNT( * ) FROM zpcct_barrier WHERE pcct_uuid = @iv_rootkey INTO @rs_root-barriers_total.
@@ -460,10 +473,15 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
   METHOD raise_busi_exception.
     DATA(lo_container) = mo_context->get_message_container( ).
-    lo_container->add_message_text_only( iv_msg_type = /iwbep/if_mgw_defines=>gcs_msg_type-error iv_msg_text = iv_text ).
+    DATA(lv_message_text) = COND string(
+      WHEN iv_code IS INITIAL THEN iv_text
+      ELSE |{ iv_code }: { iv_text }| ).
+    lo_container->add_message_text_only( iv_msg_type = /iwbep/if_mgw_defines=>gcs_msg_type-error iv_msg_text = lv_message_text ).
     RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception EXPORTING message_container = lo_container.
   ENDMETHOD.
   METHOD raise_crud_not_allowed.
-    raise_busi_exception( |{ iv_context }: { zcl_zodata_contract_constants=>c_msg_crud_not_allowed }| ).
+    raise_busi_exception(
+      iv_text = |{ iv_context }: { zcl_zodata_contract_constants=>c_msg_crud_not_allowed }|
+      iv_code = 'TECHNICAL_ERROR' ).
   ENDMETHOD.
 ENDCLASS.

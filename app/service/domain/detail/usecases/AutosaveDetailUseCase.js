@@ -10,8 +10,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailPersistenceRuntime) {
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailPersistenceRuntime) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -121,25 +122,31 @@ sap.ui.define([
             var sAt = (oSaved && oSaved.autosavedAt) || new Date().toISOString();
             oCurrentChecklist = readCurrentChecklist(mCtx);
             aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
-        var oBaseSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
-            var aSnapshotAttachments = Array.isArray((oBaseSnapshot && oBaseSnapshot.attachments) || null) ? oBaseSnapshot.attachments : [];
-            var bHasPendingAttachments = DetailAttachmentDeltaRuntime.hasPendingStagedAttachments(aCurrentAttachments);
-            var oSavedSnapshot = Object.assign({}, (oSaved && oSaved.serverSnapshot) || oCurrentChecklist, {
-                attachments: bHasPendingAttachments ? aSnapshotAttachments : aCurrentAttachments
+            var oBaseSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
+            var oSavedSnapshot = Object.assign({}, (oSaved && oSaved.serverSnapshot) || oCurrentChecklist);
+            return DetailAttachmentSaveRuntime.syncAfterSave({
+                repo: oRepo,
+                rootId: sRootId,
+                createMode: false,
+                currentAttachments: aCurrentAttachments,
+                savedResult: oSaved,
+                currentChecklist: oCurrentChecklist,
+                savedSnapshot: oSavedSnapshot,
+                baseSnapshot: oBaseSnapshot,
+                ctx: mCtx,
+                hasStagedPayload: aStagedPayload.length > 0
+            }).then(function (oAttachmentSync) {
+                return Result.ok({ autosavedAt: sAt }, [
+                    Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
+                    Effects.modelPatch("snapshot", "/", oAttachmentSync.snapshot)
+                ].concat(oAttachmentSync.effects, DetailPersistenceRuntime.successEffects("auto", sAt, {
+                    state: oAttachmentSync.hasPendingAttachments ? DetailPersistenceRuntime.STATES.DIRTY : DetailPersistenceRuntime.STATES.SAVED,
+                    messageKey: oAttachmentSync.hasPendingAttachments ? "persistenceAutosavePendingAttachments" : "persistenceAutosaveSaved",
+                    hasValidLock: true,
+                    lockOwnerSessionMatches: true,
+                    lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sAt : null
+                })));
             });
-            var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aCurrentAttachments });
-            return Result.ok({ autosavedAt: sAt }, [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, bHasPendingAttachments),
-                Effects.modelPatch("selected", "/", oSelectedSnapshot),
-                Effects.modelPatch("selected", "/attachments", aCurrentAttachments),
-                Effects.modelPatch("snapshot", "/", oSavedSnapshot)
-            ].concat(DetailPersistenceRuntime.successEffects("auto", sAt, {
-                state: bHasPendingAttachments ? DetailPersistenceRuntime.STATES.DIRTY : DetailPersistenceRuntime.STATES.SAVED,
-                messageKey: bHasPendingAttachments ? "persistenceAutosavePendingAttachments" : "persistenceAutosaveSaved",
-                hasValidLock: true,
-                lockOwnerSessionMatches: true,
-                lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sAt : null
-            })));
         }).catch(function (oError) {
             var oClassification = DetailPersistenceRuntime.classifyError(oError);
             return Result.fail(oError, DetailPersistenceRuntime.failureEffects("auto", oError, {

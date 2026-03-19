@@ -4,14 +4,14 @@
         renderType="Bare"
         width="100%"
         visible="{view>/accessState/denied}">
-        <FlexBox class="detailAccessDeniedSceneVisual" renderType="Bare">
+        <FlexBox class="detailAccessDeniedSceneVisual detailAccessDeniedScenePane" renderType="Bare">
             <Image
                 src="{view>/accessState/illustrationSrc}"
                 decorative="true"
                 densityAware="false"
                 class="detailAccessDeniedIllustration"/>
         </FlexBox>
-        <FlexBox class="detailAccessDeniedSceneCopy" renderType="Bare">
+        <FlexBox class="detailAccessDeniedSceneCopy detailAccessDeniedScenePane" renderType="Bare">
             <Title text="{path:'view>/accessState/titleKey', formatter:'.formatI18nByKey'}" class="detailAccessDeniedTitle"/>
             <Text text="{path:'view>/accessState/messageKey', formatter:'.formatI18nByKey'}" class="detailAccessDeniedText"/>
             <ObjectStatus

@@ -6,11 +6,6 @@
         renderType="Bare"
         visible="{= ${view>/hasSearched} }"
         class="searchResultsSummaryRail workbenchToolbarSurface sectionToolbarSurface">
-        <customData>
-            <core:CustomData key="role" value="status" writeToDom="true"/>
-            <core:CustomData key="aria-live" value="polite" writeToDom="true"/>
-            <core:CustomData key="aria-label" value="{i18n>searchSummaryRailAriaLabel}" writeToDom="true"/>
-        </customData>
         <VBox renderType="Bare" class="searchResultsSummaryMeta">
             <Label text="{i18n>resultsLabel}" class="searchResultsSummaryLabel"/>
             <Text

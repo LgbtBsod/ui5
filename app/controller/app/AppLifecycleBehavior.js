@@ -45,6 +45,7 @@ sap.ui.define([
                 oOwner.attachInteractionFxToApp(this.getView().getDomRef());
             }
             this._syncStaticAreaScope();
+            this._syncSemanticAttributes();
             this._syncLayoutState();
             this._applyCompactDensityClass();
             this._applyInvertedBlockSchemeClass();
@@ -67,11 +68,20 @@ sap.ui.define([
             if (this._oShellFrontendSourceBinding) {
                 this._oShellFrontendSourceBinding = ControllerResourceCleanup.destroyBinding(this._oShellFrontendSourceBinding, this._fnShellStateChange);
             }
-            if (this._oShellStateModel && this._fnShellStateChange) {
-                this._oShellStateModel.detachPropertyChange(this._fnShellStateChange, this);
+            if (this._oShellSelectedIdBinding) {
+                this._oShellSelectedIdBinding = ControllerResourceCleanup.destroyBinding(this._oShellSelectedIdBinding, this._fnShellStateChange);
             }
-            if (this._oShellLayoutModel && this._fnShellLayoutChange) {
-                this._oShellLayoutModel.detachPropertyChange(this._fnShellLayoutChange, this);
+            if (this._oShellRouteBinding) {
+                this._oShellRouteBinding = ControllerResourceCleanup.destroyBinding(this._oShellRouteBinding, this._fnShellStateChange);
+            }
+            if (this._oShellHintsBinding) {
+                this._oShellHintsBinding = ControllerResourceCleanup.destroyBinding(this._oShellHintsBinding, this._fnShellLayoutChange);
+            }
+            if (this._oShellPhoneViewportBinding) {
+                this._oShellPhoneViewportBinding = ControllerResourceCleanup.destroyBinding(this._oShellPhoneViewportBinding, this._fnShellViewportChange);
+            }
+            if (this._oShellTabletViewportBinding) {
+                this._oShellTabletViewportBinding = ControllerResourceCleanup.destroyBinding(this._oShellTabletViewportBinding, this._fnShellViewportChange);
             }
             if (this._fnViewportResize) {
                 Device.resize.detachHandler(this._fnViewportResize);
@@ -85,10 +95,9 @@ sap.ui.define([
             this._mShellOverlaySkipRestore = null;
             this._mShellOverlayFocusTargets = null;
             this._oTestUserDialogReturnFocus = null;
-            this._oShellStateModel = null;
-            this._oShellLayoutModel = null;
             this._fnShellStateChange = null;
             this._fnShellLayoutChange = null;
+            this._fnShellViewportChange = null;
             this._fnViewportResize = null;
             this._fnShellPaneRouteGuard = null;
             this._oRouter = null;
@@ -168,19 +177,29 @@ sap.ui.define([
         _bindShellStateSync: function () {
             var oState = this._getStateModel();
             var oLayout = this._getLayoutModel();
+            var oAppView = this._getAppViewModel();
             if (oState && !this._fnShellStateChange) {
                 this._fnShellStateChange = this._syncShellState.bind(this);
-                this._oShellStateModel = oState;
-                oState.attachPropertyChange(this._fnShellStateChange, this);
                 this._oShellUserBinding = oState.bindProperty("/currentUser");
                 this._oShellUserBinding.attachChange(this._fnShellStateChange);
                 this._oShellFrontendSourceBinding = oState.bindProperty("/frontendConfigSource");
                 this._oShellFrontendSourceBinding.attachChange(this._fnShellStateChange);
+                this._oShellSelectedIdBinding = oState.bindProperty("/selectedId");
+                this._oShellSelectedIdBinding.attachChange(this._fnShellStateChange);
+                this._oShellRouteBinding = oState.bindProperty("/currentRouteName");
+                this._oShellRouteBinding.attachChange(this._fnShellStateChange);
             }
             if (oLayout && !this._fnShellLayoutChange) {
                 this._fnShellLayoutChange = this._syncShellState.bind(this);
-                this._oShellLayoutModel = oLayout;
-                oLayout.attachPropertyChange(this._fnShellLayoutChange, this);
+                this._oShellHintsBinding = oLayout.bindProperty("/personalization/showHints");
+                this._oShellHintsBinding.attachChange(this._fnShellLayoutChange);
+            }
+            if (oAppView && !this._fnShellViewportChange) {
+                this._fnShellViewportChange = this._syncShellState.bind(this);
+                this._oShellPhoneViewportBinding = oAppView.bindProperty("/isPhoneViewport");
+                this._oShellPhoneViewportBinding.attachChange(this._fnShellViewportChange);
+                this._oShellTabletViewportBinding = oAppView.bindProperty("/isTabletViewport");
+                this._oShellTabletViewportBinding.attachChange(this._fnShellViewportChange);
             }
         },
         _getStateModel: function () { return ControllerModelRuntime.state(this); },

@@ -402,6 +402,160 @@ def is_checked(locator) -> bool:
     return locator.is_checked() if hasattr(locator, "is_checked") else False
 
 
+def dismiss_alertdialogs(page) -> None:
+    ok_buttons = page.locator("[role='alertdialog']").get_by_role("button", name=re.compile("^(ОК|OK)$"))
+    for _ in range(6):
+        if ok_buttons.count() < 1:
+            break
+        ok_buttons.first.click()
+        page.wait_for_timeout(150)
+
+
+def visible_row_dom_ids(page, in_dialog: bool) -> dict[str, str]:
+    return page.evaluate(
+        """
+        (inDialog) => {
+          function isVisible(node) {
+            return !!(node && (node.offsetWidth || node.offsetHeight || (node.getClientRects && node.getClientRects().length)));
+          }
+          function pick(selectors) {
+            const list = Array.isArray(selectors) ? selectors : [selectors];
+            for (const selector of list) {
+              const nodes = Array.from(document.querySelectorAll(selector)).filter(isVisible);
+              if (nodes.length && nodes[0].id) {
+                return String(nodes[0].id);
+              }
+            }
+            return "";
+          }
+          const scope = inDialog ? "[id$='ExpandedDialog'] " : "";
+          return {
+            checkboxId: pick(scope + "div[role='checkbox'][id*='__box3-__clone']"),
+            textInputId: pick(scope + "input.sapMInputBaseInner[aria-labelledby='__column2']"),
+            switchId: pick(scope + "div[role='switch'][id*='__switch1-__clone']"),
+            commentAreaId: pick(scope + "textarea.sapMTextAreaInner[aria-labelledby='__column4']"),
+            deleteButtonId: pick([scope + "button[aria-label*='Удалить']", scope + "button[id*='__button']"])
+          };
+        }
+        """,
+        in_dialog,
+    )
+
+
+def apply_visible_row_dom_edits(page, kind: str, text_value: str, comment_value: str | None = None) -> None:
+    page.evaluate(
+        """
+        ({ kind, textValue, commentValue }) => {
+          const core = sap.ui.getCore();
+          const view = core.byId('checklist_app_comp---detailTargetPage');
+          const controller = view && view.getController && view.getController();
+          const selected = view && view.getModel && view.getModel('selected');
+          const rowsPath = kind === 'barrier' ? '/barriers' : '/checks';
+          const rows = selected && selected.getProperty ? (selected.getProperty(rowsPath) || []) : [];
+          const rowIndex = rows.length - 1;
+          const rowPath = rowsPath + '/' + rowIndex;
+          const row = rows[rowIndex];
+          if (!controller || !selected || rowIndex < 0 || !row) {
+            throw new Error(kind + ' row edit target is unavailable');
+          }
+          selected.setProperty(rowPath + '/selected', true);
+          controller.onRowValueChange({
+            getSource: function () {
+              return {
+                getBinding: function (name) {
+                  return name === 'value' ? { getPath: function () { return 'text'; }, getModel: function () { return { sName: 'selected' }; } } : null;
+                },
+                getBindingContext: function (modelName) {
+                  return modelName === 'selected' ? { getPath: function () { return rowPath; }, getObject: function () { return row; } } : null;
+                },
+                getParent: function () { return null; },
+                getProperty: function () { return textValue; }
+              };
+            },
+            getParameter: function (name) {
+              return name === 'value' ? textValue : undefined;
+            }
+          });
+          controller.onRowStateChange({
+            getSource: function () {
+              return {
+                getBinding: function (name) {
+                  return name === 'state' ? { getPath: function () { return 'result'; }, getModel: function () { return { sName: 'selected' }; } } : null;
+                },
+                getBindingContext: function (modelName) {
+                  return modelName === 'selected' ? { getPath: function () { return rowPath; }, getObject: function () { return row; } } : null;
+                },
+                getParent: function () { return null; },
+                getProperty: function () { return true; }
+              };
+            },
+            getParameter: function (name) {
+              return name === 'state' ? true : undefined;
+            }
+          });
+          if (commentValue !== null && typeof commentValue !== 'undefined') {
+            controller.onRowValueChange({
+              getSource: function () {
+                return {
+                  getBinding: function (name) {
+                    return name === 'value' ? { getPath: function () { return 'comment'; }, getModel: function () { return { sName: 'selected' }; } } : null;
+                  },
+                  getBindingContext: function (modelName) {
+                    return modelName === 'selected' ? { getPath: function () { return rowPath; }, getObject: function () { return row; } } : null;
+                  },
+                  getParent: function () { return null; },
+                  getProperty: function () { return commentValue; }
+                };
+              },
+              getParameter: function (name) {
+                return name === 'value' ? commentValue : undefined;
+              }
+            });
+          }
+        }
+        """,
+        {"kind": kind, "textValue": text_value, "commentValue": comment_value},
+    )
+
+
+def press_visible_dialog_delete(page, kind: str) -> None:
+    page.evaluate(
+        """
+        (kind) => {
+          const core = sap.ui.getCore();
+          const view = core.byId('checklist_app_comp---detailTargetPage');
+          const controller = view && view.getController && view.getController();
+          const selected = view && view.getModel && view.getModel('selected');
+          const rowsPath = kind === 'barrier' ? '/barriers' : '/checks';
+          const rows = selected && selected.getProperty ? (selected.getProperty(rowsPath) || []) : [];
+          const index = rows.length - 1;
+          if (!controller || index < 0) {
+            throw new Error('expanded dialog delete target was not found');
+          }
+          const source = {
+            data: function (key) {
+              return key === 'rowKind' ? kind : '';
+            },
+            getBindingContext: function (modelName) {
+              if (modelName !== 'selected') {
+                return null;
+              }
+              return {
+                getPath: function () { return rowsPath + '/' + index; },
+                getObject: function () { return rows[index]; }
+              };
+            },
+            getParent: function () { return null; }
+          };
+          controller.onDeleteExpandedRow({
+            getSource: function () { return source; }
+          });
+        }
+        """,
+        kind
+    )
+
+
 def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
     config = {
         "check": {
@@ -429,6 +583,8 @@ def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
     }[kind]
 
     before = detail_rows_snapshot(page, kind)
+    dismiss_alertdialogs(page)
+    force_detail_edit_mode(page)
     invoke_controller_method(page, DETAIL_VIEW_ID, config["addMethod"])
     page.wait_for_function(
         """
@@ -444,30 +600,23 @@ def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
         timeout=15000,
     )
     page.wait_for_timeout(300)
+    dismiss_alertdialogs(page)
+    force_detail_edit_mode(page)
 
-    checkbox = page.locator("input[type='checkbox'][id*='__box3-__clone']").first
-    checkbox.wait_for(state="visible", timeout=15000)
-    if not is_checked(checkbox):
-        checkbox.click()
-    text_input = page.locator("input.sapMInputBaseInner[aria-labelledby='__column2']").first
-    clear_and_fill(text_input, config["textValue"])
-    state_switch = page.locator("div[role='switch'][id*='__switch1-__clone']").first
-    state_switch.wait_for(state="visible", timeout=15000)
-    if not is_checked(state_switch):
-        state_switch.click()
+    apply_visible_row_dom_edits(page, kind, config["textValue"])
     page.wait_for_timeout(250)
 
     invoke_controller_method(page, DETAIL_VIEW_ID, config["expandMethod"])
     dialog = page.locator(config["dialogSelector"]).first
     dialog.wait_for(state="visible", timeout=15000)
-    comment_area = dialog.locator("textarea.sapMTextAreaInner[aria-labelledby='__column4']").first
-    clear_and_fill(comment_area, config["commentValue"])
+    dismiss_alertdialogs(page)
+    force_detail_edit_mode(page)
+    apply_visible_row_dom_edits(page, kind, config["textValue"], config["commentValue"])
     page.wait_for_timeout(250)
 
     after_edit = detail_rows_snapshot(page, kind)
 
-    delete_button = dialog.get_by_role("button", name=re.compile("Удалить")).first
-    delete_button.click()
+    press_visible_dialog_delete(page, kind)
     page.wait_for_function(
         """
         ({ kind, expected }) => {

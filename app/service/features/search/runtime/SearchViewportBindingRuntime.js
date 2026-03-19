@@ -13,11 +13,15 @@ sap.ui.define([
         oController._iSearchViewportSyncTimer = SchedulingRuntime.clearTimer(oController._iSearchViewportSyncTimer);
     }
 
-    function syncSearchViewportLayout(oController) {
-        SearchStickyLayoutRuntime.syncSearchViewportLayout(
-            oController,
-            SearchScrollRuntime.resolveSearchScrollHost(oController)
-        );
+    function syncSearchViewportLayout(oController, bForce) {
+        var oScrollHost = SearchScrollRuntime.resolveSearchScrollHost(oController);
+        var sLayoutKey = SearchStickyLayoutRuntime.buildSearchViewportLayoutKey(oController, oScrollHost);
+        if (!bForce && sLayoutKey && oController._sSearchTableLayoutKey === sLayoutKey) {
+            return false;
+        }
+        SearchStickyLayoutRuntime.syncSearchViewportLayout(oController, oScrollHost);
+        oController._sSearchTableLayoutKey = sLayoutKey;
+        return true;
     }
 
     function syncSearchScrollAffordances(oController) {
@@ -30,7 +34,7 @@ sap.ui.define([
     function flushSearchViewportSync(oController) {
         oController._iSearchViewportSyncRaf = SchedulingRuntime.requestFrameOnce(oController._iSearchViewportSyncRaf, function () {
             oController._iSearchViewportSyncRaf = 0;
-            syncSearchViewportLayout(oController);
+            syncSearchViewportLayout(oController, false);
             syncSearchScrollAffordances(oController);
         });
     }
@@ -103,7 +107,7 @@ sap.ui.define([
         }
         if (oController._oSearchScrollHost === oScrollHost) {
             bindSearchViewportObservers(oController, oScrollHost);
-            scheduleSearchViewportSync(oController, true);
+            syncSearchViewportLayout(oController, false);
             syncSearchScrollAffordances(oController);
             return;
         }
@@ -126,7 +130,7 @@ sap.ui.define([
             oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });
         }
         bindSearchViewportObservers(oController, oScrollHost);
-        scheduleSearchViewportSync(oController, true);
+        syncSearchViewportLayout(oController, true);
         syncSearchScrollAffordances(oController);
     }
 

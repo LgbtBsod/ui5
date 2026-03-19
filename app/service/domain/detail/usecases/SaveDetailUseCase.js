@@ -6,9 +6,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
@@ -16,7 +17,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -164,30 +165,40 @@ sap.ui.define([
                 }
 
                 return Promise.all([
-                    DetailAttachmentDeltaRuntime.refreshAttachments(oRepo, sServerRootId || sRootId, aCurrentAttachments, bNeedsAttachmentReload),
+                    DetailAttachmentSaveRuntime.syncAfterSave({
+                        repo: oRepo,
+                        rootId: sRootId,
+                        createMode: bCreate,
+                        currentAttachments: aCurrentAttachments,
+                        savedResult: oSaved,
+                        currentChecklist: oCurrent,
+                        savedSnapshot: oSavedSnapshot,
+                        baseSnapshot: oSnapshot,
+                        ctx: mCtx,
+                        serverRootId: sServerRootId,
+                        hasStagedPayload: aStagedPayload.length > 0
+                    }),
                     pLockAcquire
                 ]).then(function (aPostSave) {
-                    var aSyncedAttachments = DetailAttachmentDeltaRuntime.stripStagedAttachmentInternals(aPostSave[0]);
+                    var oAttachmentSync = aPostSave[0];
+                    var aSyncedAttachments = oAttachmentSync.attachments;
                     var oLockResult = aPostSave[1];
-        var oSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
-            DetailSaveRuntime.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot)
-        );
-                    var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
+                    var oSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
+                        DetailSaveRuntime.preserveBasicFields(oAttachmentSync.snapshot, oCurrent, oSnapshot)
+                    );
+                    var oSelectedSnapshot = Object.assign({}, oAttachmentSync.selectedSnapshot);
                     var aEffects = [
                         Effects.toast("objectSaved", "success"),
                         Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
                         Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                        Effects.modelPatch("snapshot", "/", oSavedSnapshot),
-                        Effects.modelPatch("selected", "/", oSelectedSnapshot),
-                        Effects.modelPatch("selected", "/attachments", aSyncedAttachments),
-                        Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSyncedAttachments)
+                        Effects.modelPatch("snapshot", "/", oSavedSnapshot)
                     ];
+                    aEffects = aEffects.concat(oAttachmentSync.effects);
                     aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
                         hasValidLock: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
                         lockOwnerSessionMatches: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
                         lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sNow : null
                     }));
-                    DetailAttachmentDeltaRuntime.cleanupStagedAttachmentUrls(aCurrentAttachments);
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
                         aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
                         aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));

@@ -38,6 +38,47 @@ sap.ui.define([
     var TOKENS = ModelContracts.TOKENS;
     var PATHS = SearchToolbarContracts.PATHS;
 
+    function getBundleText(oController, sKey) {
+        var oI18nModel = oController.getModel && oController.getModel("i18n");
+        var oBundle = oI18nModel && oI18nModel.getResourceBundle && oI18nModel.getResourceBundle();
+        return oBundle && oBundle.getText ? oBundle.getText(sKey) : "";
+    }
+
+    function setSemanticAttr(oController, sId, mAttrs) {
+        var oControl = oController.byId && oController.byId(sId);
+        var oDomRef = oControl && oControl.getDomRef && oControl.getDomRef();
+        Object.keys(mAttrs || {}).forEach(function (sAttr) {
+            if (!oDomRef) {
+                return;
+            }
+            if (mAttrs[sAttr]) {
+                oDomRef.setAttribute(sAttr, mAttrs[sAttr]);
+                return;
+            }
+            oDomRef.removeAttribute(sAttr);
+        });
+    }
+
+    function syncSemanticRegions(oController) {
+        setSemanticAttr(oController, "searchAnalyticsRailRegion", {
+            role: "region",
+            "aria-label": getBundleText(oController, "kpiRailAriaLabel")
+        });
+        setSemanticAttr(oController, "searchFilterCard", {
+            role: "search",
+            "aria-label": getBundleText(oController, "filtersAriaLabel")
+        });
+        setSemanticAttr(oController, "searchResultsShell", {
+            role: "region",
+            "aria-label": getBundleText(oController, "searchResultsAriaLabel")
+        });
+        setSemanticAttr(oController, "searchResultsSummaryRail", {
+            role: "status",
+            "aria-live": "polite",
+            "aria-label": getBundleText(oController, "searchSummaryRailAriaLabel")
+        });
+    }
+
     function initSearchToolbarState(oController) {
         if (!String(ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_SORT_KEY, "")).trim()) {
             ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_SORT_KEY, TOKENS.DATE_CHECK);
@@ -83,6 +124,7 @@ sap.ui.define([
         var oStateModel = oController.getModel && oController.getModel(STATE_MODEL);
         var sCurrentRouteName = String(oStateModel && oStateModel.getProperty("/currentRouteName") || "").trim();
         var sLayout = String(oStateModel && oStateModel.getProperty("/layout") || "").trim();
+        syncSemanticRegions(oController);
         if (!oController._bSearchInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.SEARCH) {
             oController._bSearchInitialRouteHandled = true;
             oController._onSearchMatched();

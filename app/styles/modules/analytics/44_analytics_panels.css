@@ -1,15 +1,13 @@
 .chkApp .analyticsChartPanel,
 .chkApp .analyticsTile,
-.chkApp .analyticsScreenBody .sapMPanel,
-.chkApp .analyticsScreenBody .sapMGT {
+.chkApp .analyticsPanelSurface {
   border: 0;
   background: var(--theme-block-bg);
   box-shadow: none;
 }
 
 .chkApp .analyticsChartPanel,
-.chkApp .analyticsScreenBody .sapMPanel,
-.chkApp .analyticsScreenBody .sapMGT {
+.chkApp .analyticsPanelSurface {
   border-radius: calc(var(--radius-lg) - 0.1rem);
 }
 
@@ -34,9 +32,8 @@
   letter-spacing: 0.01em;
 }
 
-.chkApp .analyticsScreenBody .sapMPanelHdr,
-.chkApp .analyticsScreenBody .sapMPanelContent,
-.chkApp .analyticsScreenBody .sapMGTHdrContent {
+.chkApp .analyticsPanelSurface .sapMPanelHdr,
+.chkApp .analyticsPanelSurface .sapMPanelContent {
   background: transparent;
   border: 0;
   box-shadow: none;

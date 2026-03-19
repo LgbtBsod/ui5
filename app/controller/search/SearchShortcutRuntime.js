@@ -123,22 +123,57 @@ sap.ui.define([
         }
     }
 
+    function bindShortcutDomListener(oController) {
+        var oViewDom = oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
+        if (!oViewDom || oController._bSearchShortcutDomBound || !oController._fnSearchPowerUserShortcut) {
+            return;
+        }
+        oViewDom.addEventListener("keydown", oController._fnSearchPowerUserShortcut, true);
+        oController._bSearchShortcutDomBound = true;
+    }
+
+    function unbindShortcutDomListener(oController) {
+        var oViewDom = oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
+        if (!oViewDom || !oController._bSearchShortcutDomBound || !oController._fnSearchPowerUserShortcut) {
+            oController._bSearchShortcutDomBound = false;
+            return;
+        }
+        oViewDom.removeEventListener("keydown", oController._fnSearchPowerUserShortcut, true);
+        oController._bSearchShortcutDomBound = false;
+    }
+
     function bindPowerUserShortcuts(oController) {
-        if (typeof document === "undefined" || oController._fnSearchPowerUserShortcut) {
+        if (oController._fnSearchPowerUserShortcut) {
             return;
         }
         oController._fnSearchPowerUserShortcut = function (oEvent) {
             handlePowerUserShortcut(oController, oEvent);
         };
-        document.addEventListener("keydown", oController._fnSearchPowerUserShortcut, true);
+        oController._oSearchShortcutDelegate = {
+            onAfterRendering: function () {
+                bindShortcutDomListener(oController);
+            },
+            onBeforeRendering: function () {
+                unbindShortcutDomListener(oController);
+            }
+        };
+        if (oController.getView && oController.getView()) {
+            oController.getView().addEventDelegate(oController._oSearchShortcutDelegate);
+        }
+        bindShortcutDomListener(oController);
     }
 
     function unbindPowerUserShortcuts(oController) {
-        if (typeof document === "undefined" || !oController._fnSearchPowerUserShortcut) {
+        if (!oController._fnSearchPowerUserShortcut) {
             return;
         }
-        document.removeEventListener("keydown", oController._fnSearchPowerUserShortcut, true);
+        unbindShortcutDomListener(oController);
+        if (oController._oSearchShortcutDelegate && oController.getView && oController.getView()) {
+            oController.getView().removeEventDelegate(oController._oSearchShortcutDelegate);
+        }
+        oController._oSearchShortcutDelegate = null;
         oController._fnSearchPowerUserShortcut = null;
+        oController._bSearchShortcutDomBound = false;
     }
 
     return {

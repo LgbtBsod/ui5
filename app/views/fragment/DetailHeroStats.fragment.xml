@@ -1,9 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <HBox class="uxStatRow detailHeroStatBoard detailHeroStatBoardCompact" wrap="Wrap" renderType="Bare">
-        <customData>
-            <core:CustomData key="role" value="region" writeToDom="true"/>
-            <core:CustomData key="aria-label" value="{i18n>detailStatsAriaLabel}" writeToDom="true"/>
-        </customData>
+    <HBox id="detailHeroStatsRegion" class="uxStatRow detailHeroStatBoard detailHeroStatBoardCompact" wrap="Wrap" renderType="Bare">
         <HBox class="uxStatChip" renderType="Bare"><Text text="{i18n>checklistLabel}" class="sapUiTinyMarginEnd uxStatLabel"/><Text text="{= ${selected>/basic/checklist_id} || ${selected>/root/checklist_id} || ${selected>/root/CHECKLIST_ID} || (${selected>/root/id} === '__CREATE' ? ${i18n>newChecklist} : '-') }" class="uxStatValue"/></HBox>
         <HBox class="uxStatChip" renderType="Bare"><Text text="{i18n>overallResultLabel}" class="sapUiTinyMarginEnd uxStatLabel"/><ObjectStatus text="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultText'}" state="{path:'selected>/root/overall_result', formatter:'.formatBooleanResultState'}" class="uxStatValue"/></HBox>
         <HBox class="uxStatChip" renderType="Bare"><Text text="{i18n>objectStatusLabel}" class="sapUiTinyMarginEnd uxStatLabel"/><ObjectStatus text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}" state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}" class="uxStatValue"/></HBox>

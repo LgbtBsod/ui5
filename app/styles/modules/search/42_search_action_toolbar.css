@@ -20,8 +20,7 @@ body.chkAppRoot.appDark .chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
   transform: translateY(0) scale(0.97);
 }
 
-.chkApp .tableActionToolbar.sapMTB,
-.chkApp .tableActionToolbar.sapMOTB {
+.chkApp .tableActionToolbar {
   background: transparent;
   border: 0;
   box-shadow: none;
@@ -74,28 +73,21 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   min-height: 2.7rem;
 }
 
-.chkApp .searchResultsActionRail.sapMTBNewFlex,
-.chkApp .searchResultsActionRail.sapMTB {
+.chkApp .searchResultsActionRail {
   align-items: center;
   align-content: center;
   row-gap: 0.34rem;
   column-gap: 0.32rem;
 }
 
-.chkApp .searchResultsActionRail .sapMBarChild {
+.chkApp .searchResultsActionRail > * {
   display: inline-flex;
   align-items: center;
   min-height: var(--theme-workbench-control-height);
+  min-width: 0;
 }
 
-.chkApp .searchResultsActionRail .sapMLabel,
-.chkApp .searchResultsActionRail .sapMText,
-.chkApp .searchResultsActionRail .sapMObjStatus,
-.chkApp .searchResultsActionRail .sapMBtn,
-.chkApp .searchResultsActionRail .sapMMenuBtn,
-.chkApp .searchResultsActionRail .sapMSwt,
-.chkApp .searchResultsActionRail .sapMInputBase,
-.chkApp .searchResultsActionRail .sapMFlexItem {
+.chkApp .searchResultsActionRail > * {
   align-self: center;
 }
 
@@ -144,7 +136,7 @@ body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.chkApp .searchResultsActionRail > .sapMBarChild:first-child {
+.chkApp .searchResultsActionRail > :first-child {
   margin-inline-start: 0;
 }
 
@@ -169,25 +161,17 @@ body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
   letter-spacing: 0.04em;
 }
 
-.chkApp .searchResultsActionRail .sapMFlexItem,
-.chkApp .searchSmartToolbarRail .sapMFlexItem,
 .chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled .sapMBtnInner,
 .chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled:hover .sapMBtnInner {
   min-width: 0;
 }
 
 @media (max-width: 768px) {
-  .chkApp .searchResultsActionRail.sapMTBNewFlex,
-  .chkApp .searchResultsActionRail.sapMTB {
+  .chkApp .searchResultsActionRail {
     align-items: stretch;
   }
 
-  .chkApp .searchResultsActionRail .sapMBarChild,
-  .chkApp .searchResultsActionRail .sapMBtn,
-  .chkApp .searchResultsActionRail .sapMMenuBtn,
-  .chkApp .searchResultsActionRail .sapMInputBase,
-  .chkApp .searchResultsActionRail .sapMSwt,
-  .chkApp .searchResultsActionRail .sapMObjStatus {
+  .chkApp .searchResultsActionRail > * {
     max-width: 100%;
   }
 

@@ -34,6 +34,16 @@ sap.ui.define([
         return String(vValue || "").trim().toUpperCase();
     }
 
+    function firstNonEmpty() {
+        var iIndex;
+        for (iIndex = 0; iIndex < arguments.length; iIndex += 1) {
+            if (String(arguments[iIndex] || "").trim()) {
+                return String(arguments[iIndex] || "").trim();
+            }
+        }
+        return "";
+    }
+
     function extractSignal(oError) {
         var aSignals = [];
         var aDetails = Array.isArray(oError && oError.details) ? oError.details : [];
@@ -65,7 +75,11 @@ sap.ui.define([
     function classifyError(oError) {
         var sSignal = extractSignal(oError);
         var iStatus = Number((oError && (oError.statusCode || oError.status)) || 0) || 0;
-        var sBackendCode = upper(oError && oError.backend && oError.backend.code);
+        var sBackendCode = upper(firstNonEmpty(
+            oError && oError.backend && oError.backend.code,
+            oError && oError.code,
+            oError && oError.kind
+        ));
         if (sBackendCode === TAXONOMY.LOCK_EXPIRED) {
             return {
                 taxonomy: TAXONOMY.LOCK_EXPIRED,

@@ -1,16 +1,24 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandPayloadRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandContextRuntime"
-], function (FacadeCommandContracts, FacadeCommandPayloadRuntime, FacadeCommandContextRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandContextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandRuntime"
+], function (
+    FacadeCommandContracts,
+    FacadeCommandPayloadRuntime,
+    FacadeCommandContextRuntime,
+    ControllerCommandRuntime
+) {
     "use strict";
 
     function executeRaw(oController, oFacade, sMethod, mInput, mCtx) {
-        var fn = oFacade && oFacade[sMethod];
-        if (typeof fn !== "function") {
-            return Promise.resolve();
-        }
-        return Promise.resolve(oController.executeFacadeMethod(oFacade, sMethod, mInput || {}, mCtx || {}));
+        return ControllerCommandRuntime.executeFacadeCommand(
+            oController,
+            oFacade,
+            sMethod,
+            mInput || {},
+            mCtx || {}
+        );
     }
 
     function executeWithContract(oController, oFacade, sMethod, mInput, mCtx, mContract) {

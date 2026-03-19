@@ -1,28 +1,21 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime"
-], function (ThemeDomRuntime) {
+sap.ui.define([], function () {
     "use strict";
 
-    function getShellFlexItem(oController) {
-        var oLayout = oController && oController.byId && oController.byId("mainFcl");
-        var oDomRef = oLayout && oLayout.getDomRef && oLayout.getDomRef();
-        var oFlexItem = oDomRef && oDomRef.parentElement;
-        if (!oFlexItem || !oFlexItem.classList || !oFlexItem.classList.contains("sapMFlexItem")) {
-            return null;
-        }
-        return oFlexItem;
-    }
-
     function syncShellFlexItem(oController) {
-        var oFlexItem = getShellFlexItem(oController);
-        if (!oFlexItem) {
-            return;
+        var oLayout = oController && oController.byId && oController.byId("mainFcl");
+        var oLayoutData;
+
+        if (!oLayout || typeof oLayout.setFitContainer !== "function") {
+            return false;
         }
-        ThemeDomRuntime.setStyleProperties([oFlexItem], {
-            "flex": "1 1 auto",
-            "min-height": "0",
-            "height": "auto"
-        });
+        oLayout.setFitContainer(true);
+        oLayoutData = oLayout.getLayoutData && oLayout.getLayoutData();
+        if (oLayoutData && typeof oLayoutData.setGrowFactor === "function") {
+            oLayoutData.setGrowFactor(1);
+            oLayoutData.setShrinkFactor(1);
+            oLayoutData.setBaseSize("0%");
+        }
+        return true;
     }
 
     function syncShellMetricVars(oController, oRootNode) {

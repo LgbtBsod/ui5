@@ -1,9 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <OverflowToolbar class="detailControlRow detailControlRowActions toolbarTransparent" design="Transparent">
-        <customData>
-            <core:CustomData key="role" value="region" writeToDom="true"/>
-            <core:CustomData key="aria-label" value="{i18n>detailActionRailAriaLabel}" writeToDom="true"/>
-        </customData>
+    <OverflowToolbar id="detailControlActionRow" class="detailControlRow detailControlRowActions toolbarTransparent" design="Transparent">
 
         <Button
             id="detailCloseButton"
@@ -48,7 +44,7 @@
             </layoutData>
         </Button>
 
-        <ToolbarSpacer/>
+        <ToolbarSpacer class="detailControlRowSpacer"/>
 
         <Button
             icon="sap-icon://delete"
@@ -58,7 +54,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onArmDeleteChecklist"
             tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteTooltip} }"
-            class="actionPriorityDanger chkRipple">
+            class="actionPriorityDanger actionPriorityReject chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
@@ -72,7 +68,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onConfirmDeleteChecklist"
             tooltip="{i18n>deleteConfirmTooltip}"
-            class="actionPriorityDanger chkRipple">
+            class="actionPriorityDanger actionPriorityReject chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="High"/>
             </layoutData>

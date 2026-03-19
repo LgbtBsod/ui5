@@ -72,7 +72,8 @@
   gap: 0.42rem;
 }
 
-.chkApp .detailSectionToolbar .sapMTBSpacer {
+.chkApp .detailSectionToolbar .detailControlRowSpacer,
+.chkApp .detailSectionToolbar .detailAttachmentToolbarSpacer {
   min-width: 0.4rem;
 }
 
@@ -146,10 +147,10 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 .chkApp .flatEditorTable .sapMLabel,
 .chkApp .detailGridTable .sapMText,
 .chkApp .detailGridTable .sapMLabel,
-.chkApp .detailGridTable .sapMObjectIdentifierText,
-.chkApp .detailGridTable .sapMObjectNumberText,
 .chkApp .detailAttachmentTable .sapMText,
-.chkApp .detailAttachmentTable .sapMLnk {
+.chkApp .detailAttachmentTable .sapMLnk,
+.chkApp .detailAttachmentTable .detailAttachmentName,
+.chkApp .detailAttachmentTable .detailAttachmentMetaText {
   font-size: var(--theme-table-body-size);
   line-height: var(--theme-table-body-line-height);
   white-space: normal;

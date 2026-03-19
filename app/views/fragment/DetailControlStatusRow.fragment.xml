@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <OverflowToolbar class="detailControlRow detailControlRowTop toolbarTransparent" design="Transparent">
+    <OverflowToolbar id="detailControlStatusRow" class="detailControlRow detailControlRowTop toolbarTransparent" design="Transparent">
         <ObjectStatus
             icon="sap-icon://status-in-process"
             text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}"
@@ -39,7 +39,7 @@
             </layoutData>
         </ObjectStatus>
 
-        <ToolbarSpacer/>
+        <ToolbarSpacer class="detailControlRowSpacer"/>
 
         <BusyIndicator visible="{= ${state>/ui/busy/detail} || ${state>/saveInFlight} }" size="1rem" class="sapUiTinyMarginEnd">
             <layoutData>

@@ -1,9 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailUseCaseRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailEntryAdapterRuntime"
 ], function (
-    CtxFactory,
+    ControllerCommandContextRuntime,
     DetailUseCaseRegistry,
     DetailEntryAdapterRuntime
 ) {
@@ -15,7 +15,7 @@ sap.ui.define([
     }
 
     DetailService.prototype._buildCtx = function () {
-        return CtxFactory.buildCtx(this._controller, {});
+        return ControllerCommandContextRuntime.buildDefaultCtx(this._controller);
     };
 
     DetailService.prototype.openDetail = function (mInput, mCtx) {

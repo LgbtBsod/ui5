@@ -17,8 +17,8 @@
 .chkApp .chkSkin .sapMDialog.sapMViewSettingsDialog .sapMDialogSection,
 .chkApp .chkSkin .sapMDialog.sapMP13nDialog .sapMDialogSection,
 .chkApp .chkSkin .sapMDialog.sapUiCompValueHelpDialog .sapMDialogSection,
-.chkApp .chkSkin .sapMPopoverCont,
-.chkApp .chkSkin .sapMResponsivePopover .sapMPopoverCont {
+.chkApp .shellPopover .sapMPopoverCont,
+.chkApp .shellPopover.sapMResponsivePopover .sapMPopoverCont {
   padding: 0;
 }
 
@@ -38,8 +38,8 @@
 .chkApp .chkSkin .sapMDialog.sapMViewSettingsDialog,
 .chkApp .chkSkin .sapMDialog.sapMP13nDialog,
 .chkApp .chkSkin .sapMDialog.sapUiCompValueHelpDialog,
-.chkApp .chkSkin .sapMPopover,
-.chkApp .chkSkin .sapMResponsivePopover {
+.chkApp .shellPopover.sapMPopover,
+.chkApp .shellPopover.sapMResponsivePopover {
   border-radius: var(--radius-lg);
   box-shadow: var(--theme-block-shadow);
 }
@@ -48,8 +48,8 @@
 .chkApp .chkSkin .sapMDialog.sapMSelectDialog,
 .chkApp .chkSkin .sapMActionSheetDialog.sapMDialog,
 .chkApp .chkSkin .sapMDialog.sapMBusyDialog,
-.chkApp .chkSkin .sapMPopover,
-.chkApp .chkSkin .sapMResponsivePopover,
+.chkApp .shellPopover.sapMPopover,
+.chkApp .shellPopover.sapMResponsivePopover,
 .chkApp .chkSkin .sapMDialog.sapMMessageDialog {
   border-radius: var(--radius-lg);
   overflow: hidden;

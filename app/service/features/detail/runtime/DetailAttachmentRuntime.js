@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFieldContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ModelStateRuntime, ModelContracts, DetailFieldContracts, CreateSentinel) {
+], function (ModelStateRuntime, ModelContracts, DetailFieldContracts, DetailAttachmentViewState, CreateSentinel) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -38,10 +39,12 @@ sap.ui.define([
         var sRootId = String((oController && oController._currentRootId && oController._currentRootId()) || "").trim();
         if (bExpanded) {
             ModelStateRuntime.write(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_EXPANDED, false);
+            DetailAttachmentViewState.sync(oController);
             mHooks.unbindAttachmentDropZone();
             return Promise.resolve({ collapsed: true });
         }
         ModelStateRuntime.write(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_EXPANDED, true);
+        DetailAttachmentViewState.sync(oController);
         mHooks.scheduleAttachmentDropZoneBind();
         if (CreateSentinel.isCreateId(sRootId)) {
             ModelStateRuntime.write(oController, SELECTED_MODEL, "/attachments", aSessionAttachments);

@@ -162,13 +162,15 @@ body.chkAppRoot.appDark .chkApp .infoCardTile:hover::before {
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.34)) saturate(108%);
 }
 
-.chkApp .appShellHeader .sapMBarChild,
-.chkApp .appShellHeader .sapMFlexItem {
+.chkApp .shellBrandCluster,
+.chkApp .shellActionBtn,
+.chkApp .shellUserBtn,
+.chkApp .shellHeaderSpacer {
   min-width: 0;
   margin: 0;
 }
 
-.chkApp .appShellHeader .sapMTBSpacer {
+.chkApp .shellHeaderSpacer {
   flex: 1 1 0%;
   min-width: 0.5rem;
 }
@@ -310,7 +312,7 @@ body.chkAppRoot.appDark .chkApp .shellContextSubtitle {
 }
 
 @media (max-width: 75rem) {
-  .chkApp .appShellHeader .sapMTBSpacer {
+  .chkApp .shellHeaderSpacer {
     display: none;
   }
 
@@ -525,14 +527,16 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
   min-width: 0;
 }
 
-.chkApp .appShellHeader .sapMBtn .sapMBtnInner,
+.chkApp .shellActionBtn .sapMBtnInner,
+.chkApp .shellUserBtn .sapMBtnInner,
 .chkApp .shellThemeToggle .sapMBtnInner,
 .chkApp .shellUserActionBtn .sapMBtnInner,
 .chkApp .shellUserActionBtn.sapMBtn .sapMBtnInner {
   border-radius: 999px;
 }
 
-.chkApp .appShellHeader .sapMBtn:hover .sapMBtnInner,
+.chkApp .shellActionBtn:hover .sapMBtnInner,
+.chkApp .shellUserBtn:hover .sapMBtnInner,
 .chkApp .shellActionBtn:not(.sapMBtnDisabled):hover .sapMBtnInner {
   background: color-mix(in srgb, rgba(var(--accent-rgb), 0.1) 84%, transparent);
 }
@@ -561,9 +565,10 @@ body.chkAppRoot.appDark .chkApp .appShellHeader.shellPinned {
   letter-spacing: 0.01em;
 }
 
-.chkApp .appShellHeader .sapMHBox,
-.chkApp .appShellHeader .sapMVBox,
-.chkApp .appShellHeader .sapMFlexItem,
+.chkApp .appShellHeader .shellBrandCluster,
+.chkApp .appShellHeader .shellActionBtn,
+.chkApp .appShellHeader .shellUserBtn,
+.chkApp .appShellHeader .shellHeaderSpacer,
 .chkApp .appShellHeader .appShellActions,
 .chkApp .appShellHeader .shellContextActions {
   min-width: 0;

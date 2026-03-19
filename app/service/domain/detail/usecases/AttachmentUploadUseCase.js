@@ -4,14 +4,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentIdentity",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, JsRuntime, AttachmentValueCodec, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, StatePaths, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (UseCase, Result, Effects, JsRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -60,15 +58,9 @@ sap.ui.define([
     }
 
     function buildUploadEffects(mCtx, oAttachment, sToastKey) {
-        var aCurrentAll = DetailStateAccess.readCurrentAttachments(mCtx);
         var oUiState = mCtx && mCtx.uiState;
         var bLoadedAll = !!(oUiState && oUiState.get("view", ViewPathContracts.ATTACHMENTS_LOADED));
-        var aSession = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
-        var aAllNext = oAttachment ? AttachmentIdentity.appendUnique(aCurrentAll, oAttachment) : (Array.isArray(aCurrentAll) ? aCurrentAll.slice() : []);
-        var aSessionNext = oAttachment ? AttachmentIdentity.appendUnique(aSession, Object.assign({}, oAttachment, { _sessionUpload: true })) : (Array.isArray(aSession) ? aSession.slice() : []);
-        var aEffects = AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentUploaded", "success");
-        aEffects.push(Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext));
-        aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true));
+        var aEffects = DetailAttachmentStateRuntime.appendSessionAttachment(mCtx, oAttachment, sToastKey);
         if (bLoadedAll) {
             aEffects.push(Effects.modelPatch("view", ViewPathContracts.ATTACHMENTS_LOADED, true));
         }

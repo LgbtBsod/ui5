@@ -9,7 +9,7 @@
   gap: 0.4rem;
 }
 
-.chkApp .detailControlRowActions .sapMTBSpacer {
+.chkApp .detailControlRowActions .detailControlRowSpacer {
   flex: 1 1 auto;
 }
 
@@ -125,28 +125,32 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
 }
 
 body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusSuccess,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusSuccess {
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusSuccess,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusSuccess {
   --status-chip-bg: var(--feedback-success-bg);
   --status-chip-border: var(--feedback-success-border);
   --status-chip-glow: var(--feedback-success-glow);
 }
 
 body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusWarning,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusWarning {
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusWarning,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusWarning {
   --status-chip-bg: var(--feedback-warning-bg);
   --status-chip-border: var(--feedback-warning-border);
   --status-chip-glow: var(--feedback-warning-glow);
 }
 
 body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusError,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusError {
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusError,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusError {
   --status-chip-bg: var(--feedback-error-bg);
   --status-chip-border: var(--feedback-error-border);
   --status-chip-glow: var(--feedback-error-glow);
 }
 
 body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusInformation,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusInformation {
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusInformation,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusInformation {
   --status-chip-bg: var(--feedback-info-bg);
   --status-chip-border: var(--feedback-info-border);
   --status-chip-glow: var(--feedback-info-glow);

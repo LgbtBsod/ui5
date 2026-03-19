@@ -31,4 +31,17 @@ sap.ui.define([
         assert.strictEqual(oPersistencePatch.value.isManualSaveInFlight, false, "manual in-flight flag is cleared");
         assert.strictEqual(oPersistencePatch.value.currentWriteRequestId, "", "write request id is cleared");
     });
+
+    QUnit.test("classifyError prefers backend machine code over free-text signal parsing", function (assert) {
+        var oResult = DetailPersistenceRuntime.classifyError({
+            code: "SYSTEM_ERROR",
+            message: "Generic backend failure",
+            backend: {
+                code: "LOCK_NOT_OWNED_BY_SESSION"
+            }
+        });
+
+        assert.strictEqual(oResult.taxonomy, DetailPersistenceRuntime.TAXONOMY.LOCK_NOT_OWNED_BY_SESSION, "backend machine code is authoritative");
+        assert.strictEqual(oResult.persistenceState, DetailPersistenceRuntime.STATES.LOCK_LOST, "lock ownership mismatch forces lock-lost state");
+    });
 });

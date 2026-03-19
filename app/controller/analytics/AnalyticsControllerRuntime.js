@@ -2,7 +2,7 @@ sap.ui.define([
     "sap/ui/core/Core",
     "sap/ui/core/Fragment",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsYearRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
@@ -20,7 +20,7 @@ sap.ui.define([
     Core,
     Fragment,
     AnalyticsFacade,
-    CtxFactory,
+    ControllerCommandContextRuntime,
     AnalyticsBuilderRuntime,
     AnalyticsYearRuntime,
     AnalyticsContracts,
@@ -45,7 +45,7 @@ sap.ui.define([
     var YEAR_PICKER_FIELDS = AnalyticsUiContracts.YEAR_PICKER_FIELDS;
 
     function buildCtx(oController) {
-        return CtxFactory.buildCtx(oController, {});
+        return ControllerCommandContextRuntime.buildDefaultCtx(oController);
     }
 
     function coerceText(vValue) {

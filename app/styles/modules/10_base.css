@@ -26,18 +26,19 @@ body.chkAppRoot,
   pointer-events: none;
 }
 
-.chkApp .appShell > .sapMFlexItem:first-child {
+.chkApp .appShell > .appShellHeaderHost,
+.chkApp .appShell > .appFeedbackBanner,
+.chkApp .appShell > .appFeedbackCorrelation {
   flex: 0 0 auto;
-  height: auto;
+  width: 100%;
+  max-width: 100%;
 }
 
-.chkApp .appShell > .sapMFlexItem:last-child {
+.chkApp .appShell > #mainContentHost,
+.chkApp .appShell > [id$="mainContentHost"] {
   flex: 1 1 auto;
   min-height: 0;
   height: auto;
-}
-
-.chkApp .appShell > .sapMFlexItem {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -192,6 +193,11 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
 .chkApp .appShellHeader .sapMTitle,
 .chkApp .appShellHeader .sapMText {
   white-space: nowrap;
+}
+
+.chkApp .appShellHeaderRegion {
+  display: block;
+  width: 100%;
 }
 
 .chkApp .appShellHeader .sapMText:empty {

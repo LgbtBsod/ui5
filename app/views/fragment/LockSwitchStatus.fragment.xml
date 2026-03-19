@@ -16,7 +16,7 @@
     <ObjectStatus
         text="{parts:[{path:'state>/lockStateText'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateText'}"
         state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateSemantic'}"
-        class="sapUiTinyMarginBegin detailRailStatusChip">
+        class="sapUiTinyMarginBegin detailRailStatusChip detailRailLockStatusChip">
         <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
     </ObjectStatus>
 </core:FragmentDefinition>

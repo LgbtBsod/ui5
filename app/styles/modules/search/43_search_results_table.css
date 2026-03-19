@@ -35,38 +35,36 @@
   min-height: calc(var(--theme-workbench-control-height) - 0.1rem);
 }
 
-.chkApp .searchResultsTable .sapMFlexItem,
-.chkApp .searchResultsTable > .sapMFlexItem {
+.chkApp .searchResultsTable > * {
   background: transparent;
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.chkApp .searchResultsTable > .sapMFlexItem {
+.chkApp .searchResultsTable > * {
   flex: 1 1 100%;
   align-self: stretch;
   box-sizing: border-box;
 }
 
-.chkApp .searchResultsTable > .sapMVBox,
-.chkApp .searchResultsTable > .sapMVBox > .sapMFlexItem,
-.chkApp .searchResultsTable > .sapMFlexBox {
+.chkApp .searchResultsTable > *,
+.chkApp .searchResultsTable > * > *,
+.chkApp .searchResultsExperienceShell > * {
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
 }
 
-.chkApp .searchResultsTable > .sapMVBox,
-.chkApp .searchResultsTable > .sapMFlexBox {
+.chkApp .searchResultsTable > * {
   overflow-x: visible;
 }
 
 .chkApp .searchResultsTable,
 .chkApp .searchResultsExperienceShell,
-.chkApp .searchResultsExperienceShell > .sapMFlexItem,
-.chkApp .searchResultsExperienceShell > .sapMFlexItem > .sapMVBox {
+.chkApp .searchResultsExperienceShell > *,
+.chkApp .searchResultsExperienceShell > * > * {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -74,8 +72,8 @@
 }
 
 .chkApp .searchResultsTable.searchResultsExperienceShell,
-.chkApp .searchResultsTable.searchResultsExperienceShell > .sapMFlexItem,
-.chkApp .searchResultsTable.searchResultsExperienceShell > .sapMFlexItem > .sapMVBox {
+.chkApp .searchResultsTable.searchResultsExperienceShell > *,
+.chkApp .searchResultsTable.searchResultsExperienceShell > * > * {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -104,10 +102,10 @@
   overflow: visible;
 }
 
-.chkApp #searchResultsShell > .sapMFlexItem,
-.chkApp [id$="-searchResultsShell"] > .sapMFlexItem,
-.chkApp #searchResultsShell > .sapMFlexItem > .sapMVBox,
-.chkApp [id$="-searchResultsShell"] > .sapMFlexItem > .sapMVBox {
+.chkApp #searchResultsShell > *,
+.chkApp [id$="-searchResultsShell"] > *,
+.chkApp #searchResultsShell > * > *,
+.chkApp [id$="-searchResultsShell"] > * > * {
   min-width: 0;
   max-width: 100%;
 }

@@ -56,22 +56,16 @@ sap.ui.define([
 
     function resolveSearchViewportObserverTargets(oController, oScrollHost) {
         var aTargets = [];
-        var oWorkbenchDock = resolveSearchWorkbenchDock(oController);
-        var oWorkbenchDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
-        var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
         var oResultsShell = oController.byId && oController.byId("searchResultsShell");
 
         [
             resolveViewDom(oController),
             oScrollHost,
-            oWorkbenchDom,
             resolveShellHeaderHostDom(oController),
             oFilterCard && oFilterCard.getDomRef && oFilterCard.getDomRef(),
-            oActionRail && oActionRail.getDomRef && oActionRail.getDomRef(),
             resolveSearchSummaryRailDom(oController),
-            oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef(),
-            resolveSearchTableToolbarDom(oController)
+            oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef()
         ].forEach(function (oTarget) {
             if (oTarget && aTargets.indexOf(oTarget) < 0) {
                 aTargets.push(oTarget);
@@ -156,6 +150,21 @@ sap.ui.define([
         setSearchViewportCssVar(oController, "--search-smarttable-toolbar-height", iResultsToolbarHeight + "px");
     }
 
+    function buildSearchViewportLayoutKey(oController, oScrollHost) {
+        var oSummaryRailDom = resolveSearchSummaryRailDom(oController);
+        var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
+        var oFilterCard = oController.byId && oController.byId("searchFilterCard");
+        var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
+        return [
+            resolveShellHeaderOffset(SEARCH_MIN_HEADER_OFFSET_PX, SEARCH_HEADER_OFFSET_PADDING_PX, oScrollHost),
+            resolveDomHeight(oSummaryRailDom),
+            resolveDomHeight(oResultsToolbarDom),
+            resolveDomHeight(oFilterCard),
+            resolveDomHeight(oActionRail),
+            isCompactStickyViewport(SEARCH_MOBILE_STICKY_BREAKPOINT_PX) ? "compact" : "desktop"
+        ].join("|");
+    }
+
     function syncSearchViewportLayout(oController, oScrollHost) {
         var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
         SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, false);
@@ -170,6 +179,7 @@ sap.ui.define([
             return resolveShellHeaderOffset(SEARCH_MIN_HEADER_OFFSET_PX, SEARCH_HEADER_OFFSET_PADDING_PX, oScrollHost);
         },
         resolveSearchViewportObserverTargets: resolveSearchViewportObserverTargets,
+        buildSearchViewportLayoutKey: buildSearchViewportLayoutKey,
         syncSearchStickyOffsets: syncSearchStickyOffsets,
         syncSearchViewportLayout: syncSearchViewportLayout
     };

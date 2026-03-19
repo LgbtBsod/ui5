@@ -11,8 +11,7 @@
   overflow: hidden;
 }
 
-.chkApp .appFeedbackCorrelation[style*="display: none"],
-.chkApp .appFeedbackCorrelation:not([style]) {
+.chkApp .appFeedbackCorrelation {
   padding-block: 0;
 }
 
@@ -68,10 +67,6 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentTable .sapMListTblHeaderCell {
   opacity: 0.72;
 }
 
-.chkApp .searchWorkbenchDock > .searchResultsSummaryRail:has(.searchResultsSummarySelection:not(:empty)) {
-  display: flex;
-}
-
 .chkApp .detailAttachmentsEmptyState {
   align-self: start;
   width: 100%;
@@ -79,8 +74,4 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentTable .sapMListTblHeaderCell {
 
 .chkApp .detailControlPinnedDock {
   transition: opacity 160ms ease;
-}
-
-.chkApp .detailControlPinnedDock[style*="display: none"] {
-  pointer-events: none;
 }

@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
-], function (ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
+], function (ModelContracts, ModelStateRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -37,8 +38,23 @@ sap.ui.define([
     return {
         view: resolveView,
         owner: resolveOwner,
+        model: function (oController, sName, bOwnerFallback) {
+            if (typeof sName === "undefined") {
+                return resolveDefaultModel(oController, bOwnerFallback);
+            }
+            return resolveNamedModel(oController, sName, bOwnerFallback);
+        },
         named: resolveNamedModel,
         defaultModel: resolveDefaultModel,
+        read: function (oController, sName, sPath, vFallback) {
+            return ModelStateRuntime.readOnModel(resolveNamedModel(oController, sName, true), sPath, vFallback);
+        },
+        write: function (oController, sName, sPath, vValue) {
+            return ModelStateRuntime.writeOnModel(resolveNamedModel(oController, sName, true), sPath, vValue);
+        },
+        setMany: function (oController, sName, mValues) {
+            return ModelStateRuntime.setManyOnModel(resolveNamedModel(oController, sName, true), mValues);
+        },
         state: function (oController) {
             return resolveNamedModel(oController, MODELS.STATE, true);
         },

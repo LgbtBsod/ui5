@@ -1097,6 +1097,9 @@ def _build_lock_status_row(db: Session, root_uuid: str, session_guid: str = "") 
             "LockExpires": exp,
         }
 
+    if root_uuid == "__CREATE":
+        return _row(bool(session_guid), "OWNED_BY_YOU" if session_guid else "FREE", CurrentUserService.resolve_uname(db=db) if session_guid else "", None)
+
     active = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.is_killed.is_(False)).first()
     if not active:
         own = db.query(LockEntry).filter(
@@ -1851,11 +1854,6 @@ def lock_control(payload: dict, db: Session):
     uname = CurrentUserService.resolve_uname(db=db)
     if not root_key:
         return _err(400, "VALIDATION_ERROR", "RootKey is required")
-    root_uuid = _entity_key(root_key)
-    root_exists = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid, ChecklistRoot.is_deleted.isnot(True)).first()
-    if not root_exists:
-        return _err(404, "NOT_FOUND", "Checklist not found")
-
     def _lock_entity(ok: bool, reason: str, expires_at, is_killed: bool, action_name: str, owner: str = "", owner_session: str = ""):
         lock_exp = format_datetime(expires_at)
         return odata_entity({
@@ -1869,6 +1867,23 @@ def lock_control(payload: dict, db: Session):
             "Owner": owner,
             "OwnerSession": owner_session,
         })
+
+    if root_key == "__CREATE":
+        if action == "HEARTBEAT":
+            return _lock_entity(True, "OWNED_BY_YOU", None, False, "HEARTBEAT", uname, session)
+        if action == "RELEASE":
+            return _lock_entity(True, "FREE", None, False, "RELEASED")
+        if action == "ACQUIRE":
+            return _lock_entity(True, "OWNED_BY_YOU", None, False, "ACQUIRED", uname, session)
+
+    root_uuid = _entity_key(root_key)
+    root_exists = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid, ChecklistRoot.is_deleted.isnot(True)).first()
+    if not root_exists:
+        if action == "RELEASE":
+            return _lock_entity(True, "FREE", None, False, "RELEASED")
+        if action == "HEARTBEAT":
+            return _lock_entity(False, "FREE", None, False, "FREE")
+        return _err(404, "NOT_FOUND", "Checklist not found")
 
     if action == "ACQUIRE":
         r = LockService.acquire(db, root_uuid, session, uname, payload.get("StealFrom"))

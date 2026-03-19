@@ -85,6 +85,33 @@ def test_gateway_canonical_contract_and_metadata():
         assert create_permission_body.get("CanCreate") is True
         assert create_permission_body.get("GrantedOperations") == "01"
 
+
+def test_create_draft_lock_imports_are_benign_for_local_runtime():
+    with TestClient(app) as client:
+        token = _csrf(client)
+        root_key = _sample_root(client)
+        create_status = client.get(f"{SERVICE_ROOT}/LockStatusSet('__CREATE')", params={"SessionGuid": "S-CREATE"})
+        assert create_status.status_code == 200 and "d" in create_status.json()
+        assert create_status.json().get("d", {}).get("ReasonCode") == "OWNED_BY_YOU"
+
+        heartbeat = client.post(
+            f"{SERVICE_ROOT}/LockHeartbeat",
+            params={"RootId": "__CREATE", "ObjectUuid": "__CREATE", "SessionGuid": "S-CREATE"},
+            headers={"X-CSRF-Token": token}
+        )
+        assert heartbeat.status_code == 200 and "d" in heartbeat.json()
+        assert heartbeat.json().get("d", {}).get("Action") == "HEARTBEAT"
+        assert heartbeat.json().get("d", {}).get("ReasonCode") == "OWNED_BY_YOU"
+
+        release = client.post(
+            f"{SERVICE_ROOT}/LockRelease",
+            params={"RootId": "__CREATE", "SessionGuid": "S-CREATE"},
+            headers={"X-CSRF-Token": token}
+        )
+        assert release.status_code == 200 and "d" in release.json()
+        assert release.json().get("d", {}).get("Action") == "RELEASED"
+        assert release.json().get("d", {}).get("ReasonCode") == "FREE"
+
         checks = client.get(f"{SERVICE_ROOT}/ChecklistCheckSet", params={"$filter": f"RootId eq '{root_key}'"})
         barriers = client.get(f"{SERVICE_ROOT}/ChecklistBarrierSet", params={"$filter": f"RootId eq '{root_key}'"})
         assert checks.status_code == 200 and "d" in checks.json()

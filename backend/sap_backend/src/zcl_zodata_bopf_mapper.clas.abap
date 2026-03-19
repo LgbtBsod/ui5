@@ -175,7 +175,8 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
       WITH TABLE KEY node_key = iv_node_key.
     IF sy-subrc <> 0.
       RAISE EXCEPTION TYPE zcx_zodata_error
-        EXPORTING iv_msg = |BOPF mapper: no node config registered for node key '{ iv_node_key }'.|.
+        EXPORTING iv_code = 'TECHNICAL_ERROR'
+                  iv_msg  = |BOPF mapper: no node config registered for node key '{ iv_node_key }'.|.
     ENDIF.
   ENDMETHOD.
 
@@ -189,7 +190,8 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
     " Guard: root uuid must be provided
     IF lv_root_key IS INITIAL.
       RAISE EXCEPTION TYPE zcx_zodata_error
-        EXPORTING iv_msg = 'build_change_list: SaveChangesRequest.root.pcct_uuid is initial.'.
+        EXPORTING iv_code = 'VALIDATION_ERROR'
+                  iv_msg  = 'build_change_list: SaveChangesRequest.root.pcct_uuid is initial.'.
     ENDIF.
 
     append_root_delta(
@@ -260,13 +262,15 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
       ELSE.
         " Update/Delete with no key — programming error, raise explicitly
         RAISE EXCEPTION TYPE zcx_zodata_error
-          EXPORTING iv_msg = |map_to_modification: key is initial for U/D on node { <ls_change>-node_key }.|.
+          EXPORTING iv_code = 'VALIDATION_ERROR'
+                    iv_msg  = |map_to_modification: key is initial for U/D on node { <ls_change>-node_key }.|.
       ENDIF.
 
       " ── Internal data reference (must be pre-allocated) ───────
       IF <ls_change>-internal IS INITIAL.
         RAISE EXCEPTION TYPE zcx_zodata_error
-          EXPORTING iv_msg = |map_to_modification: internal data ref is initial for node { <ls_change>-node_key }.|.
+          EXPORTING iv_code = 'TECHNICAL_ERROR'
+                    iv_msg  = |map_to_modification: internal data ref is initial for node { <ls_change>-node_key }.|.
       ENDIF.
 
       " ── Field-map resolution and copy (skip for Deletes) ──────
@@ -281,7 +285,8 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
 
           IF <ls_ext_any> IS NOT ASSIGNED OR <ls_int_any> IS NOT ASSIGNED.
             RAISE EXCEPTION TYPE zcx_zodata_error
-              EXPORTING iv_msg = 'map_to_modification: cannot dereference data refs for auto field-map.'.
+              EXPORTING iv_code = 'TECHNICAL_ERROR'
+                        iv_msg  = 'map_to_modification: cannot dereference data refs for auto field-map.'.
           ENDIF.
 
           DATA(lo_ext_descr) = CAST cl_abap_structdescr(
@@ -414,7 +419,8 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
         CREATE DATA ro_ref TYPE (iv_ddic_type).
       CATCH cx_sy_create_data_error cx_root INTO DATA(lx).
         RAISE EXCEPTION TYPE zcx_zodata_error
-          EXPORTING iv_msg = |create_internal_ref: cannot create instance of '{ iv_ddic_type }'. { lx->get_text( ) }|.
+          EXPORTING iv_code = 'TECHNICAL_ERROR'
+                    iv_msg  = |create_internal_ref: cannot create instance of '{ iv_ddic_type }'. { lx->get_text( ) }|.
     ENDTRY.
   ENDMETHOD.
 
@@ -428,7 +434,8 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
         rv_change_mode = /bobf/if_frw_c=>sc_modify_update.
       WHEN OTHERS.
         RAISE EXCEPTION TYPE zcx_zodata_error
-          EXPORTING iv_msg = |map_edit_mode: unsupported edit_mode='{ iv_edit_mode }'. Expected C/U/D or space.|.
+          EXPORTING iv_code = 'VALIDATION_ERROR'
+                    iv_msg  = |map_edit_mode: unsupported edit_mode='{ iv_edit_mode }'. Expected C/U/D or space.|.
     ENDCASE.
   ENDMETHOD.
 
@@ -440,7 +447,8 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
 
     IF <ls_ext> IS NOT ASSIGNED OR <ls_int> IS NOT ASSIGNED.
       RAISE EXCEPTION TYPE zcx_zodata_error
-        EXPORTING iv_msg = 'move_fields_by_map: cannot dereference EXT or INT data ref.'.
+        EXPORTING iv_code = 'TECHNICAL_ERROR'
+                  iv_msg  = 'move_fields_by_map: cannot dereference EXT or INT data ref.'.
     ENDIF.
 
     LOOP AT it_map ASSIGNING FIELD-SYMBOL(<ls_map>).

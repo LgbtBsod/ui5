@@ -60,7 +60,7 @@ body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
   width: 100%;
 }
 
-.chkApp .analyticsTabBar.sapMITB {
+.chkApp .analyticsTabBar {
   width: 100%;
   background: transparent;
 }
@@ -101,8 +101,7 @@ body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
   border-radius: 999px;
 }
 
-.chkApp .analyticsControlToolbar.sapMTB,
-.chkApp .analyticsControlToolbar.sapMOTB {
+.chkApp .analyticsControlToolbar {
   flex-wrap: wrap;
   row-gap: 0.32rem;
   column-gap: 0.32rem;
@@ -113,8 +112,7 @@ body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 42%, transparent);
 }
 
-.chkApp .analyticsControlToolbar .sapMBarChild,
-.chkApp .analyticsControlToolbar .sapMFlexItem {
+.chkApp .analyticsControlToolbar > * {
   min-width: 0;
   max-width: 100%;
 }

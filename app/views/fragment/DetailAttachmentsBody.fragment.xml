@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:unified="sap.ui.unified">
     <VBox
         id="attachmentDropZone"
-        visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+        visible="{view>/attachmentMetaEditable}"
         class="detailAttachmentDropZone">
         <VBox class="detailAttachmentDropZoneActions">
             <HBox renderType="Bare" class="detailAttachmentPickerRow">
@@ -10,19 +10,19 @@
                 <Link
                     text="{i18n>uploadAttachment}"
                     press=".onOpenAttachmentPicker"
-                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }"
+                    enabled="{view>/attachmentActionsEnabled}"
                     class="detailAttachmentPickerLink"/>
             </HBox>
             <HBox
                 renderType="Bare"
                 class="detailAttachmentMetaRow"
-                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
+                visible="{view>/attachmentMetaEditable}">
                 <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="detailAttachmentMetaLabel"/>
                 <Select
                     id="attachmentCategorySelect"
                     width="12rem"
                     selectedKey="{view>/attachmentCategoryKey}"
-                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }"
+                    enabled="{view>/attachmentMetaEditable}"
                     items="{ path: 'masterData>/attachmentTypes', templateShareable: true }"
                     class="detailAttachmentCategorySelect">
                     <core:Item key="{masterData>key}" text="{masterData>text}"/>
@@ -35,7 +35,7 @@
                 useMultipart="false"
                 buttonText="{i18n>uploadAttachment}"
                 tooltip="{i18n>uploadAttachment}"
-                enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }"
+                enabled="{view>/attachmentActionsEnabled}"
                 change=".onAttachmentUploadChange"
                 class="detailAttachmentUploaderHidden"/>
         </VBox>
@@ -45,7 +45,7 @@
     </VBox>
 
     <VBox id="attachmentDropScope" renderType="Bare" width="100%">
-        <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{= !${view>/attachmentsExpanded} }">
+        <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{view>/showSessionAttachments}">
             <Table
                 items="{view>/sessionAttachments}"
                 class="flatEditorTable detailAttachmentTable detailAttachmentTableSession"
@@ -55,16 +55,16 @@
                     <Column>
                         <Text text="{i18n>attachmentFileName}"/>
                     </Column>
-                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
                         <Text text="{i18n>attachmentCategoryLabel}"/>
                     </Column>
                     <Column width="7rem" hAlign="End">
                         <Text text="{i18n>attachmentSize}"/>
                     </Column>
-                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
                         <Text text="{i18n>attachmentChangedOn}"/>
                     </Column>
-                    <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                    <Column width="{view>/attachmentActionsColumnWidth}" hAlign="Center">
                         <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                     </Column>
                 </columns>
@@ -88,7 +88,7 @@
                                     text="{i18n>rowActionDelete}"
                                     type="Transparent"
                                     press=".onDeleteAttachment"
-                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                                    visible="{view>/attachmentMetaEditable}"
                                     class="tableRowActionBtn tableRowActionBtnDanger"/>
                             </HBox>
                         </cells>
@@ -117,16 +117,16 @@
                     <Column>
                         <Text text="{i18n>attachmentFileName}"/>
                     </Column>
-                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
                         <Text text="{i18n>attachmentCategoryLabel}"/>
                     </Column>
                     <Column width="7rem" hAlign="End">
                         <Text text="{i18n>attachmentSize}"/>
                     </Column>
-                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
                         <Text text="{i18n>attachmentChangedOn}"/>
                     </Column>
-                    <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                    <Column width="{view>/attachmentActionsColumnWidth}" hAlign="Center">
                         <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                     </Column>
                 </columns>
@@ -150,7 +150,7 @@
                                     text="{i18n>rowActionDelete}"
                                     type="Transparent"
                                     press=".onDeleteAttachment"
-                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                                    visible="{view>/attachmentMetaEditable}"
                                     class="tableRowActionBtn tableRowActionBtnDanger"/>
                             </HBox>
                         </cells>

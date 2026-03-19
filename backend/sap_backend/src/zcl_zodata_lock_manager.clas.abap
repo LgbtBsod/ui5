@@ -105,6 +105,8 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   METHOD call_lock_fm.
     DATA lv_now TYPE timestampl.
     DATA lv_expires TYPE timestampl.
+    DATA lv_error_code TYPE string.
+    DATA lv_error_text TYPE string.
 
     ensure_contract( ).
 
@@ -122,9 +124,21 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
         OTHERS       = 3.
 
     IF sy-subrc <> 0.
+      CASE iv_mode.
+        WHEN 'H' OR 'V'.
+          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_not_owned_by_session.
+          lv_error_text = zcl_zodata_contract_constants=>c_msg_lock_session_required.
+        WHEN 'S'.
+          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_missing.
+          lv_error_text = zcl_zodata_contract_constants=>c_code_lock_missing.
+        WHEN OTHERS.
+          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_missing.
+          lv_error_text = zcl_zodata_contract_constants=>c_code_lock_missing.
+      ENDCASE.
       RAISE EXCEPTION TYPE zcx_zodata_error
         EXPORTING
-          iv_msg = |Lock manager failed. MODE={ iv_mode } BO_KEY={ is_key-bo_key } SUBRC={ sy-subrc }|.
+          iv_code = lv_error_code
+          iv_msg  = lv_error_text.
     ENDIF.
 
     IF cs_result IS SUPPLIED.

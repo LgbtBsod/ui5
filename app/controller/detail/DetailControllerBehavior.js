@@ -8,6 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (
@@ -20,6 +21,7 @@ sap.ui.define([
     ControllerModelRuntime,
     ControllerViewStateRuntime,
     SchedulingRuntime,
+    DetailAttachmentViewState,
     NavigationContracts,
     ModelContracts
 ) {
@@ -27,6 +29,42 @@ sap.ui.define([
 
     var MODELS = ModelContracts.MODELS;
     var SELECTED_MODEL = MODELS.SELECTED;
+
+    function getBundleText(oController, sKey) {
+        var oI18nModel = oController.getModel && oController.getModel("i18n");
+        var oBundle = oI18nModel && oI18nModel.getResourceBundle && oI18nModel.getResourceBundle();
+        return oBundle && oBundle.getText ? oBundle.getText(sKey) : "";
+    }
+
+    function setSemanticAttr(oController, sId, mAttrs) {
+        var oControl = oController.byId && oController.byId(sId);
+        var oDomRef = oControl && oControl.getDomRef && oControl.getDomRef();
+        Object.keys(mAttrs || {}).forEach(function (sAttr) {
+            if (!oDomRef) {
+                return;
+            }
+            if (mAttrs[sAttr]) {
+                oDomRef.setAttribute(sAttr, mAttrs[sAttr]);
+                return;
+            }
+            oDomRef.removeAttribute(sAttr);
+        });
+    }
+
+    function syncSemanticRegions(oController) {
+        setSemanticAttr(oController, "detailControlActionRow", {
+            role: "region",
+            "aria-label": getBundleText(oController, "detailActionRailAriaLabel")
+        });
+        setSemanticAttr(oController, "detailHeroStatsRegion", {
+            role: "region",
+            "aria-label": getBundleText(oController, "detailStatsAriaLabel")
+        });
+        setSemanticAttr(oController, "detailSectionAnchorRail", {
+            role: "navigation",
+            "aria-label": getBundleText(oController, "sectionNavAriaLabel")
+        });
+    }
 
     function bindStateValidationModel(oController) {
         oController._oStateValidationModel = ControllerModelRuntime.state(oController);
@@ -38,11 +76,13 @@ sap.ui.define([
             var oViewModel;
             if (sPath === "/requiredFields") {
                 oController._recomputeValidationSummary("requiredFieldsChanged", false);
+                DetailAttachmentViewState.sync(oController);
                 return;
             }
             if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== "/activeObjectId" && sPath !== "/selectedId") {
                 return;
             }
+            DetailAttachmentViewState.sync(oController);
             oViewModel = ControllerModelRuntime.viewState(oController);
             if (oViewModel) {
                 ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
@@ -72,6 +112,7 @@ sap.ui.define([
             ]);
 
             ControllerViewStateRuntime.initModel(this, DetailViewStateFactory.create.bind(null, this));
+            DetailAttachmentViewState.sync(this);
 
             this._oSelectedModel = ControllerModelRuntime.selected(this);
             if (this._oSelectedModel && this._oSelectedModel.attachPropertyChange) {
@@ -85,6 +126,7 @@ sap.ui.define([
             this._bindDetailEditSwitchKeyboardFallback();
             this._bindAdaptiveDetailViewport();
             this._bindViewportPinnedControlRail();
+            syncSemanticRegions(this);
         },
 
         onExit: function () {

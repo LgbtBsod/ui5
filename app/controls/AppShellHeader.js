@@ -57,6 +57,12 @@ sap.ui.define([
         }
     }
 
+    function setAndSync(oControl, sProperty, vValue) {
+        oControl.setProperty(sProperty, vValue, true);
+        syncHeaderContent(oControl);
+        return oControl;
+    }
+
     return Control.extend("PRODUCTION_CONTROL_CHECKLIST.controls.AppShellHeader", {
         metadata: {
             properties: {
@@ -148,7 +154,7 @@ sap.ui.define([
                             this._oContextSubtitle
                         ]
                     }).addStyleClass("shellBrandCluster"),
-                    new ToolbarSpacer(),
+                    new ToolbarSpacer().addStyleClass("shellHeaderSpacer"),
                     this._oHelpButton,
                     this._oSettingsButton,
                     this._oAnalyticsButton,
@@ -159,11 +165,56 @@ sap.ui.define([
             syncHeaderContent(this);
         },
 
+        setEyebrow: function (sValue) {
+            return setAndSync(this, "eyebrow", sValue);
+        },
+
+        setProductName: function (sValue) {
+            return setAndSync(this, "productName", sValue);
+        },
+
+        setContextSubtitle: function (sValue) {
+            return setAndSync(this, "contextSubtitle", sValue);
+        },
+
+        setUserLabel: function (sValue) {
+            return setAndSync(this, "userLabel", sValue);
+        },
+
+        setUserIcon: function (sValue) {
+            return setAndSync(this, "userIcon", sValue);
+        },
+
+        setHelpTooltip: function (sValue) {
+            return setAndSync(this, "helpTooltip", sValue);
+        },
+
+        setSettingsTooltip: function (sValue) {
+            return setAndSync(this, "settingsTooltip", sValue);
+        },
+
+        setAnalyticsTooltip: function (sValue) {
+            return setAndSync(this, "analyticsTooltip", sValue);
+        },
+
+        setUserTooltip: function (sValue) {
+            return setAndSync(this, "userTooltip", sValue);
+        },
+
+        setShowHelp: function (bValue) {
+            return setAndSync(this, "showHelp", !!bValue);
+        },
+
         renderer: {
             apiVersion: 2,
 
             render: function (oRm, oControl) {
+                oRm.openStart("header", oControl);
+                oRm.class("appShellHeaderRegion");
+                oRm.attr("role", "banner");
+                oRm.openEnd();
                 oRm.renderControl(oControl.getAggregation("_toolbar"));
+                oRm.close("header");
             }
         }
     });

@@ -66,12 +66,12 @@
 }
 
 .chkApp .detailAttachmentDropZoneActions .sapUiFup,
-.chkApp .detailAttachmentDropZoneActions .sapMBtn,
-.chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
+.chkApp .detailAttachmentDropZoneActions .tableRowActionBtn,
+.chkApp .detailAttachmentDropZoneActions .tableRowActionBtn .sapMBtnInner {
   width: 100%;
 }
 
-.chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
+.chkApp .detailAttachmentDropZoneActions .tableRowActionBtn .sapMBtnInner {
   justify-content: center;
 }
 
@@ -92,20 +92,19 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentItemRow {
 }
 
 .chkApp .detailAccessDeniedScene .detailAccessDeniedIllustration,
-.chkApp .detailAccessDeniedScene .sapMImg,
 .chkApp .detailAccessDeniedScene img {
   width: min(100%, 21.875rem);
   max-width: min(100%, 21.875rem);
 }
 
 /* Timeline/history list styling for detail history section. */
-.chkApp .sapMTLI {
+.chkApp .detailHistoryTimeline .sapMTLI {
   padding: 0.6rem 0 0.6rem 1rem;
   border-bottom: none;
   position: relative;
 }
 
-.chkApp .sapMTLI::before {
+.chkApp .detailHistoryTimeline .sapMTLI::before {
   content: "";
   position: absolute;
   left: 0.35rem;
@@ -115,16 +114,16 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentItemRow {
   pointer-events: none;
 }
 
-body.chkAppRoot.appLight .chkApp .sapMTLI::before {
+body.chkAppRoot.appLight .chkApp .detailHistoryTimeline .sapMTLI::before {
   background: rgba(0, 80, 200, 0.12);
 }
 
-body.chkAppRoot.appDark .chkApp .sapMTLI::before {
+body.chkAppRoot.appDark .chkApp .detailHistoryTimeline .sapMTLI::before {
   background: rgba(100, 150, 230, 0.15);
 }
 
-.chkApp .sapMTLIIcon,
-.chkApp .sapMTLICircle {
+.chkApp .detailHistoryTimeline .sapMTLIIcon,
+.chkApp .detailHistoryTimeline .sapMTLICircle {
   border-radius: 50%;
   width: 0.75rem;
   height: 0.75rem;
@@ -132,29 +131,29 @@ body.chkAppRoot.appDark .chkApp .sapMTLI::before {
   margin-top: 0.25rem;
 }
 
-body.chkAppRoot.appLight .chkApp .sapMTLIIcon {
+body.chkAppRoot.appLight .chkApp .detailHistoryTimeline .sapMTLIIcon {
   background: var(--hz-accent);
   opacity: 0.55;
 }
 
-body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
+body.chkAppRoot.appDark .chkApp .detailHistoryTimeline .sapMTLIIcon {
   background: var(--hz-accent-soft);
   opacity: 0.55;
 }
 
-.chkApp .sapMTLITitle {
+.chkApp .detailHistoryTimeline .sapMTLITitle {
   font-size: 0.84rem;
   font-weight: 600;
 }
 
-.chkApp .sapMTLIDescription {
+.chkApp .detailHistoryTimeline .sapMTLIDescription {
   font-size: 0.78rem;
   opacity: 0.62;
   line-height: 1.45;
   margin-top: 0.18rem;
 }
 
-.chkApp .sapMTLITimestamp {
+.chkApp .detailHistoryTimeline .sapMTLITimestamp {
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
   opacity: 0.44;
@@ -204,7 +203,7 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
   gap: 0.25rem;
 }
 
-.chkApp .detailAttachmentActions .sapMBtnInner {
+.chkApp .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
   border-radius: 999px;
 }
 
@@ -212,22 +211,17 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
   row-gap: 0.38rem;
 }
 
-.chkApp .detailAttachmentToolbar.sapMTBNewFlex {
-  flex-wrap: nowrap;
-  align-content: stretch;
-  overflow: hidden;
-}
-
-.chkApp .detailAttachmentToolbar .sapMBarChild {
+.chkApp .detailAttachmentToolbar > * {
   min-width: 0;
 }
 
-.chkApp .detailAttachmentToolbar .sapMTBSpacer {
+.chkApp .detailAttachmentToolbar .detailAttachmentToolbarSpacer {
   flex: 999 1 0%;
   min-width: 0.5rem;
 }
 
-.chkApp .detailAttachmentToolbar .sapMOTBOverflowButton {
+.chkApp .detailAttachmentToolbar .sapMOTBOverflowButton,
+.chkApp .detailAttachmentToolbar .detailAttachmentToolbarToggle {
   flex: 0 0 auto;
 }
 
@@ -252,12 +246,12 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
 }
 
 .chkApp .detailAttachmentsCard,
-.chkApp .detailAttachmentsCard > .sapMFlexItem,
-.chkApp .detailAttachmentsCard .sapMFlexItem,
+.chkApp .detailAttachmentsCard > *,
+.chkApp .detailAttachmentsCard *[class*="detailAttachment"],
 .chkApp .detailAttachmentsBody,
-.chkApp .detailAttachmentsBody > .sapMFlexItem,
+.chkApp .detailAttachmentsBody > *,
 .chkApp .detailHeroExperienceCard,
-.chkApp .detailHeroExperienceCard > .sapMFlexItem {
+.chkApp .detailHeroExperienceCard > * {
   min-height: 0;
   height: auto;
 }
@@ -427,10 +421,7 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
-.chkApp .detailEmptyStateCard.sapMFlexItem,
-.chkApp .detailEmptyStateCard.sapMFlexBox,
-.chkApp .detailEmptyStateCard.sapMHBox,
-.chkApp .detailEmptyStateCard.sapMVBox {
+.chkApp .detailEmptyStateCard {
   flex: 0 0 auto;
   align-self: stretch;
 }
@@ -511,7 +502,7 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   padding: 0 0 0.08rem;
 }
 
-.chkApp .appLayoutSplit .detailPage .detailAttachmentToolbar .sapMTitle {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentToolbarTitle {
   font-size: 0.88rem;
 }
 
@@ -653,13 +644,7 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 }
 
 @media (max-width: 1366px) {
-  .chkApp .detailAttachmentToolbar.sapMTBNewFlex {
-    flex-wrap: nowrap;
-    overflow: visible;
-    row-gap: 0;
-  }
-
-  .chkApp .detailAttachmentToolbar .sapMTBSpacer {
+  .chkApp .detailAttachmentToolbar .detailAttachmentToolbarSpacer {
     display: block;
   }
 
@@ -704,14 +689,14 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
     column-gap: 0.26rem;
   }
 
-  .chkApp .detailAttachmentToolbar.sapMTBNewFlex {
+  .chkApp .detailAttachmentToolbar {
     min-height: 0;
     height: auto;
     align-items: stretch;
     align-content: flex-start;
   }
 
-  .chkApp .detailAttachmentToolbar .sapMTitle {
+  .chkApp .detailAttachmentToolbar .detailAttachmentToolbarTitle {
     flex: 1 1 100%;
   }
 

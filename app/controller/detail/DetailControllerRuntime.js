@@ -8,6 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailInteractionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFormatters",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime"
 ], function (
@@ -20,6 +21,7 @@ sap.ui.define([
     DetailChecklistBehavior,
     DetailInteractionRuntime,
     DetailFormatters,
+    DetailAttachmentViewState,
     AttachmentUploadCore,
     DetailRowBindingRuntime
 ) {
@@ -53,6 +55,7 @@ sap.ui.define([
             },
 
             _onSelectedChecklistChanged: function (oEvent) {
+                DetailAttachmentViewState.sync(this);
                 DetailValidationSummaryRuntime.onSelectedChecklistChanged(this, oEvent, STATE_PATHS);
             }
         },

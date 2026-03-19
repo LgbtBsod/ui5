@@ -3,10 +3,6 @@
     xmlns:core="sap.ui.core"
     xmlns:smartTable="sap.ui.comp.smarttable">
     <VBox id="searchResultsShell" width="100%" class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
-        <customData>
-            <core:CustomData key="role" value="region" writeToDom="true"/>
-            <core:CustomData key="aria-label" value="{i18n>searchResultsAriaLabel}" writeToDom="true"/>
-        </customData>
         <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonList" type="XML"/>
         </VBox>

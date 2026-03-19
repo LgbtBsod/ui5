@@ -19,14 +19,16 @@ CLASS zcl_zodata_odata_util IMPLEMENTATION.
     READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key>) WITH KEY name = iv_name.
     IF sy-subrc <> 0 OR <ls_key>-value IS INITIAL.
       RAISE EXCEPTION TYPE zcx_zodata_error
-        EXPORTING iv_msg = |Key { iv_name } not found in request|.
+        EXPORTING iv_code = 'VALIDATION_ERROR'
+                  iv_msg  = |Key { iv_name } not found in request|.
     ENDIF.
 
     TRY.
         rv_uuid = <ls_key>-value.
       CATCH cx_sy_conversion_no_uuid.
         RAISE EXCEPTION TYPE zcx_zodata_error
-          EXPORTING iv_msg = |Invalid UUID for key { iv_name }|.
+          EXPORTING iv_code = 'VALIDATION_ERROR'
+                    iv_msg  = |Invalid UUID for key { iv_name }|.
     ENDTRY.
   ENDMETHOD.
 ENDCLASS.

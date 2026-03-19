@@ -1,11 +1,7 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <HBox class="workflowRail searchHeaderKpiRail searchAnalyticsRailShell" renderType="Bare" wrap="Wrap" justifyContent="Start" alignItems="Stretch">
-        <customData>
-            <core:CustomData key="role" value="region" writeToDom="true"/>
-            <core:CustomData key="aria-label" value="{i18n>kpiRailAriaLabel}" writeToDom="true"/>
-        </customData>
+    <HBox id="searchAnalyticsRailRegion" class="workflowRail searchHeaderKpiRail searchAnalyticsRailShell" renderType="Bare" wrap="Wrap" justifyContent="Start" alignItems="Stretch">
         <HBox id="searchAnalyticsRail" class="searchAnalyticsRailGrid" renderType="Bare" wrap="Wrap">
             <VBox class="kpiCard searchAnalyticsCard">
                 <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">

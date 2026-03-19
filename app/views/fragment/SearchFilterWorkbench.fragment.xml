@@ -3,10 +3,6 @@
     xmlns:core="sap.ui.core"
     xmlns:smartFilterBar="sap.ui.comp.smartfilterbar">
     <VBox id="searchFilterCard" width="100%" class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell">
-        <customData>
-            <core:CustomData key="role" value="search" writeToDom="true"/>
-            <core:CustomData key="aria-label" value="{i18n>filtersAriaLabel}" writeToDom="true"/>
-        </customData>
         <VBox visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }" class="searchFilterSkeletonShell" renderType="Bare">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonFormSection" type="XML"/>
         </VBox>

@@ -11,11 +11,9 @@
 }
 
 .chkApp .detailControlToolbar,
-.chkApp .detailWorkflowRail.sapMOTB,
+.chkApp .detailWorkflowRail,
 .chkApp .detailSectionToolbar,
-.chkApp .detailSectionCard > .sapMTB,
-.chkApp .detailSectionCard > .sapMOTB,
-.chkApp .detailControlRow.sapMTB {
+.chkApp .detailControlRow {
   background: transparent;
   border: 0;
   padding-inline: 0;
@@ -87,27 +85,25 @@
   padding: 0.18rem 0.3rem;
 }
 
-.chkApp .detailControlRowTop.sapMTBNewFlex,
-.chkApp .detailControlRowActions.sapMTBNewFlex,
-.chkApp .detailViewportNarrow .detailSectionToolbar.sapMTBNewFlex,
-.chkApp .detailViewportNarrow .detailControlRowActions.sapMTBNewFlex {
+.chkApp .detailControlRowTop,
+.chkApp .detailControlRowActions,
+.chkApp .detailViewportNarrow .detailSectionToolbar,
+.chkApp .detailViewportNarrow .detailControlRowActions {
   flex-wrap: wrap;
   align-content: center;
   overflow: visible;
   row-gap: 0.3rem;
 }
 
-.chkApp .detailViewportNarrow .detailControlRowTop.sapMTBNewFlex {
+.chkApp .detailViewportNarrow .detailControlRowTop {
   flex-wrap: wrap;
   overflow: visible;
   row-gap: 0.3rem;
 }
 
-.chkApp .detailControlRowTop .sapMBarChild,
-.chkApp .detailControlRowActions .sapMBarChild,
-.chkApp .detailControlRow .sapMBarChild,
-.chkApp .detailControlRow .sapMBtn,
-.chkApp .detailControlRow .sapMTBSpacer {
+.chkApp .detailControlRowTop > *,
+.chkApp .detailControlRowActions > *,
+.chkApp .detailControlRow > * {
   min-width: 0;
 }
 
@@ -116,11 +112,10 @@
   flex: 0 0 auto;
 }
 
-.chkApp .detailControlRowTop .sapMTBSpacer,
-.chkApp .detailControlRowActions .sapMTBSpacer,
-.chkApp .detailViewportNarrow .detailSectionToolbar .sapMTBSpacer,
-.chkApp .detailViewportNarrow .detailControlRowTop .sapMTBSpacer,
-.chkApp .detailViewportNarrow .detailControlRowActions .sapMTBSpacer {
+.chkApp .detailControlRowSpacer,
+.chkApp .detailViewportNarrow .detailSectionToolbar .detailControlRowSpacer,
+.chkApp .detailViewportNarrow .detailControlRowTop .detailControlRowSpacer,
+.chkApp .detailViewportNarrow .detailControlRowActions .detailControlRowSpacer {
   flex: 999 1 0%;
   min-width: 0.5rem;
   display: block;
@@ -132,7 +127,7 @@
   flex: 0 1 auto;
 }
 
-.chkApp .detailControlRow .sapMBtn .sapMBtnContent,
+.chkApp .detailControlRow .sapMBtnContent,
 .chkApp .detailControlRowActions .sapMBtnContent {
   color: inherit;
   overflow: hidden;
@@ -170,22 +165,21 @@ body.chkAppRoot.appLight .chkApp .detailControlRowActions {
 }
 
 @media (max-width: 1366px) {
-  .chkApp .detailControlRowActions.sapMTBNewFlex,
-  .chkApp .detailSectionToolbar.sapMTBNewFlex {
+  .chkApp .detailControlRowActions,
+  .chkApp .detailSectionToolbar {
     flex-wrap: wrap;
     overflow: visible;
     row-gap: 0.3rem;
   }
 
-  .chkApp .detailControlRowTop.sapMTBNewFlex {
+  .chkApp .detailControlRowTop {
     flex-wrap: wrap;
     overflow: visible;
     row-gap: 0.3rem;
   }
 
-  .chkApp .detailControlRowTop .sapMTBSpacer,
-  .chkApp .detailControlRowActions .sapMTBSpacer,
-  .chkApp .detailSectionToolbar .sapMTBSpacer {
+  .chkApp .detailControlRowSpacer,
+  .chkApp .detailSectionToolbar .detailControlRowSpacer {
     display: block;
   }
 }
@@ -232,7 +226,7 @@ body.chkAppRoot.appLight .chkApp .detailControlRowActions {
     white-space: normal;
   }
 
-  .chkApp .detailControlRowTop .sapMTBSpacer {
+  .chkApp .detailControlRowTop .detailControlRowSpacer {
     display: none;
   }
 
@@ -245,7 +239,7 @@ body.chkAppRoot.appLight .chkApp .detailControlRowActions {
     width: 100%;
   }
 
-  .chkApp .detailControlRowActions .sapMTBSpacer {
+  .chkApp .detailControlRowActions .detailControlRowSpacer {
     display: block;
   }
 

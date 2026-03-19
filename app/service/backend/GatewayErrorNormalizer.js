@@ -35,6 +35,17 @@ sap.ui.define([
         });
     }
 
+    function extractPrefixedCode(sMessage) {
+        var oMatch = /^([A-Z][A-Z0-9_]+):\s*(.+)$/.exec(String(sMessage || "").trim());
+        if (!oMatch) {
+            return null;
+        }
+        return {
+            code: String(oMatch[1] || "").trim(),
+            message: String(oMatch[2] || "").trim()
+        };
+    }
+
     function extractTopLevelFields(oPayload) {
         var sCode = String(
             (oPayload && (oPayload.code || oPayload.Code || oPayload.reason_code || oPayload.ReasonCode)) ||
@@ -70,6 +81,7 @@ sap.ui.define([
         var oEnvelope = pickEnvelope(oError);
         var oPayload = (oError && oError.responseJSON) || parseJsonSafe(oError && oError.responseText) || oError || {};
         var mHeaders = parseResponseHeaders((oError && oError.responseHeaders) || {});
+        var oPrefixedMessage;
         var sCode = String(
             (oEnvelope && oEnvelope.code) ||
             (oError && (oError.code || oError.statusCode || oError.status)) ||
@@ -80,13 +92,23 @@ sap.ui.define([
             (oError && oError.message) ||
             "OData request failed"
         );
+        oPrefixedMessage = extractPrefixedCode(sMessage);
+        if (oPrefixedMessage && (!oPayload.code && !oPayload.reason_code) && (!oEnvelope || !oEnvelope.code)) {
+            sMessage = oPrefixedMessage.message || sMessage;
+        }
         var oNormalized = {
             code: sCode,
             message: sMessage,
             statusCode: Number((oError && (oError.statusCode || oError.status)) || 0) || 0,
             details: extractDetails(oEnvelope),
             responseHeaders: mHeaders,
-            backend: extractTopLevelFields(oPayload),
+            backend: (function () {
+                var oBackend = extractTopLevelFields(oPayload);
+                if (!oBackend.code && oPrefixedMessage) {
+                    oBackend.code = oPrefixedMessage.code;
+                }
+                return oBackend;
+            }()),
             correlationId: String(
                 mHeaders["x-correlation-id"]
                 || mHeaders["x-request-id"]
