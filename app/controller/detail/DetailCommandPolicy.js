@@ -50,17 +50,18 @@ sap.ui.define([
     }
 
     function execute(oController, sMethod, mInput) {
-        var oFacade = oController && oController._facade;
-        var fnMethod = oFacade && oFacade[sMethod];
-        if (typeof fnMethod !== "function" || !oController || typeof oController.executeFacadeMethod !== "function") {
+        var oService = oController && oController._detailService;
+        var fnMethod = oService && oService[sMethod];
+        if (typeof fnMethod !== "function" || !oController || typeof oController.applyUseCaseEffects !== "function") {
             return Promise.resolve();
         }
-        return Promise.resolve(oController.executeFacadeMethod(
-            oFacade,
-            sMethod,
+        return Promise.resolve(fnMethod.call(
+            oService,
             normalizePayload(mInput || {}),
             CtxFactory.buildCtx(oController, {})
-        ));
+        )).then(function (oResult) {
+            return oController.applyUseCaseEffects(oResult);
+        });
     }
 
     return Object.freeze({

@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAccessViewState",
@@ -15,7 +15,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts"
 ], function (
     ControllerResourceCleanup,
-    DetailFacade,
+    DetailService,
     ControllerRouteRuntime,
     ControllerTextRuntime,
     DetailAccessViewState,
@@ -92,6 +92,24 @@ sap.ui.define([
             locationVhHint: "",
             narrowDetailViewport: false,
             deleteChecklistConfirmArmed: false,
+            detailSections: {
+                checks: {
+                    kind: "check",
+                    titleKey: "checksTitle",
+                    emptyTitleKey: "detailEmptyChecksTitle",
+                    emptyTextKey: "detailEmptyChecksText",
+                    actionIcon: "sap-icon://task",
+                    emptyIcon: "sap-icon://complete"
+                },
+                barriers: {
+                    kind: "barrier",
+                    titleKey: "barriersTitle",
+                    emptyTitleKey: "detailEmptyBarriersTitle",
+                    emptyTextKey: "detailEmptyBarriersText",
+                    actionIcon: "sap-icon://quality-issue",
+                    emptyIcon: "sap-icon://alert"
+                }
+            },
             accessState: DetailAccessViewState.createDefaultState(""),
             validationShown: false,
             validationMissing: {},
@@ -145,9 +163,9 @@ sap.ui.define([
         });
     }
 
-    return {
-        onInit: function () {
-            this._facade = new DetailFacade();
+        return {
+            onInit: function () {
+            this._detailService = new DetailService(this);
             this._bDetailInitialRouteHandled = false;
             this._mLazyDialogs = {};
             this._mDialogReturnFocus = {};
@@ -292,6 +310,26 @@ sap.ui.define([
             this._iDetailCloseFallbackTimer = SchedulingRuntime.clearTimer(this._iDetailCloseFallbackTimer);
             this._clearLocationValueHelpSearchTimer();
             this._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(this._iLocationVhTableSyncTimer);
+        },
+
+        isDetailSectionBusy: function (sKind) {
+            return sKind === "barrier"
+                ? !!ControllerViewStateRuntime.get(this, "/barriersBusy", false)
+                : !!ControllerViewStateRuntime.get(this, "/checksBusy", false);
+        },
+
+        isDetailSectionEmpty: function (sKind) {
+            var sPath = sKind === "barrier" ? "/barriers" : "/checks";
+            var oSelectedModel = this.getModel && this.getModel(SELECTED_MODEL);
+            var aRows = oSelectedModel && oSelectedModel.getProperty ? oSelectedModel.getProperty(sPath) : [];
+            return !Array.isArray(aRows) || aRows.length === 0;
+        },
+
+        formatSectionRowCount: function (sKind) {
+            var sPath = sKind === "barrier" ? "/barriers" : "/checks";
+            var oSelectedModel = this.getModel && this.getModel(SELECTED_MODEL);
+            var aRows = oSelectedModel && oSelectedModel.getProperty ? oSelectedModel.getProperty(sPath) : [];
+            return this.formatRowCount(Array.isArray(aRows) ? aRows : []);
         }
     };
 });

@@ -1,0 +1,62 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <VBox class="glassCard detailSectionCard detailTableExperienceCard" width="100%">
+        <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
+            <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonTableSection" type="XML"/>
+        </VBox>
+        <VBox renderType="Bare" visible="{= !${view>/detailSkeletonBusy} }" class="appSkeletonReveal detailSectionBody workflowBusyScope workflowBusyScopeSection">
+            <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellInset" renderType="Bare" visible="{path:'view>kind', formatter:'.isDetailSectionBusy'}">
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
+            </VBox>
+            <OverflowToolbar class="toolbarTransparent detailSectionToolbar workbenchToolbarSurface sectionToolbarSurface">
+                <Title text="{path:'view>titleKey', formatter:'.formatI18nByKey'}"/>
+                <ObjectStatus
+                    text="{path:'view>kind', formatter:'.formatSectionRowCount'}"
+                    state="None"
+                    class="chipSm statusChip detailSectionCountChip">
+                    <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
+                </ObjectStatus>
+                <ToolbarSpacer/>
+                <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecklistSection" class="sapUiTinyMarginEnd actionPrioritySecondary">
+                    <customData>
+                        <core:CustomData key="kind" value="{view>kind}"/>
+                    </customData>
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="Low"/>
+                    </layoutData>
+                </Button>
+                <Button
+                    text="{i18n>addRow}"
+                    icon="{view>actionIcon}"
+                    press=".onAddChecklistSection"
+                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                    class="actionPriorityPrimary">
+                    <customData>
+                        <core:CustomData key="kind" value="{view>kind}"/>
+                    </customData>
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="High"/>
+                    </layoutData>
+                </Button>
+            </OverflowToolbar>
+            <VBox
+                class="detailEmptyStateCard workflowEmptyStateCard"
+                renderType="Bare"
+                visible="{path:'view>kind', formatter:'.isDetailSectionEmpty'}">
+                <core:Icon src="{view>emptyIcon}" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
+                <Title text="{path:'view>emptyTitleKey', formatter:'.formatI18nByKey'}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
+                <Text text="{path:'view>emptyTextKey', formatter:'.formatI18nByKey'}" class="detailEmptyStateText workflowEmptyStateText"/>
+                <Button
+                    text="{i18n>addRow}"
+                    icon="{view>actionIcon}"
+                    type="Transparent"
+                    press=".onAddChecklistSection"
+                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                    class="detailEmptyStateAction workflowEmptyStateAction">
+                    <customData>
+                        <core:CustomData key="kind" value="{view>kind}"/>
+                    </customData>
+                </Button>
+            </VBox>
+        </VBox>
+    </VBox>
+</core:FragmentDefinition>

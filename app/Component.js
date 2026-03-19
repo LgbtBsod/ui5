@@ -1,86 +1,10 @@
 sap.ui.define([
     "sap/ui/core/UIComponent",
-    "PRODUCTION_CONTROL_CHECKLIST/model/ModelFactory",
-    "PRODUCTION_CONTROL_CHECKLIST/service/SmartSearchAdapter",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ManagerFacade",
-    "sap/ui/model/json/JSONModel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/EnsureDictLoadedUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/InitializeAppUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/LoadCurrentUserUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/StartManagersUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/DiagnosticsUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSaveGuardRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentModelInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentMainServiceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentCoreInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentStateSeedRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionDispatcher",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "sap/ui/Device",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentBootstrap",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentManagers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime"
-], function (
-    UIComponent,
-    ModelFactory,
-    SmartSearchAdapter,
-    ManagerFacade,
-    JSONModel,
-    WorkflowCoordinator,
-    DeltaPayloadBuilder,
-    GatewayBackendService,
-    DebugLogger,
-    RuntimeTimerSanitizer,
-    TimeConfigService,
-    ApplyRuntimeSettingsUseCase,
-    EnsureDictLoadedUseCase,
-    InitializeAppUseCase,
-    LoadCurrentUserUseCase,
-    StartManagersUseCase,
-    DiagnosticsUseCase,
-    CtxFactory,
-    EffectApplier,
-    FeedbackPolicy,
-    ComponentLockReleaseRuntime,
-    ComponentSaveGuardRuntime,
-    ComponentInitRuntime,
-    ComponentModelInitRuntime,
-    ComponentMainServiceRuntime,
-    ComponentCoreInitRuntime,
-    ComponentStateSeedRuntime,
-    TelemetryRuntime,
-    LayoutStateRuntime,
-    StatePaths,
-    DetailFacade,
-    ActionDispatcher,
-    ActionContract,
-    WorkflowTelemetry,
-    CreateSentinel,
-    Device,
-    InteractionFX,
-    ThemeService,
-    ComponentAppRuntime,
-    EditSessionRuntime
-) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX"
+], function (UIComponent, ComponentBootstrap, ComponentManagers, ComponentAppRuntime, InteractionFX) {
     "use strict";
 
     return UIComponent.extend("PRODUCTION_CONTROL_CHECKLIST.Component", {
@@ -88,79 +12,41 @@ sap.ui.define([
             manifest: "json"
         },
         init: function () {
-            return ComponentInitRuntime.runInit.call(this, arguments, {
-                UIComponent: UIComponent,
-                ModelFactory: ModelFactory,
-                SmartSearchAdapter: SmartSearchAdapter,
-                Managers: ManagerFacade,
-                JSONModel: JSONModel,
-                WorkflowCoordinator: WorkflowCoordinator,
-                DeltaPayloadBuilder: DeltaPayloadBuilder,
-                GatewayBackendService: GatewayBackendService,
-                DebugLogger: DebugLogger,
-                RuntimeTimerSanitizer: RuntimeTimerSanitizer,
-                TimeConfigService: TimeConfigService,
-                ApplyRuntimeSettingsUseCase: ApplyRuntimeSettingsUseCase,
-                EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
-                InitializeAppUseCase: InitializeAppUseCase,
-                LoadCurrentUserUseCase: LoadCurrentUserUseCase,
-                StartManagersUseCase: StartManagersUseCase,
-                DiagnosticsUseCase: DiagnosticsUseCase,
-                CtxFactory: CtxFactory,
-                EffectApplier: EffectApplier,
-                FeedbackPolicy: FeedbackPolicy,
-                ComponentRuntimeSupport: ComponentAppRuntime.buildComponentRuntimeSupport(),
-                ComponentLockReleaseRuntime: ComponentLockReleaseRuntime,
-                ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
-                ComponentModelInitRuntime: ComponentModelInitRuntime,
-                ComponentMainServiceRuntime: ComponentMainServiceRuntime,
-                ComponentCoreInitRuntime: ComponentCoreInitRuntime,
-                ComponentStateSeedRuntime: ComponentStateSeedRuntime,
-                TelemetryRuntime: TelemetryRuntime,
-                LayoutStateRuntime: LayoutStateRuntime,
-                StatePaths: StatePaths,
-                DetailFacade: DetailFacade,
-                ActionDispatcher: ActionDispatcher,
-                ActionContract: ActionContract,
-                WorkflowTelemetry: WorkflowTelemetry,
-                CreateSentinel: CreateSentinel,
-                Device: Device,
-                InteractionFX: InteractionFX,
-                ThemeRuntime: ThemeService
-            });
+            this._oInteractionFX = InteractionFX;
+            return ComponentBootstrap.init(this, arguments);
         },
         _startCoreManagers: function () {
-            return StartManagersUseCase.execute({ scope: "core" }, { managers: this._collectManagers() });
+            return ComponentManagers.startCore(this);
         },
         _stopLockScopedManagers: function () {
-            return StartManagersUseCase.execute({ scope: "lock", lockRuntimeActive: false }, { managers: this._collectManagers() });
+            return ComponentManagers.stopLockScoped(this);
         },
         _startLockScopedManagers: function () {
-            return StartManagersUseCase.execute({ scope: "lock", lockRuntimeActive: true }, { managers: this._collectManagers() });
+            return ComponentManagers.startLockScoped(this);
         },
         _stopAllManagers: function () {
-            EditSessionRuntime.stopAll(this._collectManagers());
+            return ComponentManagers.stopAll(this);
         },
         _collectManagers: function () {
-            return ComponentAppRuntime.collectManagers(this);
+            return ComponentManagers.collect(this);
         },
         _isLockRuntimeActive: function (oStateModel) {
-            return ComponentAppRuntime.isLockRuntimeActive(oStateModel);
+            return ComponentManagers.isLockRuntimeActive(oStateModel);
         },
         _syncLockScopedManagers: function (oStateModel) {
-            return ComponentAppRuntime.syncLockScopedManagers(this, oStateModel);
+            return ComponentManagers.syncLockScopedManagers(this, oStateModel);
         },
         _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel) {
-            return ComponentAppRuntime.applyFrontendRuntimeConfig(this, oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel, ApplyRuntimeSettingsUseCase);
+            return ComponentManagers.applyFrontendRuntimeConfig(this, oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel);
         },
         _applyManagersTimerConfig: function (mTimers) {
-            return ComponentAppRuntime.applyManagersTimerConfig(this, mTimers);
+            return ComponentManagers.applyManagersTimerConfig(this, mTimers);
         },
         _registerLockReleaseBeacon: function (oStateModel, oMainServiceModel) {
-            return ComponentAppRuntime.registerLockReleaseBeacon(this, oStateModel, oMainServiceModel);
+            return ComponentManagers.registerLockReleaseBeacon(this, oStateModel, oMainServiceModel);
         },
         _releaseActiveLockOnLeave: function (oStateModel, oMainServiceModel) {
-            return ComponentAppRuntime.releaseActiveLockOnLeave(this, oStateModel, oMainServiceModel);
+            return ComponentManagers.releaseActiveLockOnLeave(this, oStateModel, oMainServiceModel);
         },
         attachInteractionFxToApp: function (oDomRef) {
             if (this._oInteractionFxHandle && this._oInteractionFxHandle.destroy) {
@@ -176,4 +62,3 @@ sap.ui.define([
         }
     });
 });
-

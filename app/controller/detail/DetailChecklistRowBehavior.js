@@ -26,7 +26,8 @@ sap.ui.define([
 
     function resolveRowKind(oEvent) {
         var sKind = readSourceFlag(oEvent && oEvent.getSource && oEvent.getSource(), "rowKind")
-            || readSourceFlag(oEvent && oEvent.getSource && oEvent.getSource(), "dialogKind");
+            || readSourceFlag(oEvent && oEvent.getSource && oEvent.getSource(), "dialogKind")
+            || readSourceFlag(oEvent && oEvent.getSource && oEvent.getSource(), "kind");
         return sKind === "barrier" ? "barrier" : "check";
     }
 
@@ -53,11 +54,13 @@ sap.ui.define([
     }
 
     return {
+        onAddChecklistSection: function (oEvent) { return DetailRowBehaviorRuntime.onAddRow(this, resolveRowKind(oEvent), resolveHooks(this)); },
         onAddCheckRow: function () { return DetailRowBehaviorRuntime.onAddRow(this, "check", resolveHooks(this)); },
         onAddBarrierRow: function () { return DetailRowBehaviorRuntime.onAddRow(this, "barrier", resolveHooks(this)); },
         onDeleteCheckRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, "check", oEvent, resolveHooks(this)); },
         onDeleteBarrierRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, "barrier", oEvent, resolveHooks(this)); },
         onDeleteExpandedRow: function (oEvent) { return DetailRowBehaviorRuntime.onDeleteRow(this, resolveRowKind(oEvent), oEvent, resolveHooks(this)); },
+        onExpandChecklistSection: function (oEvent) { return DetailRowBehaviorRuntime.onExpandRows(this, resolveRowKind(oEvent), oEvent, resolveHooks(this)); },
         onExpandChecks: function (oEvent) { return DetailRowBehaviorRuntime.onExpandRows(this, "check", oEvent, resolveHooks(this)); },
         onExpandBarriers: function (oEvent) { return DetailRowBehaviorRuntime.onExpandRows(this, "barrier", oEvent, resolveHooks(this)); },
         onCloseChecksExpanded: function () { return DetailRowBehaviorRuntime.onCloseRowsExpanded(this, "check", resolveHooks(this)); },
