@@ -1,27 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailDirtyStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
-], function (DetailDirtyStateRuntime, ModelStateRuntime, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime"
+], function (DetailDirtyStateRuntime, ModelStateRuntime, ModelContracts, DetailRowBindingRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var SELECTED_MODEL = MODELS.SELECTED;
-
-    function resolveSelectedBindingPath(oSource, sProperty) {
-        var oBinding = oSource && oSource.getBinding && oSource.getBinding(sProperty);
-        var oContext = oSource && oSource.getBindingContext && (oSource.getBindingContext(SELECTED_MODEL) || oSource.getBindingContext());
-        var sContextPath = String((oContext && oContext.getPath && oContext.getPath()) || "").trim();
-        var sBindingPath = String((oBinding && oBinding.getPath && oBinding.getPath()) || "").trim();
-        var sModelName = String((oBinding && oBinding.getModel && oBinding.getModel() && oBinding.getModel().sName) || "").trim();
-        if (!sBindingPath || (sModelName && sModelName !== SELECTED_MODEL)) {
-            return "";
-        }
-        if (sBindingPath.charAt(0) === "/") {
-            return sBindingPath;
-        }
-        return (sContextPath ? sContextPath + "/" : "/") + sBindingPath;
-    }
 
     function normalizeEventValue(oEvent, sParameterName, sPropertyName, oSource) {
         var vValue = oEvent && oEvent.getParameter && oEvent.getParameter(sParameterName);
@@ -38,7 +24,7 @@ sap.ui.define([
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
         var sProperty = String((mOptions && mOptions.property) || "value").trim() || "value";
         var sParameter = String((mOptions && mOptions.parameter) || sProperty).trim() || sProperty;
-        var sPath = resolveSelectedBindingPath(oSource, sProperty);
+        var sPath = DetailRowBindingRuntime.resolveSelectedBindingPath(oSource, sProperty);
         var vValue;
         if (!oSource || !sPath || !mHooks.isDirtyTrackMode()) {
             return false;
@@ -54,27 +40,7 @@ sap.ui.define([
 
     function resolveRowInput(oEvent) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-        var oCursor = oSource;
-        var oCtx;
-        var oRow;
-        var sPath = "";
-        while (oCursor) {
-            if (oCursor.getBindingContext) {
-                oCtx = oCursor.getBindingContext(SELECTED_MODEL) || oCursor.getBindingContext();
-                if (oCtx && oCtx.getPath) {
-                    sPath = String(oCtx.getPath() || "");
-                    oRow = oCtx.getObject && oCtx.getObject();
-                    if (sPath) {
-                        break;
-                    }
-                }
-            }
-            oCursor = oCursor.getParent && oCursor.getParent();
-        }
-        return {
-            rowPath: sPath,
-            rowId: String((oRow && (oRow.client_row_id || oRow.Key || oRow.id)) || "").trim()
-        };
+        return DetailRowBindingRuntime.resolveSelectedRowContext(oSource);
     }
 
     return {

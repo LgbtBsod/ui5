@@ -1,0 +1,6 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <CheckBox
+        selected="{selected>selected}"
+        select=".onSelectionToggle"
+        visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+</core:FragmentDefinition>

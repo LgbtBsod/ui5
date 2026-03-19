@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig"
-], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime"
+], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime) {
     "use strict";
 
     function RowOpsUseCase() {
@@ -26,26 +27,10 @@ sap.ui.define([
         return ClientKeyGenerator.createHex32();
     }
 
-    function resolveBindingContextPath(oControl, sModelName) {
-        var oCursor = oControl;
-        var oCtx;
-        var sPath = "";
-        while (oCursor) {
-            if (oCursor.getBindingContext) {
-                oCtx = oCursor.getBindingContext(sModelName) || oCursor.getBindingContext();
-                sPath = String((oCtx && oCtx.getPath && oCtx.getPath()) || "");
-                if (sPath) {
-                    return sPath;
-                }
-            }
-            oCursor = oCursor.getParent && oCursor.getParent();
-        }
-        return "";
-    }
-
     function resolveRowIndexFromEvent(oEvent, sModelName, sCollectionPath) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-        var sPath = resolveBindingContextPath(oSource, sModelName);
+        var oContext = DetailRowBindingRuntime.resolveSelectedBindingContext(oSource, sModelName);
+        var sPath = String((oContext && oContext.getPath && oContext.getPath()) || "");
         var sPrefix = String(sCollectionPath || "");
         var oMatch;
         if (!sPath || !sPrefix || sPath.indexOf(sPrefix + "/") !== 0) {
@@ -104,18 +89,19 @@ sap.ui.define([
 
     function handleEntityRowOp(oUiState, sEntity, sOp, mInput) {
         var oConfig = DetailRowEntityConfig.get(sEntity);
-        var aRows = oUiState.get("selected", oConfig.rowsPath) || [];
+        var sRowsPath = DetailRowBindingRuntime.resolveRowsPath(oConfig);
+        var aRows = oUiState.get("selected", sRowsPath) || [];
         var iRowIndex;
         if (sOp === "add") {
-            oUiState.set("selected", oConfig.rowsPath, aRows.concat([createRow(aRows, oConfig)]));
+            oUiState.set("selected", sRowsPath, aRows.concat([createRow(aRows, oConfig)]));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "delete") {
-            iRowIndex = resolveRowIndexFromInput(mInput, aRows, oConfig.rowsPath);
+            iRowIndex = resolveRowIndexFromInput(mInput, aRows, sRowsPath);
             if (iRowIndex < 0) {
-                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, "selected", oConfig.rowsPath);
+                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, "selected", sRowsPath);
             }
-            oUiState.set("selected", oConfig.rowsPath, removeRows(aRows, iRowIndex));
+            oUiState.set("selected", sRowsPath, removeRows(aRows, iRowIndex));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "expand" || sOp === "collapse") {

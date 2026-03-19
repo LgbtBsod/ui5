@@ -308,10 +308,6 @@ body.chkAppRoot.appDark .chkApp .sapMTLIIcon {
   justify-content: center;
 }
 
-.chkApp .detailViewportNarrow .detailAttachmentTable .sapMListTbl {
-  min-width: 36rem;
-}
-
 .chkApp .detailViewportNarrow .detailAttachmentActions,
 .chkApp .detailViewportNarrow .detailAttachmentActions .tableRowActionBtn,
 .chkApp .detailViewportNarrow .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
@@ -523,19 +519,6 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   min-width: 0;
   width: 100%;
   max-width: 100%;
-}
-
-.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMListTbl {
-  width: 100%;
-  table-layout: fixed;
-  border-spacing: 0 0.56rem;
-}
-
-.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMListTblHeaderCell,
-.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMListTblCell {
-  min-width: 0;
-  max-width: 100%;
-  padding-inline: 0.52rem;
 }
 
 .chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMText,

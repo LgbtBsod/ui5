@@ -2,6 +2,8 @@
 (function () {
     "use strict";
 
+    // Productive support baseline: Chromium-based Edge on SAP UI 754 / UI5 1.71.
+    // No Internet Explorer compatibility branches are kept in this bootstrap.
     var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "/resources/sap-ui-core.js";
     var DEFAULT_THEME = "sap_fiori_3";
     var THEME_PROFILE_KEY = "checklist_app_theme_profile";
@@ -90,7 +92,7 @@
                 attachInit();
                 return;
             }
-            window.console.error("UI5 bootstrap loaded but sap.ui.getCore is unavailable.");
+            window.console.error("UI5 bootstrap loaded but sap.ui.require is unavailable.");
         };
         oScript.onerror = function () {
             window.console.error("UI5 bootstrap failed to load.");

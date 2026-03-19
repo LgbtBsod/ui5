@@ -41,8 +41,11 @@
   box-shadow: 0 0 0 0.2rem rgba(var(--accent-rgb), 0.14);
 }
 
-.chkApp .sapUiTableColCell .tableActionHeaderLabel,
-.chkApp .sapMListTblHeaderCell .tableActionHeaderLabel {
+.chkApp .detailGridTable .tableActionHeaderLabel,
+.chkApp .flatEditorTable .tableActionHeaderLabel,
+.chkApp .dialogDataTable .tableActionHeaderLabel,
+.chkApp .searchResultsTable .tableActionHeaderLabel,
+.chkApp .detailAttachmentTable .tableActionHeaderLabel {
   margin-inline: auto;
 }
 

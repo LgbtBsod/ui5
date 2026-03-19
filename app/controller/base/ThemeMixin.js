@@ -71,6 +71,8 @@ sap.ui.define([
             return applyMorningMode(this, null);
         },
         toggleTheme: function (oClickXY) {
+            // Re-applies the only supported productive visual profile and keeps the
+            // public contract stable for shell actions and tests.
             return applySupportedMode(this, DEFAULT_MODE, oClickXY);
         },
         _ensureThemeSyncListener: function () {

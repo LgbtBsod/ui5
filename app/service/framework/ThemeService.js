@@ -31,16 +31,6 @@ sap.ui.define([
     var sPendingMode = "";
 
     function normalizeMode(sModeOrTheme) {
-        var sValue = String(sModeOrTheme || "").trim().toLowerCase();
-        if (!sValue) {
-            return DEFAULT_MODE;
-        }
-        if (sValue === "night" || sValue === "dark" || sValue === "sap_fiori_3_dark" || sValue === "sap_horizon_dark") {
-            return DEFAULT_MODE;
-        }
-        if (sValue === "morning" || sValue === "light" || sValue === "sap_fiori_3" || sValue === "sap_horizon") {
-            return "morning";
-        }
         return DEFAULT_MODE;
     }
 
@@ -120,7 +110,6 @@ sap.ui.define([
     }
 
     function syncBackgroundRuntime(oProfile) {
-        var sMode = normalizeMode(oProfile && oProfile.mode);
         var sRuntimeTheme = "light";
         var bEnabled = normalizeAnimationEnabled(oProfile && oProfile.animationEnabled);
         var oBackgroundRuntime = getBackgroundRuntime();
@@ -142,7 +131,7 @@ sap.ui.define([
     }
 
     function modeForTheme(sTheme) {
-        return normalizeMode(sTheme);
+        return DEFAULT_MODE;
     }
 
     function syncDocumentRootClasses() {
@@ -262,7 +251,7 @@ sap.ui.define([
             sMode || oStoredProfile.mode,
             Object.prototype.hasOwnProperty.call(mOptions, "animationEnabled") ? mOptions.animationEnabled : oStoredProfile.animationEnabled
         );
-        var sResolvedMode = normalizeMode(oRequestedProfile.mode);
+        var sResolvedMode = DEFAULT_MODE;
         var sTheme = themeForMode(sResolvedMode);
         var sCurrentTheme = Core && typeof Core.getConfiguration === TYPE_FUNCTION && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? Core.getConfiguration().getTheme()

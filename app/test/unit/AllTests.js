@@ -1,6 +1,10 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ThemeDefaults.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ThemeMixin.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/Ui5BackgroundRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailRowBindingRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailRowEntityConfig.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailViewStateFactory.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/AnalyticsRefreshRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/AnalyticsDrilldownRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchAnalyticsIntentBehavior.qunit",

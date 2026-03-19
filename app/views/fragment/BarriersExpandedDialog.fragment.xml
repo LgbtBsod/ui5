@@ -1,4 +1,4 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <Dialog
         class="glassDialog governedDialog expandedRowsDialog"
         id="barriersExpandedDialog"
@@ -13,103 +13,14 @@
             <core:CustomData key="dialogKind" value="barrier"/>
         </customData>
         <content>
-            <VBox class="expandedDialogContent dialogContentShell governedDialogContent tableDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare">
+            <VBox
+                binding="{view>/detailExpandedDialogs/barriers/tableSpec}"
+                class="expandedDialogContent dialogContentShell governedDialogContent tableDialogBody workflowBusyScope workflowBusyScopeDialog"
+                renderType="Bare">
                 <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/barriersExpandedBusy}">
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
                 </VBox>
-                <t:Table
-                    class="dialogDataTable detailGridTable"
-                    visible="{= !${appView>/isPhoneViewport} }"
-                    rows="{selected>/barriers}"
-                    selectionMode="None"
-                    visibleRowCountMode="Fixed"
-                    visibleRowCount="8"
-                    rowHeight="48">
-                    <t:columns>
-                        <t:Column width="3rem">
-                            <Label text=""/>
-                            <t:template>
-                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
-                            </t:template>
-                        </t:Column>
-                        <t:Column>
-                            <Label text="{i18n>barriersNumberLabel}"/>
-                            <t:template>
-                                <Input value="{selected>BarriersNum}" editable="false"/>
-                            </t:template>
-                        </t:Column>
-                        <t:Column>
-                            <Label text="{i18n>barrierLabel}"/>
-                            <t:template>
-                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
-                            </t:template>
-                        </t:Column>
-                        <t:Column width="8rem">
-                            <Label text="{i18n>statusLabel}"/>
-                            <t:template>
-                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
-                            </t:template>
-                        </t:Column>
-                        <t:Column>
-                            <Label text="{i18n>commentLabel}"/>
-                            <t:template>
-                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
-                            </t:template>
-                        </t:Column>
-                        <t:Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
-                            <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
-                            <t:template>
-                                <Button
-                                    icon="sap-icon://delete"
-                                    text="{i18n>rowActionDelete}"
-                                    width="100%"
-                                    type="Transparent"
-                                    press=".onDeleteExpandedRow"
-                                    class="tableRowActionBtn tableRowActionBtnDanger expandedRowDeleteAction">
-                                    <customData>
-                                        <core:CustomData key="rowKind" value="barrier"/>
-                                    </customData>
-                                </Button>
-                            </t:template>
-                        </t:Column>
-                    </t:columns>
-                </t:Table>
-
-                <Table items="{selected>/barriers}" class="flatEditorTable dialogDataTable" growing="true" growingThreshold="20" visible="{appView>/isPhoneViewport}">
-                    <columns>
-                        <Column width="3rem"><Text text=""/></Column>
-                        <Column><Text text="{i18n>barriersNumberLabel}"/></Column>
-                        <Column><Text text="{i18n>barrierLabel}"/></Column>
-                        <Column><Text text="{i18n>statusLabel}"/></Column>
-                        <Column><Text text="{i18n>commentLabel}"/></Column>
-                        <Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
-                            <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
-                        </Column>
-                    </columns>
-                    <items>
-                        <ColumnListItem>
-                            <cells>
-                                <CheckBox selected="{selected>selected}" select=".onSelectionToggle" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
-                                <Input value="{selected>BarriersNum}" editable="false"/>
-                                <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
-                                    <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="detailResultSwitch detailBarriersResultSwitch"/>
-                                <TextArea value="{selected>comment}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }" placeholder="{i18n>commentPlaceholder}" rows="1" growing="true" growingMaxLines="6" class="commentExpandableField"/>
-                                <Button
-                                    icon="sap-icon://delete"
-                                    text="{i18n>rowActionDelete}"
-                                    width="100%"
-                                    type="Transparent"
-                                    press=".onDeleteExpandedRow"
-                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                                    class="tableRowActionBtn tableRowActionBtnDanger expandedRowDeleteAction">
-                                    <customData>
-                                        <core:CustomData key="rowKind" value="barrier"/>
-                                    </customData>
-                                </Button>
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecklistRowsTable" type="XML"/>
             </VBox>
         </content>
         <beginButton>

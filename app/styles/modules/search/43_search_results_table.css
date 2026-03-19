@@ -35,7 +35,6 @@
   min-height: calc(var(--theme-workbench-control-height) - 0.1rem);
 }
 
-.chkApp .searchResultsTable .sapMListTblCnt,
 .chkApp .searchResultsTable .sapMFlexItem,
 .chkApp .searchResultsTable > .sapMFlexItem {
   background: transparent;
@@ -64,128 +63,6 @@
   overflow-x: visible;
 }
 
-.chkApp .searchResultsTable .sapMListTbl,
-.chkApp .searchResultsTable table.sapMListTbl {
-  width: max-content;
-  min-width: 100%;
-  table-layout: auto;
-  border-collapse: separate;
-  border-spacing: 0 0.78rem;
-}
-
-.chkApp .searchResultsTable .sapMListTblCnt {
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-.chkApp .searchResultsTable .sapMListTblRow .sapMText {
-  line-height: var(--theme-table-body-line-height);
-}
-
-.chkApp .searchResultsTable .sapMListTblSubCnt {
-  margin-top: 0.2rem;
-  padding: 0.1rem 0 0.2rem;
-  max-width: 100%;
-}
-
-.chkApp .searchResultsTable .sapMListTblSubCntRow {
-  display: grid;
-  grid-template-columns: minmax(6.2rem, auto) minmax(0, 1fr);
-  gap: 0.28rem 0.65rem;
-  align-items: start;
-  padding: 0.16rem 0;
-}
-
-.chkApp .searchResultsTable .sapMListTblSubCntVal,
-.chkApp .searchResultsTable .sapMListTblSubCntVal .sapMText,
-.chkApp .searchResultsTable .sapMListTblSubCntVal .sapMObjectIdentifierText,
-.chkApp .searchResultsTable .sapMListTblSubCntVal .sapMObjectNumberText,
-.chkApp .searchResultsTable .sapMListTblSubCntVal .sapMObjStatusText {
-  min-width: 0;
-  color: var(--text-main);
-  font-size: var(--theme-table-body-size);
-  line-height: var(--theme-table-body-line-height);
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.chkApp .searchResultsTable .sapMListTblRowHasPopin .sapMListTblCell {
-  border-bottom-color: transparent;
-}
-
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblHeaderCell,
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblCell {
-  padding-inline: clamp(0.32rem, 0.7vw, 0.54rem);
-}
-
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblSubCntRow {
-  grid-template-columns: minmax(5.8rem, auto) minmax(0, 1fr);
-}
-
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblSubCntValBlock {
-  grid-template-columns: 1fr;
-}
-
-.chkApp :is(.appLayoutSplit, .appLayoutDetailOnly) .searchPage .searchResultsTable .sapMListTblSubCntVal {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-}
-
-.chkApp .searchResultsTable .sapMListTblHeaderCell:first-child,
-.chkApp .searchResultsTable .sapMListTblEmptyCell:first-child,
-.chkApp .searchResultsTable .sapMListTblCell:first-child {
-  border-top-left-radius: var(--theme-table-row-radius);
-  border-bottom-left-radius: var(--theme-table-row-radius);
-}
-
-.chkApp .searchResultsTable .sapMListTblHeaderCell:last-child,
-.chkApp .searchResultsTable .sapMListTblEmptyCell:last-child,
-.chkApp .searchResultsTable .sapMListTblCell:last-child {
-  border-top-right-radius: var(--theme-table-row-radius);
-  border-bottom-right-radius: var(--theme-table-row-radius);
-}
-
-.chkApp .searchResultsTable .sapMListTblHeaderCell {
-  background: var(--theme-table-header-bg);
-  opacity: 1;
-}
-
-.chkApp .searchResultsTable .sapMListTblCell,
-.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
-  background: color-mix(in srgb, var(--theme-table-cell-bg) 88%, transparent);
-  opacity: 0.9;
-}
-
-.chkApp .searchResultsTable .sapMListTblHeaderCell .sapMText {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-muted);
-  font-size: var(--theme-table-header-size);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.chkApp .searchResultsTable .sapMColumnHeader,
-.chkApp .searchResultsTable .sapMColumnHeaderContent {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-}
-
-.chkApp .searchResultsTable .sapMListTblRow {
-  border-radius: calc(var(--radius-md) - 0.25rem);
-  overflow: hidden;
-  transition: transform 140ms ease, filter 160ms ease;
-}
-
 .chkApp .searchResultsTable,
 .chkApp .searchResultsExperienceShell,
 .chkApp .searchResultsExperienceShell > .sapMFlexItem,
@@ -204,12 +81,6 @@
   min-width: 0;
 }
 
-.chkApp .searchResultsTable .sapMListTblSelCol {
-  display: table-cell;
-  width: 2.75rem;
-  min-width: 2.75rem;
-}
-
 .chkApp .searchResultsTable .sapMCb,
 .chkApp .searchResultsTable .sapMCbBg {
   display: inline-flex;
@@ -217,141 +88,8 @@
   justify-content: center;
 }
 
-.chkApp .searchResultsTable .sapMListTbl .sapMLIBPlaceholder,
-.chkApp .searchResultsTable .sapMListTbl .sapMSLI,
-.chkApp .searchResultsTable .sapMListTbl .sapMObjStatus,
-.chkApp .searchResultsTable .sapMListTbl .sapMSkeleton,
-.chkApp .searchResultsTable .sapMListTbl .sapMSkeletonWrapper {
-  opacity: 0.78;
-}
-
-body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblHeaderCell {
-  box-shadow: inset 0 -1px 0 rgba(203, 226, 255, 0.08);
-}
-
-body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblHeaderCell .sapMText {
-  color: rgba(237, 244, 255, 0.78);
-}
-
-body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
-  background: color-mix(in srgb, var(--theme-table-cell-bg) 68%, transparent);
-}
-
-body.chkAppRoot.appLight .chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
-  background: color-mix(in srgb, rgba(255, 255, 255, 0.82) 72%, transparent);
-}
-
 .chkApp .appLayoutSplit .searchPage .searchResultsTable {
   padding: 0.54rem 0.56rem 0.58rem;
-}
-
-
-.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblHeaderCell .sapMText {
-  font-size: 0.63rem;
-  letter-spacing: 0.05em;
-}
-
-.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblRow .sapMListTblCell {
-  padding-block: calc(var(--theme-table-cell-padding-block) - 0.14rem);
-}
-
-.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMText,
-.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
-.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
-.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMLnk,
-.chkApp .appLayoutSplit .searchPage .searchResultsTable .sapMListTblCell .sapMObjStatusText {
-  font-size: 0.73rem;
-  line-height: 1.28;
-}
-
-.chkApp .chkSkin .searchResultsTable .sapMListTbl,
-.chkApp .chkSkin .searchResultsTable .sapMListTblCell,
-.chkApp .chkSkin .searchResultsTable .sapMListTblHeaderCell {
-  background: transparent;
-  border-color: rgba(160, 184, 220, 0.18);
-}
-
-.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
-  padding:
-    var(--theme-table-cell-padding-block)
-    var(--theme-table-cell-padding-inline);
-  background: var(--theme-table-cell-bg);
-  border-top: 1px solid rgba(var(--accent-rgb), 0.12);
-  border-bottom: 1px solid rgba(var(--accent-rgb), 0.14);
-  border-inline-color: transparent;
-  border-bottom-color: rgba(160, 184, 220, 0.18);
-  vertical-align: middle;
-}
-
-.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell:first-child {
-  border-top-left-radius: var(--theme-table-row-radius);
-  border-bottom-left-radius: var(--theme-table-row-radius);
-  border-left: 1px solid rgba(var(--accent-rgb), 0.12);
-}
-
-.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell:last-child {
-  border-top-right-radius: var(--theme-table-row-radius);
-  border-bottom-right-radius: var(--theme-table-row-radius);
-  border-right: 1px solid rgba(var(--accent-rgb), 0.12);
-}
-
-.chkApp .searchResultsTable .sapMListTblCell .sapMText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectNumberText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMLnk,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjStatusText {
-  font-size: var(--theme-table-body-size);
-  line-height: var(--theme-table-body-line-height);
-  color: var(--text-main);
-}
-
-.chkApp .searchResultsTable .sapMListTblCell .sapMText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectIdentifierText,
-.chkApp .searchResultsTable .sapMListTblCell .sapMObjectNumberText {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell,
-.chkApp .searchResultsTable .sapMLIBActive .sapMListTblCell {
-  background: var(--theme-table-cell-hover-bg);
-  border-color: rgba(var(--accent-rgb), 0.2);
-}
-
-.chkApp .searchResultsTable .sapMListTblRow:hover {
-  transform: translateY(-1px);
-}
-
-.chkApp .searchResultsTable .sapMLIBFocusable:focus .sapMListTblCell {
-  background: var(--theme-table-cell-selected-bg);
-}
-
-.chkApp .searchResultsTable .sapMListNoData,
-.chkApp .searchResultsTable .sapMListTblEmptyRow,
-.chkApp .searchResultsTable .sapMListTblEmptyCell {
-  background: transparent;
-}
-
-.chkApp .searchResultsTable .sapMListNoData {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 5.8rem;
-  padding: 1rem 0.9rem 1.1rem;
-  border-radius: calc(var(--radius-lg) - 0.2rem);
-  border: 1px dashed color-mix(in srgb, var(--theme-rail-border) 42%, transparent);
-  background: color-mix(in srgb, var(--surface-1) 96%, rgba(255, 255, 255, 0.88));
-  color: var(--text-subtle);
-}
-
-.chkApp .searchResultsTable .sapMListTblEmptyCell {
-  padding: 0.9rem 0.9rem 1rem;
-  vertical-align: top;
-}
-
-.chkApp .searchResultsTable .sapMListTblEmptyRow {
-  height: 4.6rem;
 }
 
 .chkApp .searchResultsTable .toolbarTransparent {
@@ -556,21 +294,6 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   border: 0;
   background: var(--theme-block-bg);
   box-shadow: none;
-}
-
-@media (max-width: 72rem) {
-  .chkApp .searchResultsTable .sapMListTblHeaderCell {
-    min-width: 0;
-    position: static;
-    top: auto;
-  }
-}
-
-@media (max-width: 1280px) {
-  .chkApp .searchResultsTable .sapMListTblHeaderCell,
-  .chkApp .searchResultsTable .sapMListTblCell {
-    padding-block: calc(var(--theme-table-cell-padding-block) - 0.08rem);
-  }
 }
 
 @media (min-width: 72rem) {

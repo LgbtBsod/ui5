@@ -8,7 +8,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailInteractionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFormatters",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime"
 ], function (
     DetailControllerBehavior,
     DetailValidationSummaryRuntime,
@@ -19,7 +20,8 @@ sap.ui.define([
     DetailChecklistBehavior,
     DetailInteractionRuntime,
     DetailFormatters,
-    AttachmentUploadCore
+    AttachmentUploadCore,
+    DetailRowBindingRuntime
 ) {
     "use strict";
 
@@ -79,6 +81,21 @@ sap.ui.define([
             },
             isPhoneTableVisible: function (bPhone, bNarrow, aRows) {
                 return !!(bPhone || bNarrow) && hasRows(aRows);
+            },
+            isRuntimeDesktopTableVisible: function (bPhone, bNarrow, aRows, bIgnoreNarrowViewport) {
+                return !bPhone && (!!bIgnoreNarrowViewport || !bNarrow) && hasRows(aRows);
+            },
+            isRuntimePhoneTableVisible: function (bPhone, bNarrow, aRows, bIgnoreNarrowViewport) {
+                return (!!bPhone || (!bIgnoreNarrowViewport && !!bNarrow)) && hasRows(aRows);
+            },
+            formatDetailRowNumber: function (oRow, sKind) {
+                return DetailRowBindingRuntime.formatRowNumber(oRow, sKind);
+            },
+            onChecklistRowsBindingChange: function (oEvent) {
+                var oSource = oEvent && oEvent.getSource && oEvent.getSource();
+                var oViewContext = oSource && oSource.getBindingContext && oSource.getBindingContext("view");
+                var oSpec = oViewContext && oViewContext.getObject && oViewContext.getObject();
+                DetailRowBindingRuntime.bindSelectedCollectionContext(oSource, oSpec);
             },
             isBarriersRatioVisible: function (sLpcKey, aRows) {
                 return !!sLpcKey && hasRows(aRows);

@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAccessViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts"
-], function (ControllerTextRuntime, DetailAccessViewState, DetailInfoCardLayoutRuntime, DetailRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig"
+], function (ControllerTextRuntime, DetailAccessViewState, DetailInfoCardLayoutRuntime, DetailRuntimeContracts, DetailRowEntityConfig) {
     "use strict";
 
     var INFO_CARD_KEYS = DetailRuntimeContracts.INFO_CARD_KEYS;
@@ -15,7 +16,54 @@ sap.ui.define([
         return ControllerTextRuntime.getText(oController, sKey, [], sFallback || sKey);
     }
 
+    function createSectionState(oConfig) {
+        return {
+            kind: oConfig.kind,
+            titleKey: oConfig.titleKey,
+            emptyTitleKey: oConfig.emptyTitleKey,
+            emptyTextKey: oConfig.emptyTextKey,
+            actionIcon: oConfig.actionIcon,
+            emptyIcon: oConfig.emptyIcon,
+            tableSpec: {
+                kind: oConfig.kind,
+                rowsPath: oConfig.rowsPath,
+                numberField: oConfig.numberField,
+                labelKeys: oConfig.labelKeys,
+                deleteActionKind: oConfig.deleteActionKind,
+                resultSwitchClass: oConfig.resultSwitchClass,
+                desktopVisibleRowCount: oConfig.desktopVisibleRowCount,
+                desktopTableClass: oConfig.desktopTableClass,
+                mobileTableClass: oConfig.mobileTableClass,
+                noDataKey: oConfig.noDataKey,
+                ignoreNarrowViewport: false,
+                expanded: false
+            }
+        };
+    }
+
+    function createExpandedDialogState(oConfig) {
+        return {
+            kind: oConfig.kind,
+            tableSpec: {
+                kind: oConfig.kind,
+                rowsPath: oConfig.rowsPath,
+                numberField: oConfig.numberField,
+                labelKeys: oConfig.labelKeys,
+                deleteActionKind: oConfig.deleteActionKind,
+                resultSwitchClass: oConfig.resultSwitchClass,
+                desktopVisibleRowCount: 8,
+                desktopTableClass: oConfig.dialogDesktopTableClass,
+                mobileTableClass: oConfig.dialogMobileTableClass,
+                noDataKey: oConfig.noDataKey,
+                ignoreNarrowViewport: true,
+                expanded: true
+            }
+        };
+    }
+
     function create(oController) {
+        var oCheckConfig = DetailRowEntityConfig.get("check");
+        var oBarrierConfig = DetailRowEntityConfig.get("barrier");
         return {
             detailSkeletonBusy: false,
             attachmentBusy: false,
@@ -37,22 +85,12 @@ sap.ui.define([
             narrowDetailViewport: false,
             deleteChecklistConfirmArmed: false,
             detailSections: {
-                checks: {
-                    kind: "check",
-                    titleKey: "checksTitle",
-                    emptyTitleKey: "detailEmptyChecksTitle",
-                    emptyTextKey: "detailEmptyChecksText",
-                    actionIcon: "sap-icon://task",
-                    emptyIcon: "sap-icon://complete"
-                },
-                barriers: {
-                    kind: "barrier",
-                    titleKey: "barriersTitle",
-                    emptyTitleKey: "detailEmptyBarriersTitle",
-                    emptyTextKey: "detailEmptyBarriersText",
-                    actionIcon: "sap-icon://quality-issue",
-                    emptyIcon: "sap-icon://alert"
-                }
+                checks: createSectionState(oCheckConfig),
+                barriers: createSectionState(oBarrierConfig)
+            },
+            detailExpandedDialogs: {
+                checks: createExpandedDialogState(oCheckConfig),
+                barriers: createExpandedDialogState(oBarrierConfig)
             },
             accessState: DetailAccessViewState.createDefaultState(""),
             validationShown: false,

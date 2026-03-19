@@ -40,7 +40,7 @@ sap.ui.define([], function () {
             ANIMATION: "animation",
             INIT: "init",
             SETTINGS: "settings-theme-mode",
-            TOGGLE: "toggle-locked-morning"
+            TOGGLE: "reapply-locked-morning"
         })
     });
 });

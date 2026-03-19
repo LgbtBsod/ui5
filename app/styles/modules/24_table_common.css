@@ -1,91 +1,22 @@
 .chkApp .tableSurface,
-.chkApp .tableSurface .sapUiTableCnt,
-.chkApp .tableSurface .sapUiTableCtrlScr,
-.chkApp .tableSurface .sapUiTableColHdrCnt,
-.chkApp .tableSurface .sapMListTbl,
-.chkApp .tableSurface .sapMListTblCnt {
+.chkApp .detailGridTable,
+.chkApp .flatEditorTable,
+.chkApp .detailAttachmentTable,
+.chkApp .dialogDataTable,
+.chkApp .searchResultsTable {
   background: transparent;
 }
 
-.chkApp .tableSurface .sapUiTableCtrl,
-.chkApp .tableSurface .sapMListTbl {
-  border-collapse: separate;
+.chkApp .tableSurface {
+  border-radius: var(--theme-table-row-radius);
 }
 
-.chkApp .tableSurface .sapUiTableColCell,
-.chkApp .tableSurface .sapUiTableCell,
-.chkApp .tableSurface .sapMListTblHeaderCell,
-.chkApp .tableSurface .sapMListTblCell {
-  border-inline-color: transparent;
-}
-
-.chkApp .tableSurface .sapUiTableColCell,
-.chkApp .tableSurface .sapMListTblHeaderCell {
-  background: var(--theme-table-header-bg);
-  color: var(--text-muted);
-  font-size: var(--theme-table-header-size);
-  font-weight: 800;
-  line-height: var(--theme-table-header-line-height);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.chkApp .tableSurface .sapUiTableCell,
-.chkApp .tableSurface .sapMListTblCell {
+.chkApp .detailGridTable,
+.chkApp .flatEditorTable,
+.chkApp .detailAttachmentTable,
+.chkApp .dialogDataTable,
+.chkApp .searchResultsTable {
   color: var(--text-main);
   font-size: var(--theme-table-body-size);
   line-height: var(--theme-table-body-line-height);
-  background: var(--theme-table-cell-bg);
-}
-
-.chkApp .detailGridTable .sapUiTableCell,
-.chkApp .flatEditorTable .sapMListTblCell,
-.chkApp .detailAttachmentTable .sapMListTblCell,
-.chkApp .dialogDataTable .sapUiTableCell,
-.chkApp .dialogDataTable .sapMListTblCell,
-.chkApp .searchResultsTable .sapMListTblCell,
-.chkApp .searchResultsTable .sapMListTblRow .sapMListTblCell {
-  color: var(--text-main);
-  padding: var(--theme-table-cell-padding-block) var(--theme-table-cell-padding-inline);
-  font-size: var(--theme-table-body-size);
-  line-height: var(--theme-table-body-line-height);
-  background: var(--theme-table-cell-bg);
-}
-
-.chkApp .detailGridTable .sapUiTableColCell,
-.chkApp .flatEditorTable .sapMListTblHeaderCell,
-.chkApp .detailAttachmentTable .sapMListTblHeaderCell,
-.chkApp .dialogDataTable .sapUiTableColCell,
-.chkApp .dialogDataTable .sapMListTblHeaderCell,
-.chkApp .searchResultsTable .sapMListTblHeaderCell {
-  background: var(--theme-table-header-bg);
-}
-
-.chkApp .detailGridTable .sapUiTableCtrl tr:hover .sapUiTableCell,
-.chkApp .detailSectionCard .sapMListTblRow:hover .sapMListTblCell,
-.chkApp .flatEditorTable .sapMListTblRow:hover .sapMListTblCell,
-.chkApp .detailAttachmentTable .sapMListTblRow:hover .sapMListTblCell,
-.chkApp .dialogDataTable .sapUiTableTr:hover .sapUiTableCell,
-.chkApp .dialogDataTable .sapMListTblRow:hover .sapMListTblCell,
-.chkApp .searchResultsTable .sapMListTblRow:hover .sapMListTblCell {
-  background: var(--theme-table-cell-hover-bg);
-}
-
-.chkApp .tableSurface .sapUiTableCell:first-child,
-.chkApp .tableSurface .sapMListTblCell:first-child,
-.chkApp .tableSurface .sapMListTblHeaderCell:first-child {
-  border-top-left-radius: var(--theme-table-row-radius);
-  border-bottom-left-radius: var(--theme-table-row-radius);
-}
-
-.chkApp .tableSurface .sapUiTableCell:last-child,
-.chkApp .tableSurface .sapMListTblCell:last-child,
-.chkApp .tableSurface .sapMListTblHeaderCell:last-child {
-  border-top-right-radius: var(--theme-table-row-radius);
-  border-bottom-right-radius: var(--theme-table-row-radius);
-}
-
-.chkApp .tableSurface .sapUiTableTr:hover .sapUiTableCell,
-.chkApp .tableSurface .sapMListTblRow:hover .sapMListTblCell {
-  background: var(--theme-table-cell-hover-bg);
 }

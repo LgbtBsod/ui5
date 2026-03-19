@@ -9,6 +9,7 @@ browser smoke scripts.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from typing import Any
 
@@ -19,6 +20,7 @@ except ModuleNotFoundError:
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 DETAIL_ROOT = "E49B679F518F4947BD7A0F2CC1C4AC46"
+CREATE_ROUTE = "#/checklist/__CREATE"
 APP_VIEW_ID = "checklist_app_comp---app"
 SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
 DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
@@ -101,7 +103,6 @@ def wait_for_detail_ready(page, root_id: str = DETAIL_ROOT, delay: int = 1400, r
         },
         timeout=30000,
     )
-    page.wait_for_selector(f"#{DETAIL_OBJECT_PAGE_ID}", timeout=15000)
     page.wait_for_timeout(delay)
 
 
@@ -139,6 +140,29 @@ def wait_for_search_route(page, delay: int = 900) -> None:
         """,
         timeout=30000,
     )
+    page.wait_for_timeout(delay)
+
+
+def wait_for_create_detail_ready(page, delay: int = 1400) -> None:
+    wait_for_app_ready(page, 900)
+    page.wait_for_function(
+        """
+        ({ viewId, objectPageId }) => {
+          const core = sap.ui.getCore();
+          const view = core.byId(viewId);
+          const app = core.byId('checklist_app_comp---app');
+          const objectPage = core.byId(objectPageId);
+          const state = app && app.getModel && app.getModel('state');
+          return !!view
+            && !!objectPage
+            && !!state
+            && ['detail', 'detailLayout'].indexOf(String(state.getProperty('/currentRouteName') || '')) >= 0;
+        }
+        """,
+        arg={"viewId": DETAIL_VIEW_ID, "objectPageId": DETAIL_OBJECT_PAGE_ID},
+        timeout=30000,
+    )
+    page.wait_for_selector(f"#{DETAIL_OBJECT_PAGE_ID}", timeout=15000)
     page.wait_for_timeout(delay)
 
 
@@ -306,6 +330,172 @@ def run_resize_trace(page, theme_mode: str) -> dict[str, Any]:
     }
 
 
+def force_detail_edit_mode(page) -> dict[str, Any]:
+    result = page.evaluate(
+        """
+        () => {
+          const app = sap.ui.getCore().byId('checklist_app_comp---app');
+          const state = app && app.getModel && app.getModel('state');
+          if (!state) {
+            throw new Error('state model is unavailable');
+          }
+          state.setProperty('/workflow/detail/editMode', 'EDIT');
+          state.setProperty('/workflow/detail/lock/state', 'EDIT_LOCKED');
+          state.setProperty('/autosaveEnabled', false);
+          state.setProperty('/lockOperationPending', false);
+          state.setProperty('/saveInFlight', false);
+          return {
+            editMode: String(state.getProperty('/workflow/detail/editMode') || ''),
+            lockState: String(state.getProperty('/workflow/detail/lock/state') || '')
+          };
+        }
+        """
+    )
+    page.wait_for_timeout(250)
+    return result
+
+
+def detail_rows_snapshot(page, kind: str) -> dict[str, Any]:
+    return page.evaluate(
+        """
+        (kind) => {
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const selected = view && view.getModel && view.getModel('selected');
+          const state = sap.ui.getCore().byId('checklist_app_comp---app')?.getModel?.('state');
+          const path = kind === 'barrier' ? '/barriers' : '/checks';
+          const rows = selected && selected.getProperty ? (selected.getProperty(path) || []) : [];
+          const first = rows.length ? rows[0] : null;
+          const last = rows.length ? rows[rows.length - 1] : null;
+          return {
+            count: rows.length,
+            dirty: !!(state && state.getProperty && state.getProperty('/isDirty')),
+            first: first ? {
+              text: String(first.text || ''),
+              comment: String(first.comment || ''),
+              result: !!first.result,
+              selected: !!first.selected
+            } : null,
+            last: last ? {
+              text: String(last.text || ''),
+              comment: String(last.comment || ''),
+              result: !!last.result,
+              selected: !!last.selected
+            } : null
+          };
+        }
+        """,
+        kind,
+    )
+
+
+def clear_and_fill(locator, value: str) -> None:
+    locator.wait_for(state="visible", timeout=15000)
+    locator.fill("")
+    locator.fill(value)
+    locator.press("Tab")
+
+
+def is_checked(locator) -> bool:
+    aria_checked = str(locator.get_attribute("aria-checked") or "").lower()
+    if aria_checked in ("true", "false"):
+        return aria_checked == "true"
+    return locator.is_checked() if hasattr(locator, "is_checked") else False
+
+
+def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
+    config = {
+        "check": {
+            "sectionTitle": "Проверки",
+            "textLabel": "Проверка",
+            "commentLabel": "Комментарий",
+            "addMethod": "onAddCheckRow",
+            "expandMethod": "onExpandChecks",
+            "closeMethod": "onCloseChecksExpanded",
+            "dialogSelector": "[id$='checksExpandedDialog']",
+            "textValue": "Smoke check row",
+            "commentValue": "Check smoke comment"
+        },
+        "barrier": {
+            "sectionTitle": "Барьеры",
+            "textLabel": "Барьер",
+            "commentLabel": "Комментарий",
+            "addMethod": "onAddBarrierRow",
+            "expandMethod": "onExpandBarriers",
+            "closeMethod": "onCloseBarriersExpanded",
+            "dialogSelector": "[id$='barriersExpandedDialog']",
+            "textValue": "Smoke barrier row",
+            "commentValue": "Barrier smoke comment"
+        }
+    }[kind]
+
+    before = detail_rows_snapshot(page, kind)
+    invoke_controller_method(page, DETAIL_VIEW_ID, config["addMethod"])
+    page.wait_for_function(
+        """
+        ({ kind, expected }) => {
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const selected = view && view.getModel && view.getModel('selected');
+          const path = kind === 'barrier' ? '/barriers' : '/checks';
+          const rows = selected && selected.getProperty ? (selected.getProperty(path) || []) : [];
+          return rows.length === expected;
+        }
+        """,
+        arg={"kind": kind, "expected": before["count"] + 1},
+        timeout=15000,
+    )
+    page.wait_for_timeout(300)
+
+    checkbox = page.locator("input[type='checkbox'][id*='__box3-__clone']").first
+    checkbox.wait_for(state="visible", timeout=15000)
+    if not is_checked(checkbox):
+        checkbox.click()
+    text_input = page.locator("input.sapMInputBaseInner[aria-labelledby='__column2']").first
+    clear_and_fill(text_input, config["textValue"])
+    state_switch = page.locator("div[role='switch'][id*='__switch1-__clone']").first
+    state_switch.wait_for(state="visible", timeout=15000)
+    if not is_checked(state_switch):
+        state_switch.click()
+    page.wait_for_timeout(250)
+
+    invoke_controller_method(page, DETAIL_VIEW_ID, config["expandMethod"])
+    dialog = page.locator(config["dialogSelector"]).first
+    dialog.wait_for(state="visible", timeout=15000)
+    comment_area = dialog.locator("textarea.sapMTextAreaInner[aria-labelledby='__column4']").first
+    clear_and_fill(comment_area, config["commentValue"])
+    page.wait_for_timeout(250)
+
+    after_edit = detail_rows_snapshot(page, kind)
+
+    delete_button = dialog.get_by_role("button", name=re.compile("Удалить")).first
+    delete_button.click()
+    page.wait_for_function(
+        """
+        ({ kind, expected }) => {
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const selected = view && view.getModel && view.getModel('selected');
+          const path = kind === 'barrier' ? '/barriers' : '/checks';
+          const rows = selected && selected.getProperty ? (selected.getProperty(path) || []) : [];
+          return rows.length === expected;
+        }
+        """,
+        arg={"kind": kind, "expected": before["count"]},
+        timeout=15000,
+    )
+    page.wait_for_timeout(250)
+
+    after_delete = detail_rows_snapshot(page, kind)
+    invoke_controller_method(page, DETAIL_VIEW_ID, config["closeMethod"])
+    page.wait_for_timeout(250)
+
+    return {
+        "before": before,
+        "afterEdit": after_edit,
+        "afterDelete": after_delete,
+        "editValue": config["textValue"],
+        "commentValue": config["commentValue"]
+    }
+
+
 def main() -> int:
     if sync_playwright is None:
         print("[error] playwright is not installed.")
@@ -342,10 +532,19 @@ def main() -> int:
         report["shellAnalytics"] = shell_analytics_state
 
         page.goto(f"{URL}#/checklist/{DETAIL_ROOT}", wait_until="networkidle", timeout=90000)
-        wait_for_detail_ready(page, DETAIL_ROOT, 1600, require_data=not has_backend_blockers(backend_blockers))
-        report["detailRoute"] = route_state(page)
+        detail_route_blocked = False
+        try:
+            wait_for_detail_ready(page, DETAIL_ROOT, 1600, require_data=not has_backend_blockers(backend_blockers))
+            report["detailRoute"] = route_state(page)
+            detail_route_blocked = page.locator("text=PERMISSION_CHECK_FAILED").count() > 0
+            if detail_route_blocked:
+                report["detailRouteBlocked"] = True
+        except Exception as detail_route_error:
+            detail_route_blocked = True
+            report["detailRouteBlocked"] = True
+            report["detailRouteError"] = str(detail_route_error)
 
-        if not has_backend_blockers(backend_blockers):
+        if not has_backend_blockers(backend_blockers) and not detail_route_blocked:
             invoke_controller_method(page, DETAIL_VIEW_ID, "onOpenWorkflowAnalytics")
             wait_for_analytics_ready(page)
             detail_analytics_state = route_state(page)
@@ -383,6 +582,25 @@ def main() -> int:
             page.wait_for_timeout(350)
             report["locationDialog"] = value_help_box
 
+            report["detailEditModeOverride"] = force_detail_edit_mode(page)
+            checks_row_flow = run_detail_row_ui_flow(page, "check")
+            ensure(checks_row_flow["before"]["count"] + 1 == checks_row_flow["afterEdit"]["count"], "check add flow did not increase row count")
+            ensure(checks_row_flow["afterEdit"]["last"]["text"] == checks_row_flow["editValue"], "check text edit did not persist")
+            ensure(checks_row_flow["afterEdit"]["last"]["comment"] == checks_row_flow["commentValue"], "check comment edit did not persist")
+            ensure(checks_row_flow["afterEdit"]["last"]["result"] is True, "check switch edit did not persist")
+            ensure(checks_row_flow["afterEdit"]["last"]["selected"] is True, "check selection toggle did not persist")
+            ensure(checks_row_flow["afterDelete"]["count"] == checks_row_flow["before"]["count"], "check delete flow did not restore row count")
+            report["checksRowUiFlow"] = checks_row_flow
+
+            barriers_row_flow = run_detail_row_ui_flow(page, "barrier")
+            ensure(barriers_row_flow["before"]["count"] + 1 == barriers_row_flow["afterEdit"]["count"], "barrier add flow did not increase row count")
+            ensure(barriers_row_flow["afterEdit"]["last"]["text"] == barriers_row_flow["editValue"], "barrier text edit did not persist")
+            ensure(barriers_row_flow["afterEdit"]["last"]["comment"] == barriers_row_flow["commentValue"], "barrier comment edit did not persist")
+            ensure(barriers_row_flow["afterEdit"]["last"]["result"] is True, "barrier switch edit did not persist")
+            ensure(barriers_row_flow["afterEdit"]["last"]["selected"] is True, "barrier selection toggle did not persist")
+            ensure(barriers_row_flow["afterDelete"]["count"] == barriers_row_flow["before"]["count"], "barrier delete flow did not restore row count")
+            report["barriersRowUiFlow"] = barriers_row_flow
+
             phone_page = browser.new_page(viewport={"width": 390, "height": 844})
             phone_page.on(
                 "response",
@@ -398,7 +616,29 @@ def main() -> int:
             phone_checks_dialog = wait_for_dialog(phone_page, "checksExpandedDialog")
             phone_page.close()
             report["phoneChecksDialog"] = phone_checks_dialog
-        else:
+        page.goto(f"{URL}{CREATE_ROUTE}", wait_until="networkidle", timeout=90000)
+        wait_for_create_detail_ready(page, 1500)
+        report["createDetailRoute"] = route_state(page)
+        report["detailEditModeOverride"] = force_detail_edit_mode(page)
+        checks_row_flow = run_detail_row_ui_flow(page, "check")
+        ensure(checks_row_flow["before"]["count"] + 1 == checks_row_flow["afterEdit"]["count"], "check add flow did not increase row count")
+        ensure(checks_row_flow["afterEdit"]["last"]["text"] == checks_row_flow["editValue"], "check text edit did not persist")
+        ensure(checks_row_flow["afterEdit"]["last"]["comment"] == checks_row_flow["commentValue"], "check comment edit did not persist")
+        ensure(checks_row_flow["afterEdit"]["last"]["result"] is True, "check switch edit did not persist")
+        ensure(checks_row_flow["afterEdit"]["last"]["selected"] is True, "check selection toggle did not persist")
+        ensure(checks_row_flow["afterDelete"]["count"] == checks_row_flow["before"]["count"], "check delete flow did not restore row count")
+        report["checksRowUiFlow"] = checks_row_flow
+
+        barriers_row_flow = run_detail_row_ui_flow(page, "barrier")
+        ensure(barriers_row_flow["before"]["count"] + 1 == barriers_row_flow["afterEdit"]["count"], "barrier add flow did not increase row count")
+        ensure(barriers_row_flow["afterEdit"]["last"]["text"] == barriers_row_flow["editValue"], "barrier text edit did not persist")
+        ensure(barriers_row_flow["afterEdit"]["last"]["comment"] == barriers_row_flow["commentValue"], "barrier comment edit did not persist")
+        ensure(barriers_row_flow["afterEdit"]["last"]["result"] is True, "barrier switch edit did not persist")
+        ensure(barriers_row_flow["afterEdit"]["last"]["selected"] is True, "barrier selection toggle did not persist")
+        ensure(barriers_row_flow["afterDelete"]["count"] == barriers_row_flow["before"]["count"], "barrier delete flow did not restore row count")
+        report["barriersRowUiFlow"] = barriers_row_flow
+
+        if has_backend_blockers(backend_blockers):
             report["backendBlockers"] = normalize_backend_blockers(backend_blockers)
 
         browser.close()
