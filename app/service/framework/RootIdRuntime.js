@@ -1,20 +1,50 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
-], function (ModelStateRuntime, ControllerModelRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+], function (ModelStateRuntime, ControllerModelRuntime, CreateSentinel) {
     "use strict";
 
+    function sanitizeId(vId) {
+        return String(vId || "").trim();
+    }
+
+    function isRealId(vId) {
+        var sId = sanitizeId(vId);
+        return !!sId && !CreateSentinel.isCreateId(sId);
+    }
+
+    function resolveCanonicalId(aCandidates) {
+        var i;
+        var sCandidate;
+        for (i = 0; i < aCandidates.length; i += 1) {
+            sCandidate = sanitizeId(aCandidates[i]);
+            if (isRealId(sCandidate)) {
+                return sCandidate;
+            }
+        }
+        for (i = 0; i < aCandidates.length; i += 1) {
+            sCandidate = sanitizeId(aCandidates[i]);
+            if (sCandidate) {
+                return sCandidate;
+            }
+        }
+        return "";
+    }
+
     function resolveFromStateModel(oStateModel) {
-        return String(
-            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") ||
+        return resolveCanonicalId([
+            ModelStateRuntime.readOnModel(oStateModel, "/postOpenHydratedRootId", ""),
+            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", ""),
             ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "")
-        ).trim();
+        ]);
     }
 
     function resolveActiveFromStateModel(oStateModel) {
-        return String(
+        return resolveCanonicalId([
+            ModelStateRuntime.readOnModel(oStateModel, "/postOpenHydratedRootId", ""),
             ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
-        ).trim();
+        ]);
     }
 
     function resolveFromController(oController) {
@@ -23,7 +53,7 @@ sap.ui.define([
     }
 
     function resolveCurrentRootId(oController) {
-        return String((oController && oController._currentRootId && oController._currentRootId()) || "").trim()
+        return sanitizeId((oController && oController._currentRootId && oController._currentRootId()) || "")
             || resolveFromController(oController);
     }
 
@@ -34,6 +64,7 @@ sap.ui.define([
     }
 
     return {
+        resolveCanonicalId: resolveCanonicalId,
         resolveFromStateModel: resolveFromStateModel,
         resolveActiveFromStateModel: resolveActiveFromStateModel,
         resolveFromController: resolveFromController,

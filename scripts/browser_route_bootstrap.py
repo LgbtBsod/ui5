@@ -360,18 +360,25 @@ def wait_for_detail_ready(page, root_id: str, layout: str = "", timeout: int = 4
             && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail') || null;
           const detailObjectPage = all.find((item) => item && item.getId && String(item.getId()).endsWith('detailObjectPage')) || null;
           const selected = detailView && detailView.getModel && detailView.getModel('selected');
+          const detailState = detailView && detailView.getModel && detailView.getModel('state');
           const selectedRoot = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
           const routeName = state && state.getProperty ? String(state.getProperty('/currentRouteName') || '') : '';
           const currentLayout = state && state.getProperty ? String(state.getProperty('/layout') || '') : '';
+          const selectedId = state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '';
+          const activeObjectId = state && state.getProperty ? String(state.getProperty('/activeObjectId') || '') : '';
+          const detailMode = detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '';
           const domReady = !!(detailView && detailView.getDomRef && detailView.getDomRef());
           const layoutOk = !layout || currentLayout === layout || currentLayout === 'TwoColumnsMidExpanded';
+          const createRouteOk = String(rootId || '') === '__CREATE'
+            ? (selectedId === '__CREATE' || activeObjectId === '__CREATE' || detailMode === 'CREATE')
+            : selectedRoot === String(rootId || '');
           return !!state
             && !!detailView
             && !!detailObjectPage
             && domReady
             && routeName === 'detail'
             && layoutOk
-            && selectedRoot === String(rootId || '');
+            && createRouteOk;
         }
         """,
         arg=payload,

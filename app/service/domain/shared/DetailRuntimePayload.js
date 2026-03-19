@@ -8,9 +8,39 @@ sap.ui.define([
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
-    function rootId(mInput, mCtx) {
+    function sanitizeId(vId) {
+        return String(vId || "").trim();
+    }
+
+    function isRealId(vId) {
+        var sId = sanitizeId(vId);
+        return !!sId && !CreateSentinel.isCreateId(sId);
+    }
+
+    function resolveCanonicalRootId(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return UseCaseValue.rootId(mInput) || String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
+        var sInputRootId = sanitizeId(UseCaseValue.rootId(mInput));
+        var sSelectedRootId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, "/postOpenHydratedRootId"));
+        var sSelectedSnapshotRootId = sanitizeId(oUiState && oUiState.get("selected", "/root/id"));
+        var sActiveRootId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
+        var sSelectedId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.SELECTED_ID));
+        var aCandidates = [sInputRootId, sSelectedSnapshotRootId, sSelectedRootId, sActiveRootId, sSelectedId];
+        var i;
+        for (i = 0; i < aCandidates.length; i += 1) {
+            if (isRealId(aCandidates[i])) {
+                return aCandidates[i];
+            }
+        }
+        for (i = 0; i < aCandidates.length; i += 1) {
+            if (aCandidates[i]) {
+                return aCandidates[i];
+            }
+        }
+        return "";
+    }
+
+    function rootId(mInput, mCtx) {
+        return resolveCanonicalRootId(mInput, mCtx);
     }
 
     function sessionGuid(mInput, mCtx) {
@@ -55,6 +85,7 @@ sap.ui.define([
     }
 
     return {
+        resolveCanonicalRootId: resolveCanonicalRootId,
         rootId: rootId,
         sessionGuid: sessionGuid,
         tabSessionId: tabSessionId,

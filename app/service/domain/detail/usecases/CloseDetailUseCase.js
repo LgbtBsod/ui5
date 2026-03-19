@@ -90,8 +90,10 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),
                 Effects.modelPatch("state", ModelPathContracts.LOCK_OPERATION_PENDING, false),
                 Effects.modelPatch("state", ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
-                Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, null),
-                Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, null),
+                Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, ""),
+                Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, ""),
+                Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, ""),
+                Effects.modelPatch("state", ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH),
                 Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
             ];
             if (bShouldRelease && (!oReleaseResult || oReleaseResult.ok === false || oReleaseResult.released === false)) {

@@ -33,8 +33,12 @@ sap.ui.define([
 
     function releaseWithTrySave(mContext) {
         var oController = mContext && mContext.controller;
+        var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, "state"));
+        if (!sRootId) {
+            return Promise.resolve(null);
+        }
         return LockAdapter.release({
-            rootId: RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, "state")),
+            rootId: sRootId,
             sessionGuid: ModelStateRuntime.read(oController, "state", StatePaths.SESSION_ID, ""),
             payload: (mContext && mContext.payload) || {}
         }).catch(function () {
@@ -59,7 +63,9 @@ sap.ui.define([
                     [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE) || WorkflowContracts.AUTOSAVE_STATES.IDLE,
                     [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                     [StatePaths.WORKFLOW_AUTOSAVE_ENABLED]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false) === true,
-                    "/activeObjectId": ModelStateRuntime.read(oController, "state", "/activeObjectId", "") || ""
+                    "/activeObjectId": "",
+                    "/selectedId": "",
+                    "/postOpenHydratedRootId": ""
                 });
                 return "DISCARD";
             });

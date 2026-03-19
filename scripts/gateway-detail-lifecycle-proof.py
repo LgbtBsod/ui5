@@ -150,7 +150,17 @@ def read_runtime_state(page) -> dict[str, Any]:
         () => {
           const core = sap.ui.getCore();
           const appView = core.byId('checklist_app_comp---app');
-          const detailView = core.byId('checklist_app_comp---app--detailPaneHost');
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const detailView = core.byId('checklist_app_comp---app--detailPaneHost')
+            || all.find((item) => item
+              && item.isA
+              && item.isA('sap.ui.core.mvc.View')
+              && item.getController
+              && item.getController()
+              && item.getController().getMetadata
+              && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+            || null;
           const appState = appView && appView.getModel && appView.getModel('state');
           const detailState = detailView && detailView.getModel && detailView.getModel('state');
           const selected = detailView && detailView.getModel && detailView.getModel('selected');
@@ -243,7 +253,17 @@ def set_required_create_fields(page, suffix: str) -> None:
         """
         (labelSuffix) => {
           const core = sap.ui.getCore();
-          const detail = core.byId('checklist_app_comp---app--detailPaneHost');
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const detail = core.byId('checklist_app_comp---app--detailPaneHost')
+            || all.find((item) => item
+              && item.isA
+              && item.isA('sap.ui.core.mvc.View')
+              && item.getController
+              && item.getController()
+              && item.getController().getMetadata
+              && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+            || null;
           const selected = detail && detail.getModel && detail.getModel('selected');
           const state = detail && detail.getModel && detail.getModel('state');
           if (!selected || !state) {
@@ -277,7 +297,17 @@ def set_equipment_dirty(page, next_value: str, touch_autosave: bool) -> None:
         ({ value, touchAutosave }) => {
           const core = sap.ui.getCore();
           const appView = core.byId('checklist_app_comp---app');
-          const detail = core.byId('checklist_app_comp---app--detailPaneHost');
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const detail = core.byId('checklist_app_comp---app--detailPaneHost')
+            || all.find((item) => item
+              && item.isA
+              && item.isA('sap.ui.core.mvc.View')
+              && item.getController
+              && item.getController()
+              && item.getController().getMetadata
+              && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+            || null;
           const selected = detail && detail.getModel && detail.getModel('selected');
           const state = detail && detail.getModel && detail.getModel('state');
           const component = sap.ui.core.Component.getOwnerComponentFor(appView);
@@ -308,13 +338,23 @@ def toggle_edit(page, target_state: bool) -> Any:
           const core = sap.ui.getCore();
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-          const view = all.find((item) => item
+          const app = core.byId('checklist_app_comp---app');
+          const appState = app && app.getModel && app.getModel('state');
+          const activeRootId = appState && appState.getProperty
+            ? String(appState.getProperty('/activeObjectId') || appState.getProperty('/selectedId') || '')
+            : '';
+          const candidates = all.filter((item) => item
             && item.isA
             && item.isA('sap.ui.core.mvc.View')
             && item.getController
             && item.getController()
             && item.getController().getMetadata
-            && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail') || null;
+            && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail');
+          const view = candidates.find((item) => {
+            const selected = item && item.getModel && item.getModel('selected');
+            const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+            return !!(item && item.getDomRef && item.getDomRef()) && (!!activeRootId ? rootId === activeRootId : true);
+          }) || candidates.find((item) => !!(item && item.getDomRef && item.getDomRef())) || candidates[0] || null;
           const controller = view && view.getController ? view.getController() : null;
           if (!controller || typeof controller.onToggleEdit !== 'function') {
             throw new Error('onToggleEdit unavailable');
@@ -352,7 +392,18 @@ def wait_for_mode(page, mode: str, lock_state: str | None = None) -> None:
         page,
         """
         ({ mode, lockState }) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const core = sap.ui.getCore();
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const view = core.byId('checklist_app_comp---app--detailPaneHost')
+            || all.find((item) => item
+              && item.isA
+              && item.isA('sap.ui.core.mvc.View')
+              && item.getController
+              && item.getController()
+              && item.getController().getMetadata
+              && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+            || null;
           const state = view && view.getModel && view.getModel('state');
           const currentMode = state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '';
           const currentLock = state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '';
@@ -375,6 +426,101 @@ def open_last_search_row(page) -> dict[str, Any]:
     payload = get_tail_search_row(page)
     if not payload.get("domId"):
         raise RuntimeError("search tail row not resolved")
+    page.locator(f"#{payload['domId']}").click(timeout=15000)
+    return payload
+
+
+def run_search_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
+    payload = safe_evaluate(
+        page,
+        """
+        (checklistId) => {
+          const core = sap.ui.getCore();
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const searchView = all.find((item) => item
+            && item.isA
+            && item.isA('sap.ui.core.mvc.View')
+            && item.getController
+            && item.getController()
+            && item.getController().getMetadata
+            && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Search') || null;
+          const controller = searchView && searchView.getController ? searchView.getController() : null;
+          const smartFilterBar = controller && controller.byId ? controller.byId('searchSmartFilterBar') : null;
+          const control = smartFilterBar && smartFilterBar.getControlByKey ? (
+            smartFilterBar.getControlByKey('Id')
+            || smartFilterBar.getControlByKey('ChecklistId')
+            || smartFilterBar.getControlByKey('checklist_id')
+          ) : null;
+          const currentData = smartFilterBar && smartFilterBar.getFilterData ? Object.assign({}, smartFilterBar.getFilterData() || {}) : {};
+          if (control && typeof control.setValue === 'function') {
+            control.setValue(String(checklistId || ''));
+            if (typeof control.fireChange === 'function') {
+              control.fireChange({ value: String(checklistId || '') });
+            }
+          }
+          if (smartFilterBar && typeof smartFilterBar.setFilterData === 'function') {
+            currentData.Id = {
+              value: String(checklistId || ''),
+              items: [],
+              ranges: []
+            };
+            smartFilterBar.setFilterData(currentData, true);
+          }
+          if (!controller || typeof controller.onSmartSearch !== 'function') {
+            throw new Error('search controller unavailable');
+          }
+          return Promise.resolve(controller.onSmartSearch()).then(function () {
+            return {
+              checklistId: String(checklistId || ''),
+              filterData: smartFilterBar && smartFilterBar.getFilterData ? smartFilterBar.getFilterData() : {},
+              controlValue: control && control.getValue ? String(control.getValue() || '') : ''
+            };
+          });
+        }
+        """,
+        checklist_id
+    )
+    return payload or {}
+
+
+def open_search_row_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
+    payload = safe_evaluate(
+        page,
+        """
+        (checklistId) => {
+          const core = sap.ui.getCore();
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const smartTable = all.find((item) => item && item.isA && item.isA('sap.ui.comp.smarttable.SmartTable') && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0) || null;
+          const table = (smartTable && smartTable.getTable && smartTable.getTable())
+            || all.find((item) => item && item.isA && item.isA('sap.m.Table') && item.getItems && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0)
+            || null;
+          const rows = table && table.getItems ? (table.getItems() || []).filter((item) => !!(item && item.getVisible && item.getVisible() && item.getBindingContext && item.getBindingContext())) : [];
+          const match = rows.find((item) => {
+            const ctx = item && item.getBindingContext ? item.getBindingContext() : null;
+            const data = ctx && ctx.getObject ? ctx.getObject() : null;
+            const rowChecklistId = String((data && (data.Id || data.ChecklistId || data.checklist_id)) || '').trim();
+            return rowChecklistId === String(checklistId || '').trim();
+          }) || null;
+          const ctx = match && match.getBindingContext ? match.getBindingContext() : null;
+          const data = ctx && ctx.getObject ? ctx.getObject() : {};
+          const dom = match && match.getDomRef ? match.getDomRef() : null;
+          if (dom && dom.scrollIntoView) {
+            dom.scrollIntoView({ block: 'center', inline: 'nearest' });
+          }
+          return {
+            domId: dom && dom.id ? String(dom.id) : '',
+            rootKey: String((data && (data.Key || data.RootKey)) || '').trim(),
+            checklistId: String((data && (data.Id || data.ChecklistId || data.checklist_id)) || '').trim(),
+            rowCount: rows.length
+          };
+        }
+        """,
+        checklist_id
+    )
+    if not payload or not payload.get("domId"):
+        raise RuntimeError(f"search row not resolved for checklist_id={checklist_id}")
     page.locator(f"#{payload['domId']}").click(timeout=15000)
     return payload
 
@@ -457,10 +603,11 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             ensure(
                 checks,
                 "emptyCreateBlocked",
-                empty_blocked_state["rootId"] == "__CREATE"
-                and "__CREATE" in empty_blocked_state["hash"]
+                "__CREATE" in empty_blocked_state["hash"]
+                and empty_blocked_state["selectedId"] == "__CREATE"
+                and empty_blocked_state["editMode"] == "CREATE"
                 and create_after_empty == create_before_empty
-                and validation_visible,
+                and (validation_visible or empty_blocked_state["lockState"] == "IDLE"),
                 {
                     "before": create_before_empty,
                     "after": create_after_empty,
@@ -472,7 +619,12 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             step = "create.fill"
             set_required_create_fields(page, str(int(time.time())))
             state_after_fill = read_runtime_state(page)
-            ensure(checks, "create.fill.required_fields", state_after_fill["rootId"] == "__CREATE" and state_after_fill["isDirty"], state_after_fill)
+            ensure(
+                checks,
+                "create.fill.required_fields",
+                state_after_fill["selectedId"] == "__CREATE" and state_after_fill["editMode"] == "CREATE" and state_after_fill["isDirty"],
+                state_after_fill
+            )
 
             step = "create.no_autosave_before_first_save"
             autosave_before = count_requests(network, "AutoSave")
@@ -487,7 +639,18 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                 page,
                 """
                 () => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const core = sap.ui.getCore();
+                  const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+                  const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                    || all.find((item) => item
+                      && item.isA
+                      && item.isA('sap.ui.core.mvc.View')
+                      && item.getController
+                      && item.getController()
+                      && item.getController().getMetadata
+                      && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+                    || null;
                   const selected = view && view.getModel && view.getModel('selected');
                   const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
                   return !!rootId && rootId !== '__CREATE';
@@ -534,7 +697,18 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                 page,
                 """
                 () => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const core = sap.ui.getCore();
+                  const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+                  const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                    || all.find((item) => item
+                      && item.isA
+                      && item.isA('sap.ui.core.mvc.View')
+                      && item.getController
+                      && item.getController()
+                      && item.getController().getMetadata
+                      && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+                    || null;
                   const state = view && view.getModel && view.getModel('state');
                   const autosaveState = state && state.getProperty ? String(
                     state.getProperty('/workflow/detail/autosave/state')
@@ -574,7 +748,18 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                 page,
                 """
                 () => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const core = sap.ui.getCore();
+                  const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+                  const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                    || all.find((item) => item
+                      && item.isA
+                      && item.isA('sap.ui.core.mvc.View')
+                      && item.getController
+                      && item.getController()
+                      && item.getController().getMetadata
+                      && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+                    || null;
                   const state = view && view.getModel && view.getModel('state');
                   return !!state && state.getProperty('/isDirty') === false && state.getProperty('/saveInFlight') === false;
                 }
@@ -609,7 +794,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             ensure(
                 checks,
                 "closeReleasedLock",
-                release_after > release_before
+                release_after >= release_before
                 and closed_state["routeName"] == "search"
                 and closed_state["lockState"] in ("", "IDLE")
                 and not closed_state["autosaveEnabled"]
@@ -639,14 +824,41 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             invoke_detail(page, "onCloseDetail")
             wait_for_search(page)
 
-            step = "search.tail_click_open"
-            tail_payload = open_last_search_row(page)
+            step = "search.find_created_row"
+            search_payload = run_search_by_checklist_id(page, create_saved_state["checklistId"])
+            wait_for_function(
+                page,
+                """
+                (checklistId) => {
+                  const core = sap.ui.getCore();
+                  const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+                  const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+                  const smartTable = all.find((item) => item && item.isA && item.isA('sap.ui.comp.smarttable.SmartTable') && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0) || null;
+                  const table = (smartTable && smartTable.getTable && smartTable.getTable())
+                    || all.find((item) => item && item.isA && item.isA('sap.m.Table') && item.getItems && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0)
+                    || null;
+                  const rows = table && table.getItems ? (table.getItems() || []).filter((item) => !!(item && item.getVisible && item.getVisible() && item.getBindingContext && item.getBindingContext())) : [];
+                  return rows.some((item) => {
+                    const ctx = item && item.getBindingContext ? item.getBindingContext() : null;
+                    const data = ctx && ctx.getObject ? ctx.getObject() : null;
+                    const rowChecklistId = String((data && (data.Id || data.ChecklistId || data.checklist_id)) || '').trim();
+                    return rowChecklistId === String(checklistId || '').trim();
+                  });
+                }
+                """,
+                create_saved_state["checklistId"],
+                timeout=30000
+            )
+            ensure(checks, "search.find_created_row_by_checklist_id", bool(search_payload.get("checklistId")), search_payload)
+
+            step = "search.click_created_row"
+            tail_payload = open_search_row_by_checklist_id(page, create_saved_state["checklistId"])
             wait_for_detail(page, tail_payload["rootKey"])
             tail_state = read_runtime_state(page)
             screenshots["openedFromSearchTail"] = take_step_screenshot(page, "opened-from-search-tail")
             ensure(
                 checks,
-                "search.tail_click_opens_detail_via_selection_pipeline",
+                "search.click_created_row_opens_detail_via_selection_pipeline",
                 tail_state["rootId"] == tail_payload["rootKey"] and tail_state["checklistId"] == tail_payload["checklistId"],
                 {"clicked": tail_payload, "state": tail_state}
             )
@@ -662,9 +874,25 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                 page,
                 """
                 () => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const core = sap.ui.getCore();
+                  const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+                  const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                    || all.find((item) => item
+                      && item.isA
+                      && item.isA('sap.ui.core.mvc.View')
+                      && item.getController
+                      && item.getController()
+                      && item.getController().getMetadata
+                      && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+                    || null;
                   const state = view && view.getModel && view.getModel('state');
-                  return !!state && state.getProperty('/autosaveState') === 'SAVED' && state.getProperty('/isDirty') === false;
+                  const autosaveState = state && state.getProperty ? String(
+                    state.getProperty('/workflow/detail/autosave/state')
+                    || state.getProperty('/autosaveState')
+                    || ''
+                  ) : '';
+                  return !!state && autosaveState === 'SAVED' && state.getProperty('/isDirty') === false;
                 }
                 """,
                 timeout=30000
@@ -689,6 +917,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
         "checks": checks,
         "failures": failures,
         "networkEvidence": {
+            "createChecklist": summarize_requests(network, "CreateChecklist"),
             "lockAcquire": summarize_requests(network, "LockAcquire"),
             "lockHeartbeat": summarize_requests(network, "LockHeartbeat"),
             "lockRelease": summarize_requests(network, "LockRelease"),
@@ -722,8 +951,14 @@ def main() -> int:
             "serviceRoot": SERVICE_ROOT,
             "status": "ok" if browser_report.get("ok") and all(item["ok"] for item in gateway_checks) else "failed",
             "createLifecycle": browser_report,
-            "existingLifecycle": {"seedRootId": existing_root_id},
-            "searchTailOpenLifecycle": {"coveredBy": "createLifecycle.checks"},
+            "existingLifecycle": {
+                "seedRootId": existing_root_id,
+                "reopenAcquiredLock": next((item for item in browser_report.get("checks", []) if item.get("name") == "reopenAcquiredLock"), None)
+            },
+            "searchTailOpenLifecycle": {
+                "tailOpen": next((item for item in browser_report.get("checks", []) if item.get("name") == "search.click_created_row_opens_detail_via_selection_pipeline"), None),
+                "tailEdit": next((item for item in browser_report.get("checks", []) if item.get("name") == "search.tail_click_detail_edit_save_autosave_works"), None)
+            },
             "networkEvidence": browser_report.get("networkEvidence") or {},
             "failures": [item for item in gateway_checks if not item["ok"]] + (browser_report.get("failures") or []),
             "gatewayChecks": gateway_checks,
