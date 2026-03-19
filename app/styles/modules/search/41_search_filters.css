@@ -70,7 +70,8 @@ body.chkAppRoot.appDark .chkApp .filterCard {
 }
 
 .chkApp .searchSmartFilterWorkbench {
-  width: 100%;
+  background-color: transparent; 
+  border: none;
 }
 
 .chkApp .searchFilterExperienceShell .sapMBtnEmphasized .sapMBtnInner {

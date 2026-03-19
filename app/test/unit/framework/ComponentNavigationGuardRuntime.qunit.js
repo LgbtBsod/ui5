@@ -43,7 +43,8 @@ sap.ui.define([
             reverted: 0,
             resumed: 0,
             cleared: 0,
-            guardedSave: 0
+            guardedSave: 0,
+            released: 0
         };
         var oStateModel = createStateModel(Object.assign({
             "/activeObjectId": "CHK-1",
@@ -97,6 +98,7 @@ sap.ui.define([
                     return Promise.resolve(sDecision);
                 },
                 releaseWithTrySave: function () {
+                    mCounts.released += 1;
                     return Promise.resolve(null);
                 }
             },
@@ -174,5 +176,26 @@ sap.ui.define([
             assert.strictEqual(oHarness.counts.cleared, 1, "stale pending navigation intent is cleared");
             done();
         }, 0);
+    });
+
+    QUnit.test("post-create hydration does not trigger lock release guard", function (assert) {
+        var oHarness = createHarness({
+            state: {
+                "/activeObjectId": "__CREATE",
+                "/selectedId": "__CREATE",
+                "/postOpenHydratedRootId": "CHK-REAL-1",
+                "/isDirty": false,
+                "/saveInFlight": false,
+                "/workflow/detail/editMode": "EDIT",
+                "/workflow/detail/lock/state": "EDIT_LOCKED"
+            }
+        });
+
+        oHarness.routeEvent = createRouteEvent("detail", { id: "CHK-REAL-1" });
+        oHarness.fire();
+
+        assert.notOk(oHarness.routeEvent.wasPrevented(), "navigation continues without guard");
+        assert.strictEqual(oHarness.counts.released, 0, "lock release guard is not invoked");
+        assert.strictEqual(oHarness.counts.queued, 0, "pending intent is not queued");
     });
 });

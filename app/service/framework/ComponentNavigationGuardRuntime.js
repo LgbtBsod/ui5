@@ -22,7 +22,11 @@ sap.ui.define([
     }
 
     function resolveCurrentRootId(oStateModel) {
-        return normalizeId(ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") || ModelStateRuntime.readOnModel(oStateModel, PATHS.SELECTED_ID, ""));
+        return normalizeId(
+            ModelStateRuntime.readOnModel(oStateModel, "/postOpenHydratedRootId", "")
+            || ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, PATHS.SELECTED_ID, "")
+        );
     }
 
     function resolveNextRouteIntent(oRouteEvent) {

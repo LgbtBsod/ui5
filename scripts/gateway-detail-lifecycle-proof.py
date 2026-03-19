@@ -147,6 +147,25 @@ def wait_for_detail(page, expected_root: str) -> None:
     wait_for_detail_ready(page, expected_root, timeout=45000)
 
 
+def wait_for_create_runtime_ready(page) -> None:
+    wait_for_function(
+        page,
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
+          const state = app && app.getModel && app.getModel('state');
+          const requiredFields = state && state.getProperty ? state.getProperty('/requiredFields') : null;
+          return Array.isArray(requiredFields)
+            && requiredFields.length > 0
+            && String(state && state.getProperty ? state.getProperty('/workflow/detail/editMode') || '' : '') === 'CREATE';
+        }
+        """,
+        timeout=45000
+    )
+    page.wait_for_timeout(1200)
+
+
 def read_runtime_state(page) -> dict[str, Any]:
     return safe_evaluate(
         page,
@@ -672,6 +691,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
 
             step = "create.open"
             navigate_to_detail(page, "__CREATE")
+            wait_for_create_runtime_ready(page)
             screenshots["beforeFirstSave"] = take_step_screenshot(page, "before-first-save")
 
             step = "create.empty_save_blocked"

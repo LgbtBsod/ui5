@@ -1,6 +1,6 @@
 .chkApp .detailControlStickyBlock {
   position: sticky;
-
+background: transparent;
   z-index: 16;
 }
 
