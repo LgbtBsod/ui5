@@ -2,25 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, StatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig"
+], function (ControllerViewStateRuntime, ModelStateRuntime, StatePaths, WorkflowContracts, DetailRowEntityConfig) {
     "use strict";
 
-    var ROW_ENTITY_CONFIG = {
-        check: {
-            rowBusyPath: "/checksBusy",
-            dialogBusyPath: "/checksExpandedBusy",
-            dialogKey: "checksExpanded"
-        },
-        barrier: {
-            rowBusyPath: "/barriersBusy",
-            dialogBusyPath: "/barriersExpandedBusy",
-            dialogKey: "barriersExpanded"
-        }
-    };
-
     function runRowOperation(oController, sEntity, sOp, mInput, mHooks) {
-        var oConfig = ROW_ENTITY_CONFIG[sEntity] || {};
+        var oConfig = DetailRowEntityConfig.get(sEntity);
         var sBusyPath = (sOp === "expand" || sOp === "collapse") ? oConfig.dialogBusyPath : oConfig.rowBusyPath;
         var sBeforeMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sBeforeLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
@@ -117,7 +105,7 @@ sap.ui.define([
     }
 
     return {
-        entityConfig: ROW_ENTITY_CONFIG,
+        entityConfig: DetailRowEntityConfig.all,
         onAddRow: function (oController, sEntity, mHooks) {
             return runRowOperation(oController, sEntity, "add", null, mHooks);
         },
@@ -125,7 +113,7 @@ sap.ui.define([
             return runRowOperation(oController, sEntity, "delete", Object.assign({ event: oEvent }, mHooks.resolveRowInput(oEvent)), mHooks);
         },
         onExpandRows: function (oController, sEntity, oEvent, mHooks) {
-            mHooks.rememberDialogReturnFocus(ROW_ENTITY_CONFIG[sEntity].dialogKey, oEvent && oEvent.getSource && oEvent.getSource());
+            mHooks.rememberDialogReturnFocus(DetailRowEntityConfig.get(sEntity).dialogId, oEvent && oEvent.getSource && oEvent.getSource());
             return runRowOperation(oController, sEntity, "expand", null, mHooks);
         },
         onCloseRowsExpanded: function (oController, sEntity, mHooks) {

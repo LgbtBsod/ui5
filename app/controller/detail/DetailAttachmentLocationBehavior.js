@@ -24,14 +24,19 @@ sap.ui.define([
         return {
             autosave: function (mInput) { return DetailCommandPolicy.autosave(oController, { rootId: oController._currentRootId(), field: mInput.field, value: mInput.value }); },
             clearSearchTimer: function () { oController._clearLocationValueHelpSearchTimer(); },
-                consumeSuggestionSelection: function (sTarget, sValue) { return DetailPersonInputRuntime.consumeSuggestionSelection(oController, sTarget, sValue); },
+            consumeSuggestionSelection: function (sTarget, sValue) { return DetailPersonInputRuntime.consumeSuggestionSelection(oController, sTarget, sValue); },
+            getLazyDialog: function (sKey) { return oController._mLazyDialogs && oController._mLazyDialogs[sKey]; },
             isEditMode: function () { return oController._isEditMode(); },
             personSuggest: function (mInput) { return DetailCommandPolicy.personSuggest(oController, mInput); },
-                personTargetFromSource: function (oSource) { return DetailPersonInputRuntime.targetFromSource(oSource); },
+            personTargetFromSource: function (oSource) { return DetailPersonInputRuntime.targetFromSource(oSource); },
             rememberDialogReturnFocus: function (sDialogKey, oSource) { oController._rememberDialogReturnFocus(sDialogKey, oSource); },
-                rememberSuggestionSelection: function (sTarget, sValue) { DetailPersonInputRuntime.rememberSuggestionSelection(oController, sTarget, sValue); },
+            rememberSuggestionSelection: function (sTarget, sValue) { DetailPersonInputRuntime.rememberSuggestionSelection(oController, sTarget, sValue); },
             restartSearchTimer: function (fnTask, iDelayMs) { oController._iLocationVhSearchTimer = SchedulingRuntime.restartTimer(0, function () { oController._iLocationVhSearchTimer = null; fnTask(); }, iDelayMs); },
             scheduleTableSync: function () { oController._scheduleLocationValueHelpTableSync(); },
+            setLazyDialog: function (sKey, oDialog) {
+                oController._mLazyDialogs = oController._mLazyDialogs || {};
+                oController._mLazyDialogs[sKey] = oDialog;
+            },
             setViewFlag: function (sPath, bValue) { ControllerViewStateRuntime.setFlag(oController, sPath, bValue); },
             valueHelpLocation: function (mInput) { return DetailCommandPolicy.valueHelpLocation(oController, mInput); },
             withViewFlag: function (sPath, fnTask) { return oController._withViewFlag(sPath, fnTask); }
@@ -52,6 +57,8 @@ sap.ui.define([
         onProfessionChange: function (oEvent) { return DetailValueHelpRuntime.onProfessionChange(this, oEvent, createValueHelpHooks(this)); },
         onChecksNumberChange: function (oEvent) { return DetailValueHelpRuntime.onChecksNumberChange(this, oEvent, createValueHelpHooks(this)); },
         onBarriersNumberChange: function (oEvent) { return DetailValueHelpRuntime.onBarriersNumberChange(this, oEvent, createValueHelpHooks(this)); },
+        onOpenChecksNumberValueHelp: function (oEvent) { return DetailValueHelpRuntime.onOpenChecksNumberValueHelp(this, oEvent, createValueHelpHooks(this)); },
+        onOpenBarriersNumberValueHelp: function (oEvent) { return DetailValueHelpRuntime.onOpenBarriersNumberValueHelp(this, oEvent, createValueHelpHooks(this)); },
         onPersonSuggest: function (oEvent) { return DetailValueHelpRuntime.onPersonSuggest(this, oEvent, createValueHelpHooks(this)); },
         onPersonSuggestionSelected: function (oEvent) { return DetailValueHelpRuntime.onPersonSuggestionSelected(this, oEvent, createValueHelpHooks(this)); },
         onPersonInputChange: function (oEvent) { return DetailValueHelpRuntime.onPersonInputChange(this, oEvent, createValueHelpHooks(this)); },

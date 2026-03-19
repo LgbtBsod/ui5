@@ -12,6 +12,7 @@
     "test:unit": "node scripts/start-local-server.js",
     "test:opa": "node scripts/start-local-server.js",
     "lint:css": "stylelint \"app/styles/**/*.css\"",
+    "smoke:gateway:lifecycle": "python scripts/gateway-detail-lifecycle-proof.py",
     "validate": "npm run check:eol && npm run lint:css && node scripts/css-duplicate-selector-gate.js && npm run build:preload",
     "check:eol": "node scripts/check-eol.js",
     "gate:persistence-i18n": "node scripts/persistence-i18n-gate.js",

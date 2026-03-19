@@ -3,14 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator"
-], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig"
+], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig) {
     "use strict";
-
-    var ENTITY_CONFIG = {
-        check: { path: "/checks", numField: "ChecksNum", dialogId: "checksExpanded" },
-        barrier: { path: "/barriers", numField: "BarriersNum", dialogId: "barriersExpanded" }
-    };
 
     function RowOpsUseCase() {
         UseCase.call(this, "RowOpsUseCase");
@@ -102,24 +98,24 @@ sap.ui.define([
     function createRow(aRows, oConfig) {
         var sRowKey = createClientRowKey();
         var oRow = { id: sRowKey, Key: sRowKey, client_row_id: sRowKey, text: "", comment: "", result: false, selected: false };
-        oRow[oConfig.numField] = nextNum(aRows, oConfig.numField);
+        oRow[oConfig.numberField] = nextNum(aRows, oConfig.numberField);
         return oRow;
     }
 
     function handleEntityRowOp(oUiState, sEntity, sOp, mInput) {
-        var oConfig = ENTITY_CONFIG[sEntity];
-        var aRows = oUiState.get("selected", oConfig.path) || [];
+        var oConfig = DetailRowEntityConfig.get(sEntity);
+        var aRows = oUiState.get("selected", oConfig.rowsPath) || [];
         var iRowIndex;
         if (sOp === "add") {
-            oUiState.set("selected", oConfig.path, aRows.concat([createRow(aRows, oConfig)]));
+            oUiState.set("selected", oConfig.rowsPath, aRows.concat([createRow(aRows, oConfig)]));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "delete") {
-            iRowIndex = resolveRowIndexFromInput(mInput, aRows, oConfig.path);
+            iRowIndex = resolveRowIndexFromInput(mInput, aRows, oConfig.rowsPath);
             if (iRowIndex < 0) {
-                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, "selected", oConfig.path);
+                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, "selected", oConfig.rowsPath);
             }
-            oUiState.set("selected", oConfig.path, removeRows(aRows, iRowIndex));
+            oUiState.set("selected", oConfig.rowsPath, removeRows(aRows, iRowIndex));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "expand" || sOp === "collapse") {
@@ -178,7 +174,7 @@ sap.ui.define([
         if (!oUiState) {
             return Promise.resolve(Result.fail({ message: "UiState unavailable", code: "UISTATE_UNAVAILABLE" }));
         }
-        if (ENTITY_CONFIG[sEntity]) {
+        if (DetailRowEntityConfig.all[sEntity]) {
             oResult = handleEntityRowOp(oUiState, sEntity, sOp, mInput);
             if (oResult) {
                 return Promise.resolve(oResult);

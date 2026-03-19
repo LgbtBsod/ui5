@@ -13,6 +13,17 @@ sap.ui.define([
 ], function (UseCase, Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts) {
     "use strict";
 
+    function resolveCanonicalRootId(oRepo, sRootId) {
+        if (!oRepo || typeof oRepo.resolveRootId !== "function" || !sRootId || CreateSentinel.isCreateId(sRootId)) {
+            return Promise.resolve(sRootId);
+        }
+        return Promise.resolve(oRepo.resolveRootId({ rootId: sRootId })).then(function (sResolvedRootId) {
+            return String(sResolvedRootId || sRootId).trim() || sRootId;
+        }).catch(function () {
+            return sRootId;
+        });
+    }
+
     function resetTransientDetailIncidentEffects() {
         return [
             Effects.modelPatch("state", "/isKilled", false),
@@ -137,9 +148,10 @@ sap.ui.define([
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
-        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
-            activity: DetailAuthorizationRuntime.OPERATIONS.DISPLAY
-        }).then(function (oPermission) {
+        return resolveCanonicalRootId(oRepo, sRootId).then(function (sCanonicalRootId) {
+            return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sCanonicalRootId, {
+                activity: DetailAuthorizationRuntime.OPERATIONS.DISPLAY
+            }).then(function (oPermission) {
             var pValidation;
             if (!oPermission.allowed) {
                 return Result.fail({ message: "No permission to open checklist", code: "NO_VIEW_PERMISSION" }, resetTransientDetailIncidentEffects().concat([
@@ -148,7 +160,7 @@ sap.ui.define([
                         ready: false,
                         readyAt: "",
                         error: "NO_VIEW_PERMISSION",
-                        rootId: sRootId,
+                        rootId: sCanonicalRootId,
                         mode: WorkflowContracts.EDIT_MODES.READ,
                         permissionKnown: true,
                         lockKnown: false
@@ -156,52 +168,60 @@ sap.ui.define([
                 ]).concat(DetailAuthorizationRuntime.openDeniedEffects(oPermission)));
             }
             pValidation = (oCacheValidation && typeof oCacheValidation.execute === "function")
-                ? Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
+                ? Promise.resolve(oCacheValidation.execute({ rootId: sCanonicalRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
                 : Promise.resolve(null);
             return pValidation.then(function (oValidation) {
                 var oValidationData = (oValidation && oValidation.ok && oValidation.data) ? oValidation.data : null;
                 if (oValidationData && oValidationData.valid && oValidationData.snapshot) {
                     return {
                         snapshot: oValidationData.snapshot,
-                        permission: oPermission
+                        permission: oPermission,
+                        rootId: sCanonicalRootId
                     };
                 }
-                return Promise.resolve(oRepo.loadDetailSnapshot({ rootId: sRootId })).then(function (oSnapshot) {
+                return Promise.resolve(oRepo.loadDetailSnapshot({ rootId: sCanonicalRootId })).then(function (oSnapshot) {
                     var oCacheWrite = mCtx && mCtx.cacheWrite;
                     if (oCacheWrite && typeof oCacheWrite.execute === "function") {
-                        return Promise.resolve(oCacheWrite.execute({ rootId: sRootId, snapshot: oSnapshot }, mCtx || {})).catch(function () {
+                        return Promise.resolve(oCacheWrite.execute({ rootId: sCanonicalRootId, snapshot: oSnapshot }, mCtx || {})).catch(function () {
                             return null;
                         }).then(function () {
                             return {
                                 snapshot: oSnapshot,
-                                permission: oPermission
+                                permission: oPermission,
+                                rootId: sCanonicalRootId
                             };
                         });
                     }
                     return {
                         snapshot: oSnapshot,
-                        permission: oPermission
+                        permission: oPermission,
+                        rootId: sCanonicalRootId
                     };
                 });
             });
+        });
         }).then(function (oResolved) {
             if (oResolved && oResolved.ok === false) {
                 return oResolved;
             }
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
-            var aLoadedAttachments = resolveLoadedAttachments(oUiState, sRootId);
+            var sCanonicalRootId = String((oResolved && oResolved.rootId) || sRootId).trim() || sRootId;
+            var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
             return Result.ok({ snapshot: oSnapshot || {} }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                     status: "ready",
                     ready: true,
                     readyAt: sReadyAt,
                     error: "",
-                    rootId: sRootId,
+                    rootId: sCanonicalRootId,
                     mode: WorkflowContracts.EDIT_MODES.READ,
                     permissionKnown: true,
                     lockKnown: true
                 }),
+                Effects.modelPatch("state", "/activeObjectId", sCanonicalRootId),
+                Effects.modelPatch("state", "/selectedId", sCanonicalRootId),
+                Effects.modelPatch("state", "/postOpenHydratedRootId", sCanonicalRootId),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),

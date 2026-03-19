@@ -10,6 +10,23 @@ sap.ui.define([
         return ODataAdapterUtils.buildEqFilter(sProperty, sRootId);
     }
 
+    function resolveRootId(mArgs, mDeps) {
+        var sRequestedId = String(mDeps.rootId(mArgs) || "").trim();
+        if (!sRequestedId) {
+            return Promise.resolve("");
+        }
+        return GatewayRequestRuntime.get("ChecklistSearchSet", {
+            "$filter": buildStringEqFilter("Id", sRequestedId),
+            "$top": 1
+        }).then(function (oResponse) {
+            var aRows = ODataAdapterUtils.asArray(oResponse);
+            var oFirst = aRows[0] || {};
+            return String(oFirst.Key || oFirst.RootKey || oFirst.Id || sRequestedId).trim();
+        }).catch(function () {
+            return sRequestedId;
+        });
+    }
+
     function fetchDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var pRoot = GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistRootSet", sRootId, {
@@ -64,6 +81,7 @@ sap.ui.define([
 
     return {
         enrichServerSnapshot: enrichServerSnapshot,
-        loadDetailSnapshot: fetchDetailSnapshot
+        loadDetailSnapshot: fetchDetailSnapshot,
+        resolveRootId: resolveRootId
     };
 });

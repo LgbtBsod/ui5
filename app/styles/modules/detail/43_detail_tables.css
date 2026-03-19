@@ -35,7 +35,7 @@
   min-height: 0;
   min-width: 0;
   height: auto;
-  overflow-x: auto;
+  overflow-x: visible;
   overflow-y: visible;
 }
 
@@ -126,14 +126,6 @@
   width: 100%;
 }
 
-.chkApp .tableRowActionBtn .sapMBtnInner {
-  border-radius: 999px;
-  border-color: rgba(var(--accent-rgb), 0.16);
-  background: rgba(var(--accent-rgb), 0.08);
-  color: var(--text-main);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-
 .chkApp .detailGridTable .sapUiTableCtrl tr:hover .sapUiTableCell,
 .chkApp .flatEditorTable .sapMListTblRow:hover .sapMListTblCell,
 .chkApp .detailAttachmentTable .sapMListTblRow:hover .sapMListTblCell {
@@ -152,13 +144,6 @@
 .chkApp .detailAttachmentActions .tableRowActionBtn .sapMBtnInner {
   min-height: 2.12rem;
   padding-inline: 0.62rem;
-}
-
-.chkApp .detailGridTable .tableRowActionBtnDanger .sapMBtnInner,
-.chkApp .flatEditorTable .tableRowActionBtnDanger .sapMBtnInner {
-  background:
-    linear-gradient(180deg, rgba(var(--semantic-danger-rgb), 0.12), rgba(var(--semantic-danger-rgb), 0.06)),
-    var(--theme-rail-bg);
 }
 
 body.chkAppRoot.appDark .chkApp .detailGridTable .sapUiTableCell,
@@ -187,6 +172,42 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 .chkApp .appLayoutSplit [id$="-detailPaneHost"] .detailSectionBody {
   overflow-x: visible;
   gap: 0.58rem;
+}
+
+.chkApp .detailSectionToolbar {
+  gap: 0.42rem;
+}
+
+.chkApp .detailSectionToolbar .sapMTBSpacer {
+  min-width: 0.4rem;
+}
+
+.chkApp .detailSectionValueHelpInput {
+  width: clamp(12rem, 22vw, 15rem);
+  max-width: 100%;
+}
+
+.chkApp .detailSectionValueHelpInput .sapMInputBaseContentWrapper,
+.chkApp .detailSectionValueHelpInput .sapMInputBaseInner {
+  border-radius: 999px;
+}
+
+.chkApp .detailSectionNumberChip {
+  max-width: min(16rem, 100%);
+}
+
+.chkApp .detailGridTable .sapUiTableCnt,
+.chkApp .detailGridTable .sapUiTableCtrlScr,
+.chkApp .flatEditorTable .sapMListTblCnt {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chkApp .detailGridTable .sapUiTableCtrl,
+.chkApp .flatEditorTable .sapMListTbl {
+  width: max-content;
+  min-width: 100%;
 }
 
 .chkApp .appLayoutSplit #detailPaneHost .detailTableExperienceCard,
@@ -226,11 +247,6 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   border-color: var(--control-danger-border);
   background: color-mix(in srgb, var(--control-danger-bg) 28%, var(--theme-workbench-control-bg));
   color: var(--text-main);
-}
-
-.chkApp .tableRowActionBtn:hover .sapMBtnInner {
-  transform: none;
-  box-shadow: none;
 }
 
 .chkApp .detailGridTable .sapUiTableCtrl,
@@ -351,7 +367,7 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 
   .chkApp .detailGridTable,
   .chkApp .flatEditorTable {
-    min-width: 48rem;
+    min-width: 0;
   }
 
   .chkApp .appLayoutSplit #detailPaneHost .detailGridTable,
@@ -376,7 +392,7 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 
   .chkApp .detailGridTable,
   .chkApp .flatEditorTable {
-    min-width: 42rem;
+    min-width: 0;
   }
 
   .chkApp .appLayoutSplit #detailPaneHost .detailGridTable,
@@ -402,7 +418,11 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   .chkApp .detailGridTable,
   .chkApp .flatEditorTable,
   .chkApp .detailAttachmentTable {
-    min-width: 36rem;
+    min-width: 0;
+  }
+
+  .chkApp .detailSectionValueHelpInput {
+    width: min(100%, 14rem);
   }
 }
 

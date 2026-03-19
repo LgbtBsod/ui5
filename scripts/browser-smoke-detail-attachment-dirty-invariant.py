@@ -10,6 +10,14 @@ from pathlib import Path
 from typing import Any
 
 from playwright.sync_api import sync_playwright
+from browser_route_bootstrap import (
+    collect_bootstrap_diagnostics,
+    invoke_controller_method as shared_invoke_controller_method,
+    navigate_to_detail,
+    wait_for_app_ready,
+    wait_for_detail_ready as shared_wait_for_detail_ready,
+    wait_for_search_ready as shared_wait_for_search_ready,
+)
 
 
 UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
@@ -42,15 +50,7 @@ def safe_evaluate(page, script: str, arg: Any = None, retries: int = 3):
 
 
 def wait_for_ui5_bootstrap(page) -> None:
-    page.wait_for_function(
-        """
-        () => typeof window !== 'undefined'
-          && typeof window.sap !== 'undefined'
-          && !!sap.ui
-          && typeof sap.ui.getCore === 'function'
-        """,
-        timeout=60000,
-    )
+    wait_for_app_ready(page, timeout=60000)
 
 
 def flush_report(report: dict[str, Any]) -> int:
@@ -91,42 +91,11 @@ def batch_operation_requests(network: list[dict[str, Any]], method: str, marker:
 
 
 def wait_for_detail_ready(page, root_id: str) -> None:
-    wait_for_ui5_bootstrap(page)
-    page.wait_for_function(
-        """
-        (expectedRootId) => {
-          const core = sap.ui.getCore();
-          const view = core.byId('checklist_app_comp---app--detailPaneHost');
-          const objectPage = core.byId('checklist_app_comp---app--detailPaneHost--detailObjectPage');
-          const selected = view && view.getModel && view.getModel('selected');
-          const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
-          return !!view && !!objectPage && rootId === expectedRootId;
-        }
-        """,
-        arg=root_id,
-        timeout=30000,
-    )
-    page.wait_for_timeout(1500)
+    shared_wait_for_detail_ready(page, root_id, timeout=30000)
 
 
 def wait_for_search_ready(page) -> None:
-    wait_for_ui5_bootstrap(page)
-    page.wait_for_function(
-        """
-        () => {
-          const core = typeof sap !== 'undefined' && sap.ui && sap.ui.getCore && sap.ui.getCore();
-          const app = core && core.byId('checklist_app_comp---app');
-          const state = app && app.getModel && app.getModel('state');
-          return !!core
-            && !!core.byId('checklist_app_comp---app--mainFcl')
-            && !!core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable')
-            && !!state
-            && state.getProperty('/currentRouteName') === 'search';
-        }
-        """,
-        timeout=30000,
-    )
-    page.wait_for_timeout(1000)
+    shared_wait_for_search_ready(page, timeout=30000)
 
 
 def detail_state(page) -> dict[str, Any]:
@@ -164,20 +133,10 @@ def detail_state(page) -> dict[str, Any]:
 
 
 def invoke_controller_method(page, view_id: str, method_name: str, *args: Any) -> Any:
-    return safe_evaluate(
-        page,
-        """
-        ({ viewId, methodName, args }) => {
-          const view = sap.ui.getCore().byId(viewId);
-          const controller = view && view.getController && view.getController();
-          if (!controller || typeof controller[methodName] !== 'function') {
-            throw new Error('Controller method not found: ' + viewId + ':' + methodName);
-          }
-          return Promise.resolve(controller[methodName].apply(controller, args || []));
-        }
-        """,
-        {"viewId": view_id, "methodName": method_name, "args": list(args)},
-    )
+    controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Detail"
+    if "analyticsPaneHost" in view_id:
+        controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Analytics"
+    return shared_invoke_controller_method(page, controller_name, method_name, *args)
 
 
 def set_detail_edit_mode(page, state: bool) -> Any:
@@ -379,7 +338,8 @@ def main() -> int:
             page.on("request", on_request)
 
             current_step = "route.open.detail"
-            page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="domcontentloaded", timeout=90000)
+            page.goto(UI_URL, wait_until="domcontentloaded", timeout=90000)
+            navigate_to_detail(page, ROOT_ID)
             wait_for_detail_ready(page, ROOT_ID)
 
             current_step = "lock.acquire"
@@ -570,7 +530,8 @@ def main() -> int:
             "error": str(exc),
             "lastState": last_state,
             "step": current_step,
-            "classification": classify_failure(current_step, exc)
+            "classification": classify_failure(current_step, exc),
+            "bootstrap": collect_bootstrap_diagnostics(page) if "page" in locals() else {}
         })
 
     report = {

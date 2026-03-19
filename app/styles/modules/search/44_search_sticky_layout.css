@@ -10,7 +10,7 @@
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
   gap: var(--search-workbench-gap);
-  overflow: visible !important;
+  overflow: visible;
 }
 
 .chkApp .searchWorkbenchDock > .searchFilterCardDense,

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from playwright.sync_api import sync_playwright
+from browser_route_bootstrap import navigate_to_search, wait_for_app_ready, wait_for_search_ready
 
 
 UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
@@ -39,36 +40,11 @@ def safe_evaluate(page, script: str, retries: int = 3):
 
 
 def wait_for_ui5_bootstrap(page) -> None:
-    page.wait_for_function(
-        """
-        () => typeof window !== 'undefined'
-          && typeof window.sap !== 'undefined'
-          && !!sap.ui
-          && typeof sap.ui.getCore === 'function'
-        """,
-        timeout=60000,
-    )
+    wait_for_app_ready(page, timeout=60000)
 
 
 def wait_for_ui_ready(page) -> None:
-    wait_for_ui5_bootstrap(page)
-    page.wait_for_function(
-        """
-        () => {
-          if (typeof sap === 'undefined' || !sap.ui || !sap.ui.getCore) {
-            return false;
-          }
-          const core = sap.ui.getCore();
-          const app = core.byId('checklist_app_comp---app');
-          const state = app && app.getModel && app.getModel('state');
-          return !!app
-            && !!state
-            && state.getProperty('/currentRouteName') === 'search';
-        }
-        """,
-        timeout=30000,
-    )
-    page.wait_for_timeout(1200)
+    wait_for_search_ready(page, timeout=30000)
 
 
 def main() -> int:
@@ -80,6 +56,7 @@ def main() -> int:
             browser = p.chromium.launch()
             page = browser.new_page(viewport={"width": 1440, "height": 900})
             page.goto(UI_URL, wait_until="domcontentloaded", timeout=90000)
+            navigate_to_search(page)
             wait_for_ui_ready(page)
 
             result = safe_evaluate(

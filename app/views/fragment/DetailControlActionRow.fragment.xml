@@ -86,7 +86,7 @@
             tooltip="{i18n>statusDraftTooltip}"
             class="actionPrioritySecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
                 <core:CustomData key="targetStatus" value="DRAFT"/>
@@ -101,7 +101,7 @@
             tooltip="{i18n>statusRegisteredTooltip}"
             class="actionPrioritySecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
                 <core:CustomData key="targetStatus" value="REGISTERED"/>
@@ -116,7 +116,7 @@
             tooltip="{i18n>statusClosedTooltip}"
             class="chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
                 <core:CustomData key="targetStatus" value="CLOSED"/>
@@ -133,7 +133,7 @@
             class="actionPrioritySecondary chkRipple"
             visible="{path:'selected>/root/id', formatter:'.formatCopyLinkVisible'}">
             <layoutData>
-                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                <OverflowToolbarLayoutData priority="Disappear"/>
             </layoutData>
         </Button>
 
@@ -145,7 +145,7 @@
             tooltip="{i18n>detailFullscreenTooltip}"
             class="actionPrioritySecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                <OverflowToolbarLayoutData priority="Disappear"/>
             </layoutData>
         </Button>
     </OverflowToolbar>

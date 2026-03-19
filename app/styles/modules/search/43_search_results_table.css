@@ -14,7 +14,7 @@
     0 6px 14px rgba(18, 36, 64, 0.04);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  overflow-x: hidden;
+  overflow-x: visible;
   overflow-y: visible;
 }
 
@@ -139,13 +139,13 @@
 
 .chkApp .searchResultsTable > .sapMVBox,
 .chkApp .searchResultsTable > .sapMFlexBox {
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 .chkApp .searchResultsTable .sapMListTbl,
 .chkApp .searchResultsTable table.sapMListTbl,
 .chkApp .searchResultsTable .sapUiCompSmartTableInnerTable {
-  width: 100%;
+  width: max-content;
   min-width: 100%;
   table-layout: auto;
   border-collapse: separate;
@@ -697,7 +697,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 .chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTable,

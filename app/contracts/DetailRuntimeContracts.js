@@ -3,7 +3,6 @@ sap.ui.define([], function () {
 
     return Object.freeze({
         INFO_CARD_KEYS: Object.freeze({
-            CRITERIA_NUMBERS: "criteriaNumbers",
             DATETIME: "datetime",
             EQUIPMENT: "equipment",
             LOCATION: "location",
@@ -13,7 +12,6 @@ sap.ui.define([], function () {
             PROFESSION: "profession"
         }),
         INFO_CARD_TEXT_KEYS: Object.freeze({
-            CRITERIA_NUMBERS: "criteriaNumbersLabel",
             DATETIME: "dateTimeBlockLabel",
             EQUIPMENT: "equipmentLabel",
             LOCATION: "locationLabel",
@@ -23,7 +21,6 @@ sap.ui.define([], function () {
             PROFESSION: "professionLabel"
         }),
         INFO_CARD_TEXT_FALLBACKS: Object.freeze({
-            CRITERIA_NUMBERS: "Checks/Barriers criteria",
             DATETIME: "Date & Time",
             EQUIPMENT: "Equipment",
             LOCATION: "Location",
@@ -38,7 +35,6 @@ sap.ui.define([], function () {
             observer: Object.freeze(["basic.OBSERVER_FULLNAME"]),
             observed: Object.freeze(["basic.OBSERVED_FULLNAME"]),
             location: Object.freeze(["basic.LOCATION_KEY"]),
-            criteriaNumbers: Object.freeze(["basic.CHECKS_NUMBER", "basic.BARRIERS_NUMBER"]),
             lpc: Object.freeze(["basic.LPC_KEY"]),
             profession: Object.freeze(["basic.PROF_KEY"])
         }),

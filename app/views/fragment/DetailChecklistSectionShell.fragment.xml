@@ -15,6 +15,41 @@
                     class="chipSm statusChip detailSectionCountChip">
                     <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
                 </ObjectStatus>
+                <Input
+                    value="{= ${selected>/basic/CHECKS_NUMBER_TEXT} || ${selected>/basic/CHECKS_NUMBER} || '' }"
+                    placeholder="{i18n>checksNumberLabel}"
+                    visible="{= ${view>kind} === 'check' &amp;&amp; ${state>/workflow/detail/editMode} !== 'READ' }"
+                    showValueHelp="true"
+                    valueHelpOnly="true"
+                    valueHelpRequest=".onOpenChecksNumberValueHelp"
+                    editable="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
+                    class="detailSectionValueHelpInput">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="High"/>
+                    </layoutData>
+                </Input>
+                <Input
+                    value="{= ${selected>/basic/BARRIERS_NUMBER_TEXT} || ${selected>/basic/BARRIERS_NUMBER} || '' }"
+                    placeholder="{i18n>barriersNumberLabel}"
+                    visible="{= ${view>kind} === 'barrier' &amp;&amp; ${state>/workflow/detail/editMode} !== 'READ' }"
+                    showValueHelp="true"
+                    valueHelpOnly="true"
+                    valueHelpRequest=".onOpenBarriersNumberValueHelp"
+                    editable="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
+                    class="detailSectionValueHelpInput">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="High"/>
+                    </layoutData>
+                </Input>
+                <ObjectStatus
+                    text="{= ${view>kind} === 'check' ? (${selected>/basic/CHECKS_NUMBER_TEXT} || ${selected>/basic/CHECKS_NUMBER} || '-') : (${selected>/basic/BARRIERS_NUMBER_TEXT} || ${selected>/basic/BARRIERS_NUMBER} || '-') }"
+                    state="Information"
+                    visible="{= ${state>/workflow/detail/editMode} === 'READ' }"
+                    class="chipSm statusChip detailSectionNumberChip">
+                    <layoutData>
+                        <OverflowToolbarLayoutData priority="High"/>
+                    </layoutData>
+                </ObjectStatus>
                 <ToolbarSpacer/>
                 <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecklistSection" class="sapUiTinyMarginEnd actionPrioritySecondary">
                     <customData>

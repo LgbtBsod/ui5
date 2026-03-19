@@ -10,6 +10,15 @@ from pathlib import Path
 from typing import Any
 
 from playwright.sync_api import sync_playwright
+from browser_route_bootstrap import (
+    collect_bootstrap_diagnostics,
+    invoke_controller_method as shared_invoke_controller_method,
+    navigate_to_detail,
+    navigate_to_search,
+    wait_for_app_ready,
+    wait_for_detail_ready as shared_wait_for_detail_ready,
+    wait_for_search_ready as shared_wait_for_search_ready,
+)
 
 
 UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
@@ -42,69 +51,17 @@ def safe_evaluate(page, script: str, arg: Any = None, retries: int = 3):
 
 
 def wait_for_ui5_bootstrap(page) -> None:
-    page.wait_for_function(
-        """
-        () => typeof window !== 'undefined'
-          && typeof window.sap !== 'undefined'
-          && !!sap.ui
-          && typeof sap.ui.getCore === 'function'
-        """,
-        timeout=60000,
-    )
+    wait_for_app_ready(page, timeout=60000)
 
 
 def wait_for_search_ready(page) -> None:
-    wait_for_ui5_bootstrap(page)
-    page.wait_for_function(
-        """
-        () => {
-          if (typeof sap === 'undefined' || !sap.ui || !sap.ui.getCore) {
-            return false;
-          }
-          const core = sap.ui.getCore();
-          const app = core.byId('checklist_app_comp---app');
-          const state = app && app.getModel && app.getModel('state');
-          const fcl = core.byId('checklist_app_comp---app--mainFcl');
-          const smartFilterBar = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartFilterBar');
-          const smartTable = core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable');
-          const markerReady = document.documentElement.getAttribute('data-ui5-app-ready') === 'true';
-          const coreReady = !!fcl && !!smartFilterBar && !!smartTable;
-          return !!fcl
-            && !!smartFilterBar
-            && !!smartTable
-            && !!state
-            && state.getProperty('/currentRouteName') === 'search'
-            && (markerReady || coreReady);
-        }
-        """,
-        timeout=30000,
-    )
+    shared_wait_for_search_ready(page, timeout=30000)
     page.get_by_text("Create", exact=True).wait_for(timeout=30000)
     page.wait_for_timeout(1200)
 
 
 def wait_for_detail_ready(page, root_id: str) -> None:
-    wait_for_ui5_bootstrap(page)
-    page.wait_for_function(
-        """
-        (expectedRootId) => {
-          const core = sap.ui.getCore();
-          const view = core.byId('checklist_app_comp---app--detailPaneHost');
-          const app = core.byId('checklist_app_comp---app');
-          const objectPage = core.byId('checklist_app_comp---app--detailPaneHost--detailObjectPage');
-          const selected = view && view.getModel && view.getModel('selected');
-          const state = app && app.getModel && app.getModel('state');
-          const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
-          const stateSelectedId = state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '';
-          return !!view
-            && !!objectPage
-            && (rootId === expectedRootId || stateSelectedId === expectedRootId);
-        }
-        """,
-        arg=root_id,
-        timeout=30000,
-    )
-    page.wait_for_timeout(1500)
+    shared_wait_for_detail_ready(page, root_id, timeout=30000)
 
 
 def wait_for_edit_detail_ready(page, root_id: str) -> None:
@@ -293,20 +250,10 @@ def detail_state(page) -> dict[str, Any]:
 
 
 def invoke_view_controller_method(page, view_id: str, method_name: str, *args: Any):
-    return safe_evaluate(
-        page,
-        """
-        ({ viewId, methodName, args }) => {
-          const view = sap.ui.getCore().byId(viewId);
-          const controller = view && view.getController && view.getController();
-          if (!controller || typeof controller[methodName] !== 'function') {
-            throw new Error('Controller method not found: ' + viewId + ':' + methodName);
-          }
-          return Promise.resolve(controller[methodName].apply(controller, args || []));
-        }
-        """,
-        {"viewId": view_id, "methodName": method_name, "args": list(args)},
-    )
+    controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Detail"
+    if "analyticsPaneHost" in view_id:
+        controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Analytics"
+    return shared_invoke_controller_method(page, controller_name, method_name, *args)
 
 
 def set_detail_edit_mode(page, state: bool) -> Any:
@@ -465,6 +412,7 @@ def main() -> int:
 
             current_step = "route.open.search"
             page.goto(UI_URL, wait_until="domcontentloaded", timeout=90000)
+            navigate_to_search(page)
             wait_for_search_ready(page)
 
             smart_controls = safe_evaluate(
@@ -472,10 +420,19 @@ def main() -> int:
                 """
                 () => {
                   const core = sap.ui.getCore();
-                  const searchView = core.byId('checklist_app_comp---app--searchPaneHost');
+                  const all = Object.values(core.mElements || {});
+                  const searchView = all.find((item) => item
+                    && item.isA
+                    && item.isA('sap.ui.core.mvc.View')
+                    && item.getController
+                    && item.getController()
+                    && item.getController().getMetadata
+                    && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Search');
+                  const smartFilterBar = all.find((item) => item && item.getId && String(item.getId()).endsWith('searchSmartFilterBar'));
+                  const smartTable = all.find((item) => item && item.getId && String(item.getId()).endsWith('searchSmartTable'));
                   return {
-                    hasSmartFilterBar: !!core.byId('checklist_app_comp---app--searchPaneHost--searchSmartFilterBar'),
-                    hasSmartTable: !!core.byId('checklist_app_comp---app--searchPaneHost--searchSmartTable'),
+                    hasSmartFilterBar: !!smartFilterBar,
+                    hasSmartTable: !!smartTable,
                     searchVisible: !!(searchView && searchView.getDomRef && searchView.getDomRef())
                   };
                 }
@@ -487,7 +444,7 @@ def main() -> int:
                 failures.append("search.smart.gateway.controls")
 
             current_step = "route.open.detail"
-            page.goto(f"{UI_URL}#/checklist/{ROOT_ID}", wait_until="domcontentloaded", timeout=90000)
+            navigate_to_detail(page, ROOT_ID)
             wait_for_detail_ready(page, ROOT_ID)
 
             opened = detail_state(page)
@@ -864,9 +821,12 @@ def main() -> int:
                 page,
                 """
                 () => {
+                  const core = sap.ui.getCore();
+                  const all = Object.values(core.mElements || {});
+                  const smartTable = all.find((item) => item && item.getId && String(item.getId()).endsWith('searchSmartTable'));
                   return {
                     hasCreateButton: document.body && document.body.innerText.includes('Create'),
-                    smartTable: !!sap.ui.getCore().byId('checklist_app_comp---app--searchPaneHost--searchSmartTable')
+                    smartTable: !!smartTable
                   };
                 }
                 """
@@ -883,7 +843,8 @@ def main() -> int:
             "error": str(exc),
             "lastState": last_state,
             "step": current_step,
-            "classification": classify_failure(current_step, exc)
+            "classification": classify_failure(current_step, exc),
+            "bootstrap": collect_bootstrap_diagnostics(page) if "page" in locals() else {}
         })
 
     return flush_report(build_report(checks, failures, network, {

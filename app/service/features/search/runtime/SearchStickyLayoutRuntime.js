@@ -46,11 +46,6 @@ sap.ui.define([
         iToolbarTop = iActionTop + iActionHeight + (iActionHeight && iToolbarHeight ? SEARCH_STICKY_STACK_GAP_PX : 0);
         ThemeDomRuntime.toggleClass([oWorkbenchDom], "searchWorkbenchDockCompactSticky", bCompactSticky);
         ThemeDomRuntime.toggleClass([oWorkbenchDom], "searchWorkbenchDockDesktopSticky", !bCompactSticky);
-        ThemeDomRuntime.setStyleProperties([oWorkbenchDom], {
-            "overflow": "visible",
-            "overflow-x": "visible",
-            "overflow-y": "visible"
-        }, "important");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-sticky-dock-top", iTopBase + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-workbench-toolbar-stack-height", (iActionHeight + iToolbarHeight + ((iActionHeight && iToolbarHeight) ? SEARCH_STICKY_STACK_GAP_PX : 0)) + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-sticky-filter-top", iTopBase + "px");
@@ -66,47 +61,6 @@ sap.ui.define([
             (iTopBase + iSummaryRailHeight + (iSummaryRailHeight ? SEARCH_SUMMARY_RAIL_GAP_PX : 0)) + "px"
         );
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-smarttable-toolbar-height", iResultsToolbarHeight + "px");
-        if (bCompactSticky) {
-            SearchStickyDomRuntime.setSearchStaticTop(oFilterCard);
-            SearchStickyDomRuntime.setSearchStaticTop(oActionRail);
-            SearchStickyDomRuntime.setSearchStaticTop(oToolbarRail);
-            SearchStickyDomRuntime.setSearchStickyTop(oSummaryRailDom, iTopBase + "px");
-            SearchStickyDomRuntime.setSearchStickyTop(oResultsToolbarDom, (iTopBase + iSummaryRailHeight + (iSummaryRailHeight ? SEARCH_SUMMARY_RAIL_GAP_PX : 0)) + "px");
-        } else {
-            SearchStickyDomRuntime.setSearchStickyTop(oFilterCard, iTopBase + "px");
-            SearchStickyDomRuntime.setSearchStickyTop(oActionRail, iActionTop + "px");
-            SearchStickyDomRuntime.setSearchStickyTop(oToolbarRail, iToolbarTop + "px");
-            SearchStickyDomRuntime.setSearchStaticTop(oSummaryRailDom);
-            SearchStickyDomRuntime.setSearchStaticTop(oResultsToolbarDom);
-        }
-        ThemeDomRuntime.setStyleProperties([oFilterCard, oActionRail], {
-            "position": "sticky",
-            "overflow": "visible",
-            "overflow-x": "visible",
-            "overflow-y": "visible"
-        }, "important");
-        ThemeDomRuntime.setStyleProperties([oToolbarRail, oSummaryRailDom, oResultsToolbarDom], {
-            "overflow": "visible",
-            "overflow-x": "visible",
-            "overflow-y": "visible"
-        }, "important");
-        if (bCompactSticky) {
-            ThemeDomRuntime.setStyleProperties([oFilterCard, oActionRail], {
-                "position": "relative",
-                "top": "auto"
-            }, "important");
-            ThemeDomRuntime.setStyleProperty([oSummaryRailDom], "position", "sticky", "important");
-            ThemeDomRuntime.setStyleProperty([oResultsToolbarDom], "position", "sticky", "important");
-        } else {
-            ThemeDomRuntime.setStyleProperties([oSummaryRailDom], {
-                "position": "relative",
-                "top": "auto"
-            }, "important");
-            ThemeDomRuntime.setStyleProperties([oResultsToolbarDom], {
-                "position": "relative",
-                "top": "auto"
-            }, "important");
-        }
     }
 
     function syncSearchViewportLayout(oController, oScrollHost) {

@@ -15,6 +15,8 @@ sap.ui.define([], function () {
             PROFESSION: "/basic/PROF_TEXT"
         }),
         VALUE_HELP_DIALOGS: Object.freeze({
+            BARRIERS_NUMBER: "barriersNumberValueHelp",
+            CHECKS_NUMBER: "checksNumberValueHelp",
             LOCATION: "locationValueHelp"
         }),
         VIEW_PATHS: Object.freeze({

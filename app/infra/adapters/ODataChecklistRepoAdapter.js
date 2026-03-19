@@ -36,6 +36,9 @@ sap.ui.define([
 
     function create(mDeps) {
         return {
+            resolveRootId: function (mArgs) {
+                return ODataChecklistReadRuntime.resolveRootId(mArgs, readDeps());
+            },
             loadDetailSnapshot: function (mArgs) {
                 return ODataChecklistReadRuntime.loadDetailSnapshot(mArgs, readDeps());
             },

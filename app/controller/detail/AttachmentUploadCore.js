@@ -75,17 +75,10 @@ sap.ui.define([
 
     function readUploaderFiles(oUploader) {
         var oFocusDomRef;
-        var oInput;
         if (oUploader && typeof oUploader.getFocusDomRef === "function") {
             oFocusDomRef = oUploader.getFocusDomRef();
             if (oFocusDomRef && oFocusDomRef.files && oFocusDomRef.files.length) {
                 return normalizeUploaderFiles(oFocusDomRef.files);
-            }
-            if (oFocusDomRef && oFocusDomRef.querySelector) {
-                oInput = oFocusDomRef.querySelector("input[type='file']");
-                if (oInput && oInput.files && oInput.files.length) {
-                    return normalizeUploaderFiles(oInput.files);
-                }
             }
         }
         return [];
@@ -140,7 +133,6 @@ sap.ui.define([
 
     function openNativeFilePicker(oController) {
         var oUploader = oController.byId("attachmentUploader");
-        var oDomRef;
 
         if (!oUploader) {
             return Promise.resolve(false);
@@ -148,18 +140,6 @@ sap.ui.define([
         if (!canUploadAttachments(oController)) {
             oController._showToast(ATTACHMENT_CONSTANTS.UPLOAD_DISABLED_TOAST_KEY);
             return Promise.resolve(false);
-        }
-        oDomRef = typeof oUploader.getFocusDomRef === "function" ? oUploader.getFocusDomRef() : null;
-        if (oDomRef && typeof oDomRef.click === "function") {
-            oDomRef.click();
-            return Promise.resolve(true);
-        }
-        if (oDomRef && oDomRef.querySelector) {
-            var oInput = oDomRef.querySelector("input[type='file']");
-            if (oInput && typeof oInput.click === "function") {
-                oInput.click();
-                return Promise.resolve(true);
-            }
         }
         if (oUploader && typeof oUploader.openFileDialog === "function") {
             oUploader.openFileDialog();

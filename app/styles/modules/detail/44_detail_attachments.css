@@ -65,13 +65,6 @@
   pointer-events: none;
 }
 
-.chkApp .detailAttachmentUploaderHidden .sapMBtn,
-.chkApp .detailAttachmentUploaderHidden .sapUiFupInputMask,
-.chkApp .detailAttachmentUploaderHidden .sapUiFupButtonOnly,
-.chkApp .detailAttachmentUploaderHidden .sapMBtnInner {
-  display: none !important;
-}
-
 .chkApp .detailAttachmentDropZoneActions .sapUiFup,
 .chkApp .detailAttachmentDropZoneActions .sapMBtn,
 .chkApp .detailAttachmentDropZoneActions .sapMBtnInner {
@@ -713,7 +706,7 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   }
 
   .chkApp .detailAttachmentTable {
-    min-width: 48rem;
+    min-width: 0;
   }
 
   .chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
@@ -739,7 +732,7 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   }
 
   .chkApp .detailAttachmentTable {
-    min-width: 42rem;
+    min-width: 0;
   }
 
   .chkApp .appLayoutSplit #detailPaneHost .detailAttachmentTable,
