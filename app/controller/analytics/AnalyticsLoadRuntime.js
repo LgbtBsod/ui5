@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",
@@ -13,7 +12,6 @@ sap.ui.define([
 ], function (
     ControllerViewStateRuntime,
     ModelStateRuntime,
-    FacadeCommandRuntime,
     StatePaths,
     AnalyticsContracts,
     AnalyticsUiContracts,
@@ -126,6 +124,19 @@ sap.ui.define([
         throw oError;
     }
 
+    function executeAnalyticsLoad(oController, oLoadInput, mHooks) {
+        var oFacade = oController && oController._facade;
+        if (!oController || !oFacade || typeof oFacade.load !== "function" || typeof oController.executeFacadeMethod !== "function") {
+            return Promise.reject(new Error("ANALYTICS_LOAD_UNAVAILABLE"));
+        }
+        return Promise.resolve(oController.executeFacadeMethod(
+            oFacade,
+            "load",
+            buildLoadPayload(oLoadInput),
+            mHooks.buildCtx(oController)
+        ));
+    }
+
     return {
         loadAnalytics: function (oController, sReason, mHooks) {
             var oLoadInput = normalizeLoadInput(oController, sReason);
@@ -137,13 +148,7 @@ sap.ui.define([
             setReadinessState(oController, "loading", false, "", "");
             setControllerBusy(oController, true, "");
 
-            return FacadeCommandRuntime.executeRaw(
-                oController,
-                oController._facade,
-                "load",
-                buildLoadPayload(oLoadInput),
-                mHooks.buildCtx(oController)
-            ).then(function (oResult) {
+            return executeAnalyticsLoad(oController, oLoadInput, mHooks).then(function (oResult) {
                 return applySuccessfulLoad(oController, oLoadInput, mHooks, oResult);
             }).catch(function (oError) {
                 return handleLoadFailure(oController, oError);

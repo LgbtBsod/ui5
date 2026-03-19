@@ -4,6 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAccessViewState",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistStateBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistRowBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailMatchedRuntime",
@@ -24,7 +26,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime"
-], function (DialogOrchestrator, DetailViewBehavior, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailMatchedRuntime, DetailSelectedFieldRuntime, ModelPathContracts, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
+], function (DialogOrchestrator, DetailViewBehavior, DetailAccessViewState, DetailActionConstants, DetailCommandPolicy, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailMatchedRuntime, DetailSelectedFieldRuntime, ModelPathContracts, ViewPathContracts, StatePaths, FeedbackCoordinator, ControllerViewStateRuntime, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -55,7 +57,7 @@ sap.ui.define([
         };
     }
 
-    return {
+    return Object.assign({}, DetailChecklistStateBehavior, DetailChecklistRowBehavior, {
         ensureEffectDialog: function (sId) {
             var sFragment = DialogContracts.getFragmentName(sId);
             if (!sFragment) {
@@ -212,5 +214,5 @@ sap.ui.define([
         _resolveRowInput: function (oEvent) {
             return DetailSelectedFieldRuntime.resolveRowInput(oEvent);
         }
-    };
+    });
 });

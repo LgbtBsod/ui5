@@ -7,8 +7,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionPinnedRailRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistStateBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistRowBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAttachmentLocationBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFormatters",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore"
@@ -21,8 +19,6 @@ sap.ui.define([
     DetailActionPinnedRailRuntime,
     DetailActionDialogRuntime,
     DetailChecklistBehavior,
-    DetailChecklistStateBehavior,
-    DetailChecklistRowBehavior,
     DetailAttachmentLocationBehavior,
     DetailFormatters,
     AttachmentUploadCore
@@ -42,8 +38,6 @@ sap.ui.define([
         DetailActionPinnedRailRuntime,
         DetailActionDialogRuntime,
         DetailChecklistBehavior,
-        DetailChecklistStateBehavior,
-        DetailChecklistRowBehavior,
         DetailAttachmentLocationBehavior,
         {
             _computeValidationSummary: function () {
