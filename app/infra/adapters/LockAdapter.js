@@ -58,9 +58,18 @@ sap.ui.define([
     }
 
     function acquire(mArgs) {
-        var sRootId = mArgs && mArgs.rootId;
+        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sSession = normalizeLockToken(mArgs);
-        return GatewayRequestRuntime.postFunction("LockAcquire", { RootId: sRootId, SessionGuid: sSession, Force: !!(mArgs && mArgs.force), StealFrom: (mArgs && mArgs.stealFrom) || (mArgs && mArgs.force ? sSession : "") }).then(function (oResult) {
+        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim();
+        var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
+        return GatewayRequestRuntime.postFunction("LockAcquire", {
+            ObjectUuid: sObjectUuid,
+            RootId: sRootId,
+            SessionGuid: sSession,
+            TabSessionId: sTabSessionId,
+            Force: !!(mArgs && mArgs.force),
+            StealFrom: (mArgs && mArgs.stealFrom) || (mArgs && mArgs.force ? sSession : "")
+        }).then(function (oResult) {
             return normalizeResult(oResult, sSession);
         }).catch(function (oError) {
             return { ok: false, code: "ERROR", killed: false, messageKey: "lockAcquireFailed", raw: oError || {} };
@@ -68,9 +77,13 @@ sap.ui.define([
     }
 
     function heartbeat(mArgs) {
-        var sRootId = mArgs && mArgs.rootId;
+        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
-        return GatewayRequestRuntime.postFunction("LockHeartbeat", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
+        return GatewayRequestRuntime.postFunction("LockHeartbeat", {
+            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim(),
+            RootId: sRootId,
+            SessionGuid: sToken
+        }).then(function (oResult) {
             return normalizeResult(oResult, sToken);
         }).catch(function (oError) {
             return { ok: false, code: "ERROR", killed: false, messageKey: "lockHeartbeatFailed", raw: oError || {} };
@@ -78,9 +91,9 @@ sap.ui.define([
     }
 
     function status(mArgs) {
-        var sRootId = mArgs && mArgs.rootId;
+        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
-        return GatewayRequestRuntime.get("LockStatusSet('" + String(sRootId || "").trim() + "')", { SessionGuid: sToken }).then(function (oResult) {
+        return GatewayRequestRuntime.get("LockStatusSet('" + sRootId + "')", { SessionGuid: sToken }).then(function (oResult) {
             return normalizeResult(oResult, sToken);
         }).catch(function (oError) {
             return { ok: false, code: "ERROR", killed: false, messageKey: "lockStatusFailed", raw: oError || {} };
@@ -88,7 +101,7 @@ sap.ui.define([
     }
 
     function release(mArgs) {
-        var sRootId = mArgs && mArgs.rootId;
+        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
         return GatewayRequestRuntime.postFunction("LockRelease", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
             var oNormalized = normalizeResult(oResult, sToken);

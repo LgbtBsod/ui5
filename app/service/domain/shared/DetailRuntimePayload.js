@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (UseCaseValue, CreateSentinel, ModelContracts, ModelPathContracts) {
@@ -22,6 +22,15 @@ sap.ui.define([
         ).trim();
     }
 
+    function tabSessionId(mInput, mCtx) {
+        var oUiState = mCtx && mCtx.uiState;
+        return String(
+            (mInput && (mInput.tabSessionId || mInput.TabSessionId))
+            || (oUiState && oUiState.get(STATE_MODEL, "/tabSessionId"))
+            || ""
+        ).trim();
+    }
+
     function normalizeRootKey(sRootId) {
         return CreateSentinel.isCreateId(sRootId) ? "" : String(sRootId || "").trim();
     }
@@ -35,16 +44,20 @@ sap.ui.define([
         };
     }
 
-    function lockRequest(mInput, mCtx, StatePaths) {
+    function lockRequest(mInput, mCtx) {
+        var sRootId = rootId(mInput, mCtx);
         return {
-            rootId: rootId(mInput, mCtx),
-            sessionGuid: sessionGuid(mInput, mCtx)
+            rootId: sRootId,
+            objectUuid: sRootId,
+            sessionGuid: sessionGuid(mInput, mCtx),
+            tabSessionId: tabSessionId(mInput, mCtx)
         };
     }
 
     return {
         rootId: rootId,
         sessionGuid: sessionGuid,
+        tabSessionId: tabSessionId,
         normalizeRootKey: normalizeRootKey,
         saveRequest: saveRequest,
         lockRequest: lockRequest

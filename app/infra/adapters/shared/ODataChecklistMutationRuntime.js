@@ -23,7 +23,7 @@ sap.ui.define([
             mArgs && mArgs.sessionGuid
         );
         return GatewayRequestRuntime.request({
-            method: "POST_ENTITY",
+            method: "POST_FUNCTION",
             path: "SaveChanges",
             body: oRequest
         }).then(function (oServerPayload) {
@@ -41,7 +41,7 @@ sap.ui.define([
         var oCurrent = (mArgs && mArgs.delta) || {};
         var oRequest = ODataChecklistPayloadMapper.normalizeSavePayload("", oCurrent, mArgs && mArgs.attachments);
         return GatewayRequestRuntime.request({
-            method: "POST_ENTITY",
+            method: "POST_FUNCTION",
             path: "CreateChecklist",
             body: oRequest
         }).then(function (oServerPayload) {
@@ -79,7 +79,7 @@ sap.ui.define([
             mArgs && mArgs.sessionGuid
         );
         return GatewayRequestRuntime.request({
-            method: "POST_ENTITY",
+            method: "POST_FUNCTION",
             path: "AutoSave",
             body: oRequest
         }).then(function (oResponse) {

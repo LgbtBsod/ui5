@@ -15,6 +15,13 @@ ENV/
 backend/mock_gateway/.venv/
 mock_gate_way/.venv/
 
+# Node / package manager
+node_modules/
+dist/
+
+# UI5 local resource cache
+.ui5-resource-cache/
+
 # Python runtime outputs
 backend/mock_gateway/uploads/
 backend/mock_gateway/gateway.db
@@ -31,6 +38,7 @@ artifacts/*.log
 backend/mock_gateway/tmp_mock*.log
 mock_gate_way/tmp_mock*.log
 artifacts/*
+
 # Visual review artifacts and temporary captures
 artifacts/tmp_zip_compare/
 artifacts/ux/review/
@@ -44,11 +52,13 @@ docs/architecture-map.md
 docs/runtime/*.pid
 docs/runtime/*.log
 docs/runtime/*.txt
+
 # Local media dumps
 *.mp4
 *.zip
 *.jpg
 *.png
+tmp-attachment-test.txt
 
 # Generated UI5 preload namespace proxies
 app/checklist/
@@ -67,6 +77,3 @@ docs/artifacts/**/*.png
 docs/artifacts/**/*.md
 docs/artifacts/**/*.txt
 backend/mock_gateway/uploads/
-
-# Node dependencies
-node_modules/

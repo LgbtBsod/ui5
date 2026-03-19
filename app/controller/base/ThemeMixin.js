@@ -52,9 +52,6 @@ sap.ui.define([
         getCurrentThemeMode: function () {
             return DEFAULT_MODE;
         },
-        isDarkThemeEnabled: function () {
-            return false;
-        },
         isThemeAnimationEnabled: function () {
             return !!readThemeProfile().animationEnabled;
         },

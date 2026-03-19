@@ -10,7 +10,12 @@ sap.ui.define([], function () {
             /^\/ChecklistRootSet\((?:[^)]+)\)$/i,
             /^\/AttachmentSet\((?:AttachmentKey=)?[^)]+\)$/i
         ],
-        DIRECT_FUNCTION_BODY_ALLOWLIST: [],
+        DIRECT_FUNCTION_BODY_ALLOWLIST: [
+            /^SaveChanges$/i,
+            /^AutoSave$/i,
+            /^CreateChecklist$/i,
+            /^ReportExport$/i
+        ],
         DIRECT_FUNCTION_QUERY_ALLOWLIST: [
             /^LockAcquire$/i,
             /^LockHeartbeat$/i,
@@ -21,12 +26,7 @@ sap.ui.define([], function () {
         DIRECT_GET_FUNCTION_ALLOWLIST: [
             /^GetHierarchy$/i
         ],
-        DIRECT_POST_ALLOWLIST: [
-            /^\/CreateChecklist(?:$|[?(])/i,
-            /^\/AutoSave(?:$|[?(])/i,
-            /^\/SaveChanges(?:$|[?(])/i,
-            /^\/ReportExport(?:$|[?(])/i
-        ],
+        DIRECT_POST_ALLOWLIST: [],
         FORBIDDEN_PATH_PATTERNS: [
             /^\/actions\//i,
             /^\/lock\//i,
