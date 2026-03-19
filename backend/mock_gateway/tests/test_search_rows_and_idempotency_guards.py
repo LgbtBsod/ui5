@@ -8,10 +8,24 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from database import SessionLocal  # noqa: E402
+from database import Base, engine  # noqa: E402
 from models import ChecklistRoot, SaveRequestLedger  # noqa: E402
 from api.search_api import search_rows  # noqa: E402
 from services import checklist_service  # noqa: E402
 from services.checklist_service import ChecklistService  # noqa: E402
+from services.db_seed import seed_reference_data  # noqa: E402
+from main import _seed_checklist_roots_if_needed  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def reset_db():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db:
+        seed_reference_data(db)
+        _seed_checklist_roots_if_needed(db, minimum_rows=5)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 
 def test_search_rows_clamps_invalid_window_and_skips_inlinecount_by_default():

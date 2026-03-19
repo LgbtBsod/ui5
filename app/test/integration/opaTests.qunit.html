@@ -3,19 +3,30 @@
 <head>
     <meta charset="utf-8">
     <title>PCCT OPA Tests</title>
+    <link rel="stylesheet" href="/resources/sap/ui/thirdparty/qunit-2.css">
+    <script src="/resources/sap/ui/thirdparty/qunit-2.js"></script>
+    <script src="/resources/sap/ui/qunit/qunit-junit.js"></script>
     <script
         src="/resources/sap-ui-core.js"
         id="sap-ui-bootstrap"
         data-sap-ui-theme="sap_fiori_3"
         data-sap-ui-async="true"
         data-sap-ui-libs="sap.ui.core,sap.m"
-        data-sap-ui-resourceroots='{"PRODUCTION_CONTROL_CHECKLIST":"../../"}'
-        data-sap-ui-oninit="module:sap/ui/qunit/qunit-bridge">
+        data-sap-ui-resourceroots='{"PRODUCTION_CONTROL_CHECKLIST":"../../"}'>
+    </script>
+    <script>
+        QUnit.config.autostart = false;
+        sap.ui.getCore().attachInit(function () {
+            sap.ui.require([
+                "PRODUCTION_CONTROL_CHECKLIST/test/integration/AllJourneys"
+            ], function () {
+                QUnit.start();
+            });
+        });
     </script>
 </head>
 <body class="sapUiBody">
     <div id="qunit"></div>
     <div id="qunit-fixture"></div>
-    <script src="AllJourneys.js"></script>
 </body>
 </html>

@@ -37,10 +37,10 @@ sap.ui.define([
             cache: oCache,
             lastChangeSet: oLastChangeSet
         }).then(function (oResult) {
-            assert.strictEqual(oResult.isOk(), true, "use case succeeds");
-            assert.strictEqual(oResult.getValue().valid, true, "snapshot stays valid");
-            assert.strictEqual(oResult.getValue().invalidated, false, "cache is not invalidated");
-            assert.strictEqual(oResult.getValue().stampDeltaMs, 4000, "stamp delta is reported explicitly");
+            assert.strictEqual(oResult.ok, true, "use case succeeds");
+            assert.strictEqual(oResult.data.valid, true, "snapshot stays valid");
+            assert.strictEqual(oResult.data.invalidated, false, "cache is not invalidated");
+            assert.strictEqual(oResult.data.stampDeltaMs, 4000, "stamp delta is reported explicitly");
             done();
         });
     });
@@ -76,10 +76,10 @@ sap.ui.define([
             cache: oCache,
             lastChangeSet: oLastChangeSet
         }).then(function (oResult) {
-            assert.strictEqual(oResult.isOk(), true, "use case succeeds");
-            assert.strictEqual(oResult.getValue().valid, false, "snapshot is invalid after server stamp drift");
-            assert.strictEqual(oResult.getValue().invalidated, true, "cache is invalidated");
-            assert.strictEqual(oResult.getValue().stampDeltaMs, 10000, "reported delta matches stamp drift");
+            assert.strictEqual(oResult.ok, true, "use case succeeds");
+            assert.strictEqual(oResult.data.valid, false, "snapshot is invalid after server stamp drift");
+            assert.strictEqual(oResult.data.invalidated, true, "cache is invalidated");
+            assert.strictEqual(oResult.data.stampDeltaMs, 10000, "reported delta matches stamp drift");
             assert.strictEqual(bCleared, true, "cache clear is executed");
             done();
         });

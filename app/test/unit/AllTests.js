@@ -10,6 +10,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ExportSearchUseCase.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentLockReleaseRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailPersistenceRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/AutosaveDetailUseCase.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ForceReadOnlyUseCase.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/OpenDetailUseCase.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentNavigationGuardRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/LockLostUseCase.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/CacheValidationUseCase.qunit"
 ], function () {
     "use strict";

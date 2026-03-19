@@ -61,25 +61,21 @@ sap.ui.define([
         };
     }
 
-    QUnit.module("SearchAnalyticsIntentBehavior", {
-        beforeEach: function () {
-            this._fnBuildFilter = SearchCommandPolicy.buildFilter;
-            this._fnRebind = SearchCommandPolicy.rebind;
-            this._calls = [];
-            SearchCommandPolicy.buildFilter = function (_oController, mInput) {
-                this._calls.push({ type: "buildFilter", input: mInput });
-            }.bind(this);
-            SearchCommandPolicy.rebind = function (_oController, mInput) {
-                this._calls.push({ type: "rebind", input: mInput });
-            }.bind(this);
-        },
-        afterEach: function () {
-            SearchCommandPolicy.buildFilter = this._fnBuildFilter;
-            SearchCommandPolicy.rebind = this._fnRebind;
-        }
-    });
+    function createCommandPolicySpy(aCalls) {
+        return {
+            buildFilter: function (_oController, mInput) {
+                aCalls.push({ type: "buildFilter", input: mInput });
+            },
+            rebind: function (_oController, mInput) {
+                aCalls.push({ type: "rebind", input: mInput });
+            }
+        };
+    }
+
+    QUnit.module("SearchAnalyticsIntentBehavior");
 
     QUnit.test("applies source, year range and failed-check scope from analytics intent", function (assert) {
+        var aCalls = [];
         var oFixture = createController({
             filterKey: "ProfessionText",
             filterValue: "PR1",
@@ -93,7 +89,8 @@ sap.ui.define([
             intentPath: "/analyticsDrilldownIntent",
             smartTableReadyPath: "/smartTableReady",
             source: "ANALYTICS_DRILLDOWN",
-            stateModel: "state"
+            stateModel: "state",
+            commandPolicy: createCommandPolicySpy(aCalls)
         });
         var mFilterData = oFixture.applied.filterData;
 
@@ -106,10 +103,11 @@ sap.ui.define([
         assert.strictEqual(oFixture.controller.getModel("state").getProperty("/search/checksFailSegment"), "FAILED", "Failed checks segment was activated");
         assert.strictEqual(oFixture.controller.getModel("state").getProperty("/search/barriersFailSegment"), "ALL", "Barrier segment stayed neutral");
         assert.strictEqual(oFixture.controller.getModel("state").getProperty("/analyticsDrilldownIntent"), null, "Intent was cleared after apply");
-        assert.deepEqual(this._calls.map(function (oEntry) { return oEntry.type; }), ["buildFilter", "rebind"], "Search refresh was executed");
+        assert.deepEqual(aCalls.map(function (oEntry) { return oEntry.type; }), ["buildFilter", "rebind"], "Search refresh was executed");
     });
 
     QUnit.test("applies month drilldown as month date range", function (assert) {
+        var aCalls = [];
         var oFixture = createController({
             filterKey: "DateCheck",
             filterValue: "Mar",
@@ -124,13 +122,14 @@ sap.ui.define([
             intentPath: "/analyticsDrilldownIntent",
             smartTableReadyPath: "/smartTableReady",
             source: "ANALYTICS_DRILLDOWN",
-            stateModel: "state"
+            stateModel: "state",
+            commandPolicy: createCommandPolicySpy(aCalls)
         });
         var oRange = oFixture.applied.filterData.DateCheck.ranges[0];
 
         assert.strictEqual(bApplied, true, "Month intent was applied");
         assert.strictEqual(oRange.value1, "2026-03-01", "Month start date was applied");
         assert.strictEqual(oRange.value2, "2026-03-31", "Month end date was applied");
-        assert.deepEqual(this._calls.map(function (oEntry) { return oEntry.type; }), ["buildFilter"], "Rebind stayed deferred until SmartTable ready");
+        assert.deepEqual(aCalls.map(function (oEntry) { return oEntry.type; }), ["buildFilter"], "Rebind stayed deferred until SmartTable ready");
     });
 });

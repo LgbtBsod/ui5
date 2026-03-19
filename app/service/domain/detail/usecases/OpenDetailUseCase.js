@@ -13,6 +13,41 @@ sap.ui.define([
 ], function (UseCase, Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts) {
     "use strict";
 
+    function resetTransientDetailIncidentEffects() {
+        return [
+            Effects.modelPatch("state", "/isKilled", false),
+            Effects.modelPatch("state", "/hasConflict", false),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, ""),
+            Effects.modelPatch("state", StatePaths.PENDING_NAVIGATION_INTENT, null),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
+            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
+            Effects.modelPatch("state", StatePaths.PERSISTENCE, {
+                state: "idle",
+                messageKey: "persistenceIdle",
+                lastSavedAt: null,
+                lastSaveError: null,
+                taxonomy: "",
+                currentWriteRequestId: "",
+                isManualSaveInFlight: false,
+                isAutoSaveInFlight: false,
+                hasValidLock: false,
+                lockOwnerSessionMatches: false,
+                lastLockRefreshAt: null,
+                nextHeartbeatAt: null
+            }),
+            Effects.modelPatch("uiState", "/lock", {
+                ok: false,
+                reason: "FREE",
+                isKilled: false
+            }),
+            Effects.modelPatch("state", StatePaths.TAB_CONFLICT_STATE, {
+                active: false,
+                source: "",
+                at: ""
+            })
+        ];
+    }
+
     function resolveLoadedAttachments(oUiState, sRootId) {
         var sSelectedRootId = String((oUiState && oUiState.get("selected", "/root/id")) || "").trim();
         var bAttachmentsLoaded = !!(oUiState && oUiState.get("view", ViewPathContracts.ATTACHMENTS_LOADED));
@@ -38,11 +73,11 @@ sap.ui.define([
 
         if (CreateSentinel.isCreateId(sRootId)) {
             var oDraft = (oUiState && oUiState.get("selected", "/")) || {};
-        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
-            activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
+            return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
+                activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
             }).then(function (oPermission) {
                 if (!oPermission.allowed) {
-            return Result.fail({ message: "No permission to create checklist", code: "NO_CREATE_PERMISSION" }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailCreatePermissionDenied", [
+                    return Result.fail({ message: "No permission to create checklist", code: "NO_CREATE_PERMISSION" }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailCreatePermissionDenied", [
                         Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                             status: "denied",
                             ready: false,
@@ -60,7 +95,7 @@ sap.ui.define([
                         Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
                     ]));
                 }
-                return Result.ok({ snapshot: oDraft || {} }, [
+                return Result.ok({ snapshot: oDraft || {} }, resetTransientDetailIncidentEffects().concat([
                     Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, {
                         denied: false,
                         rootId: CreateSentinel.VALUE,
@@ -92,7 +127,7 @@ sap.ui.define([
                     Effects.modelPatch("selected", "/attachments", (oDraft && oDraft.attachments) || []),
                     Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, (oDraft && oDraft.attachments) || []),
                     Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
-                ]);
+                ]));
             });
         }
 
@@ -107,7 +142,7 @@ sap.ui.define([
         }).then(function (oPermission) {
             var pValidation;
             if (!oPermission.allowed) {
-                return Result.fail({ message: "No permission to open checklist", code: "NO_VIEW_PERMISSION" }, [
+                return Result.fail({ message: "No permission to open checklist", code: "NO_VIEW_PERMISSION" }, resetTransientDetailIncidentEffects().concat([
                     Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                         status: "denied",
                         ready: false,
@@ -118,7 +153,7 @@ sap.ui.define([
                         permissionKnown: true,
                         lockKnown: false
                     })
-            ].concat(DetailAuthorizationRuntime.openDeniedEffects(oPermission)));
+                ]).concat(DetailAuthorizationRuntime.openDeniedEffects(oPermission)));
             }
             pValidation = (oCacheValidation && typeof oCacheValidation.execute === "function")
                 ? Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
@@ -156,7 +191,7 @@ sap.ui.define([
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sRootId);
-            return Result.ok({ snapshot: oSnapshot || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat([
+            return Result.ok({ snapshot: oSnapshot || {} }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                     status: "ready",
                     ready: true,
@@ -177,7 +212,7 @@ sap.ui.define([
                 Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         }).catch(function (oError) {
-            return Result.fail(oError, [
+            return Result.fail(oError, resetTransientDetailIncidentEffects().concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                     status: "error",
                     ready: false,
@@ -190,7 +225,7 @@ sap.ui.define([
                 }),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
-            ]);
+            ]));
         });
     };
 

@@ -1,0 +1,52 @@
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
+], function (UseCase, Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
+    "use strict";
+
+    function LoadAttachmentsUseCase() {
+        UseCase.call(this, "LoadAttachmentsUseCase");
+    }
+
+    LoadAttachmentsUseCase.prototype = Object.create(UseCase.prototype);
+    LoadAttachmentsUseCase.prototype.constructor = LoadAttachmentsUseCase;
+
+    LoadAttachmentsUseCase.prototype.execute = function (mInput, mCtx) {
+        var sRootId = UseCaseValue.rootId(mInput);
+        var oRepo = mCtx && mCtx.repo;
+        var oUiState = mCtx && mCtx.uiState;
+        var aCurrentAttachments;
+        var aSessionAttachments;
+
+        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
+            aCurrentAttachments = DetailStateAccess.readCurrentAttachments(mCtx);
+            aSessionAttachments = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
+            return Promise.resolve(Result.ok({
+                attachments: aCurrentAttachments.length ? aCurrentAttachments : aSessionAttachments
+            }, AttachmentEffectRuntime.buildAttachmentLoadEffects(
+                aCurrentAttachments.length ? aCurrentAttachments : aSessionAttachments,
+                "",
+                "info"
+            )));
+        }
+        if (!oRepo || typeof oRepo.loadAttachments !== "function") {
+            return Promise.resolve(Result.fail({
+                message: "Attachment loader unavailable",
+                code: "ATTACHMENT_LOAD_UNAVAILABLE"
+            }, AttachmentEffectRuntime.buildAttachmentBusyResetEffects()));
+        }
+
+        return Promise.resolve(oRepo.loadAttachments({ rootId: sRootId })).then(function (oResult) {
+            return Result.ok(oResult || {}, AttachmentEffectRuntime.buildAttachmentLoadEffects((oResult && oResult.attachments) || [], "", "info"));
+        }).catch(function (oError) {
+            return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
+        });
+    };
+
+    return LoadAttachmentsUseCase;
+});

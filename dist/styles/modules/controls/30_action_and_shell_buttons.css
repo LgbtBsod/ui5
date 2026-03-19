@@ -1,0 +1,175 @@
+.chkApp .searchActionToolbarDensity,
+.chkApp .detailControlRow,
+.chkApp .detailSectionAnchorRail,
+.chkApp .detailWorkflowRail {
+  align-items: center;
+}
+
+.chkApp .searchActionToolbarDensity .sapMBtn .sapMBtnInner,
+.chkApp .detailControlRow .sapMBtn .sapMBtnInner,
+.chkApp .detailSectionAnchorBtn .sapMBtnInner {
+  border-radius: 999px;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.chkApp .searchActionToolbarDensity .sapMBtn:hover .sapMBtnInner,
+.chkApp .detailControlRow .sapMBtn:hover .sapMBtnInner,
+.chkApp .detailSectionAnchorBtn:hover .sapMBtnInner {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(18, 36, 64, 0.08);
+}
+
+.chkApp .searchActionToolbarDensity .sapMBtn:active .sapMBtnInner,
+.chkApp .detailControlRow .sapMBtn:active .sapMBtnInner,
+.chkApp .detailSectionAnchorBtn:active .sapMBtnInner {
+  transform: scale(0.98);
+}
+
+.chkApp .detailSectionAnchorBtn .sapMBtnInner,
+.chkApp .detailSectionAnchorBtn.sapMBtn:hover .sapMBtnInner {
+  background: color-mix(in srgb, var(--theme-rail-bg) 52%, transparent);
+}
+
+.chkApp .shellActionBtn .sapMBtnInner,
+.chkApp .shellUserBtn .sapMBtnInner {
+  border-radius: 999px;
+  min-height: calc(var(--theme-shell-action-min-height) - 0.2rem);
+  border-color: var(--theme-shell-action-border);
+  background: var(--theme-shell-action-bg);
+  box-shadow: var(--theme-shell-action-shadow);
+  color: var(--text-main);
+}
+
+.chkApp .shellUserBtn .sapMBtnInner {
+  padding-inline: calc(var(--theme-shell-action-padding-inline) - 0.02rem);
+}
+
+.chkApp .shellActionBtn .sapMBtnInner {
+  padding-inline: calc(var(--theme-shell-action-padding-inline) - 0.06rem);
+}
+
+.chkApp .shellActionBtn .sapMBtnContent,
+.chkApp .shellUserBtn .sapMBtnContent {
+  max-width: 12ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: calc(var(--theme-shell-action-label-size) - 0.04rem);
+  font-weight: var(--theme-shell-action-label-weight);
+  letter-spacing: 0.01em;
+}
+
+.chkApp .shellUserBtn .sapMBtnContent {
+  max-width: 18ch;
+}
+
+.chkApp .shellActionBtn .sapMBtnIcon,
+.chkApp .shellUserBtn .sapMBtnIcon {
+  color: currentcolor;
+}
+
+.chkApp .shellActionBtn .sapMBtnIconLeft,
+.chkApp .shellUserBtn .sapMBtnIconLeft {
+  margin-inline-end: var(--theme-shell-action-icon-gap);
+}
+
+.chkApp .shellActionBtn:hover .sapMBtnInner,
+.chkApp .shellUserBtn:hover .sapMBtnInner {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(18, 36, 64, 0.12);
+}
+
+.chkApp .brandActionBtn.brandActionPrimary .sapMBtnInner,
+.chkApp .detailControlRowActions .sapMBtnEmphasized .sapMBtnInner,
+.chkApp .detailAccessDeniedAction .sapMBtnInner,
+.chkApp .actionPriorityPrimary .sapMBtnInner,
+.chkApp .sapMBtn.actionPriorityPrimary .sapMBtnInner {
+  border-color: var(--control-primary-border);
+  background: var(--control-primary-bg);
+  box-shadow: var(--control-primary-shadow);
+  color: var(--control-primary-text);
+}
+
+.chkApp .detailControlRowActions .sapMBtnAccept .sapMBtnInner {
+  border-color: var(--control-success-border);
+  background: var(--control-success-bg);
+  box-shadow: var(--control-success-shadow);
+  color: var(--control-success-text);
+}
+
+.chkApp .detailControlRowActions .sapMBtnReject .sapMBtnInner,
+.chkApp .tableRowActionBtnDanger .sapMBtnInner,
+.chkApp .actionPriorityDanger .sapMBtnInner,
+.chkApp .sapMBtn.actionPriorityDanger .sapMBtnInner {
+  border-color: var(--control-danger-border);
+  background: var(--control-danger-bg);
+  box-shadow: var(--control-danger-shadow);
+  color: var(--control-danger-text);
+}
+
+.chkApp .actionPrioritySecondary .sapMBtnInner,
+.chkApp .sapMBtn.actionPrioritySecondary .sapMBtnInner {
+  border-color: var(--theme-workbench-control-border);
+  background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
+  box-shadow: none;
+  color: var(--text-main);
+}
+
+.chkApp .brandActionBtn.brandActionPrimary:hover .sapMBtnInner,
+.chkApp .detailControlRowActions .sapMBtnEmphasized:hover .sapMBtnInner,
+.chkApp .detailControlRowActions .sapMBtnAccept:hover .sapMBtnInner,
+.chkApp .detailControlRowActions .sapMBtnReject:hover .sapMBtnInner {
+  transform: translateY(-1px);
+  filter: saturate(1.04);
+}
+
+.chkApp .shellActionBtn.active .sapMBtnInner,
+.chkApp .shellActionBtn[aria-pressed="true"] .sapMBtnInner {
+  background: rgba(var(--accent-rgb), 0.1);
+  border-color: rgba(var(--accent-rgb), 0.32);
+}
+
+@media (max-width: 45rem) {
+  .chkApp .appShellHeader {
+    margin: 0.75rem 0.75rem 0;
+  }
+
+  .chkApp .shellActionBtn .sapMBtnContent,
+  .chkApp .shellUserBtn .sapMBtnContent {
+    font-size: 0;
+  }
+
+  .chkApp .shellActionBtn .sapMBtnIconLeft,
+  .chkApp .shellUserBtn .sapMBtnIconLeft {
+    margin-inline-end: 0;
+  }
+}
+
+@media (max-width: 70rem) {
+  .chkApp .shellActionBtn .sapMBtnContent {
+    font-size: 0;
+  }
+
+  .chkApp .shellActionBtn .sapMBtnIconLeft {
+    margin-inline-end: 0;
+  }
+
+  .chkApp .shellActionBtn .sapMBtnInner {
+    min-width: var(--theme-shell-action-min-height);
+    padding-inline: 0.65rem;
+  }
+
+  .chkApp .shellUserBtn .sapMBtnContent {
+    font-size: 0;
+    max-width: 0;
+  }
+
+  .chkApp .shellUserBtn .sapMBtnIconLeft {
+    margin-inline-end: 0;
+  }
+
+  .chkApp .shellUserBtn .sapMBtnInner {
+    min-width: var(--theme-shell-action-min-height);
+    padding-inline: 0.65rem;
+  }
+}

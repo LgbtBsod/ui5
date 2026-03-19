@@ -22,42 +22,50 @@ sap.ui.define([
         );
     });
 
-    QUnit.test("unload release queues keepalive fetch when token and payload are available", function (assert) {
-        var done = assert.async();
-        var fnOriginalFetch = window.fetch;
-        var aCalls = [];
-
-        window.fetch = function (sUrl, mOptions) {
-            aCalls.push({ url: sUrl, options: mOptions });
-            return Promise.resolve({ ok: true });
+    QUnit.test("readActiveLockPayload returns lock release input only for owned edit locks", function (assert) {
+        var oStateModel = {
+            getProperty: function (sPath) {
+                if (sPath === "/activeObjectId") {
+                    return "4711";
+                }
+                if (sPath === "/sessionId") {
+                    return "SESSION-1";
+                }
+                if (sPath === "/workflow/detail/editMode") {
+                    return "EDIT";
+                }
+                if (sPath === "/workflow/detail/lock/state") {
+                    return "EDIT_LOCKED";
+                }
+                return "";
+            }
         };
 
-        var oAttempt = ComponentLockReleaseRuntime.tryBeaconLockRelease("http://example.test/LockRelease", { RootId: "1", SessionGuid: "S1" }, "token");
-
-        assert.ok(oAttempt && oAttempt.queued, "Keepalive release was queued");
-        assert.strictEqual(aCalls.length, 1, "Fetch was called once");
-        assert.ok(aCalls[0].url.indexOf("RootId=1") >= 0, "RootId is sent as a function import parameter");
-        assert.ok(aCalls[0].url.indexOf("SessionGuid=S1") >= 0, "SessionGuid is sent as a function import parameter");
-        assert.strictEqual(aCalls[0].options.method, "POST", "Release uses POST");
-        assert.strictEqual(aCalls[0].options.keepalive, true, "Release uses keepalive transport");
-        assert.strictEqual(aCalls[0].options.headers["X-CSRF-Token"], "token", "CSRF token is forwarded");
-
-        oAttempt.promise.then(function (bReleased) {
-            assert.strictEqual(bReleased, true, "Keepalive completion reports success");
-            window.fetch = fnOriginalFetch;
-            done();
-        });
+        assert.deepEqual(ComponentLockReleaseRuntime.readActiveLockPayload(oStateModel), {
+            RootId: "4711",
+            SessionGuid: "SESSION-1"
+        }, "Owned edit lock payload is exposed");
     });
 
-    QUnit.test("unload release returns null when fetch transport is unavailable", function (assert) {
-        var fnOriginalFetch = window.fetch;
+    QUnit.test("readActiveLockPayload returns null outside owned edit lock state", function (assert) {
+        var oStateModel = {
+            getProperty: function (sPath) {
+                if (sPath === "/activeObjectId") {
+                    return "4711";
+                }
+                if (sPath === "/sessionId") {
+                    return "SESSION-1";
+                }
+                if (sPath === "/workflow/detail/editMode") {
+                    return "READ";
+                }
+                if (sPath === "/workflow/detail/lock/state") {
+                    return "READ_ONLY";
+                }
+                return "";
+            }
+        };
 
-        window.fetch = undefined;
-        assert.strictEqual(
-            ComponentLockReleaseRuntime.tryBeaconLockRelease("http://example.test/LockRelease", { RootId: "1", SessionGuid: "S1" }, "token"),
-            null,
-            "Keepalive release falls back when fetch is unavailable"
-        );
-        window.fetch = fnOriginalFetch;
+        assert.strictEqual(ComponentLockReleaseRuntime.readActiveLockPayload(oStateModel), null, "No payload is exposed for read-only state");
     });
 });

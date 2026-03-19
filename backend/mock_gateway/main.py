@@ -32,7 +32,15 @@ from services.analytics_service import AnalyticsService
 from services.lock_service import LockService
 from services.metadata_cache import refresh_metadata
 from services.settings_service import DEFAULT_REQUIRED_FIELDS, DEFAULT_UPLOAD_POLICY
-from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, FrontendRuntimeSettings
+from models import (
+    AnalyticsBreakdown,
+    AnalyticsRefreshState,
+    AnalyticsSnapshot,
+    ChecklistBarrier,
+    ChecklistCheck,
+    ChecklistRoot,
+    FrontendRuntimeSettings,
+)
 from utils.odata import SERVICE_ROOT, odata_error_response
 from utils.odata_batch import extract_boundary, parse_batch_request
 from utils.odata_csrf import CsrfStore
@@ -54,6 +62,23 @@ _LOG_BODY_MAX_CHARS = 4000
 def _bootstrap_schema() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_schema_compatibility()
+
+
+def _ensure_required_tables() -> None:
+    inspector = inspect(engine)
+    existing_tables = set(inspector.get_table_names())
+    required_tables = {
+        AnalyticsSnapshot.__tablename__: AnalyticsSnapshot.__table__,
+        AnalyticsBreakdown.__tablename__: AnalyticsBreakdown.__table__,
+        AnalyticsRefreshState.__tablename__: AnalyticsRefreshState.__table__,
+        FrontendRuntimeSettings.__tablename__: FrontendRuntimeSettings.__table__,
+    }
+    missing_tables = [table for name, table in required_tables.items() if name not in existing_tables]
+    if not missing_tables:
+        return
+    for table in missing_tables:
+        table.create(bind=engine, checkfirst=True)
+        logger.info("Created missing table: %s", table.name)
 
 
 def _ensure_runtime_settings_row(db) -> FrontendRuntimeSettings:
@@ -154,6 +179,7 @@ def _build_request_log_lines(request: Request, b_content_forced: bool, s_body_te
 
 
 def ensure_schema_compatibility() -> None:
+    _ensure_required_tables()
     inspector = inspect(engine)
     if "checklist_root" in inspector.get_table_names():
         existing = {col["name"] for col in inspector.get_columns("checklist_root")}
@@ -432,6 +458,8 @@ async def analytics_refresh_job() -> None:
     while True:
         db = SessionLocal()
         try:
+            _ensure_required_tables()
+            _ensure_runtime_settings_row(db)
             settings_row = db.query(FrontendRuntimeSettings).first()
             interval_ms = int(getattr(settings_row, "analytics_refresh_ms", 300000) or 300000)
             if AnalyticsService.should_refresh(db, max(5, int(interval_ms / 1000))):

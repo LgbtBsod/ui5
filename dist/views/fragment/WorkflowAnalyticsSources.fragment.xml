@@ -1,0 +1,113 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:vizData="sap.viz.ui5.data"
+    xmlns:vizFeeds="sap.viz.ui5.controls.common.feeds">
+    <IconTabFilter
+        key="sources"
+        text="{i18n>analyticsSourcesTab}"
+        icon="sap-icon://compare">
+        <VBox class="analyticsBreakdownSection" renderType="Bare">
+            <Panel
+                headerText="{i18n>analyticsSourceBreakdown}"
+                expandable="false"
+                class="analyticsChartPanel analyticsPanelSurface">
+                <content>
+                    <viz:VizFrame
+                        vizType="donut"
+                        width="100%"
+                        height="18rem"
+                        uiConfig="{applicationSet:'fiori'}"
+                        selectData=".onDrilldownAnalyticsSource"
+                        visible="{view>/analytics/hasCharts/totalBySource}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/totalBySource}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="Source" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Total" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="size" type="Measure" values="Total"/>
+                            <vizFeeds:FeedItem uid="color" type="Dimension" values="Source"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text
+                        text="{i18n>analyticsNoData}"
+                        visible="{= !${view>/analytics/hasCharts/totalBySource} }"
+                        class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+            <Panel
+                headerText="{i18n>analyticsFailedChecksBySource}"
+                expandable="false"
+                class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <viz:VizFrame
+                        vizType="bar"
+                        width="100%"
+                        height="16rem"
+                        uiConfig="{applicationSet:'fiori'}"
+                        selectData=".onDrilldownAnalyticsSourceFailedChecks"
+                        visible="{view>/analytics/hasCharts/failedChecksBySource}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedChecksBySource}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="Source" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed checks" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed checks"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Source"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text
+                        text="{i18n>analyticsNoData}"
+                        visible="{= !${view>/analytics/hasCharts/failedChecksBySource} }"
+                        class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+            <Panel
+                headerText="{i18n>analyticsFailedBarriersBySource}"
+                expandable="false"
+                class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <viz:VizFrame
+                        vizType="bar"
+                        width="100%"
+                        height="16rem"
+                        uiConfig="{applicationSet:'fiori'}"
+                        selectData=".onDrilldownAnalyticsSourceFailedBarriers"
+                        visible="{view>/analytics/hasCharts/failedBarriersBySource}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedBarriersBySource}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="Source" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed barriers" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed barriers"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Source"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text
+                        text="{i18n>analyticsNoData}"
+                        visible="{= !${view>/analytics/hasCharts/failedBarriersBySource} }"
+                        class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+        </VBox>
+    </IconTabFilter>
+</core:FragmentDefinition>

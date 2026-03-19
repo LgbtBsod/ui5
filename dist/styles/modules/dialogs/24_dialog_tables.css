@@ -1,0 +1,111 @@
+.chkApp .dialogDataTable,
+.chkApp .dialogDataTable .sapUiTableCnt,
+.chkApp .dialogDataTable .sapUiTableCtrlScr,
+.chkApp .dialogDataTable .sapUiTableColHdrCnt,
+.chkApp .dialogDataTable .sapMListTbl,
+.chkApp .dialogDataTable .sapMListTblCnt {
+  background: transparent;
+}
+
+.chkApp .dialogDataTable {
+  border-radius: calc(var(--radius-md) - 0.1rem);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 88%, transparent);
+  background: var(--theme-block-bg);
+  box-shadow: none;
+}
+
+.chkApp .dialogDataTable .sapUiTableCtrl,
+.chkApp .dialogDataTable .sapUiTableRowHdrScr,
+.chkApp .dialogDataTable .sapUiTableRowHdr,
+.chkApp .dialogDataTable .sapUiTableCCnt,
+.chkApp .dialogDataTable .sapUiTableCtrlCnt,
+.chkApp .dialogDataTable .sapMListTbl,
+.chkApp .dialogDataTable .sapMListItems {
+  background: transparent;
+}
+
+.chkApp .dialogDataTable .sapUiTableCtrl,
+.chkApp .dialogDataTable .sapMListTbl {
+  border-collapse: separate;
+  border-spacing: 0 0.62rem;
+}
+
+.chkApp .valueHelpTreeTable {
+  width: 100%;
+  min-height: 14rem;
+}
+
+.chkApp .valueHelpTreeTable .sapUiTableCnt,
+.chkApp .valueHelpTreeTable .sapUiTableCtrlScr,
+.chkApp .valueHelpTreeTable .sapUiTableColHdrCnt,
+.chkApp .valueHelpTreeTable .sapUiTableCCnt,
+.chkApp .valueHelpTreeTable .sapUiTableCtrlCnt {
+  background: transparent;
+}
+
+.chkApp .dialogDataTable .sapUiTableColCell,
+.chkApp .dialogDataTable .sapUiTableCell,
+.chkApp .dialogDataTable .sapMListTblHeaderCell,
+.chkApp .dialogDataTable .sapMListTblCell {
+  background: var(--theme-table-cell-bg);
+  border-inline-color: transparent;
+  border-color: rgba(160, 184, 220, 0.16);
+}
+
+.chkApp .dialogDataTable .sapUiTableColCell,
+.chkApp .dialogDataTable .sapMListTblHeaderCell {
+  background: var(--theme-table-header-bg);
+  color: var(--text-muted);
+  font-size: var(--theme-table-header-size);
+  font-weight: 800;
+  line-height: var(--theme-table-header-line-height);
+  letter-spacing: 0.06em;
+  padding:
+    calc(var(--theme-table-cell-padding-block) - 0.08rem)
+    var(--theme-table-cell-padding-inline);
+  text-transform: uppercase;
+}
+
+.chkApp .dialogDataTable .sapUiTableCell,
+.chkApp .dialogDataTable .sapMListTblCell {
+  color: var(--text-main);
+  padding:
+    var(--theme-table-cell-padding-block)
+    var(--theme-table-cell-padding-inline);
+  font-size: var(--theme-table-body-size);
+  line-height: var(--theme-table-body-line-height);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(249, 252, 255, 0.08)),
+    var(--theme-rail-bg);
+  border-top-color: rgba(var(--accent-rgb), 0.12);
+  border-bottom-color: rgba(var(--accent-rgb), 0.12);
+}
+
+.chkApp .dialogDataTable .sapUiTableTr:hover .sapUiTableCell,
+.chkApp .dialogDataTable .sapMListTblRow:hover .sapMListTblCell {
+  background: var(--theme-table-cell-hover-bg);
+}
+
+.chkApp .dialogDataTable .sapUiTableCell:first-child,
+.chkApp .dialogDataTable .sapMListTblCell:first-child {
+  border-top-left-radius: var(--theme-table-row-radius);
+  border-bottom-left-radius: var(--theme-table-row-radius);
+}
+
+.chkApp .dialogDataTable .sapUiTableCell:last-child,
+.chkApp .dialogDataTable .sapMListTblCell:last-child {
+  border-top-right-radius: var(--theme-table-row-radius);
+  border-bottom-right-radius: var(--theme-table-row-radius);
+}
+
+.chkApp .dialogDataTable .sapMInputBaseContentWrapper,
+.chkApp .dialogDataTable .sapMSwt,
+.chkApp .dialogDataTable .sapMBtn .sapMBtnInner {
+  border-radius: calc(var(--radius-sm) - 0.08rem);
+}
+
+.chkApp .expandedRowsDialog .expandedRowDeleteAction .sapMBtnInner,
+.chkApp .expandedRowsDialog .expandedRowsCloseButton .sapMBtnInner {
+  border-radius: 999px;
+}

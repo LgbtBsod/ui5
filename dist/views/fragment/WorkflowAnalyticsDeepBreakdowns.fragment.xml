@@ -1,0 +1,160 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:vizData="sap.viz.ui5.data"
+    xmlns:vizFeeds="sap.viz.ui5.controls.common.feeds">
+    <IconTabFilter key="breakdowns" text="{i18n>analyticsBreakdownsTab}" icon="sap-icon://business-objects-experience">
+        <VBox class="analyticsBreakdownSection" renderType="Bare">
+            <Panel headerText="{i18n>analyticsFailedChecksByProfession}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
+                <content>
+                    <viz:VizFrame
+                        vizType="bar"
+                        width="100%"
+                        height="16rem"
+                        uiConfig="{applicationSet:'fiori'}"
+                        selectData=".onDrilldownAnalyticsProfession"
+                        visible="{view>/analytics/hasCharts/failedChecksByProfession}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedChecksByProfession}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="Profession" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed checks" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed checks"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Profession"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByProfession} }" class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+
+            <Panel headerText="{i18n>analyticsFailedBarriersByLpc}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <viz:VizFrame
+                        vizType="bar"
+                        width="100%"
+                        height="16rem"
+                        uiConfig="{applicationSet:'fiori'}"
+                        selectData=".onDrilldownAnalyticsLpc"
+                        visible="{view>/analytics/hasCharts/failedBarriersByLpc}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedBarriersByLpc}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="LPC" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed barriers" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed barriers"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="LPC"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedBarriersByLpc} }" class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+
+            <Panel headerText="{i18n>analyticsFailedChecksByLocation}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <viz:VizFrame
+                        vizType="bar"
+                        width="100%"
+                        height="16rem"
+                        uiConfig="{applicationSet:'fiori'}"
+                        selectData=".onDrilldownAnalyticsLocation"
+                        visible="{view>/analytics/hasCharts/failedChecksByLocation}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedChecksByLocation}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="Location" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed checks" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed checks"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Location"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByLocation} }" class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+
+            <Panel headerText="{i18n>analyticsFailedChecksByBukrs}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/failedChecksByBukrs}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedChecksByBukrs}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="BUKRS" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed checks" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed checks"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="BUKRS"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByBukrs} }" class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+
+            <Panel headerText="{i18n>analyticsFailedChecksByOrgunit}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/failedChecksByOrgunit}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedChecksByOrgunit}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="Observer org unit" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed checks" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed checks"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Observer org unit"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedChecksByOrgunit} }" class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+
+            <Panel headerText="{i18n>analyticsFailedBarriersByBarrierNumber}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                <content>
+                    <viz:VizFrame vizType="bar" width="100%" height="16rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/failedBarriersByBarrierNumber}">
+                        <viz:dataset>
+                            <vizData:FlattenedDataset data="{view>/analytics/charts/failedBarriersByBarrierNumber}">
+                                <vizData:dimensions>
+                                    <vizData:DimensionDefinition name="Barrier" value="{view>label}"/>
+                                </vizData:dimensions>
+                                <vizData:measures>
+                                    <vizData:MeasureDefinition name="Failed barriers" value="{view>value}"/>
+                                </vizData:measures>
+                            </vizData:FlattenedDataset>
+                        </viz:dataset>
+                        <viz:feeds>
+                            <vizFeeds:FeedItem uid="valueAxis" type="Measure" values="Failed barriers"/>
+                            <vizFeeds:FeedItem uid="categoryAxis" type="Dimension" values="Barrier"/>
+                        </viz:feeds>
+                    </viz:VizFrame>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/failedBarriersByBarrierNumber} }" class="analyticsChartEmpty"/>
+                </content>
+            </Panel>
+        </VBox>
+    </IconTabFilter>
+</core:FragmentDefinition>

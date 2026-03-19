@@ -1,0 +1,162 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:unified="sap.ui.unified">
+    <VBox
+        id="attachmentDropZone"
+        visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+        class="detailAttachmentDropZone">
+        <VBox class="detailAttachmentDropZoneActions">
+            <HBox renderType="Bare" class="detailAttachmentPickerRow">
+                <Title level="H6" text="{i18n>attachmentDropZoneTitle}" class="detailAttachmentPickerTitle"/>
+                <Text text="{i18n>attachmentDropZoneHint}" class="modeHintText detailAttachmentPickerText"/>
+                <Link
+                    text="{i18n>uploadAttachment}"
+                    press=".onOpenAttachmentPicker"
+                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }"
+                    class="detailAttachmentPickerLink"/>
+            </HBox>
+            <HBox
+                renderType="Bare"
+                class="detailAttachmentMetaRow"
+                visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
+                <Label text="{i18n>attachmentCategoryLabel}" labelFor="attachmentCategorySelect" class="detailAttachmentMetaLabel"/>
+                <Select
+                    id="attachmentCategorySelect"
+                    width="12rem"
+                    selectedKey="{view>/attachmentCategoryKey}"
+                    enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }"
+                    items="{ path: 'masterData>/attachmentTypes', templateShareable: true }"
+                    class="detailAttachmentCategorySelect">
+                    <core:Item key="{masterData>key}" text="{masterData>text}"/>
+                </Select>
+            </HBox>
+            <unified:FileUploader
+                id="attachmentUploader"
+                buttonOnly="true"
+                sameFilenameAllowed="true"
+                useMultipart="false"
+                buttonText="{i18n>uploadAttachment}"
+                tooltip="{i18n>uploadAttachment}"
+                enabled="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; (!!${selected>/root/id} || !!${state>/activeObjectId} || !!${state>/selectedId}) }"
+                change=".onAttachmentUploadChange"
+                class="detailAttachmentUploaderHidden"/>
+        </VBox>
+        <Text
+            text="{parts:[{path:'masterData>/runtime/uploadPolicy/allowedExtensions'},{path:'masterData>/runtime/uploadPolicy/maxSizeMb'}], formatter:'.formatAttachmentUploadHint'}"
+            class="modeHintText detailAttachmentDropZoneMeta"/>
+    </VBox>
+
+    <VBox id="attachmentDropScope" renderType="Bare" width="100%">
+        <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{= !${view>/attachmentsExpanded} }">
+            <Table
+                items="{view>/sessionAttachments}"
+                class="flatEditorTable detailAttachmentTable detailAttachmentTableSession"
+                visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}"
+                noDataText="{i18n>noAttachmentsData}">
+                <columns>
+                    <Column>
+                        <Text text="{i18n>attachmentFileName}"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                        <Text text="{i18n>attachmentCategoryLabel}"/>
+                    </Column>
+                    <Column width="7rem" hAlign="End">
+                        <Text text="{i18n>attachmentSize}"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                        <Text text="{i18n>attachmentChangedOn}"/>
+                    </Column>
+                    <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}"/>
+                            <Text
+                                text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
+                            <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
+                            <Text text="{view>ChangedOn}"/>
+                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                <Button
+                                    icon="sap-icon://download"
+                                    text="{i18n>rowActionDownload}"
+                                    type="Transparent"
+                                    press=".onOpenAttachment"
+                                    class="tableRowActionBtn"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>rowActionDelete}"
+                                    type="Transparent"
+                                    press=".onDeleteAttachment"
+                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
+
+        <VBox id="attachmentExpandedScope" renderType="Bare" width="100%" visible="{view>/attachmentsExpanded}">
+            <HBox
+                class="detailEmptyStateCard workflowEmptyStateCard detailAttachmentsEmptyState"
+                renderType="Bare"
+                visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
+                <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
+                <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
+                <Text
+                    text="{path:'selected>/root/id', formatter:'.formatAttachmentsEmptyStateText'}"
+                    class="detailEmptyStateText workflowEmptyStateText"/>
+            </HBox>
+            <Table
+                items="{selected>/attachments}"
+                class="flatEditorTable detailAttachmentTable"
+                visible="{path:'selected>/attachments', formatter:'.hasRows'}"
+                noDataText="{i18n>noAttachmentsData}">
+                <columns>
+                    <Column>
+                        <Text text="{i18n>attachmentFileName}"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                        <Text text="{i18n>attachmentCategoryLabel}"/>
+                    </Column>
+                    <Column width="7rem" hAlign="End">
+                        <Text text="{i18n>attachmentSize}"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{= !${view>/narrowDetailViewport} }">
+                        <Text text="{i18n>attachmentChangedOn}"/>
+                    </Column>
+                    <Column width="{= ${view>/narrowDetailViewport} ? '9rem' : '14rem' }" hAlign="Center">
+                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}"/>
+                            <Text
+                                text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
+                            <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
+                            <Text text="{selected>ChangedOn}"/>
+                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                <Button
+                                    icon="sap-icon://download"
+                                    text="{i18n>rowActionDownload}"
+                                    type="Transparent"
+                                    press=".onOpenAttachment"
+                                    class="tableRowActionBtn"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>rowActionDelete}"
+                                    type="Transparent"
+                                    press=".onDeleteAttachment"
+                                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
+    </VBox>
+</core:FragmentDefinition>
