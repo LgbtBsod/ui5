@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService"
+], function (WorkflowContracts, ChecklistValidationService) {
     "use strict";
 
     function isFilled(vValue) {
@@ -28,6 +29,17 @@ sap.ui.define([
         });
 
         return Object.assign({}, oSaved, { basic: oSavedBasic });
+    }
+
+    function normalizeOverallResult(oSnapshot) {
+        var oCurrent = oSnapshot || {};
+        var oRoot = Object.assign({}, oCurrent.root || {});
+        var vOverall = ChecklistValidationService.buildOverallResult(oCurrent);
+
+        oRoot.overall_result = vOverall;
+        oRoot.OverallResult = vOverall;
+
+        return Object.assign({}, oCurrent, { root: oRoot });
     }
 
     function readCurrentChecklist(mCtx) {
@@ -62,6 +74,7 @@ sap.ui.define([
     }
 
     return {
+        normalizeOverallResult: normalizeOverallResult,
         preserveBasicFields: preserveBasicFields,
         readBaseSnapshot: readBaseSnapshot,
         readCurrentChecklist: readCurrentChecklist,

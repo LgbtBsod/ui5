@@ -22,17 +22,25 @@ sap.ui.define([
     CloseDetailUseCase.prototype.execute = function (mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
-        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
+        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx) ||
+            (oUiState && typeof oUiState.get === "function" && (
+                oUiState.get("state", ModelPathContracts.ACTIVE_OBJECT_ID) ||
+                oUiState.get("state", ModelPathContracts.SELECTED_ID)
+            )) || "";
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && typeof oUiState.get === "function" ? oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE) : "");
         var sLockState = WorkflowContracts.normalizeLockState(oUiState && typeof oUiState.get === "function" ? oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE) : "");
+        var bEditableLifecycle = WorkflowContracts.isEditableMode(sEditMode) ||
+            sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED ||
+            sLockState === WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK ||
+            sLockState === WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE;
         var bShouldRelease = !!(
             sRootId
             && !CreateSentinel.isCreateId(sRootId)
             && sSessionGuid
             && oLockPort
             && typeof oLockPort.release === "function"
-            && WorkflowContracts.isEditLocked(sEditMode, sLockState)
+            && bEditableLifecycle
         );
         var aEffects;
 
@@ -74,6 +82,12 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+                Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
+                Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, "idle"),
+                Effects.modelPatch("state", StatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, null),
+                Effects.modelPatch("state", StatePaths.PERSISTENCE_HAS_VALID_LOCK, false),
+                Effects.modelPatch("state", StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),
                 Effects.modelPatch("state", ModelPathContracts.LOCK_OPERATION_PENDING, false),
                 Effects.modelPatch("state", ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
                 Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, null),

@@ -170,7 +170,19 @@ def read_runtime_state(page) -> dict[str, Any]:
             activeObjectId: appState && appState.getProperty ? String(appState.getProperty('/activeObjectId') || '') : '',
             editMode: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '',
             lockState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/lock/state') || '') : '',
-            autosaveState: detailState && detailState.getProperty ? String(detailState.getProperty('/autosaveState') || '') : '',
+            autosaveState: detailState && detailState.getProperty ? String(
+              detailState.getProperty('/workflow/detail/autosave/state')
+              || detailState.getProperty('/autosaveState')
+              || ''
+            ) : '',
+            autosaveEnabled: !!(detailState && detailState.getProperty && (
+              detailState.getProperty('/workflow/autosave/enabled')
+              || detailState.getProperty('/workflow/detail/autosave/enabled')
+            )),
+            autosaveLastSavedAt: detailState && detailState.getProperty ? (
+              detailState.getProperty('/workflow/detail/autosave/lastSavedAt')
+              || null
+            ) : null,
             isDirty: !!(detailState && detailState.getProperty && detailState.getProperty('/isDirty')),
             saveInFlight: !!(detailState && detailState.getProperty && detailState.getProperty('/saveInFlight')),
             lockOperationPending: !!(detailState && detailState.getProperty && detailState.getProperty('/lockOperationPending')),
@@ -183,6 +195,12 @@ def read_runtime_state(page) -> dict[str, Any]:
               || ''
             ) : '',
             equipment: selected && selected.getProperty ? String(selected.getProperty('/basic/equipment') || '') : '',
+            overallResult: selected && selected.getProperty ? (
+              selected.getProperty('/root/overall_result')
+              ?? selected.getProperty('/root/OverallResult')
+              ?? selected.getProperty('/basic/overall_result')
+              ?? null
+            ) : null,
             managers: managers
           };
         }
@@ -236,12 +254,12 @@ def set_required_create_fields(page, suffix: str) -> None:
           selected.setProperty('/basic/timezone', 'Europe/Saratov');
           selected.setProperty('/basic/equipment', 'Created equipment ' + labelSuffix);
           selected.setProperty('/basic/LOCATION_KEY', 'LOC-PRD-03-B');
-          selected.setProperty('/basic/LOCATION_NAME', 'Дизель-генератор');
-          selected.setProperty('/basic/LOCATION_TEXT', 'Дизель-генератор');
+          selected.setProperty('/basic/LOCATION_NAME', 'Created location ' + labelSuffix);
+          selected.setProperty('/basic/LOCATION_TEXT', 'Created location ' + labelSuffix);
           selected.setProperty('/basic/OBSERVER_FULLNAME', 'Created Observer ' + labelSuffix);
           selected.setProperty('/basic/OBSERVED_FULLNAME', 'Created Observed ' + labelSuffix);
           selected.setProperty('/basic/LPC_KEY', 'LPC-01');
-          selected.setProperty('/basic/LPC_TEXT', 'ЛПК 01');
+          selected.setProperty('/basic/LPC_TEXT', 'LPC 01');
           selected.setProperty('/basic/PROF_KEY', 'PROF-01');
           selected.setProperty('/basic/PROF_TEXT', 'Operator');
           state.setProperty('/isDirty', true);
@@ -288,7 +306,8 @@ def toggle_edit(page, target_state: bool) -> Any:
         """
         (state) => {
           const core = sap.ui.getCore();
-          const all = Object.values(core.mElements || {});
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
           const view = all.find((item) => item
             && item.isA
             && item.isA('sap.ui.core.mvc.View')
@@ -380,6 +399,21 @@ def collect_failure_context(page, network: list[dict[str, Any]], step: str, erro
     }
 
 
+def body_contains(page, expected_text: str) -> bool:
+    return bool(
+        safe_evaluate(
+            page,
+            """
+            (expected) => {
+              const body = document.body && document.body.innerText ? document.body.innerText : '';
+              return String(body || '').indexOf(String(expected || '')) >= 0;
+            }
+            """,
+            expected_text
+        )
+    )
+
+
 def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
@@ -413,6 +447,28 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             navigate_to_detail(page, "__CREATE")
             screenshots["beforeFirstSave"] = take_step_screenshot(page, "before-first-save")
 
+            step = "create.empty_save_blocked"
+            create_before_empty = count_requests(network, "CreateChecklist")
+            invoke_detail(page, "onSaveDetail")
+            page.wait_for_timeout(1800)
+            empty_blocked_state = read_runtime_state(page)
+            create_after_empty = count_requests(network, "CreateChecklist")
+            validation_visible = body_contains(page, "Обязательные поля") or body_contains(page, "Исправьте обязательные поля")
+            ensure(
+                checks,
+                "emptyCreateBlocked",
+                empty_blocked_state["rootId"] == "__CREATE"
+                and "__CREATE" in empty_blocked_state["hash"]
+                and create_after_empty == create_before_empty
+                and validation_visible,
+                {
+                    "before": create_before_empty,
+                    "after": create_after_empty,
+                    "validationVisible": validation_visible,
+                    "state": empty_blocked_state
+                }
+            )
+
             step = "create.fill"
             set_required_create_fields(page, str(int(time.time())))
             state_after_fill = read_runtime_state(page)
@@ -425,7 +481,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             ensure(checks, "create.no_autosave_before_first_save", autosave_after == autosave_before, {"before": autosave_before, "after": autosave_after})
 
             step = "create.first_save"
-            save_before = count_requests(network, "SaveChanges")
+            create_before = count_requests(network, "CreateChecklist")
             invoke_detail(page, "onSaveDetail")
             wait_for_function(
                 page,
@@ -442,13 +498,17 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             page.wait_for_timeout(1500)
             create_saved_state = read_runtime_state(page)
             create_root_id = create_saved_state["rootId"]
-            save_after = count_requests(network, "SaveChanges")
+            create_after = count_requests(network, "CreateChecklist")
             screenshots["afterCreateSave"] = take_step_screenshot(page, "after-create-save")
             ensure(
                 checks,
-                "create.first_save.promotes_root_key",
-                bool(create_root_id) and create_root_id != "__CREATE" and save_after > save_before and "__CREATE" not in create_saved_state["hash"],
-                {"before": save_before, "after": save_after, "state": create_saved_state}
+                "validCreateSaved",
+                bool(create_root_id)
+                and create_root_id != "__CREATE"
+                and create_after == create_before + 1
+                and "__CREATE" not in create_saved_state["hash"]
+                and create_saved_state["overallResult"] in (None, "", False),
+                {"before": create_before, "after": create_after, "state": create_saved_state}
             )
 
             step = "create.no_autosave_without_changes"
@@ -476,7 +536,12 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                 () => {
                   const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
                   const state = view && view.getModel && view.getModel('state');
-                  return !!state && state.getProperty('/autosaveState') === 'SAVED' && state.getProperty('/isDirty') === false;
+                  const autosaveState = state && state.getProperty ? String(
+                    state.getProperty('/workflow/detail/autosave/state')
+                    || state.getProperty('/autosaveState')
+                    || ''
+                  ) : '';
+                  return !!state && autosaveState === 'SAVED' && state.getProperty('/isDirty') === false;
                 }
                 """,
                 timeout=30000
@@ -484,7 +549,15 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             autosave_after_dirty = count_requests(network, "AutoSave")
             autosave_state = read_runtime_state(page)
             screenshots["afterAutosave"] = take_step_screenshot(page, "after-autosave")
-            ensure(checks, "detail.autosave_only_when_dirty", autosave_after_dirty > autosave_before_dirty and autosave_state["equipment"] == next_equipment and not autosave_state["isDirty"], {"before": autosave_before_dirty, "after": autosave_after_dirty, "state": autosave_state})
+            ensure(
+                checks,
+                "autosaveStable",
+                autosave_after_dirty > autosave_before_dirty
+                and autosave_state["equipment"] == next_equipment
+                and not autosave_state["isDirty"]
+                and autosave_state["autosaveState"] == "SAVED",
+                {"before": autosave_before_dirty, "after": autosave_after_dirty, "state": autosave_state}
+            )
 
             step = "create.no_repeat_autosave_without_changes"
             repeat_before = count_requests(network, "AutoSave")
@@ -531,8 +604,18 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             wait_for_search(page)
             page.wait_for_timeout(1200)
             release_after = count_requests(network, "LockRelease")
+            closed_state = read_runtime_state(page)
             screenshots["afterCloseUnlock"] = take_step_screenshot(page, "after-close-unlock")
-            ensure(checks, "detail.close_sends_lock_release", release_after > release_before, {"before": release_before, "after": release_after})
+            ensure(
+                checks,
+                "closeReleasedLock",
+                release_after > release_before
+                and closed_state["routeName"] == "search"
+                and closed_state["lockState"] in ("", "IDLE")
+                and not closed_state["autosaveEnabled"]
+                and closed_state["activeObjectId"] == "",
+                {"before": release_before, "after": release_after, "state": closed_state}
+            )
 
             step = "create.reopen_existing_by_route"
             navigate_to_detail(page, create_root_id)
@@ -542,7 +625,15 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             configure_fast_timers(page)
             reopen_state = read_runtime_state(page)
             lock_reopen_after = count_requests(network, "LockAcquire")
-            ensure(checks, "detail.reopen_existing_reacquires_lock", lock_reopen_after > lock_reopen_before and reopen_state["rootId"] == create_root_id, {"before": lock_reopen_before, "after": lock_reopen_after, "state": reopen_state})
+            ensure(
+                checks,
+                "reopenAcquiredLock",
+                lock_reopen_after > lock_reopen_before
+                and reopen_state["rootId"] == create_root_id
+                and reopen_state["editMode"] == "EDIT"
+                and reopen_state["lockState"] == "EDIT_LOCKED",
+                {"before": lock_reopen_before, "after": lock_reopen_after, "state": reopen_state}
+            )
             toggle_edit(page, False)
             wait_for_mode(page, "READ")
             invoke_detail(page, "onCloseDetail")

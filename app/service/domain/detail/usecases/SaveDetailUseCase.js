@@ -9,11 +9,14 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -32,6 +35,34 @@ sap.ui.define([
         return readSelectedChecklist(mCtx) || DetailSaveRuntime.readCurrentChecklist(mCtx);
     }
 
+    function buildBlockedCreateValidationResult(mCtx, oValidation) {
+        var aMissingPaths = (oValidation && oValidation.missingPaths) || [];
+        var mMissing = ValidationPathMap.toMissingMap(aMissingPaths);
+        var aMissingKeys = Object.keys(mMissing).filter(function (sKey) {
+            return !!mMissing[sKey];
+        });
+
+        return Result.ok({
+            blocked: true,
+            reason: "VALIDATION_FAILED",
+            missingPaths: aMissingPaths
+        }, [
+            Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
+            Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
+            Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, true),
+            Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, mMissing),
+            Effects.modelPatch("state", StatePaths.VALIDATION_SUMMARY, {
+                hasErrors: true,
+                missingPaths: aMissingPaths,
+                missingKeys: aMissingKeys,
+                source: "save",
+                firstMissingPath: aMissingPaths[0] || "",
+                firstMissingKey: aMissingKeys[0] || ""
+            }),
+            Effects.toast("checklistValidationFailedToast", "warning")
+        ]);
+    }
+
     SaveDetailUseCase.prototype.execute = function (mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oUiState = mCtx && mCtx.uiState;
@@ -46,6 +77,7 @@ sap.ui.define([
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
         var sLockState = DetailSaveRuntime.readLockState(mCtx, StatePaths);
         var aCurrentAttachments = Array.isArray((oCurrent && oCurrent.attachments) || null) ? oCurrent.attachments : [];
+        var oValidation = null;
 
         if (!oRepo) {
             return Promise.resolve(Result.fail({ message: "Save handler unavailable", code: "SAVE_HANDLER_MISSING" }));
@@ -55,6 +87,26 @@ sap.ui.define([
         }
         if (bCreate && typeof oRepo.createChecklist !== "function") {
             return Promise.resolve(Result.fail({ message: "Create handler unavailable", code: "CREATE_HANDLER_MISSING" }));
+        }
+        if (bCreate) {
+            oValidation = ChecklistValidationService.validateRequiredFields(oCurrent, {
+                requiredFields: DetailStateAccess.readRequiredFields(mCtx)
+            });
+            if (oValidation.unavailable) {
+                return Promise.resolve(Result.fail({
+                    message: "Validation rules are not loaded yet",
+                    code: "REQUIRED_FIELDS_UNAVAILABLE"
+                }, [
+                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
+                    Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
+                    Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, false),
+                    Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, {}),
+                    Effects.toast("checklistValidationUnavailableToast", "warning")
+                ]));
+            }
+            if (!oValidation.valid) {
+                return Promise.resolve(buildBlockedCreateValidationResult(mCtx, oValidation));
+            }
         }
         if (!bCreate && !oDelta) {
             return Promise.resolve(Result.ok({ saved: false, skipped: true, reason: "NO_CHANGES" }, [
@@ -95,7 +147,9 @@ sap.ui.define([
 
             return pSave.then(function (oSaved) {
                 var sNow = new Date().toISOString();
-        var oInitialSavedSnapshot = DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot);
+        var oInitialSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
+            DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot)
+        );
                 var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.pcct_uuid || oInitialSavedSnapshot.RootKey || oInitialSavedSnapshot.rootKey || oInitialSavedSnapshot.Key || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
                 var pLockAcquire = Promise.resolve(null);
                 var bNeedsAttachmentReload = bCreate || aStagedPayload.length > 0;
@@ -115,7 +169,9 @@ sap.ui.define([
                 ]).then(function (aPostSave) {
                     var aSyncedAttachments = DetailAttachmentDeltaRuntime.stripStagedAttachmentInternals(aPostSave[0]);
                     var oLockResult = aPostSave[1];
-        var oSavedSnapshot = DetailSaveRuntime.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot);
+        var oSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
+            DetailSaveRuntime.preserveBasicFields(oInitialSavedSnapshot, oCurrent, oSnapshot)
+        );
                     var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
                     var aEffects = [
                         Effects.toast("objectSaved", "success"),

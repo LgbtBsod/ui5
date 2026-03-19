@@ -170,6 +170,16 @@ sap.ui.define([
         },
 
         formatBooleanResultText: function (vValue) {
+            if (typeof vValue === "string") {
+                var sValue = String(vValue).trim().toUpperCase();
+                if (sValue === "OK" || sValue === "TRUE" || sValue === "X") {
+                    return text(this, "statusOk", "OK");
+                }
+                if (sValue === "FAILED" || sValue === "ERROR" || sValue === "FALSE") {
+                    return text(this, "statusFailed", "Failed");
+                }
+                return "-";
+            }
             if (vValue === true) {
                 return text(this, "statusOk", "OK");
             }
@@ -180,6 +190,16 @@ sap.ui.define([
         },
 
         formatBooleanResultState: function (vValue) {
+            if (typeof vValue === "string") {
+                var sValue = String(vValue).trim().toUpperCase();
+                if (sValue === "OK" || sValue === "TRUE" || sValue === "X") {
+                    return "Success";
+                }
+                if (sValue === "FAILED" || sValue === "ERROR" || sValue === "FALSE") {
+                    return "Error";
+                }
+                return "None";
+            }
             if (vValue === true) {
                 return "Success";
             }

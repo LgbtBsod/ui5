@@ -156,6 +156,9 @@ class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
         body = None
         is_ui5_proxy = target_base == UI5_RESOURCES_BASE
         cache_path = self._ui5_cache_path() if is_ui5_proxy else None
+        if is_ui5_proxy and self.command in {"GET", "HEAD"} and cache_path is not None:
+            if self._serve_cached_ui5_payload(cache_path, head_only=self.command == "HEAD"):
+                return
         if self.command not in {"GET", "HEAD"}:
             length = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(length) if length > 0 else b""
