@@ -150,6 +150,33 @@
         return !oBody.classList.contains("theme-motion-disabled");
     }
 
+    function setThemeState(mState) {
+        var oBody = document.body;
+        if (!oBody) {
+            return;
+        }
+        oBody.setAttribute(BODY_ATTR_THEME, String(mState && mState.theme || "light"));
+        oBody.setAttribute(BODY_ATTR_BG_ENABLED, mState && mState.enabled === false ? "false" : "true");
+        applyState();
+    }
+
+    function onResizeStart() {
+        var oHost = document.getElementById(HOST_ID);
+        if (!oHost) {
+            return;
+        }
+        oHost.classList.add("is-resizing");
+    }
+
+    function onResizeEnd() {
+        var oHost = document.getElementById(HOST_ID);
+        if (!oHost) {
+            return;
+        }
+        oHost.classList.remove("is-resizing");
+        applyState();
+    }
+
     function applyState() {
         var oBody = document.body;
         var oHost = ensureHost();
@@ -196,6 +223,12 @@
         applyState();
         bindObservers();
     }
+
+    window.Ui5Bg = window.Ui5Bg || {};
+    window.Ui5Bg.onResizeEnd = onResizeEnd;
+    window.Ui5Bg.onResizeStart = onResizeStart;
+    window.Ui5Bg.setThemeState = setThemeState;
+    window.Ui5Bg.applyState = applyState;
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", bootstrap, { once: true });

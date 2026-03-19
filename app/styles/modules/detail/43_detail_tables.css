@@ -1,6 +1,8 @@
 .chkApp .detailGridTable,
-.chkApp .flatEditorTable {
+.chkApp .flatEditorTable,
+.chkApp .detailAttachmentTable {
   width: 100%;
+  border-collapse: separate;
 }
 
 .chkApp .detailGridTable {
@@ -46,18 +48,6 @@
   max-width: 100%;
 }
 
-.chkApp .detailGridTable .sapUiTableCnt,
-.chkApp .detailGridTable .sapUiTableCtrlScr,
-.chkApp .detailGridTable .sapUiTableCtrl,
-.chkApp .detailGridTable .sapUiTableColHdrCnt,
-.chkApp .flatEditorTable,
-.chkApp .flatEditorTable .sapMListTbl,
-.chkApp .flatEditorTable .sapMListTblCnt,
-.chkApp .detailAttachmentTable .sapMListTbl,
-.chkApp .detailAttachmentTable .sapMListTblCnt {
-  background: transparent;
-}
-
 .chkApp .detailGridTable .sapUiTableCell,
 .chkApp .detailGridTable .sapUiTableColCell,
 .chkApp .flatEditorTable .sapMListTblCell,
@@ -69,28 +59,13 @@
   border-bottom-color: rgba(160, 184, 220, 0.18);
 }
 
-.chkApp .detailGridTable .sapUiTableColCell,
-.chkApp .flatEditorTable .sapMListTblHeaderCell,
-.chkApp .detailAttachmentTable .sapMListTblHeaderCell {
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: var(--theme-table-header-size);
-  font-weight: 800;
-  line-height: var(--theme-table-header-line-height);
-  color: var(--text-muted);
-  background: var(--theme-table-header-bg);
-}
-
 .chkApp .detailGridTable .sapUiTableCell,
 .chkApp .flatEditorTable .sapMListTblCell {
-  padding: var(--theme-table-cell-padding-block) var(--theme-table-cell-padding-inline);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(249, 252, 255, 0.08)),
     var(--theme-rail-bg);
   border-top-color: rgba(var(--accent-rgb), 0.12);
   border-bottom-color: rgba(var(--accent-rgb), 0.12);
-  font-size: var(--theme-table-body-size);
-  line-height: var(--theme-table-body-line-height);
 }
 
 .chkApp .detailGridTable .sapUiTableColCell,
@@ -99,19 +74,11 @@
   padding-bottom: 0.54rem;
 }
 
-.chkApp .detailGridTable .sapUiTableCell,
-.chkApp .flatEditorTable .sapMListTblCell,
-.chkApp .detailAttachmentTable .sapMListTblCell {
-  padding-top: calc(var(--theme-table-cell-padding-block) - 0.12rem);
-  padding-bottom: calc(var(--theme-table-cell-padding-block) - 0.12rem);
-}
-
 .chkApp .detailBarriersGridTable .sapUiTableDataCell {
   background: transparent;
 }
 
 .chkApp .detailAttachmentTable .sapMListTblCell {
-  padding: var(--theme-table-cell-padding-block) var(--theme-table-cell-padding-inline);
   background: var(--theme-table-cell-bg);
 }
 
@@ -163,11 +130,6 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   background: rgba(214, 104, 104, 0.16);
 }
 
-.chkApp .detailSectionCard .sapMListTblRow:hover .sapMListTblCell,
-.chkApp .detailGridTable .sapUiTableTr:hover .sapUiTableCell {
-  background: var(--theme-table-cell-hover-bg);
-}
-
 .chkApp .appLayoutSplit .detailPage .detailSectionBody {
   overflow-x: visible;
   gap: 0.58rem;
@@ -217,19 +179,9 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
     calc(0.62rem * var(--theme-density-scale));
 }
 
-.chkApp .detailGridTable .sapUiTableColCell,
-.chkApp .flatEditorTable .sapMListTblHeaderCell,
-.chkApp .detailAttachmentTable .sapMListTblHeaderCell {
-  background: var(--theme-table-header-bg);
-  color: var(--text-muted);
-  border-bottom-color: transparent;
-}
-
 .chkApp .detailGridTable .sapUiTableCell,
 .chkApp .flatEditorTable .sapMListTblCell,
 .chkApp .detailAttachmentTable .sapMListTblCell {
-  background: var(--theme-table-cell-bg);
-  color: var(--text-main);
   border-width: 1px;
   border-style: solid;
 }
@@ -250,26 +202,7 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 .chkApp .detailGridTable .sapUiTableCtrl,
 .chkApp .flatEditorTable .sapMListTbl,
 .chkApp .detailAttachmentTable .sapMListTbl {
-  border-collapse: separate;
   border-spacing: 0 0.74rem;
-}
-
-.chkApp .detailGridTable .sapUiTableCell:first-child,
-.chkApp .flatEditorTable .sapMListTblCell:first-child,
-.chkApp .flatEditorTable .sapMListTblHeaderCell:first-child,
-.chkApp .detailAttachmentTable .sapMListTblCell:first-child,
-.chkApp .detailAttachmentTable .sapMListTblHeaderCell:first-child {
-  border-top-left-radius: var(--theme-table-row-radius);
-  border-bottom-left-radius: var(--theme-table-row-radius);
-}
-
-.chkApp .detailGridTable .sapUiTableCell:last-child,
-.chkApp .flatEditorTable .sapMListTblCell:last-child,
-.chkApp .flatEditorTable .sapMListTblHeaderCell:last-child,
-.chkApp .detailAttachmentTable .sapMListTblCell:last-child,
-.chkApp .detailAttachmentTable .sapMListTblHeaderCell:last-child {
-  border-top-right-radius: var(--theme-table-row-radius);
-  border-bottom-right-radius: var(--theme-table-row-radius);
 }
 
 .chkApp .tableRowActionBtn .sapMBtnContent {
@@ -286,13 +219,11 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   background: rgba(205, 72, 72, 0.1);
 }
 
-.chkApp .detailGridTable {
-  width: 100%;
-  min-height: 14.5rem;
-}
-
-.chkApp .flatEditorTable {
-  width: 100%;
+.chkApp .detailGridTable .sapUiTableCell,
+.chkApp .flatEditorTable .sapMListTblCell,
+.chkApp .detailAttachmentTable .sapMListTblCell {
+  padding-top: calc(var(--theme-table-cell-padding-block) - 0.12rem);
+  padding-bottom: calc(var(--theme-table-cell-padding-block) - 0.12rem);
 }
 
 .chkApp .detailGridTable .sapUiTableCtrl tr {
@@ -338,12 +269,6 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 .chkApp .chkSkin .detailSectionCard .sapMListTblHeaderCell {
   background: transparent;
   border-color: rgba(160, 184, 220, 0.18);
-}
-
-.chkApp .chkSkin .detailGridTable .sapUiTableColCell,
-.chkApp .chkSkin .flatEditorTable .sapMListTblHeaderCell,
-.chkApp .chkSkin .detailAttachmentTable .sapMListTblHeaderCell {
-  background: var(--theme-table-header-bg);
 }
 
 .chkApp .chkSkin .detailGridTable .sapUiTableCell,

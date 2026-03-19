@@ -115,10 +115,23 @@ sap.ui.define([
         return setThemeProfile(oProfile);
     }
 
+    function getBackgroundRuntime() {
+        return window && window.Ui5Bg ? window.Ui5Bg : null;
+    }
+
     function syncBackgroundRuntime(oProfile) {
         var sMode = normalizeMode(oProfile && oProfile.mode);
         var sRuntimeTheme = "light";
         var bEnabled = normalizeAnimationEnabled(oProfile && oProfile.animationEnabled);
+        var oBackgroundRuntime = getBackgroundRuntime();
+
+        if (oBackgroundRuntime && typeof oBackgroundRuntime.setThemeState === "function") {
+            oBackgroundRuntime.setThemeState({
+                enabled: bEnabled,
+                theme: sRuntimeTheme
+            });
+            return;
+        }
 
         ThemeDomRuntime.setBodyAttribute("data-theme", sRuntimeTheme);
         ThemeDomRuntime.setBodyAttribute("data-bg-enabled", bEnabled ? "true" : "false");

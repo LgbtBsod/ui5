@@ -187,12 +187,9 @@
 }
 
 .chkApp .searchResultsTable,
-.chkApp #searchResultsShell,
-.chkApp [id$="-searchResultsShell"],
-.chkApp #searchResultsShell > .sapMFlexItem,
-.chkApp [id$="-searchResultsShell"] > .sapMFlexItem,
-.chkApp #searchResultsShell > .sapMFlexItem > .sapMVBox,
-.chkApp [id$="-searchResultsShell"] > .sapMFlexItem > .sapMVBox {
+.chkApp .searchResultsExperienceShell,
+.chkApp .searchResultsExperienceShell > .sapMFlexItem,
+.chkApp .searchResultsExperienceShell > .sapMFlexItem > .sapMVBox {
   width: 100%;
   max-width: 100%;
   min-width: 0;

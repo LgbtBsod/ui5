@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ShellGlobalsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
-], function (ModelStateRuntime, ThemeDomRuntime, SchedulingRuntime, ModelContracts, ShellGlobalsRuntime, Ui5RuntimeFacade) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime"
+], function (ModelStateRuntime, ThemeDomRuntime, SchedulingRuntime, ModelContracts, ShellGlobalsRuntime, Ui5RuntimeFacade, AppShellDomRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -89,10 +90,7 @@ sap.ui.define([
         oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
         oRuntimeState.resizeSafetyTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeSafetyTimer);
         ThemeDomRuntime.removeClass([oDoc], _RESIZE_CLASS);
-        var oBackgroundRuntime = getBackgroundRuntime();
-        if (oBackgroundRuntime && typeof oBackgroundRuntime.onResizeEnd === "function") {
-            oBackgroundRuntime.onResizeEnd();
-        }
+        AppShellDomRuntime.notifyBackgroundResize(getBackgroundRuntime(), "end");
     }
 
     function _scheduleResizeEnd(oController) {
@@ -104,40 +102,18 @@ sap.ui.define([
 
     return {
         onSkipToMainContent: function (oEvent) {
-            var oMainHost = this.byId("mainContentHost");
-            var oMainDom = oMainHost && oMainHost.getDomRef && oMainHost.getDomRef();
-            if (oEvent && oEvent.preventDefault) {
-                oEvent.preventDefault();
-            }
-            if (!oMainDom || typeof oMainDom.focus !== "function") {
-                return;
-            }
-            if (!oMainDom.getAttribute("tabindex")) {
-                oMainDom.setAttribute("tabindex", "-1");
-            }
-            oMainDom.focus();
+            AppShellDomRuntime.focusMainContent(this, oEvent);
         },
 
         _syncShellFlexAllocation: function () {
-            var oLayout = this.byId("mainFcl");
-            var oDomRef = oLayout && oLayout.getDomRef && oLayout.getDomRef();
-            var oFlexItem = oDomRef && oDomRef.parentElement;
-            if (!oFlexItem || !oFlexItem.classList || !oFlexItem.classList.contains("sapMFlexItem")) {
-                return;
-            }
-            oFlexItem.style.flex = "1 1 auto";
-            oFlexItem.style.minHeight = "0";
-            oFlexItem.style.height = "auto";
+            AppShellDomRuntime.syncShellFlexItem(this);
         },
 
         _syncLayoutViewportGeometry: function () {
             var oLayout = this.byId("mainFcl");
 
             _beginResizing(this);
-            var oBackgroundRuntime = getBackgroundRuntime();
-            if (oBackgroundRuntime && typeof oBackgroundRuntime.onResizeStart === "function") {
-                oBackgroundRuntime.onResizeStart();
-            }
+            AppShellDomRuntime.notifyBackgroundResize(getBackgroundRuntime(), "start");
             _scheduleInvalidate(this, oLayout);
             _scheduleResizeEnd(this);
         },
@@ -162,20 +138,7 @@ sap.ui.define([
         },
 
         _syncShellMetrics: function () {
-            var oShellHeaderControl = this.byId("appShellHeaderHost");
-            var oShellHeader = oShellHeaderControl && oShellHeaderControl.getDomRef && oShellHeaderControl.getDomRef();
-            var oDoc = getGlobalDomNodes().root;
-            var oRect;
-            var iBottom;
-            if (!oDoc || !oShellHeader || !oShellHeader.getBoundingClientRect) {
-                return;
-            }
-            oRect = oShellHeader.getBoundingClientRect();
-            iBottom = Math.max(88, Math.round(oRect.bottom + 14));
-            ThemeDomRuntime.setStyleProperties([oDoc], {
-                "--app-shell-height": Math.round(oRect.height) + "px",
-                "--app-shell-offset": iBottom + "px"
-            });
+            AppShellDomRuntime.syncShellMetricVars(this, getGlobalDomNodes().root);
         },
 
         _scheduleShellLayoutRefresh: function () {
