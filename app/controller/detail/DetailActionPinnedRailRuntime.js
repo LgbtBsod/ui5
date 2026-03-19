@@ -10,16 +10,13 @@ sap.ui.define([
     function clearPinnedClasses(oController) {
         var oStickyHost = resolveStickyHost(oController);
         var oHostDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
-        var oCardDom = oHostDom && oHostDom.querySelector ? oHostDom.querySelector(".detailControlExperienceCard") : null;
         if (!oHostDom) {
             return;
         }
         ThemeDomRuntime.removeClass([oHostDom], "isViewportPinned");
         oHostDom.style.removeProperty("height");
         oHostDom.style.removeProperty("--detail-rail-height");
-        if (oCardDom) {
-            ThemeDomRuntime.removeClass([oCardDom], "detailControlCardDocked");
-        }
+        ThemeDomRuntime.removeClass([oHostDom], "detailControlCardDocked");
     }
 
     return {

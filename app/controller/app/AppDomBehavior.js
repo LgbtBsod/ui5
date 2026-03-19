@@ -86,6 +86,24 @@ sap.ui.define([
     }
 
     return {
+        onSkipToMainContent: function (oEvent) {
+            var oMainHost = this.byId("mainContentHost");
+            var oMainDom = oMainHost && oMainHost.getDomRef && oMainHost.getDomRef();
+            var oLayout = this.byId("mainFcl");
+            var oLayoutDom = oLayout && oLayout.getDomRef && oLayout.getDomRef();
+            var oTarget = oLayoutDom || oMainDom;
+            if (oEvent && oEvent.preventDefault) {
+                oEvent.preventDefault();
+            }
+            if (!oTarget || typeof oTarget.focus !== "function") {
+                return;
+            }
+            if (!oTarget.getAttribute("tabindex")) {
+                oTarget.setAttribute("tabindex", "-1");
+            }
+            oTarget.focus();
+        },
+
         _syncShellFlexAllocation: function () {
             var oLayout = this.byId("mainFcl");
             var oDomRef = oLayout && oLayout.getDomRef && oLayout.getDomRef();
@@ -138,8 +156,8 @@ sap.ui.define([
         },
 
         _syncShellMetrics: function () {
-            var oRoot = this.getView && this.getView().getDomRef && this.getView().getDomRef();
-            var oShellHeader = oRoot && oRoot.querySelector && oRoot.querySelector(".appShellHeader");
+            var oShellHeaderControl = this.byId("appShellHeaderHost");
+            var oShellHeader = oShellHeaderControl && oShellHeaderControl.getDomRef && oShellHeaderControl.getDomRef();
             var oDoc = document && document.documentElement;
             var oRect;
             var iBottom;

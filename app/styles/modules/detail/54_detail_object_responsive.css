@@ -1,27 +1,9 @@
-@media (max-width: 53.75rem) {
-  .chkApp .detailContent .sapUxAPObjectPageSubSection {
-    scroll-margin-top: calc(var(--app-shell-offset) + 3.75rem);
-  }
-}
-
 @media (max-width: 768px) {
-  .chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContent {
-    padding-bottom: 0.22rem;
-  }
-
-  .chkApp .detailMainExperienceStack {
-    gap: 0.72rem;
-  }
-
   .chkApp .detailContent input,
   .chkApp .detailContent textarea,
   .chkApp .detailContent .sapMInputBase,
   .chkApp .detailContent .sapMTextArea {
     scroll-margin-top: calc(var(--app-shell-offset) + 4rem);
     scroll-margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 8rem);
-  }
-
-  .chkApp .detailControlPinnedDock {
-    padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
   }
 }

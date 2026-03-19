@@ -2,6 +2,16 @@
 
 Run this checklist on the real Gateway / ABAP contour after deployment.
 
+## Local Pre-Flight Baseline
+
+- [ ] Start local static runtime and run `python scripts/interaction-smoke.py http://127.0.0.1:8080/index.html`.
+- [ ] Record `resultClass` from the JSON output:
+  - `PASS_LOCAL_BASELINE` means local UI/runtime contract is healthy.
+  - `BLOCKED_BACKEND` means local UI shell is healthy but static localhost cannot prove Gateway-dependent flows.
+  - `FAIL_UI_CONTRACT` means the repo has a real local runtime regression and release must stop.
+- [ ] Record backend blocker URLs and statuses when `resultClass=BLOCKED_BACKEND`; they are environment evidence, not product failure.
+- [ ] Treat local baseline as pre-flight only; it does not replace SAP / FLP evidence below.
+
 - [ ] App startup succeeds from FLP / productive URL without console bootstrap errors.
 - [ ] Search loads results and respects filters / paging.
 - [ ] Open detail from search and confirm FCL navigation state is correct.

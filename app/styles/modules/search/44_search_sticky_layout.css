@@ -50,25 +50,12 @@
   z-index: 31;
 }
 
-.chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchSmartToolbarRail,
-.chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky .searchResultsTable .sapUiCompSmartTableToolbar {
-  top: var(--search-results-toolbar-compact-top, var(--search-sticky-filter-top, var(--search-filter-sticky-top)));
-}
-
-.chkApp .searchWorkbenchDock > .searchSmartToolbarRail {
-  margin-top: 0;
-  margin-bottom: 0.34rem;
+.chkApp .searchResultsToolbarHost {
   position: relative;
   top: auto;
-  z-index: auto;
-}
-
-.chkApp .searchResultsExperienceShell > .searchSmartToolbarRail {
-  margin-top: 0;
-  margin-bottom: 0.34rem;
-  position: relative;
-  top: auto;
-  z-index: auto;
+  z-index: 2;
+  width: 100%;
+  min-width: 0;
 }
 
 .chkApp .searchWorkbenchDock > .searchResultsSummaryRail {
@@ -114,12 +101,8 @@
   min-width: 0;
 }
 
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMTB,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMIBar {
-  position: relative;
-  top: auto;
-  z-index: 2;
+.chkApp .searchResultsToolbarHost {
+  top: var(--search-results-toolbar-sticky-top, auto);
 }
 
 .chkApp .searchScrollAnchorBtn {
@@ -172,9 +155,8 @@
 }
 
 .chkApp .searchResultsActionRail,
-.chkApp .searchSmartToolbarRail,
 .chkApp .searchResultsSummaryRail,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+.chkApp .searchResultsToolbarHost {
   background: color-mix(in srgb, var(--theme-block-bg) 58%, transparent);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 46%, transparent);
   box-shadow:
@@ -186,9 +168,8 @@
 
 .chkApp .searchWorkbenchDock > .searchFilterCardDense,
 .chkApp .searchWorkbenchDock > .searchResultsActionRail,
-.chkApp .searchSmartToolbarRail,
 .chkApp .searchResultsSummaryRail,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+.chkApp .searchResultsToolbarHost {
   transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
 
@@ -202,14 +183,12 @@
   border-radius: calc(var(--radius-lg) - 0.1rem);
 }
 
-.chkApp .searchSmartToolbarRail,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+.chkApp .searchResultsToolbarHost {
   border-radius: calc(var(--radius-lg) - 0.16rem);
 }
 
 .chkApp .searchResultsActionRail.sapMTBNewFlex,
-.chkApp .searchSmartToolbarRail.sapMTBNewFlex,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar.sapMTBNewFlex {
+.chkApp .searchResultsToolbarHost.sapMTBNewFlex {
   flex-wrap: wrap;
   align-items: center;
   align-content: flex-start;
@@ -217,15 +196,13 @@
 }
 
 .chkApp .searchResultsActionRail .sapMBarChild,
-.chkApp .searchSmartToolbarRail .sapMBarChild,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar .sapMBarChild {
+.chkApp .searchResultsToolbarHost .sapMBarChild {
   min-width: 0;
   max-width: 100%;
 }
 
 .chkApp .searchResultsActionRail .sapMTBSpacer,
-.chkApp .searchSmartToolbarRail .sapMTBSpacer,
-.chkApp .searchResultsTable .sapUiCompSmartTableToolbar .sapMTBSpacer {
+.chkApp .searchResultsToolbarHost .sapMTBSpacer {
   min-width: 0.3rem;
 }
 
@@ -240,9 +217,7 @@
     display: flex;
   }
 
-  .chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky .searchResultsTable .sapUiCompSmartTableToolbar,
-  .chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky .searchResultsTable .sapUiCompSmartTableToolbar.sapMTB,
-  .chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky .searchResultsTable .sapUiCompSmartTableToolbar.sapMIBar {
+  .chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky .searchResultsToolbarHost {
     position: sticky;
     top: var(--search-results-toolbar-compact-top, calc(var(--search-sticky-filter-top, var(--search-filter-sticky-top)) + var(--search-summary-rail-height, 0px) + 0.42rem));
     z-index: 32;
@@ -256,38 +231,32 @@
   --search-results-toolbar-sticky-top: auto;
 }
 
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar {
+.chkApp .appLayoutSplit #searchPaneHost .searchResultsToolbarHost,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsToolbarHost {
   position: relative;
   top: auto;
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail,
-.chkApp .appLayoutSplit #searchPaneHost .searchSmartToolbarRail,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchSmartToolbarRail,
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsSummaryRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsSummaryRail,
-.chkApp .appLayoutSplit #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .appLayoutSingle #searchPaneHost .searchSmartToolbarRail,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail,
+.chkApp .appLayoutSplit #searchPaneHost .searchResultsToolbarHost,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsToolbarHost,
 .chkApp .appLayoutSingle #searchPaneHost .searchResultsSummaryRail,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsSummaryRail,
-.chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar {
+.chkApp .appLayoutSingle #searchPaneHost .searchResultsToolbarHost,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsToolbarHost {
   width: 100%;
   max-width: 100%;
   left: 0;
   right: 0;
 }
 
-.chkApp .appLayoutSingle #searchPaneHost .searchSmartToolbarRail,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchSmartToolbarRail,
 .chkApp .appLayoutSingle #searchPaneHost .searchResultsSummaryRail,
 .chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsSummaryRail,
-.chkApp .appLayoutSingle #searchPaneHost .searchResultsTable .sapUiCompSmartTableToolbar,
-.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsTable .sapUiCompSmartTableToolbar {
+.chkApp .appLayoutSingle #searchPaneHost .searchResultsToolbarHost,
+.chkApp .appLayoutSingle [id$="-searchPaneHost"] .searchResultsToolbarHost {
   width: 100%;
 }
 
@@ -301,9 +270,8 @@
 
 body.chkAppRoot.appDark .chkApp .searchWorkbenchDock > .searchFilterCardDense,
 body.chkAppRoot.appDark .chkApp .searchWorkbenchDock > .searchResultsActionRail,
-body.chkAppRoot.appDark .chkApp .searchSmartToolbarRail,
 body.chkAppRoot.appDark .chkApp .searchResultsSummaryRail,
-body.chkAppRoot.appDark .chkApp .searchResultsTable .sapUiCompSmartTableToolbar {
+body.chkAppRoot.appDark .chkApp .searchResultsToolbarHost {
   box-shadow:
     0 18px 34px rgba(1, 8, 18, 0.30),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -311,8 +279,8 @@ body.chkAppRoot.appDark .chkApp .searchResultsTable .sapUiCompSmartTableToolbar 
 
 @media (min-width: 72rem) {
   .chkApp .searchResultsActionRail,
-  .chkApp .searchSmartToolbarRail,
-  .chkApp .searchToolbarMetaRail {
+  .chkApp .searchToolbarMetaRail,
+  .chkApp .searchResultsToolbarHost {
     padding: 0.16rem 0.22rem;
   }
 

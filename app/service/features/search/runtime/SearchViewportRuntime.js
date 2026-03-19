@@ -39,14 +39,10 @@ sap.ui.define([
     }
 
     function scrollToSearchResultsToolbar(oController) {
-        var oFallbackToolbar = oController.byId && oController.byId("smartTableCustomToolbar");
         var oResultsShell = oController.byId && oController.byId("searchResultsShell");
         var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
         var oResultsToolbarDom = SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController);
         var oToolbarDom = oResultsToolbarDom || oResultsShellDom;
-        if (!oToolbarDom) {
-            oToolbarDom = oFallbackToolbar && oFallbackToolbar.getDomRef && oFallbackToolbar.getDomRef();
-        }
         return SearchScrollRuntime.scrollToTarget(
             oController,
             oToolbarDom,

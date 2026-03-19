@@ -25,6 +25,9 @@ except ModuleNotFoundError:
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 OUT_DIR = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "docs/artifacts/ux/baseline")
 DETAIL_ROOT = "E49B679F518F4947BD7A0F2CC1C4AC46"
+SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
+DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
+ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsTargetPage"
 
 
 def set_theme(page: Page, mode: str) -> None:
@@ -65,7 +68,9 @@ def wait_for_app_ready(page: Page, delay: int = 1200) -> None:
             return false;
           }
           var core = sap.ui.getCore();
-          return !!core.byId('checklist_app_comp---app--searchPaneHost') && !!core.byId('checklist_app_comp---app--detailPaneHost');
+          return !!core.byId('checklist_app_comp---app--mainFcl')
+            && !!core.byId('checklist_app_comp---app--appShellHeaderHost')
+            && !!core.byId('checklist_app_comp---searchTargetPage--searchWorkbenchDock');
         }
         """,
         timeout=90000,
@@ -173,21 +178,21 @@ def action_analytics_page(page: Page) -> None:
 
 def action_checks_dialog(page: Page) -> None:
     open_detail(page)
-    call_controller(page, "checklist_app_comp---app--detailPaneHost", "onExpandChecks")
+    call_controller(page, DETAIL_VIEW_ID, "onExpandChecks")
     page.wait_for_selector(".sapMDialog", timeout=10000)
     wait_ui(page, 1200)
 
 
 def action_barriers_dialog(page: Page) -> None:
     open_detail(page)
-    call_controller(page, "checklist_app_comp---app--detailPaneHost", "onExpandBarriers")
+    call_controller(page, DETAIL_VIEW_ID, "onExpandBarriers")
     page.wait_for_selector(".sapMDialog", timeout=10000)
     wait_ui(page, 1200)
 
 
 def action_location_dialog(page: Page) -> None:
     open_detail(page)
-    call_controller(page, "checklist_app_comp---app--detailPaneHost", "onOpenLocationValueHelp")
+    call_controller(page, DETAIL_VIEW_ID, "onOpenLocationValueHelp")
     page.wait_for_selector(".sapMDialog", timeout=10000)
     wait_ui(page, 1200)
 
@@ -218,12 +223,12 @@ def main() -> int:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     states = {
-        "search": (action_search, "#checklist_app_comp---app--searchPaneHost"),
-        "detail": (action_detail, "#checklist_app_comp---app--detailPaneHost"),
+        "search": (action_search, f"#{SEARCH_VIEW_ID}"),
+        "detail": (action_detail, f"#{DETAIL_VIEW_ID}"),
         "analytics-page": (action_analytics_page, ".analyticsScreenContent"),
-        "checks-dialog": (action_checks_dialog, "#checklist_app_comp---app--detailPaneHost--checksExpandedDialog"),
-        "barriers-dialog": (action_barriers_dialog, "#checklist_app_comp---app--detailPaneHost--barriersExpandedDialog"),
-        "location-dialog": (action_location_dialog, "#checklist_app_comp---app--detailPaneHost--locationValueHelpDialog"),
+        "checks-dialog": (action_checks_dialog, f"#{DETAIL_VIEW_ID}--checksExpandedDialog"),
+        "barriers-dialog": (action_barriers_dialog, f"#{DETAIL_VIEW_ID}--barriersExpandedDialog"),
+        "location-dialog": (action_location_dialog, f"#{DETAIL_VIEW_ID}--locationValueHelpDialog"),
     }
     captured: dict[str, dict[str, pathlib.Path]] = {"morning": {}, "night": {}}
 

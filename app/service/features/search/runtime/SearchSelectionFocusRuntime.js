@@ -92,14 +92,13 @@ sap.ui.define([
 
         focusSearchToolbar: function (oController) {
             var oTarget = oController.byId("backendTopInput")
-                || oController.byId("maxRowsInput")
-                || oController.byId("smartTableCustomToolbar");
+                || oController.byId("maxRowsInput");
             if (!oTarget) {
                 return focusScopedSelector(oController, "[id$='backendTopInput-inner']")
                     || focusScopedSelector(oController, "[id$='backendTopInput']")
                     || focusScopedSelector(oController, "[id$='maxRowsInput-inner']")
                     || focusScopedSelector(oController, "[id$='maxRowsInput']")
-                    || focusScopedSelector(oController, "[id$='smartTableCustomToolbar']");
+                    || focusScopedSelector(oController, ".searchCreateActionBtn");
             }
             if (FocusRuntime.focusSoon(oTarget)) {
                 return true;
@@ -109,12 +108,10 @@ sap.ui.define([
             }
             return focusSearchControlDom(oController.byId("backendTopInput"))
                 || focusSearchControlDom(oController.byId("maxRowsInput"))
-                || focusSearchControlDom(oController.byId("smartTableCustomToolbar"))
                 || focusScopedSelector(oController, "[id$='backendTopInput-inner']")
                 || focusScopedSelector(oController, "[id$='backendTopInput']")
                 || focusScopedSelector(oController, "[id$='maxRowsInput-inner']")
                 || focusScopedSelector(oController, "[id$='maxRowsInput']")
-                || focusScopedSelector(oController, "[id$='smartTableCustomToolbar']")
                 || focusScopedSelector(oController, ".searchCreateActionBtn");
         }
     };

@@ -8,7 +8,7 @@ function createResult(name, ok, detail) {
 async function runFrontendVariablesSmoke() {
   const cwd = process.cwd();
   const appRoot = path.basename(cwd) === 'app' ? cwd : path.join(cwd, 'app');
-  const schemaPath = path.join(appRoot, 'util/runtime/FrontendVariablesSchema.js');
+  const schemaPath = path.join(appRoot, 'model/schema/FrontendVariablesSchema.js');
 
   const FrontendVariablesSchema = loadSapModule(schemaPath, {});
   const defaults = FrontendVariablesSchema.buildDefaults();

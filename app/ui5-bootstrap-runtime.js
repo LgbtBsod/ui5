@@ -17,22 +17,6 @@
         return !!DEV_HOSTS[sHost];
     }
 
-    function splitClassNames(sClassNames) {
-        return String(sClassNames || "").split(/\s+/).map(function (sName) {
-            return sName.trim();
-        }).filter(Boolean);
-    }
-
-    function applyStyleClass(oTarget, sClassNames, sMethodName) {
-        if (!oTarget || typeof oTarget[sMethodName] !== "function") {
-            return oTarget;
-        }
-        splitClassNames(sClassNames).forEach(function (sClassName) {
-            oTarget[sMethodName](sClassName);
-        });
-        return oTarget;
-    }
-
     function ensureStoredThemeProfile() {
         var oStoredProfile;
         try {
@@ -63,33 +47,8 @@
 
     function mountComponent() {
         sap.ui.require([
-            "sap/ui/core/ComponentContainer",
-            "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/Ui5StyleAdapter"
-        ], function (ComponentContainer, Ui5StyleAdapter) {
-            if (Ui5StyleAdapter && typeof Ui5StyleAdapter.enableOn !== "function") {
-                Ui5StyleAdapter.enableOn = function (oTarget, sClassNames) {
-                    return applyStyleClass(oTarget, sClassNames, "addStyleClass");
-                };
-            }
-
-            if (Ui5StyleAdapter && typeof Ui5StyleAdapter.disableOn !== "function") {
-                Ui5StyleAdapter.disableOn = function (oTarget, sClassNames) {
-                    return applyStyleClass(oTarget, sClassNames, "removeStyleClass");
-                };
-            }
-
-            if (Ui5StyleAdapter && typeof Ui5StyleAdapter.restartOn !== "function") {
-                Ui5StyleAdapter.restartOn = function (oTarget, sClassName) {
-                    var oDomRef;
-                    applyStyleClass(oTarget, sClassName, "removeStyleClass");
-                    oDomRef = oTarget && oTarget.getDomRef && oTarget.getDomRef();
-                    if (oDomRef) {
-                        void oDomRef.offsetWidth;
-                    }
-                    return applyStyleClass(oTarget, sClassName, "addStyleClass");
-                };
-            }
-
+            "sap/ui/core/ComponentContainer"
+        ], function (ComponentContainer) {
             new ComponentContainer({
                 name: "PRODUCTION_CONTROL_CHECKLIST",
                 manifest: true,

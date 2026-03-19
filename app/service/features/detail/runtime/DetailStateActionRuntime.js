@@ -19,15 +19,6 @@ sap.ui.define([
     var VIEW_MODEL = MODELS.VIEW;
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
 
-    function resolveOffsetTopWithinHost(oNode, oHost) {
-        var iTop = 0, oCurrent = oNode;
-        while (oCurrent && oCurrent !== oHost) {
-            iTop += oCurrent.offsetTop || 0;
-            oCurrent = oCurrent.offsetParent;
-        }
-        return iTop;
-    }
-
     function resolvePinnedRailHeight(oController) {
         var oStickyHost = oController && oController.byId && oController.byId("detailControlPinnedDock");
         var oStickyDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
@@ -101,51 +92,15 @@ sap.ui.define([
             var sTargetId = String((oSource && oSource.data && oSource.data("targetSection")) || "").trim();
             var oObjectPage = oController.byId("detailObjectPage");
             var oTarget = sTargetId && oController.byId(sTargetId);
-            var oDomRef;
-            var oTargetNode;
-            var oScrollHost;
-            var iTopOffset;
-            var iPinnedHeight;
-            var iTargetTop;
-            var iHostTop;
             if (!sTargetId || !oTarget) {
                 return;
             }
-            oDomRef = oTarget.getDomRef && oTarget.getDomRef();
-            if (!oDomRef) {
-                if (oObjectPage && typeof oObjectPage.scrollToSection === "function") {
-                    oObjectPage.scrollToSection(oTarget.getId(), 250, -(resolvePinnedRailHeight(oController) + 22));
-                }
-                return;
-            }
-            oTargetNode = oDomRef.querySelector(".detailSectionCard")
-                || oDomRef.querySelector(".detailSectionBody")
-                || oDomRef.querySelector(".sapUxAPBlockContainer > *")
-                || oDomRef.querySelector(".sapMListTbl")
-                || oDomRef.querySelector(".sapUiTable")
-                || oDomRef;
-            oScrollHost = (typeof oController._resolveDetailScrollHost === "function" && oController._resolveDetailScrollHost())
-                || document.querySelector(".sapUxAPObjectPageWrapper")
-                || document.querySelector(".sapUxAPObjectPageScroll")
-                || document.querySelector(".sapUxAPObjectPageContainer")
-                || document.scrollingElement;
-            iTopOffset = parseFloat((window.getComputedStyle(document.documentElement).getPropertyValue("--app-shell-offset") || "").replace("px", ""));
-            if (!Number.isFinite(iTopOffset)) {
-                iTopOffset = 88;
-            }
-            iPinnedHeight = resolvePinnedRailHeight(oController);
-            if (oScrollHost && typeof oScrollHost.scrollTop === "number") {
-                iHostTop = (oScrollHost.getBoundingClientRect && oScrollHost.getBoundingClientRect().top) || 0;
-                iTargetTop = Math.max(0, Math.round(resolveOffsetTopWithinHost(oTargetNode, oScrollHost) - (iTopOffset + iPinnedHeight + 16 - iHostTop)));
-                oScrollHost.scrollTo({ top: iTargetTop, behavior: "smooth" });
-                return;
-            }
             if (oObjectPage && typeof oObjectPage.scrollToSection === "function") {
-                oObjectPage.scrollToSection(oTarget.getId(), 250, -(iTopOffset + iPinnedHeight + 16));
+                oObjectPage.scrollToSection(oTarget.getId(), 250, -(resolvePinnedRailHeight(oController) + 22));
                 return;
             }
-            if (oTargetNode && typeof oTargetNode.scrollIntoView === "function") {
-                oTargetNode.scrollIntoView({ behavior: "smooth", block: "start" });
+            if (oTarget.getDomRef && oTarget.getDomRef() && typeof oTarget.getDomRef().scrollIntoView === "function") {
+                oTarget.getDomRef().scrollIntoView({ behavior: "smooth", block: "start" });
             }
         },
         save: function (oController, mHooks, mOptions) {

@@ -20,16 +20,8 @@ sap.ui.define([
         return Math.max(0, Math.ceil(oDomRef.getBoundingClientRect().height || 0));
     }
 
-    function resolveDomHeight(vControlOrDom, sSelectorFallback, oScopeDom) {
+    function resolveDomHeight(vControlOrDom) {
         var oDomRef = vControlOrDom && vControlOrDom.nodeType ? vControlOrDom : (vControlOrDom && vControlOrDom.getDomRef && vControlOrDom.getDomRef());
-        var oScope = oScopeDom && oScopeDom.querySelector ? oScopeDom : null;
-        if ((!oDomRef || !oDomRef.getBoundingClientRect) && sSelectorFallback) {
-            if (oScope) {
-                oDomRef = oScope.querySelector(sSelectorFallback);
-            } else if (typeof document !== "undefined") {
-                oDomRef = document.querySelector(sSelectorFallback);
-            }
-        }
         if (!oDomRef || !oDomRef.getBoundingClientRect) {
             return 0;
         }
@@ -37,9 +29,8 @@ sap.ui.define([
     }
 
     function resolveSearchTableToolbarDom(oController) {
-        var oResultsShell = oController.byId && oController.byId("searchResultsShell");
-        var oResultsShellDom = oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef();
-        return oResultsShellDom && oResultsShellDom.querySelector ? oResultsShellDom.querySelector(".sapUiCompSmartTableToolbar") : null;
+        var oToolbarHost = oController.byId && oController.byId("searchResultsToolbarHost");
+        return oToolbarHost && oToolbarHost.getDomRef && oToolbarHost.getDomRef();
     }
 
     function resolveSearchSummaryRailDom(oController) {
@@ -65,6 +56,11 @@ sap.ui.define([
         return oController.byId && oController.byId("searchWorkbenchDock");
     }
 
+    function resolveShellHeaderHostDom(oController) {
+        var oShellHeaderHost = oController && oController.byId && oController.byId("appShellHeaderHost");
+        return oShellHeaderHost && oShellHeaderHost.getDomRef && oShellHeaderHost.getDomRef();
+    }
+
     function resolveResultsTableToolbarHeight(oController) {
         return resolveDomHeight(resolveSearchTableToolbarDom(oController));
     }
@@ -76,13 +72,11 @@ sap.ui.define([
         var oWorkbenchDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
-        var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
         var oResultsShell = oController.byId && oController.byId("searchResultsShell");
-        var oShellHeader = typeof document !== "undefined" ? document.querySelector(".appShellHeader") : null;
+        var oShellHeader = resolveShellHeaderHostDom(oController);
         [oViewDom, oScrollHost, oWorkbenchDom, oShellHeader,
             oFilterCard && oFilterCard.getDomRef && oFilterCard.getDomRef(),
             oActionRail && oActionRail.getDomRef && oActionRail.getDomRef(),
-            oToolbarRail && oToolbarRail.getDomRef && oToolbarRail.getDomRef(),
             resolveSearchSummaryRailDom(oController),
             oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef(),
             resolveSearchTableToolbarDom(oController)
@@ -101,6 +95,7 @@ sap.ui.define([
         resolveSearchSummaryRailDom: resolveSearchSummaryRailDom,
         resolveSearchTableToolbarDom: resolveSearchTableToolbarDom,
         resolveSearchViewportObserverTargets: resolveSearchViewportObserverTargets,
+        resolveShellHeaderHostDom: resolveShellHeaderHostDom,
         resolveViewDom: resolveViewDom,
         resolveSearchWorkbenchDock: resolveSearchWorkbenchDock,
         setSearchStaticTop: setSearchStaticTop,

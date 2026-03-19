@@ -27,6 +27,8 @@ const validators = [
   { name: 'model-path-contract-gate', file: 'model-path-contract-gate.js' },
   { name: 'listener-registration-gate', file: 'ci/listener-registration-gate.js', mode: 'advisory' },
   { name: 'uiState-workflow-mirror-gate', file: 'ci/uiState-workflow-mirror-gate.js', mode: 'advisory' },
+  { name: 'private-ui5-selectors-gate', file: 'private-ui5-selectors-gate.js' },
+  { name: 'sap-evidence-contract-gate', file: 'sap-evidence-contract-gate.js' },
   { name: 'compat-entity-access-gate', file: 'compat-entity-access-gate.js' },
   { name: 'controller-import-whitelist-gate', file: 'controller-import-whitelist-gate.js' },
   { name: 'manager-purity-gate', file: 'manager-purity-gate.js' },

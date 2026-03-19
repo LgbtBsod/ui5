@@ -20,14 +20,13 @@ sap.ui.define([
         var oWorkbenchDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
-        var oToolbarRail = oController.byId && oController.byId("smartTableCustomToolbar");
         var oSummaryRailDom = SearchStickyDomRuntime.resolveSearchSummaryRailDom(oController);
         var oResultsToolbarDom = SearchStickyDomRuntime.resolveSearchTableToolbarDom(oController);
         var iResultsToolbarHeight = SearchStickyDomRuntime.resolveResultsTableToolbarHeight(oController);
-        var iSummaryRailHeight = SearchStickyDomRuntime.resolveDomHeight(oSummaryRailDom, ".searchResultsSummaryRail", oViewDom);
-        var iFilterHeight = SearchStickyDomRuntime.resolveDomHeight(oFilterCard, ".searchFilterCardDense", oViewDom);
-        var iActionHeight = SearchStickyDomRuntime.resolveDomHeight(oActionRail, ".searchResultsActionRail", oViewDom);
-        var iToolbarHeight = SearchStickyDomRuntime.resolveDomHeight(oToolbarRail, ".searchSmartToolbarRail", oViewDom);
+        var iSummaryRailHeight = SearchStickyDomRuntime.resolveDomHeight(oSummaryRailDom);
+        var iFilterHeight = SearchStickyDomRuntime.resolveDomHeight(oFilterCard);
+        var iActionHeight = SearchStickyDomRuntime.resolveDomHeight(oActionRail);
+        var iToolbarHeight = SearchStickyDomRuntime.resolveDomHeight(oResultsToolbarDom);
         var iDockHeight = SearchStickyDomRuntime.resolveOuterHeight(oWorkbenchDock);
         var iTopBase = SearchStickyOffsetRuntime.resolveShellHeaderOffset(SEARCH_MIN_HEADER_OFFSET_PX, SEARCH_HEADER_OFFSET_PADDING_PX, oScrollHost);
         var iActionTop;
@@ -43,16 +42,16 @@ sap.ui.define([
             }
         }
         iActionTop = iTopBase + iFilterHeight + (iFilterHeight && iActionHeight ? SEARCH_STICKY_STACK_GAP_PX : 0);
-        iToolbarTop = iActionTop + iActionHeight + (iActionHeight && iToolbarHeight ? SEARCH_STICKY_STACK_GAP_PX : 0);
+        iToolbarTop = iTopBase + iSummaryRailHeight + (iSummaryRailHeight ? SEARCH_SUMMARY_RAIL_GAP_PX : 0);
         ThemeDomRuntime.toggleClass([oWorkbenchDom], "searchWorkbenchDockCompactSticky", bCompactSticky);
         ThemeDomRuntime.toggleClass([oWorkbenchDom], "searchWorkbenchDockDesktopSticky", !bCompactSticky);
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-sticky-dock-top", iTopBase + "px");
-        SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-workbench-toolbar-stack-height", (iActionHeight + iToolbarHeight + ((iActionHeight && iToolbarHeight) ? SEARCH_STICKY_STACK_GAP_PX : 0)) + "px");
+        SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-workbench-toolbar-stack-height", iActionHeight + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-sticky-filter-top", iTopBase + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-sticky-action-top", iActionTop + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-sticky-toolbar-top", iToolbarTop + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-results-toolbar-sticky-top", iToolbarTop + "px");
-        SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-outer-toolbar-height", iToolbarHeight + "px");
+        SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-outer-toolbar-height", iResultsToolbarHeight + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-summary-rail-height", iSummaryRailHeight + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(oController, "--search-summary-rail-sticky-top", iTopBase + "px");
         SearchStickyDomRuntime.setSearchViewportCssVar(

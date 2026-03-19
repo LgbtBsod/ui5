@@ -1,29 +1,9 @@
-.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderTitle,
-.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContent,
-.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageHeaderContentFlexBox,
-.chkApp .detailContent .sapUxAPObjectPageHeaderDetails,
-.chkApp .detailContent .sapUxAPObjectPageHeaderDetailsDesign-Light,
-.chkApp .detailContent [id$="detailObjectPage"] .sapUxAPObjectPageSectionHeader {
-  display: none;
-  padding: 0;
-  margin: 0;
-  min-height: 0;
-  border: 0;
-  box-shadow: none;
-  background: transparent;
-  overflow: hidden;
-}
-
-.chkApp .detailContent .sapUxAPObjectPageSubSection {
-  scroll-margin-top: calc(var(--app-shell-offset) + 5.25rem);
-}
-
-.chkApp .detailContent .sapUxAPAnchorBar .sapMITBFilter,
-.chkApp .detailContent .sapUxAPAnchorBar .sapMITBTextOnly .sapMITBText {
+.chkApp .detailControlToolbarStack .sapMITBFilter,
+.chkApp .detailControlToolbarStack .sapMITBTextOnly .sapMITBText {
   color: var(--text-subtle);
 }
 
-.chkApp .detailContent .sapUxAPAnchorBar .sapMITBSelected .sapMITBText {
+.chkApp .detailControlToolbarStack .sapMITBSelected .sapMITBText {
   color: var(--text-main);
 }
 

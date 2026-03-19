@@ -152,7 +152,7 @@ def read_runtime_state(page) -> dict[str, Any]:
           const appView = core.byId('checklist_app_comp---app');
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-          const detailView = core.byId('checklist_app_comp---app--detailPaneHost')
+          const detailView = core.byId('checklist_app_comp---detailTargetPage')
             || all.find((item) => item
               && item.isA
               && item.isA('sap.ui.core.mvc.View')
@@ -255,7 +255,7 @@ def set_required_create_fields(page, suffix: str) -> None:
           const core = sap.ui.getCore();
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-          const detail = core.byId('checklist_app_comp---app--detailPaneHost')
+          const detail = core.byId('checklist_app_comp---detailTargetPage')
             || all.find((item) => item
               && item.isA
               && item.isA('sap.ui.core.mvc.View')
@@ -299,7 +299,7 @@ def set_equipment_dirty(page, next_value: str, touch_autosave: bool) -> None:
           const appView = core.byId('checklist_app_comp---app');
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-          const detail = core.byId('checklist_app_comp---app--detailPaneHost')
+          const detail = core.byId('checklist_app_comp---detailTargetPage')
             || all.find((item) => item
               && item.isA
               && item.isA('sap.ui.core.mvc.View')
@@ -395,7 +395,7 @@ def wait_for_mode(page, mode: str, lock_state: str | None = None) -> None:
           const core = sap.ui.getCore();
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-          const view = core.byId('checklist_app_comp---app--detailPaneHost')
+          const view = core.byId('checklist_app_comp---detailTargetPage')
             || all.find((item) => item
               && item.isA
               && item.isA('sap.ui.core.mvc.View')
@@ -642,7 +642,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                   const core = sap.ui.getCore();
                   const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
                   const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                  const view = core.byId('checklist_app_comp---detailTargetPage')
                     || all.find((item) => item
                       && item.isA
                       && item.isA('sap.ui.core.mvc.View')
@@ -700,7 +700,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                   const core = sap.ui.getCore();
                   const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
                   const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                  const view = core.byId('checklist_app_comp---detailTargetPage')
                     || all.find((item) => item
                       && item.isA
                       && item.isA('sap.ui.core.mvc.View')
@@ -751,7 +751,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                   const core = sap.ui.getCore();
                   const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
                   const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                  const view = core.byId('checklist_app_comp---detailTargetPage')
                     || all.find((item) => item
                       && item.isA
                       && item.isA('sap.ui.core.mvc.View')
@@ -877,7 +877,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                   const core = sap.ui.getCore();
                   const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
                   const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-                  const view = core.byId('checklist_app_comp---app--detailPaneHost')
+                  const view = core.byId('checklist_app_comp---detailTargetPage')
                     || all.find((item) => item
                       && item.isA
                       && item.isA('sap.ui.core.mvc.View')

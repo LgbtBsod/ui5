@@ -326,10 +326,6 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
   word-break: break-word;
 }
 
-.chkApp .chkSkin .detailContent .sapUxAPObjectPageHeaderTitle,
-.chkApp .chkSkin .detailContent .sapUxAPObjectPageHeaderContent,
-.chkApp .chkSkin .detailContent .sapUxAPObjectPageSectionContainer,
-.chkApp .chkSkin .detailContent .sapUxAPBlockContainer,
 .chkApp .chkSkin .detailGridTable .sapUiTableCnt,
 .chkApp .chkSkin .detailGridTable .sapUiTableCtrlScr,
 .chkApp .chkSkin .detailGridTable .sapUiTableColHdrCnt,

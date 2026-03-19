@@ -81,11 +81,6 @@ sap.ui.define([
             oHashChanger.replaceHash(sTargetHash.replace(/^#\/?/, ""));
             return true;
         }
-        if (typeof window !== "undefined" && window.location) {
-            ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
-            window.location.hash = sTargetHash;
-            return true;
-        }
         return false;
     }
 
@@ -106,7 +101,6 @@ sap.ui.define([
         var oComponent = mContext && mContext.component;
         var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
         var oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
-        var sCurrentHash;
         var sTargetHash;
         if (!oIntent) {
             return false;
@@ -127,16 +121,7 @@ sap.ui.define([
             oHashChanger.replaceHash(sTargetHash.replace(/^#\/?/, ""));
             return true;
         }
-        if (typeof window === "undefined" || !window.location) {
-            return false;
-        }
-        sCurrentHash = String(window.location.hash || "");
-        if (sCurrentHash === sTargetHash) {
-            return true;
-        }
-        ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
-        window.location.hash = sTargetHash;
-        return true;
+        return false;
     }
 
     var mHandlers = {

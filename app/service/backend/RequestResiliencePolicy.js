@@ -33,7 +33,8 @@ sap.ui.define([], function () {
     }
 
     function normalizeHeaders(oError) {
-        return oError && oError.responseHeaders && typeof oError.responseHeaders === "object" ? oError.responseHeaders : {};
+        var mHeaders = oError && oError["responseHeaders"];
+        return mHeaders && typeof mHeaders === "object" ? mHeaders : {};
     }
 
     function isCsrfError(oError) {

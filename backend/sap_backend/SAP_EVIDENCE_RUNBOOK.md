@@ -40,6 +40,21 @@ Before the live session starts, confirm:
 
 If any pre-flight item is missing, do not start evidence capture.
 
+## Local Baseline Before SAP Session
+
+- Run `python scripts/interaction-smoke.py http://127.0.0.1:8080/index.html` against the local static host before the live SAP session.
+- Accept only these local result classes:
+  - `PASS_LOCAL_BASELINE`: local UI/runtime contract is healthy.
+  - `BLOCKED_BACKEND`: local UI/runtime contract is healthy, but SAP metadata is unavailable on static localhost.
+  - `FAIL_UI_CONTRACT`: stop the release candidate immediately and fix the repo before collecting SAP evidence.
+- Do not use the local baseline as a substitute for SAP evidence; it is only a pre-flight proof that the UI shell and route contract are not already broken before entering FLP/Gateway validation.
+
+## SAP Result Classes
+
+- `PASS_SAP_EVIDENCE`: SAP metadata/data, route flow, and required evidence artifacts succeeded.
+- `BLOCKED_SAP_ENV`: SAP contour is unavailable or incomplete; environment, authorization, or landscape setup blocked proof collection.
+- `FAIL_PRODUCT_CONTRACT`: the product/runtime contract failed under SAP-backed execution and release evidence must stop.
+
 ## Recommended Execution Order
 
 1. `EV-006` FLP launch

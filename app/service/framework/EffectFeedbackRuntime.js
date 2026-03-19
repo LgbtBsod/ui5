@@ -62,10 +62,6 @@ sap.ui.define([
                 oHashChanger.replaceHash(String(sUrl || "").replace(/^\/?/, ""));
                 return;
             }
-            if (typeof window !== "undefined" && window.location) {
-                window.location.hash = sUrl ? "#/" + String(sUrl || "").replace(/^\/+/, "") : "";
-                return;
-            }
         }
         if (oRouter && oRouter.navTo) {
             oRouter.navTo(oEffect.route, oEffect.params || {}, !!oEffect.replace);

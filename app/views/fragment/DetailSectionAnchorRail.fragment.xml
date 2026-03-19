@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <HBox class="detailSectionAnchorRail" renderType="Bare" wrap="Wrap" alignItems="Center">
+    <HBox class="detailSectionAnchorRail detailAnchorBarHost" renderType="Bare" wrap="Wrap" alignItems="Center">
         <customData>
             <core:CustomData key="role" value="navigation" writeToDom="true"/>
             <core:CustomData key="aria-label" value="{i18n>sectionNavAriaLabel}" writeToDom="true"/>

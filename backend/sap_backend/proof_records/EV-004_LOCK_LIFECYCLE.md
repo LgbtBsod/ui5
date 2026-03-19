@@ -41,6 +41,10 @@
   - normal release trace
   - timeout or takeover trace
   - browser captures for owner A and owner B
+- SAP result classes:
+  - `PASS_SAP_EVIDENCE`
+  - `BLOCKED_SAP_ENV`
+  - `FAIL_PRODUCT_CONTRACT`
 
 ## Collected Artifacts
 
@@ -64,6 +68,6 @@
 
 - Expected result: lock lifecycle is controlled, reproducible, and leaves no orphaned ownership
 - Actual result: TO_BE_FILLED
-- Pass / fail: TO_BE_FILLED
+- Pass / fail: choose one of `PASS_SAP_EVIDENCE`, `BLOCKED_SAP_ENV`, `FAIL_PRODUCT_CONTRACT`
 - Residual risks: TO_BE_FILLED
 - Follow-up action: TO_BE_FILLED

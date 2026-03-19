@@ -13,10 +13,13 @@
         fitContainer="true"
         width="100%">
         <customData>
-            <core:CustomData key="role" value="application" writeToDom="true"/>
             <core:CustomData key="aria-label" value="{i18n>appRootAriaLabel}" writeToDom="true"/>
         </customData>
-        <VBox class="appContent appShellHeaderHost" renderType="Bare">
+        <Link
+            text="{i18n>skipToMainContent}"
+            press=".onSkipToMainContent"
+            class="skipLink skipToMain"/>
+        <VBox id="appShellHeaderHost" class="appContent appShellHeaderHost" renderType="Bare">
             <customData>
                 <core:CustomData key="role" value="banner" writeToDom="true"/>
             </customData>
@@ -81,7 +84,7 @@
                 press=".onCopyFeedbackCorrelationId"/>
         </HBox>
 
-        <VBox renderType="Bare" fitContainer="true">
+        <VBox id="mainContentHost" renderType="Bare" fitContainer="true">
             <customData>
                 <core:CustomData key="role" value="main" writeToDom="true"/>
                 <core:CustomData key="aria-label" value="{i18n>mainContentAriaLabel}" writeToDom="true"/>

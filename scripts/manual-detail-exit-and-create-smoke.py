@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parent.parent
 ARTIFACT_DIR = ROOT / "docs" / "artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 BASE_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html?sap-ui-xx-componentPreload=off&smoke=manual"
+SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
+DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
 def wait_for_app(page):
     page.wait_for_load_state("domcontentloaded")
     page.wait_for_function(
@@ -23,7 +25,7 @@ def wait_for_app(page):
         () => {
           if (typeof sap === "undefined" || !sap.ui || !sap.ui.getCore) { return false; }
           const core = sap.ui.getCore();
-          return !!core.byId("checklist_app_comp---app--mainFcl") && !!core.byId("checklist_app_comp---app--searchPaneHost");
+          return !!core.byId("checklist_app_comp---app--mainFcl") && !!core.byId("checklist_app_comp---searchTargetPage");
         }
         """,
         timeout=90000,
@@ -73,7 +75,7 @@ def state_dump(page):
           const core = sap.ui.getCore();
           const app = core.byId("checklist_app_comp---app");
           const state = app && app.getModel && app.getModel("state");
-          const selected = core.byId("checklist_app_comp---app--detailPaneView")?.getModel?.("selected");
+          const selected = core.byId("checklist_app_comp---detailTargetPage")?.getModel?.("selected");
           return {
             hash: String(window.location.hash || ""),
             route: String(state?.getProperty("/currentRouteName") || ""),
@@ -97,7 +99,7 @@ def click_edit_switch(page, desired_state: bool):
     page.evaluate(
         """
         (desiredState) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneView');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller.onToggleEdit !== 'function') {
             throw new Error('detail controller toggle handler unavailable');
@@ -117,7 +119,7 @@ def invoke_detail_handler(page, method_name):
     page.evaluate(
         """
         (methodName) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneView');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller[methodName] !== 'function') {
             throw new Error(methodName + ' unavailable');
@@ -171,7 +173,7 @@ def main():
         page.evaluate(
             """
             () => {
-              const selected = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneView').getModel('selected');
+              const selected = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage').getModel('selected');
               selected.setProperty('/root/equipment', 'EQ-CREATE-GUARD');
               sap.ui.getCore().byId('checklist_app_comp---app').getModel('state').setProperty('/isDirty', true);
             }

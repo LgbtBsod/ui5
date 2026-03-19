@@ -1,8 +1,7 @@
 sap.ui.define([
     "sap/ui/test/Opa5",
-    "sap/ui/test/matchers/PropertyStrictEquals",
-    "sap/ui/core/routing/HashChanger"
-], function (Opa5, PropertyStrictEquals, HashChanger) {
+    "sap/ui/test/matchers/PropertyStrictEquals"
+], function (Opa5, PropertyStrictEquals) {
     "use strict";
 
     Opa5.createPageObjects({
@@ -20,15 +19,25 @@ sap.ui.define([
                 },
                 iNavigateToDetailRoute: function (sKey) {
                     return this.waitFor({
+                        id: "mainFcl",
                         success: function () {
-                            HashChanger.getInstance().setHash("checklist/" + sKey);
+                            var oComponent = Opa5.getAppComponent();
+                            var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
+                            if (oRouter && typeof oRouter.navTo === "function") {
+                                oRouter.navTo("detail", { id: sKey });
+                            }
                         }
                     });
                 },
                 iNavigateBackToSearchRoute: function () {
                     return this.waitFor({
+                        id: "mainFcl",
                         success: function () {
-                            HashChanger.getInstance().setHash("");
+                            var oComponent = Opa5.getAppComponent();
+                            var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
+                            if (oRouter && typeof oRouter.navTo === "function") {
+                                oRouter.navTo("search", {}, true);
+                            }
                         }
                     });
                 }
@@ -48,17 +57,22 @@ sap.ui.define([
                 },
                 iShouldExposeStickySearchAndDetailSemantics: function () {
                     return this.waitFor({
-                        controlType: "sap.ui.core.Control",
-                        success: function () {
-                            var oSearchSummary = document.querySelector("[id$='searchResultsSummaryRail']");
-                            var oSearchActions = document.querySelector("[id$='searchResultsActionRail']");
-                            var oDetailStatus = document.querySelector(".detailControlRowTop");
-                            var oDetailActions = document.querySelector(".detailControlRowActions");
-
-                            Opa5.assert.ok(!oSearchSummary || oSearchSummary.getAttribute("role") === "status", "Search summary rail exposes status semantics");
-                            Opa5.assert.ok(!oSearchActions || oSearchActions.getAttribute("role") === "region", "Search action rail exposes region semantics");
-                            Opa5.assert.ok(!oDetailStatus || oDetailStatus.getAttribute("role") === "status", "Detail status rail exposes status semantics");
-                            Opa5.assert.ok(!oDetailActions || oDetailActions.getAttribute("role") === "region", "Detail action rail exposes region semantics");
+                        id: "searchResultsSummaryRail",
+                        success: function (oSearchSummary) {
+                            var oSummaryDom = oSearchSummary && oSearchSummary.getDomRef && oSearchSummary.getDomRef();
+                            Opa5.assert.ok(!oSummaryDom || oSummaryDom.getAttribute("role") === "status", "Search summary rail exposes status semantics");
+                        }
+                    }).and.waitFor({
+                        id: "searchResultsActionRail",
+                        success: function (oSearchActions) {
+                            var oActionsDom = oSearchActions && oSearchActions.getDomRef && oSearchActions.getDomRef();
+                            Opa5.assert.ok(!oActionsDom || oActionsDom.getAttribute("role") === "region", "Search action rail exposes region semantics");
+                        }
+                    }).and.waitFor({
+                        id: "detailSectionAnchorRail",
+                        success: function (oDetailAnchorRail) {
+                            var oAnchorDom = oDetailAnchorRail && oDetailAnchorRail.getDomRef && oDetailAnchorRail.getDomRef();
+                            Opa5.assert.ok(!oAnchorDom || oAnchorDom.getAttribute("role") === "navigation", "Detail anchor rail exposes navigation semantics");
                         }
                     });
                 },

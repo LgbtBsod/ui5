@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Runtime UI audit for high-value user flows with network capture."""
+"""Runtime UI audit for SAP-backed high-value user flows with network capture.
+
+Result classes:
+- PASS_SAP_EVIDENCE: SAP metadata/data and runtime flow succeeded
+- BLOCKED_SAP_ENV: SAP contour is unavailable or incomplete
+- FAIL_PRODUCT_CONTRACT: runtime/product flow regressed under SAP-backed execution
+"""
 
 from __future__ import annotations
 
@@ -10,11 +16,17 @@ from pathlib import Path
 from typing import Any
 
 from playwright.sync_api import sync_playwright
+from browser_route_bootstrap import navigate_to_detail, wait_for_app_ready
 
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 SERVICE_ROOT = "http://127.0.0.1:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV"
 REPORT_PATH = Path("docs/ui-runtime-audit-latest.json")
+SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
+DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
+RESULT_PASS = "PASS_SAP_EVIDENCE"
+RESULT_BLOCKED = "BLOCKED_SAP_ENV"
+RESULT_FAIL = "FAIL_PRODUCT_CONTRACT"
 
 
 def fetch_existing_root_id() -> str:
@@ -54,13 +66,14 @@ def geom_snapshot(page) -> dict[str, Any]:
 
 
 def wait_for_search_ready(page) -> None:
-    page.wait_for_selector("#checklist_app_comp---app--mainSplitter", timeout=30000)
+    wait_for_app_ready(page, timeout=90000)
+    page.wait_for_selector(f"#{SEARCH_VIEW_ID}", timeout=30000)
     page.get_by_text("Create", exact=True).wait_for(timeout=30000)
     page.wait_for_timeout(1200)
 
 
 def wait_for_detail_ready(page) -> None:
-    page.wait_for_selector("#checklist_app_comp---app--detailPaneHost--detailObjectPage", timeout=30000)
+    page.wait_for_selector(f"#{DETAIL_VIEW_ID}--detailObjectPage", timeout=30000)
     page.wait_for_timeout(1500)
 
 
@@ -77,7 +90,7 @@ def invoke_search(page, method_name: str) -> None:
         """
         (methodName) => {
           const core = sap.ui.getCore();
-          const view = core.byId('checklist_app_comp---app--searchPaneHost');
+          const view = core.byId('checklist_app_comp---searchTargetPage');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller[methodName] !== 'function') {
             throw new Error('Search controller method not found: ' + methodName);
@@ -94,7 +107,7 @@ def invoke_detail(page, method_name: str) -> None:
         """
         (methodName) => {
           const core = sap.ui.getCore();
-          const view = core.byId('checklist_app_comp---app--detailPaneHost');
+          const view = core.byId('checklist_app_comp---detailTargetPage');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller[methodName] !== 'function') {
             throw new Error('Detail controller method not found: ' + methodName);
@@ -144,7 +157,7 @@ def main() -> int:
         create_before_dnd = page.evaluate(
             """
             () => {
-              const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+              const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
               return ((view.getModel('selected').getProperty('/attachments') || []).length);
             }
             """
@@ -152,7 +165,7 @@ def main() -> int:
         page.evaluate(
             """
             () => {
-              const zone = document.querySelector('#checklist_app_comp---app--detailPaneHost--attachmentDropZone');
+              const zone = document.querySelector('#checklist_app_comp---detailTargetPage--attachmentDropZone');
               if (!zone) {
                 throw new Error('attachment drop zone not found in create mode');
               }
@@ -168,7 +181,7 @@ def main() -> int:
         create_after_dnd = page.evaluate(
             """
             () => {
-              const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+              const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
               const attachments = view.getModel('selected').getProperty('/attachments') || [];
               return {
                 count: attachments.length,
@@ -217,7 +230,7 @@ def main() -> int:
         tmp_file.write_text("ui audit attachment payload", encoding="utf-8")
 
         before_upload = len(current_requests(network, lambda item: "AttachmentSet" in item["url"] or "/$batch" in item["url"]))
-        page.locator("#checklist_app_comp---app--detailPaneHost--attachmentUploader-fu").set_input_files(str(tmp_file.resolve()))
+        page.locator("#checklist_app_comp---detailTargetPage--attachmentUploader-fu").set_input_files(str(tmp_file.resolve()))
         page.wait_for_timeout(2500)
         attachment_requests = current_requests(
             network[before_upload:],

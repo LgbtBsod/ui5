@@ -39,6 +39,10 @@
   - one deny trace with failed open or export
   - one SU53 capture for deny path
   - one browser capture showing the blocked request and response code
+- SAP result classes:
+  - `PASS_SAP_EVIDENCE`
+  - `BLOCKED_SAP_ENV`
+  - `FAIL_PRODUCT_CONTRACT`
 
 ## Collected Artifacts
 
@@ -62,6 +66,6 @@
 
 - Expected result: allow and deny paths are explicit, controlled, and trace-backed
 - Actual result: TO_BE_FILLED
-- Pass / fail: TO_BE_FILLED
+- Pass / fail: choose one of `PASS_SAP_EVIDENCE`, `BLOCKED_SAP_ENV`, `FAIL_PRODUCT_CONTRACT`
 - Residual risks: TO_BE_FILLED
 - Follow-up action: TO_BE_FILLED

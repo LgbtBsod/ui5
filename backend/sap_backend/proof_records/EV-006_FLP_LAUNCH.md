@@ -38,6 +38,10 @@
   - target mapping capture
   - runtime network capture proving SAP-hosted UI5 runtime
   - service registration / activation capture
+- SAP result classes:
+  - `PASS_SAP_EVIDENCE`
+  - `BLOCKED_SAP_ENV`
+  - `FAIL_PRODUCT_CONTRACT`
 
 ## Collected Artifacts
 
@@ -61,6 +65,6 @@
 
 - Expected result: app launches from FLP using approved semantic target and productive SAP runtime
 - Actual result: TO_BE_FILLED
-- Pass / fail: TO_BE_FILLED
+- Pass / fail: choose one of `PASS_SAP_EVIDENCE`, `BLOCKED_SAP_ENV`, `FAIL_PRODUCT_CONTRACT`
 - Residual risks: TO_BE_FILLED
 - Follow-up action: TO_BE_FILLED

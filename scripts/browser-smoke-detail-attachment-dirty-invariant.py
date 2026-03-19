@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Browser smoke: staged attachment flow must stay local until explicit save."""
+"""Browser smoke: staged attachment flow must stay local until explicit save.
+
+Result classes:
+- PASS_SAP_EVIDENCE: SAP metadata/data and runtime flow succeeded
+- BLOCKED_SAP_ENV: SAP contour is unavailable or incomplete
+- FAIL_PRODUCT_CONTRACT: runtime/product flow regressed under SAP-backed execution
+"""
 
 from __future__ import annotations
 
@@ -23,6 +29,11 @@ from browser_route_bootstrap import (
 UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 ROOT_ID = sys.argv[2] if len(sys.argv) > 2 else ""
 REPORT_PATH = Path("docs/artifacts/gateway-browser-attachment-dirty-report.json")
+DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
+ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsTargetPage"
+RESULT_PASS = "PASS_SAP_EVIDENCE"
+RESULT_BLOCKED = "BLOCKED_SAP_ENV"
+RESULT_FAIL = "FAIL_PRODUCT_CONTRACT"
 
 
 def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> None:
@@ -103,7 +114,7 @@ def detail_state(page) -> dict[str, Any]:
         page,
         """
         () => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
           const selected = view && view.getModel && view.getModel('selected');
           const state = view && view.getModel && view.getModel('state');
           const viewModel = view && view.getModel && view.getModel('view');
@@ -134,7 +145,7 @@ def detail_state(page) -> dict[str, Any]:
 
 def invoke_controller_method(page, view_id: str, method_name: str, *args: Any) -> Any:
     controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Detail"
-    if "analyticsPaneHost" in view_id:
+    if "analyticsTargetPage" in view_id:
         controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Analytics"
     return shared_invoke_controller_method(page, controller_name, method_name, *args)
 
@@ -144,7 +155,7 @@ def set_detail_edit_mode(page, state: bool) -> Any:
         page,
         """
         (targetState) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
           const controller = view && view.getController && view.getController();
           if (!controller || typeof controller.onToggleEdit !== 'function') {
             throw new Error('onToggleEdit is not available');
@@ -166,7 +177,7 @@ def enter_edit_or_report(page) -> tuple[bool, dict[str, Any]]:
         page.wait_for_function(
             """
             () => {
-              const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+              const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
               const state = view && view.getModel && view.getModel('state');
               return !!(state && state.getProperty && state.getProperty('/workflow/detail/editMode') === 'EDIT');
             }
@@ -188,7 +199,7 @@ def invoke_delete(page, attachment_key: str) -> None:
         page,
         """
         (attachmentKey) => new Promise((resolve, reject) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
           const controller = view && view.getController && view.getController();
           const selected = view && view.getModel && view.getModel('selected');
           const sessionModel = view && view.getModel && view.getModel('view');
@@ -234,7 +245,7 @@ def ensure_attachments_expanded(page) -> str:
         page,
         """
         () => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
           const controller = view && view.getController && view.getController();
           const viewModel = view && view.getModel && view.getModel('view');
           if (!controller || typeof controller.onToggleAttachmentsSection !== 'function') {
@@ -251,11 +262,11 @@ def ensure_attachments_expanded(page) -> str:
         """
         () => {
           const core = sap.ui.getCore();
-          const view = core.byId('checklist_app_comp---app--detailPaneHost');
+          const view = core.byId('checklist_app_comp---detailTargetPage');
           const viewModel = view && view.getModel && view.getModel('view');
           const expanded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsExpanded'));
           const historyLoaded = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentsLoaded'));
-          const uploader = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const uploader = core.byId('checklist_app_comp---detailTargetPage--attachmentUploader');
           const dom = uploader && uploader.getDomRef && uploader.getDomRef();
           const input = dom && dom.querySelector && dom.querySelector('input[type=file]');
           if (input && input.id) {
@@ -270,8 +281,8 @@ def ensure_attachments_expanded(page) -> str:
         """
         () => {
           const core = sap.ui.getCore();
-          const control = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
-          const state = core.byId('checklist_app_comp---app--detailPaneHost')?.getModel?.('state');
+          const control = core.byId('checklist_app_comp---detailTargetPage--attachmentUploader');
+          const state = core.byId('checklist_app_comp---detailTargetPage')?.getModel?.('state');
           const dom = control && control.getDomRef && control.getDomRef();
           const input = dom && dom.querySelector && dom.querySelector('input[type=file]');
           if (input && input.id) {
@@ -293,7 +304,7 @@ def ensure_attachments_expanded(page) -> str:
         """
         () => {
           const core = sap.ui.getCore();
-          const uploader = core.byId('checklist_app_comp---app--detailPaneHost--attachmentUploader');
+          const uploader = core.byId('checklist_app_comp---detailTargetPage--attachmentUploader');
           const dom = uploader && uploader.getDomRef && uploader.getDomRef();
           const input = dom && dom.querySelector && dom.querySelector('input[type=file]');
           return String((input && input.id) || window.__gatewaySmokeAttachmentInputId || '').trim();
@@ -379,7 +390,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 (prevCount) => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
                   const viewModel = view && view.getModel && view.getModel('view');
                   const selected = view && view.getModel && view.getModel('selected');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
@@ -396,7 +407,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 (prevCount) => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
                   const viewModel = view && view.getModel && view.getModel('view');
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
@@ -416,7 +427,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 () => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
                   const viewModel = view && view.getModel && view.getModel('view');
                   return !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy') === false);
                 }
@@ -462,7 +473,7 @@ def main() -> int:
             page.wait_for_function(
                 """
                 (payload) => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---app--detailPaneHost');
+                  const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
                   const selected = view && view.getModel && view.getModel('selected');
                   const viewModel = view && view.getModel && view.getModel('view');
                   const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
@@ -514,7 +525,7 @@ def main() -> int:
 
             current_step = "lock.release"
             before_release = len(matching_requests(network, "LockRelease"))
-            invoke_controller_method(page, "checklist_app_comp---app--detailPaneHost", "onCloseDetail")
+            invoke_controller_method(page, "checklist_app_comp---detailTargetPage", "onCloseDetail")
             wait_for_search_ready(page)
             page.wait_for_timeout(1200)
             after_release = len(matching_requests(network, "LockRelease"))

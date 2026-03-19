@@ -11,7 +11,6 @@ body.chkAppRoot,
 .chkAppRoot.sapUiBody,
 #ui5_container.chkAppRoot {
   height: 100%;
-  overflow: hidden;
 }
 
 .chkApp .appShell {
@@ -55,115 +54,20 @@ body.chkAppRoot,
   min-width: 0;
 }
 
-.chkApp .appRootFcl .sapFFCLColumn,
-.chkApp .appRootFcl .sapFFCLColumnContent {
-  height: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav,
-.chkApp .appRootFcl .sapFFCLColumnContent > .sapMNav > .sapMNavItem,
-.chkApp .appRootFcl .sapFFCLColumnContent .sapUiView {
+.chkApp .appRootFcl > div,
+.chkApp .appRootFcl > div > div,
+.chkApp .appRootFcl .sapMNav,
+.chkApp .appRootFcl .sapMNavItem,
+.chkApp .appRootFcl .sapUiView {
   height: 100%;
   min-height: 0;
   min-width: 0;
 }
 
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapMNav,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapMNav,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapMNav,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapMNav,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Narrow .sapUiView,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Medium .sapUiView,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-Wide .sapUiView,
-.chkApp .appRootFcl .sapFFCLColumn.sapUiContainer-ExtraWide .sapUiView {
-  width: 100%;
-  max-width: none;
-}
-
-.chkApp .appRootFcl .sapFFCLColumn {
-  overflow: hidden;
-}
-
 .chkApp .appRootFcl,
-.chkApp .appRootFcl .sapFFCLColumn,
-.chkApp .appRootFcl .sapFFCLColumnContent {
+.chkApp .appRootFcl > div,
+.chkApp .appRootFcl > div > div {
   background: transparent;
-}
-
-.chkApp .appRootFcl .sapFFCLArrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  background: transparent;
-}
-
-.chkApp .appRootFcl .sapFFCLArrow::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, transparent, rgba(var(--accent-rgb), 0.16) 14%, rgba(var(--accent-rgb), 0.16) 86%, transparent);
-  opacity: 0;
-  transition: opacity 180ms ease;
-  pointer-events: none;
-}
-
-.chkApp .appRootFcl .sapFFCLNavigationButton {
-  position: relative;
-  z-index: 1;
-  margin: 0 auto;
-}
-
-.chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
-  min-width: 1.55rem;
-  width: 1.55rem;
-  height: 2.25rem;
-  padding: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(241, 246, 255, 0.22)),
-    var(--surface-1);
-  box-shadow:
-    0 6px 18px rgba(58, 92, 138, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45);
-}
-
-.chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnIcon {
-  color: var(--accent);
-  font-size: 0.72rem;
-}
-
-.chkApp .appRootFcl .sapFFCLNavigationButton:hover .sapMBtnInner,
-.chkApp .appRootFcl .sapFFCLNavigationButton:focus .sapMBtnInner {
-  border-color: rgba(var(--accent-rgb), 0.32);
-  box-shadow:
-    0 8px 20px rgba(58, 92, 138, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.52);
-}
-
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLArrow,
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLNavigationButton,
-.chkApp .appLayoutDetailOnly .appRootFcl .sapFFCLNavigationButton,
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLNavigationButton {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLArrow,
-.chkApp .appLayoutDetailOnly .appRootFcl .sapFFCLArrow {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .chkApp .searchPaneCenterShell {
@@ -201,33 +105,6 @@ body.chkAppRoot,
   max-width: 100%;
   min-width: 0;
   margin-inline: auto;
-}
-
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin,
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
-  width: 100%;
-  max-width: 100%;
-  flex: 1 1 100%;
-}
-
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid,
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd {
-  width: 0;
-  max-width: 0;
-  min-width: 0;
-  flex: 0 0 0;
-  opacity: 0;
-  pointer-events: none;
-  overflow: hidden;
-  border: 0;
-}
-
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent,
-.chkApp .appLayoutSingle .appRootFcl .sapFFCLColumnEnd .sapFFCLColumnContent {
-  width: 0;
-  max-width: 0;
-  min-width: 0;
-  overflow: hidden;
 }
 
 .chkApp .appLayoutSplit #searchPaneHost,
@@ -306,19 +183,6 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-track {
     linear-gradient(180deg, rgba(126, 156, 208, 0.08), rgba(16, 28, 47, 0.12));
 }
 
-body.chkAppRoot.appDark .chkApp .appRootFcl .sapFFCLNavigationButton .sapMBtnInner {
-  border-color: rgba(118, 170, 255, 0.26);
-  background:
-    linear-gradient(180deg, rgba(29, 50, 82, 0.96), rgba(12, 26, 44, 0.94));
-  box-shadow:
-    0 8px 20px rgba(2, 8, 18, 0.3),
-    inset 0 1px 0 rgba(216, 231, 255, 0.12);
-}
-
-body.chkAppRoot.appDark .chkApp .appRootFcl .sapFFCLArrow::after {
-  background: linear-gradient(180deg, transparent, rgba(118, 170, 255, 0.2) 14%, rgba(118, 170, 255, 0.2) 86%, transparent);
-}
-
 body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   background:
     linear-gradient(180deg, rgba(212, 228, 255, 0.16), rgba(212, 228, 255, 0.02)),
@@ -359,27 +223,6 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   margin: 0.78rem auto 0;
 }
 
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
-  padding-left: 0.15rem;
-}
-
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent {
-  padding-right: 0.2rem;
-}
-
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin,
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
-  flex: 0 0 clamp(25.5rem, 32vw, 32rem);
-  width: clamp(25.5rem, 32vw, 32rem);
-  max-width: clamp(25.5rem, 32vw, 32rem);
-}
-
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnMid,
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnMid .sapFFCLColumnContent {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
 .chkApp .appLayoutSplit #searchPaneHost .appContent,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .appContent {
   padding-left: 0.58rem;
@@ -394,41 +237,9 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   max-width: 78rem;
 }
 
-/* Keep the FCL separator interactive in split mode. */
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLArrow {
-  opacity: 1;
-  pointer-events: auto;
-  width: 1rem;
-  min-width: 1rem;
-  cursor: col-resize;
-}
-
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLArrow::after {
-  opacity: 1;
-}
-
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLNavigationButton {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnSeparator {
-  width: 1px;
-  opacity: 1;
-}
-
-@media (max-width: 1180px) {
-  .chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin,
-  .chkApp .appLayoutSplit .appRootFcl .sapFFCLColumnBegin .sapFFCLColumnContent {
-    flex-basis: clamp(23rem, 38vw, 27rem);
-    width: clamp(23rem, 38vw, 27rem);
-    max-width: clamp(23rem, 38vw, 27rem);
-  }
-}
-
 /* Keep layout stable during drag-resize and FCL transitions. */
-html.chkAppRoot.chkResizing .chkApp .appRootFcl .sapFFCLColumn,
-html.chkAppRoot.chkResizing .chkApp .appRootFcl .sapFFCLColumnContent {
+html.chkAppRoot.chkResizing .chkApp .appRootFcl > div,
+html.chkAppRoot.chkResizing .chkApp .appRootFcl > div > div {
   transition-duration: 0ms;
   transition: none;
 }
@@ -517,30 +328,6 @@ html.chkAppRoot.chkResizing #ui5-bg {
   animation: _liveRegionFlash 600ms ease both;
 }
 
-/* Baseline global scrollbar contract inherited from monolith. */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(120, 175, 240, 0.22) transparent;
-}
-
-*::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(120, 175, 240, 0.22);
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 155, 228, 0.44);
-}
-
 .chkApp .kbdBadge,
 kbd.chkKbd {
   display: inline-flex;
@@ -584,7 +371,9 @@ kbd.chkKbd {
     margin-inline: 0.75rem;
   }
 
-  .chkApp .appLayoutSingle .appShellHeader {
+  .chkApp .appLayoutSingle .appShellHeader,
+  .chkApp .appLayoutSplit .appShellHeader,
+  .chkApp .appLayoutDetailOnly .appShellHeader {
     width: calc(100% - 1.5rem);
     max-width: calc(100% - 1.5rem);
     margin-inline: 0.75rem;

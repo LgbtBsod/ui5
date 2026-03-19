@@ -45,6 +45,40 @@
 - Build / transport references: TO_BE_FILLED
 - Related incident / defect IDs: TO_BE_FILLED
 
+## Local Desktop Acceptance Baseline
+
+- Repo-side validation scope:
+  - startup shell and skip link contract
+  - search single-column runtime
+  - `search -> detail -> fullscreen/analytics -> back`
+  - detail section jump and sticky rail behavior
+  - compact/cozy-safe shell offset and focus path
+- Expected local command path:
+  - start local runtime via `node scripts/start-local-server.js`
+  - run browser validation via `python scripts/interaction-smoke.py http://127.0.0.1:8080/index.html`
+- Acceptance rule:
+  - local result may be recorded as `PASS_LOCAL_BASELINE` only when the interaction smoke exits `0`
+  - SAP / FLP evidence remains mandatory and must still be collected in productive landscape
+  - SAP walkthrough result must be recorded as one of `PASS_SAP_EVIDENCE`, `BLOCKED_SAP_ENV`, `FAIL_PRODUCT_CONTRACT`
+- Local evidence fields:
+  - local smoke timestamp: 2026-03-19
+  - local browser/runtime: Playwright Chromium against `http://127.0.0.1:8080/index.html`
+  - local result class: `BLOCKED_BACKEND`
+  - local result summary: local smoke contract is repaired and reproducible; shell render, resize telemetry, shell-to-analytics route, and direct detail route all pass on static localhost, while backend-dependent detail data remains blocked by missing SAP `$metadata`
+  - local artifact path or console capture: `python scripts/interaction-smoke.py http://127.0.0.1:8080/index.html`
+  - local key checks passed:
+    - `checklist_app_comp---app--mainFcl` present
+    - `checklist_app_comp---app--appShellHeaderHost` present
+    - `checklist_app_comp---searchTargetPage--searchWorkbenchDock` present
+    - `checklist_app_comp---searchTargetPage--searchFilterCard` present
+    - `checklist_app_comp---searchTargetPage--searchResultsShell` present
+    - `checklist_app_comp---searchTargetPage--searchResultsToolbarHost` present
+    - shell analytics route opens and returns `routeName=analytics`
+    - direct detail route opens with `routeName=detail` and `layout=TwoColumnsMidExpanded`
+  - local blocker class:
+    - SAP OData metadata unavailable on static localhost: `/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$metadata` returned `502`
+    - SAP OData metadata unavailable on static localhost: `/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$metadata?sap-language=EN` returned `502`
+
 ## Starter Record
 
 - Prepared by repo: yes
@@ -58,7 +92,7 @@
 ## Result
 
 - Expected result: keyboard-only flow completes without focus trap, hidden action, or sticky overlap
-- Actual result: TO_BE_FILLED
-- Pass / fail: TO_BE_FILLED
-- Residual risks: TO_BE_FILLED
-- Follow-up action: TO_BE_FILLED
+- Actual result: repo-side UI contract is hardened to zero private UI5 selectors in runtime/CSS/OPA; local browser rendering and local interaction smoke now work against the current app contract and classify the environment honestly as `BLOCKED_BACKEND` when productive metadata is unavailable
+- Pass / fail: local pre-flight currently `BLOCKED_BACKEND`; final SAP walkthrough must end as one of `PASS_SAP_EVIDENCE`, `BLOCKED_SAP_ENV`, `FAIL_PRODUCT_CONTRACT`
+- Residual risks: local static runtime still cannot prove end-to-end detail/search accessibility, lock, and personalization flows because OData metadata is unavailable outside SAP-backed runtime
+- Follow-up action: run the same EV-010 checklist on SAP / FLP runtime and update this record with final artifact paths and PASS/FAIL status

@@ -25,8 +25,6 @@ sap.ui.define([
         var oViewDom = oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
         var oTarget = oEvent && oEvent.target;
         var oActive;
-        var sHash = typeof window !== "undefined" ? String(window.location.hash || "") : "";
-        var bSearchRoute = sHash === "" || sHash === "#" || sHash.indexOf("/search") >= 0;
         var bViewAttached = !!(oViewDom && typeof document !== "undefined" && document.body && document.body.contains(oViewDom));
         if (!bViewAttached) {
             return false;
@@ -38,7 +36,7 @@ sap.ui.define([
         if (oActive && oViewDom.contains(oActive)) {
             return true;
         }
-        return bSearchRoute;
+        return false;
     }
 
     function resolveShortcutAction(oEvent) {

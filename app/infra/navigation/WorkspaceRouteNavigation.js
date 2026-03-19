@@ -133,10 +133,6 @@ sap.ui.define([
             oHashChanger.replaceHash("");
             return;
         }
-        if (typeof window !== "undefined" && window.location) {
-            window.location.hash = "";
-            return;
-        }
     }
 
     function navigateToDetail(oController, sRootId, sLayout) {

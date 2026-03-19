@@ -2,10 +2,10 @@ const fs = require('fs');
 
 async function runFeedbackSmoke() {
   const files = [
-    'service/framework/FeedbackPolicy.js',
-    'service/framework/EffectApplier.js',
-    'service/framework/EffectUiHandlers.js',
-    'service/framework/EffectActionRouting.js'
+    'app/service/framework/FeedbackPolicy.js',
+    'app/service/framework/EffectApplier.js',
+    'app/service/framework/EffectFeedbackRuntime.js',
+    'app/service/framework/EffectActionRouting.js'
   ];
   return files.map((file) => ({ name: `feedback:${file}`, ok: fs.existsSync(file), detail: 'feedback/effect runtime contract file exists' }));
 }

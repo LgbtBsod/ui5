@@ -42,18 +42,6 @@
   gap: 0.6rem;
 }
 
-.chkApp .detailContent .sapUxAPObjectPageSubSection {
-  scroll-margin-top: calc(var(--app-shell-offset) + 5.5rem);
-}
-
-.chkApp .detailContent .sapUxAPObjectPageDynamicHeaderTitleWrapper {
-  min-height: 0;
-  height: 0;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-}
-
 .chkApp .searchAnalyticsRailGrid {
   align-items: start;
 }

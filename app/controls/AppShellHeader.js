@@ -1,6 +1,5 @@
 sap.ui.define([
     "sap/ui/core/Control",
-    "sap/ui/core/Icon",
     "sap/m/OverflowToolbar",
     "sap/m/OverflowToolbarLayoutData",
     "sap/m/VBox",
@@ -10,7 +9,6 @@ sap.ui.define([
     "sap/m/Button"
 ], function (
     Control,
-    Icon,
     OverflowToolbar,
     OverflowToolbarLayoutData,
     VBox,
@@ -160,24 +158,6 @@ sap.ui.define([
 
             syncHeaderContent(this);
         },
-
-        onBeforeRendering: function () {
-            syncHeaderContent(this);
-        },
-
-        onAfterRendering: function () {
-            syncHeaderContent(this);
-        },
-
-        setProperty: function (sPropertyName, vValue, bSuppressInvalidate) {
-            Control.prototype.setProperty.call(this, sPropertyName, vValue, true);
-            syncHeaderContent(this);
-            if (!bSuppressInvalidate) {
-                this.invalidate();
-            }
-            return this;
-        },
-
 
         renderer: {
             apiVersion: 2,

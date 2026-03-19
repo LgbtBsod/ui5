@@ -39,6 +39,10 @@
   - one successful update with valid `If-Match`
   - one rejected update with stale `If-Match`
   - one user-visible conflict handling capture
+- SAP result classes:
+  - `PASS_SAP_EVIDENCE`
+  - `BLOCKED_SAP_ENV`
+  - `FAIL_PRODUCT_CONTRACT`
 
 ## Collected Artifacts
 
@@ -62,6 +66,6 @@
 
 - Expected result: stale update fails in a controlled way and valid update succeeds
 - Actual result: TO_BE_FILLED
-- Pass / fail: TO_BE_FILLED
+- Pass / fail: choose one of `PASS_SAP_EVIDENCE`, `BLOCKED_SAP_ENV`, `FAIL_PRODUCT_CONTRACT`
 - Residual risks: TO_BE_FILLED
 - Follow-up action: TO_BE_FILLED
