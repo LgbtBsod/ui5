@@ -3,12 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
-], function (GatewayRequestRuntime, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, GatewayClient) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer"
+], function (GatewayRequestRuntime, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, GatewayClient, ODataKeyNormalizer) {
     "use strict";
 
     function normalizeRootKey(sRootId) {
-        return String(sRootId || "").replace(/-/g, "").toUpperCase();
+        return ODataKeyNormalizer.normalizeBinaryKey(sRootId);
     }
 
     function mapAttachmentResult(vData) {

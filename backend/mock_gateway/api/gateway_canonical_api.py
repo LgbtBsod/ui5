@@ -1917,16 +1917,30 @@ def lock_control(payload: dict, db: Session):
             code = str(exc)
             if code == "LOCK_MISSING":
                 return _lock_entity(False, "FREE", None, False, "FREE", code="LOCK_MISSING")
+            if code == "LOCK_NOT_OWNED_BY_SESSION":
+                active_lock = LockService._active_lock(db, root_uuid)
+                return _lock_entity(
+                    False,
+                    "LOCKED_BY_OTHER",
+                    LockService._lock_expires_at(active_lock),
+                    False,
+                    "FAILED",
+                    str(active_lock.user_id or "") if active_lock else "",
+                    str(active_lock.session_guid or "") if active_lock else "",
+                    "LOCK_NOT_OWNED_BY_SESSION",
+                )
             return _err(410, "LOCK_EXPIRED", "Lock expired")
     if action == "RELEASE":
         r = LockService.release(db, root_uuid, session)
         released = bool(r.get("released"))
         return _lock_entity(
             released,
-            str(r.get("reason_code") or "FREE"),
+            str(r.get("reason_code") or ("FREE" if released else "LOCKED_BY_OTHER")),
             None,
             False,
             str(r.get("action") or ("RELEASED" if released else "FAILED")),
+            str(r.get("owner") or ""),
+            str(r.get("owner_session") or ""),
             code=str(r.get("code") or ""),
         )
     return _err(400, "VALIDATION_ERROR", "Unsupported Action")

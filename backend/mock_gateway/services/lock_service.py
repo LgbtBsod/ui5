@@ -211,6 +211,18 @@ class LockService:
         )
 
         if not lock:
+            active_lock = LockService._active_lock(db, object_uuid)
+            if active_lock:
+                return {
+                    "released": False,
+                    "save_status": "N",
+                    "ok": False,
+                    "code": "LOCK_NOT_OWNED_BY_SESSION",
+                    "reason_code": "LOCKED_BY_OTHER",
+                    "action": "FAILED",
+                    "owner": str(active_lock.user_id or "").strip(),
+                    "owner_session": str(active_lock.session_guid or "").strip(),
+                }
             return {"released": False, "save_status": "N", "ok": False, "code": "LOCK_MISSING", "reason_code": "FREE", "action": "FAILED"}
 
         s_save_status = "N"
@@ -226,7 +238,16 @@ class LockService:
         lock.is_killed = True
         db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
         db.commit()
-        return {"released": True, "save_status": s_save_status, "ok": True, "code": "LOCK_OK", "reason_code": "FREE", "action": "RELEASED"}
+        return {
+            "released": True,
+            "save_status": s_save_status,
+            "ok": True,
+            "code": "LOCK_OK",
+            "reason_code": "FREE",
+            "action": "RELEASED",
+            "owner": str(lock.user_id or "").strip(),
+            "owner_session": str(lock.session_guid or "").strip(),
+        }
 
     @staticmethod
     def cleanup(db: Session) -> int:

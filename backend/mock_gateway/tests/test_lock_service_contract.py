@@ -91,6 +91,21 @@ def test_release_try_save_reports_save_status(monkeypatch):
         assert result["action"] == "RELEASED"
 
 
+def test_release_rejects_non_owner_session():
+    with SessionLocal() as db:
+        root_id = str(uuid.uuid4())
+        _create_root(db, root_id)
+        LockService.acquire(db, root_id, "S1", "USER1")
+
+        result = LockService.release(db, root_id, "S2")
+
+        assert result["released"] is False
+        assert result["code"] == "LOCK_NOT_OWNED_BY_SESSION"
+        assert result["reason_code"] == "LOCKED_BY_OTHER"
+        assert result["action"] == "FAILED"
+        assert result["owner_session"] == "S1"
+
+
 def test_killed_lock_retention_exceeds_ttl():
     assert LOCK_KILLED_RETENTION > LOCK_TTL
 

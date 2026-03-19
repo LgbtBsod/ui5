@@ -78,6 +78,7 @@ sap.ui.define([
         var oRepo = mCtx && mCtx.repo;
         var oDelta;
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
+        var aSerializedAttachments = [];
 
         if (CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: "CREATE_DRAFT_PENDING" }, []));
@@ -112,9 +113,10 @@ sap.ui.define([
         var aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
 
         return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, sRootId).then(function (aStagedPayload) {
+            aSerializedAttachments = Array.isArray(aStagedPayload) ? aStagedPayload : [];
             return Promise.resolve(oRepo.autosaveChecklist(DetailRuntimePayload.saveRequest({
                 rootId: sRootId,
-                delta: DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aStagedPayload),
+                delta: DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aSerializedAttachments),
                 sessionGuid: sSessionGuid,
                 attachments: []
             })));
@@ -134,7 +136,7 @@ sap.ui.define([
                 savedSnapshot: oSavedSnapshot,
                 baseSnapshot: oBaseSnapshot,
                 ctx: mCtx,
-                hasStagedPayload: aStagedPayload.length > 0
+                hasStagedPayload: aSerializedAttachments.length > 0
             }).then(function (oAttachmentSync) {
                 return Result.ok({ autosavedAt: sAt }, [
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),

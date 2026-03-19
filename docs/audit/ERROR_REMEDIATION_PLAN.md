@@ -2,8 +2,7 @@
 
 ## P1
 
-- Remove route and layout behavior that bypasses standard UI5 navigation contracts.
-- Keep `FlexibleColumnLayout` under `layout` state control instead of private DOM/CSS patching.
+- Lock release on leave now stays inside the OData/Gateway stack and forwards `async` mode down to the function import request path instead of introducing a parallel REST transport.
 - Maintain product smoke checks against the current `app/` runtime surface.
 
 ## P2
@@ -13,6 +12,8 @@
 - Keep accessibility landmarks, skip-link behavior, and shell metrics aligned with SAP/Fiori semantics.
 - Analytics controller graph flattened into a single controller runtime; obsolete year/drilldown/refresh wrappers removed from the production path.
 - `DetailFacade` and `DetailService` now share one entry-adapter runtime for enter-edit/discard/use-case execution without changing their separate public entrypoints.
+- Checks and barriers expanded-row dialogs now use one shared fragment template instead of duplicated dialog markup.
+- OData binary root-key normalization is now centralized instead of being reimplemented in multiple adapter paths.
 
 ## P3
 

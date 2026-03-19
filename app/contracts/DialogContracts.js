@@ -11,8 +11,8 @@ sap.ui.define([], function () {
 
     var FRAGMENTS = Object.freeze({
         locationValueHelp: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.LocationValueHelpDialog",
-        checksExpanded: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ChecksExpandedDialog",
-        barriersExpanded: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.BarriersExpandedDialog",
+        checksExpanded: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ExpandedRowsDialog",
+        barriersExpanded: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ExpandedRowsDialog",
         analyticsReport: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.AnalyticsReportDialog",
         analyticsYearPicker: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.AnalyticsYearPickerPopover"
     });

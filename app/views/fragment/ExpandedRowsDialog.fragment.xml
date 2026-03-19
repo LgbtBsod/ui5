@@ -1,32 +1,41 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <Dialog
+        id="expandedRowsDialog"
+        binding="{view>/activeExpandedDialog}"
         class="glassDialog governedDialog expandedRowsDialog"
-        id="barriersExpandedDialog"
-        title="{i18n>barriersExpandedTitle}"
+        title="{path:'view>titleKey', formatter:'.formatI18nByKey'}"
         contentWidth="72rem"
         contentHeight="30rem"
         draggable="true"
         resizable="true"
         stretchOnPhone="true"
-        initialFocus="barriersExpandedCloseButton">
+        initialFocus="expandedRowsCloseButton">
         <customData>
-            <core:CustomData key="dialogKind" value="barrier"/>
+            <core:CustomData key="dialogKind" value="{view>kind}"/>
         </customData>
         <content>
             <VBox
-                binding="{view>/detailExpandedDialogs/barriers/tableSpec}"
+                binding="{view>tableSpec}"
                 class="expandedDialogContent dialogContentShell governedDialogContent tableDialogBody workflowBusyScope workflowBusyScopeDialog"
                 renderType="Bare">
-                <VBox class="workflowBusyOverlayShell workflowBusyOverlayShellDialog" renderType="Bare" visible="{view>/barriersExpandedBusy}">
+                <VBox
+                    class="workflowBusyOverlayShell workflowBusyOverlayShellDialog"
+                    renderType="Bare"
+                    visible="{parts:[{path:'view>/activeExpandedDialog/kind'},{path:'view>/checksExpandedBusy'},{path:'view>/barriersExpandedBusy'}], formatter:'.isExpandedDialogBusy'}">
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowBusyOverlay" type="XML"/>
                 </VBox>
                 <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecklistRowsTable" type="XML"/>
             </VBox>
         </content>
         <beginButton>
-            <Button id="barriersExpandedCloseButton" text="{i18n>closeButton}" icon="sap-icon://nav-back" press=".onCloseExpandedRows" class="expandedRowsCloseButton">
+            <Button
+                id="expandedRowsCloseButton"
+                text="{i18n>closeButton}"
+                icon="sap-icon://nav-back"
+                press=".onCloseExpandedRows"
+                class="expandedRowsCloseButton">
                 <customData>
-                    <core:CustomData key="dialogKind" value="barrier"/>
+                    <core:CustomData key="dialogKind" value="{view>kind}"/>
                 </customData>
             </Button>
         </beginButton>

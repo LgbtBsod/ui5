@@ -1,0 +1,28 @@
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime"
+], function (GatewayClientRequestRuntime) {
+    "use strict";
+
+    QUnit.module("framework/GatewayClientRequestRuntime");
+
+    QUnit.test("passes async flag to function import requests", function (assert) {
+        var done = assert.async();
+        var oModel = {
+            callFunction: function (_sPath, mOptions) {
+                assert.strictEqual(mOptions.async, false, "sync mode is forwarded to ODataModel.callFunction");
+                mOptions.success({ ok: true });
+            }
+        };
+
+        GatewayClientRequestRuntime.withDirectFunctionImportRequest(
+            oModel,
+            "LockRelease",
+            { RootId: "4711", SessionGuid: "SESSION-1" },
+            {},
+            { async: false }
+        ).promise.then(function () {
+            assert.ok(true, "request handle resolves");
+            done();
+        });
+    });
+});

@@ -91,6 +91,8 @@ sap.ui.define([
         var oConfig = DetailRowEntityConfig.get(sEntity);
         var sRowsPath = DetailRowBindingRuntime.resolveRowsPath(oConfig);
         var aRows = oUiState.get("selected", sRowsPath) || [];
+        var sExpandedDialogPath;
+        var oExpandedDialogState;
         var iRowIndex;
         if (sOp === "add") {
             oUiState.set("selected", sRowsPath, aRows.concat([createRow(aRows, oConfig)]));
@@ -105,7 +107,12 @@ sap.ui.define([
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "expand" || sOp === "collapse") {
+            sExpandedDialogPath = sEntity === "barrier"
+                ? "/detailExpandedDialogs/barriers"
+                : "/detailExpandedDialogs/checks";
+            oExpandedDialogState = oUiState.get("view", sExpandedDialogPath) || null;
             return Result.ok({ entity: sEntity, op: sOp }, [
+                Effects.modelPatch("view", "/activeExpandedDialog", oExpandedDialogState),
                 Effects.dialog(oConfig.dialogId, sOp === "expand" ? "open" : "close", {})
             ]);
         }

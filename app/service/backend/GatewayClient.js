@@ -164,7 +164,12 @@ sap.ui.define([
                 correlationId: oOptions.correlationId,
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectFunctionImportRequest(name, oPayload || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
+                    return withDirectFunctionImportRequest(
+                        name,
+                        oPayload || {},
+                        GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId),
+                        { async: oOptions.async }
+                    );
                 }
             });
         },

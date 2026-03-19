@@ -44,6 +44,7 @@ sap.ui.define([
     function createExpandedDialogState(oConfig) {
         return {
             kind: oConfig.kind,
+            titleKey: oConfig.kind === "barrier" ? "barriersExpandedTitle" : "checksExpandedTitle",
             tableSpec: {
                 kind: oConfig.kind,
                 rowsPath: oConfig.rowsPath,
@@ -97,6 +98,7 @@ sap.ui.define([
                 checks: createExpandedDialogState(oCheckConfig),
                 barriers: createExpandedDialogState(oBarrierConfig)
             },
+            activeExpandedDialog: createExpandedDialogState(oCheckConfig),
             accessState: DetailAccessViewState.createDefaultState(""),
             validationShown: false,
             validationMissing: {},

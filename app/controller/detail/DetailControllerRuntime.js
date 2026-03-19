@@ -91,6 +91,9 @@ sap.ui.define([
             isRuntimePhoneTableVisible: function (bPhone, bNarrow, aRows, bIgnoreNarrowViewport) {
                 return (!!bPhone || (!bIgnoreNarrowViewport && !!bNarrow)) && hasRows(aRows);
             },
+            isExpandedDialogBusy: function (sKind, bChecksBusy, bBarriersBusy) {
+                return String(sKind || "").trim() === "barrier" ? !!bBarriersBusy : !!bChecksBusy;
+            },
             formatDetailRowNumber: function (oRow, sKind) {
                 return DetailRowBindingRuntime.formatRowNumber(oRow, sKind);
             },

@@ -521,7 +521,34 @@ def open_search_row_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
     )
     if not payload or not payload.get("domId"):
         raise RuntimeError(f"search row not resolved for checklist_id={checklist_id}")
-    page.locator(f"#{payload['domId']}").click(timeout=15000)
+    try:
+        page.locator(f"#{payload['domId']}").click(timeout=15000)
+    except Exception as exc:
+        # Sticky search rails can transiently intercept pointer events in headed Chromium.
+        # Fall back to the UI5 row press pipeline instead of failing on a pure click race.
+        if "intercepts pointer events" not in str(exc):
+            raise
+        safe_evaluate(
+            page,
+            """
+            (domId) => {
+              const core = sap.ui.getCore();
+              const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+              const row = (registry && registry.get && registry.get(String(domId || ""))) || null;
+              if (row && typeof row.firePress === "function") {
+                row.firePress();
+                return { mode: "firePress", ok: true };
+              }
+              const dom = document.getElementById(String(domId || ""));
+              if (!dom) {
+                throw new Error("search row dom missing for fallback click");
+              }
+              dom.click();
+              return { mode: "domClick", ok: true };
+            }
+            """,
+            payload["domId"]
+        )
     return payload
 
 

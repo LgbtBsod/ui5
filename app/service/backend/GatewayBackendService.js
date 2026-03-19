@@ -25,8 +25,8 @@ sap.ui.define([
         readSet: function (entitySet, params) {
             return GatewayClient.readSet(entitySet, params || {});
         },
-        callFunctionImport: function (name, payload) {
-            return GatewayClient.callFunctionImport(name, payload || {});
+        callFunctionImport: function (name, payload, mOptions) {
+            return GatewayClient.callFunctionImport(name, payload || {}, mOptions || {});
         },
         postToPath: function (path, payload) {
             return GatewayClient.postToPath(path, payload || {});

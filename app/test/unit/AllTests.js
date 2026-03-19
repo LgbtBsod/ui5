@@ -23,7 +23,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/OpenDetailUseCase.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentNavigationGuardRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/LockLostUseCase.qunit",
-    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/CacheValidationUseCase.qunit"
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/CacheValidationUseCase.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/GatewayClientRequestRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ODataKeyNormalizer.qunit"
 ], function () {
     "use strict";
 });

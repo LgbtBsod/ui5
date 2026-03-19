@@ -172,7 +172,7 @@ sap.ui.define([
                         currentAttachments: aCurrentAttachments,
                         savedResult: oSaved,
                         currentChecklist: oCurrent,
-                        savedSnapshot: oSavedSnapshot,
+                        savedSnapshot: oInitialSavedSnapshot,
                         baseSnapshot: oSnapshot,
                         ctx: mCtx,
                         serverRootId: sServerRootId,

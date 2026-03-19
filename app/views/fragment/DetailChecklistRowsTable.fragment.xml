@@ -40,7 +40,7 @@
                     </t:template>
                 </t:Column>
                 <t:Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailRowActionsHeader" type="XML"/>
+                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                     <t:template>
                         <Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteExpandedRow" class="tableRowActionBtn tableRowActionBtnDanger">
                             <customData>
@@ -67,7 +67,7 @@
                 <Column><Text text="{path:'view>labelKeys/status', formatter:'.formatI18nByKey'}"/></Column>
                 <Column><Text text="{path:'view>labelKeys/comment', formatter:'.formatI18nByKey'}"/></Column>
                 <Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailRowActionsHeader" type="XML"/>
+                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                 </Column>
             </columns>
             <items>

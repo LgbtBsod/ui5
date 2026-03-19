@@ -14,19 +14,22 @@ sap.ui.define([
         return oController && oController.getOwnerComponent ? oController.getOwnerComponent() : null;
     }
 
-    function resolveTarget(oController) {
-        if (oController && typeof oController.getModel === "function") {
-            return oController;
+    function resolveDirectModelHost(oController) {
+        if (!oController || typeof oController.getModel !== "function") {
+            return null;
         }
-        return null;
+        if (typeof oController.getView === "function") {
+            return null;
+        }
+        return oController;
     }
 
     function resolveNamedModel(oController, sName, bOwnerFallback) {
         var oView = resolveView(oController);
-        var oTarget = resolveTarget(oController);
+        var oDirectHost = resolveDirectModelHost(oController);
         var oOwner = bOwnerFallback === false ? null : resolveOwner(oController);
         return (oView && oView.getModel && oView.getModel(sName))
-            || (oTarget && oTarget.getModel && oTarget.getModel(sName))
+            || (oDirectHost && oDirectHost.getModel && oDirectHost.getModel(sName))
             || (oOwner && oOwner.getModel && oOwner.getModel(sName))
             || null;
     }

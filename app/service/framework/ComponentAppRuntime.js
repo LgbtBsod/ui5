@@ -12,8 +12,8 @@ sap.ui.define([
 ], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayBackendService, StatePaths, WorkflowContracts) {
     "use strict";
 
-    function releaseLockWithGatewayBackend(oPayload) {
-        return GatewayBackendService.callFunctionImport("LockRelease", oPayload).then(function (oResult) {
+    function releaseLockWithGatewayBackend(oPayload, mOptions) {
+        return GatewayBackendService.callFunctionImport("LockRelease", oPayload, mOptions || {}).then(function (oResult) {
             var oData = oResult && oResult.d ? oResult.d : (oResult || {});
             return !!(oData && (oData.Ok || oData.Success || oData.ok || oData.success));
         }).catch(function () {
@@ -143,7 +143,7 @@ sap.ui.define([
         if (oComponent) {
             oComponent._bLeaveReleasePending = true;
         }
-        releaseLockWithGatewayBackend(oPayload).then(function (bReleased) {
+        releaseLockWithGatewayBackend(oPayload, { async: false }).then(function (bReleased) {
             if (!oComponent) {
                 return;
             }

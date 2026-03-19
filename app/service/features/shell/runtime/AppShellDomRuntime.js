@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime"
+], function (ThemeDomRuntime) {
     "use strict";
 
     function syncShellFlexItem(oController) {

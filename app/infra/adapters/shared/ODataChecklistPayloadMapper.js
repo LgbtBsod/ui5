@@ -1,8 +1,10 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer"
+], function (ODataKeyNormalizer) {
     "use strict";
 
     function normalizeRootKey(sRootId) {
-        return String(sRootId || "").trim();
+        return ODataKeyNormalizer.normalizeBinaryKey(sRootId);
     }
 
     function resolveServerRootId(oPayload, sFallbackRootId) {

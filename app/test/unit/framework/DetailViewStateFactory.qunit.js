@@ -44,5 +44,7 @@ sap.ui.define([
         assert.strictEqual(oState.detailExpandedDialogs.barriers.tableSpec.expanded, true, "barriers expanded spec is marked as expanded");
         assert.strictEqual(oState.detailExpandedDialogs.barriers.tableSpec.ignoreNarrowViewport, true, "barriers expanded spec ignores narrow viewport fallback");
         assert.strictEqual(oState.detailExpandedDialogs.barriers.tableSpec.desktopVisibleRowCount, 8, "expanded dialogs keep fixed desktop row count");
+        assert.strictEqual(oState.activeExpandedDialog.kind, "check", "default active expanded dialog is initialized");
+        assert.strictEqual(oState.activeExpandedDialog.titleKey, "checksExpandedTitle", "default active expanded dialog keeps title key");
     });
 });
