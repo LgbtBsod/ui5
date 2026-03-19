@@ -308,6 +308,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         assert 'Property Name="Uname"' not in metadata
         assert 'EntityType Name="SaveChangesResponse"' in metadata
         assert 'Property Name="code" Type="Edm.String"' in metadata
+        assert 'Property Name="reason_code" Type="Edm.String"' in metadata
         assert 'Property Name="lock_refreshed" Type="Edm.Boolean"' in metadata
         assert 'Property Name="lock_expires_at" Type="Edm.DateTime"' in metadata
         assert 'Property Name="server_now" Type="Edm.DateTime"' in metadata

@@ -17,6 +17,21 @@ def _as_utc(dt):
 
 class LockService:
     @staticmethod
+    def _lock_reason(code: str, success: bool) -> str:
+        normalized = str(code or "").strip().upper()
+        if normalized == "LOCK_OK":
+            return "OWNED_BY_YOU" if success else "FREE"
+        if normalized == "LOCK_NOT_OWNED_BY_SESSION":
+            return "LOCKED_BY_OTHER"
+        if normalized == "LOCK_MISSING":
+            return "FREE"
+        if normalized == "LOCK_EXPIRED":
+            return "EXPIRED"
+        if normalized == "LOCK_STOLEN":
+            return "KILLED"
+        return normalized or ("OWNED_BY_YOU" if success else "FAILED")
+
+    @staticmethod
     def _lock_expires_at(lock: LockEntry | None):
         last_refresh_at = _as_utc(lock.last_refresh_at) if lock and lock.last_refresh_at else None
         return last_refresh_at + LOCK_TTL if last_refresh_at else None
@@ -28,12 +43,13 @@ class LockService:
         return bool(lock_expires_at and lock_expires_at <= current_time)
 
     @staticmethod
-    def _lock_payload(success: bool, code: str, owner: str, owner_session: str, lock_expires, is_killed_flag: bool = False, lock_refreshed: bool = False, owner_session_match: bool | None = None) -> dict:
+    def _lock_payload(success: bool, code: str, owner: str, owner_session: str, lock_expires, is_killed_flag: bool = False, lock_refreshed: bool = False, owner_session_match: bool | None = None, action: str = "") -> dict:
         return {
             "ok": bool(success),
             "success": bool(success),
             "code": str(code or "").strip(),
-            "action": str(code or "").strip(),
+            "reason_code": LockService._lock_reason(code, bool(success)),
+            "action": str(action or code or "").strip(),
             "owner": str(owner or "").strip(),
             "owner_session": str(owner_session or "").strip(),
             "owner_session_match": owner_session_match,
@@ -99,7 +115,7 @@ class LockService:
             try:
                 lock = LockService._create_active_lock(db, object_uuid, session_guid, uname, current_time)
                 return LockService._with_server_state(
-                    LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(lock), False, True, True),
+                    LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(lock), False, True, True, "ACQUIRED"),
                     db,
                     object_uuid
                 )
@@ -115,7 +131,7 @@ class LockService:
             db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="REFRESHED"))
             db.commit()
             return LockService._with_server_state(
-                LockService._lock_payload(True, "LOCK_OK", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, True, True),
+                LockService._lock_payload(True, "LOCK_OK", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, True, True, "HEARTBEAT"),
                 db,
                 object_uuid
             )
@@ -136,13 +152,13 @@ class LockService:
             db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="STEAL_OWN_SESSION"))
             db.commit()
             return LockService._with_server_state(
-                LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(new_lock), True, True, True),
+                LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(new_lock), True, True, True, "ACQUIRED"),
                 db,
                 object_uuid
             )
 
         return LockService._with_server_state(
-            LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, False, False),
+            LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, False, False, "FAILED"),
             db,
             object_uuid
         )
@@ -154,12 +170,12 @@ class LockService:
             raise ValueError("LOCK_MISSING")
         if str(active_lock.session_guid or "").strip() != str(session_guid or "").strip():
             return LockService._with_server_state(
-                LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, False),
+                LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, False, "FAILED"),
                 db,
                 object_uuid
             )
         return LockService._with_server_state(
-            LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, True),
+            LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, True, "OWNED"),
             db,
             object_uuid
         )
@@ -177,7 +193,7 @@ class LockService:
         db.commit()
 
         return LockService._with_server_state(
-            LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, True, True),
+            LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, True, True, "HEARTBEAT"),
             db,
             object_uuid
         )
@@ -195,7 +211,7 @@ class LockService:
         )
 
         if not lock:
-            return {"released": False, "save_status": "N", "ok": False, "code": "LOCK_MISSING"}
+            return {"released": False, "save_status": "N", "ok": False, "code": "LOCK_MISSING", "reason_code": "FREE", "action": "FAILED"}
 
         s_save_status = "N"
         if try_save and isinstance(payload, dict):
@@ -210,7 +226,7 @@ class LockService:
         lock.is_killed = True
         db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
         db.commit()
-        return {"released": True, "save_status": s_save_status, "ok": True, "code": "LOCK_OK"}
+        return {"released": True, "save_status": s_save_status, "ok": True, "code": "LOCK_OK", "reason_code": "FREE", "action": "RELEASED"}
 
     @staticmethod
     def cleanup(db: Session) -> int:

@@ -69,14 +69,15 @@
                     </Column>
                 </columns>
                 <items>
-                    <ColumnListItem>
+                    <ColumnListItem class="detailAttachmentRow detailAttachmentSessionRow">
                         <cells>
-                            <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}"/>
+                            <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}" class="detailAttachmentNameCell"/>
                             <Text
-                                text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
-                            <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
-                            <Text text="{view>ChangedOn}"/>
-                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
+                                class="detailAttachmentCategoryCell"/>
+                            <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
+                            <Text text="{view>ChangedOn}" class="detailAttachmentChangedCell"/>
+                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions detailAttachmentActionCell" wrap="Wrap">
                                 <Button
                                     icon="sap-icon://download"
                                     text="{i18n>rowActionDownload}"
@@ -131,14 +132,15 @@
                     </Column>
                 </columns>
                 <items>
-                    <ColumnListItem>
+                    <ColumnListItem class="detailAttachmentRow detailAttachmentExpandedRow">
                         <cells>
-                            <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}"/>
+                            <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}" class="detailAttachmentNameCell"/>
                             <Text
-                                text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"/>
-                            <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End"/>
-                            <Text text="{selected>ChangedOn}"/>
-                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions" wrap="Wrap">
+                                text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
+                                class="detailAttachmentCategoryCell"/>
+                            <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
+                            <Text text="{selected>ChangedOn}" class="detailAttachmentChangedCell"/>
+                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions detailAttachmentActionCell" wrap="Wrap">
                                 <Button
                                     icon="sap-icon://download"
                                     text="{i18n>rowActionDownload}"

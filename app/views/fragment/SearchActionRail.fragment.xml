@@ -17,7 +17,7 @@
         <Button text="{i18n>clearSelectionButton}" icon="sap-icon://sys-cancel" press=".onClearSelection" enabled="{view>/hasSelection}" tooltip="{i18n>searchShortcutClearSelection}" class="brandActionBtn brandActionGhost actionPrioritySecondary searchClearSelectionActionBtn sapUiTinyMarginEnd chkRipple">
             <layoutData><OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/></layoutData>
         </Button>
-        <ToolbarSpacer/>
+        <ToolbarSpacer class="searchToolbarPrimarySpacer"/>
         <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
         <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
         <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
@@ -38,7 +38,7 @@
             change=".onBackendTopChange"
             submit=".onBackendTopChange"
             ariaLabelledBy="searchBackendTopA11y"
-            class="backendTopInput">
+            class="backendTopInput searchToolbarNumberInput searchToolbarBackendInput">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
             </layoutData>
@@ -60,15 +60,16 @@
             change=".onMaxRowsChange"
             submit=".onMaxRowsChange"
             ariaLabelledBy="searchMaxRowsA11y"
-            class="maxRowsInput">
+            class="maxRowsInput searchToolbarNumberInput searchToolbarMaxRowsInput">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
             </layoutData>
         </Input>
         <ObjectStatus
+            id="searchModeStatusChip"
             text="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}"
             state="Information"
-            class="searchModeStatusChip statusChipSemantic">
+            class="searchModeStatusChip statusChipSemantic searchToolbarStatusChip">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
             </layoutData>
@@ -78,12 +79,12 @@
             change=".onSearchModeToggle"
             customTextOn=""
             customTextOff=""
-            class="appAccentSwitch searchModeToggleSwitch">
+            class="appAccentSwitch searchModeToggleSwitch searchToolbarToggleSwitch">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
             </layoutData>
         </Switch>
-        <ToolbarSpacer/>
+        <ToolbarSpacer class="searchToolbarSecondarySpacer"/>
         <Button text="{i18n>searchSortButton}" icon="sap-icon://sort" type="Transparent" press=".onOpenSearchSortDialog" tooltip="{i18n>searchSortButton}" class="brandActionGhost actionPrioritySecondary searchSortButton chkRipple"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
         <Button text="{i18n>searchGroupButton}" icon="sap-icon://group-2" type="Transparent" press=".onOpenSearchGroupDialog" tooltip="{i18n>searchGroupButton}" class="brandActionGhost actionPrioritySecondary searchGroupButton chkRipple"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
         <MenuButton text="{i18n>exportMenuButton}" enabled="{view>/canExport}" tooltip="{i18n>searchShortcutExport}" class="brandActionBtn brandActionGhost actionPrioritySecondary searchExportMenuBtn chkRipple" icon="sap-icon://excel-attachment">
@@ -97,7 +98,7 @@
                 </Menu>
             </menu>
         </MenuButton>
-        <ObjectStatus text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }" state="{= ${view>/selectionCount} ? 'Success' : 'Information' }" class="searchSelectionStatusChip statusChipSemantic">
+        <ObjectStatus id="searchSelectionStatusChip" text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }" state="{= ${view>/selectionCount} ? 'Success' : 'Information' }" class="searchSelectionStatusChip statusChipSemantic searchToolbarStatusChip">
             <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="false"/></layoutData>
         </ObjectStatus>
         <Text text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }" visible="{= ${view>/hasSelection} &amp;&amp; !!${view>/selectedRowDisplayId} }" tooltip="{view>/selectedRowDisplayId}" class="searchSelectionPrimaryId" wrapping="false">

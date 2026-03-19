@@ -48,6 +48,7 @@ def test_save_changes_requires_active_session_lock_but_not_client_version():
         assert save_resp.status_code == 200
         body = save_resp.json().get("d", {})
         assert body.get("code") == "LOCK_OK"
+        assert body.get("reason_code") == "SAVED"
         assert body.get("lock_refreshed") is True
         assert body.get("lock_expires_at")
         assert body.get("server_now")
@@ -82,6 +83,7 @@ def test_autosave_requires_active_session_lock_but_not_client_version():
         assert autosave_resp.status_code == 200
         body = autosave_resp.json().get("d", {})
         assert body.get("code") == "LOCK_OK"
+        assert body.get("reason_code") == "SAVED"
         assert body.get("lock_refreshed") is True
         assert body.get("lock_expires_at")
         assert body.get("server_now")

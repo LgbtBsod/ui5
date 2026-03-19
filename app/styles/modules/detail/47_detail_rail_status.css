@@ -13,7 +13,10 @@
   flex: 1 1 auto;
 }
 
-.chkApp .detailControlRowActions .sapMBtn {
+.chkApp .detailControlRowActions .actionPriorityPrimary,
+.chkApp .detailControlRowActions .actionPrioritySecondary,
+.chkApp .detailControlRowActions .actionPriorityDanger,
+.chkApp .detailControlRowActions .detailRailCloseAction {
   margin: 0;
 }
 
@@ -47,7 +50,7 @@
 }
 
 .chkApp .detailRailCloseAction .sapMBtnInner,
-.chkApp .detailControlRowActions .sapMBtnTransparent .sapMBtnInner {
+.chkApp .detailControlRowActions .actionPrioritySecondary .sapMBtnInner {
   background: transparent;
   border-color: rgba(160, 200, 240, 0.40);
 }
@@ -124,33 +127,36 @@ body.chkAppRoot.appLight .chkApp .uxStatChip .sapMText:first-child {
   color: rgba(52, 81, 123, 0.88);
 }
 
-body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusSuccess,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusSuccess,
-body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusSuccess {
+body.chkAppRoot.appDark .chkApp .detailWorkflowChip.chipStateSuccess,
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipStateSuccess,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.chipStateSuccess {
   --status-chip-bg: var(--feedback-success-bg);
   --status-chip-border: var(--feedback-success-border);
   --status-chip-glow: var(--feedback-success-glow);
 }
 
-body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusWarning,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusWarning,
-body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusWarning {
+body.chkAppRoot.appDark .chkApp .detailWorkflowChip.chipStateWarning,
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipStateWarning,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.chipStateWarning {
   --status-chip-bg: var(--feedback-warning-bg);
   --status-chip-border: var(--feedback-warning-border);
   --status-chip-glow: var(--feedback-warning-glow);
 }
 
-body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusError,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusError,
-body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusError {
+body.chkAppRoot.appDark .chkApp .detailWorkflowChip.chipStateError,
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipStateError,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.chipStateError {
   --status-chip-bg: var(--feedback-error-bg);
   --status-chip-border: var(--feedback-error-border);
   --status-chip-glow: var(--feedback-error-glow);
 }
 
-body.chkAppRoot.appDark .chkApp .detailWorkflowChip.sapMObjStatusInformation,
-body.chkAppRoot.appDark .chkApp .detailRailStatusChip.sapMObjStatusInformation,
-body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.sapMObjStatusInformation {
+body.chkAppRoot.appDark .chkApp .detailWorkflowChip.chipStateInfo,
+body.chkAppRoot.appDark .chkApp .detailWorkflowChip.chipStateNone,
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipStateInfo,
+body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipStateNone,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.chipStateInfo,
+body.chkAppRoot.appDark .chkApp .detailRailLockStatusChip.chipStateNone {
   --status-chip-bg: var(--feedback-info-bg);
   --status-chip-border: var(--feedback-info-border);
   --status-chip-glow: var(--feedback-info-glow);

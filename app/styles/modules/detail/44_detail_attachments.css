@@ -32,7 +32,7 @@
   font-size: 0.95rem;
 }
 
-.chkApp .detailAttachmentPickerLink.sapMLnk {
+.chkApp .detailAttachmentPickerLink {
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 0.14rem;
@@ -56,7 +56,7 @@
   min-width: 11rem;
 }
 
-.chkApp .detailAttachmentUploaderHidden.sapUiFup {
+.chkApp .detailAttachmentUploaderHidden {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
@@ -65,7 +65,7 @@
   pointer-events: none;
 }
 
-.chkApp .detailAttachmentDropZoneActions .sapUiFup,
+.chkApp .detailAttachmentDropZoneActions .detailAttachmentUploaderHidden,
 .chkApp .detailAttachmentDropZoneActions .tableRowActionBtn,
 .chkApp .detailAttachmentDropZoneActions .tableRowActionBtn .sapMBtnInner {
   width: 100%;
@@ -285,12 +285,12 @@ body.chkAppRoot.appDark .chkApp .detailHistoryTimeline .sapMTLIIcon {
   min-height: 0;
 }
 
-.chkApp .detailViewportNarrow .detailAttachmentToolbar.sapMTBNewFlex {
+.chkApp .detailViewportNarrow .detailAttachmentToolbar {
   flex-wrap: nowrap;
   overflow: visible;
 }
 
-.chkApp .detailViewportNarrow .detailAttachmentToolbar .sapMTBSpacer {
+.chkApp .detailViewportNarrow .detailAttachmentToolbar .detailAttachmentToolbarSpacer {
   display: block;
 }
 
@@ -512,9 +512,11 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   max-width: 100%;
 }
 
-.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMText,
-.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMObjectIdentifierText,
-.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .sapMLnk {
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .detailAttachmentCategoryCell,
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .detailAttachmentChangedCell,
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .detailAttachmentNameCell,
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .detailAttachmentNameCell .sapMObjectIdentifierText,
+.chkApp .appLayoutSplit .detailPage .detailAttachmentTable .detailAttachmentPickerLink {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -700,10 +702,10 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
     flex: 1 1 100%;
   }
 
-  .chkApp .detailAttachmentToolbar .sapMBtn,
-  .chkApp .detailAttachmentToolbar .sapMSlt,
-  .chkApp .detailAttachmentToolbar .sapMLabel,
-  .chkApp .detailAttachmentToolbar .sapUiFup {
+  .chkApp .detailAttachmentToolbar .detailAttachmentToolbarToggle,
+  .chkApp .detailAttachmentToolbar .detailAttachmentCategorySelect,
+  .chkApp .detailAttachmentToolbar .detailAttachmentMetaLabel,
+  .chkApp .detailAttachmentToolbar .detailAttachmentUploaderHidden {
     flex: 1 1 100%;
     min-width: 0;
   }

@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime"
-], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime"
+], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime) {
     "use strict";
 
     function clearRefreshTimer(oController) {
@@ -53,6 +54,7 @@ sap.ui.define([
     function onAfterRendering(oController) {
         var oStateModel = oController.getModel && oController.getModel(ModelContracts.MODELS.STATE);
         var sCurrentRouteName = String(oStateModel && oStateModel.getProperty && oStateModel.getProperty("/currentRouteName") || "").trim();
+        StatusChipClassRuntime.syncView(oController);
         if (!oController._bAnalyticsInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             Promise.resolve(oController._onAnalyticsMatched()).catch(function () {
                 return null;

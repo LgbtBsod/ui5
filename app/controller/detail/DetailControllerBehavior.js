@@ -9,6 +9,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (
@@ -22,6 +23,7 @@ sap.ui.define([
     ControllerViewStateRuntime,
     SchedulingRuntime,
     DetailAttachmentViewState,
+    StatusChipClassRuntime,
     NavigationContracts,
     ModelContracts
 ) {
@@ -127,6 +129,7 @@ sap.ui.define([
             this._bindAdaptiveDetailViewport();
             this._bindViewportPinnedControlRail();
             syncSemanticRegions(this);
+            StatusChipClassRuntime.syncView(this);
         },
 
         onExit: function () {

@@ -1854,11 +1854,12 @@ def lock_control(payload: dict, db: Session):
     uname = CurrentUserService.resolve_uname(db=db)
     if not root_key:
         return _err(400, "VALIDATION_ERROR", "RootKey is required")
-    def _lock_entity(ok: bool, reason: str, expires_at, is_killed: bool, action_name: str, owner: str = "", owner_session: str = ""):
+    def _lock_entity(ok: bool, reason: str, expires_at, is_killed: bool, action_name: str, owner: str = "", owner_session: str = "", code: str = ""):
         lock_exp = format_datetime(expires_at)
         return odata_entity({
             "Success": ok,
             "Ok": ok,
+            "Code": str(code or reason or "").strip(),
             "LockExpires": lock_exp,
             "ExpiresOn": lock_exp,
             "IsKilled": is_killed,
@@ -1870,19 +1871,19 @@ def lock_control(payload: dict, db: Session):
 
     if root_key == "__CREATE":
         if action == "HEARTBEAT":
-            return _lock_entity(True, "OWNED_BY_YOU", None, False, "HEARTBEAT", uname, session)
+            return _lock_entity(True, "OWNED_BY_YOU", None, False, "HEARTBEAT", uname, session, "LOCK_OK")
         if action == "RELEASE":
-            return _lock_entity(True, "FREE", None, False, "RELEASED")
+            return _lock_entity(True, "FREE", None, False, "RELEASED", code="LOCK_OK")
         if action == "ACQUIRE":
-            return _lock_entity(True, "OWNED_BY_YOU", None, False, "ACQUIRED", uname, session)
+            return _lock_entity(True, "OWNED_BY_YOU", None, False, "ACQUIRED", uname, session, "LOCK_OK")
 
     root_uuid = _entity_key(root_key)
     root_exists = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid, ChecklistRoot.is_deleted.isnot(True)).first()
     if not root_exists:
         if action == "RELEASE":
-            return _lock_entity(True, "FREE", None, False, "RELEASED")
+            return _lock_entity(True, "FREE", None, False, "RELEASED", code="LOCK_OK")
         if action == "HEARTBEAT":
-            return _lock_entity(False, "FREE", None, False, "FREE")
+            return _lock_entity(False, "FREE", None, False, "FREE", code="LOCK_MISSING")
         return _err(404, "NOT_FOUND", "Checklist not found")
 
     if action == "ACQUIRE":
@@ -1893,9 +1894,10 @@ def lock_control(payload: dict, db: Session):
             "OWNED_BY_YOU" if ok else "LOCKED_BY_OTHER",
             r.get("lock_expires"),
             bool(r.get("is_killed_flag")),
-            "ACQUIRED" if ok else "FAILED",
-            uname if ok else "",
-            session if ok else "",
+            str(r.get("action") or ("ACQUIRED" if ok else "FAILED")),
+            str(r.get("owner") or (uname if ok else "")),
+            str(r.get("owner_session") or (session if ok else "")),
+            str(r.get("code") or ""),
         )
     if action == "HEARTBEAT":
         try:
@@ -1906,19 +1908,27 @@ def lock_control(payload: dict, db: Session):
                 "OWNED_BY_YOU" if ok else "KILLED",
                 r.get("lock_expires"),
                 bool(r.get("is_killed")),
-                "HEARTBEAT" if ok else "FAILED",
-                uname if ok else "",
-                session if ok else "",
+                str(r.get("action") or ("HEARTBEAT" if ok else "FAILED")),
+                str(r.get("owner") or (uname if ok else "")),
+                str(r.get("owner_session") or (session if ok else "")),
+                str(r.get("code") or ""),
             )
         except ValueError as exc:
             code = str(exc)
             if code == "LOCK_MISSING":
-                return _lock_entity(False, "FREE", None, False, "FREE")
+                return _lock_entity(False, "FREE", None, False, "FREE", code="LOCK_MISSING")
             return _err(410, "LOCK_EXPIRED", "Lock expired")
     if action == "RELEASE":
         r = LockService.release(db, root_uuid, session)
         released = bool(r.get("released"))
-        return _lock_entity(released, "FREE", None, False, "RELEASED" if released else "FAILED")
+        return _lock_entity(
+            released,
+            str(r.get("reason_code") or "FREE"),
+            None,
+            False,
+            str(r.get("action") or ("RELEASED" if released else "FAILED")),
+            code=str(r.get("code") or ""),
+        )
     return _err(400, "VALIDATION_ERROR", "Unsupported Action")
 
 
@@ -2007,6 +2017,7 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
         "changed_on": format_datetime(root.changed_on),
         "version_number": int(root.version_number or 0),
         "code": "LOCK_OK",
+        "reason_code": "SAVED",
         "lock_refreshed": True,
         "lock_expires_at": format_datetime(LockService._lock_expires_at(active_lock)) if active_lock else "",
         "server_now": format_datetime(now_utc()),
@@ -2150,6 +2161,7 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
         "changed_on": format_datetime(root.changed_on),
         "version_number": int(root.version_number or 0),
         "code": "LOCK_OK",
+        "reason_code": "SAVED",
         "lock_refreshed": True,
         "lock_expires_at": format_datetime(LockService._lock_expires_at(active_lock)) if active_lock else "",
         "server_now": format_datetime(now_utc()),

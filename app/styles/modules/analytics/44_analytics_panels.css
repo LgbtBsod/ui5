@@ -82,7 +82,7 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
   background-color: rgba(10, 20, 40, 0.22);
 }
 
-.chkApp .analyticsChartEmpty.sapMText {
+.chkApp .analyticsChartEmpty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -140,4 +140,10 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
 .chkApp .analyticsMatrixTable .sapMListTblCell:last-child {
   border-top-right-radius: var(--theme-table-row-radius);
   border-bottom-right-radius: var(--theme-table-row-radius);
+}
+
+.chkApp .analyticsMatrixMetricCell,
+.chkApp .analyticsMatrixValueCell,
+.chkApp .analyticsMatrixYearChip {
+  color: var(--text-main);
 }

@@ -91,26 +91,32 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   align-self: center;
 }
 
-.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
-.chkApp .searchResultsActionRail .sapMMenuBtn .sapMBtnInner,
-.chkApp .searchResultsActionRail .sapMInputBaseContentWrapper,
-.chkApp .searchResultsActionRail .sapMSwtCont,
-.chkApp .searchResultsActionRail .searchSelectionStatusChip {
+.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchGroupButton .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchExportMenuBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchToolbarNumberInput .sapMInputBaseContentWrapper,
+.chkApp .searchResultsActionRail .searchToolbarToggleSwitch .sapMSwtCont,
+.chkApp .searchResultsActionRail .searchToolbarStatusChip {
   min-height: var(--theme-workbench-control-height);
 }
 
-.chkApp .searchResultsActionRail .sapMBtn .sapMBtnInner,
-.chkApp .searchResultsActionRail .sapMMenuBtn .sapMBtnInner {
+.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchGroupButton .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchExportMenuBtn .sapMBtnInner {
   border-radius: 999px;
 }
 
-.chkApp .searchResultsActionRail .searchSelectionStatusChip {
+.chkApp .searchResultsActionRail .searchToolbarStatusChip {
   display: inline-flex;
   align-items: center;
   padding-block: 0;
 }
 
-.chkApp .searchResultsActionRail .sapMInputBase {
+.chkApp .searchResultsActionRail .searchToolbarNumberInput {
   width: auto;
 }
 
@@ -120,11 +126,11 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   max-width: 100%;
 }
 
-.chkApp .searchResultsActionRail .sapMSwt {
+.chkApp .searchResultsActionRail .searchToolbarToggleSwitch {
   height: var(--theme-workbench-control-height);
 }
 
-.chkApp .searchResultsActionRail .sapMSwtCont {
+.chkApp .searchResultsActionRail .searchToolbarToggleSwitch .sapMSwtCont {
   display: inline-flex;
   align-items: center;
 }
@@ -175,8 +181,7 @@ body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
     max-width: 100%;
   }
 
-  .chkApp .searchResultsActionRail .backendTopInput,
-  .chkApp .searchResultsActionRail .maxRowsInput {
+  .chkApp .searchResultsActionRail .searchToolbarNumberInput {
     min-width: 4rem;
     width: 100%;
   }

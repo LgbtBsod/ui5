@@ -11,6 +11,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts"
@@ -27,6 +28,7 @@ sap.ui.define([
     SearchAnalyticsRailRuntime,
     SearchRateProgress,
     SearchViewStateRuntime,
+    StatusChipClassRuntime,
     ModelContracts,
     NavigationContracts,
     SearchToolbarContracts
@@ -125,6 +127,7 @@ sap.ui.define([
         var sCurrentRouteName = String(oStateModel && oStateModel.getProperty("/currentRouteName") || "").trim();
         var sLayout = String(oStateModel && oStateModel.getProperty("/layout") || "").trim();
         syncSemanticRegions(oController);
+        StatusChipClassRuntime.syncView(oController);
         if (!oController._bSearchInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.SEARCH) {
             oController._bSearchInitialRouteHandled = true;
             oController._onSearchMatched();

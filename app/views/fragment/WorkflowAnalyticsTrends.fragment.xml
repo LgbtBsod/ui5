@@ -9,8 +9,8 @@
             <Panel headerText="{i18n>analyticsComparisonChartTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
                 <content>
                     <OverflowToolbar design="Transparent" class="analyticsComparisonToolbar workbenchToolbarSurface analyticsControlToolbar">
-                        <Label text="{i18n>analyticsCompareMetricLabel}" labelFor="analyticsComparisonMetricSelect"/>
-                        <Select id="analyticsComparisonMetricSelect" width="16rem" selectedKey="{view>/comparisonMetric}" change=".onSelectAnalyticsMetric">
+                        <Label text="{i18n>analyticsCompareMetricLabel}" labelFor="analyticsComparisonMetricSelect" class="analyticsControlLabel analyticsComparisonMetricLabel"/>
+                        <Select id="analyticsComparisonMetricSelect" width="16rem" selectedKey="{view>/comparisonMetric}" change=".onSelectAnalyticsMetric" class="analyticsControlSelect analyticsComparisonMetricSelect">
                             <items>
                                 <core:Item key="FAILED_CHECKS" text="{i18n>analyticsMetricFailedChecks}"/>
                                 <core:Item key="FAILED_BARRIERS" text="{i18n>analyticsMetricFailedBarriers}"/>
@@ -19,10 +19,11 @@
                                 <core:Item key="TOTAL" text="{i18n>analyticsMetricTotal}"/>
                             </items>
                         </Select>
-                        <ToolbarSpacer/>
+                        <ToolbarSpacer class="analyticsToolbarSpacer analyticsComparisonToolbarSpacer"/>
                         <ObjectStatus
                             text="{= ${view>/selectedYear} + ' vs ' + ${view>/compareYear} }"
-                            state="Information"/>
+                            state="Information"
+                            class="analyticsComparisonScopeChip statusChipSemantic"/>
                     </OverflowToolbar>
                     <MessageStrip
                         text="{view>/compareYearHintText}"
@@ -71,23 +72,24 @@
                                 <Column width="5rem"><Text text="{i18n>analyticsMonthShortDec}"/></Column>
                             </columns>
                             <items>
-                                <ColumnListItem>
+                                <ColumnListItem class="analyticsMatrixRow">
                                     <cells>
                                         <Text
-                                            text="{path: 'view>metricKey', formatter: '.formatAnalyticsMatrixMetricLabel'}"/>
-                                        <ObjectStatus text="{view>yearLabel}" state="Information"/>
-                                        <Text text="{view>jan}"/>
-                                        <Text text="{view>feb}"/>
-                                        <Text text="{view>mar}"/>
-                                        <Text text="{view>apr}"/>
-                                        <Text text="{view>may}"/>
-                                        <Text text="{view>jun}"/>
-                                        <Text text="{view>jul}"/>
-                                        <Text text="{view>aug}"/>
-                                        <Text text="{view>sep}"/>
-                                        <Text text="{view>oct}"/>
-                                        <Text text="{view>nov}"/>
-                                        <Text text="{view>dec}"/>
+                                            text="{path: 'view>metricKey', formatter: '.formatAnalyticsMatrixMetricLabel'}"
+                                            class="analyticsMatrixMetricCell"/>
+                                        <ObjectStatus text="{view>yearLabel}" state="Information" class="analyticsMatrixYearChip statusChipSemantic"/>
+                                        <Text text="{view>jan}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>feb}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>mar}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>apr}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>may}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>jun}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>jul}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>aug}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>sep}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>oct}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>nov}" class="analyticsMatrixValueCell"/>
+                                        <Text text="{view>dec}" class="analyticsMatrixValueCell"/>
                                     </cells>
                                 </ColumnListItem>
                             </items>

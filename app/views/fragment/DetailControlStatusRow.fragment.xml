@@ -1,6 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <OverflowToolbar id="detailControlStatusRow" class="detailControlRow detailControlRowTop toolbarTransparent" design="Transparent">
         <ObjectStatus
+            id="detailLifecycleStatusChip"
             icon="sap-icon://status-in-process"
             text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}"
             state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"
@@ -8,6 +9,7 @@
             tooltip="{i18n>objectStatusLabel}"/>
 
         <ObjectStatus
+            id="detailDirtyStatusChip"
             icon="sap-icon://edit"
             text="{= ${state>/isDirty} ? ${i18n>dirtyStateDirty} : ${i18n>dirtyStateSynced} }"
             state="{= ${state>/isDirty} ? 'Warning' : 'Success' }"
@@ -18,6 +20,7 @@
         </ObjectStatus>
 
         <ObjectStatus
+            id="detailHeartbeatStatusChip"
             icon="sap-icon://history"
             text="{parts:[{path:'state>/workflow/detail/editMode'},{path:'state>/workflow/detail/lock/state'}], formatter:'.formatHeartbeatText'}"
             state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateSemantic'}"
@@ -29,6 +32,7 @@
         </ObjectStatus>
 
         <ObjectStatus
+            id="detailPersistenceStatusChip"
             icon="sap-icon://synchronize"
             text="{parts:[{path:'state>/persistence/messageKey'},{path:'state>/persistence/state'},{path:'state>/persistence/lastSavedAt'}], formatter:'.formatPersistenceText'}"
             state="{path:'state>/persistence/state', formatter:'.formatPersistenceState'}"

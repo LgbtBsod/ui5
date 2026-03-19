@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <OverflowToolbar design="Transparent" class="analyticsFilterToolbar workbenchToolbarSurface">
+    <OverflowToolbar design="Transparent" class="analyticsFilterToolbar workbenchToolbarSurface analyticsControlToolbar">
         <Label text="{i18n>analyticsSourceFilterLabel}" labelFor="analyticsSourceSwitch" class="analyticsFilterLabel analyticsSourceLabel">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
@@ -19,7 +19,7 @@
                 <SegmentedButtonItem key="INTEGRATION" text="{i18n>analyticsSourceIntegration}"/>
             </items>
         </SegmentedButton>
-        <ToolbarSpacer/>
+        <ToolbarSpacer class="analyticsToolbarSpacer analyticsFilterToolbarSpacer"/>
         <Label text="{i18n>analyticsYearLabel}" labelFor="analyticsYearSelect" class="analyticsFilterLabel analyticsYearLabel">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
@@ -36,15 +36,16 @@
                 value="{view>/selectedYear}"
                 maxLength="4"
                 liveChange=".onLiveChangeAnalyticsYear"
-                change=".onSelectAnalyticsYear"/>
+                change=".onSelectAnalyticsYear"
+                class="analyticsYearInput analyticsToolbarInput"/>
             <Button
                 icon="sap-icon://calendar"
                 type="Transparent"
                 tooltip="{i18n>analyticsYearLabel}"
                 press=".onOpenAnalyticsSelectedYearPicker"
-                class="analyticsYearPickerTrigger"/>
+                class="analyticsYearPickerTrigger analyticsToolbarButton"/>
         </HBox>
-        <Button text="{i18n>analyticsPresetCurrent}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetCurrent">
+        <Button text="{i18n>analyticsPresetCurrent}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetCurrent analyticsToolbarButton">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
             </layoutData>
@@ -52,7 +53,7 @@
                 <core:CustomData key="preset" value="CURRENT"/>
             </customData>
         </Button>
-        <Button text="{i18n>analyticsPresetPrevious}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetPrevious">
+        <Button text="{i18n>analyticsPresetPrevious}" type="Transparent" press=".onApplyAnalyticsYearPreset" class="analyticsPresetButton analyticsPresetPrevious analyticsToolbarButton">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
             </layoutData>
@@ -78,13 +79,14 @@
                 valueStateText="{view>/compareYearValueStateText}"
                 maxLength="4"
                 liveChange=".onLiveChangeAnalyticsCompareYear"
-                change=".onChangeAnalyticsCompareYear"/>
+                change=".onChangeAnalyticsCompareYear"
+                class="analyticsYearInput analyticsCompareYearInput analyticsToolbarInput"/>
             <Button
                 icon="sap-icon://calendar"
                 type="Transparent"
                 tooltip="{i18n>analyticsCompareYearLabel}"
                 press=".onOpenAnalyticsCompareYearPicker"
-                class="analyticsYearPickerTrigger analyticsCompareYearPickerTrigger"/>
+                class="analyticsYearPickerTrigger analyticsCompareYearPickerTrigger analyticsToolbarButton"/>
         </HBox>
     </OverflowToolbar>
 </core:FragmentDefinition>

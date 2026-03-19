@@ -61,6 +61,8 @@ def test_acquire_handles_integrity_race(monkeypatch):
 
         assert result["success"] is False
         assert result["code"] == "LOCK_NOT_OWNED_BY_SESSION"
+        assert result["reason_code"] == "LOCKED_BY_OTHER"
+        assert result["action"] == "FAILED"
         assert result["owner"] == "OTHER"
 
 
@@ -84,6 +86,9 @@ def test_release_try_save_reports_save_status(monkeypatch):
 
         assert result["released"] is True
         assert result["save_status"] == "S"
+        assert result["code"] == "LOCK_OK"
+        assert result["reason_code"] == "FREE"
+        assert result["action"] == "RELEASED"
 
 
 def test_killed_lock_retention_exceeds_ttl():

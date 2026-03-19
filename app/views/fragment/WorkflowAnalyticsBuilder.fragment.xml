@@ -10,16 +10,16 @@
                 <content>
                     <MessageStrip text="{view>/builderSourceHintText}" type="Information" showIcon="true" visible="{= !!${view>/builderSourceHintText} }" class="chkFeedbackStrip sapUiTinyMarginBottom"/>
                     <OverflowToolbar design="Transparent" class="analyticsBuilderToolbar workbenchToolbarSurface analyticsControlToolbar">
-                        <Label text="{i18n>analyticsBuilderDimensionLabel}" labelFor="analyticsBuilderDimensionSelect"/>
-                        <Select id="analyticsBuilderDimensionSelect" width="14rem" selectedKey="{view>/builderDimension}" change=".onSelectAnalyticsBuilderDimension" items="{view>/builderDimensionOptions}">
+                        <Label text="{i18n>analyticsBuilderDimensionLabel}" labelFor="analyticsBuilderDimensionSelect" class="analyticsControlLabel analyticsBuilderDimensionLabel"/>
+                        <Select id="analyticsBuilderDimensionSelect" width="14rem" selectedKey="{view>/builderDimension}" change=".onSelectAnalyticsBuilderDimension" items="{view>/builderDimensionOptions}" class="analyticsControlSelect analyticsBuilderDimensionSelect">
                             <core:Item key="{view>key}" text="{view>text}"/>
                         </Select>
-                        <Label text="{i18n>analyticsBuilderMetricLabel}" labelFor="analyticsBuilderMetricSelect"/>
-                        <Select id="analyticsBuilderMetricSelect" width="16rem" selectedKey="{view>/builderMetric}" change=".onSelectAnalyticsBuilderMetric" items="{view>/builderMetricOptions}">
+                        <Label text="{i18n>analyticsBuilderMetricLabel}" labelFor="analyticsBuilderMetricSelect" class="analyticsControlLabel analyticsBuilderMetricLabel"/>
+                        <Select id="analyticsBuilderMetricSelect" width="16rem" selectedKey="{view>/builderMetric}" change=".onSelectAnalyticsBuilderMetric" items="{view>/builderMetricOptions}" class="analyticsControlSelect analyticsBuilderMetricSelect">
                             <core:Item key="{view>key}" text="{view>text}"/>
                         </Select>
-                        <ToolbarSpacer/>
-                        <ObjectStatus text="{= ${view>/selectedSource} + ' / ' + ${view>/selectedYear} }" state="Information"/>
+                        <ToolbarSpacer class="analyticsToolbarSpacer analyticsBuilderToolbarSpacer"/>
+                        <ObjectStatus text="{= ${view>/selectedSource} + ' / ' + ${view>/selectedYear} }" state="Information" class="analyticsBuilderScopeChip statusChipSemantic"/>
                     </OverflowToolbar>
                     <viz:VizFrame vizType="{view>/builderVizType}" width="100%" height="18rem" uiConfig="{applicationSet:'fiori'}" selectData=".onDrilldownAnalyticsBuilder" visible="{view>/builderChartHasData}">
                         <viz:dataset>

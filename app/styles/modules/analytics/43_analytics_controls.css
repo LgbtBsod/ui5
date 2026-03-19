@@ -28,9 +28,9 @@
   gap: 0.65rem;
 }
 
-.chkApp .analyticsScreenContent .sapMInputBaseContentWrapper,
-.chkApp .analyticsScreenContent .sapMSlt,
-.chkApp .analyticsScreenContent .sapMComboBoxBase {
+.chkApp .analyticsToolbarInput .sapMInputBaseContentWrapper,
+.chkApp .analyticsControlSelect,
+.chkApp .analyticsControlSelect.sapMComboBoxBase {
   background: color-mix(in srgb, var(--surface-2) 34%, transparent);
   border-color: color-mix(in srgb, var(--border-soft) 14%, transparent);
   box-shadow: none;
@@ -40,8 +40,8 @@
   gap: 0.25rem;
 }
 
-.chkApp .analyticsYearField .sapMInputBase,
-.chkApp .analyticsYearField .sapMInputBaseContentWrapper {
+.chkApp .analyticsYearInput,
+.chkApp .analyticsYearInput .sapMInputBaseContentWrapper {
   width: 7rem;
 }
 
@@ -117,25 +117,32 @@ body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
   max-width: 100%;
 }
 
-.chkApp .analyticsControlToolbar .sapMTBSpacer {
+.chkApp .analyticsControlToolbar .analyticsToolbarSpacer {
   min-width: 0.4rem;
 }
 
-.chkApp .analyticsControlToolbar .sapMLabel,
-.chkApp .analyticsControlToolbar .sapMBtn,
-.chkApp .analyticsControlToolbar .sapMSlt,
-.chkApp .analyticsControlToolbar .sapMInputBase {
+.chkApp .analyticsControlToolbar .analyticsFilterLabel,
+.chkApp .analyticsControlToolbar .analyticsControlLabel,
+.chkApp .analyticsControlToolbar .analyticsToolbarButton,
+.chkApp .analyticsControlToolbar .analyticsControlSelect,
+.chkApp .analyticsControlToolbar .analyticsToolbarInput,
+.chkApp .analyticsControlToolbar .analyticsSourceSwitch,
+.chkApp .analyticsControlToolbar .analyticsYearField,
+.chkApp .analyticsControlToolbar .analyticsBuilderScopeChip,
+.chkApp .analyticsControlToolbar .analyticsComparisonScopeChip {
   flex: 0 1 auto;
 }
 
-.chkApp .analyticsControlToolbar .sapMBtn .sapMBtnInner,
-.chkApp .analyticsControlToolbar .sapMMenuBtn .sapMBtnInner,
-.chkApp .analyticsControlToolbar .sapMInputBaseContentWrapper {
+.chkApp .analyticsControlToolbar .analyticsToolbarButton .sapMBtnInner,
+.chkApp .analyticsControlToolbar .analyticsBuilderScopeChip,
+.chkApp .analyticsControlToolbar .analyticsComparisonScopeChip,
+.chkApp .analyticsControlToolbar .analyticsToolbarInput .sapMInputBaseContentWrapper,
+.chkApp .analyticsControlToolbar .analyticsControlSelect {
   min-height: 2.08rem;
 }
 
-.chkApp .analyticsComparisonToolbar .sapMObjStatus,
-.chkApp .analyticsBuilderToolbar .sapMObjStatus {
+.chkApp .analyticsComparisonScopeChip,
+.chkApp .analyticsBuilderScopeChip {
   padding: 0.12rem 0.5rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--theme-block-bg) 96%, transparent);

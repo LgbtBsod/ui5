@@ -19,31 +19,59 @@
     0 8px 18px var(--status-chip-glow);
 }
 
-.chkApp .searchSummaryStatusChip.sapMObjStatusSuccess,
-.chkApp .searchStageStatusChip.sapMObjStatusSuccess,
-.chkApp .detailWorkflowChip.sapMObjStatusSuccess,
-.chkApp .detailRailStatusChip.sapMObjStatusSuccess {
+.chkApp .searchSummaryStatusChip.chipStateSuccess,
+.chkApp .searchStageStatusChip.chipStateSuccess,
+.chkApp .detailWorkflowChip.chipStateSuccess,
+.chkApp .detailRailStatusChip.chipStateSuccess,
+.chkApp .analyticsMetaChip.chipStateSuccess,
+.chkApp .analyticsHeroContextChip.chipStateSuccess,
+.chkApp .analyticsRefreshStatus.chipStateSuccess {
   --status-chip-bg: var(--feedback-success-bg);
   --status-chip-border: var(--feedback-success-border);
   --status-chip-glow: var(--feedback-success-glow);
 }
 
-.chkApp .searchSummaryStatusChip.sapMObjStatusWarning,
-.chkApp .searchStageStatusChip.sapMObjStatusWarning,
-.chkApp .detailWorkflowChip.sapMObjStatusWarning,
-.chkApp .detailRailStatusChip.sapMObjStatusWarning {
+.chkApp .searchSummaryStatusChip.chipStateWarning,
+.chkApp .searchStageStatusChip.chipStateWarning,
+.chkApp .detailWorkflowChip.chipStateWarning,
+.chkApp .detailRailStatusChip.chipStateWarning,
+.chkApp .analyticsMetaChip.chipStateWarning,
+.chkApp .analyticsHeroContextChip.chipStateWarning,
+.chkApp .analyticsRefreshStatus.chipStateWarning {
   --status-chip-bg: var(--feedback-warning-bg);
   --status-chip-border: var(--feedback-warning-border);
   --status-chip-glow: var(--feedback-warning-glow);
 }
 
-.chkApp .searchSummaryStatusChip.sapMObjStatusError,
-.chkApp .searchStageStatusChip.sapMObjStatusError,
-.chkApp .detailWorkflowChip.sapMObjStatusError,
-.chkApp .detailRailStatusChip.sapMObjStatusError {
+.chkApp .searchSummaryStatusChip.chipStateError,
+.chkApp .searchStageStatusChip.chipStateError,
+.chkApp .detailWorkflowChip.chipStateError,
+.chkApp .detailRailStatusChip.chipStateError,
+.chkApp .analyticsMetaChip.chipStateError,
+.chkApp .analyticsHeroContextChip.chipStateError,
+.chkApp .analyticsRefreshStatus.chipStateError {
   --status-chip-bg: var(--feedback-error-bg);
   --status-chip-border: var(--feedback-error-border);
   --status-chip-glow: var(--feedback-error-glow);
+}
+
+.chkApp .searchSummaryStatusChip.chipStateInfo,
+.chkApp .searchStageStatusChip.chipStateInfo,
+.chkApp .searchSummaryStatusChip.chipStateNone,
+.chkApp .searchStageStatusChip.chipStateNone,
+.chkApp .detailWorkflowChip.chipStateInfo,
+.chkApp .detailWorkflowChip.chipStateNone,
+.chkApp .detailRailStatusChip.chipStateInfo,
+.chkApp .detailRailStatusChip.chipStateNone,
+.chkApp .analyticsMetaChip.chipStateInfo,
+.chkApp .analyticsMetaChip.chipStateNone,
+.chkApp .analyticsHeroContextChip.chipStateInfo,
+.chkApp .analyticsHeroContextChip.chipStateNone,
+.chkApp .analyticsRefreshStatus.chipStateInfo,
+.chkApp .analyticsRefreshStatus.chipStateNone {
+  --status-chip-bg: var(--feedback-info-bg);
+  --status-chip-border: var(--feedback-info-border);
+  --status-chip-glow: var(--feedback-info-glow);
 }
 
 .chkApp .searchSummaryStatusChip .sapMObjStatusText,
@@ -268,7 +296,7 @@ body.chkAppRoot.appDark .kpiCardWarning {
   border-radius: 999px;
 }
 
-.chkApp .statusChipSemantic.sapMObjStatus,
+.chkApp .statusChipSemantic,
 .chkApp .statusChipSemantic .sapMBtnInner {
   min-height: 1.9rem;
 }

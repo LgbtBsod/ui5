@@ -73,7 +73,7 @@ body.chkAppRoot .shellPopover .sapMDialogScrollCont {
 
 .chkApp .shellUserCard,
 .chkApp .shellSettingsFactList,
-.chkApp .shellPopover .sapMList {
+.chkApp .shellUserPermissionList {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -103,8 +103,10 @@ body.chkAppRoot .shellPopover .sapMDialogScrollCont {
 
 .chkApp .shellUserPermissionList .sapMLIB,
 .chkApp .shellSettingsFactList .sapMLIB,
-.chkApp .shellPopover .sapMSLI,
-.chkApp .shellPopover .sapMSLITitleOnly {
+.chkApp .shellUserPermissionList .sapMSLI,
+.chkApp .shellUserPermissionList .sapMSLITitleOnly,
+.chkApp .shellSettingsFactList .sapMSLI,
+.chkApp .shellSettingsFactList .sapMSLITitleOnly {
   height: auto;
   min-height: 0;
   padding-top: 0.42rem;
