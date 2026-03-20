@@ -1,38 +1,7 @@
-/**
- * verify-i18n-completeness.js
- * CI gate: all keys in i18n.properties must exist in i18n_ru.properties.
- * Exit 1 on any missing key — blocks validate pipeline.
- *
- * Usage: node scripts/verify-i18n-completeness.js
- */
 "use strict";
-var fs   = require("fs");
-var path = require("path");
-
-var BASE    = path.join(__dirname, "..", "app", "i18n");
-var EN_FILE = path.join(BASE, "i18n.properties");
-var RU_FILE = path.join(BASE, "i18n_ru.properties");
-
-function parseKeys(filePath) {
-    return fs.readFileSync(filePath, "utf8")
-        .split("\n")
-        .filter(function (l) {
-            var t = l.trim();
-            return t && t[0] !== "#" && t[0] !== "!" && t.indexOf("=") > 0;
-        })
-        .map(function (l) { return l.substring(0, l.indexOf("=")).trim(); });
-}
-
-var enKeys  = parseKeys(EN_FILE);
-var ruSet   = new Set(parseKeys(RU_FILE));
-var missing = enKeys.filter(function (k) { return !ruSet.has(k); });
-
-if (missing.length) {
-    process.stderr.write(
-        "ERROR [i18n-completeness]: " + missing.length +
-        " key(s) missing from i18n_ru.properties:\n  " +
-        missing.join("\n  ") + "\n"
-    );
-    process.exit(1);
-}
-console.log("OK [i18n-completeness]: all " + enKeys.length + " EN keys in RU");
+var fs=require("fs"),path=require("path"),BASE=path.join(__dirname,"..","app","i18n");
+function keys(f){return fs.readFileSync(f,"utf8").split("\n").filter(function(l){var t=l.trim();return t&&t[0]!=="#"&&t[0]!=="!"&&t.indexOf("=")>0;}).map(function(l){return l.substring(0,l.indexOf("=")).trim();});}
+var en=keys(path.join(BASE,"i18n.properties")),ru=new Set(keys(path.join(BASE,"i18n_ru.properties")));
+var bad=en.filter(function(k){return!ru.has(k);});
+if(bad.length){process.stderr.write("ERROR [i18n]: "+bad.length+" missing from RU:\n  "+bad.join("\n  ")+"\n");process.exit(1);}
+console.log("OK [i18n]: all "+en.length+" EN keys in RU");

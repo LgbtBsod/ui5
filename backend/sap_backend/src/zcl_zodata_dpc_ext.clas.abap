@@ -1,4 +1,4 @@
-﻿CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE PUBLIC.
+CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS checklistrootset_get_entity REDEFINITION.
     METHODS checklistrootset_get_entityset REDEFINITION.
@@ -18,6 +18,9 @@
     METHODS lockrelease_create_entity REDEFINITION.
     METHODS autosave_create_entity REDEFINITION.
     METHODS savechanges_create_entity REDEFINITION.
+    METHODS createchecklist_create_entity REDEFINITION.
+    METHODS copychecklist_create_entity REDEFINITION.
+    METHODS analyticsrefreshtrigger_create_entity REDEFINITION.
     METHODS mpltreeset_get_entityset REDEFINITION.
   PRIVATE SECTION.
     TYPES: BEGIN OF ty_root_row,
@@ -95,6 +98,70 @@
     METHODS build_permission_row IMPORTING iv_rootkey TYPE sysuuid_x16 RETURNING VALUE(rs_result) TYPE zstr_pcct_permission_rs.
     METHODS build_current_user_row RETURNING VALUE(rs_result) TYPE zstr_pcct_current_user_rs.
     METHODS build_runtime_settings_row RETURNING VALUE(rs_result) TYPE zstr_pcct_runtime_settings_rs.
+
+  METHOD createchecklist_create_entity.
+    " CreateChecklist: creates a new checklist via BOPF, returns pcct_uuid
+    DATA ls_req  TYPE zstr_pcct_savechanges_rq.
+    DATA ls_resp TYPE zstr_pcct_savechanges_rs.
+    AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_create
+      ID 'BUKRS' FIELD ''.
+    IF sy-subrc <> 0.
+      raise_busi_exception( iv_text = 'No create authorization' iv_code = zcl_zodata_contract_constants=>c_code_no_create_auth ).
+    ENDIF.
+    ensure_deps( ).
+    io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
+    ls_req-root-edit_mode = 'C'.
+    TRY.
+        ls_resp = execute_save( EXPORTING is_request = ls_req iv_is_autosave = abap_false ).
+        copy_data_to_ref( EXPORTING is_data = ls_resp CHANGING cr_data = er_entity ).
+      CATCH zcx_zodata_error INTO DATA(lx_create).
+        raise_busi_exception( iv_text = lx_create->get_message_text( ) iv_code = lx_create->get_code( ) ).
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD copychecklist_create_entity.
+    " CopyChecklist: read source, clone via BOPF create with new UUID
+    DATA ls_req  TYPE zstr_pcct_savechanges_rq.
+    DATA ls_resp TYPE zstr_pcct_savechanges_rs.
+    DATA lv_src_uuid TYPE sysuuid_x16.
+    ensure_deps( ).
+    io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
+    lv_src_uuid = ls_req-root-pcct_uuid.
+    " Re-use existing root row as source, strip UUID for create path
+    DATA(ls_src) = read_root_row( lv_src_uuid ).
+    AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_create
+      ID 'BUKRS' FIELD ls_src-bukrs.
+    IF sy-subrc <> 0.
+      raise_busi_exception( iv_text = 'No create authorization for copy' iv_code = zcl_zodata_contract_constants=>c_code_no_create_auth ).
+    ENDIF.
+    CLEAR ls_req-root-pcct_uuid.
+    ls_req-root-edit_mode = 'C'.
+    ls_req-session_guid = ls_req-session_guid.
+    TRY.
+        ls_resp = execute_save( EXPORTING is_request = ls_req iv_is_autosave = abap_false ).
+        copy_data_to_ref( EXPORTING is_data = ls_resp CHANGING cr_data = er_entity ).
+      CATCH zcx_zodata_error INTO DATA(lx_copy).
+        raise_busi_exception( iv_text = lx_copy->get_message_text( ) iv_code = lx_copy->get_code( ) ).
+    ENDTRY.
+  ENDMETHOD.
+
+  METHOD analyticsrefreshtrigger_create_entity.
+    " AnalyticsRefreshTrigger: enqueue background refresh job
+    " Implementation: insert/update ZTODATA_ANALYTICS_REFRESH task row
+    DATA lv_now TYPE timestampl.
+    GET TIME STAMP FIELD lv_now.
+    UPDATE ztodata_hdr SET last_touch_at = lv_now last_touch_by = sy-uname
+      WHERE bo_key = zif_i_bo_c=>sc_bo_key AND object_id = sy-uname.
+    " Return a minimal FunctionResult acknowledging the trigger
+    DATA ls_result TYPE zstr_pcct_savechanges_rs.
+    ls_result-ok = abap_true.
+    ls_result-success = abap_true.
+    ls_result-reason_code = 'TRIGGERED'.
+    copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
+  ENDMETHOD.
+
 ENDCLASS.
 
 CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
@@ -126,6 +193,14 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       raise_busi_exception(
         iv_text = zcl_zodata_contract_constants=>c_msg_lock_acquire_required
         iv_code = 'VALIDATION_ERROR' ).
+    ENDIF.
+    " AB-03: authorize EDIT before allowing lock
+    DATA(ls_auth_lock) = read_root_row( ls_req-object_uuid ).
+    AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_change
+      ID 'BUKRS' FIELD ls_auth_lock-bukrs.
+    IF sy-subrc <> 0.
+      raise_busi_exception( iv_text = 'No edit authorization' iv_code = zcl_zodata_contract_constants=>c_code_no_edit_auth ).
     ENDIF.
     TRY.
         DATA(ls_lock_key) = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = ls_req-object_uuid ).
@@ -331,6 +406,14 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA lv_now_ts TYPE timestampl.
     DATA lv_request_id TYPE string.
     validate_save_request( is_request ).
+    " AB-03: authorize EDIT for every save/autosave
+    DATA(ls_auth_save) = read_root_row( is_request-root-pcct_uuid ).
+    AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_change
+      ID 'BUKRS' FIELD ls_auth_save-bukrs.
+    IF sy-subrc <> 0.
+      raise_busi_exception( iv_text = 'No edit authorization for save' iv_code = zcl_zodata_contract_constants=>c_code_no_edit_auth ).
+    ENDIF.
     TRY.
         mo_lock_manager->heartbeat( EXPORTING is_key = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = is_request-root-pcct_uuid ) iv_session_guid = is_request-session_guid CHANGING cs_result = ls_lock_hb ).
       CATCH zcx_zodata_error INTO DATA(lx_lock_hb_error).

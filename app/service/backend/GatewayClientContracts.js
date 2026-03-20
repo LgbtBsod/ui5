@@ -15,7 +15,6 @@ sap.ui.define([], function () {
             /^AutoSave$/i,
             /^CreateChecklist$/i,
             /^ReportExport$/i,
-            /^SetChecklistStatus$/i,
             /* C-06 FIX: moved from QUERY to BODY — metadata confirms m:HttpMethod="POST".
              * Using model.create() sends payload in request body instead of URL query string,
              * which prevents SessionGuid from appearing in SAP Gateway access log (SM50/SMICM). */

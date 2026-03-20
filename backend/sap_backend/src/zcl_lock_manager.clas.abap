@@ -1,3 +1,7 @@
+"! DEPRECATED — не использовать в продуктивном коде.
+"! Активная реализация: zcl_zodata_lock_manager → zfg_zodata_lock (ZODATA_LOCK_CONTROL).
+"! Этот класс оставлен только для обратной совместимости во время переходного периода.
+"! После подтверждения работы zcl_zodata_lock_manager на BASIS — удалить этот класс.
 CLASS zcl_lock_manager DEFINITION
   PUBLIC
   FINAL

@@ -150,6 +150,39 @@ CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
     lo_fi->set_return_entity_set( 'MplTreeSet' ).
     add_fi_param( io_fi = lo_fi iv_name = 'Date' iv_edm_type = 'Date' iv_nullable = abap_true iv_mode = 'In' ).
 
+    " ── CreateChecklist ──────────────────────────────────────────
+    lo_fi = model->create_function_import( iv_function_import_name = 'CreateChecklist' ).
+    lo_fi->set_http_method( /iwbep/if_mgw_odata_func_imp=>gcs_http_method-post ).
+    lo_fi->set_return_type( iv_entity_type_name = 'SaveChangesResponse' ).
+    add_fi_param( io_fi = lo_fi iv_name = 'Payload'       iv_edm_type = 'SaveChangesRequest' iv_nullable = abap_false ).
+    add_fi_param( io_fi = lo_fi iv_name = 'SessionGuid'   iv_edm_type = 'Guid'               iv_nullable = abap_false ).
+
+    " ── CopyChecklist ────────────────────────────────────────────
+    lo_fi = model->create_function_import( iv_function_import_name = 'CopyChecklist' ).
+    lo_fi->set_http_method( /iwbep/if_mgw_odata_func_imp=>gcs_http_method-post ).
+    lo_fi->set_return_type( iv_entity_type_name = 'SaveChangesResponse' ).
+    add_fi_param( io_fi = lo_fi iv_name = 'SourceUuid'   iv_edm_type = 'Guid'   iv_nullable = abap_false ).
+    add_fi_param( io_fi = lo_fi iv_name = 'SessionGuid'  iv_edm_type = 'Guid'   iv_nullable = abap_false ).
+
+    " ── AnalyticsRefreshTrigger ──────────────────────────────────
+    lo_fi = model->create_function_import( iv_function_import_name = 'AnalyticsRefreshTrigger' ).
+    lo_fi->set_http_method( /iwbep/if_mgw_odata_func_imp=>gcs_http_method-post ).
+    lo_fi->set_return_type( iv_entity_type_name = 'SaveChangesResponse' ).
+
+    " ── GetHierarchy ─────────────────────────────────────────────
+    lo_fi = model->create_function_import( iv_function_import_name = 'GetHierarchy' ).
+    lo_fi->set_http_method( /iwbep/if_mgw_odata_func_imp=>gcs_http_method-get ).
+    lo_fi->set_return_entity_set( 'HierarchyNodeSet' ).
+    add_fi_param( io_fi = lo_fi iv_name = 'Method'    iv_edm_type = 'String' iv_nullable = abap_true ).
+    add_fi_param( io_fi = lo_fi iv_name = 'DateCheck' iv_edm_type = 'Date'   iv_nullable = abap_true ).
+
+    " ── ReportExport ─────────────────────────────────────────────
+    lo_fi = model->create_function_import( iv_function_import_name = 'ReportExport' ).
+    lo_fi->set_http_method( /iwbep/if_mgw_odata_func_imp=>gcs_http_method-post ).
+    lo_fi->set_return_entity_set( 'ExportRowSet' ).
+    add_fi_param( io_fi = lo_fi iv_name = 'RootKeys'    iv_edm_type = 'String'  iv_nullable = abap_true ).
+    add_fi_param( io_fi = lo_fi iv_name = 'ExportMode'  iv_edm_type = 'String'  iv_nullable = abap_true ).
+
   ENDMETHOD.
 
   "══════════════════════════════════════════════════════════════════
@@ -157,7 +190,7 @@ CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
   "══════════════════════════════════════════════════════════════════
   METHOD configure_etag.
     TRY.
-        DATA(lo_root) = model->get_entity_type( iv_entity_name = 'Checklist' ).
+        DATA(lo_root) = model->get_entity_type( iv_entity_name = 'ChecklistRoot' ).
         IF lo_root IS BOUND.
           DATA(lo_changed) = lo_root->get_property( iv_property_name = 'ChangedOn' ).
           IF lo_changed IS BOUND.

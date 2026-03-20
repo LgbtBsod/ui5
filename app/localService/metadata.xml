@@ -84,11 +84,6 @@
       <Parameter Name="Barriers" Type="Edm.String" Mode="In"/>
       <Parameter Name="Attachments" Type="Edm.String" Mode="In"/>
     </FunctionImport>
-    <FunctionImport Name="SetChecklistStatus" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
-      <Parameter Name="RootId" Type="Edm.String" Mode="In"/>
-      <Parameter Name="Status" Type="Edm.String" Mode="In"/>
-      <Parameter Name="SessionGuid" Type="Edm.String" Mode="In"/>
-    </FunctionImport>
     <FunctionImport Name="AnalyticsRefreshTrigger" ReturnType="Z_EHS_PRODUCTION_CONTROL_CKLT_SRV.FunctionResult" m:HttpMethod="POST">
       <Parameter Name="TaskKey" Type="Edm.String" Mode="In"/>
       <Parameter Name="RequestedBy" Type="Edm.String" Mode="In"/>

@@ -1,6 +1,6 @@
 /**
  * GatewayClientContracts.qunit.js
- * Regression guard for C-07 (SetChecklistStatus) and C-06 (Lock in BODY).
+ * Regression guard for C-06 (Lock in BODY) and forbidden path filters.
  * Place at: app/test/unit/framework/GatewayClientContracts.qunit.js
  */
 sap.ui.define([
@@ -15,7 +15,7 @@ sap.ui.define([
     var ALL_IMPORTS = [
         "LockAcquire", "LockHeartbeat", "LockRelease",
         "CreateChecklist", "CopyChecklist", "AutoSave", "SaveChanges",
-        "SetChecklistStatus", "AnalyticsRefreshTrigger",
+        "AnalyticsRefreshTrigger",
         "GetHierarchy", "ReportExport"
     ];
     var BODY  = Contracts.DIRECT_FUNCTION_BODY_ALLOWLIST;
@@ -29,10 +29,6 @@ sap.ui.define([
             }).length;
             assert.strictEqual(hits, 1, name + " must appear in exactly one allowlist (found " + hits + ")");
         });
-    });
-
-    QUnit.test("C-07: SetChecklistStatus in BODY (was missing, caused runtime throw)", function (assert) {
-        assert.ok(Support.allowlisted("SetChecklistStatus", BODY), "SetChecklistStatus in BODY");
     });
 
     QUnit.test("C-06: Lock operations in BODY (SessionGuid must not appear in URL)", function (assert) {
