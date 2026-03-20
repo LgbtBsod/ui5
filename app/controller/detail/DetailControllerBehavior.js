@@ -57,6 +57,18 @@ sap.ui.define([
         });
     }
 
+    function syncComputedEditFlags(oController) {
+        var oStateModel = oController && oController._oStateValidationModel;
+        var oViewModel = ControllerModelRuntime.viewState(oController);
+        var sMode;
+        if (!oStateModel || !oViewModel) {
+            return;
+        }
+        sMode = String(oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) || "").trim().toUpperCase() || "READ";
+        oViewModel.setProperty("/isEditMode", sMode !== "READ");
+        oViewModel.setProperty("/isCreateMode", sMode === "CREATE");
+    }
+
     function bindStateValidationModel(oController) {
         oController._oStateValidationModel = ControllerModelRuntime.state(oController);
         if (!oController._oStateValidationModel || !oController._oStateValidationModel.attachPropertyChange) {
@@ -73,12 +85,7 @@ sap.ui.define([
             /* D-03 FIX: sync view>/isEditMode and view>/isCreateMode computed properties.
              * Avoids scattered inline expression bindings across XML fragments. */
             if (sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
-                oViewModel = ControllerModelRuntime.viewState(oController);
-                if (oViewModel) {
-                    var sMode = oController._oStateValidationModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE);
-                    oViewModel.setProperty("/isEditMode",   sMode !== "READ");
-                    oViewModel.setProperty("/isCreateMode", sMode === "CREATE");
-                }
+                syncComputedEditFlags(oController);
             }
             if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== "/activeObjectId" && sPath !== "/selectedId") {
                 return;
@@ -90,6 +97,7 @@ sap.ui.define([
             }
         };
         oController._oStateValidationModel.attachPropertyChange(oController._fnStateValidationChange, oController);
+        syncComputedEditFlags(oController);
     }
 
     return {

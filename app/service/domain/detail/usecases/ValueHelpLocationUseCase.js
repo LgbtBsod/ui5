@@ -173,6 +173,20 @@ sap.ui.define([
         });
     }
 
+    function resolveSelectionKey(oItem) {
+        if (!oItem || typeof oItem !== "object") {
+            return "";
+        }
+        return String(oItem.location_id || oItem.location_code || oItem.location_name || "").trim();
+    }
+
+    function hasVisibleSelection(aItems, oSelected) {
+        var sSelectedKey = resolveSelectionKey(oSelected);
+        return !!sSelectedKey && (aItems || []).some(function (oItem) {
+            return resolveSelectionKey(oItem) === sSelectedKey;
+        });
+    }
+
     ValueHelpLocationUseCase.prototype.execute = function (mInput, mCtx) {
         var sIntent = String((mInput && mInput.intent) || "open");
         var oUiState = mCtx && mCtx.uiState;
@@ -189,12 +203,19 @@ sap.ui.define([
 
         if (sIntent === "confirm") {
             var oSelected = oUiState && oUiState.get("view", "/locationVhSelection");
+            var aVisibleItems = (oUiState && oUiState.get("view", "/locationVhTree")) || [];
+            var bHasValidSelection = hasVisibleSelection(aVisibleItems, oSelected);
+            if (!bHasValidSelection) {
+                oSelected = null;
+            }
             return Promise.resolve(Result.ok({ selected: !!oSelected }, [
                 Effects.modelPatch("selected", "/basic/LOCATION_NAME", (oSelected && oSelected.location_name) || ""),
                 Effects.modelPatch("selected", "/basic/LOCATION_TEXT", (oSelected && (oSelected.location_text || oSelected.location_name)) || ""),
                 Effects.modelPatch("selected", "/basic/LOCATION_KEY", (oSelected && (oSelected.location_code || oSelected.location_id)) || ""),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, !!oSelected),
+                Effects.modelPatch("view", "/locationVhSelection", null),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
+                Effects.modelPatch("view", "/locationVhHint", ""),
                 Effects.dialog("locationValueHelp", "close", {})
             ]));
         }
@@ -215,6 +236,8 @@ sap.ui.define([
 
         if (sIntent !== "search") {
             return Promise.resolve(Result.ok({ intent: sIntent }, [
+                Effects.modelPatch("view", "/locationVhSelection", null),
+                Effects.modelPatch("view", "/locationVhHasSelection", false),
                 Effects.modelPatch("view", "/locationVhHint", ""),
                 Effects.dialog("locationValueHelp", sIntent, {})
             ]));
@@ -226,6 +249,7 @@ sap.ui.define([
             return Promise.resolve(Result.ok({ items: aFilteredLoaded, cacheKey: sCacheKey }, [
                 Effects.modelPatch("view", "/locationVhCacheKey", sCacheKey),
                 Effects.modelPatch("view", "/locationVhTree", aFilteredLoaded),
+                Effects.modelPatch("view", "/locationVhSelection", null),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
                 Effects.modelPatch("view", "/locationVhHint", aFilteredLoaded.length ? "" : "locationValueHelpNoDataHint")
             ]));
@@ -237,6 +261,7 @@ sap.ui.define([
                 Effects.modelPatch("view", "/locationVhTreeSource", oLoaded.items),
                 Effects.modelPatch("view", "/locationVhTree", aFiltered),
                 Effects.modelPatch("view", "/locationVhLoaded", true),
+                Effects.modelPatch("view", "/locationVhSelection", null),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
                 Effects.modelPatch("view", "/locationVhHint", aFiltered.length ? "" : "locationValueHelpNoDataHint")
             ]);

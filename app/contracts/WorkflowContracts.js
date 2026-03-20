@@ -24,6 +24,12 @@ sap.ui.define([], function () {
         FAILED: "FAILED"
     });
 
+    var CHECKLIST_STATUSES = Object.freeze({
+        DRAFT: "DRAFT",
+        REGISTERED: "REGISTERED",
+        CLOSED: "CLOSED"
+    });
+
     var REASONS = Object.freeze({
         READ_ONLY: "READ_ONLY",
         IDLE_TIMEOUT: "IDLE_TIMEOUT",
@@ -78,6 +84,7 @@ sap.ui.define([], function () {
         EDIT_MODES: EDIT_MODES,
         LOCK_STATES: LOCK_STATES,
         AUTOSAVE_STATES: AUTOSAVE_STATES,
+        CHECKLIST_STATUSES: CHECKLIST_STATUSES,
         REASONS: REASONS,
         normalizeEditMode: normalizeEditMode,
         normalizeLockState: normalizeLockState,

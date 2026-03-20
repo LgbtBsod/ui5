@@ -1,7 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator"
-], function (ClientKeyGenerator) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (ClientKeyGenerator, WorkflowContracts) {
     "use strict";
+
+    var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
 
     function nowParts() {
         var oNow = new Date();
@@ -22,13 +25,14 @@ sap.ui.define([
 
     function rootNode(oSource, sRootKey) {
         var o = oSource || {};
+        var sStatus = String(o.status || o.Status || CHECKLIST_STATUSES.DRAFT).toUpperCase() || CHECKLIST_STATUSES.DRAFT;
         return {
             id: sRootKey,
             Key: sRootKey,
             RootKey: sRootKey,
             client_row_id: sRootKey,
-            status: String(o.status || o.Status || "DRAFT").toUpperCase() || "DRAFT",
-            Status: String(o.status || o.Status || "DRAFT").toUpperCase() || "DRAFT",
+            status: sStatus,
+            Status: sStatus,
             overall_result: null,
             version_number: 0,
             VersionNumber: 0,

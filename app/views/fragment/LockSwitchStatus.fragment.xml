@@ -4,9 +4,9 @@
     </BusyIndicator>
     <Switch
         id="detailEditSwitch"
-        visible="{= !${view>/isCreateMode} }"
+        visible="{= ${state>/selectedId} !== '__CREATE' &amp;&amp; ${state>/activeObjectId} !== '__CREATE' &amp;&amp; !!${selected>/root/id} }"
         state="{view>/isEditMode}"
-        enabled="{= !${view>/isCreateMode} &amp;&amp; !${state>/lockOperationPending} }"
+        enabled="{= ${state>/selectedId} !== '__CREATE' &amp;&amp; ${state>/activeObjectId} !== '__CREATE' &amp;&amp; !!${selected>/root/id} &amp;&amp; !${state>/lockOperationPending} }"
         customTextOn=""
         customTextOff=""
         change=".onToggleEdit"

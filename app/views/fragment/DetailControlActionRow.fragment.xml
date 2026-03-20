@@ -21,7 +21,7 @@
             icon="sap-icon://save"
             type="Emphasized"
             text="{i18n>objectSave}"
-            visible="{view>/isEditMode}"
+            visible="{= ${view>/isEditMode} &amp;&amp; ${state>/selectedId} !== '__CREATE' &amp;&amp; ${state>/activeObjectId} !== '__CREATE' }"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onSaveDetail"
             tooltip="{i18n>objectSaveTooltip}"
@@ -50,7 +50,7 @@
             icon="sap-icon://delete"
             text="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
             type="{= ${view>/deleteChecklistConfirmArmed} ? 'Transparent' : 'Reject' }"
-            visible="{parts:[{path:'state>/workflow/detail/editMode'},{path:'selected>/root/id'}], formatter:'.formatDeleteChecklistVisible'}"
+            visible="{parts:[{path:'state>/workflow/detail/editMode'},{path:'state>/activeObjectId'}], formatter:'.formatDeleteChecklistVisible'}"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onArmDeleteChecklist"
             tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteTooltip} }"
@@ -64,7 +64,7 @@
             icon="sap-icon://accept"
             text="{i18n>deleteConfirmButton}"
             type="Reject"
-            visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${view>/isEditMode} &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+            visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${view>/isEditMode} &amp;&amp; !!${state>/activeObjectId} &amp;&amp; ${state>/activeObjectId} !== '__CREATE' }"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onConfirmDeleteChecklist"
             tooltip="{i18n>deleteConfirmTooltip}"
@@ -78,14 +78,15 @@
             icon="sap-icon://status-inactive"
             text="{i18n>statusDraft}"
             visible="{view>/isEditMode}"
+            enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} &amp;&amp; !${state>/validationSummary/hasErrors} }"
             press=".onChangeChecklistStatus"
-            tooltip="{i18n>statusDraftTooltip}"
+            tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusDraftTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="DRAFT"/>
+                <core:CustomData key="targetStatus" value="{= 'DRAFT' }"/>
             </customData>
         </Button>
 
@@ -93,14 +94,15 @@
             icon="sap-icon://status-critical"
             text="{i18n>statusRegistered}"
             visible="{view>/isEditMode}"
+            enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} &amp;&amp; !${state>/validationSummary/hasErrors} }"
             press=".onChangeChecklistStatus"
-            tooltip="{i18n>statusRegisteredTooltip}"
+            tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusRegisteredTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="REGISTERED"/>
+                <core:CustomData key="targetStatus" value="{= 'REGISTERED' }"/>
             </customData>
         </Button>
 
@@ -108,14 +110,15 @@
             icon="sap-icon://status-positive"
             text="{i18n>statusClosed}"
             visible="{view>/isEditMode}"
+            enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} &amp;&amp; !${state>/validationSummary/hasErrors} }"
             press=".onChangeChecklistStatus"
-            tooltip="{i18n>statusClosedTooltip}"
+            tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusClosedTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="CLOSED"/>
+                <core:CustomData key="targetStatus" value="{= 'CLOSED' }"/>
             </customData>
         </Button>
 
@@ -127,7 +130,7 @@
             tooltip="{i18n>detailCopyLinkTooltip}"
             enabled="{= !${state>/ui/busy/detail} }"
             class="detailRailActionBtn appActionSecondary chkRipple"
-            visible="{path:'selected>/root/id', formatter:'.formatCopyLinkVisible'}">
+            visible="{path:'state>/activeObjectId', formatter:'.formatCopyLinkVisible'}">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Disappear"/>
             </layoutData>

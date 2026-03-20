@@ -28,25 +28,25 @@ sap.ui.define([
 
     function buildCurrentIntent(oStateModel) {
         var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sSelectedId = RootIdRuntime.resolveFromStateModel(oStateModel);
+        var sActiveId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
         var sLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
 
         if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             return cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
         }
-        if ((sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT || sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) && sSelectedId) {
+        if ((sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT || sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) && sActiveId) {
             return {
                 routeName: NavigationContracts.ROUTES.DETAIL_LAYOUT,
                 routeArgs: {
-                    id: sSelectedId,
+                    id: sActiveId,
                     layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
                 }
             };
         }
-        if ((sRouteName === NavigationContracts.ROUTES.DETAIL || sSelectedId) && sSelectedId) {
+        if (sRouteName === NavigationContracts.ROUTES.DETAIL && sActiveId) {
             return {
                 routeName: NavigationContracts.ROUTES.DETAIL,
-                routeArgs: { id: sSelectedId }
+                routeArgs: { id: sActiveId }
             };
         }
         return buildFallbackIntent();

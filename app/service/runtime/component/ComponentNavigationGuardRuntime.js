@@ -83,6 +83,7 @@ sap.ui.define([
                 return;
             }
             if (ModelStateRuntime.readOnModel(oStateModel, PATHS.IS_DIRTY, false) && shouldGuardDetailNavigation(oStateModel, oEvent)) {
+                var oBlockedIntent = resolveNextRouteIntent(oEvent);
                 oEvent.preventDefault();
                 mOptions.queuePendingNavigationIntent(oEvent);
                 if (typeof mOptions.revertPendingNavigationIntent === "function") {
@@ -109,7 +110,11 @@ sap.ui.define([
                         mOptions.clearPendingNavigationIntent();
                         mOptions.resetDetailNavigationState(oComponent);
                         ModelStateRuntime.writeOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, true);
-                        oComponent.getRouter().navTo(oPending.routeName || oEvent.getParameter("name"), oPending.routeArgs || oEvent.getParameter("arguments") || {}, false);
+                        oComponent.getRouter().navTo(
+                            oPending.routeName || oBlockedIntent.routeName,
+                            oPending.routeArgs || oBlockedIntent.routeArgs || {},
+                            false
+                        );
                         return;
                     }
                     if (sDecision === VALUES.NO_CHANGES) {

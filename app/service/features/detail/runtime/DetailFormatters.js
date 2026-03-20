@@ -6,16 +6,15 @@ sap.ui.define([
 ], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade) {
     "use strict";
 
-    var LIFECYCLE_TEXT_KEYS = {
-        REGISTERED: { key: "statusRegistered", fallback: "Registered" },
-        CLOSED: { key: "statusClosed", fallback: "Closed" },
-        DRAFT: { key: "statusDraft", fallback: "Draft" }
-    };
-    var LIFECYCLE_STATES = {
-        REGISTERED: "Warning",
-        CLOSED: "Success",
-        DRAFT: "Information"
-    };
+    var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
+    var LIFECYCLE_TEXT_KEYS = {};
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.REGISTERED] = { key: "statusRegistered", fallback: "Registered" };
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.CLOSED] = { key: "statusClosed", fallback: "Closed" };
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT] = { key: "statusDraft", fallback: "Draft" };
+    var LIFECYCLE_STATES = {};
+    LIFECYCLE_STATES[CHECKLIST_STATUSES.REGISTERED] = "Warning";
+    LIFECYCLE_STATES[CHECKLIST_STATUSES.CLOSED] = "Success";
+    LIFECYCLE_STATES[CHECKLIST_STATUSES.DRAFT] = "Information";
     var LOCK_STATE_SEMANTICS = {
         SUCCESS: "Success",
         ERROR: "Error"
@@ -211,13 +210,13 @@ sap.ui.define([
 
         formatLifecycleStatusText: function (sStatus) {
             var sNormalized = String(sStatus || "").toUpperCase();
-            var oMeta = LIFECYCLE_TEXT_KEYS[sNormalized] || LIFECYCLE_TEXT_KEYS.DRAFT;
+            var oMeta = LIFECYCLE_TEXT_KEYS[sNormalized] || LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT];
             return text(this, oMeta.key, oMeta.fallback);
         },
 
         formatLifecycleStatusState: function (sStatus) {
             var sNormalized = String(sStatus || "").toUpperCase();
-            return LIFECYCLE_STATES[sNormalized] || LIFECYCLE_STATES.DRAFT;
+            return LIFECYCLE_STATES[sNormalized] || LIFECYCLE_STATES[CHECKLIST_STATUSES.DRAFT];
         },
 
         formatDraftStateText: function (bDirty) {

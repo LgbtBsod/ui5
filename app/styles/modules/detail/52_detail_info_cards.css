@@ -36,6 +36,14 @@
   width: 100%;
 }
 
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapMListUl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0.54rem;
+  align-items: stretch;
+}
+
 .chkApp .detailContent .infoCardGrid .sapFGLI {
   min-width: 0;
   margin: 0;
@@ -101,6 +109,12 @@
   gap: 0.42rem;
 }
 
+.chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+.chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapMListUl {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.42rem;
+}
+
 .chkApp .appLayoutSplit .detailPage .detailInfoBridgeCard {
   margin-bottom: 0.12rem;
 }
@@ -123,4 +137,29 @@
 .chkApp .appLayoutSplit .detailPage .detailContent .infoCardGrid .infoCardValue {
   font-size: 0.8rem;
   line-height: 1.28;
+}
+
+@media (max-width: 1100px) {
+  .chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+  .chkApp .detailInfoExperienceCard .infoCardGrid .sapMListUl {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 820px) {
+  .chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+  .chkApp .detailInfoExperienceCard .infoCardGrid .sapMListUl,
+  .chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+  .chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapMListUl {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+  .chkApp .detailInfoExperienceCard .infoCardGrid .sapMListUl,
+  .chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+  .chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapMListUl {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }

@@ -55,7 +55,7 @@
             </VBox>
         </VBox>
         <beginButton>
-            <Button text="{i18n>okButton}" icon="sap-icon://accept" type="Emphasized" press=".onConfirmLocationValueHelp" visible="{view>/locationVhHasSelection}"/>
+            <Button text="{i18n>okButton}" icon="sap-icon://accept" type="Emphasized" press=".onConfirmLocationValueHelp" visible="{view>/locationVhHasSelection}" enabled="{view>/locationVhHasSelection}"/>
         </beginButton>
         <endButton>
             <Button text="{i18n>closeButton}" icon="sap-icon://nav-back" press=".onCloseLocationValueHelp"/>

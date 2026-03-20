@@ -15,6 +15,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchShortcutRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchScrollRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchStickyOffsetRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/WorkspaceRouteNavigation.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ValueHelpLocationUseCase.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ExportSearchUseCase.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentLockReleaseRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailPersistenceRuntime.qunit",
