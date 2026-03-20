@@ -16,8 +16,11 @@ function renderArchitectAuditMarkdown(report) {
       {
         title: 'Metrics',
         lines: formatKeyValueLines([
-          ['Search surface lines', report.metrics.searchSurfaceLines],
-          ['Detail surface lines', report.metrics.detailSurfaceLines],
+          ['Search controller/runtime lines', report.metrics.searchControllerLines],
+          ['Detail controller/runtime lines', report.metrics.detailControllerLines],
+          ['Search runtime modules', report.metrics.searchRuntimeModules],
+          ['Detail runtime modules', report.metrics.detailRuntimeModules],
+          ['Framework runtime modules', report.metrics.frameworkRuntimeModules],
           ['Component.js lines', report.metrics.componentLines],
           ['app/styles/app-styles.css lines', report.metrics.styleLines]
         ])

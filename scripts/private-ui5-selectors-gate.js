@@ -2,6 +2,8 @@
 
 const { runGate } = require('./lib/gateRunner');
 const { scanPatterns } = require('./lib/patternScan');
+const { readJsonSafe } = require('./lib/auditInput');
+const path = require('path');
 
 const PRIVATE_PATTERNS = [
   { id: 'private-sapUiComp-filterbar-toolbar', regex: /\.sapUiCompFilterBarToolbar/g, message: 'Private SmartFilterBar toolbar selector is forbidden outside allowlist' },
@@ -12,19 +14,8 @@ const PRIVATE_PATTERNS = [
   { id: 'private-sapMListTbl-internals', regex: /\.sapMListTbl(?:Cnt|HeaderCell|Cell|Row)\b/g, message: 'Private sap.m table renderer selector is forbidden outside allowlist' }
 ];
 
-const TEMP_ALLOWLIST = new Set([
-  'app/service/features/search/runtime/SearchSelectionFocusRuntime.js',
-  'app/styles/modules/10_base.css',
-  'app/styles/modules/22_skeleton.css',
-  'app/styles/modules/controls/25_table_actions.css',
-  'app/styles/modules/92_ui5_surface_tuning.css',
-  'app/styles/modules/analytics/44_analytics_panels.css',
-  'app/styles/modules/detail/44_detail_attachments.css',
-  'app/styles/modules/dialogs/24_dialog_tables.css',
-  'app/styles/modules/detail/43_detail_tables.css',
-  'app/styles/modules/dialogs/25_dialog_runtime_skin.css',
-  'app/styles/modules/search/43_search_results_table.css'
-]);
+const ALLOWLIST_PATH = path.join(process.cwd(), 'scripts', 'private-ui5-selectors-allowlist.json');
+const TEMP_ALLOWLIST = new Set(Object.keys(readJsonSafe(ALLOWLIST_PATH, {})));
 
 runGate({
   name: 'private-ui5-selectors-gate',

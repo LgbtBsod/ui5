@@ -40,6 +40,27 @@ Before the live session starts, confirm:
 
 If any pre-flight item is missing, do not start evidence capture.
 
+## Automated Live Entry Point
+
+For the QA Gateway evidence run, use the automated runner as the default entry point:
+
+- set `GATEWAY_SMOKE_EXTERNAL_BACKEND=1`
+- set `GATEWAY_SMOKE_BACKEND_BASE=<QA host base>`
+- optionally set `GATEWAY_SMOKE_SERVICE_URL=<full QA service root>`
+- optionally set `GATEWAY_SMOKE_UI_URL=http://127.0.0.1:8080/index.html`
+- run `npm run smoke:gateway:live-evidence`
+
+The runner writes:
+
+- `docs/artifacts/gateway-live-evidence-summary.json`
+- `docs/artifacts/gateway-live-evidence-summary.md`
+
+The summary is the single execution verdict for the session and must classify the run as one of:
+
+- `PASS_SAP_EVIDENCE`
+- `BLOCKED_SAP_ENV`
+- `FAIL_PRODUCT_CONTRACT`
+
 ## Local Baseline Before SAP Session
 
 - Run `python scripts/interaction-smoke.py http://127.0.0.1:8080/index.html` against the local static host before the live SAP session.

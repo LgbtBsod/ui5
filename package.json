@@ -15,15 +15,18 @@
     "serve:test": "node scripts/start-local-server.js",
     "lint:css": "stylelint \"app/styles/**/*.css\"",
     "gate:css-architecture": "node scripts/css-architecture-governance.js",
+    "gate:architecture-sprawl": "node scripts/architecture-sprawl-gate.js",
     "gate:xml-styles": "node scripts/xml-class-governance.js",
     "gate:legacy-styles": "node scripts/legacy-style-governance.js",
     "smoke:gateway:lifecycle": "python scripts/gateway-detail-lifecycle-proof.py",
     "smoke:ui5-cache": "python scripts/ui5-resource-cache-regression.py",
-    "validate": "npm run check:eol && npm run lint:css && npm run gate:css-architecture && npm run gate:xml-styles && npm run gate:legacy-styles && node scripts/css-duplicate-selector-gate.js && npm run build:preload",
+    "validate": "npm run check:eol && npm run lint:css && npm run gate:css-architecture && npm run gate:architecture-sprawl && npm run gate:xml-styles && npm run gate:legacy-styles && node scripts/css-duplicate-selector-gate.js && npm run build:preload",
     "check:eol": "node scripts/check-eol.js",
     "gate:persistence-i18n": "node scripts/persistence-i18n-gate.js",
     "gate:release": "node scripts/release-readiness-gate.js",
-    "smoke:local": "powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1"
+    "smoke:local": "powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1",
+    "smoke:gateway:live-evidence": "node scripts/gateway-live-evidence-pack.js",
+    "gate:gateway-live-evidence": "node scripts/gateway-live-evidence-gate.js"
   },
   "devDependencies": {
     "@ui5/cli": "^3.11.6",

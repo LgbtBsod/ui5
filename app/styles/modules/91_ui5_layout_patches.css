@@ -24,6 +24,7 @@
   overflow-y: auto;
 }
 
+/* Sanctioned compatibility hook: UI5 1.71 scroll hosts expose scrollbar styling only through renderer containers. */
 .chkApp .sapMScrollCont,
 .chkApp .sapMDialogScrollCont,
 .chkApp .sapMDialogScroll,

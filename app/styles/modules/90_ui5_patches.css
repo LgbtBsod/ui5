@@ -82,6 +82,7 @@ body.chkAppRoot.appDark .chkApp .shellContextChip .sapUiIcon {
   letter-spacing: 0.01em;
 }
 
+/* Sanctioned compatibility hook: UI5 1.71 table headers still require renderer-level contrast tuning. */
 body.chkAppRoot.appDark .chkApp .detailGridTable .sapUiTableColCell,
 body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMListTblHeaderCell,
 body.chkAppRoot.appDark .chkApp .detailAttachmentTable .sapMListTblHeaderCell {

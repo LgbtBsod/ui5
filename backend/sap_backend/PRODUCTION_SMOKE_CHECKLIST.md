@@ -2,6 +2,12 @@
 
 Run this checklist on the real Gateway / ABAP contour after deployment.
 
+Preferred automated entry point for QA Gateway evidence:
+
+- `npm run smoke:gateway:live-evidence`
+- review `docs/artifacts/gateway-live-evidence-summary.json`
+- validate it with `npm run gate:gateway-live-evidence`
+
 ## Local Pre-Flight Baseline
 
 - [ ] Start local static runtime and run `python scripts/interaction-smoke.py http://127.0.0.1:8080/index.html`.

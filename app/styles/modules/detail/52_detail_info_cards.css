@@ -5,6 +5,7 @@
   border-bottom-right-radius: calc(var(--radius-xl) - 0.1rem);
 }
 
+/* Sanctioned compatibility hook: ObjectPage host keeps painting its own background in UI5 1.71. */
 .chkApp .sapUxAPObjectPageContainer,
 .chkApp .sapUxAPObjectPageContainer + div,
 .chkApp .sapUxAPObjectPageHeaderDetailsHidden {

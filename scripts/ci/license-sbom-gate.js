@@ -23,21 +23,17 @@ function parseRequirements(text) {
     .filter(Boolean);
 }
 
-function main() {
+function ensureInputs() {
   if (!fs.existsSync(REQUIREMENTS)) {
-    console.error('license-sbom-gate FAIL: requirements.txt not found');
-    process.exit(1);
+    throw new Error('requirements.txt not found');
   }
   if (!fs.existsSync(CATALOG)) {
-    console.error('license-sbom-gate FAIL: dependency-license-catalog.json not found');
-    process.exit(1);
+    throw new Error('dependency-license-catalog.json not found');
   }
+}
 
-  const requirements = parseRequirements(fs.readFileSync(REQUIREMENTS, 'utf8'));
-  const catalog = JSON.parse(fs.readFileSync(CATALOG, 'utf8'));
-  const pyCatalog = (catalog && catalog.python) || {};
+function buildComponents(requirements, pyCatalog) {
   const issues = [];
-
   const components = requirements.map((dep) => {
     const license = pyCatalog[dep.name] || '';
     if (!license) {
@@ -52,6 +48,46 @@ function main() {
       license: license || 'UNKNOWN'
     };
   });
+  return { components, issues };
+}
+
+function renderMarkdown(sbom) {
+  return [
+    '# Dependency SBOM and License Policy Report',
+    '',
+    `- Generated at: ${sbom.generatedAt}`,
+    `- Components: ${sbom.components.length}`,
+    `- Issues: ${sbom.issues.length}`,
+    '',
+    '## Components',
+    ...sbom.components.map((c) => `- ${c.ecosystem}:${c.name} (${c.spec}) - ${c.license}`),
+    '',
+    '## Policy',
+    `- Allowed licenses: ${Array.from(ALLOWED).join(', ')}`,
+    '',
+    '## Issues',
+    ...(sbom.issues.length ? sbom.issues.map((i) => `- ${i}`) : ['- none'])
+  ].join('\n') + '\n';
+}
+
+function writeReports(sbom) {
+  fs.mkdirSync(path.dirname(OUT_JSON), { recursive: true });
+  fs.writeFileSync(OUT_JSON, JSON.stringify(sbom, null, 2));
+  fs.writeFileSync(OUT_MD, renderMarkdown(sbom));
+}
+
+function main() {
+  try {
+    ensureInputs();
+  } catch (error) {
+    console.error(`license-sbom-gate FAIL: ${error.message}`);
+    process.exit(1);
+  }
+
+  const requirements = parseRequirements(fs.readFileSync(REQUIREMENTS, 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(CATALOG, 'utf8'));
+  const pyCatalog = (catalog && catalog.python) || {};
+  const { components, issues } = buildComponents(requirements, pyCatalog);
 
   const sbom = {
     generatedAt: new Date().toISOString(),
@@ -62,32 +98,14 @@ function main() {
     issues
   };
 
-  fs.mkdirSync(path.dirname(OUT_JSON), { recursive: true });
-  fs.writeFileSync(OUT_JSON, JSON.stringify(sbom, null, 2));
-
-  const md = [
-    '# Dependency SBOM and License Policy Report',
-    '',
-    `- Generated at: ${sbom.generatedAt}`,
-    `- Components: ${components.length}`,
-    `- Issues: ${issues.length}`,
-    '',
-    '## Components',
-    ...components.map((c) => `- ${c.ecosystem}:${c.name} (${c.spec}) — ${c.license}`),
-    '',
-    '## Policy',
-    `- Allowed licenses: ${Array.from(ALLOWED).join(', ')}`,
-    '',
-    '## Issues',
-    ...(issues.length ? issues.map((i) => `- ${i}`) : ['- none'])
-  ].join('\n') + '\n';
-  fs.writeFileSync(OUT_MD, md);
+  writeReports(sbom);
 
   if (issues.length) {
     console.error('license-sbom-gate FAIL');
-    issues.forEach((i) => console.error(`- ${i}`));
+    issues.forEach((issue) => console.error(`- ${issue}`));
     process.exit(1);
   }
+
   console.log('license-sbom-gate PASS');
 }
 
