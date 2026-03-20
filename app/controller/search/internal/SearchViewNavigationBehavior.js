@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchStartupBehavior"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchStartupBehavior"
 ], function (SearchCommandPolicy, NavigationIntentService, SearchActionRuntime, SearchAnalyticsRailRuntime, SearchStartupBehavior) {
     "use strict";
 

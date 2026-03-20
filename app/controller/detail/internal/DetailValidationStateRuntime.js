@@ -1,7 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationHelperRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationHelperRuntime"
 ], function (ModelStateRuntime, ModelContracts, DetailValidationHelperRuntime) {
     "use strict";
 

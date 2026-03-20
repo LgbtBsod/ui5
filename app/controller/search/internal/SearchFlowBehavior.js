@@ -1,7 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFilterLifecycleBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewLoadBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchFilterLifecycleBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchViewLoadBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",

@@ -3,13 +3,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewNavigationBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchFlowBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchViewNavigationBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewSelectionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchViewNavigationBehavior, SearchViewSelectionBehavior, SearchSelectionRuntime, SearchViewportRuntime, OperationSourceContracts, CreateSentinel) {
+], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchFlowBehavior, SearchViewNavigationBehavior, SearchViewSelectionBehavior, SearchSelectionRuntime, SearchViewportRuntime, OperationSourceContracts, CreateSentinel) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -106,6 +107,15 @@ sap.ui.define([
     }
 
     return {
+        withActionBusy: function (oController, sPath, fnAction) {
+            return SearchFlowBehavior.withActionBusy(oController, sPath, fnAction);
+        },
+        onSmartSearch: function (oController) {
+            return SearchFlowBehavior.onSmartSearch(oController);
+        },
+        onRetrySearchLoad: function (oController) {
+            return SearchFlowBehavior.onRetrySearchLoad(oController);
+        },
         onCreate: onCreate,
         onCopy: onCopy,
         onSelectVisibleRows: onSelectVisibleRows,
@@ -113,6 +123,9 @@ sap.ui.define([
         onTableSelectionChange: onTableSelectionChange,
         onTableItemPress: onTableItemPress,
         onExportScreen: onExportScreen,
-        onExportMenuAction: onExportMenuAction
+        onExportMenuAction: onExportMenuAction,
+        onOpenWorkflowAnalytics: function (oController) {
+            return SearchViewNavigationBehavior.openWorkflowAnalytics(oController);
+        }
     };
 });

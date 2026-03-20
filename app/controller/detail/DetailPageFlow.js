@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAccessViewState",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailAccessViewState",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",

@@ -3,7 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLocationSuggestRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchRequestRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",

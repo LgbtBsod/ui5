@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationFocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationReactiveRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationFocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationReactiveRuntime"
 ], function (DetailValidationStateRuntime, DetailValidationFocusRuntime, DetailValidationReactiveRuntime) {
     "use strict";
 

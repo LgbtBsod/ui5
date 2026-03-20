@@ -1,6 +1,6 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchAnalyticsIntentBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchAnalyticsIntentBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy"
 ], function (JSONModel, SearchAnalyticsIntentBehavior, SearchCommandPolicy) {
     "use strict";

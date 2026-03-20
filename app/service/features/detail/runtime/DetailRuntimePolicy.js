@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DetailRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DetailRuntimeDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DetailRuntimeOverrideHandlers"
