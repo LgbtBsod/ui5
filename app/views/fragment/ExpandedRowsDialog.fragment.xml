@@ -2,7 +2,7 @@
     <Dialog
         id="expandedRowsDialog"
         binding="{view>/activeExpandedDialog}"
-        class="glassDialog governedDialog expandedRowsDialog"
+        class="appDialogSurface governedDialog expandedRowsDialog"
         title="{path:'view>titleKey', formatter:'.formatI18nByKey'}"
         contentWidth="72rem"
         contentHeight="30rem"
@@ -16,7 +16,7 @@
         <content>
             <VBox
                 binding="{view>tableSpec}"
-                class="expandedDialogContent dialogContentShell governedDialogContent tableDialogBody workflowBusyScope workflowBusyScopeDialog"
+                class="expandedDialogContent dialogBodyShell tableDialogBody dialogBusyScope"
                 renderType="Bare">
                 <VBox
                     class="workflowBusyOverlayShell workflowBusyOverlayShellDialog"

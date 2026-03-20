@@ -2,7 +2,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:smartTable="sap.ui.comp.smarttable">
-    <VBox id="searchResultsShell" width="100%" class="glassCard smartTableGlass searchResultsTable searchResultsExperienceShell">
+    <VBox id="searchResultsShell" width="100%" class="searchResultsSurface searchResultsTable searchResultsExperienceShell">
         <VBox visible="{= (${view>/busy} || ${view>/tableBusy}) &amp;&amp; ${view>/hasSearched} }" renderType="Bare">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonList" type="XML"/>
         </VBox>

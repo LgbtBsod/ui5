@@ -45,7 +45,7 @@
 
         <ToolbarSpacer class="detailControlRowSpacer"/>
 
-        <BusyIndicator visible="{= ${state>/ui/busy/detail} || ${state>/saveInFlight} }" size="1rem" class="sapUiTinyMarginEnd">
+        <BusyIndicator visible="{= ${state>/ui/busy/detail} || ${state>/saveInFlight} }" size="1rem" class="detailControlBusyIndicator detailControlBusyIndicatorTrailing">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Disappear"/>
             </layoutData>
@@ -58,7 +58,7 @@
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onCancelEditFromDetail"
             tooltip="{i18n>objectCancelTooltip}"
-            class="detailRailActionBtn actionPrioritySecondary chkRipple">
+            class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="High"/>
             </layoutData>

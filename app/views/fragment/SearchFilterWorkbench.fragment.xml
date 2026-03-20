@@ -2,7 +2,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:smartFilterBar="sap.ui.comp.smartfilterbar">
-    <VBox id="searchFilterCard" width="100%" class="glassCard filterCard smartFilterGlass searchFilterCardDense searchFilterExperienceShell">
+    <VBox id="searchFilterCard" width="100%" class="searchFilterSurface searchWorkbenchSurface searchFilterExperienceShell">
         <VBox visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }" class="searchFilterSkeletonShell" renderType="Bare">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonFormSection" type="XML"/>
         </VBox>
@@ -31,7 +31,7 @@
                 <smartFilterBar:ControlConfiguration key="Status" label="{i18n>statusLabel}" visibleInAdvancedArea="true"/>
                 <smartFilterBar:ControlConfiguration key="FailChecksSegmentControl" label="{i18n>filterFailSegmentLabel}" visibleInAdvancedArea="true">
                     <smartFilterBar:customControl>
-                        <VBox class="searchCustomFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                        <VBox class="searchCustomFilterWrapper searchFilterSegmentWrapper" renderType="Bare">
                             <SegmentedButton id="FailChecksSegmentControl" selectedKey="{state>/search/checksFailSegment}" selectionChange=".onChecksFailSegmentChange" class="resultSegmentControl">
                                 <items>
                                     <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>
@@ -44,7 +44,7 @@
                 </smartFilterBar:ControlConfiguration>
                 <smartFilterBar:ControlConfiguration key="FailBarriersSegmentControl" label="{i18n>filterBarrierSegmentLabel}" visibleInAdvancedArea="true">
                     <smartFilterBar:customControl>
-                        <VBox class="searchCustomFilterWrapper sapUiTinyMarginTopBottom" renderType="Bare">
+                        <VBox class="searchCustomFilterWrapper searchFilterSegmentWrapper" renderType="Bare">
                             <SegmentedButton id="FailBarriersSegmentControl" selectedKey="{state>/search/barriersFailSegment}" selectionChange=".onBarriersFailSegmentChange" class="resultSegmentControl">
                                 <items>
                                     <SegmentedButtonItem key="ALL" text="{i18n>filterFailSegmentAll}"/>

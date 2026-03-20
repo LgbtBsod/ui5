@@ -181,7 +181,7 @@ sap.ui.define([
         buildInfoCard: function (oController, sId, oContext) {
         var sKey = String(BindingContextReader.read(oContext, "key", "") || "");
             var oItem = createInfoCardWrapper(sId, oContext);
-            var oShell = withStyleClasses(new VBox({ renderType: "Bare" }), "infoCardTile mushroomCard");
+            var oShell = withStyleClasses(new VBox({ renderType: "Bare" }), "appMetricSurface mushroomCard");
             var oTitle = withStyleClasses(new Text(), "infoCardTitle");
             var oHeaderRow = withStyleClasses(new HBox({
                 justifyContent: "SpaceBetween",

@@ -103,7 +103,7 @@ sap.ui.define([
             });
 
             withStyleClasses(oInput, "detailPersonSuggestInput");
-            withStyleClasses(oHint, "sapUiTinyMarginTop sapThemeNegativeText");
+            withStyleClasses(oHint, "detailInlineHintText sapThemeNegativeText");
             bindReadVisibility(oReadText);
             bindEditVisibility(oInput);
             oHint.bindProperty("text", {

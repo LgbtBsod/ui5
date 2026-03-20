@@ -16,13 +16,13 @@
                 icon="sap-icon://business-objects-experience"
                 type="Transparent"
                 press=".onOpenAnalyticsReportDialog"
-                class="analyticsReportButton actionPrioritySecondary"/>
+                class="analyticsReportButton appActionSecondary"/>
             <Button
                 text="{i18n>analyticsExportButton}"
                 icon="sap-icon://excel-attachment"
                 type="Transparent"
                 press=".onExportAnalyticsReport"
-                class="analyticsExportButton actionPrioritySecondary"/>
+                class="analyticsExportButton appActionSecondary"/>
             <ObjectStatus
                 class="analyticsRefreshStatus statusChipSemantic"
                 text="{path: 'view>/refreshState', formatter: '.formatRefreshStatusText'}"
@@ -33,7 +33,7 @@
                 type="Emphasized"
                 enabled="{parts: [{path: 'view>/refreshBusy'}, {path: 'view>/refreshState'}], formatter: '.formatRefreshEnabled'}"
                 press=".onRefreshAnalytics"
-                class="analyticsRefreshButton actionPriorityPrimary"/>
+                class="analyticsRefreshButton appActionPrimary"/>
         </headerContent>
 
         <subHeader>
@@ -49,13 +49,13 @@
 
                 <VBox class="analyticsScreenBody" renderType="Bare">
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsMessageStack" type="XML"/>
-                    <VBox class="sapUiSmallMarginTop analyticsToplineSection" renderType="Bare">
+                    <VBox class="analyticsToplineSection" renderType="Bare">
                         <HBox class="analyticsToplineGrid" wrap="Wrap" renderType="Bare">
                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsToplinePrimaryCards" type="XML"/>
                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsToplineRateCards" type="XML"/>
                         </HBox>
 
-                        <HBox class="analyticsToplineMetaGrid sapUiSmallMarginTop" wrap="Wrap" renderType="Bare">
+                        <HBox class="analyticsToplineMetaGrid" wrap="Wrap" renderType="Bare">
                             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowStatusMetaChips" type="XML"/>
                         </HBox>
                     </VBox>

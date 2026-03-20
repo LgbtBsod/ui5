@@ -19,19 +19,6 @@
   padding-inline: 0;
 }
 
-.chkApp .detailControlPinnedDock {
-  min-width: 0;
-  width: 100%;
-  flex: 0 0 auto;
-  align-self: stretch;
-  position: relative;
-  top: auto;
-  z-index: auto;
-  height: auto;
-  min-height: 0;
-  margin-bottom: 0.62rem;
-}
-
 .chkApp .detailControlExperienceCard {
   flex: 0 0 auto;
   align-self: stretch;

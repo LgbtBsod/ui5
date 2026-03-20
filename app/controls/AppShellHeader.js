@@ -19,6 +19,15 @@ sap.ui.define([
 ) {
     "use strict";
 
+    function applyStyleClasses(oControl, aClassNames) {
+        (aClassNames || []).forEach(function (sClassName) {
+            if (sClassName) {
+                oControl.addStyleClass(sClassName);
+            }
+        });
+        return oControl;
+    }
+
     function applyPriority(oControl, sPriority) {
         oControl.setLayoutData(new OverflowToolbarLayoutData({
             priority: sPriority
@@ -107,11 +116,12 @@ sap.ui.define([
         init: function () {
             var that = this;
 
-            this._oEyebrow = new Text().addStyleClass("shellEyebrow");
+            this._oEyebrow = applyStyleClasses(new Text(), ["shellEyebrow"]);
             this._oProductTitle = new Title({
                 level: "H6"
-            }).addStyleClass("shellProductTitle");
-            this._oContextSubtitle = new Text().addStyleClass("shellContextSubtitle");
+            });
+            applyStyleClasses(this._oProductTitle, ["shellProductTitle"]);
+            this._oContextSubtitle = applyStyleClasses(new Text(), ["shellContextSubtitle"]);
 
             this._oHelpButton = applyPriority(new Button({
                 icon: "sap-icon://sys-help",
@@ -119,7 +129,8 @@ sap.ui.define([
                 press: function () {
                     that.fireHelpPress({ anchor: that._oHelpButton });
                 }
-            }).addStyleClass("shellActionBtn"), "High");
+            }), "High");
+            applyStyleClasses(this._oHelpButton, ["shellActionBtn"]);
 
             this._oSettingsButton = applyPriority(new Button({
                 icon: "sap-icon://action-settings",
@@ -127,7 +138,8 @@ sap.ui.define([
                 press: function () {
                     that.fireSettingsPress({ anchor: that._oSettingsButton });
                 }
-            }).addStyleClass("shellActionBtn"), "High");
+            }), "High");
+            applyStyleClasses(this._oSettingsButton, ["shellActionBtn"]);
 
             this._oAnalyticsButton = applyPriority(new Button({
                 icon: "sap-icon://business-objects-experience",
@@ -135,14 +147,16 @@ sap.ui.define([
                 press: function () {
                     that.fireAnalyticsPress({ anchor: that._oAnalyticsButton });
                 }
-            }).addStyleClass("shellActionBtn shellAnalyticsBtn"), "High");
+            }), "High");
+            applyStyleClasses(this._oAnalyticsButton, ["shellActionBtn", "shellAnalyticsBtn"]);
 
             this._oUserButton = applyPriority(new Button({
                 type: "Transparent",
                 press: function () {
                     that.fireUserPress({ anchor: that._oUserButton });
                 }
-            }).addStyleClass("shellUserBtn"), "NeverOverflow");
+            }), "NeverOverflow");
+            applyStyleClasses(this._oUserButton, ["shellUserBtn"]);
 
             this.setAggregation("_toolbar", new OverflowToolbar({
                 content: [
@@ -153,14 +167,16 @@ sap.ui.define([
                             this._oProductTitle,
                             this._oContextSubtitle
                         ]
-                    }).addStyleClass("shellBrandCluster"),
-                    new ToolbarSpacer().addStyleClass("shellHeaderSpacer"),
+                    }),
+                    applyStyleClasses(new ToolbarSpacer(), ["shellHeaderSpacer"]),
                     this._oHelpButton,
                     this._oSettingsButton,
                     this._oAnalyticsButton,
                     this._oUserButton
                 ]
-            }).addStyleClass("appShellHeader"));
+            }));
+            applyStyleClasses(this.getAggregation("_toolbar").getContent()[0], ["shellBrandCluster"]);
+            applyStyleClasses(this.getAggregation("_toolbar"), ["appShellHeader"]);
 
             syncHeaderContent(this);
         },

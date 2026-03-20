@@ -5,6 +5,13 @@
   border-bottom-right-radius: calc(var(--radius-xl) - 0.1rem);
 }
 
+.chkApp .sapUxAPObjectPageContainer,
+.chkApp .sapUxAPObjectPageContainer + div,
+.chkApp .sapUxAPObjectPageHeaderDetailsHidden {
+    background-color: transparent; 
+}
+
+
 .chkApp .detailInfoBridgeCard::after {
   content: "";
   position: absolute;
@@ -53,6 +60,7 @@
   flex: 0 0 auto;
 }
 
+.chkApp .detailContent .infoCardGrid .appMetricSurface,
 .chkApp .detailContent .infoCardGrid .infoCardTile {
   height: 100%;
   min-height: 8.2rem;
@@ -73,7 +81,9 @@
   cursor: grabbing;
 }
 
+.chkApp .detailContent .infoCardGrid .sapFGLI:focus .appMetricSurface,
 .chkApp .detailContent .infoCardGrid .sapFGLI:focus .infoCardTile,
+.chkApp .detailContent .infoCardGrid .sapFGLI:focus-within .appMetricSurface,
 .chkApp .detailContent .infoCardGrid .sapFGLI:focus-within .infoCardTile {
   border-color: color-mix(in srgb, var(--accent) 44%, transparent);
   box-shadow:
@@ -81,6 +91,7 @@
     0 14px 30px rgba(18, 36, 64, 0.1);
 }
 
+.chkApp .detailContent .infoCardGrid .appMetricSurface:hover,
 .chkApp .detailContent .infoCardGrid .infoCardTile:hover {
   transform: translateY(-2px);
 }
@@ -98,6 +109,7 @@
   right: 0.58rem;
 }
 
+.chkApp .appLayoutSplit .detailPage .detailContent .infoCardGrid .appMetricSurface,
 .chkApp .appLayoutSplit .detailPage .detailContent .infoCardGrid .infoCardTile {
   min-height: 7rem;
   padding: 0.68rem 0.72rem 0.64rem;

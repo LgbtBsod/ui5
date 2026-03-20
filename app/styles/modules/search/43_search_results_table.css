@@ -1,4 +1,6 @@
-.chkApp .searchResultsTable {
+.chkApp .searchResultsTable,
+.chkApp .searchResultsCard,
+.chkApp .searchResultsSurface {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -18,7 +20,9 @@
   overflow-y: visible;
 }
 
-.chkApp .searchResultsTable::after {
+.chkApp .searchResultsTable::after,
+.chkApp .searchResultsCard::after,
+.chkApp .searchResultsSurface::after {
   display: none;
 }
 
@@ -50,7 +54,8 @@
 
 .chkApp .searchResultsTable > *,
 .chkApp .searchResultsTable > * > *,
-.chkApp .searchResultsExperienceShell > * {
+.chkApp .searchResultsExperienceShell > *,
+.chkApp .searchResultsSurface > * {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -64,7 +69,10 @@
 .chkApp .searchResultsTable,
 .chkApp .searchResultsExperienceShell,
 .chkApp .searchResultsExperienceShell > *,
-.chkApp .searchResultsExperienceShell > * > * {
+.chkApp .searchResultsExperienceShell > * > *,
+.chkApp .searchResultsSurface,
+.chkApp .searchResultsSurface > *,
+.chkApp .searchResultsSurface > * > * {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -73,7 +81,10 @@
 
 .chkApp .searchResultsTable.searchResultsExperienceShell,
 .chkApp .searchResultsTable.searchResultsExperienceShell > *,
-.chkApp .searchResultsTable.searchResultsExperienceShell > * > * {
+.chkApp .searchResultsTable.searchResultsExperienceShell > * > *,
+.chkApp .searchResultsTable.searchResultsSurface,
+.chkApp .searchResultsTable.searchResultsSurface > *,
+.chkApp .searchResultsTable.searchResultsSurface > * > * {
   width: 100%;
   max-width: 100%;
   min-width: 0;

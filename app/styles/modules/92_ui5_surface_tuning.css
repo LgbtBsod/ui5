@@ -9,9 +9,6 @@
   gap: 0.55rem;
   min-height: 0;
   overflow: hidden;
-}
-
-.chkApp .appFeedbackCorrelation {
   padding-block: 0;
 }
 
@@ -29,10 +26,6 @@
   letter-spacing: 0.02em;
   align-self: center;
   flex-shrink: 0;
-}
-
-.chkApp .detailSectionCountChip .sapMObjStatusText {
-  font-weight: 700;
 }
 
 .chkApp .searchResultsSummaryRail.workbenchToolbarSurface {
@@ -61,12 +54,6 @@
   min-width: 0;
 }
 
-body.chkAppRoot.appDark .chkApp .detailGridTable .sapUiTableColCell,
-body.chkAppRoot.appDark .chkApp .flatEditorTable .sapMListTblHeaderCell,
-body.chkAppRoot.appDark .chkApp .detailAttachmentTable .sapMListTblHeaderCell {
-  opacity: 0.72;
-}
-
 .chkApp .detailAttachmentsEmptyState {
   align-self: start;
   width: 100%;
@@ -74,4 +61,20 @@ body.chkAppRoot.appDark .chkApp .detailAttachmentTable .sapMListTblHeaderCell {
 
 .chkApp .detailControlPinnedDock {
   transition: opacity 160ms ease;
+}
+
+.chkApp .detailControlSkeletonSpacing {
+  margin-bottom: 0.5rem;
+}
+
+.chkApp .analyticsToplineSection {
+  margin-top: 1rem;
+}
+
+.chkApp .analyticsToplineMetaGrid {
+  margin-top: 1rem;
+}
+
+.chkApp .detailAttachmentToolbarAction {
+  margin-inline-end: 0;
 }

@@ -13,6 +13,9 @@
   flex: 1 1 auto;
 }
 
+.chkApp .detailControlRowActions .appActionPrimary,
+.chkApp .detailControlRowActions .appActionSecondary,
+.chkApp .detailControlRowActions .appActionDanger,
 .chkApp .detailControlRowActions .actionPriorityPrimary,
 .chkApp .detailControlRowActions .actionPrioritySecondary,
 .chkApp .detailControlRowActions .actionPriorityDanger,
@@ -50,11 +53,13 @@
 }
 
 .chkApp .detailRailCloseAction .sapMBtnInner,
+.chkApp .detailControlRowActions .appActionSecondary .sapMBtnInner,
 .chkApp .detailControlRowActions .actionPrioritySecondary .sapMBtnInner {
   background: transparent;
   border-color: rgba(160, 200, 240, 0.40);
 }
 
+.chkApp .detailControlRowActions .appActionPrimary .sapMBtnInner,
 .chkApp .detailControlRowActions .actionPriorityPrimary .sapMBtnInner {
   min-width: 7.75rem;
   box-shadow:
@@ -62,11 +67,13 @@
     0 10px 18px rgba(var(--accent-rgb), 0.14);
 }
 
+.chkApp .detailControlRowActions .appActionDanger .sapMBtnInner,
 .chkApp .detailControlRowActions .actionPriorityDanger .sapMBtnInner {
   border-width: 1px;
   min-width: 6.6rem;
 }
 
+.chkApp .detailControlRowActions .appActionSecondary .sapMBtnInner,
 .chkApp .detailControlRowActions .actionPrioritySecondary .sapMBtnInner,
 .chkApp .detailControlRowActions .detailRailCloseAction .sapMBtnInner {
   border-style: solid;
@@ -74,6 +81,7 @@
   backdrop-filter: blur(8px);
 }
 
+.chkApp .detailControlRowTop .appActionSecondary .sapMBtnInner,
 .chkApp .detailControlRowTop .actionPrioritySecondary .sapMBtnInner {
   min-width: 6.2rem;
 }
@@ -83,12 +91,14 @@
 }
 
 body.chkAppRoot.appLight .chkApp .detailRailCloseAction .sapMBtnInner,
+body.chkAppRoot.appLight .chkApp .detailControlRowActions .appActionSecondary .sapMBtnInner,
 body.chkAppRoot.appLight .chkApp .detailControlRowActions .actionPrioritySecondary .sapMBtnInner {
   color: rgba(48, 88, 155, 0.85);
   border-color: rgba(140, 185, 235, 0.45);
 }
 
 body.chkAppRoot.appDark .chkApp .detailRailCloseAction .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .detailControlRowActions .appActionSecondary .sapMBtnInner,
 body.chkAppRoot.appDark .chkApp .detailControlRowActions .actionPrioritySecondary .sapMBtnInner {
   color: rgba(140, 190, 245, 0.85);
   border-color: rgba(50, 90, 160, 0.40);

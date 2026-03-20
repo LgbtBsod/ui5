@@ -3,7 +3,7 @@
     xmlns:core="sap.ui.core"
     xmlns:f="sap.f"
     xmlns:dnd="sap.ui.core.dnd">
-    <VBox class="glassCard detailSectionCard detailInfoExperienceCard detailInfoBridgeCard" width="100%">
+    <VBox class="appSurfaceCard appSectionSurface detailInfoExperienceCard detailInfoBridgeCard" width="100%">
         <VBox visible="{view>/detailSkeletonBusy}" renderType="Bare">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonFormSection" type="XML"/>
         </VBox>

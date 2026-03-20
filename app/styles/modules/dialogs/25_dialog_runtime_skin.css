@@ -1,25 +1,35 @@
 .chkApp .glassDialog .sapMDialogTitle,
 .chkApp .glassDialog .sapMBar,
-.chkApp .glassDialog.valueHelpDialog .sapMDialogTitle {
+.chkApp .glassDialog.valueHelpDialog .sapMDialogTitle,
+.chkApp .appDialogSurface .sapMDialogTitle,
+.chkApp .appDialogSurface .sapMBar,
+.chkApp .appDialogSurface.valueHelpDialog .sapMDialogTitle {
   padding-inline: 1.15rem;
   min-height: 3.4rem;
 }
 
 .chkApp .glassDialog .sapMDialogSection,
 .chkApp .glassDialog.valueHelpDialog .sapMDialogSection,
+.chkApp .appDialogSurface .sapMDialogSection,
+.chkApp .appDialogSurface.valueHelpDialog .sapMDialogSection,
 .chkApp .shellPopover .sapMPopoverCont,
 .chkApp .shellPopover.sapMResponsivePopover .sapMPopoverCont {
   padding: 0;
 }
 
 .chkApp .glassDialog .sapMDialogFooter,
-.chkApp .glassDialog.valueHelpDialog .sapMDialogFooter {
+.chkApp .glassDialog.valueHelpDialog .sapMDialogFooter,
+.chkApp .appDialogSurface .sapMDialogFooter,
+.chkApp .appDialogSurface.valueHelpDialog .sapMDialogFooter {
   padding: 0.35rem 0.7rem;
 }
 
 .chkApp .glassDialog.expandedRowsDialog,
 .chkApp .glassDialog.analyticsReportDialog,
 .chkApp .glassDialog.valueHelpDialog,
+.chkApp .appDialogSurface.expandedRowsDialog,
+.chkApp .appDialogSurface.analyticsReportDialog,
+.chkApp .appDialogSurface.valueHelpDialog,
 .chkApp .shellPopover.sapMPopover,
 .chkApp .shellPopover.sapMResponsivePopover {
   border-radius: var(--radius-lg);
@@ -27,9 +37,11 @@
 }
 
 .chkApp .glassDialog,
+.chkApp .appDialogSurface,
 .chkApp .shellPopover.sapMPopover,
 .chkApp .shellPopover.sapMResponsivePopover,
-.chkApp .glassDialog.sapMDialog {
+.chkApp .glassDialog.sapMDialog,
+.chkApp .appDialogSurface.sapMDialog {
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 88%, transparent);

@@ -13,10 +13,12 @@
 
 .chkApp .detailObjectPageHost,
 .chkApp .detailControlPinnedDock,
+.chkApp .appInlineSurface,
 .chkApp .detailControlInlineCard,
 .chkApp .detailControlBar,
 .chkApp .detailControlToolbarStack,
 .chkApp .detailMainExperienceStack,
+.chkApp .appSectionSurface,
 .chkApp .detailSectionCard,
 .chkApp .detailTableExperienceCard {
   width: 100%;
@@ -139,4 +141,11 @@
   .chkApp .detailSubSectionShell {
     scroll-margin-top: calc(var(--app-shell-offset) + 3.75rem);
   }
+}
+.chkApp .createModeBannerSpacing {
+  margin-bottom: 0.5rem;
+}
+
+.chkApp .lockStatusEditSwitch .sapMSwtCont {
+  min-height: var(--theme-workbench-control-height);
 }

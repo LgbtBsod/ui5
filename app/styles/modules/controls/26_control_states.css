@@ -1,0 +1,76 @@
+.chkApp .searchFilterCardDense .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
+.chkApp .searchFilterCardDense .sapMSlt.sapMSltFocused,
+.chkApp .searchResultsTable .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
+.chkApp .searchResultsTable .sapMSlt.sapMSltFocused,
+.chkApp .appInlineSurface .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
+.chkApp .appInlineSurface .sapMSlt.sapMSltFocused,
+.chkApp .appSectionSurface .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
+.chkApp .appSectionSurface .sapMSlt.sapMSltFocused {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.chkApp .appActionPrimary .sapMBtnInner:focus-visible,
+.chkApp .appActionSecondary .sapMBtnInner:focus-visible,
+.chkApp .appActionDanger .sapMBtnInner:focus-visible,
+.chkApp .searchToolbarNavBtn .sapMBtnInner:focus-visible,
+.chkApp .detailRailCloseAction .sapMBtnInner:focus-visible,
+.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper:focus-within,
+.chkApp .searchFilterCardDense .sapMSlt:focus-within,
+.chkApp .searchFilterCardDense .sapMSegBBtn.sapMBtnFocused .sapMSegBBtnInner,
+.chkApp .searchResultsTable .sapMInputBaseContentWrapper:focus-within,
+.chkApp .searchResultsTable .sapMSlt:focus-within,
+.chkApp .appSectionSurface .sapMInputBaseContentWrapper:focus-within,
+.chkApp .appSectionSurface .sapMSlt:focus-within {
+  box-shadow: var(--focus-ring);
+}
+
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle {
+  box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.24);
+}
+
+.chkApp .appActionGhost:not(.sapMBtnDisabled):hover .sapMBtnInner,
+.chkApp .appActionGhost:not(.sapMBtnDisabled):focus .sapMBtnInner {
+  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 92%, transparent);
+  background: color-mix(in srgb, var(--theme-workbench-control-bg) 96%, var(--theme-table-cell-selected-bg) 12%);
+}
+
+.chkApp .appActionPrimary.sapMBtnDisabled .sapMBtnInner,
+.chkApp .appActionSecondary.sapMBtnDisabled .sapMBtnInner,
+.chkApp .appActionDanger.sapMBtnDisabled .sapMBtnInner,
+.chkApp .searchToolbarNavBtn.sapMBtnDisabled .sapMBtnInner,
+.chkApp .detailRailCloseAction.sapMBtnDisabled .sapMBtnInner,
+.chkApp .searchFilterCardDense .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseContentWrapper,
+.chkApp .searchResultsTable .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseContentWrapper,
+.chkApp .appSectionSurface .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseContentWrapper,
+.chkApp .searchFilterCardDense .sapMSlt.sapMSltDisabled,
+.chkApp .searchResultsTable .sapMSlt.sapMSltDisabled,
+.chkApp .appSectionSurface .sapMSlt.sapMSltDisabled,
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtDisabled,
+.chkApp .detailResultSwitch.sapMSwt.sapMSwtDisabled,
+.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtDisabled {
+  opacity: 0.72;
+  background: color-mix(in srgb, var(--theme-workbench-control-bg) 82%, transparent);
+}
+
+.chkApp .appActionPrimary.sapMBtnDisabled .sapMBtnContent,
+.chkApp .appActionPrimary.sapMBtnDisabled .sapUiIcon,
+.chkApp .appActionSecondary.sapMBtnDisabled .sapMBtnContent,
+.chkApp .appActionSecondary.sapMBtnDisabled .sapUiIcon,
+.chkApp .appActionDanger.sapMBtnDisabled .sapMBtnContent,
+.chkApp .appActionDanger.sapMBtnDisabled .sapUiIcon,
+.chkApp .searchToolbarNavBtn.sapMBtnDisabled .sapMBtnContent,
+.chkApp .searchToolbarNavBtn.sapMBtnDisabled .sapUiIcon,
+.chkApp .detailRailCloseAction.sapMBtnDisabled .sapMBtnContent,
+.chkApp .detailRailCloseAction.sapMBtnDisabled .sapUiIcon,
+.chkApp .searchFilterCardDense .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseInner,
+.chkApp .searchResultsTable .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseInner,
+.chkApp .appSectionSurface .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseInner,
+.chkApp .searchFilterCardDense .sapMSlt.sapMSltDisabled .sapMSltLabel,
+.chkApp .searchResultsTable .sapMSlt.sapMSltDisabled .sapMSltLabel,
+.chkApp .appSectionSurface .sapMSlt.sapMSltDisabled .sapMSltLabel,
+.chkApp .appAccentSwitch.sapMSwt.sapMSwtDisabled .sapMSwtText,
+.chkApp .detailResultSwitch.sapMSwt.sapMSwtDisabled .sapMSwtText,
+.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtDisabled .sapMSwtText {
+  color: var(--text-muted);
+}

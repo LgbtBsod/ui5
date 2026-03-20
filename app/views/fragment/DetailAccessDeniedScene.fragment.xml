@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <FlexBox
-        class="glassCard detailAccessDeniedScene"
+        class="appSurfaceCard detailAccessDeniedScene"
         renderType="Bare"
         width="100%"
         visible="{view>/accessState/denied}">

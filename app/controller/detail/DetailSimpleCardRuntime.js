@@ -108,7 +108,7 @@ sap.ui.define([
                     valueHelpRequest: [oController.onOpenLocationValueHelp, oController],
                     placeholder: "{i18n>locationValueHelpPlaceholder}"
                 }), "detailLocationInput"), "basic.LOCATION_KEY"));
-                oEditBox.addItem(withStyleClasses(mHooks.createPrefixedStatus(oController, "locationCodeLabel", "selected>/basic/LOCATION_KEY"), "sapUiTinyMarginTop"));
+                oEditBox.addItem(withStyleClasses(mHooks.createPrefixedStatus(oController, "locationCodeLabel", "selected>/basic/LOCATION_KEY"), "detailInlineMetaStatus"));
                 oReadText.bindProperty("text", {
                     parts: [
                         { path: "selected>/basic/LOCATION_NAME" },

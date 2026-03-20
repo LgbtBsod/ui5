@@ -64,3 +64,14 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     0 8px 18px var(--status-chip-glow);
 }
+.chkApp .lockKilledBanner {
+  margin-bottom: 0.5rem;
+}
+
+.chkApp .lockStatusBusyIndicator {
+  margin-inline-end: 0.5rem;
+}
+
+.chkApp .lockStatusChip {
+  margin-inline-start: 0.5rem;
+}

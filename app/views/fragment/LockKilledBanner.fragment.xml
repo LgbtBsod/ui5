@@ -4,5 +4,5 @@
         type="Warning"
         showIcon="true"
         visible="{uiState>/lock/isKilled}"
-        class="sapUiTinyMarginBottom searchFilterHintBanner chkFeedbackStrip chkFeedbackWarning workflowMessageSurface"/>
+        class="lockKilledBanner searchFilterHintBanner chkFeedbackStrip workflowMessageSurface"/>
 </core:FragmentDefinition>

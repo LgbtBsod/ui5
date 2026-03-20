@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox class="glassCard analyticsHeroCard" renderType="Bare">
+    <VBox class="appSurfaceCard analyticsHeroCard" renderType="Bare">
         <Text text="{i18n>analyticsScreenEyebrow}" class="workflowEyebrow"/>
         <Title text="{i18n>workflowAnalyticsTitle}" level="H2" class="analyticsScreenTitle"/>
         <Text text="{i18n>analyticsScreenSubtitle}" class="analyticsScreenSubtitle"/>

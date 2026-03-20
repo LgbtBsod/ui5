@@ -22,7 +22,7 @@
                 width="100%"
                 visible="{= !${view>/accessState/denied} &amp;&amp; !${view>/detailSkeletonBusy} }">
                 <VBox
-                    class="glassCard detailControlInlineCard detailControlExperienceCard"
+                    class="appSurfaceCard appInlineSurface detailControlExperienceCard"
                     renderType="Bare"
                     width="100%">
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailControlRail" type="XML"/>
@@ -30,7 +30,7 @@
             </VBox>
 
             <VBox
-                class="glassCard detailControlInlineCard detailControlSkeletonCard sapUiTinyMarginBottom"
+                class="appSurfaceCard appInlineSurface detailControlSkeletonCard detailControlSkeletonSpacing"
                 width="100%"
                 visible="{= !${view>/accessState/denied} &amp;&amp; ${view>/detailSkeletonBusy} }">
                 <HBox class="detailControlSkeletonRow" renderType="Bare" alignItems="Center" wrap="Wrap">

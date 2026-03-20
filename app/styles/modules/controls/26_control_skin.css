@@ -1,212 +1,41 @@
-.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-.chkApp .searchFilterCardDense .sapMSlt,
-.chkApp .searchFilterCardDense .sapMSegB,
-.chkApp .searchResultsTable .sapMInputBaseContentWrapper,
-.chkApp .searchResultsTable .sapMSlt,
-.chkApp .detailControlInlineCard .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMSlt,
-.chkApp .detailSectionCard .sapMTimePicker,
-.chkApp .detailSectionCard .sapMDatePicker {
-  border-color: color-mix(in srgb, var(--border-soft) 56%, transparent);
-  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.chkApp .searchFilterCardDense .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
-.chkApp .searchFilterCardDense .sapMSlt.sapMSltFocused,
-.chkApp .searchResultsTable .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
-.chkApp .searchResultsTable .sapMSlt.sapMSltFocused,
-.chkApp .detailControlInlineCard .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
-.chkApp .detailControlInlineCard .sapMSlt.sapMSltFocused,
-.chkApp .detailSectionCard .sapMInputBase.sapMFocus .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMSlt.sapMSltFocused {
-  border-color: var(--accent);
-  box-shadow: var(--focus-ring), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-
-body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMSlt,
-body.chkAppRoot.appDark .chkApp .searchFilterCardDense .sapMSegB,
-body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMInputBaseContentWrapper,
-body.chkAppRoot.appDark .chkApp .searchResultsTable .sapMSlt,
-body.chkAppRoot.appDark .chkApp .detailControlInlineCard .sapMInputBaseContentWrapper,
-body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMInputBaseContentWrapper,
-body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMSlt,
-body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMTimePicker,
-body.chkAppRoot.appDark .chkApp .detailSectionCard .sapMDatePicker {
-  background:
-    linear-gradient(180deg, rgba(42, 60, 89, 0.28), rgba(17, 27, 45, 0.16)),
-    color-mix(in srgb, rgba(18, 31, 50, 0.9) 92%, transparent);
-  box-shadow: inset 0 1px 0 rgba(199, 221, 255, 0.05);
-}
-
-.chkApp .appAccentSwitch.sapMSwt {
-  --accent-switch-bg: linear-gradient(180deg, var(--surface-2), var(--surface-3));
-  --accent-switch-border: var(--theme-workbench-control-border);
-  border-color: var(--accent-switch-border);
-}
-
-.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn {
-  --accent-switch-bg: var(--control-primary-bg);
-  --accent-switch-border: var(--control-primary-border);
-  box-shadow: var(--control-primary-shadow);
-}
-
-.chkApp .appAccentSwitch.sapMSwt.sapMSwtOn .sapMSwtHandle {
-  box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.24);
-}
+/*
+ * Legacy compatibility bridge.
+ * Canonical control host and state rules live in 26_control_hosts.css and 26_control_states.css.
+ * Keep only transitional aliases here until old vocabulary is fully removed.
+ */
 
 .chkApp .brandActionBtn .sapMBtnInner,
-.chkApp .searchToolbarNavBtn .sapMBtnInner,
-.chkApp .detailRailCloseAction .sapMBtnInner,
-.chkApp .actionPriorityPrimary .sapMBtnInner,
-.chkApp .actionPrioritySecondary .sapMBtnInner,
-.chkApp .actionPriorityDanger .sapMBtnInner,
-.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-.chkApp .searchFilterCardDense .sapMSlt,
-.chkApp .searchFilterCardDense .sapMSegB,
-.chkApp .searchResultsTable .sapMInputBaseContentWrapper,
-.chkApp .searchResultsTable .sapMSlt,
-.chkApp .detailControlInlineCard .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMSlt,
-.chkApp .searchResultsTable .sapUiTable,
-.chkApp .searchResultsTable .sapMTable,
-.chkApp .detailSectionCard .sapMTable,
-.chkApp .analyticsToolbarButton .sapMBtnInner,
-.chkApp .analyticsToolbarInput .sapMInputBaseContentWrapper,
-.chkApp .analyticsControlSelect,
-.chkApp .analyticsSourceSwitch {
+.chkApp .appActionPrimary .sapMBtnInner,
+.chkApp .actionPriorityPrimary .sapMBtnInner {
   border-radius: var(--radius-md);
 }
 
-.chkApp .brandActionBtn .sapMBtnInner:focus-visible,
-.chkApp .searchToolbarNavBtn .sapMBtnInner:focus-visible,
-.chkApp .detailRailCloseAction .sapMBtnInner:focus-visible,
-.chkApp .actionPriorityPrimary .sapMBtnInner:focus-visible,
-.chkApp .actionPrioritySecondary .sapMBtnInner:focus-visible,
-.chkApp .actionPriorityDanger .sapMBtnInner:focus-visible,
-.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper:focus-within,
-.chkApp .searchFilterCardDense .sapMSlt:focus-within,
-.chkApp .searchFilterCardDense .sapMSegBBtn.sapMBtnFocused .sapMSegBBtnInner,
-.chkApp .searchResultsTable .sapMInputBaseContentWrapper:focus-within,
-.chkApp .searchResultsTable .sapMSlt:focus-within,
-.chkApp .detailSectionCard .sapMInputBaseContentWrapper:focus-within,
-.chkApp .detailSectionCard .sapMSlt:focus-within {
-  box-shadow: var(--focus-ring);
-}
-
-.chkApp .appAccentSwitch.sapMSwt {
-  min-width: 3.2rem;
-  border-radius: 999px;
-  border-color: var(--accent-switch-border, var(--theme-workbench-control-border));
-  background: var(--accent-switch-bg, linear-gradient(180deg, var(--surface-2), var(--surface-3)));
-}
-
-.chkApp .appAccentSwitch.sapMSwt .sapMSwtHandle {
-  border-radius: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(235, 242, 255, 0.92));
-}
-
 .chkApp .brandActionGhost .sapMBtnInner,
-.chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-.chkApp .searchFilterCardDense .sapMSlt,
-.chkApp .searchResultsTable .sapMInputBaseContentWrapper,
-.chkApp .searchResultsTable .sapMSlt,
-.chkApp .detailControlInlineCard .sapMInputBaseContentWrapper,
+.chkApp .appActionGhost .sapMBtnInner {
+  border-radius: var(--radius-md);
+}
+
+.chkApp .actionPrioritySecondary .sapMBtnInner,
+.chkApp .appActionSecondary .sapMBtnInner,
+.chkApp .actionPriorityDanger .sapMBtnInner,
+.chkApp .appActionDanger .sapMBtnInner {
+  border-radius: var(--radius-md);
+}
+
 .chkApp .detailSectionCard .sapMInputBaseContentWrapper,
 .chkApp .detailSectionCard .sapMSlt,
-.chkApp .analyticsToolbarInput .sapMInputBaseContentWrapper,
-.chkApp .analyticsControlSelect,
-.chkApp .detailSectionToolbar .sapMSwt,
-.chkApp .tableRowActionBtn .sapMBtnInner,
-.chkApp .analyticsToolbarButton .sapMBtnInner,
-.chkApp .shellActionBtn .sapMBtnInner,
-.chkApp .shellUserBtn .sapMBtnInner,
-.chkApp .appAccentSwitch.sapMSwt,
-.chkApp .detailResultSwitch.sapMSwt,
-.chkApp .searchModeToggleSwitch.sapMSwt {
-  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 78%, transparent);
-  box-shadow: none;
+.chkApp .detailSectionCard .sapMTimePicker,
+.chkApp .detailSectionCard .sapMDatePicker,
+.chkApp .detailControlInlineCard .sapMInputBaseContentWrapper {
+  border-radius: var(--radius-md);
 }
 
-.chkApp .brandActionGhost .sapMBtnInner {
-  background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
-  color: var(--text-main);
-}
-
-.chkApp .brandActionGhost:not(.sapMBtnDisabled):hover .sapMBtnInner,
-.chkApp .brandActionGhost:not(.sapMBtnDisabled):focus .sapMBtnInner {
-  border-color: color-mix(in srgb, var(--theme-workbench-control-border) 92%, transparent);
-  background: color-mix(in srgb, var(--theme-workbench-control-bg) 96%, var(--theme-table-cell-selected-bg) 12%);
-}
-
-.chkApp .searchFilterCardDense .sapMSegB,
 .chkApp .detailSectionCard .sapMSegB {
-  padding: 0.12rem;
-  border: 1px solid color-mix(in srgb, var(--theme-workbench-control-border) 82%, transparent);
   border-radius: 999px;
-  background: var(--theme-workbench-rail-bg);
 }
 
-.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn .sapMSegBBtnInner,
 .chkApp .detailSectionCard .sapMSegB .sapMSegBBtn .sapMSegBBtnInner {
-  min-height: 2rem;
-  border: 0;
   border-radius: 999px;
-  background: transparent;
-  color: var(--text-subtle);
-  box-shadow: none;
-}
-
-.chkApp .searchFilterCardDense .sapMSegB .sapMSegBBtn.sapMSegBBtnSel .sapMSegBBtnInner,
-.chkApp .detailSectionCard .sapMSegB .sapMSegBBtn.sapMSegBBtnSel .sapMSegBBtnInner {
-  background: color-mix(in srgb, var(--theme-table-cell-selected-bg) 78%, var(--theme-workbench-control-bg));
-  color: var(--text-main);
-}
-
-.chkApp .brandActionBtn.sapMBtnDisabled .sapMBtnInner,
-.chkApp .searchToolbarNavBtn.sapMBtnDisabled .sapMBtnInner,
-.chkApp .detailRailCloseAction.sapMBtnDisabled .sapMBtnInner,
-.chkApp .actionPriorityPrimary.sapMBtnDisabled .sapMBtnInner,
-.chkApp .actionPrioritySecondary.sapMBtnDisabled .sapMBtnInner,
-.chkApp .actionPriorityDanger.sapMBtnDisabled .sapMBtnInner,
-.chkApp .searchFilterCardDense .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseContentWrapper,
-.chkApp .searchResultsTable .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseContentWrapper,
-.chkApp .searchFilterCardDense .sapMSlt.sapMSltDisabled,
-.chkApp .searchResultsTable .sapMSlt.sapMSltDisabled,
-.chkApp .detailSectionCard .sapMSlt.sapMSltDisabled,
-.chkApp .appAccentSwitch.sapMSwt.sapMSwtDisabled,
-.chkApp .detailResultSwitch.sapMSwt.sapMSwtDisabled,
-.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtDisabled {
-  opacity: 0.72;
-  background: color-mix(in srgb, var(--theme-workbench-control-bg) 82%, transparent);
-}
-
-.chkApp .brandActionBtn.sapMBtnDisabled .sapMBtnContent,
-.chkApp .brandActionBtn.sapMBtnDisabled .sapUiIcon,
-.chkApp .searchToolbarNavBtn.sapMBtnDisabled .sapMBtnContent,
-.chkApp .searchToolbarNavBtn.sapMBtnDisabled .sapUiIcon,
-.chkApp .detailRailCloseAction.sapMBtnDisabled .sapMBtnContent,
-.chkApp .detailRailCloseAction.sapMBtnDisabled .sapUiIcon,
-.chkApp .actionPriorityPrimary.sapMBtnDisabled .sapMBtnContent,
-.chkApp .actionPriorityPrimary.sapMBtnDisabled .sapUiIcon,
-.chkApp .actionPrioritySecondary.sapMBtnDisabled .sapMBtnContent,
-.chkApp .actionPrioritySecondary.sapMBtnDisabled .sapUiIcon,
-.chkApp .actionPriorityDanger.sapMBtnDisabled .sapMBtnContent,
-.chkApp .actionPriorityDanger.sapMBtnDisabled .sapUiIcon,
-.chkApp .searchFilterCardDense .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseInner,
-.chkApp .searchResultsTable .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseInner,
-.chkApp .detailSectionCard .sapMInputBase.sapMInputBaseDisabled .sapMInputBaseInner,
-.chkApp .searchFilterCardDense .sapMSlt.sapMSltDisabled .sapMSltLabel,
-.chkApp .searchResultsTable .sapMSlt.sapMSltDisabled .sapMSltLabel,
-.chkApp .detailSectionCard .sapMSlt.sapMSltDisabled .sapMSltLabel,
-.chkApp .appAccentSwitch.sapMSwt.sapMSwtDisabled .sapMSwtText,
-.chkApp .detailResultSwitch.sapMSwt.sapMSwtDisabled .sapMSwtText,
-.chkApp .searchModeToggleSwitch.sapMSwt.sapMSwtDisabled .sapMSwtText {
-  color: var(--text-muted);
 }
 
 html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense {
@@ -214,25 +43,4 @@ html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense {
   animation: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-}
-
-@supports (background: color-mix(in srgb, red 50%, blue)) {
-  .chkApp .detailSectionAnchorBtn .sapMBtnInner,
-  .chkApp .detailSectionAnchorBtn.sapMBtn:hover .sapMBtnInner {
-    background: color-mix(in srgb, var(--theme-rail-bg) 52%, transparent);
-  }
-
-  .chkApp .searchFilterCardDense .sapMInputBaseContentWrapper,
-  .chkApp .searchFilterCardDense .sapMSlt,
-  .chkApp .searchFilterCardDense .sapMSegB,
-  .chkApp .searchResultsTable .sapMInputBaseContentWrapper,
-  .chkApp .searchResultsTable .sapMSlt,
-  .chkApp .detailControlInlineCard .sapMInputBaseContentWrapper,
-  .chkApp .detailSectionCard .sapMInputBaseContentWrapper,
-  .chkApp .detailSectionCard .sapMSlt,
-  .chkApp .detailSectionCard .sapMTimePicker,
-  .chkApp .detailSectionCard .sapMDatePicker {
-    border-color: color-mix(in srgb, var(--border-soft) 56%, transparent);
-    background: color-mix(in srgb, var(--surface-2) 76%, transparent);
-  }
 }

@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox class="glassCard detailSectionCard detailTableExperienceCard" width="100%">
+    <VBox class="appSurfaceCard appSectionSurface detailTableExperienceCard" width="100%">
         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonTableSection" type="XML"/>
         </VBox>
@@ -51,7 +51,7 @@
                     </layoutData>
                 </ObjectStatus>
                 <ToolbarSpacer class="detailSectionToolbarSpacer"/>
-                <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecklistSection" class="sapUiTinyMarginEnd actionPrioritySecondary detailSectionToolbarButton">
+                <Button text="{i18n>expandTable}" type="Transparent" press=".onExpandChecklistSection" class="appActionSecondary detailSectionToolbarButton detailSectionToolbarAction">
                     <customData>
                         <core:CustomData key="kind" value="{view>kind}"/>
                     </customData>
@@ -64,7 +64,7 @@
                     icon="{view>actionIcon}"
                     press=".onAddChecklistSection"
                     visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
-                    class="actionPriorityPrimary detailSectionToolbarButton">
+                    class="appActionPrimary detailSectionToolbarButton">
                     <customData>
                         <core:CustomData key="kind" value="{view>kind}"/>
                     </customData>

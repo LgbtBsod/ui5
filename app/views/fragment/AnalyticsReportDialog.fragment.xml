@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <Dialog
         id="analyticsReportDialog"
-        class="glassDialog analyticsReportDialog governedDialog"
+        class="appDialogSurface analyticsReportDialog governedDialog"
         title="{i18n>analyticsReportDialogTitle}"
         contentWidth="42rem"
         contentHeight="28rem"
@@ -10,7 +10,7 @@
         stretchOnPhone="true"
         initialFocus="analyticsReportExportButton">
         <content>
-            <VBox class="dialogContentShell governedDialogContent analyticsReportDialogBody workflowBusyScope workflowBusyScopeDialog" renderType="Bare" fitContainer="true">
+            <VBox class="dialogBodyShell analyticsReportDialogBody dialogBusyScope" renderType="Bare" fitContainer="true">
                 <VBox class="analyticsReportHero" renderType="Bare">
                     <Text text="{i18n>analyticsReportDialogEyebrow}" class="workflowEyebrow"/>
                     <Title text="{i18n>analyticsReportDialogTitle}" level="H3" class="analyticsReportTitle"/>

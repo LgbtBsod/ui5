@@ -5,7 +5,7 @@ const { detectRuntimeRoot } = require("./qa-shared");
 
 const ROOT = process.cwd();
 const RUNTIME_ROOT = detectRuntimeRoot(ROOT);
-const CSS_ROOT = path.join(RUNTIME_ROOT === "." ? "" : RUNTIME_ROOT, "css");
+const CSS_ROOT = path.join(RUNTIME_ROOT === "." ? "" : RUNTIME_ROOT, "styles");
 const MODULES_ROOT = path.join(CSS_ROOT, "modules");
 const TARGETS = []
     .concat(fs.existsSync(path.join(ROOT, CSS_ROOT, "app-styles.css")) ? [path.join(CSS_ROOT, "app-styles.css")] : [])

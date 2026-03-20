@@ -28,6 +28,7 @@ body.chkAppRoot,
 
 .chkApp .appShell > .appShellHeaderHost,
 .chkApp .appShell > .appFeedbackBanner,
+.chkApp .appShell > .appBannerSpacing,
 .chkApp .appShell > .appFeedbackCorrelation {
   flex: 0 0 auto;
   width: 100%;
@@ -55,10 +56,7 @@ body.chkAppRoot,
 }
 
 .chkApp .appRootFcl > div,
-.chkApp .appRootFcl > div > div,
-.chkApp .appRootFcl .sapMNav,
-.chkApp .appRootFcl .sapMNavItem,
-.chkApp .appRootFcl .sapUiView {
+.chkApp .appRootFcl > div > div {
   height: 100%;
   min-height: 0;
   min-width: 0;
@@ -85,8 +83,17 @@ body.chkAppRoot,
   padding: var(--app-content-inline-pad);
 }
 
-.chkApp .toolbarTransparent,
-.chkApp .toolbarTransparent.sapMTB {
+.chkApp .appBannerSpacing {
+  margin-top: 0.5rem;
+  margin-inline: var(--app-content-inline-pad);
+}
+
+.chkApp .appBannerSpacing.appFeedbackBanner {
+  width: auto;
+  max-width: none;
+}
+
+.chkApp .toolbarTransparent {
   background: transparent;
   border: 0;
   box-shadow: none;
@@ -114,40 +121,23 @@ body.chkAppRoot,
 
 .chkApp .searchPage,
 .chkApp .detailPage,
-.chkApp .analyticsPage,
-.chkApp .searchPage > .sapUiXMLView,
-.chkApp .detailPage > .sapUiXMLView,
-.chkApp .analyticsPage > .sapUiXMLView {
+.chkApp .analyticsPage {
   overflow: hidden;
 }
 
 .chkApp .searchPage,
-.chkApp .searchPage > .sapUiXMLView,
-.chkApp .searchPage > .sapUiXMLView > .sapMPage,
-.chkApp .searchPage > .sapUiXMLView > .sapMPage > section,
 .chkApp .searchPage .appContent {
   min-height: 0;
 }
 
-.chkApp .searchPage > .sapUiXMLView > .sapMPage > section {
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 .chkApp .pageTransparent,
-.chkApp .pageTransparent > section,
-.chkApp .pageTransparent .sapMPageEnableScrolling,
-.chkApp .pageTransparent .sapMPageScroll {
+.chkApp .pageTransparent > section {
   min-height: 0;
 }
 
-.chkApp .sapMScrollCont,
-.chkApp .sapMDialogScrollCont,
-.chkApp .sapMDialogScroll,
-.chkApp .sapUiTableCtrlScr,
-.chkApp .sapUiTableVSb,
-.chkApp .sapUiTableHSb,
-.chkApp .sapMListTblCnt,
+.chkApp .searchPage .tableScrollWrap,
+.chkApp .detailPage .tableScrollWrap,
+.chkApp .analyticsPage .tableScrollWrap,
 .chkApp .tableScrollWrap {
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--accent-rgb), 0.34) rgba(160, 184, 220, 0.12);
@@ -203,18 +193,15 @@ body.chkAppRoot.appDark .chkApp *::-webkit-scrollbar-thumb {
   gap: 1rem;
 }
 
-.chkApp .appShellHeader .sapMTitle,
-.chkApp .appShellHeader .sapMText {
+.chkApp .appShellHeader .shellProductTitle,
+.chkApp .appShellHeader .shellEyebrow,
+.chkApp .appShellHeader .shellContextSubtitle {
   white-space: nowrap;
 }
 
 .chkApp .appShellHeaderRegion {
   display: block;
   width: 100%;
-}
-
-.chkApp .appShellHeader .sapMText:empty {
-  display: none;
 }
 
 /* 2026-03 layout rebalance */

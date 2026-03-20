@@ -2,3 +2,35 @@
  * Reserved for layout-only UI5 patch overrides.
  * Keep this file intentionally small.
  */
+
+/* UI5 1.71 FCL layout still needs host-level renderer alignment for full-height pages. */
+.chkApp .appRootFcl .sapMNav,
+.chkApp .appRootFcl .sapMNavItem,
+.chkApp .appRootFcl .sapUiView,
+.chkApp .searchPage > .sapUiXMLView,
+.chkApp .detailPage > .sapUiXMLView,
+.chkApp .analyticsPage > .sapUiXMLView,
+.chkApp .searchPage > .sapUiXMLView > .sapMPage,
+.chkApp .searchPage > .sapUiXMLView > .sapMPage > section,
+.chkApp .pageTransparent .sapMPageEnableScrolling,
+.chkApp .pageTransparent .sapMPageScroll {
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.chkApp .searchPage > .sapUiXMLView > .sapMPage > section {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.chkApp .sapMScrollCont,
+.chkApp .sapMDialogScrollCont,
+.chkApp .sapMDialogScroll,
+.chkApp .sapUiTableCtrlScr,
+.chkApp .sapUiTableVSb,
+.chkApp .sapUiTableHSb,
+.chkApp .sapMListTblCnt {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--accent-rgb), 0.34) rgba(160, 184, 220, 0.12);
+}

@@ -8,7 +8,7 @@
         <VBox class="analyticsBreakdownSection" renderType="Bare">
             <Panel headerText="{view>/builderChartTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface">
                 <content>
-                    <MessageStrip text="{view>/builderSourceHintText}" type="Information" showIcon="true" visible="{= !!${view>/builderSourceHintText} }" class="chkFeedbackStrip sapUiTinyMarginBottom"/>
+                    <MessageStrip text="{view>/builderSourceHintText}" type="Information" showIcon="true" visible="{= !!${view>/builderSourceHintText} }" class="chkFeedbackStrip analyticsInlineHintStrip"/>
                     <OverflowToolbar design="Transparent" class="analyticsBuilderToolbar workbenchToolbarSurface analyticsControlToolbar">
                         <Label text="{i18n>analyticsBuilderDimensionLabel}" labelFor="analyticsBuilderDimensionSelect" class="analyticsControlLabel analyticsBuilderDimensionLabel"/>
                         <Select id="analyticsBuilderDimensionSelect" width="14rem" selectedKey="{view>/builderDimension}" change=".onSelectAnalyticsBuilderDimension" items="{view>/builderDimensionOptions}" class="analyticsControlSelect analyticsBuilderDimensionSelect">

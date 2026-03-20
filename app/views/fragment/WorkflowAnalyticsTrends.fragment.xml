@@ -30,7 +30,7 @@
                         type="Information"
                         showIcon="true"
                         visible="{= !${view>/compareYearHasData} &amp;&amp; !!${view>/compareYearHintText} }"
-                        class="chkFeedbackStrip sapUiTinyMarginBottom"/>
+                        class="chkFeedbackStrip analyticsInlineHintStrip"/>
                     <viz:VizFrame vizType="line" width="100%" height="18rem" uiConfig="{applicationSet:'fiori'}" visible="{view>/analytics/hasCharts/comparisonChart}">
                         <viz:dataset>
                             <vizData:FlattenedDataset data="{view>/analytics/comparisonChartRows}">
@@ -48,10 +48,10 @@
                             <vizFeeds:FeedItem id="analyticsComparisonCategoryFeed" uid="categoryAxis" type="Dimension"/>
                         </viz:feeds>
                     </viz:VizFrame>
-                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/comparisonChart} }" class="analyticsChartEmpty sapUiTinyMarginBottom"/>
+                    <Text text="{i18n>analyticsNoData}" visible="{= !${view>/analytics/hasCharts/comparisonChart} }" class="analyticsChartEmpty analyticsChartEmptySpaced"/>
                 </content>
             </Panel>
-            <Panel headerText="{i18n>analyticsMonthlyMatrixTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+            <Panel headerText="{i18n>analyticsMonthlyMatrixTitle}" expandable="false" class="analyticsChartPanel analyticsPanelSurface analyticsPanelSurfaceSpaced">
                 <content>
                     <ScrollContainer width="100%" horizontal="true" vertical="false" focusable="false" class="analyticsMatrixScroller">
                         <Table items="{view>/analytics/monthlyMatrixRows}" class="flatEditorTable detailAttachmentTable analyticsMatrixTable" noDataText="{i18n>analyticsNoData}">

@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <ResponsivePopover
         id="shellSettingsPopover"
-        class="glassDialog shellPopover shellSettingsPopover"
+        class="appDialogSurface shellPopover shellSettingsPopover"
         title="{i18n>shellSettingsTitle}"
         contentWidth="28rem"
         placement="Bottom">
@@ -15,7 +15,7 @@
                     class="chkFeedbackStrip workflowMessageSurface"/>
                 <List
                     showSeparators="None"
-                    class="sapUiTinyMarginTop shellSettingsFactList">
+                    class="shellSettingsFactList shellSettingsFactListSpaced">
                     <StandardListItem
                         title="{i18n>shellSettingsFactThemeTitle}"
                         description="{i18n>shellSettingsFactThemeDescription}"/>

@@ -34,7 +34,7 @@
             type="{path:'state>/ui/feedback/banner/global/severity', formatter:'.formatGlobalBannerType'}"
             showIcon="true"
             visible="{parts:[{path:'state>/ui/feedback/banner/global/visible'},{path:'state>/ui/feedback/banner/global/scope'}], formatter:'.formatGlobalBannerVisible'}"
-            class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop appFeedbackBanner chkFeedbackStrip">
+            class="appBannerSpacing appFeedbackBanner chkFeedbackStrip">
             <link>
                 <Link
                     text="{i18n>retryNowButton}"
@@ -49,22 +49,24 @@
             type="{path:'state>/ui/feedback/banner/route/severity', formatter:'.formatGlobalBannerType'}"
             showIcon="true"
             visible="{parts:[{path:'state>/ui/feedback/banner/route/visible'},{path:'state>/ui/feedback/banner/route/scope'}], formatter:'.formatRouteBannerVisible'}"
-            class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginTop appFeedbackBanner chkFeedbackStrip workflowMessageSurface"/>
+            class="appBannerSpacing appFeedbackBanner chkFeedbackStrip workflowMessageSurface"/>
 
         <HBox
             id="feedbackCorrelationRegion"
             class="appFeedbackCorrelation"
             alignItems="Center"
             renderType="Bare"
-            ariaLabelledBy="correlationIdLabel"
             visible="{parts:[{path:'state>/ui/feedback/banner/global/correlationId'},{path:'state>/ui/feedback/banner/global/scope'}], formatter:'.formatGlobalBannerCorrelationVisible'}">
-            <Label id="correlationIdLabel" text="{i18n>correlationIdLabel}" labelFor="correlationIdInput" class="sapUiTinyMarginEnd"/>
+            <customData>
+                <core:CustomData key="aria-labelledby" value="correlationIdLabel" writeToDom="true"/>
+            </customData>
+            <Label id="correlationIdLabel" text="{i18n>correlationIdLabel}" labelFor="correlationIdInput" class="appFeedbackCorrelationLabel"/>
             <Input
                 id="correlationIdInput"
                 value="{state>/ui/feedback/banner/global/correlationId}"
                 editable="false"
                 width="18rem"
-                class="sapUiTinyMarginEnd"/>
+                class="appFeedbackCorrelationInput"/>
             <Button
                 text="{i18n>copyButton}"
                 type="Transparent"

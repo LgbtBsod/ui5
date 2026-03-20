@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <VBox
-        class="detailCreateModeBanner searchFilterHintBanner sapUiTinyMarginBottom appSkeletonReveal"
+        class="detailCreateModeBanner searchFilterHintBanner createModeBannerSpacing"
         renderType="Bare"
         visible="{= !${view>/detailSkeletonBusy} &amp;&amp; ${selected>/root/id} === '__CREATE' }">
         <HBox class="detailCreateModeBannerTop" renderType="Bare" alignItems="Center" wrap="Wrap">

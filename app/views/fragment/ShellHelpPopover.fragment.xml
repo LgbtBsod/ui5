@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <ResponsivePopover
         id="shellHelpPopover"
-        class="glassDialog shellPopover"
+        class="appDialogSurface shellPopover"
         title="{i18n>shellHelpTitle}"
         contentWidth="24rem"
         placement="Bottom">

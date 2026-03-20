@@ -5,6 +5,10 @@
   align-items: center;
 }
 
+.chkApp .searchToolbarAction .sapMBtnInner,
+.chkApp .appActionPrimary .sapMBtnInner,
+.chkApp .appActionSecondary .sapMBtnInner,
+.chkApp .appActionDanger .sapMBtnInner,
 .chkApp .brandActionBtn .sapMBtnInner,
 .chkApp .searchToolbarNavBtn .sapMBtnInner,
 .chkApp .detailRailCloseAction .sapMBtnInner,
@@ -16,6 +20,10 @@
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
+.chkApp .searchToolbarAction:hover .sapMBtnInner,
+.chkApp .appActionPrimary:hover .sapMBtnInner,
+.chkApp .appActionSecondary:hover .sapMBtnInner,
+.chkApp .appActionDanger:hover .sapMBtnInner,
 .chkApp .brandActionBtn:hover .sapMBtnInner,
 .chkApp .searchToolbarNavBtn:hover .sapMBtnInner,
 .chkApp .detailRailCloseAction:hover .sapMBtnInner,
@@ -27,6 +35,10 @@
   box-shadow: 0 6px 14px rgba(18, 36, 64, 0.08);
 }
 
+.chkApp .searchToolbarAction:active .sapMBtnInner,
+.chkApp .appActionPrimary:active .sapMBtnInner,
+.chkApp .appActionSecondary:active .sapMBtnInner,
+.chkApp .appActionDanger:active .sapMBtnInner,
 .chkApp .brandActionBtn:active .sapMBtnInner,
 .chkApp .searchToolbarNavBtn:active .sapMBtnInner,
 .chkApp .detailRailCloseAction:active .sapMBtnInner,
@@ -91,6 +103,8 @@
   box-shadow: 0 10px 20px rgba(18, 36, 64, 0.12);
 }
 
+.chkApp .searchPrimaryAction .sapMBtnInner,
+.chkApp .appActionPrimary .sapMBtnInner,
 .chkApp .brandActionBtn.brandActionPrimary .sapMBtnInner,
 .chkApp .detailAccessDeniedAction .sapMBtnInner,
 .chkApp .actionPriorityPrimary .sapMBtnInner {
@@ -100,6 +114,7 @@
   color: var(--control-primary-text);
 }
 
+.chkApp .appActionAccept .sapMBtnInner,
 .chkApp .actionPriorityAccept .sapMBtnInner {
   border-color: var(--control-success-border);
   background: var(--control-success-bg);
@@ -107,6 +122,8 @@
   color: var(--control-success-text);
 }
 
+.chkApp .appActionReject .sapMBtnInner,
+.chkApp .appActionDanger .sapMBtnInner,
 .chkApp .actionPriorityReject .sapMBtnInner,
 .chkApp .tableRowActionBtnDanger .sapMBtnInner,
 .chkApp .actionPriorityDanger .sapMBtnInner {
@@ -116,6 +133,7 @@
   color: var(--control-danger-text);
 }
 
+.chkApp .appActionSecondary .sapMBtnInner,
 .chkApp .actionPrioritySecondary .sapMBtnInner {
   border-color: var(--theme-workbench-control-border);
   background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
@@ -123,9 +141,13 @@
   color: var(--text-main);
 }
 
+.chkApp .searchPrimaryAction:hover .sapMBtnInner,
+.chkApp .appActionPrimary:hover .sapMBtnInner,
 .chkApp .brandActionBtn.brandActionPrimary:hover .sapMBtnInner,
 .chkApp .actionPriorityPrimary:hover .sapMBtnInner,
+.chkApp .appActionAccept:hover .sapMBtnInner,
 .chkApp .actionPriorityAccept:hover .sapMBtnInner,
+.chkApp .appActionReject:hover .sapMBtnInner,
 .chkApp .actionPriorityReject:hover .sapMBtnInner {
   transform: translateY(-1px);
   filter: saturate(1.04);

@@ -3,44 +3,60 @@
   display: none;
 }
 
-.chkApp .smartFilterGlass {
+.chkApp .smartFilterGlass,
+.chkApp .searchFilterCard,
+.chkApp .searchFilterSurface {
   border-radius: 0.875rem;
   overflow: visible;
 }
 
-body.chkAppRoot.appLight .chkApp .smartFilterGlass {
+body.chkAppRoot.appLight .chkApp .smartFilterGlass,
+body.chkAppRoot.appLight .chkApp .searchFilterCard,
+body.chkAppRoot.appLight .chkApp .searchFilterSurface {
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(160, 200, 240, 0.40);
 }
 
-body.chkAppRoot.appDark .chkApp .smartFilterGlass {
+body.chkAppRoot.appDark .chkApp .smartFilterGlass,
+body.chkAppRoot.appDark .chkApp .searchFilterCard,
+body.chkAppRoot.appDark .chkApp .searchFilterSurface {
   background: rgba(14, 24, 46, 0.75);
   border: 1px solid rgba(55, 90, 155, 0.30);
 }
 
-.chkApp .filterCard {
+.chkApp .filterCard,
+.chkApp .filterWorkbenchShell,
+.chkApp .searchWorkbenchSurface {
   border-radius: 0.875rem;
   overflow: visible;
   padding: 0.65rem 0.875rem;
 }
 
 .chkApp .filterCard .sapMFlexItem,
-.chkApp .smartFilterGlass .sapMFlexItem {
+.chkApp .smartFilterGlass .sapMFlexItem,
+.chkApp .searchFilterCard .sapMFlexItem,
+.chkApp .searchFilterSurface .sapMFlexItem {
   min-width: 0;
 }
 
-body.chkAppRoot.appLight .chkApp .filterCard {
+body.chkAppRoot.appLight .chkApp .filterCard,
+body.chkAppRoot.appLight .chkApp .filterWorkbenchShell,
+body.chkAppRoot.appLight .chkApp .searchWorkbenchSurface {
   background: rgba(248, 252, 255, 0.90);
   border: 1px solid rgba(160, 200, 240, 0.45);
 }
 
-body.chkAppRoot.appDark .chkApp .filterCard {
+body.chkAppRoot.appDark .chkApp .filterCard,
+body.chkAppRoot.appDark .chkApp .filterWorkbenchShell,
+body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface {
   background: rgba(14, 24, 46, 0.80);
   border: 1px solid rgba(55, 90, 155, 0.32);
 }
 
 .chkApp .searchFilterExperienceShell,
-.chkApp .searchResultsExperienceShell {
+.chkApp .searchResultsExperienceShell,
+.chkApp .searchWorkbenchSurface,
+.chkApp .searchResultsSurface {
   position: relative;
   overflow: visible;
   border-radius: var(--radius-xl);
@@ -51,7 +67,8 @@ body.chkAppRoot.appDark .chkApp .filterCard {
   align-self: start;
 }
 
-.chkApp .searchFilterExperienceShell {
+.chkApp .searchFilterExperienceShell,
+.chkApp .searchWorkbenchSurface {
   padding:
     calc(0.78rem * var(--theme-density-scale))
     calc(0.88rem * var(--theme-density-scale))
@@ -65,7 +82,9 @@ body.chkAppRoot.appDark .chkApp .filterCard {
 }
 
 .chkApp .searchFilterExperienceShell::before,
-.chkApp .searchResultsExperienceShell::before {
+.chkApp .searchResultsExperienceShell::before,
+.chkApp .searchWorkbenchSurface::before,
+.chkApp .searchResultsSurface::before {
   display: none;
 }
 
@@ -74,7 +93,8 @@ body.chkAppRoot.appDark .chkApp .filterCard {
   border: none;
 }
 
-.chkApp .searchFilterExperienceShell .sapMBtnEmphasized .sapMBtnInner {
+.chkApp .searchFilterExperienceShell .sapMBtnEmphasized .sapMBtnInner,
+.chkApp .searchWorkbenchSurface .sapMBtnEmphasized .sapMBtnInner {
   background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.9), rgba(var(--accent-rgb), 0.72));
   border-color: rgba(var(--accent-rgb), 0.24);
   box-shadow: 0 6px 14px rgba(var(--accent-rgb), 0.16);
@@ -82,7 +102,10 @@ body.chkAppRoot.appDark .chkApp .filterCard {
 
 .chkApp .searchFilterExperienceShell .sapMInputBaseContentWrapper,
 .chkApp .searchFilterExperienceShell .sapMSlt,
-.chkApp .searchFilterExperienceShell .sapMSegB {
+.chkApp .searchFilterExperienceShell .sapMSegB,
+.chkApp .searchWorkbenchSurface .sapMInputBaseContentWrapper,
+.chkApp .searchWorkbenchSurface .sapMSlt,
+.chkApp .searchWorkbenchSurface .sapMSegB {
   min-height: var(--theme-workbench-control-height);
   background: var(--theme-workbench-control-bg);
   border-color: var(--theme-workbench-control-border);
@@ -90,11 +113,14 @@ body.chkAppRoot.appDark .chkApp .filterCard {
 }
 
 .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn,
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
   min-width: 0;
 }
 
-.chkApp .searchFilterExperienceShell .resultSegmentControl.sapMSegB {
+.chkApp .searchFilterExperienceShell .resultSegmentControl.sapMSegB,
+.chkApp .searchWorkbenchSurface .resultSegmentControl.sapMSegB {
   display: inline-flex;
   align-items: stretch;
   width: min(100%, 12.6rem);
@@ -107,7 +133,8 @@ body.chkAppRoot.appDark .chkApp .filterCard {
   overflow: hidden;
 }
 
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn {
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn {
   flex: 1 1 0;
   margin: 0;
   min-width: 3.45rem;
@@ -115,7 +142,8 @@ body.chkAppRoot.appDark .chkApp .filterCard {
   align-items: stretch;
 }
 
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
   min-height: 2.5rem;
   height: 2.5rem;
   padding-inline: 0.9rem;
@@ -132,7 +160,8 @@ body.chkAppRoot.appDark .chkApp .filterCard {
   box-sizing: border-box;
 }
 
-.chkApp .searchFilterExperienceShell .resultSegmentControl {
+.chkApp .searchFilterExperienceShell .resultSegmentControl,
+.chkApp .searchWorkbenchSurface .resultSegmentControl {
   border: 1px solid color-mix(in srgb, var(--theme-workbench-control-border) 88%, transparent);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02)),
@@ -142,12 +171,19 @@ body.chkAppRoot.appDark .chkApp .filterCard {
     0 4px 10px rgba(18, 36, 64, 0.05);
 }
 
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn + .sapMSegBBtn {
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn + .sapMSegBBtn,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn + .sapMSegBBtn {
   border-inline-start: 1px solid color-mix(in srgb, var(--theme-workbench-control-border) 60%, transparent);
 }
 
+.chkApp .searchFilterSegmentWrapper {
+  margin-block: 0.25rem;
+}
+
 .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner,
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner {
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner {
   background:
     linear-gradient(180deg, rgba(var(--accent-rgb), 0.20), rgba(var(--accent-rgb), 0.08)),
     color-mix(in srgb, var(--theme-workbench-control-bg) 78%, rgba(var(--accent-rgb), 0.16));
@@ -158,19 +194,23 @@ body.chkAppRoot.appDark .chkApp .filterCard {
     0 4px 10px rgba(var(--accent-rgb), 0.1);
 }
 
-.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn:not(.sapMSegBBtnSel):hover .sapMSegBBtnInner {
+.chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn:not(.sapMSegBBtnSel):hover .sapMSegBBtnInner,
+.chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn:not(.sapMSegBBtnSel):hover .sapMSegBBtnInner {
   background: color-mix(in srgb, rgba(var(--accent-rgb), 0.08) 70%, transparent);
   color: var(--text-main);
 }
 
-body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl {
+body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl,
+body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface .resultSegmentControl {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.10),
     0 8px 18px rgba(1, 8, 18, 0.22);
 }
 
 body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner,
-body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner {
+body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner,
+body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtnSel .sapMSegBBtnInner,
+body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn[aria-checked="true"] .sapMSegBBtnInner {
   color: rgba(201, 228, 255, 0.96);
   background:
     linear-gradient(180deg, rgba(77, 177, 255, 0.22), rgba(77, 177, 255, 0.08)),
@@ -178,7 +218,9 @@ body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentContr
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell {
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell,
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchSurface {
   padding:
     calc(0.6rem * var(--theme-density-scale))
     calc(0.68rem * var(--theme-density-scale))
@@ -186,13 +228,17 @@ body.chkAppRoot.appDark .chkApp .searchFilterExperienceShell .resultSegmentContr
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .resultSegmentControl.sapMSegB,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .resultSegmentControl.sapMSegB {
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .resultSegmentControl.sapMSegB,
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface .resultSegmentControl.sapMSegB,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchSurface .resultSegmentControl.sapMSegB {
   min-width: 9.5rem;
   width: min(100%, 10.8rem);
 }
 
 .chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner,
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchSurface .resultSegmentControl .sapMSegBBtn .sapMSegBBtnInner {
   min-height: 2.18rem;
   height: 2.18rem;
   padding-inline: 0.58rem;

@@ -15,7 +15,9 @@
   background: var(--hz-success);
 }
 
+.chkApp .appActionPrimary .sapMBtnInner,
 .chkApp .actionPriorityPrimary .sapMBtnInner,
+.chkApp .sapMBtn.appActionPrimary .sapMBtnInner,
 .chkApp .sapMBtn.actionPriorityPrimary .sapMBtnInner {
   border-color: var(--control-primary-border);
   background: var(--control-primary-bg);
@@ -23,7 +25,9 @@
   color: var(--control-primary-text);
 }
 
+.chkApp .appActionSecondary .sapMBtnInner,
 .chkApp .actionPrioritySecondary .sapMBtnInner,
+.chkApp .sapMBtn.appActionSecondary .sapMBtnInner,
 .chkApp .sapMBtn.actionPrioritySecondary .sapMBtnInner {
   border-color: var(--theme-workbench-control-border);
   background: color-mix(in srgb, var(--theme-workbench-control-bg) 92%, transparent);
@@ -31,7 +35,9 @@
   color: var(--text-main);
 }
 
+.chkApp .appActionDanger .sapMBtnInner,
 .chkApp .actionPriorityDanger .sapMBtnInner,
+.chkApp .sapMBtn.appActionDanger .sapMBtnInner,
 .chkApp .sapMBtn.actionPriorityDanger .sapMBtnInner {
   border-color: var(--control-danger-border);
   background: var(--control-danger-bg);

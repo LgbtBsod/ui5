@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox id="detailAttachmentsCard" class="glassCard detailSectionCard detailTableExperienceCard detailAttachmentsCard" width="100%">
+    <VBox id="detailAttachmentsCard" class="appSurfaceCard appSectionSurface detailTableExperienceCard detailAttachmentsCard" width="100%">
         <VBox renderType="Bare" visible="{view>/detailSkeletonBusy}">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonTableSection" type="XML"/>
         </VBox>
@@ -10,7 +10,7 @@
             <OverflowToolbar id="detailAttachmentToolbar" class="toolbarTransparent detailSectionToolbar detailAttachmentToolbar workbenchToolbarSurface sectionToolbarSurface">
                 <Title text="{i18n>attachmentsTitle}" class="detailAttachmentToolbarTitle"/>
                 <ToolbarSpacer class="detailAttachmentToolbarSpacer"/>
-                <Button text="{= ${view>/attachmentsExpanded} ? ${i18n>hideAttachmentsSection} : ${i18n>showAttachmentsSection} }" type="Transparent" enabled="{= !${view>/attachmentBusy} }" press=".onToggleAttachmentsSection" class="sapUiTinyMarginEnd actionPrioritySecondary detailAttachmentToolbarToggle detailAttachmentToolbarButton"/>
+                <Button text="{= ${view>/attachmentsExpanded} ? ${i18n>hideAttachmentsSection} : ${i18n>showAttachmentsSection} }" type="Transparent" enabled="{= !${view>/attachmentBusy} }" press=".onToggleAttachmentsSection" class="appActionSecondary detailAttachmentToolbarToggle detailAttachmentToolbarButton detailAttachmentToolbarAction"/>
             </OverflowToolbar>
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailAttachmentsBody" type="XML"/>
         </VBox>

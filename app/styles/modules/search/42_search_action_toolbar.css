@@ -1,31 +1,64 @@
-.chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
+.chkApp .appActionGhost .sapMBtnInner,
+.chkApp .brandActionBtn.brandActionGhost .sapMBtnInner,
+.chkApp .searchGhostAction .sapMBtnInner,
+.chkApp .searchToolbarGhostAction .sapMBtnInner {
   background: transparent;
   border-color: rgba(var(--hz-accent-rgb, 0,112,242), 0.50);
   color: var(--hz-accent);
   box-shadow: none;
 }
 
-body.chkAppRoot.appDark .chkApp .brandActionBtn.brandActionGhost .sapMBtnInner {
+body.chkAppRoot.appDark .chkApp .appActionGhost .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .brandActionBtn.brandActionGhost .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchGhostAction .sapMBtnInner,
+body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
   border-color: rgba(77, 177, 255, 0.40);
   color: rgba(130, 200, 255, 0.92);
 }
 
-.chkApp .brandActionBtn.brandActionGhost:hover .sapMBtnInner {
+.chkApp .appActionGhost:hover .sapMBtnInner,
+.chkApp .brandActionBtn.brandActionGhost:hover .sapMBtnInner,
+.chkApp .searchGhostAction:hover .sapMBtnInner,
+.chkApp .searchToolbarGhostAction:hover .sapMBtnInner {
   background: rgba(var(--hz-accent-rgb, 0,112,242), 0.07);
   border-color: rgba(var(--hz-accent-rgb, 0,112,242), 0.65);
   transform: translateY(-1px);
 }
 
-.chkApp .brandActionBtn.brandActionGhost:active .sapMBtnInner {
+.chkApp .appActionGhost:active .sapMBtnInner,
+.chkApp .brandActionBtn.brandActionGhost:active .sapMBtnInner,
+.chkApp .searchGhostAction:active .sapMBtnInner,
+.chkApp .searchToolbarGhostAction:active .sapMBtnInner {
   transform: translateY(0) scale(0.97);
 }
 
-.chkApp .tableActionToolbar {
+.chkApp .tableActionToolbar,
+.chkApp .searchActionToolbar {
   background: transparent;
   border: 0;
   box-shadow: none;
   padding-block: 0.35rem;
   min-height: 2.75rem;
+}
+
+.chkApp .searchPrimaryAction .sapMBtnInner {
+  border-color: var(--control-primary-border);
+  background: var(--control-primary-bg);
+  box-shadow: var(--control-primary-shadow);
+  color: var(--control-primary-text);
+}
+
+.chkApp .searchToolbarAction .sapMBtnInner {
+  border-radius: 999px;
+}
+
+.chkApp .searchToolbarAction:hover .sapMBtnInner {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(18, 36, 64, 0.08);
+}
+
+.chkApp .searchToolbarAction:active .sapMBtnInner {
+  transform: scale(0.98);
 }
 
 .chkApp .searchCopyActionBtn .sapMBtnInner,
@@ -91,7 +124,11 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   align-self: center;
 }
 
+.chkApp .searchResultsActionRail .appActionPrimary .sapMBtnInner,
+.chkApp .searchResultsActionRail .appActionSecondary .sapMBtnInner,
+.chkApp .searchResultsActionRail .appActionGhost .sapMBtnInner,
 .chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchToolbarAction .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchGroupButton .sapMBtnInner,
@@ -102,7 +139,11 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   min-height: var(--theme-workbench-control-height);
 }
 
+.chkApp .searchResultsActionRail .appActionPrimary .sapMBtnInner,
+.chkApp .searchResultsActionRail .appActionSecondary .sapMBtnInner,
+.chkApp .searchResultsActionRail .appActionGhost .sapMBtnInner,
 .chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
+.chkApp .searchResultsActionRail .searchToolbarAction .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchGroupButton .sapMBtnInner,
@@ -155,11 +196,13 @@ body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
 }
 
 .chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
+.chkApp .searchActionToolbar .sapMOTBOverflowButton .sapMBtnContent,
 .chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent {
   font-size: 0;
 }
 
 .chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
+.chkApp .searchActionToolbar .sapMOTBOverflowButton .sapMBtnContent::after,
 .chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after {
   content: "...";
   font-size: 0.85rem;

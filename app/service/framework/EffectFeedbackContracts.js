@@ -3,7 +3,7 @@ sap.ui.define([], function () {
 
     return Object.freeze({
         CLASSES: Object.freeze({
-            DIALOG: "glassDialog",
+            DIALOG: "appDialogSurface",
             TOAST: "glassToast",
             TOAST_LEVEL_PREFIX: "glassToast--"
         }),

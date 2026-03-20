@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <HBox
-        class="searchLoadRetryRow sapUiTinyMarginTop"
+        class="searchLoadRetryRow searchLoadRetryRowSpaced"
         alignItems="Center"
         justifyContent="SpaceBetween"
         renderType="Bare"

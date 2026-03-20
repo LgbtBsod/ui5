@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:layout="sap.ui.layout.cssgrid">
     <ResponsivePopover
         id="analyticsYearPickerPopover"
-        class="glassDialog shellPopover analyticsYearPickerPopover"
+        class="appDialogSurface shellPopover analyticsYearPickerPopover"
         contentWidth="19rem"
         placement="Bottom">
         <customHeader>
