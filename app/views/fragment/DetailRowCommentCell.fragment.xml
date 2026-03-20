@@ -2,7 +2,7 @@
     <TextArea
         value="{selected>comment}"
         change=".onRowValueChange"
-        editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+        editable="{view>/isEditMode}"
         placeholder="{i18n>commentPlaceholder}"
         rows="1"
         growing="true"

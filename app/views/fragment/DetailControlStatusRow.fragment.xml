@@ -54,7 +54,7 @@
         <Button
             icon="sap-icon://undo"
             text="{i18n>objectCancel}"
-            visible="{= ${state>/workflow/detail/editMode} !== 'READ' &amp;&amp; !!${state>/isDirty} }"
+            visible="{= ${view>/isEditMode} &amp;&amp; !!${state>/isDirty} }"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onCancelEditFromDetail"
             tooltip="{i18n>objectCancelTooltip}"

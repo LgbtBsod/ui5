@@ -103,7 +103,7 @@ sap.ui.define([
             });
 
             withStyleClasses(oInput, "detailPersonSuggestInput");
-            withStyleClasses(oHint, "detailInlineHintText sapThemeNegativeText");
+            withStyleClasses(oHint, "detailInlineHintText detailInlineHintError") /* SAP-BP: detailInlineHintError replaces sapThemeNegativeText (SAP internal class) */;
             bindReadVisibility(oReadText);
             bindEditVisibility(oInput);
             oHint.bindProperty("text", {

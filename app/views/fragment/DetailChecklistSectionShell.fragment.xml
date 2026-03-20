@@ -18,7 +18,7 @@
                 <Input
                     value="{= ${selected>/basic/CHECKS_NUMBER_TEXT} || ${selected>/basic/CHECKS_NUMBER} || '' }"
                     placeholder="{i18n>checksNumberLabel}"
-                    visible="{= ${view>kind} === 'check' &amp;&amp; ${state>/workflow/detail/editMode} !== 'READ' }"
+                    visible="{= ${view>kind} === 'check' &amp;&amp; ${view>/isEditMode} }"
                     showValueHelp="true"
                     valueHelpOnly="true"
                     valueHelpRequest=".onOpenChecksNumberValueHelp"
@@ -31,7 +31,7 @@
                 <Input
                     value="{= ${selected>/basic/BARRIERS_NUMBER_TEXT} || ${selected>/basic/BARRIERS_NUMBER} || '' }"
                     placeholder="{i18n>barriersNumberLabel}"
-                    visible="{= ${view>kind} === 'barrier' &amp;&amp; ${state>/workflow/detail/editMode} !== 'READ' }"
+                    visible="{= ${view>kind} === 'barrier' &amp;&amp; ${view>/isEditMode} }"
                     showValueHelp="true"
                     valueHelpOnly="true"
                     valueHelpRequest=".onOpenBarriersNumberValueHelp"
@@ -44,7 +44,7 @@
                 <ObjectStatus
                     text="{= ${view>kind} === 'check' ? (${selected>/basic/CHECKS_NUMBER_TEXT} || ${selected>/basic/CHECKS_NUMBER} || '-') : (${selected>/basic/BARRIERS_NUMBER_TEXT} || ${selected>/basic/BARRIERS_NUMBER} || '-') }"
                     state="Information"
-                    visible="{= ${state>/workflow/detail/editMode} === 'READ' }"
+                    visible="{= !${view>/isEditMode} }"
                     class="chipSm statusChip detailSectionNumberChip">
                     <layoutData>
                         <OverflowToolbarLayoutData priority="High"/>
@@ -63,7 +63,7 @@
                     text="{i18n>addRow}"
                     icon="{view>actionIcon}"
                     press=".onAddChecklistSection"
-                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                    visible="{view>/isEditMode}"
                     class="appActionPrimary detailSectionToolbarButton">
                     <customData>
                         <core:CustomData key="kind" value="{view>kind}"/>
@@ -85,7 +85,7 @@
                     icon="{view>actionIcon}"
                     type="Transparent"
                     press=".onAddChecklistSection"
-                    visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+                    visible="{view>/isEditMode}"
                     class="detailEmptyStateAction workflowEmptyStateAction">
                     <customData>
                         <core:CustomData key="kind" value="{view>kind}"/>

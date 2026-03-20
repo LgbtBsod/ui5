@@ -27,4 +27,9 @@ builder:
     excludes:
       - "/test/**"
 
-# Productive baseline is UI5 1.71.28. Local UI5 Tooling stays on 1.71.70 because SAPUI5 1.71.28 is not resolvable via the current framework package channel; bootstrap/test URLs remain externally constrained and are documented in README_BUILD_AND_VALIDATE.md.
+# B-02 STATUS: Version intentionally mismatched.
+# - Local tooling: 1.71.70 (npm channel maximum resolvable)
+# - Productive BASIS: confirm via /sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json
+# - manifest.json minUI5Version: updated to 1.71.70 until BASIS version confirmed.
+# ACTION: Once BASIS SP level known, align both values. If BASIS < 1.71.55, run
+#   SmartFilterBar regression (persistencyKey bug fixed in 1.71.55).

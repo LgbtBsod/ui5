@@ -21,7 +21,7 @@
             icon="sap-icon://save"
             type="Emphasized"
             text="{i18n>objectSave}"
-            visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+            visible="{view>/isEditMode}"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onSaveDetail"
             tooltip="{i18n>objectSaveTooltip}"
@@ -34,7 +34,7 @@
         <Button
             icon="sap-icon://inspection"
             text="{i18n>validateButton}"
-            visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"
+            visible="{view>/isEditMode}"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onValidateChecklist"
             tooltip="{i18n>validateTooltip}"
@@ -64,7 +64,7 @@
             icon="sap-icon://accept"
             text="{i18n>deleteConfirmButton}"
             type="Reject"
-            visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${state>/workflow/detail/editMode} === 'EDIT' &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
+            visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${view>/isEditMode} &amp;&amp; !!${selected>/root/id} &amp;&amp; ${selected>/root/id} !== '__CREATE' }"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onConfirmDeleteChecklist"
             tooltip="{i18n>deleteConfirmTooltip}"
@@ -77,7 +77,7 @@
         <Button
             icon="sap-icon://status-inactive"
             text="{i18n>statusDraft}"
-            visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
+            visible="{view>/isEditMode}"
             press=".onChangeChecklistStatus"
             tooltip="{i18n>statusDraftTooltip}"
             class="detailRailActionBtn appActionSecondary chkRipple">
@@ -92,7 +92,7 @@
         <Button
             icon="sap-icon://status-critical"
             text="{i18n>statusRegistered}"
-            visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
+            visible="{view>/isEditMode}"
             press=".onChangeChecklistStatus"
             tooltip="{i18n>statusRegisteredTooltip}"
             class="detailRailActionBtn appActionSecondary chkRipple">
@@ -107,7 +107,7 @@
         <Button
             icon="sap-icon://status-positive"
             text="{i18n>statusClosed}"
-            visible="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
+            visible="{view>/isEditMode}"
             press=".onChangeChecklistStatus"
             tooltip="{i18n>statusClosedTooltip}"
             class="detailRailActionBtn appActionSecondary chkRipple">

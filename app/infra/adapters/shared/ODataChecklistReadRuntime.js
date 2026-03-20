@@ -6,8 +6,22 @@ sap.ui.define([
 ], function (GatewayRequestRuntime, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts) {
     "use strict";
 
+    /*
+     * AB-01 FIX: Standardized filter helpers.
+     *
+     * buildStringEqFilter  → Edm.String  (for text fields: Id, RootId lookup by human key)
+     * buildBinaryEqFilter  → Edm.Binary  (for binary UUID fields: RootKey)
+     *
+     * Both delegate to ODataAdapterUtils.buildEqFilter which calls
+     * sap.ui.model.odata.ODataUtils.formatValue internally.
+     * Verify accepted format via st05 trace on target BASIS before changing type.
+     */
     function buildStringEqFilter(sProperty, sRootId) {
         return ODataAdapterUtils.buildEqFilter(sProperty, sRootId);
+    }
+
+    function buildBinaryEqFilter(sProperty, sRootId) {
+        return ODataAdapterUtils.buildEqFilter(sProperty, sRootId, ODataKeyContracts.TYPES.ROOT_KEY);
     }
 
     function resolveRootId(mArgs, mDeps) {
@@ -33,7 +47,7 @@ sap.ui.define([
             type: ODataKeyContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
         var pBasic = GatewayRequestRuntime.get("ChecklistBasicInfoSet", {
-            "$filter": buildStringEqFilter("RootKey", sRootId)
+            "$filter": buildBinaryEqFilter("RootKey", sRootId)
         });
         var pChecks = GatewayRequestRuntime.get("ChecklistCheckSet", {
             "$filter": buildStringEqFilter("RootId", sRootId)

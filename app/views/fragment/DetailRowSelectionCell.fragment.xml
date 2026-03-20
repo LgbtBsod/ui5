@@ -2,5 +2,5 @@
     <CheckBox
         selected="{selected>selected}"
         select=".onSelectionToggle"
-        visible="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+        visible="{view>/isEditMode}"/>
 </core:FragmentDefinition>

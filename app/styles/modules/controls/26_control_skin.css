@@ -27,21 +27,21 @@
 .chkApp .appSectionSurface .sapMTimePicker,
 .chkApp .appSectionSurface .sapMDatePicker,
 .chkApp .appInlineSurface .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMInputBaseContentWrapper,
-.chkApp .detailSectionCard .sapMSlt,
-.chkApp .detailSectionCard .sapMTimePicker,
-.chkApp .detailSectionCard .sapMDatePicker,
-.chkApp .detailControlInlineCard .sapMInputBaseContentWrapper {
+.chkApp .appSectionSurface .sapMInputBaseContentWrapper,
+.chkApp .appSectionSurface .sapMSlt,
+.chkApp .appSectionSurface .sapMTimePicker,
+.chkApp .appSectionSurface .sapMDatePicker,
+.chkApp .appInlineSurface .sapMInputBaseContentWrapper {
   border-radius: var(--radius-md);
 }
 
 .chkApp .appSectionSurface .sapMSegB,
-.chkApp .detailSectionCard .sapMSegB {
+.chkApp .appSectionSurface .sapMSegB {
   border-radius: 999px;
 }
 
 .chkApp .appSectionSurface .sapMSegB .sapMSegBBtn .sapMSegBBtnInner,
-.chkApp .detailSectionCard .sapMSegB .sapMSegBBtn .sapMSegBBtnInner {
+.chkApp .appSectionSurface .sapMSegB .sapMSegBBtn .sapMSegBBtnInner {
   border-radius: 999px;
 }
 

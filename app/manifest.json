@@ -7,7 +7,7 @@
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
     "applicationVersion": {
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     "crossNavigation": {
       "inbounds": {
@@ -64,7 +64,7 @@
       "id": "app"
     },
     "dependencies": {
-      "minUI5Version": "1.71.28",
+      "minUI5Version": "1.71.70",
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
@@ -125,10 +125,9 @@
         "settings": {
           "bundleName": "PRODUCTION_CONTROL_CHECKLIST.i18n.i18n",
           "supportedLocales": [
-            "en",
             "ru"
           ],
-          "fallbackLocale": "en"
+          "fallbackLocale": ""
         }
       },
       "data": {
@@ -208,19 +207,22 @@
           "id": "searchTargetPage",
           "viewName": "Search",
           "controlAggregation": "beginColumnPages",
-          "viewLevel": 1
+          "viewLevel": 1,
+          "viewId": "searchView"
         },
         "detail": {
           "id": "detailTargetPage",
           "viewName": "Detail",
           "controlAggregation": "midColumnPages",
-          "viewLevel": 2
+          "viewLevel": 2,
+          "viewId": "detailView"
         },
         "analytics": {
           "id": "analyticsTargetPage",
           "viewName": "Analytics",
-          "controlAggregation": "midColumnPages",
-          "viewLevel": 2
+          "controlAggregation": "endColumnPages",
+          "viewLevel": 2,
+          "viewId": "analyticsView"
         }
       }
     },

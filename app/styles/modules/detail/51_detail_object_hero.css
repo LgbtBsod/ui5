@@ -76,6 +76,13 @@
 }
 
 .chkApp .detailInlineHintText,
+.chkApp .detailInlineHintError,
 .chkApp .detailInlineMetaStatus {
   margin-top: 0.38rem;
 }
+
+/* Error/validation hint color — app-owned replacement for sapThemeNegativeText */
+.chkApp .detailInlineHintError {
+  color: var(--ui-sem-negative-label);
+}
+

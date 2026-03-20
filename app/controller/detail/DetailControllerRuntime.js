@@ -79,12 +79,6 @@ sap.ui.define([
             isEmptyRows: function (aRows) {
                 return !hasRows(aRows);
             },
-            isDesktopTableVisible: function (bPhone, bNarrow, aRows) {
-                return !bPhone && !bNarrow && hasRows(aRows);
-            },
-            isPhoneTableVisible: function (bPhone, bNarrow, aRows) {
-                return !!(bPhone || bNarrow) && hasRows(aRows);
-            },
             isRuntimeDesktopTableVisible: function (bPhone, bNarrow, aRows, bIgnoreNarrowViewport) {
                 return !bPhone && (!!bIgnoreNarrowViewport || !bNarrow) && hasRows(aRows);
             },

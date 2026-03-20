@@ -24,13 +24,13 @@
                 <t:Column>
                     <Label text="{path:'view>labelKeys/text', formatter:'.formatI18nByKey'}"/>
                     <t:template>
-                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
+                        <Input value="{selected>text}" change=".onRowValueChange" editable="{view>/isEditMode}"/>
                     </t:template>
                 </t:Column>
                 <t:Column width="8rem">
                     <Label text="{path:'view>labelKeys/status', formatter:'.formatI18nByKey'}"/>
                     <t:template>
-                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="{view>resultSwitchClass}"/>
+                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{view>/isEditMode}" class="{view>resultSwitchClass}"/>
                     </t:template>
                 </t:Column>
                 <t:Column>
@@ -39,7 +39,7 @@
                         <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailRowCommentCell" type="XML"/>
                     </t:template>
                 </t:Column>
-                <t:Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
+                <t:Column width="10rem" hAlign="Center" visible="{view>/isEditMode}">
                     <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                     <t:template>
                         <Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteExpandedRow" class="tableRowActionBtn tableRowActionBtnDanger">
@@ -66,7 +66,7 @@
                 <Column><Text text="{path:'view>labelKeys/text', formatter:'.formatI18nByKey'}"/></Column>
                 <Column><Text text="{path:'view>labelKeys/status', formatter:'.formatI18nByKey'}"/></Column>
                 <Column><Text text="{path:'view>labelKeys/comment', formatter:'.formatI18nByKey'}"/></Column>
-                <Column width="10rem" hAlign="Center" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }">
+                <Column width="10rem" hAlign="Center" visible="{view>/isEditMode}">
                     <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
                 </Column>
             </columns>
@@ -75,10 +75,10 @@
                     <cells>
                         <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailRowSelectionCell" type="XML"/>
                         <Input value="{parts:[{path:'selected>.'},{path:'view>kind'}], formatter:'.formatDetailRowNumber'}" editable="false"/>
-                        <Input value="{selected>text}" change=".onRowValueChange" editable="{= ${state>/workflow/detail/editMode} !== 'READ' }"/>
-                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="{view>resultSwitchClass}"/>
+                        <Input value="{selected>text}" change=".onRowValueChange" editable="{view>/isEditMode}"/>
+                        <Switch state="{selected>result}" change=".onRowStateChange" enabled="{view>/isEditMode}" class="{view>resultSwitchClass}"/>
                         <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailRowCommentCell" type="XML"/>
-                        <Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteExpandedRow" visible="{= ${state>/workflow/detail/editMode} !== 'READ' }" class="tableRowActionBtn tableRowActionBtnDanger">
+                        <Button icon="sap-icon://delete" text="{i18n>rowActionDelete}" type="Transparent" press=".onDeleteExpandedRow" visible="{view>/isEditMode}" class="tableRowActionBtn tableRowActionBtnDanger">
                             <customData>
                                 <core:CustomData key="rowKind" value="{view>deleteActionKind}"/>
                             </customData>
