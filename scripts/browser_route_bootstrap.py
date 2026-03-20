@@ -396,13 +396,23 @@ def invoke_controller_method(page, controller_name: str, method_name: str, *args
           const core = sap.ui.getCore();
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
-          const view = all.find((item) => item
+          const app = core.byId('checklist_app_comp---app');
+          const appState = app && app.getModel && app.getModel('state');
+          const activeRootId = appState && appState.getProperty
+            ? String(appState.getProperty('/activeObjectId') || appState.getProperty('/selectedId') || '')
+            : '';
+          const candidates = all.filter((item) => item
             && item.isA
             && item.isA('sap.ui.core.mvc.View')
             && item.getController
             && item.getController()
             && item.getController().getMetadata
-            && item.getController().getMetadata().getName() === controllerName) || null;
+            && item.getController().getMetadata().getName() === controllerName);
+          const view = candidates.find((item) => {
+            const selected = item && item.getModel && item.getModel('selected');
+            const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+            return !!(item && item.getDomRef && item.getDomRef()) && (!!activeRootId ? rootId === activeRootId : true);
+          }) || candidates.find((item) => !!(item && item.getDomRef && item.getDomRef())) || candidates[0] || null;
           const controller = view && view.getController ? view.getController() : null;
           if (!controller || typeof controller[methodName] !== 'function') {
             throw new Error('Controller method not found: ' + controllerName + ':' + methodName);
