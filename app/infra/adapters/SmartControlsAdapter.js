@@ -1,7 +1,11 @@
 sap.ui.define([
-"PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartControlCoordinator"
-], function (SearchSmartControlCoordinator) {
+"PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartControlCoordinator",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (SearchSmartControlCoordinator, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function extractKey(oObject) {
         return SearchSmartControlCoordinator.extractChecklistId(oObject) || null;
@@ -20,7 +24,7 @@ sap.ui.define([
             if (!oSmartTable) {
                 return false;
             }
-            if (typeof oSmartTable.isInitialised === "function") {
+            if (typeof oSmartTable.isInitialised === TYPE_FUNCTION) {
                 return !!oSmartTable.isInitialised();
             }
             return true;
@@ -29,7 +33,7 @@ sap.ui.define([
             if (!oSmartFilterBar) {
                 return true;
             }
-            if (typeof oSmartFilterBar.isInitialised === "function") {
+            if (typeof oSmartFilterBar.isInitialised === TYPE_FUNCTION) {
                 return !!oSmartFilterBar.isInitialised();
             }
             return true;
@@ -41,39 +45,28 @@ sap.ui.define([
             return oInnerTable && oInnerTable.getBinding ? oInnerTable.getBinding("items") : null;
         }
         function isBusy() {
-            if (oSmartTable && typeof oSmartTable.getBusy === "function" && oSmartTable.getBusy()) {
+            if (oSmartTable && typeof oSmartTable.getBusy === TYPE_FUNCTION && oSmartTable.getBusy()) {
                 return true;
             }
-            if (oInnerTable && typeof oInnerTable.getBusy === "function" && oInnerTable.getBusy()) {
+            if (oInnerTable && typeof oInnerTable.getBusy === TYPE_FUNCTION && oInnerTable.getBusy()) {
                 return true;
             }
             return false;
         }
-        function canTriggerRebind() {
-            if (!oSmartTable || typeof oSmartTable.data !== "function") {
-                return true;
+        var fnDebouncedRebind = SearchSmartControlCoordinator.createDebouncedRebind(function () {
+            if (isReady() && !isBusy() && oSmartTable && oSmartTable.rebindTable) {
+                oSmartTable.rebindTable();
             }
-            var nNow = Date.now();
-            var nLockUntil = Number(oSmartTable.data("__pcctRebindLockUntil") || 0);
-            if (nLockUntil > nNow) {
-                return false;
-            }
-            if (isBusy()) {
-                oSmartTable.data("__pcctRebindLockUntil", nNow + 400);
-                return false;
-            }
-            oSmartTable.data("__pcctRebindLockUntil", nNow + 250);
-            return true;
-        }
+        }, 80);
 
         return {
             isReady: isReady,
             rebindSearchTable: function () {
-                if (isReady() && oSmartTable && oSmartTable.rebindTable && canTriggerRebind()) {
-                    oSmartTable.rebindTable();
-                    return true;
+                if (!isReady() || !oSmartTable || !oSmartTable.rebindTable || isBusy()) {
+                    return false;
                 }
-                return false;
+                fnDebouncedRebind();
+                return true;
             },
 
             getSmartFilterData: function () {
@@ -123,11 +116,11 @@ sap.ui.define([
                 if (!iRequestedLength) {
                     iRequestedLength = Number(oBinding.getLength && oBinding.getLength()) || 0;
                 }
-                if (typeof oBinding.requestContexts === "function") {
-                    return oBinding.requestContexts(0, iRequestedLength || undefined).then(extractObjectsFromContexts);
+                if (typeof oBinding[METHODS.REQUEST_CONTEXTS] === TYPE_FUNCTION) {
+                    return oBinding[METHODS.REQUEST_CONTEXTS](0, iRequestedLength || undefined).then(extractObjectsFromContexts);
                 }
-                if (typeof oBinding.getContexts === "function") {
-                    return Promise.resolve(extractObjectsFromContexts(oBinding.getContexts(0, iRequestedLength || undefined)));
+                if (typeof oBinding[METHODS.GET_CONTEXTS] === TYPE_FUNCTION) {
+                    return Promise.resolve(extractObjectsFromContexts(oBinding[METHODS.GET_CONTEXTS](0, iRequestedLength || undefined)));
                 }
                 return Promise.resolve(this.getVisibleRows());
             },

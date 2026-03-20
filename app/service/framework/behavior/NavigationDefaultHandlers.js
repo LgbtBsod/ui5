@@ -3,14 +3,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "sap/ui/core/routing/HashChanger",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (NavigationBehaviorHelpers, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (NavigationBehaviorHelpers, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts, JsRuntime) {
     "use strict";
 
     var NAVIGATION_SCOPE = "navigation";
     var HASH_PREFIX = "#";
     var HASH_ROUTE_PREFIX = "#/";
     var bDefaultsRegistered = false;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
+    var HASH_CHANGER = JsRuntime.HASH_CHANGER;
 
     function normalizeRouteName(vRouteName) {
         return String(vRouteName || "").trim();
@@ -22,7 +26,7 @@ sap.ui.define([
 
     function buildIntentHash(mContext, oIntent) {
         var oComponent = mContext && mContext.component;
-        var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
+        var oRouter = oComponent && typeof oComponent.getRouter === TYPE_FUNCTION ? oComponent.getRouter() : null;
         var sRouteName = normalizeRouteName(oIntent && oIntent.routeName);
         var oRouteArgs = cloneRouteArgs(oIntent && oIntent.routeArgs);
         var sUrl;
@@ -30,8 +34,8 @@ sap.ui.define([
         if (!sRouteName) {
             return "";
         }
-        if (oRouter && typeof oRouter.getURL === "function") {
-            sUrl = String(oRouter.getURL(sRouteName, oRouteArgs) || "");
+        if (oRouter && typeof oRouter[METHODS.GET_URL] === TYPE_FUNCTION) {
+            sUrl = String(oRouter[METHODS.GET_URL](sRouteName, oRouteArgs) || "");
             if (!sUrl) {
                 return HASH_PREFIX;
             }
@@ -55,8 +59,8 @@ sap.ui.define([
     function queuePendingIntent(mContext) {
         var oCurrentIntent = NavigationBehaviorHelpers.buildCurrentIntent(mContext.stateModel) || {};
         ModelStateRuntime.writeOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, {
-            routeName: mContext.routeEvent && mContext.routeEvent.getParameter && mContext.routeEvent.getParameter("name"),
-            routeArgs: (mContext.routeEvent && mContext.routeEvent.getParameter && mContext.routeEvent.getParameter("arguments")) || {},
+            routeName: mContext.routeEvent && typeof mContext.routeEvent.getParameter === TYPE_FUNCTION && mContext.routeEvent.getParameter("name"),
+            routeArgs: (mContext.routeEvent && typeof mContext.routeEvent.getParameter === TYPE_FUNCTION && mContext.routeEvent.getParameter("arguments")) || {},
             currentIntent: {
                 routeName: normalizeRouteName(oCurrentIntent.routeName),
                 routeArgs: cloneRouteArgs(oCurrentIntent.routeArgs)
@@ -77,10 +81,10 @@ sap.ui.define([
         if (!sTargetHash) {
             return false;
         }
-        oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
-        if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
+        oHashChanger = HashChanger && typeof HashChanger.getInstance === TYPE_FUNCTION ? HashChanger.getInstance() : null;
+        if (oHashChanger && typeof oHashChanger[HASH_CHANGER.REPLACE_HASH] === TYPE_FUNCTION) {
             ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
-            oHashChanger.replaceHash(sTargetHash.replace(/^#\/?/, ""));
+            oHashChanger[HASH_CHANGER.REPLACE_HASH](sTargetHash.replace(/^#\/?/, ""));
             return true;
         }
         return false;
@@ -93,7 +97,7 @@ sap.ui.define([
         }
         clearPendingIntent(mContext);
         ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
-        mContext.component.getRouter().navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
+        mContext.component.getRouter()[METHODS.NAV_TO](oIntent.routeName, oIntent.routeArgs || {}, false);
         return true;
     }
 
@@ -101,26 +105,26 @@ sap.ui.define([
         var oIntent = ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null);
         var oCurrentIntent;
         var oComponent = mContext && mContext.component;
-        var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
-        var oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
+        var oRouter = oComponent && typeof oComponent.getRouter === TYPE_FUNCTION ? oComponent.getRouter() : null;
+        var oHashChanger = HashChanger && typeof HashChanger.getInstance === TYPE_FUNCTION ? HashChanger.getInstance() : null;
         var sTargetHash;
         if (!oIntent) {
             return false;
         }
         oCurrentIntent = oIntent.currentIntent || {};
         clearPendingIntent(mContext);
-        if (oRouter && typeof oRouter.navTo === "function" && normalizeRouteName(oCurrentIntent.routeName)) {
+        if (oRouter && typeof oRouter[METHODS.NAV_TO] === TYPE_FUNCTION && normalizeRouteName(oCurrentIntent.routeName)) {
             ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
-            oRouter.navTo(oCurrentIntent.routeName, cloneRouteArgs(oCurrentIntent.routeArgs), false);
+            oRouter[METHODS.NAV_TO](oCurrentIntent.routeName, cloneRouteArgs(oCurrentIntent.routeArgs), false);
             return true;
         }
         sTargetHash = String(oIntent.currentHash || "").trim();
         if (!sTargetHash) {
             return false;
         }
-        if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
+        if (oHashChanger && typeof oHashChanger[HASH_CHANGER.REPLACE_HASH] === TYPE_FUNCTION) {
             ModelStateRuntime.writeOnModel(mContext.stateModel, "/navGuardBypass", true);
-            oHashChanger.replaceHash(sTargetHash.replace(/^#\/?/, ""));
+            oHashChanger[HASH_CHANGER.REPLACE_HASH](sTargetHash.replace(/^#\/?/, ""));
             return true;
         }
         return false;

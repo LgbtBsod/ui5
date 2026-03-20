@@ -1,5 +1,9 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function clearTimer(iTimerId) {
         if (iTimerId) {
@@ -11,7 +15,7 @@ sap.ui.define([], function () {
     function restartTimer(iTimerId, fnWork, iDelayMs) {
         clearTimer(iTimerId);
         return window.setTimeout(function () {
-            if (typeof fnWork === "function") {
+            if (typeof fnWork === TYPE_FUNCTION) {
                 fnWork();
             }
         }, Number(iDelayMs) || 0);
@@ -29,7 +33,7 @@ sap.ui.define([], function () {
             return iFrameId;
         }
         return window.requestAnimationFrame(function () {
-            if (typeof fnWork === "function") {
+            if (typeof fnWork === TYPE_FUNCTION) {
                 fnWork();
             }
         });
@@ -38,7 +42,7 @@ sap.ui.define([], function () {
     function restartFrame(iFrameId, fnWork) {
         clearFrame(iFrameId);
         return window.requestAnimationFrame(function () {
-            if (typeof fnWork === "function") {
+            if (typeof fnWork === TYPE_FUNCTION) {
                 fnWork();
             }
         });
@@ -46,7 +50,7 @@ sap.ui.define([], function () {
 
     function nextFrame(fnWork) {
         return window.requestAnimationFrame(function () {
-            if (typeof fnWork === "function") {
+            if (typeof fnWork === TYPE_FUNCTION) {
                 fnWork();
             }
         });

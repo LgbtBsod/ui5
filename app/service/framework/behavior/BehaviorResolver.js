@@ -1,7 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (BehaviorRegistry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (BehaviorRegistry, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function appendUnique(aTarget, vValue) {
         if (Array.isArray(vValue)) {
@@ -60,15 +63,15 @@ sap.ui.define([
             || BehaviorRegistry.resolveDefault(sScope, aCandidates);
         var fnFallback = mDefaultHandlers && mDefaultHandlers[sOperation];
 
-        if (oResolved && typeof oResolved.handler === "function") {
+        if (oResolved && typeof oResolved.handler === TYPE_FUNCTION) {
             return oResolved.handler;
         }
-        return typeof fnFallback === "function" ? fnFallback : null;
+        return typeof fnFallback === TYPE_FUNCTION ? fnFallback : null;
     }
 
     function execute(sScope, sOperation, mContext, mDefaultHandlers) {
         var fnHandler = resolve(sScope, sOperation, mContext, mDefaultHandlers);
-        if (typeof fnHandler !== "function") {
+        if (typeof fnHandler !== TYPE_FUNCTION) {
             return Promise.reject(new Error("No behavior handler registered for " + sScope + ":" + sOperation));
         }
         return Promise.resolve(fnHandler(mContext || {}));
@@ -76,7 +79,7 @@ sap.ui.define([
 
     function executeSync(sScope, sOperation, mContext, mDefaultHandlers) {
         var fnHandler = resolve(sScope, sOperation, mContext, mDefaultHandlers);
-        if (typeof fnHandler !== "function") {
+        if (typeof fnHandler !== TYPE_FUNCTION) {
             throw new Error("No behavior handler registered for " + sScope + ":" + sOperation);
         }
         return fnHandler(mContext || {});

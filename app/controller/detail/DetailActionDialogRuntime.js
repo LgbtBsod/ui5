@@ -2,9 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerReturnFocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (ControllerReturnFocusRuntime, ControllerViewStateRuntime, FocusRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ControllerReturnFocusRuntime, ControllerViewStateRuntime, FocusRuntime, SchedulingRuntime, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     return {
         _withViewFlag: function (sPath, fnWork) {
@@ -22,13 +26,13 @@ sap.ui.define([
                 if (!oTreeTable) {
                     return;
                 }
-                if (typeof oTreeTable.clearSelection === "function") {
+                if (typeof oTreeTable.clearSelection === TYPE_FUNCTION) {
                     oTreeTable.clearSelection();
                 }
-                if (typeof oTreeTable.setFirstVisibleRow === "function") {
+                if (typeof oTreeTable.setFirstVisibleRow === TYPE_FUNCTION) {
                     oTreeTable.setFirstVisibleRow(0);
                 }
-                if (typeof oTreeTable.invalidate === "function") {
+                if (typeof oTreeTable.invalidate === TYPE_FUNCTION) {
                     oTreeTable.invalidate();
                 }
             }.bind(this), 90);
@@ -61,9 +65,9 @@ sap.ui.define([
             }
             oSearchField = this.byId("locationValueHelpSearchField");
             SchedulingRuntime.restartTimer(0, function () {
-                oFocusTarget = oSearchField && oSearchField.getFocusDomRef ? oSearchField.getFocusDomRef() : null;
-                if (oFocusTarget && typeof oFocusTarget.focus === "function") {
-                    oFocusTarget.focus();
+                oFocusTarget = oSearchField && typeof oSearchField[METHODS.GET_FOCUS_DOM_REF] === TYPE_FUNCTION ? oSearchField[METHODS.GET_FOCUS_DOM_REF]() : null;
+                if (oFocusTarget && typeof oFocusTarget[METHODS.FOCUS] === TYPE_FUNCTION) {
+                    oFocusTarget[METHODS.FOCUS]();
                     return;
                 }
                 FocusRuntime.focusSoon(oSearchField);

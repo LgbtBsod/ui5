@@ -1,118 +1,116 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (FocusRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (FocusRuntime, SchedulingRuntime, JsRuntime) {
     "use strict";
 
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
+    var FILTER_SELECTORS = ["[id$='searchSmartFilterBar-btnGo']", "[id$='searchSmartFilterBar']", "[id$='searchSmartFilterBar'] input", "[role='search']", "input", "button"];
+    var RESULTS_SELECTORS = [".searchResultsTable .sapMListTblRow", ".searchResultsTable .sapMListTbl", "[role='row']", "[role='grid']", "[role='table']"];
+    var TOOLBAR_SELECTORS = ["[id$='backendTopInput-inner']", "[id$='backendTopInput']", "[id$='maxRowsInput-inner']", "[id$='maxRowsInput']", ".searchCreateActionBtn", "input", "button"];
+
     function resolveViewDom(oController) {
-        return oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
+        var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();
+        return oView && typeof oView[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oView[METHODS.GET_DOM_REF]();
     }
 
     function focusDomNode(oNode) {
-        if (!oNode || typeof oNode.focus !== "function") {
+        if (!oNode || typeof oNode[METHODS.FOCUS] !== TYPE_FUNCTION) {
             return false;
         }
         try {
-            if (typeof oNode.getAttribute === "function" && !oNode.getAttribute("tabindex")) {
+            if (typeof oNode.getAttribute === TYPE_FUNCTION && !oNode.getAttribute("tabindex")) {
                 oNode.setAttribute("tabindex", "-1");
             }
         } catch (_error) {
             // Ignore readonly attribute nodes.
         }
+        try {
+            oNode[METHODS.FOCUS]();
+        } catch (_focusError) {
+            // Retry on the next macrotask for nodes that are not focusable yet during rerender.
+        }
         SchedulingRuntime.restartTimer(0, function () {
-            oNode.focus();
+            try {
+                oNode[METHODS.FOCUS]();
+            } catch (_retryFocusError) {
+                // Ignore terminal focus failures.
+            }
         }, 0);
         return true;
     }
 
-    function focusScopedSelector(oController, sSelector) {
+    function focusFirstScopedSelector(oController, aSelectors) {
         var oViewDom = resolveViewDom(oController);
-        if (!oViewDom || !oViewDom.querySelector || !sSelector) {
+        var oNode;
+        if (!oViewDom || typeof oViewDom.querySelector !== TYPE_FUNCTION || !Array.isArray(aSelectors)) {
             return false;
         }
-        return focusDomNode(oViewDom.querySelector(sSelector));
+        oNode = aSelectors.reduce(function (oFound, sSelector) {
+            return oFound || (sSelector ? oViewDom.querySelector(sSelector) : null);
+        }, null);
+        return focusDomNode(oNode);
     }
 
     function focusSearchControlDom(oControl) {
-        if (!oControl || typeof oControl.getDomRef !== "function") {
+        if (!oControl || typeof oControl[METHODS.GET_DOM_REF] !== TYPE_FUNCTION) {
             return false;
         }
-        return focusDomNode(oControl.getDomRef());
+        return focusDomNode(oControl[METHODS.GET_DOM_REF]());
+    }
+
+    function focusControl(oControl) {
+        if (!oControl) {
+            return false;
+        }
+        if (FocusRuntime.focusSoon(oControl)) {
+            return true;
+        }
+        return focusSearchControlDom(oControl);
+    }
+
+    function resolveToolbarControl(oController) {
+        return oController.byId("backendTopInput")
+            || oController.byId("maxRowsInput")
+            || oController.byId("searchCreateButton");
+    }
+
+    function resolveResultsTarget(oController, fnResolveSearchInnerTable) {
+        var oInnerTable = fnResolveSearchInnerTable(oController);
+        var aSelectedItems;
+        var aItems;
+        if (!oInnerTable) {
+            return oController.byId("searchSmartTable");
+        }
+        aSelectedItems = typeof oInnerTable.getSelectedItems === TYPE_FUNCTION ? (oInnerTable.getSelectedItems() || []) : [];
+        if (Array.isArray(aSelectedItems) && aSelectedItems.length) {
+            return aSelectedItems[0];
+        }
+        aItems = typeof oInnerTable.getItems === TYPE_FUNCTION ? (oInnerTable.getItems() || []) : [];
+        if (Array.isArray(aItems) && aItems.length) {
+            return aItems[0];
+        }
+        return oInnerTable;
     }
 
     return {
         focusSearchFilters: function (oController, fnResolveSmartSearchButton) {
             var oTarget = fnResolveSmartSearchButton(oController) || oController.byId("searchSmartFilterBar");
-            if (!oTarget) {
-                return focusScopedSelector(oController, "[id$='searchSmartFilterBar-btnGo']")
-                    || focusScopedSelector(oController, "[id$='searchSmartFilterBar']")
-                    || focusScopedSelector(oController, "[id$='searchSmartFilterBar'] input");
-            }
-            if (FocusRuntime.focusSoon(oTarget)) {
-                return true;
-            }
-            return focusSearchControlDom(oTarget)
-                || focusScopedSelector(oController, "[id$='searchSmartFilterBar-btnGo']")
-                || focusScopedSelector(oController, "[id$='searchSmartFilterBar']")
-                || focusScopedSelector(oController, "[id$='searchSmartFilterBar'] input");
+            return focusControl(oTarget)
+                || focusFirstScopedSelector(oController, FILTER_SELECTORS);
         },
 
         focusSearchResults: function (oController, fnResolveSearchInnerTable) {
-            var oInnerTable = fnResolveSearchInnerTable(oController);
-            var aSelectedItems;
-            var aItems;
-            var oTarget;
-            if (!oInnerTable) {
-                return focusScopedSelector(oController, "[id$='searchSmartTable']")
-                    || focusScopedSelector(oController, ".searchResultsTable");
-            }
-            aSelectedItems = oInnerTable.getSelectedItems ? (oInnerTable.getSelectedItems() || []) : [];
-            if (Array.isArray(aSelectedItems) && aSelectedItems.length) {
-                oTarget = aSelectedItems[0];
-            }
-            if (!oTarget && oInnerTable.getItems) {
-                aItems = oInnerTable.getItems() || [];
-                if (Array.isArray(aItems) && aItems.length) {
-                    oTarget = aItems[0];
-                }
-            }
-            if (!oTarget) {
-                oTarget = oInnerTable;
-            }
-            if (FocusRuntime.focusSoon(oTarget)) {
-                return true;
-            }
-            if (focusSearchControlDom(oTarget)) {
-                return true;
-            }
-            return focusSearchControlDom(oController.byId("searchSmartTable"))
-                || focusScopedSelector(oController, ".searchResultsTable .sapMListTblRow")
-                || focusScopedSelector(oController, ".searchResultsTable .sapMListTbl");
+            var oTarget = resolveResultsTarget(oController, fnResolveSearchInnerTable);
+            return focusControl(oTarget)
+                || focusFirstScopedSelector(oController, RESULTS_SELECTORS);
         },
 
         focusSearchToolbar: function (oController) {
-            var oTarget = oController.byId("backendTopInput")
-                || oController.byId("maxRowsInput");
-            if (!oTarget) {
-                return focusScopedSelector(oController, "[id$='backendTopInput-inner']")
-                    || focusScopedSelector(oController, "[id$='backendTopInput']")
-                    || focusScopedSelector(oController, "[id$='maxRowsInput-inner']")
-                    || focusScopedSelector(oController, "[id$='maxRowsInput']")
-                    || focusScopedSelector(oController, ".searchCreateActionBtn");
-            }
-            if (FocusRuntime.focusSoon(oTarget)) {
-                return true;
-            }
-            if (focusSearchControlDom(oTarget)) {
-                return true;
-            }
-            return focusSearchControlDom(oController.byId("backendTopInput"))
-                || focusSearchControlDom(oController.byId("maxRowsInput"))
-                || focusScopedSelector(oController, "[id$='backendTopInput-inner']")
-                || focusScopedSelector(oController, "[id$='backendTopInput']")
-                || focusScopedSelector(oController, "[id$='maxRowsInput-inner']")
-                || focusScopedSelector(oController, "[id$='maxRowsInput']")
-                || focusScopedSelector(oController, ".searchCreateActionBtn");
+            return focusControl(resolveToolbarControl(oController))
+                || focusFirstScopedSelector(oController, TOOLBAR_SELECTORS);
         }
     };
 });

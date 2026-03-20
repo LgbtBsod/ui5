@@ -1,14 +1,19 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
-], function (LockFacade, ControllerModelRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (LockFacade, ControllerModelRuntime, JsRuntime) {
     "use strict";
 
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var TYPE_UNDEFINED = JsRuntime.TYPEOF.UNDEFINED;
+    var METHODS = JsRuntime.METHODS;
+
     function decodeBase64(sBase64) {
-        if (typeof window !== "undefined" && typeof window.atob === "function") {
+        if (typeof window !== TYPE_UNDEFINED && typeof window.atob === TYPE_FUNCTION) {
             return window.atob(sBase64);
         }
-        if (typeof atob === "function") {
+        if (typeof atob === TYPE_FUNCTION) {
             return atob(sBase64);
         }
         throw new Error("base64_decode_unavailable");
@@ -20,9 +25,9 @@ sap.ui.define([
         },
         setModel: function (oModel, sName) { return this.getView().setModel(oModel, sName); },
         getResourceBundle: function () {
-            var oOwner = this.getOwnerComponent && this.getOwnerComponent();
-            var oI18nModel = oOwner && oOwner.getModel ? oOwner.getModel("i18n") : null;
-            return oI18nModel && typeof oI18nModel.getResourceBundle === "function" ? oI18nModel.getResourceBundle() : null;
+            var oOwner = typeof this.getOwnerComponent === TYPE_FUNCTION && this.getOwnerComponent();
+            var oI18nModel = oOwner && typeof oOwner[METHODS.GET_MODEL] === TYPE_FUNCTION ? oOwner[METHODS.GET_MODEL]("i18n") : null;
+            return oI18nModel && typeof oI18nModel[METHODS.GET_RESOURCE_BUNDLE] === TYPE_FUNCTION ? oI18nModel[METHODS.GET_RESOURCE_BUNDLE]() : null;
         },
         releaseLock: function (sObjectId, sSessionId) {
             if (!sObjectId || !sSessionId) { return Promise.resolve(); }
@@ -30,7 +35,7 @@ sap.ui.define([
         },
         setLockPending: function (oStateModel, bPending) { if (oStateModel) { oStateModel.setProperty("/lockOperationPending", !!bPending); } },
         deleteRowFromEvent: function (oEvent, sModelName, sCollectionPath) {
-            var oCtx = oEvent && oEvent.getSource && oEvent.getSource().getBindingContext(sModelName);
+            var oCtx = oEvent && typeof oEvent.getSource === TYPE_FUNCTION && oEvent.getSource().getBindingContext(sModelName);
             if (!oCtx) { return { deleted: false }; }
             var oModel = this.getModel(sModelName);
             var aItems = oModel.getProperty(sCollectionPath) || [];
@@ -47,7 +52,7 @@ sap.ui.define([
             return { deleted: true, index: iIndex };
         },
         runWithStateFlag: function (oStateModel, sPath, fnTask) {
-            if (!oStateModel || !sPath || typeof fnTask !== "function") { return Promise.resolve(null); }
+            if (!oStateModel || !sPath || typeof fnTask !== TYPE_FUNCTION) { return Promise.resolve(null); }
             oStateModel.setProperty(sPath, true);
             return Promise.resolve().then(fnTask).finally(function () { oStateModel.setProperty(sPath, false); });
         },

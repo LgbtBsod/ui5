@@ -1,12 +1,16 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SearchUiContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, SearchUiContracts, JsRuntime) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = SearchUiContracts.COLUMN_RULES;
     var COMPACT_VIEWPORT_REM_MAX = SearchUiContracts.VIEWPORT.COMPACT_REM_MAX;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var TYPE_OBJECT = JsRuntime.TYPEOF.OBJECT;
+    var METHODS = JsRuntime.METHODS;
 
     function parseColumnPersonalizationData(oColumn) {
         var vData = oColumn && oColumn.data && oColumn.data("p13nData");
@@ -20,7 +24,7 @@ sap.ui.define([
                 return null;
             }
         }
-        return typeof vData === "object" ? vData : null;
+        return typeof vData === TYPE_OBJECT ? vData : null;
     }
 
     function resolveSearchColumnKey(oColumn) {
@@ -60,34 +64,34 @@ sap.ui.define([
         if (!oColumn || !mRule) {
             return;
         }
-        if (typeof oColumn.data === "function" && typeof oColumn.data("chkBaseVisible") !== "boolean") {
+        if (typeof oColumn.data === TYPE_FUNCTION && typeof oColumn.data("chkBaseVisible") !== JsRuntime.TYPEOF.BOOLEAN) {
             oColumn.data("chkBaseVisible", !(typeof oColumn.getVisible === "function") || oColumn.getVisible());
         }
-        bBaseVisible = typeof oColumn.data === "function" && typeof oColumn.data("chkBaseVisible") === "boolean"
+        bBaseVisible = typeof oColumn.data === TYPE_FUNCTION && typeof oColumn.data("chkBaseVisible") === JsRuntime.TYPEOF.BOOLEAN
             ? oColumn.data("chkBaseVisible")
             : true;
-        if (typeof oColumn.setWidth === "function") {
+        if (typeof oColumn.setWidth === TYPE_FUNCTION) {
             oColumn.setWidth(bCompactViewport ? "auto" : (mRule.width || "auto"));
         }
-        if (typeof oColumn.setMinScreenWidth === "function") {
+        if (typeof oColumn.setMinScreenWidth === TYPE_FUNCTION) {
             oColumn.setMinScreenWidth(mRule.minScreenWidth || "");
         }
-        if (typeof oColumn.setDemandPopin === "function") {
+        if (typeof oColumn.setDemandPopin === TYPE_FUNCTION) {
             oColumn.setDemandPopin(!!mRule.demandPopin);
         }
-        if (typeof oColumn.setImportance === "function" && mRule.importance) {
+        if (typeof oColumn.setImportance === TYPE_FUNCTION && mRule.importance) {
             oColumn.setImportance(mRule.importance);
         }
-        if (typeof oColumn.setPopinDisplay === "function") {
+        if (typeof oColumn.setPopinDisplay === TYPE_FUNCTION) {
             oColumn.setPopinDisplay(bCompactViewport ? "Block" : "Inline");
         }
-        if (typeof oColumn.setVisible === "function") {
+        if (typeof oColumn.setVisible === TYPE_FUNCTION) {
             oColumn.setVisible(!!bBaseVisible);
         }
-        if (typeof oColumn.setHAlign === "function" && (sColumnKey === "SuccessChecksRate" || sColumnKey === "SuccessBarriersRate")) {
+        if (typeof oColumn.setHAlign === TYPE_FUNCTION && (sColumnKey === "SuccessChecksRate" || sColumnKey === "SuccessBarriersRate")) {
             oColumn.setHAlign("Center");
         }
-        if (typeof oColumn.toggleStyleClass === "function") {
+        if (typeof oColumn.toggleStyleClass === TYPE_FUNCTION) {
             oColumn.toggleStyleClass("searchColumnCritical", mRule.importance === "High");
             oColumn.toggleStyleClass("searchColumnSecondary", mRule.importance === "Low");
             oColumn.toggleStyleClass("searchColumnHiddenNarrow", false);
@@ -108,10 +112,10 @@ sap.ui.define([
         if (!bForce && oController._sSearchTableLayoutKey === sLayoutKey) {
             return;
         }
-        if (typeof oInnerTable.setFixedLayout === "function") {
+        if (typeof oInnerTable.setFixedLayout === TYPE_FUNCTION) {
             oInnerTable.setFixedLayout(bCompactViewport);
         }
-        if (typeof oInnerTable.setAutoPopinMode === "function") {
+        if (typeof oInnerTable.setAutoPopinMode === TYPE_FUNCTION) {
             oInnerTable.setAutoPopinMode(false);
         }
         aColumns = oInnerTable.getColumns ? (oInnerTable.getColumns() || []) : [];
@@ -151,10 +155,10 @@ sap.ui.define([
             return null;
         }
         sSelectionMode = resolveSearchSelectionMode(oController);
-        if (oInnerTable.setMode) {
+        if (typeof oInnerTable.setMode === TYPE_FUNCTION) {
             oInnerTable.setMode(sSelectionMode);
         }
-        if (oInnerTable.setIncludeItemInSelection) {
+        if (typeof oInnerTable.setIncludeItemInSelection === TYPE_FUNCTION) {
             oInnerTable.setIncludeItemInSelection(false);
         }
         mCounts = resolveSearchTableCounts(oInnerTable);
@@ -170,10 +174,10 @@ sap.ui.define([
             syncSearchTableRuntimeState(oController, oInnerTable);
             return;
         }
-        if (oInnerTable.attachUpdateFinished) {
+        if (typeof oInnerTable.attachUpdateFinished === TYPE_FUNCTION) {
             oInnerTable.attachUpdateFinished(function () {
                 syncSearchTableRuntimeState(oController, oInnerTable);
-                if (typeof fnOnRuntimeChanged === "function") {
+                if (typeof fnOnRuntimeChanged === TYPE_FUNCTION) {
                     fnOnRuntimeChanged();
                 }
             });

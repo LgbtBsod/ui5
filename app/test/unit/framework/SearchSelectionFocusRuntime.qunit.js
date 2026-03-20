@@ -35,6 +35,7 @@ sap.ui.define([
         var done = assert.async();
         var oOutside = document.createElement("input");
         var oFixture;
+        var oTargetControl;
 
         oOutside.id = "outside-backendTopInput-inner";
         document.body.appendChild(oOutside);
@@ -45,6 +46,14 @@ sap.ui.define([
             '</div>'
         );
         oFixture.host.setAttribute("data-qunit-search-focus", "true");
+        oTargetControl = {
+            getDomRef: function () {
+                return oFixture.host.querySelector("#fixture-backendTopInput-inner");
+            }
+        };
+        oFixture.controller.byId = function (sId) {
+            return sId === "backendTopInput" ? oTargetControl : null;
+        };
 
         SearchSelectionFocusRuntime.focusSearchToolbar(oFixture.controller);
 
@@ -60,6 +69,7 @@ sap.ui.define([
         var done = assert.async();
         var oOutside = document.createElement("button");
         var oFixture;
+        var oTargetControl;
 
         oOutside.id = "outside-searchSmartFilterBar-btnGo";
         document.body.appendChild(oOutside);
@@ -70,9 +80,14 @@ sap.ui.define([
             '</div>'
         );
         oFixture.host.setAttribute("data-qunit-search-focus", "true");
+        oTargetControl = {
+            getDomRef: function () {
+                return oFixture.host.querySelector("#fixture-searchSmartFilterBar-btnGo");
+            }
+        };
 
         SearchSelectionFocusRuntime.focusSearchFilters(oFixture.controller, function () {
-            return null;
+            return oTargetControl;
         });
 
         setTimeout(function () {

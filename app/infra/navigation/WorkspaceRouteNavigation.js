@@ -7,9 +7,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "sap/ui/core/routing/HashChanger"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, RootIdRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger) {
+    "sap/ui/core/routing/HashChanger",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, RootIdRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntimeStringConstants) {
     "use strict";
+
+    var TYPEOF = JsRuntimeStringConstants.TYPEOF;
+    var METHODS = JsRuntimeStringConstants.METHODS;
+    var HASH_CHANGER = JsRuntimeStringConstants.HASH_CHANGER;
 
     function cloneArgs(oArgs) {
         return CloneUtil.clone(oArgs, {});
@@ -26,6 +31,13 @@ sap.ui.define([
         };
     }
 
+    function isDetailIntent(oIntent) {
+        var sRouteName = String(oIntent && oIntent.routeName || "").trim();
+
+        return sRouteName === NavigationContracts.ROUTES.DETAIL
+            || sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT;
+    }
+
     function readHashChanger() {
         return HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
     }
@@ -33,17 +45,20 @@ sap.ui.define([
     function buildHashFromIntent(oRouter, oIntent) {
         var sRouteName = String(oIntent && oIntent.routeName || "").trim();
         var oRouteArgs = cloneArgs(oIntent && oIntent.routeArgs);
-        if (!oRouter || typeof oRouter.getURL !== "function" || !sRouteName || sRouteName === NavigationContracts.ROUTES.SEARCH) {
+        if (!oRouter || typeof oRouter[METHODS.GET_URL] !== TYPEOF.FUNCTION || !sRouteName || sRouteName === NavigationContracts.ROUTES.SEARCH) {
             return "";
         }
-        return String(oRouter.getURL(sRouteName, oRouteArgs || {}) || "");
+        return String(oRouter[METHODS.GET_URL](sRouteName, oRouteArgs || {}) || "");
     }
 
     function buildAnalyticsReturnSnapshot(oStateModel, oRouter) {
         var oHashChanger = readHashChanger();
         var oIntent = buildCurrentIntent(oStateModel);
-        var sHash = oHashChanger && typeof oHashChanger.getHash === "function"
-            ? String(oHashChanger.getHash() || "")
+        var sHash = oHashChanger && typeof oHashChanger[HASH_CHANGER.GET_HASH] === TYPEOF.FUNCTION
+            ? String(oHashChanger[HASH_CHANGER.GET_HASH]() || "")
+            : "";
+        var sRootId = isDetailIntent(oIntent)
+            ? String(RootIdRuntime.resolveFromStateModel(oStateModel) || "").trim()
             : "";
 
         if (!sHash) {
@@ -52,7 +67,7 @@ sap.ui.define([
 
         return {
             hash: sHash,
-            rootId: String(RootIdRuntime.resolveFromStateModel(oStateModel) || "").trim()
+            rootId: sRootId
         };
     }
 
@@ -109,8 +124,8 @@ sap.ui.define([
         }
 
         setAnalyticsReturnIntent(oController);
-        if (oRouter && typeof oRouter.navTo === "function") {
-            oRouter.navTo(NavigationContracts.ROUTES.ANALYTICS, {}, false);
+        if (oRouter && typeof oRouter[METHODS.NAV_TO] === TYPEOF.FUNCTION) {
+            oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.ANALYTICS, {}, false);
         }
     }
 
@@ -135,20 +150,20 @@ sap.ui.define([
             navigateToSearch(oController);
             return;
         }
-        if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
-            oHashChanger.replaceHash(sTargetHash);
+        if (oHashChanger && typeof oHashChanger[HASH_CHANGER.REPLACE_HASH] === TYPEOF.FUNCTION) {
+            oHashChanger[HASH_CHANGER.REPLACE_HASH](sTargetHash);
         }
     }
 
     function navigateToSearch(oController) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
-        if (oRouter && typeof oRouter.navTo === "function") {
-            oRouter.navTo(NavigationContracts.ROUTES.SEARCH, {}, false);
+        if (oRouter && typeof oRouter[METHODS.NAV_TO] === TYPEOF.FUNCTION) {
+            oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.SEARCH, {}, false);
             return;
         }
-        if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
-            oHashChanger.replaceHash("");
+        if (oHashChanger && typeof oHashChanger[HASH_CHANGER.REPLACE_HASH] === TYPEOF.FUNCTION) {
+            oHashChanger[HASH_CHANGER.REPLACE_HASH]("");
             return;
         }
     }
@@ -158,24 +173,24 @@ sap.ui.define([
         var sId = String(sRootId || "").trim();
         var sResolvedLayout = LayoutStateRuntime.normalizeLayout(sLayout);
 
-        if (!oRouter || typeof oRouter.navTo !== "function" || !sId) {
+        if (!oRouter || typeof oRouter[METHODS.NAV_TO] !== TYPEOF.FUNCTION || !sId) {
             return;
         }
         if (sResolvedLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
-            oRouter.navTo(NavigationContracts.ROUTES.DETAIL_LAYOUT, { id: sId, layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN }, false);
+            oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.DETAIL_LAYOUT, { id: sId, layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN }, false);
             return;
         }
-        oRouter.navTo(NavigationContracts.ROUTES.DETAIL, { id: sId }, false);
+        oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.DETAIL, { id: sId }, false);
     }
 
     function buildDetailHash(oController, sRootId) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var sId = String(sRootId || "").trim();
 
-        if (!oRouter || typeof oRouter.getURL !== "function" || !sId) {
+        if (!oRouter || typeof oRouter[METHODS.GET_URL] !== TYPEOF.FUNCTION || !sId) {
             return "";
         }
-        return String(oRouter.getURL(NavigationContracts.ROUTES.DETAIL, { id: sId }) || "");
+        return String(oRouter[METHODS.GET_URL](NavigationContracts.ROUTES.DETAIL, { id: sId }) || "");
     }
 
     return {

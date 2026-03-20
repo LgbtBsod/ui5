@@ -1,9 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport"
-], function (GatewayErrorNormalizer, GatewayClientContracts, GatewayClientSupport) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
+], function (GatewayErrorNormalizer, GatewayClientContracts, GatewayClientSupport, RequestVerbConstants, JsRuntimeStringConstants) {
     "use strict";
+
+    var REQUEST = RequestVerbConstants.REQUEST;
+    var TYPEOF = JsRuntimeStringConstants.TYPEOF;
 
     function toRequestHandle(fnExecutor) {
         var fnAbort = function () { return; };
@@ -16,7 +21,7 @@ sap.ui.define([
         });
         return {
             promise: pPromise,
-            abort: typeof fnAbort === "function" ? fnAbort : function () { return; }
+            abort: typeof fnAbort === TYPEOF.FUNCTION ? fnAbort : function () { return; }
         };
     }
 
@@ -70,7 +75,7 @@ sap.ui.define([
         if (GatewayClientSupport.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
             return toRequestHandle(function (resolve, reject) {
                 return oModel.callFunction("/" + sFunctionName, {
-                    method: "POST",
+                    method: REQUEST.POST,
                     urlParameters: oPayload || {},
                     headers: mHeaders || {},
                     success: function (oData) { resolve(oData || {}); },
@@ -97,7 +102,7 @@ sap.ui.define([
         }
         return toRequestHandle(function (resolve, reject) {
             return oModel.callFunction("/" + sFunctionName, {
-                method: "GET",
+                method: REQUEST.GET,
                 urlParameters: mParams || {},
                 headers: mHeaders || {},
                 success: function (oData) { resolve(oData || {}); },

@@ -4,13 +4,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ProgressiveReadinessContracts"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, StatePaths, ModelContracts, ProgressiveReadinessContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ProgressiveReadinessContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, SchedulingRuntime, StatePaths, ModelContracts, ProgressiveReadinessContracts, JsRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
     var SEARCH_WORKING_HINT_MS = 2000;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function clearSearchWorkingHintTimer(oController) {
         oController._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(oController._iSearchWorkingHintTimer);
@@ -47,7 +49,7 @@ sap.ui.define([
             ControllerViewStateRuntime.set(
                 oController,
                 "/filterHintText",
-                typeof fnResolveWorkingText === "function"
+                typeof fnResolveWorkingText === TYPE_FUNCTION
                     ? fnResolveWorkingText()
                     : "Working..."
             );
@@ -73,16 +75,16 @@ sap.ui.define([
         if (!oInnerTable || !oBinding) {
             return false;
         }
-        if (typeof oInnerTable.getBusy === "function" && oInnerTable.getBusy()) {
+        if (typeof oInnerTable.getBusy === TYPE_FUNCTION && oInnerTable.getBusy()) {
             return false;
         }
-        if (typeof oBinding.isPending === "function" && oBinding.isPending()) {
+        if (typeof oBinding.isPending === TYPE_FUNCTION && oBinding.isPending()) {
             return false;
         }
         if (oBinding.bPendingRequest || oBinding.bPendingRefresh) {
             return false;
         }
-        if (typeof oBinding.isLengthFinal === "function") {
+        if (typeof oBinding.isLengthFinal === TYPE_FUNCTION) {
             return !!oBinding.isLengthFinal();
         }
         return true;
@@ -93,7 +95,7 @@ sap.ui.define([
         var fnPoll;
         clearPendingSearchLoad(oController);
         oController._oPendingSearchLoad = { settled: false };
-        if (!oInnerTable || typeof oInnerTable.attachEventOnce !== "function") {
+        if (!oInnerTable || typeof oInnerTable.attachEventOnce !== TYPE_FUNCTION) {
             return;
         }
         oInnerTable.attachEventOnce("updateFinished", function () {
@@ -133,15 +135,15 @@ sap.ui.define([
         hideSearchWorkingHint(oController);
         if (oError) {
             sErrorMessage = String((oError && (oError.message || oError.statusText)) || SEARCH_READINESS.LOAD_ERROR_MESSAGE).trim();
-            if (typeof fnApplyLoadError === "function") {
+            if (typeof fnApplyLoadError === TYPE_FUNCTION) {
                 fnApplyLoadError(sErrorMessage);
             }
             return;
         }
-        if (typeof fnApplyLoadSuccess === "function") {
-            fnApplyLoadSuccess(typeof fnReadRows === "function" ? fnReadRows(oInnerTable) : []);
+        if (typeof fnApplyLoadSuccess === TYPE_FUNCTION) {
+            fnApplyLoadSuccess(typeof fnReadRows === TYPE_FUNCTION ? fnReadRows(oInnerTable) : []);
         }
-        if (typeof fnAfterSuccess === "function") {
+        if (typeof fnAfterSuccess === TYPE_FUNCTION) {
             fnAfterSuccess(oInnerTable);
         }
     }

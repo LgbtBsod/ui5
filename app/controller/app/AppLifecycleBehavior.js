@@ -11,9 +11,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellPaneRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ShellGlobalsRuntime",
-    "sap/ui/Device"
-], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device) {
+    "sap/ui/Device",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function markStartupReady() {
         ShellGlobalsRuntime.markAppReady();
@@ -40,8 +43,8 @@ sap.ui.define([
             this._syncShellState();
         },
         onAfterRendering: function () {
-            var oOwner = this.getOwnerComponent && this.getOwnerComponent();
-            if (oOwner && typeof oOwner.attachInteractionFxToApp === "function") {
+            var oOwner = typeof this.getOwnerComponent === TYPE_FUNCTION && this.getOwnerComponent();
+            if (oOwner && typeof oOwner.attachInteractionFxToApp === TYPE_FUNCTION) {
                 oOwner.attachInteractionFxToApp(this.getView().getDomRef());
             }
             this._syncStaticAreaScope();
@@ -104,13 +107,13 @@ sap.ui.define([
             this._fnLayoutSync = null;
             this._bStartupReadyMarked = false;
             this._bShellStatePostStartupSyncScheduled = false;
-            if (typeof this._teardownAppDomRuntime === "function") {
+            if (typeof this._teardownAppDomRuntime === TYPE_FUNCTION) {
                 this._teardownAppDomRuntime();
             }
             AppShellCoordinator.onExit(this);
         },
         _bindShellPaneRouting: function () {
-            var oRouter = this.getRouter && this.getRouter();
+            var oRouter = typeof this.getRouter === TYPE_FUNCTION && this.getRouter();
             if (!oRouter || !oRouter.attachBeforeRouteMatched || this._fnShellPaneRouteGuard) {
                 return;
             }
@@ -158,9 +161,9 @@ sap.ui.define([
             ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SHELL_READY, {
                 route: String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "") || "").trim()
             });
-            if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+            if (typeof window !== JsRuntime.TYPEOF.UNDEFINED && typeof window.requestAnimationFrame === TYPE_FUNCTION) {
                 SchedulingRuntime.nextFrame(function () {
-                    if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === "function") {
+                    if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === TYPE_FUNCTION) {
                         this._bShellStatePostStartupSyncScheduled = true;
                         this._syncShellState();
                     }
@@ -168,7 +171,7 @@ sap.ui.define([
                 }.bind(this));
                 return;
             }
-            if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === "function") {
+            if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === TYPE_FUNCTION) {
                 this._bShellStatePostStartupSyncScheduled = true;
                 this._syncShellState();
             }

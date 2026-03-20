@@ -2,12 +2,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts"
-], function (ModelStateRuntime, NavigationContracts, WorkflowContracts, ComponentListenerContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ModelStateRuntime, NavigationContracts, WorkflowContracts, ComponentListenerContracts, JsRuntime) {
     "use strict";
 
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function normalizeRouteName(vRouteName) {
         return String(vRouteName || "").trim();
@@ -77,7 +80,7 @@ sap.ui.define([
             if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false)) {
                 oEvent.preventDefault();
                 mOptions.queuePendingNavigationIntent(oEvent);
-                if (typeof mOptions.revertPendingNavigationIntent === "function") {
+                if (typeof mOptions.revertPendingNavigationIntent === TYPE_FUNCTION) {
                     mOptions.revertPendingNavigationIntent();
                 }
                 return;
@@ -86,7 +89,7 @@ sap.ui.define([
                 var oBlockedIntent = resolveNextRouteIntent(oEvent);
                 oEvent.preventDefault();
                 mOptions.queuePendingNavigationIntent(oEvent);
-                if (typeof mOptions.revertPendingNavigationIntent === "function") {
+                if (typeof mOptions.revertPendingNavigationIntent === TYPE_FUNCTION) {
                     mOptions.revertPendingNavigationIntent();
                 }
                 mOptions.workflowCoordinator.confirmUnsavedAndHandle({
@@ -96,10 +99,10 @@ sap.ui.define([
                     return mOptions.runGuardedSave();
                 }, {
                     onCancel: function () {
-                        if (typeof mOptions.restorePendingNavigationIntent === "function") {
+                        if (typeof mOptions.restorePendingNavigationIntent === TYPE_FUNCTION) {
                             return mOptions.restorePendingNavigationIntent();
                         }
-                        if (typeof mOptions.clearPendingNavigationIntent === "function") {
+                        if (typeof mOptions.clearPendingNavigationIntent === TYPE_FUNCTION) {
                             return mOptions.clearPendingNavigationIntent();
                         }
                         return null;
@@ -110,7 +113,7 @@ sap.ui.define([
                         mOptions.clearPendingNavigationIntent();
                         mOptions.resetDetailNavigationState(oComponent);
                         ModelStateRuntime.writeOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, true);
-                        oComponent.getRouter().navTo(
+                        oComponent.getRouter()[METHODS.NAV_TO](
                             oPending.routeName || oBlockedIntent.routeName,
                             oPending.routeArgs || oBlockedIntent.routeArgs || {},
                             false
@@ -121,7 +124,7 @@ sap.ui.define([
                         mOptions.resumePendingNavigationIntent();
                         return;
                     }
-                    if (sDecision === "SAVE_FAILED" && typeof mOptions.clearPendingNavigationIntent === "function") {
+                    if (sDecision === "SAVE_FAILED" && typeof mOptions.clearPendingNavigationIntent === TYPE_FUNCTION) {
                         mOptions.clearPendingNavigationIntent();
                     }
                 });

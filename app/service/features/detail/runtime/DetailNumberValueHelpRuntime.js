@@ -5,8 +5,9 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFieldContracts"
-], function (SelectDialog, StandardListItem, Filter, FilterOperator, ModelStateRuntime, ModelContracts, DetailFieldContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFieldContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (SelectDialog, StandardListItem, Filter, FilterOperator, ModelStateRuntime, ModelContracts, DetailFieldContracts, JsRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -15,6 +16,8 @@ sap.ui.define([
     var AUTOSAVE_FIELDS = DetailFieldContracts.AUTOSAVE_FIELDS;
     var TEXT_PATHS = DetailFieldContracts.TEXT_PATHS;
     var VALUE_HELP_DIALOGS = DetailFieldContracts.VALUE_HELP_DIALOGS;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function resolveSelectChangeValue(oEvent) {
         return String((oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem") && oEvent.getParameter("selectedItem").getKey && oEvent.getParameter("selectedItem").getKey()) || "").trim();
@@ -22,7 +25,7 @@ sap.ui.define([
 
     function resolveSelectChangeText(oEvent) {
         var oSelectedItem = oEvent && oEvent.getParameter && oEvent.getParameter("selectedItem");
-        if (oSelectedItem && typeof oSelectedItem.getText === "function") {
+        if (oSelectedItem && typeof oSelectedItem.getText === TYPE_FUNCTION) {
             return String(oSelectedItem.getText() || "").trim();
         }
         return "";
@@ -57,10 +60,10 @@ sap.ui.define([
     }
 
     function getResourceText(oController, sKey, sFallback) {
-        if (oController && typeof oController.getText === "function") {
+        if (oController && typeof oController.getText === TYPE_FUNCTION) {
             return oController.getText(sKey, [], sFallback);
         }
-        if (oController && typeof oController.getResourceBundle === "function") {
+        if (oController && typeof oController.getResourceBundle === TYPE_FUNCTION) {
             return oController.getResourceBundle().getText(sKey);
         }
         return sFallback || sKey;
@@ -82,7 +85,7 @@ sap.ui.define([
 
     function ensureNumberValueHelp(oController, sKind, mHooks) {
         var mConfig = getDialogModelConfig(sKind);
-        var oView = oController && oController.getView && oController.getView();
+        var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();
         var oDialog = mHooks.getLazyDialog(mConfig.dialogKey);
         if (oDialog) {
             return Promise.resolve(oDialog);
@@ -115,13 +118,13 @@ sap.ui.define([
                 return applyValueHelpSelection(oController, sKind, oSelectedItem, mHooks);
             },
             cancel: function () {
-                if (typeof oController._restoreDialogFocus === "function") {
+                if (typeof oController._restoreDialogFocus === TYPE_FUNCTION) {
                     oController._restoreDialogFocus(mConfig.dialogKey);
                 }
             }
         });
-        oDialog.attachAfterClose(function () {
-            if (typeof oController._restoreDialogFocus === "function") {
+        oDialog[METHODS.ATTACH_AFTER_CLOSE](function () {
+            if (typeof oController._restoreDialogFocus === TYPE_FUNCTION) {
                 oController._restoreDialogFocus(mConfig.dialogKey);
             }
         });
@@ -141,11 +144,11 @@ sap.ui.define([
 
     function openNumberValueHelp(oController, oEvent, sKind, mHooks) {
         var mConfig = getDialogModelConfig(sKind);
-        var oSource = oEvent && oEvent.getSource && oEvent.getSource();
+        var oSource = oEvent && typeof oEvent.getSource === TYPE_FUNCTION && oEvent.getSource();
         mHooks.rememberDialogReturnFocus(mConfig.dialogKey, oSource);
         return ensureNumberValueHelp(oController, sKind, mHooks).then(function (oDialog) {
             oDialog.setRememberSelections(false);
-            oDialog.open(String(ModelStateRuntime.read(oController, SELECTED_MODEL, mConfig.textPath, "")
+            oDialog[METHODS.OPEN](String(ModelStateRuntime.read(oController, SELECTED_MODEL, mConfig.textPath, "")
                 || ModelStateRuntime.read(oController, SELECTED_MODEL, mConfig.inputPath, "")));
         });
     }

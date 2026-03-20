@@ -1,11 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime"
-], function (SearchSelectionRuntime, SearchUiContracts, EventDelegateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (SearchSelectionRuntime, SearchUiContracts, EventDelegateRuntime, JsRuntime) {
     "use strict";
 
     var SHORTCUT_ACTIONS = SearchUiContracts.SHORTCUT_ACTIONS;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function isEditableTarget(oTarget) {
         var sTagName;
@@ -70,27 +72,27 @@ sap.ui.define([
         if (!sAction) {
             return false;
         }
-        if (sAction === SHORTCUT_ACTIONS.CREATE && typeof oController.onCreate === "function") {
+        if (sAction === SHORTCUT_ACTIONS.CREATE && typeof oController.onCreate === TYPE_FUNCTION) {
             oController.onCreate();
             return true;
         }
-        if (sAction === SHORTCUT_ACTIONS.COPY && typeof oController.onCopy === "function") {
+        if (sAction === SHORTCUT_ACTIONS.COPY && typeof oController.onCopy === TYPE_FUNCTION) {
             oController.onCopy();
             return true;
         }
-        if (sAction === SHORTCUT_ACTIONS.SELECT_VISIBLE && typeof oController.onSelectVisibleRows === "function") {
+        if (sAction === SHORTCUT_ACTIONS.SELECT_VISIBLE && typeof oController.onSelectVisibleRows === TYPE_FUNCTION) {
             oController.onSelectVisibleRows();
             return true;
         }
-        if (sAction === SHORTCUT_ACTIONS.CLEAR_SELECTION && typeof oController.onClearSelection === "function") {
+        if (sAction === SHORTCUT_ACTIONS.CLEAR_SELECTION && typeof oController.onClearSelection === TYPE_FUNCTION) {
             oController.onClearSelection();
             return true;
         }
-        if (sAction === SHORTCUT_ACTIONS.SEARCH && typeof oController.onSmartSearch === "function") {
+        if (sAction === SHORTCUT_ACTIONS.SEARCH && typeof oController.onSmartSearch === TYPE_FUNCTION) {
             oController.onSmartSearch();
             return true;
         }
-        if (sAction === SHORTCUT_ACTIONS.EXPORT && typeof oController.onExportScreen === "function") {
+        if (sAction === SHORTCUT_ACTIONS.EXPORT && typeof oController.onExportScreen === TYPE_FUNCTION) {
             oController.onExportScreen();
             return true;
         }

@@ -1,7 +1,11 @@
 sap.ui.define([
-    "sap/ui/core/Core"
-], function (Core) {
+    "sap/ui/core/Core",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (Core, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function getCore() {
         return Core || null;
@@ -9,8 +13,8 @@ sap.ui.define([
 
     function attachThemeChanged(fnHandler) {
         var oCore = getCore();
-        if (oCore && typeof oCore.attachThemeChanged === "function" && typeof fnHandler === "function") {
-            oCore.attachThemeChanged(fnHandler);
+        if (oCore && typeof oCore[METHODS.ATTACH_THEME_CHANGED] === TYPE_FUNCTION && typeof fnHandler === TYPE_FUNCTION) {
+            oCore[METHODS.ATTACH_THEME_CHANGED](fnHandler);
             return true;
         }
         return false;
@@ -18,8 +22,8 @@ sap.ui.define([
 
     function detachThemeChanged(fnHandler) {
         var oCore = getCore();
-        if (oCore && typeof oCore.detachThemeChanged === "function" && typeof fnHandler === "function") {
-            oCore.detachThemeChanged(fnHandler);
+        if (oCore && typeof oCore[METHODS.DETACH_THEME_CHANGED] === TYPE_FUNCTION && typeof fnHandler === TYPE_FUNCTION) {
+            oCore[METHODS.DETACH_THEME_CHANGED](fnHandler);
             return true;
         }
         return false;
@@ -27,24 +31,24 @@ sap.ui.define([
 
     function getStaticAreaRef() {
         var oCore = getCore();
-        return oCore && typeof oCore.getStaticAreaRef === "function" ? oCore.getStaticAreaRef() : null;
+        return oCore && typeof oCore[METHODS.GET_STATIC_AREA_REF] === TYPE_FUNCTION ? oCore[METHODS.GET_STATIC_AREA_REF]() : null;
     }
 
     function getLanguageTag() {
         var oCore = getCore();
-        var oConfiguration = oCore && typeof oCore.getConfiguration === "function" ? oCore.getConfiguration() : null;
-        var oLanguageTag = oConfiguration && typeof oConfiguration.getLanguageTag === "function" ? oConfiguration.getLanguageTag() : null;
-        return oLanguageTag && typeof oLanguageTag.toString === "function" ? String(oLanguageTag.toString() || "") : "";
+        var oConfiguration = oCore && typeof oCore[METHODS.GET_CONFIGURATION] === TYPE_FUNCTION ? oCore[METHODS.GET_CONFIGURATION]() : null;
+        var oLanguageTag = oConfiguration && typeof oConfiguration[METHODS.GET_LANGUAGE_TAG] === TYPE_FUNCTION ? oConfiguration[METHODS.GET_LANGUAGE_TAG]() : null;
+        return oLanguageTag && typeof oLanguageTag[METHODS.TO_STRING] === TYPE_FUNCTION ? String(oLanguageTag[METHODS.TO_STRING]() || "") : "";
     }
 
     function getModel(sName) {
         var oCore = getCore();
-        return oCore && typeof oCore.getModel === "function" ? oCore.getModel(sName) : null;
+        return oCore && typeof oCore[METHODS.GET_MODEL] === TYPE_FUNCTION ? oCore[METHODS.GET_MODEL](sName) : null;
     }
 
     function getI18nBundle() {
         var oModel = getModel("i18n");
-        return oModel && typeof oModel.getResourceBundle === "function" ? oModel.getResourceBundle() : null;
+        return oModel && typeof oModel[METHODS.GET_RESOURCE_BUNDLE] === TYPE_FUNCTION ? oModel[METHODS.GET_RESOURCE_BUNDLE]() : null;
     }
 
     return {

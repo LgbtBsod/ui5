@@ -1,5 +1,10 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function splitClassNames(sClassNames) {
         return String(sClassNames || "").split(/\s+/).map(function (sName) {
@@ -17,7 +22,7 @@ sap.ui.define([], function () {
             }
         };
         var fnResolver = mResolvers[String(sTarget || "")];
-        var oResolved = typeof fnResolver === "function" ? fnResolver() : null;
+        var oResolved = typeof fnResolver === TYPE_FUNCTION ? fnResolver() : null;
         return oResolved || (oController && oController.getView && oController.getView()) || null;
     }
 
@@ -29,18 +34,18 @@ sap.ui.define([], function () {
         }
         mHandlers = {
             enable: function () {
-                if (oTarget.addStyleClass) {
-                    oTarget.addStyleClass(sClassName);
+                if (oTarget[METHODS.ADD_STYLE_CLASS]) {
+                    oTarget[METHODS.ADD_STYLE_CLASS](sClassName);
                 }
             },
             disable: function () {
-                if (oTarget.removeStyleClass) {
-                    oTarget.removeStyleClass(sClassName);
+                if (oTarget[METHODS.REMOVE_STYLE_CLASS]) {
+                    oTarget[METHODS.REMOVE_STYLE_CLASS](sClassName);
                 }
             }
         };
         fnHandler = mHandlers[String(sAction || "")];
-        if (typeof fnHandler === "function") {
+        if (typeof fnHandler === TYPE_FUNCTION) {
             fnHandler();
         }
     }
@@ -55,7 +60,7 @@ sap.ui.define([], function () {
     function restartClassNameOnTarget(oTarget, sClassName) {
         var oDomRef;
         applyClassNamesToTarget(oTarget, sClassName, "disable");
-        oDomRef = oTarget && oTarget.getDomRef && oTarget.getDomRef();
+        oDomRef = oTarget && oTarget[METHODS.GET_DOM_REF] && oTarget[METHODS.GET_DOM_REF]();
         if (oDomRef) {
             void oDomRef.offsetWidth;
         }

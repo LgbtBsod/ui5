@@ -6,18 +6,22 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectDialogFeedbackRuntime",
     "sap/ui/core/routing/HashChanger",
-    "sap/ui/core/Component"
-], function (DebugLogger, EffectFeedbackContracts, EffectToastRuntime, EffectBannerRouter, EffectActionRouting, EffectDialogFeedbackRuntime, HashChanger, UIComponent) {
+    "sap/ui/core/Component",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (DebugLogger, EffectFeedbackContracts, EffectToastRuntime, EffectBannerRouter, EffectActionRouting, EffectDialogFeedbackRuntime, HashChanger, UIComponent, JsRuntime) {
     "use strict";
 
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
     var HANDLER_NAMES = EffectFeedbackContracts.EFFECT_HANDLER_NAMES;
     var resolveTextKey = EffectToastRuntime.resolveTextKey;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
+    var HASH_CHANGER = JsRuntime.HASH_CHANGER;
 
     function withOptionalHandler(oController, oEffect, oOptions, sHandlerName, fnDefault) {
         var oHandlers = oOptions && oOptions.handlers;
         var fnHandler = oHandlers && oHandlers[sHandlerName];
-        if (typeof fnHandler !== "function") {
+        if (typeof fnHandler !== TYPE_FUNCTION) {
             return fnDefault();
         }
         return Promise.resolve(fnHandler(oEffect, oController, oOptions)).then(function (vHandled) {
@@ -26,24 +30,24 @@ sap.ui.define([
     }
 
     function resolveRouter(oController) {
-        var oOwnerComponent = oController && typeof oController.getOwnerComponent === "function" ? oController.getOwnerComponent() : null;
-        var oRouter = oController && typeof oController.getRouter === "function" ? oController.getRouter() : null;
+        var oOwnerComponent = oController && typeof oController.getOwnerComponent === TYPE_FUNCTION ? oController.getOwnerComponent() : null;
+        var oRouter = oController && typeof oController.getRouter === TYPE_FUNCTION ? oController.getRouter() : null;
         var oComponentOwner;
 
-        if (oRouter && typeof oRouter.navTo === "function") {
+        if (oRouter && typeof oRouter[METHODS.NAV_TO] === TYPE_FUNCTION) {
             return oRouter;
         }
-        if (oOwnerComponent && typeof oOwnerComponent.getRouter === "function") {
+        if (oOwnerComponent && typeof oOwnerComponent.getRouter === TYPE_FUNCTION) {
             oRouter = oOwnerComponent.getRouter();
-            if (oRouter && typeof oRouter.navTo === "function") {
+            if (oRouter && typeof oRouter[METHODS.NAV_TO] === TYPE_FUNCTION) {
                 return oRouter;
             }
         }
-        if (UIComponent && typeof UIComponent.getOwnerComponentFor === "function") {
-            oComponentOwner = UIComponent.getOwnerComponentFor(oController && typeof oController.getView === "function" ? oController.getView() : null);
-            if (oComponentOwner && typeof oComponentOwner.getRouter === "function") {
+        if (UIComponent && typeof UIComponent.getOwnerComponentFor === TYPE_FUNCTION) {
+            oComponentOwner = UIComponent.getOwnerComponentFor(oController && typeof oController.getView === TYPE_FUNCTION ? oController.getView() : null);
+            if (oComponentOwner && typeof oComponentOwner.getRouter === TYPE_FUNCTION) {
                 oRouter = oComponentOwner.getRouter();
-                if (oRouter && typeof oRouter.navTo === "function") {
+                if (oRouter && typeof oRouter[METHODS.NAV_TO] === TYPE_FUNCTION) {
                     return oRouter;
                 }
             }
@@ -55,16 +59,16 @@ sap.ui.define([
         var oRouter = resolveRouter(oController);
         var oHashChanger;
         var sUrl;
-        if (oRouter && oEffect && oEffect.replace && typeof oRouter.getURL === "function") {
-            sUrl = String(oRouter.getURL(oEffect.route, oEffect.params || {}) || "");
+        if (oRouter && oEffect && oEffect.replace && typeof oRouter[METHODS.GET_URL] === TYPE_FUNCTION) {
+            sUrl = String(oRouter[METHODS.GET_URL](oEffect.route, oEffect.params || {}) || "");
             oHashChanger = HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
-            if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
-                oHashChanger.replaceHash(String(sUrl || "").replace(/^\/?/, ""));
+            if (oHashChanger && typeof oHashChanger[HASH_CHANGER.REPLACE_HASH] === TYPE_FUNCTION) {
+                oHashChanger[HASH_CHANGER.REPLACE_HASH](String(sUrl || "").replace(/^\/?/, ""));
                 return;
             }
         }
-        if (oRouter && oRouter.navTo) {
-            oRouter.navTo(oEffect.route, oEffect.params || {}, !!oEffect.replace);
+        if (oRouter && typeof oRouter[METHODS.NAV_TO] === TYPE_FUNCTION) {
+            oRouter[METHODS.NAV_TO](oEffect.route, oEffect.params || {}, !!oEffect.replace);
         }
     }
 
@@ -113,7 +117,7 @@ sap.ui.define([
     }
 
     function log(oEffect) {
-        if (DebugLogger && typeof DebugLogger.info === "function") {
+        if (DebugLogger && typeof DebugLogger.info === TYPE_FUNCTION) {
             DebugLogger.info("UseCase", oEffect.level + ": " + (oEffect.message || ""), oEffect.meta || {});
         }
     }

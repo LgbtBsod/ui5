@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (JSONModel, WorkspaceRouteNavigation, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
+], function (JSONModel, WorkspaceRouteNavigation, NavigationContracts, ModelStateRuntime) {
     "use strict";
 
     QUnit.module("WorkspaceRouteNavigation");
@@ -51,5 +52,41 @@ sap.ui.define([
 
         assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.DETAIL_LAYOUT, "analytics route resolves to current active detail");
         assert.strictEqual(oIntent.routeArgs.id, "CHK-ACTIVE-2", "active detail id stays canonical");
+    });
+
+    QUnit.test("setAnalyticsReturnIntent does not preserve stale detail restore state when opened from search", function (assert) {
+        var oStateModel = new JSONModel({
+            currentRouteName: NavigationContracts.ROUTES.SEARCH,
+            activeObjectId: "CHK-STALE-9",
+            selectedId: "CHK-STALE-9",
+            postOpenHydratedRootId: "",
+            layout: NavigationContracts.LAYOUTS.ONE_COLUMN,
+            workflow: {
+                detail: {
+                    editMode: "EDIT",
+                    lockState: "EDIT_LOCKED"
+                }
+            }
+        });
+        var oController = {
+            getRouter: function () {
+                return null;
+            },
+            getModel: function (sName) {
+                return sName === "state" ? oStateModel : null;
+            }
+        };
+
+        WorkspaceRouteNavigation.setAnalyticsReturnIntent(oController);
+
+        assert.deepEqual(
+            ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", {}),
+            {
+                hash: "",
+                rootId: "",
+                restoreEdit: false
+            },
+            "search-origin analytics snapshot ignores stale detail root and restore-edit state"
+        );
     });
 });

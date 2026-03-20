@@ -6,13 +6,11 @@ sap.ui.define([], function () {
         var DetailFacade = mDeps.DetailFacade;
         var ActionDispatcher = mDeps.ActionDispatcher;
         var ComponentRuntimeSupport = mDeps.ComponentRuntimeSupport;
-        var ActionContract = mDeps.ActionContract;
         var EffectApplier = mDeps.EffectApplier;
 
         oComponent._ctx = CtxFactory.buildCtx(oComponent, {});
         oComponent._detailFacade = new DetailFacade();
         oComponent._actionDispatcher = new ActionDispatcher();
-        oComponent._actionDispatcher.setValidators(mOptions.buildActionValidators(ActionContract));
 
         return {
             resolveDetailCurrent: function () {

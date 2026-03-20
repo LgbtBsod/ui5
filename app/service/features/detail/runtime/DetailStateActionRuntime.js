@@ -10,18 +10,35 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts"
-], function (ClipboardRuntime, LayoutStateRuntime, ControllerModelRuntime, ModelStateRuntime, NavigationIntentService, RootIdRuntime, UiDecisionCoordinator, WorkflowCoordinator, StatePaths, NavigationContracts, ModelContracts, OperationSourceContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (
+    ClipboardRuntime,
+    LayoutStateRuntime,
+    ControllerModelRuntime,
+    ModelStateRuntime,
+    NavigationIntentService,
+    RootIdRuntime,
+    UiDecisionCoordinator,
+    WorkflowCoordinator,
+    StatePaths,
+    NavigationContracts,
+    ModelContracts,
+    OperationSourceContracts,
+    JsRuntime
+) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function resolvePinnedRailHeight(oController) {
         var oStickyHost = oController && oController.byId && oController.byId("detailControlPinnedDock");
-        var oStickyDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
+        var oStickyDom = oStickyHost && typeof oStickyHost[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oStickyHost[METHODS.GET_DOM_REF]();
         return Math.round((oStickyDom && oStickyDom.offsetHeight) || 0);
     }
 
@@ -29,7 +46,7 @@ sap.ui.define([
         ModelStateRuntime.write(oController, VIEW_MODEL, "/deleteChecklistConfirmArmed", false);
     }
 
-    return {
+    var workflowActions = {
         armDelete: function (oController) {
             var bCurrent;
             if (ModelStateRuntime.any(oController, STATE_MODEL, [StatePaths.UI_BUSY_DETAIL, "/lockOperationPending"])) {
@@ -73,6 +90,27 @@ sap.ui.define([
                 }
             });
         },
+        save: function (oController, mHooks, mOptions) {
+            var sSaveInFlightPath = (mOptions && mOptions.saveInFlightPath) || "/saveInFlight";
+            if (ModelStateRuntime.any(oController, STATE_MODEL, [StatePaths.UI_BUSY_DETAIL, sSaveInFlightPath])) {
+                return Promise.resolve(false);
+            }
+            return ModelStateRuntime.withFlags(oController, STATE_MODEL, [sSaveInFlightPath, StatePaths.UI_BUSY_DETAIL], function () {
+                return mHooks.saveDetail();
+            });
+        },
+        toggleEdit: function (oController, oEvent, mHooks) {
+            return Promise.resolve(mHooks.enterEdit({
+                state: !!(oEvent && typeof oEvent.getParameter === TYPE_FUNCTION && oEvent.getParameter("state"))
+            })).finally(function () {
+                if (typeof oController._scheduleAttachmentDropZoneBind === TYPE_FUNCTION) {
+                    oController._scheduleAttachmentDropZoneBind();
+                }
+            });
+        }
+    };
+
+    var navigationActions = {
         copyDetailLink: function (oController, mHooks) {
             var oState = ControllerModelRuntime.state(oController);
             var sId = RootIdRuntime.resolveActiveFromStateModel(oState);
@@ -88,49 +126,48 @@ sap.ui.define([
             });
         },
         jumpToDetailSection: function (oController, oEvent) {
-            var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-            var sTargetId = String((oSource && oSource.data && oSource.data("targetSection")) || "").trim();
+            var oSource = oEvent && typeof oEvent.getSource === TYPE_FUNCTION && oEvent.getSource();
+            var sTargetId = String((oSource && typeof oSource.data === TYPE_FUNCTION && oSource.data("targetSection")) || "").trim();
             var oObjectPage = oController.byId("detailObjectPage");
             var oTarget = sTargetId && oController.byId(sTargetId);
+            var oTargetDom;
             if (!sTargetId || !oTarget) {
                 return;
             }
-            if (oObjectPage && typeof oObjectPage.scrollToSection === "function") {
+            if (oObjectPage && typeof oObjectPage.scrollToSection === TYPE_FUNCTION && typeof oTarget.getId === TYPE_FUNCTION) {
                 oObjectPage.scrollToSection(oTarget.getId(), 250, -(resolvePinnedRailHeight(oController) + 22));
                 return;
             }
-            if (oTarget.getDomRef && oTarget.getDomRef() && typeof oTarget.getDomRef().scrollIntoView === "function") {
-                oTarget.getDomRef().scrollIntoView({ behavior: "smooth", block: "start" });
+            oTargetDom = typeof oTarget[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oTarget[METHODS.GET_DOM_REF]();
+            if (oTargetDom && typeof oTargetDom.scrollIntoView === TYPE_FUNCTION) {
+                oTargetDom.scrollIntoView({ behavior: "smooth", block: "start" });
             }
-        },
-        save: function (oController, mHooks, mOptions) {
-            var sSaveInFlightPath = (mOptions && mOptions.saveInFlightPath) || "/saveInFlight";
-            if (ModelStateRuntime.any(oController, STATE_MODEL, [StatePaths.UI_BUSY_DETAIL, sSaveInFlightPath])) {
-                return Promise.resolve(false);
-            }
-            return ModelStateRuntime.withFlags(oController, STATE_MODEL, [sSaveInFlightPath, StatePaths.UI_BUSY_DETAIL], function () {
-                return mHooks.saveDetail();
-            });
-        },
-        toggleEdit: function (oController, oEvent, mHooks) {
-            return Promise.resolve(mHooks.enterEdit({
-                state: !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"))
-            })).finally(function () {
-                if (typeof oController._scheduleAttachmentDropZoneBind === "function") {
-                    oController._scheduleAttachmentDropZoneBind();
-                }
-            });
         },
         toggleFullscreen: function (oController, mHooks) {
             var oState = ControllerModelRuntime.state(oController);
             var sLayout;
             var sNextLayout;
-            if (!oState || !oState.getProperty || !oState.setProperty) {
+            if (!oState || typeof oState[METHODS.GET_PROPERTY] !== TYPE_FUNCTION || typeof oState[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {
                 return;
             }
             sLayout = LayoutStateRuntime.readLayout(oState, NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED);
-            sNextLayout = sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN ? NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED : NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
+            sNextLayout = sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
+                ? NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED
+                : NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
             mHooks.applyLayoutState(sNextLayout);
         }
+    };
+
+    return {
+        workflowActions: workflowActions,
+        navigationActions: navigationActions,
+        armDelete: workflowActions.armDelete,
+        close: workflowActions.close,
+        confirmDelete: workflowActions.confirmDelete,
+        save: workflowActions.save,
+        toggleEdit: workflowActions.toggleEdit,
+        copyDetailLink: navigationActions.copyDetailLink,
+        jumpToDetailSection: navigationActions.jumpToDetailSection,
+        toggleFullscreen: navigationActions.toggleFullscreen
     };
 });

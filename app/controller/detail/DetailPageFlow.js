@@ -12,9 +12,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts"
-], function (DetailAccessViewState, DetailCommandPolicy, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (DetailAccessViewState, DetailCommandPolicy, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function markDetailReady(oController, mDetails) {
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DETAIL_READY, mDetails);
@@ -24,7 +28,7 @@ sap.ui.define([
         DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
         ModelStateRuntime.write(oController, "state", StatePaths.UI_BUSY_DETAIL, false);
         ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
-        if (oController && typeof oController.showI18nError === "function") {
+        if (oController && typeof oController.showI18nError === TYPE_FUNCTION) {
             oController.showI18nError("unexpectedError");
         }
         return { ok: false, error: oError };
@@ -34,13 +38,13 @@ sap.ui.define([
         if (oController._mLazyDialogs) {
             Object.keys(oController._mLazyDialogs).forEach(function (sKey) {
                 var oDialog = oController._mLazyDialogs[sKey];
-                if (oDialog && typeof oDialog.close === "function") {
-                    oDialog.close();
+                if (oDialog && typeof oDialog[METHODS.CLOSE] === TYPE_FUNCTION) {
+                    oDialog[METHODS.CLOSE]();
                 }
             });
         }
         oController._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(oController._iAttachmentDropZoneBindTimer);
-        if (typeof oController._clearLocationValueHelpSearchTimer === "function") {
+        if (typeof oController._clearLocationValueHelpSearchTimer === TYPE_FUNCTION) {
             oController._clearLocationValueHelpSearchTimer();
         }
         oController._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(oController._iLocationVhTableSyncTimer);
@@ -49,10 +53,10 @@ sap.ui.define([
     function onRouteLeave(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
         var oStateModel = ControllerModelRuntime.state(oController);
-        if (oOwner && typeof oOwner._stopLockScopedManagers === "function") {
+        if (oOwner && typeof oOwner._stopLockScopedManagers === TYPE_FUNCTION) {
             oOwner._stopLockScopedManagers();
         }
-        if (oOwner && typeof oOwner._releaseActiveLockOnLeave === "function") {
+        if (oOwner && typeof oOwner._releaseActiveLockOnLeave === TYPE_FUNCTION) {
             oOwner._releaseActiveLockOnLeave(oStateModel, oController.getModel && oController.getModel());
         }
         cleanupRouteArtifacts(oController);

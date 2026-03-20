@@ -1,13 +1,17 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
     "sap/m/ProgressIndicator",
-    "sap/m/Text"
-], function (BindingContextReader, ProgressIndicator, Text) {
+    "sap/m/Text",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (BindingContextReader, ProgressIndicator, Text, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function readColumnProperty(oColumn) {
         var vData, oData;
-        if (!oColumn || typeof oColumn.data !== "function") { return ""; }
+        if (!oColumn || typeof oColumn.data !== TYPE_FUNCTION) { return ""; }
         vData = oColumn.data("p13nData");
         oData = vData;
         if (typeof vData === "string") {
@@ -41,12 +45,12 @@ sap.ui.define([
         oBarriersColumn = mIndexes.barriersIndex >= 0 ? aColumns[mIndexes.barriersIndex] : null;
         bChecksVisible = !!bHasChecks;
         bBarriersVisible = !!bHasBarriers;
-        if (oChecksColumn && oChecksColumn.setVisible) {
-            bChecksChanged = typeof oChecksColumn.getVisible === "function" ? oChecksColumn.getVisible() !== bChecksVisible : true;
+        if (oChecksColumn && typeof oChecksColumn.setVisible === TYPE_FUNCTION) {
+            bChecksChanged = typeof oChecksColumn.getVisible === TYPE_FUNCTION ? oChecksColumn.getVisible() !== bChecksVisible : true;
             if (bChecksChanged) { oChecksColumn.setVisible(bChecksVisible); }
         }
-        if (oBarriersColumn && oBarriersColumn.setVisible) {
-            bBarriersChanged = typeof oBarriersColumn.getVisible === "function" ? oBarriersColumn.getVisible() !== bBarriersVisible : true;
+        if (oBarriersColumn && typeof oBarriersColumn.setVisible === TYPE_FUNCTION) {
+            bBarriersChanged = typeof oBarriersColumn.getVisible === TYPE_FUNCTION ? oBarriersColumn.getVisible() !== bBarriersVisible : true;
             if (bBarriersChanged) { oBarriersColumn.setVisible(bBarriersVisible); }
         }
     }
@@ -55,7 +59,7 @@ sap.ui.define([
         var aColumns = (oTable && oTable.getColumns && oTable.getColumns()) || [];
         aColumns.forEach(function (oColumn) {
             var sProperty = readColumnProperty(oColumn);
-            if (!oColumn || typeof oColumn.setWidth !== "function") {
+            if (!oColumn || typeof oColumn.setWidth !== TYPE_FUNCTION) {
                 return;
             }
             if (sProperty === "id") { oColumn.setWidth("9rem"); }
@@ -75,19 +79,19 @@ sap.ui.define([
         var sDisplayValue = Math.round(nRate) + "%";
         var sState = bFull ? "Success" : "Error";
         var oIndicator;
-        if (!oItem || typeof oItem.removeCell !== "function" || typeof oItem.insertCell !== "function" || !oCell) { return; }
+        if (!oItem || typeof oItem.removeCell !== TYPE_FUNCTION || typeof oItem.insertCell !== TYPE_FUNCTION || !oCell) { return; }
         if (!bVisible) {
-            if (typeof oCell.data === "function" && oCell.data("rateIndicator") === false) {
+            if (typeof oCell.data === TYPE_FUNCTION && oCell.data("rateIndicator") === false) {
                 return;
             }
             oIndicator = new Text({ text: "" });
             oIndicator.data("rateIndicator", false);
             oItem.removeCell(oCell);
-            if (typeof oCell.destroy === "function") { oCell.destroy(); }
+            if (typeof oCell[METHODS.DESTROY] === TYPE_FUNCTION) { oCell[METHODS.DESTROY](); }
             oItem.insertCell(oIndicator, iIndex);
             return;
         }
-        if (typeof oCell.data === "function" && oCell.data("rateIndicator") === true) {
+        if (typeof oCell.data === TYPE_FUNCTION && oCell.data("rateIndicator") === true) {
             oIndicator = oCell;
             if (oIndicator.setPercentValue) { oIndicator.setPercentValue(nRate); }
             if (oIndicator.setDisplayValue) { oIndicator.setDisplayValue(sDisplayValue); }
@@ -98,14 +102,14 @@ sap.ui.define([
         oIndicator.data("rateIndicator", true);
         oIndicator.data("rateKind", sKind || "checks");
         oItem.removeCell(oCell);
-        if (typeof oCell.destroy === "function") { oCell.destroy(); }
+        if (typeof oCell[METHODS.DESTROY] === TYPE_FUNCTION) { oCell[METHODS.DESTROY](); }
         oItem.insertCell(oIndicator, iIndex);
     }
 
     function applyToRows(oController) {
         var oTable = oController._rateProgressTable;
         var mIndexes, aItems, bChecksTotalKnown, bBarriersTotalKnown, bHasChecks, bHasBarriers;
-        if (!oTable || typeof oTable.getItems !== "function") { return; }
+        if (!oTable || typeof oTable.getItems !== TYPE_FUNCTION) { return; }
         mIndexes = resolveRateColumnIndexes(oTable);
         aItems = oTable.getItems() || [];
         bChecksTotalKnown = false;
@@ -116,7 +120,7 @@ sap.ui.define([
             var oCtx = oItem.getBindingContext && oItem.getBindingContext();
             var aCells = oItem.getCells ? (oItem.getCells() || []) : [];
             var nChecks, nBarriers, vChecksTotal, vBarriersTotal, nChecksTotal, nBarriersTotal, bShowChecks, bShowBarriers;
-            if (oItem && typeof oItem.setType === "function" && oItem.getType && oItem.getType() !== "Active") { oItem.setType("Active"); }
+            if (oItem && typeof oItem.setType === TYPE_FUNCTION && typeof oItem.getType === TYPE_FUNCTION && oItem.getType() !== "Active") { oItem.setType("Active"); }
             if (!oCtx || !aCells.length) { return; }
         nChecks = toRatePercent(BindingContextReader.readAny(oCtx, ["success_checks_rate", "SuccessChecksRate"], 0));
         nBarriers = toRatePercent(BindingContextReader.readAny(oCtx, ["success_barriers_rate", "barriers_rate", "SuccessBarriersRate"], 0));
@@ -142,7 +146,7 @@ sap.ui.define([
         oController._rateProgressBound = true;
         oController._rateProgressTable = oTable;
         applyResponsiveColumnSizing(oTable);
-        if (oTable.attachUpdateFinished) {
+        if (typeof oTable.attachUpdateFinished === TYPE_FUNCTION) {
             oTable.attachUpdateFinished(function () { applyToRows(oController); });
         }
     }

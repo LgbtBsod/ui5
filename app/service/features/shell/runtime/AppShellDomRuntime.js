@@ -1,18 +1,22 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime"
-], function (ThemeDomRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ThemeDomRuntime, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function syncShellFlexItem(oController) {
         var oLayout = oController && oController.byId && oController.byId("mainFcl");
         var oLayoutData;
 
-        if (!oLayout || typeof oLayout.setFitContainer !== "function") {
+        if (!oLayout || typeof oLayout.setFitContainer !== TYPE_FUNCTION) {
             return false;
         }
         oLayout.setFitContainer(true);
-        oLayoutData = oLayout.getLayoutData && oLayout.getLayoutData();
-        if (oLayoutData && typeof oLayoutData.setGrowFactor === "function") {
+        oLayoutData = oLayout && typeof oLayout.getLayoutData === TYPE_FUNCTION && oLayout.getLayoutData();
+        if (oLayoutData && typeof oLayoutData.setGrowFactor === TYPE_FUNCTION) {
             oLayoutData.setGrowFactor(1);
             oLayoutData.setShrinkFactor(1);
             oLayoutData.setBaseSize("0%");
@@ -22,10 +26,10 @@ sap.ui.define([
 
     function syncShellMetricVars(oController, oRootNode) {
         var oShellHeaderControl = oController && oController.byId && oController.byId("appShellHeaderHost");
-        var oShellHeader = oShellHeaderControl && oShellHeaderControl.getDomRef && oShellHeaderControl.getDomRef();
+        var oShellHeader = oShellHeaderControl && typeof oShellHeaderControl[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oShellHeaderControl[METHODS.GET_DOM_REF]();
         var oRect;
         var iBottom;
-        if (!oRootNode || !oShellHeader || !oShellHeader.getBoundingClientRect) {
+        if (!oRootNode || !oShellHeader || typeof oShellHeader.getBoundingClientRect !== TYPE_FUNCTION) {
             return;
         }
         oRect = oShellHeader.getBoundingClientRect();
@@ -38,28 +42,28 @@ sap.ui.define([
 
     function focusMainContent(oController, oEvent) {
         var oMainHost = oController && oController.byId && oController.byId("mainContentHost");
-        var oMainDom = oMainHost && oMainHost.getDomRef && oMainHost.getDomRef();
-        if (oEvent && oEvent.preventDefault) {
+        var oMainDom = oMainHost && typeof oMainHost[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oMainHost[METHODS.GET_DOM_REF]();
+        if (oEvent && typeof oEvent.preventDefault === TYPE_FUNCTION) {
             oEvent.preventDefault();
         }
-        if (!oMainDom || typeof oMainDom.focus !== "function") {
+        if (!oMainDom || typeof oMainDom[METHODS.FOCUS] !== TYPE_FUNCTION) {
             return;
         }
         if (!oMainDom.getAttribute("tabindex")) {
             oMainDom.setAttribute("tabindex", "-1");
         }
-        oMainDom.focus();
+        oMainDom[METHODS.FOCUS]();
     }
 
     function notifyBackgroundResize(oBackgroundRuntime, sPhase) {
         if (!oBackgroundRuntime) {
             return;
         }
-        if (sPhase === "start" && typeof oBackgroundRuntime.onResizeStart === "function") {
+        if (sPhase === "start" && typeof oBackgroundRuntime.onResizeStart === TYPE_FUNCTION) {
             oBackgroundRuntime.onResizeStart();
             return;
         }
-        if (sPhase === "end" && typeof oBackgroundRuntime.onResizeEnd === "function") {
+        if (sPhase === "end" && typeof oBackgroundRuntime.onResizeEnd === TYPE_FUNCTION) {
             oBackgroundRuntime.onResizeEnd();
         }
     }

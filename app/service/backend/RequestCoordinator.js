@@ -3,9 +3,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/InFlightRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/ResponseGuard",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (CorrelationId, InFlightRegistry, ResponseGuard, RequestResiliencePolicy, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
+], function (CorrelationId, InFlightRegistry, ResponseGuard, RequestResiliencePolicy, SchedulingRuntime, RequestVerbConstants, JsRuntimeStringConstants) {
     "use strict";
+
+    var REQUEST = RequestVerbConstants.REQUEST;
+    var TYPEOF = JsRuntimeStringConstants.TYPEOF;
+    var METHODS = JsRuntimeStringConstants.METHODS;
 
     function attachCorrelationId(oError, sCorrelationId) {
         var oResolved = oError || {};
@@ -41,7 +47,7 @@ sap.ui.define([
         if (vResult && typeof vResult === "object" && vResult.promise) {
             return {
                 promise: Promise.resolve(vResult.promise),
-                abort: typeof vResult.abort === "function" ? vResult.abort : function () { return; }
+                abort: typeof vResult.abort === TYPEOF.FUNCTION ? vResult.abort : function () { return; }
             };
         }
         return {
@@ -78,7 +84,7 @@ sap.ui.define([
 
     function execute(mRequest) {
         var oRequest = mRequest || {};
-        var sMethod = String(oRequest.method || "GET").trim().toUpperCase() || "GET";
+        var sMethod = String(oRequest.method || REQUEST.GET).trim().toUpperCase() || REQUEST.GET;
         var sCorrelationId = String(oRequest.correlationId || CorrelationId.next("req")).trim();
         var sDedupeKey = RequestResiliencePolicy.isSafeRead(sMethod) ? String(oRequest.dedupeKey || "").trim() : "";
         var sGuardKey = String(oRequest.responseGuardKey || "").trim();
@@ -93,7 +99,7 @@ sap.ui.define([
             var oSupersededHandle;
             try {
                 oFactoryResult = normalizeFactoryResult(
-                    typeof oRequest.requestFactory === "function"
+                    typeof oRequest.requestFactory === TYPEOF.FUNCTION
                         ? oRequest.requestFactory({
                             attempt: iAttempt + 1,
                             correlationId: sCorrelationId
@@ -105,10 +111,10 @@ sap.ui.define([
             }
             if (sGuardKey && RequestResiliencePolicy.isSafeRead(sMethod)) {
                 oSupersededHandle = ResponseGuard.replaceActiveHandle(sGuardKey, iGuardToken, oFactoryResult);
-                if (oSupersededHandle && oSupersededHandle.handle && typeof oSupersededHandle.handle.abort === "function" &&
+                if (oSupersededHandle && oSupersededHandle.handle && typeof oSupersededHandle.handle[METHODS.ABORT] === TYPEOF.FUNCTION &&
                     Number(oSupersededHandle.token || 0) !== Number(iGuardToken || 0)) {
                     try {
-                        oSupersededHandle.handle.abort();
+                        oSupersededHandle.handle[METHODS.ABORT]();
                     } catch (_abortError) {
                         // Abort is best-effort; outdated response guarding still applies.
                     }

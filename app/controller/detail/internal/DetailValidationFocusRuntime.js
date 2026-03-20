@@ -3,29 +3,32 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationHelperRuntime"
-], function (FocusRuntime, ModelStateRuntime, SchedulingRuntime, ModelContracts, DetailValidationHelperRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationHelperRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (FocusRuntime, ModelStateRuntime, SchedulingRuntime, ModelContracts, DetailValidationHelperRuntime, JsRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function resolveFocusDomRef(oControl) {
         if (!oControl) {
             return null;
         }
-        if (typeof oControl.getFocusDomRef === "function") {
-            return oControl.getFocusDomRef() || null;
+        if (typeof oControl[METHODS.GET_FOCUS_DOM_REF] === TYPE_FUNCTION) {
+            return oControl[METHODS.GET_FOCUS_DOM_REF]() || null;
         }
-        if (typeof oControl.getDomRef === "function") {
-            return oControl.getDomRef() || null;
+        if (typeof oControl[METHODS.GET_DOM_REF] === TYPE_FUNCTION) {
+            return oControl[METHODS.GET_DOM_REF]() || null;
         }
         return null;
     }
 
     function scrollInvalidIntoView(oControl) {
         var oDomRef = resolveFocusDomRef(oControl);
-        if (!oDomRef || typeof oDomRef.scrollIntoView !== "function") {
+        if (!oDomRef || typeof oDomRef.scrollIntoView !== TYPE_FUNCTION) {
             return false;
         }
         try {
@@ -52,29 +55,29 @@ sap.ui.define([
             return false;
         }
         aControls = oView.findAggregatedObjects(true, function (oControl) {
-            return !!(oControl && oControl.data && oControl.data("validationKey"));
+            return !!(oControl && typeof oControl.data === TYPE_FUNCTION && oControl.data("validationKey"));
         });
         oTarget = aMissingKeys.reduce(function (oFound, sKey) {
             if (oFound) {
                 return oFound;
             }
             return aControls.find(function (oControl) {
-                return oControl && oControl.data && oControl.data("validationKey") === sKey;
+                return oControl && typeof oControl.data === TYPE_FUNCTION && oControl.data("validationKey") === sKey;
             }) || null;
         }, null);
         if (!oTarget) {
             return false;
         }
         scrollInvalidIntoView(oTarget);
-        if (typeof oTarget.focus === "function" && FocusRuntime.focusSoon(oTarget)) {
+        if (typeof oTarget[METHODS.FOCUS] === TYPE_FUNCTION && FocusRuntime.focusSoon(oTarget)) {
             return true;
         }
         var oDomRef = resolveFocusDomRef(oTarget);
-        if (!oDomRef || typeof oDomRef.focus !== "function") {
+        if (!oDomRef || typeof oDomRef[METHODS.FOCUS] !== TYPE_FUNCTION) {
             return false;
         }
         SchedulingRuntime.restartTimer(0, function () {
-            oDomRef.focus();
+            oDomRef[METHODS.FOCUS]();
         }, 0);
         return true;
     }

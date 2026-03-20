@@ -1,38 +1,23 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig"
-], function (ControllerViewStateRuntime, ModelStateRuntime, StatePaths, WorkflowContracts, DetailRowEntityConfig) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ControllerViewStateRuntime, DetailRowEntityConfig, FocusRuntime, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function runRowOperation(oController, sEntity, sOp, mInput, mHooks) {
         var oConfig = DetailRowEntityConfig.get(sEntity);
         var sBusyPath = (sOp === "expand" || sOp === "collapse") ? oConfig.dialogBusyPath : oConfig.rowBusyPath;
-        var sBeforeMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
-        var sBeforeLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
 
-        if (!sBusyPath || !mHooks || typeof mHooks.withViewFlag !== "function" || typeof mHooks.rowOps !== "function") {
+        if (!sBusyPath || !mHooks || typeof mHooks.withViewFlag !== TYPE_FUNCTION || typeof mHooks.rowOps !== TYPE_FUNCTION) {
             return Promise.resolve();
         }
         return mHooks.withViewFlag(sBusyPath, function () {
             return mHooks.rowOps(Object.assign({ entity: sEntity, op: sOp }, mInput || {}));
-        }).then(function (vResult) {
-            var sCurrentMode;
-            var sCurrentLockState;
-            if (sOp !== "expand" && sOp !== "collapse") {
-                return vResult;
-            }
-            sCurrentMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
-            sCurrentLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
-            if (WorkflowContracts.isEditableMode(sBeforeMode) &&
-                sCurrentMode === WorkflowContracts.EDIT_MODES.READ &&
-                ((sBeforeMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED && sBeforeLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) ||
-                    sBeforeMode === WorkflowContracts.EDIT_MODES.CREATE)) {
-                ModelStateRuntime.write(oController, "state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, sBeforeMode);
-            }
-            return vResult;
         });
     }
 
@@ -47,6 +32,27 @@ sap.ui.define([
             ".sapMSlt:not(.sapMSltDisabled)",
             ".sapMSwt:not(.sapMSwtDisabled)"
         ].join(","));
+    }
+
+    function focusCardTarget(oItem, sCardKey, mHooks) {
+        var oDomRef;
+        var oFocusable;
+        if (mHooks && typeof mHooks.focusCardFieldByKey === TYPE_FUNCTION && mHooks.focusCardFieldByKey(sCardKey)) {
+            return true;
+        }
+        if (oItem && FocusRuntime.focusSoon(oItem)) {
+            return true;
+        }
+        oDomRef = oItem && typeof oItem[METHODS.GET_DOM_REF] === TYPE_FUNCTION ? oItem[METHODS.GET_DOM_REF]() : null;
+        oFocusable = findFocusableField(oDomRef);
+        if (oFocusable && typeof oFocusable[METHODS.FOCUS] === TYPE_FUNCTION) {
+            oFocusable[METHODS.FOCUS]();
+            return true;
+        }
+        if (mHooks && typeof mHooks.focusCardByKey === TYPE_FUNCTION) {
+            return !!mHooks.focusCardByKey(sCardKey);
+        }
+        return false;
     }
 
     function isInteractiveTarget(oTarget) {
@@ -138,13 +144,7 @@ sap.ui.define([
             if (!sNormalized || !mHooks.isEditMode() || isInteractiveTarget(oTarget)) {
                 return;
             }
-            oDomRef = oItem && oItem.getDomRef ? oItem.getDomRef() : null;
-            oFocusable = findFocusableField(oDomRef);
-            if (oFocusable && typeof oFocusable.focus === "function") {
-                oFocusable.focus();
-                return;
-            }
-            mHooks.focusCardByKey(sNormalized);
+            focusCardTarget(oItem, sNormalized, mHooks);
         },
         onInfoCardKeyDown: function (oController, oEvent, sCardKey, mHooks) {
             var bModifier = !!(oEvent && oEvent.ctrlKey && oEvent.shiftKey);

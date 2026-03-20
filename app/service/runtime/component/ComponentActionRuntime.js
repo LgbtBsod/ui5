@@ -4,29 +4,12 @@ sap.ui.define([
 ], function (NavigationIntentService, EffectTextResolver) {
     "use strict";
 
-    function buildActionValidators(ActionContract) {
-        var mValidators = {};
-        var mActions = (ActionContract && ActionContract.ACTIONS) || {};
+    function normalizeActionPayload(ActionContract, sAction, mPayload) {
         var fnNormalize = ActionContract && ActionContract.normalizeActionPayload;
-
         if (typeof fnNormalize !== "function") {
-            return mValidators;
+            return mPayload || {};
         }
-
-        [
-            mActions.DETAIL_RETRY_GUARDED_SAVE,
-            mActions.DETAIL_TAKEOVER_LOCK,
-            mActions.DETAIL_CANCEL_ENTER_EDIT
-        ].forEach(function (sAction) {
-            if (!sAction) {
-                return;
-            }
-            mValidators[sAction] = function (mPayload) {
-                return fnNormalize(sAction, mPayload);
-            };
-        });
-
-        return mValidators;
+        return fnNormalize(sAction, mPayload);
     }
 
     function registerDefaultHandlers(mOptions) {
@@ -50,12 +33,18 @@ sap.ui.define([
         }
         if (mActions.DETAIL_TAKEOVER_LOCK) {
             oActionDispatcher.register(mActions.DETAIL_TAKEOVER_LOCK, function (mPayload) {
-                return oDetailFacade.confirmTakeover(mPayload || {}, fnBuildLatestCtx()).then(fnApplyFacadeResult);
+                return oDetailFacade.confirmTakeover(
+                    normalizeActionPayload(oActionContract, mActions.DETAIL_TAKEOVER_LOCK, mPayload || {}),
+                    fnBuildLatestCtx()
+                ).then(fnApplyFacadeResult);
             });
         }
         if (mActions.DETAIL_CANCEL_ENTER_EDIT) {
             oActionDispatcher.register(mActions.DETAIL_CANCEL_ENTER_EDIT, function (mPayload) {
-                return oDetailFacade.cancelEnterEdit(mPayload || {}, fnGetCtx()).then(fnApplyFacadeResult);
+                return oDetailFacade.cancelEnterEdit(
+                    normalizeActionPayload(oActionContract, mActions.DETAIL_CANCEL_ENTER_EDIT, mPayload || {}),
+                    fnGetCtx()
+                ).then(fnApplyFacadeResult);
             });
         }
     }
@@ -107,7 +96,6 @@ sap.ui.define([
     }
 
     return {
-        buildActionValidators: buildActionValidators,
         registerDefaultHandlers: registerDefaultHandlers,
         createBundleText: createBundleText,
         createApplyFacadeResult: createApplyFacadeResult,

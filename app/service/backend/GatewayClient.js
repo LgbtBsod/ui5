@@ -5,12 +5,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh"
-], function (GatewayErrorNormalizer, RequestCoordinator, RequestResiliencePolicy, GatewayClientContracts, GatewayClientSupport, GatewayClientRequestRuntime, SecurityTokenRefresh) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants"
+], function (GatewayErrorNormalizer, RequestCoordinator, RequestResiliencePolicy, GatewayClientContracts, GatewayClientSupport, GatewayClientRequestRuntime, SecurityTokenRefresh, RequestVerbConstants) {
     "use strict";
 
     var _oModel = null;
     var _sServiceUrl = "";
+    var REQUEST = RequestVerbConstants.REQUEST;
+    var DEDUPE = RequestVerbConstants.DEDUPE;
 
     function createModelError() {
         var oError = new Error("GatewayClient model is not initialized");
@@ -137,8 +140,8 @@ sap.ui.define([
             var sPath = GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path));
             var oOptions = mOptions || {};
             return executeRequest({
-                method: "GET",
-                dedupeKey: "GET|" + sPath + "|" + GatewayClientSupport.encodeUrlParameters(mParams || {}),
+                method: REQUEST.GET,
+                dedupeKey: DEDUPE.GET + sPath + "|" + GatewayClientSupport.encodeUrlParameters(mParams || {}),
                 responseGuardKey: oOptions.responseGuardKey,
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: oOptions.retryCount,
@@ -158,7 +161,7 @@ sap.ui.define([
         callFunctionImport: function (name, oPayload, mOptions) {
             var oOptions = mOptions || {};
             return executeMutatingRequest({
-                method: "POST_FUNCTION",
+                method: REQUEST.POST_FUNCTION,
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
@@ -176,8 +179,8 @@ sap.ui.define([
         callGetFunctionImport: function (name, mParams, mOptions) {
             var oOptions = mOptions || {};
             return executeRequest({
-                method: "GET_FUNCTION",
-                dedupeKey: "GET_FUNCTION|" + String(name || "") + "|" + GatewayClientSupport.encodeUrlParameters(mParams || {}),
+                method: REQUEST.GET_FUNCTION,
+                dedupeKey: DEDUPE.GET_FUNCTION + String(name || "") + "|" + GatewayClientSupport.encodeUrlParameters(mParams || {}),
                 responseGuardKey: oOptions.responseGuardKey,
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: oOptions.retryCount,
@@ -193,11 +196,11 @@ sap.ui.define([
             var sPath = GatewayClientSupport.assertAllowedPath(
                 GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path)),
                 GatewayClientContracts.DIRECT_DELETE_ALLOWLIST,
-                "DELETE"
+                REQUEST.DELETE
             );
             var oOptions = mOptions || {};
             return executeMutatingRequest({
-                method: "DELETE",
+                method: REQUEST.DELETE,
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: 0,
                 correlationId: oOptions.correlationId,
@@ -209,7 +212,7 @@ sap.ui.define([
         },
         batch: function (groupId) {
             return executeMutatingRequest({
-                method: "BATCH",
+                method: REQUEST.BATCH,
                 requestFactory: function () {
                     return toPromise(function (resolve, reject) {
                         ensureModel().submitChanges({

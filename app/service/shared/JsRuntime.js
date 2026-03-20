@@ -1,9 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
+], function (JsRuntimeStringConstants) {
     "use strict";
 
-    return Object.freeze({
-        TYPEOF: Object.freeze({
-            FUNCTION: "function"
-        })
-    });
+    return JsRuntimeStringConstants;
 });

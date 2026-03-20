@@ -2,19 +2,24 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (CloneUtil, StatePaths, WorkflowContracts, WorkflowRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (CloneUtil, StatePaths, WorkflowContracts, WorkflowRuntimeConstants, JsRuntime) {
     "use strict";
 
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var TYPE_UNDEFINED = JsRuntime.TYPEOF.UNDEFINED;
+    var METHODS = JsRuntime.METHODS;
+
     function model(oController, sModelName) {
-        return oController && oController.getModel ? oController.getModel(sModelName) : null;
+        return oController && typeof oController[METHODS.GET_MODEL] === TYPE_FUNCTION ? oController[METHODS.GET_MODEL](sModelName) : null;
     }
 
     function writeOnModel(oModel, sPath, vValue) {
-        if (!oModel || typeof oModel.setProperty !== "function") {
+        if (!oModel || typeof oModel[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {
             return false;
         }
-        oModel.setProperty(sPath, vValue);
+        oModel[METHODS.SET_PROPERTY](sPath, vValue);
         return true;
     }
 
@@ -28,11 +33,11 @@ sap.ui.define([
 
     function readOnModel(oModel, sPath, vFallback) {
         var vValue;
-        if (!oModel || typeof oModel.getProperty !== "function") {
+        if (!oModel || typeof oModel[METHODS.GET_PROPERTY] !== TYPE_FUNCTION) {
             return vFallback;
         }
-        vValue = oModel.getProperty(sPath);
-        return typeof vValue === "undefined" ? vFallback : vValue;
+        vValue = oModel[METHODS.GET_PROPERTY](sPath);
+        return typeof vValue === TYPE_UNDEFINED ? vFallback : vValue;
     }
 
     function read(oController, sModelName, sPath, vFallback) {
@@ -42,10 +47,10 @@ sap.ui.define([
 
     function write(oController, sModelName, sPath, vValue) {
         var oModel = model(oController, sModelName);
-        if (!oModel || typeof oModel.setProperty !== "function") {
+        if (!oModel || typeof oModel[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {
             return false;
         }
-        oModel.setProperty(sPath, vValue);
+        oModel[METHODS.SET_PROPERTY](sPath, vValue);
         return true;
     }
 
@@ -65,7 +70,7 @@ sap.ui.define([
 
     function replaceData(oController, sModelName, vData) {
         var oModel = model(oController, sModelName);
-        if (!oModel || typeof oModel.setData !== "function") {
+        if (!oModel || typeof oModel.setData !== TYPE_FUNCTION) {
             return false;
         }
         oModel.setData(vData || {});
@@ -112,9 +117,9 @@ sap.ui.define([
     }
 
     function withFlag(oController, sModelName, sPath, fnWork, vStart, vEnd) {
-        write(oController, sModelName, sPath, typeof vStart === "undefined" ? true : vStart);
+        write(oController, sModelName, sPath, typeof vStart === TYPE_UNDEFINED ? true : vStart);
         return Promise.resolve().then(fnWork).finally(function () {
-            write(oController, sModelName, sPath, typeof vEnd === "undefined" ? false : vEnd);
+            write(oController, sModelName, sPath, typeof vEnd === TYPE_UNDEFINED ? false : vEnd);
         });
     }
 
@@ -126,8 +131,8 @@ sap.ui.define([
 
     function withFlags(oController, sModelName, aPaths, fnWork, vStart, vEnd) {
         var aFlagPaths = Array.isArray(aPaths) ? aPaths.slice() : [];
-        var vStartValue = typeof vStart === "undefined" ? true : vStart;
-        var vEndValue = typeof vEnd === "undefined" ? false : vEnd;
+        var vStartValue = typeof vStart === TYPE_UNDEFINED ? true : vStart;
+        var vEndValue = typeof vEnd === TYPE_UNDEFINED ? false : vEnd;
         aFlagPaths.forEach(function (sPath) {
             write(oController, sModelName, sPath, vStartValue);
         });

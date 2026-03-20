@@ -4,12 +4,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts"
-], function (SearchToolbarContracts, SearchMaxResults, SearchViewStateRuntime, ModelStateRuntime, ModelContracts, SearchRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (SearchToolbarContracts, SearchMaxResults, SearchViewStateRuntime, ModelStateRuntime, ModelContracts, SearchRuntimeContracts, JsRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var PATHS = SearchToolbarContracts.PATHS;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function normalizeRequestValue(sNormalizedValue, sFallbackValue) {
         var sSafeFallback = String(sFallbackValue || "").trim();
@@ -23,19 +26,19 @@ sap.ui.define([
     function syncToolbarRequestInputs(oController) {
         var oBackendTopInput = oController.byId("backendTopInput");
         var oMaxRowsInput = oController.byId("maxRowsInput");
-        var sBackendTop = SearchMaxResults.normalizeSearchBackendTopValue(oBackendTopInput && oBackendTopInput.getValue && oBackendTopInput.getValue());
-        var sMaxRows = SearchMaxResults.normalizeSearchMaxResultsValue(oMaxRowsInput && oMaxRowsInput.getValue && oMaxRowsInput.getValue());
+        var sBackendTop = SearchMaxResults.normalizeSearchBackendTopValue(oBackendTopInput && typeof oBackendTopInput[METHODS.GET_VALUE] === TYPE_FUNCTION && oBackendTopInput[METHODS.GET_VALUE]());
+        var sMaxRows = SearchMaxResults.normalizeSearchMaxResultsValue(oMaxRowsInput && typeof oMaxRowsInput[METHODS.GET_VALUE] === TYPE_FUNCTION && oMaxRowsInput[METHODS.GET_VALUE]());
         sBackendTop = normalizeOptionalRequestValue(sBackendTop);
         sMaxRows = normalizeRequestValue(sMaxRows, ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_MAX_RESULTS, SearchRuntimeContracts.DEFAULTS.SEARCH_VISIBLE_ROWS));
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_BACKEND_TOP, sBackendTop);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_FETCH_LIMIT, sBackendTop);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_MAX_RESULTS, sMaxRows);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.GROWING_PAGE_SIZE, sMaxRows);
-        if (oBackendTopInput && typeof oBackendTopInput.setValue === "function") {
-            oBackendTopInput.setValue(sBackendTop);
+        if (oBackendTopInput && typeof oBackendTopInput[METHODS.SET_VALUE] === TYPE_FUNCTION) {
+            oBackendTopInput[METHODS.SET_VALUE](sBackendTop);
         }
-        if (oMaxRowsInput && typeof oMaxRowsInput.setValue === "function") {
-            oMaxRowsInput.setValue(sMaxRows);
+        if (oMaxRowsInput && typeof oMaxRowsInput[METHODS.SET_VALUE] === TYPE_FUNCTION) {
+            oMaxRowsInput[METHODS.SET_VALUE](sMaxRows);
         }
         SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
     }
@@ -46,8 +49,8 @@ sap.ui.define([
         sValue = normalizeRequestValue(sValue, ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_MAX_RESULTS, SearchRuntimeContracts.DEFAULTS.SEARCH_VISIBLE_ROWS));
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_MAX_RESULTS, sValue);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.GROWING_PAGE_SIZE, sValue);
-        if (oSource && typeof oSource.setValue === "function") {
-            oSource.setValue(sValue);
+        if (oSource && typeof oSource[METHODS.SET_VALUE] === TYPE_FUNCTION) {
+            oSource[METHODS.SET_VALUE](sValue);
         }
         SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
     }
@@ -59,15 +62,15 @@ sap.ui.define([
         sValue = normalizeOptionalRequestValue(sValue);
         sCurrentValue = String(ModelStateRuntime.read(oController, STATE_MODEL, PATHS.SEARCH_BACKEND_TOP, SearchRuntimeContracts.DEFAULTS.SEARCH_BACKEND_TOP) || "").trim();
         if (sCurrentValue === sValue) {
-            if (oSource && typeof oSource.setValue === "function") {
-                oSource.setValue(sValue);
+            if (oSource && typeof oSource[METHODS.SET_VALUE] === TYPE_FUNCTION) {
+                oSource[METHODS.SET_VALUE](sValue);
             }
             return false;
         }
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_BACKEND_TOP, sValue);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_FETCH_LIMIT, sValue);
-        if (oSource && typeof oSource.setValue === "function") {
-            oSource.setValue(sValue);
+        if (oSource && typeof oSource[METHODS.SET_VALUE] === TYPE_FUNCTION) {
+            oSource[METHODS.SET_VALUE](sValue);
         }
         SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
         return true;

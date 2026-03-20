@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants"
+], function (RequestVerbConstants) {
     "use strict";
 
     var DEFAULT_SAFE_TIMEOUT_MS = 15000;
@@ -6,14 +8,15 @@ sap.ui.define([], function () {
     var DEFAULT_SAFE_RETRY_COUNT = 1;
     var DEFAULT_RETRY_BASE_DELAY_MS = 400;
     var DEFAULT_RETRY_MAX_DELAY_MS = 2500;
+    var REQUEST = RequestVerbConstants.REQUEST;
 
     function normalizeMethod(vMethod) {
-        return String(vMethod || "GET").trim().toUpperCase() || "GET";
+        return String(vMethod || REQUEST.GET).trim().toUpperCase() || REQUEST.GET;
     }
 
     function isSafeRead(vMethod) {
         var sMethod = normalizeMethod(vMethod);
-        return sMethod === "GET" || sMethod === "GET_FUNCTION";
+        return sMethod === REQUEST.GET || sMethod === REQUEST.GET_FUNCTION;
     }
 
     function normalizeStatusCode(oError) {

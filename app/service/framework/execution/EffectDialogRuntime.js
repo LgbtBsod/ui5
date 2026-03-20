@@ -1,20 +1,24 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LazyDialogRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting"
-], function (LazyDialogRuntime, EffectActionRouting) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (LazyDialogRuntime, EffectActionRouting, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     var DIALOG_ACTIONS = {
         open: function (oDialog) {
-            if (oDialog && typeof oDialog.open === "function") {
-                oDialog.open();
+            if (oDialog && typeof oDialog[METHODS.OPEN] === TYPE_FUNCTION) {
+                oDialog[METHODS.OPEN]();
                 return true;
             }
             return false;
         },
         close: function (oDialog) {
-            if (oDialog && typeof oDialog.close === "function") {
-                oDialog.close();
+            if (oDialog && typeof oDialog[METHODS.CLOSE] === TYPE_FUNCTION) {
+                oDialog[METHODS.CLOSE]();
                 return true;
             }
             return false;
@@ -37,7 +41,7 @@ sap.ui.define([
         if (oDialog) {
             return Promise.resolve(oDialog);
         }
-        if (oController && typeof oController.ensureEffectDialog === "function") {
+        if (oController && typeof oController.ensureEffectDialog === TYPE_FUNCTION) {
             return Promise.resolve(oController.ensureEffectDialog(sId)).then(function (oLazyDialog) {
                 return oLazyDialog || resolveDialog(oController, sId);
             });
@@ -48,7 +52,7 @@ sap.ui.define([
     function applyDialogAction(oDialog, sAction) {
         var sNormalizedAction = EffectActionRouting.normalizeEffectVerb(sAction);
         var fn = DIALOG_ACTIONS[sNormalizedAction];
-        if (typeof fn !== "function") {
+        if (typeof fn !== TYPE_FUNCTION) {
             return false;
         }
         return !!fn(oDialog);
@@ -56,7 +60,7 @@ sap.ui.define([
 
     function runDialogEffect(oController, oEffect, oOptions) {
         var sAction = EffectActionRouting.normalizeEffectVerb(oEffect && oEffect.action);
-        if (oController && typeof oController.shouldAllowDialogEffect === "function" &&
+        if (oController && typeof oController.shouldAllowDialogEffect === TYPE_FUNCTION &&
             oController.shouldAllowDialogEffect(oEffect && oEffect.id, sAction, oEffect) === false) {
             return Promise.resolve(false);
         }

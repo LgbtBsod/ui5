@@ -221,7 +221,7 @@
         "analytics": {
           "id": "analyticsTargetPage",
           "viewName": "Analytics",
-          "controlAggregation": "endColumnPages",
+          "controlAggregation": "midColumnPages",
           "viewLevel": 2,
           "viewId": "analyticsView"
         }

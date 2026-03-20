@@ -2,70 +2,67 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchViewLoadBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchFilterLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchRequestRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartTableRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy"
-], function (SearchViewLoadBehavior, SearchFilterLifecycleBehavior, SearchRequestRuntime, SearchSmartTableRuntime, SearchSelectionRuntime, SearchViewportRuntime, SearchViewStateRuntime, SearchRateProgress, SearchCommandPolicy) {
+], function (SearchViewLoadBehavior, SearchFilterLifecycleBehavior, SearchRequestRuntime, SearchSelectionRuntime, SearchViewportRuntime, SearchViewStateRuntime, SearchRateProgress, SearchCommandPolicy) {
     "use strict";
 
     function onSmartTableInitialise(oController, fnReadRows) {
-        return SearchSmartTableRuntime.onSmartTableInitialise(oController, {
-            bindTableRuntime: function (oInnerTable, fnAfterBind) {
-                SearchSelectionRuntime.bindSearchTableRuntime(oController, oInnerTable, fnAfterBind);
-            },
-            bindViewportRuntime: function () {
-                SearchViewportRuntime.bindSearchViewportRuntime(oController);
-            },
-            configureResultTable: function (oInnerTable, bForce) {
-                SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, bForce);
-            },
-            onItemPress: oController.onSearchTableItemPress,
-            onSelectionChange: oController.onSearchTableSelectionChange,
-            refreshTableIfNeeded: function (sSource) {
-                return SearchCommandPolicy.rebind(oController, { source: sSource });
-            },
-            resolveInnerTable: function () {
-                return SearchSelectionRuntime.resolveSearchInnerTable(oController);
-            },
-            scheduleViewportSync: function (bImmediate) {
-                SearchViewportRuntime.scheduleSearchViewportSync(oController, bImmediate);
-            },
-            syncRequestWindow: function () {
-                SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
-            },
-            wireRateProgress: function (oInnerTable) {
-                SearchRateProgress.wireTable(oController, oInnerTable);
-            }
+        var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
+
+        SearchViewStateRuntime.setSmartTableReady(oController, true);
+        if (!oInnerTable) {
+            return;
+        }
+        SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, true);
+        SearchSelectionRuntime.bindSearchTableRuntime(oController, oInnerTable, function () {
+            SearchViewportRuntime.bindSearchViewportRuntime(oController);
+            SearchViewportRuntime.scheduleSearchViewportSync(oController, false);
         });
+        if (oInnerTable.removeSelections) {
+            oInnerTable.removeSelections(true);
+        }
+        if (oInnerTable.attachSelectionChange && typeof oController.onSearchTableSelectionChange === "function") {
+            oInnerTable.attachSelectionChange(oController.onSearchTableSelectionChange, oController);
+        }
+        if (oInnerTable.attachItemPress && typeof oController.onSearchTableItemPress === "function") {
+            oInnerTable.attachItemPress(oController.onSearchTableItemPress, oController);
+        }
+        SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
+        SearchRateProgress.wireTable(oController, oInnerTable);
+        SearchViewportRuntime.bindSearchViewportRuntime(oController);
+        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+        return SearchCommandPolicy.rebind(oController, { source: "smartTableInitialise" });
     }
 
-function onBeforeSmartTableRebind(oController, oEvent, fnReadRows) {
+    function onBeforeSmartTableRebind(oController, oEvent, fnReadRows) {
         SearchRequestRuntime.syncToolbarRequestInputs(oController);
         var mLoadHooks = SearchViewLoadBehavior.createSmartTableLoadHooks(oController, fnReadRows);
-        return SearchSmartTableRuntime.onBeforeSmartTableRebind(oController, oEvent, {
-            applyRebindPolicy: function (mInput) {
-                return SearchCommandPolicy.applyRebindPolicy(oController, mInput);
-            },
-            beginSearchLoadingFeedback: mLoadHooks.beginSearchLoadingFeedback,
-            bindPendingSearchLoad: function (oInnerTable) {
-                return mLoadHooks.bindPendingSearchLoad(oInnerTable);
-            },
-            configureResultTable: function (oInnerTable, bForce) {
-                SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, bForce);
-            },
-            resolveInnerTable: function () {
-                return SearchSelectionRuntime.resolveSearchInnerTable(oController);
-            },
-            scheduleViewportSync: function (bImmediate) {
-                SearchViewportRuntime.scheduleSearchViewportSync(oController, bImmediate);
-            },
-            settlePendingSearchLoad: mLoadHooks.settlePendingSearchLoad,
-            syncRequestWindow: function () {
-                SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
+        var oBindingParams = oEvent && oEvent.getParameter && oEvent.getParameter("bindingParams");
+        var oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
+
+        SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, true);
+        SearchViewStateRuntime.syncSearchTableRequestWindow(oController);
+        SearchViewStateRuntime.setTableBusy(oController, true);
+        mLoadHooks.beginSearchLoadingFeedback();
+        SearchViewportRuntime.scheduleSearchViewportSync(oController, false);
+        mLoadHooks.bindPendingSearchLoad(oInnerTable);
+
+        return Promise.resolve(SearchCommandPolicy.applyRebindPolicy(oController, {
+            source: "beforeRebind",
+            bindingParams: oBindingParams || {},
+            state: SearchViewStateRuntime.readStateData(oController),
+            onDataReceived: function (oDataEvent) {
+                var oError = oDataEvent && oDataEvent.getParameter
+                    && (oDataEvent.getParameter("error") || oDataEvent.getParameter("data") && oDataEvent.getParameter("data").error);
+                mLoadHooks.settlePendingSearchLoad(oInnerTable, oError);
             }
+        })).catch(function (oError) {
+            mLoadHooks.settlePendingSearchLoad(oInnerTable, oError);
+            return Promise.reject(oError);
         });
     }
 

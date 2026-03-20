@@ -207,7 +207,32 @@ sap.ui.define([
         oComponent._fnUnsubscribeRuntimeSettings = null;
     }
 
+    var runtimeSupport = Object.freeze({
+        applyFrontendRuntimeConfig: applyFrontendRuntimeConfig,
+        applyManagersTimerConfig: applyManagersTimerConfig,
+        buildComponentRuntimeSupport: buildComponentRuntimeSupport,
+        clearComponentTimers: clearComponentTimers,
+        collectManagers: collectManagers,
+        isLockRuntimeActive: isLockRuntimeActive,
+        syncLockScopedManagers: syncLockScopedManagers
+    });
+
+    var pageLeave = Object.freeze({
+        markLeaveReleaseAttempted: markLeaveReleaseAttempted,
+        registerLockReleaseBeacon: registerLockReleaseBeacon,
+        releaseActiveLockOnLeave: releaseActiveLockOnLeave,
+        resetLeaveReleaseState: resetLeaveReleaseState
+    });
+
+    var teardown = Object.freeze({
+        clearComponentTimers: clearComponentTimers,
+        destroyComponentRuntime: destroyComponentRuntime
+    });
+
     return {
+        runtimeSupport: runtimeSupport,
+        pageLeave: pageLeave,
+        teardown: teardown,
         applyFrontendRuntimeConfig: applyFrontendRuntimeConfig,
         applyManagersTimerConfig: applyManagersTimerConfig,
         buildComponentRuntimeSupport: buildComponentRuntimeSupport,

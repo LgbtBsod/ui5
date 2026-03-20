@@ -1,25 +1,29 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function stopManager(oManager, sMethod) {
         var sResolvedMethod = sMethod || "stop";
-        if (oManager && typeof oManager[sResolvedMethod] === "function") {
+        if (oManager && typeof oManager[sResolvedMethod] === TYPE_FUNCTION) {
             oManager[sResolvedMethod]();
         }
     }
 
     function startManager(oManager) {
-        if (oManager && typeof oManager.start === "function") {
+        if (oManager && typeof oManager.start === TYPE_FUNCTION) {
             oManager.start();
         }
     }
 
     function isManagerRunning(oManager) {
-        return !!(oManager && typeof oManager.isRunning === "function" && oManager.isRunning());
+        return !!(oManager && typeof oManager.isRunning === TYPE_FUNCTION && oManager.isRunning());
     }
 
     function resetGcd(oManagers) {
-        if (oManagers && oManagers.gcd && typeof oManagers.gcd.resetOnFullSave === "function") {
+        if (oManagers && oManagers.gcd && typeof oManagers.gcd.resetOnFullSave === TYPE_FUNCTION) {
             oManagers.gcd.resetOnFullSave();
         }
     }
@@ -55,7 +59,7 @@ sap.ui.define([], function () {
 
     function stopAll(oManagers) {
         stopLockScoped(oManagers);
-        if (oManagers && oManagers.gcd && typeof oManagers.gcd.destroyManager === "function") {
+        if (oManagers && oManagers.gcd && typeof oManagers.gcd.destroyManager === TYPE_FUNCTION) {
             oManagers.gcd.destroyManager();
         }
     }

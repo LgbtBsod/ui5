@@ -6,12 +6,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
-], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts, UiSemanticConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts, UiSemanticConstants, JsRuntime) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     var PERSISTENCY_PREFIXES = SearchRuntimeContracts.PERSISTENCY_PREFIXES;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function createViewModel(sScope) {
         return new JSONModel({
@@ -95,7 +97,7 @@ sap.ui.define([
         if (!bSmartFilterReady || !bSmartTableReady) {
             return false;
         }
-        if (oSmartFilterBar && typeof oSmartFilterBar.isInitialised === "function") {
+        if (oSmartFilterBar && typeof oSmartFilterBar.isInitialised === TYPE_FUNCTION) {
             return !!oSmartFilterBar.isInitialised();
         }
         return true;
@@ -137,15 +139,28 @@ sap.ui.define([
             iThreshold = iBackendTop;
             bGrowing = false;
         }
-        if (typeof oInnerTable.setGrowing === "function") {
+        if (typeof oInnerTable.setGrowing === TYPE_FUNCTION) {
             oInnerTable.setGrowing(bGrowing);
         }
-        if (typeof oInnerTable.setGrowingScrollToLoad === "function") {
+        if (typeof oInnerTable.setGrowingScrollToLoad === TYPE_FUNCTION) {
             oInnerTable.setGrowingScrollToLoad(false);
         }
-        if (typeof oInnerTable.setGrowingThreshold === "function") {
+        if (typeof oInnerTable.setGrowingThreshold === TYPE_FUNCTION) {
             oInnerTable.setGrowingThreshold(iThreshold);
         }
+    }
+
+    function setSmartTableReady(oController, bValue) {
+        ControllerViewStateRuntime.set(oController, "/smartTableReady", !!bValue);
+    }
+
+    function setTableBusy(oController, bValue) {
+        ControllerViewStateRuntime.set(oController, "/tableBusy", !!bValue);
+    }
+
+    function readStateData(oController) {
+        var oStateModel = ControllerModelRuntime.state(oController);
+        return (oStateModel && typeof oStateModel.getData === TYPE_FUNCTION && oStateModel.getData()) || {};
     }
 
     function formatWorkflowStageText(oBundle, sStage) {
@@ -181,6 +196,9 @@ sap.ui.define([
         createViewModel: createViewModel,
         resolveSearchUiSessionKey: resolveSearchUiSessionKey,
         isSmartControlsReady: isSmartControlsReady,
+        readStateData: readStateData,
+        setSmartTableReady: setSmartTableReady,
+        setTableBusy: setTableBusy,
         syncSearchTableRequestWindow: syncSearchTableRequestWindow,
         formatHumanDateTime: ComponentFormattingRuntime.formatHumanDateTime,
         formatWorkflowStageText: formatWorkflowStageText,

@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, WorkflowRuntimeConstants, DetailPersistenceConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig"
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, WorkflowRuntimeConstants, DetailPersistenceConstants, SearchUiConfig) {
     "use strict";
 
     var PATHS = ComponentListenerContracts.PATHS;
@@ -43,7 +44,7 @@ sap.ui.define([
         var oStateModel = mOptions.stateModel;
         var oUiStateModel = mOptions.uiStateModel;
         var oLayoutModel = mOptions.layoutModel;
-        var SmartSearchAdapter = mOptions.smartSearchAdapter;
+        var oSearchConfig = mOptions.searchConfig || SearchUiConfig.getLayoutSeed();
 
         mOptions.componentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
         ComponentDetailMetaSyncRuntime.syncDetailMeta(oStateModel, mOptions.statePaths || {});
@@ -62,9 +63,9 @@ sap.ui.define([
         oComponent._fnBeforeUnload = createBeforeUnloadHandler(oStateModel, mOptions);
         window.addEventListener("beforeunload", oComponent._fnBeforeUnload);
         ModelStateRuntime.setManyOnModel(oLayoutModel, {
-            "/smartFilter/fields": SmartSearchAdapter.getSmartFilterConfig().fields,
-            "/smartTable/columns": SmartSearchAdapter.getSmartTableConfig().columns,
-            "/smartTable/selectionMode": SmartSearchAdapter.getSmartTableConfig().selectionMode
+            "/smartFilter/fields": oSearchConfig.smartFilter.fields,
+            "/smartTable/columns": oSearchConfig.smartTable.columns,
+            "/smartTable/selectionMode": oSearchConfig.smartTable.selectionMode
         });
         oComponent._oDirtyStateBinding = oStateModel.bindProperty(PATHS.IS_DIRTY);
         oComponent._fnDirtyStateBindingChange = function () {

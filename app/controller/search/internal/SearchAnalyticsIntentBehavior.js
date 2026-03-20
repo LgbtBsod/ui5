@@ -2,9 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, AnalyticsMonthRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, AnalyticsMonthRuntime, JsRuntime) {
     "use strict";
+
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function normalizeText(vValue) {
         return String(vValue || "").trim();
@@ -128,30 +132,30 @@ sap.ui.define([
         if (!bHasScope || !oSmartFilterBar) {
             return false;
         }
-        if (typeof oSmartFilterBar.isInitialised === "function" && !oSmartFilterBar.isInitialised()) {
+        if (typeof oSmartFilterBar.isInitialised === TYPE_FUNCTION && !oSmartFilterBar.isInitialised()) {
             return false;
         }
-        oControl = sFilterKey && typeof oSmartFilterBar.getControlByKey === "function" ? oSmartFilterBar.getControlByKey(sFilterKey) : null;
-        if (oControl && typeof oControl.setSelectedKey === "function") {
-            oControl.setSelectedKey(sFilterValue);
+        oControl = sFilterKey && typeof oSmartFilterBar.getControlByKey === TYPE_FUNCTION ? oSmartFilterBar.getControlByKey(sFilterKey) : null;
+        if (oControl && typeof oControl[METHODS.SET_SELECTED_KEY] === TYPE_FUNCTION) {
+            oControl[METHODS.SET_SELECTED_KEY](sFilterValue);
         }
-        if (oControl && typeof oControl.setValue === "function") {
-            oControl.setValue(sFilterValue);
+        if (oControl && typeof oControl[METHODS.SET_VALUE] === TYPE_FUNCTION) {
+            oControl[METHODS.SET_VALUE](sFilterValue);
         }
-        if (oControl && typeof oControl.setTokens === "function") {
-            oControl.setTokens([]);
+        if (oControl && typeof oControl[METHODS.SET_TOKENS] === TYPE_FUNCTION) {
+            oControl[METHODS.SET_TOKENS]([]);
         }
-        if (typeof oSmartFilterBar.getFilterData === "function" && typeof oSmartFilterBar.setFilterData === "function") {
+        if (typeof oSmartFilterBar.getFilterData === TYPE_FUNCTION && typeof oSmartFilterBar.setFilterData === TYPE_FUNCTION) {
             mFilterData = Object.assign({}, oSmartFilterBar.getFilterData() || {});
             mergeIntentFilterData(mFilterData, oIntent, sFilterKey, sFilterValue);
             oSmartFilterBar.setFilterData(mFilterData, true);
         }
         applySegmentState(oController, oIntent);
         clearAnalyticsDrilldownIntent(oController, mOptions.stateModel, mOptions.intentPath);
-        if (oCommandPolicy && typeof oCommandPolicy.buildFilter === "function") {
+        if (oCommandPolicy && typeof oCommandPolicy.buildFilter === TYPE_FUNCTION) {
             oCommandPolicy.buildFilter(oController, { source: mOptions.source });
         }
-        if (ControllerViewStateRuntime.get(oController, mOptions.smartTableReadyPath) && oCommandPolicy && typeof oCommandPolicy.rebind === "function") {
+        if (ControllerViewStateRuntime.get(oController, mOptions.smartTableReadyPath) && oCommandPolicy && typeof oCommandPolicy.rebind === TYPE_FUNCTION) {
             oCommandPolicy.rebind(oController, { source: mOptions.source });
         }
         return true;
