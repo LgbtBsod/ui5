@@ -1,15 +1,16 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator"
-], function (FeedbackCoordinator) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (FeedbackCoordinator, FeedbackConstants) {
     "use strict";
 
     return {
         showI18nToast: function (sI18nKey, aArgs) {
-            return FeedbackCoordinator.showToast(this, sI18nKey, aArgs || [], "info");
+            return FeedbackCoordinator.showToast(this, sI18nKey, aArgs || [], FeedbackConstants.SEVERITY.INFO);
         },
 
         showI18nError: function (sI18nKey, aArgs) {
-            return FeedbackCoordinator.showRouteMessage(this, "error", sI18nKey, aArgs || [], sI18nKey);
+            return FeedbackCoordinator.showRouteMessage(this, FeedbackConstants.SEVERITY.ERROR, sI18nKey, aArgs || [], sI18nKey);
         },
 
         applyUseCaseEffects: function (oResult) {

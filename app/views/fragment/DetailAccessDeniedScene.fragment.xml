@@ -16,7 +16,7 @@
             <Text text="{path:'view>/accessState/messageKey', formatter:'.formatI18nByKey'}" class="detailAccessDeniedText"/>
             <ObjectStatus
                 text="{view>/accessState/reasonCode}"
-                state="Error"
+                state="{parts:[{value:true},{value:true}], formatter:'.formatValidationState'}"
                 visible="{= !!${view>/accessState/reasonCode} }"
                 class="detailAccessDeniedReason"/>
             <Button

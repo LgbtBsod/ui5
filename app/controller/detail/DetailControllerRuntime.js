@@ -62,6 +62,7 @@ sap.ui.define([
         {
             formatValidationState: DetailFormatters.formatValidationState,
             formatValidationText: DetailFormatters.formatValidationText,
+            formatWarningMessageType: DetailFormatters.formatWarningMessageType,
             formatValidationSummaryText: DetailFormatters.formatValidationSummaryText,
             formatValidationSummaryLinkText: DetailFormatters.formatValidationSummaryLinkText,
             formatBooleanResultText: DetailFormatters.formatBooleanResultText,

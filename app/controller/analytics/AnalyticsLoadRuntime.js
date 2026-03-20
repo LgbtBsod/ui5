@@ -8,7 +8,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
 ], function (
     ControllerViewStateRuntime,
     ModelStateRuntime,
@@ -19,7 +20,8 @@ sap.ui.define([
     ReadinessTelemetryRuntime,
     ModelContracts,
     AnalyticsViewStateReader,
-    YearValue
+    YearValue,
+    AnalyticsStateConstants
 ) {
     "use strict";
 
@@ -62,7 +64,7 @@ sap.ui.define([
             return true;
         }
         ControllerViewStateRuntime.set(oController, PATHS.ERROR, MESSAGES.INVALID_YEAR);
-        setReadinessState(oController, "error", false, "", MESSAGES.INVALID_YEAR);
+        setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.ERROR, false, "", MESSAGES.INVALID_YEAR);
         return false;
     }
 
@@ -109,7 +111,7 @@ sap.ui.define([
         var sReadyAt = new Date().toISOString();
         syncAnalyticsSelectionState(oController, mHooks, oAnalytics);
         finalizeAnalyticsLoad(oController, mHooks);
-        setReadinessState(oController, "ready", true, sReadyAt, "");
+        setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.READY, true, sReadyAt, "");
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
             reason: oLoadInput.resolvedReason,
             source: oLoadInput.selectionState.selectedSource
@@ -120,7 +122,7 @@ sap.ui.define([
     function handleLoadFailure(oController, oError) {
         var sErrorMessage = String((oError && oError.message) || MESSAGES.ANALYTICS_LOAD_FAILED);
         ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
-        setReadinessState(oController, "error", false, "", sErrorMessage);
+        setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.ERROR, false, "", sErrorMessage);
         throw oError;
     }
 
@@ -145,7 +147,7 @@ sap.ui.define([
                 return Promise.resolve(false);
             }
 
-            setReadinessState(oController, "loading", false, "", "");
+            setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.LOADING, false, "", "");
             setControllerBusy(oController, true, "");
 
             return executeAnalyticsLoad(oController, oLoadInput, mHooks).then(function (oResult) {

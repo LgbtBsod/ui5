@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (UiSemanticConstants) {
     "use strict";
 
     return Object.freeze({
@@ -39,8 +41,8 @@ sap.ui.define([], function () {
             SELECTED: "selectedYear"
         }),
         VALIDATION_STATES: Object.freeze({
-            ERROR: "Error",
-            NONE: "None"
+            ERROR: UiSemanticConstants.VALUE_STATE.ERROR,
+            NONE: UiSemanticConstants.VALUE_STATE.NONE
         }),
         TEXT_KEYS: Object.freeze({
             COMPARE_YEAR_INVALID: "analyticsCompareYearInvalid"

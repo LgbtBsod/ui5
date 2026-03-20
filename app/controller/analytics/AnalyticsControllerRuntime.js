@@ -15,7 +15,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsSelectionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLifecycleBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior"
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
 ], function (
     Core,
     Fragment,
@@ -33,7 +35,9 @@ sap.ui.define([
     NavigationIntentService,
     AnalyticsSelectionBehavior,
     AnalyticsLifecycleBehavior,
-    AnalyticsLoadBehavior
+    AnalyticsLoadBehavior,
+    UiSemanticConstants,
+    AnalyticsStateConstants
 ) {
     "use strict";
 
@@ -500,16 +504,16 @@ sap.ui.define([
         formatRefreshStatusState: function (oRefreshState) {
             var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
             var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
-            if (sNormalizedStatus === "ERROR") {
-                return "Error";
+            if (sNormalizedStatus === AnalyticsStateConstants.REFRESH_STATUS.ERROR) {
+                return UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
             }
             if (bIsRunning) {
-                return "Warning";
+                return UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
             }
-            if (sNormalizedStatus === "SUCCESS" || sNormalizedStatus === "READY") {
-                return "Success";
+            if (sNormalizedStatus === AnalyticsStateConstants.REFRESH_STATUS.SUCCESS || sNormalizedStatus === AnalyticsStateConstants.REFRESH_STATUS.READY) {
+                return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
             }
-            return "Information";
+            return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
         },
 
         formatRefreshStatusText: function (oRefreshState) {
@@ -527,7 +531,40 @@ sap.ui.define([
         formatRefreshEnabled: function (bRefreshBusy, oRefreshState) {
             var sStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
             var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
-            return !bRefreshBusy && !bIsRunning && sStatus !== "REQUESTED";
+            return !bRefreshBusy && !bIsRunning && sStatus !== AnalyticsStateConstants.REFRESH_STATUS.REQUESTED;
+        },
+
+        formatAnalyticsInfoMessageType: function () {
+            return UiSemanticConstants.MESSAGE_TYPE.INFORMATION;
+        },
+
+        formatAnalyticsWarningMessageType: function () {
+            return UiSemanticConstants.MESSAGE_TYPE.WARNING;
+        },
+
+        formatAnalyticsCompareYearState: function () {
+            return UiSemanticConstants.OBJECT_STATUS_STATE.NONE;
+        },
+
+        formatAnalyticsSelectedYearState: function () {
+            return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
+        },
+
+        formatAnalyticsSourceState: function () {
+            return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
+        },
+
+        formatRefreshMessageType: function (oRefreshState) {
+            return coerceText(oRefreshState && oRefreshState.lastError)
+                ? AnalyticsStateConstants.REFRESH_MESSAGE_TYPE.ERROR
+                : AnalyticsStateConstants.REFRESH_MESSAGE_TYPE.ACTIVE;
+        },
+
+        formatRefreshMessageVisible: function (oRefreshState) {
+            var sStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
+            return sStatus === AnalyticsStateConstants.REFRESH_STATUS.REQUESTED ||
+                !!(oRefreshState && oRefreshState.isRunning) ||
+                !!coerceText(oRefreshState && oRefreshState.lastError);
         }
     };
 });

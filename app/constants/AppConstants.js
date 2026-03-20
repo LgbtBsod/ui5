@@ -12,7 +12,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ShellPaneConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
 ], function (
     DialogConstants,
     AnalyticsConstants,
@@ -27,7 +31,11 @@ sap.ui.define([
     ShellPaneConstants,
     WorkflowConstants,
     DetailPersistenceConstants,
-    WorkflowRuntimeConstants
+    WorkflowRuntimeConstants,
+    FacadeCommandConstants,
+    FeedbackConstants,
+    UiSemanticConstants,
+    AnalyticsStateConstants
 ) {
     "use strict";
 
@@ -45,6 +53,10 @@ sap.ui.define([
         SHELL_PANE: ShellPaneConstants,
         WORKFLOW: WorkflowConstants,
         DETAIL_PERSISTENCE: DetailPersistenceConstants,
-        WORKFLOW_RUNTIME: WorkflowRuntimeConstants
+        WORKFLOW_RUNTIME: WorkflowRuntimeConstants,
+        FACADE_COMMAND: FacadeCommandConstants,
+        FEEDBACK: FeedbackConstants,
+        UI_SEMANTIC: UiSemanticConstants,
+        ANALYTICS_STATE: AnalyticsStateConstants
     });
 });

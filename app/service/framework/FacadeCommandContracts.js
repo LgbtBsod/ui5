@@ -1,36 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput"
-], function (RuntimeInput) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants"
+], function (RuntimeInput, FacadeCommandConstants) {
     "use strict";
 
-    var DETAIL_METHODS = {
-        OPEN: "open",
-        ENTER_EDIT: "enterEdit",
-        SAVE: "save",
-        VALIDATE: "validate",
-        AUTOSAVE: "autosave",
-        CLOSE: "close",
-        DELETE_CHECKLIST: "deleteChecklist",
-        RESOLVE_CONFLICT: "resolveConflict",
-        ATTACHMENT_UPLOAD: "attachmentUpload",
-        ATTACHMENT_DELETE: "attachmentDelete",
-        ROW_OPS: "rowOps",
-        VALUE_HELP_LOCATION: "valueHelpLocation",
-        PERSON_SUGGEST: "personSuggest",
-        DISCARD_CHANGES: "discardChanges"
-    };
-
-    var SEARCH_METHODS = {
-        BOOTSTRAP: "bootstrap",
-        BUILD_FILTER: "buildFilter",
-        EXECUTE_SEARCH: "executeSearch",
-        REBIND: "rebind",
-        SELECT_ROW: "selectRow",
-        SELECTION_CHANGED: "selectionChanged",
-        EXPORT_FLOW: "exportFlow",
-        ANALYTICS: "analytics",
-        APPLY_REBIND_POLICY: "applyRebindPolicy"
-    };
+    var DETAIL_METHODS = FacadeCommandConstants.DETAIL;
+    var SEARCH_METHODS = FacadeCommandConstants.SEARCH;
 
     function normalizeKnownMethod(vMethod, mKnown) {
         var sMethod = RuntimeInput.asString(vMethod).trim();

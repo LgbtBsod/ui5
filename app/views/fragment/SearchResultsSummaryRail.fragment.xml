@@ -15,7 +15,7 @@
         <ToolbarSpacer/>
         <ObjectStatus
             text="{parts: [{path: 'view>/selectionCount'}, {path: 'view>/selectedRowDisplayId'}], formatter: '.formatSearchSelectionSummary'}"
-            state="Information"
+            state="{path: 'view>/selectionCount', formatter: '.formatSelectionSummaryState'}"
             class="searchResultsSummarySelection"/>
         <Button
             visible="{view>/resultsToolbarNavVisible}"

@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts"
-], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts, UiSemanticConstants) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -26,7 +27,7 @@ sap.ui.define([
             smartFilterPersistencyKey: PERSISTENCY_PREFIXES.SMART_FILTER_SESSION + String(sScope || "volatile"),
             smartTablePersistencyKey: PERSISTENCY_PREFIXES.SMART_TABLE_SESSION + String(sScope || "volatile"),
             filterHintVisible: false,
-            filterHintType: "Information",
+            filterHintType: UiSemanticConstants.MESSAGE_TYPE.INFORMATION,
             filterHintText: "",
             workflowStage: "DISCOVER",
             lastUpdatedAt: "-",
@@ -168,12 +169,12 @@ sap.ui.define([
     function formatWorkflowStageState(sStage) {
         var sNorm = String(sStage || "").toUpperCase();
         if (sNorm === "ANALYZE") {
-            return "Success";
+            return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
         }
         if (sNorm === "REVIEW") {
-            return "Warning";
+            return UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
         }
-        return "Information";
+        return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
     }
 
     return {

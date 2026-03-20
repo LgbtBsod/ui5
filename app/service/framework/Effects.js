@@ -1,13 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput"
-], function (RuntimeInput) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (RuntimeInput, FeedbackConstants) {
     "use strict";
 
     function toast(sTextKey, sLevel) {
         return {
             type: "toast",
             textKey: sTextKey,
-            level: sLevel || "info"
+            level: sLevel || FeedbackConstants.SEVERITY.INFO
         };
     }
 
@@ -76,19 +77,19 @@ sap.ui.define([
     function notify(sTextKey, sVariant) {
         return {
             type: "dialog",
-            variant: sVariant || "information",
+            variant: sVariant || FeedbackConstants.VARIANT.INFORMATION,
             textKey: sTextKey
         };
     }
 
     function warn(sTextKey) {
-        return notify(sTextKey, "warning");
+        return notify(sTextKey, FeedbackConstants.VARIANT.WARNING);
     }
 
     function log(sLevel, sMessage, oMeta) {
         return {
             type: "log",
-            level: sLevel || "info",
+            level: sLevel || FeedbackConstants.SEVERITY.INFO,
             message: sMessage,
             meta: oMeta
         };

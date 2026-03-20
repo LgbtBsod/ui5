@@ -1,9 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime"
-], function (ControllerCommandRuntime, RuntimePayloadNormalizer, ControllerCommandContextRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants"
+], function (ControllerCommandRuntime, RuntimePayloadNormalizer, ControllerCommandContextRuntime, FacadeCommandConstants) {
     "use strict";
+
+    var COMMAND = FacadeCommandConstants.SEARCH;
 
     function normalizePayload(mInput) {
         return RuntimePayloadNormalizer.normalize(mInput);
@@ -21,31 +24,31 @@ sap.ui.define([
 
     return Object.freeze({
         buildFilter: function (oController, mInput) {
-            return execute(oController, "buildFilter", mInput);
+            return execute(oController, COMMAND.BUILD_FILTER, mInput);
         },
         executeSearch: function (oController, mInput) {
-            return execute(oController, "executeSearch", mInput);
+            return execute(oController, COMMAND.EXECUTE_SEARCH, mInput);
         },
         rebind: function (oController, mInput) {
-            return execute(oController, "rebind", mInput);
+            return execute(oController, COMMAND.REBIND, mInput);
         },
         selectRow: function (oController, mInput) {
-            return execute(oController, "selectRow", mInput);
+            return execute(oController, COMMAND.SELECT_ROW, mInput);
         },
         selectionChanged: function (oController, mInput) {
-            return execute(oController, "selectionChanged", mInput);
+            return execute(oController, COMMAND.SELECTION_CHANGED, mInput);
         },
         bootstrap: function (oController, mInput) {
-            return execute(oController, "bootstrap", mInput);
+            return execute(oController, COMMAND.BOOTSTRAP, mInput);
         },
         analytics: function (oController, mInput) {
-            return execute(oController, "analytics", mInput);
+            return execute(oController, COMMAND.ANALYTICS, mInput);
         },
         applyRebindPolicy: function (oController, mInput) {
-            return execute(oController, "applyRebindPolicy", mInput);
+            return execute(oController, COMMAND.APPLY_REBIND_POLICY, mInput);
         },
         exportFlow: function (oController, mInput) {
-            return execute(oController, "exportFlow", mInput);
+            return execute(oController, COMMAND.EXPORT_FLOW, mInput);
         }
     });
 });

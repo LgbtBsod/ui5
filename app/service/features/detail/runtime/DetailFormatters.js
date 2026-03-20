@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailPersistenceConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailPersistenceConstants, UiSemanticConstants) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
@@ -13,12 +14,12 @@ sap.ui.define([
     LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.CLOSED] = { key: "statusClosed", fallback: "Closed" };
     LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT] = { key: "statusDraft", fallback: "Draft" };
     var LIFECYCLE_STATES = {};
-    LIFECYCLE_STATES[CHECKLIST_STATUSES.REGISTERED] = "Warning";
-    LIFECYCLE_STATES[CHECKLIST_STATUSES.CLOSED] = "Success";
-    LIFECYCLE_STATES[CHECKLIST_STATUSES.DRAFT] = "Information";
+    LIFECYCLE_STATES[CHECKLIST_STATUSES.REGISTERED] = UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
+    LIFECYCLE_STATES[CHECKLIST_STATUSES.CLOSED] = UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
+    LIFECYCLE_STATES[CHECKLIST_STATUSES.DRAFT] = UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
     var LOCK_STATE_SEMANTICS = {
-        SUCCESS: "Success",
-        ERROR: "Error"
+        SUCCESS: UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS,
+        ERROR: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR
     };
     var LOCK_ACTIVE_STATES = {
         EDIT_LOCKED: true
@@ -35,16 +36,16 @@ sap.ui.define([
         autosaveDisabled: "Autosave disabled (read-only mode)"
     };
     var PERSISTENCE_SEMANTICS = {
-        saving: "Warning",
-        autosaving: "Warning",
-        saved: "Success",
-        dirty: "Warning",
-        error: "Error",
-        lockLost: "Error",
-        readOnly: "Warning",
-        idleTimeoutGrace: "Warning",
-        conflict: "Error",
-        idle: "Information"
+        saving: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
+        autosaving: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
+        saved: UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS,
+        dirty: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
+        error: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
+        lockLost: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
+        readOnly: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
+        idleTimeoutGrace: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
+        conflict: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
+        idle: UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION
     };
 
     function text(oController, sKey, vArgs, vFallback) {
@@ -143,11 +144,15 @@ sap.ui.define([
 
     return {
         formatValidationState: function (bShown, bMissing) {
-            return (bShown && bMissing) ? "Error" : "None";
+            return (bShown && bMissing) ? UiSemanticConstants.VALUE_STATE.ERROR : UiSemanticConstants.VALUE_STATE.NONE;
         },
 
         formatValidationText: function (bShown, bMissing) {
             return (bShown && bMissing) ? text(this, "requiredFieldHint") : "";
+        },
+
+        formatWarningMessageType: function () {
+            return UiSemanticConstants.MESSAGE_TYPE.WARNING;
         },
 
         formatValidationSummaryText: function (oSummary) {
@@ -193,20 +198,20 @@ sap.ui.define([
             if (typeof vValue === "string") {
                 var sValue = String(vValue).trim().toUpperCase();
                 if (sValue === "OK" || sValue === "TRUE" || sValue === "X") {
-                    return "Success";
+                    return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
                 }
                 if (sValue === "FAILED" || sValue === "ERROR" || sValue === "FALSE") {
-                    return "Error";
+                    return UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
                 }
-                return "None";
+                return UiSemanticConstants.OBJECT_STATUS_STATE.NONE;
             }
             if (vValue === true) {
-                return "Success";
+                return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
             }
             if (vValue === false) {
-                return "Error";
+                return UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
             }
-            return "None";
+            return UiSemanticConstants.OBJECT_STATUS_STATE.NONE;
         },
 
         formatLifecycleStatusText: function (sStatus) {
@@ -225,7 +230,7 @@ sap.ui.define([
         },
 
         formatDraftStateState: function (bDirty) {
-            return bDirty ? "Warning" : "Success";
+            return bDirty ? UiSemanticConstants.OBJECT_STATUS_STATE.WARNING : UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
         },
 
         formatLockStateText: function (sTextValue, sMode) {
@@ -243,15 +248,15 @@ sap.ui.define([
                 return LOCK_STATE_SEMANTICS[sNormalizedState];
             }
             if (LOCK_ACTIVE_STATES[sNormalizedState]) {
-                return "Success";
+                return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
             }
             if (sNormalizedState === "LOCK_LOST" || sNormalizedState === "FORCED_READ_ONLY") {
-                return "Error";
+                return UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
             }
             if (LOCK_TRANSITION_STATES[sNormalizedState]) {
-                return "Warning";
+                return UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
             }
-            return WorkflowContracts.isEditableMode(sMode) ? "Warning" : "Information";
+            return WorkflowContracts.isEditableMode(sMode) ? UiSemanticConstants.OBJECT_STATUS_STATE.WARNING : UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
         },
 
         formatI18nByKey: function (sKey) {

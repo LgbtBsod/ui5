@@ -1,19 +1,19 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <MessageStrip
         text="{i18n>workflowAnalyticsBackendNote}"
-        type="Information"
+        type="{path: 'view>/busy', formatter: '.formatAnalyticsInfoMessageType'}"
         showIcon="true"
         class="chkFeedbackStrip workflowMessageSurface"/>
     <MessageStrip
         text="{view>/error}"
-        type="Warning"
+        type="{path: 'view>/error', formatter: '.formatAnalyticsWarningMessageType'}"
         showIcon="true"
         visible="{= !!${view>/error} }"
         class="chkFeedbackStrip chkFeedbackWarning workflowMessageSurface"/>
     <MessageStrip
         text="{= ${view>/refreshState/status} === 'REQUESTED' ? ${i18n>analyticsRefreshQueued} : (${view>/refreshState/isRunning} ? (${i18n>analyticsRefreshRunning} + ': ' + (${view>/refreshState/lastMessage} || '')) : (${view>/refreshState/lastError} ? ${view>/refreshState/lastError} : '')) }"
-        type="Information"
+        type="{path: 'view>/refreshState', formatter: '.formatRefreshMessageType'}"
         showIcon="true"
-        visible="{= ${view>/refreshState/status} === 'REQUESTED' || !!${view>/refreshState/isRunning} || !!${view>/refreshState/lastError} }"
+        visible="{path: 'view>/refreshState', formatter: '.formatRefreshMessageVisible'}"
         class="chkFeedbackStrip workflowMessageSurface"/>
 </core:FragmentDefinition>

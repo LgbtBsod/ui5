@@ -2,8 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (UseCase, Result, Effects, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants"
+], function (UseCase, Result, Effects, StatePaths, AnalyticsStateConstants, FacadeCommandConstants) {
     "use strict";
 
     function InitializeSearchUseCase() {
@@ -15,7 +17,7 @@ sap.ui.define([
 
     InitializeSearchUseCase.prototype.execute = function (mInput, mCtx) {
         var sReadyAt = new Date().toISOString();
-        return Promise.resolve(Result.ok({ reason: (mInput && mInput.reason) || "bootstrap" }, [
+        return Promise.resolve(Result.ok({ reason: (mInput && mInput.reason) || FacadeCommandConstants.SEARCH.BOOTSTRAP }, [
             Effects.modelPatch("state", StatePaths.WORKFLOW_SEARCH_MODE, "EXACT"),
             Effects.modelPatch("state", StatePaths.WORKFLOW_SEARCH_SEGMENTS, {
                 checksFailSegment: "ALL",
@@ -23,7 +25,7 @@ sap.ui.define([
             }),
             Effects.modelPatch("state", StatePaths.UI_BUSY_SEARCH_TABLE, false),
             Effects.modelPatch("state", StatePaths.READINESS_SEARCH, {
-                status: "ready",
+                status: AnalyticsStateConstants.LOAD_STATUS.READY,
                 ready: true,
                 readyAt: sReadyAt,
                 error: ""
@@ -33,7 +35,7 @@ sap.ui.define([
             return Result.fail(oError, [
                 Effects.modelPatch("state", StatePaths.UI_BUSY_SEARCH_TABLE, false),
                 Effects.modelPatch("state", StatePaths.READINESS_SEARCH, {
-                    status: "error",
+                    status: AnalyticsStateConstants.LOAD_STATUS.ERROR,
                     ready: false,
                     readyAt: "",
                     error: String((oError && oError.message) || "search_bootstrap_failed")

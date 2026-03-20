@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorRuntime"
-], function (FeedbackBehaviorRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (FeedbackBehaviorRuntime, FeedbackConstants) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
@@ -53,7 +54,7 @@ sap.ui.define([
             controller: oController,
             textKey: sTextKey,
             args: aArgs || [],
-            level: sLevel || "info"
+            level: sLevel || FeedbackConstants.SEVERITY.INFO
         });
     }
 

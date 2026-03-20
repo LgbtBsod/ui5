@@ -6,18 +6,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
-], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
+], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue, AnalyticsStateConstants) {
     "use strict";
 
     var TELEMETRY_EVENTS = Object.freeze({
         ERROR: "analytics.dashboard.error",
         LOADED: "analytics.dashboard.loaded",
         STALE: "analytics.dashboard.stale"
-    });
-    var READINESS_STATUSES = Object.freeze({
-        ERROR: "error",
-        READY: "ready"
     });
     var MODEL_NAMES = Object.freeze({
         STATE: "state",
@@ -49,7 +46,7 @@ sap.ui.define([
         return [
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.UI_BUSY_ANALYTICS, false),
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.READINESS_ANALYTICS, {
-                status: READINESS_STATUSES.READY,
+                status: AnalyticsStateConstants.LOAD_STATUS.READY,
                 ready: true,
                 readyAt: sReadyAt,
                 error: ""
@@ -64,7 +61,7 @@ sap.ui.define([
         return [
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.UI_BUSY_ANALYTICS, false),
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.READINESS_ANALYTICS, {
-                status: READINESS_STATUSES.ERROR,
+                status: AnalyticsStateConstants.LOAD_STATUS.ERROR,
                 ready: false,
                 readyAt: "",
                 error: sErrorMessage

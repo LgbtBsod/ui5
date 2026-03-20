@@ -4,15 +4,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (EffectApplier, EffectBannerRouter, FeedbackBehaviorHelpers, FeedbackBannerRuntime, ControllerModelRuntime, BehaviorRegistry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (EffectApplier, EffectBannerRouter, FeedbackBehaviorHelpers, FeedbackBannerRuntime, ControllerModelRuntime, BehaviorRegistry, FeedbackConstants) {
     "use strict";
 
     var FEEDBACK_SCOPE = "feedback";
     var EFFECT_TYPE_TOAST = "toast";
-    var BANNER_SCOPE_ROUTE = "route";
+    var BANNER_SCOPE_ROUTE = FeedbackConstants.SCOPE.ROUTE;
     var BANNER_VISIBLE = true;
-    var TOAST_LEVEL_INFO = "info";
+    var TOAST_LEVEL_INFO = FeedbackConstants.SEVERITY.INFO;
     var bDefaultsRegistered = false;
 
     function resolveText(mContext) {

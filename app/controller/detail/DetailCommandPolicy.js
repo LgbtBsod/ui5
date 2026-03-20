@@ -1,9 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime"
-], function (ControllerCommandRuntime, RuntimePayloadNormalizer, ControllerCommandContextRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants"
+], function (ControllerCommandRuntime, RuntimePayloadNormalizer, ControllerCommandContextRuntime, FacadeCommandConstants) {
     "use strict";
+
+    var COMMAND = FacadeCommandConstants.DETAIL;
 
     function normalizePayload(mInput) {
         return RuntimePayloadNormalizer.normalize(mInput);
@@ -21,49 +24,49 @@ sap.ui.define([
 
     return Object.freeze({
         enterEdit: function (oController, mInput) {
-            return execute(oController, "enterEdit", mInput);
+            return execute(oController, COMMAND.ENTER_EDIT, mInput);
         },
         open: function (oController, mInput) {
-            return execute(oController, "open", mInput);
+            return execute(oController, COMMAND.OPEN, mInput);
         },
         save: function (oController, mInput) {
-            return execute(oController, "save", mInput);
+            return execute(oController, COMMAND.SAVE, mInput);
         },
         close: function (oController, mInput) {
-            return execute(oController, "close", mInput);
+            return execute(oController, COMMAND.CLOSE, mInput);
         },
         deleteChecklist: function (oController, mInput) {
-            return execute(oController, "deleteChecklist", mInput);
+            return execute(oController, COMMAND.DELETE_CHECKLIST, mInput);
         },
         discardChanges: function (oController, mInput) {
-            return execute(oController, "discardChanges", mInput);
+            return execute(oController, COMMAND.DISCARD_CHANGES, mInput);
         },
         validate: function (oController, mInput) {
-            return execute(oController, "validate", mInput);
+            return execute(oController, COMMAND.VALIDATE, mInput);
         },
         rowOps: function (oController, mInput) {
-            return execute(oController, "rowOps", mInput);
+            return execute(oController, COMMAND.ROW_OPS, mInput);
         },
         resolveConflict: function (oController, mInput) {
-            return execute(oController, "resolveConflict", mInput);
+            return execute(oController, COMMAND.RESOLVE_CONFLICT, mInput);
         },
         attachmentLoad: function (oController, mInput) {
-            return execute(oController, "attachmentLoad", mInput);
+            return execute(oController, COMMAND.ATTACHMENT_LOAD, mInput);
         },
         attachmentDelete: function (oController, mInput) {
-            return execute(oController, "attachmentDelete", mInput);
+            return execute(oController, COMMAND.ATTACHMENT_DELETE, mInput);
         },
         attachmentUpload: function (oController, mInput) {
-            return execute(oController, "attachmentUpload", mInput);
+            return execute(oController, COMMAND.ATTACHMENT_UPLOAD, mInput);
         },
         valueHelpLocation: function (oController, mInput) {
-            return execute(oController, "valueHelpLocation", mInput);
+            return execute(oController, COMMAND.VALUE_HELP_LOCATION, mInput);
         },
         autosave: function (oController, mInput) {
-            return execute(oController, "autosave", mInput);
+            return execute(oController, COMMAND.AUTOSAVE, mInput);
         },
         personSuggest: function (oController, mInput) {
-            return execute(oController, "personSuggest", mInput);
+            return execute(oController, COMMAND.PERSON_SUGGEST, mInput);
         }
     });
 });

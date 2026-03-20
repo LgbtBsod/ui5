@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (FeedbackConstants) {
     "use strict";
 
     return Object.freeze({
@@ -23,11 +25,11 @@ sap.ui.define([], function () {
             CONFLICT: "conflict"
         }),
         LEVELS: Object.freeze({
-            INFO: "info"
+            INFO: FeedbackConstants.SEVERITY.INFO
         }),
         VARIANTS: Object.freeze({
-            INFORMATION: "information",
-            WARNING: "warning"
+            INFORMATION: FeedbackConstants.VARIANT.INFORMATION,
+            WARNING: FeedbackConstants.VARIANT.WARNING
         })
     });
 });

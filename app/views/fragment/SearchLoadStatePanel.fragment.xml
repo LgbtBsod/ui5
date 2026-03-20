@@ -26,7 +26,7 @@
 
         <MessageStrip
             text="{= ${state>/loadErrorMessage} || ${i18n>loadErrorMessage} }"
-            type="Error"
+            type="{path: 'state>/loadErrorMessage', formatter: '.formatLoadErrorType'}"
             visible="{state>/loadError}"
             showIcon="true"
             class="searchLoadStateBanner searchLoadErrorBanner chkFeedbackStrip workflowMessageSurface"/>

@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts"
-], function (SearchViewStateRuntime, SearchRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (SearchViewStateRuntime, SearchRuntimeContracts, UiSemanticConstants) {
     "use strict";
 
     var SEARCH_MODE = SearchRuntimeContracts.SEARCH_MODE;
@@ -49,10 +50,20 @@ sap.ui.define([
         return iSafeCount + " " + ((oBundle && oBundle.getText("searchSelectionUnits")) || "selected");
     }
 
+    function formatSelectionSummaryState() {
+        return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
+    }
+
+    function formatLoadErrorType() {
+        return UiSemanticConstants.MESSAGE_TYPE.ERROR;
+    }
+
     return {
         formatSearchModeChipText: formatSearchModeChipText,
         formatSearchResultsCompactText: formatSearchResultsCompactText,
         formatSearchSelectionSummary: formatSearchSelectionSummary,
+        formatSelectionSummaryState: formatSelectionSummaryState,
+        formatLoadErrorType: formatLoadErrorType,
         formatWorkflowStageText: formatWorkflowStageText,
         formatWorkflowStageState: formatWorkflowStageState
     };

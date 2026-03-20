@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput"
-], function (RuntimeInput) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (RuntimeInput, FeedbackConstants) {
     "use strict";
 
     function sanitizeErrorDetail(sDetail) {
@@ -10,23 +11,19 @@ sap.ui.define([
     }
 
     function normalizeSeverity(sSeverity) {
-        var sValue = RuntimeInput.asString(sSeverity, "info").toLowerCase();
-        return ["info", "success", "warning", "error"].indexOf(sValue) >= 0 ? sValue : "info";
+        var sValue = RuntimeInput.asString(sSeverity, FeedbackConstants.SEVERITY.INFO).toLowerCase();
+        return Object.keys(FeedbackConstants.SEVERITY).some(function (sKey) {
+            return FeedbackConstants.SEVERITY[sKey] === sValue;
+        }) ? sValue : FeedbackConstants.SEVERITY.INFO;
     }
 
     function normalizeScope(sScope) {
-        var sValue = RuntimeInput.asString(sScope, "global").toLowerCase();
-        return sValue === "route" ? "route" : "global";
+        var sValue = RuntimeInput.asString(sScope, FeedbackConstants.SCOPE.GLOBAL).toLowerCase();
+        return sValue === FeedbackConstants.SCOPE.ROUTE ? FeedbackConstants.SCOPE.ROUTE : FeedbackConstants.SCOPE.GLOBAL;
     }
 
     function toUi5MessageType(sSeverity) {
-        var mMap = {
-            success: "Success",
-            warning: "Warning",
-            error: "Error",
-            info: "Information"
-        };
-        return mMap[normalizeSeverity(sSeverity)] || "Information";
+        return FeedbackConstants.MESSAGE_TYPE_BY_SEVERITY[normalizeSeverity(sSeverity)] || FeedbackConstants.MESSAGE_TYPE_BY_SEVERITY[FeedbackConstants.SEVERITY.INFO];
     }
 
     function create(mInput, mOptions) {
@@ -54,7 +51,7 @@ sap.ui.define([
     }
 
     function empty() {
-        return create({ visible: false, severity: "info" });
+        return create({ visible: false, severity: FeedbackConstants.SEVERITY.INFO });
     }
 
     return {

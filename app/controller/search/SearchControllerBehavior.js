@@ -140,6 +140,12 @@ sap.ui.define([
         formatSearchSelectionSummary: function (iSelectionCount, sSelectedRowDisplayId) {
             return SearchFormatterBehavior.formatSearchSelectionSummary(this, iSelectionCount, sSelectedRowDisplayId);
         },
+        formatSelectionSummaryState: function () {
+            return SearchFormatterBehavior.formatSelectionSummaryState();
+        },
+        formatLoadErrorType: function () {
+            return SearchFormatterBehavior.formatLoadErrorType();
+        },
 
         onOpenSearchSortDialog: function () {
             SearchToolbarDialogRuntime.openSortDialog(this);
