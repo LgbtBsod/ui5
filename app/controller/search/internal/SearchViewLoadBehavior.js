@@ -2,9 +2,17 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadingFeedbackRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime"
-], function (SearchLoadRuntime, SearchLoadingFeedbackRuntime, SearchSelectionRuntime, SearchViewportRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime"
+], function (SearchLoadRuntime, SearchLoadingFeedbackRuntime, SearchSelectionRuntime, SearchViewportRuntime, SearchReturnRediscoveryRuntime) {
     "use strict";
+
+    function afterSearchLoadSuccess(oController, oInnerTable) {
+        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
+        SearchReturnRediscoveryRuntime.applyAfterSearchSuccess(oController, oInnerTable);
+        SearchViewportRuntime.bindSearchViewportRuntime(oController);
+        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+    }
 
     function createSmartTableLoadHooks(oController, fnReadRows) {
         return {
@@ -15,9 +23,7 @@ sap.ui.define([
                 SearchLoadRuntime.applyLoadSuccess(oController, aRows);
             },
             afterSuccess: function (oInnerTable) {
-                SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
-                SearchViewportRuntime.bindSearchViewportRuntime(oController);
-                SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+                afterSearchLoadSuccess(oController, oInnerTable);
             },
             beginSearchLoadingFeedback: function () {
                 SearchLoadingFeedbackRuntime.beginSearchLoadingFeedback(oController);
@@ -34,9 +40,7 @@ sap.ui.define([
                         return fnReadRows(oInnerTable);
                     },
                     afterSuccess: function () {
-                        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
-                        SearchViewportRuntime.bindSearchViewportRuntime(oController);
-                        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+                        afterSearchLoadSuccess(oController, oInnerTable);
                     }
                 });
             },
@@ -52,9 +56,7 @@ sap.ui.define([
                         return fnReadRows(oInnerTable);
                     },
                     afterSuccess: function () {
-                        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, oInnerTable);
-                        SearchViewportRuntime.bindSearchViewportRuntime(oController);
-                        SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
+                        afterSearchLoadSuccess(oController, oInnerTable);
                     }
                 });
             }

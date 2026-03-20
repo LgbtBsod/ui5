@@ -16,8 +16,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime"
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -31,8 +34,19 @@ function readSelectedChecklist(mCtx) {
         return (oUiState && typeof oUiState.get === "function" && oUiState.get("selected", "/")) || null;
     }
 
-    function readCurrentChecklist(mCtx) {
+function readCurrentChecklist(mCtx) {
         return readSelectedChecklist(mCtx) || DetailSaveRuntime.readCurrentChecklist(mCtx);
+    }
+
+    function buildSearchReturnContext(sMode, sRootId, oSavedSnapshot) {
+        return SearchReturnRediscoveryRuntime.buildContext({
+            rootId: sRootId,
+            checklistId: ChecklistIdentity.extractChecklistDisplayId(oSavedSnapshot),
+            reason: "detailSaveCompleted",
+            mode: sMode,
+            focusRequested: true,
+            selectionRequested: true
+        });
     }
 
     function buildBlockedCreateValidationResult(mCtx, oValidation) {
@@ -185,12 +199,12 @@ function readSelectedChecklist(mCtx) {
                     var oSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
                         DetailSaveRuntime.preserveBasicFields(oAttachmentSync.snapshot, oCurrent, oSnapshot)
                     );
-                    var oSelectedSnapshot = Object.assign({}, oAttachmentSync.selectedSnapshot);
+                    var oSelectedSnapshot = CloneUtil.clone(oAttachmentSync.selectedSnapshot, {});
                     var aEffects = [
                         Effects.toast("objectSaved", "success"),
                         Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
                         Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                        Effects.modelPatch("snapshot", "/", oSavedSnapshot)
+                        Effects.modelPatch("snapshot", "/", CloneUtil.clone(oSavedSnapshot, {}))
                     ];
                     aEffects = aEffects.concat(oAttachmentSync.effects);
                     aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
@@ -199,6 +213,15 @@ function readSelectedChecklist(mCtx) {
                         lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sNow : null
                     }));
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
+                        aEffects.push(Effects.modelPatch(
+                            "state",
+                            ModelPathContracts.SEARCH_RETURN_CONTEXT,
+                            buildSearchReturnContext(
+                                bCreate ? SearchReturnRediscoveryRuntime.MODES.CREATE : SearchReturnRediscoveryRuntime.MODES.SAVE,
+                                sServerRootId,
+                                oSavedSnapshot
+                            )
+                        ));
                         aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
                         if (bCreate) {
                             var bLockAcquired = !!(oLockResult && oLockResult.ok);

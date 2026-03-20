@@ -5,7 +5,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/ModelFactory",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ManagerFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/HeartbeatManager",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/GCDManager",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ActivityMonitor",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/AutoSaveCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ConnectivityCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/LockStatusMonitor",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/SettingsManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapDependencyBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
@@ -58,7 +64,13 @@ sap.ui.define([
     ModelFactory,
     StatePaths,
     ModelStateRuntime,
-    ManagerFacade,
+    HeartbeatManager,
+    GCDManager,
+    ActivityMonitor,
+    AutoSaveCoordinator,
+    ConnectivityCoordinator,
+    LockStatusMonitor,
+    SettingsManager,
     ComponentBootstrapDependencyBuilder,
     ComponentBootstrapContracts,
     DeltaPayloadBuilder,
@@ -115,7 +127,13 @@ sap.ui.define([
             ModelFactory: ModelFactory,
             StatePaths: StatePaths,
             ModelStateRuntime: ModelStateRuntime,
-            ManagerFacade: ManagerFacade,
+            HeartbeatManager: HeartbeatManager,
+            GCDManager: GCDManager,
+            ActivityMonitor: ActivityMonitor,
+            AutoSaveCoordinator: AutoSaveCoordinator,
+            ConnectivityCoordinator: ConnectivityCoordinator,
+            LockStatusMonitor: LockStatusMonitor,
+            SettingsManager: SettingsManager,
             DeltaPayloadBuilder: DeltaPayloadBuilder,
             CreateSentinel: CreateSentinel,
             GatewayClient: GatewayClient,
@@ -188,7 +206,7 @@ sap.ui.define([
             mainServiceModel: oModelBootstrap.mainServiceModel
         }));
 
-        return ComponentLifecycleBootstrap.bootstrap(oComponent, Object.assign({}, ComponentBootstrapDependencyBuilder.withManagerRuntime(mBootstrapDeps, ManagerFacade), {
+        return ComponentLifecycleBootstrap.bootstrap(oComponent, Object.assign({}, ComponentBootstrapDependencyBuilder.withManagerRuntime(mBootstrapDeps), {
             InitializeAppUseCase: InitializeAppUseCase,
             EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
             LoadCurrentUserUseCase: LoadCurrentUserUseCase

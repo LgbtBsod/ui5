@@ -21,6 +21,7 @@ sap.ui.define([], function () {
         READINESS_APP: "/readiness/app",
         READINESS_DETAIL: "/readiness/detail",
         READINESS_SEARCH: "/readiness/search",
+        SEARCH_RETURN_CONTEXT: "/searchReturnContext",
         SAVE_IN_FLIGHT: "/saveInFlight",
         SESSION_ID: "/sessionId",
         TAB_SESSION_ID: "/tabSessionId",

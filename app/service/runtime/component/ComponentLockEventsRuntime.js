@@ -6,6 +6,36 @@ sap.ui.define([
 ], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts) {
     "use strict";
 
+    function readCurrentLockScope(oStateModel, oStatePaths) {
+        return {
+            rootId: String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim(),
+            sessionGuid: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SESSION_ID, "") || "").trim(),
+            editMode: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") || "").trim(),
+            lockState: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") || "").trim()
+        };
+    }
+
+    function isActiveEditLockScope(oScope) {
+        return oScope.editMode === "EDIT" && oScope.lockState === "EDIT_LOCKED" && !!oScope.rootId;
+    }
+
+    function shouldIgnoreProbePayload(oPayload, oStateModel, oStatePaths) {
+        var oScope = readCurrentLockScope(oStateModel, oStatePaths);
+        var sPayloadRootId = String((oPayload && (oPayload.rootId || oPayload.RootId || oPayload.objectUuid || oPayload.ObjectUuid)) || "").trim();
+        var sPayloadSessionGuid = String((oPayload && (oPayload.sessionGuid || oPayload.SessionGuid)) || "").trim();
+
+        if (!isActiveEditLockScope(oScope)) {
+            return true;
+        }
+        if (sPayloadRootId && oScope.rootId && sPayloadRootId !== oScope.rootId) {
+            return true;
+        }
+        if (sPayloadSessionGuid && oScope.sessionGuid && sPayloadSessionGuid !== oScope.sessionGuid) {
+            return true;
+        }
+        return false;
+    }
+
     function attachLockRuntime(mOptions) {
         var oComponent = mOptions.component;
         var oMainServiceModel = mOptions.mainServiceModel;
@@ -65,6 +95,9 @@ sap.ui.define([
         }
 
         function onLockProbePayload(oPayload, bResetConflict) {
+            if (shouldIgnoreProbePayload(oPayload, oStateModel, oStatePaths)) {
+                return;
+            }
             var oLockState = ComponentRuntimeSupport.applyLockProbeState(oPayload, oStateModel);
             if (oLockState.killed || oLockState.lost) {
                 oComponent._handleKilledLock(oPayload);

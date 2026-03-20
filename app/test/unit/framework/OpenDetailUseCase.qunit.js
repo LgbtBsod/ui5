@@ -121,4 +121,59 @@
             done();
         });
     });
+
+    QUnit.test("opening same root preserves missing basic fields from current session snapshot", function (assert) {
+        var done = assert.async();
+        var oUseCase = OpenDetailUseCase();
+        var oSnapshot = {
+            root: { id: "ROOT-3", checklistId: "CHK-00003" },
+            basic: { equipment: "" }
+        };
+        var oCurrentSelected = {
+            root: { id: "ROOT-3", checklistId: "CHK-00003" },
+            basic: { equipment: "Session equipment" }
+        };
+
+        oUseCase.execute({
+            rootId: "ROOT-3"
+        }, {
+            repo: {
+                checkChecklistPermission: function () {
+                    return Promise.resolve({
+                        rootId: "ROOT-3",
+                        canView: true,
+                        canEdit: true,
+                        canDelete: true,
+                        reasonCode: "AUTHORIZED"
+                    });
+                },
+                loadDetailSnapshot: function () {
+                    return Promise.resolve(oSnapshot);
+                }
+            },
+            uiState: {
+                get: function (sModelName, sPath) {
+                    if (sModelName === "selected" && sPath === "/") {
+                        return oCurrentSelected;
+                    }
+                    if (sModelName === "snapshot" && sPath === "/") {
+                        return oCurrentSelected;
+                    }
+                    return null;
+                }
+            }
+        }).then(function (oResult) {
+            var aEffects = oResult.effects || [];
+            function findPatch(sModelName, sPath) {
+                return aEffects.filter(function (oEffect) {
+                    return oEffect.type === "modelPatch" && oEffect.modelName === sModelName && oEffect.path === sPath;
+                }).pop();
+            }
+
+            assert.ok(oResult && oResult.ok, "open detail succeeds");
+            assert.strictEqual(findPatch("selected", "/").value.basic.equipment, "Session equipment", "missing basic equipment is preserved for the same root");
+            assert.strictEqual(findPatch("snapshot", "/").value.basic.equipment, "Session equipment", "base snapshot keeps preserved basic equipment");
+            done();
+        });
+    });
 });

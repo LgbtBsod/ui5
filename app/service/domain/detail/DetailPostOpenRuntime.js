@@ -1,20 +1,23 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (Effects, StatePaths, ModelPathContracts, WorkflowContracts) {
+], function (Effects, CloneUtil, StatePaths, ModelPathContracts, WorkflowContracts) {
     "use strict";
 
     function buildEditableDetailEffects(sRootId, oOptions) {
         var sResolvedRootId = String(sRootId || "").trim();
         var oSettings = oOptions || {};
         var oSnapshot = oSettings.snapshot || {};
+        var oSelectedSnapshot = CloneUtil.clone(oSnapshot, {});
+        var oBaseSnapshot = CloneUtil.clone(oSnapshot, {});
         var bAutosaveEnabled = oSettings.autosaveEnabled !== false;
 
         return [
-            Effects.modelPatch("selected", "/", oSnapshot),
-            Effects.modelPatch("snapshot", "/", oSnapshot),
+            Effects.modelPatch("selected", "/", oSelectedSnapshot),
+            Effects.modelPatch("snapshot", "/", oBaseSnapshot),
             Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sResolvedRootId),
             Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sResolvedRootId),
             Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sResolvedRootId),

@@ -11,9 +11,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime"
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime) {
     "use strict";
+
+    function cloneSnapshot(oSnapshot) {
+        return CloneUtil.clone(oSnapshot || {}, {});
+    }
 
     function resolveCanonicalRootId(oRepo, sRootId) {
         if (!oRepo || typeof oRepo.resolveRootId !== "function" || !sRootId || CreateSentinel.isCreateId(sRootId)) {
@@ -86,6 +92,15 @@ sap.ui.define([
         };
     }
 
+    function resolveSameRootSnapshot(oUiState, sRootId, sModelName) {
+        var oSnapshot = (oUiState && oUiState.get(sModelName, "/")) || null;
+        var sSnapshotRootId = String((oSnapshot && oSnapshot.root && oSnapshot.root.id) || "").trim();
+        if (!sRootId || !sSnapshotRootId || sSnapshotRootId !== sRootId) {
+            return null;
+        }
+        return oSnapshot;
+    }
+
     function OpenDetailUseCase() {
         return {
             execute: execute
@@ -100,6 +115,8 @@ function execute(mInput, mCtx) {
 
         if (CreateSentinel.isCreateId(sRootId)) {
             var oDraft = (oUiState && oUiState.get("selected", "/")) || {};
+            var oDraftSnapshot = cloneSnapshot(oDraft);
+            var oDraftSelected = cloneSnapshot(oDraft);
             return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
                 activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
             }).then(function (oPermission) {
@@ -122,7 +139,7 @@ function execute(mInput, mCtx) {
                         Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
                     ]));
                 }
-                return Result.ok({ snapshot: oDraft || {} }, resetTransientDetailIncidentEffects().concat([
+                return Result.ok({ snapshot: oDraftSnapshot }, resetTransientDetailIncidentEffects().concat([
                     Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, {
                         denied: false,
                         rootId: CreateSentinel.VALUE,
@@ -149,10 +166,10 @@ function execute(mInput, mCtx) {
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.CREATE),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
                     Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                    Effects.modelPatch("snapshot", "/", oDraft || {}),
-                    Effects.modelPatch("selected", "/", oDraft || {}),
-                    Effects.modelPatch("selected", "/attachments", (oDraft && oDraft.attachments) || []),
-                    Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, (oDraft && oDraft.attachments) || []),
+                    Effects.modelPatch("snapshot", "/", oDraftSnapshot),
+                    Effects.modelPatch("selected", "/", oDraftSelected),
+                    Effects.modelPatch("selected", "/attachments", (oDraftSelected && oDraftSelected.attachments) || []),
+                    Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
                     Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
                 ]));
             });
@@ -223,11 +240,18 @@ function execute(mInput, mCtx) {
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
             var sCanonicalRootId = String((oResolved && oResolved.rootId) || sRootId).trim() || sRootId;
+            var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, "selected");
+            var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, "snapshot");
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
             var aSnapshotAttachments = Array.isArray(oSnapshot && oSnapshot.attachments) ? oSnapshot.attachments : [];
             var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : aSnapshotAttachments;
             var oEditState = resolveEditableOpenState(oUiState, sCanonicalRootId);
-            return Result.ok({ snapshot: oSnapshot || {} }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
+            var oNormalizedSnapshot = DetailSaveRuntime.normalizeOverallResult(
+                DetailSaveRuntime.preserveBasicFields(oSnapshot, oCurrentSelected, oCurrentSnapshot)
+            );
+            var oBaseSnapshot = cloneSnapshot(oNormalizedSnapshot);
+            var oSelectedSnapshot = cloneSnapshot(oNormalizedSnapshot);
+            return Result.ok({ snapshot: oBaseSnapshot }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                     status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
                     ready: true,
@@ -245,8 +269,8 @@ function execute(mInput, mCtx) {
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, oEditState.editMode),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, oEditState.lockState),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, oEditState.autosaveEnabled),
-                Effects.modelPatch("snapshot", "/", oSnapshot || {}),
-                Effects.modelPatch("selected", "/", oSnapshot || {}),
+                Effects.modelPatch("snapshot", "/", oBaseSnapshot),
+                Effects.modelPatch("selected", "/", oSelectedSnapshot),
                 Effects.modelPatch("selected", "/attachments", aEffectiveAttachments),
                 Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
                 Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)

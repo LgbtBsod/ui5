@@ -36,6 +36,9 @@
     function createMatchedViewPatch(sId, bCreate, mHooks) {
         var mViewPatch = {};
 
+        mViewPatch["/isEditMode"] = bCreate;
+        mViewPatch["/isCreateMode"] = bCreate;
+        mViewPatch["/hasPersistedObject"] = !bCreate && !CreateSentinel.isCreateId(sId);
         mViewPatch[ViewPathContracts.DETAIL_SKELETON_BUSY] = !bCreate;
         mViewPatch[ViewPathContracts.VALIDATION_SHOWN] = false;
         mViewPatch[ViewPathContracts.VALIDATION_MISSING] = {};

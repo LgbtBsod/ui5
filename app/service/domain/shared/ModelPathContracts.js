@@ -15,6 +15,7 @@ sap.ui.define([
         LOCK_OPERATION_PENDING: "/lockOperationPending",
         POST_OPEN_HYDRATED_ROOT_ID: "/postOpenHydratedRootId",
         REQUIRED_FIELDS: "/requiredFields",
+        SEARCH_RETURN_CONTEXT: StatePaths.SEARCH_RETURN_CONTEXT,
         SEARCH_FORCE_REFRESH_ON_RETURN: "/searchForceRefreshOnReturn",
         SELECTED_ID: "/selectedId",
         SESSION_ID: StatePaths.SESSION_ID,

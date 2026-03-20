@@ -9,8 +9,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime"
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, SearchReturnRediscoveryRuntime) {
     "use strict";
 
     function DeleteChecklistUseCase() {
@@ -77,7 +78,13 @@ function execute(mInput, mCtx) {
                     Effects.modelPatch("state", ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
                     Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, null),
                     Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, null),
-                    Effects.modelPatch("state", ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN, true),
+                    Effects.modelPatch("state", ModelPathContracts.SEARCH_RETURN_CONTEXT, SearchReturnRediscoveryRuntime.buildContext({
+                        rootId: sRootId,
+                        reason: "detailDeleteCompleted",
+                        mode: SearchReturnRediscoveryRuntime.MODES.DELETE,
+                        focusRequested: false,
+                        selectionRequested: false
+                    })),
                     Effects.toast("checklistDeleted", "success"),
                     Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
                 ]);

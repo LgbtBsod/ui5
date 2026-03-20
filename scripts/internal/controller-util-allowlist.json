@@ -30,7 +30,6 @@
   "service/framework/ActionContract",
   "service/framework/AttachmentFlowService",
   "service/framework/FacadeCommandContract",
-  "service/framework/FacadeCommandRuntime",
   "service/framework/EffectApplier",
   "service/framework/EffectActionRouting",
   "service/framework/EffectTextResolver",

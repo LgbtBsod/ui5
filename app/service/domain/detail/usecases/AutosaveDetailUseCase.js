@@ -6,13 +6,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil"
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -64,7 +66,7 @@ function mapFieldDelta(mInput, oCurrent) {
     }
 
     function resolveClientVersion(oDelta, mCtx) {
-        var oSnapshot = readCurrentChecklist(mCtx);
+        var oSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
         var oCurrent = { root: { version_number: oDelta && oDelta.client_version } };
         return DetailSaveRuntime.resolveVersionNumber(
             oCurrent,
@@ -96,11 +98,6 @@ function execute(mInput, mCtx) {
         if (!oDelta.client_version) {
             oDelta = Object.assign({}, oDelta, { client_version: resolveClientVersion(oDelta, mCtx) });
         }
-        if (!oDelta.client_version) {
-            return Promise.resolve(Result.fail({ message: "Autosave requires valid client version", code: "AUTOSAVE_RELOAD_REQUIRED" }, [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.FAILED)
-            ]));
-        }
 
         if (!sSessionGuid) {
             return Promise.resolve(Result.fail({ message: "Autosave requires active session lock", code: "LOCK_REQUIRED" }, [
@@ -124,7 +121,9 @@ function execute(mInput, mCtx) {
             oCurrentChecklist = readCurrentChecklist(mCtx);
             aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
             var oBaseSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
-            var oSavedSnapshot = Object.assign({}, (oSaved && oSaved.serverSnapshot) || oCurrentChecklist);
+            var oSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
+                DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrentChecklist, oCurrentChecklist, oBaseSnapshot)
+            );
             return DetailAttachmentSaveRuntime.syncAfterSave({
                 repo: oRepo,
                 rootId: sRootId,
@@ -139,7 +138,7 @@ function execute(mInput, mCtx) {
             }).then(function (oAttachmentSync) {
                 return Result.ok({ autosavedAt: sAt }, [
                     Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
-                    Effects.modelPatch("snapshot", "/", oAttachmentSync.snapshot)
+                    Effects.modelPatch("snapshot", "/", CloneUtil.clone(oAttachmentSync.snapshot, {}))
                 ].concat(oAttachmentSync.effects, DetailPersistenceRuntime.successEffects("auto", sAt, {
                     state: oAttachmentSync.hasPendingAttachments ? DetailPersistenceRuntime.STATES.DIRTY : DetailPersistenceRuntime.STATES.SAVED,
                     messageKey: oAttachmentSync.hasPendingAttachments ? "persistenceAutosavePendingAttachments" : "persistenceAutosaveSaved",

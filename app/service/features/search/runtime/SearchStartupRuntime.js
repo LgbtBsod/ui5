@@ -1,18 +1,21 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ProgressiveReadinessConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, DebugLogger) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime"
+], function (ControllerViewStateRuntime, SchedulingRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, DebugLogger, SearchReturnRediscoveryRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
+    var SEARCH_RETURN_REFRESH_RETRY_DELAY_MS = 500;
+    var SEARCH_RETURN_REFRESH_RETRY_LIMIT = 12;
 
     function resolveStartupPerf(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
@@ -56,22 +59,59 @@
     }
 
     function shouldRefreshSearchOnReturn(oController) {
-        return !!ModelStateRuntime.read(oController, STATE_MODEL, SEARCH_READINESS.FLAGS.FORCE_REFRESH_ON_RETURN, false)
-            && !!ControllerViewStateRuntime.get(oController, "/hasSearched", false);
+        return !!SearchReturnRediscoveryRuntime.readContext(oController)
+            || SearchReturnRediscoveryRuntime.hasLegacyRefreshFlag(oController);
     }
 
     function clearSearchRefreshFlag(oController) {
-        ModelStateRuntime.write(oController, STATE_MODEL, SEARCH_READINESS.FLAGS.FORCE_REFRESH_ON_RETURN, false);
+        SearchReturnRediscoveryRuntime.clearLegacyRefreshFlag(oController);
+    }
+
+    function resetReturnRefreshRetry(oController) {
+        oController._iSearchReturnRefreshTimer = SchedulingRuntime.clearTimer(oController._iSearchReturnRefreshTimer);
+        oController._iSearchReturnRefreshAttempts = 0;
+    }
+
+    function scheduleReturnRefreshRetry(oController, sSource, mHooks) {
+        if (!shouldRefreshSearchOnReturn(oController)) {
+            resetReturnRefreshRetry(oController);
+            return;
+        }
+        oController._iSearchReturnRefreshAttempts = Number(oController._iSearchReturnRefreshAttempts || 0) + 1;
+        if (oController._iSearchReturnRefreshAttempts > SEARCH_RETURN_REFRESH_RETRY_LIMIT) {
+            resetReturnRefreshRetry(oController);
+            return;
+        }
+        oController._iSearchReturnRefreshTimer = SchedulingRuntime.restartTimer(
+            oController._iSearchReturnRefreshTimer,
+            function () {
+                refreshSearchTableIfNeeded(oController, sSource, mHooks);
+            },
+            SEARCH_RETURN_REFRESH_RETRY_DELAY_MS
+        );
     }
 
     function refreshSearchTableIfNeeded(oController, sSource, mHooks) {
-        if (!shouldRefreshSearchOnReturn(oController) || !ControllerViewStateRuntime.get(oController, "/smartTableReady", false)) {
+        var bRebindStarted = false;
+        if (!shouldRefreshSearchOnReturn(oController)) {
+            resetReturnRefreshRetry(oController);
             return;
         }
-        clearSearchRefreshFlag(oController);
-        mHooks.rebind({
-            source: sSource || SEARCH_SOURCES.SEARCH_RETRY
-        });
+        if (!SearchReturnRediscoveryRuntime.readContext(oController)) {
+            clearSearchRefreshFlag(oController);
+        }
+        if (!ControllerViewStateRuntime.get(oController, "/hasSearched", false)) {
+            ControllerViewStateRuntime.set(oController, "/hasSearched", true);
+        }
+        if (mHooks && typeof mHooks.rebindTableDirect === "function") {
+            bRebindStarted = !!mHooks.rebindTableDirect();
+        }
+        if (!bRebindStarted && mHooks && typeof mHooks.rebind === "function") {
+            mHooks.rebind({
+                source: sSource || SEARCH_SOURCES.SEARCH_RETRY
+            });
+        }
+        scheduleReturnRefreshRetry(oController, sSource || SEARCH_SOURCES.SEARCH_RETRY, mHooks);
     }
 
     function onSearchMatched(oController, mHooks) {

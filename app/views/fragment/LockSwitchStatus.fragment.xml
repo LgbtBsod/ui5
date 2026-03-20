@@ -4,9 +4,9 @@
     </BusyIndicator>
     <Switch
         id="detailEditSwitch"
-        visible="{= ${view>/hasPersistedObject} &amp;&amp; !!${selected>/root/id} }"
+        visible="{view>/hasPersistedObject}"
         state="{view>/isEditMode}"
-        enabled="{= ${view>/hasPersistedObject} &amp;&amp; !!${selected>/root/id} &amp;&amp; !${state>/lockOperationPending} }"
+        enabled="{= ${view>/hasPersistedObject} &amp;&amp; !${state>/lockOperationPending} }"
         customTextOn=""
         customTextOff=""
         change=".onToggleEdit"

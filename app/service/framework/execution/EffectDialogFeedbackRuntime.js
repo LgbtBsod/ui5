@@ -14,6 +14,13 @@ sap.ui.define([
         information: MessageBox.information
     };
 
+    function buildMessageBoxOptions(mOptions) {
+        return Object.assign({
+            styleClass: [CLASSES.DIALOG, CLASSES.FEEDBACK_MESSAGE_BOX].join(" "),
+            contentWidth: "36rem"
+        }, mOptions || {});
+    }
+
     function showDialog(oEffect, sText) {
         var sVariant = String((oEffect && oEffect.variant) || "").toLowerCase();
         var fnShow;
@@ -24,7 +31,7 @@ sap.ui.define([
             sVariant = VARIANTS.WARNING;
         }
         fnShow = DIALOG_VARIANT_HANDLERS[sVariant] || MessageBox.show;
-        fnShow(String(sText), { styleClass: CLASSES.DIALOG });
+        fnShow(String(sText), buildMessageBoxOptions());
         return null;
     }
 
@@ -39,12 +46,11 @@ sap.ui.define([
 
     function promptBox(sKind, sText, aActions, sEmphasized) {
         return new Promise(function (resolve) {
-            MessageBox[sKind](String(sText || ""), {
+            MessageBox[sKind](String(sText || ""), buildMessageBoxOptions({
                 actions: aActions || [MessageBox.Action.OK],
                 emphasizedAction: sEmphasized,
-                styleClass: CLASSES.DIALOG,
                 onClose: resolve
-            });
+            }));
         });
     }
 
@@ -52,7 +58,7 @@ sap.ui.define([
         actions: MessageBox.Action,
         dialog: dialog,
         promptConfirm: function (sText, aActions, sEmphasized) { return promptBox("confirm", sText, aActions, sEmphasized); },
-        promptError: function (sText) { MessageBox.error(String(sText || ""), { styleClass: CLASSES.DIALOG }); },
+        promptError: function (sText) { MessageBox.error(String(sText || ""), buildMessageBoxOptions()); },
         promptWarning: function (sText, aActions, sEmphasized) { return promptBox("warning", sText, aActions, sEmphasized); }
     };
 });

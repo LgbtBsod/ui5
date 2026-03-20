@@ -42,6 +42,7 @@
             lockStatus: WorkflowRuntimeConstants.REQUEST_GROUPS.LOCKS,
             functionImport: WorkflowRuntimeConstants.REQUEST_GROUPS.LOCKS
         },
+        searchReturnContext: null,
         readiness: {
             app: { status: WorkflowRuntimeConstants.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },
             search: { status: WorkflowRuntimeConstants.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },

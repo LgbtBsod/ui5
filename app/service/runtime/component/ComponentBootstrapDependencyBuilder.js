@@ -64,12 +64,21 @@ sap.ui.define([
                 ActionContract: mStaticDeps.ActionContract,
                 WorkflowTelemetry: mStaticDeps.WorkflowTelemetry,
                 CreateSentinel: mStaticDeps.CreateSentinel,
+                DeltaPayloadBuilder: mStaticDeps.DeltaPayloadBuilder,
                 StatePaths: mStaticDeps.StatePaths,
                 SearchUiConfig: mStaticDeps.SearchUiConfig,
                 DetailFacade: mStaticDeps.DetailFacade
             },
             managers: {
-                Managers: mStaticDeps.ManagerFacade,
+                Managers: Object.freeze({
+                    HeartbeatManager: mStaticDeps.HeartbeatManager,
+                    GCDManager: mStaticDeps.GCDManager,
+                    ActivityMonitor: mStaticDeps.ActivityMonitor,
+                    AutoSaveCoordinator: mStaticDeps.AutoSaveCoordinator,
+                    ConnectivityCoordinator: mStaticDeps.ConnectivityCoordinator,
+                    LockStatusMonitor: mStaticDeps.LockStatusMonitor,
+                    SettingsManager: mStaticDeps.SettingsManager
+                }),
                 managers: {}
             },
             runtime: {
@@ -104,14 +113,15 @@ sap.ui.define([
         };
     }
 
-    function withManagerRuntime(mDeps, oManagerFacade) {
+    function withManagerRuntime(mDeps) {
         var mResolved = Object.assign({}, mDeps);
+        var oManagers = (mResolved.Managers || (mResolved.groups && mResolved.groups.managers && mResolved.groups.managers.Managers)) || {};
         mResolved.managers = {};
-        mResolved.managers[MANAGER_KEYS.HEARTBEAT_MANAGER] = oManagerFacade.HeartbeatManager;
-        mResolved.managers[MANAGER_KEYS.GCD_MANAGER] = oManagerFacade.GCDManager;
-        mResolved.managers[MANAGER_KEYS.ACTIVITY_MONITOR] = oManagerFacade.ActivityMonitor;
-        mResolved.managers[MANAGER_KEYS.AUTOSAVE_COORDINATOR] = oManagerFacade.AutoSaveCoordinator;
-        mResolved.managers[MANAGER_KEYS.LOCK_STATUS_MONITOR] = oManagerFacade.LockStatusMonitor;
+        mResolved.managers[MANAGER_KEYS.HEARTBEAT_MANAGER] = oManagers.HeartbeatManager;
+        mResolved.managers[MANAGER_KEYS.GCD_MANAGER] = oManagers.GCDManager;
+        mResolved.managers[MANAGER_KEYS.ACTIVITY_MONITOR] = oManagers.ActivityMonitor;
+        mResolved.managers[MANAGER_KEYS.AUTOSAVE_COORDINATOR] = oManagers.AutoSaveCoordinator;
+        mResolved.managers[MANAGER_KEYS.LOCK_STATUS_MONITOR] = oManagers.LockStatusMonitor;
         return mResolved;
     }
 

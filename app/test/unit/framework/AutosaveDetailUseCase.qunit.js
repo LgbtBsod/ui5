@@ -73,4 +73,76 @@
             done();
         });
     });
+
+    QUnit.test("autosave does not require client version when lock is active", function (assert) {
+        var done = assert.async();
+        var oUseCase = AutosaveDetailUseCase();
+        var bCalled = false;
+        var oCtx = {
+            repo: {
+                autosaveChecklist: function (mArgs) {
+                    bCalled = true;
+                    assert.strictEqual(mArgs.rootId, "CHK-2", "autosave uses current root id");
+                    return Promise.resolve({
+                        autosavedAt: "2026-03-19T10:05:00.000Z",
+                        serverSnapshot: {
+                            root: { id: "CHK-2", version_number: 1 },
+                            basic: { equipment: "Edited equipment" }
+                        }
+                    });
+                }
+            },
+            uiState: {
+                get: function (sModelName, sPath) {
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
+                        return WorkflowContracts.EDIT_MODES.EDIT;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
+                        return WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DIRTY) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.SESSION_ID) {
+                        return "SESSION-2";
+                    }
+                    if (sModelName === "selected" && sPath === "/") {
+                        return {
+                            root: { id: "CHK-2" },
+                            basic: { equipment: "Edited equipment" },
+                            checks: [],
+                            barriers: [],
+                            attachments: []
+                        };
+                    }
+                    if (sModelName === "snapshot" && sPath === "/") {
+                        return {
+                            root: { id: "CHK-2" },
+                            basic: { equipment: "Original equipment" },
+                            checks: [],
+                            barriers: [],
+                            attachments: []
+                        };
+                    }
+                    return null;
+                }
+            }
+        };
+
+        oUseCase.execute({ rootId: "CHK-2" }, oCtx).then(function (oResult) {
+            var aEffects = oResult.effects || [];
+            var oSnapshotPatch = aEffects.filter(function (oEffect) {
+                return oEffect.type === "modelPatch" && oEffect.modelName === "snapshot" && oEffect.path === "/";
+            }).pop();
+            var oRefreshPatch = aEffects.filter(function (oEffect) {
+                return oEffect.type === "modelPatch" && oEffect.modelName === "state" && oEffect.path === StatePaths.SEARCH_RETURN_CONTEXT;
+            }).pop();
+
+            assert.ok(bCalled, "autosave request was sent even without client version");
+            assert.ok(oResult && oResult.ok, "autosave succeeds");
+            assert.strictEqual(oSnapshotPatch.value.basic.equipment, "Edited equipment", "current basic fields are preserved when backend snapshot is partial");
+            assert.strictEqual(oRefreshPatch, undefined, "autosave does not arm search return rediscovery");
+            done();
+        });
+    });
 });

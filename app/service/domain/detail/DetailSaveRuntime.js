@@ -13,9 +13,9 @@
         var oSavedBasic = Object.assign({}, oSaved.basic || {});
         var oCurrentBasic = (oCurrentSnapshot && oCurrentSnapshot.basic) || {};
         var oBaseBasic = (oBaseSnapshot && oBaseSnapshot.basic) || {};
-        var aFields = ["date", "time", "timezone"];
+        var mMergedFields = Object.assign({}, oBaseBasic, oCurrentBasic);
 
-        aFields.forEach(function (sField) {
+        Object.keys(mMergedFields).forEach(function (sField) {
             if (isFilled(oSavedBasic[sField])) {
                 return;
             }

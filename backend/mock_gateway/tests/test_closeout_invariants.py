@@ -62,6 +62,8 @@ def test_legacy_modules_are_removed_from_active_repo_surface():
         REPO_ROOT / "app" / "service" / "domain" / "shared" / "LockFacade.js",
         REPO_ROOT / "app" / "service" / "shared" / "delta" / "DeltaDateCodec.js",
         REPO_ROOT / "app" / "service" / "shared" / "delta" / "DeltaChildChanges.js",
+        REPO_ROOT / "app" / "service" / "runtime" / "ManagerFacade.js",
+        REPO_ROOT / "app" / "service" / "framework" / "FacadeCommandRuntime.js",
     ]
 
     for path in removed_paths:
@@ -93,6 +95,8 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
         "lockFacade": "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade",
         "deltaDateCodec": "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec",
         "deltaChildChanges": "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaChildChanges",
+        "managerFacade": "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ManagerFacade",
+        "facadeCommandRuntime": "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandRuntime",
     }
 
     for path in APP_ROOT.rglob("*"):
@@ -199,6 +203,9 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     assert 'BackendModeContracts.PATHS.BACKEND_MODE' in bootstrap_source
     assert "withManagerRuntime" in bootstrap_builder
     assert "MANAGER_KEYS" in bootstrap_builder
+    assert "HeartbeatManager" in bootstrap_source
+    assert "AutoSaveCoordinator" in bootstrap_source
+    assert "Object.freeze({" in bootstrap_builder
     assert 'REAL: "real"' in backend_mode_contracts
     assert 'BACKEND_MODE: ModelPathContracts.BACKEND_MODE' in backend_mode_contracts
     for path in removed_framework_aliases:
@@ -220,6 +227,8 @@ def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts
     assert "ModelPathContracts.ACTIVE_OBJECT_ID" in root_id_runtime
     assert '"/activeObjectId"' not in telemetry_runtime
     assert "ModelPathContracts.ACTIVE_OBJECT_ID" in autosave_runtime
+    assert "buildLatestCtx" in autosave_runtime
+    assert "var oLatestCtx = fnBuildLatestCtx ? fnBuildLatestCtx() : oComponent._ctx;" in autosave_runtime
     assert "ModelPathContracts.ACTIVE_OBJECT_ID" in cross_tab_runtime
     assert "ModelPathContracts.ACTIVE_OBJECT_ID" in polling_runtime
     assert "ModelPathContracts.ACTIVE_OBJECT_ID" in lock_events_runtime
@@ -324,6 +333,12 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     payload_mapper = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistPayloadMapper.js")
     save_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "SaveDetailUseCase.js")
     autosave_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "AutosaveDetailUseCase.js")
+    delete_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "DeleteChecklistUseCase.js")
+    search_startup = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchStartupRuntime.js")
+    search_load_behavior = _read(APP_ROOT / "controller" / "search" / "internal" / "SearchViewLoadBehavior.js")
+    search_rediscovery = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchReturnRediscoveryRuntime.js")
+    state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
+    workflow_schema = _read(APP_ROOT / "model" / "schema" / "workflowSchema.js")
     abap_mapper = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_bopf_mapper.clas.abap")
     abap_dpc = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_dpc_ext.clas.abap")
 
@@ -344,6 +359,24 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "participants: Array.isArray(oIn.participants)" in payload_mapper
     assert "mergeDeltaAttachments" in save_usecase
     assert "mergeDeltaAttachments" in autosave_usecase
+    assert 'ModelPathContracts.SEARCH_RETURN_CONTEXT' in save_usecase
+    assert 'SearchReturnRediscoveryRuntime.MODES.CREATE' in save_usecase
+    assert 'SearchReturnRediscoveryRuntime.MODES.SAVE' in save_usecase
+    assert 'ChecklistIdentity.extractChecklistDisplayId' in save_usecase
+    assert 'ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN' not in save_usecase
+    assert 'ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN' not in autosave_usecase
+    assert 'ModelPathContracts.SEARCH_RETURN_CONTEXT' not in autosave_usecase
+    assert 'ModelPathContracts.SEARCH_RETURN_CONTEXT' in delete_usecase
+    assert 'SearchReturnRediscoveryRuntime.MODES.DELETE' in delete_usecase
+    assert 'SEARCH_RETURN_CONTEXT: "/searchReturnContext"' in state_paths
+    assert "searchReturnContext: null," in workflow_schema
+    assert "SearchReturnRediscoveryRuntime.readContext" in search_startup
+    assert "SearchReturnRediscoveryRuntime.hasLegacyRefreshFlag" in search_startup
+    assert "SearchReturnRediscoveryRuntime.applyAfterSearchSuccess" in search_load_behavior
+    assert "selectionRequested" in search_rediscovery
+    assert "focusRequested" in search_rediscovery
+    assert "ChecklistIdentity.extractChecklistId" in search_rediscovery
+    assert "ChecklistIdentity.extractChecklistDisplayId" in search_rediscovery
     assert "is_root-edit_mode IS NOT INITIAL" in abap_mapper
     assert "METHOD validate_save_request." in abap_dpc
     assert "checks[].edit_mode is required." in abap_dpc
@@ -428,6 +461,14 @@ def test_standardized_telemetry_event_names_cover_permission_cache_lock_and_anal
     assert 'analytics.search.error' in search_analytics_source
     assert 'analytics.dashboard.loaded' in dashboard_analytics_source
     assert 'analytics.dashboard.error' in dashboard_analytics_source
+
+
+def test_detail_save_runtime_preserves_partial_basic_snapshots_after_backend_save():
+    source = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailSaveRuntime.js")
+
+    assert "var mMergedFields = Object.assign({}, oBaseBasic, oCurrentBasic);" in source
+    assert "Object.keys(mMergedFields).forEach(function (sField) {" in source
+    assert "if (isFilled(oCurrentBasic[sField])) {" in source
 
 
 def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors():

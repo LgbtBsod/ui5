@@ -79,6 +79,7 @@ sap.ui.define([], function () {
             managers: mDeps.managers,
             statePaths: mDeps.StatePaths,
             deltaPayloadBuilder: mDeps.DeltaPayloadBuilder,
+            buildLatestCtx: mHandlers.buildLatestCtx,
             resolveDetailCurrent: mHandlers.resolveDetailCurrent,
             applyFacadeResult: mHandlers.applyFacadeResult,
             setGlobalBanner: mHandlers.setGlobalBanner,

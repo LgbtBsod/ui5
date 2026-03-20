@@ -65,23 +65,17 @@
 
     function syncComputedEditFlags(oController) {
         var oStateModel = oController && oController._oStateValidationModel;
-        var oSelectedModel = oController && oController._oSelectedModel;
         var oViewModel = ControllerModelRuntime.viewState(oController);
         var sActiveObjectId;
-        var sSelectedRootId;
         var sMode;
         if (!oStateModel || !oViewModel) {
             return;
         }
         sMode = WorkflowContracts.normalizeEditMode(oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         sActiveObjectId = String(oStateModel.getProperty(ModelPathContracts.ACTIVE_OBJECT_ID) || "").trim();
-        sSelectedRootId = String((oSelectedModel && oSelectedModel.getProperty && oSelectedModel.getProperty("/root/id")) || "").trim();
-        oViewModel.setProperty("/isEditMode", sMode !== WorkflowContracts.EDIT_MODES.READ);
+        oViewModel.setProperty("/isEditMode", WorkflowContracts.isEditableMode(sMode));
         oViewModel.setProperty("/isCreateMode", sMode === WorkflowContracts.EDIT_MODES.CREATE);
-        oViewModel.setProperty("/hasPersistedObject",
-            (!!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId)) ||
-            (!!sSelectedRootId && !CreateSentinel.isCreateId(sSelectedRootId))
-        );
+        oViewModel.setProperty("/hasPersistedObject", !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId));
     }
 
     function bindStateValidationModel(oController) {
@@ -95,6 +89,7 @@
             if (sPath === "/requiredFields") {
                 oController._recomputeValidationSummary("requiredFieldsChanged", false);
                 DetailAttachmentViewState.sync(oController);
+                syncComputedEditFlags(oController);
                 return;
             }
             /* D-03 FIX: sync view>/isEditMode and view>/isCreateMode computed properties.
@@ -206,11 +201,14 @@
             /* C-01 FIX: clear in-flight dedup registry to prevent stale promise
              * re-use when navigating between different detail objects in FCL.     */
             InFlightRegistry.clear();
-            return DetailPageFlow.onMatched(this, oEvent, {
+            return Promise.resolve(DetailPageFlow.onMatched(this, oEvent, {
                 applyLayoutState: this._applyLayoutState.bind(this),
                 scheduleAttachmentDropZoneBind: this._scheduleAttachmentDropZoneBind.bind(this),
                 validationSummaryPath: StatePaths.VALIDATION_SUMMARY
-            });
+            })).then(function (vResult) {
+                syncComputedEditFlags(this);
+                return vResult;
+            }.bind(this));
         }
     };
 });

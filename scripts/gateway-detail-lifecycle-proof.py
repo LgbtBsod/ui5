@@ -173,6 +173,7 @@ def read_runtime_state(page) -> dict[str, Any]:
         () => {
           const core = sap.ui.getCore();
           const appView = core.byId('checklist_app_comp---app');
+          const searchView = core.byId('checklist_app_comp---searchView');
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
           const detailView = core.byId('checklist_app_comp---detailTargetPage')
@@ -185,6 +186,7 @@ def read_runtime_state(page) -> dict[str, Any]:
               && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
             || null;
           const appState = appView && appView.getModel && appView.getModel('state');
+          const searchViewState = searchView && searchView.getModel && searchView.getModel('view');
           const detailState = detailView && detailView.getModel && detailView.getModel('state');
           const selected = detailView && detailView.getModel && detailView.getModel('selected');
           const component = sap.ui.core.Component.getOwnerComponentFor(appView);
@@ -201,6 +203,7 @@ def read_runtime_state(page) -> dict[str, Any]:
             layout: appState && appState.getProperty ? String(appState.getProperty('/layout') || '') : '',
             selectedId: appState && appState.getProperty ? String(appState.getProperty('/selectedId') || '') : '',
             activeObjectId: appState && appState.getProperty ? String(appState.getProperty('/activeObjectId') || '') : '',
+            searchReturnContext: appState && appState.getProperty ? (appState.getProperty('/searchReturnContext') || null) : null,
             editMode: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '',
             lockState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/lock/state') || '') : '',
             autosaveState: detailState && detailState.getProperty ? String(
@@ -209,7 +212,8 @@ def read_runtime_state(page) -> dict[str, Any]:
               || ''
             ) : '',
             autosaveEnabled: !!(detailState && detailState.getProperty && (
-              detailState.getProperty('/workflow/autosave/enabled')
+              detailState.getProperty('/autosaveEnabled')
+              || detailState.getProperty('/workflow/autosave/enabled')
               || detailState.getProperty('/workflow/detail/autosave/enabled')
             )),
             autosaveLastSavedAt: detailState && detailState.getProperty ? (
@@ -234,6 +238,10 @@ def read_runtime_state(page) -> dict[str, Any]:
               ?? selected.getProperty('/basic/overall_result')
               ?? null
             ) : null,
+            hasSearched: !!(searchViewState && searchViewState.getProperty && searchViewState.getProperty('/hasSearched')),
+            smartTableReady: !!(searchViewState && searchViewState.getProperty && searchViewState.getProperty('/smartTableReady')),
+            selectedRowId: searchViewState && searchViewState.getProperty ? String(searchViewState.getProperty('/selectedRowId') || '') : '',
+            selectedRowDisplayId: searchViewState && searchViewState.getProperty ? String(searchViewState.getProperty('/selectedRowDisplayId') || '') : '',
             managers: managers
           };
         }
@@ -334,10 +342,26 @@ def set_equipment_dirty(page, next_value: str, touch_autosave: bool) -> None:
           const selected = detail && detail.getModel && detail.getModel('selected');
           const state = detail && detail.getModel && detail.getModel('state');
           const component = sap.ui.core.Component.getOwnerComponentFor(appView);
+          const equipmentInput = all.find((item) => item
+            && item.isA
+            && item.isA('sap.m.Input')
+            && item.getVisible
+            && item.getVisible()
+            && item.getBindingInfo
+            && item.getBindingInfo('value')
+            && item.getBindingInfo('value').parts
+            && item.getBindingInfo('value').parts.some((part) => part && part.path === 'selected>/basic/equipment'));
           if (!selected || !state) {
             throw new Error('detail models unavailable');
           }
-          selected.setProperty('/basic/equipment', String(value || ''));
+          if (equipmentInput && equipmentInput.setValue) {
+            equipmentInput.setValue(String(value || ''));
+            if (equipmentInput.fireChange) {
+              equipmentInput.fireChange({ value: String(value || '') });
+            }
+          } else {
+            selected.setProperty('/basic/equipment', String(value || ''));
+          }
           state.setProperty('/isDirty', true);
           if (touchAutosave && component && component._oAutoSave && component._oAutoSave.touch) {
             component._oAutoSave.touch();
@@ -461,6 +485,28 @@ def run_search_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
           const core = sap.ui.getCore();
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const smartTable = all.find((item) => item && item.isA && item.isA('sap.ui.comp.smarttable.SmartTable') && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0) || null;
+          const table = (smartTable && smartTable.getTable && smartTable.getTable())
+            || all.find((item) => item && item.isA && item.isA('sap.m.Table') && item.getItems && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0)
+            || null;
+          const rows = table && table.getItems ? (table.getItems() || []).filter((item) => !!(item && item.getVisible && item.getVisible() && item.getBindingContext && item.getBindingContext())) : [];
+          const visibleMatch = rows.find((item) => {
+            const ctx = item && item.getBindingContext ? item.getBindingContext() : null;
+            const data = ctx && ctx.getObject ? ctx.getObject() : null;
+            const rowChecklistId = String((data && (data.Id || data.ChecklistId || data.checklist_id)) || '').trim();
+            return rowChecklistId === String(checklistId || '').trim();
+          }) || null;
+          if (visibleMatch) {
+            const ctx = visibleMatch.getBindingContext ? visibleMatch.getBindingContext() : null;
+            const data = ctx && ctx.getObject ? ctx.getObject() : {};
+            return {
+              checklistId: String((data && (data.Id || data.ChecklistId || data.checklist_id)) || '').trim(),
+              controlValue: '',
+              alreadyVisible: true,
+              filterData: {},
+              rootKey: String((data && (data.Key || data.RootKey)) || '').trim()
+            };
+          }
           const searchView = all.find((item) => item
             && item.isA
             && item.isA('sap.ui.core.mvc.View')
@@ -476,18 +522,8 @@ def run_search_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
             || smartFilterBar.getControlByKey('checklist_id')
           ) : null;
           const currentData = smartFilterBar && smartFilterBar.getFilterData ? Object.assign({}, smartFilterBar.getFilterData() || {}) : {};
-          if (control && typeof control.setValue === 'function') {
-            control.setValue(String(checklistId || ''));
-            if (typeof control.fireChange === 'function') {
-              control.fireChange({ value: String(checklistId || '') });
-            }
-          }
           if (smartFilterBar && typeof smartFilterBar.setFilterData === 'function') {
-            currentData.Id = {
-              value: String(checklistId || ''),
-              items: [],
-              ranges: []
-            };
+            currentData.Id = String(checklistId || '');
             smartFilterBar.setFilterData(currentData, true);
           }
           if (!controller || typeof controller.onSmartSearch !== 'function') {
@@ -497,7 +533,9 @@ def run_search_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
             return {
               checklistId: String(checklistId || ''),
               filterData: smartFilterBar && smartFilterBar.getFilterData ? smartFilterBar.getFilterData() : {},
-              controlValue: control && control.getValue ? String(control.getValue() || '') : ''
+              controlValue: control && control.getValue ? String(control.getValue() || '') : '',
+              alreadyVisible: false,
+              rootKey: ''
             };
           });
         }
@@ -663,6 +701,7 @@ def body_contains(page, expected_text: str) -> bool:
 def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
+    warnings: list[dict[str, Any]] = []
     network: list[dict[str, Any]] = []
     screenshots: dict[str, str] = {}
     create_root_id = ""
@@ -930,8 +969,12 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             wait_for_function(
                 page,
                 """
-                (checklistId) => {
+                ({ rootId, checklistId }) => {
                   const core = sap.ui.getCore();
+                  const searchView = core.byId('checklist_app_comp---searchView');
+                  const viewModel = searchView && searchView.getModel && searchView.getModel('view');
+                  const selectedRowId = viewModel && viewModel.getProperty ? String(viewModel.getProperty('/selectedRowId') || '') : '';
+                  const selectedRowDisplayId = viewModel && viewModel.getProperty ? String(viewModel.getProperty('/selectedRowDisplayId') || '') : '';
                   const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
                   const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
                   const smartTable = all.find((item) => item && item.isA && item.isA('sap.ui.comp.smarttable.SmartTable') && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0) || null;
@@ -939,15 +982,22 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                     || all.find((item) => item && item.isA && item.isA('sap.m.Table') && item.getItems && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0)
                     || null;
                   const rows = table && table.getItems ? (table.getItems() || []).filter((item) => !!(item && item.getVisible && item.getVisible() && item.getBindingContext && item.getBindingContext())) : [];
-                  return rows.some((item) => {
+                  const rowVisible = rows.some((item) => {
                     const ctx = item && item.getBindingContext ? item.getBindingContext() : null;
                     const data = ctx && ctx.getObject ? ctx.getObject() : null;
-                    const rowChecklistId = String((data && (data.Id || data.ChecklistId || data.checklist_id)) || '').trim();
-                    return rowChecklistId === String(checklistId || '').trim();
+                    const rowRootId = String((data && (data.Key || data.key || data.Uuid || data.id || data.ID || data.Id)) || '').trim();
+                    const rowChecklistId = String((data && (data.Id || data.ChecklistId || data.checklist_id || data.Key || data.key)) || '').trim();
+                    return rowRootId === String(rootId || '').trim() || rowChecklistId === String(checklistId || '').trim();
                   });
+                  return rowVisible
+                    && selectedRowId === String(rootId || '').trim()
+                    && selectedRowDisplayId === String(checklistId || '').trim();
                 }
                 """,
-                create_saved_state["checklistId"],
+                {
+                    "rootId": create_saved_state["rootId"],
+                    "checklistId": create_saved_state["checklistId"]
+                },
                 timeout=30000
             )
             ensure(checks, "search.find_created_row_by_checklist_id", bool(search_payload.get("checklistId")), search_payload)
@@ -1032,6 +1082,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
         "ok": not failures and all(item["ok"] for item in checks),
         "checks": checks,
         "failures": failures,
+        "warnings": warnings,
         "networkEvidence": {
             "createChecklist": summarize_requests(network, "CreateChecklist"),
             "lockAcquire": summarize_requests(network, "LockAcquire"),

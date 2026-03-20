@@ -50,6 +50,15 @@
         oController._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(oController._iLocationVhTableSyncTimer);
     }
 
+    function syncDetailCommandSurface(oController, mOptions) {
+        ControllerViewStateRuntime.setMany(oController, {
+            "/isEditMode": !!(mOptions && mOptions.isEditMode),
+            "/isCreateMode": !!(mOptions && mOptions.isCreateMode),
+            "/hasPersistedObject": !!(mOptions && mOptions.hasPersistedObject),
+            "/deleteChecklistConfirmArmed": false
+        });
+    }
+
     function onRouteLeave(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
         var oStateModel = ControllerModelRuntime.state(oController);
@@ -89,6 +98,11 @@
                 }
             })).then(function (oResult) {
                 if (!oResult || oResult.ok !== false) {
+                    syncDetailCommandSurface(oController, {
+                        isEditMode: true,
+                        isCreateMode: true,
+                        hasPersistedObject: false
+                    });
                     markDetailReady(oController, { mode: "create", rootId: mContext.sId });
                 }
                 return oResult;
@@ -132,6 +146,11 @@
                 DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
                 return oResult;
             }
+            syncDetailCommandSurface(oController, {
+                isEditMode: false,
+                isCreateMode: false,
+                hasPersistedObject: true
+            });
             return DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
                 enterEdit: function (mInput) {
                     return DetailCommandPolicy.enterEdit(oController, mInput);

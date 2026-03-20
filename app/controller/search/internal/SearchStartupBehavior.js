@@ -29,6 +29,14 @@ sap.ui.define([
             rebind: function (mInput) {
                 return SearchCommandPolicy.rebind(oController, mInput);
             },
+            rebindTableDirect: function () {
+                var oSmartTable = oController && oController.byId && oController.byId("searchSmartTable");
+                if (!oSmartTable || typeof oSmartTable.rebindTable !== "function") {
+                    return false;
+                }
+                oSmartTable.rebindTable();
+                return true;
+            },
             restoreSearchScrollPosition: function () {
                 SearchViewportRuntime.restoreSearchScrollPosition(oController);
             },

@@ -29,6 +29,7 @@
         var ActionContract = mOptions.actionContract;
         var fnBundleText = mOptions.bundleText;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
+        var fnBuildLatestCtx = typeof mOptions.buildLatestCtx === "function" ? mOptions.buildLatestCtx : null;
         function rescheduleHeartbeat() {
             var iIntervalMs;
             var sNextHeartbeatAt;
@@ -80,10 +81,11 @@
                 return { id: sId, payload: oDelta, fullPayload: CloneUtil.clone(oCurrent, {}) };
             },
             saveFn: function (oPayload) {
-                if (!oComponent._detailFacade || !oComponent._ctx) {
+                var oLatestCtx = fnBuildLatestCtx ? fnBuildLatestCtx() : oComponent._ctx;
+                if (!oComponent._detailFacade || !oLatestCtx) {
                     return Promise.reject(new Error("Autosave unavailable: detail context missing"));
                 }
-                return oComponent._detailFacade.autosave({ rootId: oPayload.id, delta: oPayload.payload }, oComponent._ctx).then(function (oResult) {
+                return oComponent._detailFacade.autosave({ rootId: oPayload.id, delta: oPayload.payload }, oLatestCtx).then(function (oResult) {
                     fnApplyFacadeResult(oResult);
                     if (!oResult || oResult.ok === false) {
                         return Promise.reject((oResult && oResult.error) || new Error("Autosave usecase failed"));
