@@ -1,9 +1,10 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaContracts"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaContracts, ModelPathContracts) {
     "use strict";
 
     var READINESS_STATUS = ComponentDetailMetaContracts.READINESS_STATUS;
@@ -48,8 +49,8 @@ sap.ui.define([
 
     function resetDetailNavigationState(oComponent) {
         ModelStateRuntime.resetDetailWorkflowState(oComponent, {
-            "/selectedId": "",
-            "/activeObjectId": "",
+            [ModelPathContracts.SELECTED_ID]: "",
+            [ModelPathContracts.ACTIVE_OBJECT_ID]: "",
             "/layout": VALUES.ONE_COLUMN
         });
         ModelStateRuntime.resetDetailRuntimeData(oComponent);

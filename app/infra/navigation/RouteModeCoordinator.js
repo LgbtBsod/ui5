@@ -1,11 +1,12 @@
-sap.ui.define([
+﻿sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeRules",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteSync",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (DebugLogger, RouteModeRules, RouteSync, LayoutStateRuntime, ModelStateRuntime, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (DebugLogger, RouteModeRules, RouteSync, LayoutStateRuntime, ModelStateRuntime, NavigationContracts, ModelPathContracts) {
     "use strict";
 
     var LAYOUTS = NavigationContracts.LAYOUTS;
@@ -46,7 +47,7 @@ sap.ui.define([
             debugLog("routeMatched", {
                 route: sRouteName,
                 layout: LayoutStateRuntime.readLayout(this._oStateModel, LAYOUTS.ONE_COLUMN),
-                selectedId: ModelStateRuntime.readOnModel(this._oStateModel, "/selectedId", null)
+                selectedId: ModelStateRuntime.readOnModel(this._oStateModel, ModelPathContracts.SELECTED_ID, null)
             });
         }
     };

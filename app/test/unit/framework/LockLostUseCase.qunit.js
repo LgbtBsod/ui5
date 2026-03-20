@@ -1,7 +1,7 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/LockLostUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (LockLostUseCase, StatePaths, WorkflowContracts) {
     "use strict";
 
@@ -9,7 +9,7 @@ sap.ui.define([
 
     QUnit.test("lock lost forces snapshot rollback and clears pending navigation intent", function (assert) {
         var done = assert.async();
-        var oUseCase = new LockLostUseCase();
+        var oUseCase = LockLostUseCase();
         var oSnapshot = {
             root: { id: "CHK-1" },
             basic: { Profession: "SNAPSHOT" }

@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFormatterBehavior",
@@ -9,8 +9,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
     "sap/ui/core/Item"
 ], function (SearchActionBehavior, SearchCommandPolicy, SearchFormatterBehavior, SearchLifecycleBehavior, SearchLocationSuggestRuntime, SearchToolbarDialogRuntime, SearchSmartTableBehavior, ControllerViewStateRuntime, SearchToolbarContracts, SearchViewportRuntime, ModelContracts, OperationSourceContracts, Item) {
     "use strict";

@@ -1,6 +1,6 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants"
 ], function (SearchCommandPolicy, OperationSourceContracts) {
     "use strict";
 

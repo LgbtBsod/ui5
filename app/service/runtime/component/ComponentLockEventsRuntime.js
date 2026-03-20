@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts) {
     "use strict";
 
     function attachLockRuntime(mOptions) {
@@ -33,7 +34,7 @@ sap.ui.define([
                 }));
             }
             return oComponent._detailFacade.onLockLost({
-                rootId: ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", ""),
+                rootId: ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
                 reason: (oPayload && (oPayload.code || oPayload.reason_code)) || "KILLED",
                 preserveDirty: false
             }, oComponent._ctx).then(function (oResult) {

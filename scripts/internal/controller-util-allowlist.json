@@ -2,7 +2,6 @@
   "util/ChecklistValidationService",
   "util/CreateSentinel",
   "util/DebugLogger",
-  "util/ExcelExport",
   "util/FlowCoordinator",
   "util/SearchSmartControlCoordinator",
   "util/TimeConfigService",

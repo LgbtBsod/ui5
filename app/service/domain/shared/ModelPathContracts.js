@@ -7,6 +7,7 @@ sap.ui.define([
         ACTIVE_OBJECT_ID: "/activeObjectId",
         ANALYTICS_RETURN_RESTORE_EDIT: "/analyticsReturnRestoreEdit",
         AUTOSAVE_ENABLED: "/autosaveEnabled",
+        BACKEND_MODE: "/backendMode",
         CURRENT_ROUTE_NAME: "/currentRouteName",
         IS_DIRTY: "/isDirty",
         LAYOUT: "/layout",

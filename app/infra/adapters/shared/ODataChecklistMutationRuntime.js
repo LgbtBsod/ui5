@@ -54,7 +54,7 @@ sap.ui.define([
     function copyChecklist(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-        return GatewayODataClient.getFunction(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST, {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST, {
             RootId: mDeps.normalizeRootKey(sRootId),
             SessionGuid: sSessionGuid
         }).then(function (oServerPayload) {

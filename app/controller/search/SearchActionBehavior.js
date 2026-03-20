@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/UiDecisionCoordinator",
@@ -8,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchViewSelectionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
 ], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchFlowBehavior, SearchViewNavigationBehavior, SearchViewSelectionBehavior, SearchSelectionRuntime, SearchViewportRuntime, OperationSourceContracts, CreateSentinel) {
     "use strict";

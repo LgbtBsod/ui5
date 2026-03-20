@@ -1,8 +1,8 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationHelperRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
 ], function (FocusRuntime, ModelStateRuntime, SchedulingRuntime, ModelContracts, DetailValidationHelperRuntime, JsRuntime) {

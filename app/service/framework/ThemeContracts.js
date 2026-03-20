@@ -15,10 +15,7 @@ sap.ui.define([], function () {
         STORAGE_KEYS: Object.freeze({
             APP_THEME: "checklist_app_theme",
             DEV_OVERRIDE: "checklist_app_theme_dev_override",
-            LEGACY_PROFILE: "sap_ui5_theme_profile",
-            LEGACY_THEME: "sap_ui5_theme",
-            PROFILE: "checklist_app_theme_profile",
-            PROFILE_RECOVERY: "checklist_app_theme_profile_recovery_20260305"
+            PROFILE: "checklist_app_theme_profile"
         }),
         MODES: MODES,
         THEMES: Object.freeze({

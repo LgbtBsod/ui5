@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -7,19 +6,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
+], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     function ForceReadOnlyUseCase() {
-        UseCase.call(this, "ForceReadOnlyUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    ForceReadOnlyUseCase.prototype = Object.create(UseCase.prototype);
-    ForceReadOnlyUseCase.prototype.constructor = ForceReadOnlyUseCase;
-
-    function isLockLostReason(sReason) {
+function isLockLostReason(sReason) {
         var sNormalized = String(sReason || "").toUpperCase();
         return sNormalized === WorkflowContracts.REASONS.KILLED || sNormalized === WorkflowContracts.REASONS.EXPIRED || sNormalized === WorkflowContracts.REASONS.LOCK_EXPIRED || sNormalized === WorkflowContracts.REASONS.LOST;
     }
@@ -55,7 +53,7 @@ sap.ui.define([
         return !bPreserveDirty;
     }
 
-    ForceReadOnlyUseCase.prototype.execute = function (mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sReason = String((mInput && mInput.reason) || WorkflowContracts.REASONS.READ_ONLY).trim() || WorkflowContracts.REASONS.READ_ONLY;
         var sMessageKey = String((mInput && mInput.messageKey) || "").trim();
         var bPreserveDirty = !!(mInput && mInput.preserveDirty) && !isLockLostReason(sReason);
@@ -132,7 +130,7 @@ sap.ui.define([
 
             return Result.ok({ forced: true, reason: sReason, release: oReleaseResult || null }, aEffects);
         });
-    };
+    }
 
     return ForceReadOnlyUseCase;
 });

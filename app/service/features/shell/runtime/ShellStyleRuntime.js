@@ -1,5 +1,5 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts",
+﻿sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ShellPaneConstants",
     "sap/ui/dom/includeStylesheet"
 ], function (ShellPaneContracts, includeStylesheet) {
     "use strict";

@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
@@ -7,21 +6,20 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants) {
+], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants) {
     "use strict";
 
     function CloseDetailUseCase() {
-        UseCase.call(this, "CloseDetailUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    CloseDetailUseCase.prototype = Object.create(UseCase.prototype);
-    CloseDetailUseCase.prototype.constructor = CloseDetailUseCase;
-
-    CloseDetailUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx) ||
@@ -103,7 +101,7 @@ sap.ui.define([
             }
             return Result.ok({ reason: (mInput && mInput.intent) || "close" }, aEffects);
         });
-    };
+    }
 
     return CloseDetailUseCase;
 });

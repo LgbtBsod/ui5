@@ -1,23 +1,21 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, ValidationPathMap, ChecklistValidationService, ViewPathContracts) {
+], function (StatePaths, Result, Effects, DetailStateAccess, ValidationPathMap, ChecklistValidationService, ViewPathContracts) {
     "use strict";
 
     function ValidateChecklistUseCase() {
-        UseCase.call(this, "ValidateChecklistUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    ValidateChecklistUseCase.prototype = Object.create(UseCase.prototype);
-    ValidateChecklistUseCase.prototype.constructor = ValidateChecklistUseCase;
-
-    ValidateChecklistUseCase.prototype.execute = function (_mInput, mCtx) {
+function execute(_mInput, mCtx) {
         var oChecklist = DetailStateAccess.readCurrentChecklist(mCtx);
         var aRequiredFields = DetailStateAccess.readRequiredFields(mCtx);
         var oValidation = ChecklistValidationService.validateRequiredFields(oChecklist, {
@@ -60,7 +58,7 @@ sap.ui.define([
             }),
             Effects.toast(oValidation.valid ? "checklistValidationPassedToast" : "checklistValidationFailedToast", oValidation.valid ? "success" : "warning")
         ]));
-    };
+    }
 
     return ValidateChecklistUseCase;
 });

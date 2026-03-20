@@ -1,6 +1,6 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentUploadRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailRuntimeConstants"
 ], function (AttachmentUploadRuntime, DetailRuntimeContracts) {
     "use strict";
 

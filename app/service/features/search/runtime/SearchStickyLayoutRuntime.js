@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts"
-], function (SearchSelectionRuntime, ThemeDomRuntime, SearchUiContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchUiConstants"
+], function (SearchSelectionRuntime, AppShellDomRuntime, ThemeDomRuntime, SearchUiContracts) {
     "use strict";
 
     var SEARCH_STICKY_STACK_GAP_PX = SearchUiContracts.VIEWPORT.STICKY_STACK_GAP_PX;
@@ -45,11 +46,6 @@ sap.ui.define([
         return oController.byId && oController.byId("searchWorkbenchDock");
     }
 
-    function resolveShellHeaderHostDom(oController) {
-        var oShellHeaderHost = oController && oController.byId && oController.byId("appShellHeaderHost");
-        return oShellHeaderHost && oShellHeaderHost.getDomRef && oShellHeaderHost.getDomRef();
-    }
-
     function resolveResultsTableToolbarHeight(oController) {
         return resolveDomHeight(resolveSearchTableToolbarDom(oController));
     }
@@ -62,7 +58,7 @@ sap.ui.define([
         [
             resolveViewDom(oController),
             oScrollHost,
-            resolveShellHeaderHostDom(oController),
+            AppShellDomRuntime.resolveShellHeaderHostDom(oController),
             oFilterCard && oFilterCard.getDomRef && oFilterCard.getDomRef(),
             resolveSearchSummaryRailDom(oController),
             oResultsShell && oResultsShell.getDomRef && oResultsShell.getDomRef()
@@ -120,6 +116,7 @@ sap.ui.define([
         var iActionTop;
         var iToolbarTop;
         var bCompactSticky = isCompactStickyViewport(SEARCH_MOBILE_STICKY_BREAKPOINT_PX);
+
         if (!iDockHeight) {
             iDockHeight = iFilterHeight + iActionHeight + iToolbarHeight;
             if (iFilterHeight && iActionHeight) {
@@ -129,8 +126,10 @@ sap.ui.define([
                 iDockHeight += SEARCH_STICKY_STACK_GAP_PX;
             }
         }
+
         iActionTop = iTopBase + iFilterHeight + (iFilterHeight && iActionHeight ? SEARCH_STICKY_STACK_GAP_PX : 0);
         iToolbarTop = iTopBase + iSummaryRailHeight + (iSummaryRailHeight ? SEARCH_SUMMARY_RAIL_GAP_PX : 0);
+
         ThemeDomRuntime.toggleClass([oWorkbenchDom], "searchWorkbenchDockCompactSticky", bCompactSticky);
         ThemeDomRuntime.toggleClass([oWorkbenchDom], "searchWorkbenchDockDesktopSticky", !bCompactSticky);
         setSearchViewportCssVar(oController, "--search-sticky-dock-top", iTopBase + "px");
@@ -155,6 +154,7 @@ sap.ui.define([
         var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
         var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
+
         return [
             resolveShellHeaderOffset(SEARCH_MIN_HEADER_OFFSET_PX, SEARCH_HEADER_OFFSET_PADDING_PX, oScrollHost),
             resolveDomHeight(oSummaryRailDom),

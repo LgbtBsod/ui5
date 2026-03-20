@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationRuntime",
@@ -7,12 +6,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/UiAssetPaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (UseCase, Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts) {
     "use strict";
 
     function resolveCanonicalRootId(oRepo, sRootId) {
@@ -71,14 +71,28 @@ sap.ui.define([
         return aAttachments;
     }
 
-    function OpenDetailUseCase() {
-        UseCase.call(this, "OpenDetailUseCase");
+    function resolveEditableOpenState(oUiState, sRootId) {
+        var sHydratedRootId = String((oUiState && oUiState.get("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
+        var sActiveRootId = String((oUiState && oUiState.get("state", ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
+        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
+        var bMatchesRoot = !!sRootId && (sHydratedRootId === sRootId || sActiveRootId === sRootId);
+        var bEditable = bMatchesRoot && WorkflowContracts.isEditLocked(sEditMode, sLockState);
+
+        return {
+            editMode: bEditable ? WorkflowContracts.EDIT_MODES.EDIT : WorkflowContracts.EDIT_MODES.READ,
+            lockState: bEditable ? WorkflowContracts.LOCK_STATES.EDIT_LOCKED : WorkflowContracts.LOCK_STATES.READ_ONLY,
+            autosaveEnabled: bEditable
+        };
     }
 
-    OpenDetailUseCase.prototype = Object.create(UseCase.prototype);
-    OpenDetailUseCase.prototype.constructor = OpenDetailUseCase;
+    function OpenDetailUseCase() {
+        return {
+            execute: execute
+        };
+    }
 
-    OpenDetailUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
@@ -210,6 +224,9 @@ sap.ui.define([
             var oPermission = oResolved && oResolved.permission;
             var sCanonicalRootId = String((oResolved && oResolved.rootId) || sRootId).trim() || sRootId;
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
+            var aSnapshotAttachments = Array.isArray(oSnapshot && oSnapshot.attachments) ? oSnapshot.attachments : [];
+            var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : aSnapshotAttachments;
+            var oEditState = resolveEditableOpenState(oUiState, sCanonicalRootId);
             return Result.ok({ snapshot: oSnapshot || {} }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
                     status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
@@ -217,20 +234,21 @@ sap.ui.define([
                     readyAt: sReadyAt,
                     error: "",
                     rootId: sCanonicalRootId,
-                    mode: WorkflowContracts.EDIT_MODES.READ,
+                    mode: oEditState.editMode,
                     permissionKnown: true,
                     lockKnown: true
                 }),
-                Effects.modelPatch("state", "/activeObjectId", sCanonicalRootId),
-                Effects.modelPatch("state", "/selectedId", sCanonicalRootId),
-                Effects.modelPatch("state", "/postOpenHydratedRootId", sCanonicalRootId),
+                Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sCanonicalRootId),
+                Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sCanonicalRootId),
+                Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCanonicalRootId),
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, oEditState.editMode),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, oEditState.lockState),
+                Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, oEditState.autosaveEnabled),
                 Effects.modelPatch("snapshot", "/", oSnapshot || {}),
                 Effects.modelPatch("selected", "/", oSnapshot || {}),
-                Effects.modelPatch("selected", "/attachments", aLoadedAttachments),
-                Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aLoadedAttachments),
+                Effects.modelPatch("selected", "/attachments", aEffectiveAttachments),
+                Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
                 Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         }).catch(function (oError) {
@@ -249,7 +267,7 @@ sap.ui.define([
                 Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         });
-    };
+    }
 
     return OpenDetailUseCase;
 });

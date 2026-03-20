@@ -1,9 +1,9 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader"
 ], function (ModelStateRuntime, NavigationIntentService, AnalyticsContracts, AnalyticsUiContracts, ModelContracts, AnalyticsMonthRuntime, AnalyticsViewStateReader) {

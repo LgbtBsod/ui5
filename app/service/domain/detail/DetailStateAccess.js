@@ -1,5 +1,5 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+﻿sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (ModelContracts, ModelPathContracts) {
     "use strict";

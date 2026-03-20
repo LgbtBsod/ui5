@@ -1,10 +1,10 @@
-sap.ui.define([
+﻿sap.ui.define([
     "sap/m/SelectDialog",
     "sap/m/StandardListItem",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFieldContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
 ], function (SelectDialog, StandardListItem, Filter, FilterOperator, ModelStateRuntime, ModelContracts, DetailFieldContracts, JsRuntime) {

@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchFilterLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchViewLoadBehavior",
@@ -7,8 +7,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants"
 ], function (SearchCommandPolicy, SearchFilterLifecycleBehavior, SearchViewLoadBehavior, SearchSelectionRuntime, ControlStyleRuntime, SearchLoadRuntime, ControllerActionBusyRuntime, ReadinessTelemetryRuntime, OperationSourceContracts, ReadinessTelemetryContracts) {
     "use strict";
 

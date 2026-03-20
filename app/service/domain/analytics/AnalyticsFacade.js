@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/usecases/LoadAnalyticsDashboardUseCase"
 ], function (LoadAnalyticsDashboardUseCase) {
     "use strict";
@@ -6,7 +6,7 @@ sap.ui.define([
     function AnalyticsFacade(mDeps) {
         var d = mDeps || {};
         this._uc = {
-            load: d.loadUseCase || new LoadAnalyticsDashboardUseCase()
+            load: d.loadUseCase || LoadAnalyticsDashboardUseCase()
         };
     }
 

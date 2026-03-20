@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+from sqlalchemy.exc import OperationalError, ProgrammingError
+
 from config import ALLOW_MOCK_USER_HEADER
 from models import AppUserProfile, RuntimeUserContext
 
@@ -74,7 +76,10 @@ class CurrentUserService:
             if mock_uname:
                 return _normalize_uname(mock_uname)
         if db is not None:
-            row = db.get(RuntimeUserContext, "CURRENT")
+            try:
+                row = db.get(RuntimeUserContext, "CURRENT")
+            except (OperationalError, ProgrammingError):
+                row = None
             if row is not None:
                 return _normalize_uname(getattr(row, "uname", None))
         return _normalize_uname(None)
@@ -82,7 +87,13 @@ class CurrentUserService:
     @staticmethod
     def resolve_profile(db, request=None, explicit_uname: str | None = None) -> dict:
         uname = CurrentUserService.resolve_uname(db=db, request=request, explicit_uname=explicit_uname)
-        row = db.get(AppUserProfile, uname) if db is not None else None
+        if db is not None:
+            try:
+                row = db.get(AppUserProfile, uname)
+            except (OperationalError, ProgrammingError):
+                row = None
+        else:
+            row = None
         permissions = _normalize_permissions(getattr(row, "permissions_json", []))
         full_name = str(getattr(row, "full_name", "") or "").strip() or uname
         return {

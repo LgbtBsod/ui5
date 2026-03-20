@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
@@ -15,19 +14,19 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime"
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime) {
     "use strict";
 
     function SaveDetailUseCase() {
-        UseCase.call(this, "SaveDetailUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    SaveDetailUseCase.prototype = Object.create(UseCase.prototype);
-    SaveDetailUseCase.prototype.constructor = SaveDetailUseCase;
-
-    function readSelectedChecklist(mCtx) {
+function readSelectedChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         return (oUiState && typeof oUiState.get === "function" && oUiState.get("selected", "/")) || null;
     }
@@ -64,7 +63,7 @@ sap.ui.define([
         ]);
     }
 
-    SaveDetailUseCase.prototype.execute = function (mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oUiState = mCtx && mCtx.uiState;
         var oCurrent = readCurrentChecklist(mCtx);
@@ -200,16 +199,26 @@ sap.ui.define([
                         lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sNow : null
                     }));
                     if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
-                        aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
-                        aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));
                         aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
                         if (bCreate) {
                             var bLockAcquired = !!(oLockResult && oLockResult.ok);
-                            aEffects.push(Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
-                            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, bLockAcquired ? WorkflowContracts.EDIT_MODES.EDIT : WorkflowContracts.EDIT_MODES.READ));
-                            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, bLockAcquired ? WorkflowContracts.LOCK_STATES.EDIT_LOCKED : WorkflowContracts.LOCK_STATES.READ_ONLY));
-                            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, bLockAcquired));
+                            if (bLockAcquired) {
+                                aEffects = aEffects.concat(DetailPostOpenRuntime.buildEditableDetailEffects(sServerRootId, {
+                                    snapshot: oSelectedSnapshot,
+                                    autosaveEnabled: true
+                                }));
+                            } else {
+                                aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
+                                aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));
+                                aEffects.push(Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
+                                aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+                                aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
+                                aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false));
+                            }
                             aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
+                        } else {
+                            aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
+                            aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));
                         }
                     }
                 return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
@@ -226,7 +235,7 @@ sap.ui.define([
                 ].concat(oFailure.effects));
             });
         });
-    };
+    }
 
     return SaveDetailUseCase;
 });

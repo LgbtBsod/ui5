@@ -1,14 +1,13 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsPayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
-], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue, AnalyticsStateConstants) {
+], function (Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue, AnalyticsStateConstants) {
     "use strict";
 
     var TELEMETRY_EVENTS = Object.freeze({
@@ -72,13 +71,12 @@ sap.ui.define([
     }
 
     function LoadAnalyticsDashboardUseCase() {
-        UseCase.call(this, "LoadAnalyticsDashboardUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    LoadAnalyticsDashboardUseCase.prototype = Object.create(UseCase.prototype);
-    LoadAnalyticsDashboardUseCase.prototype.constructor = LoadAnalyticsDashboardUseCase;
-
-    LoadAnalyticsDashboardUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var oAnalytics = mCtx && mCtx.analytics;
         var mRequest = buildNormalizedRequest(mInput);
         var sReadyAt = new Date().toISOString();
@@ -123,7 +121,7 @@ sap.ui.define([
             });
             return Result.fail(oError, buildErrorEffects(sErrorMessage));
         });
-    };
+    }
 
     return LoadAnalyticsDashboardUseCase;
 });

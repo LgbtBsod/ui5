@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
@@ -8,19 +7,21 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime) {
     "use strict";
 
     function AutosaveDetailUseCase() {
-        UseCase.call(this, "AutosaveDetailUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    function mapFieldDelta(mInput, oCurrent) {
+function mapFieldDelta(mInput, oCurrent) {
         var mFieldMap = {
             LPC_KEY: "Lpc",
             PROF_KEY: "Profession",
@@ -71,10 +72,7 @@ sap.ui.define([
         );
     }
 
-    AutosaveDetailUseCase.prototype = Object.create(UseCase.prototype);
-    AutosaveDetailUseCase.prototype.constructor = AutosaveDetailUseCase;
-
-    AutosaveDetailUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oDelta;
@@ -157,7 +155,7 @@ sap.ui.define([
                 lockOwnerSessionMatches: !DetailPersistenceRuntime.isLockFailure(oClassification.taxonomy)
             }).effects);
         });
-    };
+    }
 
     return AutosaveDetailUseCase;
 });

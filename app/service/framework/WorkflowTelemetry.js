@@ -1,10 +1,10 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/CorrelationId",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/MemoryTelemetryBuffer",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/DebugTelemetryAdapter",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (CorrelationId, ModelStateRuntime, TelemetryRuntime, MemoryTelemetryBuffer, DebugTelemetryAdapter, WorkflowContracts) {
     "use strict";
 

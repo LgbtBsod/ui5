@@ -1,20 +1,18 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsPayloadNormalizer",
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
-], function (UseCase, Result, Effects, AnalyticsPayloadNormalizer, WorkflowTelemetry) {
+], function (Result, Effects, AnalyticsPayloadNormalizer, WorkflowTelemetry) {
     "use strict";
 
     function AnalyticsUseCase() {
-        UseCase.call(this, "AnalyticsUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    AnalyticsUseCase.prototype = Object.create(UseCase.prototype);
-    AnalyticsUseCase.prototype.constructor = AnalyticsUseCase;
-
-    AnalyticsUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sIntent = (mInput && mInput.intent) || "";
         var bSilent = !!(mInput && mInput.silent);
 
@@ -74,7 +72,7 @@ sap.ui.define([
         }
 
         return Promise.resolve(Result.ok({}, []));
-    };
+    }
 
     return AnalyticsUseCase;
 });

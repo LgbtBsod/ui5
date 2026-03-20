@@ -1,5 +1,5 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
+﻿sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFieldContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailNumberValueHelpRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailPersonSuggestRuntime"

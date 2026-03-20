@@ -1,10 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (UseCase, DetailAuthorizationRuntime, UseCaseValue, CreateSentinel, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants"
+], function (DetailAuthorizationRuntime, UseCaseValue, CreateSentinel, NavigationContracts) {
     "use strict";
 
     function resolveCanonicalRootId(oRepo, sRootId) {
@@ -19,13 +18,12 @@ sap.ui.define([
     }
 
     function ResolveDetailRouteUseCase() {
-        UseCase.call(this, "ResolveDetailRouteUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    ResolveDetailRouteUseCase.prototype = Object.create(UseCase.prototype);
-    ResolveDetailRouteUseCase.prototype.constructor = ResolveDetailRouteUseCase;
-
-    ResolveDetailRouteUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var sRouteName = String((mInput && mInput.routeName) || NavigationContracts.ROUTES.DETAIL).trim() || NavigationContracts.ROUTES.DETAIL;
         var mRouteArgs = (mInput && mInput.routeArgs) || {};
@@ -58,7 +56,7 @@ sap.ui.define([
             };
         });
         });
-    };
+    }
 
     return ResolveDetailRouteUseCase;
 });

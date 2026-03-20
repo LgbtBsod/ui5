@@ -1,9 +1,9 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts"
 ], function (ComponentBootContracts, ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, EffectFeedbackContracts) {
     "use strict";

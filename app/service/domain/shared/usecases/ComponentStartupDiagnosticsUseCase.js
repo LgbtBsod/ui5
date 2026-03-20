@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/StartupCapabilityDiagnosticsUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result"
-], function (StartupCapabilityDiagnosticsUseCase, Result) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/BackendModeContracts"
+], function (StartupCapabilityDiagnosticsUseCase, Result, BackendModeContracts) {
     "use strict";
 
     function createCapabilitySync(mDeps) {
@@ -9,7 +10,7 @@ sap.ui.define([
         var fnGetBackendMode = mDeps && mDeps.getBackendMode;
         return function (mOverrides) {
             if (!oStateModel || typeof oStateModel.getProperty !== "function") return { ok: false, reason: "missing_state_model_adapter" };
-            var oDiagnostics = StartupCapabilityDiagnosticsUseCase.buildDiagnostics(Object.assign({ backendMode: typeof fnGetBackendMode === "function" ? fnGetBackendMode() : "real", metadataOk: oStateModel.getProperty("/mainServiceMetadataOk"), metadataError: oStateModel.getProperty("/mainServiceMetadataError") }, mOverrides || {}));
+            var oDiagnostics = StartupCapabilityDiagnosticsUseCase.buildDiagnostics(Object.assign({ backendMode: typeof fnGetBackendMode === "function" ? fnGetBackendMode() : BackendModeContracts.MODES.REAL, metadataOk: oStateModel.getProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_OK), metadataError: oStateModel.getProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_ERROR) }, mOverrides || {}));
             return StartupCapabilityDiagnosticsUseCase.applyToStateModel(oStateModel, oDiagnostics);
         };
     }
@@ -19,15 +20,15 @@ sap.ui.define([
         var oStateModel = mDeps && mDeps.stateModel;
         var fnSync = mDeps && mDeps.syncCapability;
         if (!oMainServiceModel || !oStateModel || typeof fnSync !== "function") return { ok: false, reason: "missing_dependency" };
-        oStateModel.setProperty("/mainServiceMetadataOk", null);
-        oStateModel.setProperty("/mainServiceMetadataError", "");
+        oStateModel.setProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_OK, null);
+        oStateModel.setProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_ERROR, "");
         fnSync({ metadataOk: null });
-        oMainServiceModel.attachMetadataLoaded(function () { oStateModel.setProperty("/mainServiceMetadataOk", true); oStateModel.setProperty("/mainServiceMetadataError", ""); fnSync(); });
+        oMainServiceModel.attachMetadataLoaded(function () { oStateModel.setProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_OK, true); oStateModel.setProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_ERROR, ""); fnSync(); });
         oMainServiceModel.attachMetadataFailed(function (oEvent) {
             var oParams = oEvent && oEvent.getParameters ? oEvent.getParameters() : {};
             var sReason = (oParams && (oParams.message || oParams.responseText)) || "Metadata request failed";
-            oStateModel.setProperty("/mainServiceMetadataOk", false);
-            oStateModel.setProperty("/mainServiceMetadataError", sReason);
+            oStateModel.setProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_OK, false);
+            oStateModel.setProperty(BackendModeContracts.PATHS.MAIN_SERVICE_METADATA_ERROR, sReason);
             fnSync();
             if (typeof mDeps.onMetadataFailed === "function") mDeps.onMetadataFailed(sReason);
         });

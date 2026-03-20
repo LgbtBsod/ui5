@@ -1,6 +1,6 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (DetailRowEntityConfig, ModelContracts) {
     "use strict";
 

@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts, GatewayContractConstants) {
+], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
     "use strict";
 
     /*
@@ -59,9 +60,13 @@ sap.ui.define([
             "$filter": buildStringEqFilter("RootId", sRootId),
             "$select": "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn"
         });
-        return Promise.all([pRoot, pBasic, pChecks, pBarriers]).then(function (aResult) {
+        var pAttachments = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
+            "$filter": buildBinaryEqFilter("RootKey", sRootId),
+            "$select": "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,Value,ScanStatus,ScannedOn,CreatedOn,ChangedOn"
+        });
+        return Promise.all([pRoot, pBasic, pChecks, pBarriers, pAttachments]).then(function (aResult) {
             var oSnapshot = ODataChecklistSnapshotRuntime.mapResult(aResult[0], aResult[1], aResult[2], aResult[3]);
-            oSnapshot.attachments = [];
+            oSnapshot.attachments = ODataAdapterUtils.asArray(aResult[4]).map(ChecklistSnapshotMapper.mapAttachmentRow);
             return oSnapshot;
         });
     }

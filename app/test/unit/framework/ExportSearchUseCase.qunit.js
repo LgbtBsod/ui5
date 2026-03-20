@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ExportSearchUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport"
 ], function (ExportSearchUseCase, SpreadsheetExport) {
@@ -8,7 +8,7 @@ sap.ui.define([
 
     QUnit.test("export keeps explicit false values in normalized rows", function (assert) {
         var done = assert.async();
-        var oUseCase = new ExportSearchUseCase();
+        var oUseCase = ExportSearchUseCase();
         var fnOriginalDownload = SpreadsheetExport.download;
         var oCaptured = null;
 
@@ -51,7 +51,7 @@ sap.ui.define([
 
     QUnit.test("complex date range export falls back to currently bound rows", function (assert) {
         var done = assert.async();
-        var oUseCase = new ExportSearchUseCase();
+        var oUseCase = ExportSearchUseCase();
         var fnOriginalDownload = SpreadsheetExport.download;
         var bRepoCalled = false;
         var bBoundRowsCalled = false;

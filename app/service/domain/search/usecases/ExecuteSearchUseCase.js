@@ -1,20 +1,18 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (UseCase, Result, Effects, SearchSelectionEffects, StatePaths) {
+], function (Result, Effects, SearchSelectionEffects, StatePaths) {
     "use strict";
 
     function ExecuteSearchUseCase() {
-        UseCase.call(this, "ExecuteSearchUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    ExecuteSearchUseCase.prototype = Object.create(UseCase.prototype);
-    ExecuteSearchUseCase.prototype.constructor = ExecuteSearchUseCase;
-
-    ExecuteSearchUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var oSmartControls = mCtx && mCtx.smartControls;
         if (!oSmartControls || typeof oSmartControls.rebindSearchTable !== "function") {
             return Promise.resolve(Result.fail({ message: "Smart controls unavailable", code: "SMART_CONTROLS_UNAVAILABLE" }));
@@ -38,7 +36,7 @@ sap.ui.define([
         oSmartControls.rebindSearchTable();
 
         return Promise.resolve(Result.ok({ intent: sIntent }, aEffects));
-    };
+    }
 
     return ExecuteSearchUseCase;
 });

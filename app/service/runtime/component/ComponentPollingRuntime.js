@@ -1,7 +1,8 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ModelStateRuntime, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (ModelStateRuntime, WorkflowContracts, ModelPathContracts) {
     "use strict";
 
     function createHeartbeatManager(mOptions) {
@@ -19,7 +20,7 @@ sap.ui.define([
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.heartbeat !== "function") {
                     return Promise.resolve({ success: false, is_killed: false, skipped: true, missing: "ctx.lock.heartbeat" });
                 }
-                var sRootId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
+                var sRootId = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");
                 var sSessionGuid = ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "");
                 return oComponent._ctx.lock.heartbeat({ rootId: sRootId, sessionGuid: sSessionGuid }).then(function (oRes) {
                     return Object.assign({ rootId: sRootId, sessionGuid: sSessionGuid }, oRes || {});
@@ -44,7 +45,7 @@ sap.ui.define([
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock.status !== "function") {
                     return Promise.resolve({ success: false, is_killed: false, skipped: true, missing: "ctx.lock.status" });
                 }
-                var sRootId = ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "");
+                var sRootId = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");
                 var sSessionGuid = ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "");
                 return oComponent._ctx.lock.status({ rootId: sRootId, sessionGuid: sSessionGuid }).then(function (oRes) {
                     return Object.assign({ rootId: sRootId, sessionGuid: sSessionGuid }, oRes || {});

@@ -1,19 +1,20 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellPaneRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ShellGlobalsRuntime",
     "sap/ui/Device",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device, JsRuntime, ModelPathContracts) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -187,7 +188,7 @@ sap.ui.define([
                 this._oShellUserBinding.attachChange(this._fnShellStateChange);
                 this._oShellFrontendSourceBinding = oState.bindProperty("/frontendConfigSource");
                 this._oShellFrontendSourceBinding.attachChange(this._fnShellStateChange);
-                this._oShellSelectedIdBinding = oState.bindProperty("/selectedId");
+                this._oShellSelectedIdBinding = oState.bindProperty(ModelPathContracts.SELECTED_ID);
                 this._oShellSelectedIdBinding.attachChange(this._fnShellStateChange);
                 this._oShellRouteBinding = oState.bindProperty("/currentRouteName");
                 this._oShellRouteBinding.attachChange(this._fnShellStateChange);

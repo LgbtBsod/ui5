@@ -1,6 +1,6 @@
-sap.ui.define([
+﻿sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/FrontendConfigConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants"
 ], function (DebugLogger, FrontendConfigConstants) {
     "use strict";
 

@@ -1,8 +1,8 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (StatePaths, CreateSentinel, ModelStateRuntime, WorkflowContracts, ModelPathContracts) {
     "use strict";
@@ -37,7 +37,7 @@ sap.ui.define([
                 ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_DETAIL, false)
                 || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)
             ),
-            "/currentRootKey": ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID || "/activeObjectId", "") || "",
+            "/currentRootKey": ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "",
             "/sessionGuid": ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || ""
         });
     }

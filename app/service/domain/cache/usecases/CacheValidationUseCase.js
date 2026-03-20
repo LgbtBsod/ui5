@@ -1,11 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/ports/BrowserCachePort",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/ports/LastChangeSetPort",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (UseCase, Result, BrowserCachePort, LastChangeSetPort, WorkflowTelemetry, CreateSentinel) {
+], function (Result, BrowserCachePort, LastChangeSetPort, WorkflowTelemetry, CreateSentinel) {
     "use strict";
 
     function toMs(v) {
@@ -60,18 +59,20 @@ sap.ui.define([
         return true;
     }
 
-    function CacheValidationUseCase() { UseCase.call(this, "CacheValidationUseCase"); }
-    CacheValidationUseCase.prototype = Object.create(UseCase.prototype);
-    CacheValidationUseCase.prototype.constructor = CacheValidationUseCase;
+    function CacheValidationUseCase() {
+        return {
+            execute: execute
+        };
+    }
 
-    function emit(mCtx, oPayload) {
+function emit(mCtx, oPayload) {
         WorkflowTelemetry.emit("cache.validation", {
             stateModel: mCtx && mCtx.stateModel,
             payload: oPayload || {}
         });
     }
 
-    CacheValidationUseCase.prototype.execute = function (mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sRootId = (mInput && mInput.rootId) || "";
         var sEntityKind = (mInput && mInput.entityKind) || "detailSnapshot";
         var iTolerance = Number((mInput && mInput.toleranceMs) || 5500);
@@ -138,7 +139,7 @@ sap.ui.define([
                 });
             });
         });
-    };
+    }
 
     return CacheValidationUseCase;
 });

@@ -6,6 +6,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ManagerFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapDependencyBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
@@ -47,7 +49,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/EnsureDictLoadedUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/InitializeAppUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/LoadCurrentUserUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/DiagnosticsUseCase"
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/DiagnosticsUseCase",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/BackendModeContracts"
 ], function (
     UIComponent,
     JSONModel,
@@ -56,6 +59,8 @@ sap.ui.define([
     StatePaths,
     ModelStateRuntime,
     ManagerFacade,
+    ComponentBootstrapDependencyBuilder,
+    ComponentBootstrapContracts,
     DeltaPayloadBuilder,
     CreateSentinel,
     GatewayClient,
@@ -97,11 +102,54 @@ sap.ui.define([
     EnsureDictLoadedUseCase,
     InitializeAppUseCase,
     LoadCurrentUserUseCase,
-    DiagnosticsUseCase
+    DiagnosticsUseCase,
+    BackendModeContracts
 ) {
     "use strict";
 
+    function createBootstrapDeps(oComponent) {
+        var mGroups = ComponentBootstrapDependencyBuilder.build({
+            UIComponent: UIComponent,
+            JSONModel: JSONModel,
+            Device: Device,
+            ModelFactory: ModelFactory,
+            StatePaths: StatePaths,
+            ModelStateRuntime: ModelStateRuntime,
+            ManagerFacade: ManagerFacade,
+            DeltaPayloadBuilder: DeltaPayloadBuilder,
+            CreateSentinel: CreateSentinel,
+            GatewayClient: GatewayClient,
+            DebugLogger: DebugLogger,
+            RuntimeTimerSanitizer: RuntimeTimerSanitizer,
+            TimeConfigService: TimeConfigService,
+            CtxFactory: CtxFactory,
+            EffectApplier: EffectApplier,
+            FeedbackPolicy: FeedbackPolicy,
+            WorkflowCoordinator: WorkflowCoordinator,
+            TelemetryRuntime: TelemetryRuntime,
+            LayoutStateRuntime: LayoutStateRuntime,
+            ActionDispatcher: ActionDispatcher,
+            ActionContract: ActionContract,
+            WorkflowTelemetry: WorkflowTelemetry,
+            ThemeService: ThemeService,
+            SearchUiConfig: SearchUiConfig,
+            DetailFacade: DetailFacade,
+            ApplyRuntimeSettingsUseCase: ApplyRuntimeSettingsUseCase,
+            EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
+            InitializeAppUseCase: InitializeAppUseCase,
+            LoadCurrentUserUseCase: LoadCurrentUserUseCase,
+            DiagnosticsUseCase: DiagnosticsUseCase
+        });
+        var mDeps = ComponentBootstrapDependencyBuilder.flatten(mGroups);
+        mDeps.ComponentRuntimeSupport = ComponentAppRuntime.buildComponentRuntimeSupport();
+        return {
+            groups: mGroups,
+            deps: mDeps
+        };
+    }
+
     function init(oComponent, aInitArgs) {
+        var oBootstrap;
         var mBootstrapDeps;
         var oModelBootstrap;
         var oRuntimeContext;
@@ -115,64 +163,16 @@ sap.ui.define([
         };
         ThemeService.syncDocumentRootClasses();
 
-        mBootstrapDeps = {
-            UIComponent: UIComponent,
-            ModelFactory: ModelFactory,
-            ModelStateRuntime: ModelStateRuntime,
-            Managers: ManagerFacade,
-            JSONModel: JSONModel,
-            WorkflowCoordinator: WorkflowCoordinator,
-            DeltaPayloadBuilder: DeltaPayloadBuilder,
-            GatewayClient: GatewayClient,
-            DebugLogger: DebugLogger,
-            RuntimeTimerSanitizer: RuntimeTimerSanitizer,
-            TimeConfigService: TimeConfigService,
-            ApplyRuntimeSettingsUseCase: ApplyRuntimeSettingsUseCase,
-            EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
-            InitializeAppUseCase: InitializeAppUseCase,
-            LoadCurrentUserUseCase: LoadCurrentUserUseCase,
-            DiagnosticsUseCase: DiagnosticsUseCase,
-            CtxFactory: CtxFactory,
-            EffectApplier: EffectApplier,
-            FeedbackPolicy: FeedbackPolicy,
-            ComponentRuntimeSupport: ComponentAppRuntime.buildComponentRuntimeSupport(),
-            ComponentLockReleaseRuntime: ComponentLockReleaseRuntime,
-            ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
-            ComponentModelInitRuntime: ComponentModelInitRuntime,
-            ComponentMainServiceRuntime: ComponentMainServiceRuntime,
-            ComponentCoreInitRuntime: ComponentCoreInitRuntime,
-            ComponentStateSeedRuntime: ComponentStateSeedRuntime,
-            ComponentActionRuntime: ComponentActionRuntime,
-            ComponentFeedbackInitRuntime: ComponentFeedbackInitRuntime,
-            ComponentRuntimeHandlerRuntime: ComponentRuntimeHandlerRuntime,
-            ComponentCrossTabRuntime: ComponentCrossTabRuntime,
-            ComponentInitListenersRuntime: ComponentInitListenersRuntime,
-            ComponentManagerOrchestrationRuntime: ComponentManagerOrchestrationRuntime,
-            ComponentLockEventsRuntime: ComponentLockEventsRuntime,
-            ComponentModelBootstrap: ComponentModelBootstrap,
-            ComponentCoreRuntimeBootstrap: ComponentCoreRuntimeBootstrap,
-            ComponentLifecycleBootstrap: ComponentLifecycleBootstrap,
-            ComponentBootRuntime: ComponentBootRuntime,
-            TelemetryRuntime: TelemetryRuntime,
-            LayoutStateRuntime: LayoutStateRuntime,
-            StatePaths: StatePaths,
-            DetailFacade: DetailFacade,
-            ActionDispatcher: ActionDispatcher,
-            ActionContract: ActionContract,
-            WorkflowTelemetry: WorkflowTelemetry,
-            CreateSentinel: CreateSentinel,
-            Device: Device,
-            ThemeRuntime: ThemeService,
-            SearchUiConfig: SearchUiConfig
-        };
+        oBootstrap = createBootstrapDeps(oComponent);
+        mBootstrapDeps = oBootstrap.deps;
 
         oModelBootstrap = ComponentModelBootstrap.bootstrap(oComponent, mBootstrapDeps);
         DiagnosticsUseCase.execute({}, {
             mainServiceModel: oModelBootstrap.mainServiceModel,
             stateModel: oModelBootstrap.models.stateModel,
-            getBackendMode: function () { return "real"; },
+            getBackendMode: function () { return BackendModeContracts.MODES.REAL; },
             onMetadataFailed: function () {
-                mBootstrapDeps.ModelStateRuntime.writeOnModel(oModelBootstrap.models.stateModel, "/backendMode", "real");
+                mBootstrapDeps.ModelStateRuntime.writeOnModel(oModelBootstrap.models.stateModel, BackendModeContracts.PATHS.BACKEND_MODE, BackendModeContracts.MODES.REAL);
             }
         });
         ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
@@ -188,14 +188,7 @@ sap.ui.define([
             mainServiceModel: oModelBootstrap.mainServiceModel
         }));
 
-        return ComponentLifecycleBootstrap.bootstrap(oComponent, Object.assign({}, mBootstrapDeps, {
-            managers: {
-                HeartbeatManager: ManagerFacade.HeartbeatManager,
-                GCDManager: ManagerFacade.GCDManager,
-                ActivityMonitor: ManagerFacade.ActivityMonitor,
-                AutoSaveCoordinator: ManagerFacade.AutoSaveCoordinator,
-                LockStatusMonitor: ManagerFacade.LockStatusMonitor
-            },
+        return ComponentLifecycleBootstrap.bootstrap(oComponent, Object.assign({}, ComponentBootstrapDependencyBuilder.withManagerRuntime(mBootstrapDeps, ManagerFacade), {
             InitializeAppUseCase: InitializeAppUseCase,
             EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
             LoadCurrentUserUseCase: LoadCurrentUserUseCase

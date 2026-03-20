@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationRuntime",
@@ -9,19 +8,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (UseCase, Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, WorkflowContracts, WorkflowRuntimeConstants) {
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     function EnterEditUseCase() {
-        UseCase.call(this, "EnterEditUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    EnterEditUseCase.prototype = Object.create(UseCase.prototype);
-    EnterEditUseCase.prototype.constructor = EnterEditUseCase;
-
-    function readCode(oLock) {
+function readCode(oLock) {
         return String((oLock && oLock.code) || "").toUpperCase();
     }
 
@@ -33,7 +31,7 @@ sap.ui.define([
         ];
     }
 
-    EnterEditUseCase.prototype.execute = function (mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var bEdit = !!(mInput && mInput.state);
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = UseCaseValue.rootId(mInput);
@@ -161,7 +159,7 @@ sap.ui.define([
             });
             return Result.fail(oError, readOnlyEffects());
         });
-    };
+    }
 
     return EnterEditUseCase;
 });

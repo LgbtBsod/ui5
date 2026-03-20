@@ -1,8 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (LockFacade, ControllerModelRuntime, JsRuntime) {
+], function (LockAdapter, ControllerModelRuntime, JsRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -31,7 +31,7 @@ sap.ui.define([
         },
         releaseLock: function (sObjectId, sSessionId) {
             if (!sObjectId || !sSessionId) { return Promise.resolve(); }
-            return LockFacade.release(sObjectId, sSessionId);
+            return LockAdapter.release({ rootId: sObjectId, sessionGuid: sSessionId }).catch(function () { return null; });
         },
         setLockPending: function (oStateModel, bPending) { if (oStateModel) { oStateModel.setProperty("/lockOperationPending", !!bPending); } },
         deleteRowFromEvent: function (oEvent, sModelName, sCollectionPath) {

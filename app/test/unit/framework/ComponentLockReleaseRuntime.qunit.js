@@ -1,7 +1,7 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (ComponentLockReleaseRuntime, GatewayContractConstants, WorkflowContracts) {
     "use strict";
 

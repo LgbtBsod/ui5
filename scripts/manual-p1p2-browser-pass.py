@@ -24,9 +24,9 @@ ARTIFACT_DIR = ROOT / "docs" / "artifacts" / "manual-p1p2"
 ARTIFACT_JSON = ROOT / "docs" / "artifacts" / "manual-p1p2-browser-evidence.json"
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 KNOWN_ROOT_ID = "E49B679F518F4947BD7A0F2CC1C4AC46"
-SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
-DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
-ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsTargetPage"
+SEARCH_VIEW_ID = "checklist_app_comp---searchView"
+DETAIL_VIEW_ID = "checklist_app_comp---detailView"
+ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsView"
 
 VIEWPORTS = [
     {"name": "desktop", "width": 1440, "height": 960},
@@ -187,9 +187,11 @@ def wait_for_app_ready(page, delay_ms: int = 1200) -> None:
           }
           const core = sap.ui.getCore();
           const app = core.byId("checklist_app_comp---app");
-          const search = core.byId("checklist_app_comp---searchTargetPage");
-          const detail = core.byId("checklist_app_comp---detailTargetPage");
-          return !!app && !!search && !!detail && document.body.classList.contains("chkAppRoot");
+          const state = app && app.getModel && app.getModel("state");
+          const routeName = state && state.getProperty ? String(state.getProperty("/currentRouteName") || "") : "";
+          return !!app
+            && document.body.classList.contains("chkAppRoot")
+            && (routeName === "search" || routeName === "detail" || routeName === "analytics");
         }
         """,
         timeout=90000,
@@ -335,7 +337,7 @@ def trigger_create_from_controller(page) -> dict[str, Any]:
         """
         () => {
           const core = sap.ui.getCore();
-          const search = core && core.byId && core.byId("checklist_app_comp---searchTargetPage");
+          const search = core && core.byId && core.byId("checklist_app_comp---searchView");
           const controller = search && search.getController && search.getController();
           if (!controller || typeof controller.onCreate !== "function") {
             return { ok: false, reason: "search-controller-create-unavailable" };
@@ -357,7 +359,7 @@ def trigger_search_go(page, timeout: int = 12000) -> dict[str, Any]:
             """
             () => {
               const core = sap.ui.getCore();
-              const button = core && core.byId && core.byId("checklist_app_comp---searchTargetPage--searchSmartFilterBar-btnGo");
+              const button = core && core.byId && core.byId("checklist_app_comp---searchView--searchSmartFilterBar-btnGo");
               if (!button || typeof button.firePress !== "function") {
                 return { ok: false, reason: "search-go-unavailable" };
               }
@@ -376,7 +378,7 @@ def invoke_detail_action(page, action: str) -> dict[str, Any]:
         """
         (action) => {
           const core = sap.ui.getCore();
-          const detail = core && core.byId && core.byId("checklist_app_comp---detailTargetPage");
+          const detail = core && core.byId && core.byId("checklist_app_comp---detailView");
           const controller = detail && detail.getController && detail.getController();
           if (!controller || typeof controller[action] !== "function") {
             return { ok: false, reason: "action unavailable", action };
@@ -437,7 +439,7 @@ def resolve_existing_root(page) -> str:
         """
         () => {
           const core = sap.ui.getCore();
-          const smartTable = core.byId("checklist_app_comp---searchTargetPage--searchSmartTable");
+          const smartTable = core.byId("checklist_app_comp---searchView--searchSmartTable");
           const table = smartTable && smartTable.getTable && smartTable.getTable();
           const items = table && table.getItems ? table.getItems() : [];
           if (!Array.isArray(items) || !items.length) {
@@ -817,8 +819,30 @@ def run_matrix_checks(browser, tracker: ScenarioTracker, artifact_rows: list[dic
             }
             """
         )
-        invoke_detail_action(page, "onOpenLocationValueHelp")
-        page.wait_for_selector("[id$='locationValueHelpDialog']", timeout=15000)
+        opened_location_vh = page.evaluate(
+            """
+            () => {
+              const trigger =
+                document.querySelector(".detailLocationInput [id$='-vhi']")
+                || document.querySelector(".detailLocationInput .sapUiIconPointer")
+                || document.querySelector("[aria-label*='локац'] [id$='-vhi']");
+              if (trigger && typeof trigger.click === "function") {
+                trigger.click();
+                return { ok: true, source: "dom-trigger" };
+              }
+              return { ok: false, source: "dom-trigger-missing" };
+            }
+            """
+        )
+        if not opened_location_vh.get("ok"):
+            invoke_detail_action(page, "onOpenLocationValueHelp")
+        page.wait_for_function(
+            """
+            () => !!document.querySelector("[id$='locationValueHelpDialog']")
+              || !!document.querySelector("[id$='locationValueHelpSearchField']")
+            """,
+            timeout=15000,
+        )
         page.wait_for_timeout(400)
 
         focus_open = page.evaluate("() => document.activeElement ? document.activeElement.id || '' : ''")
@@ -826,7 +850,7 @@ def run_matrix_checks(browser, tracker: ScenarioTracker, artifact_rows: list[dic
             "F2",
             f"{viewport['name']}: dialog initial focus",
             "locationValueHelpSearchField" in focus_open,
-            {"activeElementId": focus_open},
+            {"activeElementId": focus_open, "openAction": opened_location_vh},
         )
 
         scroll_state = page.evaluate(
@@ -923,7 +947,7 @@ def run_slow_network_check(browser, tracker: ScenarioTracker, artifact_rows: lis
     mid = page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId("checklist_app_comp---searchTargetPage").getModel("view");
+          const view = sap.ui.getCore().byId("checklist_app_comp---searchView").getModel("view");
           const root = document.querySelector(".searchExperienceStack");
           const shell = document.querySelector(".appRootSplitter");
           return {
@@ -940,7 +964,7 @@ def run_slow_network_check(browser, tracker: ScenarioTracker, artifact_rows: lis
     end = page.evaluate(
         """
         () => {
-          const view = sap.ui.getCore().byId("checklist_app_comp---searchTargetPage").getModel("view");
+          const view = sap.ui.getCore().byId("checklist_app_comp---searchView").getModel("view");
           const root = document.querySelector(".searchExperienceStack");
           const shell = document.querySelector(".appRootSplitter");
           return {
@@ -991,7 +1015,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
         """
         () => {
           const core = sap.ui.getCore();
-          const detail = core.byId("checklist_app_comp---detailTargetPage");
+          const detail = core.byId("checklist_app_comp---detailView");
           const state = detail.getModel("state");
           const view = detail.getModel("view");
           const controls = detail.findAggregatedObjects(true, (c) => !!(c && c.data && c.data("validationKey")));
@@ -1006,7 +1030,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     blur_state = page.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---detailView");
           const controls = detail.findAggregatedObjects(true, (c) => !!(c && c.data && c.data("validationKey")));
           const first = controls[0];
           if (!first || typeof first.getFocusDomRef !== "function") {
@@ -1027,7 +1051,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     d1_post = page.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---detailView");
           const state = detail.getModel("state");
           const view = detail.getModel("view");
           const visibleMessages = Array.from(document.querySelectorAll(".detailFieldValidationText"))
@@ -1057,7 +1081,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     d2_state = page.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---detailView");
           const state = detail.getModel("state");
           const view = detail.getModel("view");
           const strip = document.querySelector(".chkFeedbackStrip.chkFeedbackError");
@@ -1090,7 +1114,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     d4_state = page.evaluate(
         """
         () => {
-          const selected = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage").getModel("selected");
+          const selected = sap.ui.getCore().byId("checklist_app_comp---detailView").getModel("selected");
           const longText = "LONG_".repeat(80);
           selected.setProperty("/basic/equipment", longText);
           selected.setProperty("/basic/LOCATION_NAME", longText);
@@ -1124,7 +1148,7 @@ def run_detail_validation_and_content_checks(browser, tracker: ScenarioTracker, 
     unicode_state = page.evaluate(
         """
         () => {
-          const selected = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage").getModel("selected");
+          const selected = sap.ui.getCore().byId("checklist_app_comp---detailView").getModel("selected");
           const values = {
             equipment: "Nasos 🚀 漢字 Пример",
             observer: "Иван Иванов 😀",
@@ -1262,7 +1286,7 @@ def run_feedback_toast_check(browser, tracker: ScenarioTracker) -> None:
         """
         () => new Promise((resolve) => {
           sap.ui.require(["PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier", "sap/m/MessageToast"], function (EffectApplier, MessageToast) {
-            const detail = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage");
+            const detail = sap.ui.getCore().byId("checklist_app_comp---detailView");
             const controller = detail && detail.getController && detail.getController();
             if (!controller) {
               resolve({ ok: false, reason: "detail controller missing" });
@@ -1475,7 +1499,7 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
     page_two.evaluate(
         """
         () => {
-          const detail = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage");
+          const detail = sap.ui.getCore().byId("checklist_app_comp---detailView");
           const state = detail && detail.getModel && detail.getModel("state");
           if (state && state.setProperty) {
             state.setProperty("/workflow/detail/editMode", "EDIT");
@@ -1488,7 +1512,7 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
     before = page_two.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---detailView").getModel("state");
           return {
             mode: state.getProperty("/workflow/detail/editMode"),
             lock: state.getProperty("/workflow/detail/lock/state"),
@@ -1518,7 +1542,7 @@ def run_cross_tab_check(browser, tracker: ScenarioTracker, artifact_rows: list[d
     after = page_two.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---detailView").getModel("state");
           return {
             mode: state.getProperty("/workflow/detail/editMode"),
             lock: state.getProperty("/workflow/detail/lock/state"),
@@ -1551,7 +1575,7 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
     pre = page.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---detailView").getModel("state");
           return {
             mode: state.getProperty("/workflow/detail/editMode"),
             lock: state.getProperty("/workflow/detail/lock/state"),
@@ -1568,7 +1592,7 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
     before_reload = page.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---detailView").getModel("state");
           return {
             mode: state.getProperty("/workflow/detail/editMode"),
             lock: state.getProperty("/workflow/detail/lock/state")
@@ -1581,7 +1605,7 @@ def run_deep_link_refresh_check(browser, tracker: ScenarioTracker) -> None:
     after_reload = page.evaluate(
         """
         () => {
-          const state = sap.ui.getCore().byId("checklist_app_comp---detailTargetPage").getModel("state");
+          const state = sap.ui.getCore().byId("checklist_app_comp---detailView").getModel("state");
           return {
             mode: state.getProperty("/workflow/detail/editMode"),
             lock: state.getProperty("/workflow/detail/lock/state"),
@@ -1764,7 +1788,7 @@ def run_startup_check(browser, tracker: ScenarioTracker) -> None:
           if (typeof sap === "undefined" || !sap.ui || !sap.ui.getCore) {
             return false;
           }
-          const search = sap.ui.getCore().byId("checklist_app_comp---searchTargetPage");
+          const search = sap.ui.getCore().byId("checklist_app_comp---searchView");
           const view = search && search.getModel && search.getModel("view");
           return !!search && !!view && !!view.getProperty("/smartTableReady");
         }

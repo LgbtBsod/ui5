@@ -1,10 +1,10 @@
-sap.ui.define([
+﻿sap.ui.define([
     "sap/ui/core/Fragment",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DialogContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
 ], function (Fragment, EffectTextResolver, ControllerViewStateRuntime, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, YearValue) {
     "use strict";

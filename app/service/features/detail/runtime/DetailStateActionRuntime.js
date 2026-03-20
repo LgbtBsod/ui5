@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ClipboardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
@@ -8,10 +8,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (
     ClipboardRuntime,
     LayoutStateRuntime,
@@ -25,7 +26,8 @@ sap.ui.define([
     NavigationContracts,
     ModelContracts,
     OperationSourceContracts,
-    JsRuntime
+    JsRuntime,
+    ModelPathContracts
 ) {
     "use strict";
 
@@ -67,8 +69,8 @@ sap.ui.define([
                 if (sDecision === "DISCARD") {
                     ModelStateRuntime.resetDetailWorkflowState(oController, {
                         "/layout": NavigationContracts.LAYOUTS.ONE_COLUMN,
-                        "/selectedId": "",
-                        "/activeObjectId": ""
+                        [ModelPathContracts.SELECTED_ID]: "",
+                        [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
                     });
                     ModelStateRuntime.resetDetailRuntimeData(oController);
                     NavigationIntentService.navigateToSearch(oController);

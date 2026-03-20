@@ -1,7 +1,7 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/AutosaveDetailUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (AutosaveDetailUseCase, StatePaths, WorkflowContracts) {
     "use strict";
 
@@ -9,7 +9,7 @@ sap.ui.define([
 
     QUnit.test("autosave keeps dirty flag when staged attachments are still pending", function (assert) {
         var done = assert.async();
-        var oUseCase = new AutosaveDetailUseCase();
+        var oUseCase = AutosaveDetailUseCase();
         var oCurrent = {
             root: { id: "CHK-1", version_number: 7 },
             basic: {},

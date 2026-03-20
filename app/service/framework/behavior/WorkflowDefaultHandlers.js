@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
@@ -7,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/WorkflowBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (LockAdapter, DialogOrchestrator, StatePaths, RootIdRuntime, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, CreateSentinel, WorkflowContracts) {
     "use strict";
 

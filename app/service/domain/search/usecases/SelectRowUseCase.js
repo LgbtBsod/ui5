@@ -1,14 +1,12 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, ModelPathContracts, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants"
+], function (Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DetailPostOpenRuntime, NavigationContracts) {
     "use strict";
 
     function readSessionGuid(mCtx) {
@@ -28,13 +26,12 @@ sap.ui.define([
     }
 
     function SelectRowUseCase() {
-        UseCase.call(this, "SelectRowUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    SelectRowUseCase.prototype = Object.create(UseCase.prototype);
-    SelectRowUseCase.prototype.constructor = SelectRowUseCase;
-
-    SelectRowUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sIntent = String((mInput && mInput.intent) || "open");
         var oSmart = mCtx && mCtx.smartControls;
         var oRepo = mCtx && mCtx.repo;
@@ -92,19 +89,12 @@ sap.ui.define([
                 if (oSmart && typeof oSmart.rebindSearchTable === "function") {
                     oSmart.rebindSearchTable();
                 }
-                return Result.ok({ selectedRootId: sRootId, intent: sIntent }, [
-                    Effects.modelPatch("selected", "/", oSnapshot),
-                    Effects.modelPatch("snapshot", "/", oSnapshot),
-                    Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sCopiedRootId),
-                    Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sCopiedRootId),
-                    Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCopiedRootId),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.EDIT),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.EDIT_LOCKED),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
+                return Result.ok({ selectedRootId: sRootId, intent: sIntent }, DetailPostOpenRuntime.buildEditableDetailEffects(sCopiedRootId, {
+                    snapshot: oSnapshot
+                }).concat([
                     Effects.toast("checklistCopied", "success"),
                     Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sCopiedRootId }, false)
-                ]);
+                ]));
             }).catch(function (oError) {
                 return Result.fail(oError);
             });
@@ -113,7 +103,7 @@ sap.ui.define([
         return Promise.resolve(Result.ok({ selectedRootId: sRootId, intent: sIntent }, [
             Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sRootId }, false)
         ]));
-    };
+    }
 
     return SelectRowUseCase;
 });

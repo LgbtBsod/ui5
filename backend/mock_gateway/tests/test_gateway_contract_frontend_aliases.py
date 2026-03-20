@@ -280,11 +280,43 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         copied_basic_rows = copied_basic.json().get("d", {}).get("results", [])
         assert copied_basic_rows
         assert copied_basic_rows[0].get("DateCheck")
+        copied_attachments = client.get(f"{SERVICE_ROOT}/AttachmentSet", params={"$filter": f"RootKey eq '{copied_key}'"})
+        assert copied_attachments.status_code == 200
+        copied_attachment_rows = copied_attachments.json().get("d", {}).get("results", [])
+        assert len(copied_attachment_rows) == 2
+        assert all(row.get("AttachmentKey") for row in copied_attachment_rows)
+        copied_checks = client.get(f"{SERVICE_ROOT}/ChecklistCheckSet", params={"$filter": f"RootKey eq '{copied_key}'"})
+        assert copied_checks.status_code == 200
+        copied_check_rows = copied_checks.json().get("d", {}).get("results", [])
+        assert any(row.get("Comment") == "Created by autosave" for row in copied_check_rows)
+        copied_barriers = client.get(f"{SERVICE_ROOT}/ChecklistBarrierSet", params={"$filter": f"RootKey eq '{copied_key}'"})
+        assert copied_barriers.status_code == 200
+        copied_barrier_rows = copied_barriers.json().get("d", {}).get("results", [])
+        assert any(str(row.get("Comment") or "").strip() == "Barrier via create payload" for row in copied_barrier_rows)
         copied_lock = client.get(f"{SERVICE_ROOT}/LockStatusSet({copied_key})", params={"SessionGuid": "S3"})
         assert copied_lock.status_code == 200
         copied_lock_body = copied_lock.json().get("d", {})
         assert copied_lock_body.get("Ok") is True
         assert copied_lock_body.get("ReasonCode") == "OWNED_BY_YOU"
+        copied_save = client.post(
+            f"{SERVICE_ROOT}/SaveChanges",
+            json={
+                "root": {"pcct_uuid": copied_key, "equipment": "Pump Local Copy"},
+                "checks": [],
+                "barriers": [],
+                "client_version": 1,
+                "SessionGuid": "S3",
+            },
+            headers={"X-CSRF-Token": token},
+        )
+        assert copied_save.status_code == 200
+        copied_save_body = copied_save.json().get("d", {})
+        assert copied_save_body.get("pcct_uuid") == copied_key
+        assert copied_save_body.get("version_number") == 2
+        reopened_copy = client.get(f"{SERVICE_ROOT}/ChecklistRootSet({copied_key})")
+        assert reopened_copy.status_code == 200
+        reopened_copy_body = reopened_copy.json().get("d", {})
+        assert reopened_copy_body.get("VersionNumber") == 2
 
         stale = client.post(f"{SERVICE_ROOT}/AutoSave", json=autosave_payload, headers={"X-CSRF-Token": token})
         assert stale.status_code == 200

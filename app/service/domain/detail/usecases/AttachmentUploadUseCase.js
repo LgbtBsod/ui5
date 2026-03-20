@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
@@ -10,7 +9,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, JsRuntime, AttachmentEffectRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (Result, Effects, JsRuntime, AttachmentEffectRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -69,13 +68,12 @@ sap.ui.define([
     }
 
     function AttachmentUploadUseCase() {
-        UseCase.call(this, "AttachmentUploadUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    AttachmentUploadUseCase.prototype = Object.create(UseCase.prototype);
-    AttachmentUploadUseCase.prototype.constructor = AttachmentUploadUseCase;
-
-    AttachmentUploadUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sRootId = String((mInput && mInput.rootId) || "").trim();
         if (!sRootId && !CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(Result.fail({
@@ -91,7 +89,7 @@ sap.ui.define([
         }).catch(function (oError) {
             return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
         });
-    };
+    }
 
     return AttachmentUploadUseCase;
 });

@@ -1,9 +1,9 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/NavigationBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "sap/ui/core/routing/HashChanger",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
 ], function (NavigationBehaviorHelpers, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts, JsRuntime) {
     "use strict";

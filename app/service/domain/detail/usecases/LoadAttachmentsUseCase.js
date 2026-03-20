@@ -1,22 +1,20 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
+], function (Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
     "use strict";
 
     function LoadAttachmentsUseCase() {
-        UseCase.call(this, "LoadAttachmentsUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    LoadAttachmentsUseCase.prototype = Object.create(UseCase.prototype);
-    LoadAttachmentsUseCase.prototype.constructor = LoadAttachmentsUseCase;
-
-    LoadAttachmentsUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
@@ -48,7 +46,7 @@ sap.ui.define([
         }).catch(function (oError) {
             return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
         });
-    };
+    }
 
     return LoadAttachmentsUseCase;
 });

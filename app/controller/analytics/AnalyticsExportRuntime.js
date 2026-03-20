@@ -1,11 +1,11 @@
-sap.ui.define([
+﻿sap.ui.define([
     "sap/ui/core/Fragment",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DialogContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",

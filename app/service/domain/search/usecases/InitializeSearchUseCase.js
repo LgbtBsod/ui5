@@ -1,21 +1,19 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants"
-], function (UseCase, Result, Effects, StatePaths, AnalyticsStateConstants, FacadeCommandConstants) {
+], function (Result, Effects, StatePaths, AnalyticsStateConstants, FacadeCommandConstants) {
     "use strict";
 
     function InitializeSearchUseCase() {
-        UseCase.call(this, "InitializeSearchUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    InitializeSearchUseCase.prototype = Object.create(UseCase.prototype);
-    InitializeSearchUseCase.prototype.constructor = InitializeSearchUseCase;
-
-    InitializeSearchUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sReadyAt = new Date().toISOString();
         return Promise.resolve(Result.ok({ reason: (mInput && mInput.reason) || FacadeCommandConstants.SEARCH.BOOTSTRAP }, [
             Effects.modelPatch("state", StatePaths.WORKFLOW_SEARCH_MODE, "EXACT"),
@@ -43,7 +41,7 @@ sap.ui.define([
                 Effects.modelPatch("view", "/bootstrapBusy", false)
             ]);
         });
-    };
+    }
 
     return InitializeSearchUseCase;
 });

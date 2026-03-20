@@ -1,8 +1,9 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (LayoutStateRuntime, ModelStateRuntime, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (LayoutStateRuntime, ModelStateRuntime, NavigationContracts, ModelPathContracts) {
     "use strict";
 
     function normalizeId(vId) {
@@ -18,14 +19,14 @@ sap.ui.define([
         }
         if (sRoute === NavigationContracts.ROUTES.ANALYTICS) {
             return normalizeId(
-                ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "") ||
-                ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
+                ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "") ||
+                ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
             );
         }
         if (NavigationContracts.isDetailRoute(sRoute) && sArgId) {
             return sArgId;
         }
-        return normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
+        return normalizeId(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, ""));
     }
 
     function resolveActiveObjectId(sLayout, sRouteName, mArgs, oStateModel) {
@@ -38,8 +39,8 @@ sap.ui.define([
             return sArgId;
         }
         return normalizeId(
-            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") ||
-            ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "")
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") ||
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
         );
     }
 
@@ -61,8 +62,8 @@ sap.ui.define([
             return null;
         }
         sPrevLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
-        sPrevSelectedId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
-        sPrevActiveObjectId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", ""));
+        sPrevSelectedId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, ""));
+        sPrevActiveObjectId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""));
         sPrevRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         sNextSelectedId = resolveSelectedId(sLayout, sRouteName, mArgs, oStateModel);
         sNextActiveObjectId = resolveActiveObjectId(sLayout, sRouteName, mArgs, oStateModel);
@@ -73,11 +74,11 @@ sap.ui.define([
             bChanged = true;
         }
         if (sPrevSelectedId !== sNextSelectedId) {
-            ModelStateRuntime.writeOnModel(oStateModel, "/selectedId", sNextSelectedId);
+            ModelStateRuntime.writeOnModel(oStateModel, ModelPathContracts.SELECTED_ID, sNextSelectedId);
             bChanged = true;
         }
         if (sPrevActiveObjectId !== sNextActiveObjectId) {
-            ModelStateRuntime.writeOnModel(oStateModel, "/activeObjectId", sNextActiveObjectId);
+            ModelStateRuntime.writeOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, sNextActiveObjectId);
             bChanged = true;
         }
         if (sPrevLayout !== sLayout) {

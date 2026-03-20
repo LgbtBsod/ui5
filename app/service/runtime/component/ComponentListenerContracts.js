@@ -1,7 +1,8 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (ModelContracts, NavigationContracts) {
+﻿sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (ModelContracts, NavigationContracts, ModelPathContracts) {
     "use strict";
 
     return Object.freeze({
@@ -13,12 +14,12 @@ sap.ui.define([
             ENV: "env"
         }),
         PATHS: Object.freeze({
-            ACTIVE_OBJECT_ID: "/activeObjectId",
+            ACTIVE_OBJECT_ID: ModelPathContracts.ACTIVE_OBJECT_ID,
             DETAIL_ACCESS_GUARD: "/detailAccessGuard",
             IS_DIRTY: "/isDirty",
             IS_LOADING: "/isLoading",
             NAV_GUARD_BYPASS: "/navGuardBypass",
-            SELECTED_ID: "/selectedId"
+            SELECTED_ID: ModelPathContracts.SELECTED_ID
         }),
         VALUES: Object.freeze({
             AUTHORIZED: "AUTHORIZED",

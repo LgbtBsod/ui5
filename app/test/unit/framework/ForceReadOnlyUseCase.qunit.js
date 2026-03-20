@@ -1,7 +1,7 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/ForceReadOnlyUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (ForceReadOnlyUseCase, StatePaths, WorkflowContracts) {
     "use strict";
 
@@ -9,7 +9,7 @@ sap.ui.define([
 
     QUnit.test("preserveDirty downgrade keeps selected state instead of reverting to stale snapshot", function (assert) {
         var done = assert.async();
-        var oUseCase = new ForceReadOnlyUseCase();
+        var oUseCase = ForceReadOnlyUseCase();
         var oSelected = {
             root: { id: "CHK-1" },
             basic: { Profession: "CURRENT" }

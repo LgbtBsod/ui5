@@ -3,15 +3,15 @@
  * Keep this file intentionally small.
  */
 
-/* UI5 1.71 FCL layout still needs host-level renderer alignment for full-height pages. */
-.chkApp .appRootFcl .sapMNav,
-.chkApp .appRootFcl .sapMNavItem,
-.chkApp .appRootFcl .sapUiView,
-.chkApp .searchPage > .sapUiXMLView,
-.chkApp .detailPage > .sapUiXMLView,
-.chkApp .analyticsPage > .sapUiXMLView,
-.chkApp .searchPage > .sapUiXMLView > .sapMPage,
-.chkApp .searchPage > .sapUiXMLView > .sapMPage > section,
+/* Sanctioned compatibility hook: UI5 1.71 FCL still needs renderer containers for full-height pages. */
+.chkApp .appRootFclTransparent .sapMNav,
+.chkApp .appRootFclTransparent .sapMNavItem,
+.chkApp .appRootFclTransparent .sapUiView,
+.chkApp .searchPage.sapMPage > .sapUiXMLView,
+.chkApp .detailPage.sapMPage > .sapUiXMLView,
+.chkApp .analyticsPage.sapMPage > .sapUiXMLView,
+.chkApp .searchPage.sapMPage > .sapUiXMLView > .sapMPage,
+.chkApp .searchPage.sapMPage > .sapUiXMLView > .sapMPage > section,
 .chkApp .pageTransparent .sapMPageEnableScrolling,
 .chkApp .pageTransparent .sapMPageScroll {
   min-height: 0;
@@ -19,19 +19,20 @@
   height: 100%;
 }
 
-.chkApp .searchPage > .sapUiXMLView > .sapMPage > section {
+.chkApp .searchPage.sapMPage > .sapUiXMLView > .sapMPage > section {
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-/* Sanctioned compatibility hook: UI5 1.71 scroll hosts expose scrollbar styling only through renderer containers. */
-.chkApp .sapMScrollCont,
+/* Sanctioned compatibility hook: page and dialog scroll hosts expose scrollbar styling only through renderer containers. */
+.chkApp .pageTransparent .sapMScrollCont,
 .chkApp .sapMDialogScrollCont,
 .chkApp .sapMDialogScroll,
-.chkApp .sapUiTableCtrlScr,
-.chkApp .sapUiTableVSb,
-.chkApp .sapUiTableHSb,
-.chkApp .sapMListTblCnt {
+.chkApp .detailGridTable .sapUiTableCtrlScr,
+.chkApp .detailGridTable .sapUiTableVSb,
+.chkApp .detailGridTable .sapUiTableHSb,
+.chkApp .flatEditorTable .sapMListTblCnt,
+.chkApp .analyticsMatrixTable .sapMListTblCnt {
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--accent-rgb), 0.34) rgba(160, 184, 220, 0.12);
 }

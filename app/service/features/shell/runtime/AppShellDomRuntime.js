@@ -7,6 +7,11 @@ sap.ui.define([
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
 
+    function resolveShellHeaderHostDom(oController) {
+        var oShellHeaderControl = oController && oController.byId && oController.byId("appShellHeaderHost");
+        return oShellHeaderControl && typeof oShellHeaderControl[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oShellHeaderControl[METHODS.GET_DOM_REF]();
+    }
+
     function syncShellFlexItem(oController) {
         var oLayout = oController && oController.byId && oController.byId("mainFcl");
         var oLayoutData;
@@ -25,8 +30,7 @@ sap.ui.define([
     }
 
     function syncShellMetricVars(oController, oRootNode) {
-        var oShellHeaderControl = oController && oController.byId && oController.byId("appShellHeaderHost");
-        var oShellHeader = oShellHeaderControl && typeof oShellHeaderControl[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oShellHeaderControl[METHODS.GET_DOM_REF]();
+        var oShellHeader = resolveShellHeaderHostDom(oController);
         var oRect;
         var iBottom;
         if (!oRootNode || !oShellHeader || typeof oShellHeader.getBoundingClientRect !== TYPE_FUNCTION) {
@@ -71,6 +75,7 @@ sap.ui.define([
     return {
         focusMainContent: focusMainContent,
         notifyBackgroundResize: notifyBackgroundResize,
+        resolveShellHeaderHostDom: resolveShellHeaderHostDom,
         syncShellFlexItem: syncShellFlexItem,
         syncShellMetricVars: syncShellMetricVars
     };

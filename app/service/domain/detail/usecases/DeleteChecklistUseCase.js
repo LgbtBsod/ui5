@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAuthorizationRuntime",
@@ -8,20 +7,19 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (UseCase, Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants) {
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     function DeleteChecklistUseCase() {
-        UseCase.call(this, "DeleteChecklistUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    DeleteChecklistUseCase.prototype = Object.create(UseCase.prototype);
-    DeleteChecklistUseCase.prototype.constructor = DeleteChecklistUseCase;
-
-    DeleteChecklistUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
 
@@ -89,7 +87,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false)
             ]);
         });
-    };
+    }
 
     return DeleteChecklistUseCase;
 });

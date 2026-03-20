@@ -1,14 +1,15 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
-], function (LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -146,7 +147,7 @@ sap.ui.define([
         bShowHints = !!ModelStateRuntime.read(oController, LAYOUT_MODEL, "/personalization/showHints", false);
         sFrontendSource = String(
             ModelStateRuntime.read(oController, STATE_MODEL, "/frontendConfigSource", "")
-            || ModelStateRuntime.read(oController, STATE_MODEL, "/backendMode", "")
+            || ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.BACKEND_MODE, "")
             || "gateway_runtime"
         );
         bSearchWorkspace = !sSelectedId;

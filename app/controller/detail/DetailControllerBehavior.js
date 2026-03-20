@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/InFlightRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailService",
@@ -12,10 +12,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (
     ControllerResourceCleanup,
     InFlightRegistry,
@@ -33,7 +34,8 @@ sap.ui.define([
     NavigationContracts,
     ModelContracts,
     CreateSentinel,
-    WorkflowContracts
+    WorkflowContracts,
+    ModelPathContracts
 ) {
     "use strict";
 
@@ -72,7 +74,7 @@ sap.ui.define([
             return;
         }
         sMode = WorkflowContracts.normalizeEditMode(oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
-        sActiveObjectId = String(oStateModel.getProperty(StatePaths.ACTIVE_OBJECT_ID || "/activeObjectId") || "").trim();
+        sActiveObjectId = String(oStateModel.getProperty(ModelPathContracts.ACTIVE_OBJECT_ID) || "").trim();
         sSelectedRootId = String((oSelectedModel && oSelectedModel.getProperty && oSelectedModel.getProperty("/root/id")) || "").trim();
         oViewModel.setProperty("/isEditMode", sMode !== WorkflowContracts.EDIT_MODES.READ);
         oViewModel.setProperty("/isCreateMode", sMode === WorkflowContracts.EDIT_MODES.CREATE);
@@ -100,7 +102,7 @@ sap.ui.define([
             if (sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
                 syncComputedEditFlags(oController);
             }
-            if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== "/activeObjectId" && sPath !== "/selectedId") {
+            if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== ModelPathContracts.ACTIVE_OBJECT_ID && sPath !== ModelPathContracts.SELECTED_ID) {
                 return;
             }
             DetailAttachmentViewState.sync(oController);

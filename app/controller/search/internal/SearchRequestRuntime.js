@@ -1,10 +1,10 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
 ], function (SearchToolbarContracts, SearchMaxResults, SearchViewStateRuntime, ModelStateRuntime, ModelContracts, SearchRuntimeContracts, JsRuntime) {
     "use strict";

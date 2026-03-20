@@ -1,23 +1,21 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants) {
+], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants) {
     "use strict";
 
     function RowOpsUseCase() {
-        UseCase.call(this, "RowOpsUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    RowOpsUseCase.prototype = Object.create(UseCase.prototype);
-    RowOpsUseCase.prototype.constructor = RowOpsUseCase;
-
-    function nextNum(aRows, sField) {
+function nextNum(aRows, sField) {
         return (aRows || []).reduce(function (iMax, oRow) {
             var iVal = Number(oRow && oRow[sField]) || 0;
             return iVal > iMax ? iVal : iMax;
@@ -160,7 +158,7 @@ sap.ui.define([
         return aSafe;
     }
 
-    RowOpsUseCase.prototype.execute = function (mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         var sEntity = (mInput && mInput.entity) || "";
         var sOp = (mInput && mInput.op) || "";
@@ -186,7 +184,7 @@ sap.ui.define([
         return Promise.resolve(Result.ok({ entity: sEntity, op: sOp }, [
             Effects.log("info", "Row operation", { entity: sEntity, op: sOp })
         ]));
-    };
+    }
 
     return RowOpsUseCase;
 });

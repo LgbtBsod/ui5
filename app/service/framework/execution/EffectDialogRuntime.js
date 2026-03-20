@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LazyDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (LazyDialogRuntime, EffectActionRouting, JsRuntime) {
+], function (LazyDialogRuntime, EffectActionRouting, DialogContracts, JsRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -25,11 +26,21 @@ sap.ui.define([
         }
     };
 
+    function resolveSharedExpandedRowsDialog(oController, sId) {
+        if (sId !== DialogContracts.IDS.CHECKS_EXPANDED && sId !== DialogContracts.IDS.BARRIERS_EXPANDED) {
+            return null;
+        }
+        return LazyDialogRuntime.resolveDialog(oController, sId, {
+            dialogId: "expandedRowsDialog"
+        });
+    }
+
     function resolveDialog(oController, sId) {
         if (!oController || !sId) {
             return null;
         }
-        return LazyDialogRuntime.resolveDialog(oController, sId, {
+        return resolveSharedExpandedRowsDialog(oController, sId)
+            || LazyDialogRuntime.resolveDialog(oController, sId, {
             dialogId: sId + "Dialog"
         }) || LazyDialogRuntime.resolveDialog(oController, sId, {
             dialogId: sId

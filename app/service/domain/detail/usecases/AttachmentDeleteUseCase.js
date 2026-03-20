@@ -1,12 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (UseCase, Result, JsRuntime, UseCaseValue, AttachmentEffectRuntime, DetailAttachmentStateRuntime, CreateSentinel) {
+], function (Result, JsRuntime, UseCaseValue, AttachmentEffectRuntime, DetailAttachmentStateRuntime, CreateSentinel) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -19,17 +18,16 @@ sap.ui.define([
     }
 
     function AttachmentDeleteUseCase() {
-        UseCase.call(this, "AttachmentDeleteUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    function buildDeleteEffects(mCtx, sAttachmentId, oAttachment) {
+function buildDeleteEffects(mCtx, sAttachmentId, oAttachment) {
         return DetailAttachmentStateRuntime.removeAttachment(mCtx, sAttachmentId, oAttachment, "attachmentDeleted");
     }
 
-    AttachmentDeleteUseCase.prototype = Object.create(UseCase.prototype);
-    AttachmentDeleteUseCase.prototype.constructor = AttachmentDeleteUseCase;
-
-    AttachmentDeleteUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
         var sRootId = UseCaseValue.rootId(mInput);
         var oAttachment = (mInput && mInput.attachment) || null;
@@ -51,7 +49,7 @@ sap.ui.define([
         }).catch(function (oError) {
             return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
         });
-    };
+    }
 
     return AttachmentDeleteUseCase;
 });

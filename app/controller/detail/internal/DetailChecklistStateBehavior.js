@@ -1,11 +1,11 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailStateActionRuntime",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (DetailActionConstants, DetailCommandPolicy, ModelStateRuntime, RootIdRuntime, DetailStateActionRuntime, CreateSentinel, ModelContracts) {
     "use strict";
 

@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailViewBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
@@ -15,10 +15,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DialogContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants"
 ], function (DialogOrchestrator, DetailViewBehavior, DetailActionConstants, DetailCommandPolicy, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackCoordinator, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
@@ -34,10 +34,13 @@ sap.ui.define([
     return Object.assign({}, DetailChecklistStateBehavior, DetailChecklistRowBehavior, {
         ensureEffectDialog: function (sId) {
             var sFragment = DialogContracts.getFragmentName(sId);
+            var bExpandedRowsDialog = sFragment === DialogContracts.FRAGMENTS.CHECKS_EXPANDED
+                || sFragment === DialogContracts.FRAGMENTS.BARRIERS_EXPANDED;
             if (!sFragment) {
                 return Promise.resolve(null);
             }
             return DialogOrchestrator.ensure(this, sId, {
+                dialogId: bExpandedRowsDialog ? "expandedRowsDialog" : undefined,
                 fragmentName: sFragment,
                 afterClose: function (_oDialog, oCtrl, sDialogKey) {
                     if (oCtrl && typeof oCtrl._restoreDialogFocus === "function") {

@@ -14,14 +14,8 @@
   box-shadow: var(--shell-shadow);
 }
 
-.chkApp .appShellHeaderHost .appShellHeader.sapMHBox,
-.chkApp .appShellHeaderHost .appShellHeader.sapMVBox {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.chkApp .appShellHeader .sapMText:empty {
+.chkApp .appShellHeader .shellEyebrow:empty,
+.chkApp .appShellHeader .shellContextSubtitle:empty {
   display: none;
 }
 
@@ -39,10 +33,11 @@ body.chkAppRoot.appDark .chkApp .shellContextChip .sapUiIcon {
   color: rgba(237, 244, 255, 0.88);
 }
 
-.chkApp .appFeedbackCorrelation .sapMInputBaseContentWrapper {
+.chkApp .appFeedbackCorrelationInput .sapMInputBaseContentWrapper {
   border-radius: 999px;
 }
 
+/* Sanctioned compatibility hook: UI5 1.71 button chrome still renders the visual pill on sapMBtnInner. */
 .chkApp .shellActionBtn .sapMBtnInner,
 .chkApp .shellUserBtn .sapMBtnInner,
 .chkApp .shellThemeToggle .sapMBtnInner,
@@ -61,13 +56,15 @@ body.chkAppRoot.appDark .chkApp .shellContextChip .sapUiIcon {
   transform: translateY(0);
 }
 
+/* Sanctioned compatibility hook: OverflowToolbar menu button stays renderer-owned in UI5 1.71. */
 .chkApp .appShellHeader .sapMOverflowToolbarMenuButton {
   flex: 0 0 auto;
 }
 
 .chkApp .shellUserBtn .sapMBtnContent,
-.chkApp .appShellHeader .shellTitle,
-.chkApp .appShellHeader .sapMBtnContent {
+.chkApp .appShellHeader .shellProductTitle,
+.chkApp .shellActionBtn .sapMBtnContent,
+.chkApp .shellUserActionBtn .sapMBtnContent {
   min-width: 0;
   max-width: 100%;
 }

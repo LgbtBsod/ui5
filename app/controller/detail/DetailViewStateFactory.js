@@ -1,10 +1,10 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailAccessViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (ControllerTextRuntime, DetailAccessViewState, DetailInfoCardLayoutRuntime, DetailRuntimeContracts, DetailRowEntityConfig, WorkflowContracts) {
     "use strict";
 
@@ -67,7 +67,7 @@ sap.ui.define([
         var oCheckConfig = DetailRowEntityConfig.get("check");
         var oBarrierConfig = DetailRowEntityConfig.get("barrier");
         return {
-            /* D-03: computed properties — kept in sync by bindStateValidationModel
+            /* D-03: computed properties â€” kept in sync by bindStateValidationModel
              * in DetailControllerBehavior whenever editMode changes.
              * Initial values = READ mode on open. */
             isEditMode: false,

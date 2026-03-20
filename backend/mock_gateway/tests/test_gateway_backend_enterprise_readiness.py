@@ -4,6 +4,7 @@ import os
 import sys
 
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import OperationalError
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT not in sys.path:
@@ -11,6 +12,7 @@ if ROOT not in sys.path:
 
 from main import app  # noqa: E402
 from config import ALLOW_MOCK_USER_HEADER, APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA  # noqa: E402
+from services.current_user_service import CurrentUserService  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
 
 
@@ -50,3 +52,19 @@ def test_canonical_prefixed_routes_remain_available():
     with TestClient(app) as client:
         resp = client.get(f"{SERVICE_ROOT}/SimpleAnalytical")
     assert resp.status_code == 200
+
+
+def test_current_user_service_falls_back_when_runtime_identity_tables_are_missing():
+    class BrokenDb:
+        def get(self, _entity, _key):
+            raise OperationalError("SELECT 1", {}, Exception("missing table"))
+
+    uname = CurrentUserService.resolve_uname(db=BrokenDb())
+    profile = CurrentUserService.resolve_profile(db=BrokenDb())
+
+    assert uname == "operator"
+    assert profile == {
+        "uname": "operator",
+        "full_name": "operator",
+        "permissions": [],
+    }

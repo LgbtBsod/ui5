@@ -1,8 +1,11 @@
 from sqlalchemy import func
 import json
+import shutil
+import uuid
+from pathlib import Path
 from sqlalchemy.orm import Session
 
-from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot, SaveRequestLedger
+from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, SaveRequestLedger
 from services.lock_service import LockService
 from utils.etag import format_etag
 from utils.time import now_utc
@@ -72,6 +75,27 @@ def lpc_allows_barriers(lpc: str) -> bool:
 
 
 class ChecklistService:
+    @staticmethod
+    def _copy_attachment_rows(db: Session, source_root_id: str, target_root_id: str) -> None:
+        entries = db.query(AttachmentEntry).filter(AttachmentEntry.root_id == source_root_id).order_by(AttachmentEntry.created_on.asc()).all()
+        for entry in entries:
+            source_path = Path(entry.storage_path)
+            new_id = str(uuid.uuid4())
+            target_path = source_path.with_name(new_id)
+            shutil.copyfile(source_path, target_path)
+            db.add(AttachmentEntry(
+                id=new_id,
+                root_id=target_root_id,
+                folder_key=str(entry.folder_key or target_root_id),
+                category_key=entry.category_key,
+                file_name=entry.file_name,
+                mime_type=entry.mime_type,
+                file_size=int(entry.file_size or 0),
+                storage_path=str(target_path),
+                created_on=now_utc(),
+                changed_on=now_utc(),
+            ))
+
     @staticmethod
     def calculate_etag(db: Session, root_id: str):
         root_date = db.query(ChecklistRoot.changed_on).filter(ChecklistRoot.id == root_id).scalar()
@@ -292,6 +316,7 @@ class ChecklistService:
                     ChecklistCheck(
                         root_id=root_id,
                         text=(row or {}).get("text") or "",
+                        comment=(row or {}).get("comment") or "",
                         status="DONE" if (row or {}).get("result") else "PENDING",
                         position=i,
                     )
@@ -302,13 +327,14 @@ class ChecklistService:
                 db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
                 for i, row in enumerate(barriers_payload or []):
                     db.add(
-                        ChecklistBarrier(
-                            root_id=root_id,
-                            description=(row or {}).get("text") or (row or {}).get("description") or "",
-                            is_active=bool((row or {}).get("result", (row or {}).get("is_active", True))),
-                            position=i,
-                        )
+                    ChecklistBarrier(
+                        root_id=root_id,
+                        description=(row or {}).get("text") or (row or {}).get("description") or "",
+                        comment=(row or {}).get("comment") or "",
+                        is_active=bool((row or {}).get("result", (row or {}).get("is_active", True))),
+                        position=i,
                     )
+                )
             else:
                 db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
 
@@ -462,6 +488,7 @@ class ChecklistService:
                 ChecklistCheck(
                     root_id=new_root.id,
                     text=check.text,
+                    comment=check.comment,
                     status="PENDING",
                     position=check.position,
                 )
@@ -473,10 +500,12 @@ class ChecklistService:
                     ChecklistBarrier(
                         root_id=new_root.id,
                         description=barrier.description,
+                        comment=barrier.comment,
                         is_active=barrier.is_active,
                         position=barrier.position,
                     )
                 )
 
+        ChecklistService._copy_attachment_rows(db, source.id, new_root.id)
         db.commit()
         return new_root

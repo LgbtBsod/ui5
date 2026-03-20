@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/OpenDetailUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
 ], function (OpenDetailUseCase, StatePaths) {
@@ -8,7 +8,7 @@ sap.ui.define([
 
     QUnit.test("opening detail clears stale lock incident and conflict state", function (assert) {
         var done = assert.async();
-        var oUseCase = new OpenDetailUseCase();
+        var oUseCase = OpenDetailUseCase();
         var oSnapshot = {
             root: { id: "ROOT-1", checklistId: "CHK-00001" },
             basic: { Profession: "Operator" }
@@ -59,6 +59,65 @@ sap.ui.define([
                 source: "",
                 at: ""
             }, "cross-tab conflict state is reset");
+            done();
+        });
+    });
+
+    QUnit.test("opening already hydrated editable detail preserves edit lock state", function (assert) {
+        var done = assert.async();
+        var oUseCase = OpenDetailUseCase();
+        var oSnapshot = {
+            root: { id: "ROOT-2", checklistId: "CHK-00002" },
+            attachments: [{ AttachmentKey: "ATT-1", FileName: "copy.txt" }]
+        };
+
+        oUseCase.execute({
+            rootId: "ROOT-2"
+        }, {
+            repo: {
+                checkChecklistPermission: function () {
+                    return Promise.resolve({
+                        rootId: "ROOT-2",
+                        canView: true,
+                        canEdit: true,
+                        canDelete: true,
+                        reasonCode: "AUTHORIZED"
+                    });
+                },
+                loadDetailSnapshot: function () {
+                    return Promise.resolve(oSnapshot);
+                }
+            },
+            uiState: {
+                get: function (sModelName, sPath) {
+                    if (sModelName === "state" && sPath === "/postOpenHydratedRootId") {
+                        return "ROOT-2";
+                    }
+                    if (sModelName === "state" && sPath === "/activeObjectId") {
+                        return "ROOT-2";
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
+                        return "EDIT";
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
+                        return "EDIT_LOCKED";
+                    }
+                    return null;
+                }
+            }
+        }).then(function (oResult) {
+            var aEffects = oResult.effects || [];
+            function findPatch(sModelName, sPath) {
+                return aEffects.filter(function (oEffect) {
+                    return oEffect.type === "modelPatch" && oEffect.modelName === sModelName && oEffect.path === sPath;
+                }).pop();
+            }
+
+            assert.ok(oResult && oResult.ok, "open detail succeeds");
+            assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE).value, "EDIT", "edit mode is preserved");
+            assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE).value, "EDIT_LOCKED", "lock state is preserved");
+            assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED).value, true, "autosave stays enabled");
+            assert.deepEqual(findPatch("selected", "/attachments").value, oSnapshot.attachments, "snapshot attachments are preserved");
             done();
         });
     });

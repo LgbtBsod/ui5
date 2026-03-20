@@ -1,6 +1,6 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFormattingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsChartValueRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsMonthlyComparisonRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsKpiDeltaRuntime",

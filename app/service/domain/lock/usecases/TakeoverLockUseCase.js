@@ -1,24 +1,22 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, ModelContracts, StatePaths, ModelPathContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+], function (Result, Effects, ModelContracts, StatePaths, ModelPathContracts, WorkflowContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function TakeoverLockUseCase() {
-        UseCase.call(this, "TakeoverLockUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    TakeoverLockUseCase.prototype = Object.create(UseCase.prototype);
-    TakeoverLockUseCase.prototype.constructor = TakeoverLockUseCase;
-
-    TakeoverLockUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var oLock = mCtx && mCtx.lock;
         var oUiState = mCtx && mCtx.uiState;
         var sRootId = (mInput && mInput.rootId) || (oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
@@ -38,7 +36,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
             ]);
         });
-    };
+    }
 
     return TakeoverLockUseCase;
 });

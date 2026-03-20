@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/ODataChecklistRepoAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/DictAdapter",
@@ -104,9 +104,9 @@ sap.ui.define([
                 stateModel: mModels.state
             }),
             lastChangeSet: safeBuild(LastChangeSetAdapter),
-            cacheValidation: new CacheValidationUseCase(),
-            cacheRead: new CacheReadUseCase(),
-            cacheWrite: new CacheWriteUseCase()
+            cacheValidation: CacheValidationUseCase(),
+            cacheRead: CacheReadUseCase(),
+            cacheWrite: CacheWriteUseCase()
         };
     }
 

@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "sap/f/GridListItem",
     "sap/m/VBox",
     "sap/m/HBox",
@@ -9,9 +9,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailObserverCardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailSimpleCardRuntime"
 ], function (GridListItem, VBox, HBox, Text, Button, CustomData, ObjectStatus, BindingContextReader, ControlStyleRuntime, ControllerTextRuntime, DetailRuntimeContracts, ModelContracts, WorkflowContracts, DetailObserverCardRuntime, DetailSimpleCardRuntime) {

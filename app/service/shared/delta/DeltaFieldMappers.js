@@ -1,7 +1,6 @@
 sap.ui.define([
-  "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts"
-], function (DeltaDateCodec, DeltaContracts) {
+], function (DeltaContracts) {
   "use strict";
 
   function assignIfPresent(oTarget, sKey, vValue) {

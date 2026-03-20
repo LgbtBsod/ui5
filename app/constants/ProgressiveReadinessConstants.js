@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts"
-], function (NavigationContracts, ShellPaneContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ShellPaneConstants"
+], function (NavigationConstants, ShellPaneConstants) {
     "use strict";
 
     return Object.freeze({
@@ -20,10 +20,10 @@ sap.ui.define([
             })
         }),
         PANES: Object.freeze({
-            SEARCH_LOADED_PATH: ShellPaneContracts.READINESS_PATHS.SEARCH,
-            DETAIL_LOADED_PATH: ShellPaneContracts.READINESS_PATHS.DETAIL,
-            ANALYTICS_LOADED_PATH: ShellPaneContracts.READINESS_PATHS.ANALYTICS
+            SEARCH_LOADED_PATH: ShellPaneConstants.READINESS_PATHS.SEARCH,
+            DETAIL_LOADED_PATH: ShellPaneConstants.READINESS_PATHS.DETAIL,
+            ANALYTICS_LOADED_PATH: ShellPaneConstants.READINESS_PATHS.ANALYTICS
         }),
-        LAYOUTS: NavigationContracts.LAYOUTS
+        LAYOUTS: NavigationConstants.LAYOUTS
     });
 });

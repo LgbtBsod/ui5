@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/ValueHelpLocationUseCase"
 ], function (ValueHelpLocationUseCase) {
     "use strict";
@@ -30,7 +30,7 @@ sap.ui.define([
 
     QUnit.test("search clears stale hidden selection before showing filtered tree", function (assert) {
         var done = assert.async();
-        var oUseCase = new ValueHelpLocationUseCase();
+        var oUseCase = ValueHelpLocationUseCase();
         var oUiState = createUiState({
             "/locationVhLoaded": true,
             "/locationVhCacheKey": "2026-03-20",
@@ -71,7 +71,7 @@ sap.ui.define([
 
     QUnit.test("confirm ignores selection that is no longer visible after filtering", function (assert) {
         var done = assert.async();
-        var oUseCase = new ValueHelpLocationUseCase();
+        var oUseCase = ValueHelpLocationUseCase();
         var oUiState = createUiState({
             "/locationVhTree": [
                 { location_id: "L2", location_name: "Beta", location_text: "Beta text", location_code: "B2" }

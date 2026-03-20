@@ -1,24 +1,107 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/constants/LocationValueHelpConstants"
-], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, UseCaseValue, LocationValueHelpConstants) {
+], function (StatePaths, Result, Effects, DetailStateAccess, UseCaseValue, LocationValueHelpConstants) {
     "use strict";
 
     var SESSION_CACHE_KEY = LocationValueHelpConstants.SESSION_CACHE_KEY;
 
     function ValueHelpLocationUseCase() {
-        UseCase.call(this, "ValueHelpLocationUseCase");
-        this._mSessionCache = {};
-        this._mInflightLoads = {};
-    }
+        var oLocalState = {
+            _mSessionCache: {},
+            _mInflightLoads: {}
+        };
 
-    ValueHelpLocationUseCase.prototype = Object.create(UseCase.prototype);
-    ValueHelpLocationUseCase.prototype.constructor = ValueHelpLocationUseCase;
+        return {
+            execute: function (mInput, mCtx) {
+                var sIntent = String((mInput && mInput.intent) || "open");
+                var oUiState = mCtx && mCtx.uiState;
+                var sCacheKey = resolveCacheKey(mCtx);
+                var aViewItems = readViewCache(oUiState, sCacheKey);
+
+                if (sIntent === "treeSelection") {
+                    var oEvent = mInput && mInput.event;
+                    var oRowCtx = oEvent && oEvent.getParameter && oEvent.getParameter("rowContext");
+                    var oRow = oRowCtx && oRowCtx.getObject ? oRowCtx.getObject() : null;
+                    oUiState && oUiState.set && oUiState.set("view", "/locationVhSelection", oRow || null);
+                    return Promise.resolve(Result.ok({ selected: !!oRow }, [Effects.modelPatch("view", "/locationVhHasSelection", !!oRow)]));
+                }
+
+                if (sIntent === "confirm") {
+                    var oSelected = oUiState && oUiState.get("view", "/locationVhSelection");
+                    var aVisibleItems = (oUiState && oUiState.get("view", "/locationVhTree")) || [];
+                    var bHasValidSelection = hasVisibleSelection(aVisibleItems, oSelected);
+                    if (!bHasValidSelection) {
+                        oSelected = null;
+                    }
+                    return Promise.resolve(Result.ok({ selected: !!oSelected }, [
+                        Effects.modelPatch("selected", "/basic/LOCATION_NAME", (oSelected && oSelected.location_name) || ""),
+                        Effects.modelPatch("selected", "/basic/LOCATION_TEXT", (oSelected && (oSelected.location_text || oSelected.location_name)) || ""),
+                        Effects.modelPatch("selected", "/basic/LOCATION_KEY", (oSelected && (oSelected.location_code || oSelected.location_id)) || ""),
+                        Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, !!oSelected),
+                        Effects.modelPatch("view", "/locationVhSelection", null),
+                        Effects.modelPatch("view", "/locationVhHasSelection", false),
+                        Effects.modelPatch("view", "/locationVhHint", ""),
+                        Effects.dialog(LocationValueHelpConstants.DIALOG_ID, "close", {})
+                    ]));
+                }
+
+                if (sIntent === "open") {
+                    if (aViewItems.length) {
+                        return Promise.resolve(Result.ok({ intent: sIntent, items: aViewItems, cacheKey: sCacheKey }, buildLoadedEffects(aViewItems, true, sCacheKey)));
+                    }
+                    return ensureItemsLoaded(oLocalState, mCtx).then(function (oLoaded) {
+                        return Result.ok({ intent: sIntent, items: oLoaded.items, cacheKey: oLoaded.cacheKey }, buildLoadedEffects(oLoaded.items, true, oLoaded.cacheKey));
+                    }).catch(function (oError) {
+                        return Result.fail(oError, [
+                            Effects.modelPatch("view", "/locationVhHint", LocationValueHelpConstants.HINTS.NO_DATA),
+                            Effects.dialog(LocationValueHelpConstants.DIALOG_ID, "open", {})
+                        ]);
+                    });
+                }
+
+                if (sIntent !== "search") {
+                    return Promise.resolve(Result.ok({ intent: sIntent }, [
+                        Effects.modelPatch("view", "/locationVhSelection", null),
+                        Effects.modelPatch("view", "/locationVhHasSelection", false),
+                        Effects.modelPatch("view", "/locationVhHint", ""),
+                        Effects.dialog(LocationValueHelpConstants.DIALOG_ID, sIntent, {})
+                    ]));
+                }
+
+                var sQuery = String((mInput && mInput.value) || "").trim();
+                if (aViewItems.length) {
+                    var aFilteredLoaded = filterItems(aViewItems, sQuery);
+                    return Promise.resolve(Result.ok({ items: aFilteredLoaded, cacheKey: sCacheKey }, [
+                        Effects.modelPatch("view", "/locationVhCacheKey", sCacheKey),
+                        Effects.modelPatch("view", "/locationVhTree", aFilteredLoaded),
+                        Effects.modelPatch("view", "/locationVhSelection", null),
+                        Effects.modelPatch("view", "/locationVhHasSelection", false),
+                        Effects.modelPatch("view", "/locationVhHint", aFilteredLoaded.length ? "" : LocationValueHelpConstants.HINTS.NO_DATA)
+                    ]));
+                }
+
+                return ensureItemsLoaded(oLocalState, mCtx).then(function (oLoaded) {
+                    var aFiltered = filterItems(oLoaded.items, sQuery);
+                    return Result.ok({ items: aFiltered, cacheKey: oLoaded.cacheKey }, [
+                        Effects.modelPatch("view", "/locationVhCacheKey", oLoaded.cacheKey),
+                        Effects.modelPatch("view", "/locationVhTreeSource", oLoaded.items),
+                        Effects.modelPatch("view", "/locationVhTree", aFiltered),
+                        Effects.modelPatch("view", "/locationVhLoaded", true),
+                        Effects.modelPatch("view", "/locationVhSelection", null),
+                        Effects.modelPatch("view", "/locationVhHasSelection", false),
+                        Effects.modelPatch("view", "/locationVhHint", aFiltered.length ? "" : LocationValueHelpConstants.HINTS.NO_DATA)
+                    ]);
+                }).catch(function (oError) {
+                    return Result.fail(oError);
+                });
+            }
+        };
+    }
 
     function resolveCacheKey(mCtx) {
         var sDateCheck = String(DetailStateAccess.resolveDateCheck(mCtx) || "").trim();
@@ -187,89 +270,6 @@ sap.ui.define([
             return resolveSelectionKey(oItem) === sSelectedKey;
         });
     }
-
-    ValueHelpLocationUseCase.prototype.execute = function (mInput, mCtx) {
-        var sIntent = String((mInput && mInput.intent) || "open");
-        var oUiState = mCtx && mCtx.uiState;
-        var sCacheKey = resolveCacheKey(mCtx);
-        var aViewItems = readViewCache(oUiState, sCacheKey);
-
-        if (sIntent === "treeSelection") {
-            var oEvent = mInput && mInput.event;
-            var oRowCtx = oEvent && oEvent.getParameter && oEvent.getParameter("rowContext");
-            var oRow = oRowCtx && oRowCtx.getObject ? oRowCtx.getObject() : null;
-            oUiState && oUiState.set("view", "/locationVhSelection", oRow || null);
-            return Promise.resolve(Result.ok({ selected: !!oRow }, [Effects.modelPatch("view", "/locationVhHasSelection", !!oRow)]));
-        }
-
-        if (sIntent === "confirm") {
-            var oSelected = oUiState && oUiState.get("view", "/locationVhSelection");
-            var aVisibleItems = (oUiState && oUiState.get("view", "/locationVhTree")) || [];
-            var bHasValidSelection = hasVisibleSelection(aVisibleItems, oSelected);
-            if (!bHasValidSelection) {
-                oSelected = null;
-            }
-            return Promise.resolve(Result.ok({ selected: !!oSelected }, [
-                Effects.modelPatch("selected", "/basic/LOCATION_NAME", (oSelected && oSelected.location_name) || ""),
-                Effects.modelPatch("selected", "/basic/LOCATION_TEXT", (oSelected && (oSelected.location_text || oSelected.location_name)) || ""),
-                Effects.modelPatch("selected", "/basic/LOCATION_KEY", (oSelected && (oSelected.location_code || oSelected.location_id)) || ""),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, !!oSelected),
-                Effects.modelPatch("view", "/locationVhSelection", null),
-                Effects.modelPatch("view", "/locationVhHasSelection", false),
-                Effects.modelPatch("view", "/locationVhHint", ""),
-                Effects.dialog(LocationValueHelpConstants.DIALOG_ID, "close", {})
-            ]));
-        }
-
-        if (sIntent === "open") {
-            if (aViewItems.length) {
-                return Promise.resolve(Result.ok({ intent: sIntent, items: aViewItems, cacheKey: sCacheKey }, buildLoadedEffects(aViewItems, true, sCacheKey)));
-            }
-            return ensureItemsLoaded(this, mCtx).then(function (oLoaded) {
-                return Result.ok({ intent: sIntent, items: oLoaded.items, cacheKey: oLoaded.cacheKey }, buildLoadedEffects(oLoaded.items, true, oLoaded.cacheKey));
-            }).catch(function (oError) {
-                return Result.fail(oError, [
-                    Effects.modelPatch("view", "/locationVhHint", LocationValueHelpConstants.HINTS.NO_DATA),
-                    Effects.dialog(LocationValueHelpConstants.DIALOG_ID, "open", {})
-                ]);
-            });
-        }
-
-        if (sIntent !== "search") {
-            return Promise.resolve(Result.ok({ intent: sIntent }, [
-                Effects.modelPatch("view", "/locationVhSelection", null),
-                Effects.modelPatch("view", "/locationVhHasSelection", false),
-                Effects.modelPatch("view", "/locationVhHint", ""),
-                Effects.dialog(LocationValueHelpConstants.DIALOG_ID, sIntent, {})
-            ]));
-        }
-
-        var sQuery = String((mInput && mInput.value) || "").trim();
-        if (aViewItems.length) {
-            var aFilteredLoaded = filterItems(aViewItems, sQuery);
-            return Promise.resolve(Result.ok({ items: aFilteredLoaded, cacheKey: sCacheKey }, [
-                Effects.modelPatch("view", "/locationVhCacheKey", sCacheKey),
-                Effects.modelPatch("view", "/locationVhTree", aFilteredLoaded),
-                Effects.modelPatch("view", "/locationVhSelection", null),
-                Effects.modelPatch("view", "/locationVhHasSelection", false),
-                Effects.modelPatch("view", "/locationVhHint", aFilteredLoaded.length ? "" : LocationValueHelpConstants.HINTS.NO_DATA)
-            ]));
-        }
-        return ensureItemsLoaded(this, mCtx).then(function (oLoaded) {
-            var aFiltered = filterItems(oLoaded.items, sQuery);
-            return Result.ok({ items: aFiltered, cacheKey: oLoaded.cacheKey }, [
-                Effects.modelPatch("view", "/locationVhCacheKey", oLoaded.cacheKey),
-                Effects.modelPatch("view", "/locationVhTreeSource", oLoaded.items),
-                Effects.modelPatch("view", "/locationVhTree", aFiltered),
-                Effects.modelPatch("view", "/locationVhLoaded", true),
-                Effects.modelPatch("view", "/locationVhSelection", null),
-                Effects.modelPatch("view", "/locationVhHasSelection", false),
-                Effects.modelPatch("view", "/locationVhHint", aFiltered.length ? "" : LocationValueHelpConstants.HINTS.NO_DATA)
-            ]);
-        }).catch(function (oError) {
-            return Result.fail(oError);
-        });
-    };
 
     return ValueHelpLocationUseCase;
 });

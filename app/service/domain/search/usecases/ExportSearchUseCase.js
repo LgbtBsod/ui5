@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
@@ -7,17 +6,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
-], function (UseCase, Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry) {
+], function (Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry) {
     "use strict";
 
     function ExportSearchUseCase() {
-        UseCase.call(this, "ExportSearchUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    ExportSearchUseCase.prototype = Object.create(UseCase.prototype);
-    ExportSearchUseCase.prototype.constructor = ExportSearchUseCase;
-
-    function pick(v, fallback) {
+function pick(v, fallback) {
         return v === undefined || v === null ? fallback : v;
     }
 
@@ -209,7 +207,7 @@ sap.ui.define([
         });
     }
 
-    ExportSearchUseCase.prototype.execute = function (mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sEntity = (mInput && mInput.entity) || "screen";
         return resolveExportRows(mInput || {}, mCtx || {}).then(function (aRows) {
             var aNormalized = normalizeRows(aRows, sEntity);
@@ -238,7 +236,7 @@ sap.ui.define([
             });
             return Result.fail({ message: sMessageCode, code: sMessageCode }, [Effects.toast("exportFailed", "error")]);
         });
-    };
+    }
 
     return ExportSearchUseCase;
 });

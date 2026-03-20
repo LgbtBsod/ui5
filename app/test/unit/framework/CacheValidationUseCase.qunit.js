@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/usecases/CacheValidationUseCase"
 ], function (CacheValidationUseCase) {
     "use strict";
@@ -7,7 +7,7 @@ sap.ui.define([
 
     QUnit.test("keeps cache when stamp delta is within tolerance", function (assert) {
         var done = assert.async();
-        var oUseCase = new CacheValidationUseCase();
+        var oUseCase = CacheValidationUseCase();
         var oSnapshot = {
             meta: {
                 aggChangedOn: "2026-03-17T10:00:00.000Z"
@@ -47,7 +47,7 @@ sap.ui.define([
 
     QUnit.test("invalidates cache when stamp delta exceeds tolerance", function (assert) {
         var done = assert.async();
-        var oUseCase = new CacheValidationUseCase();
+        var oUseCase = CacheValidationUseCase();
         var bCleared = false;
         var oCache = {
             read: function () {

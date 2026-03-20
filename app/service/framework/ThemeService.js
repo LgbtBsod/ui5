@@ -17,9 +17,6 @@ sap.ui.define([
     var MOTION_DISABLED_CLASS = ThemeContracts.CLASSES.MOTION_DISABLED;
     var MOTION_ENABLED_CLASS = ThemeContracts.CLASSES.MOTION_ENABLED;
     var THEME_PROFILE_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.PROFILE;
-    var LEGACY_THEME_PROFILE_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.LEGACY_PROFILE;
-    var LEGACY_THEME_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.LEGACY_THEME;
-    var THEME_PROFILE_RECOVERY_KEY = ThemeContracts.STORAGE_KEYS.PROFILE_RECOVERY;
     var DEFAULT_MODE = ThemeContracts.MODES.DEFAULT;
     var DEFAULT_ANIMATION_ENABLED = ThemeContracts.DEFAULTS.ANIMATION_ENABLED;
     var MODE_TO_THEME = {
@@ -45,41 +42,19 @@ sap.ui.define([
         };
     }
 
-    function recoverLegacyProfileDefaults(oProfile) {
-        var oNormalized = buildThemeProfile(oProfile && oProfile.mode, oProfile && oProfile.animationEnabled);
-        var sRecoveredFlag;
-        try {
-            sRecoveredFlag = window.localStorage.getItem(THEME_PROFILE_RECOVERY_KEY);
-            if (!sRecoveredFlag) {
-                setThemeProfile(oNormalized);
-                window.localStorage.setItem(THEME_PROFILE_RECOVERY_KEY, "done");
-            }
-        } catch (e) {
-            // Best-effort recovery only.
-        }
-        return oNormalized;
-    }
-
     function getThemeProfile() {
         var sRawProfile;
         var oParsedProfile;
-        var sLegacyMode;
         try {
-            sRawProfile = window.localStorage.getItem(THEME_PROFILE_STORAGE_KEY)
-                || window.localStorage.getItem(LEGACY_THEME_PROFILE_STORAGE_KEY);
+            sRawProfile = window.localStorage.getItem(THEME_PROFILE_STORAGE_KEY);
             if (sRawProfile) {
                 oParsedProfile = JSON.parse(sRawProfile);
-                return recoverLegacyProfileDefaults(oParsedProfile);
+                return buildThemeProfile(oParsedProfile && oParsedProfile.mode, oParsedProfile && oParsedProfile.animationEnabled);
             }
         } catch (e) {
-            // Fallback to legacy key and defaults.
+            // Fallback to defaults.
         }
-        try {
-            sLegacyMode = window.localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
-        } catch (e2) {
-            sLegacyMode = DEFAULT_MODE;
-        }
-        return setThemeProfile(buildThemeProfile(sLegacyMode || DEFAULT_MODE, DEFAULT_ANIMATION_ENABLED));
+        return setThemeProfile(buildThemeProfile(DEFAULT_MODE, DEFAULT_ANIMATION_ENABLED));
     }
 
     function setThemeProfile(oProfile) {

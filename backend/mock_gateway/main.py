@@ -36,10 +36,12 @@ from models import (
     AnalyticsBreakdown,
     AnalyticsRefreshState,
     AnalyticsSnapshot,
+    AppUserProfile,
     ChecklistBarrier,
     ChecklistCheck,
     ChecklistRoot,
     FrontendRuntimeSettings,
+    RuntimeUserContext,
 )
 from utils.odata import SERVICE_ROOT, odata_error_response
 from utils.odata_batch import extract_boundary, parse_batch_request
@@ -72,6 +74,8 @@ def _ensure_required_tables() -> None:
         AnalyticsBreakdown.__tablename__: AnalyticsBreakdown.__table__,
         AnalyticsRefreshState.__tablename__: AnalyticsRefreshState.__table__,
         FrontendRuntimeSettings.__tablename__: FrontendRuntimeSettings.__table__,
+        AppUserProfile.__tablename__: AppUserProfile.__table__,
+        RuntimeUserContext.__tablename__: RuntimeUserContext.__table__,
     }
     missing_tables = [table for name, table in required_tables.items() if name not in existing_tables]
     if not missing_tables:

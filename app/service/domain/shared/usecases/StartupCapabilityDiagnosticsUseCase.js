@@ -1,21 +1,24 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/Result"], function (Result) {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/BackendModeContracts"
+], function (Result, BackendModeContracts) {
     "use strict";
 
     function buildDiagnostics(mInput) {
         var m = mInput || {};
-        var sMode = "real";
+        var sMode = String(m.backendMode || BackendModeContracts.MODES.REAL);
         var bMetadataOk = m.metadataOk === true;
         var bMetadataFailed = m.metadataOk === false;
-        var sReason = bMetadataFailed ? "metadata_unavailable" : "";
-        var sStatus = sReason ? "degraded" : (bMetadataOk ? "ready" : "pending");
-        var sKey = sStatus === "pending" ? "capabilityPending" : (sReason ? "capabilityDegradedMetadata" : "capabilityReady");
-        return { status: sStatus, degradedReason: sReason, messageKey: sKey, backend: { mode: sMode, configuredMode: "real" }, metadata: { ok: bMetadataOk, error: m.metadataError || "" }, checkedAt: new Date().toISOString() };
+        var sReason = bMetadataFailed ? BackendModeContracts.CAPABILITY.METADATA_UNAVAILABLE : "";
+        var sStatus = sReason ? BackendModeContracts.CAPABILITY.DEGRADED : (bMetadataOk ? BackendModeContracts.CAPABILITY.READY : BackendModeContracts.CAPABILITY.PENDING);
+        var sKey = sStatus === BackendModeContracts.CAPABILITY.PENDING ? "capabilityPending" : (sReason ? "capabilityDegradedMetadata" : "capabilityReady");
+        return { status: sStatus, degradedReason: sReason, messageKey: sKey, backend: { mode: sMode, configuredMode: BackendModeContracts.MODES.REAL }, metadata: { ok: bMetadataOk, error: m.metadataError || "" }, checkedAt: new Date().toISOString() };
     }
 
     function applyToStateModel(oStateModel, oDiagnostics) {
         if (!oStateModel || typeof oStateModel.setProperty !== "function") return { ok: false, reason: "missing_state_model_adapter" };
         oStateModel.setProperty("/capabilityDiagnostics", oDiagnostics || {});
-        oStateModel.setProperty("/capabilityStatus", (oDiagnostics && oDiagnostics.status) || "pending");
+        oStateModel.setProperty("/capabilityStatus", (oDiagnostics && oDiagnostics.status) || BackendModeContracts.CAPABILITY.PENDING);
         oStateModel.setProperty("/capabilityDegradedReason", (oDiagnostics && oDiagnostics.degradedReason) || "");
         oStateModel.setProperty("/capabilityMessageKey", (oDiagnostics && oDiagnostics.messageKey) || "capabilityPending");
         return { ok: true };

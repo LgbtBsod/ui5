@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "sap/m/VBox",
     "sap/m/Text",
     "sap/m/Input",
@@ -7,7 +7,7 @@ sap.ui.define([
     "sap/m/Select",
     "sap/ui/core/Item",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
 ], function (VBox, Text, Input, DatePicker, TimePicker, Select, CoreItem, ControlStyleRuntime, WorkflowContracts) {
     "use strict";
 

@@ -22,9 +22,9 @@ URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 DETAIL_ROOT = "E49B679F518F4947BD7A0F2CC1C4AC46"
 CREATE_ROUTE = "#/checklist/__CREATE"
 APP_VIEW_ID = "checklist_app_comp---app"
-SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
-DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
-ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsTargetPage"
+SEARCH_VIEW_ID = "checklist_app_comp---searchView"
+DETAIL_VIEW_ID = "checklist_app_comp---detailView"
+ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsView"
 SHELL_HEADER_HOST_ID = f"{APP_VIEW_ID}--appShellHeaderHost"
 SEARCH_WORKBENCH_ID = f"{SEARCH_VIEW_ID}--searchWorkbenchDock"
 SEARCH_FILTER_ID = f"{SEARCH_VIEW_ID}--searchFilterCard"
@@ -266,7 +266,7 @@ def capture_resize_runtime(page) -> dict[str, Any]:
             && sap.ui
             && sap.ui.getCore
             && !!sap.ui.getCore().byId('checklist_app_comp---app--mainFcl')
-            && !!sap.ui.getCore().byId('checklist_app_comp---searchTargetPage--searchWorkbenchDock')
+            && !!sap.ui.getCore().byId('checklist_app_comp---searchView--searchWorkbenchDock')
             && !!sap.ui.getCore().byId('checklist_app_comp---app--appShellHeaderHost');
           const bgStyle = bg ? getComputedStyle(bg) : null;
           const containerStyle = container ? getComputedStyle(container) : null;
@@ -359,7 +359,7 @@ def detail_rows_snapshot(page, kind: str) -> dict[str, Any]:
     return page.evaluate(
         """
         (kind) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailView');
           const selected = view && view.getModel && view.getModel('selected');
           const state = sap.ui.getCore().byId('checklist_app_comp---app')?.getModel?.('state');
           const path = kind === 'barrier' ? '/barriers' : '/checks';
@@ -447,7 +447,7 @@ def apply_visible_row_dom_edits(page, kind: str, text_value: str, comment_value:
         """
         ({ kind, textValue, commentValue }) => {
           const core = sap.ui.getCore();
-          const view = core.byId('checklist_app_comp---detailTargetPage');
+          const view = core.byId('checklist_app_comp---detailView');
           const controller = view && view.getController && view.getController();
           const selected = view && view.getModel && view.getModel('selected');
           const rowsPath = kind === 'barrier' ? '/barriers' : '/checks';
@@ -523,7 +523,7 @@ def press_visible_dialog_delete(page, kind: str) -> None:
         """
         (kind) => {
           const core = sap.ui.getCore();
-          const view = core.byId('checklist_app_comp---detailTargetPage');
+          const view = core.byId('checklist_app_comp---detailView');
           const controller = view && view.getController && view.getController();
           const selected = view && view.getModel && view.getModel('selected');
           const rowsPath = kind === 'barrier' ? '/barriers' : '/checks';
@@ -564,8 +564,8 @@ def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
             "commentLabel": "Комментарий",
             "addMethod": "onAddCheckRow",
             "expandMethod": "onExpandChecks",
-            "closeMethod": "onCloseChecksExpanded",
-            "dialogSelector": "[id$='checksExpandedDialog']",
+            "closeMethod": "onCloseExpandedRows",
+            "dialogSelector": "[id$='expandedRowsDialog']",
             "textValue": "Smoke check row",
             "commentValue": "Check smoke comment"
         },
@@ -575,8 +575,8 @@ def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
             "commentLabel": "Комментарий",
             "addMethod": "onAddBarrierRow",
             "expandMethod": "onExpandBarriers",
-            "closeMethod": "onCloseBarriersExpanded",
-            "dialogSelector": "[id$='barriersExpandedDialog']",
+            "closeMethod": "onCloseExpandedRows",
+            "dialogSelector": "[id$='expandedRowsDialog']",
             "textValue": "Smoke barrier row",
             "commentValue": "Barrier smoke comment"
         }
@@ -589,7 +589,7 @@ def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
     page.wait_for_function(
         """
         ({ kind, expected }) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailView');
           const selected = view && view.getModel && view.getModel('selected');
           const path = kind === 'barrier' ? '/barriers' : '/checks';
           const rows = selected && selected.getProperty ? (selected.getProperty(path) || []) : [];
@@ -620,7 +620,7 @@ def run_detail_row_ui_flow(page, kind: str) -> dict[str, Any]:
     page.wait_for_function(
         """
         ({ kind, expected }) => {
-          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailView');
           const selected = view && view.getModel && view.getModel('selected');
           const path = kind === 'barrier' ? '/barriers' : '/checks';
           const rows = selected && selected.getProperty ? (selected.getProperty(path) || []) : [];
@@ -675,7 +675,7 @@ def main() -> int:
         wait_for_analytics_ready(page)
         shell_analytics_state = route_state(page)
         ensure(shell_analytics_state["routeName"] == "analytics", "shell analytics did not navigate to analytics route")
-        ensure(shell_analytics_state["midPageId"].endswith("analyticsTargetPage"), "shell analytics did not activate analytics mid page")
+        ensure(shell_analytics_state["midPageId"].endswith("analyticsView"), "shell analytics did not activate analytics mid page")
         invoke_controller_method(page, ANALYTICS_VIEW_ID, "onCloseAnalytics")
         wait_for_search_route(page)
         report["shellAnalytics"] = shell_analytics_state

@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ModelStateRuntime, ControllerModelRuntime, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (ModelStateRuntime, ControllerModelRuntime, CreateSentinel, ModelPathContracts) {
     "use strict";
 
     function sanitizeId(vId) {
@@ -34,16 +35,16 @@ sap.ui.define([
 
     function resolveFromStateModel(oStateModel) {
         return resolveCanonicalId([
-            ModelStateRuntime.readOnModel(oStateModel, "/postOpenHydratedRootId", ""),
-            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", ""),
-            ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "")
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, ""),
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
         ]);
     }
 
     function resolveActiveFromStateModel(oStateModel) {
         return resolveCanonicalId([
-            ModelStateRuntime.readOnModel(oStateModel, "/postOpenHydratedRootId", ""),
-            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, ""),
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
         ]);
     }
 

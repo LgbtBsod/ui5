@@ -1,22 +1,20 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailStateAccess, StatePaths, UseCaseValue, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+], function (Result, Effects, DetailStateAccess, StatePaths, UseCaseValue, WorkflowContracts) {
     "use strict";
 
     function PersonSuggestUseCase() {
-        UseCase.call(this, "PersonSuggestUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    PersonSuggestUseCase.prototype = Object.create(UseCase.prototype);
-    PersonSuggestUseCase.prototype.constructor = PersonSuggestUseCase;
-
-    function selectedItemPayload(oItem) {
+function selectedItemPayload(oItem) {
         if (!oItem || !oItem.getBindingContext) { return null; }
         var oCtx = oItem.getBindingContext("view");
         return oCtx && oCtx.getObject ? oCtx.getObject() : null;
@@ -50,7 +48,7 @@ sap.ui.define([
         return Number((oUiState && oUiState.get && oUiState.get("view", requestVersionPathForTarget(sTarget))) || 0) === Number(iVersion || 0);
     }
 
-    PersonSuggestUseCase.prototype.execute = function (mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sIntent = String((mInput && mInput.intent) || "suggest");
         var oUiState = mCtx && mCtx.uiState;
         var sMode = resolveMode(mCtx);
@@ -136,7 +134,7 @@ sap.ui.define([
             }
             return Result.fail(oError);
         });
-    };
+    }
 
     return PersonSuggestUseCase;
 });

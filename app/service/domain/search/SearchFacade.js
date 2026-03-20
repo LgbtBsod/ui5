@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/InitializeSearchUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/BuildSearchFilterUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ExecuteSearchUseCase",
@@ -28,15 +28,15 @@ sap.ui.define([
     function SearchFacade(mDeps) {
         var d = mDeps || {};
         this._uc = {
-            bootstrap: d.bootstrapUseCase || new InitializeSearchUseCase(),
-            buildFilter: d.buildFilterUseCase || new BuildSearchFilterUseCase(),
-            execute: d.executeUseCase || new ExecuteSearchUseCase(),
-            rebind: d.rebindUseCase || new RebindSearchUseCase(),
-            selectRow: d.selectRowUseCase || new SelectRowUseCase(),
-            selectionChanged: d.selectionChangedUseCase || new SelectionChangedUseCase(),
-            exportFlow: d.exportUseCase || new ExportSearchUseCase(),
-            analytics: d.analyticsUseCase || new AnalyticsUseCase(),
-            applyRebindPolicy: d.applyRebindPolicyUseCase || new ApplyRebindPolicyUseCase()
+            bootstrap: d.bootstrapUseCase || InitializeSearchUseCase(),
+            buildFilter: d.buildFilterUseCase || BuildSearchFilterUseCase(),
+            execute: d.executeUseCase || ExecuteSearchUseCase(),
+            rebind: d.rebindUseCase || RebindSearchUseCase(),
+            selectRow: d.selectRowUseCase || SelectRowUseCase(),
+            selectionChanged: d.selectionChangedUseCase || SelectionChangedUseCase(),
+            exportFlow: d.exportUseCase || ExportSearchUseCase(),
+            analytics: d.analyticsUseCase || AnalyticsUseCase(),
+            applyRebindPolicy: d.applyRebindPolicyUseCase || ApplyRebindPolicyUseCase()
         };
     }
 

@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
@@ -8,7 +8,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (
     JSONModel,
     RouteModeCoordinator,
@@ -19,7 +20,8 @@ sap.ui.define([
     TimeConfigService,
     TimerDefaults,
     SchedulingRuntime,
-    NavigationContracts
+    NavigationContracts,
+    ModelPathContracts
 ) {
     "use strict";
 
@@ -101,9 +103,9 @@ sap.ui.define([
             if (oState) {
                 ModelStateRuntime.setManyOnModel(oState, {
                     "/layout": ModelStateRuntime.readOnModel(oState, "/layout", LAYOUTS.ONE_COLUMN) || LAYOUTS.ONE_COLUMN,
-                    "/selectedId": typeof ModelStateRuntime.readOnModel(oState, "/selectedId", undefined) === "undefined"
+                    [ModelPathContracts.SELECTED_ID]: typeof ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, undefined) === "undefined"
                         ? null
-                        : ModelStateRuntime.readOnModel(oState, "/selectedId", null)
+                        : ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, null)
                 });
             }
             initStateBoundUi(oController, oState);

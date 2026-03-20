@@ -1,15 +1,16 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/ports/BrowserCachePort"
-], function (UseCase, Result, BrowserCachePort) {
+], function (Result, BrowserCachePort) {
     "use strict";
 
-    function CacheReadUseCase() { UseCase.call(this, "CacheReadUseCase"); }
-    CacheReadUseCase.prototype = Object.create(UseCase.prototype);
-    CacheReadUseCase.prototype.constructor = CacheReadUseCase;
+    function CacheReadUseCase() {
+        return {
+            execute: execute
+        };
+    }
 
-    CacheReadUseCase.prototype.execute = function (mInput, mCtx) {
+function execute(mInput, mCtx) {
         var sRootId = (mInput && mInput.rootId) || "";
         var sEntityKind = (mInput && mInput.entityKind) || "detailSnapshot";
         var oCache = mCtx && mCtx.cache;
@@ -21,7 +22,7 @@ sap.ui.define([
                 snapshot: (oEntry && oEntry.payload) || null
             });
         });
-    };
+    }
 
     return CacheReadUseCase;
 });

@@ -40,6 +40,28 @@ def test_legacy_modules_are_removed_from_active_repo_surface():
         REPO_ROOT / "backend" / "mock_gateway" / "api" / "actions_api.py",
         REPO_ROOT / "backend" / "mock_gateway" / "api" / "odata_compat_api.py",
         REPO_ROOT / "app" / "shell-user-runtime.js",
+        REPO_ROOT / "app" / "contracts" / "AnalyticsContracts.js",
+        REPO_ROOT / "app" / "contracts" / "DialogContracts.js",
+        REPO_ROOT / "app" / "contracts" / "FrontendConfigConstants.js",
+        REPO_ROOT / "app" / "contracts" / "ModelContracts.js",
+        REPO_ROOT / "app" / "contracts" / "NavigationContracts.js",
+        REPO_ROOT / "app" / "contracts" / "OperationSourceContracts.js",
+        REPO_ROOT / "app" / "contracts" / "SearchRuntimeContracts.js",
+        REPO_ROOT / "app" / "contracts" / "SearchUiContracts.js",
+        REPO_ROOT / "app" / "contracts" / "ShellPaneContracts.js",
+        REPO_ROOT / "app" / "contracts" / "WorkflowContracts.js",
+        REPO_ROOT / "app" / "contracts" / "AnalyticsUiContracts.js",
+        REPO_ROOT / "app" / "contracts" / "DetailRuntimeContracts.js",
+        REPO_ROOT / "app" / "contracts" / "ProgressiveReadinessContracts.js",
+        REPO_ROOT / "app" / "contracts" / "ReadinessTelemetryContracts.js",
+        REPO_ROOT / "app" / "contracts" / "UiAssetPaths.js",
+        REPO_ROOT / "app" / "constants" / "AppConstants.js",
+        REPO_ROOT / "app" / "service" / "framework" / "UseCase.js",
+        REPO_ROOT / "app" / "service" / "shared" / "ExcelExport.js",
+        REPO_ROOT / "app" / "service" / "domain" / "search" / "ExportFacade.js",
+        REPO_ROOT / "app" / "service" / "domain" / "shared" / "LockFacade.js",
+        REPO_ROOT / "app" / "service" / "shared" / "delta" / "DeltaDateCodec.js",
+        REPO_ROOT / "app" / "service" / "shared" / "delta" / "DeltaChildChanges.js",
     ]
 
     for path in removed_paths:
@@ -59,6 +81,18 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
         "smartCacheManager": "SmartCacheManager",
         "legacyDetailCurrent": "_detailCurrent",
         "legacyDetailSnapshot": "_detailSnapshot",
+        "legacyUseCaseBaseImport": "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
+        "legacyUseCasePrototype": "Object.create(UseCase.prototype)",
+        "legacyUseCaseCtorCall": "UseCase.call(this",
+        "legacyExcelExportWrapper": "PRODUCTION_CONTROL_CHECKLIST/service/shared/ExcelExport",
+        "legacyExportFacade": "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/ExportFacade",
+        "legacyCreateAlias": "__CREATE__",
+        "legacyLayoutStorageKey": "sap_ui5_layout_personalization",
+        "legacyThemeProfileKey": "sap_ui5_theme_profile",
+        "legacyThemeKey": "sap_ui5_theme",
+        "lockFacade": "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/LockFacade",
+        "deltaDateCodec": "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaDateCodec",
+        "deltaChildChanges": "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaChildChanges",
     }
 
     for path in APP_ROOT.rglob("*"):
@@ -69,16 +103,60 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
             assert pattern not in text, f"{label} leaked into active frontend path: {path}"
 
 
+def test_productive_frontend_uses_canonical_constant_modules_without_contract_wrappers():
+    wrapper_import_markers = [
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/DialogContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/FrontendConfigConstants",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/OperationSourceContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/ProgressiveReadinessContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchRuntimeContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/ShellPaneContracts",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/UiAssetPaths",
+        "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    ]
+
+    for path in APP_ROOT.rglob("*.js"):
+        text = _read(path)
+        for marker in wrapper_import_markers:
+            assert marker not in text, f"contract wrapper import leaked into active frontend path: {path}"
+
+
+def test_productive_frontend_has_no_app_constants_god_object_imports():
+    forbidden_markers = [
+        "PRODUCTION_CONTROL_CHECKLIST/constants/AppConstants",
+        "constants/AppConstants",
+    ]
+
+    for path in APP_ROOT.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.suffix.lower() not in {".js", ".xml", ".json", ".html"}:
+            continue
+        text = _read(path)
+        for marker in forbidden_markers:
+            assert marker not in text, f"AppConstants aggregator import leaked into repo path: {path}"
+
+
 def test_boot_and_runtime_source_lock_strict_success_path():
-    boot_text = _read(APP_ROOT / "service" / "framework" / "ComponentBootRuntime.js")
-    init_text = _read(APP_ROOT / "service" / "framework" / "ComponentInitRuntime.js")
-    feedback_bootstrap_text = _read(APP_ROOT / "service" / "framework" / "ComponentFeedbackInitRuntime.js")
-    boot_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentBootContracts.js")
+    bootstrap_source = _read(APP_ROOT / "service" / "framework" / "ComponentBootstrap.js")
+    bootstrap_builder = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootstrapDependencyBuilder.js")
+    backend_mode_contracts = _read(APP_ROOT / "service" / "domain" / "shared" / "BackendModeContracts.js")
+    boot_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootRuntime.js")
+    init_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreInitRuntime.js")
+    feedback_bootstrap_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentFeedbackInitRuntime.js")
+    boot_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootContracts.js")
     feedback_contracts = _read(APP_ROOT / "service" / "framework" / "EffectFeedbackContracts.js")
-    listener_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentListenerContracts.js")
-    save_guard_contracts = _read(APP_ROOT / "service" / "framework" / "ComponentSaveGuardContracts.js")
+    listener_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerContracts.js")
+    save_guard_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentSaveGuardContracts.js")
     cache_text = _read(APP_ROOT / "infra" / "adapters" / "BrowserCacheAdapter.js")
-    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentListenerBindingRuntime.js")
+    listener_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerBindingRuntime.js")
 
     removed_framework_aliases = [
         APP_ROOT / "service" / "framework" / "ComponentLockRuntime.js",
@@ -93,18 +171,18 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     ]
 
     assert 'var bBootCompleted = false;' in boot_text
-    assert 'resolveSettledStageError(aStageResults[0], "load_current_user_failed")' in boot_text
-    assert 'resolveSettledStageError(aStageResults[1], "load_runtime_settings_failed")' in boot_text
-    assert 'resolveSettledStageError(aStageResults[2], "bootstrap_init_bundle_failed")' in boot_text
-    assert 'cleanupStaleSessions' in boot_text
+    assert "resolveSettledStageError(aStageResults[0], STAGE_ERRORS.LOAD_CURRENT_USER_FAILED)" in boot_text
+    assert "resolveSettledStageError(aStageResults[1], STAGE_ERRORS.LOAD_RUNTIME_SETTINGS_FAILED)" in boot_text
+    assert "resolveSettledStageError(aStageResults[2], STAGE_ERRORS.BOOTSTRAP_INIT_BUNDLE_FAILED)" in boot_text
+    assert "cleanupStaleSessions" in boot_text
     assert 'if (bBootCompleted) {' in boot_text
     assert boot_text.index('if (bBootCompleted) {') < boot_text.index('oComponent._startCoreManagers();')
-    assert 'ModelStateRuntime.writeOnModel(oStateModel, "/readiness/app", {' in boot_text
+    assert 'ModelStateRuntime.writeOnModel(oStateModel, PATHS.READINESS_APP, {' in boot_text
 
-    assert 'return ComponentBootRuntime.runBootSequence({' in init_text
-    assert 'cacheAdapter: this._ctx && this._ctx.cache,' in init_text
+    assert "initializeComponentRuntime" in init_text
+    assert "buildLatestCtx" in init_text
+    assert "resolveDetailCurrent" in init_text
     assert 'throw oError || new Error("runtime_settings_load_failed");' in feedback_bootstrap_text
-    assert 'return mDeps.LoadCurrentUserUseCase && mDeps.LoadCurrentUserUseCase.refresh' in init_text
     assert 'READINESS_STATUS' in boot_contracts
     assert 'STAGE_ERRORS' in boot_contracts
     assert 'TOAST_SHOW_MS' in feedback_contracts
@@ -115,8 +193,60 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     assert 'clearByTabSessionId: clearByTabSessionId,' in cache_text
     assert 'cleanupStaleSessions: cleanupStaleSessions,' in cache_text
     assert 'StatePaths.UI_BUSY_GLOBAL' not in listener_runtime
+    assert "ComponentBootstrapDependencyBuilder.build" in bootstrap_source
+    assert "ComponentBootstrapDependencyBuilder.withManagerRuntime" in bootstrap_source
+    assert 'getBackendMode: function () { return BackendModeContracts.MODES.REAL; }' in bootstrap_source
+    assert 'BackendModeContracts.PATHS.BACKEND_MODE' in bootstrap_source
+    assert "withManagerRuntime" in bootstrap_builder
+    assert "MANAGER_KEYS" in bootstrap_builder
+    assert 'REAL: "real"' in backend_mode_contracts
+    assert 'BACKEND_MODE: ModelPathContracts.BACKEND_MODE' in backend_mode_contracts
     for path in removed_framework_aliases:
         assert not path.exists(), f"alias-only framework file still present: {path}"
+
+
+def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts():
+    root_id_runtime = _read(APP_ROOT / "service" / "framework" / "RootIdRuntime.js")
+    telemetry_runtime = _read(APP_ROOT / "service" / "framework" / "TelemetryRuntime.js")
+    autosave_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentAutosaveRuntime.js")
+    cross_tab_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCrossTabRuntime.js")
+    polling_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentPollingRuntime.js")
+    lock_events_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentLockEventsRuntime.js")
+    open_detail_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "OpenDetailUseCase.js")
+    shell_state_runtime = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "ShellStateRuntime.js")
+    diagnostics_usecase = _read(APP_ROOT / "service" / "domain" / "shared" / "usecases" / "InitializeAppUseCase.js")
+    startup_capability_usecase = _read(APP_ROOT / "service" / "domain" / "shared" / "usecases" / "StartupCapabilityDiagnosticsUseCase.js")
+
+    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in root_id_runtime
+    assert '"/activeObjectId"' not in telemetry_runtime
+    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in autosave_runtime
+    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in cross_tab_runtime
+    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in polling_runtime
+    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in lock_events_runtime
+    assert "ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID" in open_detail_usecase
+    assert "ModelPathContracts.SELECTED_ID" in open_detail_usecase
+    assert "ModelPathContracts.BACKEND_MODE" in shell_state_runtime
+    assert "BackendModeContracts.MODES.REAL" in diagnostics_usecase
+    assert "BackendModeContracts.CAPABILITY.READY" in startup_capability_usecase
+
+
+def test_productive_runtime_has_no_raw_active_or_selected_id_paths_outside_canonical_contracts():
+    allowed_suffixes = {
+        str(APP_ROOT / "service" / "domain" / "shared" / "ModelPathContracts.js"),
+        str(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerContracts.js"),
+    }
+
+    for path in APP_ROOT.rglob("*.js"):
+        normalized = str(path)
+        if "/app/test/" in normalized.replace("\\", "/"):
+            continue
+        if normalized in allowed_suffixes:
+            continue
+        text = _read(path)
+        assert '"/activeObjectId"' not in text, f'raw activeObjectId path leaked: {path}'
+        assert '"/selectedId"' not in text, f'raw selectedId path leaked: {path}'
+        assert 'StatePaths.ACTIVE_OBJECT_ID || "/activeObjectId"' not in text, f'activeObjectId fallback leaked: {path}'
+        assert 'ModelPathContracts.ACTIVE_OBJECT_ID || "/activeObjectId"' not in text, f'activeObjectId fallback leaked: {path}'
 
 
 def test_open_detail_source_checks_permission_before_cache_and_backend_load():
@@ -164,10 +294,31 @@ def test_local_validation_guide_matches_real_repo_assets():
     assert "Manual smoke playbook" in guide
     assert "EDIT_LOCKED" in guide
     assert "filterLocationKey" in guide
+    assert "evergreen Microsoft Edge" in guide
+    assert "Create a new checklist and complete the first save." in guide
+    assert "Architectural baseline" in guide
+
+
+def test_final_audit_docs_reflect_current_production_baseline():
+    audit_md = _read(REPO_ROOT / "docs" / "artifacts" / "product-audit-current.md")
+    audit_json = _read(REPO_ROOT / "docs" / "artifacts" / "product-audit-current.json")
+    final_report_path = REPO_ROOT / "docs" / "artifacts" / "final-production-baseline.md"
+    final_report = _read(final_report_path)
+
+    assert final_report_path.exists()
+    assert "production-grade baseline" in final_report
+    assert "app/constants/*" in final_report
+    assert "ModelPathContracts" in final_report
+    assert "StatePaths" in final_report
+    assert "plain modules/factories exposing `{ execute }`" in final_report
+    assert "evergreen Microsoft Edge" in final_report
+    assert "selectedId and activeObjectId are not consumed as uncontrolled parallel truths" not in audit_md
+    assert '"status": "baseline_ready"' in audit_json
+    assert "constants/contracts cleanup, `UseCase` migration, and CSS patch decoupling are complete" in audit_md
 
 
 def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
-    delta_contracts = _read(APP_ROOT / "service" / "contracts" / "DeltaContracts.js")
+    delta_contracts = _read(APP_ROOT / "service" / "shared" / "delta" / "DeltaContracts.js")
     payload_builder = _read(APP_ROOT / "service" / "shared" / "DeltaPayloadBuilder.js")
     field_mappers = _read(APP_ROOT / "service" / "shared" / "delta" / "DeltaFieldMappers.js")
     payload_mapper = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistPayloadMapper.js")
@@ -185,6 +336,8 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "participants:" in payload_builder
     assert "attachments:" in payload_builder
     assert "buildCreatePayload" in payload_builder
+    assert "appendChildChanges" in payload_builder
+    assert "formatODataDate" in payload_builder
     assert "rootEditMode" in payload_builder
     assert "toParticipantFields" in field_mappers
     assert "toAttachmentFields" in field_mappers
@@ -248,7 +401,7 @@ def test_sticky_runtime_is_route_scoped_without_global_body_observer():
 def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
     state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
     workflow_schema = _read(APP_ROOT / "model" / "schema" / "workflowSchema.js")
-    listener_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentDetailMetaSyncRuntime.js")
+    listener_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentDetailMetaSyncRuntime.js")
 
     assert 'DETAIL_META: "/detailMeta",' in state_paths
     assert 'detailMeta:' in workflow_schema
@@ -275,6 +428,47 @@ def test_standardized_telemetry_event_names_cover_permission_cache_lock_and_anal
     assert 'analytics.search.error' in search_analytics_source
     assert 'analytics.dashboard.loaded' in dashboard_analytics_source
     assert 'analytics.dashboard.error' in dashboard_analytics_source
+
+
+def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors():
+    patch_css = _read(APP_ROOT / "styles" / "modules" / "90_ui5_patches.css")
+    layout_patch_css = _read(APP_ROOT / "styles" / "modules" / "91_ui5_layout_patches.css")
+    search_sticky_runtime = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchStickyLayoutRuntime.js")
+    shell_dom_runtime = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "AppShellDomRuntime.js")
+
+    assert ".appFeedbackCorrelationInput .sapMInputBaseContentWrapper" in patch_css
+    assert ".appFeedbackCorrelation .sapMInputBaseContentWrapper" not in patch_css
+    assert ".appShellHeader .sapMBtnContent" not in patch_css
+    assert ".shellActionBtn .sapMBtnContent" in patch_css
+    assert ".pageTransparent .sapMScrollCont" in layout_patch_css
+    assert ".chkApp .sapMScrollCont," not in layout_patch_css
+    assert ".appRootFclTransparent .sapMNav" in layout_patch_css
+    assert ".appRootFcl .sapMNav" not in layout_patch_css
+    assert ".searchPage.sapMPage > .sapUiXMLView" in layout_patch_css
+    assert ".detailGridTable .sapUiTableCtrlScr" in layout_patch_css
+    assert ".flatEditorTable .sapMListTblCnt" in layout_patch_css
+    assert "AppShellDomRuntime.resolveShellHeaderHostDom" in search_sticky_runtime
+    assert "function resolveShellHeaderHostDom" in shell_dom_runtime
+
+
+def test_expanded_rows_dialog_is_shared_across_checks_and_barriers_and_smoke_ids_are_current():
+    detail_behavior = _read(APP_ROOT / "controller" / "detail" / "DetailChecklistBehavior.js")
+    effect_dialog_runtime = _read(APP_ROOT / "service" / "framework" / "execution" / "EffectDialogRuntime.js")
+    lazy_dialog_runtime = _read(APP_ROOT / "service" / "framework" / "LazyDialogRuntime.js")
+    interaction_smoke = _read(REPO_ROOT / "scripts" / "interaction-smoke.py")
+    manual_p1p2 = _read(REPO_ROOT / "scripts" / "manual-p1p2-browser-pass.py")
+
+    assert 'dialogId: bExpandedRowsDialog ? "expandedRowsDialog" : undefined' in detail_behavior
+    assert 'DialogContracts.IDS.CHECKS_EXPANDED' in effect_dialog_runtime
+    assert 'DialogContracts.IDS.BARRIERS_EXPANDED' in effect_dialog_runtime
+    assert 'dialogId: "expandedRowsDialog"' in effect_dialog_runtime
+    assert 'if (mCache[sDialogId]) {' in lazy_dialog_runtime
+    assert 'mCache[sDialogId] = oDialog;' in lazy_dialog_runtime
+    assert 'DETAIL_VIEW_ID = "checklist_app_comp---detailView"' in interaction_smoke
+    assert 'SEARCH_VIEW_ID = "checklist_app_comp---searchView"' in interaction_smoke
+    assert 'dialogSelector": "[id$=\'expandedRowsDialog\']"' in interaction_smoke
+    assert 'DETAIL_VIEW_ID = "checklist_app_comp---detailView"' in manual_p1p2
+    assert 'SEARCH_VIEW_ID = "checklist_app_comp---searchView"' in manual_p1p2
 
 
 def test_report_export_respects_selected_and_all_found_contracts():

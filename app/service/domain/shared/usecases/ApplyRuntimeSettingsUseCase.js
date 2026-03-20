@@ -1,9 +1,9 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/AttachmentUploadPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/schema/FrontendVariablesSchema"
 ], function (Result, TimeConfigService, DebugLogger, AttachmentUploadPolicy, FrontendConfigConstants, FrontendVariablesSchema) {
     "use strict";

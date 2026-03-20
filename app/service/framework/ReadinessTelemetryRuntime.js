@@ -1,6 +1,6 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ReadinessTelemetryContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants"
 ], function (ModelStateRuntime, ReadinessTelemetryContracts) {
     "use strict";
 

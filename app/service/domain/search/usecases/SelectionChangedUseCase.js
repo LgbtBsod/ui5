@@ -1,20 +1,18 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
 "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartControlCoordinator"
-], function (UseCase, Result, Effects, ChecklistIdentity, SearchSmartControlCoordinator) {
+], function (Result, Effects, ChecklistIdentity, SearchSmartControlCoordinator) {
     "use strict";
 
     function SelectionChangedUseCase() {
-        UseCase.call(this, "SelectionChangedUseCase");
+        return {
+            execute: execute
+        };
     }
 
-    SelectionChangedUseCase.prototype = Object.create(UseCase.prototype);
-    SelectionChangedUseCase.prototype.constructor = SelectionChangedUseCase;
-
-    SelectionChangedUseCase.prototype.execute = function (mInput) {
+function execute(mInput) {
         var aSelectedRowIds = [];
         var sSelectedRowId = "";
         var sSelectedRowDisplayId = "";
@@ -54,7 +52,7 @@ sap.ui.define([
             Effects.modelPatch("view", "/canCopy", bSingleSelection),
             Effects.modelPatch("view", "/canDelete", bSingleSelection)
         ]));
-    };
+    }
 
     return SelectionChangedUseCase;
 });

@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/OpenDetailUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/EnterEditUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/SaveDetailUseCase",
@@ -40,23 +40,23 @@ sap.ui.define([
     function create(mDeps) {
         var d = mDeps || {};
         return {
-            open: d.openUseCase || new OpenDetailUseCase(),
-            enterEdit: d.enterEditUseCase || new EnterEditUseCase(),
-            save: d.saveUseCase || new SaveDetailUseCase(),
-            validate: d.validateUseCase || new ValidateChecklistUseCase(),
-            autosave: d.autosaveUseCase || new AutosaveDetailUseCase(),
-            close: d.closeUseCase || new CloseDetailUseCase(),
-            deleteChecklist: d.deleteChecklistUseCase || new DeleteChecklistUseCase(),
-            resolveConflict: d.resolveConflictUseCase || new ResolveConflictUseCase(),
-            attachmentLoad: d.attachmentLoadUseCase || new LoadAttachmentsUseCase(),
-            attachmentUpload: d.attachmentUploadUseCase || new AttachmentUploadUseCase(),
-            attachmentDelete: d.attachmentDeleteUseCase || new AttachmentDeleteUseCase(),
-            rowOps: d.rowOpsUseCase || new RowOpsUseCase(),
-            valueHelpLocation: d.valueHelpLocationUseCase || new ValueHelpLocationUseCase(),
-            personSuggest: d.personSuggestUseCase || new PersonSuggestUseCase(),
-            lockLost: d.lockLostUseCase || new LockLostUseCase(),
-            forceReadOnly: d.forceReadOnlyUseCase || new ForceReadOnlyUseCase(),
-            takeoverLock: d.takeoverLockUseCase || new TakeoverLockUseCase()
+            open: d.openUseCase || OpenDetailUseCase(),
+            enterEdit: d.enterEditUseCase || EnterEditUseCase(),
+            save: d.saveUseCase || SaveDetailUseCase(),
+            validate: d.validateUseCase || ValidateChecklistUseCase(),
+            autosave: d.autosaveUseCase || AutosaveDetailUseCase(),
+            close: d.closeUseCase || CloseDetailUseCase(),
+            deleteChecklist: d.deleteChecklistUseCase || DeleteChecklistUseCase(),
+            resolveConflict: d.resolveConflictUseCase || ResolveConflictUseCase(),
+            attachmentLoad: d.attachmentLoadUseCase || LoadAttachmentsUseCase(),
+            attachmentUpload: d.attachmentUploadUseCase || AttachmentUploadUseCase(),
+            attachmentDelete: d.attachmentDeleteUseCase || AttachmentDeleteUseCase(),
+            rowOps: d.rowOpsUseCase || RowOpsUseCase(),
+            valueHelpLocation: d.valueHelpLocationUseCase || ValueHelpLocationUseCase(),
+            personSuggest: d.personSuggestUseCase || PersonSuggestUseCase(),
+            lockLost: d.lockLostUseCase || LockLostUseCase(),
+            forceReadOnly: d.forceReadOnlyUseCase || ForceReadOnlyUseCase(),
+            takeoverLock: d.takeoverLockUseCase || TakeoverLockUseCase()
         };
     }
 

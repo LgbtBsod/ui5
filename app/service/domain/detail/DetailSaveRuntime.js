@@ -1,5 +1,5 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+﻿sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService"
 ], function (WorkflowContracts, ChecklistValidationService) {
     "use strict";

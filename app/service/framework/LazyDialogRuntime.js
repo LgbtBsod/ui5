@@ -42,9 +42,10 @@ sap.ui.define([
     function ensureDialog(oController, sKey, mConfig) {
         var mCache = ensureMap(oController, mConfig);
         var sFragmentName = mConfig && mConfig.fragmentName;
+        var sDialogId = resolveDialogId(oController, sKey, mConfig || {});
 
-        if (mCache[sKey]) {
-            return Promise.resolve(mCache[sKey]);
+        if (mCache[sDialogId]) {
+            return Promise.resolve(mCache[sDialogId]);
         }
         if (!sFragmentName) {
             return Promise.resolve(null);
@@ -55,7 +56,7 @@ sap.ui.define([
             name: sFragmentName,
             controller: oController
         }).then(function (oDialog) {
-            mCache[sKey] = oDialog;
+            mCache[sDialogId] = oDialog;
             oController.getView().addDependent(oDialog);
             bindDialogHooks(oController, sKey, oDialog, mConfig || {});
             return oDialog;
