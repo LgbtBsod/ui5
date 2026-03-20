@@ -220,6 +220,41 @@ def build_report(
     return report
 
 
+def capture_route_snapshot(page, label: str) -> dict[str, Any]:
+    snapshot = safe_evaluate(
+        page,
+        """
+        (label) => {
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
+          const detail = core.byId('checklist_app_comp---detailTargetPage');
+          const analytics = core.byId('checklist_app_comp---analyticsTargetPage');
+          const search = core.byId('checklist_app_comp---searchTargetPage');
+          const appState = app && app.getModel && app.getModel('state');
+          const detailState = detail && detail.getModel && detail.getModel('state');
+          const selected = detail && detail.getModel && detail.getModel('selected');
+          return {
+            label: String(label || ''),
+            hash: String(window.location.hash || ''),
+            currentRouteName: appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '',
+            layout: appState && appState.getProperty ? String(appState.getProperty('/layout') || '') : '',
+            selectedId: appState && appState.getProperty ? String(appState.getProperty('/selectedId') || '') : '',
+            activeObjectId: appState && appState.getProperty ? String(appState.getProperty('/activeObjectId') || '') : '',
+            detailRootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+            detailMode: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '',
+            detailLockState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/lock/state') || '') : '',
+            detailAutosaveState: detailState && detailState.getProperty ? String(detailState.getProperty('/autosaveState') || '') : '',
+            searchVisible: !!(search && search.getDomRef && search.getDomRef()),
+            detailVisible: !!(detail && detail.getDomRef && detail.getDomRef()),
+            analyticsVisible: !!(analytics && analytics.getDomRef && analytics.getDomRef())
+          };
+        }
+        """,
+        label
+    )
+    return snapshot
+
+
 def flush_report(report: dict[str, Any]) -> int:
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -398,6 +433,7 @@ def main() -> int:
     checks: list[dict[str, Any]] = []
     failures: list[str] = []
     last_state: dict[str, Any] = {}
+    route_snapshots: list[dict[str, Any]] = []
     current_step = "startup"
     attachment_file = Path("docs/runtime/gateway-smoke-attachment.txt")
     attachment_file.parent.mkdir(parents=True, exist_ok=True)
@@ -426,6 +462,7 @@ def main() -> int:
             page.goto(UI_URL, wait_until="domcontentloaded", timeout=90000)
             navigate_to_search(page)
             wait_for_search_ready(page)
+            route_snapshots.append(capture_route_snapshot(page, "search.initial"))
 
             smart_controls = safe_evaluate(
                 page,
@@ -458,6 +495,7 @@ def main() -> int:
             current_step = "route.open.detail"
             navigate_to_detail(page, ROOT_ID)
             wait_for_detail_ready(page, ROOT_ID)
+            route_snapshots.append(capture_route_snapshot(page, "detail.initial"))
 
             opened = detail_state(page)
             last_state = opened
@@ -630,6 +668,7 @@ def main() -> int:
             )
             invoke_view_controller_method(page, "checklist_app_comp---detailTargetPage", "onOpenWorkflowAnalytics")
             wait_for_analytics_ready(page)
+            route_snapshots.append(capture_route_snapshot(page, "analytics.fromDetail"))
             analytics_request_after = len(
                 matching_requests(network, "SimpleAnalyticalSet")
             ) + len(
@@ -662,6 +701,7 @@ def main() -> int:
             wait_for_detail_ready(page, ROOT_ID)
             wait_for_edit_detail_ready(page, ROOT_ID)
             analytics_return_state = detail_route_state(page)
+            route_snapshots.append(capture_route_snapshot(page, "detail.afterAnalyticsClose"))
             ok_analytics_return = (
                 analytics_return_state.get("currentRouteName") == "detail"
                 and analytics_return_state.get("rootId") == ROOT_ID
@@ -828,6 +868,7 @@ def main() -> int:
             invoke_view_controller_method(page, "checklist_app_comp---detailTargetPage", "onCloseDetail")
             wait_for_search_ready(page)
             page.wait_for_timeout(1600)
+            route_snapshots.append(capture_route_snapshot(page, "search.afterDetailClose"))
             after_release = len(matching_requests(network, "LockRelease"))
             back_to_search = safe_evaluate(
                 page,
@@ -848,6 +889,60 @@ def main() -> int:
             if not ok_release:
                 failures.append("detail.lock.release")
 
+            current_step = "route.repeat.detail"
+            repeat_detail_before = len(matching_requests(network, "LockAcquire"))
+            navigate_to_detail(page, ROOT_ID)
+            wait_for_detail_ready(page, ROOT_ID)
+            route_snapshots.append(capture_route_snapshot(page, "detail.repeatOpen"))
+            repeat_open_state = detail_route_state(page)
+            ok_repeat_open = (
+                repeat_open_state.get("currentRouteName") == "detail"
+                and repeat_open_state.get("rootId") == ROOT_ID
+                and repeat_open_state.get("mode") in ("READ", "EDIT")
+            )
+            ensure(checks, "detail.route.repeat_open", ok_repeat_open, repeat_open_state)
+            if not ok_repeat_open:
+                failures.append("detail.route.repeat_open")
+
+            current_step = "route.repeat.detail.close"
+            invoke_view_controller_method(page, "checklist_app_comp---detailTargetPage", "onCloseDetail")
+            wait_for_search_ready(page)
+            page.wait_for_timeout(1200)
+            route_snapshots.append(capture_route_snapshot(page, "search.afterRepeatDetailClose"))
+            repeat_close_state = capture_route_snapshot(page, "search.afterRepeatDetailCloseCheck")
+            ok_repeat_close = (
+                repeat_close_state.get("currentRouteName") == "search"
+                and repeat_close_state.get("activeObjectId") == ""
+            )
+            ensure(checks, "detail.route.repeat_close", ok_repeat_close, {
+                "beforeLockAcquireCount": repeat_detail_before,
+                "afterState": repeat_close_state
+            })
+            if not ok_repeat_close:
+                failures.append("detail.route.repeat_close")
+
+            current_step = "route.repeat.analytics"
+            navigate_to_search(page)
+            wait_for_search_ready(page)
+            invoke_view_controller_method(page, "checklist_app_comp---searchTargetPage", "onOpenWorkflowAnalytics")
+            wait_for_analytics_ready(page)
+            route_snapshots.append(capture_route_snapshot(page, "analytics.repeatOpen"))
+            analytics_repeat_state = capture_route_snapshot(page, "analytics.repeatOpenCheck")
+            ok_analytics_repeat = analytics_repeat_state.get("currentRouteName") == "analytics"
+            ensure(checks, "analytics.route.repeat_open", ok_analytics_repeat, analytics_repeat_state)
+            if not ok_analytics_repeat:
+                failures.append("analytics.route.repeat_open")
+
+            invoke_view_controller_method(page, "checklist_app_comp---analyticsTargetPage", "onCloseAnalytics")
+            wait_for_search_ready(page)
+            page.wait_for_timeout(1200)
+            route_snapshots.append(capture_route_snapshot(page, "search.afterRepeatAnalyticsClose"))
+            analytics_repeat_close_state = capture_route_snapshot(page, "search.afterRepeatAnalyticsCloseCheck")
+            ok_analytics_repeat_close = analytics_repeat_close_state.get("currentRouteName") == "search"
+            ensure(checks, "analytics.route.repeat_close", ok_analytics_repeat_close, analytics_repeat_close_state)
+            if not ok_analytics_repeat_close:
+                failures.append("analytics.route.repeat_close")
+
             browser.close()
     except Exception as exc:  # noqa: BLE001
         bootstrap = {}
@@ -867,6 +962,7 @@ def main() -> int:
 
     return flush_report(build_report(checks, failures, network, {
         "lastState": last_state,
+        "routeSnapshots": route_snapshots,
         "failureContext": {
             "step": current_step,
             "classification": classify_failure(current_step, failures[-1] if failures else "")

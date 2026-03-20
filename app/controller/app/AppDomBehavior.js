@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ShellGlobalsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime"
-], function (ModelStateRuntime, ThemeDomRuntime, SchedulingRuntime, ModelContracts, ShellGlobalsRuntime, Ui5RuntimeFacade, AppShellDomRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime"
+], function (ModelStateRuntime, ThemeDomRuntime, SchedulingRuntime, ModelContracts, ShellGlobalsRuntime, Ui5RuntimeFacade, AppShellDomRuntime, SemanticDomRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -65,16 +66,10 @@ sap.ui.define([
 
     function syncSemanticAttributes(oController) {
         var oMainHost = oController && oController.byId && oController.byId("mainContentHost");
-        var oMainDom = oMainHost && oMainHost.getDomRef && oMainHost.getDomRef();
         var oFeedbackRegion = oController && oController.byId && oController.byId("feedbackCorrelationRegion");
-        var oFeedbackDom = oFeedbackRegion && oFeedbackRegion.getDomRef && oFeedbackRegion.getDomRef();
 
-        if (oMainDom) {
-            oMainDom.setAttribute("role", "main");
-        }
-        if (oFeedbackDom) {
-            oFeedbackDom.setAttribute("role", "region");
-        }
+        SemanticDomRuntime.syncAttributes(oMainHost, { role: "main" });
+        SemanticDomRuntime.syncAttributes(oFeedbackRegion, { role: "region" });
     }
 
     function _scheduleInvalidate(oController, oLayout) {

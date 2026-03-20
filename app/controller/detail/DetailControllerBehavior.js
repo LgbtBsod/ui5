@@ -10,6 +10,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (
@@ -24,6 +25,7 @@ sap.ui.define([
     SchedulingRuntime,
     DetailAttachmentViewState,
     StatusChipClassRuntime,
+    SemanticDomRuntime,
     NavigationContracts,
     ModelContracts
 ) {
@@ -38,31 +40,16 @@ sap.ui.define([
         return oBundle && oBundle.getText ? oBundle.getText(sKey) : "";
     }
 
-    function setSemanticAttr(oController, sId, mAttrs) {
-        var oControl = oController.byId && oController.byId(sId);
-        var oDomRef = oControl && oControl.getDomRef && oControl.getDomRef();
-        Object.keys(mAttrs || {}).forEach(function (sAttr) {
-            if (!oDomRef) {
-                return;
-            }
-            if (mAttrs[sAttr]) {
-                oDomRef.setAttribute(sAttr, mAttrs[sAttr]);
-                return;
-            }
-            oDomRef.removeAttribute(sAttr);
-        });
-    }
-
     function syncSemanticRegions(oController) {
-        setSemanticAttr(oController, "detailControlActionRow", {
+        SemanticDomRuntime.syncControllerTarget(oController, "detailControlActionRow", {
             role: "region",
             "aria-label": getBundleText(oController, "detailActionRailAriaLabel")
         });
-        setSemanticAttr(oController, "detailHeroStatsRegion", {
+        SemanticDomRuntime.syncControllerTarget(oController, "detailHeroStatsRegion", {
             role: "region",
             "aria-label": getBundleText(oController, "detailStatsAriaLabel")
         });
-        setSemanticAttr(oController, "detailSectionAnchorRail", {
+        SemanticDomRuntime.syncControllerTarget(oController, "detailSectionAnchorRail", {
             role: "navigation",
             "aria-label": getBundleText(oController, "sectionNavAriaLabel")
         });

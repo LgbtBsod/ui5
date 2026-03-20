@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime"
-], function (ThemeDomRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime"
+], function (ThemeDomRuntime, EventDelegateRuntime) {
     "use strict";
 
     function resolveStickyHost(oController) {
@@ -37,11 +38,12 @@ sap.ui.define([
                     onsapspace: this._onDetailEditSwitchKeyboardActivate.bind(this)
                 };
             }
-            oSwitch.removeEventDelegate(this._oDetailEditSwitchDelegate);
-            oSwitch.addEventDelegate(this._oDetailEditSwitchDelegate, this);
+            EventDelegateRuntime.ensure(this, "_oDetailEditSwitchDelegate", oSwitch, this._oDetailEditSwitchDelegate, this);
         },
 
         _unbindViewportPinnedControlRail: function () {
+            var oSwitch = this.byId && this.byId("detailEditSwitch");
+            EventDelegateRuntime.remove(this, "_oDetailEditSwitchDelegate", oSwitch);
             clearPinnedClasses(this);
         },
 

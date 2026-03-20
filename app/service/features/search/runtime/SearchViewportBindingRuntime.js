@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (SearchScrollRuntime, SearchStickyLayoutRuntime, SchedulingRuntime, SearchUiContracts, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime"
+], function (SearchScrollRuntime, SearchStickyLayoutRuntime, SchedulingRuntime, SearchUiContracts, JsRuntime, EventDelegateRuntime) {
     "use strict";
 
     var SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS = SearchUiContracts.VIEWPORT.LAYOUT_DEBOUNCE_MS;
@@ -103,7 +104,7 @@ sap.ui.define([
                     bindSearchViewportRuntime(oController);
                 }
             };
-            oView.addEventDelegate(oController._oSearchViewportDelegate);
+            EventDelegateRuntime.ensure(oController, "_oSearchViewportDelegate", oView, oController._oSearchViewportDelegate, oController);
         }
         if (oController._oSearchScrollHost === oScrollHost) {
             bindSearchViewportObservers(oController, oScrollHost);
@@ -137,7 +138,7 @@ sap.ui.define([
     function unbindSearchViewportRuntime(oController) {
         var oView = oController && oController.getView && oController.getView();
         if (oView && oController._oSearchViewportDelegate && oView.removeEventDelegate) {
-            oView.removeEventDelegate(oController._oSearchViewportDelegate);
+            EventDelegateRuntime.remove(oController, "_oSearchViewportDelegate", oView);
         }
         if (oController._oSearchScrollHost && oController._fnSearchScrollSync) {
             oController._oSearchScrollHost.removeEventListener("scroll", oController._fnSearchScrollSync, { passive: true });
@@ -149,7 +150,6 @@ sap.ui.define([
         clearSearchViewportSyncTimer(oController);
         oController._iSearchAnchorSyncTimer = SchedulingRuntime.clearTimer(oController._iSearchAnchorSyncTimer);
         oController._iSearchViewportSyncRaf = SchedulingRuntime.clearFrame(oController._iSearchViewportSyncRaf);
-        oController._oSearchViewportDelegate = null;
         oController._oSearchScrollHost = null;
         oController._fnSearchScrollSync = null;
         oController._fnSearchViewportResize = null;

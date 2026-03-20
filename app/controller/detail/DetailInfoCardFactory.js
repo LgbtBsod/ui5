@@ -161,19 +161,16 @@ sap.ui.define([
                     key: "cardkey",
                     value: "{" + VIEW_MODEL + ">key}",
                     writeToDom: true
+                }),
+                new CustomData({
+                    key: "tabindex",
+                    value: "0",
+                    writeToDom: true
                 })
             ]
         });
         withStyleClasses(oItem, "infoCardGridItem");
         oItem.setBindingContext(oContext, VIEW_MODEL);
-        oItem.addEventDelegate({
-            onAfterRendering: function () {
-                var oDomRef = oItem.getDomRef();
-                if (oDomRef) {
-                    oDomRef.setAttribute("tabindex", "0");
-                }
-            }
-        });
         return oItem;
     }
 

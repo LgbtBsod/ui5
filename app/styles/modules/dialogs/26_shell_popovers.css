@@ -79,6 +79,10 @@ body.chkAppRoot .shellPopover .sapMDialogScrollCont {
   min-width: 0;
 }
 
+.chkApp .shellSettingsFactListSpaced {
+  margin-top: 0.5rem;
+}
+
 .chkApp .shellUserCard {
   padding: 0.68rem 0.76rem;
   border-radius: calc(var(--radius-lg) - 0.14rem);

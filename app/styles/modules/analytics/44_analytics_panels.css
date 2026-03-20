@@ -98,6 +98,16 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
   opacity: 0.92;
 }
 
+.chkApp .analyticsChartEmptySpaced,
+.chkApp .analyticsInlineHintStrip {
+  margin-bottom: 0.5rem;
+}
+
+.chkApp .analyticsTabBarSpaced,
+.chkApp .analyticsPanelSurfaceSpaced {
+  margin-top: 1rem;
+}
+
 .chkApp .analyticsLegendItem {
   display: inline-flex;
   align-items: center;

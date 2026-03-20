@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <IconTabBar expandable="false" class="sapUiSmallMarginTop analyticsTabBar">
+    <IconTabBar expandable="false" class="analyticsTabBar analyticsTabBarSpaced">
         <items>
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsTrends" type="XML"/>
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsBuilder" type="XML"/>

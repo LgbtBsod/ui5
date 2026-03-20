@@ -1,5 +1,4 @@
 .chkApp .appActionGhost .sapMBtnInner,
-.chkApp .brandActionBtn.brandActionGhost .sapMBtnInner,
 .chkApp .searchGhostAction .sapMBtnInner,
 .chkApp .searchToolbarGhostAction .sapMBtnInner {
   background: transparent;
@@ -9,7 +8,6 @@
 }
 
 body.chkAppRoot.appDark .chkApp .appActionGhost .sapMBtnInner,
-body.chkAppRoot.appDark .chkApp .brandActionBtn.brandActionGhost .sapMBtnInner,
 body.chkAppRoot.appDark .chkApp .searchGhostAction .sapMBtnInner,
 body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
   border-color: rgba(77, 177, 255, 0.40);
@@ -17,7 +15,6 @@ body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
 }
 
 .chkApp .appActionGhost:hover .sapMBtnInner,
-.chkApp .brandActionBtn.brandActionGhost:hover .sapMBtnInner,
 .chkApp .searchGhostAction:hover .sapMBtnInner,
 .chkApp .searchToolbarGhostAction:hover .sapMBtnInner {
   background: rgba(var(--hz-accent-rgb, 0,112,242), 0.07);
@@ -26,7 +23,6 @@ body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
 }
 
 .chkApp .appActionGhost:active .sapMBtnInner,
-.chkApp .brandActionBtn.brandActionGhost:active .sapMBtnInner,
 .chkApp .searchGhostAction:active .sapMBtnInner,
 .chkApp .searchToolbarGhostAction:active .sapMBtnInner {
   transform: translateY(0) scale(0.97);
@@ -127,7 +123,6 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
 .chkApp .searchResultsActionRail .appActionPrimary .sapMBtnInner,
 .chkApp .searchResultsActionRail .appActionSecondary .sapMBtnInner,
 .chkApp .searchResultsActionRail .appActionGhost .sapMBtnInner,
-.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarAction .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,
@@ -142,7 +137,6 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
 .chkApp .searchResultsActionRail .appActionPrimary .sapMBtnInner,
 .chkApp .searchResultsActionRail .appActionSecondary .sapMBtnInner,
 .chkApp .searchResultsActionRail .appActionGhost .sapMBtnInner,
-.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarAction .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,

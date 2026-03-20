@@ -9,10 +9,7 @@ const ALLOWED_LEGACY_PATHS = [
     path.normalize("app/styles/modules/20_surface.css"),
     path.normalize("app/styles/modules/controls/26_control_skin.css"),
     path.normalize("app/styles/modules/controls/30_action_and_shell_buttons.css"),
-    path.normalize("app/styles/modules/controls/33_overflow_and_badges.css"),
-    path.normalize("app/styles/modules/controls/34_action_priority_and_a11y.css"),
     path.normalize("app/styles/modules/detail/46_detail_rail_shell.css"),
-    path.normalize("app/styles/modules/detail/47_detail_rail_status.css"),
     path.normalize("app/styles/modules/detail/50_detail_object_shell.css"),
     path.normalize("app/styles/modules/detail/52_detail_info_cards.css"),
     path.normalize("app/styles/modules/search/42_search_action_toolbar.css")

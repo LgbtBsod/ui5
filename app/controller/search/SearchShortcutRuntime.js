@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts"
-], function (SearchSelectionRuntime, SearchUiContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/SearchUiContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime"
+], function (SearchSelectionRuntime, SearchUiContracts, EventDelegateRuntime) {
     "use strict";
 
     var SHORTCUT_ACTIONS = SearchUiContracts.SHORTCUT_ACTIONS;
@@ -158,7 +159,7 @@ sap.ui.define([
             }
         };
         if (oController.getView && oController.getView()) {
-            oController.getView().addEventDelegate(oController._oSearchShortcutDelegate);
+            EventDelegateRuntime.ensure(oController, "_oSearchShortcutDelegate", oController.getView(), oController._oSearchShortcutDelegate, oController);
         }
         bindShortcutDomListener(oController);
     }
@@ -169,9 +170,8 @@ sap.ui.define([
         }
         unbindShortcutDomListener(oController);
         if (oController._oSearchShortcutDelegate && oController.getView && oController.getView()) {
-            oController.getView().removeEventDelegate(oController._oSearchShortcutDelegate);
+            EventDelegateRuntime.remove(oController, "_oSearchShortcutDelegate", oController.getView());
         }
-        oController._oSearchShortcutDelegate = null;
         oController._fnSearchPowerUserShortcut = null;
         oController._bSearchShortcutDomBound = false;
     }

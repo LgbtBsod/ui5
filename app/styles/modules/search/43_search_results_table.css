@@ -151,6 +151,10 @@ body.chkAppRoot.appDark .chkApp .searchLoadErrorBanner {
   padding: 0.5rem 0;
 }
 
+.chkApp .searchLoadRetryRowSpaced {
+  margin-top: 0.35rem;
+}
+
 .chkApp .searchLoadRetryRow .searchLoadRetryButton .sapMBtnInner {
   border-radius: 999px;
   padding: 0 0.75rem;
@@ -291,6 +295,11 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchStatusStripStack {
   gap: 0.45rem;
   overflow: visible;
+}
+
+.chkApp .searchStatusStripStackSpaced,
+.chkApp .searchBusyPanelSpaced {
+  margin-bottom: 0.5rem;
 }
 
 .chkApp .searchFilterHintBanner {

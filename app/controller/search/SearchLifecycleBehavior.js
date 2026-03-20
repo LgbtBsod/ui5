@@ -12,6 +12,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts"
@@ -29,6 +30,7 @@ sap.ui.define([
     SearchRateProgress,
     SearchViewStateRuntime,
     StatusChipClassRuntime,
+    SemanticDomRuntime,
     ModelContracts,
     NavigationContracts,
     SearchToolbarContracts
@@ -46,35 +48,20 @@ sap.ui.define([
         return oBundle && oBundle.getText ? oBundle.getText(sKey) : "";
     }
 
-    function setSemanticAttr(oController, sId, mAttrs) {
-        var oControl = oController.byId && oController.byId(sId);
-        var oDomRef = oControl && oControl.getDomRef && oControl.getDomRef();
-        Object.keys(mAttrs || {}).forEach(function (sAttr) {
-            if (!oDomRef) {
-                return;
-            }
-            if (mAttrs[sAttr]) {
-                oDomRef.setAttribute(sAttr, mAttrs[sAttr]);
-                return;
-            }
-            oDomRef.removeAttribute(sAttr);
-        });
-    }
-
     function syncSemanticRegions(oController) {
-        setSemanticAttr(oController, "searchAnalyticsRailRegion", {
+        SemanticDomRuntime.syncControllerTarget(oController, "searchAnalyticsRailRegion", {
             role: "region",
             "aria-label": getBundleText(oController, "kpiRailAriaLabel")
         });
-        setSemanticAttr(oController, "searchFilterCard", {
+        SemanticDomRuntime.syncControllerTarget(oController, "searchFilterCard", {
             role: "search",
             "aria-label": getBundleText(oController, "filtersAriaLabel")
         });
-        setSemanticAttr(oController, "searchResultsShell", {
+        SemanticDomRuntime.syncControllerTarget(oController, "searchResultsShell", {
             role: "region",
             "aria-label": getBundleText(oController, "searchResultsAriaLabel")
         });
-        setSemanticAttr(oController, "searchResultsSummaryRail", {
+        SemanticDomRuntime.syncControllerTarget(oController, "searchResultsSummaryRail", {
             role: "status",
             "aria-live": "polite",
             "aria-label": getBundleText(oController, "searchSummaryRailAriaLabel")

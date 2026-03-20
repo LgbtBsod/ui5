@@ -45,7 +45,7 @@
             <Panel
                 headerText="{i18n>analyticsFailedChecksBySource}"
                 expandable="false"
-                class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                class="analyticsChartPanel analyticsPanelSurface analyticsPanelSurfaceSpaced">
                 <content>
                     <viz:VizFrame
                         vizType="bar"
@@ -78,7 +78,7 @@
             <Panel
                 headerText="{i18n>analyticsFailedBarriersBySource}"
                 expandable="false"
-                class="analyticsChartPanel analyticsPanelSurface sapUiSmallMarginTop">
+                class="analyticsChartPanel analyticsPanelSurface analyticsPanelSurfaceSpaced">
                 <content>
                     <viz:VizFrame
                         vizType="bar"

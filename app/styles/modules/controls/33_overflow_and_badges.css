@@ -20,7 +20,6 @@
 .chkApp .searchResultsActionRail .appActionPrimary .sapMBtnInner,
 .chkApp .searchResultsActionRail .appActionSecondary .sapMBtnInner,
 .chkApp .searchResultsActionRail .appActionGhost .sapMBtnInner,
-.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchSortButton .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchGroupButton .sapMBtnInner,
@@ -28,7 +27,6 @@
 .chkApp .searchSmartToolbarRail .appActionPrimary .sapMBtnInner,
 .chkApp .searchSmartToolbarRail .appActionSecondary .sapMBtnInner,
 .chkApp .searchSmartToolbarRail .appActionGhost .sapMBtnInner,
-.chkApp .searchSmartToolbarRail .brandActionBtn .sapMBtnInner,
 .chkApp .searchSmartToolbarRail .searchToolbarNavBtn .sapMBtnInner {
   display: inline-flex;
   align-items: center;
@@ -38,7 +36,6 @@
 .chkApp .searchResultsActionRail .appActionPrimary .sapMBtnIconLeft,
 .chkApp .searchResultsActionRail .appActionSecondary .sapMBtnIconLeft,
 .chkApp .searchResultsActionRail .appActionGhost .sapMBtnIconLeft,
-.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnIconLeft,
 .chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnIconLeft,
 .chkApp .searchResultsActionRail .searchSortButton .sapMBtnIconLeft,
 .chkApp .searchResultsActionRail .searchGroupButton .sapMBtnIconLeft,
@@ -46,7 +43,6 @@
 .chkApp .searchSmartToolbarRail .appActionPrimary .sapMBtnIconLeft,
 .chkApp .searchSmartToolbarRail .appActionSecondary .sapMBtnIconLeft,
 .chkApp .searchSmartToolbarRail .appActionGhost .sapMBtnIconLeft,
-.chkApp .searchSmartToolbarRail .brandActionBtn .sapMBtnIconLeft,
 .chkApp .searchSmartToolbarRail .searchToolbarNavBtn .sapMBtnIconLeft {
   margin-inline-end: 0;
 }
@@ -54,7 +50,6 @@
 .chkApp .searchResultsActionRail .appActionPrimary .sapMBtnContent,
 .chkApp .searchResultsActionRail .appActionSecondary .sapMBtnContent,
 .chkApp .searchResultsActionRail .appActionGhost .sapMBtnContent,
-.chkApp .searchResultsActionRail .brandActionBtn .sapMBtnContent,
 .chkApp .searchResultsActionRail .searchToolbarNavBtn .sapMBtnContent,
 .chkApp .searchResultsActionRail .searchSortButton .sapMBtnContent,
 .chkApp .searchResultsActionRail .searchGroupButton .sapMBtnContent,
@@ -62,7 +57,6 @@
 .chkApp .searchSmartToolbarRail .appActionPrimary .sapMBtnContent,
 .chkApp .searchSmartToolbarRail .appActionSecondary .sapMBtnContent,
 .chkApp .searchSmartToolbarRail .appActionGhost .sapMBtnContent,
-.chkApp .searchSmartToolbarRail .brandActionBtn .sapMBtnContent,
 .chkApp .searchSmartToolbarRail .searchToolbarNavBtn .sapMBtnContent {
   line-height: 1.1;
 }

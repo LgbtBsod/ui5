@@ -9,6 +9,7 @@ sap.ui.define([], function () {
         "chipStateNone"
     ];
     var DELEGATE_KEY = "__chipStateDelegateAttached";
+    var DELEGATE_REF_KEY = "__chipStateDelegateRef";
 
     function stateToClass(sState) {
         switch (String(sState || "").trim()) {
@@ -44,18 +45,21 @@ sap.ui.define([], function () {
     }
 
     function ensureDelegate(oControl) {
+        var oDelegate;
         if (!oControl || !oControl.addEventDelegate || !oControl.data) {
             return;
         }
         if (oControl.data(DELEGATE_KEY)) {
             return;
         }
-        oControl.addEventDelegate({
+        oDelegate = {
             onAfterRendering: function () {
                 syncControl(oControl);
             }
-        });
+        };
+        oControl.addEventDelegate(oDelegate);
         oControl.data(DELEGATE_KEY, "true");
+        oControl.data(DELEGATE_REF_KEY, oDelegate);
     }
 
     function isSemanticChip(oControl) {

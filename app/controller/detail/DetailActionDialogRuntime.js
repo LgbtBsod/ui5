@@ -36,26 +36,11 @@ sap.ui.define([
 
         _rememberDialogReturnFocus: function (sKey, oControl) {
             var oFallback = oControl;
-            var oActive;
-            var sActiveId;
             if (!sKey) {
                 return;
             }
-            if (!oFallback && typeof document !== "undefined") {
-                oActive = document.activeElement;
-                sActiveId = oActive && oActive.id ? String(oActive.id) : "";
-                if (sActiveId) {
-                    oFallback = {
-                        focus: function () {
-                            var oNode = document.getElementById(sActiveId);
-                            if (oNode && typeof oNode.focus === "function") {
-                                oNode.focus();
-                            }
-                        }
-                    };
-                } else if (oActive && typeof oActive.focus === "function") {
-                    oFallback = oActive;
-                }
+            if (!oFallback) {
+                oFallback = FocusRuntime.createActiveElementFallback();
             }
             ControllerReturnFocusRuntime.remember(this, sKey, oFallback, {
                 storeProperty: "_mDialogReturnFocus"

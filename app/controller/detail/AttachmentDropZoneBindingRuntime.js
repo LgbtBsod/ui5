@@ -1,27 +1,27 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentDropZoneRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (AttachmentUploadCore, AttachmentDropZoneRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime"
+], function (AttachmentUploadCore, AttachmentDropZoneRuntime, SchedulingRuntime, EventDelegateRuntime) {
     "use strict";
 
     function ensureDropZoneDelegate(oController, oDropZone) {
-        if (!oDropZone || !oDropZone.addEventDelegate || oController._attachmentDropZoneDelegate) {
+        if (!oDropZone || !oDropZone.addEventDelegate) {
             return;
         }
-        oController._attachmentDropZoneDelegate = {
-            onAfterRendering: function () {
-                bindAttachmentDropZone(oController);
-            }
-        };
-        oDropZone.addEventDelegate(oController._attachmentDropZoneDelegate);
+        if (!oController._attachmentDropZoneDelegate) {
+            oController._attachmentDropZoneDelegate = {
+                onAfterRendering: function () {
+                    bindAttachmentDropZone(oController);
+                }
+            };
+        }
+        EventDelegateRuntime.ensure(oController, "_attachmentDropZoneDelegate", oDropZone, oController._attachmentDropZoneDelegate, oController);
     }
 
     function clearDropZoneDelegate(oController, oDropZone) {
-        if (oDropZone && oController._attachmentDropZoneDelegate && oDropZone.removeEventDelegate) {
-            oDropZone.removeEventDelegate(oController._attachmentDropZoneDelegate);
-            oController._attachmentDropZoneDelegate = null;
-        }
+        EventDelegateRuntime.remove(oController, "_attachmentDropZoneDelegate", oDropZone);
     }
 
     function ensureHandlers(oController, aSpecs) {
