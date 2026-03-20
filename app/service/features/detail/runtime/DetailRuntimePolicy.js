@@ -1,20 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DetailRuntimeDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DetailRuntimeOverrideHandlers"
-], function (DetailRuntimeConstants, BehaviorResolver, DetailRuntimeDefaultHandlers, DetailRuntimeOverrideHandlers) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/DetailRuntimeBehaviorRuntime"
+], function (DetailRuntimeConstants, DetailRuntimeBehaviorRuntime) {
     "use strict";
 
     function runSyncOperation(sOperation, mContext) {
-        DetailRuntimeDefaultHandlers.ensureRegistered();
-        DetailRuntimeOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.executeSync(
-            DetailRuntimeConstants.SCOPE,
-            sOperation,
-            mContext || {},
-            DetailRuntimeDefaultHandlers.handlers
-        );
+        return DetailRuntimeBehaviorRuntime.executeSync(sOperation, mContext || {});
     }
 
     function analyticsEditRestorePlan(mContext) {
@@ -30,8 +21,8 @@ sap.ui.define([
 
     return {
         analyticsEditRestorePlan: analyticsEditRestorePlan,
-        registerBehaviorOverride: DetailRuntimeOverrideHandlers.register,
-        unregisterBehaviorOverride: DetailRuntimeOverrideHandlers.unregister,
-        clearBehaviorOverrides: DetailRuntimeOverrideHandlers.clear
+        registerBehaviorOverride: DetailRuntimeBehaviorRuntime.registerBehaviorOverride,
+        unregisterBehaviorOverride: DetailRuntimeBehaviorRuntime.unregisterBehaviorOverride,
+        clearBehaviorOverrides: DetailRuntimeBehaviorRuntime.clearBehaviorOverrides
     };
 });

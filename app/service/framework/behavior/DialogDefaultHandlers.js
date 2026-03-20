@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LazyDialogRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectDialogRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
 ], function (LazyDialogRuntime, EffectDialogRuntime, BehaviorRegistry) {
     "use strict";

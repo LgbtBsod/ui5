@@ -2,13 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/WorkflowBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (LockAdapter, DialogOrchestrator, StatePaths, FeedbackCoordinator, RootIdRuntime, ModelStateRuntime, BehaviorRegistry, CreateSentinel, WorkflowContracts) {
+], function (LockAdapter, DialogOrchestrator, StatePaths, RootIdRuntime, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, CreateSentinel, WorkflowContracts) {
     "use strict";
 
     var WORKFLOW_SCOPE = "workflow";
@@ -60,14 +60,7 @@ sap.ui.define([
         }
         if (sAction === DialogOrchestrator.actions.NO) {
             return releaseWithTrySave(mContext).then(function () {
-                ModelStateRuntime.resetDetailWorkflowState(oController, {
-                    [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE) || WorkflowContracts.AUTOSAVE_STATES.IDLE,
-                    [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
-                    [StatePaths.WORKFLOW_AUTOSAVE_ENABLED]: ModelStateRuntime.read(oController, "state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false) === true,
-                    "/activeObjectId": "",
-                    "/selectedId": "",
-                    "/postOpenHydratedRootId": ""
-                });
+                WorkflowBehaviorHelpers.resetDetailWorkflowState(oController);
                 return "DISCARD";
             });
         }
@@ -78,13 +71,11 @@ sap.ui.define([
 
     function confirmUnsavedAndHandle(mContext) {
         var oController = mContext && mContext.controller;
-        var sText;
         if (!ModelStateRuntime.read(oController, "state", "/isDirty", false)) {
             return Promise.resolve("NO_CHANGES");
         }
-        sText = FeedbackCoordinator.resolveText(oController, "unsavedChangesPrompt", [], "unsavedChangesPrompt");
         return DialogOrchestrator.promptConfirm(
-            sText,
+            WorkflowBehaviorHelpers.resolveText(oController, "unsavedChangesPrompt", [], "unsavedChangesPrompt"),
             [DialogOrchestrator.actions.YES, DialogOrchestrator.actions.NO, DialogOrchestrator.actions.CANCEL],
             DialogOrchestrator.actions.YES
         ).then(function (sAction) {
@@ -101,12 +92,13 @@ sap.ui.define([
 
         if (iStatus === 409) {
             aActions = [
-                FeedbackCoordinator.resolveText(oController, "reloadButton", [], "reloadButton"),
-                FeedbackCoordinator.resolveText(oController, "overwriteButton", [], "overwriteButton"),
+                WorkflowBehaviorHelpers.resolveText(oController, "reloadButton", [], "reloadButton"),
+                WorkflowBehaviorHelpers.resolveText(oController, "overwriteButton", [], "overwriteButton"),
                 DialogOrchestrator.actions.CANCEL
             ];
-            return DialogOrchestrator.promptWarning(
-                FeedbackCoordinator.resolveText(oController, "conflictDialogText", [], "conflictDialogText"),
+            return WorkflowBehaviorHelpers.promptWarning(
+                oController,
+                "conflictDialogText",
                 aActions
             ).then(function (sAction) {
                 return mHandlers && mHandlers.onConflictChoice ? mHandlers.onConflictChoice(sAction) : sAction;
@@ -115,25 +107,26 @@ sap.ui.define([
         if (iStatus === 410 && mHandlers && mHandlers.onLockExpired) {
             return mHandlers.onLockExpired();
         }
-        DialogOrchestrator.promptError(
-            FeedbackCoordinator.resolveText(
-                oController,
-                "genericOperationFailed",
-                [((oError && oError.message) || "Unknown error")],
-                "genericOperationFailed"
-            )
+        WorkflowBehaviorHelpers.promptError(
+            oController,
+            "genericOperationFailed",
+            [((oError && oError.message) || "Unknown error")],
+            "genericOperationFailed"
         );
         return Promise.resolve(null);
     }
 
     function confirmStealOwnLock(mContext) {
         var oController = mContext && mContext.controller;
-        var sYes = FeedbackCoordinator.resolveText(oController, "yesButton", [], "yesButton");
-        var sNo = FeedbackCoordinator.resolveText(oController, "noButton", [], "noButton");
-        return DialogOrchestrator.promptWarning(
-            FeedbackCoordinator.resolveText(oController, "lockStealOwnSessionPrompt", [], "lockStealOwnSessionPrompt"),
+        var sYes = WorkflowBehaviorHelpers.resolveText(oController, "yesButton", [], "yesButton");
+        var sNo = WorkflowBehaviorHelpers.resolveText(oController, "noButton", [], "noButton");
+        return WorkflowBehaviorHelpers.promptWarning(
+            oController,
+            "lockStealOwnSessionPrompt",
             [sYes, sNo],
-            sYes
+            sYes,
+            [],
+            "lockStealOwnSessionPrompt"
         ).then(function (sAction) {
             return sAction === sYes;
         });
@@ -141,9 +134,13 @@ sap.ui.define([
 
     function showLockKilledNotice(mContext) {
         var oController = mContext && mContext.controller;
-        DialogOrchestrator.promptWarning(
-            FeedbackCoordinator.resolveText(oController, "lockKilledMessage", [], "lockKilledMessage"),
-            [FeedbackCoordinator.resolveText(oController, "okButton", [], "okButton")]
+        return WorkflowBehaviorHelpers.promptWarning(
+            oController,
+            "lockKilledMessage",
+            [WorkflowBehaviorHelpers.resolveText(oController, "okButton", [], "okButton")],
+            undefined,
+            [],
+            "lockKilledMessage"
         );
     }
 

@@ -1,15 +1,21 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandPayloadRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FacadeCommandContextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer"
 ], function (
     FacadeCommandContracts,
-    FacadeCommandPayloadRuntime,
-    FacadeCommandContextRuntime,
-    ControllerCommandRuntime
+    ControllerCommandRuntime,
+    ControllerCommandContextRuntime,
+    RuntimePayloadNormalizer
 ) {
     "use strict";
+
+    function normalizePayload(vCommandOrPayload, oPayload) {
+        return RuntimePayloadNormalizer.normalize(
+            arguments.length > 1 ? oPayload : vCommandOrPayload
+        );
+    }
 
     function executeRaw(oController, oFacade, sMethod, mInput, mCtx) {
         return ControllerCommandRuntime.executeFacadeCommand(
@@ -35,7 +41,7 @@ sap.ui.define([
         var oProfile = mProfile || {};
         var fnBuildCtx = typeof oProfile.buildCtx === "function"
             ? oProfile.buildCtx
-            : FacadeCommandContextRuntime.buildDefaultCtx;
+            : ControllerCommandContextRuntime.buildDefaultCtx;
         return executeWithContract(
             oController,
             oFacade,
@@ -51,21 +57,21 @@ sap.ui.define([
 
     function executeDetail(oController, oFacade, sMethod, mInput) {
         return executeNamed(oController, oFacade, sMethod, mInput, {
-            buildCtx: FacadeCommandContextRuntime.buildDefaultCtx,
+            buildCtx: ControllerCommandContextRuntime.buildDefaultCtx,
             normalizeMethod: function (vMethod) {
                 return FacadeCommandContracts.normalizeKnownMethod(vMethod, FacadeCommandContracts.DETAIL_METHODS);
             },
-            normalizePayload: FacadeCommandPayloadRuntime.normalizePayload
+            normalizePayload: normalizePayload
         });
     }
 
     function executeSearch(oController, oFacade, sMethod, mInput) {
         return executeNamed(oController, oFacade, sMethod, mInput, {
-            buildCtx: FacadeCommandContextRuntime.buildSearchCtx,
+            buildCtx: ControllerCommandContextRuntime.buildSearchCtx,
             normalizeMethod: function (vMethod) {
                 return FacadeCommandContracts.normalizeKnownMethod(vMethod, FacadeCommandContracts.SEARCH_METHODS);
             },
-            normalizePayload: FacadeCommandPayloadRuntime.normalizePayload
+            normalizePayload: normalizePayload
         });
     }
 

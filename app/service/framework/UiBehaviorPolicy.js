@@ -1,20 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiBehaviorDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiBehaviorOverrideHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/UiBehaviorRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiBehaviorConstants"
-], function (BehaviorResolver, UiBehaviorDefaultHandlers, UiBehaviorOverrideHandlers, UiBehaviorConstants) {
+], function (UiBehaviorRuntime, UiBehaviorConstants) {
     "use strict";
 
     function runSyncOperation(sOperation, mContext) {
-        UiBehaviorDefaultHandlers.ensureRegistered();
-        UiBehaviorOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.executeSync(
-            UiBehaviorConstants.SCOPE,
-            sOperation,
-            mContext || {},
-            UiBehaviorDefaultHandlers.handlers
-        );
+        return UiBehaviorRuntime.executeSync(sOperation, mContext || {});
     }
 
     function create(mOptions) {
@@ -58,8 +49,8 @@ sap.ui.define([
 
     return {
         create: create,
-        registerBehaviorOverride: UiBehaviorOverrideHandlers.register,
-        unregisterBehaviorOverride: UiBehaviorOverrideHandlers.unregister,
-        clearBehaviorOverrides: UiBehaviorOverrideHandlers.clear
+        registerBehaviorOverride: UiBehaviorRuntime.registerBehaviorOverride,
+        unregisterBehaviorOverride: UiBehaviorRuntime.unregisterBehaviorOverride,
+        clearBehaviorOverrides: UiBehaviorRuntime.clearBehaviorOverrides
     };
 });

@@ -1,20 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowOverrideHandlers"
-], function (BehaviorResolver, WorkflowDefaultHandlers, WorkflowOverrideHandlers) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/WorkflowBehaviorRuntime"
+], function (WorkflowBehaviorRuntime) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
-        WorkflowDefaultHandlers.ensureRegistered();
-        WorkflowOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.execute("workflow", sOperation, mContext || {}, WorkflowDefaultHandlers.handlers);
+        return WorkflowBehaviorRuntime.execute(sOperation, mContext || {});
     }
 
     function runSyncOperation(sOperation, mContext) {
-        WorkflowDefaultHandlers.ensureRegistered();
-        WorkflowOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.executeSync("workflow", sOperation, mContext || {}, WorkflowDefaultHandlers.handlers);
+        return WorkflowBehaviorRuntime.executeSync(sOperation, mContext || {});
     }
 
     return {
@@ -53,8 +47,8 @@ sap.ui.define([
                 controller: oController
             });
         },
-        registerBehaviorOverride: WorkflowOverrideHandlers.register,
-        unregisterBehaviorOverride: WorkflowOverrideHandlers.unregister,
-        clearBehaviorOverrides: WorkflowOverrideHandlers.clear
+        registerBehaviorOverride: WorkflowBehaviorRuntime.registerBehaviorOverride,
+        unregisterBehaviorOverride: WorkflowBehaviorRuntime.unregisterBehaviorOverride,
+        clearBehaviorOverrides: WorkflowBehaviorRuntime.clearBehaviorOverrides
     };
 });

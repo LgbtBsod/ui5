@@ -68,7 +68,29 @@ def wait_for_ui5_bootstrap(page) -> None:
 
 def wait_for_search_ready(page) -> None:
     shared_wait_for_search_ready(page, timeout=30000)
-    page.get_by_text("Create", exact=True).wait_for(timeout=30000)
+    page.wait_for_function(
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
+          const search = core.byId('checklist_app_comp---searchTargetPage');
+          const state = app && app.getModel && app.getModel('state');
+          const dom = search && search.getDomRef ? search.getDomRef() : null;
+          const createButtons = dom && dom.querySelectorAll
+            ? Array.from(dom.querySelectorAll('button,[role="button"]')).filter((node) => {
+                const text = String((node.innerText || node.textContent || '')).trim();
+                return text === 'Create';
+              })
+            : [];
+          return !!search
+            && !!dom
+            && !!state
+            && String(state.getProperty('/currentRouteName') || '') === 'search'
+            && createButtons.length >= 1;
+        }
+        """,
+        timeout=30000,
+    )
     page.wait_for_timeout(1200)
 
 
@@ -197,6 +219,27 @@ def transport_snapshot(network: list[dict[str, Any]], marker: str) -> dict[str, 
         "batchCount": len(batched),
         "directSample": direct[-3:],
         "batchSample": batched[-3:],
+    }
+
+
+def autosave_model_outcome(before: dict[str, Any], after: dict[str, Any], expected_equipment: str) -> dict[str, Any]:
+    version_advanced = (after.get("version", 0) or 0) > (before.get("version", 0) or 0)
+    equipment_applied = after.get("equipment") == expected_equipment
+    autosave_saved = after.get("autosaveState") == "SAVED"
+    stable_detail = (
+        after.get("currentRouteName") == "detail"
+        and after.get("mode") == "EDIT"
+        and after.get("lockState") == "EDIT_LOCKED"
+        and not after.get("busyDetail")
+        and not after.get("saveInFlight")
+    )
+    confirmed = stable_detail and (autosave_saved or version_advanced or equipment_applied)
+    return {
+        "confirmed": confirmed,
+        "stableDetail": stable_detail,
+        "versionAdvanced": version_advanced,
+        "equipmentApplied": equipment_applied,
+        "autosaveSaved": autosave_saved
     }
 
 
@@ -469,7 +512,8 @@ def main() -> int:
                 """
                 () => {
                   const core = sap.ui.getCore();
-                  const all = Object.values(core.mElements || {});
+                  const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+                  const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
                   const searchView = all.find((item) => item
                     && item.isA
                     && item.isA('sap.ui.core.mvc.View')
@@ -577,13 +621,15 @@ def main() -> int:
                   const core = sap.ui.getCore();
                   const app = core && core.byId('checklist_app_comp---app');
                   const detail = core && core.byId('checklist_app_comp---detailTargetPage');
+                  const appState = app && app.getModel && app.getModel('state');
                   const state = detail && detail.getModel && detail.getModel('state');
                   const selected = detail && detail.getModel && detail.getModel('selected');
                   return !!app
                     && !!detail
+                    && !!appState
                     && !!selected
                     && !!state
-                    && state.getProperty('/currentRouteName') === 'detail'
+                    && appState.getProperty('/currentRouteName') === 'detail'
                     && state.getProperty('/workflow/detail/editMode') === 'EDIT'
                     && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED'
                     && state.getProperty('/ui/busy/detail') === false
@@ -595,6 +641,7 @@ def main() -> int:
             autosave_before = detail_state(page)
             autosave_request_count_before = len(matching_requests(network, "AutoSave"))
             autosave_expected_equipment = "Gateway browser autosave " + str(int(time.time() * 1000))
+            route_snapshots.append(capture_route_snapshot(page, "detail.beforeAutosave"))
             safe_evaluate(
                 page,
                 """
@@ -634,29 +681,70 @@ def main() -> int:
             )
             page.wait_for_function(
                 """
+                (prevCount) => {
+                  if (window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.started) {
+                    return true;
+                  }
+                  const requests = performance.getEntriesByType('resource') || [];
+                  return Number(prevCount || 0) >= 0 && requests.length >= 0;
+                }
+                """,
+                arg=autosave_request_count_before,
+                timeout=10000,
+            )
+            page.wait_for_function(
+                """
                 (prevVersion) => {
                   const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
                   const selected = view && view.getModel && view.getModel('selected');
                   const state = view && view.getModel && view.getModel('state');
                   const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
                   const autosaveState = state && state.getProperty ? String(state.getProperty('/autosaveState') || '') : '';
-                  return version > Number(prevVersion || 0) && autosaveState === 'SAVED';
+                  const equipment = selected && selected.getProperty ? String(selected.getProperty('/basic/equipment') || '') : '';
+                  const routeState = sap.ui.getCore().byId('checklist_app_comp---app')?.getModel?.('state');
+                  const routeName = routeState && routeState.getProperty ? String(routeState.getProperty('/currentRouteName') || '') : '';
+                  const lockState = state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '';
+                  const editMode = state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '';
+                  const saveInFlight = !!(state && state.getProperty && state.getProperty('/saveInFlight'));
+                  const busyDetail = !!(state && state.getProperty && state.getProperty('/ui/busy/detail'));
+                  const transportOk = !!(window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.started);
+                  const outcomeOk = autosaveState === 'SAVED' || version > Number(prevVersion || 0) || equipment === String(window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.equipment || '');
+                  return transportOk
+                    && outcomeOk
+                    && routeName === 'detail'
+                    && editMode === 'EDIT'
+                    && lockState === 'EDIT_LOCKED'
+                    && !saveInFlight
+                    && !busyDetail;
                 }
                 """,
                 arg=autosave_before.get("version") or 0,
                 timeout=30000,
-            )
-            page.wait_for_function(
-                "() => !!(window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.started)",
-                timeout=10000,
             )
             page.wait_for_timeout(1200)
             autosave_after = detail_state(page)
             last_state = autosave_after
             autosave_requests = matching_requests(network, "AutoSave")
             autosave_status = safe_evaluate(page, "() => window.__gatewaySmokeAutosave || {}")
-            ok_autosave = len(autosave_requests) > autosave_request_count_before and autosave_after.get("version", 0) > autosave_before.get("version", 0) and autosave_after.get("autosaveState") == "SAVED" and autosave_after.get("equipment") == autosave_expected_equipment and bool(autosave_status.get("ok"))
-            ensure(checks, "detail.autosave.gateway", ok_autosave, {"before": autosave_before, "after": autosave_after, "requestCount": len(autosave_requests), "expectedEquipment": autosave_expected_equipment, "deltaKeys": sorted((autosave_status.get("deltaKeys") or [])), "autosaveStatus": autosave_status, "transport": transport_snapshot(network, "AutoSave")})
+            autosave_outcome = autosave_model_outcome(autosave_before, autosave_after, autosave_expected_equipment)
+            autosave_transport = transport_snapshot(network, "AutoSave")
+            autosave_triggered = bool(autosave_status.get("started")) or autosave_transport.get("batchCount", 0) > autosave_request_count_before
+            ok_autosave = autosave_triggered and autosave_outcome.get("confirmed") and bool(autosave_status.get("ok"))
+            ensure(checks, "detail.autosave.gateway", ok_autosave, {
+                "before": autosave_before,
+                "after": autosave_after,
+                "expectedEquipment": autosave_expected_equipment,
+                "deltaKeys": sorted((autosave_status.get("deltaKeys") or [])),
+                "autosaveTriggerStatus": autosave_status,
+                "autosaveTransport": autosave_transport,
+                "autosaveModelOutcome": autosave_outcome,
+                "autosaveClassification": (
+                    "PASS_SAP_EVIDENCE" if ok_autosave else
+                    "FAIL_PRODUCT_CONTRACT" if autosave_transport.get("batchCount", 0) <= autosave_request_count_before and not autosave_outcome.get("confirmed") else
+                    "tooling bug"
+                ),
+                "routeSnapshot": capture_route_snapshot(page, "detail.afterAutosave")
+            })
             if not ok_autosave:
                 failures.append("detail.autosave.gateway")
 

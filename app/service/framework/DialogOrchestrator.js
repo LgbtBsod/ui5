@@ -1,15 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DialogDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DialogOverrideHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier"
-], function (BehaviorResolver, DialogDefaultHandlers, DialogOverrideHandlers, EffectApplier) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/DialogBehaviorRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectApplier"
+], function (DialogBehaviorRuntime, EffectApplier) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
-        DialogDefaultHandlers.ensureRegistered();
-        DialogOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.execute("dialog", sOperation, mContext || {}, DialogDefaultHandlers.handlers);
+        return DialogBehaviorRuntime.execute(sOperation, mContext || {});
     }
 
     function ensure(oController, sKey, mConfig) {
@@ -58,9 +54,9 @@ sap.ui.define([
         open: open,
         close: close,
         runEffect: runEffect,
-        registerBehaviorOverride: DialogOverrideHandlers.register,
-        unregisterBehaviorOverride: DialogOverrideHandlers.unregister,
-        clearBehaviorOverrides: DialogOverrideHandlers.clear,
+        registerBehaviorOverride: DialogBehaviorRuntime.registerBehaviorOverride,
+        unregisterBehaviorOverride: DialogBehaviorRuntime.unregisterBehaviorOverride,
+        clearBehaviorOverrides: DialogBehaviorRuntime.clearBehaviorOverrides,
         promptWarning: EffectApplier.promptWarning,
         promptConfirm: EffectApplier.promptConfirm,
         promptError: EffectApplier.promptError,

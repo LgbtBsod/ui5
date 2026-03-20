@@ -1,10 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/NavigationBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "sap/ui/core/routing/HashChanger",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (WorkspaceRouteNavigation, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts) {
+], function (NavigationBehaviorHelpers, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts) {
     "use strict";
 
     var NAVIGATION_SCOPE = "navigation";
@@ -51,7 +51,7 @@ sap.ui.define([
     }
 
     function queuePendingIntent(mContext) {
-        var oCurrentIntent = WorkspaceRouteNavigation.buildCurrentIntent(mContext.stateModel) || {};
+        var oCurrentIntent = NavigationBehaviorHelpers.buildCurrentIntent(mContext.stateModel) || {};
         ModelStateRuntime.writeOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, {
             routeName: mContext.routeEvent && mContext.routeEvent.getParameter && mContext.routeEvent.getParameter("name"),
             routeArgs: (mContext.routeEvent && mContext.routeEvent.getParameter && mContext.routeEvent.getParameter("arguments")) || {},
@@ -126,25 +126,25 @@ sap.ui.define([
 
     var mHandlers = {
         buildCurrentIntent: function (mContext) {
-            return WorkspaceRouteNavigation.buildCurrentIntent(mContext.stateModel);
+            return NavigationBehaviorHelpers.buildCurrentIntent(mContext.stateModel);
         },
         setAnalyticsReturnIntent: function (mContext) {
-            return WorkspaceRouteNavigation.setAnalyticsReturnIntent(mContext.controller);
+            return NavigationBehaviorHelpers.setAnalyticsReturnIntent(mContext.controller);
         },
         navigateToSearch: function (mContext) {
-            return WorkspaceRouteNavigation.navigateToSearch(mContext.controller);
+            return NavigationBehaviorHelpers.navigateToSearch(mContext.controller);
         },
         navigateToDetail: function (mContext) {
-            return WorkspaceRouteNavigation.navigateToDetail(mContext.controller, mContext.rootId, mContext.layout);
+            return NavigationBehaviorHelpers.navigateToDetail(mContext.controller, mContext.rootId, mContext.layout);
         },
         buildDetailHash: function (mContext) {
-            return WorkspaceRouteNavigation.buildDetailHash(mContext.controller, mContext.rootId);
+            return NavigationBehaviorHelpers.buildDetailHash(mContext.controller, mContext.rootId);
         },
         navigateToAnalytics: function (mContext) {
-            return WorkspaceRouteNavigation.navigateToAnalytics(mContext.controller);
+            return NavigationBehaviorHelpers.navigateToAnalytics(mContext.controller);
         },
         navigateBackFromAnalytics: function (mContext) {
-            return WorkspaceRouteNavigation.navigateBackFromAnalytics(mContext.controller);
+            return NavigationBehaviorHelpers.navigateBackFromAnalytics(mContext.controller);
         },
         queuePendingIntent: queuePendingIntent,
         clearPendingIntent: clearPendingIntent,

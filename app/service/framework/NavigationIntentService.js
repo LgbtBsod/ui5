@@ -1,14 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/NavigationDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/NavigationOverrideHandlers"
-], function (BehaviorResolver, NavigationDefaultHandlers, NavigationOverrideHandlers) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/NavigationBehaviorRuntime"
+], function (NavigationBehaviorRuntime) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
-        NavigationDefaultHandlers.ensureRegistered();
-        NavigationOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.executeSync("navigation", sOperation, mContext || {}, NavigationDefaultHandlers.handlers);
+        return NavigationBehaviorRuntime.executeSync(sOperation, mContext || {});
     }
 
     function buildCurrentIntent(oStateModel) {
@@ -109,8 +105,8 @@ sap.ui.define([
         revertPendingIntent: revertPendingIntent,
         resumePendingIntent: resumePendingIntent,
         restorePendingIntent: restorePendingIntent,
-        registerBehaviorOverride: NavigationOverrideHandlers.register,
-        unregisterBehaviorOverride: NavigationOverrideHandlers.unregister,
-        clearBehaviorOverrides: NavigationOverrideHandlers.clear
+        registerBehaviorOverride: NavigationBehaviorRuntime.registerBehaviorOverride,
+        unregisterBehaviorOverride: NavigationBehaviorRuntime.unregisterBehaviorOverride,
+        clearBehaviorOverrides: NavigationBehaviorRuntime.clearBehaviorOverrides
     };
 });

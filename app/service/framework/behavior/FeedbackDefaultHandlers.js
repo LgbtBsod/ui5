@@ -1,40 +1,29 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectApplier",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectBannerRouter",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectApplier",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectBannerRouter",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (EffectApplier, EffectBannerRouter, EffectTextResolver, FeedbackBannerRuntime, ControllerModelRuntime, BehaviorRegistry) {
+], function (EffectApplier, EffectBannerRouter, FeedbackBehaviorHelpers, FeedbackBannerRuntime, ControllerModelRuntime, BehaviorRegistry) {
     "use strict";
 
     var FEEDBACK_SCOPE = "feedback";
     var bDefaultsRegistered = false;
 
     function resolveText(mContext) {
-        return EffectTextResolver.getText(
-            mContext.controller,
-            mContext.textKey,
-            mContext.args || [],
-            mContext.fallback || mContext.textKey || ""
-        );
+        return FeedbackBehaviorHelpers.resolveText(mContext.controller, mContext.textKey, mContext.args || [], mContext.fallback || mContext.textKey);
     }
 
     function applyUseCaseResult(mContext) {
         var oController = mContext.controller;
         var oResult = mContext.result;
+        var fnResolveText = FeedbackBehaviorHelpers.createResolver(oController);
         var oUiHandlers = {
             banner: function (oEffect, oCtrl, oOptions) {
                 return EffectBannerRouter.handleEffect(oCtrl, oEffect, oOptions, {
                     fallbackTextKey: "",
-                    resolveTextKey: function (sTextKey) {
-                        return resolveText({
-                            controller: oCtrl || oController,
-                            textKey: sTextKey,
-                            args: [],
-                            fallback: sTextKey
-                        });
-                    }
+                    resolveTextKey: FeedbackBehaviorHelpers.createResolver(oCtrl || oController)
                 }, oOptions);
             },
             dialog: function (oEffect, oCtrl, oOptions) {
@@ -42,14 +31,7 @@ sap.ui.define([
             }
         };
         return EffectApplier.applyEffects(oController, oResult && oResult.effects, {
-            resolveTextKey: function (sKey) {
-                return resolveText({
-                    controller: oController,
-                    textKey: sKey,
-                    args: [],
-                    fallback: sKey
-                });
-            },
+            resolveTextKey: fnResolveText,
             handlers: oUiHandlers,
             actionDispatcher: mContext.options && mContext.options.actionDispatcher
         }).then(function () {

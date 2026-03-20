@@ -1,8 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/UiDecisionBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (DialogOrchestrator, EffectTextResolver, BehaviorRegistry) {
+], function (UiDecisionBehaviorHelpers, BehaviorRegistry) {
     "use strict";
 
     var UI_DECISION_SCOPE = "uiDecision";
@@ -16,19 +15,14 @@ sap.ui.define([
     }
 
     function confirmDeleteChecklist(mContext) {
-        var oController = mContext && mContext.controller;
-        var sTextKey = String((mContext && mContext.textKey) || "deleteChecklistConfirmText");
-        var sText;
         if (!mContext || !mContext.armed || mContext.busy) {
             return Promise.resolve(false);
         }
-        sText = EffectTextResolver.getText(oController, sTextKey, [], sTextKey);
-        return DialogOrchestrator.promptWarning(
-            sText,
-            [DialogOrchestrator.actions.DELETE, DialogOrchestrator.actions.CANCEL],
-            DialogOrchestrator.actions.CANCEL
+        return UiDecisionBehaviorHelpers.confirmDelete(
+            mContext && mContext.controller,
+            String((mContext && mContext.textKey) || "deleteChecklistConfirmText")
         ).then(function (sAction) {
-            if (sAction !== DialogOrchestrator.actions.DELETE) {
+            if (sAction !== "Delete") {
                 runOptionalHandler(mContext && mContext.onReset);
                 return false;
             }
@@ -44,14 +38,12 @@ sap.ui.define([
         var iSelectionCount = Number(mContext && mContext.selectionCount || 0);
         var sSelectedRowId = String((mContext && mContext.selectedRowId) || "").trim();
         if (!sSelectedRowId) {
-            if (oController && typeof oController.showI18nError === "function") {
-                oController.showI18nError("nothingToOpen");
-            }
+            UiDecisionBehaviorHelpers.showError(oController, "nothingToOpen");
             runOptionalHandler(mContext && mContext.onMissingSelection);
             return false;
         }
-        if (iSelectionCount > 1 && oController && typeof oController.showI18nToast === "function") {
-            oController.showI18nToast("searchOpenUsesFirstHint", [iSelectionCount]);
+        if (iSelectionCount > 1) {
+            UiDecisionBehaviorHelpers.showToast(oController, "searchOpenUsesFirstHint", [iSelectionCount]);
         }
         return true;
     }
@@ -60,9 +52,7 @@ sap.ui.define([
         var oController = mContext && mContext.controller;
         var iSelectionCount = Number(mContext && mContext.selectionCount || 0);
         if (iSelectionCount > 1) {
-            if (oController && typeof oController.showI18nError === "function") {
-                oController.showI18nError("searchCopySingleSelectionHint");
-            }
+            UiDecisionBehaviorHelpers.showError(oController, "searchCopySingleSelectionHint");
             runOptionalHandler(mContext && mContext.onBlockedSelection);
             return false;
         }
@@ -70,35 +60,23 @@ sap.ui.define([
     }
 
     function notifySelectVisibleEmpty(mContext) {
-        var oController = mContext && mContext.controller;
-        if (oController && typeof oController.showI18nError === "function") {
-            oController.showI18nError("searchSelectVisibleEmpty");
-        }
+        UiDecisionBehaviorHelpers.showError(mContext && mContext.controller, "searchSelectVisibleEmpty");
         return false;
     }
 
     function notifyShellRefreshSuccess(mContext) {
-        var oController = mContext && mContext.controller;
-        if (oController && typeof oController.showI18nToast === "function") {
-            oController.showI18nToast("shellContextRefreshed");
-        }
+        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, "shellContextRefreshed");
         return true;
     }
 
     function notifyShellRefreshFailure(mContext) {
-        var oController = mContext && mContext.controller;
         var oError = mContext && mContext.error;
-        if (oController && typeof oController.showI18nToast === "function") {
-            oController.showI18nToast("shellUserRefreshFailed", [oError && oError.message || "Unknown error"]);
-        }
+        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, "shellUserRefreshFailed", [oError && oError.message || "Unknown error"]);
         return false;
     }
 
     function notifyCorrelationCopied(mContext) {
-        var oController = mContext && mContext.controller;
-        if (oController && typeof oController.showI18nToast === "function") {
-            oController.showI18nToast("correlationIdCopied");
-        }
+        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, "correlationIdCopied");
         return true;
     }
 

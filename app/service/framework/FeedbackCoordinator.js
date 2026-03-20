@@ -1,20 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackOverrideHandlers"
-], function (BehaviorResolver, FeedbackDefaultHandlers, FeedbackOverrideHandlers) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorRuntime"
+], function (FeedbackBehaviorRuntime) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
-        FeedbackDefaultHandlers.ensureRegistered();
-        FeedbackOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.execute("feedback", sOperation, mContext || {}, FeedbackDefaultHandlers.handlers);
+        return FeedbackBehaviorRuntime.execute(sOperation, mContext || {});
     }
 
     function runSyncOperation(sOperation, mContext) {
-        FeedbackDefaultHandlers.ensureRegistered();
-        FeedbackOverrideHandlers.ensureRegistered();
-        return BehaviorResolver.executeSync("feedback", sOperation, mContext || {}, FeedbackDefaultHandlers.handlers);
+        return FeedbackBehaviorRuntime.executeSync(sOperation, mContext || {});
     }
 
     function resolveText(oController, sKey, aArgs, sFallback) {
@@ -69,8 +63,8 @@ sap.ui.define([
         showGlobalMessage: showGlobalMessage,
         showRouteMessage: showRouteMessage,
         showToast: showToast,
-        registerBehaviorOverride: FeedbackOverrideHandlers.register,
-        unregisterBehaviorOverride: FeedbackOverrideHandlers.unregister,
-        clearBehaviorOverrides: FeedbackOverrideHandlers.clear
+        registerBehaviorOverride: FeedbackBehaviorRuntime.registerBehaviorOverride,
+        unregisterBehaviorOverride: FeedbackBehaviorRuntime.unregisterBehaviorOverride,
+        clearBehaviorOverrides: FeedbackBehaviorRuntime.clearBehaviorOverrides
     };
 });

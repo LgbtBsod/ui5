@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
 ], function (ActionContract, EffectActionRouting, SecurityTokenRefresh, BehaviorRegistry) {

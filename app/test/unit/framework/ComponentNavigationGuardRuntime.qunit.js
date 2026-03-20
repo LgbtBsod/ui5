@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentNavigationGuardRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
 ], function (ComponentNavigationGuardRuntime, StatePaths) {
     "use strict";

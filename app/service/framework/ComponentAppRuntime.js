@@ -1,11 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentSessionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentFormattingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentDetailStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSessionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFormattingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"

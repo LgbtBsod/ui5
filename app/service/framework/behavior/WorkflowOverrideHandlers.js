@@ -1,22 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (BehaviorRegistry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/OverrideHandlerFactory"
+], function (OverrideHandlerFactory) {
     "use strict";
 
-    var WORKFLOW_SCOPE = "workflow";
-
-    return {
-        ensureRegistered: function () {
-            return true;
-        },
-        register: function (sId, fnHandler) {
-            return BehaviorRegistry.registerOverride(WORKFLOW_SCOPE, sId, fnHandler);
-        },
-        unregister: function (sId) {
-            return BehaviorRegistry.unregisterOverride(WORKFLOW_SCOPE, sId);
-        },
-        clear: function () {
-            return BehaviorRegistry.clearOverrides(WORKFLOW_SCOPE);
-        }
-    };
+    return OverrideHandlerFactory.create("workflow");
 });

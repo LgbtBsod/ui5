@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentLockReleaseRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime"
 ], function (ComponentLockReleaseRuntime) {
     "use strict";
 

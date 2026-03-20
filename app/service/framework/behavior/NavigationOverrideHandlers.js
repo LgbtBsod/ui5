@@ -1,22 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (BehaviorRegistry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/OverrideHandlerFactory"
+], function (OverrideHandlerFactory) {
     "use strict";
 
-    var NAVIGATION_SCOPE = "navigation";
-
-    return {
-        ensureRegistered: function () {
-            return true;
-        },
-        register: function (sId, fnHandler) {
-            return BehaviorRegistry.registerOverride(NAVIGATION_SCOPE, sId, fnHandler);
-        },
-        unregister: function (sId) {
-            return BehaviorRegistry.unregisterOverride(NAVIGATION_SCOPE, sId);
-        },
-        clear: function () {
-            return BehaviorRegistry.clearOverrides(NAVIGATION_SCOPE);
-        }
-    };
+    return OverrideHandlerFactory.create("navigation");
 });

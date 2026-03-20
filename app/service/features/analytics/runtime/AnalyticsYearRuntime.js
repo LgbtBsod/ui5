@@ -1,6 +1,6 @@
 sap.ui.define([
     "sap/ui/core/Fragment",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectTextResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsUiContracts",

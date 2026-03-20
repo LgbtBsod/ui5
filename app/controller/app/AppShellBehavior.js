@@ -3,12 +3,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/app/AppShellActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ClipboardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerState",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackBannerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerState",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiDecisionCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
 ], function (ActionContract, AppShellActionRuntime, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, AppShellCoordinator, NavigationIntentService, ModelStateRuntime, UiDecisionCoordinator, NavigationContracts, ModelContracts) {
