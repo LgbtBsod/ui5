@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationGuardRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (ComponentNavigationGuardRuntime, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (ComponentNavigationGuardRuntime, StatePaths, WorkflowContracts) {
     "use strict";
 
     function createStateModel(mSeed) {
@@ -186,8 +187,8 @@ sap.ui.define([
                 "/postOpenHydratedRootId": "CHK-REAL-1",
                 "/isDirty": false,
                 "/saveInFlight": false,
-                "/workflow/detail/editMode": "EDIT",
-                "/workflow/detail/lock/state": "EDIT_LOCKED"
+                "/workflow/detail/editMode": WorkflowContracts.EDIT_MODES.EDIT,
+                "/workflow/detail/lock/state": WorkflowContracts.LOCK_STATES.EDIT_LOCKED
             }
         });
 

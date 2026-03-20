@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/AutosaveDetailUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (AutosaveDetailUseCase, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (AutosaveDetailUseCase, StatePaths, WorkflowContracts) {
     "use strict";
 
     QUnit.module("AutosaveDetailUseCase");
@@ -35,10 +36,10 @@ sap.ui.define([
             uiState: {
                 get: function (sModelName, sPath) {
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
-                        return "EDIT";
+                        return WorkflowContracts.EDIT_MODES.EDIT;
                     }
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
-                        return "EDIT_LOCKED";
+                        return WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
                     }
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DIRTY) {
                         return true;

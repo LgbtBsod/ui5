@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (ComponentLockReleaseRuntime, GatewayContractConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (ComponentLockReleaseRuntime, GatewayContractConstants, WorkflowContracts) {
     "use strict";
 
     QUnit.module("ComponentLockReleaseRuntime");
@@ -33,10 +34,10 @@ sap.ui.define([
                     return "SESSION-1";
                 }
                 if (sPath === "/workflow/detail/editMode") {
-                    return "EDIT";
+                    return WorkflowContracts.EDIT_MODES.EDIT;
                 }
                 if (sPath === "/workflow/detail/lock/state") {
-                    return "EDIT_LOCKED";
+                    return WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
                 }
                 return "";
             }
@@ -58,10 +59,10 @@ sap.ui.define([
                     return "SESSION-1";
                 }
                 if (sPath === "/workflow/detail/editMode") {
-                    return "READ";
+                    return WorkflowContracts.EDIT_MODES.READ;
                 }
                 if (sPath === "/workflow/detail/lock/state") {
-                    return "READ_ONLY";
+                    return WorkflowContracts.LOCK_STATES.READ_ONLY;
                 }
                 return "";
             }
