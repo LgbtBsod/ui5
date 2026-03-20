@@ -13,7 +13,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
 ], function (
     ControllerResourceCleanup,
     InFlightRegistry,
@@ -29,7 +30,8 @@ sap.ui.define([
     StatusChipClassRuntime,
     SemanticDomRuntime,
     NavigationContracts,
-    ModelContracts
+    ModelContracts,
+    CreateSentinel
 ) {
     "use strict";
 
@@ -59,14 +61,23 @@ sap.ui.define([
 
     function syncComputedEditFlags(oController) {
         var oStateModel = oController && oController._oStateValidationModel;
+        var oSelectedModel = oController && oController._oSelectedModel;
         var oViewModel = ControllerModelRuntime.viewState(oController);
+        var sActiveObjectId;
+        var sSelectedRootId;
         var sMode;
         if (!oStateModel || !oViewModel) {
             return;
         }
         sMode = String(oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) || "").trim().toUpperCase() || "READ";
+        sActiveObjectId = String(oStateModel.getProperty("/activeObjectId") || "").trim();
+        sSelectedRootId = String((oSelectedModel && oSelectedModel.getProperty && oSelectedModel.getProperty("/root/id")) || "").trim();
         oViewModel.setProperty("/isEditMode", sMode !== "READ");
         oViewModel.setProperty("/isCreateMode", sMode === "CREATE");
+        oViewModel.setProperty("/hasPersistedObject",
+            (!!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId)) ||
+            (!!sSelectedRootId && !CreateSentinel.isCreateId(sSelectedRootId))
+        );
     }
 
     function bindStateValidationModel(oController) {
@@ -95,6 +106,7 @@ sap.ui.define([
             if (oViewModel) {
                 ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
             }
+            syncComputedEditFlags(oController);
         };
         oController._oStateValidationModel.attachPropertyChange(oController._fnStateValidationChange, oController);
         syncComputedEditFlags(oController);

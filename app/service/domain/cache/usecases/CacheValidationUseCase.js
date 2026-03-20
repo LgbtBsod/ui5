@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/ports/BrowserCachePort",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/ports/LastChangeSetPort",
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
-], function (UseCase, Result, BrowserCachePort, LastChangeSetPort, WorkflowTelemetry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+], function (UseCase, Result, BrowserCachePort, LastChangeSetPort, WorkflowTelemetry, CreateSentinel) {
     "use strict";
 
     function toMs(v) {
@@ -34,7 +35,7 @@ sap.ui.define([
         var aBarriers = Array.isArray(oSnap && oSnap.barriers) ? oSnap.barriers : [];
         var oMeta = oSnap && oSnap.meta || {};
         var bHasRootId = !!String(oRoot.id || oRoot.Key || oRoot.RootKey || "").trim();
-        var bCreateDraft = String(oRoot.id || "").trim() === "__CREATE";
+        var bCreateDraft = CreateSentinel.isCreateId(oRoot.id);
         var bHasBasicPayload = Object.keys(oBasic).some(function (sKey) {
             return !!String(oBasic[sKey] || "").trim();
         });

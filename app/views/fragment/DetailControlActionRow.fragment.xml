@@ -21,7 +21,7 @@
             icon="sap-icon://save"
             type="Emphasized"
             text="{i18n>objectSave}"
-            visible="{= ${view>/isEditMode} &amp;&amp; ${state>/selectedId} !== '__CREATE' &amp;&amp; ${state>/activeObjectId} !== '__CREATE' }"
+            visible="{= ${view>/isEditMode} &amp;&amp; ${view>/hasPersistedObject} }"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/saveInFlight} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onSaveDetail"
             tooltip="{i18n>objectSaveTooltip}"
@@ -64,7 +64,7 @@
             icon="sap-icon://accept"
             text="{i18n>deleteConfirmButton}"
             type="Reject"
-            visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${view>/isEditMode} &amp;&amp; !!${state>/activeObjectId} &amp;&amp; ${state>/activeObjectId} !== '__CREATE' }"
+            visible="{= ${view>/deleteChecklistConfirmArmed} &amp;&amp; ${view>/isEditMode} &amp;&amp; ${view>/hasPersistedObject} }"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
             press=".onConfirmDeleteChecklist"
             tooltip="{i18n>deleteConfirmTooltip}"
@@ -86,7 +86,7 @@
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="{= 'DRAFT' }"/>
+                <core:CustomData key="targetStatus" value="{view>/statusTargets/DRAFT}"/>
             </customData>
         </Button>
 
@@ -102,7 +102,7 @@
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="{= 'REGISTERED' }"/>
+                <core:CustomData key="targetStatus" value="{view>/statusTargets/REGISTERED}"/>
             </customData>
         </Button>
 
@@ -118,7 +118,7 @@
                 <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="{= 'CLOSED' }"/>
+                <core:CustomData key="targetStatus" value="{view>/statusTargets/CLOSED}"/>
             </customData>
         </Button>
 

@@ -4,11 +4,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue"
-], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, UseCaseValue) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/LocationValueHelpConstants"
+], function (StatePaths, UseCase, Result, Effects, DetailStateAccess, UseCaseValue, LocationValueHelpConstants) {
     "use strict";
 
-    var SESSION_CACHE_KEY = "pcct_detail_location_vh_cache_v1";
+    var SESSION_CACHE_KEY = LocationValueHelpConstants.SESSION_CACHE_KEY;
 
     function ValueHelpLocationUseCase() {
         UseCase.call(this, "ValueHelpLocationUseCase");
@@ -21,7 +22,7 @@ sap.ui.define([
 
     function resolveCacheKey(mCtx) {
         var sDateCheck = String(DetailStateAccess.resolveDateCheck(mCtx) || "").trim();
-        return sDateCheck || "__default__";
+        return sDateCheck || LocationValueHelpConstants.DEFAULT_CACHE_KEY;
     }
 
     function safeCloneItems(aItems) {
@@ -104,10 +105,10 @@ sap.ui.define([
             Effects.modelPatch("view", "/locationVhLoaded", true),
             Effects.modelPatch("view", "/locationVhSelection", null),
             Effects.modelPatch("view", "/locationVhHasSelection", false),
-            Effects.modelPatch("view", "/locationVhHint", aSafeItems.length ? "" : "locationValueHelpNoDataHint")
+            Effects.modelPatch("view", "/locationVhHint", aSafeItems.length ? "" : LocationValueHelpConstants.HINTS.NO_DATA)
         ];
         if (bOpen) {
-            aEffects.push(Effects.dialog("locationValueHelp", "open", {}));
+            aEffects.push(Effects.dialog(LocationValueHelpConstants.DIALOG_ID, "open", {}));
         }
         return aEffects;
     }
@@ -138,7 +139,7 @@ sap.ui.define([
             return oUseCase._mInflightLoads[sCacheKey];
         }
         pLoad = UseCaseValue.callOrDefault(function () {
-            return oLookup && oLookup.search({ query: "", limit: 200, dateCheck: DetailStateAccess.resolveDateCheck(mCtx) });
+            return oLookup && oLookup.search({ query: "", limit: LocationValueHelpConstants.SEARCH_LIMIT, dateCheck: DetailStateAccess.resolveDateCheck(mCtx) });
         }, { items: [] }).then(function (oFound) {
             var aItems = writeCachedItems(oUseCase, sCacheKey, (oFound && oFound.items) || []);
             return {
@@ -216,7 +217,7 @@ sap.ui.define([
                 Effects.modelPatch("view", "/locationVhSelection", null),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
                 Effects.modelPatch("view", "/locationVhHint", ""),
-                Effects.dialog("locationValueHelp", "close", {})
+                Effects.dialog(LocationValueHelpConstants.DIALOG_ID, "close", {})
             ]));
         }
 
@@ -228,8 +229,8 @@ sap.ui.define([
                 return Result.ok({ intent: sIntent, items: oLoaded.items, cacheKey: oLoaded.cacheKey }, buildLoadedEffects(oLoaded.items, true, oLoaded.cacheKey));
             }).catch(function (oError) {
                 return Result.fail(oError, [
-                    Effects.modelPatch("view", "/locationVhHint", "locationValueHelpNoDataHint"),
-                    Effects.dialog("locationValueHelp", "open", {})
+                    Effects.modelPatch("view", "/locationVhHint", LocationValueHelpConstants.HINTS.NO_DATA),
+                    Effects.dialog(LocationValueHelpConstants.DIALOG_ID, "open", {})
                 ]);
             });
         }
@@ -239,7 +240,7 @@ sap.ui.define([
                 Effects.modelPatch("view", "/locationVhSelection", null),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
                 Effects.modelPatch("view", "/locationVhHint", ""),
-                Effects.dialog("locationValueHelp", sIntent, {})
+                Effects.dialog(LocationValueHelpConstants.DIALOG_ID, sIntent, {})
             ]));
         }
 
@@ -251,7 +252,7 @@ sap.ui.define([
                 Effects.modelPatch("view", "/locationVhTree", aFilteredLoaded),
                 Effects.modelPatch("view", "/locationVhSelection", null),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
-                Effects.modelPatch("view", "/locationVhHint", aFilteredLoaded.length ? "" : "locationValueHelpNoDataHint")
+                Effects.modelPatch("view", "/locationVhHint", aFilteredLoaded.length ? "" : LocationValueHelpConstants.HINTS.NO_DATA)
             ]));
         }
         return ensureItemsLoaded(this, mCtx).then(function (oLoaded) {
@@ -263,7 +264,7 @@ sap.ui.define([
                 Effects.modelPatch("view", "/locationVhLoaded", true),
                 Effects.modelPatch("view", "/locationVhSelection", null),
                 Effects.modelPatch("view", "/locationVhHasSelection", false),
-                Effects.modelPatch("view", "/locationVhHint", aFiltered.length ? "" : "locationValueHelpNoDataHint")
+                Effects.modelPatch("view", "/locationVhHint", aFiltered.length ? "" : LocationValueHelpConstants.HINTS.NO_DATA)
             ]);
         }).catch(function (oError) {
             return Result.fail(oError);

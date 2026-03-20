@@ -1,34 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (Effects, StatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+], function (Effects, StatePaths, WorkflowContracts, DetailPersistenceConstants) {
     "use strict";
 
-    var STATES = Object.freeze({
-        IDLE: "idle",
-        DIRTY: "dirty",
-        SAVING: "saving",
-        AUTOSAVING: "autosaving",
-        SAVED: "saved",
-        ERROR: "error",
-        LOCK_LOST: "lockLost",
-        READ_ONLY: "readOnly",
-        IDLE_TIMEOUT_GRACE: "idleTimeoutGrace",
-        CONFLICT: "conflict"
-    });
-
-    var TAXONOMY = Object.freeze({
-        PERMISSION_DENIED: "PERMISSION_DENIED",
-        LOCK_EXPIRED: "LOCK_EXPIRED",
-        LOCK_NOT_OWNED_BY_SESSION: "LOCK_NOT_OWNED_BY_SESSION",
-        LOCK_STOLEN: "LOCK_STOLEN",
-        LOCK_MISSING: "LOCK_MISSING",
-        VERSION_CONFLICT: "VERSION_CONFLICT",
-        VALIDATION_ERROR: "VALIDATION_ERROR",
-        NETWORK_ERROR: "NETWORK_ERROR",
-        TECHNICAL_ERROR: "TECHNICAL_ERROR"
-    });
+    var STATES = DetailPersistenceConstants.STATES;
+    var TAXONOMY = DetailPersistenceConstants.TAXONOMY;
 
     function upper(vValue) {
         return String(vValue || "").trim().toUpperCase();

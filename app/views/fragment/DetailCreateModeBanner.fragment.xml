@@ -2,7 +2,7 @@
     <VBox
         class="detailCreateModeBanner searchFilterHintBanner createModeBannerSpacing"
         renderType="Bare"
-        visible="{= !${view>/detailSkeletonBusy} &amp;&amp; ${selected>/root/id} === '__CREATE' }">
+        visible="{= !${view>/detailSkeletonBusy} &amp;&amp; ${view>/isCreateMode} }">
         <HBox class="detailCreateModeBannerTop" renderType="Bare" alignItems="Center" wrap="Wrap">
             <core:Icon src="sap-icon://create-entry-time" class="detailCreateModeIcon"/>
             <Title text="{i18n>detailCreateDraftTitle}" level="H6" class="detailCreateModeTitle"/>

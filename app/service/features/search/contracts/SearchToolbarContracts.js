@@ -29,7 +29,7 @@ sap.ui.define([
             Object.freeze({ key: "ChangedOn", textKey: "searchSortChangedOn", fallback: "Changed on" })
         ]),
         GROUP_ITEMS: Object.freeze([
-            Object.freeze({ key: "__NONE__", textKey: "searchGroupNone", fallback: "No grouping" }),
+            Object.freeze({ key: ModelContracts.TOKENS.GROUP_NONE, textKey: "searchGroupNone", fallback: "No grouping" }),
             Object.freeze({ key: "Status", textKey: "searchGroupStatus", fallback: "Status" }),
             Object.freeze({ key: "LpcText", textKey: "searchGroupLpc", fallback: "LPC" }),
             Object.freeze({ key: "ProfessionText", textKey: "searchGroupProfession", fallback: "Profession" }),

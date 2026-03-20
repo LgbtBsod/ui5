@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailAccessViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/DetailRuntimeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig"
-], function (ControllerTextRuntime, DetailAccessViewState, DetailInfoCardLayoutRuntime, DetailRuntimeContracts, DetailRowEntityConfig) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (ControllerTextRuntime, DetailAccessViewState, DetailInfoCardLayoutRuntime, DetailRuntimeContracts, DetailRowEntityConfig, WorkflowContracts) {
     "use strict";
 
     var INFO_CARD_KEYS = DetailRuntimeContracts.INFO_CARD_KEYS;
@@ -71,6 +72,7 @@ sap.ui.define([
              * Initial values = READ mode on open. */
             isEditMode: false,
             isCreateMode: false,
+            hasPersistedObject: false,
             detailSkeletonBusy: false,
             attachmentBusy: false,
             attachmentsExpanded: false,
@@ -91,6 +93,7 @@ sap.ui.define([
             observedSuggestions: [],
             observerInputValue: "",
             observedInputValue: "",
+            statusTargets: WorkflowContracts.CHECKLIST_STATUSES,
             personSuggestHint: "",
             locationVhHint: "",
             narrowDetailViewport: false,
