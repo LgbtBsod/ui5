@@ -49,7 +49,7 @@ CLASS zcl_zodata_contract_constants DEFINITION
 
     CONSTANTS c_msg_lock_acquire_required      TYPE string VALUE 'LockAcquire: ObjectUuid and SessionGuid are required.'.
     CONSTANTS c_msg_lock_heartbeat_required    TYPE string VALUE 'LockHeartbeat: ObjectUuid and SessionGuid are required.'.
-    CONSTANTS c_msg_lock_release_required      TYPE string VALUE 'LockRelease: ObjectUuid is required.'.
+    CONSTANTS c_msg_lock_release_required      TYPE string VALUE 'LockRelease: ObjectUuid and SessionGuid are required.'.
     CONSTANTS c_msg_lock_session_required      TYPE string VALUE 'SaveChanges: active lock for SessionGuid is required.'.
     CONSTANTS c_msg_release_save_failed_prefix TYPE string VALUE 'Final save failed during release:'.
     CONSTANTS c_msg_save_root_required         TYPE string VALUE 'SaveChanges: root.pcct_uuid is required.'.

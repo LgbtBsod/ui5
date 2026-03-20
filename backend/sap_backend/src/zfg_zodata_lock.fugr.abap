@@ -66,6 +66,20 @@ FUNCTION zodata_lock_control.
       ENDIF.
 
     WHEN 'R'. " release
+      IF iv_session_guid IS INITIAL.
+        RAISE update_error.
+      ENDIF.
+
+      SELECT SINGLE lock_session
+        FROM ztodata_hdr
+        WHERE bo_key    = @iv_bo_key
+          AND object_id = @iv_object_id
+        INTO @DATA(lv_release_session).
+
+      IF sy-subrc <> 0 OR lv_release_session IS INITIAL OR lv_release_session <> iv_session_guid.
+        RAISE lock_error.
+      ENDIF.
+
       CALL FUNCTION 'DEQUEUE_EZODATA_LCK'
         EXPORTING
           mode_ztodata_lck = 'E'
@@ -78,8 +92,12 @@ FUNCTION zodata_lock_control.
              lock_session    = ''
              tab_session_id  = ''
              lock_expires_at = '00000000000000'
-       WHERE bo_key          = iv_bo_key
-         AND object_id       = iv_object_id.
+        WHERE bo_key          = iv_bo_key
+          AND object_id       = iv_object_id.
+
+      IF sy-subrc <> 0.
+        RAISE update_error.
+      ENDIF.
 
     WHEN 'H' OR 'T'. " heartbeat / technical touch
       IF iv_mode = 'H' AND iv_session_guid IS INITIAL.

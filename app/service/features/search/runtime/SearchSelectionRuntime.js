@@ -6,22 +6,6 @@ sap.ui.define([
 ], function (SearchSelectionIdentityRuntime, SearchSelectionTableRuntime, SearchSelectionFocusRuntime, SearchSelectionMutationRuntime) {
     "use strict";
 
-    function resolveSmartSearchButton(oController) {
-        var oSmartFilterBar = oController.byId("searchSmartFilterBar");
-        var aButtons;
-        if (!oSmartFilterBar || typeof oSmartFilterBar.findAggregatedObjects !== "function") {
-            return null;
-        }
-        aButtons = oSmartFilterBar.findAggregatedObjects(true, function (oCandidate) {
-            var sName = oCandidate && oCandidate.getMetadata && oCandidate.getMetadata().getName();
-            if (sName !== "sap.m.Button") {
-                return false;
-            }
-            return typeof oCandidate.getType === "function" && oCandidate.getType() === "Emphasized";
-        }) || [];
-        return aButtons[0] || null;
-    }
-
     function resolveSearchInnerTable(oController) {
         var oSmartTable = oController.byId("searchSmartTable");
         return oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
@@ -71,7 +55,7 @@ sap.ui.define([
         extractSelectedRowId: SearchSelectionIdentityRuntime.extractSelectedRowId,
         extractSelectedRowIds: SearchSelectionIdentityRuntime.extractSelectedRowIds,
         focusSearchFilters: function (oController) {
-            return SearchSelectionFocusRuntime.focusSearchFilters(oController, resolveSmartSearchButton);
+            return SearchSelectionFocusRuntime.focusSearchFilters(oController);
         },
         focusSearchResults: function (oController) {
             return SearchSelectionFocusRuntime.focusSearchResults(oController, resolveSearchInnerTable);
@@ -80,7 +64,6 @@ sap.ui.define([
             return SearchSelectionFocusRuntime.focusSearchToolbar(oController);
         },
         resolveSearchInnerTable: resolveSearchInnerTable,
-        resolveSmartSearchButton: resolveSmartSearchButton,
         selectVisibleRows: selectVisibleRows,
         syncSearchTableRuntimeState: SearchSelectionTableRuntime.syncSearchTableRuntimeState
     };

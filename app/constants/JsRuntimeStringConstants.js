@@ -19,6 +19,7 @@ sap.ui.define([], function () {
             CLOSE: "close",
             DESTROY: "destroy",
             DETACH_THEME_CHANGED: "detachThemeChanged",
+            FOCUS: "focus",
             FUNCTION: "function",
             GET_CONFIGURATION: "getConfiguration",
             GET_CONTEXTS: "getContexts",

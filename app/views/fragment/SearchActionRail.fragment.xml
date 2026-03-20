@@ -5,9 +5,6 @@
         <Button text="{i18n>createButton}" icon="sap-icon://task" press=".onCreate" tooltip="{i18n>searchShortcutCreate}" enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }" class="searchPrimaryAction searchToolbarAction searchCreateActionBtn">
             <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
         </Button>
-        <Button id="searchToolbarUpButton" icon="sap-icon://navigation-up-arrow" text="{i18n>searchBackToResultsToolbarButton}" type="Emphasized" visible="{view>/resultsToolbarNavVisible}" tooltip="{i18n>searchBackToResultsToolbarTooltip}" press=".onScrollSearchResultsToolbarAnchor" class="searchToolbarNavBtn searchToolbarNavBtnUp">
-            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
-        </Button>
         <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }" class="searchToolbarGhostAction searchToolbarAction searchCopyActionBtn">
             <layoutData><OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/></layoutData>
         </Button>

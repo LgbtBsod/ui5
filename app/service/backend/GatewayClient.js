@@ -158,6 +158,9 @@ sap.ui.define([
             });
         },
         serviceUrl: serviceUrl,
+        getModel: function () {
+            return ensureModel();
+        },
         callFunctionImport: function (name, oPayload, mOptions) {
             var oOptions = mOptions || {};
             return executeMutatingRequest({

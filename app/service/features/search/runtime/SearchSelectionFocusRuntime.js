@@ -1,80 +1,115 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (FocusRuntime, SchedulingRuntime, JsRuntime) {
+], function (FocusRuntime, JsRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
-    var FILTER_SELECTORS = ["[id$='searchSmartFilterBar-btnGo']", "[id$='searchSmartFilterBar']", "[id$='searchSmartFilterBar'] input", "[role='search']", "input", "button"];
-    var RESULTS_SELECTORS = [".searchResultsTable .sapMListTblRow", ".searchResultsTable .sapMListTbl", "[role='row']", "[role='grid']", "[role='table']"];
-    var TOOLBAR_SELECTORS = ["[id$='backendTopInput-inner']", "[id$='backendTopInput']", "[id$='maxRowsInput-inner']", "[id$='maxRowsInput']", ".searchCreateActionBtn", "input", "button"];
-
-    function resolveViewDom(oController) {
-        var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();
-        return oView && typeof oView[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oView[METHODS.GET_DOM_REF]();
-    }
+    var FILTER_CONTROL_SELECTORS = ["input", "button", "[role='search']", "[role='combobox']"];
+    var RESULTS_CONTROL_SELECTORS = ["[role='row']", "[role='grid']", "[role='table']", "tr", ".sapMLIB", ".sapMListTblRow"];
+    var TOOLBAR_CONTROL_SELECTORS = ["input", "button", "[role='button']", "[role='combobox']"];
+    var FILTER_VIEW_SELECTORS = [
+        ".searchFilterSurface input",
+        ".searchFilterSurface button",
+        "[role='search'] input",
+        "[role='search'] button"
+    ];
+    var RESULTS_VIEW_SELECTORS = [
+        ".searchResultsTable [role='row']",
+        ".searchResultsTable .sapMLIB",
+        ".searchResultsTable .sapMListTblRow",
+        ".searchResultsTable [role='grid']",
+        ".searchResultsTable [role='table']"
+    ];
+    var TOOLBAR_VIEW_SELECTORS = [
+        ".searchResultsActionRail input",
+        ".searchResultsActionRail button",
+        ".searchResultsActionRail [role='button']",
+        ".searchResultsActionRail [role='combobox']"
+    ];
 
     function focusDomNode(oNode) {
         if (!oNode || typeof oNode[METHODS.FOCUS] !== TYPE_FUNCTION) {
             return false;
         }
         try {
-            if (typeof oNode.getAttribute === TYPE_FUNCTION && !oNode.getAttribute("tabindex")) {
-                oNode.setAttribute("tabindex", "-1");
-            }
-        } catch (_error) {
-            // Ignore readonly attribute nodes.
-        }
-        try {
             oNode[METHODS.FOCUS]();
+            return true;
         } catch (_focusError) {
-            // Retry on the next macrotask for nodes that are not focusable yet during rerender.
+            return false;
         }
-        SchedulingRuntime.restartTimer(0, function () {
-            try {
-                oNode[METHODS.FOCUS]();
-            } catch (_retryFocusError) {
-                // Ignore terminal focus failures.
+    }
+
+    function resolveDomRef(oControl) {
+        if (!oControl) {
+            return null;
+        }
+        if (typeof oControl[METHODS.GET_FOCUS_DOM_REF] === TYPE_FUNCTION) {
+            return oControl[METHODS.GET_FOCUS_DOM_REF]();
+        }
+        if (typeof oControl[METHODS.GET_DOM_REF] === TYPE_FUNCTION) {
+            return oControl[METHODS.GET_DOM_REF]();
+        }
+        return null;
+    }
+
+    function resolveViewDomRef(oController) {
+        var oView = oController && typeof oController.getView === TYPE_FUNCTION ? oController.getView() : null;
+        return oView && typeof oView[METHODS.GET_DOM_REF] === TYPE_FUNCTION ? oView[METHODS.GET_DOM_REF]() : null;
+    }
+
+    function queryFirstFocusable(oRoot, aSelectors) {
+        var i;
+        var oCandidate;
+        if (!oRoot || typeof oRoot.querySelector !== TYPE_FUNCTION || !Array.isArray(aSelectors)) {
+            return null;
+        }
+        for (i = 0; i < aSelectors.length; i += 1) {
+            oCandidate = aSelectors[i] ? oRoot.querySelector(aSelectors[i]) : null;
+            if (oCandidate) {
+                return oCandidate;
             }
-        }, 0);
-        return true;
-    }
-
-    function focusFirstScopedSelector(oController, aSelectors) {
-        var oViewDom = resolveViewDom(oController);
-        var oNode;
-        if (!oViewDom || typeof oViewDom.querySelector !== TYPE_FUNCTION || !Array.isArray(aSelectors)) {
-            return false;
         }
-        oNode = aSelectors.reduce(function (oFound, sSelector) {
-            return oFound || (sSelector ? oViewDom.querySelector(sSelector) : null);
-        }, null);
-        return focusDomNode(oNode);
+        return null;
     }
 
-    function focusSearchControlDom(oControl) {
-        if (!oControl || typeof oControl[METHODS.GET_DOM_REF] !== TYPE_FUNCTION) {
-            return false;
-        }
-        return focusDomNode(oControl[METHODS.GET_DOM_REF]());
-    }
-
-    function focusControl(oControl) {
+    function focusControl(oControl, aSelectors) {
+        var oDomRef;
+        var oFocusable;
         if (!oControl) {
             return false;
+        }
+        if (typeof oControl[METHODS.FOCUS] === TYPE_FUNCTION) {
+            try {
+                oControl[METHODS.FOCUS]();
+                return true;
+            } catch (_focusError) {
+                // Fall back to DOM focus below.
+            }
         }
         if (FocusRuntime.focusSoon(oControl)) {
             return true;
         }
-        return focusSearchControlDom(oControl);
+        oDomRef = resolveDomRef(oControl);
+        oFocusable = queryFirstFocusable(oDomRef, aSelectors || []);
+        return focusDomNode(oFocusable || oDomRef);
+    }
+
+    function focusViewScopedFallback(oController, aSelectors) {
+        var oViewDomRef = resolveViewDomRef(oController);
+        var oFocusable = queryFirstFocusable(oViewDomRef, aSelectors || []);
+        return focusDomNode(oFocusable);
     }
 
     function resolveToolbarControl(oController) {
         return oController.byId("backendTopInput")
             || oController.byId("maxRowsInput")
-            || oController.byId("searchCreateButton");
+            || oController.byId("searchResultsActionRail");
+    }
+
+    function resolveFilterControl(oController) {
+        return oController.byId("searchSmartFilterBar");
     }
 
     function resolveResultsTarget(oController, fnResolveSearchInnerTable) {
@@ -96,21 +131,20 @@ sap.ui.define([
     }
 
     return {
-        focusSearchFilters: function (oController, fnResolveSmartSearchButton) {
-            var oTarget = fnResolveSmartSearchButton(oController) || oController.byId("searchSmartFilterBar");
-            return focusControl(oTarget)
-                || focusFirstScopedSelector(oController, FILTER_SELECTORS);
+        focusSearchFilters: function (oController) {
+            return focusControl(resolveFilterControl(oController), FILTER_CONTROL_SELECTORS)
+                || focusViewScopedFallback(oController, FILTER_VIEW_SELECTORS);
         },
 
         focusSearchResults: function (oController, fnResolveSearchInnerTable) {
             var oTarget = resolveResultsTarget(oController, fnResolveSearchInnerTable);
-            return focusControl(oTarget)
-                || focusFirstScopedSelector(oController, RESULTS_SELECTORS);
+            return focusControl(oTarget, RESULTS_CONTROL_SELECTORS)
+                || focusViewScopedFallback(oController, RESULTS_VIEW_SELECTORS);
         },
 
         focusSearchToolbar: function (oController) {
-            return focusControl(resolveToolbarControl(oController))
-                || focusFirstScopedSelector(oController, TOOLBAR_SELECTORS);
+            return focusControl(resolveToolbarControl(oController), TOOLBAR_CONTROL_SELECTORS)
+                || focusViewScopedFallback(oController, TOOLBAR_VIEW_SELECTORS);
         }
     };
 });

@@ -19,7 +19,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/FeedbackBannerState.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchAnalyticsIntentBehavior.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchSelectionFocusRuntime.qunit",
-    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchShortcutRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchScrollRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchStickyOffsetRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/WorkspaceRouteNavigation.qunit",

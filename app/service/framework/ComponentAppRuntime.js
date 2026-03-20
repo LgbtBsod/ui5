@@ -8,8 +8,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayClient, StatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter"
+], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayClient, StatePaths, WorkflowContracts, LockAdapter) {
     "use strict";
 
     function buildComponentRuntimeSupport() {
@@ -146,7 +147,16 @@ sap.ui.define([
         if (!oPayload || hasLeaveReleaseInFlight(oComponent)) {
             return false;
         }
-        return markLeaveReleaseAttempted(oComponent);
+        if (!markLeaveReleaseAttempted(oComponent)) {
+            return false;
+        }
+        oComponent._bLeaveReleaseSent = LockAdapter.releaseOnPageLeave({
+            rootId: oPayload.RootId,
+            objectUuid: oPayload.RootId,
+            sessionGuid: oPayload.SessionGuid,
+            model: oMainServiceModel
+        });
+        return oComponent._bLeaveReleaseSent;
     }
 
     function clearComponentTimers(oComponent) {

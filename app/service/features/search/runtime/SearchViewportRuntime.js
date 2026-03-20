@@ -55,7 +55,6 @@ sap.ui.define([
         scheduleSearchViewportSync: SearchViewportBindingRuntime.scheduleSearchViewportSync,
         scrollToSearchFilters: scrollToSearchFilters,
         scrollToSearchResultsToolbar: scrollToSearchResultsToolbar,
-        syncSearchScrollAffordances: SearchViewportBindingRuntime.syncSearchScrollAffordances,
         syncSearchViewportLayout: SearchViewportBindingRuntime.syncSearchViewportLayout,
         unbindSearchViewportRuntime: SearchViewportBindingRuntime.unbindSearchViewportRuntime
     };

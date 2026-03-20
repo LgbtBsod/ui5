@@ -25,18 +25,10 @@ sap.ui.define([
         return true;
     }
 
-    function syncSearchScrollAffordances(oController) {
-        SearchScrollRuntime.syncSearchScrollAffordances(
-            oController,
-            SearchStickyLayoutRuntime.resolveSearchTableToolbarDom(oController)
-        );
-    }
-
     function flushSearchViewportSync(oController) {
         oController._iSearchViewportSyncRaf = SchedulingRuntime.requestFrameOnce(oController._iSearchViewportSyncRaf, function () {
             oController._iSearchViewportSyncRaf = 0;
             syncSearchViewportLayout(oController, false);
-            syncSearchScrollAffordances(oController);
         });
     }
 
@@ -109,17 +101,11 @@ sap.ui.define([
         if (oController._oSearchScrollHost === oScrollHost) {
             bindSearchViewportObservers(oController, oScrollHost);
             syncSearchViewportLayout(oController, false);
-            syncSearchScrollAffordances(oController);
             return;
         }
-        if (oController._oSearchScrollHost && oController._fnSearchScrollSync) {
-            oController._oSearchScrollHost.removeEventListener("scroll", oController._fnSearchScrollSync, { passive: true });
-        }
         oController._oSearchScrollHost = oScrollHost;
-        if (!oController._fnSearchScrollSync) {
-            oController._fnSearchScrollSync = function () {
-                syncSearchScrollAffordances(oController);
-            };
+        if (oController._oSearchScrollSyncHost && oController._oSearchScrollSyncHost !== oScrollHost && oController._fnSearchScrollSync) {
+            oController._oSearchScrollSyncHost.removeEventListener("scroll", oController._fnSearchScrollSync);
         }
         if (!oController._fnSearchViewportResize) {
             oController._fnSearchViewportResize = function () {
@@ -127,12 +113,18 @@ sap.ui.define([
             };
             window.addEventListener("resize", oController._fnSearchViewportResize);
         }
-        if (oScrollHost) {
+        if (oScrollHost && !oController._fnSearchScrollSync) {
+            oController._fnSearchScrollSync = function () {
+                scheduleSearchViewportSync(oController, false);
+            };
             oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });
+            oController._oSearchScrollSyncHost = oScrollHost;
+        } else if (oScrollHost && oController._oSearchScrollSyncHost !== oScrollHost && oController._fnSearchScrollSync) {
+            oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });
+            oController._oSearchScrollSyncHost = oScrollHost;
         }
         bindSearchViewportObservers(oController, oScrollHost);
         syncSearchViewportLayout(oController, true);
-        syncSearchScrollAffordances(oController);
     }
 
     function unbindSearchViewportRuntime(oController) {
@@ -140,17 +132,18 @@ sap.ui.define([
         if (oView && oController._oSearchViewportDelegate && oView.removeEventDelegate) {
             EventDelegateRuntime.remove(oController, "_oSearchViewportDelegate", oView);
         }
-        if (oController._oSearchScrollHost && oController._fnSearchScrollSync) {
-            oController._oSearchScrollHost.removeEventListener("scroll", oController._fnSearchScrollSync, { passive: true });
-        }
         if (oController._fnSearchViewportResize) {
             window.removeEventListener("resize", oController._fnSearchViewportResize);
+        }
+        if (oController._oSearchScrollSyncHost && oController._fnSearchScrollSync) {
+            oController._oSearchScrollSyncHost.removeEventListener("scroll", oController._fnSearchScrollSync);
         }
         unbindSearchViewportObservers(oController);
         clearSearchViewportSyncTimer(oController);
         oController._iSearchAnchorSyncTimer = SchedulingRuntime.clearTimer(oController._iSearchAnchorSyncTimer);
         oController._iSearchViewportSyncRaf = SchedulingRuntime.clearFrame(oController._iSearchViewportSyncRaf);
         oController._oSearchScrollHost = null;
+        oController._oSearchScrollSyncHost = null;
         oController._fnSearchScrollSync = null;
         oController._fnSearchViewportResize = null;
         oController._sSearchTableLayoutKey = "";
@@ -162,7 +155,6 @@ sap.ui.define([
     return {
         bindSearchViewportRuntime: bindSearchViewportRuntime,
         scheduleSearchViewportSync: scheduleSearchViewportSync,
-        syncSearchScrollAffordances: syncSearchScrollAffordances,
         syncSearchViewportLayout: syncSearchViewportLayout,
         unbindSearchViewportRuntime: unbindSearchViewportRuntime
     };

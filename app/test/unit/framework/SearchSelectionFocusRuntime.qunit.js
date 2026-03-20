@@ -4,6 +4,17 @@ sap.ui.define([
 ], function (SearchSelectionFocusRuntime, jQuery) {
     "use strict";
 
+    function attachFocusSpy(oNode) {
+        oNode.dataset.focused = "";
+        Object.defineProperty(oNode, "focus", {
+            configurable: true,
+            value: function () {
+                oNode.dataset.focused = "true";
+            }
+        });
+        return oNode;
+    }
+
     function createControllerFixture(sMarkup) {
         var oHost = document.createElement("div");
         oHost.innerHTML = sMarkup;
@@ -32,12 +43,12 @@ sap.ui.define([
     });
 
     QUnit.test("focusSearchToolbar stays scoped to the current view", function (assert) {
-        var done = assert.async();
         var oOutside = document.createElement("input");
         var oFixture;
         var oTargetControl;
 
         oOutside.id = "outside-backendTopInput-inner";
+        attachFocusSpy(oOutside);
         document.body.appendChild(oOutside);
 
         oFixture = createControllerFixture(
@@ -46,7 +57,11 @@ sap.ui.define([
             '</div>'
         );
         oFixture.host.setAttribute("data-qunit-search-focus", "true");
+        attachFocusSpy(oFixture.host.querySelector("#fixture-backendTopInput-inner"));
         oTargetControl = {
+            focus: function () {
+                oFixture.host.querySelector("#fixture-backendTopInput-inner").dataset.focused = "true";
+            },
             getDomRef: function () {
                 return oFixture.host.querySelector("#fixture-backendTopInput-inner");
             }
@@ -57,21 +72,19 @@ sap.ui.define([
 
         SearchSelectionFocusRuntime.focusSearchToolbar(oFixture.controller);
 
-        setTimeout(function () {
-            assert.strictEqual(document.activeElement.id, "fixture-backendTopInput-inner", "Focus stayed inside the current search view");
-            oOutside.remove();
-            oFixture.host.remove();
-            done();
-        }, 0);
+        assert.strictEqual(oFixture.host.querySelector("#fixture-backendTopInput-inner").dataset.focused, "true", "Focus stayed inside the current search view");
+        assert.notStrictEqual(oOutside.dataset.focused, "true", "Outside node was not targeted");
+        oOutside.remove();
+        oFixture.host.remove();
     });
 
     QUnit.test("focusSearchFilters stays scoped to the current view", function (assert) {
-        var done = assert.async();
         var oOutside = document.createElement("button");
         var oFixture;
         var oTargetControl;
 
         oOutside.id = "outside-searchSmartFilterBar-btnGo";
+        attachFocusSpy(oOutside);
         document.body.appendChild(oOutside);
 
         oFixture = createControllerFixture(
@@ -80,21 +93,43 @@ sap.ui.define([
             '</div>'
         );
         oFixture.host.setAttribute("data-qunit-search-focus", "true");
+        attachFocusSpy(oFixture.host.querySelector("#fixture-searchSmartFilterBar-btnGo"));
         oTargetControl = {
+            focus: function () {
+                oFixture.host.querySelector("#fixture-searchSmartFilterBar-btnGo").dataset.focused = "true";
+            },
             getDomRef: function () {
                 return oFixture.host.querySelector("#fixture-searchSmartFilterBar-btnGo");
             }
         };
+        oFixture.controller.byId = function (sId) {
+            return sId === "searchSmartFilterBar" ? oTargetControl : null;
+        };
 
-        SearchSelectionFocusRuntime.focusSearchFilters(oFixture.controller, function () {
-            return oTargetControl;
+        SearchSelectionFocusRuntime.focusSearchFilters(oFixture.controller);
+
+        assert.strictEqual(oFixture.host.querySelector("#fixture-searchSmartFilterBar-btnGo").dataset.focused, "true", "Filter focus stayed inside the current search view");
+        assert.notStrictEqual(oOutside.dataset.focused, "true", "Outside filter node was not targeted");
+        oOutside.remove();
+        oFixture.host.remove();
+    });
+
+    QUnit.test("focusSearchResults falls back to a view-scoped results target", function (assert) {
+        var oFixture = createControllerFixture(
+            '<div data-qunit-search-focus="true">' +
+                '<div class="searchResultsTable">' +
+                    '<button id="fixture-results-row" role="row"></button>' +
+                '</div>' +
+            '</div>'
+        );
+
+        oFixture.host.setAttribute("data-qunit-search-focus", "true");
+        attachFocusSpy(oFixture.host.querySelector("#fixture-results-row"));
+        SearchSelectionFocusRuntime.focusSearchResults(oFixture.controller, function () {
+            return null;
         });
 
-        setTimeout(function () {
-            assert.strictEqual(document.activeElement.id, "fixture-searchSmartFilterBar-btnGo", "Filter focus stayed inside the current search view");
-            oOutside.remove();
-            oFixture.host.remove();
-            done();
-        }, 0);
+        assert.strictEqual(oFixture.host.querySelector("#fixture-results-row").dataset.focused, "true", "Results focus stayed inside the current search view");
+        oFixture.host.remove();
     });
 });

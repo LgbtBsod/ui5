@@ -61,9 +61,10 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
       zcx_zodata_error.
 
   METHODS unlock
-    IMPORTING
+  IMPORTING
       !is_key TYPE ty_key
-    RAISING
+      !iv_session_guid TYPE string OPTIONAL
+  RAISING
       zcx_zodata_error.
 
   METHODS update_last_touch

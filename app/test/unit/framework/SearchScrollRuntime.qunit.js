@@ -16,17 +16,18 @@ sap.ui.define([
     }
 
     function createControllerFixture() {
-        var oScrollHost = document.createElement("div");
-        var oViewRoot = document.createElement("div");
+        var oScrollHost;
+        var oViewRoot;
         var oStateModel = createStateModel();
 
-        oScrollHost.style.height = "120px";
-        oScrollHost.style.overflow = "auto";
-        oScrollHost.setAttribute("data-qunit-search-scroll", "true");
-
-        oViewRoot.innerHTML = '<div style="height: 600px;"></div>';
-        oScrollHost.appendChild(oViewRoot);
-        document.body.appendChild(oScrollHost);
+        oScrollHost = {
+            scrollTop: 0,
+            clientHeight: 120,
+            scrollHeight: 600
+        };
+        oViewRoot = {
+            parentElement: oScrollHost
+        };
 
         return {
             scrollHost: oScrollHost,
@@ -36,11 +37,11 @@ sap.ui.define([
                     return {
                         getDomRef: function () {
                             return oViewRoot;
+                        },
+                        getModel: function (sName) {
+                            return sName === "state" ? oStateModel : null;
                         }
                     };
-                },
-                getModel: function (sName) {
-                    return sName === "state" ? oStateModel : null;
                 }
             }
         };
@@ -57,6 +58,15 @@ sap.ui.define([
     QUnit.test("capture and restore keep search scroll position across search-detail-search transition intent", function (assert) {
         var done = assert.async();
         var oFixture = createControllerFixture();
+        var fnOriginalRequestFrame = window.requestAnimationFrame;
+        var fnOriginalCancelFrame = window.cancelAnimationFrame;
+
+        window.requestAnimationFrame = function (fnWork) {
+            return window.setTimeout(fnWork, 0);
+        };
+        window.cancelAnimationFrame = function (iFrameId) {
+            window.clearTimeout(iFrameId);
+        };
 
         oFixture.scrollHost.scrollTop = 180;
         SearchScrollRuntime.captureSearchScrollPosition(oFixture.controller);
@@ -71,7 +81,9 @@ sap.ui.define([
 
         setTimeout(function () {
             assert.strictEqual(oFixture.scrollHost.scrollTop, 180, "Search scroll position is restored");
+            window.requestAnimationFrame = fnOriginalRequestFrame;
+            window.cancelAnimationFrame = fnOriginalCancelFrame;
             done();
-        }, 50);
+        }, 30);
     });
 });

@@ -17,12 +17,5 @@
             text="{parts: [{path: 'view>/selectionCount'}, {path: 'view>/selectedRowDisplayId'}], formatter: '.formatSearchSelectionSummary'}"
             state="{path: 'view>/selectionCount', formatter: '.formatSelectionSummaryState'}"
             class="searchResultsSummarySelection"/>
-        <Button
-            visible="{view>/resultsToolbarNavVisible}"
-            text="{i18n>searchBackToResultsToolbarButton}"
-            type="Transparent"
-            tooltip="{i18n>searchBackToResultsToolbarTooltip}"
-            press=".onScrollSearchResultsToolbarAnchor"
-            class="searchResultsSummaryUpButton searchToolbarNavBtn searchToolbarNavBtnUp chkRipple"/>
     </HBox>
 </core:FragmentDefinition>

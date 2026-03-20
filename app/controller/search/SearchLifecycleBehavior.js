@@ -4,7 +4,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchShortcutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchStartupBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchViewLoadBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchAnalyticsIntentBehavior",
@@ -23,7 +22,6 @@ sap.ui.define([
     ControllerRouteRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
-    SearchShortcutRuntime,
     SearchStartupBehavior,
     SearchViewLoadBehavior,
     SearchAnalyticsIntentBehavior,
@@ -107,7 +105,6 @@ sap.ui.define([
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
         ]);
         SearchStartupBehavior.syncSmartControlAvailability(oController);
-        SearchShortcutRuntime.bindPowerUserShortcuts(oController);
         SearchViewportRuntime.bindSearchViewportRuntime(oController);
     }
 
@@ -136,7 +133,6 @@ sap.ui.define([
 
     function onExit(oController) {
         ControllerRouteRuntime.detachAllMatched(oController);
-        SearchShortcutRuntime.unbindPowerUserShortcuts(oController);
         SearchViewportRuntime.unbindSearchViewportRuntime(oController);
         SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer(oController);
         oController._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRailPulseTimer);

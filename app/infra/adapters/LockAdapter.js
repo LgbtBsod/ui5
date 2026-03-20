@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient"
+], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants, GatewayClient) {
     "use strict";
 
     function normalizeLockToken(mArgs) {
@@ -105,7 +106,11 @@ sap.ui.define([
     function release(mArgs) {
         var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
+            RootId: sRootId,
+            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim(),
+            SessionGuid: sToken
+        }).then(function (oResult) {
             var oNormalized = normalizeResult(oResult, sToken);
             return { ok: !!oNormalized.ok, code: oNormalized.code || "OK", released: true, killed: !!oNormalized.killed, messageKey: oNormalized.messageKey || "" };
         }).catch(function (oError) {
@@ -116,5 +121,48 @@ sap.ui.define([
         });
     }
 
-    return { acquire: acquire, heartbeat: heartbeat, status: status, release: release };
+    function releaseOnPageLeave(mArgs) {
+        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
+        var sToken = normalizeLockToken(mArgs);
+        var oModel;
+        var sServiceUrl;
+        var sCsrfToken;
+        var oPayload;
+        if (!sRootId || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
+            return false;
+        }
+        try {
+            oModel = GatewayClient.getModel();
+            sServiceUrl = GatewayClient.serviceUrl();
+            sCsrfToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
+        } catch (_error) {
+            return false;
+        }
+        if (!sServiceUrl || !sCsrfToken) {
+            return false;
+        }
+        oPayload = {
+            RootId: sRootId,
+            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim(),
+            SessionGuid: sToken
+        };
+        try {
+            window.fetch(String(sServiceUrl).replace(/\/+$/, "") + "/" + GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
+                method: "POST",
+                keepalive: true,
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "X-CSRF-Token": sCsrfToken
+                },
+                body: JSON.stringify(oPayload)
+            });
+            return true;
+        } catch (_fetchError) {
+            return false;
+        }
+    }
+
+    return { acquire: acquire, heartbeat: heartbeat, status: status, release: release, releaseOnPageLeave: releaseOnPageLeave };
 });

@@ -138,7 +138,7 @@ sap.ui.define([
         return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, bCreate ? "" : sRootId).then(function (aStagedPayload) {
             var oUnifiedDelta = DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aStagedPayload);
             var pSave = bCreate
-                ? Promise.resolve(oRepo.createChecklist({ delta: oUnifiedDelta }))
+                ? Promise.resolve(oRepo.createChecklist({ delta: oUnifiedDelta, sessionGuid: sSessionGuid }))
                 : Promise.resolve(oRepo.saveChecklist(DetailRuntimePayload.saveRequest({
                     rootId: sRootId,
                     delta: oUnifiedDelta,

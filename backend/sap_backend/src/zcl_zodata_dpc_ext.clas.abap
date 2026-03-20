@@ -136,9 +136,37 @@ CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE
     IF sy-subrc <> 0.
       raise_busi_exception( iv_text = 'No create authorization for copy' iv_code = zcl_zodata_contract_constants=>c_code_no_create_auth ).
     ENDIF.
+    ls_req-root = CORRESPONDING #( ls_src ).
+    CLEAR: ls_req-root-pcct_uuid,
+      ls_req-root-created_on,
+      ls_req-root-created_by,
+      ls_req-root-changed_on,
+      ls_req-root-changed_by,
+      ls_req-root-version_number,
+      ls_req-root-lock_owner,
+      ls_req-root-lock_session,
+      ls_req-root-tab_session_id,
+      ls_req-root-lock_expires_at.
+    ls_req-checks = CORRESPONDING #( read_check_rows( lv_src_uuid ) ).
+    ls_req-barriers = CORRESPONDING #( read_barrier_rows( lv_src_uuid ) ).
     CLEAR ls_req-root-pcct_uuid.
     ls_req-root-edit_mode = 'C'.
-    ls_req-session_guid = ls_req-session_guid.
+    LOOP AT ls_req-checks ASSIGNING FIELD-SYMBOL(<ls_copy_check>).
+      CLEAR <ls_copy_check>-key_uuid.
+      <ls_copy_check>-edit_mode = 'C'.
+    ENDLOOP.
+    LOOP AT ls_req-barriers ASSIGNING FIELD-SYMBOL(<ls_copy_barrier>).
+      CLEAR <ls_copy_barrier>-key_uuid.
+      <ls_copy_barrier>-edit_mode = 'C'.
+    ENDLOOP.
+    LOOP AT ls_req-participants ASSIGNING FIELD-SYMBOL(<ls_copy_participant>).
+      CLEAR <ls_copy_participant>-key_uuid.
+      <ls_copy_participant>-edit_mode = 'C'.
+    ENDLOOP.
+    LOOP AT ls_req-attachments ASSIGNING FIELD-SYMBOL(<ls_copy_attachment>).
+      CLEAR <ls_copy_attachment>-key_uuid.
+      <ls_copy_attachment>-edit_mode = 'C'.
+    ENDLOOP.
     TRY.
         ls_resp = execute_save( EXPORTING is_request = ls_req iv_is_autosave = abap_false ).
         copy_data_to_ref( EXPORTING is_data = ls_resp CHANGING cr_data = er_entity ).
@@ -264,47 +292,33 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_req TYPE zstr_pcct_lock_release_rq.
     DATA ls_result TYPE zstr_pcct_lock_release_rs.
     DATA lv_now_ts TYPE timestampl.
-    DATA lv_release_code TYPE string VALUE zcl_zodata_contract_constants=>c_code_lock_ok.
-    DATA lv_release_message TYPE string.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
-    IF ls_req-object_uuid IS INITIAL.
+    IF ls_req-object_uuid IS INITIAL OR ls_req-session_guid IS INITIAL.
       raise_busi_exception(
         iv_text = zcl_zodata_contract_constants=>c_msg_lock_release_required
         iv_code = 'VALIDATION_ERROR' ).
     ENDIF.
     TRY.
         DATA(ls_lock_key) = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = ls_req-object_uuid ).
-        mo_lock_manager->unlock( ls_lock_key ).
-      CATCH zcx_lock_error.
+        mo_lock_manager->unlock(
+          EXPORTING
+            is_key          = ls_lock_key
+            iv_session_guid = ls_req-session_guid ).
+      CATCH zcx_lock_error INTO DATA(lx_release_lock).
+        raise_busi_exception(
+          iv_text = lx_release_lock->get_text( )
+          iv_code = zcl_zodata_contract_constants=>c_code_lock_not_owned_by_session ).
+      CATCH zcx_zodata_error INTO DATA(lx_release_error).
+        raise_busi_exception( iv_text = lx_release_error->get_message_text( ) iv_code = lx_release_error->get_code( ) ).
     ENDTRY.
-    IF ls_req-try_save = abap_true AND ls_req-payload IS NOT INITIAL.
-      TRY.
-          execute_save( EXPORTING is_request = ls_req-payload iv_is_autosave = abap_false ).
-        CATCH /iwbep/cx_mgw_busi_exception INTO DATA(lx_busi).
-          lv_release_code = zcl_zodata_contract_constants=>c_code_release_save_failed.
-          lv_release_message = lx_busi->get_text( ).
-          ls_result-success = abap_false.
-          ls_result-message = |{ zcl_zodata_contract_constants=>c_msg_release_save_failed_prefix } { lv_release_message }|.
-          ls_result-reason_code = lv_release_code.
-        CATCH zcx_zodata_error INTO DATA(lx_save_error).
-          lv_release_code = zcl_zodata_contract_constants=>c_code_release_save_failed.
-          lv_release_message = lx_save_error->get_message_text( ).
-          ls_result-success = abap_false.
-          ls_result-message = |{ zcl_zodata_contract_constants=>c_msg_release_save_failed_prefix } { lv_release_message }|.
-          ls_result-reason_code = lv_release_code.
-      ENDTRY.
-    ELSE.
-      COMMIT WORK AND WAIT.
-    ENDIF.
-    IF ls_result-success IS INITIAL AND lv_release_code = zcl_zodata_contract_constants=>c_code_lock_ok.
-      ls_result-success = abap_true.
-    ENDIF.
+    COMMIT WORK AND WAIT.
+    ls_result-success = abap_true.
     ls_result-action = zcl_zodata_contract_constants=>c_action_released.
     ls_result-object_uuid = ls_req-object_uuid.
     GET TIME STAMP FIELD lv_now_ts.
     mo_contract->fill_lock_result(
-      EXPORTING iv_ok = xsdbool( lv_release_code = zcl_zodata_contract_constants=>c_code_lock_ok ) iv_code = lv_release_code iv_action = zcl_zodata_contract_constants=>c_action_released iv_object_uuid = ls_req-object_uuid iv_owner_session = ls_req-session_guid iv_server_now = lv_now_ts iv_lock_refreshed = abap_false iv_owner_session_match = abap_true
+      EXPORTING iv_ok = abap_true iv_code = zcl_zodata_contract_constants=>c_code_lock_ok iv_action = zcl_zodata_contract_constants=>c_action_released iv_object_uuid = ls_req-object_uuid iv_owner_session = ls_req-session_guid iv_server_now = lv_now_ts iv_lock_refreshed = abap_false iv_owner_session_match = abap_true
       CHANGING cs_result = ls_result ).
     copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
   ENDMETHOD.
@@ -346,34 +360,84 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD checklistrootset_get_entity.
     DATA ls_row TYPE ty_root_row.
     ls_row = read_root_row( read_root_key( it_key_tab ) ).
+    AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_view
+      ID 'BUKRS' FIELD ls_row-bukrs.
+    IF sy-subrc <> 0.
+      raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_permission_no_view iv_code = zcl_zodata_contract_constants=>c_code_no_view_auth ).
+    ENDIF.
     copy_data_to_ref( EXPORTING is_data = ls_row CHANGING cr_data = er_entity ).
   ENDMETHOD.
   METHOD checklistrootset_get_entityset.
     DATA lt_rows TYPE tt_root_row.
+    DATA lt_allowed TYPE tt_root_row.
     lt_rows = read_root_rows( ).
-    copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
+    LOOP AT lt_rows ASSIGNING FIELD-SYMBOL(<ls_root_row>).
+      AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+        ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_view
+        ID 'BUKRS' FIELD <ls_root_row>-bukrs.
+      IF sy-subrc = 0.
+        APPEND <ls_root_row> TO lt_allowed.
+      ENDIF.
+    ENDLOOP.
+    copy_data_to_ref( EXPORTING is_data = lt_allowed CHANGING cr_data = er_entityset ).
   ENDMETHOD.
   METHOD checklistbasicinfos_get_entity.
     DATA ls_row TYPE ty_root_row.
     ls_row = read_root_row( read_root_key( it_key_tab ) ).
+    AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_view
+      ID 'BUKRS' FIELD ls_row-bukrs.
+    IF sy-subrc <> 0.
+      raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_permission_no_view iv_code = zcl_zodata_contract_constants=>c_code_no_view_auth ).
+    ENDIF.
     copy_data_to_ref( EXPORTING is_data = ls_row CHANGING cr_data = er_entity ).
   ENDMETHOD.
   METHOD checklistbasicinfos_get_entityset.
     DATA lt_rows TYPE tt_root_row.
+    DATA lt_allowed TYPE tt_root_row.
     lt_rows = read_root_rows( ).
-    copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
+    LOOP AT lt_rows ASSIGNING FIELD-SYMBOL(<ls_basic_root_row>).
+      AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+        ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_view
+        ID 'BUKRS' FIELD <ls_basic_root_row>-bukrs.
+      IF sy-subrc = 0.
+        APPEND <ls_basic_root_row> TO lt_allowed.
+      ENDIF.
+    ENDLOOP.
+    copy_data_to_ref( EXPORTING is_data = lt_allowed CHANGING cr_data = er_entityset ).
   ENDMETHOD.
   METHOD checklistcheckset_get_entityset.
     DATA lv_rootkey TYPE sysuuid_x16.
     DATA lt_rows TYPE tt_check_row.
+    DATA ls_root_auth TYPE ty_root_row.
     TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
+    IF lv_rootkey IS NOT INITIAL.
+      ls_root_auth = read_root_row( lv_rootkey ).
+      AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+        ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_view
+        ID 'BUKRS' FIELD ls_root_auth-bukrs.
+      IF sy-subrc <> 0.
+        raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_permission_no_view iv_code = zcl_zodata_contract_constants=>c_code_no_view_auth ).
+      ENDIF.
+    ENDIF.
     lt_rows = read_check_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.
   METHOD checklistbarriers_get_entityset.
     DATA lv_rootkey TYPE sysuuid_x16.
     DATA lt_rows TYPE tt_barrier_row.
+    DATA ls_root_auth TYPE ty_root_row.
     TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
+    IF lv_rootkey IS NOT INITIAL.
+      ls_root_auth = read_root_row( lv_rootkey ).
+      AUTHORITY-CHECK OBJECT zcl_zodata_contract_constants=>c_auth_object_checklist
+        ID 'ACTVT' FIELD zcl_zodata_contract_constants=>c_op_view
+        ID 'BUKRS' FIELD ls_root_auth-bukrs.
+      IF sy-subrc <> 0.
+        raise_busi_exception( iv_text = zcl_zodata_contract_constants=>c_msg_permission_no_view iv_code = zcl_zodata_contract_constants=>c_code_no_view_auth ).
+      ENDIF.
+    ENDIF.
     lt_rows = read_barrier_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.
@@ -485,20 +549,89 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
   METHOD read_root_row.
+    TYPES: BEGIN OF ty_check_agg,
+      pcct_uuid TYPE sysuuid_x16,
+      total TYPE int4,
+      success TYPE int4,
+    END OF ty_check_agg.
+    TYPES: BEGIN OF ty_barrier_agg,
+      pcct_uuid TYPE sysuuid_x16,
+      total TYPE int4,
+      success TYPE int4,
+    END OF ty_barrier_agg.
+    DATA ls_check_agg TYPE ty_check_agg.
+    DATA ls_barrier_agg TYPE ty_barrier_agg.
     SELECT SINGLE pcct_uuid checklist_id lpc lpc_text status integration_flag date_check time_check time_zone equipment bukrs observer_fullname observer_perner observer_position observer_orgunit observed_fullname observed_perner observed_position observed_orgunit location_key location_name location_text changed_on changed_by created_on created_by version_number lock_owner lock_session tab_session_id lock_expires_at FROM ztodata_hdr INTO CORRESPONDING FIELDS OF @rs_root WHERE pcct_uuid = @iv_rootkey.
     IF sy-subrc <> 0. raise_busi_exception( iv_text = |ChecklistRoot not found for key { iv_rootkey }.| iv_code = 'VALIDATION_ERROR' ). ENDIF.
-    SELECT COUNT( * ) FROM zpcct_check WHERE pcct_uuid = @iv_rootkey INTO @rs_root-checks_total.
-    SELECT COUNT( * ) FROM zpcct_check WHERE pcct_uuid = @iv_rootkey AND result = @abap_true INTO @rs_root-checks_success.
-    SELECT COUNT( * ) FROM zpcct_barrier WHERE pcct_uuid = @iv_rootkey INTO @rs_root-barriers_total.
-    SELECT COUNT( * ) FROM zpcct_barrier WHERE pcct_uuid = @iv_rootkey AND result = @abap_true INTO @rs_root-barriers_success.
+    SELECT SINGLE pcct_uuid,
+                  COUNT( * ) AS total,
+                  SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
+      FROM zpcct_check
+      WHERE pcct_uuid = @iv_rootkey
+      GROUP BY pcct_uuid
+      INTO @ls_check_agg.
+    IF sy-subrc = 0.
+      rs_root-checks_total = ls_check_agg-total.
+      rs_root-checks_success = ls_check_agg-success.
+    ENDIF.
+    SELECT SINGLE pcct_uuid,
+                  COUNT( * ) AS total,
+                  SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
+      FROM zpcct_barrier
+      WHERE pcct_uuid = @iv_rootkey
+      GROUP BY pcct_uuid
+      INTO @ls_barrier_agg.
+    IF sy-subrc = 0.
+      rs_root-barriers_total = ls_barrier_agg-total.
+      rs_root-barriers_success = ls_barrier_agg-success.
+    ENDIF.
   ENDMETHOD.
   METHOD read_root_rows.
+    TYPES: BEGIN OF ty_check_agg,
+      pcct_uuid TYPE sysuuid_x16,
+      total TYPE int4,
+      success TYPE int4,
+    END OF ty_check_agg,
+    tt_check_agg TYPE HASHED TABLE OF ty_check_agg WITH UNIQUE KEY pcct_uuid.
+    TYPES: BEGIN OF ty_barrier_agg,
+      pcct_uuid TYPE sysuuid_x16,
+      total TYPE int4,
+      success TYPE int4,
+    END OF ty_barrier_agg,
+    tt_barrier_agg TYPE HASHED TABLE OF ty_barrier_agg WITH UNIQUE KEY pcct_uuid.
+    DATA lt_check_agg TYPE tt_check_agg.
+    DATA lt_barrier_agg TYPE tt_barrier_agg.
     SELECT pcct_uuid checklist_id lpc lpc_text status integration_flag date_check time_check time_zone equipment bukrs observer_fullname observer_perner observer_position observer_orgunit observed_fullname observed_perner observed_position observed_orgunit location_key location_name location_text changed_on changed_by created_on created_by version_number lock_owner lock_session tab_session_id lock_expires_at FROM ztodata_hdr INTO CORRESPONDING FIELDS OF TABLE @rt_root.
+    IF rt_root IS INITIAL.
+      RETURN.
+    ENDIF.
+    SELECT pcct_uuid,
+           COUNT( * ) AS total,
+           SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
+      FROM zpcct_check
+      FOR ALL ENTRIES IN @rt_root
+      WHERE pcct_uuid = @rt_root-pcct_uuid
+      GROUP BY pcct_uuid
+      INTO TABLE @lt_check_agg.
+    SELECT pcct_uuid,
+           COUNT( * ) AS total,
+           SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
+      FROM zpcct_barrier
+      FOR ALL ENTRIES IN @rt_root
+      WHERE pcct_uuid = @rt_root-pcct_uuid
+      GROUP BY pcct_uuid
+      INTO TABLE @lt_barrier_agg.
     LOOP AT rt_root ASSIGNING FIELD-SYMBOL(<ls_root>).
-      SELECT COUNT( * ) FROM zpcct_check WHERE pcct_uuid = @<ls_root>-pcct_uuid INTO @<ls_root>-checks_total.
-      SELECT COUNT( * ) FROM zpcct_check WHERE pcct_uuid = @<ls_root>-pcct_uuid AND result = @abap_true INTO @<ls_root>-checks_success.
-      SELECT COUNT( * ) FROM zpcct_barrier WHERE pcct_uuid = @<ls_root>-pcct_uuid INTO @<ls_root>-barriers_total.
-      SELECT COUNT( * ) FROM zpcct_barrier WHERE pcct_uuid = @<ls_root>-pcct_uuid AND result = @abap_true INTO @<ls_root>-barriers_success.
+      READ TABLE lt_check_agg ASSIGNING FIELD-SYMBOL(<ls_check_agg>) WITH TABLE KEY pcct_uuid = <ls_root>-pcct_uuid.
+      IF sy-subrc = 0.
+        <ls_root>-checks_total = <ls_check_agg>-total.
+        <ls_root>-checks_success = <ls_check_agg>-success.
+      ENDIF.
+      READ TABLE lt_barrier_agg ASSIGNING FIELD-SYMBOL(<ls_barrier_agg>) WITH TABLE KEY pcct_uuid = <ls_root>-pcct_uuid.
+      IF sy-subrc = 0.
+        <ls_root>-barriers_total = <ls_barrier_agg>-total.
+        <ls_root>-barriers_success = <ls_barrier_agg>-success.
+      ENDIF.
     ENDLOOP.
   ENDMETHOD.
   METHOD read_check_rows.

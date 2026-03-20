@@ -36,7 +36,7 @@ sap.ui.define([
 
     function checkCreatePermission(sActivity, mDeps) {
         var firstRow = mDeps.firstRow;
-        return GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CREATE_PERMISSION, "CURRENT", {
+        return GatewayODataClient.get(ODataAdapterUtils.buildEntityPath("ChecklistCreatePermissionSet", "CURRENT", {
             type: ODataKeyContracts.TYPES.CURRENT_ALIAS_KEY
         }).replace(/^\//, ""), {
             "__ts": Date.now()

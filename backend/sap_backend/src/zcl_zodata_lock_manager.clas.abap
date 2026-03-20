@@ -92,8 +92,9 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
 
   METHOD zif_zodata_lock_manager~unlock.
     call_lock_fm(
-      iv_mode = 'R'
-      is_key  = is_key ).
+      iv_mode         = 'R'
+      is_key          = is_key
+      iv_session_guid = iv_session_guid ).
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~update_last_touch.
@@ -126,6 +127,9 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
     IF sy-subrc <> 0.
       CASE iv_mode.
         WHEN 'H' OR 'V'.
+          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_not_owned_by_session.
+          lv_error_text = zcl_zodata_contract_constants=>c_msg_lock_session_required.
+        WHEN 'R'.
           lv_error_code = zcl_zodata_contract_constants=>c_code_lock_not_owned_by_session.
           lv_error_text = zcl_zodata_contract_constants=>c_msg_lock_session_required.
         WHEN 'S'.

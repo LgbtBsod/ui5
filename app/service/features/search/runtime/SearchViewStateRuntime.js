@@ -45,8 +45,6 @@ sap.ui.define([
             canDelete: false,
             selectedRowId: "",
             selectedRowDisplayId: "",
-            scrollNavVisible: false,
-            resultsToolbarNavVisible: false,
             analyticsRailBusy: false,
             analyticsRail: { total: 0, monthly: 0, failedChecks: 0, failedBarriers: 0, avgChecksRate: 0, avgBarriersRate: 0, refreshedAtText: "-", sourceText: "-" },
             analytics: {
