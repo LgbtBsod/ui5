@@ -1,8 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (Result, GatewayBackendService, ModelPathContracts) {
+], function (Result, GatewayClient, ModelPathContracts) {
     "use strict";
 
     /**
@@ -19,7 +19,7 @@ sap.ui.define([
                 oStateModel.setProperty(ModelPathContracts.UI_BUSY_GLOBAL, false);
                 oStateModel.setProperty("/locationsLoading", false);
                 oStateModel.setProperty("/backendMode", "real");
-                oStateModel.setProperty("/backendServiceUrl", GatewayBackendService.serviceUrl() || "");
+                oStateModel.setProperty("/backendServiceUrl", GatewayClient.serviceUrl() || "");
             }
 
             return Promise.resolve(Result.ok({ initialized: true }, []));

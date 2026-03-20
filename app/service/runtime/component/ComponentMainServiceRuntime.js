@@ -4,7 +4,7 @@ sap.ui.define([
     "use strict";
 
     function createMainServiceModel(oComponent, mDeps, sMainServiceUri) {
-        var GatewayBackendService = mDeps.GatewayBackendService;
+        var GatewayClient = mDeps.GatewayClient;
         var mChangeGroups = {
             "*": {
                 groupId: "changes",
@@ -31,7 +31,7 @@ sap.ui.define([
         oMainServiceModel.setChangeGroups(mChangeGroups);
         oComponent.setModel(oMainServiceModel, "mainService");
         oComponent.setModel(oMainServiceModel);
-        GatewayBackendService.setModel(oMainServiceModel, { serviceUrl: sMainServiceUri });
+        GatewayClient.setModel(oMainServiceModel, { serviceUrl: sMainServiceUri });
 
         return oMainServiceModel;
     }

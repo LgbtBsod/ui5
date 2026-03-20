@@ -17,7 +17,7 @@ sap.ui.define([
         var oEnvModel = mOptions.envModel;
         var oMasterDataModel = mOptions.masterDataModel;
         var SettingsManager = mOptions.settingsManager;
-        var GatewayBackendService = mOptions.gatewayBackendService;
+        var GatewayClient = mOptions.gatewayBackendService;
         var TelemetryRuntime = mOptions.telemetryRuntime;
         var fnEmitTelemetry = mOptions.emitTelemetry;
         var oRuntimeApplyQueue = Promise.resolve();
@@ -51,7 +51,7 @@ sap.ui.define([
             applyRuntimeSettings: applyRuntimeSettings,
             loadRuntimeSettings: function (mLoadOptions) {
                 var bForce = !!(mLoadOptions && mLoadOptions.force);
-                var pLoad = bForce ? SettingsManager.reload(GatewayBackendService) : SettingsManager.load(GatewayBackendService);
+                var pLoad = bForce ? SettingsManager.reload(GatewayClient) : SettingsManager.load(GatewayClient);
                 return pLoad.then(function (oRuntime) {
                     return applyRuntimeSettings(oRuntime);
                 }).catch(function (oError) {

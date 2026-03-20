@@ -15,7 +15,7 @@ sap.ui.define([], function () {
                 envModel: mModels.envModel,
                 masterDataModel: mModels.masterDataModel,
                 settingsManager: mDeps.Managers && mDeps.Managers.SettingsManager || mDeps.SettingsManager,
-                gatewayBackendService: mDeps.GatewayBackendService,
+                gatewayBackendService: mDeps.GatewayClient,
                 telemetryRuntime: mDeps.TelemetryRuntime,
                 emitTelemetry: mOptions.emitTelemetry
             }),

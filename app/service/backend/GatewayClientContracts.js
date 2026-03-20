@@ -15,17 +15,15 @@ sap.ui.define([], function () {
             /^AutoSave$/i,
             /^CreateChecklist$/i,
             /^ReportExport$/i,
-            /* C-07 FIX: SetChecklistStatus was missing — caused runtime throw */
-            /^SetChecklistStatus$/i
-        ],
-        DIRECT_FUNCTION_QUERY_ALLOWLIST: [
-            /* C-06 TODO: LockAcquire/Heartbeat/Release use urlParameters (query string).
-             * SessionGuid appears in Gateway access log (SM50).
-             * Move to DIRECT_FUNCTION_BODY_ALLOWLIST after confirming ABAP accepts
-             * POST body for these FunctionImports (they are declared m:HttpMethod="POST"). */
+            /^SetChecklistStatus$/i,
+            /* C-06 FIX: moved from QUERY to BODY — metadata confirms m:HttpMethod="POST".
+             * Using model.create() sends payload in request body instead of URL query string,
+             * which prevents SessionGuid from appearing in SAP Gateway access log (SM50/SMICM). */
             /^LockAcquire$/i,
             /^LockHeartbeat$/i,
-            /^LockRelease$/i,
+            /^LockRelease$/i
+        ],
+        DIRECT_FUNCTION_QUERY_ALLOWLIST: [
             /^CopyChecklist$/i,
             /^AnalyticsRefreshTrigger$/i
         ],

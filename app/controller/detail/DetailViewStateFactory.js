@@ -66,10 +66,11 @@ sap.ui.define([
         var oCheckConfig = DetailRowEntityConfig.get("check");
         var oBarrierConfig = DetailRowEntityConfig.get("barrier");
         return {
-            /* D-03: computed property — kept in sync by bindStateValidationModel
+            /* D-03: computed properties — kept in sync by bindStateValidationModel
              * in DetailControllerBehavior whenever editMode changes.
-             * Initial value = false (READ mode on open). */
+             * Initial values = READ mode on open. */
             isEditMode: false,
+            isCreateMode: false,
             detailSkeletonBusy: false,
             attachmentBusy: false,
             attachmentsExpanded: false,

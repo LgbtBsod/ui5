@@ -70,12 +70,14 @@ sap.ui.define([
                 DetailAttachmentViewState.sync(oController);
                 return;
             }
-            /* D-03 FIX: sync view>/isEditMode computed property to avoid 17 inline expressions */
+            /* D-03 FIX: sync view>/isEditMode and view>/isCreateMode computed properties.
+             * Avoids scattered inline expression bindings across XML fragments. */
             if (sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
                 oViewModel = ControllerModelRuntime.viewState(oController);
                 if (oViewModel) {
-                    oViewModel.setProperty("/isEditMode",
-                        oController._oStateValidationModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) !== "READ");
+                    var sMode = oController._oStateValidationModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE);
+                    oViewModel.setProperty("/isEditMode",   sMode !== "READ");
+                    oViewModel.setProperty("/isCreateMode", sMode === "CREATE");
                 }
             }
             if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== "/activeObjectId" && sPath !== "/selectedId") {

@@ -68,8 +68,8 @@ sap.ui.define([
             return checkCreatePermission(sActivity, mDeps);
         }
         return GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistPermissionSet", sRootId, {
-            type: ODataKeyContracts.TYPES.ROOT_KEY
-        }).replace(/^\//, ""), {
+            type: ODataKeyContracts.TYPES.ROOT_KEY,
+            "$select": "RootKey,CanCreate,CanView,CanEdit,CanDelete,ReasonCode,Message"}).replace(/^\//, ""), {
             ACTVT: sActivity
         }).then(function (oResponse) {
             return normalizePermissionResponse(firstRow(oResponse), sRootId, sActivity);

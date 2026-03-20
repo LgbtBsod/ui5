@@ -6,14 +6,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayBackendService, StatePaths, WorkflowContracts) {
+], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayClient, StatePaths, WorkflowContracts) {
     "use strict";
 
     function releaseLockWithGatewayBackend(oPayload, mOptions) {
-        return GatewayBackendService.callFunctionImport("LockRelease", oPayload, mOptions || {}).then(function (oResult) {
+        return GatewayClient.callFunctionImport("LockRelease", oPayload, mOptions || {}).then(function (oResult) {
             var oData = oResult && oResult.d ? oResult.d : (oResult || {});
             return !!(oData && (oData.Ok || oData.Success || oData.ok || oData.success));
         }).catch(function () {
@@ -195,7 +195,7 @@ sap.ui.define([
             oComponent._fnUnsubscribeRuntimeSettings();
         }
         clearComponentTimers(oComponent);
-        GatewayBackendService.reset();
+        GatewayClient.reset();
         oComponent._fnCrossTabStorage = null;
         oComponent._oCrossTabChannel = null;
         oComponent._oLifecycleRouter = null;

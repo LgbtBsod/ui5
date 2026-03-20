@@ -1,8 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayBackendService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/CurrentUserProfile"
-], function (Result, GatewayBackendService, CurrentUserProfile) {
+], function (Result, GatewayClient, CurrentUserProfile) {
     "use strict";
 
     function buildSummary(oProfile) {
@@ -10,7 +10,7 @@ sap.ui.define([
     }
 
     function readCurrentUser(sLogin) {
-        return GatewayBackendService.readEntity("CurrentUserSet", "'CURRENT'", {
+        return GatewayClient.readEntity("CurrentUserSet", "'CURRENT'", {
             __ts: Date.now()
         }).then(function (oData) {
             return CurrentUserProfile.normalizeCurrentUser(oData, sLogin);

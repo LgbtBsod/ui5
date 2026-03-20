@@ -47,13 +47,16 @@ sap.ui.define([
             type: ODataKeyContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
         var pBasic = GatewayRequestRuntime.get("ChecklistBasicInfoSet", {
-            "$filter": buildBinaryEqFilter("RootKey", sRootId)
+            "$filter": buildBinaryEqFilter("RootKey", sRootId),
+            "$select": "RootKey,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName"
         });
         var pChecks = GatewayRequestRuntime.get("ChecklistCheckSet", {
-            "$filter": buildStringEqFilter("RootId", sRootId)
+            "$filter": buildStringEqFilter("RootId", sRootId),
+            "$select": "Key,RootKey,ChecksNum,Text,Comment,Result,ChangedOn"
         });
         var pBarriers = GatewayRequestRuntime.get("ChecklistBarrierSet", {
-            "$filter": buildStringEqFilter("RootId", sRootId)
+            "$filter": buildStringEqFilter("RootId", sRootId),
+            "$select": "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn"
         });
         return Promise.all([pRoot, pBasic, pChecks, pBarriers]).then(function (aResult) {
             var oSnapshot = ODataChecklistSnapshotRuntime.mapResult(aResult[0], aResult[1], aResult[2], aResult[3]);

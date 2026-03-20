@@ -4,9 +4,9 @@
     </BusyIndicator>
     <Switch
         id="detailEditSwitch"
-        visible="{= ${state>/workflow/detail/editMode} !== 'CREATE' }"
-        state="{= ${state>/workflow/detail/editMode} === 'EDIT' }"
-        enabled="{= ${state>/workflow/detail/editMode} !== 'CREATE' &amp;&amp; !${state>/lockOperationPending} }"
+        visible="{= !${view>/isCreateMode} }"
+        state="{view>/isEditMode}"
+        enabled="{= !${view>/isCreateMode} &amp;&amp; !${state>/lockOperationPending} }"
         customTextOn=""
         customTextOff=""
         change=".onToggleEdit"
