@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (LockAdapter, DialogOrchestrator, StatePaths, FeedbackCoordinator, RootIdRuntime, ModelStateRuntime, BehaviorRegistry, WorkflowContracts) {
+], function (LockAdapter, DialogOrchestrator, StatePaths, FeedbackCoordinator, RootIdRuntime, ModelStateRuntime, BehaviorRegistry, CreateSentinel, WorkflowContracts) {
     "use strict";
 
     var WORKFLOW_SCOPE = "workflow";
@@ -34,7 +35,7 @@ sap.ui.define([
     function releaseWithTrySave(mContext) {
         var oController = mContext && mContext.controller;
         var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, "state"));
-        if (!sRootId) {
+        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(null);
         }
         return LockAdapter.release({

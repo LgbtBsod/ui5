@@ -127,7 +127,19 @@ sap.ui.define([
             formatCopyLinkVisible: DetailFormatters.formatCopyLinkVisible,
             formatDeleteChecklistVisible: DetailFormatters.formatDeleteChecklistVisible,
             formatAutosaveText: DetailFormatters.formatAutosaveText,
-            formatAttachmentsEmptyStateText: DetailFormatters.formatAttachmentsEmptyStateText
+            formatAttachmentsEmptyStateText: DetailFormatters.formatAttachmentsEmptyStateText,
+            isCheckSectionEmpty: function (sKind, aRows) {
+                return String(sKind || "").trim() === "check" && !hasRows(aRows);
+            },
+            isBarrierSectionEmpty: function (sKind, aRows) {
+                return String(sKind || "").trim() === "barrier" && !hasRows(aRows);
+            },
+            hasCheckSectionRows: function (sKind, aRows) {
+                return String(sKind || "").trim() === "check" && hasRows(aRows);
+            },
+            hasBarrierSectionRows: function (sKind, aRows) {
+                return String(sKind || "").trim() === "barrier" && hasRows(aRows);
+            }
         }
     );
 });

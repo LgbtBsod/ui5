@@ -99,7 +99,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.28rem;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .chkApp #searchResultsShell > *,
@@ -308,6 +308,18 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   max-width: 100%;
   box-sizing: border-box;
   overflow-x: visible;
+}
+
+.chkApp .searchResultsTable .sapUiCompSmartTable,
+.chkApp .searchResultsTable .sapUiCompSmartTable > div,
+.chkApp .searchResultsTable .sapMListTblCnt,
+.chkApp .searchResultsTable .sapMListTblScr {
+  min-height: 0;
+}
+
+.chkApp .searchResultsTable .sapMListTblCnt {
+  overflow-x: auto;
+  overflow-y: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -44,6 +44,18 @@
   max-width: 100%;
 }
 
+.chkApp .detailSectionTableHost,
+.chkApp .detailSectionTableHost > * {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.chkApp .detailSectionTableHost .sapUiTable,
+.chkApp .detailSectionTableHost .sapMTable {
+  width: 100%;
+}
+
 .chkApp .tableRowActionBtn,
 .chkApp .tableRowActionBtn .sapMBtnInner {
   width: 100%;
@@ -141,6 +153,12 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 .chkApp .flatEditorTable .sapMSwt,
 .chkApp .detailGridTable .sapMSwt {
   min-width: 2.5rem;
+}
+
+.chkApp .detailSectionTableHost .sapUiTableCnt,
+.chkApp .detailSectionTableHost .sapUiTableCtrlScr,
+.chkApp .detailSectionTableHost .sapUiTableCCnt {
+  max-width: 100%;
 }
 
 .chkApp .flatEditorTable .sapMText,

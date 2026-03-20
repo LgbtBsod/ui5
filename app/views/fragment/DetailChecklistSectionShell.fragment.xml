@@ -76,7 +76,7 @@
             <VBox
                 class="detailEmptyStateCard workflowEmptyStateCard"
                 renderType="Bare"
-                visible="{path:'view>kind', formatter:'.isDetailSectionEmpty'}">
+                visible="{path:'selected>', formatter:'.isEmptyRows'}">
                 <core:Icon src="{view>emptyIcon}" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
                 <Title text="{path:'view>emptyTitleKey', formatter:'.formatI18nByKey'}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
                 <Text text="{path:'view>emptyTextKey', formatter:'.formatI18nByKey'}" class="detailEmptyStateText workflowEmptyStateText"/>
@@ -91,6 +91,14 @@
                         <core:CustomData key="kind" value="{view>kind}"/>
                     </customData>
                 </Button>
+            </VBox>
+            <VBox
+                class="detailSectionTableHost"
+                renderType="Bare"
+                visible="{path:'selected>', formatter:'.hasRows'}">
+                <VBox width="100%" binding="{view>tableSpec}">
+                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecklistRowsTable" type="XML"/>
+                </VBox>
             </VBox>
         </VBox>
     </VBox>
