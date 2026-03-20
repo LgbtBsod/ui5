@@ -30,9 +30,7 @@ sap.ui.define([], function () {
         DIRECT_GET_FUNCTION_ALLOWLIST: [
             /^GetHierarchy$/i
         ],
-        /* postToPath is reserved for future entity-POST endpoints.
-         * C-08: DIRECT_POST_ALLOWLIST is intentionally empty — postToPath API is
-         * currently unused. If a new POST endpoint is needed, add its path here. */
+        /* Reserved for future direct-POST entity endpoints. Currently unused. */
         DIRECT_POST_ALLOWLIST: [],
         FORBIDDEN_PATH_PATTERNS: [
             /^\/actions\//i,

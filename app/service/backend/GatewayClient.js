@@ -188,24 +188,7 @@ sap.ui.define([
                 }
             });
         },
-        postToPath: function (path, oPayload, mOptions) {
-            var sPath = GatewayClientSupport.assertAllowedPath(
-                GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path)),
-                GatewayClientContracts.DIRECT_POST_ALLOWLIST,
-                "POST"
-            );
-            var oOptions = mOptions || {};
-            return executeMutatingRequest({
-                method: "POST_ENTITY",
-                timeoutMs: oOptions.timeoutMs,
-                retryCount: 0,
-                correlationId: oOptions.correlationId,
-                requestFactory: function (mRuntime) {
-                    var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectPostRequest(sPath, oPayload || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
-                }
-            });
-        },
+        /* postToPath removed — DIRECT_POST_ALLOWLIST is empty, no callers. */
         deletePath: function (path, mOptions) {
             var sPath = GatewayClientSupport.assertAllowedPath(
                 GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path)),

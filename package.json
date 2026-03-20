@@ -17,7 +17,7 @@
     "gate:persistence-i18n": "node scripts/persistence-i18n-gate.js",
     "gate:release": "node scripts/release-readiness-gate.js",
     "smoke:local": "powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1",
-    "verify:preload": "node -e \"const fs=require(\\'fs\\');try{const sz=fs.statSync(\\'dist/Component-preload.js\\').size;if(sz<50000){process.stderr.write(\\'ERROR: Component-preload.js looks like a stub (\\'+sz+\\' bytes)\\\\n\\');process.exit(1);}else{console.log(\\'OK: Component-preload.js \\'+sz+\\' bytes\\');}}catch(e){process.stderr.write(\\'ERROR: dist/Component-preload.js not found — run npm run build:dist\\\\n\\');process.exit(1);}\""
+    "verify:preload": "node -e \"var fs=require('fs');try{var sz=fs.statSync('dist/Component-preload.js').size;if(sz<50000){process.stderr.write('ERROR: Component-preload.js stub ('+sz+' bytes)\\n');process.exit(1);}console.log('OK: Component-preload.js '+sz+' bytes');}catch(e){process.stderr.write('ERROR: dist/Component-preload.js missing — run npm run build:dist\\n');process.exit(1);}\""
   },
   "devDependencies": {
     "@ui5/cli": "^3.11.6",

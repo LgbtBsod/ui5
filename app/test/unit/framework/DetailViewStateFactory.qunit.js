@@ -47,4 +47,16 @@ sap.ui.define([
         assert.strictEqual(oState.activeExpandedDialog.kind, "check", "default active expanded dialog is initialized");
         assert.strictEqual(oState.activeExpandedDialog.titleKey, "checksExpandedTitle", "default active expanded dialog keeps title key");
     });
+
+
+    QUnit.test("D-03: isEditMode defaults to false (READ mode on open)", function (assert) {
+        var oState = DetailViewStateFactory.create(oMockController);
+        assert.strictEqual(oState.isEditMode, false, "isEditMode initially false");
+    });
+
+    QUnit.test("D-03: isCreateMode defaults to false", function (assert) {
+        var oState = DetailViewStateFactory.create(oMockController);
+        assert.strictEqual(oState.isCreateMode, false, "isCreateMode initially false");
+    });
+
 });

@@ -75,7 +75,8 @@
         "sap.ui.table": {},
         "sap.viz": {},
         "sap.uxap": {},
-        "sap.ui.export": {}
+        "sap.ui.export": {},
+        "sap.ui.fl": {}
       }
     },
     "contentDensities": {
@@ -227,9 +228,8 @@
       }
     },
     "config": {
-      "backendMode": "real",
       "uiContractVersion": "1.0.0"
     },
-    "flexEnabled": false
+    "flexEnabled": true
   }
 }
