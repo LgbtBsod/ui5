@@ -34,4 +34,22 @@ sap.ui.define([
         assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.DETAIL, "detail route is preserved");
         assert.strictEqual(oIntent.routeArgs.id, "CHK-ACTIVE-2", "active detail id wins over stale selected id");
     });
+
+    QUnit.test("buildCurrentIntent treats analytics as transient and uses current active detail", function (assert) {
+        var oStateModel = new JSONModel({
+            currentRouteName: NavigationContracts.ROUTES.ANALYTICS,
+            activeObjectId: "CHK-ACTIVE-2",
+            postOpenHydratedRootId: "",
+            layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN,
+            analyticsNavReturn: {
+                hash: "checklist/CHK-STALE-1",
+                rootId: "CHK-STALE-1",
+                restoreEdit: true
+            }
+        });
+        var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel);
+
+        assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.DETAIL_LAYOUT, "analytics route resolves to current active detail");
+        assert.strictEqual(oIntent.routeArgs.id, "CHK-ACTIVE-2", "active detail id stays canonical");
+    });
 });

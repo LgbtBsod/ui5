@@ -8,19 +8,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayClient, StatePaths, WorkflowContracts, GatewayContractConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
+], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayClient, StatePaths, WorkflowContracts) {
     "use strict";
-
-    function releaseLockWithGatewayBackend(oPayload, mOptions) {
-        return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, oPayload, mOptions || {}).then(function (oResult) {
-            var oData = oResult && oResult.d ? oResult.d : (oResult || {});
-            return !!(oData && (oData.Ok || oData.Success || oData.ok || oData.success));
-        }).catch(function () {
-            return false;
-        });
-    }
 
     function buildComponentRuntimeSupport() {
         return {
@@ -102,7 +92,26 @@ sap.ui.define([
     }
 
     function hasLeaveReleaseInFlight(oComponent) {
-        return !!(oComponent && (oComponent._bLeaveReleaseSent || oComponent._bLeaveReleasePending));
+        return !!(oComponent && (oComponent._bLeaveReleaseAttempted || oComponent._bLeaveReleasePending));
+    }
+
+    function markLeaveReleaseAttempted(oComponent) {
+        if (!oComponent) {
+            return false;
+        }
+        oComponent._bLeaveReleasePending = true;
+        oComponent._bLeaveReleaseAttempted = true;
+        oComponent._bLeaveReleaseSent = false;
+        return true;
+    }
+
+    function resetLeaveReleaseState(oComponent) {
+        if (!oComponent) {
+            return false;
+        }
+        oComponent._bLeaveReleasePending = false;
+        oComponent._bLeaveReleaseAttempted = false;
+        return true;
     }
 
     function registerLockReleaseBeacon(oComponent, oStateModel, oMainServiceModel) {
@@ -121,17 +130,13 @@ sap.ui.define([
                 tryReleaseOnPageLeave();
                 return;
             }
-            if (oComponent) {
-                oComponent._bLeaveReleasePending = false;
-            }
+            resetLeaveReleaseState(oComponent);
         }
 
         window.addEventListener("pagehide", tryReleaseOnPageLeave);
-        window.addEventListener("beforeunload", tryReleaseOnPageLeave);
         document.addEventListener("visibilitychange", tryReleaseOnVisibilityChange);
         return function () {
             window.removeEventListener("pagehide", tryReleaseOnPageLeave);
-            window.removeEventListener("beforeunload", tryReleaseOnPageLeave);
             document.removeEventListener("visibilitychange", tryReleaseOnVisibilityChange);
         };
     }
@@ -141,17 +146,7 @@ sap.ui.define([
         if (!oPayload || hasLeaveReleaseInFlight(oComponent)) {
             return false;
         }
-        if (oComponent) {
-            oComponent._bLeaveReleasePending = true;
-        }
-        releaseLockWithGatewayBackend(oPayload, { async: false }).then(function (bReleased) {
-            if (!oComponent) {
-                return;
-            }
-            oComponent._bLeaveReleasePending = false;
-            oComponent._bLeaveReleaseSent = !!bReleased;
-        });
-        return true;
+        return markLeaveReleaseAttempted(oComponent);
     }
 
     function clearComponentTimers(oComponent) {
@@ -220,8 +215,10 @@ sap.ui.define([
         collectManagers: collectManagers,
         destroyComponentRuntime: destroyComponentRuntime,
         isLockRuntimeActive: isLockRuntimeActive,
+        markLeaveReleaseAttempted: markLeaveReleaseAttempted,
         registerLockReleaseBeacon: registerLockReleaseBeacon,
         releaseActiveLockOnLeave: releaseActiveLockOnLeave,
+        resetLeaveReleaseState: resetLeaveReleaseState,
         syncLockScopedManagers: syncLockScopedManagers
     };
 });

@@ -58,12 +58,24 @@ sap.ui.define([
         return UiSemanticConstants.MESSAGE_TYPE.ERROR;
     }
 
+    function formatSearchModeState() {
+        return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
+    }
+
+    function formatToolbarSelectionState(iSelectionCount) {
+        return Number(iSelectionCount || 0) > 0
+            ? UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS
+            : UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
+    }
+
     return {
         formatSearchModeChipText: formatSearchModeChipText,
         formatSearchResultsCompactText: formatSearchResultsCompactText,
         formatSearchSelectionSummary: formatSearchSelectionSummary,
         formatSelectionSummaryState: formatSelectionSummaryState,
         formatLoadErrorType: formatLoadErrorType,
+        formatSearchModeState: formatSearchModeState,
+        formatToolbarSelectionState: formatToolbarSelectionState,
         formatWorkflowStageText: formatWorkflowStageText,
         formatWorkflowStageState: formatWorkflowStageState
     };

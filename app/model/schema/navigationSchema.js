@@ -13,8 +13,7 @@ sap.ui.define([
         copySourceId: null,
         navGuardBypass: false,
         analyticsNavReturn: {
-            routeName: "search",
-            routeArgs: {},
+            hash: "",
             rootId: "",
             restoreEdit: false
         },

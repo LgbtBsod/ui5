@@ -6,11 +6,29 @@ sap.ui.define([
 
     QUnit.module("framework/GatewayClientRequestRuntime");
 
-    QUnit.test("passes async flag to function import requests", function (assert) {
-        var done = assert.async();
+    QUnit.test("rejects synchronous function import requests", function (assert) {
         var oModel = {
             callFunction: function (_sPath, mOptions) {
-                assert.strictEqual(mOptions.async, false, "sync mode is forwarded to ODataModel.callFunction");
+                assert.ok(false, "sync request must be rejected before reaching ODataModel");
+            }
+        };
+
+        assert.throws(function () {
+            GatewayClientRequestRuntime.withDirectFunctionImportRequest(
+                oModel,
+                GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
+                { RootId: "4711", SessionGuid: "SESSION-1" },
+                {},
+                { async: false }
+            );
+        }, /Synchronous function imports are not supported/, "sync mode is forbidden");
+    });
+
+    QUnit.test("keeps function import requests async by default", function (assert) {
+        var done = assert.async();
+        var oModel = {
+            create: function (_sPath, _oPayload, mOptions) {
+                assert.strictEqual(typeof mOptions.async, "undefined", "async flag is no longer forwarded");
                 mOptions.success({ ok: true });
             }
         };
@@ -20,7 +38,7 @@ sap.ui.define([
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
             { RootId: "4711", SessionGuid: "SESSION-1" },
             {},
-            { async: false }
+            {}
         ).promise.then(function () {
             assert.ok(true, "request handle resolves");
             done();

@@ -64,12 +64,13 @@ sap.ui.define([
 
     function withDirectFunctionImportRequest(oModel, sName, oPayload, mHeaders, mOptions) {
         var sFunctionName = GatewayClientSupport.assertAllowedFunctionName(sName);
-        var bAsync = !mOptions || typeof mOptions.async !== "boolean" ? true : mOptions.async;
+        if (mOptions && mOptions.async === false) {
+            throw new Error("Synchronous function imports are not supported");
+        }
         if (GatewayClientSupport.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
             return toRequestHandle(function (resolve, reject) {
                 return oModel.callFunction("/" + sFunctionName, {
                     method: "POST",
-                    async: bAsync,
                     urlParameters: oPayload || {},
                     headers: mHeaders || {},
                     success: function (oData) { resolve(oData || {}); },
@@ -80,7 +81,6 @@ sap.ui.define([
         if (GatewayClientSupport.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_FUNCTION_BODY_ALLOWLIST)) {
             return toRequestHandle(function (resolve, reject) {
                 return oModel.create("/" + sFunctionName, oPayload || {}, {
-                    async: bAsync,
                     headers: mHeaders || {},
                     success: function (oData) { resolve(oData || {}); },
                     error: function (e) { reject(e); }

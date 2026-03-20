@@ -26,15 +26,44 @@ sap.ui.define([
         };
     }
 
+    function readHashChanger() {
+        return HashChanger && HashChanger.getInstance ? HashChanger.getInstance() : null;
+    }
+
+    function buildHashFromIntent(oRouter, oIntent) {
+        var sRouteName = String(oIntent && oIntent.routeName || "").trim();
+        var oRouteArgs = cloneArgs(oIntent && oIntent.routeArgs);
+        if (!oRouter || typeof oRouter.getURL !== "function" || !sRouteName || sRouteName === NavigationContracts.ROUTES.SEARCH) {
+            return "";
+        }
+        return String(oRouter.getURL(sRouteName, oRouteArgs || {}) || "");
+    }
+
+    function buildAnalyticsReturnSnapshot(oStateModel, oRouter) {
+        var oHashChanger = readHashChanger();
+        var oIntent = buildCurrentIntent(oStateModel);
+        var sHash = oHashChanger && typeof oHashChanger.getHash === "function"
+            ? String(oHashChanger.getHash() || "")
+            : "";
+
+        if (!sHash) {
+            sHash = buildHashFromIntent(oRouter, oIntent);
+        }
+
+        return {
+            hash: sHash,
+            rootId: String(RootIdRuntime.resolveFromStateModel(oStateModel) || "").trim()
+        };
+    }
+
     function buildCurrentIntent(oStateModel) {
         var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         var sActiveId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
         var sLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
 
-        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
-            return cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
-        }
-        if ((sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT || sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) && sActiveId) {
+        if ((sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT
+            || (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN))
+            && sActiveId) {
             return {
                 routeName: NavigationContracts.ROUTES.DETAIL_LAYOUT,
                 routeArgs: {
@@ -54,20 +83,19 @@ sap.ui.define([
 
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
-        var oIntent = buildCurrentIntent(oStateModel);
+        var oRouter = oController && oController.getRouter && oController.getRouter();
+        var oSnapshot = buildAnalyticsReturnSnapshot(oStateModel, oRouter);
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
-        var sRootId = RootIdRuntime.resolveFromStateModel(oStateModel);
-        var bRestoreEdit = !!(sRootId && WorkflowContracts.isEditLocked(sMode, sLockState));
+        var bRestoreEdit = !!(oSnapshot.rootId && WorkflowContracts.isEditLocked(sMode, sLockState));
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
-            routeName: String(oIntent.routeName || NavigationContracts.ROUTES.SEARCH),
-            routeArgs: cloneArgs(oIntent.routeArgs),
-            rootId: sRootId,
+            hash: oSnapshot.hash,
+            rootId: oSnapshot.rootId,
             restoreEdit: bRestoreEdit
         });
 
-        return oIntent;
+        return oSnapshot;
     }
 
     function navigateToAnalytics(oController) {
@@ -88,15 +116,13 @@ sap.ui.define([
 
     function navigateBackFromAnalytics(oController) {
         var oStateModel = readStateModel(oController);
-        var oIntent = cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", buildFallbackIntent()) || buildFallbackIntent());
-        var oRouter = oController && oController.getRouter && oController.getRouter();
+        var oReturn = cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", {}) || {});
+        var oHashChanger = readHashChanger();
         var sTargetRootId;
+        var sTargetHash = String((oReturn && oReturn.hash) || "").trim();
 
-        if (!oIntent.routeName) {
-            oIntent = buildFallbackIntent();
-        }
-        sTargetRootId = String((oIntent && (oIntent.rootId || (oIntent.routeArgs && oIntent.routeArgs.id))) || "").trim();
-        if (oIntent && oIntent.restoreEdit && sTargetRootId) {
+        sTargetRootId = String((oReturn && oReturn.rootId) || "").trim();
+        if (oReturn && oReturn.restoreEdit && sTargetRootId) {
             ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", {
                 rootId: sTargetRootId,
                 requestedAt: new Date().toISOString()
@@ -105,12 +131,12 @@ sap.ui.define([
             ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", null);
         }
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", null);
-        if ((oIntent.routeName || NavigationContracts.ROUTES.SEARCH) === NavigationContracts.ROUTES.SEARCH) {
+        if (!sTargetHash) {
             navigateToSearch(oController);
             return;
         }
-        if (oRouter && typeof oRouter.navTo === "function") {
-            oRouter.navTo(oIntent.routeName, oIntent.routeArgs || {}, false);
+        if (oHashChanger && typeof oHashChanger.replaceHash === "function") {
+            oHashChanger.replaceHash(sTargetHash);
         }
     }
 

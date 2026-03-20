@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (UiSemanticConstants) {
     "use strict";
 
     var CHIP_STATE_CLASSES = [
@@ -13,13 +15,13 @@ sap.ui.define([], function () {
 
     function stateToClass(sState) {
         switch (String(sState || "").trim()) {
-        case "Success":
+        case UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS:
             return "chipStateSuccess";
-        case "Warning":
+        case UiSemanticConstants.OBJECT_STATUS_STATE.WARNING:
             return "chipStateWarning";
-        case "Error":
+        case UiSemanticConstants.OBJECT_STATUS_STATE.ERROR:
             return "chipStateError";
-        case "Information":
+        case UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION:
             return "chipStateInfo";
         default:
             return "chipStateNone";

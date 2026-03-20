@@ -31,6 +31,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentNavigationGuardRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/LockLostUseCase.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/CacheValidationUseCase.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentAppRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentListenerInitRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/GatewayClientRequestRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/GatewayClientContracts.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ODataKeyNormalizer.qunit"

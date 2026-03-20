@@ -5,7 +5,7 @@
         <MessageStrip
             id="detailValidationSummaryStrip"
             text="{path:'state>/validationSummary', formatter:'.formatValidationSummaryText'}"
-            type="Error"
+            type="{parts:[{value:true},{value:true}], formatter:'.formatValidationState'}"
             showIcon="true"
             class="chkFeedbackStrip chkFeedbackError workflowMessageSurface"
             visible="{= ${view>/validationShown} &amp;&amp; ${state>/validationSummary/hasErrors} }">

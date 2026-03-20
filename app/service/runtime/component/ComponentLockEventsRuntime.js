@@ -49,6 +49,7 @@ sap.ui.define([
 
         oComponent._bLeaveReleaseSent = false;
         oComponent._bLeaveReleasePending = false;
+        oComponent._bLeaveReleaseAttempted = false;
         oComponent._fnUnregisterBeacon = oComponent._registerLockReleaseBeacon(oStateModel, oMainServiceModel);
 
         function applyOwnedLockState(oLockState, bResetConflict) {

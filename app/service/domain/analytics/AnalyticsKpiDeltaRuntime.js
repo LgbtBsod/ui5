@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsChartValueRuntime"
-], function (AnalyticsChartValueRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsChartValueRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (AnalyticsChartValueRuntime, UiSemanticConstants) {
     "use strict";
 
     function formatSignedValue(nValue) {
@@ -14,12 +15,12 @@ sap.ui.define([
     function buildDeltaState(nValue, bPositiveIsGood) {
         var nSafe = AnalyticsChartValueRuntime.toNumber(nValue);
         if (nSafe === 0) {
-            return "None";
+            return UiSemanticConstants.OBJECT_STATUS_STATE.NONE;
         }
         if (bPositiveIsGood) {
-            return nSafe > 0 ? "Success" : "Error";
+            return nSafe > 0 ? UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS : UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
         }
-        return nSafe < 0 ? "Success" : "Error";
+        return nSafe < 0 ? UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS : UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
     }
 
     function buildKpiDeltas(oDashboard, aMonthlyComparison) {

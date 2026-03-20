@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (FeedbackConstants) {
     "use strict";
 
     var KINDS = {
@@ -17,7 +19,7 @@ sap.ui.define([], function () {
             code: oPartial.code || "UNKNOWN",
             messageKey: oPartial.messageKey || "unexpectedError",
             params: oPartial.params || {},
-            severity: oPartial.severity || "error",
+            severity: oPartial.severity || FeedbackConstants.SEVERITY.ERROR,
             retriable: !!oPartial.retriable
         };
     }

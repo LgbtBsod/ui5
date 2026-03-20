@@ -25,6 +25,19 @@ sap.ui.define([
         ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? "persistenceDirty" : "persistenceIdle");
     }
 
+    function createBeforeUnloadHandler(oStateModel, mOptions) {
+        return function (oEvent) {
+            var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, mOptions.statePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+            var bHasUnsaved = WorkflowContracts.isEditableMode(sMode) && ModelStateRuntime.readOnModel(oStateModel, PATHS.IS_DIRTY, false);
+            if (!bHasUnsaved) {
+                return;
+            }
+            oEvent.preventDefault();
+            oEvent.returnValue = VALUES.UNSAVED_CHANGES_MESSAGE;
+            return VALUES.UNSAVED_CHANGES_MESSAGE;
+        };
+    }
+
     function initializeListeners(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
@@ -46,16 +59,7 @@ sap.ui.define([
         if (oComponent._fnBeforeUnload) {
             window.removeEventListener("beforeunload", oComponent._fnBeforeUnload);
         }
-        oComponent._fnBeforeUnload = function (oEvent) {
-            var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, mOptions.statePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
-            var bHasUnsaved = WorkflowContracts.isEditableMode(sMode) && ModelStateRuntime.readOnModel(oStateModel, PATHS.IS_DIRTY, false);
-            if (!bHasUnsaved) {
-                return;
-            }
-            oEvent.preventDefault();
-            oEvent.returnValue = VALUES.UNSAVED_CHANGES_MESSAGE;
-            return VALUES.UNSAVED_CHANGES_MESSAGE;
-        };
+        oComponent._fnBeforeUnload = createBeforeUnloadHandler(oStateModel, mOptions);
         window.addEventListener("beforeunload", oComponent._fnBeforeUnload);
         ModelStateRuntime.setManyOnModel(oLayoutModel, {
             "/smartFilter/fields": SmartSearchAdapter.getSmartFilterConfig().fields,
@@ -78,6 +82,7 @@ sap.ui.define([
     }
 
     return {
+        createBeforeUnloadHandler: createBeforeUnloadHandler,
         initializeListeners: initializeListeners
     };
 });

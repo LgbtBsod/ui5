@@ -10,8 +10,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsExportRows",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
-], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
+], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger, FeedbackConstants) {
     "use strict";
 
     var PATHS = AnalyticsUiContracts.PATHS;
@@ -85,17 +86,17 @@ sap.ui.define([
             if (DebugLogger && typeof DebugLogger.error === "function") {
                 DebugLogger.error("AnalyticsExportRuntime", "build_rows_failed", getLoggerPayload(oError, sErrorMessage));
             }
-            FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
+            FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
             return Promise.resolve(false);
         }
         if (!aRows.length) {
-            return FeedbackCoordinator.showToast(oController, "nothingToExport", [], "warning");
+            return FeedbackCoordinator.showToast(oController, "nothingToExport", [], FeedbackConstants.SEVERITY.WARNING);
         }
         try {
             return SpreadsheetExport.download(buildAnalyticsExportFileName(oController), aRows, {
                 workbookColumns: buildSpreadsheetColumns(aRows)
             }).then(function () {
-                FeedbackCoordinator.showToast(oController, "searchExportSuccess", [], "info");
+                FeedbackCoordinator.showToast(oController, "searchExportSuccess", [], FeedbackConstants.SEVERITY.INFO);
                 return true;
             }).catch(function (oError) {
                 sErrorMessage = String((oError && oError.message) || "Analytics export failed");
@@ -105,7 +106,7 @@ sap.ui.define([
                         export: getLoggerPayload(oError, sErrorMessage)
                     }, getSelectionLogContext(oController)));
                 }
-                FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
+                FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
                 return false;
             });
         } catch (oError) {
@@ -116,7 +117,7 @@ sap.ui.define([
                     export: getLoggerPayload(oError, sErrorMessage)
                 }, getSelectionLogContext(oController)));
             }
-            FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], "error");
+            FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
             return Promise.resolve(false);
         }
     }

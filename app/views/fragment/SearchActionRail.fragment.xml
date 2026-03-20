@@ -67,7 +67,7 @@
         <ObjectStatus
             id="searchModeStatusChip"
             text="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}"
-            state="Information"
+            state="{path: 'state>/searchMode', formatter: '.formatSearchModeState'}"
             class="searchModeStatusChip statusChipSemantic searchToolbarStatusChip">
             <layoutData>
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
@@ -96,7 +96,7 @@
                 </Menu>
             </menu>
         </MenuButton>
-        <ObjectStatus id="searchSelectionStatusChip" text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }" state="{= ${view>/selectionCount} ? 'Success' : 'Information' }" class="searchSelectionStatusChip statusChipSemantic searchToolbarStatusChip">
+        <ObjectStatus id="searchSelectionStatusChip" text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }" state="{path:'view>/selectionCount', formatter: '.formatToolbarSelectionState'}" class="searchSelectionStatusChip statusChipSemantic searchToolbarStatusChip">
             <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="false"/></layoutData>
         </ObjectStatus>
         <Text text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }" visible="{= ${view>/hasSelection} &amp;&amp; !!${view>/selectedRowDisplayId} }" tooltip="{view>/selectedRowDisplayId}" class="searchSelectionPrimaryId" wrapping="false">

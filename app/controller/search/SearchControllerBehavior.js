@@ -146,6 +146,12 @@ sap.ui.define([
         formatLoadErrorType: function () {
             return SearchFormatterBehavior.formatLoadErrorType();
         },
+        formatSearchModeState: function () {
+            return SearchFormatterBehavior.formatSearchModeState();
+        },
+        formatToolbarSelectionState: function (iSelectionCount) {
+            return SearchFormatterBehavior.formatToolbarSelectionState(iSelectionCount);
+        },
 
         onOpenSearchSortDialog: function () {
             SearchToolbarDialogRuntime.openSortDialog(this);
