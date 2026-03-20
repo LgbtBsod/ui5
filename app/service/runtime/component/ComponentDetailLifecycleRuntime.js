@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ModelStateRuntime, NavigationContracts, WorkflowContracts) {
+], function (ModelStateRuntime, RootIdRuntime, NavigationContracts, WorkflowContracts) {
     "use strict";
 
     function normalizeRouteName(vRouteName) {
@@ -18,10 +19,7 @@ sap.ui.define([
     }
 
     function resolveCurrentRootId(oStateModel) {
-        return normalizeId(
-            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") ||
-            ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "")
-        );
+        return normalizeId(RootIdRuntime.resolveFromStateModel(oStateModel));
     }
 
     function resolveNextRouteIntent(oRouteEvent) {
@@ -68,7 +66,7 @@ sap.ui.define([
         var sReadinessStatus = String(oReadiness.status || "idle").trim() || "idle";
         var bAllowed = bPermissionKnown && sReadinessStatus !== "denied" && sReadinessStatus !== "error";
         ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {
-            rootId: String(oReadiness.rootId || ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") || "").trim(),
+            rootId: String(oReadiness.rootId || RootIdRuntime.resolveActiveFromStateModel(oStateModel) || "").trim(),
             readiness: {
                 status: sReadinessStatus,
                 ready: !!oReadiness.ready,

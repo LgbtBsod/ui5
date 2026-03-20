@@ -2,19 +2,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts) {
+], function (ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, RootIdRuntime, WorkflowContracts) {
     "use strict";
 
     function hasActiveRoot(oController) {
         var oSelected = ControllerModelRuntime.selected(oController);
-        var oViewState = ControllerModelRuntime.viewState(oController);
         var sSelectedRootId = String(ModelStateRuntime.readOnModel(oSelected, "/root/id", "") || "").trim();
-        var sActiveObjectId = String(ModelStateRuntime.read(oController, "state", "/activeObjectId", "") || "").trim();
-        var sSelectedId = String(ModelStateRuntime.read(oController, "state", "/selectedId", "") || "").trim();
-        var aSessionAttachments = ModelStateRuntime.readOnModel(oViewState, "/sessionAttachments", []);
+        var sCanonicalRootId = RootIdRuntime.resolveFromController(oController);
+        var aSessionAttachments = ControllerViewStateRuntime.get(oController, "/sessionAttachments", []);
 
-        return !!(sSelectedRootId || sActiveObjectId || sSelectedId || (Array.isArray(aSessionAttachments) && aSessionAttachments.length));
+        return !!(sSelectedRootId || sCanonicalRootId || (Array.isArray(aSessionAttachments) && aSessionAttachments.length));
     }
 
     function sync(oController) {

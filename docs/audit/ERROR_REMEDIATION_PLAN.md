@@ -2,23 +2,19 @@
 
 ## P1
 
-- Lock release on leave now stays inside the OData/Gateway stack and forwards `async` mode down to the function import request path instead of introducing a parallel REST transport.
-- Maintain product smoke checks against the current `app/` runtime surface.
+- Prove the real attachment UI flow end-to-end: `upload -> open/download -> delete -> save-reconcile` on existing and create-draft detail flows.
+- Keep status buttons on one product path only: validate fields, patch entity status, send ordinary `SaveChanges`; no separate status command or use case may return.
+- Continue cleaning route/root ownership so `selectedId` and `activeObjectId` are not treated as uncontrolled parallel truths outside the sanctioned root resolver and route sync path.
 
 ## P2
 
-- Reduce custom runtime indirection in `search`, `detail`, and `app shell` layers.
-- Bind sticky, focus, and viewport behavior only to stable application wrapper ids/classes.
-- Keep accessibility landmarks, skip-link behavior, and shell metrics aligned with SAP/Fiori semantics.
-- Analytics controller graph flattened into a single controller runtime; obsolete year/drilldown/refresh wrappers removed from the production path.
-- `DetailFacade` and `DetailService` now share one entry-adapter runtime for enter-edit/discard/use-case execution without changing their separate public entrypoints.
-- Checks and barriers expanded-row dialogs now use one shared fragment template instead of duplicated dialog markup.
-- OData binary root-key normalization is now centralized instead of being reimplemented in multiple adapter paths.
+- Do not change lock transport from query to body until backend confirms support and the local Gateway contour proves `create -> edit -> heartbeat -> save/autosave -> release` on the new contract.
+- Decide whether `GatewayBackendService` remains a documented backend facade or is removed in the next Gateway refactor wave; do not keep it as an undocumented proxy layer.
+- Add OData annotation datasource only if the backend actually exposes annotations; otherwise keep this as an explicit Gateway dependency.
+- Start targeted `$select` rollout on high-volume search/detail reads instead of broad speculative optimization.
+- Decide preload strategy explicitly: real productive preload build path or documented dev-only placeholder contract for `Component-preload.js`.
 
 ## P3
 
-- Shrink private `.sap*` styling overrides over time in favor of wrapper-based styling.
-- Keep governance and release evidence separate from product runtime smoke.
-- Continue replacing dead compatibility helpers with direct controller to facade/use case flows.
-- Shared table skin moved to `24_table_common.css`; remaining private table selectors are now concentrated in one module instead of being duplicated across `detail`, `dialogs`, and `search`.
-- Background theme attributes are now written through the background runtime API, reducing overlapping shell/theme DOM side effects.
+- Refresh the product audit against the current repo state and keep `P1/P2` limited to live product issues, not already-closed DOM/style/sprawl findings.
+- Continue reducing route/runtime indirection only where it improves supportability without reopening validated lifecycle flows.

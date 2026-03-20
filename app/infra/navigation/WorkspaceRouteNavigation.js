@@ -3,11 +3,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "sap/ui/core/routing/HashChanger"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger) {
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, RootIdRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger) {
     "use strict";
 
     function cloneArgs(oArgs) {
@@ -16,15 +17,6 @@ sap.ui.define([
 
     function readStateModel(oController) {
         return ControllerModelRuntime.state(oController);
-    }
-
-    function readSelectedId(oStateModel) {
-        return String(
-            (
-                ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "") ||
-                ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "")
-            ) || ""
-        ).trim();
     }
 
     function buildFallbackIntent() {
@@ -36,7 +28,7 @@ sap.ui.define([
 
     function buildCurrentIntent(oStateModel) {
         var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sSelectedId = readSelectedId(oStateModel);
+        var sSelectedId = RootIdRuntime.resolveFromStateModel(oStateModel);
         var sLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
 
         if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
@@ -65,7 +57,7 @@ sap.ui.define([
         var oIntent = buildCurrentIntent(oStateModel);
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
-        var sRootId = readSelectedId(oStateModel);
+        var sRootId = RootIdRuntime.resolveFromStateModel(oStateModel);
         var bRestoreEdit = !!(sRootId && WorkflowContracts.isEditLocked(sMode, sLockState));
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
