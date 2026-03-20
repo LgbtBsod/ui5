@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/AttachmentRepoRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper",
@@ -11,7 +10,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistExportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (GatewayRequestRuntime, ChecklistSnapshotMapper, AttachmentRepoRuntime, ODataChecklistPayloadMapper, ODataChecklistSnapshotRuntime, ODataChecklistReadRuntime, ODataChecklistStatusRuntime, ODataChecklistPermissionRuntime, ODataChecklistMutationRuntime, ODataChecklistExportRuntime, DetailRuntimePayload, CreateSentinel) {
+], function (ChecklistSnapshotMapper, AttachmentRepoRuntime, ODataChecklistPayloadMapper, ODataChecklistSnapshotRuntime, ODataChecklistReadRuntime, ODataChecklistStatusRuntime, ODataChecklistPermissionRuntime, ODataChecklistMutationRuntime, ODataChecklistExportRuntime, DetailRuntimePayload, CreateSentinel) {
     "use strict";
     function rootId(mArgs) { return DetailRuntimePayload.rootId(mArgs); }
     function normalizeRootKey(sRootId) { return ODataChecklistPayloadMapper.normalizeRootKey(sRootId); }

@@ -3,8 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StateSchema",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/AttachmentUploadPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime"
-], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     function clone(v) {
@@ -56,7 +58,7 @@ sap.ui.define([
 
         createUiStateModel: function () {
             return createModel({
-                mode: "READ",
+                mode: WorkflowContracts.EDIT_MODES.READ,
                 busy: false,
                 currentRootKey: "",
                 sessionGuid: "",
@@ -116,7 +118,7 @@ sap.ui.define([
         },
 
         createEnvModel: function () {
-            return createModel({ source: "gateway", loadedAt: "", variables: {}, timers: createTimers() });
+            return createModel({ source: WorkflowRuntimeConstants.SOURCES.GATEWAY, loadedAt: "", variables: {}, timers: createTimers() });
         }
     };
 });

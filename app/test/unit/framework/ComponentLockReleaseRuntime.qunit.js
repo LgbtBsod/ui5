@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime"
-], function (ComponentLockReleaseRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (ComponentLockReleaseRuntime, GatewayContractConstants) {
     "use strict";
 
     QUnit.module("ComponentLockReleaseRuntime");
@@ -17,7 +18,7 @@ sap.ui.define([
 
         assert.strictEqual(
             ComponentLockReleaseRuntime.buildLockReleaseUrl(oStateModel),
-            "http://example.test/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/LockRelease",
+            "http://example.test/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/" + GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
             "Lock release URL is normalized"
         );
     });

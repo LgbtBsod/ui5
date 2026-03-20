@@ -1,15 +1,18 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     return Object.freeze({
         AUTOSAVE_STATE: Object.freeze({
-            SAVING: "SAVING"
+            SAVING: WorkflowContracts.AUTOSAVE_STATES.SAVING
         }),
         BANNER_DETAIL: Object.freeze({
             SAVE_FAILED: "save_failed"
         }),
         BANNER_LEVEL: Object.freeze({
-            ERROR: "error",
+            ERROR: WorkflowRuntimeConstants.READINESS_STATUS.ERROR,
             INFO: "info",
             WARNING: "warning"
         }),

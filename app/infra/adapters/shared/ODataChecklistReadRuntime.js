@@ -1,9 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts"
-], function (GatewayRequestRuntime, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts, GatewayContractConstants) {
     "use strict";
 
     /*
@@ -29,7 +30,7 @@ sap.ui.define([
         if (!sRequestedId) {
             return Promise.resolve("");
         }
-        return GatewayRequestRuntime.get("ChecklistSearchSet", {
+        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_SEARCH, {
             "$filter": buildStringEqFilter("Id", sRequestedId),
             "$top": 1
         }).then(function (oResponse) {
@@ -43,18 +44,18 @@ sap.ui.define([
 
     function fetchDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
-        var pRoot = GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistRootSet", sRootId, {
+        var pRoot = GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
             type: ODataKeyContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
-        var pBasic = GatewayRequestRuntime.get("ChecklistBasicInfoSet", {
+        var pBasic = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BASIC_INFO, {
             "$filter": buildBinaryEqFilter("RootKey", sRootId),
             "$select": "RootKey,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName"
         });
-        var pChecks = GatewayRequestRuntime.get("ChecklistCheckSet", {
+        var pChecks = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK, {
             "$filter": buildStringEqFilter("RootId", sRootId),
             "$select": "Key,RootKey,ChecksNum,Text,Comment,Result,ChangedOn"
         });
-        var pBarriers = GatewayRequestRuntime.get("ChecklistBarrierSet", {
+        var pBarriers = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER, {
             "$filter": buildStringEqFilter("RootId", sRootId),
             "$select": "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn"
         });

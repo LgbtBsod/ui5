@@ -1,11 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper"
-], function (GatewayRequestRuntime, ChecklistSnapshotMapper) {
+], function (ODataAdapterUtils, ChecklistSnapshotMapper) {
     "use strict";
 
     function firstRow(vData) {
-        var oUnwrapped = GatewayRequestRuntime.unwrap(vData);
+        var oUnwrapped = ODataAdapterUtils.unwrap(vData);
         if (Array.isArray(oUnwrapped)) { return oUnwrapped[0] || {}; }
         if (oUnwrapped && Array.isArray(oUnwrapped.results)) { return oUnwrapped.results[0] || {}; }
         return oUnwrapped || {};
@@ -118,8 +118,8 @@ sap.ui.define([
         return {
             root: oRootRow,
             basic: oMappedBasic,
-            checks: GatewayRequestRuntime.asArray(oChecks).map(ChecklistSnapshotMapper.mapCheckRow),
-            barriers: GatewayRequestRuntime.asArray(oBarriers).map(ChecklistSnapshotMapper.mapBarrierRow),
+            checks: ODataAdapterUtils.asArray(oChecks).map(ChecklistSnapshotMapper.mapCheckRow),
+            barriers: ODataAdapterUtils.asArray(oBarriers).map(ChecklistSnapshotMapper.mapBarrierRow),
             attachments: [],
             meta: { source: "GatewayODataClient", aggChangedOn: sAggChangedOn, versionNumber: iVersionNumber }
         };

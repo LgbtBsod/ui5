@@ -5,18 +5,25 @@
  */
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport"
-], function (Contracts, Support) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (Contracts, Support, GatewayContractConstants) {
     "use strict";
 
     QUnit.module("service/backend/GatewayClientContracts");
 
     /* Every FunctionImport from metadata.xml must appear in exactly one list */
     var ALL_IMPORTS = [
-        "LockAcquire", "LockHeartbeat", "LockRelease",
-        "CreateChecklist", "CopyChecklist", "AutoSave", "SaveChanges",
-        "AnalyticsRefreshTrigger",
-        "GetHierarchy", "ReportExport"
+        GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE,
+        GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT,
+        GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
+        GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST,
+        GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST,
+        GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE,
+        GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES,
+        GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER,
+        GatewayContractConstants.FUNCTION_IMPORTS.GET_HIERARCHY,
+        GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT
     ];
     var BODY  = Contracts.DIRECT_FUNCTION_BODY_ALLOWLIST;
     var QUERY = Contracts.DIRECT_FUNCTION_QUERY_ALLOWLIST;
@@ -32,7 +39,11 @@ sap.ui.define([
     });
 
     QUnit.test("C-06: Lock operations in BODY (SessionGuid must not appear in URL)", function (assert) {
-        ["LockAcquire", "LockHeartbeat", "LockRelease"].forEach(function (name) {
+        [
+            GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE,
+            GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT,
+            GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE
+        ].forEach(function (name) {
             assert.ok(Support.allowlisted(name, BODY),  name + " in BODY");
             assert.notOk(Support.allowlisted(name, QUERY), name + " NOT in QUERY");
         });

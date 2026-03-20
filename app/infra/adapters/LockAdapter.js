@@ -1,6 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime"
-], function (GatewayRequestRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants) {
     "use strict";
 
     function normalizeLockToken(mArgs) {
@@ -35,7 +37,7 @@ sap.ui.define([
     }
 
     function normalizeResult(oRawResult, sToken) {
-        var oResult = GatewayRequestRuntime.unwrap(oRawResult) || {};
+        var oResult = ODataAdapterUtils.unwrap(oRawResult) || {};
         var bOk = !!(oResult.success || oResult.Success || oResult.Ok || oResult.lockOk || oResult.ok);
         var bKilled = !!(oResult.is_killed || oResult.IsKilled || oResult.killed);
         var bCanTakeover = !!(oResult.can_takeover || oResult.CanTakeover || oResult.locked_by_same_user);
@@ -62,7 +64,7 @@ sap.ui.define([
         var sSession = normalizeLockToken(mArgs);
         var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim();
         var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
-        return GatewayRequestRuntime.postFunction("LockAcquire", {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
             ObjectUuid: sObjectUuid,
             RootId: sRootId,
             SessionGuid: sSession,
@@ -79,7 +81,7 @@ sap.ui.define([
     function heartbeat(mArgs) {
         var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
-        return GatewayRequestRuntime.postFunction("LockHeartbeat", {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
             ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim(),
             RootId: sRootId,
             SessionGuid: sToken
@@ -93,7 +95,7 @@ sap.ui.define([
     function status(mArgs) {
         var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
-        return GatewayRequestRuntime.get("LockStatusSet('" + sRootId + "')", { SessionGuid: sToken }).then(function (oResult) {
+        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.LOCK_STATUS + "('" + sRootId + "')", { SessionGuid: sToken }).then(function (oResult) {
             return normalizeResult(oResult, sToken);
         }).catch(function (oError) {
             return { ok: false, code: "ERROR", killed: false, messageKey: "lockStatusFailed", raw: oError || {} };
@@ -103,7 +105,7 @@ sap.ui.define([
     function release(mArgs) {
         var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
-        return GatewayRequestRuntime.postFunction("LockRelease", { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, { RootId: sRootId, SessionGuid: sToken }).then(function (oResult) {
             var oNormalized = normalizeResult(oResult, sToken);
             return { ok: !!oNormalized.ok, code: oNormalized.code || "OK", released: true, killed: !!oNormalized.killed, messageKey: oNormalized.messageKey || "" };
         }).catch(function (oError) {

@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, WorkflowRuntimeConstants) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
@@ -116,7 +117,7 @@ sap.ui.define([
                 oComponent._handleForceReadOnly({
                     reason: oClassification.taxonomy,
                     messageKey: oClassification.messageKey,
-                    source: "autosave"
+                    source: WorkflowRuntimeConstants.SOURCES.AUTOSAVE
                 });
                 return;
             }

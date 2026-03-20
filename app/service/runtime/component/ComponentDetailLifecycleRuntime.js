@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (ModelStateRuntime, RootIdRuntime, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (ModelStateRuntime, RootIdRuntime, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     function normalizeRouteName(vRouteName) {
@@ -60,11 +61,11 @@ sap.ui.define([
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
         var sAutosaveState = WorkflowContracts.normalizeAutosaveState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE));
-        var sValidationSource = String((ModelStateRuntime.readOnModel(oStateModel, StatePaths.VALIDATION_SUMMARY, {}) || {}).source || "idle");
+        var sValidationSource = String((ModelStateRuntime.readOnModel(oStateModel, StatePaths.VALIDATION_SUMMARY, {}) || {}).source || WorkflowRuntimeConstants.VALIDATION_STATUS.IDLE);
         var bDirty = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false);
         var bPermissionKnown = !!oReadiness.permissionKnown;
-        var sReadinessStatus = String(oReadiness.status || "idle").trim() || "idle";
-        var bAllowed = bPermissionKnown && sReadinessStatus !== "denied" && sReadinessStatus !== "error";
+        var sReadinessStatus = String(oReadiness.status || WorkflowRuntimeConstants.READINESS_STATUS.IDLE).trim() || WorkflowRuntimeConstants.READINESS_STATUS.IDLE;
+        var bAllowed = bPermissionKnown && sReadinessStatus !== WorkflowRuntimeConstants.READINESS_STATUS.DENIED && sReadinessStatus !== WorkflowRuntimeConstants.READINESS_STATUS.ERROR;
         ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {
             rootId: String(oReadiness.rootId || RootIdRuntime.resolveActiveFromStateModel(oStateModel) || "").trim(),
             readiness: {
@@ -88,7 +89,7 @@ sap.ui.define([
                 lastSavedAt: ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null)
             },
             validation: {
-                state: sValidationSource || "idle"
+                state: sValidationSource || WorkflowRuntimeConstants.VALIDATION_STATUS.IDLE
             }
         });
     }

@@ -2,8 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, WorkflowRuntimeConstants, DetailPersistenceConstants) {
     "use strict";
 
     var PATHS = ComponentListenerContracts.PATHS;
@@ -19,7 +21,7 @@ sap.ui.define([
         if (!PERSISTENCE_DIRTY_SOURCE_STATES[sPersistenceState]) {
             return;
         }
-        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/state", bDirty ? "dirty" : "idle");
+        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/state", bDirty ? DetailPersistenceConstants.STATES.DIRTY : DetailPersistenceConstants.STATES.IDLE);
         ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? "persistenceDirty" : "persistenceIdle");
     }
 

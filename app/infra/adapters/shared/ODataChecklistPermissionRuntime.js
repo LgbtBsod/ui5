@@ -1,9 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts"
-], function (GatewayRequestRuntime, AccessPayload, ODataAdapterUtils, ODataKeyContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayODataClient, AccessPayload, ODataAdapterUtils, ODataKeyContracts, GatewayContractConstants) {
     "use strict";
 
     function parseGrantedOperations(vValue) {
@@ -35,7 +36,7 @@ sap.ui.define([
 
     function checkCreatePermission(sActivity, mDeps) {
         var firstRow = mDeps.firstRow;
-        return GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistCreatePermissionSet", "CURRENT", {
+        return GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CREATE_PERMISSION, "CURRENT", {
             type: ODataKeyContracts.TYPES.CURRENT_ALIAS_KEY
         }).replace(/^\//, ""), {
             "__ts": Date.now()
@@ -67,7 +68,7 @@ sap.ui.define([
             }
             return checkCreatePermission(sActivity, mDeps);
         }
-        return GatewayRequestRuntime.get(ODataAdapterUtils.buildEntityPath("ChecklistPermissionSet", sRootId, {
+        return GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_PERMISSION, sRootId, {
             type: ODataKeyContracts.TYPES.ROOT_KEY,
             "$select": "RootKey,CanCreate,CanView,CanEdit,CanDelete,ReasonCode,Message"}).replace(/^\//, ""), {
             ACTVT: sActivity

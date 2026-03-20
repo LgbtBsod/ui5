@@ -1,19 +1,10 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (WorkflowRuntimeConstants) {
     "use strict";
 
     return Object.freeze({
-        STATES: Object.freeze({
-            IDLE: "idle",
-            DIRTY: "dirty",
-            SAVING: "saving",
-            AUTOSAVING: "autosaving",
-            SAVED: "saved",
-            ERROR: "error",
-            LOCK_LOST: "lockLost",
-            READ_ONLY: "readOnly",
-            IDLE_TIMEOUT_GRACE: "idleTimeoutGrace",
-            CONFLICT: "conflict"
-        }),
+        STATES: WorkflowRuntimeConstants.PERSISTENCE_STATES,
         TAXONOMY: Object.freeze({
             PERMISSION_DENIED: "PERMISSION_DENIED",
             LOCK_EXPIRED: "LOCK_EXPIRED",

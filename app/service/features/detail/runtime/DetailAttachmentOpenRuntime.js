@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DownloadRuntime"
-], function (ODataAdapterUtils, ODataKeyContracts, ModelContracts, DownloadRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DownloadRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (ODataAdapterUtils, ODataKeyContracts, ModelContracts, DownloadRuntime, GatewayContractConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -43,7 +44,7 @@ sap.ui.define([
         if (!sAttachmentId || !oMainService || typeof oMainService.read !== "function") {
             return Promise.resolve(false);
         }
-        sEntityPath = ODataAdapterUtils.buildEntityPath("AttachmentSet", sAttachmentId, {
+        sEntityPath = ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, sAttachmentId, {
             name: "AttachmentKey",
             type: ODataKeyContracts.TYPES.ATTACHMENT_KEY
         });

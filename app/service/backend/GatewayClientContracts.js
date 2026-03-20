@@ -1,5 +1,19 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayContractConstants) {
     "use strict";
+
+    function escapeRegExp(sValue) {
+        return String(sValue || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function exactPattern(sValue) {
+        return new RegExp("^" + escapeRegExp(sValue) + "$", "i");
+    }
+
+    function entityDeletePattern(sEntitySet, sKeyPattern) {
+        return new RegExp("^\\/" + escapeRegExp(sEntitySet) + "\\(" + sKeyPattern + "\\)$", "i");
+    }
 
     function disallowedPathPattern(sTail) {
         return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
@@ -7,27 +21,24 @@ sap.ui.define([], function () {
 
     return {
         DIRECT_DELETE_ALLOWLIST: [
-            /^\/ChecklistRootSet\((?:[^)]+)\)$/i,
-            /^\/AttachmentSet\((?:AttachmentKey=)?[^)]+\)$/i
+            entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, "(?:[^)]+)"),
+            entityDeletePattern(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, "(?:AttachmentKey=)?[^)]+")
         ],
         DIRECT_FUNCTION_BODY_ALLOWLIST: [
-            /^SaveChanges$/i,
-            /^AutoSave$/i,
-            /^CreateChecklist$/i,
-            /^ReportExport$/i,
-            /* C-06 FIX: moved from QUERY to BODY — metadata confirms m:HttpMethod="POST".
-             * Using model.create() sends payload in request body instead of URL query string,
-             * which prevents SessionGuid from appearing in SAP Gateway access log (SM50/SMICM). */
-            /^LockAcquire$/i,
-            /^LockHeartbeat$/i,
-            /^LockRelease$/i
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES),
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE),
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST),
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT),
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE),
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT),
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE)
         ],
         DIRECT_FUNCTION_QUERY_ALLOWLIST: [
-            /^CopyChecklist$/i,
-            /^AnalyticsRefreshTrigger$/i
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST),
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER)
         ],
         DIRECT_GET_FUNCTION_ALLOWLIST: [
-            /^GetHierarchy$/i
+            exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.GET_HIERARCHY)
         ],
         /* Reserved for future direct-POST entity endpoints. Currently unused. */
         DIRECT_POST_ALLOWLIST: [],

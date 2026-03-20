@@ -1,7 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper"
-], function (GatewayRequestRuntime, ODataChecklistPayloadMapper) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayODataClient, ODataChecklistPayloadMapper, GatewayContractConstants) {
     "use strict";
 
     function withSessionGuid(oRequest, sSessionGuid) {
@@ -22,11 +23,7 @@ sap.ui.define([
             ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta, mArgs && mArgs.attachments),
             mArgs && mArgs.sessionGuid
         );
-        return GatewayRequestRuntime.request({
-            method: "POST_FUNCTION",
-            path: "SaveChanges",
-            body: oRequest
-        }).then(function (oServerPayload) {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, oRequest).then(function (oServerPayload) {
             return mDeps.enrichServerSnapshot(oServerPayload, sRootId).then(function (oServerSnapshot) {
                 return {
                     lastChangeSet: {},
@@ -40,11 +37,7 @@ sap.ui.define([
     function createChecklist(mArgs, mDeps) {
         var oCurrent = (mArgs && mArgs.delta) || {};
         var oRequest = ODataChecklistPayloadMapper.normalizeSavePayload("", oCurrent, mArgs && mArgs.attachments);
-        return GatewayRequestRuntime.request({
-            method: "POST_FUNCTION",
-            path: "CreateChecklist",
-            body: oRequest
-        }).then(function (oServerPayload) {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST, oRequest).then(function (oServerPayload) {
             return mDeps.enrichServerSnapshot(oServerPayload, "").then(function (oServerSnapshot) {
                 return {
                     lastChangeSet: {},
@@ -58,7 +51,7 @@ sap.ui.define([
     function copyChecklist(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-        return GatewayRequestRuntime.postFunction("CopyChecklist", {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST, {
             RootId: mDeps.normalizeRootKey(sRootId),
             SessionGuid: sSessionGuid
         }).then(function (oServerPayload) {
@@ -78,11 +71,7 @@ sap.ui.define([
             ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta),
             mArgs && mArgs.sessionGuid
         );
-        return GatewayRequestRuntime.request({
-            method: "POST_FUNCTION",
-            path: "AutoSave",
-            body: oRequest
-        }).then(function (oResponse) {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE, oRequest).then(function (oResponse) {
             return mDeps.enrichServerSnapshot(oResponse, sRootId).then(function (oServerSnapshot) {
                 return {
                     autosavedAt: new Date().toISOString(),

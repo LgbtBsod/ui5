@@ -1,6 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime"
-], function (GatewayRequestRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants) {
     "use strict";
 
     var DOMAIN_KEYS = {
@@ -44,12 +46,12 @@ sap.ui.define([
     }
 
     function loadDomain(sDomain) {
-        return GatewayRequestRuntime.get("DictionaryItemSet", {
+        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.DICTIONARY_ITEM, {
             "$filter": "Domain eq '" + String(sDomain || "").replace(/'/g, "''") + "'",
             "$orderby": "Key asc",
             "$top": 500
         }).then(function (oData) {
-            return normalizeRowsForDomain(GatewayRequestRuntime.asArray(oData));
+            return normalizeRowsForDomain(ODataAdapterUtils.asArray(oData));
         });
     }
 

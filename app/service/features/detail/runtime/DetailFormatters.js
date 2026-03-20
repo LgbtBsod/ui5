@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
-], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailPersistenceConstants) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
@@ -308,7 +309,7 @@ sap.ui.define([
                 }
                 return text(this, sMessageKey, sMessageKey);
             }
-            if (sPersistenceState === "saved" && sLastSavedAt) {
+            if (sPersistenceState === DetailPersistenceConstants.STATES.SAVED && sLastSavedAt) {
                 return text(this, "persistenceSavedAt", [formatAutosaveTime(sLastSavedAt)], "Saved");
             }
             return text(this, "persistenceIdle", "No pending changes");

@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime"
-], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+], function (StatePaths, UseCase, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants) {
     "use strict";
 
     function RowOpsUseCase() {
@@ -75,7 +76,7 @@ sap.ui.define([
     function markDirtyResult(sEntity, sOp) {
         return Result.ok({ entity: sEntity, op: sOp }, [
             Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true),
-            Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, "dirty"),
+            Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.DIRTY),
             Effects.modelPatch("state", StatePaths.PERSISTENCE_MESSAGE_KEY, "persistenceDirty")
         ]);
     }

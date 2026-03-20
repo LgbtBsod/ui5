@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (CloneUtil, StatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (CloneUtil, StatePaths, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     function model(oController, sModelName) {
@@ -89,7 +90,7 @@ sap.ui.define([
             "/isDirty": false,
             "/activeObjectId": "",
             "/persistence": {
-                state: "idle",
+                state: WorkflowRuntimeConstants.PERSISTENCE_STATES.IDLE,
                 messageKey: "persistenceIdle",
                 lastSavedAt: null,
                 lastSaveError: null,

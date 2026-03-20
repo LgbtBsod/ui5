@@ -14,7 +14,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/ModelContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
 ], function (
     ControllerResourceCleanup,
     InFlightRegistry,
@@ -31,7 +32,8 @@ sap.ui.define([
     SemanticDomRuntime,
     NavigationContracts,
     ModelContracts,
-    CreateSentinel
+    CreateSentinel,
+    WorkflowContracts
 ) {
     "use strict";
 
@@ -69,11 +71,11 @@ sap.ui.define([
         if (!oStateModel || !oViewModel) {
             return;
         }
-        sMode = String(oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE) || "").trim().toUpperCase() || "READ";
-        sActiveObjectId = String(oStateModel.getProperty("/activeObjectId") || "").trim();
+        sMode = WorkflowContracts.normalizeEditMode(oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        sActiveObjectId = String(oStateModel.getProperty(StatePaths.ACTIVE_OBJECT_ID || "/activeObjectId") || "").trim();
         sSelectedRootId = String((oSelectedModel && oSelectedModel.getProperty && oSelectedModel.getProperty("/root/id")) || "").trim();
-        oViewModel.setProperty("/isEditMode", sMode !== "READ");
-        oViewModel.setProperty("/isCreateMode", sMode === "CREATE");
+        oViewModel.setProperty("/isEditMode", sMode !== WorkflowContracts.EDIT_MODES.READ);
+        oViewModel.setProperty("/isCreateMode", sMode === WorkflowContracts.EDIT_MODES.CREATE);
         oViewModel.setProperty("/hasPersistedObject",
             (!!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId)) ||
             (!!sSelectedRootId && !CreateSentinel.isCreateId(sSelectedRootId))

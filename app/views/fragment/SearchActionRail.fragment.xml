@@ -17,7 +17,6 @@
         <Button text="{i18n>clearSelectionButton}" icon="sap-icon://sys-cancel" press=".onClearSelection" enabled="{view>/hasSelection}" tooltip="{i18n>searchShortcutClearSelection}" class="searchToolbarGhostAction searchToolbarAction searchClearSelectionActionBtn">
             <layoutData><OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/></layoutData>
         </Button>
-        <ToolbarSpacer class="searchToolbarPrimarySpacer"/>
         <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
         <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
         <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
@@ -84,7 +83,6 @@
                 <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
             </layoutData>
         </Switch>
-        <ToolbarSpacer class="searchToolbarSecondarySpacer"/>
         <Button text="{i18n>searchSortButton}" icon="sap-icon://sort" type="Transparent" press=".onOpenSearchSortDialog" tooltip="{i18n>searchSortButton}" class="searchToolbarGhostAction searchToolbarAction searchSortButton"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
         <Button text="{i18n>searchGroupButton}" icon="sap-icon://group-2" type="Transparent" press=".onOpenSearchGroupDialog" tooltip="{i18n>searchGroupButton}" class="searchToolbarGhostAction searchToolbarAction searchGroupButton"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
         <MenuButton text="{i18n>exportMenuButton}" enabled="{view>/canExport}" tooltip="{i18n>searchShortcutExport}" class="searchToolbarGhostAction searchToolbarAction searchExportMenuBtn" icon="sap-icon://excel-attachment">

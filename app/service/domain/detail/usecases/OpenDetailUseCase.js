@@ -9,8 +9,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/UiAssetPaths",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts"
-], function (UseCase, Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+], function (UseCase, Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants) {
     "use strict";
 
     function resolveCanonicalRootId(oRepo, sRootId) {
@@ -33,7 +35,7 @@ sap.ui.define([
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
             Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             Effects.modelPatch("state", StatePaths.PERSISTENCE, {
-                state: "idle",
+                state: DetailPersistenceConstants.STATES.IDLE,
                 messageKey: "persistenceIdle",
                 lastSavedAt: null,
                 lastSaveError: null,
@@ -90,7 +92,7 @@ sap.ui.define([
                 if (!oPermission.allowed) {
                     return Result.fail({ message: "No permission to create checklist", code: "NO_CREATE_PERMISSION" }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailCreatePermissionDenied", [
                         Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
-                            status: "denied",
+                            status: WorkflowRuntimeConstants.READINESS_STATUS.DENIED,
                             ready: false,
                             readyAt: "",
                             error: "NO_CREATE_PERMISSION",
@@ -120,7 +122,7 @@ sap.ui.define([
                         illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
                     }),
                     Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
-                        status: "ready",
+                        status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
                         ready: true,
                         readyAt: sReadyAt,
                         error: "",
@@ -156,7 +158,7 @@ sap.ui.define([
             if (!oPermission.allowed) {
                 return Result.fail({ message: "No permission to open checklist", code: "NO_VIEW_PERMISSION" }, resetTransientDetailIncidentEffects().concat([
                     Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
-                        status: "denied",
+                        status: WorkflowRuntimeConstants.READINESS_STATUS.DENIED,
                         ready: false,
                         readyAt: "",
                         error: "NO_VIEW_PERMISSION",
@@ -210,7 +212,7 @@ sap.ui.define([
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
             return Result.ok({ snapshot: oSnapshot || {} }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
-                    status: "ready",
+                    status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
                     ready: true,
                     readyAt: sReadyAt,
                     error: "",
@@ -234,7 +236,7 @@ sap.ui.define([
         }).catch(function (oError) {
             return Result.fail(oError, resetTransientDetailIncidentEffects().concat([
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
-                    status: "error",
+                    status: WorkflowRuntimeConstants.READINESS_STATUS.ERROR,
                     ready: false,
                     readyAt: "",
                     error: String((oError && oError.message) || "detail_open_failed"),

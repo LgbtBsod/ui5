@@ -1,7 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity"
-], function (GatewayRequestRuntime, ChecklistIdentity) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayODataClient, ODataAdapterUtils, ChecklistIdentity, GatewayContractConstants) {
     "use strict";
 
     function exportSearchResults(mArgs) {
@@ -17,12 +19,8 @@ sap.ui.define([
         if (!aRootIds.length && mArgs && mArgs.searchContract) {
             oPayload.SearchContract = Object.assign({}, mArgs.searchContract);
         }
-        return GatewayRequestRuntime.request({
-            method: "POST_ENTITY",
-            path: "ReportExport",
-            body: oPayload
-        }).then(function (oResponse) {
-            return GatewayRequestRuntime.asArray(oResponse);
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT, oPayload).then(function (oResponse) {
+            return ODataAdapterUtils.asArray(oResponse);
         });
     }
 

@@ -3,39 +3,36 @@ sap.ui.define([
 ], function (GatewayClient) {
     "use strict";
 
-    function _asPath(sPath) {
+    function asPath(sPath) {
         var s = String(sPath || "");
         return s.charAt(0) === "/" ? s : "/" + s;
     }
 
+    function asFunctionName(sPath) {
+        return asPath(sPath).replace(/^\//, "").split("?")[0];
+    }
+
+    function get(sPath, mParams, mOptions) {
+        return GatewayClient.rawRead(asPath(sPath), mParams || {}, mOptions || {});
+    }
+
+    function getFunction(sPath, mParams, mOptions) {
+        return GatewayClient.callGetFunctionImport(asFunctionName(sPath), mParams || {}, mOptions || {});
+    }
+
+    function postFunction(sPath, oBody, mOptions) {
+        return GatewayClient.callFunctionImport(asFunctionName(sPath), oBody || {}, mOptions || {});
+    }
+
+    function remove(sPath, mOptions) {
+        return GatewayClient.deletePath(asPath(sPath), mOptions || {});
+    }
+
     return {
-        request: function (mOptions) {
-            var m = mOptions || {};
-            var sMethod = String(m.method || "GET").toUpperCase();
-            var sFunctionName = _asPath(m.path).replace(/^\//, "").split("?")[0];
-            var mDispatch = {
-                GET: function () {
-                    return GatewayClient.rawRead(_asPath(m.path), m.params || {}, m);
-                },
-                GET_FUNCTION: function () {
-                    return GatewayClient.callGetFunctionImport(sFunctionName, m.params || {}, m);
-                },
-                POST_ENTITY: function () {
-                    return GatewayClient.postToPath(_asPath(m.path), m.body || {}, m);
-                },
-                POST_FUNCTION: function () {
-                    return GatewayClient.callFunctionImport(sFunctionName, m.body || {}, m);
-                },
-                DELETE: function () {
-                    return GatewayClient.deletePath(_asPath(m.path), m);
-                }
-            };
-            var fn = mDispatch[sMethod];
-            if (typeof fn !== "function") {
-                throw new Error("Unsupported GatewayODataClient method: " + sMethod);
-            }
-            return fn();
-        },
+        get: get,
+        getFunction: getFunction,
+        postFunction: postFunction,
+        deletePath: remove,
         fetchCsrfToken: function () {
             return GatewayClient.fetchCsrfToken();
         }

@@ -11,7 +11,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchUiConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ShellPaneConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
 ], function (
     DialogConstants,
     AnalyticsConstants,
@@ -25,7 +26,8 @@ sap.ui.define([
     SearchUiConstants,
     ShellPaneConstants,
     WorkflowConstants,
-    DetailPersistenceConstants
+    DetailPersistenceConstants,
+    WorkflowRuntimeConstants
 ) {
     "use strict";
 
@@ -42,6 +44,7 @@ sap.ui.define([
         SEARCH_UI: SearchUiConstants,
         SHELL_PANE: ShellPaneConstants,
         WORKFLOW: WorkflowConstants,
-        DETAIL_PERSISTENCE: DetailPersistenceConstants
+        DETAIL_PERSISTENCE: DetailPersistenceConstants,
+        WORKFLOW_RUNTIME: WorkflowRuntimeConstants
     });
 });

@@ -1,4 +1,7 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     return {
@@ -19,11 +22,11 @@ sap.ui.define([], function () {
         networkOnline: true,
         networkGraceMode: false,
         networkGraceExpiresAt: null,
-        autosaveState: "IDLE",
+        autosaveState: WorkflowContracts.AUTOSAVE_STATES.IDLE,
         autosaveAt: null,
         autosaveEnabled: false,
         persistence: {
-            state: "idle",
+            state: WorkflowRuntimeConstants.PERSISTENCE_STATES.IDLE,
             messageKey: "persistenceIdle",
             lastSavedAt: null,
             lastSaveError: null,
@@ -40,7 +43,7 @@ sap.ui.define([], function () {
             hasErrors: false,
             missingPaths: [],
             missingKeys: [],
-            source: "idle",
+            source: WorkflowRuntimeConstants.VALIDATION_STATUS.IDLE,
             firstMissingPath: "",
             firstMissingKey: ""
         },
@@ -53,7 +56,7 @@ sap.ui.define([], function () {
         requiredFields: [],
         mainServiceMetadataOk: null,
         mainServiceMetadataError: "",
-        capabilityStatus: "pending",
+        capabilityStatus: WorkflowRuntimeConstants.READINESS_STATUS.PENDING,
         capabilityDegradedReason: "",
         capabilityMessageKey: "capabilityPending",
         capabilityDiagnostics: {},
@@ -68,8 +71,8 @@ sap.ui.define([], function () {
             feedback: {
                 banner: {
                     global: {
-                        visible: false,
-                        severity: "info",
+                    visible: false,
+                    severity: "info",
                         text: "",
                         details: "",
                         correlationId: "",

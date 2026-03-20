@@ -8,8 +8,10 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+], function (UseCase, Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants) {
     "use strict";
 
     function CloseDetailUseCase() {
@@ -68,7 +70,7 @@ sap.ui.define([
             }
             aEffects = [
                 Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
-                    status: "idle",
+                    status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE,
                     ready: false,
                     readyAt: "",
                     error: "",
@@ -84,7 +86,7 @@ sap.ui.define([
                 Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                 Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
                 Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-                Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, "idle"),
+                Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.IDLE),
                 Effects.modelPatch("state", StatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, null),
                 Effects.modelPatch("state", StatePaths.PERSISTENCE_HAS_VALID_LOCK, false),
                 Effects.modelPatch("state", StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),

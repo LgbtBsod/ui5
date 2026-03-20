@@ -1,14 +1,16 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (WorkflowRuntimeConstants) {
     "use strict";
 
     return Object.freeze({
         READINESS_STATUS: Object.freeze({
-            DENIED: "denied",
-            ERROR: "error",
-            IDLE: "idle"
+            DENIED: WorkflowRuntimeConstants.READINESS_STATUS.DENIED,
+            ERROR: WorkflowRuntimeConstants.READINESS_STATUS.ERROR,
+            IDLE: WorkflowRuntimeConstants.READINESS_STATUS.IDLE
         }),
         VALIDATION_STATE: Object.freeze({
-            IDLE: "idle"
+            IDLE: WorkflowRuntimeConstants.VALIDATION_STATUS.IDLE
         })
     });
 });

@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (WorkflowRuntimeConstants) {
     "use strict";
 
     return Object.freeze({
@@ -16,12 +18,12 @@ sap.ui.define([], function () {
             REQUIRED_FIELDS: "/requiredFields"
         }),
         READINESS_STATUS: Object.freeze({
-            ERROR: "error",
-            LOADING: "loading",
-            READY: "ready"
+            ERROR: WorkflowRuntimeConstants.READINESS_STATUS.ERROR,
+            LOADING: WorkflowRuntimeConstants.READINESS_STATUS.LOADING,
+            READY: WorkflowRuntimeConstants.READINESS_STATUS.READY
         }),
         FRONTEND_CONFIG_SOURCE: Object.freeze({
-            GATEWAY: "gateway",
+            GATEWAY: WorkflowRuntimeConstants.SOURCES.GATEWAY,
             GATEWAY_RUNTIME: "gateway_runtime",
             GATEWAY_RUNTIME_ERROR: "gateway_runtime_error"
         }),

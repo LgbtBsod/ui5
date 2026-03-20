@@ -9,8 +9,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/contracts/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts"
-], function (UseCase, Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+], function (UseCase, Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     function DeleteChecklistUseCase() {
@@ -50,7 +51,7 @@ sap.ui.define([
                     Effects.modelPatch("selected", "/", {}),
                     Effects.modelPatch("snapshot", "/", {}),
                     Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
-                        status: "idle",
+                        status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE,
                         ready: false,
                         readyAt: "",
                         error: "",

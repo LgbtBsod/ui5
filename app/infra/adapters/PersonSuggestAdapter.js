@@ -1,6 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/GatewayRequestRuntime"
-], function (GatewayRequestRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants) {
     "use strict";
 
     function joinNameParts(aParts) {
@@ -36,8 +38,8 @@ sap.ui.define([
             mParams.DateCheck = sDateCheck;
         }
 
-        return GatewayRequestRuntime.get("PersonVHSet", mParams).then(function (oData) {
-            var aItems = GatewayRequestRuntime.asArray(oData).map(normalizePerson).filter(function (oPerson) {
+        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.PERSON_VALUE_HELP, mParams).then(function (oData) {
+            var aItems = ODataAdapterUtils.asArray(oData).map(normalizePerson).filter(function (oPerson) {
                 if (!sQuery) { return true; }
                 return String(oPerson.fullName || "").toLowerCase().indexOf(sQuery) >= 0
                     || String(oPerson.perner || "").toLowerCase().indexOf(sQuery) >= 0;

@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime"
-], function (GatewayClientRequestRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayClientRequestRuntime, GatewayContractConstants) {
     "use strict";
 
     QUnit.module("framework/GatewayClientRequestRuntime");
@@ -16,7 +17,7 @@ sap.ui.define([
 
         GatewayClientRequestRuntime.withDirectFunctionImportRequest(
             oModel,
-            "LockRelease",
+            GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
             { RootId: "4711", SessionGuid: "SESSION-1" },
             {},
             { async: false }
