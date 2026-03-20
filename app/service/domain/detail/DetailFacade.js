@@ -46,7 +46,6 @@ sap.ui.define([
     DetailFacade.prototype.validate = function (i, c) { return DetailEntryAdapterRuntime.executeUseCase(this._uc.validate, i, c); };
     DetailFacade.prototype.autosave = function (i, c) { return DetailEntryAdapterRuntime.executeUseCase(this._uc.autosave, i, c); };
     DetailFacade.prototype.deleteChecklist = function (i, c) { return DetailEntryAdapterRuntime.executeUseCase(this._uc.deleteChecklist, i, c); };
-    DetailFacade.prototype.changeStatus = function (i, c) { return DetailEntryAdapterRuntime.executeUseCase(this._uc.changeStatus, i, c); };
     DetailFacade.prototype.resolveConflict = function (i, c) { return DetailEntryAdapterRuntime.executeUseCase(this._uc.resolveConflict, i, c); };
     DetailFacade.prototype.attachmentLoad = function (i, c) { return DetailEntryAdapterRuntime.executeUseCase(this._uc.attachmentLoad, i, c); };
     DetailFacade.prototype.attachmentUpload = function (i, c) { return DetailEntryAdapterRuntime.executeUseCase(this._uc.attachmentUpload, i, c); };

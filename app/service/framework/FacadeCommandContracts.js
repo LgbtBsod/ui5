@@ -11,7 +11,6 @@ sap.ui.define([
         AUTOSAVE: "autosave",
         CLOSE: "close",
         DELETE_CHECKLIST: "deleteChecklist",
-        CHANGE_STATUS: "changeStatus",
         RESOLVE_CONFLICT: "resolveConflict",
         ATTACHMENT_UPLOAD: "attachmentUpload",
         ATTACHMENT_DELETE: "attachmentDelete",

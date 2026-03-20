@@ -37,10 +37,6 @@ sap.ui.define([
         return DetailEntryAdapterRuntime.executeUseCase(this._uc.autosave, mInput, mCtx || this._buildCtx());
     };
 
-    DetailService.prototype.changeStatus = function (mInput, mCtx) {
-        return DetailEntryAdapterRuntime.executeUseCase(this._uc.changeStatus, mInput, mCtx || this._buildCtx());
-    };
-
     DetailService.prototype.loadAttachments = function (mInput, mCtx) {
         return DetailEntryAdapterRuntime.executeUseCase(this._uc.attachmentLoad, mInput, mCtx || this._buildCtx());
     };

@@ -12,6 +12,13 @@ sap.ui.define([
     "use strict";
 
     var WORKFLOW_SCOPE = "workflow";
+    var RESULT_SAVE = "SAVE";
+    var RESULT_DISCARD = "DISCARD";
+    var RESULT_CANCEL = "CANCEL";
+    var RESULT_NO_CHANGES = "NO_CHANGES";
+    var RESULT_SAVE_FAILED = "SAVE_FAILED";
+    var HTTP_CONFLICT = 409;
+    var HTTP_GONE = 410;
     var bDefaultsRegistered = false;
 
     function statusFromError(oError) {
@@ -53,26 +60,26 @@ sap.ui.define([
         var fnOnCancel = mContext && mContext.onCancel;
         if (sAction === DialogOrchestrator.actions.YES) {
             return Promise.resolve(fnOnSave && fnOnSave()).then(function (vSaveResult) {
-                return (vSaveResult === false || (vSaveResult && vSaveResult.ok === false)) ? "SAVE_FAILED" : "SAVE";
+                return (vSaveResult === false || (vSaveResult && vSaveResult.ok === false)) ? RESULT_SAVE_FAILED : RESULT_SAVE;
             }).catch(function () {
-                return "SAVE_FAILED";
+                return RESULT_SAVE_FAILED;
             });
         }
         if (sAction === DialogOrchestrator.actions.NO) {
             return releaseWithTrySave(mContext).then(function () {
                 WorkflowBehaviorHelpers.resetDetailWorkflowState(oController);
-                return "DISCARD";
+                return RESULT_DISCARD;
             });
         }
         return Promise.resolve(typeof fnOnCancel === "function" ? fnOnCancel() : null).then(function () {
-            return "CANCEL";
+            return RESULT_CANCEL;
         });
     }
 
     function confirmUnsavedAndHandle(mContext) {
         var oController = mContext && mContext.controller;
         if (!ModelStateRuntime.read(oController, "state", "/isDirty", false)) {
-            return Promise.resolve("NO_CHANGES");
+            return Promise.resolve(RESULT_NO_CHANGES);
         }
         return DialogOrchestrator.promptConfirm(
             WorkflowBehaviorHelpers.resolveText(oController, "unsavedChangesPrompt", [], "unsavedChangesPrompt"),
@@ -90,7 +97,7 @@ sap.ui.define([
         var iStatus = statusFromError(oError);
         var aActions;
 
-        if (iStatus === 409) {
+        if (iStatus === HTTP_CONFLICT) {
             aActions = [
                 WorkflowBehaviorHelpers.resolveText(oController, "reloadButton", [], "reloadButton"),
                 WorkflowBehaviorHelpers.resolveText(oController, "overwriteButton", [], "overwriteButton"),
@@ -104,7 +111,7 @@ sap.ui.define([
                 return mHandlers && mHandlers.onConflictChoice ? mHandlers.onConflictChoice(sAction) : sAction;
             });
         }
-        if (iStatus === 410 && mHandlers && mHandlers.onLockExpired) {
+        if (iStatus === HTTP_GONE && mHandlers && mHandlers.onLockExpired) {
             return mHandlers.onLockExpired();
         }
         WorkflowBehaviorHelpers.promptError(

@@ -28,12 +28,29 @@ sap.ui.define([
         return normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
     }
 
+    function resolveActiveObjectId(sLayout, sRouteName, mArgs, oStateModel) {
+        var sRoute = String(sRouteName || "");
+        var sArgId = normalizeId(mArgs && mArgs.id);
+        if (sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN || sRoute === NavigationContracts.ROUTES.SEARCH) {
+            return null;
+        }
+        if (NavigationContracts.isDetailRoute(sRoute) && sArgId) {
+            return sArgId;
+        }
+        return normalizeId(
+            ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", "") ||
+            ModelStateRuntime.readOnModel(oStateModel, "/selectedId", "")
+        );
+    }
+
     function syncRouteState(oStateModel, sNextLayout, sRouteName, mArgs) {
         var sLayout;
         var sPrevLayout;
         var sPrevRouteName;
         var sNextSelectedId;
+        var sNextActiveObjectId;
         var sPrevSelectedId;
+        var sPrevActiveObjectId;
         var sNextRouteName;
         var bChanged = false;
         if (!oStateModel || typeof oStateModel.getProperty !== "function" || typeof oStateModel.setProperty !== "function") {
@@ -45,8 +62,10 @@ sap.ui.define([
         }
         sPrevLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
         sPrevSelectedId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/selectedId", ""));
+        sPrevActiveObjectId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, "/activeObjectId", ""));
         sPrevRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         sNextSelectedId = resolveSelectedId(sLayout, sRouteName, mArgs, oStateModel);
+        sNextActiveObjectId = resolveActiveObjectId(sLayout, sRouteName, mArgs, oStateModel);
         sNextRouteName = String(sRouteName || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
 
         if (sPrevRouteName !== sNextRouteName) {
@@ -57,11 +76,16 @@ sap.ui.define([
             ModelStateRuntime.writeOnModel(oStateModel, "/selectedId", sNextSelectedId);
             bChanged = true;
         }
+        if (sPrevActiveObjectId !== sNextActiveObjectId) {
+            ModelStateRuntime.writeOnModel(oStateModel, "/activeObjectId", sNextActiveObjectId);
+            bChanged = true;
+        }
         if (sPrevLayout !== sLayout) {
             ModelStateRuntime.writeOnModel(oStateModel, "/layout", sLayout);
             bChanged = true;
         }
         return bChanged ? {
+            activeObjectId: sNextActiveObjectId,
             layout: sLayout,
             selectedId: sNextSelectedId,
             currentRouteName: sNextRouteName

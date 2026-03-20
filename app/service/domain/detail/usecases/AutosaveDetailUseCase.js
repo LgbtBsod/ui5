@@ -11,8 +11,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/contracts/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailPersistenceRuntime) {
+], function (UseCase, Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime) {
     "use strict";
 
     function AutosaveDetailUseCase() {
@@ -110,7 +111,7 @@ sap.ui.define([
         }
 
         var oCurrentChecklist = readCurrentChecklist(mCtx);
-        var aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
+        var aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
 
         return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, sRootId).then(function (aStagedPayload) {
             aSerializedAttachments = Array.isArray(aStagedPayload) ? aStagedPayload : [];
@@ -123,7 +124,7 @@ sap.ui.define([
         }).then(function (oSaved) {
             var sAt = (oSaved && oSaved.autosavedAt) || new Date().toISOString();
             oCurrentChecklist = readCurrentChecklist(mCtx);
-            aCurrentAttachments = Array.isArray((oCurrentChecklist && oCurrentChecklist.attachments) || null) ? oCurrentChecklist.attachments : [];
+            aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
             var oBaseSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
             var oSavedSnapshot = Object.assign({}, (oSaved && oSaved.serverSnapshot) || oCurrentChecklist);
             return DetailAttachmentSaveRuntime.syncAfterSave({

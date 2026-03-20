@@ -8,6 +8,8 @@ sap.ui.define([
     "use strict";
 
     var NAVIGATION_SCOPE = "navigation";
+    var HASH_PREFIX = "#";
+    var HASH_ROUTE_PREFIX = "#/";
     var bDefaultsRegistered = false;
 
     function normalizeRouteName(vRouteName) {
@@ -31,15 +33,15 @@ sap.ui.define([
         if (oRouter && typeof oRouter.getURL === "function") {
             sUrl = String(oRouter.getURL(sRouteName, oRouteArgs) || "");
             if (!sUrl) {
-                return "#";
+                return HASH_PREFIX;
             }
-            return sUrl.charAt(0) === "/" ? "#" + sUrl : "#/" + sUrl;
+            return sUrl.charAt(0) === "/" ? HASH_PREFIX + sUrl : HASH_ROUTE_PREFIX + sUrl;
         }
         if (sRouteName === NavigationContracts.ROUTES.SEARCH) {
-            return "#";
+            return HASH_PREFIX;
         }
         if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
-            return "#/" + NavigationContracts.ROUTES.ANALYTICS;
+            return HASH_ROUTE_PREFIX + NavigationContracts.ROUTES.ANALYTICS;
         }
         if (sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT && oRouteArgs.id && oRouteArgs.layout) {
             return "#/checklist/" + encodeURIComponent(String(oRouteArgs.id)) + "/" + encodeURIComponent(String(oRouteArgs.layout));

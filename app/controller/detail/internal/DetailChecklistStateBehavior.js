@@ -103,9 +103,33 @@ sap.ui.define([
 
         onChangeChecklistStatus: function (oEvent) {
             var oSrc = oEvent && oEvent.getSource && oEvent.getSource();
-            DetailCommandPolicy.changeStatus(this, RootIdRuntime.withCurrentRootId(this, {
-                status: (oSrc && (oSrc.data("status") || oSrc.data("targetStatus"))) || ""
-            }));
+            var sStatus = String((oSrc && (oSrc.data("status") || oSrc.data("targetStatus"))) || "").trim().toUpperCase();
+            var oSelectedModel = this.getModel && this.getModel(ModelContracts.MODELS.SELECTED);
+            var sCurrentStatus = String(ModelStateRuntime.readOnModel(oSelectedModel, "/root/status", "") || "").trim().toUpperCase();
+
+            if (!sStatus) {
+                return Promise.resolve(false);
+            }
+
+            return DetailCommandPolicy.validate(this, RootIdRuntime.withCurrentRootId(this)).then(function () {
+                this._recomputeValidationSummary("statusChange", true);
+                if (ModelStateRuntime.read(this, STATE_MODEL, STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors", false)) {
+                    this._focusFirstInvalidField();
+                    return false;
+                }
+                if (sCurrentStatus !== sStatus) {
+                    ModelStateRuntime.writeOnModel(oSelectedModel, "/root/status", sStatus);
+                    ModelStateRuntime.writeOnModel(oSelectedModel, "/root/Status", sStatus);
+                    ModelStateRuntime.write(this, STATE_MODEL, "/isDirty", true);
+                }
+                return DetailStateActionRuntime.save(this, {
+                    saveDetail: function () {
+                        return DetailCommandPolicy.save(this, RootIdRuntime.withCurrentRootId(this));
+                    }.bind(this)
+                }, {
+                    saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
+                });
+            }.bind(this));
         }
     };
 });

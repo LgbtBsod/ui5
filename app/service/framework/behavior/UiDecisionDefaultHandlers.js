@@ -5,6 +5,16 @@ sap.ui.define([
     "use strict";
 
     var UI_DECISION_SCOPE = "uiDecision";
+    var ACTION_DELETE = "Delete";
+    var TEXT_DELETE_CHECKLIST_CONFIRM = "deleteChecklistConfirmText";
+    var TEXT_NOTHING_TO_OPEN = "nothingToOpen";
+    var TEXT_OPEN_USES_FIRST = "searchOpenUsesFirstHint";
+    var TEXT_COPY_SINGLE_SELECTION = "searchCopySingleSelectionHint";
+    var TEXT_SELECT_VISIBLE_EMPTY = "searchSelectVisibleEmpty";
+    var TEXT_SHELL_REFRESH_SUCCESS = "shellContextRefreshed";
+    var TEXT_SHELL_REFRESH_FAILURE = "shellUserRefreshFailed";
+    var TEXT_CORRELATION_COPIED = "correlationIdCopied";
+    var ERROR_UNKNOWN = "Unknown error";
     var bDefaultsRegistered = false;
 
     function runOptionalHandler(fnHandler) {
@@ -20,9 +30,9 @@ sap.ui.define([
         }
         return UiDecisionBehaviorHelpers.confirmDelete(
             mContext && mContext.controller,
-            String((mContext && mContext.textKey) || "deleteChecklistConfirmText")
+            String((mContext && mContext.textKey) || TEXT_DELETE_CHECKLIST_CONFIRM)
         ).then(function (sAction) {
-            if (sAction !== "Delete") {
+            if (sAction !== ACTION_DELETE) {
                 runOptionalHandler(mContext && mContext.onReset);
                 return false;
             }
@@ -38,12 +48,12 @@ sap.ui.define([
         var iSelectionCount = Number(mContext && mContext.selectionCount || 0);
         var sSelectedRowId = String((mContext && mContext.selectedRowId) || "").trim();
         if (!sSelectedRowId) {
-            UiDecisionBehaviorHelpers.showError(oController, "nothingToOpen");
+            UiDecisionBehaviorHelpers.showError(oController, TEXT_NOTHING_TO_OPEN);
             runOptionalHandler(mContext && mContext.onMissingSelection);
             return false;
         }
         if (iSelectionCount > 1) {
-            UiDecisionBehaviorHelpers.showToast(oController, "searchOpenUsesFirstHint", [iSelectionCount]);
+            UiDecisionBehaviorHelpers.showToast(oController, TEXT_OPEN_USES_FIRST, [iSelectionCount]);
         }
         return true;
     }
@@ -52,7 +62,7 @@ sap.ui.define([
         var oController = mContext && mContext.controller;
         var iSelectionCount = Number(mContext && mContext.selectionCount || 0);
         if (iSelectionCount > 1) {
-            UiDecisionBehaviorHelpers.showError(oController, "searchCopySingleSelectionHint");
+            UiDecisionBehaviorHelpers.showError(oController, TEXT_COPY_SINGLE_SELECTION);
             runOptionalHandler(mContext && mContext.onBlockedSelection);
             return false;
         }
@@ -60,23 +70,23 @@ sap.ui.define([
     }
 
     function notifySelectVisibleEmpty(mContext) {
-        UiDecisionBehaviorHelpers.showError(mContext && mContext.controller, "searchSelectVisibleEmpty");
+        UiDecisionBehaviorHelpers.showError(mContext && mContext.controller, TEXT_SELECT_VISIBLE_EMPTY);
         return false;
     }
 
     function notifyShellRefreshSuccess(mContext) {
-        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, "shellContextRefreshed");
+        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_SUCCESS);
         return true;
     }
 
     function notifyShellRefreshFailure(mContext) {
         var oError = mContext && mContext.error;
-        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, "shellUserRefreshFailed", [oError && oError.message || "Unknown error"]);
+        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_FAILURE, [oError && oError.message || ERROR_UNKNOWN]);
         return false;
     }
 
     function notifyCorrelationCopied(mContext) {
-        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, "correlationIdCopied");
+        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_CORRELATION_COPIED);
         return true;
     }
 

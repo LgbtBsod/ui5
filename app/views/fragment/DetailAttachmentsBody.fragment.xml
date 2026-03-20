@@ -102,7 +102,7 @@
             <HBox
                 class="detailEmptyStateCard workflowEmptyStateCard detailAttachmentsEmptyState"
                 renderType="Bare"
-                visible="{path:'selected>/attachments', formatter:'.isEmptyRows'}">
+                visible="{path:'view>/sessionAttachments', formatter:'.isEmptyRows'}">
                 <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
                 <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
                 <Text
@@ -110,9 +110,9 @@
                     class="detailEmptyStateText workflowEmptyStateText"/>
             </HBox>
             <Table
-                items="{selected>/attachments}"
+                items="{view>/sessionAttachments}"
                 class="flatEditorTable detailAttachmentTable"
-                visible="{path:'selected>/attachments', formatter:'.hasRows'}"
+                visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}"
                 noDataText="{i18n>noAttachmentsData}">
                 <columns>
                     <Column>
@@ -134,12 +134,12 @@
                 <items>
                     <ColumnListItem class="detailAttachmentRow detailAttachmentExpandedRow">
                         <cells>
-                            <ObjectIdentifier title="{selected>FileName}" text="{selected>MimeType}" class="detailAttachmentNameCell"/>
+                            <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}" class="detailAttachmentNameCell"/>
                             <Text
-                                text="{parts:[{path:'selected>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'selected>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
+                                text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
                                 class="detailAttachmentCategoryCell"/>
-                            <Text text="{path:'selected>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
-                            <Text text="{selected>ChangedOn}" class="detailAttachmentChangedCell"/>
+                            <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
+                            <Text text="{view>ChangedOn}" class="detailAttachmentChangedCell"/>
                             <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions detailAttachmentActionCell" wrap="Wrap">
                                 <Button
                                     icon="sap-icon://download"

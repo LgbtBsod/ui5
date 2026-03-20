@@ -23,6 +23,15 @@ sap.ui.define([
         return (oChecklist && oChecklist.attachments) || [];
     }
 
+    function readWorkingAttachments(mCtx) {
+        var oUiState = uiState(mCtx);
+        var aSession = oUiState && oUiState.get("view", "/sessionAttachments");
+        if (Array.isArray(aSession)) {
+            return aSession;
+        }
+        return readCurrentAttachments(mCtx);
+    }
+
     function readDetailSnapshot(mCtx) {
         var oUiState = uiState(mCtx);
         return (oUiState && oUiState.get(SNAPSHOT_MODEL, "/")) || {};
@@ -45,6 +54,7 @@ sap.ui.define([
         readCurrentChecklist: readCurrentChecklist,
         readDetailSnapshot: readDetailSnapshot,
         readRequiredFields: readRequiredFields,
+        readWorkingAttachments: readWorkingAttachments,
         resolveDateCheck: resolveDateCheck
     };
 });

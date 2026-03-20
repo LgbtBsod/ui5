@@ -21,8 +21,15 @@ sap.ui.define([], function () {
         }),
         VIEW_PATHS: Object.freeze({
             ATTACHMENT_BUSY: "/attachmentBusy",
+            ATTACHMENT_ACTIONS_ENABLED: "/attachmentActionsEnabled",
+            ATTACHMENT_META_EDITABLE: "/attachmentMetaEditable",
+            ATTACHMENT_DESKTOP_COLUMNS_VISIBLE: "/attachmentDesktopColumnsVisible",
+            ATTACHMENT_ACTIONS_COLUMN_WIDTH: "/attachmentActionsColumnWidth",
+            ATTACHMENT_CATEGORY_KEY: "/attachmentCategoryKey",
             ATTACHMENTS_EXPANDED: "/attachmentsExpanded",
             ATTACHMENTS_LOADED: "/attachmentsLoaded",
+            SESSION_ATTACHMENTS: "/sessionAttachments",
+            SHOW_SESSION_ATTACHMENTS: "/showSessionAttachments",
             LOCATION_VH_BUSY: "/locationVhBusy"
         })
     });

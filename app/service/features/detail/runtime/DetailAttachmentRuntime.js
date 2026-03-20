@@ -35,7 +35,6 @@ sap.ui.define([
     function toggleAttachmentsSection(oController, mHooks) {
         var bExpanded = !!ModelStateRuntime.read(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_EXPANDED, false);
         var bLoaded = !!ModelStateRuntime.read(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_LOADED, false);
-        var aSessionAttachments = ModelStateRuntime.read(oController, VIEW_MODEL, VIEW_PATHS.SESSION_ATTACHMENTS, []) || [];
         var sRootId = String((oController && oController._currentRootId && oController._currentRootId()) || "").trim();
         if (bExpanded) {
             ModelStateRuntime.write(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_EXPANDED, false);
@@ -47,7 +46,6 @@ sap.ui.define([
         DetailAttachmentViewState.sync(oController);
         mHooks.scheduleAttachmentDropZoneBind();
         if (CreateSentinel.isCreateId(sRootId)) {
-            ModelStateRuntime.write(oController, SELECTED_MODEL, "/attachments", aSessionAttachments);
             ModelStateRuntime.write(oController, VIEW_MODEL, VIEW_PATHS.ATTACHMENTS_LOADED, true);
             return Promise.resolve({ expanded: true, staged: true });
         }

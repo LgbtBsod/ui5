@@ -77,7 +77,7 @@ sap.ui.define([
         var iClientVersion = DetailSaveRuntime.resolveVersionNumber(oCurrent, oSnapshot);
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
         var sLockState = DetailSaveRuntime.readLockState(mCtx, StatePaths);
-        var aCurrentAttachments = Array.isArray((oCurrent && oCurrent.attachments) || null) ? oCurrent.attachments : [];
+        var aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
         var oValidation = null;
 
         if (!oRepo) {

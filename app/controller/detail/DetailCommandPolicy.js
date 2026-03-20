@@ -41,9 +41,6 @@ sap.ui.define([
         validate: function (oController, mInput) {
             return execute(oController, "validate", mInput);
         },
-        changeStatus: function (oController, mInput) {
-            return execute(oController, "changeStatus", mInput);
-        },
         rowOps: function (oController, mInput) {
             return execute(oController, "rowOps", mInput);
         },

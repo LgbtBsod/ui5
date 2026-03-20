@@ -8,11 +8,13 @@ sap.ui.define([
 
     function hasActiveRoot(oController) {
         var oSelected = ControllerModelRuntime.selected(oController);
+        var oViewState = ControllerModelRuntime.viewState(oController);
         var sSelectedRootId = String(ModelStateRuntime.readOnModel(oSelected, "/root/id", "") || "").trim();
         var sActiveObjectId = String(ModelStateRuntime.read(oController, "state", "/activeObjectId", "") || "").trim();
         var sSelectedId = String(ModelStateRuntime.read(oController, "state", "/selectedId", "") || "").trim();
+        var aSessionAttachments = ModelStateRuntime.readOnModel(oViewState, "/sessionAttachments", []);
 
-        return !!(sSelectedRootId || sActiveObjectId || sSelectedId);
+        return !!(sSelectedRootId || sActiveObjectId || sSelectedId || (Array.isArray(aSessionAttachments) && aSessionAttachments.length));
     }
 
     function sync(oController) {

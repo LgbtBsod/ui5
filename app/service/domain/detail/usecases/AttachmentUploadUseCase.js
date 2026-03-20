@@ -3,13 +3,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (UseCase, Result, Effects, JsRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (UseCase, Result, Effects, JsRuntime, AttachmentEffectRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;

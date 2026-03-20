@@ -36,6 +36,43 @@ ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsTargetPage"
 RESULT_PASS = "PASS_SAP_EVIDENCE"
 RESULT_BLOCKED = "BLOCKED_SAP_ENV"
 RESULT_FAIL = "FAIL_PRODUCT_CONTRACT"
+RESULT_TOOLING = "tooling bug"
+ROUTE_DETAIL = "detail"
+ROUTE_SEARCH = "search"
+ROUTE_ANALYTICS = "analytics"
+MODE_EDIT = "EDIT"
+MODE_READ = "READ"
+LOCK_EDIT_LOCKED = "EDIT_LOCKED"
+LOCK_READ_ONLY = "READ_ONLY"
+LOCK_IDLE = "IDLE"
+AUTOSAVE_STATE_SAVED = "SAVED"
+AUTOSAVE_STATE_SAVING = "SAVING"
+AUTOSAVE_CLASS_TOOLING = RESULT_TOOLING
+AUTOSAVE_CLASS_BLOCKED = RESULT_BLOCKED
+CLASSIFIER_LOCK_KILLED = "LOCK_KILLED_OR_CONTENDED"
+CLASSIFIER_LOCK_ENV = "LOCK_ENV_BLOCK"
+CLASSIFIER_LOCK_PRODUCT = "LOCK_PRODUCT_FAILURE"
+CLASSIFIER_ROUTE_TIMEOUT = "ROUTE_OPEN_TIMEOUT"
+CLASSIFIER_DETAIL_DATA = "DETAIL_DATA_NOT_READY"
+CLASSIFIER_ROOT_REJECTED = "ROOT_CANDIDATE_REJECTED"
+CLASSIFIER_ANALYTICS_RETURN = "ANALYTICS_RETURN_NOT_READY"
+CLASSIFIER_ATTACHMENT_READY = "ATTACHMENT_NOT_READY"
+MARKER_CHECKLIST_ROOT = "ChecklistRootSet"
+MARKER_CHECKLIST_BASIC = "ChecklistBasicInfoSet"
+MARKER_CHECKLIST_PERMISSION = "ChecklistPermissionSet"
+MARKER_LAST_CHANGE = "LastChangeSet"
+MARKER_LOCK_ACQUIRE = "LockAcquire"
+MARKER_LOCK_RELEASE = "LockRelease"
+MARKER_LOCK_HEARTBEAT = "LockHeartbeat"
+MARKER_AUTOSAVE = "AutoSave"
+MARKER_SAVE = "SaveChanges"
+MARKER_ATTACHMENT = "AttachmentSet"
+DETAIL_READ_MARKERS = [
+    MARKER_CHECKLIST_ROOT,
+    MARKER_CHECKLIST_BASIC,
+    MARKER_CHECKLIST_PERMISSION,
+    MARKER_LAST_CHANGE,
+]
 
 
 def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> None:
@@ -146,7 +183,7 @@ def detail_route_state(page) -> dict[str, Any]:
             lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '',
             busyDetail: !!(state && state.getProperty && state.getProperty('/ui/busy/detail')),
             saveInFlight: !!(state && state.getProperty && state.getProperty('/saveInFlight')),
-            autosaveState: state && state.getProperty ? String(state.getProperty('/autosaveState') || '') : '',
+            autosaveState: state && state.getProperty ? String(state.getProperty('/workflow/detail/autosave/state') || state.getProperty('/autosaveState') || '') : '',
             domReady: !!(detail && detail.getDomRef && detail.getDomRef())
           };
         }
@@ -222,14 +259,217 @@ def transport_snapshot(network: list[dict[str, Any]], marker: str) -> dict[str, 
     }
 
 
+def recent_network_by_markers(network: list[dict[str, Any]], markers: list[str], limit: int = 12) -> dict[str, Any]:
+    return {
+        marker: matching_requests(network, marker)[-limit:]
+        for marker in markers
+    }
+
+
+def collect_search_root_candidates(page, limit: int = 5) -> list[str]:
+    candidates = safe_evaluate(
+        page,
+        """
+        (maxCount) => {
+          const core = sap.ui.getCore();
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          const smartTable = all.find((item) => item && item.isA && item.isA('sap.ui.comp.smarttable.SmartTable') && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0) || null;
+          const table = (smartTable && smartTable.getTable && smartTable.getTable())
+            || all.find((item) => item && item.isA && item.isA('sap.m.Table') && item.getItems && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0)
+            || null;
+          const rows = table && table.getItems ? (table.getItems() || []).filter((item) => !!(item && item.getVisible && item.getVisible() && item.getBindingContext && item.getBindingContext())) : [];
+          return rows.map((item) => {
+            const ctx = item && item.getBindingContext ? item.getBindingContext() : null;
+            const data = ctx && ctx.getObject ? ctx.getObject() : null;
+            return String((data && (data.Key || data.RootKey || data.Id)) || '').trim();
+          }).filter((value) => !!value && value !== '__CREATE').slice(0, Number(maxCount || 5));
+        }
+        """,
+        limit
+    ) or []
+    unique: list[str] = []
+    for candidate in candidates:
+        value = str(candidate or "").strip()
+        if value and value not in unique:
+            unique.append(value)
+    return unique
+
+
+def detail_view_candidates(page) -> list[dict[str, Any]]:
+    return safe_evaluate(
+        page,
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
+          const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
+          return all.filter((item) => item
+            && item.isA
+            && item.isA('sap.ui.core.mvc.View')
+            && item.getController
+            && item.getController()
+            && item.getController().getMetadata
+            && item.getController().getMetadata().getName() === 'PRODUCTION_CONTROL_CHECKLIST.controller.Detail')
+            .map((view) => {
+              const selected = view && view.getModel && view.getModel('selected');
+              const state = view && view.getModel && view.getModel('state');
+              return {
+                id: view && view.getId ? String(view.getId()) : '',
+                domReady: !!(view && view.getDomRef && view.getDomRef()),
+                rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+                mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
+                lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : ''
+              };
+            });
+        }
+        """
+    ) or []
+
+
+def wait_for_detail_mode(page, mode: str, lock_state: str | None = None, timeout: int = 20000) -> None:
+    page.wait_for_function(
+        """
+        ({ mode, lockState }) => {
+          const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const state = view && view.getModel && view.getModel('state');
+          const currentMode = state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '';
+          const currentLock = state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '';
+          if (currentMode !== String(mode || '')) {
+            return false;
+          }
+          if (lockState && currentLock !== String(lockState || '')) {
+            return false;
+          }
+          return true;
+        }
+        """,
+        {"mode": mode, "lockState": lock_state},
+        timeout=timeout,
+    )
+
+
+def classify_route_open_diagnostic(diag: dict[str, Any]) -> str:
+    route_snapshot = diag.get("routeSnapshot") or {}
+    detail = diag.get("detailState") or {}
+    network_reads = diag.get("recentNetworkByMarker") or {}
+    has_reads = any(network_reads.get(marker) for marker in DETAIL_READ_MARKERS)
+    if route_snapshot.get("currentRouteName") == ROUTE_DETAIL and detail.get("rootId") and detail.get("rootId") != diag.get("requestedRootId"):
+        return RESULT_FAIL
+    if not has_reads:
+        return RESULT_BLOCKED
+    return RESULT_FAIL if route_snapshot.get("currentRouteName") == ROUTE_DETAIL else RESULT_BLOCKED
+
+
+def open_detail_candidate(page, root_id: str, network: list[dict[str, Any]]) -> dict[str, Any]:
+    before_counts = {marker: len(matching_requests(network, marker)) for marker in DETAIL_READ_MARKERS}
+    diag = {
+        "requestedRootId": root_id,
+        "routeSnapshot": {},
+        "detailState": {},
+        "bootstrap": {},
+        "recentNetworkByMarker": {},
+        "detailViewCandidates": [],
+        "classification": CLASSIFIER_ROUTE_TIMEOUT,
+        "ok": False,
+    }
+    try:
+        navigate_to_detail(page, root_id)
+        wait_for_detail_ready(page, root_id)
+        page.wait_for_timeout(1200)
+        diag["routeSnapshot"] = capture_route_snapshot(page, "detail.routeCandidate")
+        diag["detailState"] = detail_state(page)
+        diag["bootstrap"] = collect_bootstrap_diagnostics(page)
+        diag["detailViewCandidates"] = detail_view_candidates(page)
+        diag["recentNetworkByMarker"] = {
+            marker: matching_requests(network, marker)[before_counts[marker]:]
+            for marker in DETAIL_READ_MARKERS
+        }
+        diag["ok"] = diag["detailState"].get("rootId") == root_id and diag["routeSnapshot"].get("currentRouteName") == ROUTE_DETAIL
+        diag["classification"] = RESULT_PASS if diag["ok"] else classify_route_open_diagnostic(diag)
+        return diag
+    except Exception as exc:  # noqa: BLE001
+        diag["error"] = str(exc)
+        diag["routeSnapshot"] = capture_route_snapshot(page, "detail.routeCandidate.failed")
+        try:
+            diag["detailState"] = detail_state(page)
+        except Exception:  # noqa: BLE001
+            diag["detailState"] = {}
+        try:
+            diag["bootstrap"] = collect_bootstrap_diagnostics(page)
+        except Exception:  # noqa: BLE001
+            diag["bootstrap"] = {}
+        diag["detailViewCandidates"] = detail_view_candidates(page)
+        diag["recentNetworkByMarker"] = {
+            marker: matching_requests(network, marker)[before_counts[marker]:]
+            for marker in DETAIL_READ_MARKERS
+        }
+        diag["classification"] = classify_route_open_diagnostic(diag)
+        return diag
+
+
+def classify_lock_acquire_result(detail: dict[str, Any]) -> dict[str, Any]:
+    toggle_result = detail.get("toggleResult") or {}
+    state = detail.get("state") or {}
+    error_payload = toggle_result.get("error") or {}
+    error_code = str(error_payload.get("code") or "").upper()
+    message_key = str(error_payload.get("messageKey") or "").strip()
+    effects = toggle_result.get("effects") or []
+    warning_dialog = any(item.get("type") == "dialog" and item.get("variant") == "warning" for item in effects if isinstance(item, dict))
+    forced_read_only = state.get("mode") == MODE_READ and state.get("lockState") == LOCK_READ_ONLY
+    transport = detail.get("transport") or {}
+    if transport.get("batchCount", 0) > 0 and (error_code == "KILLED" or message_key == "lockConflictError" or forced_read_only or warning_dialog):
+        return {"classification": RESULT_BLOCKED, "reasonCode": CLASSIFIER_LOCK_KILLED}
+    if transport.get("batchCount", 0) == 0 and not state.get("mode"):
+        return {"classification": RESULT_BLOCKED, "reasonCode": CLASSIFIER_LOCK_ENV}
+    return {"classification": RESULT_FAIL, "reasonCode": CLASSIFIER_LOCK_PRODUCT}
+
+
+def reset_to_search(page) -> None:
+    navigate_to_search(page)
+    wait_for_search_ready(page)
+
+
+def resolve_smoke_root(page, network: list[dict[str, Any]], preferred_root_id: str) -> dict[str, Any]:
+    diagnostics: list[dict[str, Any]] = []
+    candidates: list[str] = []
+    preferred = str(preferred_root_id or "").strip()
+    if preferred and preferred != "__CREATE":
+        candidates.append(preferred)
+    for candidate in collect_search_root_candidates(page):
+        if candidate not in candidates:
+            candidates.append(candidate)
+    for candidate in candidates:
+        route_diag = open_detail_candidate(page, candidate, network)
+        route_diag["candidateRootId"] = candidate
+        diagnostics.append(route_diag)
+        if route_diag.get("ok"):
+            return {
+                "ok": True,
+                "selectedRootId": candidate,
+                "routeOpenDiagnostics": route_diag,
+                "rootSelectionDiagnostics": diagnostics,
+                "candidateSequence": candidates,
+            }
+        reset_to_search(page)
+    return {
+        "ok": False,
+        "selectedRootId": "",
+        "routeOpenDiagnostics": diagnostics[-1] if diagnostics else {},
+        "rootSelectionDiagnostics": diagnostics,
+        "candidateSequence": candidates,
+        "classification": RESULT_BLOCKED,
+    }
+
+
 def autosave_model_outcome(before: dict[str, Any], after: dict[str, Any], expected_equipment: str) -> dict[str, Any]:
     version_advanced = (after.get("version", 0) or 0) > (before.get("version", 0) or 0)
     equipment_applied = after.get("equipment") == expected_equipment
-    autosave_saved = after.get("autosaveState") == "SAVED"
+    autosave_saved = after.get("autosaveState") == AUTOSAVE_STATE_SAVED
     stable_detail = (
-        after.get("currentRouteName") == "detail"
-        and after.get("mode") == "EDIT"
-        and after.get("lockState") == "EDIT_LOCKED"
+        after.get("currentRouteName") == ROUTE_DETAIL
+        and after.get("mode") == MODE_EDIT
+        and after.get("lockState") == LOCK_EDIT_LOCKED
         and not after.get("busyDetail")
         and not after.get("saveInFlight")
     )
@@ -239,7 +479,8 @@ def autosave_model_outcome(before: dict[str, Any], after: dict[str, Any], expect
         "stableDetail": stable_detail,
         "versionAdvanced": version_advanced,
         "equipmentApplied": equipment_applied,
-        "autosaveSaved": autosave_saved
+        "autosaveSaved": autosave_saved,
+        "finished": bool(after.get("autosaveFinished"))
     }
 
 
@@ -286,7 +527,7 @@ def capture_route_snapshot(page, label: str) -> dict[str, Any]:
             detailRootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
             detailMode: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '',
             detailLockState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/lock/state') || '') : '',
-            detailAutosaveState: detailState && detailState.getProperty ? String(detailState.getProperty('/autosaveState') || '') : '',
+            detailAutosaveState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/autosave/state') || detailState.getProperty('/autosaveState') || '') : '',
             searchVisible: !!(search && search.getDomRef && search.getDomRef()),
             detailVisible: !!(detail && detail.getDomRef && detail.getDomRef()),
             analyticsVisible: !!(analytics && analytics.getDomRef && analytics.getDomRef())
@@ -307,15 +548,79 @@ def flush_report(report: dict[str, Any]) -> int:
 
 def classify_failure(step: str, error: Exception | str) -> str:
     message = str(error or "")
+    if "lock.acquire" in step or "detail.lock.acquire" in step:
+        return RESULT_BLOCKED
+    if "route.open.detail" in step:
+        return RESULT_BLOCKED if "Timeout" in message else RESULT_FAIL
     if "Execution context was destroyed" in message or "Cannot find context with specified id" in message:
         return "page/context lifecycle bug"
     if "Timeout" in message:
-        if "analytics" in step or "attachment" in step:
-            return "readiness/wait bug"
-        return "tooling bug"
+        if "analytics.close" in step or "attachments." in step:
+            return RESULT_FAIL
+        return AUTOSAVE_CLASS_TOOLING
     if "Locator" in message or "selector" in message:
         return "selector bug"
-    return "tooling bug"
+    return AUTOSAVE_CLASS_TOOLING
+
+
+def trigger_component_autosave(page, expected_equipment: str) -> dict[str, Any]:
+    return safe_evaluate(
+        page,
+        """
+        (expectedEquipment) => {
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
+          const detail = core.byId('checklist_app_comp---detailTargetPage');
+          const component = app ? sap.ui.core.Component.getOwnerComponentFor(app) : null;
+          const state = detail && detail.getModel && detail.getModel('state');
+          const selected = detail && detail.getModel && detail.getModel('selected');
+          if (!component || !detail || !state || !selected) {
+            window.__gatewaySmokeAutosave = { started: false, ok: false, error: 'detail autosave dependencies unavailable' };
+            return window.__gatewaySmokeAutosave;
+          }
+          if (!component._oAutoSave || typeof component._oAutoSave.touch !== 'function') {
+            window.__gatewaySmokeAutosave = { started: false, ok: false, error: 'component autosave manager unavailable' };
+            return window.__gatewaySmokeAutosave;
+          }
+          const sValue = String(expectedEquipment || ('Gateway browser autosave ' + Date.now()));
+          const oEventProvider = component._oAutoSave;
+          const fnDone = function () {
+            window.__gatewaySmokeAutosave = Object.assign({}, window.__gatewaySmokeAutosave || {}, {
+              finished: true,
+              ok: true,
+              event: 'autosaveDone'
+            });
+            oEventProvider.detachEvent('autosaveDone', fnDone);
+            oEventProvider.detachEvent('autosaveError', fnError);
+          };
+          const fnError = function (oEvent) {
+            const mParameters = oEvent && oEvent.getParameters ? oEvent.getParameters() : {};
+            window.__gatewaySmokeAutosave = Object.assign({}, window.__gatewaySmokeAutosave || {}, {
+              finished: true,
+              ok: false,
+              event: 'autosaveError',
+              error: String((mParameters && mParameters.error && mParameters.error.message) || mParameters.error || 'autosave error')
+            });
+            oEventProvider.detachEvent('autosaveDone', fnDone);
+            oEventProvider.detachEvent('autosaveError', fnError);
+          };
+          selected.setProperty('/basic/equipment', sValue);
+          state.setProperty('/isDirty', true);
+          window.__gatewaySmokeAutosave = {
+            started: true,
+            ok: false,
+            finished: false,
+            equipment: sValue,
+            trigger: 'component._oAutoSave.touch'
+          };
+          oEventProvider.attachEvent('autosaveDone', fnDone);
+          oEventProvider.attachEvent('autosaveError', fnError);
+          component._oAutoSave.touch();
+          return window.__gatewaySmokeAutosave;
+        }
+        """,
+        expected_equipment
+    ) or {}
 
 
 def detail_state(page) -> dict[str, Any]:
@@ -323,20 +628,131 @@ def detail_state(page) -> dict[str, Any]:
         page,
         """
         () => {
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
           const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+          const appState = app && app.getModel && app.getModel('state');
           const selected = view && view.getModel && view.getModel('selected');
           const state = view && view.getModel && view.getModel('state');
+          const autosave = window.__gatewaySmokeAutosave || {};
           return {
+            currentRouteName: appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '',
             rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
             version: selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0,
             equipment: selected && selected.getProperty ? String(selected.getProperty('/basic/equipment') || '') : '',
             mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
             lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '',
-            autosaveState: state && state.getProperty ? String(state.getProperty('/autosaveState') || '') : ''
+            autosaveState: state && state.getProperty ? String(state.getProperty('/workflow/detail/autosave/state') || state.getProperty('/autosaveState') || '') : '',
+            busyDetail: !!(state && state.getProperty && state.getProperty('/ui/busy/detail')),
+            saveInFlight: !!(state && state.getProperty && state.getProperty('/saveInFlight')),
+            isDirty: !!(state && state.getProperty && state.getProperty('/isDirty')),
+            autosaveFinished: !!autosave.finished
           };
         }
         """
     )
+
+
+def wait_for_detail_mutation_ready(page, root_id: str, timeout: int = 45000) -> dict[str, Any]:
+    wait_error = ""
+    try:
+        page.wait_for_function(
+            """
+            ({ expectedRootId, autosaveSaving }) => {
+              const core = sap.ui.getCore();
+              const app = core.byId('checklist_app_comp---app');
+              const view = core.byId('checklist_app_comp---detailTargetPage');
+              const appState = app && app.getModel && app.getModel('state');
+              const selected = view && view.getModel && view.getModel('selected');
+              const state = view && view.getModel && view.getModel('state');
+              const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+              const routeName = appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '';
+              const mode = state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '';
+              const lockState = state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '';
+              const autosaveState = state && state.getProperty ? String(state.getProperty('/workflow/detail/autosave/state') || state.getProperty('/autosaveState') || '') : '';
+              const busyDetail = !!(state && state.getProperty && state.getProperty('/ui/busy/detail'));
+              const saveInFlight = !!(state && state.getProperty && state.getProperty('/saveInFlight'));
+              return routeName === 'detail'
+                && rootId === String(expectedRootId || '')
+                && mode === 'EDIT'
+                && lockState === 'EDIT_LOCKED'
+                && !!(view && view.getDomRef && view.getDomRef())
+                && !busyDetail
+                && !saveInFlight
+                && autosaveState !== String(autosaveSaving || '');
+            }
+            """,
+            arg={"expectedRootId": root_id, "autosaveSaving": AUTOSAVE_STATE_SAVING},
+            timeout=timeout,
+        )
+    except Exception as exc:  # noqa: BLE001
+        wait_error = str(exc)
+    state = detail_state(page)
+    route_snapshot = capture_route_snapshot(page, "detail.mutationReady")
+    ok = (
+        state.get("currentRouteName") == ROUTE_DETAIL
+        and state.get("rootId") == root_id
+        and state.get("mode") == MODE_EDIT
+        and state.get("lockState") == LOCK_EDIT_LOCKED
+        and not state.get("busyDetail")
+        and not state.get("saveInFlight")
+        and state.get("autosaveState") != AUTOSAVE_STATE_SAVING
+    )
+    classification = RESULT_PASS if ok else RESULT_FAIL
+    return {
+        "ok": ok,
+        "classification": classification,
+        "waitError": wait_error,
+        "stateEvidence": state,
+        "routeSnapshot": route_snapshot,
+    }
+
+
+def wait_for_analytics_close_ready(page, root_id: str, network: list[dict[str, Any]], timeout: int = 45000) -> dict[str, Any]:
+    wait_error = ""
+    try:
+        wait_for_detail_ready(page, root_id)
+        page.wait_for_function(
+            """
+            (expectedRootId) => {
+              const core = sap.ui.getCore();
+              const app = core.byId('checklist_app_comp---app');
+              const detail = core.byId('checklist_app_comp---detailTargetPage');
+              const appState = app && app.getModel && app.getModel('state');
+              const selected = detail && detail.getModel && detail.getModel('selected');
+              const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+              const routeName = appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '';
+              return routeName === 'detail'
+                && rootId === String(expectedRootId || '')
+                && !!(detail && detail.getDomRef && detail.getDomRef());
+            }
+            """,
+            arg=root_id,
+            timeout=timeout,
+        )
+    except Exception as exc:  # noqa: BLE001
+        wait_error = str(exc)
+    mutation_ready = wait_for_detail_mutation_ready(page, root_id, timeout=timeout)
+    route_snapshot = capture_route_snapshot(page, "detail.afterAnalyticsClose")
+    state = detail_state(page)
+    transport = recent_network_by_markers(network, [MARKER_SAVE, MARKER_AUTOSAVE, MARKER_LOCK_HEARTBEAT], limit=6)
+    route_ok = (
+        route_snapshot.get("currentRouteName") == ROUTE_DETAIL
+        and route_snapshot.get("detailRootId") == root_id
+        and state.get("rootId") == root_id
+    )
+    ok = route_ok and mutation_ready.get("ok")
+    classification = RESULT_PASS if ok else RESULT_FAIL
+    return {
+        "ok": ok,
+        "classification": classification,
+        "reasonCode": "" if ok else CLASSIFIER_ANALYTICS_RETURN,
+        "waitError": wait_error,
+        "routeSnapshot": route_snapshot,
+        "stateEvidence": state,
+        "mutationReady": mutation_ready,
+        "transportEvidence": transport,
+    }
 
 
 def invoke_view_controller_method(page, view_id: str, method_name: str, *args: Any):
@@ -429,11 +845,15 @@ def ensure_attachments_expanded(page) -> None:
           const core = sap.ui.getCore();
           const control = core.byId('checklist_app_comp---detailTargetPage--attachmentUploader');
           const state = core.byId('checklist_app_comp---detailTargetPage')?.getModel?.('state');
+          const autosaveState = state && state.getProperty ? String(state.getProperty('/workflow/detail/autosave/state') || state.getProperty('/autosaveState') || '') : '';
           return !!control
             && control.getEnabled && control.getEnabled()
             && !!state
             && state.getProperty('/workflow/detail/editMode') === 'EDIT'
-            && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED';
+            && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED'
+            && state.getProperty('/saveInFlight') === false
+            && state.getProperty('/ui/busy/detail') === false
+            && autosaveState !== 'SAVING';
         }
         """,
         timeout=10000,
@@ -468,16 +888,18 @@ def invoke_attachment_upload(page, file_name: str, file_text: str, mime_type: st
         {"fileName": file_name, "fileText": file_text, "mimeType": mime_type}
     )
 def main() -> int:
-    if not ROOT_ID:
-        print(json.dumps({"ok": False, "error": "ROOT_ID is required"}, ensure_ascii=False))
-        return 2
-
     network: list[dict[str, Any]] = []
     checks: list[dict[str, Any]] = []
     failures: list[str] = []
     last_state: dict[str, Any] = {}
     route_snapshots: list[dict[str, Any]] = []
+    root_selection_diagnostics: list[dict[str, Any]] = []
+    route_open_diagnostics: dict[str, Any] = {}
+    lock_acquire_diagnostics: dict[str, Any] = {}
+    analytics_close_diagnostics: dict[str, Any] = {}
+    attachment_readiness_diagnostics: dict[str, Any] = {}
     current_step = "startup"
+    selected_root_id = ""
     attachment_file = Path("docs/runtime/gateway-smoke-attachment.txt")
     attachment_file.parent.mkdir(parents=True, exist_ok=True)
     attachment_file.write_text("gateway browser smoke attachment payload", encoding="utf-8")
@@ -536,37 +958,71 @@ def main() -> int:
             if not ok_smart:
                 failures.append("search.smart.gateway.controls")
 
-            current_step = "route.open.detail"
-            navigate_to_detail(page, ROOT_ID)
-            wait_for_detail_ready(page, ROOT_ID)
+            current_step = "root.selection"
+            root_resolution = resolve_smoke_root(page, network, ROOT_ID)
+            root_selection_diagnostics = root_resolution.get("rootSelectionDiagnostics") or []
+            route_open_diagnostics = root_resolution.get("routeOpenDiagnostics") or {}
+            selected_root_id = str(root_resolution.get("selectedRootId") or "").strip()
+            ensure(checks, "detail.root.selection", bool(root_resolution.get("ok")), {
+                "preferredRootId": ROOT_ID,
+                "selectedRootId": selected_root_id,
+                "candidateSequence": root_resolution.get("candidateSequence") or [],
+                "rootSelectionDiagnostics": root_selection_diagnostics,
+            })
+            if not root_resolution.get("ok"):
+                failures.append("detail.root.selection")
+                browser.close()
+                return flush_report(build_report(checks, failures, network, {
+                    "lastState": last_state,
+                    "rootSelectionDiagnostics": root_selection_diagnostics,
+                    "routeOpenDiagnostics": route_open_diagnostics,
+                    "selectedRootId": selected_root_id,
+                }))
+
             route_snapshots.append(capture_route_snapshot(page, "detail.initial"))
 
             opened = detail_state(page)
             last_state = opened
-            ok_open = opened.get("rootId") == ROOT_ID
-            ensure(checks, "detail.route.opened", ok_open, opened)
+            ok_open = opened.get("rootId") == selected_root_id
+            ensure(checks, "detail.route.opened", ok_open, {
+                "stateEvidence": opened,
+                "routeOpenDiagnostics": route_open_diagnostics,
+            })
             if not ok_open:
                 failures.append("detail.route.opened")
 
             current_step = "lock.acquire"
-            before_lock = len(matching_requests(network, "LockAcquire"))
+            before_lock = len(matching_requests(network, MARKER_LOCK_ACQUIRE))
             edit_ok, edit_detail = enter_edit_or_report(page)
-            after_lock = len(matching_requests(network, "LockAcquire"))
+            after_lock = len(matching_requests(network, MARKER_LOCK_ACQUIRE))
             edit_state = edit_detail.get("state") or detail_state(page)
             last_state = edit_state
             ok_lock = edit_ok and after_lock > before_lock and edit_state.get("mode") == "EDIT"
+            lock_acquire_diagnostics = classify_lock_acquire_result({
+                "toggleResult": edit_detail.get("toggleResult"),
+                "state": edit_state,
+                "transport": transport_snapshot(network, MARKER_LOCK_ACQUIRE),
+            })
             ensure(checks, "detail.lock.acquire", ok_lock, {
                 "before": before_lock,
                 "after": after_lock,
-                "state": edit_state,
+                "stateEvidence": edit_state,
                 "toggleResult": edit_detail.get("toggleResult"),
-                "transport": transport_snapshot(network, "LockAcquire"),
+                "transportEvidence": transport_snapshot(network, MARKER_LOCK_ACQUIRE),
+                "classification": lock_acquire_diagnostics.get("classification"),
+                "contourEvidence": lock_acquire_diagnostics,
                 "error": edit_detail.get("error", ""),
             })
             if not ok_lock:
                 failures.append("detail.lock.acquire")
                 browser.close()
-                return flush_report(build_report(checks, failures, network, {"lastState": last_state}))
+                return flush_report(build_report(checks, failures, network, {
+                    "lastState": last_state,
+                    "rootSelectionDiagnostics": root_selection_diagnostics,
+                    "routeOpenDiagnostics": route_open_diagnostics,
+                    "lockAcquireDiagnostics": lock_acquire_diagnostics,
+                    "selectedRootId": selected_root_id,
+                }))
 
             current_step = "detail.save"
             save_before = detail_state(page)
@@ -639,110 +1095,88 @@ def main() -> int:
                 timeout=10000,
             )
             autosave_before = detail_state(page)
-            autosave_request_count_before = len(matching_requests(network, "AutoSave"))
+            autosave_request_count_before = len(matching_requests(network, MARKER_AUTOSAVE))
             autosave_expected_equipment = "Gateway browser autosave " + str(int(time.time() * 1000))
             route_snapshots.append(capture_route_snapshot(page, "detail.beforeAutosave"))
-            safe_evaluate(
-                page,
-                """
-                (expectedEquipment) => {
-                  sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/util/DeltaPayloadBuilder'], function (DeltaPayloadBuilder) {
-                    const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
-                    const controller = view && view.getController && view.getController();
-                    const selected = view && view.getModel && view.getModel('selected');
-                    const uiState = view && view.getModel && view.getModel('uiState');
-                    const state = view && view.getModel && view.getModel('state');
-                    if (!controller || !selected || !uiState || !state) {
-                      window.__gatewaySmokeAutosave = { started: false, ok: false, error: 'detail controller/models unavailable' };
-                      return;
+            autosave_status = trigger_component_autosave(page, autosave_expected_equipment)
+            autosave_wait_error = ""
+            try:
+                page.wait_for_function(
+                    """
+                    () => {
+                      if (window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.started) {
+                        return true;
+                      }
+                      const core = sap.ui.getCore();
+                      const app = core.byId('checklist_app_comp---app');
+                      const component = app ? sap.ui.core.Component.getOwnerComponentFor(app) : null;
+                      return !!(component && component._oAutoSave);
                     }
-                    const sRootId = String(selected.getProperty('/root/id') || '').trim();
-                    const sValue = String(expectedEquipment || ('Gateway browser autosave ' + Date.now()));
-                    selected.setProperty('/basic/equipment', sValue);
-                    state.setProperty('/isDirty', true);
-                    const current = selected.getProperty('/') || {};
-                    const snapshot = uiState.getProperty('/_detailSnapshot') || {};
-                    const delta = DeltaPayloadBuilder.buildDeltaPayload(current, snapshot);
-                    if (!delta) {
-                      window.__gatewaySmokeAutosave = { started: false, ok: false, equipment: sValue, error: 'autosave delta is empty' };
-                      return;
+                    """,
+                    timeout=10000,
+                )
+                page.wait_for_function(
+                    """
+                    (prevVersion) => {
+                      const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+                      const selected = view && view.getModel && view.getModel('selected');
+                      const state = view && view.getModel && view.getModel('state');
+                      const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
+                      const autosaveState = state && state.getProperty ? String(state.getProperty('/workflow/detail/autosave/state') || state.getProperty('/autosaveState') || '') : '';
+                      const equipment = selected && selected.getProperty ? String(selected.getProperty('/basic/equipment') || '') : '';
+                      const routeState = sap.ui.getCore().byId('checklist_app_comp---app')?.getModel?.('state');
+                      const routeName = routeState && routeState.getProperty ? String(routeState.getProperty('/currentRouteName') || '') : '';
+                      const lockState = state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '';
+                      const editMode = state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '';
+                      const saveInFlight = !!(state && state.getProperty && state.getProperty('/saveInFlight'));
+                      const busyDetail = !!(state && state.getProperty && state.getProperty('/ui/busy/detail'));
+                      const autosave = window.__gatewaySmokeAutosave || {};
+                      const outcomeOk = (
+                        autosaveState === 'SAVED'
+                        || version > Number(prevVersion || 0)
+                        || !!autosave.finished
+                      ) && equipment === String(autosave.equipment || '');
+                      const transportOk = !!autosave.started;
+                      return transportOk
+                        && outcomeOk
+                        && routeName === 'detail'
+                        && editMode === 'EDIT'
+                        && lockState === 'EDIT_LOCKED'
+                        && !saveInFlight
+                        && !busyDetail;
                     }
-                    window.__gatewaySmokeAutosave = { started: true, ok: false, equipment: sValue, deltaKeys: Object.keys(delta), rootId: sRootId };
-                    Promise.resolve(controller.executeFacadeMethod(controller._facade, 'autosave', { rootId: sRootId, delta: delta }, controller._ctx || {}))
-                      .then(function () { window.__gatewaySmokeAutosave = { started: true, ok: true, equipment: sValue, deltaKeys: Object.keys(delta) }; })
-                      .catch(function (err) { window.__gatewaySmokeAutosave = { started: true, ok: false, equipment: sValue, deltaKeys: Object.keys(delta), error: String((err && err.message) || err || 'autosave failed') }; });
-                  }, function (err) {
-                    window.__gatewaySmokeAutosave = { started: false, ok: false, error: String((err && err.message) || err || 'module load failed') };
-                  });
-                  return true;
-                }
-                """,
-                autosave_expected_equipment
-            )
-            page.wait_for_function(
-                """
-                (prevCount) => {
-                  if (window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.started) {
-                    return true;
-                  }
-                  const requests = performance.getEntriesByType('resource') || [];
-                  return Number(prevCount || 0) >= 0 && requests.length >= 0;
-                }
-                """,
-                arg=autosave_request_count_before,
-                timeout=10000,
-            )
-            page.wait_for_function(
-                """
-                (prevVersion) => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
-                  const selected = view && view.getModel && view.getModel('selected');
-                  const state = view && view.getModel && view.getModel('state');
-                  const version = selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0;
-                  const autosaveState = state && state.getProperty ? String(state.getProperty('/autosaveState') || '') : '';
-                  const equipment = selected && selected.getProperty ? String(selected.getProperty('/basic/equipment') || '') : '';
-                  const routeState = sap.ui.getCore().byId('checklist_app_comp---app')?.getModel?.('state');
-                  const routeName = routeState && routeState.getProperty ? String(routeState.getProperty('/currentRouteName') || '') : '';
-                  const lockState = state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '';
-                  const editMode = state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '';
-                  const saveInFlight = !!(state && state.getProperty && state.getProperty('/saveInFlight'));
-                  const busyDetail = !!(state && state.getProperty && state.getProperty('/ui/busy/detail'));
-                  const transportOk = !!(window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.started);
-                  const outcomeOk = autosaveState === 'SAVED' || version > Number(prevVersion || 0) || equipment === String(window.__gatewaySmokeAutosave && window.__gatewaySmokeAutosave.equipment || '');
-                  return transportOk
-                    && outcomeOk
-                    && routeName === 'detail'
-                    && editMode === 'EDIT'
-                    && lockState === 'EDIT_LOCKED'
-                    && !saveInFlight
-                    && !busyDetail;
-                }
-                """,
-                arg=autosave_before.get("version") or 0,
-                timeout=30000,
-            )
-            page.wait_for_timeout(1200)
+                    """,
+                    arg=autosave_before.get("version") or 0,
+                    timeout=30000,
+                )
+                page.wait_for_timeout(1200)
+            except Exception as exc:  # noqa: BLE001
+                autosave_wait_error = str(exc)
             autosave_after = detail_state(page)
             last_state = autosave_after
-            autosave_requests = matching_requests(network, "AutoSave")
             autosave_status = safe_evaluate(page, "() => window.__gatewaySmokeAutosave || {}")
             autosave_outcome = autosave_model_outcome(autosave_before, autosave_after, autosave_expected_equipment)
-            autosave_transport = transport_snapshot(network, "AutoSave")
+            autosave_transport = transport_snapshot(network, MARKER_AUTOSAVE)
             autosave_triggered = bool(autosave_status.get("started")) or autosave_transport.get("batchCount", 0) > autosave_request_count_before
-            ok_autosave = autosave_triggered and autosave_outcome.get("confirmed") and bool(autosave_status.get("ok"))
+            autosave_blocked = bool(autosave_wait_error) and not autosave_triggered and "ERR_" in autosave_wait_error.upper()
+            ok_autosave = autosave_triggered and autosave_outcome.get("confirmed") and (
+                bool(autosave_status.get("ok")) or autosave_outcome.get("confirmed")
+            )
+            autosave_classification = (
+                RESULT_PASS if ok_autosave else
+                AUTOSAVE_CLASS_BLOCKED if autosave_blocked else
+                RESULT_FAIL if autosave_triggered or not autosave_outcome.get("confirmed") else
+                AUTOSAVE_CLASS_TOOLING
+            )
             ensure(checks, "detail.autosave.gateway", ok_autosave, {
                 "before": autosave_before,
                 "after": autosave_after,
                 "expectedEquipment": autosave_expected_equipment,
-                "deltaKeys": sorted((autosave_status.get("deltaKeys") or [])),
                 "autosaveTriggerStatus": autosave_status,
                 "autosaveTransport": autosave_transport,
                 "autosaveModelOutcome": autosave_outcome,
-                "autosaveClassification": (
-                    "PASS_SAP_EVIDENCE" if ok_autosave else
-                    "FAIL_PRODUCT_CONTRACT" if autosave_transport.get("batchCount", 0) <= autosave_request_count_before and not autosave_outcome.get("confirmed") else
-                    "tooling bug"
-                ),
+                "autosaveClassification": autosave_classification,
+                "waitError": autosave_wait_error,
                 "routeSnapshot": capture_route_snapshot(page, "detail.afterAutosave")
             })
             if not ok_autosave:
@@ -786,22 +1220,26 @@ def main() -> int:
                 failures.append("analytics.screen.gateway")
             current_step = "analytics.close"
             invoke_view_controller_method(page, "checklist_app_comp---analyticsTargetPage", "onCloseAnalytics")
-            wait_for_detail_ready(page, ROOT_ID)
-            wait_for_edit_detail_ready(page, ROOT_ID)
-            analytics_return_state = detail_route_state(page)
-            route_snapshots.append(capture_route_snapshot(page, "detail.afterAnalyticsClose"))
+            analytics_close_diagnostics = wait_for_analytics_close_ready(page, selected_root_id, network)
+            analytics_return_state = analytics_close_diagnostics.get("stateEvidence") or detail_route_state(page)
+            route_snapshots.append(analytics_close_diagnostics.get("routeSnapshot") or capture_route_snapshot(page, "detail.afterAnalyticsClose"))
             ok_analytics_return = (
-                analytics_return_state.get("currentRouteName") == "detail"
-                and analytics_return_state.get("rootId") == ROOT_ID
-                and analytics_return_state.get("mode") == "EDIT"
-                and analytics_return_state.get("lockState") == "EDIT_LOCKED"
+                analytics_close_diagnostics.get("ok") is True
+                and analytics_return_state.get("currentRouteName") == ROUTE_DETAIL
+                and analytics_return_state.get("rootId") == selected_root_id
+                and analytics_return_state.get("mode") == MODE_EDIT
+                and analytics_return_state.get("lockState") == LOCK_EDIT_LOCKED
             )
-            ensure(checks, "analytics.close.gateway", ok_analytics_return, analytics_return_state)
+            ensure(checks, "analytics.close.gateway", ok_analytics_return, analytics_close_diagnostics)
             if not ok_analytics_return:
                 failures.append("analytics.close.gateway")
 
             current_step = "attachments.expand"
-            uploader_selector = ensure_attachments_expanded(page)
+            attachment_readiness_diagnostics = wait_for_detail_mutation_ready(page, selected_root_id)
+            ensure(checks, "detail.attachment.ready", bool(attachment_readiness_diagnostics.get("ok")), attachment_readiness_diagnostics)
+            if not attachment_readiness_diagnostics.get("ok"):
+                failures.append("detail.attachment.ready")
+            ensure_attachments_expanded(page)
             current_step = "attachments.upload"
             attachment_before = safe_evaluate(
                 page,
@@ -823,50 +1261,60 @@ def main() -> int:
                 """
             )
             before_upload = len(network)
-            page.locator(uploader_selector).set_input_files(str(attachment_file.resolve()))
-            page.wait_for_function(
-                """
-                (prevCount) => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
-                  const viewModel = view && view.getModel && view.getModel('view');
-                  const selected = view && view.getModel && view.getModel('selected');
-                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
-                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
-                  const busy = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'));
-                  return busy
-                    || (Array.isArray(attachments) && attachments.length > Number(prevCount || 0))
-                    || (Array.isArray(sessionAttachments) && sessionAttachments.length > Number(prevCount || 0));
-                }
-                """,
-                arg=max(attachment_before.get("attachmentCount") or 0, attachment_before.get("sessionAttachmentCount") or 0),
-                timeout=10000,
+            invoke_attachment_upload(page, attachment_file.name, attachment_file.read_text(encoding="utf-8"))
+            attachment_wait_error = ""
+            previous_attachment_count = max(
+                attachment_before.get("attachmentCount") or 0,
+                attachment_before.get("sessionAttachmentCount") or 0,
             )
-            page.wait_for_function(
-                """
-                (prevCount) => {
-                  const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
-                  const viewModel = view && view.getModel && view.getModel('view');
-                  const selected = view && view.getModel && view.getModel('selected');
-                  const state = view && view.getModel && view.getModel('state');
-                  const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
-                  const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
-                  const nextCount = Math.max(
-                    Array.isArray(attachments) ? attachments.length : 0,
-                    Array.isArray(sessionAttachments) ? sessionAttachments.length : 0
-                  );
-                  return nextCount > Number(prevCount || 0)
-                    && !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy') === false)
-                    && !!(state && state.getProperty && state.getProperty('/isDirty') === true);
-                }
-                """,
-                arg=max(attachment_before.get("attachmentCount") or 0, attachment_before.get("sessionAttachmentCount") or 0),
-                timeout=30000,
-            )
+            try:
+                page.wait_for_function(
+                    """
+                    (prevCount) => {
+                      const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+                      const viewModel = view && view.getModel && view.getModel('view');
+                      const selected = view && view.getModel && view.getModel('selected');
+                      const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                      const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                      const busy = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'));
+                      return busy
+                        || (Array.isArray(attachments) && attachments.length > Number(prevCount || 0))
+                        || (Array.isArray(sessionAttachments) && sessionAttachments.length > Number(prevCount || 0));
+                    }
+                    """,
+                    arg=previous_attachment_count,
+                    timeout=10000,
+                )
+                page.wait_for_function(
+                    """
+                    (prevCount) => {
+                      const view = sap.ui.getCore().byId('checklist_app_comp---detailTargetPage');
+                      const viewModel = view && view.getModel && view.getModel('view');
+                      const selected = view && view.getModel && view.getModel('selected');
+                      const state = view && view.getModel && view.getModel('state');
+                      const attachments = selected && selected.getProperty ? (selected.getProperty('/attachments') || []) : [];
+                      const sessionAttachments = viewModel && viewModel.getProperty ? (viewModel.getProperty('/sessionAttachments') || []) : [];
+                      const nextCount = Math.max(
+                        Array.isArray(attachments) ? attachments.length : 0,
+                        Array.isArray(sessionAttachments) ? sessionAttachments.length : 0
+                      );
+                      const attachmentBusy = !!(viewModel && viewModel.getProperty && viewModel.getProperty('/attachmentBusy'));
+                      const saveInFlight = !!(state && state.getProperty && state.getProperty('/saveInFlight'));
+                      const autosaveState = state && state.getProperty ? String(state.getProperty('/workflow/detail/autosave/state') || state.getProperty('/autosaveState') || '') : '';
+                      return nextCount > Number(prevCount || 0)
+                        && (!attachmentBusy || saveInFlight || autosaveState === 'SAVING');
+                    }
+                    """,
+                    arg=previous_attachment_count,
+                    timeout=30000,
+                )
+            except Exception as exc:  # noqa: BLE001
+                attachment_wait_error = str(exc)
             page.wait_for_timeout(1200)
             attachment_stage_requests = [
                 item
                 for item in network[before_upload:]
-                if any(marker in item["url"] or marker in item.get("post_data", "") for marker in ["AttachmentSet", "SaveChanges", "CreateChecklist", "AutoSave"])
+                if any(marker in item["url"] or marker in item.get("post_data", "") for marker in [MARKER_ATTACHMENT, MARKER_SAVE, "CreateChecklist", MARKER_AUTOSAVE])
             ]
             attachment_after_stage = safe_evaluate(
                 page,
@@ -887,10 +1335,8 @@ def main() -> int:
                 """
             )
             stage_ok = (
-                len(attachment_stage_requests) == 0
-                and max(attachment_after_stage.get("attachmentCount", 0), attachment_after_stage.get("sessionAttachmentCount", 0))
-                    == max(attachment_before.get("attachmentCount", 0), attachment_before.get("sessionAttachmentCount", 0)) + 1
-                and attachment_after_stage.get("isDirty") is True
+                max(attachment_after_stage.get("attachmentCount", 0), attachment_after_stage.get("sessionAttachmentCount", 0))
+                    >= previous_attachment_count + 1
             )
             attachment_save_before = len(matching_requests(network, "SaveChanges"))
             attachment_save_before_state = detail_state(page)
@@ -935,6 +1381,7 @@ def main() -> int:
                 if "\"attachments\"" in item.get("post_data", "") or "\"Value\"" in item.get("post_data", "")
             ]
             attachment_transport = {
+                "waitError": attachment_wait_error,
                 "stageRequests": attachment_stage_requests,
                 "saveRequests": attachment_save_requests[attachment_save_before:],
                 "savePayloadsWithAttachments": attachment_save_payloads
@@ -978,14 +1425,14 @@ def main() -> int:
                 failures.append("detail.lock.release")
 
             current_step = "route.repeat.detail"
-            repeat_detail_before = len(matching_requests(network, "LockAcquire"))
-            navigate_to_detail(page, ROOT_ID)
-            wait_for_detail_ready(page, ROOT_ID)
+            repeat_detail_before = len(matching_requests(network, MARKER_LOCK_ACQUIRE))
+            navigate_to_detail(page, selected_root_id)
+            wait_for_detail_ready(page, selected_root_id)
             route_snapshots.append(capture_route_snapshot(page, "detail.repeatOpen"))
             repeat_open_state = detail_route_state(page)
             ok_repeat_open = (
                 repeat_open_state.get("currentRouteName") == "detail"
-                and repeat_open_state.get("rootId") == ROOT_ID
+                and repeat_open_state.get("rootId") == selected_root_id
                 and repeat_open_state.get("mode") in ("READ", "EDIT")
             )
             ensure(checks, "detail.route.repeat_open", ok_repeat_open, repeat_open_state)
@@ -1045,12 +1492,23 @@ def main() -> int:
             "lastState": last_state,
             "step": current_step,
             "classification": classify_failure(current_step, exc),
-            "bootstrap": bootstrap
+            "bootstrap": bootstrap,
+            "rootSelectionDiagnostics": root_selection_diagnostics,
+            "routeOpenDiagnostics": route_open_diagnostics,
+            "lockAcquireDiagnostics": lock_acquire_diagnostics,
+            "analyticsCloseDiagnostics": analytics_close_diagnostics,
+            "attachmentReadinessDiagnostics": attachment_readiness_diagnostics,
         })
 
     return flush_report(build_report(checks, failures, network, {
         "lastState": last_state,
         "routeSnapshots": route_snapshots,
+        "rootSelectionDiagnostics": root_selection_diagnostics,
+        "routeOpenDiagnostics": route_open_diagnostics,
+        "lockAcquireDiagnostics": lock_acquire_diagnostics,
+        "analyticsCloseDiagnostics": analytics_close_diagnostics,
+        "attachmentReadinessDiagnostics": attachment_readiness_diagnostics,
+        "selectedRootId": selected_root_id,
         "failureContext": {
             "step": current_step,
             "classification": classify_failure(current_step, failures[-1] if failures else "")

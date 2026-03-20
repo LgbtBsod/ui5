@@ -12,6 +12,7 @@ sap.ui.define([
         var aSafeAttachments = Array.isArray(aAttachments) ? aAttachments : [];
         var aEffects = [
             Effects.modelPatch("selected", "/attachments", aSafeAttachments),
+            Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSafeAttachments),
             Effects.modelPatch("view", ViewPathContracts.ATTACHMENTS_LOADED, true)
         ].concat(buildAttachmentBusyResetEffects());
         if (sToastKey) {
@@ -21,10 +22,7 @@ sap.ui.define([
     }
 
     function buildAttachmentSyncEffects(aAttachments, sToastKey, sToastLevel) {
-        var aSafeAttachments = Array.isArray(aAttachments) ? aAttachments : [];
-        var aEffects = [
-            Effects.modelPatch("selected", "/attachments", aSafeAttachments)
-        ].concat(buildAttachmentBusyResetEffects());
+        var aEffects = buildAttachmentBusyResetEffects();
         if (sToastKey) {
             aEffects.push(Effects.toast(sToastKey, sToastLevel || "info"));
         }

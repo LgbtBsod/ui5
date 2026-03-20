@@ -22,14 +22,16 @@ sap.ui.define([
         var oUiState = mCtx && mCtx.uiState;
         var aCurrentAttachments;
         var aSessionAttachments;
+        var aWorkingAttachments;
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             aCurrentAttachments = DetailStateAccess.readCurrentAttachments(mCtx);
             aSessionAttachments = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
+            aWorkingAttachments = aSessionAttachments.length ? aSessionAttachments : aCurrentAttachments;
             return Promise.resolve(Result.ok({
-                attachments: aCurrentAttachments.length ? aCurrentAttachments : aSessionAttachments
+                attachments: aWorkingAttachments
             }, AttachmentEffectRuntime.buildAttachmentLoadEffects(
-                aCurrentAttachments.length ? aCurrentAttachments : aSessionAttachments,
+                aWorkingAttachments,
                 "",
                 "info"
             )));

@@ -68,8 +68,22 @@ sap.ui.define([
 
         createViewModel: function () {
             return createModel({
-                root: {}, basicInfo: {}, checks: { items: [] },
-                barriers: { items: [] }, attachments: { items: [] }, meta: { aggChangedOn: "" }
+                root: {},
+                basicInfo: {},
+                checks: { items: [] },
+                barriers: { items: [] },
+                attachments: { items: [] },
+                meta: { aggChangedOn: "" },
+                sessionAttachments: [],
+                showSessionAttachments: true,
+                attachmentsExpanded: false,
+                attachmentsLoaded: false,
+                attachmentBusy: false,
+                attachmentActionsEnabled: false,
+                attachmentMetaEditable: false,
+                attachmentDesktopColumnsVisible: true,
+                attachmentActionsColumnWidth: "14rem",
+                attachmentCategoryKey: ""
             });
         },
 

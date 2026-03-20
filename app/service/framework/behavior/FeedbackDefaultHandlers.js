@@ -9,6 +9,10 @@ sap.ui.define([
     "use strict";
 
     var FEEDBACK_SCOPE = "feedback";
+    var EFFECT_TYPE_TOAST = "toast";
+    var BANNER_SCOPE_ROUTE = "route";
+    var BANNER_VISIBLE = true;
+    var TOAST_LEVEL_INFO = "info";
     var bDefaultsRegistered = false;
 
     function resolveText(mContext) {
@@ -60,8 +64,8 @@ sap.ui.define([
             fallback: mContext.fallback || mContext.textKey
         });
         FeedbackBannerRuntime.setBanner(oState, "route", {
-            visible: true,
-            scope: "route",
+            visible: BANNER_VISIBLE,
+            scope: BANNER_SCOPE_ROUTE,
             severity: mContext.severity,
             text: sText
         });
@@ -70,10 +74,10 @@ sap.ui.define([
 
     function showToast(mContext) {
         return EffectApplier.applyEffects(mContext.controller, [{
-            type: "toast",
+            type: EFFECT_TYPE_TOAST,
             textKey: mContext.textKey,
             textArgs: mContext.args || [],
-            level: mContext.level || "info"
+            level: mContext.level || TOAST_LEVEL_INFO
         }], {
             resolveTextKey: function (sKey) {
                 return resolveText({
