@@ -5,16 +5,18 @@
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths"
-], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 
-    var OPERATIONS = {
-        CREATE: "01",
-        CHANGE: "02",
-        DISPLAY: "03",
-        DELETE: "06"
-    };
+    var OPERATIONS = DetailUseCaseConstants.ACCESS_OPERATIONS;
+    var ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
+    var MODELS = ModelContracts.MODELS;
 
     function resolveRequestedActivity(mOptions) {
         var sActivity = String((mOptions && (mOptions.activity || mOptions.actvt)) || "").trim();
@@ -39,21 +41,21 @@
     function defaultDeniedReason(sActivity) {
         switch (String(sActivity || "").trim()) {
         case OPERATIONS.CREATE:
-            return "NO_CREATE_PERMISSION";
+            return DETAIL_CODES.NO_CREATE_PERMISSION;
         case OPERATIONS.CHANGE:
-            return "NO_EDIT_PERMISSION";
+            return DETAIL_CODES.NO_EDIT_PERMISSION;
         case OPERATIONS.DELETE:
-            return "NO_DELETE_PERMISSION";
+            return DETAIL_CODES.NO_DELETE_PERMISSION;
         case OPERATIONS.DISPLAY:
         default:
-            return "NO_VIEW_PERMISSION";
+            return DETAIL_CODES.NO_VIEW_PERMISSION;
         }
     }
 
     function normalizePermission(oPermission, sRootId, mOptions) {
         var sRequestedActivity = resolveRequestedActivity(mOptions);
         var oResolved = AccessPayload.normalizePermission(oPermission, sRootId, {
-            reasonCode: "AUTHORIZED",
+            reasonCode: ACCESS_REASON_CODES.AUTHORIZED,
             requestedActivity: sRequestedActivity
         });
         var bAllowed = activityAllowed(oResolved, sRequestedActivity);
@@ -118,7 +120,7 @@
 
     function contentAccessEffects(oPermission) {
         return [
-            Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, buildAccessState(oPermission, false))
+            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.ACCESS_STATE, buildAccessState(oPermission, false))
         ];
     }
 
@@ -127,18 +129,18 @@
             activity: OPERATIONS.DISPLAY
         });
         return [
-            Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-            Effects.modelPatch("selected", "/", {}),
-            Effects.modelPatch("snapshot", "/", {}),
-            Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false),
-            Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, buildAccessState(oResolved, true)),
-            Effects.toast("detailViewPermissionDenied", "warning")
+            Effects.modelPatch(MODELS.STATE, StatePaths.UI_BUSY_DETAIL, false),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, false),
+            Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ROOT, {}),
+            Effects.modelPatch(MODELS.SNAPSHOT, DETAIL_MODEL_PATHS.ROOT, {}),
+            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.DETAIL_SKELETON_BUSY, false),
+            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.ACCESS_STATE, buildAccessState(oResolved, true)),
+            Effects.toast(DETAIL_MESSAGE_KEYS.DETAIL_VIEW_PERMISSION_DENIED, "warning")
         ];
     }
 
@@ -157,7 +159,7 @@
             var oMissingPermission = deniedPermission(
                 sResolvedRootId,
                 sRequestedActivity,
-                "PERMISSION_CHECK_UNAVAILABLE",
+                DETAIL_CODES.PERMISSION_CHECK_UNAVAILABLE,
                 "Permission backend is unavailable"
             );
             emitPermissionDenied(mCtx, oMissingPermission, sRequestedActivity);
@@ -177,7 +179,7 @@
             var oFailedPermission = deniedPermission(
                 sResolvedRootId,
                 sRequestedActivity,
-                "PERMISSION_CHECK_FAILED",
+                DETAIL_CODES.PERMISSION_CHECK_FAILED,
                 "Permission could not be confirmed"
             );
             emitPermissionDenied(mCtx, oFailedPermission, sRequestedActivity);

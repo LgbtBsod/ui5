@@ -57,7 +57,7 @@
             default: ControllerModelRuntime.defaultModel(oController),
             view: ControllerModelRuntime.viewState(oController),
             state: ControllerModelRuntime.state(oController),
-            uiState: ControllerModelRuntime.uiState(oController),
+            shell: ControllerModelRuntime.shell(oController),
             selected: ControllerModelRuntime.selected(oController),
             snapshot: ControllerModelRuntime.snapshot(oController),
             masterData: ControllerModelRuntime.masterData(oController),
@@ -73,7 +73,7 @@
         // Historical name only: `uiState` in the context is a facade adapter over
         // normalized named models (`state`, `selected`, `snapshot`, `view`, etc.).
         // It is not a business-data owner and must stay tolerant to missing legacy
-        // `uiState` JSONModel instances during the sunset period.
+        // `uiState` JSONModel instances.
         oUiStateAdapter = safeBuild(Ui5StateAdapter, mModels);
 
         return {

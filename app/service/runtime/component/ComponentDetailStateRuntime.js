@@ -1,11 +1,14 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (StatePaths, CreateSentinel, ModelStateRuntime, WorkflowContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (StatePaths, CreateSentinel, ModelStateRuntime, WorkflowContracts, ModelPathContracts, ModelContracts) {
     "use strict";
+
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
 
     function resolveBootDetailId(sHash) {
         var s = String(sHash || "").trim();
@@ -31,14 +34,14 @@
         };
     }
 
-    function syncUiStateMode(oStateModel, oUiStateModel) {
-        ModelStateRuntime.setManyOnModel(oUiStateModel, {
-            "/busy": !!(
+    function syncShellRuntimeState(oStateModel, oShellModel) {
+        ModelStateRuntime.setManyOnModel(oShellModel, {
+            [MODEL_PATHS.SHELL_BUSY]: !!(
                 ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_DETAIL, false)
-                || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)
+                || ModelStateRuntime.readOnModel(oStateModel, StatePaths.IS_LOADING, false)
             ),
-            "/currentRootKey": ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "",
-            "/sessionGuid": ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || ""
+            [MODEL_PATHS.SHELL_CURRENT_ROOT_KEY]: ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "",
+            [MODEL_PATHS.SHELL_SESSION_GUID]: ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || ""
         });
     }
 
@@ -58,7 +61,7 @@
         resolveBootDetailId: resolveBootDetailId,
         isCreateBootHash: isCreateBootHash,
         applyLockProbeState: applyLockProbeState,
-        syncUiStateMode: syncUiStateMode,
+        syncShellRuntimeState: syncShellRuntimeState,
         syncDetailCurrentFromSelected: syncDetailCurrentFromSelected,
         resolveDetailCurrent: resolveDetailCurrent
     };

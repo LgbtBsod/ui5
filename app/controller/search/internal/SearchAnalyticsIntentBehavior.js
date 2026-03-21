@@ -3,12 +3,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, AnalyticsMonthRuntime, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, AnalyticsMonthRuntime, JsRuntime, ModelContracts, StatePaths) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function normalizeText(vValue) {
         return String(vValue || "").trim();
@@ -73,14 +76,14 @@ sap.ui.define([
     function applySegmentState(oController, oIntent) {
         var sMetric = normalizeText(oIntent && oIntent.extras && oIntent.extras.metric).toUpperCase();
 
-        ModelStateRuntime.write(oController, "state", "/search/checksFailSegment", "ALL");
-        ModelStateRuntime.write(oController, "state", "/search/barriersFailSegment", "ALL");
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.SEARCH_CHECKS_FAIL_SEGMENT, "ALL");
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.SEARCH_BARRIERS_FAIL_SEGMENT, "ALL");
 
         if (sMetric === "FAILED_CHECKS" || sMetric === "FAILED_CHECKLISTS") {
-            ModelStateRuntime.write(oController, "state", "/search/checksFailSegment", "FAILED");
+            ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.SEARCH_CHECKS_FAIL_SEGMENT, "FAILED");
         }
         if (sMetric === "FAILED_BARRIERS" || sMetric === "FAILED_BARRIER_CHECKLISTS") {
-            ModelStateRuntime.write(oController, "state", "/search/barriersFailSegment", "FAILED");
+            ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.SEARCH_BARRIERS_FAIL_SEGMENT, "FAILED");
         }
     }
 

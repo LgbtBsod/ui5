@@ -4,19 +4,21 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (Effects, DetailAttachmentDeltaRuntime, DetailAttachmentStateRuntime, CreateSentinel, StatePaths, ViewPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Effects, DetailAttachmentDeltaRuntime, DetailAttachmentStateRuntime, CreateSentinel, StatePaths, ViewPathContracts, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
     function syncAfterSave(mOptions) {
         var oRepo = mOptions.repo;
         var sRootId = String(mOptions.rootId || "").trim();
         var bCreate = !!mOptions.createMode;
         var aCurrentAttachments = Array.isArray(mOptions.currentAttachments) ? mOptions.currentAttachments : [];
-        var oSaved = mOptions.savedResult || {};
-        var oCurrent = mOptions.currentChecklist || {};
         var oSavedSnapshot = mOptions.savedSnapshot || {};
-        var oCtx = mOptions.ctx;
         var sServerRootId = String(mOptions.serverRootId || "").trim();
         var bNeedsAttachmentReload = bCreate || !!mOptions.hasStagedPayload;
 
@@ -30,13 +32,13 @@ sap.ui.define([
             var bHasPendingAttachments = DetailAttachmentDeltaRuntime.hasPendingStagedAttachments(aCurrentAttachments);
             var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
             var aEffects = [
-                Effects.modelPatch("selected", "/", oSelectedSnapshot),
-                Effects.modelPatch("selected", "/attachments", aSyncedAttachments),
-                Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSyncedAttachments)
+                Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
+                Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ATTACHMENTS, aSyncedAttachments),
+                Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSyncedAttachments)
             ];
 
             if (!bHasPendingAttachments) {
-                aEffects.push(Effects.modelPatch("snapshot", "/", Object.assign({}, oSavedSnapshot, {
+                aEffects.push(Effects.modelPatch(MODELS.SNAPSHOT, DETAIL_MODEL_PATHS.ROOT, Object.assign({}, oSavedSnapshot, {
                     attachments: aSyncedAttachments
                 })));
             }

@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:t="sap.ui.table">
     <VBox width="100%" modelContextChange=".onChecklistRowsBindingChange">
         <t:Table
-            visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>'},{path:'view>ignoreNarrowViewport'}], formatter:'.isRuntimeDesktopTableVisible'}"
+            visible="{parts:[{path:'shell>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>'},{path:'view>ignoreNarrowViewport'}], formatter:'.isRuntimeDesktopTableVisible'}"
             rows="{selected>}"
             selectionMode="None"
             visibleRowCountMode="Fixed"
@@ -58,7 +58,7 @@
             growing="true"
             growingThreshold="50"
             growingScrollToLoad="true"
-            visible="{parts:[{path:'appView>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>'},{path:'view>ignoreNarrowViewport'}], formatter:'.isRuntimePhoneTableVisible'}"
+            visible="{parts:[{path:'shell>/isPhoneViewport'},{path:'view>/narrowDetailViewport'},{path:'selected>'},{path:'view>ignoreNarrowViewport'}], formatter:'.isRuntimePhoneTableVisible'}"
             noDataText="{path:'view>noDataKey', formatter:'.formatI18nByKey'}">
             <columns>
                 <Column width="3rem"><Text text=""/></Column>

@@ -9,9 +9,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
 
     function CloseDetailUseCase() {
         return {
@@ -24,12 +29,12 @@ function execute(mInput, mCtx) {
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx) ||
             (oUiState && typeof oUiState.get === "function" && (
-                oUiState.get("state", ModelPathContracts.ACTIVE_OBJECT_ID) ||
-                oUiState.get("state", ModelPathContracts.SELECTED_ID)
+                oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID) ||
+                oUiState.get(STATE_MODEL, ModelPathContracts.SELECTED_ID)
             )) || "";
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
-        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && typeof oUiState.get === "function" ? oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE) : "");
-        var sLockState = WorkflowContracts.normalizeLockState(oUiState && typeof oUiState.get === "function" ? oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE) : "");
+        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && typeof oUiState.get === "function" ? oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE) : "");
+        var sLockState = WorkflowContracts.normalizeLockState(oUiState && typeof oUiState.get === "function" ? oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE) : "");
         var bEditableLifecycle = WorkflowContracts.isEditableMode(sEditMode) ||
             sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED ||
             sLockState === WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK ||
@@ -47,7 +52,7 @@ function execute(mInput, mCtx) {
         var pRelease = Promise.resolve();
         if (bShouldRelease) {
             pRelease = Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () {
-                return { ok: false, code: "ERROR", released: false, messageKey: "lockReleaseFailed" };
+                return { ok: false, code: "ERROR", released: false, messageKey: DETAIL_MESSAGE_KEYS.LOCK_RELEASE_FAILED };
             });
         }
 
@@ -67,7 +72,7 @@ function execute(mInput, mCtx) {
                 );
             }
             aEffects = [
-                Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                     status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE,
                     ready: false,
                     readyAt: "",
@@ -77,27 +82,27 @@ function execute(mInput, mCtx) {
                     permissionKnown: false,
                     lockKnown: false
                 }),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-                Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.IDLE),
-                Effects.modelPatch("state", StatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, null),
-                Effects.modelPatch("state", StatePaths.PERSISTENCE_HAS_VALID_LOCK, false),
-                Effects.modelPatch("state", StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),
-                Effects.modelPatch("state", ModelPathContracts.LOCK_OPERATION_PENDING, false),
-                Effects.modelPatch("state", ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
-                Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, ""),
-                Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, ""),
-                Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, ""),
-                Effects.modelPatch("state", ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+                Effects.modelPatch(STATE_MODEL, StatePaths.SAVE_IN_FLIGHT, false),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false),
+                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.IDLE),
+                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, null),
+                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_HAS_VALID_LOCK, false),
+                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.LOCK_OPERATION_PENDING, false),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, ""),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, ""),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH),
                 Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
             ];
             if (bShouldRelease && (!oReleaseResult || oReleaseResult.ok === false || oReleaseResult.released === false)) {
-                aEffects.push(Effects.warn((oReleaseResult && oReleaseResult.messageKey) || "lockReleaseFailed"));
+                aEffects.push(Effects.warn((oReleaseResult && oReleaseResult.messageKey) || DETAIL_MESSAGE_KEYS.LOCK_RELEASE_FAILED));
             }
             return Result.ok({ reason: (mInput && mInput.intent) || "close" }, aEffects);
         });

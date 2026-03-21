@@ -1,8 +1,13 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService"
-], function (WorkflowContracts, ChecklistValidationService) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (WorkflowContracts, ChecklistValidationService, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
     function isFilled(vValue) {
         return String(vValue == null ? "" : vValue).trim().length > 0;
@@ -44,12 +49,12 @@
 
     function readCurrentChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get("selected", "/")) || {};
+        return (oUiState && oUiState.get(MODELS.SELECTED, DETAIL_MODEL_PATHS.ROOT)) || {};
     }
 
     function readBaseSnapshot(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get("snapshot", "/")) || {};
+        return (oUiState && oUiState.get(MODELS.SNAPSHOT, DETAIL_MODEL_PATHS.ROOT)) || {};
     }
 
     function resolveVersionNumber(oCurrent, oSnapshot) {
@@ -65,12 +70,12 @@
 
     function readSessionGuid(mCtx, StatePaths) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get("state", StatePaths.SESSION_ID)) || "";
+        return (oUiState && oUiState.get(MODELS.STATE, StatePaths.SESSION_ID)) || "";
     }
 
     function readLockState(mCtx, StatePaths) {
         var oUiState = mCtx && mCtx.uiState;
-        return WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
+        return WorkflowContracts.normalizeLockState(oUiState && oUiState.get(MODELS.STATE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
     }
 
     return {

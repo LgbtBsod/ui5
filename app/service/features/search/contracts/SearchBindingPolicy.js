@@ -3,9 +3,13 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "sap/ui/model/Sorter",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchFilterBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults"
-], function (Filter, FilterOperator, Sorter, SearchFilterBuilder, SearchMaxResults) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+], function (Filter, FilterOperator, Sorter, SearchFilterBuilder, SearchMaxResults, SearchRuntimeConstants) {
     "use strict";
+
+    var SEARCH_MODE = SearchRuntimeConstants.SEARCH_MODE;
+    var SEARCH_SEGMENTS = SearchRuntimeConstants.SEARCH_SEGMENTS;
 
     function pickFilterValue(vValue) {
         if (typeof vValue === "string") { return vValue; }
@@ -39,15 +43,15 @@ sap.ui.define([
         var oBindingParams = mArgs.bindingParams || {};
         var mState = mArgs.state || {};
         var fnDataReceived = mArgs.onDataReceived;
-        var sSearchMode = String(mState.searchMode || ((mState.search || {}).modeSwitch) || "EXACT").toUpperCase();
-        var sChecksSegment = ((mState.search || {}).checksFailSegment) || mState.filterFailedChecks || "ALL";
-        var sBarriersSegment = ((mState.search || {}).barriersFailSegment) || mState.filterFailedBarriers || "ALL";
+        var sSearchMode = String(mState.searchMode || SEARCH_MODE.EXACT).toUpperCase();
+        var sChecksSegment = ((mState.search || {}).checksFailSegment) || SEARCH_SEGMENTS.ALL;
+        var sBarriersSegment = ((mState.search || {}).barriersFailSegment) || SEARCH_SEGMENTS.ALL;
         var oChecksFilter = SearchFilterBuilder.buildFailSegmentFilter(sChecksSegment);
         var oBarriersFilter = SearchFilterBuilder.buildBarrierFailSegmentFilter(sBarriersSegment);
         oBindingParams.filters = sanitizeFilters(oBindingParams.filters || []);
         if (oChecksFilter) { oBindingParams.filters.push(oChecksFilter); }
         if (oBarriersFilter) { oBindingParams.filters.push(oBarriersFilter); }
-        if (sSearchMode === "LOOSE" && oBindingParams.filters.length > 1) {
+        if (sSearchMode === SEARCH_MODE.LOOSE && oBindingParams.filters.length > 1) {
             oBindingParams.filters = [new Filter({ filters: oBindingParams.filters, and: false })];
         }
         applySortAndGroupPolicy(oBindingParams, mState);

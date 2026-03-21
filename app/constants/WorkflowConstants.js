@@ -31,6 +31,7 @@ sap.ui.define([], function () {
     });
 
     var REASONS = Object.freeze({
+        FREE: "FREE",
         READ_ONLY: "READ_ONLY",
         IDLE_TIMEOUT: "IDLE_TIMEOUT",
         KILLED: "KILLED",

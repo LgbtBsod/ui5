@@ -36,7 +36,7 @@ sap.ui.define([], function () {
         var fnHandleForceReadOnly = mDeps.ComponentRuntimeHandlerRuntime.createForceReadOnlyHandler({
             component: oComponent,
             stateModel: mModels.stateModel,
-            uiStateModel: mModels.uiStateModel,
+            shellModel: mModels.shellModel,
             statePaths: mDeps.StatePaths,
             componentRuntimeSupport: oComponentRuntimeSupport,
             telemetryRuntime: mDeps.TelemetryRuntime,
@@ -109,8 +109,8 @@ sap.ui.define([], function () {
                 timerDefaults: mDeps.ComponentStateSeedRuntime.seedInitialState(mModels.stateModel, mDeps.StatePaths, mDeps.TimeConfigService)
             },
             navigation: {
-                syncUiStateMode: function () {
-                    return oComponentRuntimeSupport.syncUiStateMode(mModels.stateModel, mModels.uiStateModel);
+                syncShellRuntimeState: function () {
+                    return oComponentRuntimeSupport.syncShellRuntimeState(mModels.stateModel, mModels.shellModel);
                 }
             }
         };

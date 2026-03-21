@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
-], function (Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue, AnalyticsStateConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue, AnalyticsStateConstants, ModelContracts) {
     "use strict";
 
     var TELEMETRY_EVENTS = Object.freeze({
@@ -16,8 +17,8 @@ sap.ui.define([
         STALE: "analytics.dashboard.stale"
     });
     var MODEL_NAMES = Object.freeze({
-        STATE: "state",
-        VIEW: "view"
+        STATE: ModelContracts.MODELS.STATE,
+        VIEW: ModelContracts.MODELS.VIEW
     });
     var VIEW_PATHS = Object.freeze({
         ANALYTICS: AnalyticsUiContracts.PATHS.ANALYTICS,

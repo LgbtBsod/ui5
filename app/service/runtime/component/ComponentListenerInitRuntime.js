@@ -1,14 +1,16 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, WorkflowRuntimeConstants, DetailPersistenceConstants, SearchUiConfig) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, WorkflowRuntimeConstants, DetailPersistenceConstants, SearchUiConfig, ModelContracts) {
     "use strict";
 
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
     var PERSISTENCE_DIRTY_SOURCE_STATES = Object.freeze({
@@ -42,18 +44,17 @@
     function initializeListeners(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
-        var oUiStateModel = mOptions.uiStateModel;
-        var oLayoutModel = mOptions.layoutModel;
+        var oShellModel = mOptions.shellModel;
         var oSearchConfig = mOptions.searchConfig || SearchUiConfig.getLayoutSeed();
 
-        mOptions.componentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
+        mOptions.componentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
         ComponentDetailMetaSyncRuntime.syncDetailMeta(oStateModel, mOptions.statePaths || {});
         if (oComponent._fnOnFullSave) {
             window.removeEventListener(VALUES.FULL_SAVE_EVENT, oComponent._fnOnFullSave);
         }
         oComponent._fnOnFullSave = function () { oComponent._oGcd.resetOnFullSave(); };
         window.addEventListener(VALUES.FULL_SAVE_EVENT, oComponent._fnOnFullSave);
-        oComponent.setModel(mOptions.layoutModel, ComponentListenerContracts.MODEL_NAMES.LAYOUT);
+        oComponent.setModel(mOptions.shellModel, ComponentListenerContracts.MODEL_NAMES.SHELL);
         oComponent.setModel(mOptions.cacheModel, ComponentListenerContracts.MODEL_NAMES.CACHE);
         oComponent.setModel(mOptions.masterDataModel, ComponentListenerContracts.MODEL_NAMES.MASTER_DATA);
         oComponent.setModel(mOptions.envModel, ComponentListenerContracts.MODEL_NAMES.ENV);
@@ -62,10 +63,10 @@
         }
         oComponent._fnBeforeUnload = createBeforeUnloadHandler(oStateModel, mOptions);
         window.addEventListener("beforeunload", oComponent._fnBeforeUnload);
-        ModelStateRuntime.setManyOnModel(oLayoutModel, {
-            "/smartFilter/fields": oSearchConfig.smartFilter.fields,
-            "/smartTable/columns": oSearchConfig.smartTable.columns,
-            "/smartTable/selectionMode": oSearchConfig.smartTable.selectionMode
+        ModelStateRuntime.setManyOnModel(oShellModel, {
+            [MODEL_PATHS.SHELL_SMART_FILTER_FIELDS]: oSearchConfig.smartFilter.fields,
+            [MODEL_PATHS.SHELL_SMART_TABLE_COLUMNS]: oSearchConfig.smartTable.columns,
+            [MODEL_PATHS.SHELL_SMART_TABLE_SELECTION_MODE]: oSearchConfig.smartTable.selectionMode
         });
         oComponent._oDirtyStateBinding = oStateModel.bindProperty(PATHS.IS_DIRTY);
         oComponent._fnDirtyStateBindingChange = function () {

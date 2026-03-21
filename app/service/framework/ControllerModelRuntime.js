@@ -61,29 +61,26 @@
         state: function (oController) {
             return resolveNamedModel(oController, MODELS.STATE, true);
         },
-        layout: function (oController) {
-            return resolveNamedModel(oController, MODELS.LAYOUT, true);
-        },
-        appView: function (oController) {
-            return resolveNamedModel(oController, MODELS.APP_VIEW, false);
+        shell: function (oController) {
+            return resolveNamedModel(oController, MODELS.SHELL, true);
         },
         viewState: function (oController) {
             return resolveNamedModel(oController, MODELS.VIEW, false);
-        },
-        uiState: function (oController) {
-            return resolveNamedModel(oController, "uiState", true);
         },
         selected: function (oController) {
             return resolveNamedModel(oController, MODELS.SELECTED, true);
         },
         snapshot: function (oController) {
-            return resolveNamedModel(oController, "snapshot", true);
+            return resolveNamedModel(oController, MODELS.SNAPSHOT, true);
         },
         masterData: function (oController) {
             return resolveNamedModel(oController, MODELS.MASTER_DATA, true);
         },
+        locationTree: function (oController) {
+            return resolveNamedModel(oController, MODELS.LOCATION_TREE, true);
+        },
         env: function (oController) {
-            return resolveNamedModel(oController, "env", true);
+            return resolveNamedModel(oController, MODELS.ENV, true);
         }
     };
 });

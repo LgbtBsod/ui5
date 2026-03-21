@@ -16,10 +16,10 @@
 
     function initializeBootState(oStateModel) {
         ModelStateRuntime.setManyOnModel(oStateModel, {
-            "/isLoading": true,
-            "/masterDataLoading": false,
-            "/locationsLoading": false,
-            "/readiness/app": {
+            [PATHS.IS_LOADING]: true,
+            [PATHS.MASTER_DATA_LOADING]: false,
+            [PATHS.LOCATIONS_LOADING]: false,
+            [PATHS.READINESS_APP]: {
                 status: READINESS_STATUS.LOADING,
                 ready: false,
                 readyAt: "",
@@ -219,8 +219,8 @@
                     oComponent._startCoreManagers();
                     oComponent._syncLockScopedManagers(oStateModel);
                 }
-                mOptions.componentRuntimeSupport && mOptions.componentRuntimeSupport.syncUiStateMode && mOptions.componentRuntimeSupport.syncUiStateMode(oStateModel, mOptions.uiStateModel || null);
-                oStateModel.setProperty("/isLoading", false);
+                mOptions.componentRuntimeSupport && mOptions.componentRuntimeSupport.syncShellRuntimeState && mOptions.componentRuntimeSupport.syncShellRuntimeState(oStateModel, mOptions.shellModel || null);
+                oStateModel.setProperty(PATHS.IS_LOADING, false);
             });
     }
 

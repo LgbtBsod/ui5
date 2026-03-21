@@ -13,9 +13,22 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime"
-], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
+    var SELECTED_MODEL = MODELS.SELECTED;
+    var STATE_MODEL = MODELS.STATE;
+    var VIEW_MODEL = MODELS.VIEW;
+    var DETAIL_ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
     function cloneSnapshot(oSnapshot) {
         return CloneUtil.clone(oSnapshot || {}, {});
@@ -34,13 +47,13 @@ sap.ui.define([
 
     function resetTransientDetailIncidentEffects() {
         return [
-            Effects.modelPatch("state", "/isKilled", false),
-            Effects.modelPatch("state", "/hasConflict", false),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, ""),
-            Effects.modelPatch("state", StatePaths.PENDING_NAVIGATION_INTENT, null),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
-            Effects.modelPatch("state", StatePaths.PERSISTENCE, {
+            Effects.modelPatch(STATE_MODEL, "/isKilled", false),
+            Effects.modelPatch(STATE_MODEL, "/hasConflict", false),
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_LOCK_LOST_REASON, ""),
+            Effects.modelPatch(STATE_MODEL, StatePaths.PENDING_NAVIGATION_INTENT, null),
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
+            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE, {
                 state: DetailPersistenceConstants.STATES.IDLE,
                 messageKey: "persistenceIdle",
                 lastSavedAt: null,
@@ -54,12 +67,12 @@ sap.ui.define([
                 lastLockRefreshAt: null,
                 nextHeartbeatAt: null
             }),
-            Effects.modelPatch("uiState", "/lock", {
+            Effects.modelPatch(MODELS.SHELL, MODEL_PATHS.SHELL_LOCK, {
                 ok: false,
-                reason: "FREE",
+                reason: WorkflowContracts.REASONS.FREE,
                 isKilled: false
             }),
-            Effects.modelPatch("state", StatePaths.TAB_CONFLICT_STATE, {
+            Effects.modelPatch(STATE_MODEL, StatePaths.TAB_CONFLICT_STATE, {
                 active: false,
                 source: "",
                 at: ""
@@ -68,9 +81,9 @@ sap.ui.define([
     }
 
     function resolveLoadedAttachments(oUiState, sRootId) {
-        var sSelectedRootId = String((oUiState && oUiState.get("selected", "/root/id")) || "").trim();
-        var bAttachmentsLoaded = !!(oUiState && oUiState.get("view", ViewPathContracts.ATTACHMENTS_LOADED));
-        var aAttachments = (oUiState && oUiState.get("selected", "/attachments")) || [];
+        var sSelectedRootId = String((oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT_ID)) || "").trim();
+        var bAttachmentsLoaded = !!(oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED));
+        var aAttachments = (oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS)) || [];
         if (!sRootId || sSelectedRootId !== sRootId || !bAttachmentsLoaded || !Array.isArray(aAttachments)) {
             return [];
         }
@@ -78,10 +91,10 @@ sap.ui.define([
     }
 
     function resolveEditableOpenState(oUiState, sRootId) {
-        var sHydratedRootId = String((oUiState && oUiState.get("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
-        var sActiveRootId = String((oUiState && oUiState.get("state", ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
-        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
-        var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
+        var sHydratedRootId = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
+        var sActiveRootId = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
+        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
         var bMatchesRoot = !!sRootId && (sHydratedRootId === sRootId || sActiveRootId === sRootId);
         var bEditable = bMatchesRoot && WorkflowContracts.isEditLocked(sEditMode, sLockState);
 
@@ -93,7 +106,7 @@ sap.ui.define([
     }
 
     function resolveSameRootSnapshot(oUiState, sRootId, sModelName) {
-        var oSnapshot = (oUiState && oUiState.get(sModelName, "/")) || null;
+        var oSnapshot = (oUiState && oUiState.get(sModelName, DETAIL_MODEL_PATHS.ROOT)) || null;
         var sSnapshotRootId = String((oSnapshot && oSnapshot.root && oSnapshot.root.id) || "").trim();
         if (!sRootId || !sSnapshotRootId || sSnapshotRootId !== sRootId) {
             return null;
@@ -107,52 +120,52 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
         var sReadyAt = new Date().toISOString();
 
         if (CreateSentinel.isCreateId(sRootId)) {
-            var oDraft = (oUiState && oUiState.get("selected", "/")) || {};
+            var oDraft = (oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
             var oDraftSnapshot = cloneSnapshot(oDraft);
             var oDraftSelected = cloneSnapshot(oDraft);
             return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
                 activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
             }).then(function (oPermission) {
                 if (!oPermission.allowed) {
-                    return Result.fail({ message: "No permission to create checklist", code: "NO_CREATE_PERMISSION" }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailCreatePermissionDenied", [
-                        Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                    return Result.fail({ message: "No permission to create checklist", code: DETAIL_CODES.NO_CREATE_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, DETAIL_MESSAGE_KEYS.DETAIL_CREATE_PERMISSION_DENIED, [
+                        Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                             status: WorkflowRuntimeConstants.READINESS_STATUS.DENIED,
                             ready: false,
                             readyAt: "",
-                            error: "NO_CREATE_PERMISSION",
+                            error: DETAIL_CODES.NO_CREATE_PERMISSION,
                             rootId: CreateSentinel.VALUE,
                             mode: WorkflowContracts.EDIT_MODES.READ,
                             permissionKnown: true,
                             lockKnown: true
                         }),
-                        Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                        Effects.modelPatch("selected", "/", {}),
-                        Effects.modelPatch("snapshot", "/", {}),
-                        Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false),
+                        Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
+                        Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
+                        Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
+                        Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false),
                         Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
                     ]));
                 }
                 return Result.ok({ snapshot: oDraftSnapshot }, resetTransientDetailIncidentEffects().concat([
-                    Effects.modelPatch("view", ViewPathContracts.ACCESS_STATE, {
+                    Effects.modelPatch(VIEW_MODEL, ViewPathContracts.ACCESS_STATE, {
                         denied: false,
                         rootId: CreateSentinel.VALUE,
                         userId: "",
                         canView: false,
                         canEdit: true,
                         canDelete: false,
-                        reasonCode: "CREATE_DRAFT",
+                        reasonCode: DETAIL_ACCESS_REASON_CODES.CREATE_DRAFT,
                         titleKey: "",
                         messageKey: "",
                         illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
                     }),
-                    Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                    Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                         status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
                         ready: true,
                         readyAt: sReadyAt,
@@ -162,21 +175,21 @@ function execute(mInput, mCtx) {
                         permissionKnown: true,
                         lockKnown: true
                     }),
-                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.CREATE),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                    Effects.modelPatch("snapshot", "/", oDraftSnapshot),
-                    Effects.modelPatch("selected", "/", oDraftSelected),
-                    Effects.modelPatch("selected", "/attachments", (oDraftSelected && oDraftSelected.attachments) || []),
-                    Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
-                    Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
+                    Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.CREATE),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+                    Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, oDraftSnapshot),
+                    Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oDraftSelected),
+                    Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
+                    Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
+                    Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
                 ]));
             });
         }
 
         if (!sRootId || !oRepo || typeof oRepo.loadDetailSnapshot !== "function") {
-            return Promise.resolve(Result.fail({ message: "Open detail input invalid", code: "INVALID_INPUT" }));
+            return Promise.resolve(Result.fail({ message: "Open detail input invalid", code: DETAIL_CODES.INVALID_INPUT }));
         }
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
@@ -187,12 +200,12 @@ function execute(mInput, mCtx) {
             }).then(function (oPermission) {
             var pValidation;
             if (!oPermission.allowed) {
-                return Result.fail({ message: "No permission to open checklist", code: "NO_VIEW_PERMISSION" }, resetTransientDetailIncidentEffects().concat([
-                    Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                return Result.fail({ message: "No permission to open checklist", code: DETAIL_CODES.NO_VIEW_PERMISSION }, resetTransientDetailIncidentEffects().concat([
+                    Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                         status: WorkflowRuntimeConstants.READINESS_STATUS.DENIED,
                         ready: false,
                         readyAt: "",
-                        error: "NO_VIEW_PERMISSION",
+                        error: DETAIL_CODES.NO_VIEW_PERMISSION,
                         rootId: sCanonicalRootId,
                         mode: WorkflowContracts.EDIT_MODES.READ,
                         permissionKnown: true,
@@ -240,8 +253,8 @@ function execute(mInput, mCtx) {
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
             var sCanonicalRootId = String((oResolved && oResolved.rootId) || sRootId).trim() || sRootId;
-            var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, "selected");
-            var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, "snapshot");
+            var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, SELECTED_MODEL);
+            var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, SNAPSHOT_MODEL);
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
             var aSnapshotAttachments = Array.isArray(oSnapshot && oSnapshot.attachments) ? oSnapshot.attachments : [];
             var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : aSnapshotAttachments;
@@ -252,7 +265,7 @@ function execute(mInput, mCtx) {
             var oBaseSnapshot = cloneSnapshot(oNormalizedSnapshot);
             var oSelectedSnapshot = cloneSnapshot(oNormalizedSnapshot);
             return Result.ok({ snapshot: oBaseSnapshot }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
-                Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                     status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
                     ready: true,
                     readyAt: sReadyAt,
@@ -262,22 +275,22 @@ function execute(mInput, mCtx) {
                     permissionKnown: true,
                     lockKnown: true
                 }),
-                Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sCanonicalRootId),
-                Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sCanonicalRootId),
-                Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCanonicalRootId),
-                Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, oEditState.editMode),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, oEditState.lockState),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, oEditState.autosaveEnabled),
-                Effects.modelPatch("snapshot", "/", oBaseSnapshot),
-                Effects.modelPatch("selected", "/", oSelectedSnapshot),
-                Effects.modelPatch("selected", "/attachments", aEffectiveAttachments),
-                Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
-                Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sCanonicalRootId),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sCanonicalRootId),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCanonicalRootId),
+                Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, oEditState.editMode),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, oEditState.lockState),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, oEditState.autosaveEnabled),
+                Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, oBaseSnapshot),
+                Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
+                Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, aEffectiveAttachments),
+                Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
+                Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         }).catch(function (oError) {
             return Result.fail(oError, resetTransientDetailIncidentEffects().concat([
-                Effects.modelPatch("state", StatePaths.READINESS_DETAIL, {
+                Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                     status: WorkflowRuntimeConstants.READINESS_STATUS.ERROR,
                     ready: false,
                     readyAt: "",
@@ -287,8 +300,8 @@ function execute(mInput, mCtx) {
                     permissionKnown: false,
                     lockKnown: false
                 }),
-                Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                Effects.modelPatch("view", ViewPathContracts.DETAIL_SKELETON_BUSY, false)
+                Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
+                Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         });
     }

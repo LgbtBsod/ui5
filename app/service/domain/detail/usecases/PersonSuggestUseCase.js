@@ -4,9 +4,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (Result, Effects, DetailStateAccess, StatePaths, UseCaseValue, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (Result, Effects, DetailStateAccess, StatePaths, UseCaseValue, WorkflowContracts, ModelContracts) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var SELECTED_MODEL = ModelContracts.MODELS.SELECTED;
+    var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function PersonSuggestUseCase() {
         return {
@@ -22,7 +27,7 @@ function selectedItemPayload(oItem) {
 
     function resolveMode(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        return WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
     }
     function inputPathForTarget(sTarget) {
         return String(sTarget || "").toLowerCase() === "observed" ? "/observedInputValue" : "/observerInputValue";
@@ -39,13 +44,13 @@ function selectedItemPayload(oItem) {
 
     function advanceRequestVersion(oUiState, sTarget) {
         var sPath = requestVersionPathForTarget(sTarget);
-        var iNext = Number((oUiState && oUiState.get && oUiState.get("view", sPath)) || 0) + 1;
-        oUiState && oUiState.set && oUiState.set("view", sPath, iNext);
+        var iNext = Number((oUiState && oUiState.get && oUiState.get(VIEW_MODEL, sPath)) || 0) + 1;
+        oUiState && oUiState.set && oUiState.set(VIEW_MODEL, sPath, iNext);
         return iNext;
     }
 
     function isCurrentRequestVersion(oUiState, sTarget, iVersion) {
-        return Number((oUiState && oUiState.get && oUiState.get("view", requestVersionPathForTarget(sTarget))) || 0) === Number(iVersion || 0);
+        return Number((oUiState && oUiState.get && oUiState.get(VIEW_MODEL, requestVersionPathForTarget(sTarget))) || 0) === Number(iVersion || 0);
     }
 
     function execute(mInput, mCtx) {
@@ -60,8 +65,8 @@ function selectedItemPayload(oItem) {
         if (sMode !== WorkflowContracts.EDIT_MODES.EDIT) {
             advanceRequestVersion(oUiState, sTarget);
             return Promise.resolve(Result.ok({ skipped: true, items: [] }, [
-                Effects.modelPatch("view", sPath, []),
-                Effects.modelPatch("view", "/personSuggestHint", "")
+                Effects.modelPatch(VIEW_MODEL, sPath, []),
+                Effects.modelPatch(VIEW_MODEL, "/personSuggestHint", "")
             ]));
         }
 
@@ -71,13 +76,13 @@ function selectedItemPayload(oItem) {
             if (!oItem) { return Promise.resolve(Result.ok({ selected: false }, [])); }
             var aEffects = [
                 Effects.modelPatch("view", sInputPath, oItem.fullName || ""),
-                Effects.modelPatch("view", sPath, []),
-                Effects.modelPatch("view", "/personSuggestHint", ""),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_FULLNAME", oItem.fullName || ""),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_PERNER", oItem.perner || ""),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_POSITION", oItem.position || ""),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_ORGUNIT", oItem.orgUnit || ""),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)
+                Effects.modelPatch(VIEW_MODEL, sPath, []),
+                Effects.modelPatch(VIEW_MODEL, "/personSuggestHint", ""),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_FULLNAME", oItem.fullName || ""),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_PERNER", oItem.perner || ""),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_POSITION", oItem.position || ""),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_ORGUNIT", oItem.orgUnit || ""),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, true)
             ];
             return Promise.resolve(Result.ok({ selected: true }, aEffects));
         }
@@ -85,14 +90,14 @@ function selectedItemPayload(oItem) {
             advanceRequestVersion(oUiState, sTarget);
             var sValue = String((mInput && mInput.value) || "");
             return Promise.resolve(Result.ok({ manualChange: true }, [
-                Effects.modelPatch("view", sInputPath, sValue),
-                Effects.modelPatch("view", sPath, []),
-                Effects.modelPatch("view", "/personSuggestHint", ""),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_FULLNAME", sValue),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_PERNER", ""),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_POSITION", ""),
-                Effects.modelPatch("selected", "/basic/" + sPrefix + "_ORGUNIT", ""),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)
+                Effects.modelPatch(VIEW_MODEL, sInputPath, sValue),
+                Effects.modelPatch(VIEW_MODEL, sPath, []),
+                Effects.modelPatch(VIEW_MODEL, "/personSuggestHint", ""),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_FULLNAME", sValue),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_PERNER", ""),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_POSITION", ""),
+                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_ORGUNIT", ""),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, true)
             ]));
         }
 
@@ -102,8 +107,8 @@ function selectedItemPayload(oItem) {
         if (sTerm.length < 2) {
             advanceRequestVersion(oUiState, sTarget);
             return Promise.resolve(Result.ok({ items: [] }, [
-                Effects.modelPatch("view", sPath, []),
-                Effects.modelPatch("view", "/personSuggestHint", "")
+                Effects.modelPatch(VIEW_MODEL, sPath, []),
+                Effects.modelPatch(VIEW_MODEL, "/personSuggestHint", "")
             ]));
         }
 
@@ -125,8 +130,8 @@ function selectedItemPayload(oItem) {
                 });
             });
             return Result.ok({ items: aItems }, [
-                Effects.modelPatch("view", sPath, aItems),
-                Effects.modelPatch("view", "/personSuggestHint", aItems.length ? "" : "personSuggestNoDataHint")
+                Effects.modelPatch(VIEW_MODEL, sPath, aItems),
+                Effects.modelPatch(VIEW_MODEL, "/personSuggestHint", aItems.length ? "" : "personSuggestNoDataHint")
             ]);
         }).catch(function (oError) {
             if (!isCurrentRequestVersion(oUiState, sTarget, iRequestVersion)) {

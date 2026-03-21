@@ -28,7 +28,7 @@ sap.ui.define([], function () {
         DEFAULTS: Object.freeze({
             ANIMATION_ENABLED: true
         }),
-        APP_VIEW_PATHS: Object.freeze({
+        SHELL_PATHS: Object.freeze({
             ANIMATION_ENABLED: "/animationEnabled",
             INVERTED_BLOCK_SCHEME: "/invertedBlockScheme",
             THEME_MODE: "/themeMode"

@@ -2,9 +2,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (Result, Effects, SearchSelectionEffects, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+], function (Result, Effects, SearchSelectionEffects, StatePaths, ModelContracts, SearchRuntimeConstants) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var VIEW_MODEL = ModelContracts.MODELS.VIEW;
+    var SEARCH_MODE = SearchRuntimeConstants.SEARCH_MODE;
 
     function ExecuteSearchUseCase() {
         return {
@@ -19,12 +25,12 @@ function execute(mInput, mCtx) {
         }
 
         var sIntent = (mInput && mInput.intent) || "search";
-        var aEffects = [Effects.modelPatch("view", "/hasSearched", true)].concat(
+        var aEffects = [Effects.modelPatch(VIEW_MODEL, "/hasSearched", true)].concat(
             SearchSelectionEffects.buildSelectionResetEffects({ markBusy: true })
         );
 
         if (sIntent === "searchModeToggle") {
-            aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_SEARCH_MODE, (mInput && mInput.state) ? "LOOSE" : "EXACT"));
+            aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.SEARCH_MODE, (mInput && mInput.state) ? SEARCH_MODE.LOOSE : SEARCH_MODE.EXACT));
         }
 
         if (typeof oSmartControls.isReady === "function" && !oSmartControls.isReady()) {

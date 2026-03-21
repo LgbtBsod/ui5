@@ -1,13 +1,17 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
+], function (ModelContracts, ModelPathContracts, DetailUseCaseConstants, ViewPathContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var SELECTED_MODEL = MODELS.SELECTED;
-    var SNAPSHOT_MODEL = "snapshot";
+    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
     var STATE_MODEL = MODELS.STATE;
+    var VIEW_MODEL = MODELS.VIEW;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
     function uiState(mCtx) {
         return mCtx && mCtx.uiState;
@@ -15,7 +19,7 @@
 
     function readCurrentChecklist(mCtx) {
         var oUiState = uiState(mCtx);
-        return (oUiState && oUiState.get(SELECTED_MODEL, "/")) || {};
+        return (oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
     }
 
     function readCurrentAttachments(mCtx) {
@@ -25,7 +29,7 @@
 
     function readWorkingAttachments(mCtx) {
         var oUiState = uiState(mCtx);
-        var aSession = oUiState && oUiState.get("view", "/sessionAttachments");
+        var aSession = oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS);
         if (Array.isArray(aSession)) {
             return aSession;
         }
@@ -34,7 +38,7 @@
 
     function readDetailSnapshot(mCtx) {
         var oUiState = uiState(mCtx);
-        return (oUiState && oUiState.get(SNAPSHOT_MODEL, "/")) || {};
+        return (oUiState && oUiState.get(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
     }
 
     function readRequiredFields(mCtx) {

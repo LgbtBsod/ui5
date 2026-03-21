@@ -5,9 +5,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants, ModelContracts) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var SELECTED_MODEL = ModelContracts.MODELS.SELECTED;
+    var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function RowOpsUseCase() {
         return {
@@ -73,9 +78,9 @@ function nextNum(aRows, sField) {
 
     function markDirtyResult(sEntity, sOp) {
         return Result.ok({ entity: sEntity, op: sOp }, [
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true),
-            Effects.modelPatch("state", StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.DIRTY),
-            Effects.modelPatch("state", StatePaths.PERSISTENCE_MESSAGE_KEY, "persistenceDirty")
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, true),
+            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.DIRTY),
+            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_MESSAGE_KEY, "persistenceDirty")
         ]);
     }
 
@@ -89,29 +94,29 @@ function nextNum(aRows, sField) {
     function handleEntityRowOp(oUiState, sEntity, sOp, mInput) {
         var oConfig = DetailRowEntityConfig.get(sEntity);
         var sRowsPath = DetailRowBindingRuntime.resolveRowsPath(oConfig);
-        var aRows = oUiState.get("selected", sRowsPath) || [];
+        var aRows = oUiState.get(SELECTED_MODEL, sRowsPath) || [];
         var sExpandedDialogPath;
         var oExpandedDialogState;
         var iRowIndex;
         if (sOp === "add") {
-            oUiState.set("selected", sRowsPath, aRows.concat([createRow(aRows, oConfig)]));
+            oUiState.set(SELECTED_MODEL, sRowsPath, aRows.concat([createRow(aRows, oConfig)]));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "delete") {
             iRowIndex = resolveRowIndexFromInput(mInput, aRows, sRowsPath);
             if (iRowIndex < 0) {
-                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, "selected", sRowsPath);
+                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, SELECTED_MODEL, sRowsPath);
             }
-            oUiState.set("selected", sRowsPath, removeRows(aRows, iRowIndex));
+            oUiState.set(SELECTED_MODEL, sRowsPath, removeRows(aRows, iRowIndex));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "expand" || sOp === "collapse") {
             sExpandedDialogPath = sEntity === "barrier"
                 ? "/detailExpandedDialogs/barriers"
                 : "/detailExpandedDialogs/checks";
-            oExpandedDialogState = oUiState.get("view", sExpandedDialogPath) || null;
+            oExpandedDialogState = oUiState.get(VIEW_MODEL, sExpandedDialogPath) || null;
             return Result.ok({ entity: sEntity, op: sOp }, [
-                Effects.modelPatch("view", "/activeExpandedDialog", oExpandedDialogState),
+                Effects.modelPatch(VIEW_MODEL, "/activeExpandedDialog", oExpandedDialogState),
                 Effects.dialog(oConfig.dialogId, sOp === "expand" ? "open" : "close", {})
             ]);
         }
@@ -177,8 +182,8 @@ function nextNum(aRows, sField) {
             var sDropPosition = oEvent && oEvent.getParameter && oEvent.getParameter("dropPosition");
             var sDraggedKey = resolveCardKeyFromControl(oEvent && oEvent.getParameter && oEvent.getParameter("draggedControl"));
             var sDroppedKey = resolveCardKeyFromControl(oEvent && oEvent.getParameter && oEvent.getParameter("droppedControl"));
-            var aCards = oUiState.get("view", "/infoCards") || [];
-            oUiState.set("view", "/infoCards", moveCard(aCards, sDraggedKey, sDroppedKey, sDropPosition));
+            var aCards = oUiState.get(VIEW_MODEL, "/infoCards") || [];
+            oUiState.set(VIEW_MODEL, "/infoCards", moveCard(aCards, sDraggedKey, sDroppedKey, sDropPosition));
             return Promise.resolve(Result.ok({ entity: sEntity, op: sOp }, []));
         }
         return Promise.resolve(Result.ok({ entity: sEntity, op: sOp }, [

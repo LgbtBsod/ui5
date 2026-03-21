@@ -5,9 +5,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry"
-], function (Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+], function (Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry, SearchRuntimeConstants) {
     "use strict";
+
+    var SEARCH_MODE = SearchRuntimeConstants.SEARCH_MODE;
+    var SEARCH_SEGMENTS = SearchRuntimeConstants.SEARCH_SEGMENTS;
 
     function ExportSearchUseCase() {
         return {
@@ -141,9 +145,9 @@ function pick(v, fallback) {
             filterLpc: pickStateOrFilter(mFilterData.Lpc, mState.filterLpc),
             filterProfession: pickFilterValue(mFilterData.ProfessionText),
             filterStatus: pickFilterValue(mFilterData.Status),
-            searchMode: String(mState.searchMode || "EXACT").toUpperCase(),
-            checksSegment: String(((mState.search || {}).checksFailSegment) || mState.filterFailedChecks || "ALL").toUpperCase(),
-            barriersSegment: String(((mState.search || {}).barriersFailSegment) || mState.filterFailedBarriers || "ALL").toUpperCase()
+            searchMode: String(mState.searchMode || SEARCH_MODE.EXACT).toUpperCase(),
+            checksSegment: String(((mState.search || {}).checksFailSegment) || SEARCH_SEGMENTS.ALL).toUpperCase(),
+            barriersSegment: String(((mState.search || {}).barriersFailSegment) || SEARCH_SEGMENTS.ALL).toUpperCase()
         };
     }
 

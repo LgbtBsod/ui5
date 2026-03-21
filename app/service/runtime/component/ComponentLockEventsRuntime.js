@@ -2,9 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts) {
     "use strict";
+
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
 
     function readCurrentLockScope(oStateModel, oStatePaths) {
         return {
@@ -40,7 +44,7 @@ sap.ui.define([
         var oComponent = mOptions.component;
         var oMainServiceModel = mOptions.mainServiceModel;
         var oStateModel = mOptions.stateModel;
-        var oUiStateModel = mOptions.uiStateModel;
+        var oShellModel = mOptions.shellModel;
         var oCacheModel = mOptions.cacheModel;
         var oStatePaths = mOptions.statePaths || {};
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
@@ -69,7 +73,7 @@ sap.ui.define([
                 preserveDirty: false
             }, oComponent._ctx).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
-                ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
+                ComponentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
                 fnEmitTelemetry("lock.lost.detected", mOptions.telemetryRuntime.lockLost(
                     (oPayload && (oPayload.code || oPayload.reason_code)) || "KILLED",
                     "lock_probe"
@@ -88,7 +92,11 @@ sap.ui.define([
             ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_HAS_VALID_LOCK, true);
             ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, true);
             ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_LAST_LOCK_REFRESH_AT, new Date().toISOString());
-            ModelStateRuntime.writeOnModel(oUiStateModel, "/lock", { ok: true, reason: "OWNED_BY_YOU", isKilled: false });
+            ModelStateRuntime.writeOnModel(oShellModel, MODEL_PATHS.SHELL_LOCK, {
+                ok: true,
+                reason: WorkflowContracts.REASONS.OWNED_BY_YOU,
+                isKilled: false
+            });
             if (bResetConflict) {
                 ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", false);
             }
@@ -141,9 +149,9 @@ sap.ui.define([
         });
         oComponent._oActivity.attachEvent("activity", function (oEvent) {
             var sAt = (ComponentRuntimeSupport.eventPayload(oEvent) || {}).at || new Date().toISOString();
-            ModelStateRuntime.setManyOnModel(oUiStateModel, {
-                "/activity/lastActiveAt": sAt,
-                "/activity/idleUntil": new Date(Date.parse(sAt) + Number(TimeConfigService.read(oStateModel, "idleMs"))).toISOString()
+            ModelStateRuntime.setManyOnModel(oShellModel, {
+                [MODEL_PATHS.SHELL_ACTIVITY_LAST_ACTIVE_AT]: sAt,
+                [MODEL_PATHS.SHELL_ACTIVITY_IDLE_UNTIL]: new Date(Date.parse(sAt) + Number(TimeConfigService.read(oStateModel, "idleMs"))).toISOString()
             });
         });
     }

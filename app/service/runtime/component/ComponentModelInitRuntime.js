@@ -23,16 +23,14 @@
         var Device = mDeps.Device;
 
         return {
-            dataModel: reuseJsonModel(oComponent.getModel("data"), ModelFactory.createDataModel),
-            mplModel: reuseJsonModel(oComponent.getModel("mpl"), ModelFactory.createMplModel),
+            locationTreeModel: reuseJsonModel(oComponent.getModel(MODELS.LOCATION_TREE), ModelFactory.createLocationTreeModel),
             stateModel: reuseJsonModel(oComponent.getModel(MODELS.STATE), ModelFactory.createStateModel),
-            uiStateModel: reuseJsonModel(oComponent.getModel("uiState"), ModelFactory.createUiStateModel),
+            shellModel: reuseJsonModel(oComponent.getModel(MODELS.SHELL), ModelFactory.createShellModel),
             viewModel: reuseJsonModel(oComponent.getModel(MODELS.VIEW), ModelFactory.createViewModel),
             selectedModel: reuseJsonModel(oComponent.getModel(MODELS.SELECTED), function () { return new JSONModel({}); }),
-            snapshotModel: reuseJsonModel(oComponent.getModel("snapshot"), ModelFactory.createSnapshotModel),
+            snapshotModel: reuseJsonModel(oComponent.getModel(MODELS.SNAPSHOT), ModelFactory.createSnapshotModel),
             masterDataModel: reuseJsonModel(oComponent.getModel(MODELS.MASTER_DATA), ModelFactory.createMasterDataModel),
-            layoutModel: reuseJsonModel(oComponent.getModel("layout"), ModelFactory.createLayoutModel),
-            cacheModel: reuseJsonModel(oComponent.getModel("cache"), ModelFactory.createCacheModel),
+            cacheModel: reuseJsonModel(oComponent.getModel(MODELS.CACHE), ModelFactory.createCacheModel),
             envModel: ModelFactory.createEnvModel(),
             deviceModel: new JSONModel(Device)
         };
@@ -40,20 +38,17 @@
 
     function registerModels(oComponent, mModels) {
         var oDeviceModel = mModels.deviceModel;
-        oComponent.setModel(mModels.dataModel, "data");
-        oComponent.setModel(mModels.mplModel, "mpl");
+        oComponent.setModel(mModels.locationTreeModel, MODELS.LOCATION_TREE);
         oComponent.setModel(mModels.selectedModel, MODELS.SELECTED);
-        oComponent.setModel(mModels.snapshotModel, "snapshot");
+        oComponent.setModel(mModels.snapshotModel, MODELS.SNAPSHOT);
         oComponent.setModel(mModels.stateModel, MODELS.STATE);
-        oComponent.setModel(mModels.uiStateModel, "uiState");
+        oComponent.setModel(mModels.shellModel, MODELS.SHELL);
         oComponent.setModel(mModels.viewModel, MODELS.VIEW);
-        oComponent.setModel(mModels.viewModel, MODELS.APP_VIEW);
         oComponent.setModel(mModels.masterDataModel, MODELS.MASTER_DATA);
-        oComponent.setModel(mModels.layoutModel, "layout");
-        oComponent.setModel(mModels.cacheModel, "cache");
-        oComponent.setModel(mModels.envModel, "env");
+        oComponent.setModel(mModels.cacheModel, MODELS.CACHE);
+        oComponent.setModel(mModels.envModel, MODELS.ENV);
         oDeviceModel.setDefaultBindingMode("OneWay");
-        oComponent.setModel(oDeviceModel, "device");
+        oComponent.setModel(oDeviceModel, MODELS.DEVICE);
     }
 
     return {

@@ -22,7 +22,7 @@
             formatHumanDateTime: ComponentFormattingRuntime.formatHumanDateTime,
             eventPayload: ComponentFormattingRuntime.eventPayload,
             applyLockProbeState: ComponentDetailStateRuntime.applyLockProbeState,
-            syncUiStateMode: ComponentDetailStateRuntime.syncUiStateMode,
+            syncShellRuntimeState: ComponentDetailStateRuntime.syncShellRuntimeState,
             syncDetailCurrentFromSelected: ComponentDetailStateRuntime.syncDetailCurrentFromSelected,
             resolveDetailCurrent: ComponentDetailStateRuntime.resolveDetailCurrent
         };

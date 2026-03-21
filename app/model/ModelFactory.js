@@ -4,9 +4,10 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/AttachmentUploadPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime, WorkflowContracts, WorkflowRuntimeConstants) {
+], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime, ThemeContracts, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
     function clone(v) {
@@ -51,23 +52,55 @@
         };
     }
 
+    function createShellDefaults() {
+        var oLayoutDefaults = createLayoutDefaults();
+
+        return {
+            animationEnabled: ThemeContracts.DEFAULTS.ANIMATION_ENABLED,
+            compactDensity: false,
+            invertedBlockScheme: false,
+            themeMode: ThemeContracts.MODES.MORNING,
+            isPhoneViewport: false,
+            isTabletViewport: false,
+            viewportWidth: 0,
+            busy: false,
+            currentRootKey: "",
+            sessionGuid: "",
+            lock: { ok: false, reason: WorkflowContracts.REASONS.FREE, isKilled: false },
+            timers: createTimers(),
+            activity: { lastActiveAt: "", idleUntil: "" },
+            smartFilter: oLayoutDefaults.smartFilter,
+            smartTable: oLayoutDefaults.smartTable,
+            personalization: oLayoutDefaults.personalization,
+            shell: {
+                eyebrow: "",
+                productName: "",
+                routeLabel: "",
+                contextSubtitle: "",
+                userLabel: "",
+                userMeta: "",
+                userSessionLabel: "",
+                userSessionState: "Information",
+                userActionVisible: false,
+                userActionText: "",
+                userActionIcon: "sap-icon://employee-lookup",
+                userActionType: "Transparent",
+                userActionKind: "",
+                userActionHint: "",
+                userActionPassiveText: "",
+                userTooltip: "",
+                userIcon: "sap-icon://employee",
+                userSummaryText: "",
+                userPermissions: [],
+                userLoginLabel: "",
+                userEnvironmentLabel: "",
+                userRefreshBusy: false,
+                showHints: oLayoutDefaults.personalization.showHints
+            }
+        };
+    }
+
     return {
-        createDataModel: function () {
-            return createModel({ checkLists: [], visibleCheckLists: [], selectedChecklist: null });
-        },
-
-        createUiStateModel: function () {
-            return createModel({
-                mode: WorkflowContracts.EDIT_MODES.READ,
-                busy: false,
-                currentRootKey: "",
-                sessionGuid: "",
-                lock: { ok: false, reason: "FREE", isKilled: false },
-                timers: createTimers(),
-                activity: { lastActiveAt: "", idleUntil: "" }
-            });
-        },
-
         createViewModel: function () {
             return createModel({
                 root: {},
@@ -109,11 +142,11 @@
             return createModel(StateSchema.createStateDefaults());
         },
 
-        createLayoutModel: function () {
-            return createModel(createLayoutDefaults());
+        createShellModel: function () {
+            return createModel(createShellDefaults());
         },
 
-        createMplModel: function () {
+        createLocationTreeModel: function () {
             return createModel({ locations: [] });
         },
 

@@ -7,8 +7,8 @@ sap.ui.define([
     var getText = ControllerTextRuntime.getText;
 
     return {
-        _ensureAppViewDefaults: function () {
-            ShellStateRuntime.ensureAppViewDefaults(this);
+        _ensureShellDefaults: function () {
+            ShellStateRuntime.ensureShellDefaults(this);
         },
         _syncShellState: function () {
             ShellStateRuntime.syncShellState(this, {

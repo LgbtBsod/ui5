@@ -13,7 +13,7 @@
     function attachLifecycleBindings(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
-        var oUiStateModel = mOptions.uiStateModel;
+        var oShellModel = mOptions.shellModel;
         var oSelectedModel = mOptions.selectedModel;
         var StatePaths = mOptions.statePaths || {};
         var fnEmitTelemetry = mOptions.emitTelemetry;
@@ -24,7 +24,7 @@
         oComponent._fnStateModelPropertyChange = function (oEvent) {
             var sPath = oEvent.getParameter("path") || "";
             if ([PATHS.IS_LOADING, PATHS.ACTIVE_OBJECT_ID, StatePaths.SESSION_ID, StatePaths.UI_BUSY_DETAIL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE].indexOf(sPath) >= 0) {
-                mOptions.componentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
+                mOptions.componentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
             }
             if ([PATHS.ACTIVE_OBJECT_ID, StatePaths.READINESS_DETAIL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, StatePaths.WORKFLOW_DIRTY, StatePaths.VALIDATION_SUMMARY].indexOf(sPath) >= 0) {
                 ComponentDetailMetaSyncRuntime.syncDetailMeta(oStateModel, StatePaths);

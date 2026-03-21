@@ -1,5 +1,10 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (DetailUseCaseConstants) {
     "use strict";
+
+    var ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
 
     function text(vValue, sFallback) {
         var sValue = String(vValue || "").trim();
@@ -16,7 +21,7 @@ sap.ui.define([], function () {
             canView: !!(oResolved.canView || oResolved.CanView || oOptions.canView),
             canEdit: !!(oResolved.canEdit || oResolved.CanEdit || oOptions.canEdit),
             canDelete: !!(oResolved.canDelete || oResolved.CanDelete || oOptions.canDelete),
-            reasonCode: text(oResolved.reasonCode || oResolved.ReasonCode, oOptions.reasonCode || "AUTHORIZED"),
+            reasonCode: text(oResolved.reasonCode || oResolved.ReasonCode, oOptions.reasonCode || ACCESS_REASON_CODES.AUTHORIZED),
             message: text(oResolved.message || oResolved.Message, oOptions.message || ""),
             requestedActivity: text(oResolved.requestedActivity || oResolved.RequestedActivity, oOptions.requestedActivity || "")
         };
@@ -40,7 +45,7 @@ sap.ui.define([], function () {
     function buildDeniedViewState(oPermission, sRootId) {
         var oGuard = buildGuard(oPermission, sRootId, {
             canView: false,
-            reasonCode: "NO_VIEW_PERMISSION"
+            reasonCode: DETAIL_CODES.NO_VIEW_PERMISSION
         });
         return {
             busy: false,

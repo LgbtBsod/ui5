@@ -6,7 +6,7 @@
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var APP_VIEW_MODEL = MODELS.APP_VIEW;
+    var SHELL_MODEL = MODELS.SHELL;
     var PHONE_MAX_WIDTH = 720;
     var TABLET_MAX_WIDTH = 1080;
 
@@ -19,9 +19,9 @@
         var bPhone = iWidth > 0 && iWidth <= PHONE_MAX_WIDTH;
         var bTablet = iWidth > PHONE_MAX_WIDTH && iWidth <= TABLET_MAX_WIDTH;
 
-        ModelStateRuntime.write(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_PHONE_VIEWPORT, bPhone);
-        ModelStateRuntime.write(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_TABLET_VIEWPORT, bTablet);
-        ModelStateRuntime.write(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_VIEWPORT_WIDTH, iWidth);
+        ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_IS_PHONE_VIEWPORT, bPhone);
+        ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_IS_TABLET_VIEWPORT, bTablet);
+        ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_VIEWPORT_WIDTH, iWidth);
 
         if (typeof oController._syncShellMetrics === "function") {
             oController._syncShellMetrics();

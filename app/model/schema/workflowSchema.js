@@ -8,8 +8,6 @@
     return {
         filterId: "",
         filterLpc: "",
-        filterFailedChecks: "ALL",
-        filterFailedBarriers: "ALL",
         search: { checksFailSegment: "ALL", barriersFailSegment: "ALL" },
         searchMode: "EXACT",
         searchBackendTop: "100",
@@ -66,8 +64,7 @@
                 editMode: WorkflowContracts.EDIT_MODES.READ,
                 lock: { state: WorkflowContracts.LOCK_STATES.READ_ONLY },
                 autosave: { state: WorkflowContracts.AUTOSAVE_STATES.IDLE, lastSavedAt: null }
-            },
-            search: { mode: "EXACT", segments: { checks: "ALL", barriers: "ALL" } }
+            }
         },
         operationalKpi: {
             saveAttempts: 0, saveSuccess: 0, saveFailed: 0,

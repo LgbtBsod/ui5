@@ -3,11 +3,13 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ProgressiveReadinessConstants"
-], function (ComponentFormattingRuntime, ControllerViewStateRuntime, ModelStateRuntime, StatePaths, ProgressiveReadinessContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ProgressiveReadinessConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (ComponentFormattingRuntime, ControllerViewStateRuntime, ModelStateRuntime, StatePaths, ProgressiveReadinessContracts, ModelContracts) {
     "use strict";
 
     var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function formatSearchDateTime(vDate) {
         if (vDate === null || vDate === undefined || vDate === "") {
@@ -35,7 +37,7 @@
             "/loadErrorMessage": oStatus.loadError ? String(oStatus.loadErrorMessage || SEARCH_READINESS.LOAD_ERROR_MESSAGE) : ""
         };
         mState[StatePaths.UI_BUSY_SEARCH_TABLE] = !!oStatus.isBusy;
-        ModelStateRuntime.setMany(oController, "state", mState);
+        ModelStateRuntime.setMany(oController, STATE_MODEL, mState);
     }
 
     function markLoading(oController) {

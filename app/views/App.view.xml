@@ -14,15 +14,15 @@
         width="100%">
         <VBox id="appShellHeaderHost" class="appContent appShellHeaderHost" renderType="Bare">
             <cc:AppShellHeader
-                eyebrow="{appView>/shell/eyebrow}"
-                productName="{appView>/shell/productName}"
-                contextSubtitle="{appView>/shell/contextSubtitle}"
-                userLabel="{appView>/shell/userLabel}"
-                userIcon="{appView>/shell/userIcon}"
+                eyebrow="{shell>/shell/eyebrow}"
+                productName="{shell>/shell/productName}"
+                contextSubtitle="{shell>/shell/contextSubtitle}"
+                userLabel="{shell>/shell/userLabel}"
+                userIcon="{shell>/shell/userIcon}"
                 showHelp="false"
                 settingsTooltip="{i18n>shellSettingsTooltip}"
                 analyticsTooltip="{i18n>workflowAnalyticsTitle}"
-                userTooltip="{appView>/shell/userTooltip}"
+                userTooltip="{shell>/shell/userTooltip}"
                 settingsPress=".onOpenShellSettings"
                 analyticsPress=".onOpenShellAnalytics"
                 userPress=".onOpenShellUserMenu"/>

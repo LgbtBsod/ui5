@@ -1,5 +1,4 @@
 ﻿sap.ui.define([
-    "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
@@ -9,9 +8,10 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
 ], function (
-    JSONModel,
     RouteModeCoordinator,
     DebugLogger,
     ControllerModelRuntime,
@@ -21,13 +21,17 @@
     TimerDefaults,
     SchedulingRuntime,
     NavigationContracts,
-    ModelPathContracts
+    ModelPathContracts,
+    ModelContracts,
+    JsRuntime
 ) {
     "use strict";
 
-    var APP_VIEW_PATHS = ThemeContracts.APP_VIEW_PATHS;
+    var MODELS = ModelContracts.MODELS;
+    var SHELL_PATHS = ThemeContracts.SHELL_PATHS;
     var LAYOUTS = NavigationContracts.LAYOUTS;
     var SYNC_SOURCES = ThemeContracts.SYNC_SOURCES;
+    var TYPE_UNDEFINED = JsRuntime.TYPEOF.UNDEFINED;
 
     function resolveStateModel(oController) {
         return ControllerModelRuntime.state(oController);
@@ -35,11 +39,11 @@
 
     function ensureControllerStateModel(oController, oStateModel) {
         if (oStateModel && !ControllerModelRuntime.state(oController)) {
-            ControllerModelRuntime.view(oController).setModel(oStateModel, "state");
+            ControllerModelRuntime.view(oController).setModel(oStateModel, MODELS.STATE);
         }
     }
 
-    function buildAppViewModelData(oThemeResult) {
+    function buildShellModelData(oThemeResult) {
         return {
             animationEnabled: !oThemeResult || oThemeResult.animationEnabled !== false,
             invertedBlockScheme: false,
@@ -49,20 +53,20 @@
     }
 
     function syncThemeState(oController, sSource, oThemeResult) {
-        var oAppView = ControllerModelRuntime.appView(oController);
-        var oAppViewPatch = buildAppViewModelData(oThemeResult);
+        var oShellModel = ControllerModelRuntime.shell(oController);
+        var oShellPatch = buildShellModelData(oThemeResult);
         var oModelPatch = {};
 
-        oModelPatch[APP_VIEW_PATHS.THEME_MODE] = oAppViewPatch.themeMode;
-        oModelPatch[APP_VIEW_PATHS.ANIMATION_ENABLED] = oAppViewPatch.animationEnabled;
-        if (oAppView) {
-            ModelStateRuntime.setManyOnModel(oAppView, oModelPatch);
+        oModelPatch[SHELL_PATHS.THEME_MODE] = oShellPatch.themeMode;
+        oModelPatch[SHELL_PATHS.ANIMATION_ENABLED] = oShellPatch.animationEnabled;
+        if (oShellModel) {
+            ModelStateRuntime.setManyOnModel(oShellModel, oModelPatch);
         }
         DebugLogger.info("theme", "sync", {
-            animationEnabled: oAppViewPatch.animationEnabled,
+            animationEnabled: oShellPatch.animationEnabled,
             appliedTheme: oThemeResult && oThemeResult.theme,
             source: sSource || SYNC_SOURCES.INIT,
-            themeMode: oAppViewPatch.themeMode
+            themeMode: oShellPatch.themeMode
         });
     }
 
@@ -94,16 +98,14 @@
     return {
         onInit: function (oController) {
             var oApplied = oController.applyStoredTheme();
-            var oAppViewData = buildAppViewModelData(oApplied);
             var oState = resolveStateModel(oController);
 
-            oController.setModel(new JSONModel(oAppViewData), "appView");
             syncThemeState(oController, SYNC_SOURCES.INIT, oApplied);
             ensureControllerStateModel(oController, oState);
             if (oState) {
                 ModelStateRuntime.setManyOnModel(oState, {
-                    "/layout": ModelStateRuntime.readOnModel(oState, "/layout", LAYOUTS.ONE_COLUMN) || LAYOUTS.ONE_COLUMN,
-                    [ModelPathContracts.SELECTED_ID]: typeof ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, undefined) === "undefined"
+                    [ModelPathContracts.LAYOUT]: ModelStateRuntime.readOnModel(oState, ModelPathContracts.LAYOUT, LAYOUTS.ONE_COLUMN) || LAYOUTS.ONE_COLUMN,
+                    [ModelPathContracts.SELECTED_ID]: typeof ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, undefined) === TYPE_UNDEFINED
                         ? null
                         : ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, null)
                 });

@@ -2,12 +2,14 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
-], function (Effects, StatePaths, WorkflowContracts, DetailPersistenceConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (Effects, StatePaths, WorkflowContracts, DetailPersistenceConstants, ModelContracts) {
     "use strict";
 
     var STATES = DetailPersistenceConstants.STATES;
     var TAXONOMY = DetailPersistenceConstants.TAXONOMY;
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function upper(vValue) {
         return String(vValue || "").trim().toUpperCase();
@@ -174,8 +176,8 @@
     function modelEffects(mPayload) {
         var oPayload = createPayload(mPayload);
         return [
-            Effects.modelPatch("state", "/persistence", oPayload),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, (function () {
+            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE, oPayload),
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, (function () {
                 if (oPayload.state === STATES.SAVING || oPayload.state === STATES.AUTOSAVING) {
                     return WorkflowContracts.AUTOSAVE_STATES.SAVING;
                 }
@@ -187,8 +189,8 @@
                 }
                 return WorkflowContracts.AUTOSAVE_STATES.IDLE;
             }())),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, oPayload.lastSavedAt),
-            Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, !!(oPayload.isManualSaveInFlight || oPayload.isAutoSaveInFlight))
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, oPayload.lastSavedAt),
+            Effects.modelPatch(STATE_MODEL, StatePaths.SAVE_IN_FLIGHT, !!(oPayload.isManualSaveInFlight || oPayload.isAutoSaveInFlight))
         ];
     }
 

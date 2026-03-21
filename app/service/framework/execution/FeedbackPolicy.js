@@ -3,12 +3,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NormalizedError",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (Effects, NormalizedError, ComponentSaveGuardContracts, EffectFeedbackContracts, FeedbackConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (Effects, NormalizedError, ComponentSaveGuardContracts, EffectFeedbackContracts, FeedbackConstants, ModelContracts) {
     "use strict";
 
     var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function buildNormalizedError(mInput) {
         return NormalizedError.create(mInput || {});
@@ -77,7 +79,7 @@ sap.ui.define([
     function toEffects(oError) {
         var oNormalized = normalize(oError);
         var aEffects = oNormalized.kind === NormalizedError.KINDS.VALIDATION
-            ? [Effects.modelPatch("state", "/ui/feedback/inlineErrors", oNormalized.params)]
+            ? [Effects.modelPatch(STATE_MODEL, "/ui/feedback/inlineErrors", oNormalized.params)]
             : [];
         var sKind = String(oNormalized.kind || "").toUpperCase();
         var bGlobalIncident = sKind === "BACKEND" && String(oNormalized.messageKey || "") === BANNER_TEXT_KEY.SESSION_EXPIRED;

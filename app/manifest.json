@@ -131,13 +131,7 @@
           "fallbackLocale": ""
         }
       },
-      "data": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
       "state": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "layout": {
         "type": "sap.ui.model.json.JSONModel"
       },
       "cache": {
@@ -146,13 +140,13 @@
       "masterData": {
         "type": "sap.ui.model.json.JSONModel"
       },
-      "uiState": {
+      "shell": {
         "type": "sap.ui.model.json.JSONModel"
       },
       "selected": {
         "type": "sap.ui.model.json.JSONModel"
       },
-      "mpl": {
+      "locationtree": {
         "type": "sap.ui.model.json.JSONModel"
       }
     },

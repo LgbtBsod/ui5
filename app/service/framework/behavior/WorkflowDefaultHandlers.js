@@ -7,15 +7,18 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/WorkflowBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (LockAdapter, DialogOrchestrator, StatePaths, RootIdRuntime, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, CreateSentinel, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (LockAdapter, DialogOrchestrator, StatePaths, RootIdRuntime, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, CreateSentinel, WorkflowContracts, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 
     var WORKFLOW_SCOPE = "workflow";
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
     var RESULT_SAVE = "SAVE";
     var RESULT_DISCARD = "DISCARD";
     var RESULT_CANCEL = "CANCEL";
-    var RESULT_NO_CHANGES = "NO_CHANGES";
+    var RESULT_NO_CHANGES = DetailUseCaseConstants.CODES.NO_CHANGES;
     var RESULT_SAVE_FAILED = "SAVE_FAILED";
     var HTTP_CONFLICT = 409;
     var HTTP_GONE = 410;
@@ -41,13 +44,13 @@
 
     function releaseWithTrySave(mContext) {
         var oController = mContext && mContext.controller;
-        var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, "state"));
+        var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, STATE_MODEL));
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(null);
         }
         return LockAdapter.release({
             rootId: sRootId,
-            sessionGuid: ModelStateRuntime.read(oController, "state", StatePaths.SESSION_ID, ""),
+            sessionGuid: ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.SESSION_ID, ""),
             payload: (mContext && mContext.payload) || {}
         }).catch(function () {
             return null;
@@ -78,7 +81,7 @@
 
     function confirmUnsavedAndHandle(mContext) {
         var oController = mContext && mContext.controller;
-        if (!ModelStateRuntime.read(oController, "state", "/isDirty", false)) {
+        if (!ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false)) {
             return Promise.resolve(RESULT_NO_CHANGES);
         }
         return DialogOrchestrator.promptConfirm(

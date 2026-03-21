@@ -13,9 +13,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var SELECTED_MODEL = MODELS.SELECTED;
+    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
+    var STATE_MODEL = MODELS.STATE;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
+    var DETAIL_REASONS = DetailUseCaseConstants.REASONS;
 
     function AutosaveDetailUseCase() {
         return {
@@ -40,7 +51,7 @@ function mapFieldDelta(mInput, oCurrent) {
 
     function readSelectedChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && typeof oUiState.get === "function" && oUiState.get("selected", "/")) || null;
+        return (oUiState && typeof oUiState.get === "function" && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || null;
     }
 
     function readCurrentChecklist(mCtx) {
@@ -59,9 +70,9 @@ function mapFieldDelta(mInput, oCurrent) {
 
     function isAutosaveAllowed(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
-        var sLockStatus = WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
-        var bDirty = !!(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DIRTY));
+        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        var sLockStatus = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
+        var bDirty = !!(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DIRTY));
         return WorkflowContracts.isEditLocked(sEditMode, sLockStatus) && bDirty;
     }
 
@@ -95,26 +106,26 @@ function execute(mInput, mCtx) {
         var aSerializedAttachments = [];
 
         if (CreateSentinel.isCreateId(sRootId)) {
-            return Promise.resolve(Result.ok({ skipped: true, reason: "CREATE_DRAFT_PENDING" }, []));
+            return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.CREATE_DRAFT_PENDING }, []));
         }
         if (!isAutosaveAllowed(mCtx)) {
-            return Promise.resolve(Result.ok({ skipped: true, reason: "AUTOSAVE_GUARD" }, []));
+            return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.AUTOSAVE_GUARD }, []));
         }
         if (!sRootId || !oRepo || typeof oRepo.autosaveChecklist !== "function") {
-            return Promise.resolve(Result.fail({ message: "Autosave unavailable", code: "AUTOSAVE_UNAVAILABLE" }));
+            return Promise.resolve(Result.fail({ message: "Autosave unavailable", code: DETAIL_CODES.AUTOSAVE_UNAVAILABLE }));
         }
 
         oDelta = resolveDelta(mInput, mCtx);
         if (!oDelta) {
-            return Promise.resolve(Result.fail({ message: "Autosave delta is empty", code: "AUTOSAVE_EMPTY_DELTA" }));
+            return Promise.resolve(Result.fail({ message: "Autosave delta is empty", code: DETAIL_CODES.AUTOSAVE_EMPTY_DELTA }));
         }
         if (!oDelta.client_version) {
             oDelta = Object.assign({}, oDelta, { client_version: resolveClientVersion(oDelta, mCtx) });
         }
 
         if (!sSessionGuid) {
-            return Promise.resolve(Result.fail({ message: "Autosave requires active session lock", code: "LOCK_REQUIRED" }, [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.FAILED)
+            return Promise.resolve(Result.fail({ message: "Autosave requires active session lock", code: DETAIL_CODES.LOCK_REQUIRED }, [
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.FAILED)
             ]));
         }
 
@@ -151,11 +162,11 @@ function execute(mInput, mCtx) {
             }).then(function (oAttachmentSync) {
                 return writeDetailCache(oCacheWrite, sRootId, oAttachmentSync.snapshot, mCtx).then(function () {
                     return Result.ok({ autosavedAt: sAt }, [
-                        Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
-                        Effects.modelPatch("snapshot", "/", CloneUtil.clone(oAttachmentSync.snapshot, {}))
+                        Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
+                        Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, CloneUtil.clone(oAttachmentSync.snapshot, {}))
                     ].concat(oAttachmentSync.effects, DetailPersistenceRuntime.successEffects("auto", sAt, {
                         state: oAttachmentSync.hasPendingAttachments ? DetailPersistenceRuntime.STATES.DIRTY : DetailPersistenceRuntime.STATES.SAVED,
-                        messageKey: oAttachmentSync.hasPendingAttachments ? "persistenceAutosavePendingAttachments" : "persistenceAutosaveSaved",
+                        messageKey: oAttachmentSync.hasPendingAttachments ? DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVE_PENDING_ATTACHMENTS : DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVE_SAVED,
                         hasValidLock: true,
                         lockOwnerSessionMatches: true,
                         lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sAt : null

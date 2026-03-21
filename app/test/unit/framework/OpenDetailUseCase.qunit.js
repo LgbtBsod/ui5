@@ -49,7 +49,7 @@
             assert.strictEqual(findPatch("state", "/hasConflict").value, false, "stale conflict flag is cleared");
             assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON).value, "", "lock lost reason is reset");
             assert.strictEqual(findPatch("state", StatePaths.PENDING_NAVIGATION_INTENT).value, null, "pending navigation intent is reset");
-            assert.deepEqual(findPatch("uiState", "/lock").value, {
+            assert.deepEqual(findPatch("shell", "/lock").value, {
                 ok: false,
                 reason: "FREE",
                 isKilled: false

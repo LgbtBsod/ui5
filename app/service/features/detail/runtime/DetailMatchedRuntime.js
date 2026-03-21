@@ -9,13 +9,15 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants"
-], function (DraftChecklistFactory, ModelPathContracts, ViewPathContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, CreateSentinel, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (DraftChecklistFactory, ModelPathContracts, ViewPathContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, CreateSentinel, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, DetailUseCaseConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
     var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
     var APP_SOURCES = OperationSourceContracts.APP;
 
     function createMatchedStatePatch(sId, sRouteName, bCreate) {
@@ -121,7 +123,7 @@
     function openCreateDraft(oController, mContext, mHooks) {
         if (mContext.oSelected && mContext.oSelected.setData) {
             mContext.oSelected.setData(DraftChecklistFactory.createEmptyDraft());
-            ModelStateRuntime.writeOnModel(mContext.oSelected, "/attachments", []);
+            ModelStateRuntime.writeOnModel(mContext.oSelected, DETAIL_MODEL_PATHS.ATTACHMENTS, []);
         }
         return mHooks.openChecklist({ id: CreateSentinel.VALUE, rootId: CreateSentinel.VALUE });
     }

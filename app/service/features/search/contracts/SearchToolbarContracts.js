@@ -1,6 +1,7 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelContracts) {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (ModelContracts, StatePaths) {
     "use strict";
 
     return Object.freeze({
@@ -14,7 +15,7 @@
             SEARCH_BACKEND_TOP: "/searchBackendTop",
             SEARCH_FETCH_LIMIT: "/searchFetchLimit",
             GROWING_PAGE_SIZE: "/growingPageSize",
-            SEARCH_MODE: "/searchMode"
+            SEARCH_MODE: StatePaths.SEARCH_MODE
         }),
         DEFAULTS: Object.freeze({
             SORT_KEY: ModelContracts.TOKENS.DATE_CHECK,

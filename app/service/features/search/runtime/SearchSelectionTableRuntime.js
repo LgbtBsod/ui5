@@ -2,8 +2,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchUiConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SearchUiContracts, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (ControllerViewStateRuntime, ModelStateRuntime, SearchUiContracts, JsRuntime, ModelContracts) {
     "use strict";
 
     var SEARCH_COLUMN_RULES = SearchUiContracts.COLUMN_RULES;
@@ -11,6 +12,7 @@
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var TYPE_OBJECT = JsRuntime.TYPEOF.OBJECT;
     var METHODS = JsRuntime.METHODS;
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function parseColumnPersonalizationData(oColumn) {
         var vData = oColumn && oColumn.data && oColumn.data("p13nData");
@@ -128,7 +130,7 @@
 
     function resolveSearchSelectionMode(oController) {
         var sSelectionMode = String(
-            ModelStateRuntime.read(oController, "state", "/smartTable/selectionMode", "MultiSelect")
+            ModelStateRuntime.read(oController, STATE_MODEL, "/smartTable/selectionMode", "MultiSelect")
         ).trim() || "MultiSelect";
         return sSelectionMode === "SingleSelectMaster" ? "MultiSelect" : sSelectionMode;
     }

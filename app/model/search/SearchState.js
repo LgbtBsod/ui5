@@ -1,19 +1,25 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+], function (StatePaths, SearchRuntimeConstants) {
     "use strict";
+
+    var SEARCH_MODE = SearchRuntimeConstants.SEARCH_MODE;
+    var SEARCH_SEGMENTS = SearchRuntimeConstants.SEARCH_SEGMENTS;
 
     return {
         applyDefaults: function (oStateModel) {
             if (!oStateModel.getProperty("/search") || typeof oStateModel.getProperty("/search") !== "object") {
                 oStateModel.setProperty("/search", {});
             }
-            if (!oStateModel.getProperty("/search/checksFailSegment")) {
-                oStateModel.setProperty("/search/checksFailSegment", "ALL");
+            if (!oStateModel.getProperty(StatePaths.SEARCH_CHECKS_FAIL_SEGMENT)) {
+                oStateModel.setProperty(StatePaths.SEARCH_CHECKS_FAIL_SEGMENT, SEARCH_SEGMENTS.ALL);
             }
-            if (!oStateModel.getProperty("/search/barriersFailSegment")) {
-                oStateModel.setProperty("/search/barriersFailSegment", "ALL");
+            if (!oStateModel.getProperty(StatePaths.SEARCH_BARRIERS_FAIL_SEGMENT)) {
+                oStateModel.setProperty(StatePaths.SEARCH_BARRIERS_FAIL_SEGMENT, SEARCH_SEGMENTS.ALL);
             }
-            if (!oStateModel.getProperty("/search/modeSwitch")) {
-                oStateModel.setProperty("/search/modeSwitch", oStateModel.getProperty("/searchMode") || "EXACT");
+            if (!oStateModel.getProperty(StatePaths.SEARCH_MODE)) {
+                oStateModel.setProperty(StatePaths.SEARCH_MODE, SEARCH_MODE.EXACT);
             }
         }
     };

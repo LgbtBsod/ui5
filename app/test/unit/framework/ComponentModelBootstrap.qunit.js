@@ -8,7 +8,7 @@ sap.ui.define([
     QUnit.test("creates json models and resolves manifest-owned mainService", function (assert) {
         var oModels = {
             stateModel: { id: "state" },
-            uiStateModel: { id: "ui" }
+            shellModel: { id: "shell" }
         };
         var oMainServiceModel = { id: "mainService" };
         var oComponent = {

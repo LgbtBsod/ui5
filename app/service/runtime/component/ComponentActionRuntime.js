@@ -60,7 +60,7 @@ sap.ui.define([
         var effectApplier = mOptions.effectApplier;
         var actionDispatcher = mOptions.actionDispatcher;
         var selectedModel = mOptions.selectedModel;
-        var uiStateModel = mOptions.uiStateModel;
+        var shellModel = mOptions.shellModel;
         var componentRuntimeSupport = mOptions.componentRuntimeSupport;
         var resolveBundleText = createBundleText(component);
 
@@ -71,7 +71,7 @@ sap.ui.define([
                 },
                 actionDispatcher: actionDispatcher
             });
-            componentRuntimeSupport.syncDetailCurrentFromSelected(selectedModel, uiStateModel);
+            componentRuntimeSupport.syncDetailCurrentFromSelected(selectedModel, shellModel);
         };
     }
 

@@ -12,7 +12,7 @@
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var APP_VIEW_MODEL = MODELS.APP_VIEW;
+    var SHELL_MODEL = MODELS.SHELL;
     var _RESIZE_END_DELAY_MS = 520;
     var _RESIZE_SAFETY_DELAY_MS = 1800;
     var _RESIZE_CLASS = "chkResizing";
@@ -137,12 +137,12 @@
         },
 
         _applyCompactDensityClass: function () {
-            var bCompact = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_COMPACT_DENSITY, false);
+            var bCompact = !!ModelStateRuntime.read(this, SHELL_MODEL, MODEL_PATHS.SHELL_COMPACT_DENSITY, false);
             ThemeDomRuntime.toggleClass(getAppDomTargets(this), "appDensityCompact", bCompact);
         },
 
         _applyInvertedBlockSchemeClass: function () {
-            var bEnabled = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
+            var bEnabled = !!ModelStateRuntime.read(this, SHELL_MODEL, MODEL_PATHS.SHELL_INVERTED_BLOCK_SCHEME, false);
             ThemeDomRuntime.toggleClass(getAppDomTargets(this), "appInvertedBlockScheme", bEnabled);
         },
 

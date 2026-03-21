@@ -148,6 +148,30 @@ def test_productive_frontend_has_no_app_constants_god_object_imports():
             assert marker not in text, f"AppConstants aggregator import leaked into repo path: {path}"
 
 
+def test_manifest_and_model_constants_expose_only_current_global_model_surface():
+    manifest = _read(APP_ROOT / "manifest.json")
+    model_constants = _read(APP_ROOT / "constants" / "ModelConstants.js")
+    model_bootstrap = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentModelInitRuntime.js")
+
+    assert '"shell": {' in manifest
+    assert '"locationtree": {' in manifest
+    assert '"state": {' in manifest
+    assert '"masterData": {' in manifest
+    assert '"cache": {' in manifest
+    assert '"data": {' not in manifest
+    assert '"uiState": {' not in manifest
+    assert '"layout": {' not in manifest
+    assert '"mpl": {' not in manifest
+    assert '"appView": {' not in manifest
+
+    assert 'DATA: "data"' not in model_constants
+    assert 'LOCATION_TREE: "locationtree"' in model_constants
+    assert 'SHELL: "shell"' in model_constants
+
+    assert 'MODELS.DATA' not in model_bootstrap
+    assert 'createDataModel' not in model_bootstrap
+
+
 def test_boot_and_runtime_source_lock_strict_success_path():
     bootstrap_source = _read(APP_ROOT / "service" / "framework" / "ComponentBootstrap.js")
     bootstrap_builder = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootstrapDependencyBuilder.js")

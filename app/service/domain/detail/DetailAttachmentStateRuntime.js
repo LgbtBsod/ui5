@@ -4,13 +4,19 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (Effects, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, ViewPathContracts, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Effects, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, ViewPathContracts, StatePaths, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
+    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
 
     function readSessionAttachments(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        var aSession = oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS);
+        var aSession = oUiState && oUiState.get(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS);
         return Array.isArray(aSession) ? aSession : [];
     }
 
@@ -23,9 +29,9 @@ sap.ui.define([
     function syncEffects(mCtx, aAttachments, sToastKey, sSeverity, bDirty) {
         var aPersisted = Array.isArray(aAttachments) ? aAttachments.slice() : [];
         return AttachmentEffectRuntime.buildAttachmentSyncEffects(aPersisted, sToastKey || "", sSeverity || "info").concat([
-            Effects.modelPatch("selected", "/attachments", aPersisted),
-            Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aPersisted),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, !!bDirty)
+            Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ATTACHMENTS, aPersisted),
+            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aPersisted),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, !!bDirty)
         ]);
     }
 
@@ -34,9 +40,9 @@ sap.ui.define([
         var aSession = readSessionAttachments(mCtx);
         var aAllNext = AttachmentIdentity.appendUnique(aCurrentAll, oAttachment);
         var aSessionNext = AttachmentIdentity.appendUnique(aSession, Object.assign({}, oAttachment, { _sessionUpload: true }));
-        return AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentUploaded", "success").concat([
-            Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, true)
+        return AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, sToastKey || DETAIL_MESSAGE_KEYS.ATTACHMENT_UPLOADED, "success").concat([
+            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, true)
         ]);
     }
 
@@ -45,8 +51,8 @@ sap.ui.define([
         var aSession = readSessionAttachments(mCtx);
         var aAllNext = AttachmentIdentity.removeByAttachment(aCurrentAll, sAttachmentId, oAttachment);
         var aSessionNext = AttachmentIdentity.removeByAttachment(aSession, sAttachmentId, oAttachment);
-        return AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, sToastKey || "attachmentDeleted", "info").concat([
-            Effects.modelPatch("view", ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext)
+        return AttachmentEffectRuntime.buildAttachmentSyncEffects(aAllNext, sToastKey || DETAIL_MESSAGE_KEYS.ATTACHMENT_DELETED, "info").concat([
+            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext)
         ]);
     }
 

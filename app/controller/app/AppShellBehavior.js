@@ -17,8 +17,7 @@
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var STATE_MODEL = MODELS.STATE;
-    var APP_VIEW_MODEL = MODELS.APP_VIEW;
-    var LAYOUT_MODEL = MODELS.LAYOUT;
+    var SHELL_MODEL = MODELS.SHELL;
 
     return {
         onToggleTheme: function () {
@@ -54,22 +53,22 @@
         },
         onToggleShellHints: function (oEvent) {
             var bState = !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"));
-            ModelStateRuntime.write(this, LAYOUT_MODEL, "/personalization/showHints", bState);
+            ModelStateRuntime.write(this, SHELL_MODEL, MODEL_PATHS.SHELL_PERSONALIZATION_SHOW_HINTS, bState);
             this._syncShellState();
         },
         onToggleCompactDensity: function (oEvent) {
-            var bState = ModelStateRuntime.writeBoolean(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_COMPACT_DENSITY, oEvent && oEvent.getParameter && oEvent.getParameter("state"));
+            var bState = ModelStateRuntime.writeBoolean(this, SHELL_MODEL, MODEL_PATHS.SHELL_COMPACT_DENSITY, oEvent && oEvent.getParameter && oEvent.getParameter("state"));
             this._applyCompactDensityClass();
             return bState;
         },
         onToggleThemeAnimation: function (oEvent) {
-            var bState = ModelStateRuntime.writeBoolean(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_ANIMATION_ENABLED, oEvent && oEvent.getParameter && oEvent.getParameter("state"));
+            var bState = ModelStateRuntime.writeBoolean(this, SHELL_MODEL, MODEL_PATHS.SHELL_ANIMATION_ENABLED, oEvent && oEvent.getParameter && oEvent.getParameter("state"));
             AppShellCoordinator.onToggleThemeAnimation(this, bState);
             return bState;
         },
         onToggleInvertedBlockScheme: function () {
-            var bCurrent = !!ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
-            var bState = ModelStateRuntime.writeBoolean(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, !bCurrent);
+            var bCurrent = !!ModelStateRuntime.read(this, SHELL_MODEL, MODEL_PATHS.SHELL_INVERTED_BLOCK_SCHEME, false);
+            var bState = ModelStateRuntime.writeBoolean(this, SHELL_MODEL, MODEL_PATHS.SHELL_INVERTED_BLOCK_SCHEME, !bCurrent);
             this._applyInvertedBlockSchemeClass();
             return bState;
         },
@@ -84,7 +83,7 @@
         },
         formatGlobalBannerType: function (sSeverity) { return FeedbackBannerState.toUi5MessageType(sSeverity); },
         onShellUserPrimaryAction: function () {
-            var sActionKind = String(ModelStateRuntime.read(this, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_SHELL_USER_ACTION_KIND, "") || "").trim();
+            var sActionKind = String(ModelStateRuntime.read(this, SHELL_MODEL, MODEL_PATHS.SHELL_USER_ACTION_KIND, "") || "").trim();
             if (ActionContract.normalizeShellUserAction(sActionKind) === ActionContract.SHELL_USER_ACTIONS.REFRESH_CONTEXT) {
                 return this._refreshShellUserContext();
             }

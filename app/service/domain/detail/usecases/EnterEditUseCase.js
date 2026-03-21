@@ -9,9 +9,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, WorkflowContracts, WorkflowRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, WorkflowContracts, WorkflowRuntimeConstants, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
 
     function EnterEditUseCase() {
         return {
@@ -25,9 +31,9 @@ function readCode(oLock) {
 
     function readOnlyEffects() {
         return [
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
-            Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
+            Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
         ];
     }
 
@@ -64,10 +70,10 @@ function readCode(oLock) {
             });
         }
         if (bCreateDraft) {
-            return Promise.resolve(Result.ok({ code: "CREATE_DRAFT" }, [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.CREATE),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+            return Promise.resolve(Result.ok({ code: ACCESS_REASON_CODES.CREATE_DRAFT }, [
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.CREATE),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
             ]));
         }
         if (!sSessionGuid) {
@@ -80,7 +86,7 @@ function readCode(oLock) {
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
         if (oStateModel) {
-            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "ACQUIRING_LOCK");
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK);
         }
 
         return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
@@ -88,7 +94,7 @@ function readCode(oLock) {
         }).then(function (oPermission) {
             var pPrecheck;
             if (!oPermission.allowed) {
-            return Result.fail({ message: "No permission to edit checklist", code: "NO_EDIT_PERMISSION" }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailEditPermissionDenied", readOnlyEffects()));
+                return Result.fail({ message: "No permission to edit checklist", code: DETAIL_CODES.NO_EDIT_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailEditPermissionDenied", readOnlyEffects()));
             }
             pPrecheck = (oCacheValidation && typeof oCacheValidation.execute === "function")
                 ? Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
@@ -120,10 +126,10 @@ function readCode(oLock) {
                             source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT
                     }
                 });
-            return Result.ok({ code: "OK", lock: oLock }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat([
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.EDIT),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.EDIT_LOCKED),
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
+                return Result.ok({ code: "OK", lock: oLock }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat([
+                    Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.EDIT),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.EDIT_LOCKED),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
                 ]));
             }
             if (sCode === "LOCKED_OWN_SESSION") {

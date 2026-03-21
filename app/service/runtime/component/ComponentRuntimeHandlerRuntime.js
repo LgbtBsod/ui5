@@ -6,7 +6,7 @@ sap.ui.define([
     function createForceReadOnlyHandler(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
-        var oUiStateModel = mOptions.uiStateModel;
+        var oShellModel = mOptions.shellModel;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
         var TelemetryRuntime = mOptions.telemetryRuntime;
         var fnApplyFacadeResult = mOptions.applyFacadeResult;
@@ -24,7 +24,7 @@ sap.ui.define([
                     fnClearPendingNavigationIntent();
                 }
                 fnApplyFacadeResult(oResult);
-                ComponentRuntimeSupport.syncUiStateMode(oStateModel, oUiStateModel);
+                ComponentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
                 fnEmitTelemetry("lock.lost.detected", TelemetryRuntime.lockLost(
                     mForceInput && mForceInput.reason,
                     mForceInput && mForceInput.source

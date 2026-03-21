@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (WorkflowRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (WorkflowRuntimeConstants, StatePaths) {
     "use strict";
 
     return Object.freeze({
@@ -9,7 +10,7 @@ sap.ui.define([
             CURRENT_USER: "/currentUser",
             FRONTEND_CONFIG_SOURCE: "/frontendConfigSource",
             FRONTEND_VARIABLES: "/frontendVariables",
-            IS_LOADING: "/isLoading",
+            IS_LOADING: StatePaths.IS_LOADING,
             LOAD_ERROR: "/loadError",
             LOAD_ERROR_MESSAGE: "/loadErrorMessage",
             LOCATIONS_LOADING: "/locationsLoading",

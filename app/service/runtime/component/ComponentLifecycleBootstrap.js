@@ -6,7 +6,7 @@ sap.ui.define([], function () {
             component: oComponent,
             mainServiceModel: mModels.mainServiceModel,
             stateModel: mModels.stateModel,
-            uiStateModel: mModels.uiStateModel,
+            shellModel: mModels.shellModel,
             cacheModel: mModels.cacheModel,
             statePaths: mDeps.StatePaths,
             componentRuntimeSupport: oRuntimeSupport,
@@ -25,9 +25,8 @@ sap.ui.define([], function () {
         return {
             component: oComponent,
             stateModel: mModels.stateModel,
-            uiStateModel: mModels.uiStateModel,
+            shellModel: mModels.shellModel,
             selectedModel: mModels.selectedModel,
-            layoutModel: mModels.layoutModel,
             cacheModel: mModels.cacheModel,
             masterDataModel: mModels.masterDataModel,
             envModel: mModels.envModel,
@@ -73,7 +72,7 @@ sap.ui.define([], function () {
         mDeps.ComponentManagerOrchestrationRuntime.attachManagerRuntime({
             component: oComponent,
             stateModel: mModels.stateModel,
-            uiStateModel: mModels.uiStateModel,
+            shellModel: mModels.shellModel,
             snapshotModel: mModels.snapshotModel,
             timerDefaults: mTelemetry.timerDefaults,
             managers: mDeps.managers,
@@ -102,7 +101,7 @@ sap.ui.define([], function () {
         return mDeps.ComponentBootRuntime.runBootSequence({
             component: oComponent,
             stateModel: mModels.stateModel,
-            uiStateModel: mModels.uiStateModel,
+            shellModel: mModels.shellModel,
             envModel: mModels.envModel,
             cacheModel: mModels.cacheModel,
             cacheAdapter: oComponent._ctx && oComponent._ctx.cache,

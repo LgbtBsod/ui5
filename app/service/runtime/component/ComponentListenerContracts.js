@@ -1,23 +1,25 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelContracts, NavigationContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (ModelContracts, NavigationContracts, ModelPathContracts, StatePaths, DetailUseCaseConstants) {
     "use strict";
 
     return Object.freeze({
         MODEL_NAMES: Object.freeze({
             I18N: ModelContracts.MODELS.I18N,
-            LAYOUT: ModelContracts.MODELS.LAYOUT,
-            CACHE: "cache",
+            SHELL: ModelContracts.MODELS.SHELL,
+            CACHE: ModelContracts.MODELS.CACHE,
             MASTER_DATA: ModelContracts.MODELS.MASTER_DATA,
-            ENV: "env"
+            ENV: ModelContracts.MODELS.ENV
         }),
         PATHS: Object.freeze({
             ACTIVE_OBJECT_ID: ModelPathContracts.ACTIVE_OBJECT_ID,
             DETAIL_ACCESS_GUARD: "/detailAccessGuard",
             IS_DIRTY: "/isDirty",
-            IS_LOADING: "/isLoading",
+            IS_LOADING: StatePaths.IS_LOADING,
             NAV_GUARD_BYPASS: "/navGuardBypass",
             SELECTED_ID: ModelPathContracts.SELECTED_ID
         }),
@@ -27,7 +29,7 @@
             FULL_SAVE_EVENT: "pcct:fullSave",
             LOCK_OWNED: "LOCK_OWNED",
             LOCK_RELEASED: "LOCK_RELEASED",
-            NO_CHANGES: "NO_CHANGES",
+            NO_CHANGES: DetailUseCaseConstants.CODES.NO_CHANGES,
             ONE_COLUMN: NavigationContracts.LAYOUTS.ONE_COLUMN,
             SAVE: "SAVE",
             UNSAVED_CHANGES_MESSAGE: "You have unsaved changes"

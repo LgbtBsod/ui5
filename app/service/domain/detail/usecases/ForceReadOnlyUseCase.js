@@ -4,12 +4,22 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var SELECTED_MODEL = MODELS.SELECTED;
+    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
+    var STATE_MODEL = MODELS.STATE;
+    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
     function ForceReadOnlyUseCase() {
         return {
@@ -17,7 +27,7 @@ sap.ui.define([
         };
     }
 
-function isLockLostReason(sReason) {
+    function isLockLostReason(sReason) {
         var sNormalized = String(sReason || "").toUpperCase();
         return sNormalized === WorkflowContracts.REASONS.KILLED || sNormalized === WorkflowContracts.REASONS.EXPIRED || sNormalized === WorkflowContracts.REASONS.LOCK_EXPIRED || sNormalized === WorkflowContracts.REASONS.LOST;
     }
@@ -38,12 +48,12 @@ function isLockLostReason(sReason) {
 
     function resolvePersistenceMessageKey(sReason) {
         if (isLockLostReason(sReason)) {
-            return "persistenceLockLost";
+            return DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_LOST;
         }
         if (isIdleTimeoutReason(sReason)) {
-            return "persistenceIdleTimeoutGrace";
+            return DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE_TIMEOUT_GRACE;
         }
-        return "persistenceForcedReadOnly";
+        return DETAIL_MESSAGE_KEYS.PERSISTENCE_FORCED_READ_ONLY;
     }
 
     function shouldRestoreSnapshotState(sReason, bPreserveDirty) {
@@ -61,12 +71,14 @@ function isLockLostReason(sReason) {
         var oLockPort = mCtx && mCtx.lock;
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
-        var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
-        var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
+        var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
         var oStateModel = mCtx && mCtx.stateModel;
-        var oSelectedState = (oUiState && typeof oUiState.get === "function" && oUiState.get("selected", "/")) || {};
-        var oSnapshotState = (oUiState && typeof oUiState.get === "function" && oUiState.get("snapshot", "/")) || {};
-        var sTransitionState = isIdleTimeoutReason(sReason) ? "IDLE_TIMEOUT_GRACE" : (isLockLostReason(sReason) ? "LOCK_LOST" : "FORCED_READ_ONLY");
+        var oSelectedState = (oUiState && typeof oUiState.get === "function" && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
+        var oSnapshotState = (oUiState && typeof oUiState.get === "function" && oUiState.get(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
+        var sTransitionState = isIdleTimeoutReason(sReason)
+            ? WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE
+            : (isLockLostReason(sReason) ? WorkflowContracts.LOCK_STATES.LOCK_LOST : WorkflowContracts.LOCK_STATES.FORCED_READ_ONLY);
         var bRestoreSnapshotState = shouldRestoreSnapshotState(sReason, bPreserveDirty);
         var bShouldRelease = !!(
             sRootId &&
@@ -82,7 +94,7 @@ function isLockLostReason(sReason) {
         }
         var pRelease = bShouldRelease
             ? Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () {
-                return { ok: false, released: false, messageKey: "lockReleaseFailed" };
+                return { ok: false, released: false, messageKey: DETAIL_MESSAGE_KEYS.LOCK_RELEASE_FAILED };
             })
             : Promise.resolve(null);
 
@@ -90,14 +102,14 @@ function isLockLostReason(sReason) {
             var sPersistenceState = resolvePersistenceState(sReason);
             var sPersistenceMessageKey = resolvePersistenceMessageKey(sReason);
             aEffects = [
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, sTransitionState),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
-                Effects.modelPatch("state", StatePaths.PENDING_NAVIGATION_INTENT, null),
-                Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
-                Effects.modelPatch("state", ModelPathContracts.LOCK_EXPIRES, null),
-                Effects.modelPatch("uiState", "/lock", {
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, sTransitionState),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
+                Effects.modelPatch(STATE_MODEL, StatePaths.PENDING_NAVIGATION_INTENT, null),
+                Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.LOCK_EXPIRES, null),
+                Effects.modelPatch(MODELS.SHELL, MODEL_PATHS.SHELL_LOCK, {
                     ok: false,
                     reason: sReason,
                     isKilled: String(sReason || "").toUpperCase() === WorkflowContracts.REASONS.KILLED
@@ -116,16 +128,16 @@ function isLockLostReason(sReason) {
             }).effects);
 
             if (bRestoreSnapshotState) {
-                aEffects.push(Effects.modelPatch("selected", "/", oSnapshotState));
+                aEffects.push(Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oSnapshotState));
             } else if (bPreserveDirty) {
-                aEffects.push(Effects.modelPatch("selected", "/", oSelectedState));
+                aEffects.push(Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedState));
             }
 
             if (sMessageKey) {
                 aEffects.push(Effects.warn(sMessageKey));
             }
             if (bShouldRelease && !isLockLostReason(sReason) && (!oReleaseResult || oReleaseResult.ok === false || oReleaseResult.released === false)) {
-                aEffects.push(Effects.warn((oReleaseResult && oReleaseResult.messageKey) || "lockReleaseFailed"));
+                aEffects.push(Effects.warn((oReleaseResult && oReleaseResult.messageKey) || DETAIL_MESSAGE_KEYS.LOCK_RELEASE_FAILED));
             }
 
             return Result.ok({ forced: true, reason: sReason, release: oReleaseResult || null }, aEffects);

@@ -5,13 +5,20 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants"
-], function (Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DetailPostOpenRuntime, NavigationContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DetailPostOpenRuntime, NavigationContracts, ModelContracts, DetailUseCaseConstants) {
     "use strict";
+
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var ACCESS_OPERATIONS = DetailUseCaseConstants.ACCESS_OPERATIONS;
 
     function readSessionGuid(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return String((oUiState && oUiState.get("state", StatePaths.SESSION_ID)) || "").trim();
+        return String((oUiState && oUiState.get(STATE_MODEL, StatePaths.SESSION_ID)) || "").trim();
     }
 
     function resolveCopiedRootId(oSnapshot) {
@@ -52,11 +59,11 @@ function execute(mInput, mCtx) {
             }
             return Promise.resolve(oRepo.checkChecklistPermission({
                 rootId: sRootId,
-                activity: "06"
+                activity: ACCESS_OPERATIONS.DELETE
             })).then(function (oPermission) {
                 if (!oPermission || oPermission.canDelete !== true) {
-                    return Result.fail({ message: "No permission to delete checklist", code: "NO_DELETE_PERMISSION" }, [
-                        Effects.toast("detailDeletePermissionDenied", "warning")
+                    return Result.fail({ message: "No permission to delete checklist", code: DETAIL_CODES.NO_DELETE_PERMISSION }, [
+                        Effects.toast(DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, "warning")
                     ]);
                 }
                 return Promise.resolve(oRepo.deleteChecklist({ rootId: sRootId })).then(function () {
@@ -64,7 +71,7 @@ function execute(mInput, mCtx) {
                         oSmart.rebindSearchTable();
                     }
                     return Result.ok({ selectedRootId: sRootId, intent: sIntent }, SearchSelectionEffects.buildSelectionResetEffects().concat([
-                        Effects.toast("checklistDeleted", "success")
+                        Effects.toast(DETAIL_MESSAGE_KEYS.CHECKLIST_DELETED, "success")
                     ]));
                 });
             }).catch(function (oError) {

@@ -25,7 +25,7 @@ sap.ui.define([], function () {
                 effectApplier: EffectApplier,
                 actionDispatcher: oComponent._actionDispatcher,
                 selectedModel: mModels.selectedModel,
-                uiStateModel: mModels.uiStateModel,
+                shellModel: mModels.shellModel,
                 componentRuntimeSupport: ComponentRuntimeSupport
             })
         };

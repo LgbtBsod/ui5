@@ -15,8 +15,7 @@
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var STATE_MODEL = MODELS.STATE;
-    var LAYOUT_MODEL = MODELS.LAYOUT;
-    var APP_VIEW_MODEL = MODELS.APP_VIEW;
+    var SHELL_MODEL = MODELS.SHELL;
     var PERMISSION_TEXT_KEY_MAP = {
         "01": "shellPermissionCreate",
         "02": "shellPermissionChange",
@@ -71,19 +70,19 @@
         return !!String((oCurrentUser && oCurrentUser.fullName) || "").trim();
     }
 
-    function ensureAppViewDefaults(oController) {
+    function ensureShellDefaults(oController) {
         var mPatch = {};
 
-        if (!ControllerModelRuntime.appView(oController)) {
+        if (!ControllerModelRuntime.shell(oController)) {
             return;
         }
-        mPatch[MODEL_PATHS.APP_VIEW_COMPACT_DENSITY] = !!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_COMPACT_DENSITY, false);
-        mPatch[MODEL_PATHS.APP_VIEW_ANIMATION_ENABLED] = ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_ANIMATION_ENABLED, true) !== false;
-        mPatch[MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME] = !!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_INVERTED_BLOCK_SCHEME, false);
-        mPatch[MODEL_PATHS.APP_VIEW_IS_PHONE_VIEWPORT] = !!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_PHONE_VIEWPORT, false);
-        mPatch[MODEL_PATHS.APP_VIEW_IS_TABLET_VIEWPORT] = !!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_IS_TABLET_VIEWPORT, false);
-        if (!ModelStateRuntime.read(oController, APP_VIEW_MODEL, MODEL_PATHS.APP_VIEW_SHELL, null)) {
-                mPatch[MODEL_PATHS.APP_VIEW_SHELL] = {
+        mPatch[MODEL_PATHS.SHELL_COMPACT_DENSITY] = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_COMPACT_DENSITY, false);
+        mPatch[MODEL_PATHS.SHELL_ANIMATION_ENABLED] = ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_ANIMATION_ENABLED, true) !== false;
+        mPatch[MODEL_PATHS.SHELL_INVERTED_BLOCK_SCHEME] = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_INVERTED_BLOCK_SCHEME, false);
+        mPatch[MODEL_PATHS.SHELL_IS_PHONE_VIEWPORT] = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_IS_PHONE_VIEWPORT, false);
+        mPatch[MODEL_PATHS.SHELL_IS_TABLET_VIEWPORT] = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_IS_TABLET_VIEWPORT, false);
+        if (!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_ROOT, null)) {
+            mPatch[MODEL_PATHS.SHELL_ROOT] = {
                 eyebrow: "",
                 productName: "",
                 routeLabel: "",
@@ -108,7 +107,7 @@
                 userRefreshBusy: false
             };
         }
-        ModelStateRuntime.setMany(oController, APP_VIEW_MODEL, mPatch);
+        ModelStateRuntime.setMany(oController, SHELL_MODEL, mPatch);
     }
 
     function syncShellState(oController, mHooks) {
@@ -128,11 +127,11 @@
         var bSearchWorkspace;
         var bEditWorkspace;
 
-        if (!ControllerModelRuntime.appView(oController) || !oState) {
+        if (!ControllerModelRuntime.shell(oController) || !oState) {
             return;
         }
 
-        ensureAppViewDefaults(oController);
+        ensureShellDefaults(oController);
         sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
         sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         sMode = LayoutStateRuntime.readMode(oState, WorkflowContracts.EDIT_MODES.READ);
@@ -144,7 +143,7 @@
         aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
         aPermissionSheets = buildPermissionSheets(oController, aPermissionRules, mHooks);
         sUserSummaryText = buildUserSummaryText(oController, aPermissionSheets, oCurrentUser.summaryText, mHooks);
-        bShowHints = !!ModelStateRuntime.read(oController, LAYOUT_MODEL, "/personalization/showHints", false);
+        bShowHints = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_PERSONALIZATION_SHOW_HINTS, false);
         sFrontendSource = String(
             ModelStateRuntime.read(oController, STATE_MODEL, "/frontendConfigSource", "")
             || ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.BACKEND_MODE, "")
@@ -185,14 +184,14 @@
         mShellPatch["/shell/userTooltip"] = sUserSummaryText || resolveText(mHooks, oController, "shellUserTooltipStandalone", null, "Open user session controls");
         mShellPatch["/shell/userIcon"] = "sap-icon://employee";
         mShellPatch["/shell/showHints"] = bShowHints;
-        ModelStateRuntime.setMany(oController, APP_VIEW_MODEL, mShellPatch);
+        ModelStateRuntime.setMany(oController, SHELL_MODEL, mShellPatch);
         if (typeof oController._markStartupReady === "function") {
             oController._markStartupReady();
         }
     }
 
     return {
-        ensureAppViewDefaults: ensureAppViewDefaults,
+        ensureShellDefaults: ensureShellDefaults,
         syncShellState: syncShellState
     };
 });

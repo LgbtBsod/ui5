@@ -13,10 +13,13 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ShellGlobalsRuntime",
     "sap/ui/Device",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device, JsRuntime, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (ControllerResourceCleanup, AppShellCoordinator, ControllerModelRuntime, ModelStateRuntime, SchedulingRuntime, NavigationContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ShellLayoutRuntime, ShellPaneRuntime, ShellViewportRuntime, ShellGlobalsRuntime, Device, JsRuntime, ModelPathContracts, StatePaths, ModelContracts) {
     "use strict";
 
+    var MODELS = ModelContracts.MODELS;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function markStartupReady() {
@@ -34,7 +37,7 @@
                 user: "shellUserRefreshButton"
             };
             this._oTestUserDialogReturnFocus = null;
-            this._ensureAppViewDefaults();
+            this._ensureShellDefaults();
             this._bindLayoutSync();
             this._bindShellStateSync();
             this._bindShellPaneRouting();
@@ -136,9 +139,9 @@
             if (!this._fnLayoutSync) {
                 this._fnLayoutSync = this._syncLayoutState.bind(this);
             }
-            this._oLayoutBinding = oState.bindProperty("/layout");
+            this._oLayoutBinding = oState.bindProperty(ModelPathContracts.LAYOUT);
             this._oLayoutBinding.attachChange(this._fnLayoutSync);
-            this._oRouteNameBinding = oState.bindProperty("/currentRouteName");
+            this._oRouteNameBinding = oState.bindProperty(ModelPathContracts.CURRENT_ROUTE_NAME);
             this._oRouteNameBinding.attachChange(this._fnLayoutSync);
         },
         _syncLayoutState: function () {
@@ -153,14 +156,14 @@
                 return;
             }
             oStateModel = this._getStateModel();
-            bAppReady = !!ModelStateRuntime.readOnModel(oStateModel, "/readiness/app/ready", false);
-            bIsLoading = !!ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false);
+            bAppReady = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_APP_READY, false);
+            bIsLoading = !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.IS_LOADING, false);
             if (!bAppReady || bIsLoading) {
                 return;
             }
             this._bStartupReadyMarked = true;
             ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SHELL_READY, {
-                route: String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", "") || "").trim()
+                route: String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.CURRENT_ROUTE_NAME, "") || "").trim()
             });
             if (typeof window !== JsRuntime.TYPEOF.UNDEFINED && typeof window.requestAnimationFrame === TYPE_FUNCTION) {
                 SchedulingRuntime.nextFrame(function () {
@@ -180,8 +183,7 @@
         },
         _bindShellStateSync: function () {
             var oState = this._getStateModel();
-            var oLayout = this._getLayoutModel();
-            var oAppView = this._getAppViewModel();
+            var oShell = this._getShellModel();
             if (oState && !this._fnShellStateChange) {
                 this._fnShellStateChange = this._syncShellState.bind(this);
                 this._oShellUserBinding = oState.bindProperty("/currentUser");
@@ -193,22 +195,21 @@
                 this._oShellRouteBinding = oState.bindProperty("/currentRouteName");
                 this._oShellRouteBinding.attachChange(this._fnShellStateChange);
             }
-            if (oLayout && !this._fnShellLayoutChange) {
+            if (oShell && !this._fnShellLayoutChange) {
                 this._fnShellLayoutChange = this._syncShellState.bind(this);
-                this._oShellHintsBinding = oLayout.bindProperty("/personalization/showHints");
+                this._oShellHintsBinding = oShell.bindProperty("/personalization/showHints");
                 this._oShellHintsBinding.attachChange(this._fnShellLayoutChange);
             }
-            if (oAppView && !this._fnShellViewportChange) {
+            if (oShell && !this._fnShellViewportChange) {
                 this._fnShellViewportChange = this._syncShellState.bind(this);
-                this._oShellPhoneViewportBinding = oAppView.bindProperty("/isPhoneViewport");
+                this._oShellPhoneViewportBinding = oShell.bindProperty("/isPhoneViewport");
                 this._oShellPhoneViewportBinding.attachChange(this._fnShellViewportChange);
-                this._oShellTabletViewportBinding = oAppView.bindProperty("/isTabletViewport");
+                this._oShellTabletViewportBinding = oShell.bindProperty("/isTabletViewport");
                 this._oShellTabletViewportBinding.attachChange(this._fnShellViewportChange);
             }
         },
-        _getStateModel: function () { return ControllerModelRuntime.state(this); },
-        _getLayoutModel: function () { return ControllerModelRuntime.layout(this); },
-        _getAppViewModel: function () { return ControllerModelRuntime.appView(this); },
+        _getStateModel: function () { return ControllerModelRuntime.state(this) || this.getModel(MODELS.STATE); },
+        _getShellModel: function () { return ControllerModelRuntime.shell(this); },
         _syncResponsiveViewport: function () { ShellViewportRuntime.syncResponsiveViewport(this); }
     };
 });

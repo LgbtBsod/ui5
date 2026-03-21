@@ -10,6 +10,11 @@ sap.ui.define([], function () {
             SMART_FILTER_SESSION: "pcctSmartFilterSession_",
             SMART_TABLE_SESSION: "pcctSmartTableSession_"
         }),
+        SEARCH_SEGMENTS: Object.freeze({
+            ALL: "ALL",
+            FAILED: "FAILED",
+            SUCCESS: "SUCCESS"
+        }),
         SEARCH_MODE: Object.freeze({
             EXACT: "EXACT",
             LOOSE: "LOOSE"

@@ -4,8 +4,8 @@ sap.ui.define([], function () {
     var SMART_FILTER_FIELDS = Object.freeze([
         { key: "filterId", type: "Input", path: "/filterId" },
         { key: "filterLpc", type: "Select", path: "/filterLpc" },
-        { key: "filterFailedChecks", type: "Segment", path: "/filterFailedChecks" },
-        { key: "filterFailedBarriers", type: "Segment", path: "/filterFailedBarriers" }
+        { key: "filterFailedChecks", type: "Segment", path: "/search/checksFailSegment" },
+        { key: "filterFailedBarriers", type: "Segment", path: "/search/barriersFailSegment" }
     ]);
     var SMART_TABLE_COLUMNS = Object.freeze(["id", "status", "checks", "barriers", "observer"]);
     var SEARCH_LAYOUT_SEED = Object.freeze({

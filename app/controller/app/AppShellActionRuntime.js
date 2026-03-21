@@ -12,7 +12,7 @@
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var APP_VIEW_MODEL = MODELS.APP_VIEW;
+    var SHELL_MODEL = MODELS.SHELL;
 
     var SHELL_OVERLAY_FRAGMENTS = {
         help: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ShellHelpPopover",
@@ -30,13 +30,13 @@
 
     function refreshCurrentUser(oController) {
         var oState = ControllerModelRuntime.state(oController);
-        var oAppView = ControllerModelRuntime.appView(oController);
-        var bAlreadyBusy = !!ModelStateRuntime.read(oController, APP_VIEW_MODEL, "/shell/userRefreshBusy", false);
+        var oShellModel = ControllerModelRuntime.shell(oController);
+        var bAlreadyBusy = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_USER_REFRESH_BUSY, false);
         if (!oState || bAlreadyBusy) {
             return Promise.resolve(false);
         }
-        if (oAppView) {
-            ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", true);
+        if (oShellModel) {
+            ModelStateRuntime.writeOnModel(oShellModel, MODEL_PATHS.SHELL_USER_REFRESH_BUSY, true);
         }
         return LoadCurrentUserUseCase.refresh({
             stateModel: oState
@@ -51,8 +51,8 @@
             UiDecisionCoordinator.notifyShellRefreshFailure({ controller: oController, error: oError });
             return false;
         }).finally(function () {
-            if (oAppView) {
-                ModelStateRuntime.writeOnModel(oAppView, "/shell/userRefreshBusy", false);
+            if (oShellModel) {
+                ModelStateRuntime.writeOnModel(oShellModel, MODEL_PATHS.SHELL_USER_REFRESH_BUSY, false);
             }
         });
     }

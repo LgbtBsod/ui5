@@ -13,12 +13,16 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (DetailAccessViewState, DetailCommandPolicy, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (DetailAccessViewState, DetailCommandPolicy, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
 
     function markDetailReady(oController, mDetails) {
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DETAIL_READY, mDetails);
@@ -26,7 +30,7 @@
 
     function handleMatchFailure(oController, oError) {
         DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
-        ModelStateRuntime.write(oController, "state", StatePaths.UI_BUSY_DETAIL, false);
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false);
         ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
         if (oController && typeof oController.showI18nError === TYPE_FUNCTION) {
             oController.showI18nError("unexpectedError");
@@ -112,7 +116,7 @@
         }
 
         if (mContext.sPostOpenHydratedRootId && mContext.sPostOpenHydratedRootId === mContext.sId && mContext.sSelectedRootId === mContext.sId) {
-            ModelStateRuntime.write(oController, "state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "");
+            ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "");
             ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
             markDetailReady(oController, { mode: "hydratedReturn", rootId: mContext.sId });
             DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
@@ -124,22 +128,22 @@
             return;
         }
 
-        ModelStateRuntime.write(oController, "state", ModelPathContracts.ACTIVE_OBJECT_ID, mContext.sId);
+        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, mContext.sId);
         return DetailCommandPolicy.open(oController, { id: mContext.sId, rootId: mContext.sId }).then(function (oResult) {
             var oAccessState;
             if (oResult && oResult.ok === false) {
-                if (!oResult.error || oResult.error.code !== "NO_VIEW_PERMISSION") {
+                if (!oResult.error || oResult.error.code !== DETAIL_CODES.NO_VIEW_PERMISSION) {
                     DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
                     return oResult;
                 }
                 oAccessState = ControllerViewStateRuntime.get(oController, "/accessState", {}) || {};
-                ModelStateRuntime.write(oController, "state", "/detailAccessGuard", {
+                ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.DETAIL_ACCESS_GUARD, {
                     rootId: String(oAccessState.rootId || mContext.sId || "").trim(),
                     userId: String(oAccessState.userId || "").trim(),
                     canView: false,
                     canEdit: !!oAccessState.canEdit,
                     canDelete: !!oAccessState.canDelete,
-                    reasonCode: String(oAccessState.reasonCode || "NO_VIEW_PERMISSION").trim(),
+                    reasonCode: String(oAccessState.reasonCode || DETAIL_CODES.NO_VIEW_PERMISSION).trim(),
                     message: String(oAccessState.message || "").trim(),
                     checkedAt: new Date().toISOString()
                 });

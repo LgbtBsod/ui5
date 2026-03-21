@@ -21,13 +21,8 @@
         SUCCESS: UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS,
         ERROR: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR
     };
-    var LOCK_ACTIVE_STATES = {
-        EDIT_LOCKED: true
-    };
-    var LOCK_TRANSITION_STATES = {
-        ACQUIRING_LOCK: true,
-        IDLE_TIMEOUT_GRACE: true
-    };
+    var LOCK_ACTIVE_STATES = {};
+    var LOCK_TRANSITION_STATES = {};
     var AUTOSAVE_TEXT_FALLBACKS = {
         autosaveWaiting: "Autosave waiting",
         autosaveSaving: "Saving...",
@@ -47,6 +42,9 @@
         conflict: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
         idle: UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION
     };
+    LOCK_ACTIVE_STATES[WorkflowContracts.LOCK_STATES.EDIT_LOCKED] = true;
+    LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK] = true;
+    LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE] = true;
 
     function text(oController, sKey, vArgs, vFallback) {
         var aArgs = [];
@@ -250,7 +248,7 @@
             if (LOCK_ACTIVE_STATES[sNormalizedState]) {
                 return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
             }
-            if (sNormalizedState === "LOCK_LOST" || sNormalizedState === "FORCED_READ_ONLY") {
+            if (sNormalizedState === WorkflowContracts.LOCK_STATES.LOCK_LOST || sNormalizedState === WorkflowContracts.LOCK_STATES.FORCED_READ_ONLY) {
                 return UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
             }
             if (LOCK_TRANSITION_STATES[sNormalizedState]) {
@@ -271,16 +269,16 @@
             if (WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.CREATE) {
                 return text(this, "heartbeatDraftCreate", "Draft editing active");
             }
-            if (sNormalizedLockState === "ACQUIRING_LOCK") {
+            if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK) {
                 return text(this, "autosaveSaving", "Saving...");
             }
-            if (sNormalizedLockState === "IDLE_TIMEOUT_GRACE") {
+            if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE) {
                 return text(this, "idleTimeoutGraceBannerTitle", "Idle timeout warning");
             }
-            if (sNormalizedLockState === "LOCK_LOST") {
+            if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.LOCK_LOST) {
                 return text(this, "lockLostBannerTitle", "Lock lost");
             }
-            if (sNormalizedLockState === "FORCED_READ_ONLY") {
+            if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.FORCED_READ_ONLY) {
                 return text(this, "detailForcedReadOnlyTitle", "Read-only enforced");
             }
             return text(this, "heartbeatInactive", "Heartbeat paused (read-only mode)");
@@ -288,14 +286,13 @@
 
         formatAutosaveText: function (sMode, sLockState, sAutosaveState) {
             var sState = WorkflowContracts.normalizeAutosaveState(sAutosaveState);
-            var mKeyByState = {
-                IDLE: "autosaveWaiting",
-                SAVING: "autosaveSaving",
-                SAVED: "autosaveSaved",
-                ERROR: "autosaveError"
-            };
+            var mKeyByState = {};
             var sNormalizedMode = WorkflowContracts.normalizeEditMode(sMode);
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
+            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.IDLE] = "autosaveWaiting";
+            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.SAVING] = "autosaveSaving";
+            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.SAVED] = "autosaveSaved";
+            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.FAILED] = "autosaveError";
             if (sNormalizedMode === WorkflowContracts.EDIT_MODES.CREATE) {
                 return text(this, "autosaveCreateDraft", "Draft changes are local until first save");
             }
@@ -331,7 +328,7 @@
         },
 
         formatPersistenceState: function (sPersistenceState) {
-            return PERSISTENCE_SEMANTICS[String(sPersistenceState || "").trim()] || "Information";
+            return PERSISTENCE_SEMANTICS[String(sPersistenceState || "").trim()] || UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
         },
 
         formatPassedTotal: function (aRows) {

@@ -48,8 +48,7 @@ sap.ui.define([
             },
             isDirty: false
         });
-        var oUiStateModel = new JSONModel({});
-        var oLayoutModel = new JSONModel({
+        var oShellModel = new JSONModel({
             smartFilter: {},
             smartTable: {}
         });
@@ -78,8 +77,7 @@ sap.ui.define([
         ComponentListenerInitRuntime.initializeListeners({
             component: oComponent,
             stateModel: oStateModel,
-            uiStateModel: oUiStateModel,
-            layoutModel: oLayoutModel,
+            shellModel: oShellModel,
             cacheModel: oCacheModel,
             masterDataModel: oMasterDataModel,
             envModel: oEnvModel,
@@ -88,14 +86,14 @@ sap.ui.define([
                 WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lockState"
             },
             componentRuntimeSupport: {
-                syncUiStateMode: function () {}
+                syncShellRuntimeState: function () {}
             },
             searchConfig: SearchUiConfig.getLayoutSeed()
         });
 
-        assert.deepEqual(oLayoutModel.getProperty("/smartFilter/fields"), SearchUiConfig.getLayoutSeed().smartFilter.fields, "smart filter config is seeded from canonical search config");
-        assert.deepEqual(oLayoutModel.getProperty("/smartTable/columns"), SearchUiConfig.getLayoutSeed().smartTable.columns, "smart table columns are seeded from canonical search config");
-        assert.strictEqual(oLayoutModel.getProperty("/smartTable/selectionMode"), "MultiSelect", "selection mode is seeded from canonical search config");
+        assert.deepEqual(oShellModel.getProperty("/smartFilter/fields"), SearchUiConfig.getLayoutSeed().smartFilter.fields, "smart filter config is seeded from canonical search config");
+        assert.deepEqual(oShellModel.getProperty("/smartTable/columns"), SearchUiConfig.getLayoutSeed().smartTable.columns, "smart table columns are seeded from canonical search config");
+        assert.strictEqual(oShellModel.getProperty("/smartTable/selectionMode"), "MultiSelect", "selection mode is seeded from canonical search config");
         assert.ok(aAdded.indexOf("beforeunload") >= 0, "beforeunload listener is attached");
 
         window.addEventListener = fnOriginalAdd;

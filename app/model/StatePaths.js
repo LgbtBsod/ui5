@@ -2,7 +2,9 @@ sap.ui.define([], function () {
     "use strict";
 
     return {
+        DETAIL_ACCESS_GUARD: "/detailAccessGuard",
         DETAIL_META: "/detailMeta",
+        IS_LOADING: "/isLoading",
         PENDING_NAVIGATION_INTENT: "/pendingNavigationIntent",
         PERSISTENCE: "/persistence",
         PERSISTENCE_CURRENT_WRITE_REQUEST_ID: "/persistence/currentWriteRequestId",
@@ -19,8 +21,12 @@ sap.ui.define([], function () {
         PERSISTENCE_TAXONOMY: "/persistence/taxonomy",
         READINESS_ANALYTICS: "/readiness/analytics",
         READINESS_APP: "/readiness/app",
+        READINESS_APP_READY: "/readiness/app/ready",
         READINESS_DETAIL: "/readiness/detail",
         READINESS_SEARCH: "/readiness/search",
+        SEARCH_BARRIERS_FAIL_SEGMENT: "/search/barriersFailSegment",
+        SEARCH_CHECKS_FAIL_SEGMENT: "/search/checksFailSegment",
+        SEARCH_MODE: "/searchMode",
         SEARCH_RETURN_CONTEXT: "/searchReturnContext",
         SAVE_IN_FLIGHT: "/saveInFlight",
         SESSION_ID: "/sessionId",

@@ -3,9 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime"
-], function (BindingContextReader, ControllerViewStateRuntime, ModelStateRuntime, FocusRuntime, LayoutPersonalizationRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (BindingContextReader, ControllerViewStateRuntime, ModelStateRuntime, FocusRuntime, LayoutPersonalizationRuntime, ModelContracts) {
     "use strict";
+
+    var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
 
     function cloneCards(aCards) {
         return (Array.isArray(aCards) ? aCards : []).map(function (oCard, iIndex) {
@@ -24,7 +28,7 @@ sap.ui.define([
         var aLayout = normalizeCards(aCards).map(function (oCard, iIndex) {
             return { key: oCard.key, pinned: !!oCard.pinned, order: iIndex };
         });
-        ModelStateRuntime.write(oController, "layout", "/personalization/infoCardLayout", aLayout);
+        ModelStateRuntime.write(oController, MODELS.SHELL, MODEL_PATHS.SHELL_PERSONALIZATION_INFO_CARD_LAYOUT, aLayout);
         LayoutPersonalizationRuntime.writeInfoCardLayout(aLayout);
         return aLayout;
     }
@@ -54,7 +58,7 @@ sap.ui.define([
     }
 
     function resolveCards(oController, aBaseCards) {
-        var aLayout = ModelStateRuntime.read(oController, "layout", "/personalization/infoCardLayout", []);
+        var aLayout = ModelStateRuntime.read(oController, MODELS.SHELL, MODEL_PATHS.SHELL_PERSONALIZATION_INFO_CARD_LAYOUT, []);
         var mLayoutByKey = {};
         var aOrderedKeys = [];
         cloneCards(aLayout).forEach(function (oEntry, iIndex) {
