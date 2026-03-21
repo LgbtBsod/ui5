@@ -10,6 +10,7 @@ sap.ui.define([], function () {
         DETAIL_DELETE_PERMISSION_DENIED: "detailDeletePermissionDenied",
         DETAIL_DRAFT_CHANGED: "detailDraftChanged",
         DETAIL_DRAFT_CLEAN: "detailDraftClean",
+        DETAIL_DRAFT_LOCAL: "detailDraftLocal",
         DETAIL_FORCED_READ_ONLY_TITLE: "detailForcedReadOnlyTitle",
         DETAIL_VIEW_PERMISSION_DENIED: "detailViewPermissionDenied",
         DETAIL_EMPTY_ATTACHMENTS_SAVED_TEXT: "detailEmptyAttachmentsSavedText",

@@ -11,8 +11,8 @@
         <ObjectStatus
             id="detailDirtyStatusChip"
             icon="sap-icon://edit"
-            text="{= ${state>/isDirty} ? ${i18n>dirtyStateDirty} : ${i18n>dirtyStateSynced} }"
-            state="{= ${state>/isDirty} ? 'Warning' : 'Success' }"
+            text="{parts:[{path:'state>/isDirty'},{path:'view>/isCreateMode'}], formatter:'.formatDraftStateText'}"
+            state="{parts:[{path:'state>/isDirty'},{path:'view>/isCreateMode'}], formatter:'.formatDraftStateState'}"
             class="detailRailStatusChip statusChipSemantic">
             <layoutData>
                 <OverflowToolbarLayoutData priority="High"/>
@@ -34,7 +34,7 @@
         <ObjectStatus
             id="detailPersistenceStatusChip"
             icon="sap-icon://synchronize"
-            text="{parts:[{path:'state>/persistence/messageKey'},{path:'state>/persistence/state'},{path:'state>/persistence/lastSavedAt'}], formatter:'.formatPersistenceText'}"
+            text="{parts:[{path:'state>/persistence/messageKey'},{path:'state>/persistence/state'},{path:'state>/persistence/lastSavedAt'},{path:'view>/isCreateMode'}], formatter:'.formatPersistenceText'}"
             state="{path:'state>/persistence/state', formatter:'.formatPersistenceState'}"
             tooltip="{parts:[{path:'state>/persistence/messageKey'},{path:'state>/persistence/state'},{path:'state>/persistence/lastSavedAt'},{path:'state>/persistence/lastSaveError'}], formatter:'.formatPersistenceTooltip'}"
             class="detailRailStatusChip statusChipSemantic">

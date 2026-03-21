@@ -218,12 +218,21 @@
             return LIFECYCLE_STATES[sNormalized] || LIFECYCLE_STATES[CHECKLIST_STATUSES.DRAFT];
         },
 
-        formatDraftStateText: function (bDirty) {
-            return bDirty ? text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CHANGED) : text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CLEAN);
+        formatDraftStateText: function (bDirty, bCreateMode) {
+            if (bDirty) {
+                return text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CHANGED);
+            }
+            if (bCreateMode) {
+                return text(this, DetailMessageKeyConstants.DETAIL_DRAFT_LOCAL);
+            }
+            return text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CLEAN);
         },
 
-        formatDraftStateState: function (bDirty) {
-            return bDirty ? UiSemanticConstants.OBJECT_STATUS_STATE.WARNING : UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
+        formatDraftStateState: function (bDirty, bCreateMode) {
+            if (bDirty || bCreateMode) {
+                return UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
+            }
+            return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
         },
 
         formatLockStateText: function (sTextValue, sMode) {
@@ -292,7 +301,10 @@
             return text(this, AUTOSAVE_TEXT_KEYS[sState] || DetailMessageKeyConstants.AUTOSAVE_WAITING);
         },
 
-        formatPersistenceText: function (sMessageKey, sPersistenceState, sLastSavedAt) {
+        formatPersistenceText: function (sMessageKey, sPersistenceState, sLastSavedAt, bCreateMode) {
+            if (bCreateMode && sPersistenceState !== DetailPersistenceConstants.STATES.SAVED) {
+                return text(this, DETAIL_MESSAGE_KEYS.AUTOSAVE_CREATE_DRAFT);
+            }
             if (sMessageKey) {
                 if (sMessageKey === DETAIL_MESSAGE_KEYS.PERSISTENCE_SAVED || sMessageKey === DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVE_SAVED) {
                     if (sLastSavedAt) {
